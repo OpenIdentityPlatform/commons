@@ -1,5 +1,8 @@
 package com.google.code.maven.plugin.dependency;
 
+import java.io.File;
+import java.text.MessageFormat;
+
 import org.apache.maven.artifact.Artifact;
 import org.codehaus.plexus.util.StringUtils;
 
@@ -211,7 +214,7 @@ public class ArtifactItem
      */
     public String getLocalFile()
     {
-        return localFile;
+        return replaceTokens(localFile);
     }
 
     /**
@@ -228,7 +231,7 @@ public class ArtifactItem
      */
     public String getDownloadUrl()
     {
-        return downloadUrl;
+        return replaceTokens(downloadUrl);
     }
 
     /**
@@ -309,4 +312,36 @@ public class ArtifactItem
     {
         this.deploy = deploy;
     }
+    
+    
+    private String replaceTokens(String target)
+    {
+        if(target == null)
+               return null;
+
+        if(target.isEmpty())
+            return target;
+        
+        // replace all tokens
+        if(getGroupId() != null)
+            target = target.replace("{groupId}", getGroupId());
+        
+        if(getArtifactId() != null)
+            target = target.replace("{artifactId}", getArtifactId());
+        
+        if(getVersion() != null)
+            target = target.replace("{version}", getVersion());
+        
+        if(getPackaging() != null)
+            target = target.replace("{packaging}", getPackaging());
+        
+        if(getClassifier() != null)
+            target = target.replace("{classifier}", getClassifier());
+        
+        if(getType() != null)
+            target = target.replace("{type}", getType());
+        
+        return target;
+    }
+    
 }
