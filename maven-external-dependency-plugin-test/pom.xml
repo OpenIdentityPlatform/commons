@@ -1,0 +1,107 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.google.code</groupId>
+  <artifactId>maven-external-dependency-plugi-test</artifactId>
+  <packaging>jar</packaging>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>maven-external-dependency-plugi-test</name>
+  <url>http://maven.apache.org</url>
+  <build>
+     <plugins>
+     
+         <!--  JAVA PROJECT COMPILER  -->
+         
+         <plugin>
+             <artifactId>maven-compiler-plugin</artifactId>
+             <configuration>
+                 <source>1.5</source>
+                 <target>1.5</target>
+             </configuration>
+         </plugin>
+         
+         
+         <!--  EXTERNAL DEPENDENCY RESOLVER  -->
+
+         <plugin>
+             <groupId>com.google.code</groupId>
+             <artifactId>maven-external-dependency-plugin</artifactId>
+             <version>0.1-SNAPSHOT</version>
+             <inherited>false</inherited>                
+             <configuration>
+                 <createChecksum>true</createChecksum>
+                 <artifactItems>
+                 
+                    <!-- THIS JAR IS HOSTED ON GOOGLE CODE, 
+                         BUT IS NOT AVAILABLE IN A MAVEN REPO -->
+                    <artifactItem>
+                        <groupId>com.google.code</groupId>
+                        <artifactId>google-api-translate-java</artifactId>
+                        <version>0.92</version>
+                        <packaging>jar</packaging>
+                        <downloadUrl>
+                           http://google-api-translate-java.googlecode.com/files/google-api-translate-java-{version}.jar
+                        </downloadUrl>
+                        <install>true</install>
+                        <force>false</force>
+                    </artifactItem>
+
+
+                    <!-- HERE IS AN EXAMPLE OF AN ADOBE FLASH LIBRARY (SWC) HOSTED 
+                         ON GOOGLE CODE, BUT NOT AVAILABLE IN A MAVEN REPO -->
+                    <artifactItem>
+                        <groupId>org.papervision3d</groupId>
+                        <artifactId>Papervision3D</artifactId>
+                        <version>2.1.932</version>
+                        <packaging>swc</packaging>
+                        <downloadUrl>
+                           http://papervision3d.googlecode.com/files/{artifactId}_{version}.{packaging}
+                        </downloadUrl>
+                        <install>true</install>
+                        <force>false</force>
+                    </artifactItem>
+                    
+                 </artifactItems>
+			    
+
+             </configuration>
+             <executions>
+                 <execution>
+                     <id>process-resources</id>
+                     <goals>
+                         <goal>process-external</goal>
+                     </goals>
+                 </execution>
+             </executions>
+         </plugin>
+     </plugins>
+  </build>
+  
+
+  <!--  PROJECT DEPENDENCIES  -->
+  
+  <dependencies>
+  
+	<dependency>
+	    <groupId>com.google.code</groupId>
+	    <artifactId>google-api-translate-java</artifactId>
+	    <version>0.92</version>
+	</dependency>
+	  
+	<dependency>
+		<groupId>junit</groupId>
+		<artifactId>junit</artifactId>
+		<version>3.8.1</version>
+		<scope>test</scope>
+	</dependency>
+  </dependencies>
+  
+  <!--  SOURCE CONTROL -->
+
+  <scm>
+      <connection>scm:svn:http://maven-external-dependency-plugin.googlecode.com/svn/trunk/maven-external-dependency-plugin-test/</connection>
+      <developerConnection>scm:svn:https://maven-external-dependency-plugin.googlecode.com/svn/trunk/maven-external-dependency-plugin-test/</developerConnection>
+      <url>https://maven-external-dependency-plugin.googlecode.com/svn/trunk/maven-external-dependency-plugin-test/</url>
+  </scm>
+          
+</project>
