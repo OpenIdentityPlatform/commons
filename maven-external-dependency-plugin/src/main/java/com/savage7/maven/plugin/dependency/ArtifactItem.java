@@ -1,4 +1,4 @@
-package com.google.code.maven.plugin.dependency;
+package com.savage7.maven.plugin.dependency;
 
 import java.io.File;
 import java.text.MessageFormat;
