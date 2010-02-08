@@ -1,14 +1,30 @@
 <?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.savage7</groupId>
+    <groupId>com.savage7.maven</groupId>
     <artifactId>maven-external-dependency-plugin</artifactId>
     <version>0.1-SNAPSHOT</version>
     <name>Maven External Dependency Plugin</name>
+    <url>http://code.google.com/p/maven-external-dependency-plugin/</url>
+    <inceptionYear>2010</inceptionYear>
     <description>
         This Maven plugin allows downloading, installing, and deploying dependency artifacts that are not stored in a Maven repository. 
     </description>
     <packaging>maven-plugin</packaging>
+    <developers>
+        <developer> 
+            <name>Robert Savage</name>
+            <email>robert@savage7.com</email>
+            <roles>
+                <role>owner</role>
+            </roles>
+            <url>http://www.savage7.com</url>
+        </developer>
+    </developers>
+    <issueManagement>
+        <system>Google Code</system>
+        <url>http://code.google.com/p/maven-external-dependency-plugin/issues/list</url>
+    </issueManagement>    
 
     <!--  PLUGINS -->
     
@@ -67,7 +83,22 @@
     <scm>
         <connection>scm:svn:http://maven-external-dependency-plugin.googlecode.com/svn/trunk/maven-external-dependency-plugin/</connection>
         <developerConnection>scm:svn:https://maven-external-dependency-plugin.googlecode.com/svn/trunk/maven-external-dependency-plugin/</developerConnection>
-        <url>https://maven-external-dependency-plugin.googlecode.com/svn/trunk/maven-external-dependency-plugin/</url>
+        <url>http://maven-external-dependency-plugin.googlecode.com/svn/trunk/maven-external-dependency-plugin/</url>
     </scm>
         
+  <!--  MAVEN DEPLOYMENT REPOSITORY-->
+  
+  <distributionManagement>
+    <repository>
+       <id>ossrh</id>
+       <name>Sonatype OSS Repository</name>
+       <url>http://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+    </repository>
+    <snapshotRepository>
+       <id>ossrh</id>
+       <name>Sonatype OSS Repository</name>
+       <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
+          
 </project>
