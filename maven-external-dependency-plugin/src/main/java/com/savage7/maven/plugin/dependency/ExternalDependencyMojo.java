@@ -6,9 +6,6 @@ import java.io.Writer;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.deployer.ArtifactDeployer;
 import org.apache.maven.artifact.factory.ArtifactFactory;
@@ -258,17 +255,6 @@ public class ExternalDependencyMojo extends AbstractInstallMojo
                                 sshFile.mkdirs();
                             }
                         }        
-                        
-                        if ( protocol.equalsIgnoreCase( "scp" ) )
-                        {
-                            File sshFile = new File( System.getProperty( "user.home" ), ".ssh" );
-
-                            if ( !sshFile.exists() )
-                            {
-                                sshFile.mkdirs();
-                            }
-                        }
-                        
                         
                         File file = new File(artifactItem.getLocalFile());
 
