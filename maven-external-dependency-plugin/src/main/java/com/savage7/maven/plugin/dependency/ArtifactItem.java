@@ -1,8 +1,5 @@
 package com.savage7.maven.plugin.dependency;
 
-import java.io.File;
-import java.text.MessageFormat;
-
 import org.apache.maven.artifact.Artifact;
 import org.codehaus.plexus.util.StringUtils;
 

@@ -5,11 +5,18 @@ import java.io.IOException;
 import java.io.Writer;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.deployer.ArtifactDeployer;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.installer.ArtifactInstaller;
 import org.apache.maven.artifact.metadata.ArtifactMetadata;
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.repository.ArtifactRepositoryFactory;
+import org.apache.maven.artifact.repository.layout.ArtifactRepositoryLayout;
 
 
 import org.apache.maven.model.Model;
@@ -17,11 +24,14 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.install.AbstractInstallMojo;
+import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.artifact.ProjectArtifactMetadata;
 import org.codehaus.plexus.digest.Digester;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.WriterFactory;
+
+import com.savage7.maven.plugin.dependency.ArtifactItem;
 
 
 /**
@@ -40,6 +50,21 @@ import org.codehaus.plexus.util.WriterFactory;
  */
 public class ExternalDependencyMojo extends AbstractInstallMojo
 {
+	/**
+     * @parameter default-value="${project}"
+     * @required
+     * @readonly
+     */
+    private MavenProject project;
+
+    /**
+     * Map that contains the layouts.
+     *
+     * @component role="org.apache.maven.artifact.repository.layout.ArtifactRepositoryLayout"
+     */
+    @SuppressWarnings("unchecked")
+	private Map repositoryLayouts;
+    
     /**
     * @component
     */
@@ -53,6 +78,13 @@ public class ExternalDependencyMojo extends AbstractInstallMojo
      * @readonly
      */
     protected ArtifactFactory artifactFactory;    
+
+    /**
+     * Component used to create a repository.
+     *
+     * @component
+     */
+    ArtifactRepositoryFactory repositoryFactory;    
     
     /**
     * @parameter expression="${localRepository}"
@@ -71,6 +103,10 @@ public class ExternalDependencyMojo extends AbstractInstallMojo
     */
     protected ArrayList<ArtifactItem> artifactItems;    
     
+    /**
+     * @component
+     */
+    private ArtifactDeployer artifactDeployer;
     
     /**
      * Digester for MD5.
@@ -88,12 +124,22 @@ public class ExternalDependencyMojo extends AbstractInstallMojo
     
     
     /**
+     * Flag whether Maven is currently in online/offline mode.
+     * 
+     * @parameter default-value="${settings.offline}"
+     * @readonly
+     */
+    private boolean offline;
+    
+    
+    /**
      * Flag whether to create checksums (MD5, SHA-1) or not.
      *
      * @parameter expression="${createChecksum}" default-value="true"
      */
     protected boolean createChecksum = true;
 
+    
     public void execute() throws MojoExecutionException, MojoFailureException  
     {
         try
@@ -197,7 +243,44 @@ public class ExternalDependencyMojo extends AbstractInstallMojo
                     //TODO: implement Maven deployment
                     if( artifactItem.getDeploy() )
                     {
-                        getLog().warn("ARTIFACT DEPLOYMENT NOT YET IMPLEMENTED: " + artifactItem.toString());
+                        failIfOffline();
+
+                        ArtifactRepository repo = getDeploymentRepository();
+
+                        String protocol = repo.getProtocol();      
+                        
+                        if ( protocol.equalsIgnoreCase( "scp" ) )
+                        {
+                            File sshFile = new File( System.getProperty( "user.home" ), ".ssh" );
+
+                            if ( !sshFile.exists() )
+                            {
+                                sshFile.mkdirs();
+                            }
+                        }        
+                        
+                        if ( protocol.equalsIgnoreCase( "scp" ) )
+                        {
+                            File sshFile = new File( System.getProperty( "user.home" ), ".ssh" );
+
+                            if ( !sshFile.exists() )
+                            {
+                                sshFile.mkdirs();
+                            }
+                        }
+                        
+                        
+                        File file = new File(artifactItem.getLocalFile());
+
+                        if ( file != null && file.isFile() )
+                        {
+                        	artifactDeployer.deploy( file, artifact, repo, localRepository );
+                        	getLog().warn("ARTIFACT DEPLOYED: " + artifactItem.toString());
+                        }
+                        else
+                        {
+                        	getLog().warn("ARTIFACT DEPLOYMENT NOT YET IMPLEMENTED: " + artifactItem.toString());
+                        }
                     }
                     
                     
@@ -305,5 +388,49 @@ public class ExternalDependencyMojo extends AbstractInstallMojo
         model.setPackaging( artifact.getPackaging() );
 
         return model;
-    }    
+    }
+    
+    
+    private void failIfOffline() throws MojoFailureException
+	{
+	    if ( offline )
+	    {
+	        throw new MojoFailureException( "Cannot deploy artifacts when Maven is in offline mode" );
+	    }
+	}    
+    
+    
+	private ArtifactRepository getDeploymentRepository()
+	    throws MojoExecutionException, MojoFailureException
+	{
+	    ArtifactRepository repo = null;
+	    
+	    if ( repo == null )
+	    {
+	        repo = project.getDistributionManagementArtifactRepository();
+	    }
+	
+	    if ( repo == null )
+	    {
+	        String msg = "Deployment failed: repository element was not specified in the POM inside"
+	            + " distributionManagement element";
+	
+	        throw new MojoExecutionException( msg );
+	    }
+	
+	    return repo;
+	}
+
+    ArtifactRepositoryLayout getLayout( String id )
+    throws MojoExecutionException
+{
+    ArtifactRepositoryLayout layout = (ArtifactRepositoryLayout) repositoryLayouts.get( id );
+
+    if ( layout == null )
+    {
+        throw new MojoExecutionException( "Invalid repository layout: " + id );
+    }
+
+    return layout;
+}	
 }
