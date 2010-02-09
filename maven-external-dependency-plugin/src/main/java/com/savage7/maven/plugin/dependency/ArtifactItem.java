@@ -1,5 +1,7 @@
 package com.savage7.maven.plugin.dependency;
 
+import java.io.File;
+
 import org.apache.maven.artifact.Artifact;
 import org.codehaus.plexus.util.StringUtils;
 
@@ -48,19 +50,26 @@ public class ArtifactItem
      * Local file to download artifact to.
      * Location file to install artifact from. 
      * 
-     * @parameter
+     * @parameter default-value="{artifactId}-{version}.{packaging}"
+     * 
      */
-    private String localFile;
-
+    private String localFile = "{artifactId}-{version}.{packaging}";
     
     /**
      * URL to download artifact from.
      * 
      * @parameter
+     * @required
      */
-    private String downloadUrl;
-    
-    
+    private String stagingDirectory;    
+
+    /**
+     * URL to download artifact from.
+     * 
+     * @parameter
+     */
+    private String downloadUrl;    
+
     /**
      * Packaging type of the artifact to be installed. 
      *
@@ -79,9 +88,9 @@ public class ArtifactItem
     /**
      * Deploys the artifact to a remote maven repository
      *
-     * @parameter default-value="false"
+     * @parameter default-value="true"
      */
-    private Boolean deploy = false;
+    private Boolean deploy = true;
 
     /**
      * Forces a download, maven install, maven deploy
@@ -90,6 +99,29 @@ public class ArtifactItem
      */
     private Boolean force = false;
     
+    /**
+     * Location of an existing POM file to be installed alongside the main artifact, given by the {@link #file}
+     * parameter.
+     *
+     * @parameter expression="${pomFile}"
+     */
+    private File pomFile;
+
+    /**
+     * Generate a minimal POM for the artifact if none is supplied via the parameter {@link #pomFile}. Defaults to
+     * <code>true</code> if there is no existing POM in the local repository yet.
+     *
+     * @parameter expression="${generatePom}" default-value="true"
+     */
+    private Boolean generatePom = true;
+
+    /**
+     * Flag whether to create checksums (MD5, SHA-1) or not.
+     *
+     * @parameter expression="${createChecksum}" 
+     */
+    private String createChecksum;   
+
     
     public ArtifactItem()
     {
@@ -222,6 +254,23 @@ public class ArtifactItem
     {
         this.localFile = filterEmptyString( localFile );
     }
+
+    /**
+     * @return Returns the stagingDirectory.
+     */
+    public String getStagingDirectory()
+    {
+        return replaceTokens(stagingDirectory);
+    }
+
+    /**
+     * @param stagingDirectory
+     * The stagingDirectory to set.
+     */
+    public void setStagingDirectory( String stagingDirectory )
+    {
+        this.stagingDirectory = filterEmptyString( stagingDirectory );
+    }
     
     /**
      * @return Returns the source URL to download the artifact.
@@ -309,7 +358,59 @@ public class ArtifactItem
     {
         this.deploy = deploy;
     }
+
     
+    /**
+     * @return PomFile.
+     */
+    public File getPomFile()
+    {
+        return pomFile;
+    }
+
+    /**
+     * @param pomFile
+     * PomFile.
+     */
+    public void setPomFile( File pomFile )
+    {
+        this.pomFile = pomFile;
+    }
+
+    /**
+     * @return GeneratePom.
+     */
+    public Boolean getGeneratePom()
+    {
+        return generatePom;
+    }
+
+    /**
+     * @param generatePom
+     * GeneratePom.
+     */
+    public void setGeneratePom( Boolean generatePom )
+    {
+        this.generatePom = generatePom;
+    }
+    
+    
+    /**
+     * @return CreateChecksum.
+     */
+    public String getCreateChecksum()
+    {
+        return createChecksum;
+    }
+
+    /**
+     * @param createChecksum
+     * CreateChecksum.
+     */
+    public void setCreateChecksum( String createChecksum )
+    {
+        this.createChecksum = createChecksum;
+    }    
     
     private String replaceTokens(String target)
     {

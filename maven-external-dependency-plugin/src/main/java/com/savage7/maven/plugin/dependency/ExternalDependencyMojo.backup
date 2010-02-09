@@ -35,10 +35,10 @@ import com.savage7.maven.plugin.dependency.ArtifactItem;
  * Acquire external Maven artifacts and install 
  * into local Maven (M2) repository.
  *
- * @goal process-external
+ * @goal process-external2
  * @aggregator 
  *
- * @phase process-resources
+ * @phase process-resources2
  * 
  * @author <a href="mailto:robert@savage7.com">Robert Savage</a>
  * @see  http://code.google.com/p/maven-external-dependency-plugin/
