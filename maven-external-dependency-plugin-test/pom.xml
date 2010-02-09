@@ -1,27 +1,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.savage7.maven</groupId>
+  <groupId>com.savage7.maven.plugins</groupId>
   <artifactId>maven-external-dependency-plugin-test</artifactId>
   <packaging>jar</packaging>
   <version>0.1</version>
   <name>maven-external-dependency-plugin-test</name>
   <url>http://maven.apache.org</url>
   <build>
-
-      <extensions>
-        <extension>
-            <groupId>org.apache.maven.wagon</groupId>
-            <artifactId>wagon-webdav</artifactId>
-            <version>1.0-beta-2</version>
-        </extension>
-	    <extension>
-	        <groupId>commons-logging</groupId>
-	        <artifactId>commons-logging</artifactId>
-	        <version>1.1</version>
-	    </extension> 
-      </extensions>
-
      <plugins>
      
          <!--  JAVA PROJECT COMPILER  -->
@@ -38,12 +24,16 @@
          <!--  EXTERNAL DEPENDENCY RESOLVER  -->
 
          <plugin>
-             <groupId>com.savage7.maven</groupId>
+             <groupId>com.savage7.maven.plugins</groupId>
              <artifactId>maven-external-dependency-plugin</artifactId>
              <version>0.1-SNAPSHOT</version>
-             <inherited>false</inherited>              
+             <inherited>false</inherited>
              <configuration>
+                 <stagingDirectory>
+                        ${project.build.directory}/dependencies/
+                 </stagingDirectory>
                  <createChecksum>true</createChecksum>
+                 <force>false</force>
                  <artifactItems>
                  
                     <!-- THIS JAR IS HOSTED ON GOOGLE CODE, 
@@ -54,11 +44,8 @@
                         <version>0.92</version>
                         <packaging>jar</packaging>
                         <downloadUrl>
-                           http://google-api-translate-java.googlecode.com/files/google-api-translate-java-{version}.jar
+                           http://google-api-translate-java.googlecode.com/files/{artifactId}-{version}.jar
                         </downloadUrl>
-                        <install>true</install>
-                        <force>true</force>
-                        <deploy>true</deploy>
                     </artifactItem>
 
 
@@ -72,25 +59,58 @@
                         <downloadUrl>
                            http://papervision3d.googlecode.com/files/{artifactId}_{version}.{packaging}
                         </downloadUrl>
-                        <install>true</install>
-                        <force>false</force>
                     </artifactItem>
-                    
+
                  </artifactItems>
 			    
-
              </configuration>
              <executions>
                  <execution>
-                     <phase>validate</phase>
-                     <id>process-resources</id>
+                     <id>clean-external-dependencies</id>
+                     <phase>clean</phase>
                      <goals>
-                         <goal>process-external</goal>
-                     </goals>
+                         <!-- mvn com.savage7.maven:maven-external-dependency-plugin:clean-external -->
+                         <goal>clean-external</goal>
+                     </goals>                     
+                 </execution>
+                 <execution>
+                     <id>resolve-install-external-dependencies</id>
+                     <phase>process-resources</phase>
+                     <goals>
+                         <!-- mvn com.savage7.maven:maven-external-dependency-plugin:resolve-external -->
+                         <goal>resolve-external</goal>
+
+                         <!-- mvn com.savage7.maven:maven-external-dependency-plugin:install-external -->
+                         <goal>install-external</goal>
+                     </goals>                     
+                 </execution>
+                 <execution>
+                     <id>deploy-external-dependencies</id>
+                     <phase>deploy</phase>
+                     <goals>
+                         <!-- mvn com.savage7.maven:maven-external-dependency-plugin:deploy-external -->
+                         <goal>deploy-external</goal>
+                     </goals>                     
                  </execution>
              </executions>
          </plugin>
      </plugins>
+     
+     
+<!--      IF USING THE WEBDEV PTOTOCOL, THE FOLLOWING EXTENTIONS MAY BE REQUIRED  -->
+<!--      <extensions>-->
+<!--        <extension>-->
+<!--            <groupId>org.apache.maven.wagon</groupId>-->
+<!--            <artifactId>wagon-webdav</artifactId>-->
+<!--            <version>1.0-beta-2</version>-->
+<!--        </extension>-->
+<!--        <extension>-->
+<!--            <groupId>commons-logging</groupId>-->
+<!--            <artifactId>commons-logging</artifactId>-->
+<!--            <version>1.1</version>-->
+<!--        </extension> -->
+<!--      </extensions>-->
+
   </build>
   
 
@@ -133,5 +153,23 @@
       <developerConnection>scm:svn:https://maven-external-dependency-plugin.googlecode.com/svn/trunk/maven-external-dependency-plugin-test/</developerConnection>
       <url>http://maven-external-dependency-plugin.googlecode.com/svn/trunk/maven-external-dependency-plugin-test/</url>
   </scm>
+  
+  
+  <!--  SOURCE CONTROL -->
+
+  <distributionManagement>
+      <repository>
+        <id>central</id>
+        <name>libs-releases</name>
+        <url>http://localhost:8081/artifactory/libs-releases-local</url>
+      </repository>
+      <snapshotRepository>
+          <uniqueVersion>false</uniqueVersion>
+          <id>snapshots</id>
+          <name>libs-snapshots</name>
+          <url>http://localhost:8081/artifactory/libs-snapshots-local</url>
+      </snapshotRepository>
+  </distributionManagement>
+      
 
 </project>
