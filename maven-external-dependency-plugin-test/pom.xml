@@ -8,7 +8,20 @@
   <name>maven-external-dependency-plugin-test</name>
   <url>http://maven.apache.org</url>
   <build>
-  
+
+      <extensions>
+        <extension>
+            <groupId>org.apache.maven.wagon</groupId>
+            <artifactId>wagon-webdav</artifactId>
+            <version>1.0-beta-2</version>
+        </extension>
+	    <extension>
+	        <groupId>commons-logging</groupId>
+	        <artifactId>commons-logging</artifactId>
+	        <version>1.1</version>
+	    </extension> 
+      </extensions>
+
      <plugins>
      
          <!--  JAVA PROJECT COMPILER  -->
@@ -28,7 +41,7 @@
              <groupId>com.savage7.maven</groupId>
              <artifactId>maven-external-dependency-plugin</artifactId>
              <version>0.1-SNAPSHOT</version>
-             <inherited>false</inherited>                
+             <inherited>false</inherited>              
              <configuration>
                  <createChecksum>true</createChecksum>
                  <artifactItems>
@@ -44,7 +57,8 @@
                            http://google-api-translate-java.googlecode.com/files/google-api-translate-java-{version}.jar
                         </downloadUrl>
                         <install>true</install>
-                        <force>false</force>
+                        <force>true</force>
+                        <deploy>true</deploy>
                     </artifactItem>
 
 
@@ -96,12 +110,12 @@
 		<version>3.8.1</version>
 		<scope>test</scope>
 	</dependency>
+                                                	
   </dependencies>
   
 
   <!--  MAVEN PLUGIN REPOSITORIES  -->
-  
- 
+   
   <pluginRepositories>
       <pluginRepository>
           <id>ossrh</id>
