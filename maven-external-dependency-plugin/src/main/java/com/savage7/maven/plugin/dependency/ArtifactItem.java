@@ -1,4 +1,22 @@
 package com.savage7.maven.plugin.dependency;
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 import java.io.File;
 
@@ -9,10 +27,12 @@ import org.codehaus.plexus.util.StringUtils;
  * ArtifactItem represents information specified in the plugin configuration
  * section for each artifact.
  * 
- * @since 1.0
  * @author <a href="mailto:robert@savage7.com">Robert Savage</a>
- * @version 1.0
+ * @see  http://code.google.com/p/maven-external-dependency-plugin/
+ * @version 0.1
+ * @category Maven Plugin
  */
+
 public class ArtifactItem
 {
     /**
@@ -121,6 +141,13 @@ public class ArtifactItem
      * @parameter expression="${createChecksum}" 
      */
     private String createChecksum;   
+
+    /**
+     * Checksum for Artifact 
+     * 
+     * @parameter
+     */
+    private String checksum;    
 
     
     public ArtifactItem()
@@ -409,8 +436,35 @@ public class ArtifactItem
      */
     public void setCreateChecksum( String createChecksum )
     {
-        this.createChecksum = createChecksum;
+        this.createChecksum = filterEmptyString(createChecksum);
     }    
+
+    /**
+     * @return Checksum.
+     */
+    public String getChecksum()
+    {
+        return checksum;
+    }
+
+    /**
+     * @return true is a checksum was defined.
+     */
+    public boolean hasChecksum()
+    {
+        return (checksum != null && !checksum.isEmpty());
+    }
+
+    
+    /**
+     * @param checksum
+     * Checksum.
+     */
+    public void setChecksum( String checksum )
+    {
+        this.checksum = filterEmptyString(checksum);
+    }    
+    
     
     private String replaceTokens(String target)
     {

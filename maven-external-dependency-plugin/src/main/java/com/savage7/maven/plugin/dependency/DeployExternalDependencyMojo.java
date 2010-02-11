@@ -1,5 +1,24 @@
 package com.savage7.maven.plugin.dependency;
 
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import java.io.File;
 import java.io.IOException;
 
@@ -68,12 +87,12 @@ public class DeployExternalDependencyMojo extends AbstractExternalDependencyMojo
         // (not sure why this is needed, but doesn't see to work otherwise?)
         super.localRepository = this.localRepository;
 
-        getLog().debug("DEPLOYING EXTERNAL DEPENDENCIES - <START>");
+        getLog().info("starting to deploy external dependencies to distribution repository");
 
         // loop over and process all configured artifacts 
         for(ArtifactItem artifactItem : artifactItems)
         {
-            getLog().info("RESOLVING ARTIFACT FOR DEPLOY: " + artifactItem.toString());
+            getLog().info("resolving artifact in locale repository for deployment: " + artifactItem.toString());
 
             //
             // CREATE MAVEN ARTIFACT
@@ -112,7 +131,6 @@ public class DeployExternalDependencyMojo extends AbstractExternalDependencyMojo
                             }
                         }        
                         
-                        
                         // create Maven artifact POM file
                         File generatedPomFile = null;
 
@@ -134,7 +152,6 @@ public class DeployExternalDependencyMojo extends AbstractExternalDependencyMojo
 
                                 if ( artifactItem.getGeneratePom() == true )
                                 {
-                                    getLog().debug( "DEPLOYING GENERATED POM: " + generatedPomFile.getCanonicalPath());
                                     artifact.addMetadata( pomMetadata );
                                 }
                             }
@@ -142,11 +159,20 @@ public class DeployExternalDependencyMojo extends AbstractExternalDependencyMojo
                         }
                         
                     	// deploy now
+                        getLog().info( "deploying artifact to distribution repository: " + artifactItem.toString());
                         artifactDeployer.deploy( artifact.getFile(), artifact, repo, localRepository );
                         
                         //TODO: Deploy Checksums? 
-                    }										
+                    }	
+                    else
+                    {
+                    	getLog().debug("configured to not deploy artifact: " + artifactItem.toString());                    	
+                    }
 				} 
+                catch (MojoFailureException e)
+                {
+                	throw e;
+                }
                 catch(ArtifactResolutionException e) 
                 {
                 	throw new MojoExecutionException("Error occurred while attempting to resolve artifact.",e);
@@ -159,10 +185,7 @@ public class DeployExternalDependencyMojo extends AbstractExternalDependencyMojo
                 {
                 	throw new MojoExecutionException("Deployment of external dependency failed.",e);
 				} 
-                catch (IOException e) 
-                {
-					throw new MojoExecutionException("File I/O Exception encountered while attempting to deply external dependencies.",e);
-				}            	
+           	
             }
             else
             {
@@ -181,12 +204,18 @@ public class DeployExternalDependencyMojo extends AbstractExternalDependencyMojo
             }
         }
 
-        getLog().debug("DEPLOYING EXTERNAL DEPENDENCIES - <END>'");
+        getLog().info("finished deploying external dependencies to distribution repository");
     }
     
     
     
-    
+    /**
+     * Gets the repository defined in project POM's distribution management section
+     * 
+     * @return deployment repository defined in distribution management
+     * @throws MojoExecutionException
+     * @throws MojoFailureException
+     */
 	private ArtifactRepository getDeploymentRepository() throws MojoExecutionException, MojoFailureException
 	{
 	    ArtifactRepository repo = null;
@@ -207,6 +236,12 @@ public class DeployExternalDependencyMojo extends AbstractExternalDependencyMojo
 	    return repo;
 	}    
 	
+	/**
+	 * Checks for offline mode;
+	 * throws exception if offline, deploy goal cannot proceed
+	 * 
+	 * @throws MojoFailureException
+	 */
     private void failIfOffline() throws MojoFailureException
 	{
 	    if ( offline )

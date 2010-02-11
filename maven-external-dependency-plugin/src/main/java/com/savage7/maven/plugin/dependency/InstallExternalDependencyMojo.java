@@ -1,8 +1,25 @@
 package com.savage7.maven.plugin.dependency;
 
-import java.io.File;
-import java.net.URL;
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
+import java.io.File;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.installer.ArtifactInstaller;
 import org.apache.maven.artifact.metadata.ArtifactMetadata;
@@ -11,7 +28,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.artifact.ProjectArtifactMetadata;
 import org.codehaus.plexus.digest.Digester;
-import org.codehaus.plexus.util.FileUtils;
 
 
 /**
@@ -41,7 +57,7 @@ public class InstallExternalDependencyMojo extends AbstractExternalDependencyMoj
     /**
      * Digester for MD5.
      *
-     * @component default-value="sha1"
+     * @component default-value="md5"
      */
     protected Digester md5Digester;
 
@@ -59,8 +75,6 @@ public class InstallExternalDependencyMojo extends AbstractExternalDependencyMoj
      */
     protected boolean createChecksum = true;  
     
-
-   
     
     public void execute() throws MojoExecutionException, MojoFailureException  
     {
@@ -75,12 +89,12 @@ public class InstallExternalDependencyMojo extends AbstractExternalDependencyMoj
             
             Boolean cachedCreateChecksums = this.createChecksum; 
 
-            getLog().debug("INSTALL EXTERNAL DEPENDENCIES - <START>");
+            getLog().info("starting to install external dependencies into local repository");
 
             // loop over and process all configured artifacts 
             for(ArtifactItem artifactItem : artifactItems)
             {
-                getLog().info("RESOLVING ARTIFACT FOR INSTALL: " + artifactItem.toString());
+                getLog().info("resolving artifact for installation: " + artifactItem.toString());
                 
                 //
                 // CREATE MAVEN ARTIFACT
@@ -96,15 +110,19 @@ public class InstallExternalDependencyMojo extends AbstractExternalDependencyMoj
                     artifactItem.getForce() ||
                     force)
                 {
-                	if(artifactItem.getForce())
+                    if(artifactItem.getForce())
                     {
-                        getLog().debug("FORCING ARTIFACT INSTALL: " + artifactItem.toString());
-                    }
+                        getLog().debug("this artifact is flagged as a FORCED install: " + artifactItem.toString());
+                    }                	
                     
                 	// ensure the artifact file is located in the staging directory
                 	File stagedArtifactFile = getFullyQualifiedArtifactFilePath(artifactItem);
                 	if(stagedArtifactFile.exists())
-                	{                	
+                	{
+                		// verify file checksum (if a checksum was defined);
+                		// 'MojoFailureException' exception will be thrown if verification fails
+                		verifyArtifactItemChecksum(artifactItem, stagedArtifactFile);
+                		
                         //
                         // INSTALL MAVEN ARTIFACT TO LOCAL REPOSITORY
                         //
@@ -122,6 +140,7 @@ public class InstallExternalDependencyMojo extends AbstractExternalDependencyMoj
                             	if ( artifactItem.getPomFile() != null )
                                 {
                                     ArtifactMetadata pomMetadata = new ProjectArtifactMetadata( artifact, artifactItem.getPomFile() );
+                                    getLog().debug( "installing defined POM file: " + artifactItem.getPomFile());
                                     artifact.addMetadata( pomMetadata );
                                 }
                                 else
@@ -132,13 +151,13 @@ public class InstallExternalDependencyMojo extends AbstractExternalDependencyMoj
 
                                     if ( artifactItem.getGeneratePom() == true )
                                     {
-                                        getLog().debug( "INSTALLING GENERATED POM: " + generatedPomFile.getCanonicalPath());
+                                        getLog().debug( "installing generated POM file: " + generatedPomFile.getCanonicalPath());
                                         artifact.addMetadata( pomMetadata );
                                     }
                                 }
                             }                        	
                         	
-                            getLog().info("INSTALLING ARTIFACT TO M2 LOCAL REPO: " + localRepository.getId() );
+                            getLog().info("installing artifact into local repository: " + localRepository.getId() );
 
                             // install artifact to local repository
                             installer.install(stagedArtifactFile,artifact,localRepository);
@@ -156,7 +175,7 @@ public class InstallExternalDependencyMojo extends AbstractExternalDependencyMoj
                         }
                         else
                         {
-                            getLog().debug("CONFIGURED TO NOT INSTALL ARTIFACT: " + artifactItem.toString());
+                            getLog().debug("configured to not install artifact: " + artifactItem.toString());
                         }                		
                 	}
                 	else
@@ -167,32 +186,19 @@ public class InstallExternalDependencyMojo extends AbstractExternalDependencyMoj
                 				                        "'; file not found in staging path: " + 
                 				                        stagedArtifactFile.getCanonicalPath());
                 	}
-                	
-                	
-                    //
-                    // DOWNLOAD FILE FROM URL
-                    //
-                    if(artifactItem.getDownloadUrl() != null)
-                    {
-                    	File downloadFile = getFullyQualifiedArtifactFilePath(artifactItem);
-
-                    	getLog().info("DOWNLOADING ARTIFACT FROM: " + artifactItem.getDownloadUrl());
-                        getLog().info("DOWNLOADING ARTIFACT TO: " + downloadFile.getCanonicalPath());
-                        
-                        // download file from URL 
-                        FileUtils.copyURLToFile(new URL(artifactItem.getDownloadUrl()), downloadFile);
-
-                        getLog().debug("ARTIFACT FILE DOWNLOADED SUCCESSFULLY.");
-                    }
                 }
                 else
                 {
-                    getLog().debug("ARTIFACT ALREADY EXISTS IN LOCAL REPO; NO DOWNLOAD NEEDED " + artifactItem.toString());
+                    getLog().info("this aritifact already exists in the local repository; no download is needed: " + artifactItem.toString());
                 }
             }
 
-            getLog().debug("INSTALL EXTERNAL DEPENDENCIES - <END>'");            
+            getLog().info("finished installing all external dependencies into local repository");
         } 
+        catch (MojoFailureException e)
+        {
+        	throw e;
+        }
         catch (Exception e) 
         {
             getLog().error(e);
