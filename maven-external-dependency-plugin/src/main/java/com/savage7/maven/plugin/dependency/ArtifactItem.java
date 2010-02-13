@@ -478,7 +478,7 @@ public class ArtifactItem
      */
     public String getExtractFile()
     {
-        return extractFile;
+        return replaceTokens(extractFile);
     }
 
     /**
