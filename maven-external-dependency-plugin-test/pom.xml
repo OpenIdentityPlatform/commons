@@ -76,7 +76,7 @@
                     </artifactItem>
 
 
-                    <!-- HERE IS AN EXAMPLE OF AN ARTIFACT EXTRACTED FROM A ZIP FILE 
+                    <!-- HERE IS AN EXAMPLE OF AN ARTIFACT 
                          EXTRACTED FROM A ZIP FILE -->
                     <artifactItem>
                         <groupId>com.google.code</groupId>
