@@ -1,6 +1,4 @@
-package com.savage7.maven.plugin.dependency;
-
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -17,10 +15,18 @@ package com.savage7.maven.plugin.dependency;
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
- */
+ **/
+
+package com.savage7.maven.plugin.dependency;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
@@ -125,17 +131,71 @@ public class ResolveExternalDependencyMojo extends AbstractExternalDependencyMoj
 
                         // download file from URL 
                         FileUtils.copyURLToFile(new URL(artifactItem.getDownloadUrl()), tempDownloadFile);
-
+                        
                 		// verify file checksum (if a checksum was defined);
                 		// 'MojoFailureException' exception will be thrown if verification fails
                 		verifyArtifactItemChecksum(artifactItem, tempDownloadFile);
                         
                         // now that the file has been successfully downloaded and the checksum verification 
                         // has passed (if required), lets copy the temporary file to the staging location
-                        File artifactFile = getFullyQualifiedArtifactFilePath(artifactItem);                        
-                        FileUtils.copyFile(tempDownloadFile,artifactFile);
+                        File artifactFile = getFullyQualifiedArtifactFilePath(artifactItem);
                         
-                        getLog().info("copied downloaded artifact file to staging path: " + artifactFile.getCanonicalPath());
+                        // if this artifact is not configured to extract a file, then
+                        // simply copy the downloaded file to the target artifact file
+                        if(!artifactItem.hasExtractFile())
+                        {
+                        	FileUtils.copyFile(tempDownloadFile,artifactFile);
+                        	getLog().info("copied downloaded artifact file to staging path: " + artifactFile.getCanonicalPath());
+                        }
+                        
+                        // if this artifact is configured to extract a file, then
+                        // extract the file from the downloaded ZIP file to the target artifact file
+                        else
+                        {
+                        	getLog().info("extracting target file from downloaded compressed file: " + artifactItem.getExtractFile());
+                        	
+                        	ZipFile zipFile = new ZipFile(tempDownloadFile);
+                    		ZipEntry zipEntry = zipFile.getEntry(artifactItem.getExtractFile().trim());
+                    		
+                    		// if a zip entry was not found, then throw a Mojo exception 
+                    		if(zipEntry == null)
+                    		{
+                    			// checksum verification failed, throw error
+                    			throw new MojoFailureException("Could not find target artifact file to extract from downloaded resouce: " + 
+                    					                       "\r\n   groupId      : " + artifact.getGroupId() +
+                    					                       "\r\n   artifactId   : " + artifact.getArtifactId() +
+                    					                       "\r\n   version      : " + artifact.getVersion() +
+                    					                       "\r\n   extractFile  : " + artifactItem.getExtractFile() +
+                    										   "\r\n   download URL : " + artifactItem.getDownloadUrl());
+                    		}
+
+                    		// ensure the path exists to write the file to
+                    		File parentDirectory = artifactFile.getParentFile();
+                    		if(parentDirectory != null && !parentDirectory.exists())
+                    		{
+                    			artifactFile.getParentFile().mkdirs();
+                    		}
+                    		
+                            //Create input and output streams
+                            InputStream inStream = zipFile.getInputStream(zipEntry);
+                            OutputStream outStream = new FileOutputStream(artifactFile,false);
+
+                            // write target file content from file in zip to artifact file  
+                            byte[] buffer = new byte[1024];
+                            int nrBytesRead;
+                            while ((nrBytesRead = inStream.read(buffer)) > 0) 
+                            {
+                                outStream.write(buffer, 0, nrBytesRead);
+                            }
+
+	                        //Finish off by closing the streams
+                            outStream.close();
+	                        inStream.close();
+
+	                        getLog().info("extracted target file to staging path: " + artifactFile.getCanonicalPath());
+                        }
+                        
+                        
 
                         // now we are done with the temporary file so lets delete it
                         tempDownloadFile.delete();

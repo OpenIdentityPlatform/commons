@@ -1,6 +1,4 @@
-package com.savage7.maven.plugin.dependency;
-
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -17,7 +15,9 @@ package com.savage7.maven.plugin.dependency;
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
- */
+ **/
+
+package com.savage7.maven.plugin.dependency;
 
 import java.io.File;
 import org.apache.maven.artifact.Artifact;
@@ -28,7 +28,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.artifact.ProjectArtifactMetadata;
 import org.codehaus.plexus.digest.Digester;
-
 
 /**
  * Install external dependencies to local repository  
@@ -74,7 +73,7 @@ public class InstallExternalDependencyMojo extends AbstractExternalDependencyMoj
      * @parameter expression="${createChecksum}" default-value="true"
      */
     protected boolean createChecksum = true;  
-    
+  
     
     public void execute() throws MojoExecutionException, MojoFailureException  
     {

@@ -69,43 +69,44 @@ under the License.
     <!--  PROJECT DEPENDENCIES-->
 
     <dependencies>
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-project</artifactId>
-            <version>2.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-plugin-api</artifactId>
-            <version>2.0</version>
-            <scope>provided</scope>
-        </dependency>
+	    <dependency>
+	      <groupId>org.apache.maven</groupId>
+	      <artifactId>maven-plugin-api</artifactId>
+	      <version>2.0</version>
+	      <scope>provided</scope>
+	    </dependency>
+	    <dependency>
+	      <groupId>org.apache.maven</groupId>
+	      <artifactId>maven-project</artifactId>
+	      <version>2.0</version>
+	      <scope>provided</scope>
+	    </dependency>
         <dependency>
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
             <version>1.1</version>
         </dependency>
-	    <dependency>
-	      <groupId>org.codehaus.plexus</groupId>
-	      <artifactId>plexus-utils</artifactId>
-	      <version>1.5.6</version>
-	    </dependency>
-	    <dependency>
-	      <groupId>org.codehaus.plexus</groupId>
-	      <artifactId>plexus-digest</artifactId>
-	      <version>1.0</version>
-	    </dependency>        
-	    <dependency>
-		  <groupId>org.apache.maven.plugins</groupId>
-		  <artifactId>maven-install-plugin</artifactId>
-		  <version>2.3</version>        
-	    </dependency>        
-	    <dependency>
-		  <groupId>org.apache.maven.plugins</groupId>
-		  <artifactId>maven-deploy-plugin</artifactId>
-		  <version>2.3</version>        
-	    </dependency>        
+        <dependency>
+          <groupId>org.codehaus.plexus</groupId>
+          <artifactId>plexus-utils</artifactId>
+          <version>1.5.6</version>
+        </dependency>
+        <dependency>
+          <groupId>org.codehaus.plexus</groupId>
+          <artifactId>plexus-digest</artifactId>
+          <version>1.0</version>
+        </dependency>        
+        <dependency>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>2.3</version>        
+        </dependency>        
+        <dependency>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>2.3</version>        
+        </dependency>      
+
     </dependencies>
     
     <!--  SOURCE CONTROL -->
@@ -115,8 +116,9 @@ under the License.
         <developerConnection>scm:svn:https://maven-external-dependency-plugin.googlecode.com/svn/trunk/maven-external-dependency-plugin/</developerConnection>
         <url>http://maven-external-dependency-plugin.googlecode.com/svn/trunk/maven-external-dependency-plugin/</url>
     </scm>
+
         
-  <!--  MAVEN DEPLOYMENT REPOSITORY-->
+  <!--  MAVEN DEPLOYMENT REPOSITORY -->
   
   <distributionManagement>
     <repository>
@@ -130,7 +132,7 @@ under the License.
        <url>http://oss.sonatype.org/content/repositories/snapshots</url>
     </snapshotRepository>
   </distributionManagement>
-          
+  
         
   <!--  SITE REPORTING / DOCUMENTATION -->
   
@@ -147,5 +149,5 @@ under the License.
       </plugin>
     </plugins>
   </reporting>
-          
+  
 </project>

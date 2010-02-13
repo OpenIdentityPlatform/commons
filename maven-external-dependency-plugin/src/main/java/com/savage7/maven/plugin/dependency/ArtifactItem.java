@@ -1,5 +1,4 @@
-package com.savage7.maven.plugin.dependency;
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -16,7 +15,9 @@ package com.savage7.maven.plugin.dependency;
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
- */
+ **/
+
+package com.savage7.maven.plugin.dependency;
 
 import java.io.File;
 
@@ -73,7 +74,7 @@ public class ArtifactItem
      * @parameter default-value="{artifactId}-{version}.{packaging}"
      * 
      */
-    private String localFile = "{artifactId}-{version}.{packaging}";
+    private String localFile = "{artifactId}-{version}-{classifier}.{packaging}";
     
     /**
      * URL to download artifact from.
@@ -149,6 +150,14 @@ public class ArtifactItem
      */
     private String checksum;    
 
+    
+    /**
+     * File name to extract from downloaded ZIP file
+     * 
+     * @parameter 
+     */
+    private String extractFile;
+    
     
     public ArtifactItem()
     {
@@ -454,7 +463,6 @@ public class ArtifactItem
     {
         return (checksum != null && !checksum.isEmpty());
     }
-
     
     /**
      * @param checksum
@@ -463,6 +471,31 @@ public class ArtifactItem
     public void setChecksum( String checksum )
     {
         this.checksum = filterEmptyString(checksum);
+    }    
+
+    /**
+     * @return ExtractFile.
+     */
+    public String getExtractFile()
+    {
+        return extractFile;
+    }
+
+    /**
+     * @return true is an extractFile was defined.
+     */
+    public boolean hasExtractFile()
+    {
+        return (extractFile != null && !extractFile.isEmpty());
+    }
+
+    /**
+     * @param ExtractFile
+     * extractFile.
+     */
+    public void setExtractFile( String extractFile )
+    {
+        this.extractFile = filterEmptyString(extractFile);
     }    
     
     
@@ -483,12 +516,21 @@ public class ArtifactItem
         
         if(getVersion() != null)
             target = target.replace("{version}", getVersion());
+
+        if(getVersion() != null)
+            target = target.replace("{_version}", getVersion().replace(".", "_"));
         
         if(getPackaging() != null)
             target = target.replace("{packaging}", getPackaging());
         
         if(getClassifier() != null)
+        {
             target = target.replace("{classifier}", getClassifier());
+        }
+        else
+        {
+        	target = target.replace("-{classifier}", "");
+        }
         
         if(getType() != null)
             target = target.replace("{type}", getType());

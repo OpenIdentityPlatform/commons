@@ -33,7 +33,7 @@
                         ${project.build.directory}/dependencies/
                  </stagingDirectory>
                  <createChecksum>true</createChecksum>
-                 <force>true</force>
+                 <force>false</force>
                  <artifactItems>
                  
                     <!-- THIS JAR IS HOSTED ON GOOGLE CODE, 
@@ -47,7 +47,6 @@
                            http://google-api-translate-java.googlecode.com/files/{artifactId}-{version}.jar
                         </downloadUrl>                        
                     </artifactItem>
-
 
                     <!-- HERE IS AN EXAMPLE OF AN ADOBE FLASH LIBRARY (SWC) HOSTED 
                          ON GOOGLE CODE, BUT NOT AVAILABLE IN A MAVEN REPO -->
@@ -75,6 +74,20 @@
                         </downloadUrl>                        
                         <checksum>025836cd51474bd3bbda6f74a1168e092a670363</checksum>                        
                     </artifactItem>
+
+
+                    <!-- HERE IS AN EXAMPLE OF AN ARTIFACT EXTRACTED FROM A ZIP FILE 
+                         EXTRACTED FROM A ZIP FILE -->
+                    <artifactItem>
+                        <groupId>com.google.code</groupId>
+                        <artifactId>tweener</artifactId>
+                        <version>1.33.74</version>
+                        <packaging>swc</packaging>
+                        <downloadUrl>
+                           http://tweener.googlecode.com/files/tweener_1_33_74_as3_swc.zip
+                        </downloadUrl>                        
+                        <extractFile>tweener.swc</extractFile>                        
+                    </artifactItem>
                     
                  </artifactItems>
 			    
@@ -84,7 +97,7 @@
                      <id>clean-external-dependencies</id>
                      <phase>clean</phase>
                      <goals>
-                         <!-- mvn com.savage7.maven:maven-external-dependency-plugin:clean-external -->
+                         <!-- mvn com.savage7.maven.plugins:maven-external-dependency-plugin:clean-external -->
                          <goal>clean-external</goal>
                      </goals>                     
                  </execution>
@@ -92,10 +105,10 @@
                      <id>resolve-install-external-dependencies</id>
                      <phase>process-resources</phase>
                      <goals>
-                         <!-- mvn com.savage7.maven:maven-external-dependency-plugin:resolve-external -->
+                         <!-- mvn com.savage7.maven.plugins:maven-external-dependency-plugin:resolve-external -->
                          <goal>resolve-external</goal>
 
-                         <!-- mvn com.savage7.maven:maven-external-dependency-plugin:install-external -->
+                         <!-- mvn com.savage7.maven.plugins:maven-external-dependency-plugin:install-external -->
                          <goal>install-external</goal>
                      </goals>                     
                  </execution>
@@ -103,7 +116,7 @@
                      <id>deploy-external-dependencies</id>
                      <phase>deploy</phase>
                      <goals>
-                         <!-- mvn com.savage7.maven:maven-external-dependency-plugin:deploy-external -->
+                         <!-- mvn com.savage7.maven.plugins:maven-external-dependency-plugin:deploy-external -->
                          <goal>deploy-external</goal>
                      </goals>                     
                  </execution>
