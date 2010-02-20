@@ -1,0 +1,17 @@
+ -----
+ maven-external-dependencies-plugin
+ -----
+ Robert Savage
+ -----
+
+maven-external-dependencies-plugin
+
+ Welcome to the maven-external-dependencies-plugin project.
+ 
+ This Maven (mojo) plugin is used to aid in managing external Maven artifacts that are not published public Maven repositories. This plugin can install and or deploy local files or web hosted files into your Maven repository.
+
+ Please select content menu to the left.
+ or visit the home page at:  
+ http://code.google.com/p/maven-external-dependency-plugin
+  
+
