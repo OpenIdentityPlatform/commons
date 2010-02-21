@@ -1,20 +1,15 @@
 /**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *  http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements. See the NOTICE file distributed with this
+ * work for additional information regarding copyright ownership. The ASF
+ * licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law
+ * or agreed to in writing, software distributed under the License is
+ * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
  **/
 
 package com.savage7.maven.plugin.dependency;
@@ -30,29 +25,29 @@ import org.apache.maven.project.artifact.ProjectArtifactMetadata;
 import org.codehaus.plexus.digest.Digester;
 
 /**
- * Install external dependencies to local repository  
+ * Install external dependencies to local repository.
  *
  * @goal install-external
- * 
  * @author <a href="mailto:robert@savage7.com">Robert Savage</a>
- * @see  http://code.google.com/p/maven-external-dependency-plugin/
+ * @see http://code.google.com/p/maven-external-dependency-plugin/
  * @version 0.1
  * @category Maven Plugin
  */
-public class InstallExternalDependencyMojo extends AbstractExternalDependencyMojo
+public class InstallExternalDependencyMojo extends
+        AbstractExternalDependencyMojo
 {
-   /**
-    * @parameter expression="${localRepository}"
-    * @required
-    * @readonly
-    */
-    protected ArtifactRepository localRepository;	
-	
-   /**
-    * @component
-    */
+    /**
+     * @parameter expression="${localRepository}"
+     * @required
+     * @readonly
+     */
+    protected ArtifactRepository localRepository;
+
+    /**
+     * @component
+     */
     protected ArtifactInstaller installer;
-    
+
     /**
      * Digester for MD5.
      *
@@ -65,17 +60,16 @@ public class InstallExternalDependencyMojo extends AbstractExternalDependencyMoj
      *
      * @component default-value="sha1"
      */
-    protected Digester sha1Digester;    
+    protected Digester sha1Digester;
 
     /**
      * Flag whether to create checksums (MD5, SHA-1) or not.
      *
      * @parameter expression="${createChecksum}" default-value="true"
      */
-    protected boolean createChecksum = true;  
-  
-    
-    public void execute() throws MojoExecutionException, MojoFailureException  
+    protected boolean createChecksum = true;
+
+    public void execute() throws MojoExecutionException, MojoFailureException
     {
         try
         {
@@ -85,123 +79,159 @@ public class InstallExternalDependencyMojo extends AbstractExternalDependencyMoj
             super.createChecksum = this.createChecksum;
             super.md5Digester = this.md5Digester;
             super.sha1Digester = this.sha1Digester;
-            
-            Boolean cachedCreateChecksums = this.createChecksum; 
 
-            getLog().info("starting to install external dependencies into local repository");
+            Boolean cachedCreateChecksums = this.createChecksum;
 
-            // loop over and process all configured artifacts 
-            for(ArtifactItem artifactItem : artifactItems)
+            getLog()
+                    .info(
+                            "starting to install external dependencies into local repository");
+
+            // loop over and process all configured artifacts
+            for (ArtifactItem artifactItem : artifactItems)
             {
-                getLog().info("resolving artifact for installation: " + artifactItem.toString());
-                
+                getLog().info(
+                        "resolving artifact for installation: "
+                                + artifactItem.toString());
+
                 //
                 // CREATE MAVEN ARTIFACT
                 //
                 Artifact artifact = createArtifact(artifactItem);
 
-                // determine if the artifact is already installed in the local Maven repository
-                Boolean artifactAlreadyInstalled = getLocalRepoFile(artifact).exists();
-                
-                // only proceed with this artifact if it is not already 
+                // determine if the artifact is already installed in the local
+                // Maven repository
+                Boolean artifactAlreadyInstalled = getLocalRepoFile(artifact)
+                        .exists();
+
+                // only proceed with this artifact if it is not already
                 // installed or it is configured to be forced.
-                if(!artifactAlreadyInstalled || 
-                    artifactItem.getForce() ||
-                    force)
+                if (!artifactAlreadyInstalled || artifactItem.getForce()
+                        || force)
                 {
-                    if(artifactItem.getForce())
+                    if (artifactItem.getForce())
                     {
-                        getLog().debug("this artifact is flagged as a FORCED install: " + artifactItem.toString());
-                    }                	
-                    
-                	// ensure the artifact file is located in the staging directory
-                	File stagedArtifactFile = getFullyQualifiedArtifactFilePath(artifactItem);
-                	if(stagedArtifactFile.exists())
-                	{
-                		// verify file checksum (if a checksum was defined);
-                		// 'MojoFailureException' exception will be thrown if verification fails
-                		verifyArtifactItemChecksum(artifactItem, stagedArtifactFile);
-                		
+                        getLog().debug(
+                                "this artifact is flagged as a FORCED install: "
+                                        + artifactItem.toString());
+                    }
+
+                    // ensure the artifact file is located in the staging
+                    // directory
+                    File stagedArtifactFile = getFullyQualifiedArtifactFilePath(artifactItem);
+                    if (stagedArtifactFile.exists())
+                    {
+                        // verify file checksum (if a checksum was defined);
+                        // 'MojoFailureException' exception will be thrown if
+                        // verification fails
+                        verifyArtifactItemChecksum(artifactItem,
+                                stagedArtifactFile);
+
                         //
                         // INSTALL MAVEN ARTIFACT TO LOCAL REPOSITORY
                         //
-                        if(artifact != null &&
-                           artifactItem.getInstall())
+                        if (artifact != null && artifactItem.getInstall())
                         {
                             // create Maven artifact POM file
                             File generatedPomFile = null;
 
                             // don't generate a POM file for POM artifacts
-                            if ( !"pom".equals( artifactItem.getPackaging() ) )
+                            if (!"pom".equals(artifactItem.getPackaging()))
                             {
-                                // if a POM file was provided for the artifact item, then
-                            	// use that POM file instead of generating a new one
-                            	if ( artifactItem.getPomFile() != null )
+                                // if a POM file was provided for the artifact
+                                // item, then
+                                // use that POM file instead of generating a new
+                                // one
+                                if (artifactItem.getPomFile() != null)
                                 {
-                                    ArtifactMetadata pomMetadata = new ProjectArtifactMetadata( artifact, artifactItem.getPomFile() );
-                                    getLog().debug( "installing defined POM file: " + artifactItem.getPomFile());
-                                    artifact.addMetadata( pomMetadata );
+                                    ArtifactMetadata pomMetadata = new ProjectArtifactMetadata(
+                                            artifact, artifactItem.getPomFile());
+                                    getLog()
+                                            .debug(
+                                                    "installing defined POM file: "
+                                                            + artifactItem
+                                                                    .getPomFile());
+                                    artifact.addMetadata(pomMetadata);
                                 }
                                 else
                                 {
-                                    // dynamically create a new POM file for this artifact
-                                	generatedPomFile = generatePomFile(artifactItem);
-                                    ArtifactMetadata pomMetadata = new ProjectArtifactMetadata( artifact, generatedPomFile );
+                                    // dynamically create a new POM file for
+                                    // this artifact
+                                    generatedPomFile = generatePomFile(artifactItem);
+                                    ArtifactMetadata pomMetadata = new ProjectArtifactMetadata(
+                                            artifact, generatedPomFile);
 
-                                    if ( artifactItem.getGeneratePom() == true )
+                                    if (artifactItem.getGeneratePom() == true)
                                     {
-                                        getLog().debug( "installing generated POM file: " + generatedPomFile.getCanonicalPath());
-                                        artifact.addMetadata( pomMetadata );
+                                        getLog()
+                                                .debug(
+                                                        "installing generated POM file: "
+                                                                + generatedPomFile
+                                                                        .getCanonicalPath());
+                                        artifact.addMetadata(pomMetadata);
                                     }
                                 }
-                            }                        	
-                        	
-                            getLog().info("installing artifact into local repository: " + localRepository.getId() );
+                            }
+
+                            getLog().info(
+                                    "installing artifact into local repository: "
+                                            + localRepository.getId());
 
                             // install artifact to local repository
-                            installer.install(stagedArtifactFile,artifact,localRepository);
-                            
+                            installer.install(stagedArtifactFile, artifact,
+                                    localRepository);
+
                             // install checksum files to local repository
-                            if(artifactItem.getCreateChecksum() != null)
+                            if (artifactItem.getCreateChecksum() != null)
                             {
-                            	super.createChecksum = artifactItem.getCreateChecksum().equalsIgnoreCase("true");
+                                super.createChecksum = artifactItem
+                                        .getCreateChecksum().equalsIgnoreCase(
+                                                "true");
                             }
                             else
                             {
-                            	super.createChecksum = cachedCreateChecksums;
+                                super.createChecksum = cachedCreateChecksums;
                             }
-                          	installChecksums( artifact );
+                            installChecksums(artifact);
                         }
                         else
                         {
-                            getLog().debug("configured to not install artifact: " + artifactItem.toString());
-                        }                		
-                	}
-                	else
-                	{
-                		// throw error because we were unable to install the external dependency 
-                		throw new MojoFailureException("Unable to install external dependency '" + 
-                				                        artifactItem.getArtifactId() + 
-                				                        "'; file not found in staging path: " + 
-                				                        stagedArtifactFile.getCanonicalPath());
-                	}
+                            getLog().debug(
+                                    "configured to not install artifact: "
+                                            + artifactItem.toString());
+                        }
+                    }
+                    else
+                    {
+                        // throw error because we were unable to install the
+                        // external dependency
+                        throw new MojoFailureException(
+                                "Unable to install external dependency '"
+                                        + artifactItem.getArtifactId()
+                                        + "'; file not found in staging path: "
+                                        + stagedArtifactFile.getCanonicalPath());
+                    }
                 }
                 else
                 {
-                    getLog().info("this aritifact already exists in the local repository; no download is needed: " + artifactItem.toString());
+                    getLog()
+                            .info(
+                                    "this aritifact already exists in the local repository; no download is needed: "
+                                            + artifactItem.toString());
                 }
             }
 
-            getLog().info("finished installing all external dependencies into local repository");
-        } 
+            getLog()
+                    .info(
+                            "finished installing all external dependencies into local repository");
+        }
         catch (MojoFailureException e)
         {
-        	throw e;
+            throw e;
         }
-        catch (Exception e) 
+        catch (Exception e)
         {
             getLog().error(e);
             throw new MojoExecutionException(e.getMessage(), e);
         }
-    }      
+    }
 }
