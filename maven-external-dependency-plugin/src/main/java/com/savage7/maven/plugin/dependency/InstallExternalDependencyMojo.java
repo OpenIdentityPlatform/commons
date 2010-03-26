@@ -15,6 +15,7 @@
 package com.savage7.maven.plugin.dependency;
 
 import java.io.File;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.installer.ArtifactInstaller;
 import org.apache.maven.artifact.metadata.ArtifactMetadata;
@@ -82,16 +83,13 @@ public class InstallExternalDependencyMojo extends
 
             Boolean cachedCreateChecksums = this.createChecksum;
 
-            getLog()
-                    .info(
-                            "starting to install external dependencies into local repository");
+            getLog().info("starting to install external dependencies into local repository");
 
             // loop over and process all configured artifacts
             for (ArtifactItem artifactItem : artifactItems)
             {
-                getLog().info(
-                        "resolving artifact for installation: "
-                                + artifactItem.toString());
+                getLog().info("resolving artifact for installation: "
+                               + artifactItem.toString());
 
                 //
                 // CREATE MAVEN ARTIFACT
@@ -125,7 +123,14 @@ public class InstallExternalDependencyMojo extends
                         // verification fails
                         verifyArtifactItemChecksum(artifactItem,
                                 stagedArtifactFile);
-
+                        
+                        
+                        // perform Sonatype REST query to ensure that this artifacts checksum
+                        // is not resolved to an existing artifact already hosted in another 
+                        // Maven repository
+                        verifyArtifactItemChecksumBySonatypeLookup(artifactItem,
+                            stagedArtifactFile);
+                        
                         //
                         // INSTALL MAVEN ARTIFACT TO LOCAL REPOSITORY
                         //
@@ -162,11 +167,8 @@ public class InstallExternalDependencyMojo extends
 
                                     if (artifactItem.getGeneratePom() == true)
                                     {
-                                        getLog()
-                                                .debug(
-                                                        "installing generated POM file: "
-                                                                + generatedPomFile
-                                                                        .getCanonicalPath());
+                                        getLog().debug("installing generated POM file: "
+                                                       + generatedPomFile.getCanonicalPath());
                                         artifact.addMetadata(pomMetadata);
                                     }
                                 }
@@ -213,16 +215,12 @@ public class InstallExternalDependencyMojo extends
                 }
                 else
                 {
-                    getLog()
-                            .info(
-                                    "this aritifact already exists in the local repository; no download is needed: "
+                    getLog().info("this aritifact already exists in the local repository; no download is needed: "
                                             + artifactItem.toString());
                 }
             }
 
-            getLog()
-                    .info(
-                            "finished installing all external dependencies into local repository");
+            getLog().info("finished installing all external dependencies into local repository");
         }
         catch (MojoFailureException e)
         {

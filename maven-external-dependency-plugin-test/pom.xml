@@ -26,13 +26,14 @@
          <plugin>
              <groupId>com.savage7.maven.plugins</groupId>
              <artifactId>maven-external-dependency-plugin</artifactId>
-             <version>0.1-SNAPSHOT</version>
+             <version>0.2-SNAPSHOT</version>
              <inherited>false</inherited>
              <configuration>
                  <stagingDirectory>
                         ${project.build.directory}/dependencies/
                  </stagingDirectory>
                  <createChecksum>true</createChecksum>
+                 <skipChecksumVerification>false</skipChecksumVerification>
                  <force>false</force>
                  <artifactItems>
                  
@@ -60,7 +61,6 @@
                         </downloadUrl>
                     </artifactItem>
 
-
                     <!-- HERE IS AN EXAMPLE OF A FILE USING A CLASSIFIER 
                          AND A CHECKSUM VERIFICATION ON THE DOWNLOADED FILE -->
                     <artifactItem>
@@ -70,11 +70,10 @@
                         <classifier>bin</classifier>
                         <packaging>zip</packaging>
                         <downloadUrl>
-                           http://apache.mirrors.timporter.net/ant/binaries/{artifactId}-{version}-{classifier}.zip
+                           http://apache.securedservers.com/ant/binaries/{artifactId}-{version}-{classifier}.zip
                         </downloadUrl>                        
                         <checksum>025836cd51474bd3bbda6f74a1168e092a670363</checksum>                        
                     </artifactItem>
-
 
                     <!-- HERE IS AN EXAMPLE OF AN ARTIFACT 
                          EXTRACTED FROM A ZIP FILE -->
@@ -88,7 +87,24 @@
                         </downloadUrl>                        
                         <extractFile>tweener.swc</extractFile>                        
                     </artifactItem>
-                    
+
+                    <!-- HERE IS AN EXAMPLE OF AN ARTIFACT DEFINED THAT DOWNLOADS A 
+                         FILE THAT CONTAINS A SHA1 CHECKSUM USED BY ANOTHER ALREADY
+                         MAVEN HOSTED ARTIFACT.   PLEASE NOTE, THIS DEPENDENCY WILL
+                         FAIL TO INSTALL SINCE THE GROUP ID, ARTIFACT ID, and VERSION
+                         ARE A MISMATCH -->
+                    <!-- 
+                    <artifactItem>
+                        <groupId>com.imaginary</groupId>
+                        <artifactId>non-existant</artifactId>
+                        <version>1.0.0</version>
+                        <packaging>jar</packaging>
+                        <downloadUrl>
+                           http://repo1.maven.org/maven2/org/apache/ant/ant/1.8.0/ant-1.8.0.jar
+                        </downloadUrl> 
+                        <skipChecksumVerification>false</skipChecksumVerification>
+                    </artifactItem>
+                     -->
                  </artifactItems>
 			    
              </configuration>

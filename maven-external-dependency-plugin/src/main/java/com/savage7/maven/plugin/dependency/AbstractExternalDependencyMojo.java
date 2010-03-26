@@ -24,6 +24,9 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.model.Model;
@@ -38,6 +41,9 @@ import org.codehaus.plexus.digest.Md5Digester;
 import org.codehaus.plexus.digest.Sha1Digester;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.WriterFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * Base class for all goals in this plugin.
@@ -90,6 +96,17 @@ public abstract class AbstractExternalDependencyMojo extends
      */
     protected Boolean force = false;
 
+    
+    /**
+     * If this property is set to true, then the 
+     * downloaded file's checksum will not be 
+     * verified using the Sonatype artifact query
+     * by checksum validation routine.
+     * 
+     * @parameter default-value="false"
+     */
+    protected Boolean skipChecksumVerification = false;
+    
     /**
      * Create Maven Artifact object from ArtifactItem configuration descriptor
      * 
@@ -280,6 +297,151 @@ public abstract class AbstractExternalDependencyMojo extends
                         "verification passed on MD5 checksum for artifact: "
                                 + artifactItem.toString());
             }
+        }
+    }
+    
+
+    /**
+     * Validate downloaded file artifact checksum does not match another
+     * artifact's checksum that already exists in a public Maven 
+     * repository.  Using the Sonatype REST API to perform a checksum
+     * lookup.
+     * 
+     * @since 0.2
+     * 
+     * @param artifactItem
+     *            to validate checksum against
+     * @param targetFile
+     *            to validate checksum against
+     * @throws MojoExecutionException
+     * @throws MojoFailureException
+     * @throws IOException
+     */
+    protected void verifyArtifactItemChecksumBySonatypeLookup(ArtifactItem artifactItem,
+        File targetFile) throws MojoExecutionException,
+        MojoFailureException, IOException
+    {
+        // skip this artifact checksum verification?
+        if (skipChecksumVerification == true ||
+            artifactItem.getSkipChecksumVerification() == true)
+        {
+            return;
+        }
+
+        boolean artifactMismatch = false;
+        StringBuilder detectedArtifacts = new StringBuilder();
+        
+        try
+        {
+            // calculate SHA1 checksum
+            String sha1Checksum = sha1Digester.calc(targetFile);
+            getLog().debug("performing Sonatype lookup on artifact SHA1 checksum: " + sha1Checksum);
+        
+            // perform REST query against Sonatype checksum lookup API
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = dbf.newDocumentBuilder();
+            Document document = builder.parse("http://repository.sonatype.org/service/local/data_index?sha1="+sha1Checksum);
+            NodeList artifactList = document.getElementsByTagName("artifact");
+
+            // were any results returned?
+            if(artifactList != null && artifactList.getLength() > 0)
+            {
+                int nodeCount = artifactList.getLength(); 
+                getLog().info(nodeCount + " existing artifacts found in Sonatype checksum lookup.  verifying artifact GAV.");
+                
+                // iterate over all the query returned artifact definitions and 
+                // attempt to determine if any of the returned artifact GAV do
+                // no match the GAV of the attempted install artifact.
+                for(int index = 0; index < nodeCount; index++)
+                {
+                    Node artifactNode = artifactList.item(index);
+                    if(artifactNode.hasChildNodes())
+                    {
+                        NodeList children = artifactNode.getChildNodes();
+                        for(int loop = 0; loop < children.getLength(); loop++)
+                        {
+                            Node artifactProperty = children.item(loop);
+                            
+                            // append returned artifact property names to an output message string
+                            if(!artifactProperty.getNodeName().equalsIgnoreCase("#text"))
+                            {
+                                detectedArtifacts.append("\n       " + artifactProperty.getNodeName() + " : " + artifactProperty.getTextContent());
+                            }
+                            
+                            // attempt to validate the returned artifact's GroupId against the target install artifact
+                            if(artifactProperty.getNodeName().equalsIgnoreCase("groupId"))
+                            {
+                                if(!artifactProperty.getTextContent().equalsIgnoreCase(artifactItem.getGroupId()))
+                                {
+                                    getLog().error("artifact found in Sonatype lookup does not match: "+
+                                        artifactProperty.getNodeName() + ":" + 
+                                        artifactProperty.getTextContent() + " != " + 
+                                        artifactItem.getGroupId());
+                                    artifactMismatch = true;
+                                }
+                            }
+                            
+                            // attempt to validate the returned artifact's ArtifactId against the target install artifact
+                            else if(artifactProperty.getNodeName().equalsIgnoreCase("artifactId"))
+                            {
+                                if(!artifactProperty.getTextContent().equalsIgnoreCase(artifactItem.getArtifactId()))
+                                {
+                                    getLog().error("artifact found in Sonatype lookup does not match: "+
+                                        artifactProperty.getNodeName() + ":" + 
+                                        artifactProperty.getTextContent() + " != " + 
+                                        artifactItem.getArtifactId());
+                                    artifactMismatch = true;
+                                }
+                            }
+                            
+                            // attempt to validate the returned artifact's Version against the target install artifact
+                            else if(artifactProperty.getNodeName().equalsIgnoreCase("version"))
+                            {
+                                if(!artifactProperty.getTextContent().equalsIgnoreCase(artifactItem.getVersion()))
+                                {
+                                    getLog().error("artifact found in Sonatype lookup does not match: "+
+                                        artifactProperty.getNodeName() + ":" + 
+                                        artifactProperty.getTextContent() + " != " + 
+                                        artifactItem.getVersion());
+                                    artifactMismatch = true;
+                                }
+                            }                                        
+                        }
+                    }
+
+                    detectedArtifacts.append("\n");
+                }
+            }
+            else
+            {
+                getLog().debug("no existing artifacts found in Sonatype checksum lookup.  continue with artifact installation.");
+            }
+        }
+        catch(Exception ex)
+        {
+            getLog().error(ex);
+        }
+        
+        // was a mismatch detected?
+        if(artifactMismatch == true)
+        {
+            // checksum verification failed, throw error
+            throw new MojoFailureException(
+                    "Sonatype artifact checksum verification failed on artifact defined in POM: \n"
+                    + "\n       groupId    : "
+                    + artifactItem.getGroupId()
+                    + "\n       artifactId : "
+                    + artifactItem.getArtifactId()
+                    + "\n       version    : "
+                    + artifactItem.getVersion()
+                    + "\n       checksum   : "
+                    + artifactItem.getChecksum()
+                    + "\n       file       : "
+                    + targetFile.getCanonicalPath()
+                    + "\n\n The following artifact(s) were detected using the same checksum:\n"
+                    + detectedArtifacts.toString()
+                    + "\n\n Please verify that the GAV defined on the target artifact is correct.\n"
+                    );
         }
     }
 }

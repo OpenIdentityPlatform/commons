@@ -136,6 +136,16 @@ public class ArtifactItem
     private String createChecksum;
 
     /**
+     * If this property is set to true, then the 
+     * downloaded file's checksum will not be 
+     * verified using the Sonatype artifact query
+     * by checksum validation routine.
+     * 
+     * @parameter default-value="false"
+     */
+    private Boolean skipChecksumVerification = false;
+
+    /**
      * Checksum for Artifact.
      * 
      * @parameter
@@ -483,6 +493,25 @@ public class ArtifactItem
         this.checksum = filterEmptyString(checksum);
     }
 
+    /**
+     * @return SkipChecksumVerification.
+     */
+    public final Boolean getSkipChecksumVerification()
+    {
+        return skipChecksumVerification;
+    }
+
+    /**
+     * @param skipChecksumVerification
+     *            SkipChecksumVerification.
+     */
+    public final void setSkipChecksumVerification(final Boolean skipChecksumVerification)
+    {
+        this.skipChecksumVerification = skipChecksumVerification;
+    }
+
+    
+    
     /**
      * @return ExtractFile.
      */
