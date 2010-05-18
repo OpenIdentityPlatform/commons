@@ -103,7 +103,7 @@ public class DeployExternalDependencyMojo extends
             {
                 try
                 {
-                    artifactResolver.resolve(artifact, null, localRepository);
+                    artifactResolver.resolve(artifact, project.getRemoteArtifactRepositories(), localRepository);
 
                     //
                     // DEPLOY TO DISTRIBUTION MAVEN REPOSITORY
