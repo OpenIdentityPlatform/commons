@@ -4,7 +4,7 @@
   <groupId>com.savage7.maven.plugins</groupId>
   <artifactId>maven-external-dependency-plugin-test</artifactId>
   <packaging>jar</packaging>
-  <version>0.1</version>
+  <version>0.3</version>
   <name>maven-external-dependency-plugin-test</name>
   <url>http://maven.apache.org</url>
   <build>
@@ -26,7 +26,7 @@
          <plugin>
              <groupId>com.savage7.maven.plugins</groupId>
              <artifactId>maven-external-dependency-plugin</artifactId>
-             <version>0.2-SNAPSHOT</version>
+             <version>0.3-SNAPSHOT</version>
              <inherited>false</inherited>
              <configuration>
                  <stagingDirectory>
@@ -66,13 +66,13 @@
                     <artifactItem>
                         <groupId>org.apache.ant</groupId>
                         <artifactId>apache-ant</artifactId>
-                        <version>1.8.0</version>
+                        <version>1.8.1</version>
                         <classifier>bin</classifier>
                         <packaging>zip</packaging>
                         <downloadUrl>
                            http://apache.securedservers.com/ant/binaries/{artifactId}-{version}-{classifier}.zip
                         </downloadUrl>                        
-                        <checksum>025836cd51474bd3bbda6f74a1168e092a670363</checksum>                        
+                        <checksum>671a3d4431df7e9ce29c08f7fcd7533d</checksum>                        
                     </artifactItem>
 
                     <!-- HERE IS AN EXAMPLE OF AN ARTIFACT 
@@ -105,6 +105,24 @@
                         <skipChecksumVerification>false</skipChecksumVerification>
                     </artifactItem>
                      -->
+                     
+                     
+                    <!--  DIFFERENT CHECKSUMS FOR DOWNLOAD FILE AND EXTRACTED FILE  --> 
+				    <artifactItem>
+				        <groupId>de.innosystec</groupId>
+				        <artifactId>java-unrar</artifactId>
+				        <version>0.3</version>
+				        <packaging>jar</packaging>
+				        <downloadUrl>
+				            http://github.com/downloads/edmund-wagner/junrar/java-unrar-{version}.zip
+				        </downloadUrl>
+				        <checksum>530351609180152cff40fa1c79a28193185aba83</checksum>
+				        <install>true</install>
+				        <force>false</force>
+				        <extractFile>java-unrar/java-unrar-{version}.jar</extractFile>
+				        <extractFileChecksum>bce51f76274c41ddac3ca8e99378ff2893108049</extractFileChecksum>
+				    </artifactItem>
+
                  </artifactItems>
 			    
              </configuration>
