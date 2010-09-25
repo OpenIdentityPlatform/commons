@@ -302,6 +302,79 @@ public abstract class AbstractExternalDependencyMojo extends
     
 
     /**
+     * Validate artifact configured extracted file checksum against specified file.
+     * 
+     * @param artifactItem
+     *            to validate checksum against
+     * @param targetFile
+     *            to validate checksum against
+     * @throws MojoExecutionException
+     * @throws MojoFailureException
+     * @throws IOException
+     */
+    protected void verifyArtifactItemExtractFileChecksum(ArtifactItem artifactItem,
+            File targetFile) throws MojoExecutionException,
+            MojoFailureException, IOException
+    {
+        // if a checksum was specified, we must verify the checksum against the
+        // extracted file
+        if (artifactItem.hasExtractFileChecksum())
+        {
+            getLog().info(
+                    "verifying checksum on extracted file: CKSM="
+                            + artifactItem.getChecksum());
+
+            // perform MD5 checksum verification
+            getLog().info(
+                    "testing for MD5 checksum on artifact: "
+                            + artifactItem.toString());
+            if (!verifyChecksum(targetFile, new Md5Digester(), artifactItem
+                    .getExtractFileChecksum()))
+            {
+                getLog().info(
+                        "verification failed on MD5 checksum for extracted file: "
+                                + targetFile.getCanonicalPath());
+                getLog().info(
+                        "testing for SHA1 checksum on artifact: "
+                                + artifactItem.toString());
+
+                // did not pass MD5 checksum verification, now test SHA1
+                // checksum
+                if (!verifyChecksum(targetFile, new Sha1Digester(),
+                        artifactItem.getExtractFileChecksum()))
+                {
+                    // checksum verification failed, throw error
+                    throw new MojoFailureException(
+                            "Both MD5 and SHA1 checksum verification failed for: "
+                                    + "\r\n   groupId        : "
+                                    + artifactItem.getGroupId()
+                                    + "\r\n   artifactId     : "
+                                    + artifactItem.getArtifactId()
+                                    + "\r\n   version        : "
+                                    + artifactItem.getVersion()
+                                    + "\r\n   checksum       : "
+                                    + artifactItem.getChecksum()
+                                    + "\r\n   extracted file : "
+                                    + targetFile.getCanonicalPath());
+                }
+                else
+                {
+                    getLog().info(
+                            "verification passed on SHA1 checksum for artifact: "
+                                    + artifactItem.toString());
+                }
+            }
+            else
+            {
+                getLog().info(
+                        "verification passed on MD5 checksum for artifact: "
+                                + artifactItem.toString());
+            }
+        }
+    }
+
+    
+    /**
      * Validate downloaded file artifact checksum does not match another
      * artifact's checksum that already exists in a public Maven 
      * repository.  Using the Sonatype REST API to perform a checksum

@@ -159,6 +159,15 @@ public class ArtifactItem
      */
     private String extractFile;
 
+  
+    /**
+     * File checksum from file that was extracted from downloaded ZIP file.
+     * 
+     * @parameter
+     */
+    private String extractFileChecksum;
+
+    
     /**
      * default constructor.
      */
@@ -484,6 +493,23 @@ public class ArtifactItem
         return (checksum != null && !checksum.isEmpty());
     }
 
+    /**
+     * @return true is a checksum was defined for an extracted file.
+     */
+    public final boolean hasExtractFileChecksum()
+    {
+        return (hasChecksum() && extractFileChecksum != null && !extractFileChecksum.isEmpty());
+    }
+    
+    /**
+     * @return Extracted File Checksum.
+     */    
+    public final String getExtractFileChecksum()
+    {
+        return extractFileChecksum;
+    }
+    
+    
     /**
      * @param checksum
      *            Checksum
