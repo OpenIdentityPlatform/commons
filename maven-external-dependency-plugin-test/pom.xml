@@ -1,266 +1,256 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>com.savage7.maven.plugins</groupId>
-  <artifactId>maven-external-dependency-plugin-test</artifactId>
-  <packaging>jar</packaging>
-  <version>0.3</version>
-  <name>maven-external-dependency-plugin-test</name>
-  <url>http://maven.apache.org</url>
-  <build>
-     <plugins>
-     
-         <!--  JAVA PROJECT COMPILER  -->
-         
-         <plugin>
-             <artifactId>maven-compiler-plugin</artifactId>
-             <configuration>
-                 <source>1.6</source>
-                 <target>1.6</target>
-             </configuration>
-         </plugin>
-         
-         
-         <!--  EXTERNAL DEPENDENCY RESOLVER  -->
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.savage7.maven.plugins</groupId>
+	<artifactId>maven-external-dependency-plugin-test</artifactId>
+	<packaging>jar</packaging>
+	<version>0.4</version>
+	<name>maven-external-dependency-plugin-test</name>
+	<url>http://maven.apache.org</url>
+	<build>
+		<plugins>
 
-         <plugin>
-             <groupId>com.savage7.maven.plugins</groupId>
-             <artifactId>maven-external-dependency-plugin</artifactId>
-             <version>0.3-SNAPSHOT</version>
-             <inherited>false</inherited>
-             <configuration>
-                 <stagingDirectory>
-                        ${project.build.directory}/dependencies/
+			<!-- JAVA PROJECT COMPILER -->
+
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+
+
+			<!-- EXTERNAL DEPENDENCY RESOLVER -->
+
+			<plugin>
+				<groupId>com.savage7.maven.plugins</groupId>
+				<artifactId>maven-external-dependency-plugin</artifactId>
+				<version>0.4</version>
+				<inherited>false</inherited>
+				<configuration>
+					<stagingDirectory>
+						${project.build.directory}/dependencies/
                  </stagingDirectory>
-                 <createChecksum>true</createChecksum>
-                 <skipChecksumVerification>false</skipChecksumVerification>
-                 <force>false</force>
-                 <artifactItems>
-                 
-                    <!-- THIS JAR IS HOSTED ON GOOGLE CODE, 
-                         BUT IS NOT AVAILABLE IN A MAVEN REPO -->
-                    <artifactItem>
-                        <groupId>com.google.code</groupId>
-                        <artifactId>google-api-translate-java</artifactId>
-                        <version>0.92</version>
-                        <packaging>jar</packaging>
-                        <downloadUrl>
-                           http://google-api-translate-java.googlecode.com/files/{artifactId}-{version}.jar
-                        </downloadUrl>                        
-                    </artifactItem>
+					<createChecksum>true</createChecksum>
+					<skipChecksumVerification>false</skipChecksumVerification>
+					<force>false</force>
+					<artifactItems>
 
-                    <!-- HERE IS AN EXAMPLE OF AN ADOBE FLASH LIBRARY (SWC) HOSTED 
-                         ON GOOGLE CODE, BUT NOT AVAILABLE IN A MAVEN REPO -->
-                    <artifactItem>
-                        <groupId>org.papervision3d</groupId>
-                        <artifactId>Papervision3D</artifactId>
-                        <version>2.1.932</version>
-                        <packaging>swc</packaging>
-                        <downloadUrl>
-                           http://papervision3d.googlecode.com/files/{artifactId}_{version}.{packaging}
+						<!-- THIS JAR IS HOSTED ON GOOGLE CODE, BUT IS NOT AVAILABLE IN A MAVEN 
+							REPO -->
+						<artifactItem>
+							<groupId>com.google.code</groupId>
+							<artifactId>google-api-translate-java</artifactId>
+							<version>0.92</version>
+							<packaging>jar</packaging>
+							<downloadUrl>
+								http://google-api-translate-java.googlecode.com/files/{artifactId}-{version}.jar
                         </downloadUrl>
-                    </artifactItem>
+						</artifactItem>
 
-                    <!-- HERE IS AN EXAMPLE OF A FILE USING A CLASSIFIER 
-                         AND A CHECKSUM VERIFICATION ON THE DOWNLOADED FILE -->
-                    <artifactItem>
-                        <groupId>org.apache.ant</groupId>
-                        <artifactId>apache-ant</artifactId>
-                        <version>1.8.1</version>
-                        <classifier>bin</classifier>
-                        <packaging>zip</packaging>
-                        <downloadUrl>
-                           http://apache.securedservers.com/ant/binaries/{artifactId}-{version}-{classifier}.zip
-                        </downloadUrl>                        
-                        <checksum>671a3d4431df7e9ce29c08f7fcd7533d</checksum>                        
-                    </artifactItem>
+						<!-- HERE IS AN EXAMPLE OF AN ADOBE FLASH LIBRARY (SWC) HOSTED ON GOOGLE 
+							CODE, BUT NOT AVAILABLE IN A MAVEN REPO -->
+						<artifactItem>
+							<groupId>org.papervision3d</groupId>
+							<artifactId>Papervision3D</artifactId>
+							<version>2.1.932</version>
+							<packaging>swc</packaging>
+							<downloadUrl>
+								http://papervision3d.googlecode.com/files/{artifactId}_{version}.{packaging}
+                        </downloadUrl>
+						</artifactItem>
 
-                    <!-- HERE IS AN EXAMPLE OF AN ARTIFACT 
-                         EXTRACTED FROM A ZIP FILE -->
-                    <artifactItem>
-                        <groupId>com.google.code</groupId>
-                        <artifactId>tweener</artifactId>
-                        <version>1.33.74</version>
-                        <packaging>swc</packaging>
-                        <downloadUrl>
-                           http://tweener.googlecode.com/files/tweener_1_33_74_as3_swc.zip
-                        </downloadUrl>                        
-                        <extractFile>tweener.swc</extractFile>                        
-                    </artifactItem>
+						<!-- HERE IS AN EXAMPLE OF A FILE USING A CLASSIFIER AND A CHECKSUM 
+							VERIFICATION ON THE DOWNLOADED FILE -->
+						<artifactItem>
+							<groupId>org.apache.ant</groupId>
+							<artifactId>apache-ant</artifactId>
+							<version>1.8.1</version>
+							<classifier>bin</classifier>
+							<packaging>zip</packaging>
+							<downloadUrl>
+								http://apache.securedservers.com/ant/binaries/{artifactId}-{version}-{classifier}.zip
+                        </downloadUrl>
+							<checksum>671a3d4431df7e9ce29c08f7fcd7533d</checksum>
+						</artifactItem>
 
-                    <!-- HERE IS AN EXAMPLE OF AN ARTIFACT DEFINED THAT DOWNLOADS A 
-                         FILE THAT CONTAINS A SHA1 CHECKSUM USED BY ANOTHER ALREADY
-                         MAVEN HOSTED ARTIFACT.   PLEASE NOTE, THIS DEPENDENCY WILL
-                         FAIL TO INSTALL SINCE THE GROUP ID, ARTIFACT ID, and VERSION
-                         ARE A MISMATCH -->
-                    <!-- 
-                    <artifactItem>
-                        <groupId>com.imaginary</groupId>
-                        <artifactId>non-existant</artifactId>
-                        <version>1.0.0</version>
-                        <packaging>jar</packaging>
-                        <downloadUrl>
-                           http://repo1.maven.org/maven2/org/apache/ant/ant/1.8.0/ant-1.8.0.jar
-                        </downloadUrl> 
-                        <skipChecksumVerification>false</skipChecksumVerification>
-                    </artifactItem>
-                     -->
-                     
-                     
-                    <!--  DIFFERENT CHECKSUMS FOR DOWNLOAD FILE AND EXTRACTED FILE  --> 
-				    <artifactItem>
-				        <groupId>de.innosystec</groupId>
-				        <artifactId>java-unrar</artifactId>
-				        <version>0.3</version>
-				        <packaging>jar</packaging>
-				        <downloadUrl>
-				            http://github.com/downloads/edmund-wagner/junrar/java-unrar-{version}.zip
+						<!-- HERE IS AN EXAMPLE OF AN ARTIFACT EXTRACTED FROM A ZIP FILE -->
+						<artifactItem>
+							<groupId>com.google.code</groupId>
+							<artifactId>tweener</artifactId>
+							<version>1.33.74</version>
+							<packaging>swc</packaging>
+							<downloadUrl>
+								http://tweener.googlecode.com/files/tweener_1_33_74_as3_swc.zip
+                        </downloadUrl>
+							<extractFile>tweener.swc</extractFile>
+						</artifactItem>
+
+						<!-- HERE IS AN EXAMPLE OF AN ARTIFACT DEFINED THAT DOWNLOADS A FILE 
+							THAT CONTAINS A SHA1 CHECKSUM USED BY ANOTHER ALREADY MAVEN HOSTED ARTIFACT. 
+							PLEASE NOTE, THIS DEPENDENCY WILL FAIL TO INSTALL SINCE THE GROUP ID, ARTIFACT 
+							ID, and VERSION ARE A MISMATCH -->
+						<!-- <artifactItem> <groupId>com.imaginary</groupId> <artifactId>non-existant</artifactId> 
+							<version>1.0.0</version> <packaging>jar</packaging> <downloadUrl> http://repo1.maven.org/maven2/org/apache/ant/ant/1.8.0/ant-1.8.0.jar 
+							</downloadUrl> <skipChecksumVerification>false</skipChecksumVerification> 
+							</artifactItem> -->
+
+
+						<!-- DIFFERENT CHECKSUMS FOR DOWNLOAD FILE AND EXTRACTED FILE -->
+						<artifactItem>
+							<groupId>de.innosystec</groupId>
+							<artifactId>java-unrar</artifactId>
+							<version>0.3</version>
+							<packaging>jar</packaging>
+							<downloadUrl>
+								http://github.com/downloads/edmund-wagner/junrar/java-unrar-{version}.zip
 				        </downloadUrl>
-				        <checksum>530351609180152cff40fa1c79a28193185aba83</checksum>
-				        <install>true</install>
-				        <force>false</force>
-				        <extractFile>java-unrar/java-unrar-{version}.jar</extractFile>
-				        <extractFileChecksum>bce51f76274c41ddac3ca8e99378ff2893108049</extractFileChecksum>
-				    </artifactItem>
+							<checksum>530351609180152cff40fa1c79a28193185aba83</checksum> <!-- this checksum is applied to the download file -->
+							<install>true</install>
+							<force>false</force>
+							<extractFile>java-unrar/java-unrar-{version}.jar</extractFile>
+							<extractFileChecksum>bce51f76274c41ddac3ca8e99378ff2893108049</extractFileChecksum>  <!-- this checksum is applied to the extracted file -->
+						</artifactItem>
 
-                 </artifactItems>
-			    
-             </configuration>
-             <executions>
-                 <execution>
-                     <id>clean-external-dependencies</id>
-                     <phase>clean</phase>
-                     <goals>
-                         <!-- mvn com.savage7.maven.plugins:maven-external-dependency-plugin:clean-external -->
-                         <goal>clean-external</goal>
-                     </goals>                     
-                 </execution>
-                 <execution>
-                     <id>resolve-install-external-dependencies</id>
-                     <phase>process-resources</phase>
-                     <goals>
-                         <!-- mvn com.savage7.maven.plugins:maven-external-dependency-plugin:resolve-external -->
-                         <goal>resolve-external</goal>
+					</artifactItems>
 
-                         <!-- mvn com.savage7.maven.plugins:maven-external-dependency-plugin:install-external -->
-                         <goal>install-external</goal>
-                     </goals>                     
-                 </execution>
-                 <execution>
-                     <id>deploy-external-dependencies</id>
-                     <phase>deploy</phase>
-                     <goals>
-                         <!-- mvn com.savage7.maven.plugins:maven-external-dependency-plugin:deploy-external -->
-                         <goal>deploy-external</goal>
-                     </goals>                     
-                 </execution>
-             </executions>
-         </plugin>
-     </plugins>
-     
-     
-<!--      IF USING THE WEBDEV PROTOCOL, THE FOLLOWING EXTENTIONS MAY BE REQUIRED  -->
-<!--      <extensions>-->
-<!--        <extension>-->
-<!--            <groupId>org.apache.maven.wagon</groupId>-->
-<!--            <artifactId>wagon-webdav</artifactId>-->
-<!--            <version>1.0-beta-2</version>-->
-<!--        </extension>-->
-<!--        <extension>-->
-<!--            <groupId>commons-logging</groupId>-->
-<!--            <artifactId>commons-logging</artifactId>-->
-<!--            <version>1.1</version>-->
-<!--        </extension> -->
-<!--      </extensions>-->
+				</configuration>
+				<executions>
+					<execution>
+						<id>clean-external-dependencies</id>
+						<phase>clean</phase>
+						<goals>
+							<!-- mvn com.savage7.maven.plugins:maven-external-dependency-plugin:clean-external -->
+							<goal>clean-external</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>resolve-install-external-dependencies</id>
+						<phase>process-resources</phase>
+						<goals>
+							<!-- mvn com.savage7.maven.plugins:maven-external-dependency-plugin:resolve-external -->
+							<goal>resolve-external</goal>
 
-  </build>
-  
+							<!-- mvn com.savage7.maven.plugins:maven-external-dependency-plugin:install-external -->
+							<goal>install-external</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>deploy-external-dependencies</id>
+						<phase>deploy</phase>
+						<goals>
+							<!-- mvn com.savage7.maven.plugins:maven-external-dependency-plugin:deploy-external -->
+							<goal>deploy-external</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
 
-  <!--  PROJECT DEPENDENCIES  -->
-  
-  <dependencies>
-  
-	<dependency>
-	    <groupId>com.google.code</groupId>
-	    <artifactId>google-api-translate-java</artifactId>
-	    <version>0.92</version>
-	</dependency>
-	  
-    <dependency>
-        <groupId>org.papervision3d</groupId>
-        <artifactId>Papervision3D</artifactId>
-        <version>2.1.932</version>
-        <type>swc</type>
-    </dependency>
-    	  
-	<dependency>
-		<groupId>junit</groupId>
-		<artifactId>junit</artifactId>
-		<version>3.8.1</version>
-		<scope>test</scope>
-	</dependency>
-                                                	
-  </dependencies>
-  
 
-  <!--  MAVEN PLUGIN REPOSITORIES  -->
-   
-  <pluginRepositories>
-      <pluginRepository>
-          <id>ossrh</id>
-          <name>Sonatype OSS Repository</name>
-          <url>http://oss.sonatype.org/content/groups/public</url>
-          <layout>default</layout>
-      </pluginRepository>
-  </pluginRepositories>
-  
-  <repositories>
-	  <repository>
-          <id>snapshots</id>
-          <name>libs-snapshots</name>
-	      <url>http://localhost:8081/artifactory/libs-snapshots-local</url>
-	      <snapshots>
-	      <enabled>true</enabled>
-	      </snapshots>
-	  </repository>
-      <repository>
-		  <id>central</id>
-   		  <name>libs-releases</name>
-		  <url>http://localhost:8081/artifactory/libs-releases-local</url>
-          <snapshots>
-            <enabled>false</enabled>
-          </snapshots>
-      </repository>
-  </repositories>  
+		<!-- IF USING THE WEBDEV PROTOCOL, THE FOLLOWING EXTENTIONS MAY BE REQUIRED -->
+		<!-- <extensions> -->
+		<!-- <extension> -->
+		<!-- <groupId>org.apache.maven.wagon</groupId> -->
+		<!-- <artifactId>wagon-webdav</artifactId> -->
+		<!-- <version>1.0-beta-2</version> -->
+		<!-- </extension> -->
+		<!-- <extension> -->
+		<!-- <groupId>commons-logging</groupId> -->
+		<!-- <artifactId>commons-logging</artifactId> -->
+		<!-- <version>1.1</version> -->
+		<!-- </extension> -->
+		<!-- </extensions> -->
 
-  
-  <!--  SOURCE CONTROL -->
+	</build>
 
-  <scm>
-      <connection>scm:svn:http://maven-external-dependency-plugin.googlecode.com/svn/trunk/maven-external-dependency-plugin-test/</connection>
-      <developerConnection>scm:svn:https://maven-external-dependency-plugin.googlecode.com/svn/trunk/maven-external-dependency-plugin-test/</developerConnection>
-      <url>http://maven-external-dependency-plugin.googlecode.com/svn/trunk/maven-external-dependency-plugin-test/</url>
-  </scm>
-  
-  
-  <!--  PRIVATE REPOSITORY -->
-  
-  <!-- this section is defined for testing the deployment to a private 
-       repository, please update this section for your own repository -->
 
-  <distributionManagement>
-      <repository>
-        <id>central</id>
-        <name>libs-releases</name>
-        <url>http://localhost:8081/artifactory/libs-releases-local</url>
-      </repository>
-      <snapshotRepository>
-          <uniqueVersion>false</uniqueVersion>
-          <id>snapshots</id>
-          <name>libs-snapshots</name>
-          <url>http://localhost:8081/artifactory/libs-snapshots-local</url>
-      </snapshotRepository>
-  </distributionManagement>
-      
+	<!-- PROJECT DEPENDENCIES -->
+
+	<dependencies>
+
+		<dependency>
+			<groupId>com.google.code</groupId>
+			<artifactId>google-api-translate-java</artifactId>
+			<version>0.92</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.papervision3d</groupId>
+			<artifactId>Papervision3D</artifactId>
+			<version>2.1.932</version>
+			<type>swc</type>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>3.8.1</version>
+			<scope>test</scope>
+		</dependency>
+
+	</dependencies>
+
+
+	<!-- MAVEN PLUGIN REPOSITORIES -->
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>ossrh</id>
+			<name>Sonatype OSS Repository</name>
+			<url>http://oss.sonatype.org/content/groups/public</url>
+			<layout>default</layout>
+		</pluginRepository>
+	</pluginRepositories>
+
+	<repositories>
+		<repository>
+			<id>snapshots</id>
+			<name>libs-snapshots</name>
+			<url>http://localhost:8081/artifactory/libs-snapshots-local</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>central</id>
+			<name>libs-releases</name>
+			<url>http://localhost:8081/artifactory/libs-releases-local</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
+
+	<!-- SOURCE CONTROL -->
+
+	<scm>
+		<connection>scm:svn:http://maven-external-dependency-plugin.googlecode.com/svn/trunk/maven-external-dependency-plugin-test/</connection>
+		<developerConnection>scm:svn:https://maven-external-dependency-plugin.googlecode.com/svn/trunk/maven-external-dependency-plugin-test/</developerConnection>
+		<url>http://maven-external-dependency-plugin.googlecode.com/svn/trunk/maven-external-dependency-plugin-test/</url>
+	</scm>
+
+
+	<!-- PRIVATE REPOSITORY -->
+
+	<!-- this section is defined for testing the deployment to a private repository, 
+		please update this section for your own repository -->
+
+	<distributionManagement>
+		<repository>
+			<id>central</id>
+			<name>libs-releases</name>
+			<url>http://localhost:8081/artifactory/libs-releases-local</url>
+		</repository>
+		<snapshotRepository>
+			<uniqueVersion>false</uniqueVersion>
+			<id>snapshots</id>
+			<name>libs-snapshots</name>
+			<url>http://localhost:8081/artifactory/libs-snapshots-local</url>
+		</snapshotRepository>
+	</distributionManagement>
+
 
 </project>
