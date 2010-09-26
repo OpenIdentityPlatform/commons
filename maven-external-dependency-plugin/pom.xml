@@ -77,6 +77,17 @@ under the License.
                 </configuration>
             </plugin>
          </plugins>    
+         
+         
+	     <extensions>
+	      <!-- Enabling the use of FTP -->
+	      <extension>
+	        <groupId>org.apache.maven.wagon</groupId>
+	         <artifactId>wagon-ftp</artifactId>
+	         <version>1.0-beta-6</version>
+	      </extension>
+	    </extensions>
+
     </build>
 
     <!--  PROJECT DEPENDENCIES-->
@@ -146,7 +157,7 @@ under the License.
     <site>
        <id>savage7-site-docs</id>
        <name>Savage7 Site Docs</name>
-       <url>file:///W:/maven/plugin/maven-external-dependency-plugin/</url>
+       <url>ftp://savage7.com/maven-external-dependency-plugin/</url>
     </site>
   </distributionManagement>
   
