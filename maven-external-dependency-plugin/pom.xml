@@ -85,14 +85,27 @@ under the License.
                     <tagBase>https://maven-external-dependency-plugin.googlecode.com/svn/release</tagBase>
                 </configuration>
             </plugin>
+<!--			<plugin>-->
+<!--				<groupId>org.apache.maven.plugins</groupId>-->
+<!--				<artifactId>maven-javadoc-plugin</artifactId>-->
+<!--				<version>2.7</version>-->
+<!--				<configuration>-->
+<!--				    <skip>true</skip>-->
+<!--				</configuration>-->
+<!--			</plugin>  -->
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.7</version>
-				<configuration>
-				    <skip>true</skip>
-				</configuration>
-			</plugin>  
+			  <groupId>org.apache.maven.plugins</groupId>
+			  <artifactId>maven-gpg-plugin</artifactId>
+			  <executions>
+			    <execution>
+			      <id>sign-artifacts</id>
+			      <phase>verify</phase>
+			      <goals>
+			        <goal>sign</goal>
+			      </goals>
+			    </execution>
+			  </executions>
+			</plugin>
          </plugins>    
          
          
