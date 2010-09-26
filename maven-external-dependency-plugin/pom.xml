@@ -82,6 +82,7 @@ under the License.
                 <version>2.0</version>
                 <configuration>
                     <goals>deploy</goals>
+                    <tagBase>https://maven-external-dependency-plugin.googlecode.com/svn/release</tagBase>
                 </configuration>
             </plugin>
 			<plugin>
@@ -151,9 +152,9 @@ under the License.
     <!--  SOURCE CONTROL -->
 
     <scm>
-        <connection>scm:svn:https://maven-external-dependency-plugin.googlecode.com/svn/trunk/</connection>
-        <developerConnection>scm:svn:https://maven-external-dependency-plugin.googlecode.com/svn/trunk/</developerConnection>
-        <url>https://maven-external-dependency-plugin.googlecode.com/svn/trunk/</url>
+        <connection>scm:svn:https://maven-external-dependency-plugin.googlecode.com/svn/trunk/maven-external-dependency-plugin</connection>
+        <developerConnection>scm:svn:https://maven-external-dependency-plugin.googlecode.com/svn/trunk/maven-external-dependency-plugin</developerConnection>
+        <url>https://maven-external-dependency-plugin.googlecode.com/svn/trunk/maven-external-dependency-plugin</url>
     </scm>
 
         
