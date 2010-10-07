@@ -39,6 +39,15 @@ under the License.
             <url>http://www.savage7.com</url>
         </developer>
     </developers>
+    <contributors>
+      <contributor>
+        <name>Marvin Froeder</name>
+        <email>velo.br@gmail.com</email>
+        <roles>
+          <role>Add support to extra compressed artifacts like bzip2, dir, gzip, tar, tgz, tar.gz, tbz2, tar.bz2</role>
+        </roles>
+      </contributor>
+    </contributors>
     <issueManagement>
         <system>Google Code - Issue Tracking</system>
         <url>http://code.google.com/p/maven-external-dependency-plugin/issues/list</url>
@@ -160,7 +169,12 @@ under the License.
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-deploy-plugin</artifactId>
           <version>2.3</version>        
-        </dependency>      
+        </dependency>     
+        <dependency>
+          <groupId>org.codehaus.plexus</groupId>
+          <artifactId>plexus-archiver</artifactId>
+          <version>1.1</version>
+        </dependency> 
     </dependencies>
     
     <!--  SOURCE CONTROL -->

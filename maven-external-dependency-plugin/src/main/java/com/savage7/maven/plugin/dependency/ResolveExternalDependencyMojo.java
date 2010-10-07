@@ -16,11 +16,9 @@ package com.savage7.maven.plugin.dependency;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.InputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -29,7 +27,13 @@ import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.codehaus.plexus.archiver.UnArchiver;
+import org.codehaus.plexus.archiver.manager.ArchiverManager;
+import org.codehaus.plexus.archiver.manager.NoSuchArchiverException;
+import org.codehaus.plexus.components.io.fileselectors.FileInfo;
+import org.codehaus.plexus.components.io.fileselectors.FileSelector;
 import org.codehaus.plexus.util.FileUtils;
+import org.codehaus.plexus.util.IOUtil;
 
 /**
  * Download/Acquire external Maven artifacts, copy to staging directory.
@@ -70,6 +74,12 @@ public class ResolveExternalDependencyMojo extends
     @SuppressWarnings("unchecked")
     protected java.util.List remoteRepositories;
 
+    /**
+     * @component
+     * @readonly
+     */
+    protected ArchiverManager archiverManager;
+
     public void execute() throws MojoExecutionException, MojoFailureException
     {
         try
@@ -86,7 +96,7 @@ public class ResolveExternalDependencyMojo extends
             // artifactFactory, null, null );
 
             // loop over and process all configured artifacts
-            for (ArtifactItem artifactItem : artifactItems)
+            for (final ArtifactItem artifactItem : artifactItems)
             {
                 getLog().info(
                     "attempting to resolve external artifact: "
@@ -120,9 +130,11 @@ public class ResolveExternalDependencyMojo extends
                     //
                     if (artifactItem.getDownloadUrl() != null)
                     {
+                        URL downloadUrl = new URL(artifactItem.getDownloadUrl());
+                        
                         // create a temporary download file
                         File tempDownloadFile = File.createTempFile(
-                            artifactItem.getLocalFile(), ".tmp");
+                            artifactItem.getLocalFile(), "." + getExtension(downloadUrl));
 
                         getLog().info(
                             "downloading artifact from URL: "
@@ -132,8 +144,7 @@ public class ResolveExternalDependencyMojo extends
                                 + tempDownloadFile.getCanonicalPath());
 
                         // download file from URL
-                        FileUtils.copyURLToFile(new URL(artifactItem
-                            .getDownloadUrl()), tempDownloadFile);
+                        FileUtils.copyURLToFile(downloadUrl, tempDownloadFile);
 
                         // verify file checksum (if a checksum was defined);
                         // 'MojoFailureException' exception will be thrown if
@@ -145,7 +156,7 @@ public class ResolveExternalDependencyMojo extends
                         // and the checksum verification
                         // has passed (if required), lets copy the temporary
                         // file to the staging location
-                        File artifactFile = getFullyQualifiedArtifactFilePath(artifactItem);
+                        final File artifactFile = getFullyQualifiedArtifactFilePath(artifactItem);
 
                         // if this artifact is not configured to extract a file,
                         // then
@@ -171,13 +182,36 @@ public class ResolveExternalDependencyMojo extends
                                     + "compressed file: "
                                     + artifactItem.getExtractFile());
 
-                            ZipFile zipFile = new ZipFile(tempDownloadFile);
-                            ZipEntry zipEntry = zipFile.getEntry(artifactItem
-                                .getExtractFile().trim());
+                            UnArchiver unarchiver;
+                            try
+                            {
+                                unarchiver = archiverManager.getUnArchiver(tempDownloadFile);
+                            }
+                            catch (NoSuchArchiverException e)
+                            {
+                                throw new MojoExecutionException( "Archive type, no unarchiver available for it", e);
+                            }
+                            
+                            // ensure the path exists to write the file to
+                            File parentDirectory = artifactFile.getParentFile();
+                            if (parentDirectory != null
+                                && !parentDirectory.exists())
+                            {
+                                artifactFile.getParentFile().mkdirs();
+                            }
+
+                            File tempOutputDir = FileUtils.createTempFile(tempDownloadFile.getName(), ".dir", null);
+                            tempOutputDir.mkdirs();
+
+                            unarchiver.setSourceFile(tempDownloadFile);
+                            unarchiver.setDestDirectory(tempOutputDir);
+                            unarchiver.extract();//will extract nothing, the file selector will do the trick
+                            
+                            FileUtils.copyFile(new File(tempOutputDir, artifactItem.getExtractFile()), artifactFile);
 
                             // if a zip entry was not found, then throw a Mojo
                             // exception
-                            if (zipEntry == null)
+                            if (!artifactFile.exists())
                             {
                                 // checksum verification failed, throw error
                                 throw new MojoFailureException(
@@ -194,33 +228,6 @@ public class ResolveExternalDependencyMojo extends
                                         + "\r\n   download URL : "
                                         + artifactItem.getDownloadUrl());
                             }
-
-                            // ensure the path exists to write the file to
-                            File parentDirectory = artifactFile.getParentFile();
-                            if (parentDirectory != null
-                                && !parentDirectory.exists())
-                            {
-                                artifactFile.getParentFile().mkdirs();
-                            }
-
-                            // Create input and output streams
-                            InputStream inStream = zipFile
-                                .getInputStream(zipEntry);
-                            OutputStream outStream = new FileOutputStream(
-                                artifactFile, false);
-
-                            // write target file content from file in zip to
-                            // artifact file
-                            byte[] buffer = new byte[1024];
-                            int nrBytesRead;
-                            while ((nrBytesRead = inStream.read(buffer)) > 0)
-                            {
-                                outStream.write(buffer, 0, nrBytesRead);
-                            }
-
-                            // Finish off by closing the streams
-                            outStream.close();
-                            inStream.close();
 
                             getLog().info(
                                 "extracted target file to staging path: "
@@ -271,6 +278,18 @@ public class ResolveExternalDependencyMojo extends
             getLog().error(e);
             throw new MojoExecutionException(e.getMessage(), e);
         }
+    }
+
+    private String getExtension(URL downloadUrl)
+    {
+        String path = downloadUrl.getPath();
+        if(path.endsWith(".tar.gz")) {
+            return "tar.gz";
+        }
+        if(path.endsWith(".tar.bz2")) {
+            return "tar.bz2";
+        }
+        return FileUtils.getExtension(path);
     }
 
     /**
