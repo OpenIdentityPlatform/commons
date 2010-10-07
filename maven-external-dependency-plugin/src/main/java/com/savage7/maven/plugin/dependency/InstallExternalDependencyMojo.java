@@ -24,7 +24,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.artifact.ProjectArtifactMetadata;
 import org.codehaus.plexus.digest.Digester;
-import org.codehaus.plexus.util.FileUtils;
 
 /**
  * Install external dependencies to local repository.
