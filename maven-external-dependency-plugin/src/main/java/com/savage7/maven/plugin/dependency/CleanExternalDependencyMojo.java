@@ -26,6 +26,7 @@ import org.apache.maven.plugin.MojoFailureException;
  * @see http://code.google.com/p/maven-external-dependency-plugin/
  * @version 0.1
  * @category Maven Plugin
+ * @ThreadSafe
  */
 public class CleanExternalDependencyMojo extends AbstractExternalDependencyMojo
 {

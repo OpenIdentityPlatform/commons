@@ -25,6 +25,7 @@ import org.codehaus.plexus.util.StringUtils;
  * @author <a href="mailto:robert@savage7.com">Robert Savage</a>
  * @see http://code.google.com/p/maven-external-dependency-plugin/
  * @version 0.1
+ * @ThreadSafe
  */
 
 public class ArtifactItem

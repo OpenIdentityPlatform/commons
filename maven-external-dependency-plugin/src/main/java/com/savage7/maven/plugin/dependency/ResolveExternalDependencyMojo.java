@@ -43,6 +43,7 @@ import org.codehaus.plexus.util.IOUtil;
  * @see http://code.google.com/p/maven-external-dependency-plugin/
  * @version 0.1
  * @category Maven Plugin
+ * @ThreadSafe
  */
 public class ResolveExternalDependencyMojo extends
     AbstractExternalDependencyMojo

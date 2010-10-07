@@ -52,6 +52,7 @@ import org.w3c.dom.NodeList;
  * @see http://code.google.com/p/maven-external-dependency-plugin/
  * @version 0.1
  * @category Maven Plugin
+ * @ThreadSafe
  */
 public abstract class AbstractExternalDependencyMojo extends
         AbstractInstallMojo
