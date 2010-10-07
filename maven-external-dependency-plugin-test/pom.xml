@@ -4,9 +4,9 @@
 	<groupId>com.savage7.maven.plugins</groupId>
 	<artifactId>maven-external-dependency-plugin-test</artifactId>
 	<packaging>jar</packaging>
-	<version>0.4</version>
+	<version>0.5</version>
 	<name>maven-external-dependency-plugin-test</name>
-	<url>http://maven.apache.org</url>
+	<url>http://code.google.com/p/maven-external-dependency-plugin/</url>
 	<build>
 		<plugins>
 
@@ -26,12 +26,12 @@
 			<plugin>
 				<groupId>com.savage7.maven.plugins</groupId>
 				<artifactId>maven-external-dependency-plugin</artifactId>
-				<version>0.4</version>
+				<version>0.5-SNAPSHOT</version>
 				<inherited>false</inherited>
 				<configuration>
 					<stagingDirectory>
 						${project.build.directory}/dependencies/
-                 </stagingDirectory>
+                    </stagingDirectory>
 					<createChecksum>true</createChecksum>
 					<skipChecksumVerification>false</skipChecksumVerification>
 					<force>false</force>
@@ -105,7 +105,7 @@
 							<packaging>jar</packaging>
 							<downloadUrl>
 								http://github.com/downloads/edmund-wagner/junrar/java-unrar-{version}.zip
-				        </downloadUrl>
+				            </downloadUrl>
 							<checksum>530351609180152cff40fa1c79a28193185aba83</checksum> <!-- this checksum is applied to the download file -->
 							<install>true</install>
 							<force>false</force>
@@ -121,7 +121,7 @@
 						<id>clean-external-dependencies</id>
 						<phase>clean</phase>
 						<goals>
-							<!-- mvn com.savage7.maven.plugins:maven-external-dependency-plugin:clean-external -->
+<!--							 mvn com.savage7.maven.plugins:maven-external-dependency-plugin:clean-external -->
 							<goal>clean-external</goal>
 						</goals>
 					</execution>
@@ -129,10 +129,10 @@
 						<id>resolve-install-external-dependencies</id>
 						<phase>process-resources</phase>
 						<goals>
-							<!-- mvn com.savage7.maven.plugins:maven-external-dependency-plugin:resolve-external -->
+<!--							 mvn com.savage7.maven.plugins:maven-external-dependency-plugin:resolve-external -->
 							<goal>resolve-external</goal>
 
-							<!-- mvn com.savage7.maven.plugins:maven-external-dependency-plugin:install-external -->
+<!--							 mvn com.savage7.maven.plugins:maven-external-dependency-plugin:install-external -->
 							<goal>install-external</goal>
 						</goals>
 					</execution>
@@ -140,7 +140,7 @@
 						<id>deploy-external-dependencies</id>
 						<phase>deploy</phase>
 						<goals>
-							<!-- mvn com.savage7.maven.plugins:maven-external-dependency-plugin:deploy-external -->
+<!--							 mvn com.savage7.maven.plugins:maven-external-dependency-plugin:deploy-external -->
 							<goal>deploy-external</goal>
 						</goals>
 					</execution>
@@ -206,7 +206,7 @@
 
 	<repositories>
 		<repository>
-			<id>snapshots</id>
+			<id>artifactory</id>
 			<name>libs-snapshots</name>
 			<url>http://localhost:8081/artifactory/libs-snapshots-local</url>
 			<snapshots>
@@ -214,7 +214,7 @@
 			</snapshots>
 		</repository>
 		<repository>
-			<id>central</id>
+			<id>artifactory</id>
 			<name>libs-releases</name>
 			<url>http://localhost:8081/artifactory/libs-releases-local</url>
 			<snapshots>
@@ -240,13 +240,13 @@
 
 	<distributionManagement>
 		<repository>
-			<id>central</id>
+			<id>artifactory</id>
 			<name>libs-releases</name>
 			<url>http://localhost:8081/artifactory/libs-releases-local</url>
 		</repository>
 		<snapshotRepository>
 			<uniqueVersion>false</uniqueVersion>
-			<id>snapshots</id>
+			<id>artifactory</id>
 			<name>libs-snapshots</name>
 			<url>http://localhost:8081/artifactory/libs-snapshots-local</url>
 		</snapshotRepository>
