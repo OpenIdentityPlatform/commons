@@ -24,6 +24,7 @@ import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.UnArchiver;
 import org.codehaus.plexus.archiver.manager.ArchiverManager;
 import org.codehaus.plexus.archiver.manager.NoSuchArchiverException;
@@ -202,11 +203,24 @@ public class ResolveExternalDependencyMojo extends
                             unarchiver.setDestDirectory(tempOutputDir);
                             unarchiver.extract();//will extract nothing, the file selector will do the trick
                             
-                            FileUtils.copyFile(new File(tempOutputDir, artifactItem.getExtractFile()), artifactFile);
+                            File extractedFile = new File(tempOutputDir, artifactItem.getExtractFile());
 
                             // if a zip entry was not found, then throw a Mojo
                             // exception
-                            if (!artifactFile.exists())
+
+                            if (extractedFile.isFile())
+                            {
+                                FileUtils.copyFile(extractedFile, artifactFile);
+                            }
+                            else if (extractedFile.isDirectory()
+                                    && artifactItem.isRepack())
+                            {
+                                Archiver archiver = archiverManager.getArchiver(artifactFile);
+                                archiver.setDestFile(artifactFile);
+                                archiver.addDirectory(extractedFile);
+                                archiver.createArchive();
+                            }
+                            else
                             {
                                 // checksum verification failed, throw error
                                 throw new MojoFailureException(
@@ -223,6 +237,7 @@ public class ResolveExternalDependencyMojo extends
                                         + "\r\n   download URL : "
                                         + artifactItem.getDownloadUrl());
                             }
+                            
 
                             getLog().info(
                                 "extracted target file to staging path: "

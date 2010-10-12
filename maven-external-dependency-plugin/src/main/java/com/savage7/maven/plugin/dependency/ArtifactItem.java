@@ -167,7 +167,13 @@ public class ArtifactItem
      * @parameter
      */
     private String extractFileChecksum;
-
+    
+    /**
+     * In case you need to repack an directory as a new artifact
+     * 
+     * @parameter
+     */
+    private boolean repack = false;
     
     /**
      * default constructor.
@@ -626,6 +632,16 @@ public class ArtifactItem
         }
 
         return target;
+    }
+
+    public boolean isRepack()
+    {
+        return repack;
+    }
+
+    public void setRepack(boolean repack)
+    {
+        this.repack = repack;
     }
 
 }

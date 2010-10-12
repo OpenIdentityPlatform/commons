@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component-set>
+  <components>
+    <component>
+      <role>org.codehaus.plexus.archiver.Archiver</role>
+      <role-hint>tar.gz</role-hint>
+      <implementation>com.savage7.maven.plugin.dependency.archiver.TarGZipArchiver</implementation>
+      <instantiation-strategy>per-lookup</instantiation-strategy>
+    </component>
+  </components>
+</component-set>
