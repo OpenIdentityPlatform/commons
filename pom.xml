@@ -23,11 +23,12 @@
  "Portions Copyrighted 2011 [name of copyright owner]"
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.forgerock</groupId>
     <artifactId>forgerock-parent</artifactId>
-    <version>1-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>ForgeRock Parent</name>
     <description>Parent POM for ForgeRock projects. Provides default project build configuration.</description>
@@ -96,12 +97,10 @@
         </pluginRepository>
     </pluginRepositories>
 
-
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <forgerockDistMgmtSnapshotsUrl>https://repo.forgerock.org/content/repositories/snapshots/</forgerockDistMgmtSnapshotsUrl>
     </properties>
-
 
     <build>
         <pluginManagement>
@@ -154,6 +153,9 @@
                         <source>1.5</source>
                         <target>1.5</target>
                         <encoding>${project.build.sourceEncoding}</encoding>
+                        <compilerArgument>-Xlint:all</compilerArgument>
+                        <showWarnings>true</showWarnings>
+                        <showDeprecation>true</showDeprecation>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -202,6 +204,7 @@
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>2.7</version>
                     <configuration>
+                        <author>false</author>
                         <header><![CDATA[<b>${project.name} ${project.version}</b>]]>
                         </header>
                         <footer><![CDATA[<b>${project.name} ${project.version}</b>]]>
@@ -385,4 +388,3 @@
         </profile>
     </profiles>
 </project>
-
