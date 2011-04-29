@@ -23,8 +23,7 @@
  "Portions Copyrighted 2011 [name of copyright owner]"
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.forgerock</groupId>
     <artifactId>forgerock-parent</artifactId>
@@ -35,14 +34,14 @@
     <url>http://www.forgerock.com</url>
     <licenses>
         <license>
-            <name>CDDL License, Version 1.0</name>
+            <name>CDDL-1.0</name>
             <url>http://forgerock.org/license/CDDLv1.0.html</url>
-            <comments>Common Development and Distribution License Version 1.0</comments>
+            <comments>Common Development and Distribution License (CDDL) 1.0</comments>
             <distribution>repo</distribution>
         </license>
     </licenses>
     <organization>
-        <name>ForgeRock</name>
+        <name>ForgeRock AS</name>
         <url>http://www.forgerock.com</url>
     </organization>
     <issueManagement>
@@ -63,43 +62,68 @@
         <repository>
             <id>forgerock-staging</id>
             <name>ForgeRock Release Repository</name>
-            <url>https://repo.forgerock.org/staging/deploy/maven2/</url>
+            <url>${forgerockDistMgmtReleasesUrl}</url>
         </repository>
     </distributionManagement>
 
     <!-- NOT ALLOWED: (see FAQ at http://maven.apache.org/guides/mini/guide-central-repository-upload.html ) -->
     <repositories>
         <repository>
-            <id>ForgeRock</id>
+            <id>forgerock-staging-repository</id>
             <name>ForgeRock Release Repository</name>
-            <url>http://repo.forgerock.org</url>
+            <url>http://maven.forgerock.org/repo/releases</url>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
         </repository>
-        <!--repository>
-            <id>ForgeRock</id>
+        <repository>
+            <id>forgerock-snapshots-repository</id>
             <name>ForgeRock Snapshot Repository</name>
-            <url>https://repo.forgerock.org/content/repositories/snapshots/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
+            <url>http://maven.forgerock.org/repo/snapshots</url>
             <releases>
                 <enabled>false</enabled>
             </releases>
-        </repository-->
+        </repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
-            <id>ForgeRock-Plugin</id>
+            <id>forgerock-plugins-repository</id>
             <name>ForgeRock Plugin Repository</name>
-            <url>http://repo.forgerock.org</url>
+            <url>http://maven.forgerock.org/repo/repo</url>
         </pluginRepository>
     </pluginRepositories>
 
     <properties>
+        <!-- ************** -->
+        <!-- Build settings -->
+        <!-- ************** -->
+
+        <!-- Cross plugins settings -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <forgerockDistMgmtSnapshotsUrl>https://repo.forgerock.org/content/repositories/snapshots/</forgerockDistMgmtSnapshotsUrl>
+
+        <!-- maven-compiler-plugin -->
+        <maven.compiler.target>1.5</maven.compiler.target>
+        <maven.compiler.source>1.5</maven.compiler.source>
+
+        <!-- maven-enforcer-plugin -->
+        <maven.min.version>2.2.1</maven.min.version>
+        <jdk.min.version>${maven.compiler.source}</jdk.min.version>
+
+        <!-- maven-idea-plugin & maven-eclipse-plugin -->
+        <downloadSources>true</downloadSources>
+        <downloadJavadocs>true</downloadJavadocs>
+
+        <!-- maven-pmd-plugin -->
+        <targetJdk>${maven.compiler.target}</targetJdk>
+
+        <!-- ***************** -->
+        <!-- Repository Deployment URLs -->
+        <!-- ***************** -->
+        <forgerockDistMgmtSnapshotsUrl>http://maven.forgerock.org/repo/snapshots</forgerockDistMgmtSnapshotsUrl>
+        <forgerockDistMgmtReleasesUrl>http://maven.forgerock.org/repo/releases</forgerockDistMgmtReleasesUrl>
+
+        <!-- this property makes sure NetBeans 6.8+ picks up some formatting rules from checkstyle -->
+        <netbeans.checkstyle.format>true</netbeans.checkstyle.format>
     </properties>
 
     <build>
@@ -150,13 +174,18 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>2.3.2</version>
                     <configuration>
-                        <source>1.5</source>
-                        <target>1.5</target>
+                        <source>${maven.compiler.target}</source>
+                        <target>${maven.compiler.target}</target>
                         <encoding>${project.build.sourceEncoding}</encoding>
                         <compilerArgument>-Xlint:all</compilerArgument>
                         <showWarnings>true</showWarnings>
                         <showDeprecation>true</showDeprecation>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>2.2</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -205,10 +234,12 @@
                     <version>2.7</version>
                     <configuration>
                         <author>false</author>
+                        <quiet>true</quiet>
                         <header><![CDATA[<b>${project.name} ${project.version}</b>]]>
                         </header>
                         <footer><![CDATA[<b>${project.name} ${project.version}</b>]]>
                         </footer>
+                        <additionalparam>-linksource</additionalparam>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -279,31 +310,71 @@
                 </plugin>
             </plugins>
         </pluginManagement>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-enforcer-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>enforce-maven</id>
-                        <goals>
-                            <goal>enforce</goal>
-                        </goals>
-                        <configuration>
-                            <rules>
-                                <requireMavenVersion>
-                                    <version>(,2.1.0),(2.1.0,2.2.0),(2.2.0,)</version>
-                                    <message>Maven 2.1.0 and 2.2.0 produce incorrect GPG signatures and checksums respectively.</message>
-                                </requireMavenVersion>
-                            </rules>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
     </build>
 
     <profiles>
+        <profile>
+            <id>enforce</id>
+            <activation>
+                <property>
+                    <name>!skip-enforce</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>enforce-plugin-versions</id>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                                <configuration>
+                                    <rules>
+                                        <requirePluginVersions>
+                                            <message>Best practice is to always define plugin versions!</message>
+                                            <banLatest>true</banLatest>
+                                            <banRelease>true</banRelease>
+                                            <phases>deploy,site</phases>
+                                        </requirePluginVersions>
+                                    </rules>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>enforce-java-version</id>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                                <configuration>
+                                    <rules>
+                                        <requireJavaVersion>
+                                            <message>To build this project JDK ${jdk.min.version} (or greater) is required. Please install it.</message>
+                                            <version>${jdk.min.version}</version>
+                                        </requireJavaVersion>
+                                    </rules>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>enforce-maven-version</id>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                                <configuration>
+                                    <rules>
+                                        <requireMavenVersion>
+                                            <message>To build this project Maven ${maven.min.version} (or greater) is required. Please install it.</message>
+                                            <version>${maven.min.version}</version>
+                                        </requireMavenVersion>
+                                    </rules>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
         <profile>
             <id>forgerock-release</id>
             <build>
@@ -360,6 +431,26 @@
                             </execution>
                         </executions>
                     </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>enforce-maven</id>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                                <configuration>
+                                    <rules>
+                                        <requireMavenVersion>
+                                            <version>(,2.1.0),(2.1.0,2.2.0),(2.2.0,)</version>
+                                            <message>Maven 2.1.0 and 2.2.0 produce incorrect GPG signatures and checksums respectively.</message>
+                                        </requireMavenVersion>
+                                    </rules>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
                 </plugins>
             </build>
         </profile>
@@ -371,19 +462,38 @@
                     <exists>${basedir}</exists>
                 </file>
             </activation>
+            <properties>
+                <sitePluginVersion>3.0-beta-3</sitePluginVersion>
+            </properties>
             <build>
                 <pluginManagement>
                     <plugins>
                         <plugin>
                             <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-site-plugin</artifactId>
-                            <version>3.0-beta-3</version>
+                            <version>${sitePluginVersion}</version>
                             <configuration>
                                 <outputEncoding>${project.build.sourceEncoding}</outputEncoding>
                             </configuration>
                         </plugin>
                     </plugins>
                 </pluginManagement>
+                <plugins>
+                    <!-- if releasing current pom with maven 3 site descriptor must be attached -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-site-plugin</artifactId>
+                        <inherited>false</inherited>
+                        <executions>
+                            <execution>
+                                <id>attach-descriptor</id>
+                                <goals>
+                                    <goal>attach-descriptor</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
             </build>
         </profile>
     </profiles>
