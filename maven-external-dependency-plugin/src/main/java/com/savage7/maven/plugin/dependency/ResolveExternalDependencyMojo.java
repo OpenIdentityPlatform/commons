@@ -329,7 +329,7 @@ public class ResolveExternalDependencyMojo extends
             // REV 0.5-SNAPSHOT; 2011-04-30; RRS
             //
             // AS OF MAVEN V3, THIS EXCEPTION IS GETTING THROWN WHEN 
-            // AN ATIFACT CANNOT BE RESOLVED IN THE LOCA REPOSITORY,
+            // AN ATIFACT CANNOT BE RESOLVED IN THE LOCAL REPOSITORY,
             // THUS CAUSING THE MAVEN BUILD TO FAIL AND NOT PERFORM
             // THE EXTERNAL DEPENDENCY DOWNLOAD.
             //
