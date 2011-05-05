@@ -16,6 +16,8 @@ package com.savage7.maven.plugin.dependency;
 
 import java.io.File;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -91,6 +93,8 @@ public class ResolveExternalDependencyMojo extends
             // Set<Artifact> projectArtifacts = project.createArtifacts(
             // artifactFactory, null, null );
 
+            Map<URL, File> cachedDownloads = new HashMap<URL, File>();
+
             // loop over and process all configured artifacts
             for (final ArtifactItem artifactItem : artifactItems)
             {
@@ -127,24 +131,45 @@ public class ResolveExternalDependencyMojo extends
                     if (artifactItem.getDownloadUrl() != null)
                     {
                         URL downloadUrl = new URL(artifactItem.getDownloadUrl());
-                        
-                        // create a temporary download file
-                        File tempDownloadFile = File.createTempFile(
+
+                        final File tempDownloadFile;
+
+                        if (cachedDownloads.containsKey(downloadUrl)) {
+                            tempDownloadFile = cachedDownloads.get(downloadUrl);
+                            getLog().info(
+                                "Artifact already downloaded from URL: "
+                                    + artifactItem.getDownloadUrl());
+                            getLog().debug(
+                                "Using cached download: "
+                                    + tempDownloadFile.getCanonicalPath());
+                        } else {
+                            // create a temporary download file
+                            tempDownloadFile = File.createTempFile(
                             artifactItem.getLocalFile(), "." + getExtension(downloadUrl));
 
-                        getLog().info(
-                            "downloading artifact from URL: "
-                                + artifactItem.getDownloadUrl());
-                        getLog().debug(
-                            "downloading artifact to temporary file: "
-                                + tempDownloadFile.getCanonicalPath());
+                            getLog().info(
+                                "downloading artifact from URL: "
+                                    + artifactItem.getDownloadUrl());
+                            getLog().debug(
+                                "downloading artifact to temporary file: "
+                                    + tempDownloadFile.getCanonicalPath());
 
-                        // download file from URL
-                        FileUtils.copyURLToFile(downloadUrl, tempDownloadFile);
+                            // download file from URL
+                            FileUtils.copyURLToFile(downloadUrl, tempDownloadFile);
+
+                            getLog().debug(
+                                "caching temporary file for later");
+                            cachedDownloads.put(downloadUrl, tempDownloadFile);
+                        }
 
                         // verify file checksum (if a checksum was defined);
                         // 'MojoFailureException' exception will be thrown if
                         // verification fails
+                        //
+                        // Note: In theory, there might be conflicting checksums
+                        // configured for the same artifact; checksum
+                        // verification may thus be done several times for a
+                        // cached download.
                         verifyArtifactItemChecksum(artifactItem,
                             tempDownloadFile);
 
@@ -244,13 +269,6 @@ public class ResolveExternalDependencyMojo extends
                                     + artifactFile.getCanonicalPath());
                         }
 
-                        // now we are done with the temporary file so lets
-                        // delete it
-                        tempDownloadFile.delete();
-                        getLog().debug(
-                            "deleting temporary download file: "
-                                + tempDownloadFile.getCanonicalPath());
-
                         // update the artifact items local file property
                         artifactItem.setLocalFile(artifactFile
                             .getCanonicalPath());
@@ -274,6 +292,15 @@ public class ResolveExternalDependencyMojo extends
                         "external artifact resolved in existing repository; "
                             + "no download needed: " + artifactItem.toString());
                 }
+            }
+
+            // now we are done with the temporary files so lets
+            // delete them
+            for (File tempDownloadFile : cachedDownloads.values()) {
+                tempDownloadFile.delete();
+                getLog().debug(
+                    "deleting temporary download file: "
+                        + tempDownloadFile.getCanonicalPath());
             }
 
             getLog().info("finished resolving all external dependencies");
