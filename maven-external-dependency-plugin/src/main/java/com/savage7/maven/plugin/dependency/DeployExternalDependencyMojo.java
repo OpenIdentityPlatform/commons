@@ -52,10 +52,7 @@ public class DeployExternalDependencyMojo extends
     /**
      * Used to look up Artifacts in the remote repository.
      *
-     * @parameter expression=
-     *            "${component.org.apache.maven.artifact.resolver.ArtifactResolver}"
-     * @required
-     * @readonly
+     * @component
      */
     protected ArtifactResolver artifactResolver;
 

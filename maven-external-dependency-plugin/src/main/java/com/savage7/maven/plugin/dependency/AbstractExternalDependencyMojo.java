@@ -61,10 +61,7 @@ public abstract class AbstractExternalDependencyMojo extends
     /**
      * Used to look up Artifacts in the remote repository.
      * 
-     * @parameter expression=
-     *            "${component.org.apache.maven.artifact.factory.ArtifactFactory}"
-     * @required
-     * @readonly
+     * @component
      */
     protected ArtifactFactory artifactFactory;
 
