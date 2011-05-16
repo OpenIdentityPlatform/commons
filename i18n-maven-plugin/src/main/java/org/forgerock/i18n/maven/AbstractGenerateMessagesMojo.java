@@ -57,7 +57,7 @@ abstract class AbstractGenerateMessagesMojo extends AbstractMojo
 
     /**
      * Creates a new message file.
-     * 
+     *
      * @param name
      *          The name of the message file relative to the resource directory.
      */
@@ -82,7 +82,7 @@ abstract class AbstractGenerateMessagesMojo extends AbstractMojo
     /**
      * Returns the class name (without package) which will contain the generated
      * message descriptors.
-     * 
+     *
      * @return The class name (without package) which will contain the generated
      *         message descriptors.
      */
@@ -117,7 +117,7 @@ abstract class AbstractGenerateMessagesMojo extends AbstractMojo
 
     /**
      * The name of the message file relative to the resource directory.
-     * 
+     *
      * @return The name of the message file relative to the resource directory.
      */
     String getName()
@@ -130,7 +130,7 @@ abstract class AbstractGenerateMessagesMojo extends AbstractMojo
     /**
      * Returns a {@code File} representing the full path to the output Java
      * file.
-     * 
+     *
      * @param outputDirectory
      *          The target directory.
      * @return A {@code File} representing the full path to the output Java
@@ -149,7 +149,7 @@ abstract class AbstractGenerateMessagesMojo extends AbstractMojo
 
     /**
      * Returns the name of the package containing the message file.
-     * 
+     *
      * @return The name of the package containing the message file.
      */
     String getPackageName()
@@ -163,7 +163,7 @@ abstract class AbstractGenerateMessagesMojo extends AbstractMojo
 
     /**
      * The resource bundle name.
-     * 
+     *
      * @return The resource bundle name.
      */
     String getResourceBundleName()
@@ -175,7 +175,7 @@ abstract class AbstractGenerateMessagesMojo extends AbstractMojo
 
     /**
      * Returns a {@code File} representing the full path to this message file.
-     * 
+     *
      * @param resourceDirectory
      *          The resource directory.
      * @return A {@code File} representing the full path to this message file.
@@ -191,7 +191,7 @@ abstract class AbstractGenerateMessagesMojo extends AbstractMojo
     /**
      * Returns the name of the message file with the package name and trailing
      * ".properties" suffix stripped.
-     * 
+     *
      * @return The name of the message file with the package name and trailing
      *         ".properties" suffix stripped.
      */
@@ -219,7 +219,7 @@ abstract class AbstractGenerateMessagesMojo extends AbstractMojo
 
     /**
      * Creates a new specifier.
-     * 
+     *
      * @param sa
      *          Specifier components.
      */
@@ -233,7 +233,7 @@ abstract class AbstractGenerateMessagesMojo extends AbstractMojo
     /**
      * Returns a java class associated with a particular formatter based on the
      * conversion type of the specifier.
-     * 
+     *
      * @return Class for representing the type of argument used as a replacement
      *         for this specifier.
      */
@@ -280,7 +280,7 @@ abstract class AbstractGenerateMessagesMojo extends AbstractMojo
     /**
      * Returns {@code true} if this specifier uses argument indexes (for example
      * 2$).
-     * 
+     *
      * @return boolean {@code true} if this specifier uses argument indexes.
      */
     boolean specifiesArgumentIndex()
@@ -312,7 +312,7 @@ abstract class AbstractGenerateMessagesMojo extends AbstractMojo
 
     /**
      * Creates a parameterized instance.
-     * 
+     *
      * @param key
      *          The message key.
      * @param formatString
@@ -377,7 +377,7 @@ abstract class AbstractGenerateMessagesMojo extends AbstractMojo
      * Returns a string representing the message type class' variable
      * information (for example '<String,Integer>') that is based on the type of
      * arguments specified by the specifiers in this message.
-     * 
+     *
      * @return String representing the message type class parameters.
      */
     String getClassTypeVariables()
@@ -408,7 +408,7 @@ abstract class AbstractGenerateMessagesMojo extends AbstractMojo
     /**
      * Returns the javadoc comments that will appear above the messages
      * declaration in the messages file.
-     * 
+     *
      * @return The javadoc comments that will appear above the messages
      *         declaration in the messages file.
      */
@@ -435,7 +435,7 @@ abstract class AbstractGenerateMessagesMojo extends AbstractMojo
     /**
      * Returns the name of the Java class that will be used to represent this
      * message's type.
-     * 
+     *
      * @return The name of the Java class that will be used to represent this
      *         message's type.
      */
@@ -465,7 +465,7 @@ abstract class AbstractGenerateMessagesMojo extends AbstractMojo
     /**
      * Sets the arguments that will be supplied in the declaration of the
      * message.
-     * 
+     *
      * @param s
      *          The array of string arguments that will be passed in the
      *          constructor.
@@ -522,7 +522,7 @@ abstract class AbstractGenerateMessagesMojo extends AbstractMojo
     /**
      * Returns a list of format specifiers contained in the provided format
      * string.
-     * 
+     *
      * @param s
      *          The format string.
      * @return The list of format specifiers.
@@ -578,7 +578,7 @@ abstract class AbstractGenerateMessagesMojo extends AbstractMojo
      * general this is when a format specifier is more complicated than we
      * support or when the number of arguments exceeds the number of specific
      * message type classes (MessageType0, MessageType1 ...) that are defined.
-     * 
+     *
      * @return boolean {@code true} if the generic message type class should be
      *         used.
      */
@@ -588,7 +588,7 @@ abstract class AbstractGenerateMessagesMojo extends AbstractMojo
       {
         return true;
       }
-      else if (specifiers != null)
+      else
       {
         for (final FormatSpecifier s : specifiers)
         {
@@ -608,7 +608,7 @@ abstract class AbstractGenerateMessagesMojo extends AbstractMojo
   /**
    * Indicates whether or not message files should be regenerated even if they
    * are already up to date.
-   * 
+   *
    * @parameter default-value="false"
    * @required
    */
@@ -616,7 +616,7 @@ abstract class AbstractGenerateMessagesMojo extends AbstractMojo
 
   /**
    * The list of files we want to transfer, relative to the resource directory.
-   * 
+   *
    * @parameter
    * @required
    */
@@ -624,7 +624,7 @@ abstract class AbstractGenerateMessagesMojo extends AbstractMojo
 
   /**
    * The current Maven project.
-   * 
+   *
    * @parameter default-value="${project}"
    * @readonly
    * @required
@@ -722,7 +722,7 @@ abstract class AbstractGenerateMessagesMojo extends AbstractMojo
 
   /**
    * Adds the generated source directory to the compilation path.
-   * 
+   *
    * @param targetDirectory
    *          The source directory to be added.
    */
@@ -732,7 +732,7 @@ abstract class AbstractGenerateMessagesMojo extends AbstractMojo
 
   /**
    * Returns the resource directory containing the message files.
-   * 
+   *
    * @return The resource directory containing the message files.
    */
   abstract File getResourceDirectory();
@@ -741,7 +741,7 @@ abstract class AbstractGenerateMessagesMojo extends AbstractMojo
 
   /**
    * Returns the target directory in which the source files should be generated.
-   * 
+   *
    * @return The target directory in which the source files should be generated.
    */
   abstract File getTargetDirectory();
@@ -782,7 +782,13 @@ abstract class AbstractGenerateMessagesMojo extends AbstractMojo
       if (force
           || sourceFile.lastModified() > outputFile.lastModified())
       {
-        outputFile.delete();
+        if (!outputFile.delete())
+        {
+          throw new MojoExecutionException(
+              "Unable to continue because the old message file "
+                  + messageFile.getName() + " could not be deleted");
+        }
+
         getLog().info(
             "Regenerating " + outputFile.getName() + " from "
                 + sourceFile.getName());
@@ -820,7 +826,22 @@ abstract class AbstractGenerateMessagesMojo extends AbstractMojo
       outputWriter = new PrintWriter(outputFile, "UTF-8");
 
       final Properties properties = new Properties();
-      properties.load(new FileInputStream(sourceFile));
+      final FileInputStream propertiesFile = new FileInputStream(sourceFile);
+      try
+      {
+        properties.load(propertiesFile);
+      }
+      finally
+      {
+        try
+        {
+          propertiesFile.close();
+        }
+        catch (Exception ignored)
+        {
+          // Ignore.
+        }
+      }
 
       for (String stubLine = stubReader.readLine(); stubLine != null; stubLine = stubReader
           .readLine())
@@ -880,7 +901,7 @@ abstract class AbstractGenerateMessagesMojo extends AbstractMojo
         }
       }
     }
-    catch (final Exception e)
+    catch (final IOException e)
     {
       // Don't leave a malformed file laying around. Delete it so it will be
       // forced to be regenerated.
