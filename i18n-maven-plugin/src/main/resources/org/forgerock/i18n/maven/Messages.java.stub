@@ -1,0 +1,25 @@
+package ${PACKAGE};
+
+
+
+import org.forgerock.i18n.LocalizableMessageDescriptor;
+
+
+
+/**
+ * This file contains localizable message descriptors which were generated
+ * automatically when this module was built. It should not be edited.
+ */
+public final class ${CLASS_NAME}
+{
+  // The name of the resource bundle.
+  private static final String RESOURCE = "${RESOURCE_BUNDLE_NAME}";
+
+  // Prevent instantiation.
+  private ${CLASS_NAME}()
+  {
+    // Do nothing.
+  }
+
+  ${MESSAGES}
+}
