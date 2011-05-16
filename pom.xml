@@ -39,6 +39,12 @@
   <name>ForgeRock I18N Framework</name>
   <description>A common framework for embedding localizable messages in applications</description>
   <packaging>pom</packaging>
+  <scm>
+    <url>https://svn.forgerock.org/commons/i18n-framework/trunk/</url>
+    <connection>scm:svn:https://svn.forgerock.org/commons/i18n-framework/trunk/</connection>
+    <developerConnection>scm:svn:https://svn.forgerock.org/commons/i18n-framework/trunk/</developerConnection>
+    <tag>HEAD</tag>
+  </scm>
   <modules>
     <module>i18n-maven-plugin</module>
     <module>i18n-core</module>
