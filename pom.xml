@@ -48,6 +48,7 @@
   <modules>
     <module>i18n-maven-plugin</module>
     <module>i18n-core</module>
+    <module>i18n-slf4j</module>
   </modules>
   <dependencies>
     <dependency>
@@ -60,6 +61,12 @@
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
       <version>6.0.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <version>1.8.5</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

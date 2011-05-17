@@ -27,15 +27,30 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.forgerock.commons</groupId>
     <artifactId>i18n-framework</artifactId>
+    <groupId>org.forgerock.commons</groupId>
     <version>1.1-SNAPSHOT</version>
   </parent>
   <groupId>org.forgerock.commons</groupId>
-  <artifactId>i18n-core</artifactId>
-  <name>ForgeRock I18N Core</name>
-  <description>Core Java APIs for embedding and using localizable messages in applications</description>
+  <artifactId>i18n-slf4j</artifactId>
+  <name>ForgeRock I18N SLF4J Support</name>
+  <description>This module provides an interface for efficiently writing localized messages out to a SLF4J Logger</description>
   <packaging>bundle</packaging>
+  <dependencies>
+    <dependency>
+      <groupId>org.forgerock.commons</groupId>
+      <artifactId>i18n-core</artifactId>
+      <version>${project.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+    	<groupId>org.slf4j</groupId>
+    	<artifactId>slf4j-api</artifactId>
+    	<version>1.6.1</version>
+    	<type>jar</type>
+    	<scope>compile</scope>
+    </dependency>
+  </dependencies>
   <build>
     <plugins>
       <plugin>
@@ -50,7 +65,7 @@
             </goals>
             <configuration>
               <messageFiles>
-                <messageFile>org/forgerock/i18n/my_test.properties</messageFile>
+                <messageFile>org/forgerock/i18n/slf4j/my_test.properties</messageFile>
               </messageFiles>
             </configuration>
           </execution>
@@ -62,7 +77,7 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Export-Package>org.forgerock.i18n.*</Export-Package>
+            <Export-Package>org.forgerock.i18n.slf4j.*</Export-Package>
           </instructions>
         </configuration>
       </plugin>
