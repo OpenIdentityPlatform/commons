@@ -57,7 +57,7 @@ import org.forgerock.i18n.LocalizableMessageDescriptor.AbstractLocalizableMessag
  * This class implements {@code CharSequence} so that messages can be supplied
  * as arguments to other messages. This way messages can be composed of
  * fragments of other messages if necessary.
- * 
+ *
  * @see LocalizableMessageBuilder
  */
 public final class LocalizableMessage implements CharSequence,
@@ -93,7 +93,7 @@ public final class LocalizableMessage implements CharSequence,
    * you should be sure that the message you are creating is not locale
    * sensitive. If it is locale sensitive consider defining an appropriate
    * {@link LocalizableMessageDescriptor}.
-   * 
+   *
    * @param formatString
    *          The raw message format string.
    * @param args
@@ -121,7 +121,7 @@ public final class LocalizableMessage implements CharSequence,
   /**
    * Creates a new message whose content is the {@code String} representation of
    * the provided {@code Object}.
-   * 
+   *
    * @param object
    *          The object to be converted to a message, may be {@code null}.
    * @return The new message.
@@ -147,7 +147,7 @@ public final class LocalizableMessage implements CharSequence,
 
   /**
    * Returns whether we are running post 1.5 on AIX or not.
-   * 
+   *
    * @return {@code true} if we are running post 1.5 on AIX and {@code false}
    *         otherwise.
    */
@@ -183,7 +183,7 @@ public final class LocalizableMessage implements CharSequence,
   /**
    * Creates a new parameterized message instance. See the class header for
    * instructions on how to create messages outside of this package.
-   * 
+   *
    * @param descriptor
    *          The message descriptor.
    * @param args
@@ -202,7 +202,7 @@ public final class LocalizableMessage implements CharSequence,
   /**
    * Returns the {@code char} value at the specified index of the {@code String}
    * representation of this message in the default locale.
-   * 
+   *
    * @param index
    *          The index of the {@code char} value to be returned.
    * @return The specified {@code char} value.
@@ -221,7 +221,7 @@ public final class LocalizableMessage implements CharSequence,
   /**
    * Returns the {@code char} value at the specified index of the {@code String}
    * representation of this message in the specified locale.
-   * 
+   *
    * @param locale
    *          The locale.
    * @param index
@@ -245,7 +245,7 @@ public final class LocalizableMessage implements CharSequence,
    * Compares this message with the specified message for order in the default
    * locale. Returns a negative integer, zero, or a positive integer as this
    * object is less than, equal to, or greater than the specified object.
-   * 
+   *
    * @param message
    *          The message to be compared.
    * @return A negative integer, zero, or a positive integer as this object is
@@ -262,7 +262,7 @@ public final class LocalizableMessage implements CharSequence,
    * Returns {@code true} if the provided object is a message whose
    * {@code String} representation is equal to the {@code String} representation
    * of this message in the default locale.
-   * 
+   *
    * @param o
    *          The object to be compared for equality with this message.
    * @return {@code true} if this message is the equal to {@code o}, otherwise
@@ -290,7 +290,7 @@ public final class LocalizableMessage implements CharSequence,
 
   /**
    * Formats this message using the provided {@link Formatter}.
-   * 
+   *
    * @param formatter
    *          The {@link Formatter}.
    * @param flags
@@ -336,7 +336,7 @@ public final class LocalizableMessage implements CharSequence,
   /**
    * Returns the hash code value for this message calculated using the hash code
    * of the {@code String} representation of this message in the default locale.
-   * 
+   *
    * @return The hash code value for this message.
    */
   @Override
@@ -350,7 +350,7 @@ public final class LocalizableMessage implements CharSequence,
   /**
    * Returns the length of the {@code String} representation of this message in
    * the default locale.
-   * 
+   *
    * @return The length of the {@code String} representation of this message in
    *         the default locale.
    */
@@ -364,7 +364,7 @@ public final class LocalizableMessage implements CharSequence,
   /**
    * Returns the length of the {@code String} representation of this message in
    * the specified locale.
-   * 
+   *
    * @param locale
    *          The locale.
    * @return The length of the {@code String} representation of this message in
@@ -388,7 +388,7 @@ public final class LocalizableMessage implements CharSequence,
    * message. For example, a logging implementation could log the resource name
    * in addition to the ordinal in order to unambiguously identify a message in
    * a locale independent way.
-   * 
+   *
    * @return The ordinal associated with this descriptor, or {@code -1} if
    *         undefined.
    * @see LocalizableMessage#resourceName()
@@ -408,7 +408,10 @@ public final class LocalizableMessage implements CharSequence,
    * message. For example, a logging implementation could log the resource name
    * in addition to the ordinal in order to unambiguously identify a message in
    * a locale independent way.
-   * 
+   * <p>
+   * The resource name may be used for obtaining named loggers, e.g. using
+   * SLF4J's {@code org.slf4j.LoggerFactory#getLogger(String name)}.
+   *
    * @return The name of the resource in which this message is defined, or
    *         {@code null} if this message is a raw message and its source is
    *         undefined.
@@ -428,7 +431,7 @@ public final class LocalizableMessage implements CharSequence,
    * ends with the {@code char} value at index {@code end - 1} . The length (in
    * {@code char}s) of the returned sequence is {@code end - start}, so if
    * {@code start == end} then an empty sequence is returned.
-   * 
+   *
    * @param start
    *          The start index, inclusive.
    * @param end
@@ -454,7 +457,7 @@ public final class LocalizableMessage implements CharSequence,
    * ends with the {@code char} value at index {@code end - 1} . The length (in
    * {@code char}s) of the returned sequence is {@code end - start}, so if
    * {@code start == end} then an empty sequence is returned.
-   * 
+   *
    * @param locale
    *          The locale.
    * @param start
@@ -481,7 +484,7 @@ public final class LocalizableMessage implements CharSequence,
   /**
    * Returns the {@code String} representation of this message in the default
    * locale.
-   * 
+   *
    * @return The {@code String} representation of this message.
    */
   @Override
@@ -495,7 +498,7 @@ public final class LocalizableMessage implements CharSequence,
   /**
    * Returns the {@code String} representation of this message in the specified
    * locale.
-   * 
+   *
    * @param locale
    *          The locale.
    * @return The {@code String} representation of this message.

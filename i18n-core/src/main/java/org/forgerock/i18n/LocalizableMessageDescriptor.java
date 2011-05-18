@@ -57,7 +57,7 @@ public final class LocalizableMessageDescriptor
 
     /**
      * Creates a parameterized instance.
-     * 
+     *
      * @param sourceClass
      *          The class in which this descriptor is defined. This class will
      *          be used to obtain the {@code ClassLoader} for retrieving the
@@ -87,7 +87,7 @@ public final class LocalizableMessageDescriptor
 
     /**
      * Creates a localizable message.
-     * 
+     *
      * @return The localizable message.
      */
     public LocalizableMessage get()
@@ -112,7 +112,7 @@ public final class LocalizableMessageDescriptor
      * Indicates whether or not formatting should be applied to the given format
      * string. Note that a format string might have literal specifiers (%% or %n
      * for example) that require formatting but are not replaced by arguments.
-     * 
+     *
      * @param s
      *          Candidate for formatting.
      * @return {@code true} if the format string requires formatting.
@@ -127,7 +127,7 @@ public final class LocalizableMessageDescriptor
 
   /**
    * Subclass for creating messages with one argument.
-   * 
+   *
    * @param <T1>
    *          The type of the first message argument.
    */
@@ -137,7 +137,7 @@ public final class LocalizableMessageDescriptor
 
     /**
      * Creates a parameterized instance.
-     * 
+     *
      * @param sourceClass
      *          The class in which this descriptor is defined. This class will
      *          be used to obtain the {@code ClassLoader} for retrieving the
@@ -166,7 +166,7 @@ public final class LocalizableMessageDescriptor
      * Creates a message with arguments that will replace format specifiers in
      * the associated format string when the message is rendered to string
      * representation.
-     * 
+     *
      * @return The localizable message containing the provided arguments.
      * @param a1
      *          A message argument.
@@ -194,7 +194,7 @@ public final class LocalizableMessageDescriptor
 
   /**
    * Subclass for creating messages with two arguments.
-   * 
+   *
    * @param <T1>
    *          The type of the first message argument.
    * @param <T2>
@@ -206,7 +206,7 @@ public final class LocalizableMessageDescriptor
 
     /**
      * Creates a parameterized instance.
-     * 
+     *
      * @param sourceClass
      *          The class in which this descriptor is defined. This class will
      *          be used to obtain the {@code ClassLoader} for retrieving the
@@ -235,7 +235,7 @@ public final class LocalizableMessageDescriptor
      * Creates a message with arguments that will replace format specifiers in
      * the associated format string when the message is rendered to string
      * representation.
-     * 
+     *
      * @return The localizable message containing the provided arguments.
      * @param a1
      *          A message argument.
@@ -265,7 +265,7 @@ public final class LocalizableMessageDescriptor
 
   /**
    * Subclass for creating messages with three arguments.
-   * 
+   *
    * @param <T1>
    *          The type of the first message argument.
    * @param <T2>
@@ -279,7 +279,7 @@ public final class LocalizableMessageDescriptor
 
     /**
      * Creates a parameterized instance.
-     * 
+     *
      * @param sourceClass
      *          The class in which this descriptor is defined. This class will
      *          be used to obtain the {@code ClassLoader} for retrieving the
@@ -308,7 +308,7 @@ public final class LocalizableMessageDescriptor
      * Creates a message with arguments that will replace format specifiers in
      * the associated format string when the message is rendered to string
      * representation.
-     * 
+     *
      * @return The localizable message containing the provided arguments.
      * @param a1
      *          A message argument.
@@ -341,7 +341,7 @@ public final class LocalizableMessageDescriptor
 
   /**
    * Subclass for creating messages with four arguments.
-   * 
+   *
    * @param <T1>
    *          The type of the first message argument.
    * @param <T2>
@@ -357,7 +357,7 @@ public final class LocalizableMessageDescriptor
 
     /**
      * Creates a parameterized instance.
-     * 
+     *
      * @param sourceClass
      *          The class in which this descriptor is defined. This class will
      *          be used to obtain the {@code ClassLoader} for retrieving the
@@ -386,7 +386,7 @@ public final class LocalizableMessageDescriptor
      * Creates a message with arguments that will replace format specifiers in
      * the associated format string when the message is rendered to string
      * representation.
-     * 
+     *
      * @return The localizable message containing the provided arguments.
      * @param a1
      *          A message argument.
@@ -421,7 +421,7 @@ public final class LocalizableMessageDescriptor
 
   /**
    * Subclass for creating messages with five arguments.
-   * 
+   *
    * @param <T1>
    *          The type of the first message argument.
    * @param <T2>
@@ -439,7 +439,7 @@ public final class LocalizableMessageDescriptor
 
     /**
      * Creates a parameterized instance.
-     * 
+     *
      * @param sourceClass
      *          The class in which this descriptor is defined. This class will
      *          be used to obtain the {@code ClassLoader} for retrieving the
@@ -468,7 +468,7 @@ public final class LocalizableMessageDescriptor
      * Creates a message with arguments that will replace format specifiers in
      * the associated format string when the message is rendered to string
      * representation.
-     * 
+     *
      * @return The localizable message containing the provided arguments.
      * @param a1
      *          A message argument.
@@ -505,7 +505,7 @@ public final class LocalizableMessageDescriptor
 
   /**
    * Subclass for creating messages with six arguments.
-   * 
+   *
    * @param <T1>
    *          The type of the first message argument.
    * @param <T2>
@@ -525,7 +525,7 @@ public final class LocalizableMessageDescriptor
 
     /**
      * Creates a parameterized instance.
-     * 
+     *
      * @param sourceClass
      *          The class in which this descriptor is defined. This class will
      *          be used to obtain the {@code ClassLoader} for retrieving the
@@ -554,7 +554,7 @@ public final class LocalizableMessageDescriptor
      * Creates a message with arguments that will replace format specifiers in
      * the associated format string when the message is rendered to string
      * representation.
-     * 
+     *
      * @return The localizable message containing the provided arguments.
      * @param a1
      *          A message argument.
@@ -593,7 +593,7 @@ public final class LocalizableMessageDescriptor
 
   /**
    * Subclass for creating messages with seven arguments.
-   * 
+   *
    * @param <T1>
    *          The type of the first message argument.
    * @param <T2>
@@ -615,7 +615,7 @@ public final class LocalizableMessageDescriptor
 
     /**
      * Creates a parameterized instance.
-     * 
+     *
      * @param sourceClass
      *          The class in which this descriptor is defined. This class will
      *          be used to obtain the {@code ClassLoader} for retrieving the
@@ -644,7 +644,7 @@ public final class LocalizableMessageDescriptor
      * Creates a message with arguments that will replace format specifiers in
      * the associated format string when the message is rendered to string
      * representation.
-     * 
+     *
      * @return The localizable message containing the provided arguments.
      * @param a1
      *          A message argument.
@@ -686,7 +686,7 @@ public final class LocalizableMessageDescriptor
 
   /**
    * Subclass for creating messages with eight arguments.
-   * 
+   *
    * @param <T1>
    *          The type of the first message argument.
    * @param <T2>
@@ -710,7 +710,7 @@ public final class LocalizableMessageDescriptor
 
     /**
      * Creates a parameterized instance.
-     * 
+     *
      * @param sourceClass
      *          The class in which this descriptor is defined. This class will
      *          be used to obtain the {@code ClassLoader} for retrieving the
@@ -739,7 +739,7 @@ public final class LocalizableMessageDescriptor
      * Creates a message with arguments that will replace format specifiers in
      * the associated format string when the message is rendered to string
      * representation.
-     * 
+     *
      * @return The localizable message containing the provided arguments.
      * @param a1
      *          A message argument.
@@ -783,7 +783,7 @@ public final class LocalizableMessageDescriptor
 
   /**
    * Subclass for creating messages with nine arguments.
-   * 
+   *
    * @param <T1>
    *          The type of the first message argument.
    * @param <T2>
@@ -809,7 +809,7 @@ public final class LocalizableMessageDescriptor
 
     /**
      * Creates a parameterized instance.
-     * 
+     *
      * @param sourceClass
      *          The class in which this descriptor is defined. This class will
      *          be used to obtain the {@code ClassLoader} for retrieving the
@@ -838,7 +838,7 @@ public final class LocalizableMessageDescriptor
      * Creates a message with arguments that will replace format specifiers in
      * the associated format string when the message is rendered to string
      * representation.
-     * 
+     *
      * @return The localizable message containing the provided arguments.
      * @param a1
      *          A message argument.
@@ -893,7 +893,7 @@ public final class LocalizableMessageDescriptor
 
     /**
      * Creates a parameterized instance.
-     * 
+     *
      * @param sourceClass
      *          The class in which this descriptor is defined. This class will
      *          be used to obtain the {@code ClassLoader} for retrieving the
@@ -922,7 +922,7 @@ public final class LocalizableMessageDescriptor
      * Creates a message with arguments that will replace format specifiers in
      * the associated format string when the message is rendered to string
      * representation.
-     * 
+     *
      * @return The localizable message containing the provided arguments.
      * @param args
      *          The message arguments.
@@ -998,7 +998,7 @@ public final class LocalizableMessageDescriptor
 
     /**
      * Creates a parameterized message descriptor.
-     * 
+     *
      * @param sourceClass
      *          The class in which this descriptor is defined. This class will
      *          be used to obtain the {@code ClassLoader} for retrieving the
@@ -1030,7 +1030,7 @@ public final class LocalizableMessageDescriptor
     /**
      * Returns the format string which should be used when creating the string
      * representation of this message using the default locale.
-     * 
+     *
      * @return The format string.
      */
     final String getFormatString()
@@ -1043,7 +1043,7 @@ public final class LocalizableMessageDescriptor
     /**
      * Returns the format string which should be used when creating the string
      * representation of this message using the specified locale.
-     * 
+     *
      * @param locale
      *          The locale.
      * @return The format string.
@@ -1086,11 +1086,11 @@ public final class LocalizableMessageDescriptor
      * message. For example, a logging implementation could log the resource
      * name in addition to the ordinal in order to unambiguously identify a
      * message in a locale independent way.
-     * 
+     *
      * @return The ordinal associated with this descriptor, or {@code -1} if
      *         undefined.
      */
-    final int ordinal()
+    public final int ordinal()
     {
       return ordinal;
     }
@@ -1100,7 +1100,7 @@ public final class LocalizableMessageDescriptor
     /**
      * Indicates whether or not this descriptor format string should be
      * processed by {@code Formatter} during string rendering.
-     * 
+     *
      * @return {@code true} if a {@code Formatter} should be used, otherwise
      *         {@code false}.
      */
@@ -1116,12 +1116,15 @@ public final class LocalizableMessageDescriptor
      * message. For example, a logging implementation could log the resource
      * name in addition to the ordinal in order to unambiguously identify a
      * message in a locale independent way.
-     * 
+     * <p>
+     * The resource name may be used for obtaining named loggers, e.g. using
+     * SLF4J's {@code org.slf4j.LoggerFactory#getLogger(String name)}.
+     *
      * @return The name of the resource in which this message is defined, or
      *         {@code null} if this message is a raw message and its source is
      *         undefined.
      */
-    final String resourceName()
+    public final String resourceName()
     {
       return resourceName;
     }
@@ -1157,7 +1160,7 @@ public final class LocalizableMessageDescriptor
 
     /**
      * Creates a parameterized instance.
-     * 
+     *
      * @param formatString
      *          The format string.
      */
@@ -1175,7 +1178,7 @@ public final class LocalizableMessageDescriptor
      * Creates a message with arguments that will replace format specifiers in
      * the associated format string when the message is rendered to string
      * representation.
-     * 
+     *
      * @return The localizable message containing the provided arguments.
      * @param args
      *          The message arguments.

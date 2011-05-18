@@ -895,6 +895,8 @@ abstract class AbstractGenerateMessagesMojo extends AbstractMojo
               messageFile.getPackageName());
           stubLine = stubLine.replace("${CLASS_NAME}",
               messageFile.getClassName());
+          stubLine = stubLine.replace("${FILE_NAME}",
+              messageFile.getName());
           stubLine = stubLine.replace("${RESOURCE_BUNDLE_NAME}",
               messageFile.getResourceBundleName());
           outputWriter.println(stubLine);
