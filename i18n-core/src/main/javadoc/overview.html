@@ -50,7 +50,7 @@ following lines to your pom.xml:
       &lt;plugin>
         &lt;groupId>org.forgerock.commons&lt;/groupId>
         &lt;artifactId>i18n-maven-plugin&lt;/artifactId>
-        &lt;version>1.2&lt;/version>
+        &lt;version>1.3.0-SNAPSHOT&lt;/version>
         &lt;executions>
           &lt;execution>
             &lt;phase>generate-sources&lt;/phase>
@@ -96,7 +96,7 @@ message contained in the property file. For example:
 To use the generated messages you'll need the following dependency:
 <pre>  &lt;groupId>org.forgerock.commons&lt;/groupId>
   &lt;artifactId>i18n-core&lt;/artifactId>
-  &lt;version>1.2&lt;/version>
+  &lt;version>1.3.0-SNAPSHOT&lt;/version>
   &lt;scope>compile&lt;/scope></pre>
 Messages can then be instantiated in a type safe manner which is enforced at
 compile time (unlike CAL10N) as well as avoiding runtime errors due to
