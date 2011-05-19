@@ -29,7 +29,7 @@
   <parent>
     <artifactId>i18n-framework</artifactId>
     <groupId>org.forgerock.commons</groupId>
-    <version>1.2.0</version>
+    <version>1.3.0-SNAPSHOT</version>
   </parent>
   <groupId>org.forgerock.commons</groupId>
   <artifactId>i18n-slf4j</artifactId>
