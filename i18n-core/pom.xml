@@ -37,6 +37,12 @@
   <description>Core Java APIs for embedding and using localizable messages in applications</description>
   <packaging>bundle</packaging>
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
     <plugins>
       <plugin>
         <groupId>org.forgerock.commons</groupId>
@@ -73,6 +79,7 @@
           <show>protected</show>
           <quiet>true</quiet>
           <detectOfflineLinks>false</detectOfflineLinks>
+          <overview>${project.build.outputDirectory}/javadoc/overview.html</overview>
         </configuration>
         <executions>
           <execution>
