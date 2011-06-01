@@ -138,4 +138,78 @@ public final class LocalizableMessageTest
     assertThat(message.resourceName()).isEqualTo(RESOURCE_NAME);
   }
 
+
+
+  /**
+   * Tests raw message with no arguments.
+   */
+  @Test
+  public void testRawMessageNoArgs()
+  {
+    final LocalizableMessage message = LocalizableMessage.raw("hello world");
+    assertThat(message.toString()).isEqualTo("hello world");
+  }
+
+
+
+  /**
+   * Tests raw message with no arguments is not formatted.
+   */
+  @Test
+  public void testRawMessageNoArgsNoFormatting()
+  {
+    final LocalizableMessage message = LocalizableMessage.raw("hello %%");
+    assertThat(message.toString()).isEqualTo("hello %%");
+  }
+
+
+
+  /**
+   * Tests raw message with one argument is formatted.
+   */
+  @Test
+  public void testRawMessageOneArg()
+  {
+    final LocalizableMessage message = LocalizableMessage.raw(
+        "hello %s", "world");
+    assertThat(message.toString()).isEqualTo("hello world");
+  }
+
+
+
+  /**
+   * Tests raw message with two arguments is formatted.
+   */
+  @Test
+  public void testRawMessageTwoArgs()
+  {
+    final LocalizableMessage message = LocalizableMessage.raw(
+        "%s %s", "hello", "world");
+    assertThat(message.toString()).isEqualTo("hello world");
+  }
+
+
+
+  /**
+   * Tests valueOf.
+   */
+  @Test
+  public void testValueOfNoArgs()
+  {
+    final LocalizableMessage message = LocalizableMessage.valueOf("hello world");
+    assertThat(message.toString()).isEqualTo("hello world");
+  }
+
+
+
+  /**
+   * Tests valueOf is not formatted.
+   */
+  @Test
+  public void testValueOfNoFormatting()
+  {
+    final LocalizableMessage message = LocalizableMessage.valueOf("hello %%");
+    assertThat(message.toString()).isEqualTo("hello %%");
+  }
+
 }

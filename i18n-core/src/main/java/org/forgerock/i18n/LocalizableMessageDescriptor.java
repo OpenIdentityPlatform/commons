@@ -1167,8 +1167,7 @@ public final class LocalizableMessageDescriptor
     Raw(final CharSequence formatString)
     {
       super(Void.class, null, null, -1);
-      this.formatString = formatString != null ? formatString
-          .toString() : "";
+      this.formatString = formatString.toString();
       this.requiresFormatter = this.formatString.matches(".*%.*");
     }
 
@@ -1212,6 +1211,14 @@ public final class LocalizableMessageDescriptor
     }
 
   }
+
+
+
+  /**
+   * Cached zero arg raw message descriptor.
+   */
+  static final LocalizableMessageDescriptor.Raw RAW0 =
+    new LocalizableMessageDescriptor.Raw("%s");
 
 
 

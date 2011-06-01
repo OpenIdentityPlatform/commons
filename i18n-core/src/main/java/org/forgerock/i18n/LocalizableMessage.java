@@ -93,6 +93,16 @@ public final class LocalizableMessage implements CharSequence,
    * you should be sure that the message you are creating is not locale
    * sensitive. If it is locale sensitive consider defining an appropriate
    * {@link LocalizableMessageDescriptor}.
+   * <p>
+   * This method handles the special case where a {@code CharSequence} needs to
+   * be converted directly to {@code LocalizableMessage} as follows:
+   * <pre>
+   * String s = ...;
+   *
+   * // Both of these are equivalent:
+   * LocalizableMessage m = LocalizableMessage.raw(s);
+   * LocalizableMessage m = LocalizableMessage.raw("%s", s);
+   * </pre>
    *
    * @param formatString
    *          The raw message format string.
@@ -112,8 +122,26 @@ public final class LocalizableMessage implements CharSequence,
       throw new NullPointerException("formatString was null");
     }
 
-    return new LocalizableMessageDescriptor.Raw(formatString)
-        .get(args);
+    /*
+     * Experience with OpenDJ (see OPENDJ-142) has shown that this method is
+     * heavily abused in the single argument case where a developer wishes to
+     * convert a String to a LocalizableMessage:
+     */
+    // String s = ...;
+    // LocalizableMessage m = LocalizableMessage.raw(s);
+    /*
+     * This will have unexpected behavior if the string contains a formatting
+     * character such as "%".
+     */
+    if (args == null || args.length == 0)
+    {
+      return LocalizableMessageDescriptor.RAW0.get(formatString);
+    }
+    else
+    {
+      return new LocalizableMessageDescriptor.Raw(formatString)
+          .get(args);
+    }
   }
 
 
@@ -138,8 +166,7 @@ public final class LocalizableMessage implements CharSequence,
     }
     else
     {
-      return new LocalizableMessageDescriptor.Raw(
-          String.valueOf(object)).get();
+      return raw(String.valueOf(object));
     }
   }
 
