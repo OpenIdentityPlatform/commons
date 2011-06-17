@@ -41,7 +41,7 @@ public class MessagePropertyKeyTest
 
   /**
    * Data provider for {@link #testValueOfInvalidString(String)}.
-   * 
+   *
    * @return Test data.
    */
   @DataProvider(parallel = true)
@@ -56,7 +56,7 @@ public class MessagePropertyKeyTest
 
   /**
    * Tests the {@code valueOf(String s)} method with invalid key strings.
-   * 
+   *
    * @param s
    *          The key string.
    * @throws IllegalArgumentException
@@ -73,7 +73,7 @@ public class MessagePropertyKeyTest
 
   /**
    * Tests the {@code valueOf(String s)} method with valid key strings.
-   * 
+   *
    * @param s
    *          The key string.
    * @param name
@@ -95,7 +95,7 @@ public class MessagePropertyKeyTest
 
   /**
    * Data provider for {@link #testValueOfValidString(String, String, int)}.
-   * 
+   *
    * @return Test data.
    */
   @DataProvider(parallel = true)
@@ -113,6 +113,47 @@ public class MessagePropertyKeyTest
         { "YET_ANOTHER_MESSAGE_123", "YET_ANOTHER_MESSAGE", 123 },
         { "M111ABC_ABC_111_XYZ_1", "M111ABC_ABC_111_XYZ", 1 },
         { "M111ABC_ABC_111_XYZ_123", "M111ABC_ABC_111_XYZ", 123 }, };
+  }
+
+
+
+  /**
+   * Data provider for {@link #testIsPresent(String, String, boolean)}.
+   *
+   * @return Test data.
+   */
+  @DataProvider(parallel = true)
+  public Object[][] isPresent()
+  {
+    return new Object[][]
+    {
+        { "TEST_MESSAGE", "LocalizableMessage m = TEST_MESSAGE.get();", true},
+        { "TEST_MESSAGE", "LocalizableMessage m = TEST_MESSAGE", true},
+        { "TEST_MESSAGE", "TEST_MESSAGE.get();", true},
+        { "TEST_MESSAGE", "TEST_MESSAGE", true},
+        { "TEST_MESSAGE", "LocalizableMessage m = TEST_MESSAGE1.get();", false},
+        { "TEST_MESSAGE", "LocalizableMessage m = NOT_TEST_MESSAGE.get();", false},
+    };
+  }
+
+
+
+  /**
+   * Tests the {@code isPresent} method.
+   *
+   * @param s
+   *          The key string.
+   * @param line
+   *          The line of text to compare.
+   * @param expectedResult
+   *          The expected result.
+   */
+  @Test(dataProvider = "isPresent")
+  public void testIsPresent(final String s, final String line,
+      final boolean expectedResult)
+  {
+    final MessagePropertyKey key = MessagePropertyKey.valueOf(s);
+    assertThat(key.isPresent(line)).isEqualTo(expectedResult);
   }
 
 }

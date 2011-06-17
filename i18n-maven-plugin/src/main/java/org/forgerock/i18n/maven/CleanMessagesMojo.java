@@ -87,8 +87,7 @@ public final class CleanMessagesMojo extends AbstractMojo
             while (i.hasNext())
             {
               final MessagePropertyKey key = i.next();
-
-              if (line.contains(key.getName()))
+              if (key.isPresent(line))
               {
                 i.remove();
                 unreferencedProperties.remove(key);
