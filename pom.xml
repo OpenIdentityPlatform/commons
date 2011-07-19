@@ -77,9 +77,9 @@
   </ciManagement>
   <distributionManagement>
     <site>
-      <id>i18n-framework.commons.forgerock.org</id>
-      <name>I18N Framework Community</name>
-      <url>scp://commons.forgerock.org/var/www/vhosts/commons.forgerock.org/httpdocs/i18n-framework</url>
+      <id>forgerock.org</id>
+      <name>OpenDJ Community</name>
+      <url>scp://forgerock.org/var/www/vhosts/commons.forgerock.org/httpdocs/i18n-framework</url>
     </site>
   </distributionManagement>
   <modules>
