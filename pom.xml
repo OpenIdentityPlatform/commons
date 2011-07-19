@@ -39,17 +39,75 @@
   <name>ForgeRock I18N Framework</name>
   <description>A common framework for embedding localizable messages in applications</description>
   <packaging>pom</packaging>
+  <issueManagement>
+    <system>Jira</system>
+    <!-- TODO: need JIRA project -->
+    <url>https://bugster.forgerock.org/jira/browse/OPENDJ</url>
+  </issueManagement>
+  <mailingLists>
+    <mailingList>
+      <!-- TODO: need mailing list -->
+      <name>I18N Mailing List</name>
+      <archive>http://lists.forgerock.org/pipermail/opendj/</archive>
+      <subscribe>https://lists.forgerock.org/mailman/listinfo/opendj/</subscribe>
+      <unsubscribe>https://lists.forgerock.org/mailman/listinfo/opendj/</unsubscribe>
+      <post>opendj@forgerock.org</post>
+    </mailingList>
+  </mailingLists>
   <scm>
     <url>https://svn.forgerock.org/commons/i18n-framework/trunk/</url>
     <connection>scm:svn:https://svn.forgerock.org/commons/i18n-framework/trunk/</connection>
     <developerConnection>scm:svn:https://svn.forgerock.org/commons/i18n-framework/trunk/</developerConnection>
     <tag>HEAD</tag>
   </scm>
+  <ciManagement>
+    <system>jenkins</system>
+    <url>http://builds.forgerock.org/job/Commons%20-%20I18N%20Framework/</url>
+    <notifiers>
+      <notifier>
+        <type>mail</type>
+        <sendOnError>true</sendOnError>
+        <sendOnFailure>true</sendOnFailure>
+        <sendOnSuccess>false</sendOnSuccess>
+        <sendOnWarning>false</sendOnWarning>
+        <!-- TODO: need mailing list -->
+        <address>opendj-dev@forgerock.org</address>
+      </notifier>
+    </notifiers>
+  </ciManagement>
+  <distributionManagement>
+    <site>
+      <id>i18n-framework.commons.forgerock.org</id>
+      <name>I18N Framework Community</name>
+      <url>scp://commons.forgerock.org/var/www/vhosts/commons.forgerock.org/httpdocs/i18n-framework</url>
+    </site>
+  </distributionManagement>
   <modules>
     <module>i18n-maven-plugin</module>
     <module>i18n-core</module>
     <module>i18n-slf4j</module>
   </modules>
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <version>2.4</version>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>mailing-list</report>
+              <report>issue-tracking</report>
+              <report>license</report>
+              <report>scm</report>
+              <report>cim</report>
+              <report>distribution-management</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+    </plugins>
+  </reporting>
   <dependencies>
     <dependency>
       <groupId>org.easytesting</groupId>

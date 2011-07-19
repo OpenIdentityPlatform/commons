@@ -34,7 +34,10 @@
   <groupId>org.forgerock.commons</groupId>
   <artifactId>i18n-core</artifactId>
   <name>ForgeRock I18N Core</name>
-  <description>Core Java APIs for embedding and using localizable messages in applications</description>
+  <description>
+    This module provides core Java APIs for embedding and using
+    localizable messages in applications.
+  </description>
   <packaging>bundle</packaging>
   <build>
     <resources>
@@ -102,4 +105,27 @@
       </plugin>
     </plugins>
   </build>
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.7</version>
+        <configuration>
+          <author>false</author>
+          <quiet>true</quiet>
+          <detectOfflineLinks>false</detectOfflineLinks>
+          <show>protected</show>
+          <excludePackageNames>com.*</excludePackageNames>
+        </configuration>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>javadoc</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+    </plugins>
+  </reporting>
 </project>
