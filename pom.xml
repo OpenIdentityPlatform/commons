@@ -38,6 +38,7 @@
   <version>1.3.0-SNAPSHOT</version>
   <name>ForgeRock I18N Framework</name>
   <description>A common framework for embedding localizable messages in applications</description>
+  <url>http://commons.forgerock.org/i18n-framework</url>
   <packaging>pom</packaging>
   <issueManagement>
     <system>Jira</system>

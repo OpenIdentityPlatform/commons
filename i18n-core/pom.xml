@@ -81,7 +81,6 @@
         <configuration>
           <show>protected</show>
           <quiet>true</quiet>
-          <detectOfflineLinks>false</detectOfflineLinks>
           <overview>${project.build.outputDirectory}/javadoc/overview.html</overview>
         </configuration>
         <executions>
@@ -114,7 +113,6 @@
         <configuration>
           <author>false</author>
           <quiet>true</quiet>
-          <detectOfflineLinks>false</detectOfflineLinks>
           <show>protected</show>
           <excludePackageNames>com.*</excludePackageNames>
         </configuration>

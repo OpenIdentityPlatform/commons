@@ -87,7 +87,6 @@
         <configuration>
           <show>protected</show>
           <quiet>true</quiet>
-          <detectOfflineLinks>false</detectOfflineLinks>
         </configuration>
         <executions>
           <execution>
@@ -119,9 +118,11 @@
         <configuration>
           <author>false</author>
           <quiet>true</quiet>
-          <detectOfflineLinks>false</detectOfflineLinks>
           <show>protected</show>
           <excludePackageNames>com.*</excludePackageNames>
+         <links>
+           <link>http://www.slf4j.org/apidocs</link>
+         </links>
         </configuration>
         <reportSets>
           <reportSet>
