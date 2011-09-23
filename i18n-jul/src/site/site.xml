@@ -29,13 +29,13 @@
   <body>
     <menu name="I18N Framework">
       <item name="Core" href="../i18n-core/index.html" />
-      <item name="Maven Plugin" href="index.html" />
-      <item name="Java Logging Support" href="../i18n-jul/index.html" />
+      <item name="Maven Plugin" href="../i18n-maven-plugin/index.html" />
+      <item name="Java Logging Support" href="index.html" />
       <item name="SLF4J Support" href="../i18n-slf4j/index.html" />
     </menu>
     <menu name="Documentation">
       <item name="Introduction" href="index.html" />
-      <item name="Goals" href="plugin-info.html" />
+      <item name="Javadoc" href="apidocs/index.html" />
     </menu>
     <menu name="I18N Framework Development">
       <item name="Join"

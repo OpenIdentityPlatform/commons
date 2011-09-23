@@ -42,8 +42,7 @@
   <packaging>pom</packaging>
   <issueManagement>
     <system>Jira</system>
-    <!-- TODO: need JIRA project -->
-    <url>https://bugster.forgerock.org/jira/browse/OPENDJ</url>
+    <url>https://bugster.forgerock.org/jira/browse/CINTFR</url>
   </issueManagement>
   <mailingLists>
     <mailingList>
@@ -86,6 +85,7 @@
   <modules>
     <module>i18n-maven-plugin</module>
     <module>i18n-core</module>
+    <module>i18n-jul</module>
     <module>i18n-slf4j</module>
   </modules>
   <reporting>
@@ -109,6 +109,9 @@
       </plugin>
     </plugins>
   </reporting>
+  <properties>
+    <currentStableVersion>1.3.0</currentStableVersion>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>org.easytesting</groupId>

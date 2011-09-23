@@ -22,20 +22,18 @@
  *      Copyright 2011 ForgeRock AS
  */
 
-package org.forgerock.i18n.slf4j;
+package org.forgerock.i18n.jul;
 
 
 
 import java.util.Locale;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.logging.Logger;
 
 
 
 /**
- * A factory of {@link LocalizedLogger} instances which obtains a SLF4J
- * {@link Logger} by calling the appropriate {@link LoggerFactory} method and
+ * A factory of {@link LocalizedLogger} instances which obtains a Java
+ * {@link Logger} by calling the appropriate {@link Logger} factory method and
  * wrapping it in an instance of {@code LocalizedLogger}.
  */
 public final class LocalizedLoggerFactory
@@ -48,6 +46,7 @@ public final class LocalizedLoggerFactory
    */
   public static LocalizedLoggerFactory getInstance()
   {
+    // This can't be cached because the default locale can change.
     return new LocalizedLoggerFactory(Locale.getDefault());
   }
 
@@ -82,17 +81,16 @@ public final class LocalizedLoggerFactory
 
 
   /**
-   * Returns a localized logger which will forward log messages to an SLF4J
-   * {@code Logger} obtained by calling {@link LoggerFactory#getLogger(Class)}.
+   * Returns a localized logger which will forward log messages to an anonymous
+   * Java {@code Logger} obtained by calling {@link Logger#getAnonymousLogger()}
+   * .
    *
-   * @param clazz
-   *          The name of the wrapped SLF4J {@code Logger}.
    * @return The localized logger.
-   * @see LoggerFactory#getLogger(Class)
+   * @see Logger#getAnonymousLogger()
    */
-  public LocalizedLogger getLocalizedLogger(final Class<?> clazz)
+  public LocalizedLogger getLocalizedAnonymousLogger()
   {
-    final Logger logger = LoggerFactory.getLogger(clazz);
+    final Logger logger = Logger.getAnonymousLogger();
     return new LocalizedLogger(logger, locale);
   }
 
@@ -100,12 +98,11 @@ public final class LocalizedLoggerFactory
 
   /**
    * Returns a localized logger which will forward log messages to the provided
-   * SLF4J {@code Logger}.
+   * Java {@code Logger}.
    *
    * @param logger
-   *          The wrapped SLF4J {@code Logger}.
+   *          The wrapped Java {@code Logger}.
    * @return The localized logger.
-   * @see LoggerFactory#getLogger(String)
    */
   public LocalizedLogger getLocalizedLogger(final Logger logger)
   {
@@ -115,17 +112,17 @@ public final class LocalizedLoggerFactory
 
 
   /**
-   * Returns a localized logger which will forward log messages to an SLF4J
-   * {@code Logger} obtained by calling {@link LoggerFactory#getLogger(String)}.
+   * Returns a localized logger which will forward log messages to the named
+   * Java {@code Logger} obtained by calling {@link Logger#getLogger(String)}.
    *
    * @param name
-   *          The name of the wrapped SLF4J {@code Logger}.
+   *          The name of the wrapped Java {@code Logger}.
    * @return The localized logger.
-   * @see LoggerFactory#getLogger(String)
+   * @see Logger#getLogger(String)
    */
   public LocalizedLogger getLocalizedLogger(final String name)
   {
-    final Logger logger = LoggerFactory.getLogger(name);
+    final Logger logger = Logger.getLogger(name);
     return new LocalizedLogger(logger, locale);
   }
 

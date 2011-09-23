@@ -23,8 +23,8 @@
  */
 
 /**
- * This package provides an alternative localization mechanism to
- * {@code org.slf4j.cal10n}. Using the ForgeRock I18N framework for logging
+ * This package provides a localization mechanism for
+ * {@code java.util.logging}. Using the ForgeRock I18N framework for logging
  * ensures that message type safety is enforced at compile time.
  * <p>
  * Example usage:
@@ -35,11 +35,11 @@
  * ...
  *
  * // EXAMPLE_MESSAGE has parameters String and Integer
- * LocalizedLogger logger = LocalizedLogger.getLocalizedLogger(this.class);
- * logger.error(EXAMPLE_MESSAGE, "a string", 123);
+ * LocalizedLogger logger = LocalizedLogger.getLocalizedLogger("mylogger");
+ * logger.warning(EXAMPLE_MESSAGE, "a string", 123);
  * </pre>
  */
-package org.forgerock.i18n.slf4j;
+package org.forgerock.i18n.jul;
 
 
 
