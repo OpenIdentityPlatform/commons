@@ -141,6 +141,23 @@ public final class LocalizableMessageTest
 
 
   /**
+   * Tests retrieval of a message containing a quoted percent character.
+   */
+  @Test
+  public void testMessageWithQuotedPercent()
+  {
+    final LocalizableMessage message = MyTestMessages.MESSAGE_WITH_QUOTED_PERCENT.get();
+
+    assertThat(message.toString()).isEqualTo("Message with\nquoted %");
+    assertThat(message.toString(Locale.FRANCE)).isEqualTo(
+        "French message with\nquoted %");
+    assertThat(message.ordinal()).isEqualTo(-1);
+    assertThat(message.resourceName()).isEqualTo(RESOURCE_NAME);
+  }
+
+
+
+  /**
    * Tests raw message with no arguments.
    */
   @Test

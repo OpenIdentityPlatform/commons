@@ -119,7 +119,7 @@ public final class LocalizableMessageDescriptor
      */
     private final boolean containsArgumentLiterals(final String s)
     {
-      return s.matches(".*%[n|%].*"); // match Formatter literals
+      return s.contains("%%") || s.contains("%n"); // match Formatter literals
     }
   }
 
