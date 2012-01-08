@@ -34,7 +34,7 @@
   </parent>
   <groupId>org.forgerock.commons</groupId>
   <artifactId>i18n-framework</artifactId>
-  <version>1.4.0</version>
+  <version>1.4.1-SNAPSHOT</version>
   <name>ForgeRock I18N Framework</name>
   <description>A common framework for embedding localizable messages in applications</description>
   <url>http://commons.forgerock.org/i18n-framework</url>
@@ -54,10 +54,9 @@
     </mailingList>
   </mailingLists>
   <scm>
-    <url>https://svn.forgerock.org/commons/i18n-framework/tags/1.4.0</url>
-    <connection>scm:svn:https://svn.forgerock.org/commons/i18n-framework/tags/1.4.0</connection>
-    <developerConnection>scm:svn:https://svn.forgerock.org/commons/i18n-framework/tags/1.4.0</developerConnection>
-    <tag>HEAD</tag>
+    <url>https://svn.forgerock.org/commons/i18n-framework/trunk/</url>
+    <connection>scm:svn:https://svn.forgerock.org/commons/i18n-framework/trunk/</connection>
+    <developerConnection>scm:svn:https://svn.forgerock.org/commons/i18n-framework/trunk/</developerConnection>
   </scm>
   <ciManagement>
     <system>jenkins</system>

@@ -28,7 +28,7 @@
   <parent>
     <groupId>org.forgerock.commons</groupId>
     <artifactId>i18n-framework</artifactId>
-    <version>1.4.0</version>
+    <version>1.4.1-SNAPSHOT</version>
   </parent>
   <artifactId>i18n-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
