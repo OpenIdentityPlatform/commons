@@ -25,8 +25,7 @@
   !      Copyright 2011 ForgeRock AS
   !    
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.forgerock</groupId>
@@ -35,7 +34,7 @@
   </parent>
   <groupId>org.forgerock.commons</groupId>
   <artifactId>i18n-framework</artifactId>
-  <version>1.4.0-SNAPSHOT</version>
+  <version>1.4.0</version>
   <name>ForgeRock I18N Framework</name>
   <description>A common framework for embedding localizable messages in applications</description>
   <url>http://commons.forgerock.org/i18n-framework</url>
@@ -55,9 +54,9 @@
     </mailingList>
   </mailingLists>
   <scm>
-    <url>https://svn.forgerock.org/commons/i18n-framework/trunk/</url>
-    <connection>scm:svn:https://svn.forgerock.org/commons/i18n-framework/trunk/</connection>
-    <developerConnection>scm:svn:https://svn.forgerock.org/commons/i18n-framework/trunk/</developerConnection>
+    <url>https://svn.forgerock.org/commons/i18n-framework/tags/1.4.0</url>
+    <connection>scm:svn:https://svn.forgerock.org/commons/i18n-framework/tags/1.4.0</connection>
+    <developerConnection>scm:svn:https://svn.forgerock.org/commons/i18n-framework/tags/1.4.0</developerConnection>
     <tag>HEAD</tag>
   </scm>
   <ciManagement>
@@ -204,7 +203,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore></ignore>
+                    <ignore />
                   </action>
                 </pluginExecution>
               </pluginExecutions>
