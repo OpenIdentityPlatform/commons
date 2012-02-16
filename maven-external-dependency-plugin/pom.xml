@@ -21,7 +21,7 @@ under the License.
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.savage7.maven.plugins</groupId>
     <artifactId>maven-external-dependency-plugin</artifactId>
-    <version>0.5-SNAPSHOT</version>
+    <version>0.5</version>
     <name>Maven External Dependency Plugin</name>
     <url>http://code.google.com/p/maven-external-dependency-plugin/</url>
     <inceptionYear>2010</inceptionYear>
@@ -199,9 +199,9 @@ under the License.
     <!--  SOURCE CONTROL -->
 
     <scm>
-        <connection>scm:svn:https://maven-external-dependency-plugin.googlecode.com/svn/trunk/maven-external-dependency-plugin</connection>
-        <developerConnection>scm:svn:https://maven-external-dependency-plugin.googlecode.com/svn/trunk/maven-external-dependency-plugin</developerConnection>
-        <url>https://maven-external-dependency-plugin.googlecode.com/svn/trunk/maven-external-dependency-plugin</url>
+        <connection>scm:svn:https://maven-external-dependency-plugin.googlecode.com/svn/release/maven-external-dependency-plugin-0.5</connection>
+        <developerConnection>scm:svn:https://maven-external-dependency-plugin.googlecode.com/svn/release/maven-external-dependency-plugin-0.5</developerConnection>
+        <url>https://maven-external-dependency-plugin.googlecode.com/svn/release/maven-external-dependency-plugin-0.5</url>
     </scm>
 
         
