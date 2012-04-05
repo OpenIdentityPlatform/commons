@@ -25,6 +25,16 @@
     only required to have Javadoc descriptions (i.e. parameters, throws, etc
     are not required). 
   -->
+  
+  <!-- Allow in-place suppression of Checkstyle -->
+  <module name="SuppressionCommentFilter">
+    <property name="offCommentFormat" value="@DisableCheckstyle" />
+    <property name="onCommentFormat" value="@EnableCheckstyle" />
+  </module>
+  <module name="SuppressWithNearbyCommentFilter">
+    <property name="commentFormat" value="@SuppressCheckstyle (\d+)" />
+    <property name="influenceFormat" value="$1" />
+  </module>
 
   <!-- Require a new line at the end of all source files. This was more of a
        requirement from CVS, but since some editors add one automatically we
@@ -53,6 +63,9 @@
   
     <!-- Enable result caching -->
     <property name="cacheFile" value="${checkstyle.cache.file}" />
+
+    <!-- Required for suppressions -->
+    <module name="FileContentsHolder" />
 
     <!-- 
     
@@ -86,14 +99,14 @@
     <module name="ClassTypeParameterName">
       <property name="format" value="^[A-Z][0-9]*$" />
     </module>
-    
-    <!--  As per Sun conventions -->
     <module name="ConstantName" />
     <module name="LocalFinalVariableName" />
     <module name="LocalVariableName" />
     <module name="MemberName" />
     <module name="MethodName" />
-    <module name="MethodTypeParameterName" />
+    <module name="MethodTypeParameterName" >
+      <property name="format" value="^[A-Z][0-9]*$" />
+    </module>
     <module name="PackageName" />
     <module name="ParameterName" />
     <module name="StaticVariableName" />
