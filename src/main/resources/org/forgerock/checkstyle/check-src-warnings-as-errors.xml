@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions Copyrighted [year] [name of copyright owner]".
+
+  Copyright 2012 ForgeRock AS. All rights reserved.
+-->
+<!DOCTYPE module PUBLIC
+    "-//Puppy Crawl//DTD Check Configuration 1.3//EN"
+    "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
+<module name="Checker">
+
+  <!-- 
+    This Checkstyle configuration contains the set of warning severity checks
+    contained in check-src-default.xml. It can be used in addition to
+    check-src-default.xml as part of a separate pass in order to flag warnings
+    as errors and trigger a build failure. This set of checks should only be
+    used in very strict projects.
+  -->
+
+  <!--  As per Sun conventions -->
+  <module name="Translation" />
+  <module name="FileLength" />
+
+  <module name="TreeWalker">
+  
+    <!-- Enable result caching -->
+    <property name="cacheFile" value="${checkstyle.cache.file}" />
+
+    <!--
+    
+        SIZE VIOLATIONS
+    
+    -->
+        
+    <!--  As per Sun conventions -->
+    <module name="MethodLength" />
+    <module name="ParameterNumber" />
+        
+    <!--
+    
+        CODING
+    
+    -->
+
+    <!--  As per Sun conventions -->
+    <module name="MissingSwitchDefault" />
+    
+    <!--
+    
+        CLASS DESIGN
+    
+    -->
+
+    <!--  As per Sun conventions -->
+    <module name="DesignForExtension" />
+    
+    <!--
+    
+        MISC
+    
+    -->
+
+    <!--  Flag task tags as warnings -->
+    <module name="TodoComment">
+      <property name="format" value="TODO" />
+    </module>
+    <module name="TodoComment">
+      <property name="format" value="FIXME" />
+    </module>
+    <module name="TodoComment">
+      <property name="format" value="XXX" />
+    </module>
+    
+  </module>
+</module>

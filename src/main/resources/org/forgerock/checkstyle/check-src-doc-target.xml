@@ -19,9 +19,20 @@
     "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
 <module name="Checker">
 
-  <!--  As per Sun conventions -->
-  <module name="Translation" />
-  <module name="FileLength" />
+  <!-- 
+    This Checkstyle configuration defines additional checks which should be
+    enabled for source code which is intended for inclusion in documentation or
+    site content. Specifically:
+    
+    * source code must not contain lines which are greater than 80 characters
+      in order to fit on an A4 page (70 is recommended)
+      
+    * long methods are not allowed since these will be hard to read and will
+      very likely split across more than one page
+      
+    * methods containing too many parameters are not allowed since this
+      indicates that the method will be hard to understand.
+  -->
 
   <module name="TreeWalker">
   
@@ -33,47 +44,16 @@
         SIZE VIOLATIONS
     
     -->
-        
+    
+    <!-- Unlike Sun conventions, allow imports to exceed line length since
+         they are a pain to wrap -->
+    <module name="LineLength">
+      <property name="max" value="80" />
+      <property name="ignorePattern" value="^import " />
+    </module>
+    
     <!--  As per Sun conventions -->
     <module name="MethodLength" />
     <module name="ParameterNumber" />
-        
-    <!--
-    
-        BLOCKS
-    
-    -->
-
-    <!--  As per Sun conventions -->
-    <!--  This will fail for empty catch/while/for blocks -->
-    <module name="EmptyBlock" />
-
-    <!--
-    
-        CODING
-    
-    -->
-
-    <!--  As per Sun conventions -->
-    <module name="MissingSwitchDefault" />
-    
-    <!--
-    
-        CLASS DESIGN
-    
-    -->
-
-    <!--  As per Sun conventions -->
-    <module name="DesignForExtension" />
-    
-    <!--
-    
-        MISC
-    
-    -->
-
-    <!--  As per Sun conventions -->
-    <module name="TodoComment" />
-    
   </module>
 </module>

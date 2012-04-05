@@ -19,6 +19,13 @@
     "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
 <module name="Checker">
 
+  <!-- 
+    This Checkstyle configuration defines a set of relaxed checks which should
+    be enabled for unit test source code. No warnings are issued and methods are
+    only required to have Javadoc descriptions (i.e. parameters, throws, etc
+    are not required). 
+  -->
+
   <!-- Require a new line at the end of all source files. This was more of a
        requirement from CVS, but since some editors add one automatically we
        should require it anyway in order to avoid obfuscated diffs -->
@@ -36,12 +43,10 @@
     <property name="message" value="Line has trailing spaces." />
   </module>
   
-  <!-- Require package-info.java for all packages -->
-  <module name="JavadocPackage" />
-
   <!--  Use header file template passed in from Maven -->
   <module name="RegexpHeader">
     <property name="headerFile" value="${checkstyle.header.file}" />
+    <property name="multiLines" value="1,2,3" />
   </module>
 
   <module name="TreeWalker">
@@ -55,25 +60,20 @@
     
     -->
 
-    <!--  Require Javadoc for all types regardless of scope -->
+    <!--  Require Javadoc for public classes only -->
     <module name="JavadocType">
-      <property name="scope" value="private" />
+      <property name="scope" value="public" />
     </module>
     
-    <!--  Require valid Javadoc for all protected and public members -->
+    <!--  Require valid Javadoc for public test methods. We only want a summary,
+          so allow missing param, throws, returns tags. -->
     <module name="JavadocMethod">
-      <property name="scope" value="protected" />
+      <property name="scope" value="public" />
+      <property name="allowMissingParamTags" value="true" />
+      <property name="allowMissingThrowsTags" value="true" />
+      <property name="allowMissingReturnTag" value="true" />
       <property name="allowUndeclaredRTE" value="true" />
       <property name="allowThrowsTagsForSubclasses" value="true" />
-    </module>
-    <module name="JavadocVariable">
-      <property name="scope" value="protected" />
-    </module>
-    
-    <!--  If Javadoc is present then it must be valid -->
-    <module name="JavadocStyle">
-      <property name="scope" value="private" />
-      <property name="checkEmptyJavadoc" value="true" />
     </module>
     
     <!--
@@ -124,12 +124,10 @@
     <!-- Unlike Sun conventions, allow lines bigger than 80 and imports to
          exceed line length since they are a pain to wrap -->
     <module name="LineLength">
-      <property name="max" value="120" />
+      <property name="max" value="100" />
       <property name="ignorePattern" value="^import " />
     </module>
     
-    <!--  Additional checks -->
-
     <!--  Restrict classes to one per file -->
     <module name="OuterTypeNumber" />
     
@@ -142,24 +140,17 @@
     <!--  As per Sun conventions -->
     <module name="EmptyForIteratorPad" />
     <module name="MethodParamPad" />
-    <module name="NoWhitespaceAfter" />
+    <!--  Unlike Sun conventions, allow whitespace after array initializer -->
+    <module name="NoWhitespaceAfter">
+      <property name="tokens" value="BNOT,DEC,DOT,INC,LNOT,UNARY_MINUS,UNARY_PLUS" />
+    </module>
     <module name="NoWhitespaceBefore" />
     <module name="OperatorWrap" />
     <module name="ParenPad" />
     <module name="TypecastParenPad" />
     <module name="WhitespaceAfter" />
     <module name="WhitespaceAround" />
-
-    <!--
     
-        MODIFIERS
-    
-    -->
-    
-    <!--  As per Sun conventions -->
-    <module name="ModifierOrder" />
-    <module name="RedundantModifier" />
-
     <!--
     
         BLOCKS
@@ -168,7 +159,7 @@
 
     <!--  Unlike Sun conventions, align length with LineLength -->
     <module name="LeftCurly">
-      <property name="maxLineLength" value="120" />
+      <property name="maxLineLength" value="100" />
     </module>
     
     <!--  Unlike Sun conventions, allow nested blocks in switch statements
@@ -177,10 +168,16 @@
       <property name="allowInSwitchCase" value="true" />
     </module>
     
+    <!--  Unlike Sun conventions we'll allow empty blocks, but only if they are
+          documented -->
+    <module name="EmptyBlock">
+      <property name="option" value="text" />
+    </module>
+    
     <!--  As per Sun conventions -->
     <module name="NeedBraces" />
     <module name="RightCurly" />
-
+    
     <!--
     
         CODING
@@ -190,24 +187,8 @@
     <!--  As per Sun conventions -->
     <module name="EmptyStatement" />
     <module name="EqualsHashCode" />    
-    <!--  Skip: inline conditionals are fine as long as they are used sensibly.
-    <module name="AvoidInlineConditionals" />
-    -->
-    <!--  Skip: double checked locking is possible in Java 5 as long as
-                the reference is volatile.
-    <module name="DoubleCheckedLocking" />
-    -->
-    <!--  Skip: hidden fields are common in constructors. In addition fluent
-                design recommends non-void setters for chaining.
-    <module name="HiddenField" />
-    -->
     <module name="IllegalInstantiation" />
     <module name="InnerAssignment" />
-    <!--  Skip: magic numbers are ok as long as they are commented. Examples may
-                include capacities, memory sizes, durations, etc.
-    <module name="MagicNumber" />
-    -->
-    <module name="RedundantThrows" />
     <module name="SimplifyBooleanExpression" />
     <module name="SimplifyBooleanReturn" />
     
@@ -218,18 +199,8 @@
     <module name="StringLiteralEquality" />
     <!-- Check package name is present and matches directory name as well -->
     <module name="PackageDeclaration" />
-
-    <!--
-    
-        CLASS DESIGN
-    
-    -->
-
-    <!--  As per Sun conventions -->
-    <module name="FinalClass" />
-    <module name="HideUtilityClassConstructor" />
-    <module name="InterfaceIsType" />
-    <module name="VisibilityModifier" />
+    <!--  Require one statement per line -->
+    <module name="OneStatementPerLine" />
     
     <!--
     
@@ -239,10 +210,7 @@
 
     <!--  As per Sun conventions -->
     <module name="ArrayTypeStyle" />
-    <module name="FinalParameters" />
     <module name="UpperEll" />
-    
-    <!--  Additional checks -->
 
     <!--  Require 4 character indent -->
     <module name="Indentation">
