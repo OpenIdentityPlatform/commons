@@ -29,5 +29,6 @@
   <suppress checks="ParameterNumber" files=".*" />
   <suppress checks="MissingSwitchDefault" files=".*" />
   <suppress checks="DesignForExtension" files=".*" />
+  <suppress checks="FinalParameters" files=".*" />
   <suppress checks="TodoComment" files=".*" />
 </suppressions>

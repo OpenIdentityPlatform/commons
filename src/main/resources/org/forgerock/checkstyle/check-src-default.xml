@@ -349,7 +349,9 @@
 
     <!--  As per Sun conventions -->
     <module name="ArrayTypeStyle" />
-    <module name="FinalParameters" />
+    <module name="FinalParameters">
+      <property name="severity" value="warning" />
+    </module>
     <module name="UpperEll" />
     
     <!--  Additional checks -->
