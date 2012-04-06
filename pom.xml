@@ -124,9 +124,12 @@
         <targetJdk>${maven.compiler.target}</targetJdk>
 
         <!-- maven-checkstyle-plugin -->
-        <checkstyleConfigLocation>config/sun_checks.xml</checkstyleConfigLocation>
-        <!--checkstyleConfigLocation>${project.basedir}/src/checkstyle/checkstyle.xml</checkstyleConfigLocation-->
-
+        <checkstyleSourceConfigLocation>org/forgerock/checkstyle/check-src-default.xml</checkstyleSourceConfigLocation>
+        <checkstyleTestConfigLocation>org/forgerock/checkstyle/check-unit-tests.xml</checkstyleTestConfigLocation>
+        <checkstyleDocTargetConfigLocation>org/forgerock/checkstyle/check-src-doc-target.xml</checkstyleDocTargetConfigLocation>
+        <checkstyleSuppressionsLocation>org/forgerock/checkstyle/check-src-suppress-warnings.xml</checkstyleSuppressionsLocation>
+        <checkstyleHeaderLocation>org/forgerock/checkstyle/default-java-header</checkstyleHeaderLocation>
+                                
         <!-- ***************** -->
         <!-- Repository Deployment URLs -->
         <!-- ***************** -->
@@ -171,9 +174,54 @@
                     <version>2.3.7</version>
                 </plugin>
                 <plugin>
+                    <!-- Strictly speaking Checkstyle should be invoked as a
+                         report during site generation. However, we want
+                         to fail the build if source code does not comply with
+                         our coding guidelines, and not at a later stage when
+                         the site is generated (which may never occur for some
+                         projects).     
+                    -->
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
-                    <version>2.8</version>
+                    <version>2.9.1</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.forgerock</groupId>
+                            <artifactId>forgerock-build-tools</artifactId>
+                            <version>1.0.0-SNAPSHOT</version>
+                        </dependency>
+                    </dependencies>
+                    <executions>
+                        <execution>
+                            <id>process-classes</id>
+                            <configuration>
+                                <configLocation>${checkstyleSourceConfigLocation}</configLocation>
+                                <headerLocation>${checkstyleHeaderLocation}</headerLocation>
+                                <consoleOutput>true</consoleOutput>
+                                <failsOnError>true</failsOnError>
+                                <linkXRef>false</linkXRef>
+                            </configuration>
+                            <phase>process-classes</phase>
+                            <goals>
+                                <goal>checkstyle</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>process-test-classes</id>
+                            <configuration>
+                                <sourceDirectory>${project.build.testSourceDirectory}</sourceDirectory>
+                                <configLocation>${checkstyleTestConfigLocation}</configLocation>
+                                <headerLocation>${checkstyleHeaderLocation}</headerLocation>
+                                <consoleOutput>true</consoleOutput>
+                                <failsOnError>true</failsOnError>
+                                <linkXRef>false</linkXRef>
+                            </configuration>
+                            <phase>process-test-classes</phase>
+                            <goals>
+                                <goal>checkstyle</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -473,15 +521,9 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-checkstyle-plugin</artifactId>
-                        <!--dependencies>
-                            <dependency>
-                                <groupId>org.forgerock.commons</groupId>
-                                <artifactId>forgerock-checkstyle-checks</artifactId>
-                                <version>1.0.0-SNAPSHOT</version>
-                            </dependency>
-                        </dependencies-->
                         <configuration>
-                            <configLocation>${checkstyleConfigLocation}</configLocation>
+                            <configLocation>${checkstyleSourceConfigLocation}</configLocation>
+                            <headerLocation>${checkstyleHeaderLocation}</headerLocation>
                         </configuration>
                     </plugin>
                 </plugins>
