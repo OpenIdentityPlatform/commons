@@ -26,15 +26,54 @@
     are not required). 
   -->
   
-  <!-- Allow in-place suppression of Checkstyle -->
+  <!--
+  
+      SUPPRESSION FILTERS
+      
+  -->
+  
+  <!-- Toggle Checkstyle on/off
+  
+      // @Checkstyle:off
+      ... ignored
+      // @Checkstyle:on
+  
+  -->
   <module name="SuppressionCommentFilter">
-    <property name="offCommentFormat" value="@DisableCheckstyle" />
-    <property name="onCommentFormat" value="@EnableCheckstyle" />
+    <property name="offCommentFormat" value="@Checkstyle:off" />
+    <property name="onCommentFormat" value="@Checkstyle:on" />
   </module>
+  
+  <!--  Instruct Checkstyle to ignore next line
+  
+      // @Checkstyle:ignore
+      ... ignored
+      ... checked
+  
+  -->
   <module name="SuppressWithNearbyCommentFilter">
-    <property name="commentFormat" value="@SuppressCheckstyle (\d+)" />
+    <property name="commentFormat" value="@Checkstyle:ignore" />
+    <property name="influenceFormat" value="1" />
+  </module>
+  
+  <!--  Instruct Checkstyle to ignore next N lines (-ve means previous lines)
+  
+      // @Checkstyle:ignoreFor 2
+      ... ignored
+      ... ignored
+      ... checked
+  
+  -->
+  <module name="SuppressWithNearbyCommentFilter">
+    <property name="commentFormat" value="@Checkstyle:ignoreFor (\d+)" />
     <property name="influenceFormat" value="$1" />
   </module>
+  
+  <!--
+  
+      CHECKS
+      
+  -->
 
   <!-- Require a new line at the end of all source files. This was more of a
        requirement from CVS, but since some editors add one automatically we
