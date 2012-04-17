@@ -20,16 +20,18 @@
 <module name="Checker">
 
   <!-- 
-    This Checkstyle configuration contains the set of warning severity checks
-    contained in check-src-default.xml. It can be used in addition to
-    check-src-default.xml as part of a separate pass in order to flag warnings
-    as errors and trigger a build failure. This set of checks should only be
-    used in very strict projects.
+    This Checkstyle configuration contains an additional set of checks with
+    warning severity. This set of checks should only be used in very strict
+    projects.
   -->
 
   <!--  As per Sun conventions -->
-  <module name="Translation" />
-  <module name="FileLength" />
+  <module name="Translation" >
+    <property name="severity" value="warning" />
+  </module>
+  <module name="FileLength" >
+    <property name="severity" value="warning" />
+  </module>
 
   <module name="TreeWalker">
   
@@ -43,8 +45,12 @@
     -->
         
     <!--  As per Sun conventions -->
-    <module name="MethodLength" />
-    <module name="ParameterNumber" />
+    <module name="MethodLength" >
+      <property name="severity" value="warning" />
+    </module>
+    <module name="ParameterNumber" >
+      <property name="severity" value="warning" />
+    </module>
         
     <!--
     
@@ -53,7 +59,9 @@
     -->
 
     <!--  As per Sun conventions -->
-    <module name="MissingSwitchDefault" />
+    <module name="MissingSwitchDefault" >
+      <property name="severity" value="warning" />
+    </module>
     
     <!--
     
@@ -62,7 +70,9 @@
     -->
 
     <!--  As per Sun conventions -->
-    <module name="DesignForExtension" />
+    <module name="DesignForExtension" >
+      <property name="severity" value="warning" />
+    </module>
     
     <!--
     
@@ -71,17 +81,22 @@
     -->
     
     <!--  As per Sun conventions -->
-    <module name="FinalParameters" />
+    <module name="FinalParameters" >
+      <property name="severity" value="warning" />
+    </module>
 
     <!--  Flag task tags as warnings -->
     <module name="TodoComment">
       <property name="format" value="TODO" />
+      <property name="severity" value="warning" />
     </module>
     <module name="TodoComment">
       <property name="format" value="FIXME" />
+      <property name="severity" value="warning" />
     </module>
     <module name="TodoComment">
       <property name="format" value="XXX" />
+      <property name="severity" value="warning" />
     </module>
     
   </module>

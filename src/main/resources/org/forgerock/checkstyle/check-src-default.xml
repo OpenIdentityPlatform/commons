@@ -24,7 +24,7 @@
     be enabled for all source code, except unit tests. The checks are based on
     the Sun conventions, with a few notable exceptions and additions:
     
-    * lines are permitted to be 100 characters long, as opposed to 80 (imports
+    * lines are permitted to be 120 characters long, as opposed to 80 (imports
       are allowed to be any length since wrapping them is ugly)
       
     * Javadoc is required for all classes (for code readability), but only
@@ -115,14 +115,6 @@
     <property name="headerFile" value="${checkstyle.header.file}" />
     <property name="multiLines" value="1,2,3" />
   </module>
-  
-  <!--  As per Sun conventions, except issue as warnings -->
-  <module name="Translation">
-    <property name="severity" value="warning" />
-  </module>
-  <module name="FileLength">
-    <property name="severity" value="warning" />
-  </module>
 
   <module name="TreeWalker">
   
@@ -207,20 +199,10 @@
     <!-- Unlike Sun conventions, allow lines bigger than 80 and imports to
          exceed line length since they are a pain to wrap -->
     <module name="LineLength">
-      <property name="max" value="100" />
+      <property name="max" value="120" />
       <property name="ignorePattern" value="^import " />
     </module>
     
-    <!--  As per Sun conventions, except issue as warnings -->
-    <module name="MethodLength">
-      <property name="severity" value="warning" />
-    </module>
-    <module name="ParameterNumber">
-      <property name="severity" value="warning" />
-    </module>
-    
-    <!--  Additional checks -->
-
     <!--  Restrict classes to one per file -->
     <module name="OuterTypeNumber" />
     
@@ -262,7 +244,7 @@
 
     <!--  Unlike Sun conventions, align length with LineLength -->
     <module name="LeftCurly">
-      <property name="maxLineLength" value="100" />
+      <property name="maxLineLength" value="120" />
     </module>
     
     <!--  Unlike Sun conventions, allow nested blocks in switch statements
@@ -290,30 +272,11 @@
     <!--  As per Sun conventions -->
     <module name="EmptyStatement" />
     <module name="EqualsHashCode" />    
-    <!--  Skip: inline conditionals are fine as long as they are used sensibly.
-    <module name="AvoidInlineConditionals" />
-    -->
-    <!--  Skip: double checked locking is possible in Java 5 as long as
-                the reference is volatile.
-    <module name="DoubleCheckedLocking" />
-    -->
-    <!--  Skip: hidden fields are common in constructors. In addition fluent
-                design recommends non-void setters for chaining.
-    <module name="HiddenField" />
-    -->
     <module name="IllegalInstantiation" />
     <module name="InnerAssignment" />
-    <!--  Skip: magic numbers are ok as long as they are commented. Examples may
-                include capacities, memory sizes, durations, etc.
-    <module name="MagicNumber" />
-    -->
     <module name="RedundantThrows" />
     <module name="SimplifyBooleanExpression" />
     <module name="SimplifyBooleanReturn" />
-    <!--  As per Sun conventions, except issue as warnings -->
-    <module name="MissingSwitchDefault">
-      <property name="severity" value="warning" />
-    </module>
     
     <!--  Additional checks -->
     
@@ -336,10 +299,6 @@
     <module name="HideUtilityClassConstructor" />
     <module name="InterfaceIsType" />
     <module name="VisibilityModifier" />
-    <!--  As per Sun conventions, except issue as warnings -->
-    <module name="DesignForExtension">
-      <property name="severity" value="warning" />
-    </module>
     
     <!--
     
@@ -349,12 +308,7 @@
 
     <!--  As per Sun conventions -->
     <module name="ArrayTypeStyle" />
-    <module name="FinalParameters">
-      <property name="severity" value="warning" />
-    </module>
     <module name="UpperEll" />
-    
-    <!--  Additional checks -->
 
     <!--  Require 4 character indent -->
     <module name="Indentation">
@@ -363,20 +317,6 @@
     
     <!--  Require that file name corresponds to class name -->
     <module name="OuterTypeFilename" />
-    
-    <!--  Flag task tags as warnings -->
-    <module name="TodoComment">
-      <property name="format" value="TODO" />
-      <property name="severity" value="warning" />
-    </module>
-    <module name="TodoComment">
-      <property name="format" value="FIXME" />
-      <property name="severity" value="warning" />
-    </module>
-    <module name="TodoComment">
-      <property name="format" value="XXX" />
-      <property name="severity" value="warning" />
-    </module>
 
   </module>
 </module>
