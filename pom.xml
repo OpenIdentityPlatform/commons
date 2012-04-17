@@ -116,18 +116,22 @@
         <maven.min.version>2.2.1</maven.min.version>
         <jdk.min.version>${maven.compiler.source}</jdk.min.version>
 
+        <!-- findbugs-maven-plugin -->
+        <findbugsPluginVersion>2.3.3</findbugsPluginVersion>
+
         <!-- maven-idea-plugin & maven-eclipse-plugin -->
         <downloadSources>true</downloadSources>
         <downloadJavadocs>true</downloadJavadocs>
 
         <!-- maven-pmd-plugin -->
+        <pmdPluginVersion>2.6</pmdPluginVersion>
         <targetJdk>${maven.compiler.target}</targetJdk>
 
         <!-- maven-checkstyle-plugin -->
+        <checkstylePluginVersion>2.9.1</checkstylePluginVersion>
         <checkstyleSourceConfigLocation>org/forgerock/checkstyle/check-src-default.xml</checkstyleSourceConfigLocation>
-        <checkstyleTestConfigLocation>org/forgerock/checkstyle/check-unit-tests.xml</checkstyleTestConfigLocation>
         <checkstyleDocTargetConfigLocation>org/forgerock/checkstyle/check-src-doc-target.xml</checkstyleDocTargetConfigLocation>
-        <checkstyleSuppressionsLocation>org/forgerock/checkstyle/check-src-suppress-warnings.xml</checkstyleSuppressionsLocation>
+        <checkstyleUnitTestSuppressionsLocation>org/forgerock/checkstyle/unit-test-suppressions.xml</checkstyleUnitTestSuppressionsLocation>
         <checkstyleHeaderLocation>org/forgerock/checkstyle/default-java-header</checkstyleHeaderLocation>
                                 
         <!-- ***************** -->
@@ -156,7 +160,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>findbugs-maven-plugin</artifactId>
-                    <version>2.3.3</version>
+                    <version>${findbugsPluginVersion}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -174,16 +178,9 @@
                     <version>2.3.7</version>
                 </plugin>
                 <plugin>
-                    <!-- Strictly speaking Checkstyle should be invoked as a
-                         report during site generation. However, we want
-                         to fail the build if source code does not comply with
-                         our coding guidelines, and not at a later stage when
-                         the site is generated (which may never occur for some
-                         projects).     
-                    -->
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
-                    <version>2.9.1</version>
+                    <version>${checkstylePluginVersion}</version>
                     <dependencies>
                         <dependency>
                             <groupId>org.forgerock</groupId>
@@ -191,37 +188,6 @@
                             <version>1.0.0-SNAPSHOT</version>
                         </dependency>
                     </dependencies>
-                    <executions>
-                        <execution>
-                            <id>process-classes</id>
-                            <configuration>
-                                <configLocation>${checkstyleSourceConfigLocation}</configLocation>
-                                <headerLocation>${checkstyleHeaderLocation}</headerLocation>
-                                <consoleOutput>true</consoleOutput>
-                                <failsOnError>true</failsOnError>
-                                <linkXRef>false</linkXRef>
-                            </configuration>
-                            <phase>process-classes</phase>
-                            <goals>
-                                <goal>checkstyle</goal>
-                            </goals>
-                        </execution>
-                        <execution>
-                            <id>process-test-classes</id>
-                            <configuration>
-                                <sourceDirectory>${project.build.testSourceDirectory}</sourceDirectory>
-                                <configLocation>${checkstyleTestConfigLocation}</configLocation>
-                                <headerLocation>${checkstyleHeaderLocation}</headerLocation>
-                                <consoleOutput>true</consoleOutput>
-                                <failsOnError>true</failsOnError>
-                                <linkXRef>false</linkXRef>
-                            </configuration>
-                            <phase>process-test-classes</phase>
-                            <goals>
-                                <goal>checkstyle</goal>
-                            </goals>
-                        </execution>
-                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -314,7 +280,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-pmd-plugin</artifactId>
-                    <version>2.6</version>
+                    <version>${pmdPluginVersion}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -462,12 +428,74 @@
             </build>
         </profile>
         <profile>
+            <id>precommit</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <!-- Enforce Checkstyle during compilation -->
+                
+                        <!-- Strictly speaking Checkstyle should be invoked as a
+                             report during site generation. However, we want
+                             to fail the build if source code does not comply with
+                             our coding guidelines, and not at a later stage when
+                             the site is generated (which may never occur for some
+                             projects).     
+                        -->
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-checkstyle-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>process-classes</id>
+                                <configuration>
+                                    <cacheFile>${project.build.directory}/checkstyle-main-cachefile</cacheFile>
+                                    <outputFile>${project.build.directory}/checkstyle-main-result.xml</outputFile>
+                                    <configLocation>${checkstyleSourceConfigLocation}</configLocation>
+                                    <headerLocation>${checkstyleHeaderLocation}</headerLocation>
+                                    <consoleOutput>true</consoleOutput>
+                                    <failsOnError>true</failsOnError>
+                                    <linkXRef>false</linkXRef>
+                                </configuration>
+                                <phase>process-classes</phase>
+                                <goals>
+                                    <goal>checkstyle</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>process-test-classes</id>
+                                <configuration>
+                                    <cacheFile>${project.build.directory}/checkstyle-test-cachefile</cacheFile>
+                                    <outputFile>${project.build.directory}/checkstyle-test-result.xml</outputFile>
+                                    <sourceDirectory>${project.build.testSourceDirectory}</sourceDirectory>
+                                    <configLocation>${checkstyleSourceConfigLocation}</configLocation>
+                                    <suppressionsLocation>${checkstyleUnitTestSuppressionsLocation}</suppressionsLocation>
+                                    <headerLocation>${checkstyleHeaderLocation}</headerLocation>
+                                    <consoleOutput>true</consoleOutput>
+                                    <failsOnError>true</failsOnError>
+                                    <linkXRef>false</linkXRef>
+                                </configuration>
+                                <phase>process-test-classes</phase>
+                                <goals>
+                                    <goal>checkstyle</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
             <id>metrics</id>
             <properties>
                 <testReportsDirectory>${project.build.directory}/surefire-reports/cobertura</testReportsDirectory>
             </properties>
             <build>
                 <plugins>
+                    <!-- Enforce Checkstyle during compilation -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-checkstyle-plugin</artifactId>
+                    </plugin>
+                        
                     <!-- Cobertura -->
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
@@ -496,6 +524,7 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>findbugs-maven-plugin</artifactId>
+                        <version>${findbugsPluginVersion}</version>
                         <configuration>
                             <xmlOutput>true</xmlOutput>
                             <findbugsXmlOutput>true</findbugsXmlOutput>
@@ -510,6 +539,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-pmd-plugin</artifactId>
+                        <version>${pmdPluginVersion}</version>
                         <configuration>
                             <linkXref>true</linkXref>
                             <sourceEncoding>${project.build.sourceEncoding}</sourceEncoding>
@@ -518,13 +548,25 @@
                     </plugin>
 
                     <!-- CheckStyle -->
-                    <plugin>
+                    <plugin> 
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-checkstyle-plugin</artifactId>
+                        <version>${checkstylePluginVersion}</version>
                         <configuration>
                             <configLocation>${checkstyleSourceConfigLocation}</configLocation>
                             <headerLocation>${checkstyleHeaderLocation}</headerLocation>
+                            <suppressionsLocation>${checkstyleUnitTestSuppressionsLocation}</suppressionsLocation>
+                            <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                            <consoleOutput>true</consoleOutput>
+                            <linkXRef>false</linkXRef>
                         </configuration>
+                        <reportSets>
+                            <reportSet>
+                                <reports>
+                                    <report>checkstyle</report>
+                                </reports>
+                            </reportSet>
+                        </reportSets>
                     </plugin>
                 </plugins>
             </reporting>
