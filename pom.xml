@@ -139,7 +139,8 @@
         <checkstyleDocTargetConfigLocation>org/forgerock/checkstyle/check-src-doc-target.xml</checkstyleDocTargetConfigLocation>
         <checkstyleUnitTestSuppressionsLocation>org/forgerock/checkstyle/unit-test-suppressions.xml</checkstyleUnitTestSuppressionsLocation>
         <checkstyleHeaderLocation>org/forgerock/checkstyle/default-java-header</checkstyleHeaderLocation>
-                                
+        <checkstyleFailOnError>true</checkstyleFailOnError>
+
         <!-- ***************** -->
         <!-- Repository Deployment URLs -->
         <!-- ***************** -->
@@ -475,8 +476,9 @@
                                     <outputFile>${project.build.directory}/checkstyle-main-result.xml</outputFile>
                                     <configLocation>${checkstyleSourceConfigLocation}</configLocation>
                                     <headerLocation>${checkstyleHeaderLocation}</headerLocation>
-                                    <consoleOutput>true</consoleOutput>
-                                    <failsOnError>true</failsOnError>
+                                    <!-- Only output errors if we're not expecting any -->
+                                    <consoleOutput>${checkstyleFailOnError}</consoleOutput>
+                                    <failsOnError>${checkstyleFailOnError}</failsOnError>
                                     <linkXRef>false</linkXRef>
                                 </configuration>
                                 <phase>process-classes</phase>
@@ -493,8 +495,9 @@
                                     <configLocation>${checkstyleSourceConfigLocation}</configLocation>
                                     <suppressionsLocation>${checkstyleUnitTestSuppressionsLocation}</suppressionsLocation>
                                     <headerLocation>${checkstyleHeaderLocation}</headerLocation>
-                                    <consoleOutput>true</consoleOutput>
-                                    <failsOnError>true</failsOnError>
+                                    <!-- Only output errors if we're not expecting any -->
+                                    <consoleOutput>${checkstyleFailOnError}</consoleOutput>
+                                    <failsOnError>${checkstyleFailOnError}</failsOnError>
                                     <linkXRef>false</linkXRef>
                                 </configuration>
                                 <phase>process-test-classes</phase>
