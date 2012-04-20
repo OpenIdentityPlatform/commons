@@ -366,6 +366,13 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>2.11</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.forgerock</groupId>
+                            <artifactId>forgerock-build-tools</artifactId>
+                            <version>${forgerockBuildToolsVersion}</version>
+                        </dependency>
+                    </dependencies>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
