@@ -120,7 +120,10 @@
         <findbugsPluginVersion>2.3.3</findbugsPluginVersion>
         
         <!-- maven-javadoc-plugin -->
+        <javadocPluginVersion>2.8</javadocPluginVersion>
         <javadocStylesheet>org/forgerock/javadoc/javadoc.css</javadocStylesheet>
+        <javadocWindowTitle>${project.name} ${project.version} Documentation</javadocWindowTitle>
+        <javadocDocTitle>${javadocWindowTitle}</javadocDocTitle>
 
         <!-- maven-idea-plugin & maven-eclipse-plugin -->
         <downloadSources>true</downloadSources>
@@ -267,7 +270,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>2.8</version>
+                    <version>${javadocPluginVersion}</version>
                     <dependencies>
                         <dependency>
                             <groupId>org.forgerock</groupId>
@@ -278,10 +281,10 @@
                     <configuration>
                         <author>false</author>
                         <quiet>true</quiet>
-                        <header><![CDATA[<b>${project.name} ${project.version}</b>]]>
-                        </header>
-                        <footer><![CDATA[<b>${project.name} ${project.version}</b>]]>
-                        </footer>
+                        <windowtitle>${javadocWindowTitle}</windowtitle>
+                        <doctitle>${javadocDocTitle}</doctitle>
+                        <header><![CDATA[<b>${javadocDocTitle}</b>]]></header>
+                        <footer><![CDATA[<b>${javadocDocTitle}</b>]]></footer>
                         <additionalparam>-linksource</additionalparam>
                         <stylesheetfile>${javadocStylesheet}</stylesheetfile>
                     </configuration>
@@ -708,6 +711,66 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+        <profile>
+            <!--  This profile will automatically generate Javadoc for modules
+                  containing src/main/javadoc and avoids modules from having
+                  to repeat a lot of boilerplate in their pom files.
+                  
+                  Since it is not possible for reports to inherit from
+                  pluginManagement, we have to duplicate the configuration here
+                  (there are several major issues opened against Maven for this
+                  missing functionality).
+            -->
+            <id>generate-javadoc</id>
+            <activation>
+                <file>
+                    <!--  Just require presence of the directory, but don't require content -->
+                    <exists>src/main/javadoc</exists>
+                </file>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+            <reporting>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>${javadocPluginVersion}</version>
+                        <configuration>
+                            <author>false</author>
+                            <quiet>true</quiet>
+                            <windowtitle>${javadocWindowTitle}</windowtitle>
+                            <doctitle>${javadocDocTitle}</doctitle>
+                            <header><![CDATA[<b>${javadocDocTitle}</b>]]></header>
+                            <footer><![CDATA[<b>${javadocDocTitle}</b>]]></footer>
+                            <show>protected</show>
+                            <excludePackageNames>com.*</excludePackageNames>
+                            <stylesheetfile>${javadocStylesheet}</stylesheetfile>
+                        </configuration>
+                        <reportSets>
+                            <reportSet>
+                                <reports>
+                                    <report>javadoc</report>
+                                </reports>
+                            </reportSet>
+                        </reportSets>
+                    </plugin>
+                </plugins>
+            </reporting>
         </profile>
     </profiles>
 </project>
