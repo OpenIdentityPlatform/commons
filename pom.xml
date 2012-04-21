@@ -472,14 +472,11 @@
                             <execution>
                                 <id>process-classes</id>
                                 <configuration>
-                                    <cacheFile>${project.build.directory}/checkstyle-main-cachefile</cacheFile>
-                                    <outputFile>${project.build.directory}/checkstyle-main-result.xml</outputFile>
                                     <configLocation>${checkstyleSourceConfigLocation}</configLocation>
                                     <headerLocation>${checkstyleHeaderLocation}</headerLocation>
                                     <!-- Only output errors if we're not expecting any -->
                                     <consoleOutput>${checkstyleFailOnError}</consoleOutput>
                                     <failsOnError>${checkstyleFailOnError}</failsOnError>
-                                    <linkXRef>false</linkXRef>
                                 </configuration>
                                 <phase>process-classes</phase>
                                 <goals>
@@ -498,7 +495,6 @@
                                     <!-- Only output errors if we're not expecting any -->
                                     <consoleOutput>${checkstyleFailOnError}</consoleOutput>
                                     <failsOnError>${checkstyleFailOnError}</failsOnError>
-                                    <linkXRef>false</linkXRef>
                                 </configuration>
                                 <phase>process-test-classes</phase>
                                 <goals>
@@ -582,10 +578,12 @@
                         <configuration>
                             <configLocation>${checkstyleSourceConfigLocation}</configLocation>
                             <headerLocation>${checkstyleHeaderLocation}</headerLocation>
+                            <!-- Performance problem means this doesn't scale.
                             <suppressionsLocation>${checkstyleUnitTestSuppressionsLocation}</suppressionsLocation>
                             <includeTestSourceDirectory>true</includeTestSourceDirectory>
-                            <consoleOutput>true</consoleOutput>
-                            <linkXRef>false</linkXRef>
+                            -->
+                            <!-- Only output errors if we're not expecting any -->
+                            <consoleOutput>${checkstyleFailOnError}</consoleOutput>
                         </configuration>
                         <reportSets>
                             <reportSet>
