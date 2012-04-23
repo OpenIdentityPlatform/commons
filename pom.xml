@@ -470,31 +470,14 @@
                         <artifactId>maven-checkstyle-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>process-classes</id>
+                                <id>check-src-and-tests</id>
                                 <configuration>
                                     <configLocation>${checkstyleSourceConfigLocation}</configLocation>
                                     <headerLocation>${checkstyleHeaderLocation}</headerLocation>
-                                    <!-- Only output errors if we're not expecting any -->
-                                    <consoleOutput>${checkstyleFailOnError}</consoleOutput>
-                                    <failsOnError>${checkstyleFailOnError}</failsOnError>
-                                </configuration>
-                                <phase>process-classes</phase>
-                                <goals>
-                                    <goal>checkstyle</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>process-test-classes</id>
-                                <configuration>
-                                    <cacheFile>${project.build.directory}/checkstyle-test-cachefile</cacheFile>
-                                    <outputFile>${project.build.directory}/checkstyle-test-result.xml</outputFile>
-                                    <sourceDirectory>${project.build.testSourceDirectory}</sourceDirectory>
-                                    <configLocation>${checkstyleSourceConfigLocation}</configLocation>
                                     <suppressionsLocation>${checkstyleUnitTestSuppressionsLocation}</suppressionsLocation>
-                                    <headerLocation>${checkstyleHeaderLocation}</headerLocation>
+                                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
                                     <!-- Only output errors if we're not expecting any -->
                                     <consoleOutput>${checkstyleFailOnError}</consoleOutput>
-                                    <failsOnError>${checkstyleFailOnError}</failsOnError>
                                 </configuration>
                                 <phase>process-test-classes</phase>
                                 <goals>
@@ -578,10 +561,8 @@
                         <configuration>
                             <configLocation>${checkstyleSourceConfigLocation}</configLocation>
                             <headerLocation>${checkstyleHeaderLocation}</headerLocation>
-                            <!-- Performance problem means this doesn't scale.
                             <suppressionsLocation>${checkstyleUnitTestSuppressionsLocation}</suppressionsLocation>
                             <includeTestSourceDirectory>true</includeTestSourceDirectory>
-                            -->
                             <!-- Only output errors if we're not expecting any -->
                             <consoleOutput>${checkstyleFailOnError}</consoleOutput>
                         </configuration>
