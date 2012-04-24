@@ -478,6 +478,7 @@
                                     <includeTestSourceDirectory>true</includeTestSourceDirectory>
                                     <!-- Only output errors if we're not expecting any -->
                                     <consoleOutput>${checkstyleFailOnError}</consoleOutput>
+                                    <failsOnError>${checkstyleFailOnError}</failsOnError>
                                 </configuration>
                                 <phase>process-test-classes</phase>
                                 <goals>
@@ -565,6 +566,7 @@
                             <includeTestSourceDirectory>true</includeTestSourceDirectory>
                             <!-- Only output errors if we're not expecting any -->
                             <consoleOutput>${checkstyleFailOnError}</consoleOutput>
+                            <failsOnError>${checkstyleFailOnError}</failsOnError>
                         </configuration>
                         <reportSets>
                             <reportSet>
