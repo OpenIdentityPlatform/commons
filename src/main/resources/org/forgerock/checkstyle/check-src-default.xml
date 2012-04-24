@@ -321,6 +321,7 @@
     <!--  Require 4 character indent -->
     <module name="Indentation">
       <property name="caseIndent" value="0" />
+      <property name="throwsIndent" value="8" />
     </module>
     
     <!--  Require that file name corresponds to class name -->
