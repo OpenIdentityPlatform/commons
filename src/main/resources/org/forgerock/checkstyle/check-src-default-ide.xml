@@ -20,10 +20,9 @@
 <module name="Checker">
 
   <!-- 
-    This Checkstyle configuration defines a set of checks which should
-    be enabled for unit tests. It comprises of the set of checks in
-    check-src-default.xml minus the unit-test-suppressions. Although not used
-    by Maven directly, this file may be useful when configuring IDEs.
+    This Checkstyle configuration contains all the checks from
+    check-src-default.xml and, in addition, a suppression file filter
+    in order to make it easier to configure IDEs. 
   -->
   
   <!--
@@ -69,6 +68,11 @@
     <property name="influenceFormat" value="$1" />
   </module>
   
+  <!-- Pull in suppressions file for IDEs-->
+  <module name="SuppressionFilter">
+    <property name="file" value="${checkstyle.suppressions.file}"/>
+  </module>
+  
   <!--
   
       CHECKS
@@ -91,6 +95,9 @@
     <property name="format" value="\s+$" />
     <property name="message" value="Line has trailing spaces." />
   </module>
+  
+  <!-- Require package-info.java for all packages -->
+  <module name="JavadocPackage" />
 
   <!--  Use header file template passed in from Maven -->
   <module name="RegexpHeader">
@@ -106,6 +113,33 @@
     <!-- Required for suppressions -->
     <module name="FileContentsHolder" />
 
+    <!-- 
+    
+        JAVADOC COMMENTS
+    
+    -->
+
+    <!--  Require Javadoc for all types regardless of scope -->
+    <module name="JavadocType">
+      <property name="scope" value="protected" />
+    </module>
+    
+    <!--  Require valid Javadoc for all protected and public members -->
+    <module name="JavadocMethod">
+      <property name="scope" value="protected" />
+      <property name="allowUndeclaredRTE" value="true" />
+      <property name="allowThrowsTagsForSubclasses" value="true" />
+    </module>
+    <module name="JavadocVariable">
+      <property name="scope" value="protected" />
+    </module>
+    
+    <!--  If Javadoc is present then it must be valid -->
+    <module name="JavadocStyle">
+      <property name="scope" value="private" />
+      <property name="checkEmptyJavadoc" value="true" />
+    </module>
+    
     <!--
     
         NAMING CONVENTIONS
@@ -185,6 +219,18 @@
 
     <!--
     
+        MODIFIERS
+    
+    -->
+    
+    <!--  As per Sun conventions -->
+    <!-- Do we want these? They are a bit pedantic.
+    <module name="ModifierOrder" />
+    <module name="RedundantModifier" />
+    -->
+ 
+    <!--
+    
         BLOCKS
     
     -->
@@ -220,6 +266,9 @@
     <module name="EmptyStatement" />
     <module name="EqualsHashCode" />    
     <module name="IllegalInstantiation" />
+    <module name="RedundantThrows">
+      <property name="allowSubclasses" value="true" />
+    </module>
     <module name="SimplifyBooleanExpression" />
     <module name="SimplifyBooleanReturn" />
     
@@ -232,6 +281,21 @@
     <module name="PackageDeclaration" />
     <!--  Require one statement per line -->
     <module name="OneStatementPerLine" />
+
+    <!--
+    
+        CLASS DESIGN
+    
+    -->
+
+    <!--  As per Sun conventions -->
+    <module name="FinalClass" />
+    <module name="HideUtilityClassConstructor" />
+    <module name="InterfaceIsType" />
+    <module name="VisibilityModifier">
+      <property name="packageAllowed" value="true"/>
+      <property name="protectedAllowed" value="true"/>
+    </module>
     
     <!--
     
@@ -246,6 +310,8 @@
     <!--  Require 4 character indent -->
     <module name="Indentation">
       <property name="caseIndent" value="0" />
+      <!--  Uncomment when fixed in official Checkstyle -->
+      <!-- <property name="throwsIndent" value="8" />  -->
     </module>
     
     <!--  Require that file name corresponds to class name -->
