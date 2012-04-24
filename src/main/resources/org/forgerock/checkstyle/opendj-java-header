@@ -8,17 +8,16 @@
 ^\W*\(the "License"\).  You may not use this file except in compliance$
 ^\W*with the License.$
 ^\W*$
-^\W*You can obtain a copy of the license at$
-^\W*trunk/opendj3/legal-notices/CDDLv1_0.txt$
+^\W*You can obtain a copy of the license at legal-notices/CDDLv1_0.txt$
 ^\W*or http://forgerock.org/license/CDDLv1.0.html.$
 ^\W*See the License for the specific language governing permissions$
 ^\W*and limitations under the License.$
 ^\W*$
 ^\W*When distributing Covered Code, include this CDDL HEADER in each$
-^\W*file and include the License file at$
-^\W*trunk/opendj3/legal-notices/CDDLv1_0.txt.  If applicable,$
-^\W*add the following below this CDDL HEADER, with the fields enclosed$
-^\W*by brackets "\[\]" replaced with your own identifying information:$
+^\W*file and include the License file at legal-notices/CDDLv1_0.txt.$
+^\W*If applicable, add the following below this CDDL HEADER, with the$
+^\W*fields enclosed by brackets "\[\]" replaced with your own identifying$
+^\W*information:$
 ^\W*Portions Copyright \[yyyy\] \[name of copyright owner\]$
 ^\W*$
 ^\W*CDDL HEADER END$
