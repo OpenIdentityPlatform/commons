@@ -502,7 +502,7 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-checkstyle-plugin</artifactId>
                     </plugin>
-                        
+
                     <!-- Cobertura -->
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
@@ -566,7 +566,8 @@
                             <includeTestSourceDirectory>true</includeTestSourceDirectory>
                             <!-- Only output errors if we're not expecting any -->
                             <consoleOutput>${checkstyleFailOnError}</consoleOutput>
-                            <failsOnError>${checkstyleFailOnError}</failsOnError>
+                            <!-- Reports should never fail site generation -->
+                            <failsOnError>false</failsOnError>
                         </configuration>
                         <reportSets>
                             <reportSet>
