@@ -95,8 +95,8 @@ final class MessagePropertyKey implements Comparable<MessagePropertyKey> {
      *            The ordinal of the message key, or {@code -1} if none was
      *            provided.
      */
-    private MessagePropertyKey(final String description, final int ordinal) {
-        this.name = description;
+    private MessagePropertyKey(final String name, final int ordinal) {
+        this.name = name;
         this.ordinal = ordinal;
         this.startRegex = Pattern.compile(name + "[^A-Z0-9_].*");
         this.midRegex = Pattern.compile(".*[^A-Z0-9_]" + name + "[^A-Z0-9_].*");
