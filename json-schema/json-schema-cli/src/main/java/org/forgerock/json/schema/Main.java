@@ -11,12 +11,10 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
  */
 package org.forgerock.json.schema;
 
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.schema.validator.Constants;
@@ -235,7 +233,7 @@ public class Main {
         if (null != validator) {
             if (verbose) {
                 final boolean[] valid = new boolean[1];
-                validator.validate(value.getValue(), null, new ErrorHandler() {
+                validator.validate(value.getObject(), null, new ErrorHandler() {
                     @Override
                     public void error(ValidationException exception) throws SchemaException {
                         valid[0] = false;
@@ -250,7 +248,7 @@ public class Main {
                     System.out.println("OK - Object is valid!");
                 }
             } else {
-                validator.validate(value.getValue(), null, new FailFastErrorHandler());
+                validator.validate(value.getObject(), null, new FailFastErrorHandler());
                 System.out.println("OK - Object is valid!");
             }
         } else {
