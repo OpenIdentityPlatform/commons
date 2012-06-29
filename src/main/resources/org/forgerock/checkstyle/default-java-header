@@ -11,5 +11,5 @@
 ^\W*When distributing Covered Software, include this CDDL Header Notice in each file and include$
 ^\W*the License file at legal/CDDLv1\.0\.txt\. If applicable, add the following below the CDDL$
 ^\W*Header, with the fields enclosed by brackets \[\] replaced by your own identifying$
-^\W*information: "Portions Copyright(ed)? \[year\] \[name of copyright owner\]"\.$
+^\W*information: "Portions [Cc]opyright(ed)? \[year\] \[name of copyright owner\]"\.$
 ^\W*$
