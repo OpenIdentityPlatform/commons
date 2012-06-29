@@ -15,30 +15,80 @@
   Copyright © 2011-2012 ForgeRock AS. All rights reserved.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.forgerock</groupId>
-        <artifactId>forgerock-parent</artifactId>
-        <version>1.0.0</version>
+        <groupId>org.forgerock.commons</groupId>
+        <artifactId>json-ref-parent</artifactId>
+        <version>1.1.0-SNAPSHOT</version>
     </parent>
-    <groupId>org.forgerock.commons</groupId>
-    <artifactId>json-ref-parent</artifactId>
-    <version>1.1.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
-    <name>JSON Reference parent project</name>
-    <description>Parent project for the JSON Reference library</description>
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.target>1.6</maven.compiler.target>
-        <maven.compiler.source>1.6</maven.compiler.source>
-    </properties>
-    <modules>
-        <module>core</module>
-        <module>jackson</module>
-    </modules>
-    <repositories>
+    <artifactId>json-ref</artifactId>
+    <name>JSON Reference core</name>
+    <description>JSON Reference core library</description>
+    <packaging>bundle</packaging>
+    <dependencies>
+        <dependency>
+            <groupId>org.easytesting</groupId>
+            <artifactId>fest-assert</artifactId>
+            <version>1.4</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>6.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>json-fluent</artifactId>
+            <version>1.1.0</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+    <build>
+        <resources>
+            <resource>
+                <directory>${basedir}/src/main/java</directory>
+                <includes>
+                    <include>META-INF/**/*</include>
+                </includes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Export-Package>
+                            org.forgerock.json.ref;version=${project.version}
+                        </Export-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <links>
+                        <link>http://download.oracle.com/javase/1.6.0/docs/api/</link>
+                    </links>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 <!-- may-be-temporary, based-on our decisions around the content and release of forgerock-parent -->
+    <repositories>
         <repository>
             <id>forgerock-staging-repository</id>
             <name>ForgeRock Release Repository</name>
@@ -47,6 +97,6 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
-<!-- /may-be-temporary -->
     </repositories>
+<!-- /may-be-temporary -->
 </project>
