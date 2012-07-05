@@ -186,6 +186,12 @@
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-bundle-plugin</artifactId>
                     <version>2.3.7</version>
+                    <configuration>
+                        <instructions>
+                            <Implementation-Build>${ci.build.number}</Implementation-Build>
+                            <SCM-Revision>${ci.svn.revision}</SCM-Revision>
+                        </instructions>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -763,6 +769,31 @@
                     </plugin>
                 </plugins>
             </reporting>
+        </profile>
+        <profile>
+            <!-- This profile only active if the build server exports the SVN_REVISION variable -->
+            <id>ci-build</id>
+            <activation>
+                <property>
+                    <name>env.SVN_REVISION</name>
+                </property>
+            </activation>
+            <properties>
+                <ci.build.number>${env.BUILD_NUMBER}</ci.build.number>
+                <ci.svn.revision>${env.SVN_REVISION}</ci.svn.revision>
+            </properties>
+        </profile>
+        <profile>
+            <id>non-ci-build</id>
+            <activation>
+                <property>
+                    <name>!env.SVN_REVISION</name>
+                </property>
+            </activation>
+            <properties>
+                <ci.build.number>0</ci.build.number>
+                <ci.svn.revision>0</ci.svn.revision>
+            </properties>
         </profile>
     </profiles>
 </project>
