@@ -31,7 +31,7 @@
     <url>http://commons.forgerock.org/forgerock-rest</url>
     <issueManagement>
         <system>Jira</system>
-        <url>https://bugster.forgerock.org/jira/browse/COMMREST</url>
+        <url>https://bugster.forgerock.org/jira/browse/CREST</url>
     </issueManagement>
     <scm>
         <url>https://svn.forgerock.org/commons/forgerock-rest/trunk/</url>
