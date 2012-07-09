@@ -54,7 +54,7 @@ public interface PatchRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    String getId();
+    String getResourceId();
 
     /**
      * Returns the patch which should be applied to the JSON resource.
@@ -89,7 +89,7 @@ public interface PatchRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    PatchRequest setId(String id);
+    PatchRequest setResourceId(String id);
 
     /**
      * Sets the patch which should be applied to the JSON resource.
@@ -121,5 +121,5 @@ public interface PatchRequest extends Request {
      *             If this patch request does not permit changes to the version
      *             information.
      */
-    DeleteRequest setRevision(String version);
+    PatchRequest setRevision(String version);
 }

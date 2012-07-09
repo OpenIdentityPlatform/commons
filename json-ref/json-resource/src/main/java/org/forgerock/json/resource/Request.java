@@ -88,7 +88,7 @@ public interface Request {
      *         targeted, or {@code null} if the ID is not applicable (e.g. for
      *         singleton resources, certain actions, or some create requests).
      */
-    String getId();
+    String getResourceId();
 
     /**
      * Sets the name of the JSON resource component to which this request should
@@ -118,5 +118,5 @@ public interface Request {
      *             If this request does not permit changes to the JSON resource
      *             ID.
      */
-    Request setId(String id);
+    Request setResourceId(String id);
 }
