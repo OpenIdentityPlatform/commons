@@ -74,7 +74,7 @@ public interface ActionRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    String getId();
+    String getResourceId();
 
     /**
      * Returns the content of this action request. The structure of the content
@@ -82,7 +82,7 @@ public interface ActionRequest extends Request {
      *
      * @return The content of this action request.
      */
-    JsonValue getValue();
+    JsonValue getContent();
 
     /**
      * Sets the identifier of the type of operation to be performed by this
@@ -123,18 +123,18 @@ public interface ActionRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    ActionRequest setId(String id);
+    ActionRequest setResourceId(String id);
 
     /**
      * Sets the content of this action request. The structure of the content is
      * defined by the action.
      *
-     * @param value
+     * @param content
      *            The content of this action request.
      * @return This action request.
      * @throws UnsupportedOperationException
      *             If this action request does not permit changes to the
      *             content.
      */
-    ActionRequest setValue(JsonValue value);
+    ActionRequest setContent(JsonValue content);
 }
