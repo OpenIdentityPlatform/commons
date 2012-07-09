@@ -53,7 +53,7 @@ public interface ReadRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    String getId();
+    String getResourceId();
 
     /**
      * {@inheritDoc}
@@ -65,5 +65,5 @@ public interface ReadRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    ReadRequest setId(String id);
+    ReadRequest setResourceId(String id);
 }

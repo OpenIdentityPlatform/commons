@@ -194,7 +194,6 @@ public final class ContextAttribute<T> implements Comparable<ContextAttribute<?>
      * @return The attribute value.
      */
     public T get(final Context context, final T initialValue) {
-
         return asT(context.getAttribute(this, false, new FixedValueFactory<T>(initialValue)));
     }
 
