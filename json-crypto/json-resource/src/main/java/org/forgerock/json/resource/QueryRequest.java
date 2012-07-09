@@ -71,7 +71,7 @@ public interface QueryRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    String getId();
+    String getResourceId();
 
     /**
      * Returns the additional parameters which should be used to control the
@@ -136,7 +136,7 @@ public interface QueryRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    QueryRequest setId(String id);
+    QueryRequest setResourceId(String id);
 
     /**
      * Sets the query filter which will be used for selecting which JSON

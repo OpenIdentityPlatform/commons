@@ -53,7 +53,7 @@ public interface DeleteRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    String getId();
+    String getResourceId();
 
     /**
      * Returns the expected version information associated with the JSON
@@ -81,7 +81,7 @@ public interface DeleteRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    DeleteRequest setId(String id);
+    DeleteRequest setResourceId(String id);
 
     /**
      * Sets the expected version information associated with the JSON resource

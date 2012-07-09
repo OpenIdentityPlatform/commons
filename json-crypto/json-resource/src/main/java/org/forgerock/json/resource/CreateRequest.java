@@ -64,7 +64,7 @@ public interface CreateRequest extends Request {
      * should generate a resource ID on behalf of the client.
      */
     @Override
-    String getId();
+    String getResourceId();
 
     /**
      * Sets the content of the JSON resource to be created.
@@ -91,5 +91,5 @@ public interface CreateRequest extends Request {
      * should generate a resource ID on behalf of the client.
      */
     @Override
-    CreateRequest setId(String id);
+    CreateRequest setResourceId(String id);
 }

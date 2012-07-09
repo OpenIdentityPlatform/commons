@@ -55,7 +55,7 @@ public interface UpdateRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    String getId();
+    String getResourceId();
 
     /**
      * Returns the new content of the JSON resource to be replaced.
@@ -90,7 +90,7 @@ public interface UpdateRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    UpdateRequest setId(String id);
+    UpdateRequest setResourceId(String id);
 
     /**
      * Sets the new content of the JSON resource to be replaced.
