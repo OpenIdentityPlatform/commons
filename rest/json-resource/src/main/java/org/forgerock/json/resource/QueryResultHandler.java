@@ -31,8 +31,7 @@ import org.forgerock.json.resource.exception.ResourceException;
  * avoid keeping the invoking thread from dispatching to other completion
  * handlers.
  */
-public interface QueryResultHandler extends ResultHandler<Void> {
-    // FIXME: need to return a result containing the paged results cookie.
+public interface QueryResultHandler extends ResultHandler<QueryResult> {
 
     /**
      * {@inheritDoc}
@@ -55,7 +54,12 @@ public interface QueryResultHandler extends ResultHandler<Void> {
 
     /**
      * {@inheritDoc}
+     *
+     * @param result
+     *            The query result indicating that no more resources are to be
+     *            returned and, if applicable, including information which
+     *            should be used for subsequent paged results query requests.
      */
     @Override
-    void handleResult(Void result);
+    void handleResult(QueryResult result);
 }

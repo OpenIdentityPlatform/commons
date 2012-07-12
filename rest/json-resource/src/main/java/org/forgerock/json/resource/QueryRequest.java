@@ -27,8 +27,6 @@ import org.forgerock.json.fluent.JsonPointer;
  */
 public interface QueryRequest extends Request {
 
-    // TODO: paged results.
-
     /**
      * {@inheritDoc}
      */
@@ -68,10 +66,36 @@ public interface QueryRequest extends Request {
     List<JsonPointer> getFieldFilters();
 
     /**
-     * {@inheritDoc}
+     * Returns the opaque cookie which is used by the resource provider to track
+     * its position in the set of query results. Paged results will be enabled
+     * if and only if the page size is non-zero.
+     * <p>
+     * The cookie must be {@code null} in the initial query request sent by the
+     * client. For subsequent query requests the client must include the cookie
+     * returned with the previous query result, until the resource provider
+     * returns a {@code null} cookie indicating that the final page of results
+     * has been returned.
+     *
+     * @return The opaque cookie which is used by the resource provider to track
+     *         its position in the set of query results, or {@code null} if
+     *         paged results are not requested (when the page size is 0), or if
+     *         the first page of results is being requested (when the page size
+     *         is non-zero).
+     * @see #getPageSize()
      */
-    @Override
-    String getResourceId();
+    String getPagedResultsCookie();
+
+    /**
+     * Returns the requested page results page size or {@code 0} if paged
+     * results are not required. For all paged result requests other than the
+     * initial request, a cookie should be provided with the query request. See
+     * {@link #getPagedResultsCookie()} for more information.
+     *
+     * @return The requested page results page size or {@code 0} if paged
+     *         results are not required.
+     * @see #getPagedResultsCookie()
+     */
+    int getPageSize();
 
     /**
      * Returns the additional parameters which should be used to control the
@@ -100,6 +124,12 @@ public interface QueryRequest extends Request {
      *         a pre-defined query is not to be used.
      */
     String getQueryId();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    String getResourceId();
 
     /**
      * Returns the sort keys which should be used for ordering the JSON
@@ -133,10 +163,46 @@ public interface QueryRequest extends Request {
     QueryRequest setComponent(String path);
 
     /**
-     * {@inheritDoc}
+     * Sets the opaque cookie which is used by the resource provider to track
+     * its position in the set of query results. Paged results will be enabled
+     * if and only if the page size is non-zero.
+     * <p>
+     * The cookie must be {@code null} in the initial query request sent by the
+     * client. For subsequent query requests the client must include the cookie
+     * returned with the previous query result, until the resource provider
+     * returns a {@code null} cookie indicating that the final page of results
+     * has been returned.
+     *
+     * @param cookie
+     *            The opaque cookie which is used by the resource provider to
+     *            track its position in the set of query results, or
+     *            {@code null} if paged results are not requested (when the page
+     *            size is 0), or if the first page of results is being requested
+     *            (when the page size is non-zero).
+     * @return This query request.
+     * @throws UnsupportedOperationException
+     *             If this query request does not permit changes to the paged
+     *             results cookie.
+     * @see #setPageSize(int)
      */
-    @Override
-    QueryRequest setResourceId(String id);
+    QueryRequest setPagedResultsCookie(String cookie);
+
+    /**
+     * Sets the requested page results page size or {@code 0} if paged results
+     * are not required. For all paged result requests other than the initial
+     * request, a cookie should be provided with the query request. See
+     * {@link #setPagedResultsCookie(String)} for more information.
+     *
+     * @param size
+     *            The requested page results page size or {@code 0} if paged
+     *            results are not required.
+     * @return This query request.
+     * @throws UnsupportedOperationException
+     *             If this query request does not permit changes to the page
+     *             size.
+     * @see #getPagedResultsCookie()
+     */
+    QueryRequest setPageSize(int size);
 
     /**
      * Sets the query filter which will be used for selecting which JSON
@@ -165,4 +231,10 @@ public interface QueryRequest extends Request {
      *             identifier.
      */
     QueryRequest setQueryId(String id);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    QueryRequest setResourceId(String id);
 }
