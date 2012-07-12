@@ -333,6 +333,8 @@ public final class Requests {
             QueryRequest {
         private QueryFilter filter;
         private final List<SortKey> keys = new LinkedList<SortKey>();
+        private String pagedResultsCookie;
+        private int pageSize = 0;
         private final Map<String, String> parameters = new LinkedHashMap<String, String>(2);
         private String queryId;
 
@@ -346,6 +348,8 @@ public final class Requests {
             this.queryId = request.getQueryId();
             this.keys.addAll(request.getSortKeys());
             this.parameters.putAll(request.getQueryAdditionalParameters());
+            this.pageSize = request.getPageSize();
+            this.pagedResultsCookie = request.getPagedResultsCookie();
         }
 
         /**
@@ -357,6 +361,22 @@ public final class Requests {
                 this.keys.add(notNull(key));
             }
             return this;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String getPagedResultsCookie() {
+            return pagedResultsCookie;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public int getPageSize() {
+            return pageSize;
         }
 
         /**
@@ -397,6 +417,24 @@ public final class Requests {
         @Override
         public QueryRequest setAdditionalQueryParameter(final String name, final String value) {
             parameters.put(notNull(name), notNull(value));
+            return this;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public QueryRequest setPagedResultsCookie(final String cookie) {
+            this.pagedResultsCookie = cookie;
+            return this;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public QueryRequest setPageSize(final int size) {
+            this.pageSize = size;
             return this;
         }
 

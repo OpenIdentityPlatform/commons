@@ -236,7 +236,7 @@ public interface Connection extends Closeable {
      * @param results
      *            A collection into which matching resources will be added as
      *            they are received.
-     * @return The updated result collection.
+     * @return The query result.
      * @throws ResourceException
      *             If the query could not be performed.
      * @throws UnsupportedOperationException
@@ -245,7 +245,7 @@ public interface Connection extends Closeable {
      *             If this connection has already been closed, i.e. if
      *             {@code isClosed() == true}.
      */
-    <T extends Collection<? super Resource>> T query(QueryRequest request, T results)
+    <T extends Collection<? super Resource>> QueryResult query(QueryRequest request, T results)
             throws ResourceException;
 
     /**
