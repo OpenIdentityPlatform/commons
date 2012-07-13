@@ -14,9 +14,16 @@
  * Copyright © 2012 ForgeRock AS. All rights reserved.
  */
 
-package org.forgerock.json.resource;
+package org.forgerock.json.resource.provider;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.Context;
+import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResultHandler;
+import org.forgerock.json.resource.UpdateRequest;
 
 /**
  * An implementation interface for resource providers which exposes a single
@@ -29,9 +36,9 @@ import org.forgerock.json.fluent.JsonValue;
  * <li>update
  * </ul>
  * More specifically, a singleton resource cannot be created, deleted, or
- * queried a may only support a limited sub-set of actions.
+ * queried and may only support a limited sub-set of actions.
  */
-public interface SingletonResourceProvider {
+public interface ResourceSingleton {
 
     /**
      * Performs the provided
