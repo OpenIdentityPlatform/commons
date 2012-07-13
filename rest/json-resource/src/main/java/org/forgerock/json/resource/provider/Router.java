@@ -335,17 +335,18 @@ public final class Router implements ResourceProvider {
      * Registers a resource collection with this router, replacing any existing
      * registered resource containers having the same URI template.
      *
-     * @param route
+     * @param uriTemplate
      *            The URI template associated with the resource collection.
      * @param container
      *            The resource collection container.
      * @return This router.
      */
-    public Router registerResourceContainer(final String route, final ResourceCollection container) {
+    public Router registerResourceContainer(final String uriTemplate,
+            final ResourceCollection container) {
         if (container == null) {
             throw new NullPointerException();
         }
-        routes.add(new Route(new UriTemplate(route), container));
+        routes.add(new Route(new UriTemplate(uriTemplate), container));
         return this;
     }
 
