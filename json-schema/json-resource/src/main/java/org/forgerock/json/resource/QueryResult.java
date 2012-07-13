@@ -27,7 +27,7 @@ public final class QueryResult {
     private final int remainingPagedResults;
 
     /**
-     * Creates a new query result with a {@cod null} paged results cookie and no
+     * Creates a new query result with a {@code null} paged results cookie and no
      * estimate of the total number of remaining results.
      */
     public QueryResult() {
