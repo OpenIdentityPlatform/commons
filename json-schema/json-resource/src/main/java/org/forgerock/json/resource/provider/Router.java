@@ -16,12 +16,18 @@
 
 package org.forgerock.json.resource.provider;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.Context;
+import org.forgerock.json.resource.ContextAttribute;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.PatchRequest;
@@ -33,6 +39,7 @@ import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.json.resource.exception.BadRequestException;
+import org.forgerock.json.resource.exception.NotFoundException;
 import org.forgerock.json.resource.exception.ResourceException;
 
 /**
@@ -50,6 +57,39 @@ import org.forgerock.json.resource.exception.ResourceException;
  * deregistration of resource containers while the router is handling requests.
  */
 public final class Router implements ResourceProvider {
+
+    /**
+     * Contains the result of a URI template match.
+     */
+    private static final class Matcher {
+        private final boolean matches;
+        private final Map<String, String> variables;
+
+        Matcher(final boolean matches, final Map<String, String> variables) {
+            this.matches = matches;
+            this.variables = variables;
+        }
+
+        boolean isMoreSpecificThan(final Matcher matcher) {
+            if (matcher == null) {
+                return true;
+            } else {
+                return variables.size() < matcher.variables.size();
+            }
+        }
+
+        boolean matches() {
+            return matches;
+        }
+
+        Map<String, String> variables() {
+            return variables;
+        }
+    }
+
+    /**
+     * A mapping from a URI template to a resource provider implementation.
+     */
     private static final class Route {
         private final Object provider;
         private final UriTemplate template;
@@ -80,8 +120,26 @@ public final class Router implements ResourceProvider {
             return template.hashCode();
         }
 
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String toString() {
+            final StringBuilder builder = new StringBuilder();
+            builder.append('{');
+            builder.append(template);
+            builder.append(" -> ");
+            builder.append(provider);
+            builder.append('}');
+            return builder.toString();
+        }
+
         ResourceCollection getCollectionResourceProvider() {
             return (ResourceCollection) provider;
+        }
+
+        Matcher getMatcher(final String uri) {
+            return template.matcher(uri);
         }
 
         ResourceSingleton getSingletonResourceProvider() {
@@ -99,13 +157,83 @@ public final class Router implements ResourceProvider {
         COLLECTION, SINGLETON;
     }
 
+    /**
+     * A very simple URI template implementation based on RFC 6570.
+     */
     private static final class UriTemplate {
-        // FIXME: need to normalize the template string so that /users/{foo}
-        // matches /users/{bar}.
-        private final String templateString;
+        /**
+         * A parsed template component: either a variable or a literal.
+         */
+        private static final class Element {
+            private final boolean isVariable;
+            private final String value;
+
+            Element(final boolean isVariable, final String value) {
+                this.isVariable = isVariable;
+                this.value = value;
+            }
+        }
+
+        private final List<Element> elements = new LinkedList<Element>();
+        private final String normalizedTemplate;
+        private final int numVariables;
+        private final String template;
 
         UriTemplate(final String template) {
-            this.templateString = template;
+            final String t = normalizeUri(template);
+
+            this.template = t;
+            this.normalizedTemplate = t.replaceAll("\\{\\w\\}", "{x}");
+
+            // Parse the template.
+            int vcount = 0;
+            boolean isInVariable = false;
+            int elementStart = 0;
+            int lastCloseBrace = -2;
+
+            for (int i = 0; i < t.length(); i++) {
+                if (isInVariable) {
+                    final char c = template.charAt(i);
+                    if (c == '}') {
+                        if (elementStart == i) {
+                            throw new IllegalArgumentException("URI template " + template
+                                    + " contains zero-length template variable");
+                        }
+                        elements.add(new Element(true, template.substring(elementStart, i)));
+                        isInVariable = false;
+                        elementStart = i + 1;
+                        lastCloseBrace = i;
+                        vcount++;
+                    } else if (!isValidVariableCharacter(c)) {
+                        throw new IllegalArgumentException("URI template " + template
+                                + " contains an illegal character " + c + " in a template variable");
+                    } else {
+                        // Continue counting characters in variable.
+                    }
+                } else if (template.charAt(i) == '{') {
+                    if (lastCloseBrace == (i - 1)) {
+                        throw new IllegalArgumentException("URI template " + template
+                                + " contains consecutive template variables");
+                    }
+                    elements.add(new Element(false, template.substring(elementStart, i)));
+                    isInVariable = true;
+                    elementStart = i + 1;
+                } else {
+                    // Continue counting characters in literal.
+                }
+            }
+
+            if (isInVariable) {
+                // This shouldn't happen because the template always contains a
+                // trailing '/' which is not a valid variable character.
+                throw new IllegalArgumentException("URI template " + template
+                        + " contains a trailing unclosed variable");
+            } else {
+                // Add trailing literal element.
+                elements.add(new Element(false, template.substring(elementStart)));
+            }
+
+            this.numVariables = vcount;
         }
 
         @Override
@@ -113,7 +241,7 @@ public final class Router implements ResourceProvider {
             if (this == obj) {
                 return true;
             } else if (obj instanceof UriTemplate) {
-                return templateString.equals(((UriTemplate) obj).templateString);
+                return normalizedTemplate.equals(((UriTemplate) obj).normalizedTemplate);
             } else {
                 return false;
             }
@@ -121,9 +249,95 @@ public final class Router implements ResourceProvider {
 
         @Override
         public int hashCode() {
-            return templateString.hashCode();
+            return normalizedTemplate.hashCode();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String toString() {
+            return template;
+        }
+
+        Matcher matcher(final String uri) {
+            // Fast-path for cases where the template does not contain any variables.
+            if (numVariables == 0) {
+                final String value = elements.iterator().next().value;
+                if (value.equals(uri)) {
+                    return new Matcher(true, Collections.<String, String> emptyMap());
+                } else {
+                    return NO_MATCH;
+                }
+            }
+
+            // Template contains variables.
+            final String nuri = normalizeUri(uri);
+            int index = 0;
+            final Map<String, String> variables = new LinkedHashMap<String, String>(numVariables);
+            for (final Element e : elements) {
+                if (index >= nuri.length()) {
+                    // End of URI reached, but remaining template elements.
+                    return NO_MATCH;
+                }
+
+                if (e.isVariable) {
+                    // Parse variable up to next path separator.
+                    final int end = nuri.indexOf('/', index);
+                    final String field = nuri.substring(index, end);
+                    variables.put(e.value, field);
+                    index = end;
+                } else {
+                    // Parse literal content.
+                    final String remainder = nuri.substring(index);
+                    if (remainder.startsWith(e.value)) {
+                        index += e.value.length();
+                    } else {
+                        return NO_MATCH;
+                    }
+                }
+            }
+
+            if (index < nuri.length()) {
+                /*
+                 * We've reached the end of the template yet there is still some
+                 * of the URI remaining. If we were to support "starts with"
+                 * semantics then we would indicate that the template matches.
+                 */
+                return NO_MATCH;
+            }
+
+            return new Matcher(true, Collections.unmodifiableMap(variables));
+        }
+
+        // As per RFC.
+        private boolean isValidVariableCharacter(final char c) {
+            return ((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z'))
+                    || ((c >= '0') || (c <= '9')) || (c == '_');
+        }
+
+        // Ensure that URI contains a trailing '/' in order to make parsing a
+        // matching simpler.
+        private String normalizeUri(final String uri) {
+            return uri.endsWith("/") ? uri : uri + "/";
         }
     }
+
+    /**
+     * The context attribute {@code org.forgerock.json.resource.provider.Router}
+     * whose value is a {@code Map} containing the parsed URI template fields,
+     * keyed on the URI template field name. This context attribute will be
+     * added to the context once a request has been routed.
+     */
+    public static final ContextAttribute<Map<String, String>> URI_TEMPLATE_FIELDS =
+            new ContextAttribute<Map<String, String>>(Router.class, Collections
+                    .<String, String> emptyMap());
+
+    /**
+     * Cached Matcher used for failed match attempts.
+     */
+    private static final Matcher NO_MATCH = new Matcher(false, Collections
+            .<String, String> emptyMap());
 
     // The registered set of routes.
     private final Set<Route> routes = new CopyOnWriteArraySet<Route>();
@@ -357,7 +571,7 @@ public final class Router implements ResourceProvider {
      * @param uriTemplate
      *            The URI template associated with the singleton resource.
      * @param container
-     *            The singleton resource provider.
+     *            The singleton resource container.
      * @return This router.
      */
     public Router registerResourceContainer(final String uriTemplate,
@@ -367,6 +581,26 @@ public final class Router implements ResourceProvider {
         }
         routes.add(new Route(new UriTemplate(uriTemplate), container));
         return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append('[');
+        boolean isFirst = true;
+        for (final Route route : routes) {
+            if (isFirst) {
+                isFirst = false;
+            } else {
+                builder.append(", ");
+            }
+            builder.append(route);
+        }
+        builder.append(']');
+        return builder.toString();
     }
 
     /**
@@ -405,10 +639,23 @@ public final class Router implements ResourceProvider {
 
     private Route findMatchingRoute(final Context context, final Request request)
             throws ResourceException {
-        // TODO: find best match route
-        // TODO: throw exception if no match is found
-        // TODO: update context with template variables
-        return null;
+        Matcher bestMatcher = null;
+        Route bestRoute = null;
+
+        for (final Route route : routes) {
+            final Matcher matcher = route.getMatcher(request.getComponent());
+            if (matcher.matches() && matcher.isMoreSpecificThan(bestMatcher)) {
+                bestMatcher = matcher;
+                bestRoute = route;
+            }
+        }
+        if (bestMatcher != null) {
+            URI_TEMPLATE_FIELDS.set(context, bestMatcher.variables());
+            return bestRoute;
+        }
+
+        // TODO: i18n
+        throw new NotFoundException(String.format("Resource %s not found", request.getComponent()));
     }
 
     private ResourceException newBadRequestException(final String fs, final Object... args) {

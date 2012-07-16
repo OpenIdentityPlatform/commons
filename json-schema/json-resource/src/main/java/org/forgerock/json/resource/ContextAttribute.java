@@ -81,6 +81,44 @@ public final class ContextAttribute<T> implements Comparable<ContextAttribute<?>
     private final Factory<T> initialValueFactory;
 
     /**
+     * Creates a new context attribute with the provided class name and no
+     * initial value.
+     *
+     * @param clazz
+     *            The class whose name will be used as the attribute ID.
+     */
+    public ContextAttribute(final Class<?> clazz) {
+        this(clazz.getName());
+    }
+
+    /**
+     * Creates a new context attribute with the provided class name and initial
+     * value.
+     *
+     * @param clazz
+     *            The class whose name will be used as the attribute ID.
+     * @param initialValueFactory
+     *            A factory which will be used to lazily initialize the
+     *            attribute on demand.
+     */
+    public ContextAttribute(final Class<?> clazz, final Factory<T> initialValueFactory) {
+        this(clazz.getName(), initialValueFactory);
+    }
+
+    /**
+     * Creates a new context attribute with the provided class name and initial
+     * value.
+     *
+     * @param clazz
+     *            The class whose name will be used as the attribute ID.
+     * @param initialValue
+     *            The initial value for the attribute.
+     */
+    public ContextAttribute(final Class<?> clazz, final T initialValue) {
+        this(clazz.getName(), initialValue);
+    }
+
+    /**
      * Creates a new context attribute with the provided ID and no initial
      * value.
      *
