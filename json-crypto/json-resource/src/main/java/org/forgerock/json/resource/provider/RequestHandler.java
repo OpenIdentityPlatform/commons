@@ -56,7 +56,7 @@ import org.forgerock.json.resource.UpdateRequest;
  * failure on the result handler; i.e. they must catch all exceptions and set a
  * failure.
  */
-public interface ResourceProvider {
+public interface RequestHandler {
 
     /**
      * Handles performing an action on a resource, and optionally returns an
