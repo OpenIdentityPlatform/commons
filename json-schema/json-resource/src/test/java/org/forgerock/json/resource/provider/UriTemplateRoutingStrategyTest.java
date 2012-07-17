@@ -157,6 +157,21 @@ public final class UriTemplateRoutingStrategyTest {
     }
 
     @Test
+    public void testMultipleRoutePrecedence() throws ResourceException {
+        UriTemplateRoutingStrategy s = new UriTemplateRoutingStrategy();
+        SingletonResourceProvider p1 = mock(SingletonResourceProvider.class);
+        SingletonResourceProvider p2 = mock(SingletonResourceProvider.class);
+        s.register("/object", p1);
+        s.register("/{objectId}", p2);
+
+        Context c = newRootContext();
+        Request r1 = newReadRequest("/object");
+        assertThat(s.routeRequest(c, r1).asSingleton()).isSameAs(p1);
+        Request r2 = newReadRequest("/thing");
+        assertThat(s.routeRequest(c, r2).asSingleton()).isSameAs(p2);
+    }
+
+    @Test
     public void testRouteReregistration1() throws ResourceException {
         UriTemplateRoutingStrategy s = new UriTemplateRoutingStrategy();
         SingletonResourceProvider p1 = mock(SingletonResourceProvider.class);
