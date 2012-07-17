@@ -214,6 +214,7 @@ public interface Connection extends Closeable {
      * @param handler
      *            A result handler which can be used to process matching
      *            resources as they are received.
+     * @return The query result.
      * @throws ResourceException
      *             If the query could not be performed.
      * @throws UnsupportedOperationException
@@ -222,7 +223,7 @@ public interface Connection extends Closeable {
      *             If this connection has already been closed, i.e. if
      *             {@code isClosed() == true}.
      */
-    void query(QueryRequest request, QueryResultHandler handler) throws ResourceException;
+    QueryResult query(QueryRequest request, QueryResultHandler handler) throws ResourceException;
 
     /**
      * Searches for all JSON resources matching a user specified set of
@@ -267,7 +268,7 @@ public interface Connection extends Closeable {
      *             If this connection has already been closed, i.e. if
      *             {@code isClosed() == true}.
      */
-    FutureResult<Void> queryAsync(QueryRequest request, QueryResultHandler handler);
+    FutureResult<QueryResult> queryAsync(QueryRequest request, QueryResultHandler handler);
 
     /**
      * Reads a JSON resource.
