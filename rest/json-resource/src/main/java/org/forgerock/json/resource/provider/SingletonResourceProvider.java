@@ -38,11 +38,11 @@ import org.forgerock.json.resource.UpdateRequest;
  * More specifically, a singleton resource cannot be created, deleted, or
  * queried and may only support a limited sub-set of actions.
  */
-public interface ResourceSingleton {
+public interface SingletonResourceProvider {
 
     /**
      * Performs the provided
-     * {@link ResourceProvider#action(Context, ActionRequest, ResultHandler)
+     * {@link RequestHandler#action(Context, ActionRequest, ResultHandler)
      * action} against the single resource instance.
      *
      * @param context
@@ -51,12 +51,12 @@ public interface ResourceSingleton {
      *            The action request. The resource ID will be {@code null}.
      * @param handler
      *            The result handler to be notified on completion.
-     * @see ResourceProvider#action(Context, ActionRequest, ResultHandler)
+     * @see RequestHandler#action(Context, ActionRequest, ResultHandler)
      */
     void actionInstance(Context context, ActionRequest request, ResultHandler<JsonValue> handler);
 
     /**
-     * {@link ResourceProvider#patch(Context, PatchRequest, ResultHandler)
+     * {@link RequestHandler#patch(Context, PatchRequest, ResultHandler)
      * Patches} the single resource instance.
      *
      * @param context
@@ -65,12 +65,12 @@ public interface ResourceSingleton {
      *            The patch request. The resource ID will be {@code null}.
      * @param handler
      *            The result handler to be notified on completion.
-     * @see ResourceProvider#patch(Context, PatchRequest, ResultHandler)
+     * @see RequestHandler#patch(Context, PatchRequest, ResultHandler)
      */
     void patchInstance(Context context, PatchRequest request, ResultHandler<Resource> handler);
 
     /**
-     * {@link ResourceProvider#read(Context, ReadRequest, ResultHandler) Reads}
+     * {@link RequestHandler#read(Context, ReadRequest, ResultHandler) Reads}
      * the single resource instance.
      *
      * @param context
@@ -79,12 +79,12 @@ public interface ResourceSingleton {
      *            The read request. The resource ID will be {@code null}.
      * @param handler
      *            The result handler to be notified on completion.
-     * @see ResourceProvider#read(Context, ReadRequest, ResultHandler)
+     * @see RequestHandler#read(Context, ReadRequest, ResultHandler)
      */
     void readInstance(Context context, ReadRequest request, ResultHandler<Resource> handler);
 
     /**
-     * {@link ResourceProvider#update(Context, UpdateRequest, ResultHandler)
+     * {@link RequestHandler#update(Context, UpdateRequest, ResultHandler)
      * Updates} the single resource instance.
      *
      * @param context
@@ -93,7 +93,7 @@ public interface ResourceSingleton {
      *            The update request. The resource ID will be {@code null}.
      * @param handler
      *            The result handler to be notified on completion.
-     * @see ResourceProvider#update(Context, UpdateRequest, ResultHandler)
+     * @see RequestHandler#update(Context, UpdateRequest, ResultHandler)
      */
     void updateInstance(Context context, UpdateRequest request, ResultHandler<Resource> handler);
 
