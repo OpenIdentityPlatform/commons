@@ -18,7 +18,6 @@ package org.forgerock.json.resource;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.exception.ResourceException;
 import org.forgerock.json.resource.provider.RequestHandler;
-import org.forgerock.util.Factory;
 
 /**
  * This class contains methods for creating and manipulating connection
@@ -28,94 +27,96 @@ public final class Connections {
 
     // Internal connection implementation.
     private static final class InternalConnection extends AbstractAsynchronousConnection {
-        private final Factory<Context> contextFactory;
+        private volatile boolean isClosed = false;
         private final RequestHandler requestHandler;
 
-        private InternalConnection(final RequestHandler handler,
-                final Factory<Context> contextFactory) {
+        private InternalConnection(final RequestHandler handler) {
             this.requestHandler = handler;
-            this.contextFactory = contextFactory;
         }
 
         @Override
-        public FutureResult<JsonValue> actionAsync(final ActionRequest request,
-                final ResultHandler<JsonValue> handler) {
+        public FutureResult<JsonValue> actionAsync(final Context context,
+                final ActionRequest request, final ResultHandler<JsonValue> handler) {
+            checkConnectionState();
             final FutureResultHandler<JsonValue> future =
                     new FutureResultHandler<JsonValue>(handler);
-            final Context context = contextFactory.newInstance();
             requestHandler.action(context, request, future);
             return future;
         }
 
         @Override
         public void close() {
-            // No implementation required.
+            isClosed = true;
         }
 
         @Override
-        public FutureResult<Resource> createAsync(final CreateRequest request,
-                final ResultHandler<Resource> handler) {
+        public FutureResult<Resource> createAsync(final Context context,
+                final CreateRequest request, final ResultHandler<Resource> handler) {
+            checkConnectionState();
             final FutureResultHandler<Resource> future = new FutureResultHandler<Resource>(handler);
-            final Context context = contextFactory.newInstance();
             requestHandler.create(context, request, future);
             return future;
         }
 
         @Override
-        public FutureResult<Resource> deleteAsync(final DeleteRequest request,
-                final ResultHandler<Resource> handler) {
+        public FutureResult<Resource> deleteAsync(final Context context,
+                final DeleteRequest request, final ResultHandler<Resource> handler) {
+            checkConnectionState();
             final FutureResultHandler<Resource> future = new FutureResultHandler<Resource>(handler);
-            final Context context = contextFactory.newInstance();
             requestHandler.delete(context, request, future);
             return future;
         }
 
         @Override
         public boolean isClosed() {
-            // Cannot be closed.
-            return false;
+            return isClosed;
         }
 
         @Override
         public boolean isValid() {
-            // Always valid.
-            return true;
+            return !isClosed;
         }
 
         @Override
-        public FutureResult<Resource> patchAsync(final PatchRequest request,
+        public FutureResult<Resource> patchAsync(final Context context, final PatchRequest request,
                 final ResultHandler<Resource> handler) {
+            checkConnectionState();
             final FutureResultHandler<Resource> future = new FutureResultHandler<Resource>(handler);
-            final Context context = contextFactory.newInstance();
             requestHandler.patch(context, request, future);
             return future;
         }
 
         @Override
-        public FutureResult<QueryResult> queryAsync(final QueryRequest request,
-                final QueryResultHandler handler) {
+        public FutureResult<QueryResult> queryAsync(final Context context,
+                final QueryRequest request, final QueryResultHandler handler) {
+            checkConnectionState();
             final FutureQueryResultHandler future = new FutureQueryResultHandler(handler);
-            final Context context = contextFactory.newInstance();
             requestHandler.query(context, request, future);
             return future;
         }
 
         @Override
-        public FutureResult<Resource> readAsync(final ReadRequest request,
+        public FutureResult<Resource> readAsync(final Context context, final ReadRequest request,
                 final ResultHandler<Resource> handler) {
+            checkConnectionState();
             final FutureResultHandler<Resource> future = new FutureResultHandler<Resource>(handler);
-            final Context context = contextFactory.newInstance();
             requestHandler.read(context, request, future);
             return future;
         }
 
         @Override
-        public FutureResult<Resource> updateAsync(final UpdateRequest request,
-                final ResultHandler<Resource> handler) {
+        public FutureResult<Resource> updateAsync(final Context context,
+                final UpdateRequest request, final ResultHandler<Resource> handler) {
+            checkConnectionState();
             final FutureResultHandler<Resource> future = new FutureResultHandler<Resource>(handler);
-            final Context context = contextFactory.newInstance();
             requestHandler.update(context, request, future);
             return future;
+        }
+
+        private void checkConnectionState() {
+            if (isClosed()) {
+                throw new IllegalStateException("Connection already closed");
+            }
         }
 
     }
@@ -144,93 +145,39 @@ public final class Connections {
         }
     }
 
+    /**
+     * Creates a new connection to a {@link RequestHandler}.
+     *
+     * @param handler
+     *            The request handler to which client requests should be
+     *            forwarded.
+     * @return The new internal connection.
+     * @throws NullPointerException
+     *             If {@code handler} was {@code null}.
+     */
+    public static Connection newInternalConnection(final RequestHandler handler) {
+        return new InternalConnection(handler);
+    }
+
+    /**
+     * Creates a new connection factory which binds internal client connections
+     * to {@link RequestHandler}s.
+     *
+     * @param handler
+     *            The request handler to which client requests should be
+     *            forwarded.
+     * @return The new internal connection factory.
+     * @throws NullPointerException
+     *             If {@code handler} was {@code null}.
+     */
+    public static ConnectionFactory newInternalConnectionFactory(final RequestHandler handler) {
+        final Connection connection = newInternalConnection(handler);
+        return new InternalConnectionFactory(connection);
+    }
+
     // Prevent instantiation.
     private Connections() {
         // Nothing to do.
-    }
-
-    /**
-     * Creates a new connection to a {@link RequestHandler}.
-     *
-     * @param handler
-     *            The request handler to which client requests should be
-     *            forwarded.
-     * @param context
-     *            The request context which should be passed to the request
-     *            handler with each request.
-     * @return The new internal connection.
-     * @throws NullPointerException
-     *             If {@code handler} or {@code context} was {@code null}.
-     */
-    public static Connection newInternalConnection(final RequestHandler handler,
-            final Context context) {
-        final Factory<Context> contextFactory = new Factory<Context>() {
-            @Override
-            public Context newInstance() {
-                return context;
-            }
-        };
-        return newInternalConnection(handler, contextFactory);
-    }
-
-    /**
-     * Creates a new connection to a {@link RequestHandler}.
-     *
-     * @param handler
-     *            The request handler to which client requests should be
-     *            forwarded.
-     * @param contextFactory
-     *            A factory which should be used to create a new context for
-     *            each request.
-     * @return The new internal connection.
-     * @throws NullPointerException
-     *             If {@code handler} or {@code contextFactory} was {@code null}
-     *             .
-     */
-    public static Connection newInternalConnection(final RequestHandler handler,
-            final Factory<Context> contextFactory) {
-        return new InternalConnection(handler, contextFactory);
-    }
-
-    /**
-     * Creates a new connection factory which binds internal client connections
-     * to {@link RequestHandler}s.
-     *
-     * @param handler
-     *            The request handler to which client requests should be
-     *            forwarded.
-     * @param context
-     *            The request context which should be passed to the request
-     *            handler with each request.
-     * @return The new internal connection factory.
-     * @throws NullPointerException
-     *             If {@code handler} or {@code context} was {@code null}.
-     */
-    public static ConnectionFactory newInternalConnectionFactory(final RequestHandler handler,
-            final Context context) {
-        final Connection connection = newInternalConnection(handler, context);
-        return new InternalConnectionFactory(connection);
-    }
-
-    /**
-     * Creates a new connection factory which binds internal client connections
-     * to {@link RequestHandler}s.
-     *
-     * @param handler
-     *            The request handler to which client requests should be
-     *            forwarded.
-     * @param contextFactory
-     *            A factory which should be used to create a new context for
-     *            each request.
-     * @return The new internal connection factory.
-     * @throws NullPointerException
-     *             If {@code handler} or {@code contextFactory} was {@code null}
-     *             .
-     */
-    public static ConnectionFactory newInternalConnectionFactory(final RequestHandler handler,
-            final Factory<Context> contextFactory) {
-        final Connection connection = newInternalConnection(handler, contextFactory);
-        return new InternalConnectionFactory(connection);
     }
 
 }

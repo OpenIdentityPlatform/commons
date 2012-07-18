@@ -34,67 +34,9 @@ public abstract class AbstractAsynchronousConnection implements Connection {
     }
 
     @Override
-    public JsonValue action(final ActionRequest request) throws ResourceException {
-        final FutureResult<JsonValue> future = actionAsync(request, null);
-        try {
-            return future.get();
-        } catch (final InterruptedException e) {
-            throw interrupted(e);
-        } finally {
-            // Cancel the request if it hasn't completed.
-            future.cancel(false);
-        }
-    }
-
-    @Override
-    public Resource create(final CreateRequest request) throws ResourceException {
-        final FutureResult<Resource> future = createAsync(request, null);
-        try {
-            return future.get();
-        } catch (final InterruptedException e) {
-            throw interrupted(e);
-        } finally {
-            // Cancel the request if it hasn't completed.
-            future.cancel(false);
-        }
-    }
-
-    @Override
-    public Resource delete(final DeleteRequest request) throws ResourceException {
-        final FutureResult<Resource> future = deleteAsync(request, null);
-        try {
-            return future.get();
-        } catch (final InterruptedException e) {
-            throw interrupted(e);
-        } finally {
-            // Cancel the request if it hasn't completed.
-            future.cancel(false);
-        }
-    }
-
-    // Handle thread interruption.
-    private ResourceException interrupted(final InterruptedException e) {
-        // TODO: i18n?
-        return new ServiceUnavailableException("Client thread interrupted", e);
-    }
-
-    @Override
-    public Resource patch(final PatchRequest request) throws ResourceException {
-        final FutureResult<Resource> future = patchAsync(request, null);
-        try {
-            return future.get();
-        } catch (final InterruptedException e) {
-            throw interrupted(e);
-        } finally {
-            // Cancel the request if it hasn't completed.
-            future.cancel(false);
-        }
-    }
-
-    @Override
-    public QueryResult query(final QueryRequest request, final QueryResultHandler handler)
+    public JsonValue action(final Context context, final ActionRequest request)
             throws ResourceException {
-        final FutureResult<QueryResult> future = queryAsync(request, handler);
+        final FutureResult<JsonValue> future = actionAsync(context, request, null);
         try {
             return future.get();
         } catch (final InterruptedException e) {
@@ -106,8 +48,64 @@ public abstract class AbstractAsynchronousConnection implements Connection {
     }
 
     @Override
-    public <T extends Collection<? super Resource>> QueryResult query(final QueryRequest request,
-            final T results) throws ResourceException {
+    public Resource create(final Context context, final CreateRequest request)
+            throws ResourceException {
+        final FutureResult<Resource> future = createAsync(context, request, null);
+        try {
+            return future.get();
+        } catch (final InterruptedException e) {
+            throw interrupted(e);
+        } finally {
+            // Cancel the request if it hasn't completed.
+            future.cancel(false);
+        }
+    }
+
+    @Override
+    public Resource delete(final Context context, final DeleteRequest request)
+            throws ResourceException {
+        final FutureResult<Resource> future = deleteAsync(context, request, null);
+        try {
+            return future.get();
+        } catch (final InterruptedException e) {
+            throw interrupted(e);
+        } finally {
+            // Cancel the request if it hasn't completed.
+            future.cancel(false);
+        }
+    }
+
+    @Override
+    public Resource patch(final Context context, final PatchRequest request)
+            throws ResourceException {
+        final FutureResult<Resource> future = patchAsync(context, request, null);
+        try {
+            return future.get();
+        } catch (final InterruptedException e) {
+            throw interrupted(e);
+        } finally {
+            // Cancel the request if it hasn't completed.
+            future.cancel(false);
+        }
+    }
+
+    @Override
+    public QueryResult query(final Context context, final QueryRequest request,
+            final QueryResultHandler handler) throws ResourceException {
+        final FutureResult<QueryResult> future = queryAsync(context, request, handler);
+        try {
+            return future.get();
+        } catch (final InterruptedException e) {
+            throw interrupted(e);
+        } finally {
+            // Cancel the request if it hasn't completed.
+            future.cancel(false);
+        }
+    }
+
+    @Override
+    public <T extends Collection<? super Resource>> QueryResult query(final Context context,
+            final QueryRequest request, final T results) throws ResourceException {
         final QueryResultHandler handler = new QueryResultHandler() {
 
             @Override
@@ -126,12 +124,12 @@ public abstract class AbstractAsynchronousConnection implements Connection {
                 // Ignore - handled by future.
             }
         };
-        return query(request, handler);
+        return query(context, request, handler);
     }
 
     @Override
-    public Resource read(final ReadRequest request) throws ResourceException {
-        final FutureResult<Resource> future = readAsync(request, null);
+    public Resource read(final Context context, final ReadRequest request) throws ResourceException {
+        final FutureResult<Resource> future = readAsync(context, request, null);
         try {
             return future.get();
         } catch (final InterruptedException e) {
@@ -143,8 +141,9 @@ public abstract class AbstractAsynchronousConnection implements Connection {
     }
 
     @Override
-    public Resource update(final UpdateRequest request) throws ResourceException {
-        final FutureResult<Resource> future = updateAsync(request, null);
+    public Resource update(final Context context, final UpdateRequest request)
+            throws ResourceException {
+        final FutureResult<Resource> future = updateAsync(context, request, null);
         try {
             return future.get();
         } catch (final InterruptedException e) {
@@ -153,6 +152,12 @@ public abstract class AbstractAsynchronousConnection implements Connection {
             // Cancel the request if it hasn't completed.
             future.cancel(false);
         }
+    }
+
+    // Handle thread interruption.
+    private ResourceException interrupted(final InterruptedException e) {
+        // TODO: i18n?
+        return new ServiceUnavailableException("Client thread interrupted", e);
     }
 
 }
