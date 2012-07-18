@@ -133,6 +133,14 @@ public final class Requests {
          * {@inheritDoc}
          */
         @Override
+        public <R, P> R accept(final RequestVisitor<R, P> v, final P p) {
+            return v.visitActionRequest(p, this);
+        };
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
         public String getActionId() {
             return actionId;
         }
@@ -207,6 +215,14 @@ public final class Requests {
          * {@inheritDoc}
          */
         @Override
+        public <R, P> R accept(final RequestVisitor<R, P> v, final P p) {
+            return v.visitCreateRequest(p, this);
+        };
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
         public JsonValue getContent() {
             return content;
         }
@@ -242,6 +258,14 @@ public final class Requests {
             super(request);
             this.version = request.getRevision();
         }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public <R, P> R accept(final RequestVisitor<R, P> v, final P p) {
+            return v.visitDeleteRequest(p, this);
+        };
 
         /**
          * {@inheritDoc}
@@ -284,6 +308,14 @@ public final class Requests {
             this.patch = request.getPatch(); // FIXME: is Patch immutable?
             this.version = request.getRevision();
         }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public <R, P> R accept(final RequestVisitor<R, P> v, final P p) {
+            return v.visitPatchRequest(p, this);
+        };
 
         /**
          * {@inheritDoc}
@@ -351,6 +383,14 @@ public final class Requests {
             this.pageSize = request.getPageSize();
             this.pagedResultsCookie = request.getPagedResultsCookie();
         }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public <R, P> R accept(final RequestVisitor<R, P> v, final P p) {
+            return v.visitQueryRequest(p, this);
+        };
 
         /**
          * {@inheritDoc}
@@ -481,6 +521,14 @@ public final class Requests {
          * {@inheritDoc}
          */
         @Override
+        public <R, P> R accept(final RequestVisitor<R, P> v, final P p) {
+            return v.visitReadRequest(p, this);
+        };
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
         protected ReadRequest getThis() {
             return this;
         }
@@ -501,6 +549,14 @@ public final class Requests {
             this.version = request.getRevision();
             this.content = copyJsonValue(request.getNewContent());
         }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public <R, P> R accept(final RequestVisitor<R, P> v, final P p) {
+            return v.visitUpdateRequest(p, this);
+        };
 
         /**
          * {@inheritDoc}
