@@ -21,11 +21,10 @@ import static org.forgerock.json.resource.ContextAttribute.PARENT;
 import static org.forgerock.json.resource.ContextAttribute.TYPE;
 
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.util.Factory;
 
 /**
@@ -35,16 +34,12 @@ import org.forgerock.util.Factory;
  * time-stamp information, HTTP headers, etc using {@code ContextAttributes}.
  */
 public final class Context {
-    // TODO: methods for determining whether or not the request has been
-    // cancelled?
-
-    private static final class ValueHolder {
-        private final Object value;
-
-        private ValueHolder(final Object value) {
-            this.value = value;
-        }
-    }
+    /*
+     * TODO: do we need to synchronize access to the underlying attribute map?
+     * Doing so would preclude us from sharing the map when converting to and
+     * from a JSON value, since the JSON value will not synchronize access. One
+     * possibility is to use a CHM.
+     */
 
     /**
      * Creates a new context whose {@link ContextAttribute#TYPE TYPE} is
@@ -71,33 +66,39 @@ public final class Context {
         return new Context("root", id, null);
     }
 
-    private final Map<ContextAttribute<?>, ValueHolder> attributes =
-            new LinkedHashMap<ContextAttribute<?>, ValueHolder>(4);
+    /**
+     * Creates a new context using the provided JSON representation. The JSON
+     * representation of a context is typically generated using the method
+     * {@link #toJsonValue()}.
+     * <p>
+     * The returned context will share the same underlying {@code Map} as the
+     * provided JSON value, so subsequent changes to either object will be
+     * reflected in the other.
+     * <p>
+     * <b>NOTE:</b> if the provided JSON content is not a valid context then
+     * subsequent attempts to access context attributes may fail unpredictably,
+     * usually with a {@code ClassCastException}.
+     *
+     * @param json
+     *            The JSON representation of the context to be created.
+     * @return A new context whose content is the provided JSON representation.
+     */
+    public static Context valueOf(final JsonValue json) {
+        return new Context(json.asMap());
+    }
+
+    private final Map<String, Object> attributes;
+
+    private Context(final Map<String, Object> attributes) {
+        this.attributes = attributes;
+    }
 
     private Context(final String type, final String id, final Context parent) {
+        this.attributes = new LinkedHashMap<String, Object>(3);
+
         TYPE.set(this, type);
         ID.set(this, id);
         PARENT.set(this, parent);
-    }
-
-    /**
-     * Returns a set containing a copy of the attributes associated with this
-     * context. Subsequent changes to the set of attributes associated with this
-     * context will not be reflected in the returned set.
-     * <p>
-     * This method may be used in order to serialize this context.
-     * <p>
-     * <b>NOTE:</b> The returned set of attributes will include the
-     * {@link ContextAttribute#TYPE TYPE}, {@link ContextAttribute#ID ID}, and
-     * {@link ContextAttribute#PARENT PARENT}, if present.
-     *
-     * @return A set containing a copy of the attributes associated with this
-     *         context.
-     */
-    public Set<ContextAttribute<?>> getAttributes() {
-        synchronized (attributes) {
-            return new LinkedHashSet<ContextAttribute<?>>(attributes.keySet());
-        }
     }
 
     /**
@@ -168,6 +169,36 @@ public final class Context {
     }
 
     /**
+     * Returns a JSON value whose content is the set of attributes contained
+     * within this context.
+     * <p>
+     * The returned JSON value will share the same underlying {@code Map} as
+     * this context, so subsequent changes to either object will be reflected in
+     * the other.
+     * <p>
+     * The returned JSON value may be converted back into a context using the
+     * factory method {@link #valueOf(JsonValue)}.
+     *
+     * @return A JSON value whose content is the set of attributes contained
+     *         within this context.
+     */
+    public JsonValue toJsonValue() {
+        return new JsonValue(attributes);
+    }
+
+    /**
+     * Returns the {@code String} representation of this context. The string
+     * representation will be computed as the JSON representation of the
+     * attributes contained within this context.
+     *
+     * @return The {@code String} representation of this context.
+     */
+    @Override
+    public String toString() {
+        return new JsonValue(attributes).toString();
+    }
+
+    /**
      * Queries this context for the provided attribute, searching the parents if
      * requested, and optionally initializing the attribute if it was not found.
      *
@@ -185,22 +216,25 @@ public final class Context {
      */
     <T> Object getAttribute(final ContextAttribute<T> attribute, final boolean checkParent,
             final Factory<T> initialValueFactory) {
-        // Fast-path: assume that the attribute is present in this context.
-        synchronized (attributes) {
-            final ValueHolder vh = attributes.get(attribute);
-            if (vh != null) {
-                return vh.value;
-            }
+        final String id = attribute.id();
+
+        // Fast-path: assume that the attribute is present and non-null in this context.
+        final Object value = attributes.get(id);
+        if (value != null) {
+            return value;
+        }
+
+        // Attribute may be present, but null.
+        if (attributes.containsKey(id)) {
+            return null;
         }
 
         // Search parents if requested.
         if (checkParent) {
             for (Context parent = getParent(); parent != null; parent = parent.getParent()) {
-                synchronized (parent.attributes) {
-                    final ValueHolder vh = parent.attributes.get(attribute);
-                    if (vh != null) {
-                        return vh.value;
-                    }
+                // Fast-path: assume that the attribute is not present.
+                if (parent.attributes.containsKey(id)) {
+                    return parent.attributes.get(id);
                 }
             }
         }
@@ -208,14 +242,9 @@ public final class Context {
         // The attribute was not present in this context or in the parents
         // (if searched), so initialize it if requested.
         if (initialValueFactory != null) {
-            synchronized (attributes) {
-                ValueHolder vh = attributes.get(attribute);
-                if (vh == null) {
-                    vh = new ValueHolder(initialValueFactory.newInstance());
-                    attributes.put(attribute, vh);
-                }
-                return vh.value;
-            }
+            final Object newValue = initialValueFactory.newInstance();
+            attributes.put(id, newValue);
+            return newValue;
         }
 
         // Not present.
@@ -230,10 +259,7 @@ public final class Context {
      * @return The removed attribute value or {@code null} if it was not found.
      */
     Object removeAttribute(final ContextAttribute<?> attribute) {
-        synchronized (attributes) {
-            final ValueHolder vh = attributes.remove(attribute);
-            return vh != null ? vh.value : null;
-        }
+        return attributes.remove(attribute.id());
     }
 
     /**
@@ -247,9 +273,6 @@ public final class Context {
      *         beforehand.
      */
     Object setAttribute(final ContextAttribute<?> attribute, final Object newValue) {
-        synchronized (attributes) {
-            final ValueHolder vh = attributes.put(attribute, new ValueHolder(newValue));
-            return vh != null ? vh.value : null;
-        }
+        return attributes.put(attribute.id(), newValue);
     }
 }
