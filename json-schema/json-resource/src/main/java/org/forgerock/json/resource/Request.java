@@ -32,6 +32,22 @@ public interface Request {
     // TODO: include support for something similar to LDAP controls?
 
     /**
+     * Applies a {@code RequestVisitor} to this {@code Request}.
+     *
+     * @param <R>
+     *            The return type of the visitor's methods.
+     * @param <P>
+     *            The type of the additional parameters to the visitor's
+     *            methods.
+     * @param v
+     *            The request visitor.
+     * @param p
+     *            Optional additional visitor parameter.
+     * @return A result as specified by the visitor.
+     */
+    <R, P> R accept(final RequestVisitor<R, P> v, final P p);
+
+    /**
      * Adds one or more fields which should be included with each JSON resource
      * returned by this request.
      *
