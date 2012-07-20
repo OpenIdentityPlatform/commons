@@ -52,7 +52,7 @@ public final class Router implements RequestHandler {
      * {@inheritDoc}
      */
     @Override
-    public void action(final Context context, final ActionRequest request,
+    public void handleAction(final Context context, final ActionRequest request,
             final ResultHandler<JsonValue> handler) {
         try {
             final RoutingResult route = strategy.routeRequest(context, request);
@@ -81,7 +81,7 @@ public final class Router implements RequestHandler {
      * {@inheritDoc}
      */
     @Override
-    public void create(final Context context, final CreateRequest request,
+    public void handleCreate(final Context context, final CreateRequest request,
             final ResultHandler<Resource> handler) {
         try {
             final RoutingResult route = strategy.routeRequest(context, request);
@@ -102,7 +102,7 @@ public final class Router implements RequestHandler {
      * {@inheritDoc}
      */
     @Override
-    public void delete(final Context context, final DeleteRequest request,
+    public void handleDelete(final Context context, final DeleteRequest request,
             final ResultHandler<Resource> handler) {
         try {
             final RoutingResult route = strategy.routeRequest(context, request);
@@ -129,7 +129,7 @@ public final class Router implements RequestHandler {
      * {@inheritDoc}
      */
     @Override
-    public void patch(final Context context, final PatchRequest request,
+    public void handlePatch(final Context context, final PatchRequest request,
             final ResultHandler<Resource> handler) {
         try {
             final RoutingResult route = strategy.routeRequest(context, request);
@@ -161,7 +161,7 @@ public final class Router implements RequestHandler {
      * {@inheritDoc}
      */
     @Override
-    public void query(final Context context, final QueryRequest request,
+    public void handleQuery(final Context context, final QueryRequest request,
             final QueryResultHandler handler) {
         try {
             final RoutingResult route = strategy.routeRequest(context, request);
@@ -188,7 +188,7 @@ public final class Router implements RequestHandler {
      * {@inheritDoc}
      */
     @Override
-    public void read(final Context context, final ReadRequest request,
+    public void handleRead(final Context context, final ReadRequest request,
             final ResultHandler<Resource> handler) {
         try {
             final RoutingResult route = strategy.routeRequest(context, request);
@@ -232,7 +232,7 @@ public final class Router implements RequestHandler {
      * {@inheritDoc}
      */
     @Override
-    public void update(final Context context, final UpdateRequest request,
+    public void handleUpdate(final Context context, final UpdateRequest request,
             final ResultHandler<Resource> handler) {
         try {
             final RoutingResult route = strategy.routeRequest(context, request);
