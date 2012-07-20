@@ -48,7 +48,7 @@ public final class RouterTest {
         RoutingStrategy s = mock(RoutingStrategy.class);
         when(s.routeRequest(c, r)).thenReturn(new RoutingResult(p));
         Router router = new Router(s);
-        router.action(c, r, h);
+        router.handleAction(c, r, h);
 
         // Check that request was routed.
         verify(p).actionInstance(c, r, h);
@@ -67,7 +67,7 @@ public final class RouterTest {
         RoutingStrategy s = mock(RoutingStrategy.class);
         when(s.routeRequest(c, r)).thenReturn(new RoutingResult(p));
         Router router = new Router(s);
-        router.action(c, r, h);
+        router.handleAction(c, r, h);
 
         // Check that request was never routed but the handler was invoked.
         verifyZeroInteractions(p);
@@ -87,7 +87,7 @@ public final class RouterTest {
         RoutingStrategy s = mock(RoutingStrategy.class);
         when(s.routeRequest(c, r)).thenReturn(new RoutingResult(p));
         Router router = new Router(s);
-        router.action(c, r, h);
+        router.handleAction(c, r, h);
 
         // Check that request was routed.
         verify(p).actionCollection(c, r, h);
@@ -106,7 +106,7 @@ public final class RouterTest {
         RoutingStrategy s = mock(RoutingStrategy.class);
         when(s.routeRequest(c, r)).thenReturn(new RoutingResult(p));
         Router router = new Router(s);
-        router.action(c, r, h);
+        router.handleAction(c, r, h);
 
         // Check that request was routed.
         verify(p).actionInstance(c, r, h);
@@ -125,7 +125,7 @@ public final class RouterTest {
         RoutingStrategy s = mock(RoutingStrategy.class);
         when(s.routeRequest(c, r)).thenThrow(new NotFoundException());
         Router router = new Router(s);
-        router.action(c, r, h);
+        router.handleAction(c, r, h);
 
         // Check that request was never routed but the handler was invoked.
         verifyZeroInteractions(p);
