@@ -40,7 +40,7 @@ public final class Connections {
             checkConnectionState();
             final FutureResultHandler<JsonValue> future =
                     new FutureResultHandler<JsonValue>(handler);
-            requestHandler.action(context, request, future);
+            requestHandler.handleAction(context, request, future);
             return future;
         }
 
@@ -54,7 +54,7 @@ public final class Connections {
                 final CreateRequest request, final ResultHandler<Resource> handler) {
             checkConnectionState();
             final FutureResultHandler<Resource> future = new FutureResultHandler<Resource>(handler);
-            requestHandler.create(context, request, future);
+            requestHandler.handleCreate(context, request, future);
             return future;
         }
 
@@ -63,7 +63,7 @@ public final class Connections {
                 final DeleteRequest request, final ResultHandler<Resource> handler) {
             checkConnectionState();
             final FutureResultHandler<Resource> future = new FutureResultHandler<Resource>(handler);
-            requestHandler.delete(context, request, future);
+            requestHandler.handleDelete(context, request, future);
             return future;
         }
 
@@ -82,7 +82,7 @@ public final class Connections {
                 final ResultHandler<Resource> handler) {
             checkConnectionState();
             final FutureResultHandler<Resource> future = new FutureResultHandler<Resource>(handler);
-            requestHandler.patch(context, request, future);
+            requestHandler.handlePatch(context, request, future);
             return future;
         }
 
@@ -91,7 +91,7 @@ public final class Connections {
                 final QueryRequest request, final QueryResultHandler handler) {
             checkConnectionState();
             final FutureQueryResultHandler future = new FutureQueryResultHandler(handler);
-            requestHandler.query(context, request, future);
+            requestHandler.handleQuery(context, request, future);
             return future;
         }
 
@@ -100,7 +100,7 @@ public final class Connections {
                 final ResultHandler<Resource> handler) {
             checkConnectionState();
             final FutureResultHandler<Resource> future = new FutureResultHandler<Resource>(handler);
-            requestHandler.read(context, request, future);
+            requestHandler.handleRead(context, request, future);
             return future;
         }
 
@@ -109,7 +109,7 @@ public final class Connections {
                 final UpdateRequest request, final ResultHandler<Resource> handler) {
             checkConnectionState();
             final FutureResultHandler<Resource> future = new FutureResultHandler<Resource>(handler);
-            requestHandler.update(context, request, future);
+            requestHandler.handleUpdate(context, request, future);
             return future;
         }
 

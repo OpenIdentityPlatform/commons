@@ -52,7 +52,7 @@ public interface CollectionResourceProvider {
 
     /**
      * Performs the provided
-     * {@link RequestHandler#action(Context, ActionRequest, ResultHandler)
+     * {@link RequestHandler#handleAction(Context, ActionRequest, ResultHandler)
      * action} against the resource collection.
      *
      * @param context
@@ -61,13 +61,13 @@ public interface CollectionResourceProvider {
      *            The action request. The resource ID will be {@code null}.
      * @param handler
      *            The result handler to be notified on completion.
-     * @see RequestHandler#action(Context, ActionRequest, ResultHandler)
+     * @see RequestHandler#handleAction(Context, ActionRequest, ResultHandler)
      */
     void actionCollection(Context context, ActionRequest request, ResultHandler<JsonValue> handler);
 
     /**
      * Performs the provided
-     * {@link RequestHandler#action(Context, ActionRequest, ResultHandler)
+     * {@link RequestHandler#handleAction(Context, ActionRequest, ResultHandler)
      * action} against a resource within the collection.
      *
      * @param context
@@ -77,12 +77,12 @@ public interface CollectionResourceProvider {
      *            and identify the target resource instance.
      * @param handler
      *            The result handler to be notified on completion.
-     * @see RequestHandler#action(Context, ActionRequest, ResultHandler)
+     * @see RequestHandler#handleAction(Context, ActionRequest, ResultHandler)
      */
     void actionInstance(Context context, ActionRequest request, ResultHandler<JsonValue> handler);
 
     /**
-     * {@link RequestHandler#create(Context, CreateRequest, ResultHandler) Adds}
+     * {@link RequestHandler#handleCreate(Context, CreateRequest, ResultHandler) Adds}
      * a new resource instance to the collection.
      *
      * @param context
@@ -94,12 +94,12 @@ public interface CollectionResourceProvider {
      *            identify the newly created resource.
      * @param handler
      *            The result handler to be notified on completion.
-     * @see RequestHandler#create(Context, CreateRequest, ResultHandler)
+     * @see RequestHandler#handleCreate(Context, CreateRequest, ResultHandler)
      */
     void createInstance(Context context, CreateRequest request, ResultHandler<JsonValue> handler);
 
     /**
-     * {@link RequestHandler#delete(Context, DeleteRequest, ResultHandler)
+     * {@link RequestHandler#handleDelete(Context, DeleteRequest, ResultHandler)
      * Removes} a resource instance from the collection.
      *
      * @param context
@@ -109,12 +109,12 @@ public interface CollectionResourceProvider {
      *            and identify the target resource instance.
      * @param handler
      *            The result handler to be notified on completion.
-     * @see RequestHandler#delete(Context, DeleteRequest, ResultHandler)
+     * @see RequestHandler#handleDelete(Context, DeleteRequest, ResultHandler)
      */
     void deleteInstance(Context context, DeleteRequest request, ResultHandler<JsonValue> handler);
 
     /**
-     * {@link RequestHandler#patch(Context, PatchRequest, ResultHandler)
+     * {@link RequestHandler#handlePatch(Context, PatchRequest, ResultHandler)
      * Patches} an existing resource within the collection.
      *
      * @param context
@@ -124,12 +124,12 @@ public interface CollectionResourceProvider {
      *            and identify the target resource instance.
      * @param handler
      *            The result handler to be notified on completion.
-     * @see RequestHandler#patch(Context, PatchRequest, ResultHandler)
+     * @see RequestHandler#handlePatch(Context, PatchRequest, ResultHandler)
      */
     void patchInstance(Context context, PatchRequest request, ResultHandler<Resource> handler);
 
     /**
-     * {@link RequestHandler#query(Context, QueryRequest, QueryResultHandler)
+     * {@link RequestHandler#handleQuery(Context, QueryRequest, QueryResultHandler)
      * Searches} the collection for all resources which match the query request
      * criteria.
      *
@@ -139,12 +139,12 @@ public interface CollectionResourceProvider {
      *            The query request. The resource ID will be {@code null}.
      * @param handler
      *            The query result handler to be notified on completion.
-     * @see RequestHandler#query(Context, QueryRequest, QueryResultHandler)
+     * @see RequestHandler#handleQuery(Context, QueryRequest, QueryResultHandler)
      */
     void queryCollection(Context context, QueryRequest request, QueryResultHandler handler);
 
     /**
-     * {@link RequestHandler#read(Context, ReadRequest, ResultHandler) Reads} an
+     * {@link RequestHandler#handleRead(Context, ReadRequest, ResultHandler) Reads} an
      * existing resource within the collection.
      *
      * @param context
@@ -154,12 +154,12 @@ public interface CollectionResourceProvider {
      *            identify the target resource instance.
      * @param handler
      *            The result handler to be notified on completion.
-     * @see RequestHandler#read(Context, ReadRequest, ResultHandler)
+     * @see RequestHandler#handleRead(Context, ReadRequest, ResultHandler)
      */
     void readInstance(Context context, ReadRequest request, ResultHandler<Resource> handler);
 
     /**
-     * {@link RequestHandler#update(Context, UpdateRequest, ResultHandler)
+     * {@link RequestHandler#handleUpdate(Context, UpdateRequest, ResultHandler)
      * Updates} an existing resource within the collection.
      *
      * @param context
@@ -169,7 +169,7 @@ public interface CollectionResourceProvider {
      *            and identify the target resource instance.
      * @param handler
      *            The result handler to be notified on completion.
-     * @see RequestHandler#update(Context, UpdateRequest, ResultHandler)
+     * @see RequestHandler#handleUpdate(Context, UpdateRequest, ResultHandler)
      */
     void updateInstance(Context context, UpdateRequest request, ResultHandler<Resource> handler);
 
