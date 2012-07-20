@@ -86,7 +86,7 @@ public interface RequestHandler {
      * @param handler
      *            The result handler to be notified on completion.
      */
-    void action(Context context, ActionRequest request, ResultHandler<JsonValue> handler);
+    void handleAction(Context context, ActionRequest request, ResultHandler<JsonValue> handler);
 
     /**
      * Adds a new JSON resource, invoking the provided result handler upon
@@ -113,7 +113,7 @@ public interface RequestHandler {
      * @param handler
      *            The result handler to be notified on completion.
      */
-    void create(Context context, CreateRequest request, ResultHandler<Resource> handler);
+    void handleCreate(Context context, CreateRequest request, ResultHandler<Resource> handler);
 
     /**
      * Deletes a JSON resource, invoking the provided result handler upon
@@ -140,7 +140,7 @@ public interface RequestHandler {
      * @param handler
      *            The result handler to be notified on completion.
      */
-    void delete(Context context, DeleteRequest request, ResultHandler<Resource> handler);
+    void handleDelete(Context context, DeleteRequest request, ResultHandler<Resource> handler);
 
     /**
      * Updates a JSON resource by applying a set of changes to its existing
@@ -170,7 +170,7 @@ public interface RequestHandler {
      * @param handler
      *            The result handler to be notified on completion.
      */
-    void patch(Context context, PatchRequest request, ResultHandler<Resource> handler);
+    void handlePatch(Context context, PatchRequest request, ResultHandler<Resource> handler);
 
     /**
      * Searches for all JSON resources matching a user specified set of
@@ -194,7 +194,7 @@ public interface RequestHandler {
      * @param handler
      *            The query result handler to be notified on completion.
      */
-    void query(Context context, QueryRequest request, QueryResultHandler handler);
+    void handleQuery(Context context, QueryRequest request, QueryResultHandler handler);
 
     /**
      * Reads a JSON resource, invoking the provided result handler upon
@@ -218,7 +218,7 @@ public interface RequestHandler {
      * @param handler
      *            The result handler to be notified on completion.
      */
-    void read(Context context, ReadRequest request, ResultHandler<Resource> handler);
+    void handleRead(Context context, ReadRequest request, ResultHandler<Resource> handler);
 
     /**
      * Updates a JSON resource by replacing its existing content with new
@@ -246,6 +246,6 @@ public interface RequestHandler {
      * @param handler
      *            The result handler to be notified on completion.
      */
-    void update(Context context, UpdateRequest request, ResultHandler<Resource> handler);
+    void handleUpdate(Context context, UpdateRequest request, ResultHandler<Resource> handler);
 
 }

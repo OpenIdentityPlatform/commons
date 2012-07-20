@@ -42,7 +42,7 @@ public interface SingletonResourceProvider {
 
     /**
      * Performs the provided
-     * {@link RequestHandler#action(Context, ActionRequest, ResultHandler)
+     * {@link RequestHandler#handleAction(Context, ActionRequest, ResultHandler)
      * action} against the single resource instance.
      *
      * @param context
@@ -51,12 +51,12 @@ public interface SingletonResourceProvider {
      *            The action request. The resource ID will be {@code null}.
      * @param handler
      *            The result handler to be notified on completion.
-     * @see RequestHandler#action(Context, ActionRequest, ResultHandler)
+     * @see RequestHandler#handleAction(Context, ActionRequest, ResultHandler)
      */
     void actionInstance(Context context, ActionRequest request, ResultHandler<JsonValue> handler);
 
     /**
-     * {@link RequestHandler#patch(Context, PatchRequest, ResultHandler)
+     * {@link RequestHandler#handlePatch(Context, PatchRequest, ResultHandler)
      * Patches} the single resource instance.
      *
      * @param context
@@ -65,12 +65,12 @@ public interface SingletonResourceProvider {
      *            The patch request. The resource ID will be {@code null}.
      * @param handler
      *            The result handler to be notified on completion.
-     * @see RequestHandler#patch(Context, PatchRequest, ResultHandler)
+     * @see RequestHandler#handlePatch(Context, PatchRequest, ResultHandler)
      */
     void patchInstance(Context context, PatchRequest request, ResultHandler<Resource> handler);
 
     /**
-     * {@link RequestHandler#read(Context, ReadRequest, ResultHandler) Reads}
+     * {@link RequestHandler#handleRead(Context, ReadRequest, ResultHandler) Reads}
      * the single resource instance.
      *
      * @param context
@@ -79,12 +79,12 @@ public interface SingletonResourceProvider {
      *            The read request. The resource ID will be {@code null}.
      * @param handler
      *            The result handler to be notified on completion.
-     * @see RequestHandler#read(Context, ReadRequest, ResultHandler)
+     * @see RequestHandler#handleRead(Context, ReadRequest, ResultHandler)
      */
     void readInstance(Context context, ReadRequest request, ResultHandler<Resource> handler);
 
     /**
-     * {@link RequestHandler#update(Context, UpdateRequest, ResultHandler)
+     * {@link RequestHandler#handleUpdate(Context, UpdateRequest, ResultHandler)
      * Updates} the single resource instance.
      *
      * @param context
@@ -93,7 +93,7 @@ public interface SingletonResourceProvider {
      *            The update request. The resource ID will be {@code null}.
      * @param handler
      *            The result handler to be notified on completion.
-     * @see RequestHandler#update(Context, UpdateRequest, ResultHandler)
+     * @see RequestHandler#handleUpdate(Context, UpdateRequest, ResultHandler)
      */
     void updateInstance(Context context, UpdateRequest request, ResultHandler<Resource> handler);
 
