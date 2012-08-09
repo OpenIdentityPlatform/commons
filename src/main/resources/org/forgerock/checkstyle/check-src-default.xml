@@ -161,7 +161,6 @@
     <module name="ClassTypeParameterName">
       <property name="format" value="^[A-Z][0-9]*$" />
     </module>
-    <module name="ConstantName" />
     <module name="LocalFinalVariableName" />
     <module name="LocalVariableName" />
     <module name="MemberName" />
@@ -173,6 +172,13 @@
     <module name="ParameterName" />
     <module name="StaticVariableName" />
     <module name="TypeName" />
+
+    <!-- As per Sun convention except also allowing "logger" or "xxxLogger"
+         since some people don't like references to "LOGGER" shouting out all
+         over their code -->
+    <module name="ConstantName">
+      <property name="format" value="^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$|^[a-z][a-zA-Z0-9]*Logger$|^logger$"/>
+    </module>
     
     <!--
     
