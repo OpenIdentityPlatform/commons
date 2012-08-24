@@ -37,6 +37,7 @@
             <item name="JSON Crypto" href="../json-crypto/index.html" />
             <item name="JSON Crypto CLI" href="../json-crypto-cli/index.html" />
             <item name="JSON Resource" href="../json-resource/index.html" />
+            <item name="JSON Resource Servlet" href="../json-resource-servlet/index.html" />
         </menu>
         <menu name="Documentation">
             <item name="Introduction" href="index.html" />
