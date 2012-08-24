@@ -63,6 +63,9 @@
         <li>
           <a href="json-resource/index.html">json-resource</a> : JSON based REST framework.
         </li>
+        <li>
+          <a href="json-resource-servlet/index.html">json-resource-servlet</a> : JSON resource Servlet integration.
+        </li>
       </ul>
     </section>
   </body>
