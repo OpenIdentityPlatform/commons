@@ -15,8 +15,7 @@
  */
 
 /**
- * Classes and interfaces for core types including connections, resources, and
- * requests.
+ * JSON resource J2EE Servlet integration providing support for Servlet API 2.5 and beyond.
  */
-package org.forgerock.json.resource;
+package org.forgerock.json.resource.servlet;
 

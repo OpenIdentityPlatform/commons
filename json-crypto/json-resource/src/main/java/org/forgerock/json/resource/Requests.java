@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 
@@ -60,8 +61,12 @@ public final class Requests {
          */
         @Override
         public final T addFieldFilter(final String... fields) {
-            for (final String field : fields) {
-                this.fields.add(new JsonPointer(field));
+            try {
+                for (final String field : fields) {
+                    this.fields.add(new JsonPointer(field));
+                }
+            } catch (JsonException e) {
+                throw new IllegalArgumentException(e.getMessage());
             }
             return getThis();
         }

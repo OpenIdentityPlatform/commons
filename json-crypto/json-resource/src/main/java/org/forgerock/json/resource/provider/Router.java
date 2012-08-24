@@ -87,7 +87,7 @@ public final class Router implements RequestHandler {
             final RoutingResult route = strategy.routeRequest(context, request);
             if (route.isCollection()) {
                 // Resource ID is optional for create requests.
-                route.asCollection().createInstance(context, request, null);
+                route.asCollection().createInstance(context, request, handler);
             } else {
                 // TODO: i18n
                 throw newBadRequestException("The singleton resource %s cannot be created", request
@@ -108,7 +108,7 @@ public final class Router implements RequestHandler {
             final RoutingResult route = strategy.routeRequest(context, request);
             if (route.isCollection()) {
                 if (request.getResourceId() != null) {
-                    route.asCollection().deleteInstance(context, request, null);
+                    route.asCollection().deleteInstance(context, request, handler);
                 } else {
                     // TODO: i18n
                     throw newBadRequestException(
@@ -135,7 +135,7 @@ public final class Router implements RequestHandler {
             final RoutingResult route = strategy.routeRequest(context, request);
             if (route.isCollection()) {
                 if (request.getResourceId() != null) {
-                    route.asCollection().patchInstance(context, request, null);
+                    route.asCollection().patchInstance(context, request, handler);
                 } else {
                     // TODO: i18n
                     throw newBadRequestException(
@@ -144,7 +144,7 @@ public final class Router implements RequestHandler {
                 }
             } else {
                 if (request.getResourceId() == null) {
-                    route.asSingleton().patchInstance(context, request, null);
+                    route.asSingleton().patchInstance(context, request, handler);
                 } else {
                     // TODO: i18n
                     throw newBadRequestException(
@@ -194,7 +194,7 @@ public final class Router implements RequestHandler {
             final RoutingResult route = strategy.routeRequest(context, request);
             if (route.isCollection()) {
                 if (request.getResourceId() != null) {
-                    route.asCollection().readInstance(context, request, null);
+                    route.asCollection().readInstance(context, request, handler);
                 } else {
                     // TODO: i18n
                     throw newBadRequestException(
@@ -203,7 +203,7 @@ public final class Router implements RequestHandler {
                 }
             } else {
                 if (request.getResourceId() == null) {
-                    route.asSingleton().readInstance(context, request, null);
+                    route.asSingleton().readInstance(context, request, handler);
                 } else {
                     // TODO: i18n
                     throw newBadRequestException(
@@ -238,7 +238,7 @@ public final class Router implements RequestHandler {
             final RoutingResult route = strategy.routeRequest(context, request);
             if (route.isCollection()) {
                 if (request.getResourceId() != null) {
-                    route.asCollection().updateInstance(context, request, null);
+                    route.asCollection().updateInstance(context, request, handler);
                 } else {
                     // TODO: i18n
                     throw newBadRequestException(
@@ -247,7 +247,7 @@ public final class Router implements RequestHandler {
                 }
             } else {
                 if (request.getResourceId() == null) {
-                    route.asSingleton().updateInstance(context, request, null);
+                    route.asSingleton().updateInstance(context, request, handler);
                 } else {
                     // TODO: i18n
                     throw newBadRequestException(

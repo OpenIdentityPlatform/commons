@@ -16,6 +16,7 @@
 
 package org.forgerock.json.resource;
 
+import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonPointer;
 
 /**
@@ -45,7 +46,11 @@ public final class SortKey {
      *             If {@code field} is not a valid JSON pointer.
      */
     public static SortKey ascendingOrder(final String field) {
-        return ascendingOrder(new JsonPointer(field));
+        try {
+            return ascendingOrder(new JsonPointer(field));
+        } catch (JsonException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
     }
 
     /**
@@ -69,7 +74,11 @@ public final class SortKey {
      *             If {@code field} is not a valid JSON pointer.
      */
     public static SortKey descendingOrder(final String field) {
-        return descendingOrder(new JsonPointer(field));
+        try {
+            return descendingOrder(new JsonPointer(field));
+        } catch (JsonException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
     }
 
     /**
@@ -107,14 +116,45 @@ public final class SortKey {
      * {@code false} if it is in descending order.
      *
      * @return {@code true} if this sort key is in ascending order, or
-     *         {@code false} if it is in descending order.
+     *         {@code false} if it is in descending ord)er.
      */
     public boolean isAscendingOrder() {
         return isAscendingOrder;
     }
 
     /**
-     * {@inheritDoc}
+     * Parses the provided string as a sort key. If the string does not begin
+     * with a plus or minus symbol, then the sort key will default to ascending
+     * order.
+     *
+     * @param s
+     *            The string representation of a sort key as specified in
+     *            {@link #toString()}.
+     * @return The parsed sort key.
+     * @throws IllegalArgumentException
+     *             If {@code s} is not a valid sort key.
+     */
+    public static SortKey valueOf(String s) {
+        if (s.length() == 0) {
+            throw new IllegalArgumentException("Empty sort key");
+        }
+
+        switch (s.charAt(0)) {
+        case '-':
+            return descendingOrder(s.substring(1));
+        case '+':
+            return ascendingOrder(s.substring(1));
+        default:
+            return ascendingOrder(s);
+        }
+    }
+
+    /**
+     * Returns the string representation of this sort key. It will be composed
+     * of a plus symbol, if the key is ascending, or a minus symbol, if the key
+     * is descending, followed by the field name.
+     *
+     * @return The string representation of this sort key.
      */
     public String toString() {
         final StringBuilder builder = new StringBuilder();
