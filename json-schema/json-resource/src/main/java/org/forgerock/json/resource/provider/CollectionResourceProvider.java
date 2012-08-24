@@ -96,7 +96,7 @@ public interface CollectionResourceProvider {
      *            The result handler to be notified on completion.
      * @see RequestHandler#handleCreate(Context, CreateRequest, ResultHandler)
      */
-    void createInstance(Context context, CreateRequest request, ResultHandler<JsonValue> handler);
+    void createInstance(Context context, CreateRequest request, ResultHandler<Resource> handler);
 
     /**
      * {@link RequestHandler#handleDelete(Context, DeleteRequest, ResultHandler)
@@ -111,7 +111,7 @@ public interface CollectionResourceProvider {
      *            The result handler to be notified on completion.
      * @see RequestHandler#handleDelete(Context, DeleteRequest, ResultHandler)
      */
-    void deleteInstance(Context context, DeleteRequest request, ResultHandler<JsonValue> handler);
+    void deleteInstance(Context context, DeleteRequest request, ResultHandler<Resource> handler);
 
     /**
      * {@link RequestHandler#handlePatch(Context, PatchRequest, ResultHandler)
