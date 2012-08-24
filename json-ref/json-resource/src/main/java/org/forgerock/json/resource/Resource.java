@@ -16,6 +16,8 @@
 
 package org.forgerock.json.resource;
 
+import java.util.LinkedHashMap;
+
 import org.forgerock.json.fluent.JsonValue;
 
 /**
@@ -48,6 +50,24 @@ public final class Resource {
     }
 
     /**
+     * Returns {@code true} if the provided object is a resource having the same
+     * resource ID and revision as this resource.
+     * <p>
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj == this) {
+            return true;
+        } else if (obj instanceof Resource) {
+            final Resource that = (Resource) obj;
+            return isEqual(id, that.id) && isEqual(revision, that.revision);
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * Returns the content of this JSON resource.
      *
      * @return The content of this JSON resource.
@@ -75,4 +95,41 @@ public final class Resource {
     public String getRevision() {
         return revision;
     }
+
+    /**
+     * Returns the hash code for this resource. Two resources are guaranteed to
+     * have the same hash code if they share the same resource ID and revision.
+     * <p>
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        int hash = 17;
+        hash = hash * 31 + id != null ? id.hashCode() : 0;
+        hash = hash * 31 + revision != null ? revision.hashCode() : 0;
+        return hash;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        final JsonValue wrapper = new JsonValue(new LinkedHashMap<String, Object>(3));
+        wrapper.add("id", id);
+        wrapper.add("rev", revision);
+        wrapper.add("content", content);
+        return wrapper.toString();
+    }
+
+    private boolean isEqual(final String s1, final String s2) {
+        if (s1 == s2) {
+            return true;
+        } else if (s1 == null || s2 == null) {
+            return false;
+        } else {
+            return s1.equals(s2);
+        }
+    }
+
 }

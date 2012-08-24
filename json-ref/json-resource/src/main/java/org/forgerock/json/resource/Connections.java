@@ -16,7 +16,6 @@
 package org.forgerock.json.resource;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.exception.ResourceException;
 import org.forgerock.json.resource.provider.RequestHandler;
 
 /**
@@ -123,21 +122,22 @@ public final class Connections {
 
     // Internal connection factory implementation.
     private static final class InternalConnectionFactory implements ConnectionFactory {
-        private final Connection connection;
-        private final FutureResult<Connection> future;
+        private final RequestHandler handler;
 
-        private InternalConnectionFactory(final Connection connection) {
-            this.connection = connection;
-            this.future = new CompletedFutureResult<Connection>(connection);
+        private InternalConnectionFactory(final RequestHandler handler) {
+            this.handler = handler;
         }
 
         @Override
-        public Connection getConnection() throws ResourceException {
-            return connection;
+        public Connection getConnection() {
+            return newInternalConnection(handler);
         }
 
         @Override
         public FutureResult<Connection> getConnectionAsync(final ResultHandler<Connection> handler) {
+            final Connection connection = getConnection();
+            final FutureResult<Connection> future =
+                    new CompletedFutureResult<Connection>(connection);
             if (handler != null) {
                 handler.handleResult(connection);
             }
@@ -171,8 +171,7 @@ public final class Connections {
      *             If {@code handler} was {@code null}.
      */
     public static ConnectionFactory newInternalConnectionFactory(final RequestHandler handler) {
-        final Connection connection = newInternalConnection(handler);
-        return new InternalConnectionFactory(connection);
+        return new InternalConnectionFactory(handler);
     }
 
     // Prevent instantiation.
