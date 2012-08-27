@@ -16,6 +16,7 @@
 package org.forgerock.json.resource.servlet;
 
 import static org.forgerock.json.resource.servlet.HttpContext.newHttpContext;
+import static org.forgerock.json.resource.servlet.HttpUtils.CONTENT_TYPE;
 import static org.forgerock.json.resource.servlet.HttpUtils.HEADER_IF_MATCH;
 import static org.forgerock.json.resource.servlet.HttpUtils.METHOD_DELETE;
 import static org.forgerock.json.resource.servlet.HttpUtils.METHOD_GET;
@@ -505,6 +506,14 @@ public final class HttpServletAdapter {
         }
 
         // Perform preliminary request validation.
+        if (req.getContentType() != null && !req.getContentType().equals(CONTENT_TYPE)) {
+            // TODO: i18n
+            throw new BadRequestException(
+                    "The request could not be processed because it specified the content-type '"
+                            + req.getContentType() + "' when only the content-type '"
+                            + CONTENT_TYPE + "' is supported");
+        }
+
         if (req.getHeader("If-Modified-Since") != null) {
             // TODO: i18n
             throw new ConflictException("Header If-Modified-Since not supported");
