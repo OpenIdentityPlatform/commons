@@ -35,22 +35,25 @@ final class HttpUtils {
     static final String CONTENT_TYPE = "application/json";
     static final String CRLF = "\r\n";
 
+    static final String ETAG_ANY = "*";
     static final String HEADER_ETAG = "ETag";
     static final String HEADER_IF_MATCH = "If-Match";
-    static final String HEADER_X_HTTP_METHOD_OVERRIDE = "X-HTTP-Method-Override";
+    static final String HEADER_IF_NONE_MATCH = "If-None-Match";
 
+    static final String HEADER_X_HTTP_METHOD_OVERRIDE = "X-HTTP-Method-Override";
     static final String METHOD_DELETE = "DELETE";
     static final String METHOD_GET = "GET";
     static final String METHOD_HEAD = "HEAD";
     static final String METHOD_OPTIONS = "OPTIONS";
     static final String METHOD_PATCH = "PATCH";
+
     static final String METHOD_POST = "POST";
-
     static final String METHOD_PUT = "PUT";
-    static final String METHOD_TRACE = "TRACE";
 
-    static final String PARAM_ACTION_ID = "_action-id";
+    static final String METHOD_TRACE = "TRACE";
+    static final String PARAM_ACTION = "_action";
     static final String PARAM_DEBUG = "_debug";
+
     static final String PARAM_PRETTY_PRINT = "_pretty-print";
 
     /**
@@ -115,7 +118,11 @@ final class HttpUtils {
      *             If the value could not be parsed as a single string.
      */
     static String asSingleValue(final String name, final String[] values) throws ResourceException {
-        if (values.length > 1) {
+        if (values == null || values.length == 0) {
+            // FIXME: i18n.
+            throw new BadRequestException("No values provided for the request parameter \'" + name
+                    + "\'");
+        } else if (values.length > 1) {
             // FIXME: i18n.
             throw new BadRequestException(
                     "Multiple values provided for the single-valued request parameter \'" + name
