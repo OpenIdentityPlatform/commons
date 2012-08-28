@@ -155,7 +155,12 @@ final class Servlet2RequestDispatcher implements RequestDispatcher {
         public ResourceException visitActionRequest(final Void p, final ActionRequest request) {
             try {
                 final JsonValue result = connection.action(context, request);
-                writer.writeObject(result.getObject());
+                if (result != null) {
+                    writer.writeObject(result.getObject());
+                } else {
+                    // No content.
+                    httpResponse.setStatus(HttpServletResponse.SC_NO_CONTENT);
+                }
                 return null;
             } catch (final IOException e) {
                 return adapt(e);
@@ -170,7 +175,9 @@ final class Servlet2RequestDispatcher implements RequestDispatcher {
         @Override
         public ResourceException visitCreateRequest(final Void p, final CreateRequest request) {
             try {
-                return writeResource(connection.create(context, request));
+                httpResponse.setStatus(HttpServletResponse.SC_CREATED);
+                writeResource(connection.create(context, request));
+                return null;
             } catch (final ResourceException e) {
                 return e;
             }
