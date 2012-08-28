@@ -17,13 +17,15 @@ package org.forgerock.json.resource.servlet;
 
 import static org.forgerock.json.resource.servlet.HttpContext.newHttpContext;
 import static org.forgerock.json.resource.servlet.HttpUtils.CONTENT_TYPE;
+import static org.forgerock.json.resource.servlet.HttpUtils.ETAG_ANY;
 import static org.forgerock.json.resource.servlet.HttpUtils.HEADER_IF_MATCH;
+import static org.forgerock.json.resource.servlet.HttpUtils.HEADER_IF_NONE_MATCH;
 import static org.forgerock.json.resource.servlet.HttpUtils.METHOD_DELETE;
 import static org.forgerock.json.resource.servlet.HttpUtils.METHOD_GET;
 import static org.forgerock.json.resource.servlet.HttpUtils.METHOD_PATCH;
 import static org.forgerock.json.resource.servlet.HttpUtils.METHOD_POST;
 import static org.forgerock.json.resource.servlet.HttpUtils.METHOD_PUT;
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_ACTION_ID;
+import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_ACTION;
 import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_DEBUG;
 import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_PRETTY_PRINT;
 import static org.forgerock.json.resource.servlet.HttpUtils.adapt;
@@ -192,13 +194,13 @@ public final class HttpServletAdapter {
             final Map<String, String[]> parameters = req.getParameterMap();
             final DeleteRequest request =
                     Requests.newDeleteRequest(dpath.getComponent(), dpath.getResourceId())
-                            .setRevision(getEtag(req));
+                            .setRevision(getIfMatch(req));
             for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
                 final String name = p.getKey();
                 final String[] values = p.getValue();
                 if (!parseCommonParameter(name, values, request)) {
                     // FIXME: i18n.
-                    throw new BadRequestException("Unrecognized delete request parameter \'" + name
+                    throw new BadRequestException("Unrecognized delete request parameter '" + name
                             + "'");
                 }
             }
@@ -233,8 +235,8 @@ public final class HttpServletAdapter {
                                 request.addSortKey(SortKey.valueOf(s));
                             } catch (final IllegalArgumentException e) {
                                 // FIXME: i18n.
-                                throw new BadRequestException("The value \'" + s
-                                        + "\' for parameter '" + name
+                                throw new BadRequestException("The value '" + s
+                                        + "' for parameter '" + name
                                         + "' could not be parsed as a valid sort key");
                             }
                         }
@@ -250,7 +252,7 @@ public final class HttpServletAdapter {
                             request.setQueryFilter(QueryFilter.valueOf(s));
                         } catch (final IllegalArgumentException e) {
                             // FIXME: i18n.
-                            throw new BadRequestException("The value \'" + s + "\' for parameter '"
+                            throw new BadRequestException("The value '" + s + "' for parameter '"
                                     + name + "' could not be parsed as a valid sort key");
                         }
                     } else {
@@ -279,7 +281,7 @@ public final class HttpServletAdapter {
                     final String[] values = p.getValue();
                     if (!parseCommonParameter(name, values, request)) {
                         // FIXME: i18n.
-                        throw new BadRequestException("Unrecognized read request parameter \'"
+                        throw new BadRequestException("Unrecognized read request parameter '"
                                 + name + "'");
                     }
                 }
@@ -307,47 +309,60 @@ public final class HttpServletAdapter {
 
             final DecodedPath dpath = decodePath(req.getPathInfo());
             final Map<String, String[]> parameters = req.getParameterMap();
+            final String action = asSingleValue(PARAM_ACTION, parameters.get(PARAM_ACTION));
 
-            // A post may be an action or a create, so check first.
-            if (parameters.containsKey(PARAM_ACTION_ID)) {
-                // Action request.
-                final String actionId =
-                        asSingleValue(PARAM_ACTION_ID, parameters.get(PARAM_ACTION_ID));
+            if (action.equals("create")) {
+                // Create request must be targeted at collection component.
+                if (!dpath.isCollection()) {
+                    // TODO: i18n
+                    throw new BadRequestException(
+                            "Resource creation using the 'create' POST action "
+                                    + "is not supported for singleton resources");
+                }
+
+                if (dpath.getResourceId() != null) {
+                    // TODO: i18n
+                    throw new BadRequestException(
+                            "Resource creation using the 'create' POST action "
+                                    + "is not supported for resources within a collection");
+                }
+
                 final JsonValue content = getJsonContentAsMap(req);
-                final ActionRequest request =
-                        Requests.newActionRequest(dpath.getComponent(), dpath.getResourceId(),
-                                actionId).setContent(content);
+                final String resourceId = getResourceId(content);
+                final CreateRequest request =
+                        Requests.newCreateRequest(dpath.getComponent(), resourceId, content);
+
                 for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
                     final String name = p.getKey();
                     final String[] values = p.getValue();
                     if (parseCommonParameter(name, values, request)) {
                         continue;
-                    } else if (name.equals(PARAM_ACTION_ID)) {
+                    } else if (name.equals(PARAM_ACTION)) {
                         // Ignore - already handled.
                     } else {
-                        request.setAdditionalActionParameter(name, asSingleValue(name, values));
+                        // FIXME: i18n.
+                        throw new BadRequestException("Unrecognized create request parameter '"
+                                + name + "'");
                     }
                 }
                 // Invoke the request.
                 final Context context = newRequestContext(req);
                 dispatcher.dispatchRequest(context, request, req, resp);
             } else {
-                // Create request.
+                // Action request.
                 final JsonValue content = getJsonContentAsMap(req);
-                final CreateRequest request =
-                        Requests.newCreateRequest(dpath.getComponent(), dpath.getResourceId(),
-                                content);
-                // See if the client provided a resource ID in the content.
-                if (request.getResourceId() == null) {
-                    request.setResourceId(content.get("_id").asString());
-                }
+                final ActionRequest request =
+                        Requests.newActionRequest(dpath.getComponent(), dpath.getResourceId(),
+                                action).setContent(content);
                 for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
                     final String name = p.getKey();
                     final String[] values = p.getValue();
-                    if (!parseCommonParameter(name, values, request)) {
-                        // FIXME: i18n.
-                        throw new BadRequestException("Unrecognized create request parameter \'"
-                                + name + "'");
+                    if (parseCommonParameter(name, values, request)) {
+                        continue;
+                    } else if (name.equals(PARAM_ACTION)) {
+                        // Ignore - already handled.
+                    } else {
+                        request.setAdditionalActionParameter(name, asSingleValue(name, values));
                     }
                 }
                 // Invoke the request.
@@ -363,25 +378,62 @@ public final class HttpServletAdapter {
         try {
             preprocessRequest(req);
 
-            // TODO: a put may be a create if there is an if-none-match header.
             final DecodedPath dpath = decodePath(req.getPathInfo());
             final Map<String, String[]> parameters = req.getParameterMap();
             final JsonValue content = getJsonContentAsMap(req);
-            final UpdateRequest request =
-                    Requests.newUpdateRequest(dpath.getComponent(), dpath.getResourceId(), content)
-                            .setRevision(getEtag(req));
-            for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
-                final String name = p.getKey();
-                final String[] values = p.getValue();
-                if (!parseCommonParameter(name, values, request)) {
-                    // FIXME: i18n.
-                    throw new BadRequestException("Unrecognized update request parameter \'" + name
-                            + "'");
+
+            final String rev = getIfNoneMatch(req);
+            if (ETAG_ANY.equals(rev)) {
+                // This is a create with a user provided resource ID.
+
+                // Create request must be targeted at collection instance.
+                if (!dpath.isCollection()) {
+                    // TODO: i18n
+                    throw new BadRequestException("Resource creation using PUT "
+                            + "is not supported for singleton resources");
                 }
+
+                if (dpath.getResourceId() == null) {
+                    // TODO: i18n
+                    throw new BadRequestException("Resource creation using PUT "
+                            + "is not supported for resources within a collection");
+                }
+
+                final CreateRequest request =
+                        Requests.newCreateRequest(dpath.getComponent(), dpath.getResourceId(),
+                                content);
+
+                for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
+                    final String name = p.getKey();
+                    final String[] values = p.getValue();
+                    if (!parseCommonParameter(name, values, request)) {
+                        // FIXME: i18n.
+                        throw new BadRequestException("Unrecognized create request parameter '"
+                                + name + "'");
+                    }
+                }
+
+                // Invoke the request.
+                final Context context = newRequestContext(req);
+                dispatcher.dispatchRequest(context, request, req, resp);
+            } else {
+                final UpdateRequest request =
+                        Requests.newUpdateRequest(dpath.getComponent(), dpath.getResourceId(),
+                                content).setRevision(getIfMatch(req));
+                for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
+                    final String name = p.getKey();
+                    final String[] values = p.getValue();
+                    if (!parseCommonParameter(name, values, request)) {
+                        // FIXME: i18n.
+                        throw new BadRequestException("Unrecognized update request parameter '"
+                                + name + "'");
+                    }
+                }
+
+                // Invoke the request.
+                final Context context = newRequestContext(req);
+                dispatcher.dispatchRequest(context, request, req, resp);
             }
-            // Invoke the request.
-            final Context context = newRequestContext(req);
-            dispatcher.dispatchRequest(context, request, req, resp);
         } catch (final ResourceException e) {
             fail(resp, e);
         }
@@ -439,12 +491,33 @@ public final class HttpServletAdapter {
         servletContext.log(builder.toString());
     }
 
-    private String getEtag(final HttpServletRequest req) throws ResourceException {
-        // Remove quotes.
+    private String getIfMatch(final HttpServletRequest req) throws ResourceException {
         final String etag = req.getHeader(HEADER_IF_MATCH);
-        if (etag != null && etag.length() >= 2) {
-            if (etag.charAt(0) == '"') {
-                return etag.substring(1, etag.length() - 1);
+        if (etag != null) {
+            if (etag.length() >= 2) {
+                // Remove quotes.
+                if (etag.charAt(0) == '"') {
+                    return etag.substring(1, etag.length() - 1);
+                }
+            } else if (etag.equals(HttpUtils.ETAG_ANY)) {
+                // If-Match * is implied anyway.
+                return null;
+            }
+        }
+        return etag;
+    }
+
+    private String getIfNoneMatch(final HttpServletRequest req) throws ResourceException {
+        final String etag = req.getHeader(HEADER_IF_NONE_MATCH);
+        if (etag != null) {
+            if (etag.length() >= 2) {
+                // Remove quotes.
+                if (etag.charAt(0) == '"') {
+                    return etag.substring(1, etag.length() - 1);
+                }
+            } else if (etag.equals(ETAG_ANY)) {
+                // If-None-Match *.
+                return ETAG_ANY;
             }
         }
         return etag;
@@ -469,6 +542,11 @@ public final class HttpServletAdapter {
         return result;
     }
 
+    private String getResourceId(final JsonValue content) {
+        final JsonValue tmp = content.isMap() ? content.get("_id") : null;
+        return (tmp != null && tmp.isString()) ? tmp.asString() : null;
+    }
+
     private Context newRequestContext(final HttpServletRequest req) {
         return newHttpContext(parentContext, req);
     }
@@ -481,7 +559,7 @@ public final class HttpServletAdapter {
                     request.addFieldFilter(s);
                 } catch (final IllegalArgumentException e) {
                     // FIXME: i18n.
-                    throw new BadRequestException("The value \'" + s + "\' for parameter '" + name
+                    throw new BadRequestException("The value '" + s + "' for parameter '" + name
                             + "' could not be parsed as a valid JSON pointer");
                 }
             }
