@@ -499,7 +499,7 @@ public final class HttpServletAdapter {
                 if (etag.charAt(0) == '"') {
                     return etag.substring(1, etag.length() - 1);
                 }
-            } else if (etag.equals(HttpUtils.ETAG_ANY)) {
+            } else if (etag.equals(ETAG_ANY)) {
                 // If-Match * is implied anyway.
                 return null;
             }
