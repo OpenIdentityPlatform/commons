@@ -16,13 +16,17 @@
 package org.forgerock.json.resource.servlet;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.Connections;
 import org.forgerock.json.resource.Context;
+import org.forgerock.json.resource.provider.RequestHandler;
 
 /**
  * An HTTP Servlet implementation which forwards requests to an
@@ -36,13 +40,15 @@ import org.forgerock.json.resource.Context;
  * using their default constructor and initialize them by calling the
  * {@link #init()}. The default implementation of this method is to first check
  * to see if a connection factory was provided during construction and, if not,
- * obtain one by calling {@link #getConnectionFactory()}.
+ * obtain one by calling {@link #getConnectionFactory()} whose default behavior
+ * is to initialize the connection factory using parameters defined in the
+ * Servlet's configuration (see {@link #getConnectionFactory()} more details).
  * </ul>
- * Most implementations will need to take the second approach and, therefore,
- * must override {@link #getConnectionFactory()} and may be also
- * {@link #getParentContext()}.
+ * Most implementations will use the second approach.
  */
 public class HttpServlet extends javax.servlet.http.HttpServlet {
+    private static final String INIT_PARAM_CONNECTION_FACTORY_CLASS = "connection-factory-class";
+    private static final String INIT_PARAM_REQUEST_HANDLER_CLASS = "request-handler-class";
     private static final String METHOD_PATCH = "PATCH";
 
     private static final long serialVersionUID = 6089858120348026823L;
@@ -190,18 +196,52 @@ public class HttpServlet extends javax.servlet.http.HttpServlet {
      * construction (which will be the case if the default constructor was
      * called during normal Servlet initialization).
      * <p>
-     * The default implementation is to throw a {@code ServletException} since
-     * this method MUST be overridden when no connection factory is provided
-     * during construction.
+     * The default implementation is to do the following:
+     * <ul>
+     * <li>check the Servlet configuration for the
+     * <i>connection-factory-class</i> {@code init-param}. If such a parameter
+     * is defined then load the associated class which must be a sub-class of
+     * {@link ConnectionFactory} and create a new instance. This method will
+     * look for a constructor which accepts a {@code ServletConfig} as its sole
+     * argument, before trying the default zero argument constructor
+     * <li>check the Servlet configuration for the <i>request-handler-class</i>
+     * {@code init-param}. If such a parameter is defined then load the
+     * associated class which must be a sub-class of {@link RequestHandler} and
+     * create a new instance. This method will look for a constructor which
+     * accepts a {@code ServletConfig} as its sole argument, before trying the
+     * default zero argument constructor. Once the {@code RequestHandler} has
+     * been instantiated it will be adapted to a {@code ConnectionFactory} using
+     * {@link Connections#newInternalConnectionFactory(RequestHandler)}
+     * <li>if neither of the above parameters are defined then throw a
+     * {@code ServletException}.
+     * </ul>
      *
      * @return The connection factory which this Servlet should use.
      * @throws ServletException
-     *             If this method has not been overridden, or if the connection
-     *             factory could not be obtained for some other reason.
+     *             If the connection factory could not be initialized.
      */
     protected ConnectionFactory getConnectionFactory() throws ServletException {
-        throw new ServletException("Connection factory not set and method "
-                + "getConnectionFactory() has not been overridden");
+        final ServletConfig config = getServletConfig();
+        if (config != null) {
+            // Check for configured connection factory class first.
+            final String connectionFactoryClass =
+                    config.getInitParameter(INIT_PARAM_CONNECTION_FACTORY_CLASS);
+            if (connectionFactoryClass != null) {
+                return configureInstance(config, connectionFactoryClass, ConnectionFactory.class);
+            }
+
+            // Check for configured request handler class next.
+            final String requestHandlerClass =
+                    config.getInitParameter(INIT_PARAM_REQUEST_HANDLER_CLASS);
+            if (requestHandlerClass != null) {
+                final RequestHandler handler =
+                        configureInstance(config, requestHandlerClass, RequestHandler.class);
+                return Connections.newInternalConnectionFactory(handler);
+            }
+        }
+
+        // FIXME: i18n
+        throw new ServletException("Unable to initialize ConnectionFactory");
     }
 
     /**
@@ -238,6 +278,26 @@ public class HttpServlet extends javax.servlet.http.HttpServlet {
         } else {
             // Delegate all other methods to super class.
             super.service(req, resp);
+        }
+    }
+
+    private <T> T configureInstance(final ServletConfig config,
+            final String connectionFactoryClass, final Class<T> clazz) throws ServletException {
+        final ClassLoader cl = getServletContext().getClassLoader();
+        try {
+            final Class<?> tmp = Class.forName(connectionFactoryClass, true, cl);
+            final Class<? extends T> cls = tmp.asSubclass(clazz);
+            try {
+                // Try constructor which accepts ServletConfig.
+                final Constructor<? extends T> constructor =
+                        cls.getConstructor(ServletConfig.class);
+                return constructor.newInstance(config);
+            } catch (final NoSuchMethodException e) {
+                // Try default constructor.
+                return cls.newInstance();
+            }
+        } catch (final Exception e) {
+            throw new ServletException(e);
         }
     }
 
