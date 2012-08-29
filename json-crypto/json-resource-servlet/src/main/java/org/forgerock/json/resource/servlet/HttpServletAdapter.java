@@ -63,6 +63,7 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.json.resource.exception.BadRequestException;
 import org.forgerock.json.resource.exception.ConflictException;
 import org.forgerock.json.resource.exception.NotSupportedException;
+import org.forgerock.json.resource.exception.PreconditionFailedException;
 import org.forgerock.json.resource.exception.ResourceException;
 
 /**
@@ -188,7 +189,9 @@ public final class HttpServletAdapter {
 
     void doDelete(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
+            // Validate request.
             preprocessRequest(req);
+            rejectIfNoneMatch(req);
 
             final DecodedPath dpath = decodePath(req.getPathInfo());
             final Map<String, String[]> parameters = req.getParameterMap();
@@ -214,7 +217,10 @@ public final class HttpServletAdapter {
 
     void doGet(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
+            // Validate request.
             preprocessRequest(req);
+            rejectIfMatch(req);
+            rejectIfNoneMatch(req);
 
             final DecodedPath dpath = decodePath(req.getPathInfo());
             final Map<String, String[]> parameters = req.getParameterMap();
@@ -296,7 +302,9 @@ public final class HttpServletAdapter {
 
     void doPatch(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
+            // Validate request.
             preprocessRequest(req);
+            rejectIfNoneMatch(req);
             throw new NotSupportedException("Patch operations are not supported");
         } catch (final ResourceException e) {
             fail(resp, e);
@@ -305,7 +313,10 @@ public final class HttpServletAdapter {
 
     void doPost(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
+            // Validate request.
             preprocessRequest(req);
+            rejectIfNoneMatch(req);
+            rejectIfMatch(req);
 
             final DecodedPath dpath = decodePath(req.getPathInfo());
             final Map<String, String[]> parameters = req.getParameterMap();
@@ -376,7 +387,15 @@ public final class HttpServletAdapter {
 
     void doPut(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
+            // Validate request.
             preprocessRequest(req);
+            if (req.getHeader(HEADER_IF_MATCH) != null
+                    && req.getHeader(HEADER_IF_NONE_MATCH) != null) {
+                // FIXME: i18n
+                throw new PreconditionFailedException(
+                        "Simultaneous use of If-Match and If-None-Match not "
+                                + "supported for PUT requests");
+            }
 
             final DecodedPath dpath = decodePath(req.getPathInfo());
             final Map<String, String[]> parameters = req.getParameterMap();
@@ -600,6 +619,24 @@ public final class HttpServletAdapter {
         if (req.getHeader("If-Unmodified-Since") != null) {
             // TODO: i18n
             throw new ConflictException("Header If-Unmodified-Since not supported");
+        }
+    }
+
+    private void rejectIfMatch(final HttpServletRequest req) throws ResourceException,
+            PreconditionFailedException {
+        if (req.getHeader(HEADER_IF_MATCH) != null) {
+            // FIXME: i18n
+            throw new PreconditionFailedException("If-Match not supported for " + getMethod(req)
+                    + " requests");
+        }
+    }
+
+    private void rejectIfNoneMatch(final HttpServletRequest req) throws ResourceException,
+            PreconditionFailedException {
+        if (req.getHeader(HEADER_IF_NONE_MATCH) != null) {
+            // FIXME: i18n
+            throw new PreconditionFailedException("If-None-Match not supported for "
+                    + getMethod(req) + " requests");
         }
     }
 
