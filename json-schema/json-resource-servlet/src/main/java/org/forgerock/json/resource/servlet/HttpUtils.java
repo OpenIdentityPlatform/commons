@@ -37,6 +37,7 @@ final class HttpUtils {
 
     static final String ETAG_ANY = "*";
     static final String HEADER_ETAG = "ETag";
+    static final String HEADER_LOCATION = "Location";
     static final String HEADER_IF_MATCH = "If-Match";
     static final String HEADER_IF_NONE_MATCH = "If-None-Match";
 
