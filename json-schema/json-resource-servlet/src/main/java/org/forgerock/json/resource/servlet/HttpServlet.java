@@ -196,25 +196,26 @@ public class HttpServlet extends javax.servlet.http.HttpServlet {
      * construction (which will be the case if the default constructor was
      * called during normal Servlet initialization).
      * <p>
-     * The default implementation is to do the following:
-     * <ul>
-     * <li>check the Servlet configuration for the
-     * <i>connection-factory-class</i> {@code init-param}. If such a parameter
-     * is defined then load the associated class which must be a sub-class of
-     * {@link ConnectionFactory} and create a new instance. This method will
-     * look for a constructor which accepts a {@code ServletConfig} as its sole
-     * argument, before trying the default zero argument constructor
-     * <li>check the Servlet configuration for the <i>request-handler-class</i>
-     * {@code init-param}. If such a parameter is defined then load the
-     * associated class which must be a sub-class of {@link RequestHandler} and
-     * create a new instance. This method will look for a constructor which
-     * accepts a {@code ServletConfig} as its sole argument, before trying the
-     * default zero argument constructor. Once the {@code RequestHandler} has
-     * been instantiated it will be adapted to a {@code ConnectionFactory} using
-     * {@link Connections#newInternalConnectionFactory(RequestHandler)}
-     * <li>if neither of the above parameters are defined then throw a
-     * {@code ServletException}.
-     * </ul>
+     * The default implementation of this method attempts to instantiate the
+     * connection factory using parameters defined in the Servlet's
+     * configuration.
+     * <p>
+     * Firstly, this method uses the class name specified by the the
+     * {@code connection-factory-class} Servlet configuration parameter, if
+     * present, to instantiate a {@link ConnectionFactory}.
+     * <p>
+     * If no such parameter is present then this method attempts to create a
+     * {@link RequestHandler} using the {@code request-handler-class} Servlet
+     * configuration parameter if present.
+     * <p>
+     * Finally, if neither parameter is present, this method throws a
+     * {@link ServletException} as before.
+     * <p>
+     * In order to construct instances of {@code ConnectionFactory} or
+     * {@code RequestHandler} this method first attempts to use a constructor
+     * which accepts a {@link ServletConfig} as a parameter. If no such
+     * constructor is found, then it attempts to use the class' default
+     * constructor.
      *
      * @return The connection factory which this Servlet should use.
      * @throws ServletException
