@@ -198,18 +198,13 @@ public class HttpServlet extends javax.servlet.http.HttpServlet {
      * <p>
      * The default implementation of this method attempts to instantiate the
      * connection factory using parameters defined in the Servlet's
-     * configuration.
-     * <p>
-     * Firstly, this method uses the class name specified by the the
-     * {@code connection-factory-class} Servlet configuration parameter, if
-     * present, to instantiate a {@link ConnectionFactory}.
-     * <p>
-     * If no such parameter is present then this method attempts to create a
-     * {@link RequestHandler} using the {@code request-handler-class} Servlet
-     * configuration parameter if present.
-     * <p>
-     * Finally, if neither parameter is present, this method throws a
-     * {@link ServletException} as before.
+     * configuration. Firstly, this method uses the class name specified by the
+     * the {@code connection-factory-class} Servlet configuration parameter, if
+     * present, to instantiate a {@link ConnectionFactory}. If no such parameter
+     * is present then this method attempts to create a {@link RequestHandler}
+     * using the {@code request-handler-class} Servlet configuration parameter
+     * if present. Finally, if neither parameter is present, this method throws
+     * a {@link ServletException} as before.
      * <p>
      * In order to construct instances of {@code ConnectionFactory} or
      * {@code RequestHandler} this method first attempts to use a constructor
