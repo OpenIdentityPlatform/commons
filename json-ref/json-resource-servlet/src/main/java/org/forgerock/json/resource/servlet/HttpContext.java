@@ -73,7 +73,7 @@ public final class HttpContext {
         final Context context = parent.newSubContext("http");
 
         METHOD.set(context, HttpUtils.getMethod(req));
-        PATH.set(context, req.getPathInfo());
+        PATH.set(context, req.getRequestURL().toString());
 
         HEADERS.set(context, new LazyMap<String, Object>(new Factory<Map<String, Object>>() {
             @Override

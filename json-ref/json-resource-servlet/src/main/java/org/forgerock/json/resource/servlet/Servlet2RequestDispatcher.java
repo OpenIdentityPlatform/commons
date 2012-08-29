@@ -18,6 +18,7 @@ package org.forgerock.json.resource.servlet;
 import static org.forgerock.json.resource.servlet.HttpUtils.CHARACTER_ENCODING;
 import static org.forgerock.json.resource.servlet.HttpUtils.CONTENT_TYPE;
 import static org.forgerock.json.resource.servlet.HttpUtils.HEADER_ETAG;
+import static org.forgerock.json.resource.servlet.HttpUtils.HEADER_LOCATION;
 import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_PRETTY_PRINT;
 import static org.forgerock.json.resource.servlet.HttpUtils.adapt;
 import static org.forgerock.json.resource.servlet.HttpUtils.asBooleanValue;
@@ -137,12 +138,15 @@ final class Servlet2RequestDispatcher implements RequestDispatcher {
     private static final class Runner implements RequestVisitor<ResourceException, Void> {
         private final Connection connection;
         private final Context context;
+        private final HttpServletRequest httpRequest;
         private final HttpServletResponse httpResponse;
         private final JsonGenerator writer;
 
-        private Runner(final Connection connection, final HttpServletResponse httpResponse,
-                final Context context, final JsonGenerator writer) {
+        private Runner(final Connection connection, final Context context,
+                final HttpServletRequest httpRequest, final HttpServletResponse httpResponse,
+                final JsonGenerator writer) {
             this.connection = connection;
+            this.httpRequest = httpRequest;
             this.httpResponse = httpResponse;
             this.context = context;
             this.writer = writer;
@@ -175,8 +179,10 @@ final class Servlet2RequestDispatcher implements RequestDispatcher {
         @Override
         public ResourceException visitCreateRequest(final Void p, final CreateRequest request) {
             try {
+                final Resource resource = connection.create(context, request);
+                httpResponse.setHeader(HEADER_LOCATION, getResourceURL(request, resource));
                 httpResponse.setStatus(HttpServletResponse.SC_CREATED);
-                writeResource(connection.create(context, request));
+                writeResource(resource);
                 return null;
             } catch (final ResourceException e) {
                 return e;
@@ -245,6 +251,24 @@ final class Servlet2RequestDispatcher implements RequestDispatcher {
             }
         }
 
+        private String getResourceURL(final CreateRequest request, final Resource resource) {
+            final StringBuffer buffer = httpRequest.getRequestURL();
+
+            // Strip out everything except the scheme and host.
+            buffer.setLength(buffer.length() - httpRequest.getRequestURI().length());
+
+            // Add back the context and servlet paths.
+            buffer.append(httpRequest.getContextPath());
+            buffer.append(httpRequest.getServletPath());
+
+            // Add new component and resource ID.
+            buffer.append(request.getComponent());
+            buffer.append('/');
+            buffer.append(resource.getId());
+
+            return buffer.toString();
+        }
+
         private ResourceException writeResource(final Resource resource) {
             if (resource.getRevision() != null) {
                 final StringBuilder builder = new StringBuilder();
@@ -307,7 +331,8 @@ final class Servlet2RequestDispatcher implements RequestDispatcher {
             httpResponse.setContentType(CONTENT_TYPE);
             httpResponse.setCharacterEncoding(CHARACTER_ENCODING);
 
-            final Runner runner = new Runner(connection, httpResponse, context, writer);
+            final Runner runner =
+                    new Runner(connection, context, httpRequest, httpResponse, writer);
             final ResourceException e = request.accept(runner, null);
             if (e != null) {
                 throw e;
