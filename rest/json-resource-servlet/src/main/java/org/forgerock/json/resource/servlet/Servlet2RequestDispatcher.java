@@ -182,8 +182,7 @@ final class Servlet2RequestDispatcher implements RequestDispatcher {
                 final Resource resource = connection.create(context, request);
                 httpResponse.setHeader(HEADER_LOCATION, getResourceURL(request, resource));
                 httpResponse.setStatus(HttpServletResponse.SC_CREATED);
-                writeResource(resource);
-                return null;
+                return writeResource(resource);
             } catch (final ResourceException e) {
                 return e;
             }
