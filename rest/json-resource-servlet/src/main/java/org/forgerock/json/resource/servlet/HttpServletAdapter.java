@@ -35,6 +35,7 @@ import static org.forgerock.json.resource.servlet.HttpUtils.asSingleValue;
 import static org.forgerock.json.resource.servlet.HttpUtils.fail;
 import static org.forgerock.json.resource.servlet.HttpUtils.getMethod;
 import static org.forgerock.json.resource.servlet.HttpUtils.isDebugRequested;
+import static org.forgerock.json.resource.servlet.RestApiInfoContext.newRestApiInfoContext;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -567,7 +568,7 @@ public final class HttpServletAdapter {
     }
 
     private Context newRequestContext(final HttpServletRequest req) {
-        return newHttpContext(parentContext, req);
+        return newRestApiInfoContext(newHttpContext(parentContext, req));
     }
 
     private boolean parseCommonParameter(final String name, final String[] values,
