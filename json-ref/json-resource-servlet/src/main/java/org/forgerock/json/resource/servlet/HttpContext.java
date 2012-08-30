@@ -31,9 +31,16 @@ import org.forgerock.util.Factory;
 import org.forgerock.util.LazyMap;
 
 /**
- * HTTP request context attributes.
+ * A {@link Context} containing information relating to the originating HTTP
+ * Servlet request. An HTTP {@link Context} will be created for each REST
+ * request having the {@link #CONTEXT_TYPE type} "http" and the
+ * {@link ContextAttribute}s defined in this class.
  */
 public final class HttpContext {
+    /**
+     * The {@link ContextAttribute#TYPE TYPE} of this context.
+     */
+    public static final String CONTEXT_TYPE = "http";
 
     /**
      * The reserved {@code Map<String, Object>} valued attribute
@@ -70,7 +77,7 @@ public final class HttpContext {
             new ContextAttribute<Map<String, Object>>("security");
 
     static Context newHttpContext(final Context parent, final HttpServletRequest req) {
-        final Context context = parent.newSubContext("http");
+        final Context context = parent.newSubContext(CONTEXT_TYPE);
 
         METHOD.set(context, HttpUtils.getMethod(req));
         PATH.set(context, req.getRequestURL().toString());
