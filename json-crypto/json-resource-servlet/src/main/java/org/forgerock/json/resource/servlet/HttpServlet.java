@@ -16,7 +16,7 @@
 package org.forgerock.json.resource.servlet;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -24,9 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.json.resource.Connections;
 import org.forgerock.json.resource.Context;
-import org.forgerock.json.resource.provider.RequestHandler;
 
 /**
  * An HTTP Servlet implementation which forwards requests to an
@@ -47,8 +45,9 @@ import org.forgerock.json.resource.provider.RequestHandler;
  * Most implementations will use the second approach.
  */
 public class HttpServlet extends javax.servlet.http.HttpServlet {
-    private static final String INIT_PARAM_CONNECTION_FACTORY_CLASS = "connection-factory-class";
-    private static final String INIT_PARAM_REQUEST_HANDLER_CLASS = "request-handler-class";
+    private static final String INIT_PARAM_CLASS = "connection-factory-class";
+    private static final String INIT_PARAM_METHOD = "connection-factory-method";
+    private static final String INIT_PARAM_METHOD_DEFAULT = "getConnectionFactory";
     private static final String METHOD_PATCH = "PATCH";
 
     private static final long serialVersionUID = 6089858120348026823L;
@@ -198,19 +197,19 @@ public class HttpServlet extends javax.servlet.http.HttpServlet {
      * <p>
      * The default implementation of this method attempts to instantiate the
      * connection factory using parameters defined in the Servlet's
-     * configuration. Firstly, this method uses the class name specified by the
-     * the {@code connection-factory-class} Servlet configuration parameter, if
-     * present, to instantiate a {@link ConnectionFactory}. If no such parameter
-     * is present then this method attempts to create a {@link RequestHandler}
-     * using the {@code request-handler-class} Servlet configuration parameter
-     * if present. Finally, if neither parameter is present, this method throws
-     * a {@link ServletException} as before.
-     * <p>
-     * In order to construct instances of {@code ConnectionFactory} or
-     * {@code RequestHandler} this method first attempts to use a constructor
-     * which accepts a {@link ServletConfig} as a parameter. If no such
-     * constructor is found, then it attempts to use the class' default
-     * constructor.
+     * configuration as follows:
+     * <ul>
+     * <li>it loads the class specified in the {@code connection-factory-class}
+     * Servlet configuration parameter
+     * <li>it looks for a static the factory method whose name is specified in
+     * the {@code connection-factory-method} Servlet configuration property
+     * (default {@code getConnectionFactory})
+     * <li>it invokes the static factory method, passing in the
+     * {@code ServletConfig} as a parameter if permitted by the method.
+     * </ul>
+     * If the Servlet configuration is unavailable or if the configuration does
+     * not contain a {@code connection-factory-class} parameter then this method
+     * will throw a {@code ServletException}.
      *
      * @return The connection factory which this Servlet should use.
      * @throws ServletException
@@ -220,19 +219,25 @@ public class HttpServlet extends javax.servlet.http.HttpServlet {
         final ServletConfig config = getServletConfig();
         if (config != null) {
             // Check for configured connection factory class first.
-            final String connectionFactoryClass =
-                    config.getInitParameter(INIT_PARAM_CONNECTION_FACTORY_CLASS);
-            if (connectionFactoryClass != null) {
-                return configureInstance(config, connectionFactoryClass, ConnectionFactory.class);
-            }
-
-            // Check for configured request handler class next.
-            final String requestHandlerClass =
-                    config.getInitParameter(INIT_PARAM_REQUEST_HANDLER_CLASS);
-            if (requestHandlerClass != null) {
-                final RequestHandler handler =
-                        configureInstance(config, requestHandlerClass, RequestHandler.class);
-                return Connections.newInternalConnectionFactory(handler);
+            final String className = config.getInitParameter(INIT_PARAM_CLASS);
+            if (className != null) {
+                final ClassLoader cl = getServletContext().getClassLoader();
+                try {
+                    final Class<?> cls = Class.forName(className, true, cl);
+                    final String tmp = config.getInitParameter(INIT_PARAM_METHOD);
+                    final String methodName = tmp != null ? tmp : INIT_PARAM_METHOD_DEFAULT;
+                    try {
+                        // Try method which accepts ServletConfig.
+                        final Method factoryMethod = cls.getMethod(methodName, ServletConfig.class);
+                        return (ConnectionFactory) factoryMethod.invoke(null, config);
+                    } catch (final NoSuchMethodException e) {
+                        // Try no-arg method.
+                        final Method factoryMethod = cls.getMethod(methodName);
+                        return (ConnectionFactory) factoryMethod.invoke(null);
+                    }
+                } catch (final Exception e) {
+                    throw new ServletException(e);
+                }
             }
         }
 
@@ -274,26 +279,6 @@ public class HttpServlet extends javax.servlet.http.HttpServlet {
         } else {
             // Delegate all other methods to super class.
             super.service(req, resp);
-        }
-    }
-
-    private <T> T configureInstance(final ServletConfig config,
-            final String connectionFactoryClass, final Class<T> clazz) throws ServletException {
-        final ClassLoader cl = getServletContext().getClassLoader();
-        try {
-            final Class<?> tmp = Class.forName(connectionFactoryClass, true, cl);
-            final Class<? extends T> cls = tmp.asSubclass(clazz);
-            try {
-                // Try constructor which accepts ServletConfig.
-                final Constructor<? extends T> constructor =
-                        cls.getConstructor(ServletConfig.class);
-                return constructor.newInstance(config);
-            } catch (final NoSuchMethodException e) {
-                // Try default constructor.
-                return cls.newInstance();
-            }
-        } catch (final Exception e) {
-            throw new ServletException(e);
         }
     }
 
