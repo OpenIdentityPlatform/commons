@@ -15,6 +15,8 @@
  */
 package org.forgerock.json.resource.servlet;
 
+import static org.forgerock.json.resource.servlet.ServletConfigurator.getServletConfigurator;
+
 import java.io.IOException;
 import java.lang.reflect.Method;
 
@@ -221,7 +223,7 @@ public class HttpServlet extends javax.servlet.http.HttpServlet {
             // Check for configured connection factory class first.
             final String className = config.getInitParameter(INIT_PARAM_CLASS);
             if (className != null) {
-                final ClassLoader cl = getServletContext().getClassLoader();
+                final ClassLoader cl = getServletConfigurator(getServletContext()).getClassLoader();
                 try {
                     final Class<?> cls = Class.forName(className, true, cl);
                     final String tmp = config.getInitParameter(INIT_PARAM_METHOD);
