@@ -36,6 +36,7 @@ import static org.forgerock.json.resource.servlet.HttpUtils.fail;
 import static org.forgerock.json.resource.servlet.HttpUtils.getMethod;
 import static org.forgerock.json.resource.servlet.HttpUtils.isDebugRequested;
 import static org.forgerock.json.resource.servlet.RestApiInfoContext.newRestApiInfoContext;
+import static org.forgerock.json.resource.servlet.ServletConfigurator.getServletConfigurator;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -141,19 +142,9 @@ public final class HttpServletAdapter {
             final Context parentContext) throws ServletException {
         this.servletContext = servletContext;
         this.parentContext = parentContext != null ? parentContext : Context.newRootContext();
-
-        switch (servletContext.getMajorVersion()) {
-        case 1:
-            // FIXME: i18n.
-            throw new ServletException("Unsupported Servlet version "
-                    + servletContext.getMajorVersion());
-        case 2:
-            this.dispatcher = new Servlet2RequestDispatcher(factory, jsonMapper.getJsonFactory());
-            break;
-        default:
-            this.dispatcher = new Servlet3RequestDispatcher(factory, jsonMapper.getJsonFactory());
-            break;
-        }
+        this.dispatcher =
+                getServletConfigurator(servletContext).getRequestDispatcher(factory,
+                        jsonMapper.getJsonFactory());
     }
 
     /**

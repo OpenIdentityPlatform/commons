@@ -58,14 +58,18 @@ final class HttpUtils {
     static final String PARAM_PRETTY_PRINT = "_pretty-print";
 
     /**
-     * Adapts an {@code IOException} to a {@code ResourceException}.
+     * Adapts an {@code Exception} to a {@code ResourceException}.
      *
      * @param e
-     *            The IO exception which caused the request to fail.
+     *            The exception which caused the request to fail.
      * @return The equivalent resource exception.
      */
-    static ResourceException adapt(final IOException e) {
-        return new InternalServerErrorException(e);
+    static ResourceException adapt(final Exception e) {
+        if (e instanceof ResourceException) {
+            return (ResourceException) e;
+        } else {
+            return new InternalServerErrorException(e);
+        }
     }
 
     /**
@@ -152,29 +156,18 @@ final class HttpUtils {
     }
 
     /**
-     * Safely fail an HTTP request using the provided {@code IOException}.
-     *
-     * @param resp
-     *            The HTTP response.
-     * @param e
-     *            The IO exception which caused the request to fail.
-     */
-    static void fail(final HttpServletResponse resp, final IOException e) {
-        fail(resp, adapt(e));
-    }
-
-    /**
-     * Safely fail an HTTP request using the provided {@code ResourceException}.
+     * Safely fail an HTTP request using the provided {@code Exception}.
      *
      * @param resp
      *            The HTTP response.
      * @param e
      *            The resource exception indicating why the request failed.
      */
-    static void fail(final HttpServletResponse resp, final ResourceException e) {
+    static void fail(final HttpServletResponse resp, final Exception e) {
         if (!resp.isCommitted()) {
+            final ResourceException re = adapt(e);
             try {
-                resp.sendError(e.getCode(), e.getMessage());
+                resp.sendError(re.getCode(), re.getMessage());
             } catch (final IOException ignored) {
                 // Ignore the error since this was probably the cause.
             }
