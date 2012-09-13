@@ -121,7 +121,9 @@
         
         <!-- maven-javadoc-plugin -->
         <javadocPluginVersion>2.8</javadocPluginVersion>
-        <javadocStylesheet>org/forgerock/javadoc/javadoc.css</javadocStylesheet>
+        <!-- forgerock-build-tools stylesheet org/forgerock/javadoc/javadoc.css
+             does not work with JDK7 -->
+        <javadocStylesheet></javadocStylesheet>
         <javadocWindowTitle>${project.name} ${project.version} Documentation</javadocWindowTitle>
         <javadocDocTitle>${javadocWindowTitle}</javadocDocTitle>
 
@@ -275,6 +277,9 @@
                     <version>1.2</version>
                 </plugin>
                 <plugin>
+                    <!--  See generate-javadoc profile - the configuration here
+                          must be aligned with the report configuration
+                          specified in the profile -->
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>${javadocPluginVersion}</version>
@@ -293,6 +298,8 @@
                         <header><![CDATA[<b>${javadocDocTitle}</b>]]></header>
                         <footer><![CDATA[<b>${javadocDocTitle}</b>]]></footer>
                         <additionalparam>-linksource</additionalparam>
+                        <show>protected</show>
+                        <excludePackageNames>com.*</excludePackageNames>
                         <stylesheetfile>${javadocStylesheet}</stylesheetfile>
                     </configuration>
                 </plugin>
@@ -755,6 +762,7 @@
                             <doctitle>${javadocDocTitle}</doctitle>
                             <header><![CDATA[<b>${javadocDocTitle}</b>]]></header>
                             <footer><![CDATA[<b>${javadocDocTitle}</b>]]></footer>
+                            <additionalparam>-linksource</additionalparam>
                             <show>protected</show>
                             <excludePackageNames>com.*</excludePackageNames>
                             <stylesheetfile>${javadocStylesheet}</stylesheetfile>
