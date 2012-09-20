@@ -929,6 +929,12 @@ public final class ForgeRockTestListener extends TestListenerAdapter implements 
     }
 
     private void writeReportToFile(final File reportFile) {
+        if (!reportFile.getParentFile().exists()) {
+            // Ignore errors since these  will be detected when we open the
+            // file anyway.
+            reportFile.getParentFile().mkdirs();
+        }
+
         PrintStream reportStream = null;
         try {
             reportStream = new PrintStream(new FileOutputStream(reportFile));

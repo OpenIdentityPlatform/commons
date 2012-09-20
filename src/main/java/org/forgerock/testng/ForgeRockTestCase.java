@@ -17,13 +17,12 @@
 
 package org.forgerock.testng;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.IdentityHashMap;
-import java.util.Set;
+//import java.lang.reflect.Field;
+//import java.lang.reflect.Modifier;
+//import java.util.IdentityHashMap;
+//import java.util.Set;
 
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.Test;
 
 /**
  * This class defines a base test case that should be sub-classed by all unit
@@ -32,8 +31,22 @@ import org.testng.annotations.Test;
  * This class adds the ability to print error messages and automatically have
  * them include the class name.
  */
-@Test
 public abstract class ForgeRockTestCase {
+
+    /*
+     * FIXME: this class has been commented out since it is not clear whether it
+     * provides any value forward. More specifically, OpenDJ server runs 35K
+     * unit tests in a single monolithic suite which causes memory management
+     * problems due to the large amount of test data that needs to be cached for
+     * report generation at test completion. Moving forward we will be splitting
+     * our projects into smaller Maven modules whose associated unit test suites
+     * should be much smaller and, therefore, less demanding.
+     */
+
+    /*
+     * Unit tests should still continue to inherit from this class in case we do
+     * want to reintroduce or implement common functionality in future.
+     */
 
     /*
      * This is all a HACK to reduce the amount of memory that's consumed.
@@ -50,14 +63,14 @@ public abstract class ForgeRockTestCase {
      * method. We can't just clear it out right away in the TestListener because
      * some methods share a @DataProvider.
      */
-    private final IdentityHashMap<Object[], Object> successfulTestParams = new IdentityHashMap<Object[], Object>();
+//    private final IdentityHashMap<Object[], Object> successfulTestParams = new IdentityHashMap<Object[], Object>();
 
     /**
      * These are test parameters from a test that has failed. We need to keep
      * these around because the test report expects to find them when printing
      * out failures.
      */
-    private final IdentityHashMap<Object[], Object> failedTestParams = new IdentityHashMap<Object[], Object>();
+//    private final IdentityHashMap<Object[], Object> failedTestParams = new IdentityHashMap<Object[], Object>();
 
     /**
      * Null out all test parameters except the ones used in failed tests since
@@ -65,20 +78,20 @@ public abstract class ForgeRockTestCase {
      */
     @AfterClass(alwaysRun = true)
     public final void clearSuccessfulTestParams() {
-        final Set<Object[]> paramsSet = successfulTestParams.keySet();
-        if (paramsSet == null) { // Can this ever happen?
-            return;
-        }
-        for (final Object[] params : paramsSet) {
-            if (failedTestParams.containsKey(params)) {
-                continue;
-            }
-            for (int i = 0; i < params.length; i++) {
-                params[i] = null;
-            }
-        }
-        successfulTestParams.clear();
-        failedTestParams.clear();
+//        final Set<Object[]> paramsSet = successfulTestParams.keySet();
+//        if (paramsSet == null) { // Can this ever happen?
+//            return;
+//        }
+//        for (final Object[] params : paramsSet) {
+//            if (failedTestParams.containsKey(params)) {
+//                continue;
+//            }
+//            for (int i = 0; i < params.length; i++) {
+//                params[i] = null;
+//            }
+//        }
+//        successfulTestParams.clear();
+//        failedTestParams.clear();
     }
 
     /**
@@ -90,38 +103,38 @@ public abstract class ForgeRockTestCase {
      */
     @AfterClass(alwaysRun = true)
     public final void nullMemberVariablesAfterTest() {
-        Class<?> cls = this.getClass();
-        /*
-         * Iterate through all of the fields in all subclasses of
-         * ForgeRockTestCase, but not ForgeRockTestCase itself.
-         */
-        while (ForgeRockTestCase.class.isAssignableFrom(cls)
-                && !ForgeRockTestCase.class.equals(cls)) {
-            final Field fields[] = cls.getDeclaredFields();
-            for (final Field field : fields) {
-                final int modifiers = field.getModifiers();
-                final Class<?> fieldClass = field.getType();
-
-                /*
-                 * If it's a non-static non-final non-primitive type, then null
-                 * it out so that the garbage collector can reclaim it and
-                 * everything it references.
-                 */
-                if (!fieldClass.isPrimitive() && !fieldClass.isEnum()
-                        && !Modifier.isFinal(modifiers) && !Modifier.isStatic(modifiers)) {
-                    field.setAccessible(true);
-                    try {
-                        field.set(this, null);
-                    } catch (final IllegalAccessException e) {
-                        /*
-                         * We're only doing this to save memory, so it's no big
-                         * deal if we can't set it.
-                         */
-                    }
-                }
-            }
-            cls = cls.getSuperclass();
-        }
+//        Class<?> cls = this.getClass();
+//        /*
+//         * Iterate through all of the fields in all subclasses of
+//         * ForgeRockTestCase, but not ForgeRockTestCase itself.
+//         */
+//        while (ForgeRockTestCase.class.isAssignableFrom(cls)
+//                && !ForgeRockTestCase.class.equals(cls)) {
+//            final Field fields[] = cls.getDeclaredFields();
+//            for (final Field field : fields) {
+//                final int modifiers = field.getModifiers();
+//                final Class<?> fieldClass = field.getType();
+//
+//                /*
+//                 * If it's a non-static non-final non-primitive type, then null
+//                 * it out so that the garbage collector can reclaim it and
+//                 * everything it references.
+//                 */
+//                if (!fieldClass.isPrimitive() && !fieldClass.isEnum()
+//                        && !Modifier.isFinal(modifiers) && !Modifier.isStatic(modifiers)) {
+//                    field.setAccessible(true);
+//                    try {
+//                        field.set(this, null);
+//                    } catch (final IllegalAccessException e) {
+//                        /*
+//                         * We're only doing this to save memory, so it's no big
+//                         * deal if we can't set it.
+//                         */
+//                    }
+//                }
+//            }
+//            cls = cls.getSuperclass();
+//        }
     }
 
     /**
@@ -129,9 +142,9 @@ public abstract class ForgeRockTestCase {
      * know to NOT null it out later.
      */
     final void addParamsFromFailedTest(final Object[] testParams) {
-        if (testParams != null) {
-            failedTestParams.put(testParams, testParams);
-        }
+//        if (testParams != null) {
+//            failedTestParams.put(testParams, testParams);
+//        }
     }
 
     /**
@@ -139,8 +152,8 @@ public abstract class ForgeRockTestCase {
      * out later if it's not part.
      */
     final void addParamsFromSuccessfulTests(final Object[] testParams) {
-        if (testParams != null) {
-            successfulTestParams.put(testParams, testParams);
-        }
+//        if (testParams != null) {
+//            successfulTestParams.put(testParams, testParams);
+//        }
     }
 }
