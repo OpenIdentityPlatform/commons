@@ -47,6 +47,14 @@ under the License.
           <role>Add support to extra compressed artifacts like bzip2, dir, gzip, tar, tgz, tar.gz, tbz2, tar.bz2</role>
         </roles>
       </contributor>
+      <contributor> 
+            <name>Valera Kharseko</name>
+            <email>vharseko@openam.org.ru</email>
+            <roles>
+                <role>vagon extension provider</role>
+            </roles>
+            <url>http://openam.org.ru</url>
+        </contributor>
     </contributors>
     <issueManagement>
         <system>Google Code - Issue Tracking</system>
@@ -59,8 +67,15 @@ under the License.
 	    <distribution>repo</distribution>
 	    <comments>A business-friendly OSS license</comments>
 	  </license>
-	</licenses>
+	</licenses>    
     
+    <!-- BUILD PROPERTIES -->
+    <properties>
+        <!-- PROJECT ENCODING PROPERTIES -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    </properties>
+        
     <!--  PLUGINS -->
     
     <build>
@@ -193,7 +208,17 @@ under the License.
           <groupId>org.codehaus.plexus</groupId>
           <artifactId>plexus-archiver</artifactId>
           <version>1.1</version>
-        </dependency> 
+        </dependency>
+        <dependency>
+        	<groupId>org.apache.maven</groupId>
+        	<artifactId>maven-settings</artifactId>
+        	<version>2.2.1</version>
+        </dependency>
+        <dependency>
+        	<groupId>org.apache.maven.wagon</groupId>
+        	<artifactId>wagon-provider-api</artifactId>
+        	<version>2.2</version>
+        </dependency>
     </dependencies>
     
     <!--  SOURCE CONTROL -->

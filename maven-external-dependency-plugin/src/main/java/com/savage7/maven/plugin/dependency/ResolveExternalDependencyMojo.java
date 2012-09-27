@@ -20,12 +20,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.settings.MavenSettingsBuilder;
+import org.apache.maven.settings.Proxy;
+import org.apache.maven.settings.Settings;
+import org.apache.maven.wagon.Wagon;
+import org.apache.maven.wagon.observers.Debug;
+import org.apache.maven.wagon.proxy.ProxyInfo;
+import org.apache.maven.wagon.repository.Repository;
 import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.UnArchiver;
 import org.codehaus.plexus.archiver.manager.ArchiverManager;
@@ -66,7 +74,7 @@ public class ResolveExternalDependencyMojo extends
      * @readonly
      * @required
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
     protected java.util.List remoteRepositories;
 
     /**
@@ -75,6 +83,20 @@ public class ResolveExternalDependencyMojo extends
      */
     protected ArchiverManager archiverManager;
 
+    /** 
+     * @component 
+     * @required 
+     * @readonly 
+     */ 
+    private WagonManager wagonManager; 
+
+    /** 
+     * @component 
+     * @required 
+     * @readonly 
+     */ 
+    private MavenSettingsBuilder mavenSettingsBuilder; 
+    
     public void execute() throws MojoExecutionException, MojoFailureException
     {
         try
@@ -152,7 +174,39 @@ public class ResolveExternalDependencyMojo extends
                                     + tempDownloadFile.getCanonicalPath());
 
                             // download file from URL
-                            FileUtils.copyURLToFile(downloadUrl, tempDownloadFile);
+                            //FileUtils.copyURLToFile(downloadUrl, tempDownloadFile);
+
+                            //vharseko@openam.org.ru
+                            String endPointUrl = downloadUrl.getProtocol() + "://"+ downloadUrl.getAuthority();
+                            Repository repository = new Repository("additonal-configs", endPointUrl);
+                            Wagon wagon = wagonManager.getWagon(downloadUrl.getProtocol());
+                            if (getLog().isDebugEnabled())
+                            {
+                                Debug debug = new Debug();
+                                wagon.addSessionListener(debug);
+                                wagon.addTransferListener(debug);
+                            }
+                            wagon.setTimeout(1000);
+                            Settings settings = mavenSettingsBuilder.buildSettings();
+                            ProxyInfo proxyInfo = null;
+                            if (settings != null&& settings.getActiveProxy() != null)
+                            {
+                                Proxy settingsProxy = settings.getActiveProxy();
+                                proxyInfo = new ProxyInfo();
+                                proxyInfo.setHost(settingsProxy.getHost());
+                                proxyInfo.setType(settingsProxy.getProtocol());
+                                proxyInfo.setPort(settingsProxy.getPort());
+                                proxyInfo.setNonProxyHosts(settingsProxy.getNonProxyHosts());
+                                proxyInfo.setUserName(settingsProxy.getUsername());
+                                proxyInfo.setPassword(settingsProxy.getPassword());
+                            }
+
+                            if (proxyInfo != null)
+                                wagon.connect(repository, wagonManager.getAuthenticationInfo(repository.getId()),proxyInfo);
+                            else
+                                wagon.connect(repository, wagonManager.getAuthenticationInfo(repository.getId()));
+                            
+                            wagon.get(downloadUrl.getPath(), tempDownloadFile);
 
                             getLog().debug(
                                 "caching temporary file for later");
