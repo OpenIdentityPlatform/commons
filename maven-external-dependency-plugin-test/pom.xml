@@ -4,9 +4,17 @@
 	<groupId>com.savage7.maven.plugins</groupId>
 	<artifactId>maven-external-dependency-plugin-test</artifactId>
 	<packaging>jar</packaging>
-	<version>0.5</version>
+	<version>0.6-SNAPSHOT</version>
 	<name>maven-external-dependency-plugin-test</name>
 	<url>http://code.google.com/p/maven-external-dependency-plugin/</url>
+	
+    <!-- BUILD PROPERTIES -->
+    <properties>
+        <!-- PROJECT ENCODING PROPERTIES -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    </properties>
+    
 	<build>
 		<plugins>
 
@@ -26,7 +34,7 @@
 			<plugin>
 				<groupId>com.savage7.maven.plugins</groupId>
 				<artifactId>maven-external-dependency-plugin</artifactId>
-				<version>0.5-SNAPSHOT</version>
+				<version>0.6-SNAPSHOT</version>
 				<inherited>false</inherited>
 				<configuration>
 					<stagingDirectory>
@@ -42,7 +50,7 @@
 						<artifactItem>
 							<groupId>com.google.code</groupId>
 							<artifactId>google-api-translate-java</artifactId>
-							<version>0.92</version>
+							<version>0.97</version>
 							<packaging>jar</packaging>
 							<downloadUrl>
 								http://google-api-translate-java.googlecode.com/files/{artifactId}-{version}.jar
@@ -66,13 +74,13 @@
 						<artifactItem>
 							<groupId>org.apache.ant</groupId>
 							<artifactId>apache-ant</artifactId>
-							<version>1.8.1</version>
+							<version>1.8.4</version>
 							<classifier>bin</classifier>
 							<packaging>zip</packaging>
 							<downloadUrl>
 								http://apache.securedservers.com/ant/binaries/{artifactId}-{version}-{classifier}.zip
                         </downloadUrl>
-							<checksum>671a3d4431df7e9ce29c08f7fcd7533d</checksum>
+							<checksum>f1fe34f9de8b40cb8811a6286faec4ec7a35ba23</checksum>
 						</artifactItem>
 
 						<!-- HERE IS AN EXAMPLE OF AN ARTIFACT EXTRACTED FROM A ZIP FILE -->
@@ -98,20 +106,22 @@
 
 
 						<!-- DIFFERENT CHECKSUMS FOR DOWNLOAD FILE AND EXTRACTED FILE -->
+						<!-- 
 						<artifactItem>
 							<groupId>de.innosystec</groupId>
 							<artifactId>java-unrar</artifactId>
-							<version>0.3</version>
+							<version>0.5</version>
 							<packaging>jar</packaging>
 							<downloadUrl>
-								http://github.com/downloads/edmund-wagner/junrar/java-unrar-{version}.zip
+								https://github.com/downloads/edmund-wagner/junrar/java-unrar-{version}.zip
 				            </downloadUrl>
-							<checksum>530351609180152cff40fa1c79a28193185aba83</checksum> <!-- this checksum is applied to the download file -->
+							<checksum>2C55D845394FAA6A6B5C2C477E280BC50D73DF32</checksum>
 							<install>true</install>
 							<force>false</force>
 							<extractFile>java-unrar/java-unrar-{version}.jar</extractFile>
-							<extractFileChecksum>bce51f76274c41ddac3ca8e99378ff2893108049</extractFileChecksum>  <!-- this checksum is applied to the extracted file -->
+							<extractFileChecksum>111074096B6BDCE79FA09842143C336A5CF64FCB</extractFileChecksum>
 						</artifactItem>
+						 -->
 
 					</artifactItems>
 
@@ -163,6 +173,46 @@
 		<!-- </extension> -->
 		<!-- </extensions> -->
 
+		<pluginManagement>
+			<plugins>
+				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											com.savage7.maven.plugins
+										</groupId>
+										<artifactId>
+											maven-external-dependency-plugin
+										</artifactId>
+										<versionRange>
+											[0.5-SNAPSHOT,)
+										</versionRange>
+										<goals>
+											<goal>
+												resolve-external
+											</goal>
+											<goal>
+												install-external
+											</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
 
 
@@ -173,7 +223,7 @@
 		<dependency>
 			<groupId>com.google.code</groupId>
 			<artifactId>google-api-translate-java</artifactId>
-			<version>0.92</version>
+			<version>0.97</version>
 		</dependency>
 
 		<dependency>
@@ -189,6 +239,12 @@
 			<version>3.8.1</version>
 			<scope>test</scope>
 		</dependency>
+		
+		<dependency>
+		    <groupId>org.json</groupId>
+		    <artifactId>json</artifactId>
+		    <version>20090211</version>
+		</dependency>		
 
 	</dependencies>
 
@@ -206,7 +262,7 @@
 
 	<repositories>
 		<repository>
-			<id>artifactory</id>
+			<id>artifactory-snapshots</id>
 			<name>libs-snapshots</name>
 			<url>http://localhost:8081/artifactory/libs-snapshots-local</url>
 			<snapshots>
@@ -214,7 +270,7 @@
 			</snapshots>
 		</repository>
 		<repository>
-			<id>artifactory</id>
+			<id>artifactory-releases</id>
 			<name>libs-releases</name>
 			<url>http://localhost:8081/artifactory/libs-releases-local</url>
 			<snapshots>
@@ -240,13 +296,13 @@
 
 	<distributionManagement>
 		<repository>
-			<id>artifactory</id>
+			<id>artifactory-releases</id>
 			<name>libs-releases</name>
 			<url>http://localhost:8081/artifactory/libs-releases-local</url>
 		</repository>
 		<snapshotRepository>
 			<uniqueVersion>false</uniqueVersion>
-			<id>artifactory</id>
+			<id>artifactory-snapshots</id>
 			<name>libs-snapshots</name>
 			<url>http://localhost:8081/artifactory/libs-snapshots-local</url>
 		</snapshotRepository>
