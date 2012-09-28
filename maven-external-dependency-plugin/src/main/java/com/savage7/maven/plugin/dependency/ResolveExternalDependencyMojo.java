@@ -206,7 +206,7 @@ public class ResolveExternalDependencyMojo extends
                             else
                                 wagon.connect(repository, wagonManager.getAuthenticationInfo(repository.getId()));
                             
-                            wagon.get(downloadUrl.getPath(), tempDownloadFile);
+                            wagon.get(downloadUrl.getPath().substring(1), tempDownloadFile);
 
                             getLog().debug(
                                 "caching temporary file for later");
