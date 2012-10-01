@@ -63,8 +63,18 @@ define("config/process/UserConfig", [
                     eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: false});
                     router.init();
                 }, function() {
-                    eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: true});
-                    router.init();
+                    userDelegate.forInternalCredentials(function(user) {
+                        if(!user.userName && user._id) {
+                            user.userName = user._id;
+                        }
+                        
+                        conf.setProperty('loggedUser', user);
+                        eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: false});
+                        router.init();
+                    }, function() {
+                        eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: true});
+                        router.init();
+                    }, {"serverError": {status: "503"}, "unauthorized": {status: "401"}});
                 }, {"serverError": {status: "503"}, "unauthorized": {status: "401"}});
             }    
         },
@@ -171,8 +181,11 @@ define("config/process/UserConfig", [
             processDescription: function(userData, userDelegate, conf, loginCtrl, appConfiguration, router) {
                 var loggedUser = userData.user;                
                 
-                //if(loggedUser.roles && loggedUser.roles.indexOf("openidm-admin") !== -1) {
-                if(userData.userName === "openidm-admin") {
+                if(loggedUser.roles && loggedUser.roles.indexOf("openidm-admin") !== -1) {
+                    if(!loggedUser.userName && loggedUser._id) {
+                        loggedUser.userName = loggedUser._id;
+                    }
+                    
                     conf.setProperty('loggedUser', {roles: "openidm-admin,openidm-authorized", userName: userData.userName});
                     eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: false});
                     
@@ -251,14 +264,23 @@ define("config/process/UserConfig", [
                      eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unauthorized");
                      router.routeTo("", {trigger: true});
                  }, function() {
-                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unauthorized");
-                     console.log("Saving redirection link" + window.location.hash);
-                     
-                     if(!conf.gotoURL) {
-                         conf.setProperty("gotoURL", window.location.hash);
-                     }
-                     
-                     eventManager.sendEvent(constants.EVENT_LOGOUT);                                         
+                     userDelegate.forInternalCredentials(function(user) {
+                         if(!user.userName && user._id) {
+                             user.userName = user._id;
+                         }
+                         
+                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unauthorized");
+                         router.routeTo("", {trigger: true});
+                     }, function() {
+                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unauthorized");
+                         console.log("Saving redirection link" + window.location.hash);
+                         
+                         if(!conf.gotoURL) {
+                             conf.setProperty("gotoURL", window.location.hash);
+                         }
+                         
+                         eventManager.sendEvent(constants.EVENT_LOGOUT);  
+                     });                                    
                  }, {"serverError": {status: "503"}, "unauthorized": {status: "401"}});    
              }
          },

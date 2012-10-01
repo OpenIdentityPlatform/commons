@@ -37,7 +37,11 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
     };
 
     obj.prototype.serviceCall = function(callParams) {
-        callParams.url = this.serviceUrl + callParams.url;
+        if(callParams.serviceUrl) {
+            callParams.url = callParams.serviceUrl + callParams.url;
+        } else {
+            callParams.url = this.serviceUrl + callParams.url;
+        }
         serviceInvoker.restCall(callParams);
     };
 

@@ -26,7 +26,6 @@
 
 define("org/forgerock/commons/ui/user/main", [
     "./delegates/UserDelegate",
-    "./delegates/InternalUserDelegate",
     "./login/LoginCtrl",
     "./login/OpenAMLoginHelper",
     "./login/InternalLoginHelper",  

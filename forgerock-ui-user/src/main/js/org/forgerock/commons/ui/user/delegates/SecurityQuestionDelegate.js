@@ -22,51 +22,41 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define */
+/*global $, define, _ */
 
 /**
- * @author yaromin
+ * @author jdabrowski
  */
-define("org/forgerock/commons/ui/user/delegates/InternalUserDelegate", [
+define("org/forgerock/commons/ui/user/delegates/SecurityQuestionDelegate", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/EventManager"
 ], function(constants, AbstractDelegate, configuration, eventManager) {
 
-    var obj = new AbstractDelegate(constants.host + "/openidm/internal/user");
+    var obj = new AbstractDelegate(constants.host + "/openidm/config/ui/secquestions");
 
-    /**
-     * Check credentials method
-     */
-    obj.checkCredentials = function(uid, password, successCallback, errorCallback) {
-        obj.serviceCall({
-            url: "/?_query-id=for-credentials&" + $.param({password: password, uid: uid.toLowerCase()}),
-            success: successCallback,
-            error: errorCallback
-        });
+    obj.getAllSecurityQuestions = function(successCallback, errorCallback) {
+        var i;
+        if (obj.pureSecurityQuestions) {
+            successCallback(obj.pureSecurityQuestions);
+        } else {
+            console.info("Getting all security questions");
+            
+            obj.serviceCall({url: "", success: function(data) {
+                if(successCallback) {
+                    obj.pureSecurityQuestions = data.securityquestions;
+                    obj.securityQuestions = {};
+                    for (i = 0; i < data.securityquestions.length; i++) {
+                        obj.securityQuestions[data.securityquestions[i].key] = data.securityquestions[i];
+                    }
+               
+                    successCallback(data.securityquestions);
+                }
+            }, error: errorCallback} );
+        }
     };
     
-    /**
-     * Checks if logged in and returns profile
-     */
-    obj.getProfile = function(successCallback, errorCallback, errorsHandlers) {
-        obj.serviceCall({
-            url: "/?_query-id=for-credentials",
-            success: function (data) {
-                if(!data.result || data.result.length !== 1) {
-                    if(errorCallback) {
-                        errorCallback();
-                    }
-                } else if(successCallback) {
-                    successCallback(data.result[0]);
-                }
-            },
-            error: errorCallback,
-            errorsHandlers: errorsHandlers
-        });
-    };
-
     return obj;
 });
 

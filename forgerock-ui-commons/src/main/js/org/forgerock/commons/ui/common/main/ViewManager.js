@@ -28,8 +28,8 @@
  * @author mbilski
  */
 define("org/forgerock/commons/ui/common/main/ViewManager", [
-    "org/forgerock/commons/ui/common/util/UIUtils"    
-], function(uiUtils) {
+    "org/forgerock/commons/ui/common/util/UIUtils"
+], function(uiUtils, msg) {
     var obj = {};
     
     obj.currentView = "null";
@@ -58,7 +58,7 @@ define("org/forgerock/commons/ui/common/main/ViewManager", [
                 callback();
             }
         }
-        
+
         obj.currentView = viewPath;
         obj.currentDialog = "null";
     };

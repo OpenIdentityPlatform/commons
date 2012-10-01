@@ -30,8 +30,9 @@ define("org/forgerock/commons/ui/user/ForgottenPasswordDialog", [
     "org/forgerock/commons/ui/user/delegates/UserDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/main/Configuration"
-], function(Dialog, validatorsManager, userDelegate, eventManager, constants, conf) {
+    "org/forgerock/commons/ui/common/main/Configuration",
+    "org/forgerock/commons/ui/user/delegates/SecurityQuestionDelegate"
+], function(Dialog, validatorsManager, userDelegate, eventManager, constants, conf, securityQuestionDelegate) {
     var ForgottenPasswordDialog = Dialog.extend({    
         contentTemplate: "templates/user/ForgottenPasswordTemplate.html",
         baseTemplate: "templates/user/LoginBaseTemplate.html",
@@ -69,8 +70,8 @@ define("org/forgerock/commons/ui/user/ForgottenPasswordDialog", [
             }, this));
             
             securityQuestionRef = this.securityQuestions;
-            $.getJSON("data/secquestions.json", function(data) {
-                $.each(data, function(i,item){
+            securityQuestionDelegate.getAllSecurityQuestions(function(secquestions) {
+                $.each(secquestions, function(i,item){
                     securityQuestionRef[item.key] = item.value;
                 });
             });
@@ -101,7 +102,7 @@ define("org/forgerock/commons/ui/user/ForgottenPasswordDialog", [
         },
         
         changePassword: function() {
-            var dialog = this.close(), userName = this.$el.find("input[name=resetEmail]").val(), securityAnswer = this.$el.find("input[name=fgtnSecurityAnswer]").val(), newPassword = this.$el.find("input[name=password]").val();
+            var dialog = this, userName = this.$el.find("input[name=resetEmail]").val(), securityAnswer = this.$el.find("input[name=fgtnSecurityAnswer]").val(), newPassword = this.$el.find("input[name=password]").val();
             console.log("changing password");
             
             userDelegate.setNewPassword(userName, securityAnswer, newPassword,

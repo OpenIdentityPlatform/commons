@@ -34,8 +34,9 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
     "org/forgerock/commons/ui/user/delegates/UserDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/main/Configuration"
-], function(AbstractView, validatorsManager, uiUtils, userDelegate, eventManager, constants, conf) {
+    "org/forgerock/commons/ui/common/main/Configuration",
+    "org/forgerock/commons/ui/user/delegates/CountryStateDelegate"
+], function(AbstractView, validatorsManager, uiUtils, userDelegate, eventManager, constants, conf, countryStateDelegate) {
     var UserProfileView = AbstractView.extend({
         template: "templates/user/UserProfileTemplate.html",
         events: {
@@ -80,16 +81,19 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
         
         render: function(args, callback) {
             this.parentRender(function() {
+                var self = this;
                 validatorsManager.bindValidators(this.$el);
                 
-                uiUtils.loadSelectOptions("data/countries.json", $("select[name='country']"), true, _.bind(function() {
-                    if(conf.loggedUser.country) {
-                        this.$el.find("select[name='country'] > option:first").text("");
-                        this.$el.find("select[name='country']").val(conf.loggedUser.country);
-                        
-                        this.loadStates();
-                    }
-                }, this));
+                countryStateDelegate.getAllCountries( function(countries) {
+                    uiUtils.loadSelectOptions(countries, $("select[name='country']"), true, _.bind(function() {
+                        if(conf.loggedUser.country) {
+                            this.$el.find("select[name='country'] > option:first").text("");
+                            this.$el.find("select[name='country']").val(conf.loggedUser.country);
+                            
+                            this.loadStates();
+                        }
+                    }, self));
+                });
 
                 this.reloadData();
                 
@@ -100,17 +104,19 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
         },
         
         loadStates: function() {
-            var country = $('#profile select[name="country"]').val();            
+            var country = $('#profile select[name="country"]').val(), self = this;            
               
             if(country) {
                 this.$el.find("select[name='country'] > option:first").text("");
                 
-                uiUtils.loadSelectOptions("data/"+country+".json", $("select[name='stateProvince']"), true, _.bind(function() {
-                    if(conf.loggedUser.stateProvince) {
-                        this.$el.find("select[name='stateProvince'] > option:first").text("");
-                        this.$el.find("select[name='stateProvince']").val(conf.loggedUser.stateProvince);
-                    }
-                }, this));
+                countryStateDelegate.getAllStatesForCountry(country, function(states) {
+                    uiUtils.loadSelectOptions(states, $("select[name='stateProvince']"), true, _.bind(function() {
+                        if(conf.loggedUser.stateProvince) {
+                            this.$el.find("select[name='stateProvince'] > option:first").text("");
+                            this.$el.find("select[name='stateProvince']").val(conf.loggedUser.stateProvince);
+                        }
+                    }, self));
+                });
             } else {
                 this.$el.find("select[name='stateProvince']").emptySelect();
                 this.$el.find("select[name='country'] > option:first").text("Please Select");

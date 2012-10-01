@@ -37,7 +37,11 @@ define("org/forgerock/commons/ui/user/login/InternalLoginHelper", [
         userDelegate.logAndGetUserDataByCredentials(userName, password, function(user) {
             eventManager.sendEvent(constants.EVENT_SUCCESFULY_LOGGGED_IN, {user: user, userName: userName});
         }, function() {
-            eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "invalidCredentials");
+            userDelegate.internalLogIn(userName, password, function(user) {
+                eventManager.sendEvent(constants.EVENT_SUCCESFULY_LOGGGED_IN, {user: user, userName: userName});
+            }, function() {
+                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "invalidCredentials");   
+            }, {"unauthorized": { status: "401"}});
         }, {"unauthorized": { status: "401"}});
     };
 

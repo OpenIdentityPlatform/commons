@@ -169,29 +169,19 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         });
     };
     
-    obj.loadSelectOptions = function(url, el, empty, callback) {
-        $.ajax({
-            type : "GET",
-            url : url,
-            dataType : "json",
-            success : function(data) {                
-                if( empty === undefined || empty === true ) {
-                    data = [ {
-                        "key" : "",
-                        "value" : "Please Select"
-                    } ].concat(data);
-                }
-                
-                el.loadSelect(data);
-                
-                if(callback) {
-                    callback(data);
-                }
-            },
-            error : function(xhr) {
-                console.log('Error: ' + xhr.status + ' ' + xhr.statusText); 
+    obj.loadSelectOptions = function(data, el, empty, callback) {
+        if( empty === undefined || empty === true ) {
+            data = [ {
+                "key" : "",
+                "value" : "Please Select"
+            } ].concat(data);
             }
-        });
+                
+        el.loadSelect(data);
+                
+        if(callback) {
+            callback(data);
+        }
     };
     
     return obj;

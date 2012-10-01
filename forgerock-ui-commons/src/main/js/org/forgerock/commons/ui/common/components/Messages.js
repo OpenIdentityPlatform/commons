@@ -40,6 +40,9 @@ define("org/forgerock/commons/ui/common/components/Messages", [
         messages: [],
         numberOfMessages: 0,
         el: "#messages",
+        events: {
+            "click div": "hideMessages"
+        },
         
         displayMessageFromConfig: function(msgKey) {
             this.addMessage({message: obj.configuration.messages[msgKey].msg, type: obj.configuration.messages[msgKey].type});
@@ -95,6 +98,10 @@ define("org/forgerock/commons/ui/common/components/Messages", [
                     }
                 });
             }            
+        },
+        
+        hideMessages : function() {
+            this.$el.find("div").fadeOut(500);
         }
     });
     

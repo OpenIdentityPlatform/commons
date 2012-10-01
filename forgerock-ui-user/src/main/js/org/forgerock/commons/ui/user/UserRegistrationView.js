@@ -34,8 +34,10 @@ define("org/forgerock/commons/ui/user/UserRegistrationView", [
     "org/forgerock/commons/ui/user/delegates/UserDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/main/Configuration"
-], function(AbstractView, validatorsManager, uiUtils, userDelegate, eventManager, constants, conf) {
+    "org/forgerock/commons/ui/common/main/Configuration",
+    "org/forgerock/commons/ui/user/delegates/CountryStateDelegate",
+    "org/forgerock/commons/ui/user/delegates/SecurityQuestionDelegate"
+], function(AbstractView, validatorsManager, uiUtils, userDelegate, eventManager, constants, conf, countryStateDelegate, securityQuestionDelegate) {
     var UserRegistrationView = AbstractView.extend({
         template: "templates/user/UserRegistrationTemplate.html",
         baseTemplate: "templates/user/LoginBaseTemplate.html",
@@ -94,7 +96,9 @@ define("org/forgerock/commons/ui/user/UserRegistrationView", [
                 validatorsManager.bindValidators(this.$el);
                 this.unlock();
                 
-                uiUtils.loadSelectOptions("data/secquestions.json", $("select[name='securityQuestion']"));
+                securityQuestionDelegate.getAllSecurityQuestions(function(secquestions) {
+                    uiUtils.loadSelectOptions(secquestions, $("select[name='securityQuestion']"));
+                });
                 
                 this.siteImageCounter = 0;
                 $("#siteImageFlow img").load(_.bind(this.refreshFlow, this));

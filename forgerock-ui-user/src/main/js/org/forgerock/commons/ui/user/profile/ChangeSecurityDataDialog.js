@@ -34,8 +34,9 @@ define("org/forgerock/commons/ui/user/profile/ChangeSecurityDataDialog", [
     "org/forgerock/commons/ui/user/delegates/UserDelegate",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/commons/ui/common/util/Constants"
-], function(Dialog, validatorsManager, conf, userDelegate, uiUtils, eventManager, constants) {
+    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/user/delegates/SecurityQuestionDelegate"
+], function(Dialog, validatorsManager, conf, userDelegate, uiUtils, eventManager, constants, securityQuestionDelegate) {
     var ChangeSecurityDataDialog = Dialog.extend({    
         contentTemplate: "templates/user/ChangeSecurityDataDialogTemplate.html",
         
@@ -99,16 +100,16 @@ define("org/forgerock/commons/ui/user/profile/ChangeSecurityDataDialog", [
         },
         
         reloadData: function() {
-            var user = conf.loggedUser;
+            var user = conf.loggedUser, self = this;
             
-            uiUtils.loadSelectOptions("data/secquestions.json", this.$el.find("select[name='securityQuestion']"), 
-                false, _.bind(function() {
-                
-                this.$el.find("select[name='securityQuestion']").val(user.securityQuestion);                
-                this.$el.find("input[name=oldSecurityQuestion]").val(user.securityQuestion);                
-                validatorsManager.validateAllFields(this.$el);
-            }, this));
-            
+            securityQuestionDelegate.getAllSecurityQuestions(function(secquestions) {
+                uiUtils.loadSelectOptions(secquestions, self.$el.find("select[name='securityQuestion']"), 
+                    false, _.bind(function() {
+                        this.$el.find("select[name='securityQuestion']").val(user.securityQuestion);                
+                        this.$el.find("input[name=oldSecurityQuestion]").val(user.securityQuestion);                
+                    validatorsManager.validateAllFields(this.$el);
+                }, self));
+            });
             this.$el.find("select[name=securityQuestion]").on('change', _.bind(function() {
                 this.$el.find("input[name=securityAnswer]").trigger('change');
             }, this));

@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define */
+/*global $, define, _ */
 
 /**
  * @author yaromin
@@ -124,7 +124,31 @@ define("org/forgerock/commons/ui/user/delegates/UserDelegate", [
             url: "/?_query-id=for-credentials",
             headers: headers,
             success: function (data) {
-                if(!data.result) {
+                if(!data.result || _.isEmpty(data.result)) {
+                    if(errorCallback) {
+                        errorCallback();
+                    }
+                } else if(successCallback) {
+                    successCallback(data.result[0]);
+                }
+            },
+            error: errorCallback,
+            errorsHandlers: errorsHandlers
+        });
+        delete headers[constants.OPENIDM_HEADER_PARAM_PASSWORD];
+    };
+    
+    obj.internalLogIn = function(uid, password, successCallback, errorCallback, errorsHandlers) {
+        var headers = {};
+        headers[constants.OPENIDM_HEADER_PARAM_USERNAME] = uid.toLowerCase();
+        headers[constants.OPENIDM_HEADER_PARAM_PASSWORD] = password;
+        headers[constants.OPENIDM_HEADER_PARAM_NO_SESION] = false;
+        obj.serviceCall({
+            serviceUrl: constants.host + "/openidm/repo/internal/user",
+            url: "/?_query-id=for-internalcredentials",
+            headers: headers,
+            success: function (data) {
+                if(!data.result || _.isEmpty(data.result)) {
                     if(errorCallback) {
                         errorCallback();
                     }
@@ -155,6 +179,24 @@ define("org/forgerock/commons/ui/user/delegates/UserDelegate", [
     obj.getProfile = function(successCallback, errorCallback, errorsHandlers) {
         obj.serviceCall({
             url: "/?_query-id=for-credentials",
+            success: function (data) {
+                if(!data.result || data.result.length !== 1) {
+                    if(errorCallback) {
+                        errorCallback();
+                    }
+                } else if(successCallback) {
+                    successCallback(data.result[0]);
+                }
+            },
+            error: errorCallback,
+            errorsHandlers: errorsHandlers
+        });
+    };
+    
+    obj.forInternalCredentials = function(successCallback, errorCallback, errorsHandlers) {
+        obj.serviceCall({
+            serviceUrl: constants.host + "/openidm/repo/internal/user",
+            url: "/?_query-id=for-internalcredentials",
             success: function (data) {
                 if(!data.result || data.result.length !== 1) {
                     if(errorCallback) {
