@@ -39,10 +39,10 @@ define("org/forgerock/commons/ui/common/main/ViewManager", [
      * Initializes view if it is not equal to current view.
      * Changes URL without triggering event.
      */
-    obj.changeView = function(viewPath, args, callback) {        
+    obj.changeView = function(viewPath, args, callback, forceUpdate) {        
         var view;
         
-        if(obj.currentView !== viewPath) {
+        if(obj.currentView !== viewPath || forceUpdate) {
             view = require(viewPath);
             
             if(view.init) {

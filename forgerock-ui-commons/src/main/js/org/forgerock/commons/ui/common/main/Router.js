@@ -50,8 +50,10 @@ define("org/forgerock/commons/ui/common/main/Router", [
                     obj.bindedRoutes[route] = _.bind(this.processRoute, {key: route});
                 }
             },
-            processRoute : function(args) {
-                var route = obj.configuration.routes[this.key], baseView;
+            processRoute : function() {
+                var route = obj.configuration.routes[this.key], baseView, i, args;
+                
+                args = _.toArray(arguments);
                 
                 if(route.excludedRole) {
                     if(conf.loggedUser && conf.loggedUser.roles.indexOf(route.excludedRole) !== -1) {
@@ -72,9 +74,9 @@ define("org/forgerock/commons/ui/common/main/Router", [
                 } else if(route.dialog) {
                     route.baseView = obj.configuration.routes[route.base];
                     
-                    eventManager.sendEvent(constants.EVENT_SHOW_DIALOG, {route: route, args: [args], base: route.base});
+                    eventManager.sendEvent(constants.EVENT_SHOW_DIALOG, {route: route, args: args, base: route.base});
                 } else if(route.view) {
-                    eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: route, args: [args]});
+                    eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: route, args: args});
                 }
             }
         });        
@@ -116,11 +118,13 @@ define("org/forgerock/commons/ui/common/main/Router", [
         } else {
             pattern = route.pattern;
         }
-
-        if(args) {
+        
+        if(args) {            
             for(i = 0; i < args.length; i++) {
                 pattern = pattern.replace("?", args[i]);
             }
+            
+            pattern = pattern.replace(/\?/g, "");
         }
         
         return pattern;

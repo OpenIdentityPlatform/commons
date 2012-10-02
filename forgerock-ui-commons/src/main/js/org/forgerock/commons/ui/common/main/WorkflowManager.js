@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define */
+/*global $, define, _ */
 
 /**
  * @author jdabrowski
@@ -121,19 +121,23 @@ define("org/forgerock/commons/ui/common/main/WorkflowManager", [
         this.serviceCall(callParams);
     };
     
-    obj.getAllAvalibleTasksViewForUser = function(userName, successCallback, errorCallback) {
-        obj.getAllTasks(function(avalibleTasks) {
-            obj.buildStandardViewFromTaskBasicDataMap(avalibleTasks, successCallback);
-        });
+    obj.getTasksAvalibleToUser = function(userName, successCallback, errorCallback) {
+        obj.getAllTasks(successCallback, errorCallback);
     };
     
     obj.getAllTasksViewForUser = function(userName, successCallback, errorCallback) {
         obj.getTasksAssignedToUser(userName, function(avalibleTasks) {
-            obj.buildStandardViewFromTaskBasicDataMap(avalibleTasks, successCallback);
-        });
+            obj.buildStandardViewFromTaskBasicDataMap(avalibleTasks, successCallback, errorCallback);
+        }, errorCallback);
     };
     
-    obj.buildStandardViewFromTaskBasicDataMap = function(taskInstanceBasicInfoMap, successCallback) {
+    obj.getAllAvalibleTasksViewForUser = function(userName, successCallback, errorCallback) {
+        obj.getTasksAvalibleToUser(userName, function(avalibleTasks) {
+            obj.buildStandardViewFromTaskBasicDataMap(avalibleTasks, successCallback, errorCallback);
+        }, errorCallback);
+    };
+    
+    obj.buildStandardViewFromTaskBasicDataMap = function(taskInstanceBasicInfoMap, successCallback, errorCallback) {
         var finished = 0, taskBasicData, getTasksSuccessCallback, pointer, myTasks = {};
         
         getTasksSuccessCallback = function(taskData) {
@@ -150,7 +154,11 @@ define("org/forgerock/commons/ui/common/main/WorkflowManager", [
             taskBasicData = taskInstanceBasicInfoMap[pointer];
             obj.getTask(taskBasicData._id, getTasksSuccessCallback);
         }
-    }
+        
+        if(_.isEmpty(taskInstanceBasicInfoMap)) {
+            errorCallback();
+        }
+    };
     
     obj.buildStandardViewFromTaskMap = function(taskInstanceMap) {
         var result = {}, pointer, taskInstance, taskInstanceProcessName, taskInstanceTaskName, taskView;
@@ -159,8 +167,8 @@ define("org/forgerock/commons/ui/common/main/WorkflowManager", [
             taskInstanceProcessName = taskInstance.processDefinitionId.split(':')[0];
             taskInstanceTaskName = taskInstance.name;
             
-            taskView = {};
-            taskView[taskInstance._id] = taskInstance.params;
+            taskView = taskInstance.params;
+            taskView._id = taskInstance._id;
             
             if (!result[taskInstanceProcessName]) {
                 result[taskInstanceProcessName] = {};

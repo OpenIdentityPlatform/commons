@@ -83,6 +83,7 @@
 	<modules>
 		<module>forgerock-ui-commons</module>
 		<module>forgerock-ui-user</module>
+		<module>forgerock-ui-functional-tests</module>
 	</modules>
 		
 	<build>
