@@ -59,7 +59,7 @@ define("config/AppConfiguration", [
                    configuration: {
                        routes: {
                            "": {
-                               view: "org/forgerock/commons/ui/common/main/MainView",
+                               view: "org/forgerock/commons/ui/user/LoginView",
                                url: ""                                   
                            },
                            "profile": {
@@ -97,11 +97,6 @@ define("config/AppConfiguration", [
                                dialog: "org/forgerock/commons/ui/user/ChangeSecurityDataDialog",
                                role: "openidm-authorized",
                                url: "profile/change_security_data/"
-                           },
-                           "apps": {
-                               view: "org/forgerock/commons/ui/user/apps/AppsView",
-                               role: "openidm-authorized",
-                               url: "applications/"
                            }
                        }
                    } 
@@ -161,16 +156,12 @@ define("config/AppConfiguration", [
                    } 
                },
                {
-                   moduleClass: "org/forgerock/commons/ui/user/dashboard/NotificationViewHelper",
+                   moduleClass: "org/forgerock/commons/ui/common/util/UIUtils",
                    configuration: {
-                       typeToIconMapping: {
-                           "1": "images/notifications/pending.png",
-                           "2": "images/notifications/group_added.png",
-                           "3": "images/notifications/approved.png",
-                           "4": "images/notifications/removed.png"
-                       }
+                       templateUrls: [
+                       ]
                    } 
-               },
+               },               
                {
                    moduleClass: "org/forgerock/commons/ui/common/components/Messages",
                    configuration: {
