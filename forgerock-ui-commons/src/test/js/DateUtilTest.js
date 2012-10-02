@@ -3,8 +3,8 @@
 require.config({
     "packages" : [ {
         name : "qunit",
-        main : "qunit-amd-1.5.0-alpha-1",
-        location : "js/org/codehaus/mojo/qunit-amd/1.5.0-alpha-1/qunit-amd-1.5.0-alpha-1"
+        main : "qunit-amd-1.2.0-SNAPSHOT",
+        location : "js/org/codehaus/mojo/qunit-amd/1.2.0-SNAPSHOT/qunit-amd-1.2.0-SNAPSHOT"
     }, {
         name : "xdate",
         main : "xdate-0.7-min",
@@ -18,12 +18,12 @@ require([
 ], function(dateUtil, qu) {
      
     qu.test("passing test", function() {
-        QUnit.equal("a", "a");
+        QUnit.equals("a", "a");
     });
 
-//    qu.test("results length test", function() {
-//        var date = new Date("12-03-2012");
-//        QUnit.equal(dateUtil.formatDate(date), "December 03, 2012");
-//    });
+    qu.test("results length test", function() {
+        var date = new Date("October 13, 1975 11:13:00");
+        QUnit.equals(dateUtil.formatDate(date), "October 13, 1975");
+    });
             
 });
