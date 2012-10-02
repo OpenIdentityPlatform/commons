@@ -72,7 +72,16 @@ define("org/forgerock/commons/ui/common/main/WorkflowManager", [
 
         obj.serviceCall({url: taskManagementUrl + "?_query-id=query-all-ids", success: function(data) {
             if(successCallback) {
-                obj.users = data.result;
+                successCallback(data.result);
+            }
+        }, error: errorCallback} );
+    };
+    
+    obj.getAllProcessInstances = function(successCallback, errorCallback) {
+        console.info("getting all process instances");
+
+        obj.serviceCall({url: processManagementUrl + "?_query-id=query-all-ids", success: function(data) {
+            if(successCallback) {
                 successCallback(data.result);
             }
         }, error: errorCallback} );
@@ -82,7 +91,6 @@ define("org/forgerock/commons/ui/common/main/WorkflowManager", [
         console.info("getting all unassigned tasks");
         obj.serviceCall({url: taskManagementUrl + "?_query-id=filtered-query&" + $.param({key: proccessNameKey}), success: function(data) {
             if(successCallback) {
-                obj.users = data.result;
                 successCallback(data.result);
             }
         }, error: errorCallback} );
@@ -93,7 +101,6 @@ define("org/forgerock/commons/ui/common/main/WorkflowManager", [
     
         obj.serviceCall({url: taskManagementUrl + "?_query-id=filtered-query&" + $.param({assignee: userName}), success: function(data) {
             if(successCallback) {
-                obj.users = data.result;
                 successCallback(data.result);
             }
         }, error: errorCallback} );
@@ -102,6 +109,69 @@ define("org/forgerock/commons/ui/common/main/WorkflowManager", [
     obj.serviceCall = function(callParams) {
         console.log(callParams.url);
         serviceInvoker.restCall(callParams);
+    };
+    
+    obj.assignTaskToUser = function(taskId, userName, successCallback, errorCallback) {
+        var callParams, params;
+        console.debug("assign user to task");
+        params = {assignee: userName};
+        callParams =  {url: taskManagementUrl + "/" + taskId, type: "PUT", success: successCallback, error: errorCallback, data: JSON.stringify(params)};
+        callParams.headers = [];
+        callParams.headers["If-Match"] = '"*"';
+        this.serviceCall(callParams);
+    };
+    
+    obj.getTasksAvalibleToUser = function(userName, successCallback, errorCallback) {
+        obj.getAllTasks(successCallback, errorCallback);
+    };
+    
+    obj.getAllAvalibleTasksViewForUser = function(userName, successCallback, errorCallback) {
+        var myTasks = {};
+        obj.getTasksAvalibleToUser(userName, function(avalibleTasks) {
+            var finished = 0, taskBasicData, getTasksSuccessCallback, pointer;
+            
+            getTasksSuccessCallback = function(taskData) {
+                taskData.params = {userApplicationLnkId: taskData.description};
+                myTasks[taskData._id] = taskData;
+                
+                finished++;
+                if(finished === avalibleTasks.length) {
+                    console.log(successCallback);
+                    successCallback(obj.buildStandardViewFromTaskMap(myTasks));
+                }
+            };
+            
+            for (pointer in avalibleTasks) {
+                taskBasicData = avalibleTasks[pointer];
+                obj.getTask(taskBasicData._id, getTasksSuccessCallback);
+            }
+        });
+    };
+    
+    obj.buildStandardViewFromTaskMap = function(taskInstanceMap) {
+        var result = {}, pointer, taskInstance, taskInstanceProcessName, taskInstanceTaskName, taskView;
+        for (pointer in taskInstanceMap) {
+            taskInstance = taskInstanceMap[pointer];
+            taskInstanceProcessName = taskInstance.processDefinitionId.split(':')[0];
+            taskInstanceTaskName = taskInstance.name;
+            
+            taskView = {};
+            taskView[taskInstance._id] = taskInstance.params;
+            
+            if (!result[taskInstanceProcessName]) {
+                result[taskInstanceProcessName] = {};
+            }
+            
+            if (!result[taskInstanceProcessName][taskInstanceTaskName]) {
+                result[taskInstanceProcessName][taskInstanceTaskName] = {};
+            }
+            
+            if (!result[taskInstanceProcessName][taskInstanceTaskName].tasks) {
+                result[taskInstanceProcessName][taskInstanceTaskName].tasks = [];
+            }
+            result[taskInstanceProcessName][taskInstanceTaskName].tasks.push(taskView);
+        }
+        return result;
     };
     
     return obj;
