@@ -31,5 +31,10 @@ public class UserHelper {
 	public String register(JsonNode user) {
 		return openIDMClient.createUser(user);
 	}
+
+	public void createDefaultUser() {
+		// TODO Auto-generated method stub
+		
+	}
 	
 }

@@ -38,6 +38,9 @@ public class AbstractTest extends AbstractTestNGSpringContextTests {
 	@Inject
 	protected OpenIDMClient openidmClient;
 	
+	@Inject
+	protected UserHelper userHelper;
+	
 	@BeforeMethod
 	public void cleanup() {
 		selenium.removeCookies();

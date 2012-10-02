@@ -48,8 +48,9 @@ public class FormsHelper {
 		}
 	}
 	
-	public void getFieldValue(String el, String name) {
+	public String getFieldValue(String el, String name) {
 		//TODO
+		throw new UnsupportedOperationException();
 	}
 	
 	public void submit(String el, String name) {
