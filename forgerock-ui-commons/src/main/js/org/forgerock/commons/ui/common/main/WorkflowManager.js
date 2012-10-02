@@ -126,27 +126,30 @@ define("org/forgerock/commons/ui/common/main/WorkflowManager", [
     };
     
     obj.getAllAvalibleTasksViewForUser = function(userName, successCallback, errorCallback) {
-        var myTasks = {};
         obj.getTasksAvalibleToUser(userName, function(avalibleTasks) {
-            var finished = 0, taskBasicData, getTasksSuccessCallback, pointer;
-            
-            getTasksSuccessCallback = function(taskData) {
-                taskData.params = {userApplicationLnkId: taskData.description};
-                myTasks[taskData._id] = taskData;
-                
-                finished++;
-                if(finished === avalibleTasks.length) {
-                    console.log(successCallback);
-                    successCallback(obj.buildStandardViewFromTaskMap(myTasks));
-                }
-            };
-            
-            for (pointer in avalibleTasks) {
-                taskBasicData = avalibleTasks[pointer];
-                obj.getTask(taskBasicData._id, getTasksSuccessCallback);
-            }
+            obj.buildStandardViewFromTaskBasicDataMap(avalibleTasks, successCallback);
         });
     };
+    
+    obj.buildStandardViewFromTaskBasicDataMap = function(taskInstanceBasicInfoMap, successCallback) {
+        var finished = 0, taskBasicData, getTasksSuccessCallback, pointer, myTasks = {};
+        
+        getTasksSuccessCallback = function(taskData) {
+            taskData.params = {userApplicationLnkId: taskData.description};
+            myTasks[taskData._id] = taskData;
+            
+            finished++;
+            if(finished === taskInstanceBasicInfoMap.length) {
+                console.log(successCallback);
+                successCallback(obj.buildStandardViewFromTaskMap(myTasks));
+            }
+        };
+        
+        for (pointer in taskInstanceBasicInfoMap) {
+            taskBasicData = taskInstanceBasicInfoMap[pointer];
+            obj.getTask(taskBasicData._id, getTasksSuccessCallback);
+        }
+    }
     
     obj.buildStandardViewFromTaskMap = function(taskInstanceMap) {
         var result = {}, pointer, taskInstance, taskInstanceProcessName, taskInstanceTaskName, taskView;
