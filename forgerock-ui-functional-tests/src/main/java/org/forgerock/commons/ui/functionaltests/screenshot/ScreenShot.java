@@ -1,4 +1,4 @@
-package org.forgerock.commons.ui.functionaltests.helpers;
+package org.forgerock.commons.ui.functionaltests.screenshot;
 
 import java.io.File;
 import java.io.IOException;

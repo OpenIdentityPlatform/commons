@@ -1,4 +1,4 @@
-package org.forgerock.commons.ui.functionaltests.helpers;
+package org.forgerock.commons.ui.functionaltests.screenshot;
 
 import javax.inject.Inject;
 

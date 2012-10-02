@@ -28,6 +28,9 @@ public class FormsHelper {
     @Inject
     private JsonUtils jsonUtils;
     
+    @Inject
+    private WebDriverWait webDriverWait;
+    
 	/**
 	 * Sets the field value and fire event.
 	 * @param el id of root element
@@ -63,10 +66,17 @@ public class FormsHelper {
 		((JavascriptExecutor) driver).executeScript("js2form(document.getElementById('"+ el +"'), "+ jsonStr +");");
 	}
 	
+	/**
+	 * @param el id of root element
+	 */
 	public JsonNode readForm(String el) {
-		//this method shoud execute js script, which will use form2js to
-		//read the form
-		return null;
+		String json = (String) ((JavascriptExecutor) driver).executeScript("return JSON.stringify(form2js('"+ el +"', '.', false));");
+		
+		//form2js includes also buttons...
+		//it's a quick fix for that
+		json = json.replaceAll(",\"[a-zA-Z]+utton\":\"\"", "");		
+		
+		return jsonUtils.readJsonFromString(json);
 	}
 	
 	/**
@@ -89,10 +99,8 @@ public class FormsHelper {
 		}		
 	}
 	
-	public void assertFormValidationPasses(final String el) {
-		//TODO move webDriverWait to @Inject
-		
-		(new WebDriverWait(driver, 10)).until(new ExpectedCondition<Boolean>() {
+	public void assertFormValidationPasses(final String el) {		
+		webDriverWait.until(new ExpectedCondition<Boolean>() {
             public Boolean apply(WebDriver d) {
                 return d.findElements(By.cssSelector("#"+ el +" [data-validation-status=error]")).size() == 0;
             }
@@ -101,12 +109,29 @@ public class FormsHelper {
 		Assert.assertEquals(driver.findElements(By.cssSelector("#"+ el +" [data-validation-status=error]")).size(), 0);
 	}
 	
-	public void assertValidationPasses(String el, String name) {
-		//TODO
+	public void assertValidationPasses(final String el, final String name) {
+		webDriverWait.until(new ExpectedCondition<Boolean>() {
+            public Boolean apply(WebDriver d) {
+                return d.findElements(By.cssSelector("#"+ el +" [name="+ name +"][data-validation-status=error]")).size() == 0;
+            }
+        });
+		
+		Assert.assertEquals(driver.findElements(By.cssSelector("#"+ el +" [name="+ name +"][data-validation-status=error]")).size(), 0);
+		
+		//TODO checking for tick
 	}
 	
-	public void assertValidationError(String el, String name) {
-		//TODO
+	public void assertValidationError(final String el, final String name) {
+		webDriverWait.until(new ExpectedCondition<Boolean>() {
+            public Boolean apply(WebDriver d) {
+                return d.findElements(By.cssSelector("#"+ el +" [name="+ name +"][data-validation-status=error]")).size() != 0;
+            }
+        });
+		
+		Assert.assertNotEquals(driver.findElements(By.cssSelector("#"+ el +" [name="+ name +"][data-validation-status=error]")).size(), 0);
+		
+		//TODO checking for tick
+		//TODO checking for message
 	}
 	
 }

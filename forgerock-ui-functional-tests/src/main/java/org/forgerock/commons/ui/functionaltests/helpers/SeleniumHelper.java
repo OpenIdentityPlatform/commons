@@ -3,6 +3,7 @@ package org.forgerock.commons.ui.functionaltests.helpers;
 import javax.inject.Inject;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.Cookie;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -53,6 +54,11 @@ public class SeleniumHelper {
 	
 	public void removeCookies() {
 		driver.manage().deleteAllCookies();
+	}
+	
+	public void setSessionCookie(String id) {
+		Cookie cookie = new Cookie("JSESSIONID", id);
+		driver.manage().addCookie(cookie);
 	}
 
 	public WebDriver getDriver() {

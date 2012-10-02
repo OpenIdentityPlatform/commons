@@ -16,8 +16,10 @@ public class MessagesHelper {
 	@Inject
 	private WebDriver driver;
 	
+	@Inject
+	private WebDriverWait wait;
+	
 	public void assertInfoMessage(String text) {
-		WebDriverWait wait = new WebDriverWait(driver, 10);
 		WebElement message = driver.findElement(By.className("confirmMessage"));
 		WebElement element = wait.until(ExpectedConditions.visibilityOf(message));
 		
@@ -27,7 +29,6 @@ public class MessagesHelper {
 	}
 	
 	public void assertErrorMessage(String text) {
-		WebDriverWait wait = new WebDriverWait(driver, 10);
 		WebElement message = driver.findElement(By.className("errorMessage"));
 		WebElement element = wait.until(ExpectedConditions.visibilityOf(message));
 		
