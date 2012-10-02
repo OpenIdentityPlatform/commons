@@ -121,12 +121,14 @@ define("org/forgerock/commons/ui/common/main/WorkflowManager", [
         this.serviceCall(callParams);
     };
     
-    obj.getTasksAvalibleToUser = function(userName, successCallback, errorCallback) {
-        obj.getAllTasks(successCallback, errorCallback);
+    obj.getAllAvalibleTasksViewForUser = function(userName, successCallback, errorCallback) {
+        obj.getAllTasks(function(avalibleTasks) {
+            obj.buildStandardViewFromTaskBasicDataMap(avalibleTasks, successCallback);
+        });
     };
     
-    obj.getAllAvalibleTasksViewForUser = function(userName, successCallback, errorCallback) {
-        obj.getTasksAvalibleToUser(userName, function(avalibleTasks) {
+    obj.getAllTasksViewForUser = function(userName, successCallback, errorCallback) {
+        obj.getTasksAssignedToUser(userName, function(avalibleTasks) {
             obj.buildStandardViewFromTaskBasicDataMap(avalibleTasks, successCallback);
         });
     };
@@ -140,7 +142,6 @@ define("org/forgerock/commons/ui/common/main/WorkflowManager", [
             
             finished++;
             if(finished === taskInstanceBasicInfoMap.length) {
-                console.log(successCallback);
                 successCallback(obj.buildStandardViewFromTaskMap(myTasks));
             }
         };
