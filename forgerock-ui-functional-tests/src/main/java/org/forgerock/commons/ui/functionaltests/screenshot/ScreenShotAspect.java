@@ -18,7 +18,7 @@ public class ScreenShotAspect {
 			throwing = "assertionError")
 	public void makeScreenShot(AssertionError assertionError) {
 		System.err.println("Test failed, preparing screenshot...");
-		screenShot.makeScreenShot(assertionError.getLocalizedMessage());
+		screenShot.makeScreenShot(assertionError.getLocalizedMessage(), assertionError);
 	}
 
 }

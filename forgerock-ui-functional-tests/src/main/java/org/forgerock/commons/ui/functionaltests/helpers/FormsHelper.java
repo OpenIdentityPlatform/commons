@@ -7,10 +7,7 @@ import javax.inject.Inject;
 import org.codehaus.jackson.JsonNode;
 import org.forgerock.commons.ui.functionaltests.helpers.SeleniumHelper.ElementType;
 import org.forgerock.commons.ui.functionaltests.utils.JsonUtils;
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Component;
@@ -38,6 +35,7 @@ public class FormsHelper {
 	 */
 	public void setField(String el, String name, String value) {
 		WebElement element = selenium.getElement(el, name, ElementType.NAME);
+		element.clear();
 		element.sendKeys(value);
 		
 		String event = element.getAttribute("data-validator-event");
@@ -49,8 +47,8 @@ public class FormsHelper {
 	}
 	
 	public String getFieldValue(String el, String name) {
-		//TODO
-		throw new UnsupportedOperationException();
+		WebElement element = selenium.getElement(el, name, ElementType.NAME);
+		return element.getAttribute("value");
 	}
 	
 	public void submit(String el, String name) {
@@ -100,39 +98,66 @@ public class FormsHelper {
 		}		
 	}
 	
-	public void assertFormValidationPasses(final String el) {		
-		webDriverWait.until(new ExpectedCondition<Boolean>() {
-            public Boolean apply(WebDriver d) {
-                return d.findElements(By.cssSelector("#"+ el +" [data-validation-status=error]")).size() == 0;
-            }
-        });
-		
-		Assert.assertEquals(driver.findElements(By.cssSelector("#"+ el +" [data-validation-status=error]")).size(), 0);
+	public void assertFormValidationError(final String el) {
+		String failMessage = "Validation for form returned 'valid'. Expected: 'invalid'";
+		try{
+			webDriverWait.until(new ExpectedCondition<Boolean>() {
+	            public Boolean apply(WebDriver d) {
+	                return d.findElements(By.cssSelector("#"+ el +" [data-validation-status=error]")).size() > 0;
+	            }
+	        });
+		} catch (TimeoutException e) {
+			System.err.println("TimeoutException for assertFormValidationPasses");
+			Assert.fail(failMessage);
+		}
+		Assert.assertTrue(driver.findElements(By.cssSelector("#"+ el +" [data-validation-status=error]")).size() > 0, failMessage);
+	}
+	
+	public void assertFormValidationPasses(final String el) {	
+		String failMessage = "Validation for form returned 'invalid'. Expected: 'valid'";
+		try{
+			webDriverWait.until(new ExpectedCondition<Boolean>() {
+	            public Boolean apply(WebDriver d) {
+	                return d.findElements(By.cssSelector("#"+ el +" [data-validation-status=error]")).size() == 0;
+	            }
+	        });
+		} catch (TimeoutException e) {
+			System.err.println("TimeoutException for assertFormValidationPasses");
+			Assert.fail(failMessage);
+		}
+		Assert.assertEquals(0, driver.findElements(By.cssSelector("#"+ el +" [data-validation-status=error]")).size(), failMessage);
 	}
 	
 	public void assertValidationPasses(final String el, final String name) {
-		webDriverWait.until(new ExpectedCondition<Boolean>() {
-            public Boolean apply(WebDriver d) {
-                return d.findElements(By.cssSelector("#"+ el +" [name="+ name +"][data-validation-status=error]")).size() == 0;
-            }
-        });
-		
-		Assert.assertEquals(driver.findElements(By.cssSelector("#"+ el +" [name="+ name +"][data-validation-status=error]")).size(), 0);
+		String failMessage = "Validation for " + name + " returned 'invalid'. Expected: 'valid'";
+		try{
+			webDriverWait.until(new ExpectedCondition<Boolean>() {
+	            public Boolean apply(WebDriver d) {
+	                return d.findElements(By.cssSelector("#"+ el +" [name="+ name +"][data-validation-status=error]")).size() == 0;
+	            }
+	        });
+		} catch (TimeoutException e) {
+			System.err.println("TimeoutException for assertValidationPasses");
+			Assert.fail(failMessage);
+		}
+		Assert.assertEquals(0, driver.findElements(By.cssSelector("#"+ el +" [name="+ name +"][data-validation-status=error]")).size(), failMessage);
 		
 		//TODO checking for tick
 	}
 	
 	public void assertValidationError(final String el, final String name) {
-		webDriverWait.until(new ExpectedCondition<Boolean>() {
-            public Boolean apply(WebDriver d) {
-                return d.findElements(By.cssSelector("#"+ el +" [name="+ name +"][data-validation-status=error]")).size() != 0;
-            }
-        });
-		
-		Assert.assertNotEquals(driver.findElements(By.cssSelector("#"+ el +" [name="+ name +"][data-validation-status=error]")).size(), 0);
-		
-		//TODO checking for tick
-		//TODO checking for message
+		String failMessage = "Validation for " + name + " returned 'valid'. Expected: 'invalid'";
+		try{
+			webDriverWait.until(new ExpectedCondition<Boolean>() {
+	            public Boolean apply(WebDriver d) {
+	                return d.findElements(By.cssSelector("#"+ el +" [name="+ name +"][data-validation-status=error]")).size() != 0;
+	            }
+	        });
+		} catch (TimeoutException e) {
+			System.err.println("TimeoutException for assertValidationError");
+			Assert.fail(failMessage);
+		}
+		Assert.assertNotEquals(0, driver.findElements(By.cssSelector("#"+ el +" [name="+ name +"][data-validation-status=error]")).size(), failMessage);
 	}
 	
 }

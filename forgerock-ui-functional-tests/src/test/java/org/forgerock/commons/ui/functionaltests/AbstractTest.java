@@ -52,5 +52,27 @@ public class AbstractTest extends AbstractTestNGSpringContextTests {
 	public void cleanupOnEnd() {
 		openidmClient.removeAllUsers();
 	}
+	
+	protected void fieldShouldBeValidAfterChange(String element, String fieldName, String valueToSet) {
+		String tmpValue = forms.getFieldValue(element, fieldName);
+		forms.assertValidationPasses(element, fieldName);
+		forms.setField(element, fieldName, valueToSet);
+		forms.assertValidationPasses(element, fieldName);
+		forms.assertFormValidationPasses(element);
+		forms.setField(element, fieldName, tmpValue);
+		forms.assertValidationPasses(element, fieldName);
+		forms.assertFormValidationPasses(element);
+	}
+
+	protected void fieldShouldBeNotValidAfterChange(String element, String fieldName, String valueToSet) {
+		String tmpValue = forms.getFieldValue(element, fieldName);
+		forms.assertValidationPasses(element, fieldName);
+		forms.setField(element, fieldName, valueToSet);
+		forms.assertValidationError(element, fieldName);
+		forms.assertFormValidationError(element);
+		forms.setField(element, fieldName, tmpValue);
+		forms.assertValidationPasses(element, fieldName);
+		forms.assertFormValidationPasses(element);
+	}
 
 }

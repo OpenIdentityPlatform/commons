@@ -7,28 +7,29 @@ import org.testng.annotations.Test;
 public class RegistrationTest extends AbstractTest {
 	
 	@Test
-	public void testFieldsValidation() {
-//		JsonNode user = jsonUtils.readJsonFromFile("/registration/validuser.json");
-//		router.goToRegistration();
-//		forms.fillForm("content", user);
-//		forms.validateForm("content");
-//		forms.assertFormValidationPasses("content");
-//		
-//		testIfFieldNotValidAfterChange("content", "email", "qwe");
-//		testIfFieldNotValidAfterChange("content", "email", "qwe@");
-//		testIfFieldNotValidAfterChange("content", "email", "qwe@x.plllll");
-//		
-//		userHelper.createDefaultUser();
-//		testIfFieldNotValidAfterChange("content", "email", "test@test.test");
+	public void testEmailFieldValidation() {
+		JsonNode user = jsonUtils.readJsonFromFile("/registration/validuser.json");
+		router.goToRegistration();
+		forms.fillForm("content", user);
+		forms.validateForm("content");
+		forms.assertFormValidationPasses("content");
+		
+		fieldShouldBeNotValidAfterChange("content", "email", "qwe");
+		fieldShouldBeNotValidAfterChange("content", "email", "qwe@");
+		fieldShouldBeNotValidAfterChange("content", "email", "qwe@x.plllll");
 	}
 	
-	private void testIfFieldNotValidAfterChange(String element, String fieldName, String valueToSet) {
-		String tmpValue = forms.getFieldValue(element, fieldName);
-		forms.assertValidationPasses(element, fieldName);
-		forms.setField(element, fieldName, valueToSet);
-		forms.assertValidationError(element, fieldName);
-		forms.setField(element, fieldName, tmpValue);
-		forms.assertValidationPasses(element, fieldName);
+	@Test
+	public void testEmailAlreadyExists() {
+		JsonNode user = jsonUtils.readJsonFromFile("/registration/validuser.json");
+		router.goToRegistration();
+		forms.fillForm("content", user);
+		forms.validateForm("content");
+		forms.assertFormValidationPasses("content");
+		
+		fieldShouldBeValidAfterChange("content", "email", "test@test.test");
+		userHelper.createDefaultUser();
+		fieldShouldBeNotValidAfterChange("content", "email", "test@test.test");
 	}
 	
 }

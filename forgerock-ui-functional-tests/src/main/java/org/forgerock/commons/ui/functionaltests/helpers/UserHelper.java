@@ -4,10 +4,14 @@ import javax.inject.Inject;
 
 import org.codehaus.jackson.JsonNode;
 import org.forgerock.commons.ui.functionaltests.openidmclient.OpenIDMClient;
+import org.forgerock.commons.ui.functionaltests.utils.JsonUtils;
 import org.springframework.stereotype.Component;
 
 @Component
 public class UserHelper {
+	
+	@Inject
+	protected JsonUtils jsonUtils;
 	
 	@Inject
 	private OpenIDMClient openIDMClient;
@@ -33,8 +37,7 @@ public class UserHelper {
 	}
 
 	public void createDefaultUser() {
-		// TODO Auto-generated method stub
-		
+		openIDMClient.createUser(jsonUtils.readJsonFromFile("/defaultuser.json"));
 	}
 	
 }
