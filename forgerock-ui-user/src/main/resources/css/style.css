@@ -1057,12 +1057,12 @@ div.underline {
     color: #fff;
 }
 
-#tasksMenu h3 {
+.tasksTable h3 {
     padding: 0;
     margin: 0;
 }
 
-#tasksMenu li {
+.tasksTable li {
     margin-left: 15px;
 }
 
@@ -1070,4 +1070,17 @@ div.underline {
 	padding: 0;
 	margin: 0;
 	color: #fff;
+}
+
+.tasksTable table {
+    border-spacing: 0px;
+    width: 100%;
+}
+
+.tasksTable tbody tr:hover {
+	background-color: #aaa;
+}
+
+.tasksTable th {
+    text-align: left;
 }
