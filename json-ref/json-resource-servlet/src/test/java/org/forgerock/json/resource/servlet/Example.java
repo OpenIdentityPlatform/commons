@@ -17,6 +17,7 @@
 package org.forgerock.json.resource.servlet;
 
 import static org.forgerock.json.resource.Context.newRootContext;
+import static org.forgerock.json.resource.provider.RoutingMode.EQUALS;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -31,7 +32,6 @@ import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.exception.ResourceException;
 import org.forgerock.json.resource.provider.RequestHandler;
 import org.forgerock.json.resource.provider.Router;
-import org.forgerock.json.resource.provider.UriTemplateRoutingStrategy;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.servlet.ServletRegistration;
 import org.glassfish.grizzly.servlet.WebappContext;
@@ -78,13 +78,12 @@ public class Example {
     }
 
     private RequestHandler createRequestHandler() throws ResourceException {
-        final UriTemplateRoutingStrategy routes = new UriTemplateRoutingStrategy();
-        routes.register("/users", new MapBackend());
-        routes.register("/groups", new MapBackend());
-        final RequestHandler handler = new Router(routes);
+        final Router router = new Router();
+        router.addRoute(EQUALS, "/users", new MapBackend());
+        router.addRoute(EQUALS, "/groups", new MapBackend());
 
         // Populate with some test users and groups.
-        final Connection connection = Connections.newInternalConnection(handler);
+        final Connection connection = Connections.newInternalConnection(router);
 
         final JsonValue user1 = new JsonValue(new LinkedHashMap<String, Object>());
         user1.add("userName", "alice");
@@ -114,6 +113,6 @@ public class Example {
             connection.create(newRootContext(), request);
         }
 
-        return handler;
+        return router;
     }
 }

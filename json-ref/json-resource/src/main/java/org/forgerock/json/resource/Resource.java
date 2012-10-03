@@ -30,21 +30,21 @@ public final class Resource {
     // endpoint is an extrinsic property of a resource.
 
     private final JsonValue content;
-    private final String id;
+    private final String resourceName;
     private final String revision;
 
     /**
      * Creates a new JSON resource.
      *
-     * @param id
-     *            The JSON resource ID, if applicable.
+     * @param resourceName
+     *            The resource name.
      * @param revision
      *            The JSON resource version, if known.
      * @param content
      *            The JSON resource content.
      */
-    public Resource(final String id, final String revision, final JsonValue content) {
-        this.id = id;
+    public Resource(final String resourceName, final String revision, final JsonValue content) {
+        this.resourceName = resourceName;
         this.revision = revision;
         this.content = content;
     }
@@ -61,7 +61,7 @@ public final class Resource {
             return true;
         } else if (obj instanceof Resource) {
             final Resource that = (Resource) obj;
-            return isEqual(id, that.id) && isEqual(revision, that.revision);
+            return resourceName.equals(resourceName) && isEqual(revision, that.revision);
         } else {
             return false;
         }
@@ -77,13 +77,12 @@ public final class Resource {
     }
 
     /**
-     * Returns the ID of this JSON resource, if applicable.
+     * Returns the name of this JSON resource.
      *
-     * @return The ID of this JSON resource, or {@code null} if this resource
-     *         does not have an ID.
+     * @return The name of this JSON resource.
      */
-    public String getId() {
-        return id;
+    public String getResourceName() {
+        return resourceName;
     }
 
     /**
@@ -105,7 +104,7 @@ public final class Resource {
     @Override
     public int hashCode() {
         int hash = 17;
-        hash = hash * 31 + id != null ? id.hashCode() : 0;
+        hash = hash * 31 + resourceName.hashCode();
         hash = hash * 31 + revision != null ? revision.hashCode() : 0;
         return hash;
     }
@@ -116,7 +115,7 @@ public final class Resource {
     @Override
     public String toString() {
         final JsonValue wrapper = new JsonValue(new LinkedHashMap<String, Object>(3));
-        wrapper.add("id", id);
+        wrapper.add("id", resourceName);
         wrapper.add("rev", revision);
         wrapper.add("content", content);
         return wrapper.toString();

@@ -44,11 +44,11 @@ public interface SingletonResourceProvider {
      * Performs the provided
      * {@link RequestHandler#handleAction(Context, ActionRequest, ResultHandler)
      * action} against the single resource instance.
-     *
+     * 
      * @param context
      *            The request context.
      * @param request
-     *            The action request. The resource ID will be {@code null}.
+     *            The action request.
      * @param handler
      *            The result handler to be notified on completion.
      * @see RequestHandler#handleAction(Context, ActionRequest, ResultHandler)
@@ -58,11 +58,11 @@ public interface SingletonResourceProvider {
     /**
      * {@link RequestHandler#handlePatch(Context, PatchRequest, ResultHandler)
      * Patches} the single resource instance.
-     *
+     * 
      * @param context
      *            The request context.
      * @param request
-     *            The patch request. The resource ID will be {@code null}.
+     *            The patch request.
      * @param handler
      *            The result handler to be notified on completion.
      * @see RequestHandler#handlePatch(Context, PatchRequest, ResultHandler)
@@ -70,13 +70,13 @@ public interface SingletonResourceProvider {
     void patchInstance(Context context, PatchRequest request, ResultHandler<Resource> handler);
 
     /**
-     * {@link RequestHandler#handleRead(Context, ReadRequest, ResultHandler) Reads}
-     * the single resource instance.
-     *
+     * {@link RequestHandler#handleRead(Context, ReadRequest, ResultHandler)
+     * Reads} the single resource instance.
+     * 
      * @param context
      *            The request context.
      * @param request
-     *            The read request. The resource ID will be {@code null}.
+     *            The read request.
      * @param handler
      *            The result handler to be notified on completion.
      * @see RequestHandler#handleRead(Context, ReadRequest, ResultHandler)
@@ -86,11 +86,11 @@ public interface SingletonResourceProvider {
     /**
      * {@link RequestHandler#handleUpdate(Context, UpdateRequest, ResultHandler)
      * Updates} the single resource instance.
-     *
+     * 
      * @param context
      *            The request context.
      * @param request
-     *            The update request. The resource ID will be {@code null}.
+     *            The update request.
      * @param handler
      *            The result handler to be notified on completion.
      * @see RequestHandler#handleUpdate(Context, UpdateRequest, ResultHandler)

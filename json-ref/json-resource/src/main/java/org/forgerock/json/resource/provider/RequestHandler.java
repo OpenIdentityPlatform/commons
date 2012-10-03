@@ -47,11 +47,11 @@ import org.forgerock.json.resource.UpdateRequest;
  * <p>
  * For synchronous internal processing, directly call
  * {@link ResultHandler#handleResult} on the result handler in the method, e.g.
- *
+ * 
  * <pre>
  * handler.handleResult(result);
  * </pre>
- *
+ * 
  * Asynchronous implementations must take care to eventually set a result or a
  * failure on the result handler; i.e. they must catch all exceptions and set a
  * failure.
@@ -78,7 +78,7 @@ public interface RequestHandler {
      * {@code BadRequestException} if the passed identifier, parameters or
      * filter is invalid {@code NotFoundException} if the specified resource
      * could not be found.
-     *
+     * 
      * @param context
      *            The request context, such as associated principal.
      * @param request
@@ -105,7 +105,7 @@ public interface RequestHandler {
      * for example when an intermediate resource in the hierarchy does not
      * exist.
      * </ul>
-     *
+     * 
      * @param context
      *            The request context, such as associated principal.
      * @param request
@@ -132,7 +132,7 @@ public interface RequestHandler {
      * <li>{@code PreconditionFailedException} if version did not match the
      * existing resource.
      * </ul>
-     *
+     * 
      * @param context
      *            The request context, such as associated principal.
      * @param request
@@ -162,7 +162,7 @@ public interface RequestHandler {
      * <li>{@code ConflictException} if patch could not be applied for the given
      * resource state.
      * </ul>
-     *
+     * 
      * @param context
      *            The request context, such as associated principal.
      * @param request
@@ -186,7 +186,7 @@ public interface RequestHandler {
      * <li>{@code NotFoundException} if the specified resource could not be
      * found
      * </ul>
-     *
+     * 
      * @param context
      *            The request context, such as associated principal.
      * @param request
@@ -210,7 +210,7 @@ public interface RequestHandler {
      * <li>{@code NotFoundException} if the specified resource could not be
      * found.
      * </ul>
-     *
+     * 
      * @param context
      *            The request context, such as associated principal.
      * @param request
@@ -238,7 +238,7 @@ public interface RequestHandler {
      * <li>{@code NotFoundException} if the specified resource could not be
      * found.
      * </ul>
-     *
+     * 
      * @param context
      *            The request context, such as associated principal.
      * @param request
