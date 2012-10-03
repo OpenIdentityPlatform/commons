@@ -311,10 +311,8 @@ abstract class RequestRunner implements ResultHandler<Connection>, RequestVisito
         buffer.append(httpRequest.getContextPath());
         buffer.append(httpRequest.getServletPath());
 
-        // Add new component and resource ID.
-        buffer.append(request.getComponent());
-        buffer.append('/');
-        buffer.append(resource.getId());
+        // Add new resource name.
+        buffer.append(request.getResourceName());
 
         return buffer.toString();
     }

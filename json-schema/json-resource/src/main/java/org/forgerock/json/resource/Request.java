@@ -77,13 +77,13 @@ public interface Request {
     Request addFieldFilter(String... fields);
 
     /**
-     * Returns the name of the JSON resource component to which this request
-     * should be targeted.
+     * Returns the name of the JSON resource to which this request should be
+     * targeted.
      *
-     * @return The name of the JSON resource component to which this request
-     *         should be targeted.
+     * @return The name of the JSON resource to which this request should be
+     *         targeted.
      */
-    String getComponent();
+    String getResourceName();
 
     /**
      * Returns the list of fields which should be included with each JSON
@@ -97,42 +97,16 @@ public interface Request {
     List<JsonPointer> getFieldFilters();
 
     /**
-     * Returns the ID of the JSON resource to which this request should be
-     * targeted, if applicable.
-     *
-     * @return The ID of the JSON resource to which this request should be
-     *         targeted, or {@code null} if the ID is not applicable (e.g. for
-     *         singleton resources, certain actions, or some create requests).
-     */
-    String getResourceId();
-
-    /**
-     * Sets the name of the JSON resource component to which this request should
-     * be targeted.
+     * Sets the name of the JSON resource to which this request should be
+     * targeted.
      *
      * @param name
-     *            The name of the JSON resource component to which this request
-     *            should be targeted.
+     *            The name of the JSON resource to which this request should be
+     *            targeted.
      * @return This request.
      * @throws UnsupportedOperationException
      *             If this request does not permit changes to the JSON resource
-     *             component name.
+     *             name.
      */
-    Request setComponent(String name);
-
-    /**
-     * Sets the ID of the JSON resource to which this request should be
-     * targeted, if applicable.
-     *
-     * @param id
-     *            The ID of the JSON resource to which this request should be
-     *            targeted, or {@code null} if the ID is not applicable (e.g.
-     *            for singleton resources, certain actions, or some create
-     *            requests).
-     * @return This request.
-     * @throws UnsupportedOperationException
-     *             If this request does not permit changes to the JSON resource
-     *             ID.
-     */
-    Request setResourceId(String id);
+    Request setResourceName(String name);
 }

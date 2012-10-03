@@ -42,19 +42,13 @@ public interface PatchRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    String getComponent();
+    String getResourceName();
 
     /**
      * {@inheritDoc}
      */
     @Override
     List<JsonPointer> getFieldFilters();
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    String getResourceId();
 
     /**
      * Returns the patch which should be applied to the JSON resource.
@@ -83,13 +77,7 @@ public interface PatchRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    PatchRequest setComponent(String path);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    PatchRequest setResourceId(String id);
+    PatchRequest setResourceName(String name);
 
     /**
      * Sets the patch which should be applied to the JSON resource.

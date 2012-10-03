@@ -64,6 +64,7 @@ import org.forgerock.json.resource.SortKey;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.json.resource.exception.BadRequestException;
 import org.forgerock.json.resource.exception.ConflictException;
+import org.forgerock.json.resource.exception.InternalServerErrorException;
 import org.forgerock.json.resource.exception.NotSupportedException;
 import org.forgerock.json.resource.exception.PreconditionFailedException;
 import org.forgerock.json.resource.exception.ResourceException;
@@ -142,9 +143,8 @@ public final class HttpServletAdapter {
             final Context parentContext) throws ServletException {
         this.servletContext = servletContext;
         this.parentContext = parentContext != null ? parentContext : Context.newRootContext();
-        this.dispatcher =
-                getServletConfigurator(servletContext).getRequestDispatcher(factory,
-                        jsonMapper.getJsonFactory());
+        this.dispatcher = getServletConfigurator(servletContext).getRequestDispatcher(factory,
+                jsonMapper.getJsonFactory());
     }
 
     /**
@@ -185,11 +185,9 @@ public final class HttpServletAdapter {
             preprocessRequest(req);
             rejectIfNoneMatch(req);
 
-            final DecodedPath dpath = decodePath(req.getPathInfo());
             final Map<String, String[]> parameters = req.getParameterMap();
-            final DeleteRequest request =
-                    Requests.newDeleteRequest(dpath.getComponent(), dpath.getResourceId())
-                            .setRevision(getIfMatch(req));
+            final DeleteRequest request = Requests.newDeleteRequest(getResourceName(req))
+                    .setRevision(getIfMatch(req));
             for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
                 final String name = p.getKey();
                 final String[] values = p.getValue();
@@ -214,12 +212,10 @@ public final class HttpServletAdapter {
             rejectIfMatch(req);
             rejectIfNoneMatch(req);
 
-            final DecodedPath dpath = decodePath(req.getPathInfo());
             final Map<String, String[]> parameters = req.getParameterMap();
-
-            if (dpath.isCollection() && dpath.getResourceId() == null) {
+            if (parameters.containsKey("_query-id") || parameters.containsKey("_query-filter")) {
                 // Query against collection.
-                final QueryRequest request = Requests.newQueryRequest(dpath.getComponent());
+                final QueryRequest request = Requests.newQueryRequest(getResourceName(req));
 
                 for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
                     final String name = p.getKey();
@@ -270,10 +266,7 @@ public final class HttpServletAdapter {
                 dispatcher.dispatchRequest(context, request, req, resp);
             } else {
                 // Read of instance within collection or singleton.
-                final ReadRequest request = Requests.newReadRequest(dpath.getComponent());
-                if (dpath.getResourceId() != null) {
-                    request.setResourceId(dpath.getResourceId());
-                }
+                final ReadRequest request = Requests.newReadRequest(getResourceName(req));
                 for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
                     final String name = p.getKey();
                     final String[] values = p.getValue();
@@ -310,31 +303,13 @@ public final class HttpServletAdapter {
             rejectIfNoneMatch(req);
             rejectIfMatch(req);
 
-            final DecodedPath dpath = decodePath(req.getPathInfo());
             final Map<String, String[]> parameters = req.getParameterMap();
             final String action = asSingleValue(PARAM_ACTION, parameters.get(PARAM_ACTION));
 
             if (action.equals("create")) {
-                // Create request must be targeted at collection component.
-                if (!dpath.isCollection()) {
-                    // TODO: i18n
-                    throw new BadRequestException(
-                            "Resource creation using the 'create' POST action "
-                                    + "is not supported for singleton resources");
-                }
-
-                if (dpath.getResourceId() != null) {
-                    // TODO: i18n
-                    throw new BadRequestException(
-                            "Resource creation using the 'create' POST action "
-                                    + "is not supported for resources within a collection");
-                }
-
                 final JsonValue content = getJsonContentAsMap(req);
-                final String resourceId = getResourceId(content);
-                final CreateRequest request =
-                        Requests.newCreateRequest(dpath.getComponent(), resourceId, content);
-
+                final CreateRequest request = Requests.newCreateRequest(getResourceName(req),
+                        content);
                 for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
                     final String name = p.getKey();
                     final String[] values = p.getValue();
@@ -354,9 +329,8 @@ public final class HttpServletAdapter {
             } else {
                 // Action request.
                 final JsonValue content = getJsonContentAsMap(req);
-                final ActionRequest request =
-                        Requests.newActionRequest(dpath.getComponent(), dpath.getResourceId(),
-                                action).setContent(content);
+                final ActionRequest request = Requests.newActionRequest(getResourceName(req),
+                        action).setContent(content);
                 for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
                     final String name = p.getKey();
                     final String[] values = p.getValue();
@@ -389,31 +363,32 @@ public final class HttpServletAdapter {
                                 + "supported for PUT requests");
             }
 
-            final DecodedPath dpath = decodePath(req.getPathInfo());
             final Map<String, String[]> parameters = req.getParameterMap();
             final JsonValue content = getJsonContentAsMap(req);
 
             final String rev = getIfNoneMatch(req);
             if (ETAG_ANY.equals(rev)) {
-                // This is a create with a user provided resource ID.
-
-                // Create request must be targeted at collection instance.
-                if (!dpath.isCollection()) {
-                    // TODO: i18n
-                    throw new BadRequestException("Resource creation using PUT "
-                            + "is not supported for singleton resources");
+                // This is a create with a user provided resource ID: split the
+                // path into the parent resource name and resource ID.
+                String resourceName = getResourceName(req);
+                int i = resourceName.lastIndexOf('/');
+                final CreateRequest request;
+                if (i < 0) {
+                    // The Servlet specifically states that the path info
+                    // contains a forward slash so this is an internal error.
+                    // FIXME: i18n.
+                    throw new InternalServerErrorException("Invalid HTTP servlet request path info");
+                } else if (i == 0) {
+                    request = Requests.newCreateRequest("/", content);
+                } else {
+                    request = Requests.newCreateRequest(resourceName.substring(0, i), content);
                 }
-
-                if (dpath.getResourceId() == null) {
-                    // TODO: i18n
-                    throw new BadRequestException("Resource creation using PUT "
-                            + "is not supported for resources within a collection");
+                String newResourceId = resourceName.substring(i + 1);
+                if (newResourceId.isEmpty()) {
+                    // FIXME: i18n.
+                    throw new BadRequestException("No new resource ID in HTTP PUT request");
                 }
-
-                final CreateRequest request =
-                        Requests.newCreateRequest(dpath.getComponent(), dpath.getResourceId(),
-                                content);
-
+                request.setNewResourceId(newResourceId);
                 for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
                     final String name = p.getKey();
                     final String[] values = p.getValue();
@@ -428,9 +403,8 @@ public final class HttpServletAdapter {
                 final Context context = newRequestContext(req);
                 dispatcher.dispatchRequest(context, request, req, resp);
             } else {
-                final UpdateRequest request =
-                        Requests.newUpdateRequest(dpath.getComponent(), dpath.getResourceId(),
-                                content).setRevision(getIfMatch(req));
+                final UpdateRequest request = Requests.newUpdateRequest(getResourceName(req),
+                        content).setRevision(getIfMatch(req));
                 for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
                     final String name = p.getKey();
                     final String[] values = p.getValue();
@@ -450,32 +424,10 @@ public final class HttpServletAdapter {
         }
     }
 
-    private DecodedPath decodePath(String path) throws ResourceException {
-        // TODO: decode path against request handler.
-
-        // Cases (path may be null):
-        //
-        // /schema  (cn = schema, rid = null) - read  (singleton)
-        // /users   (cn = users,  rid = null) - query (collection)
-        // /users/1 (cn = users, rid = 1)     - read  (collection)
-        //
-
-        // Dumb and buggy implementation for now: assume that all resources
-        // are collections.
-        if (path.equals("/")) {
-            return new DecodedPath("/", null, true);
-        }
-
-        if (path.endsWith("/")) {
-            path = path.substring(0, path.length() - 1);
-        }
-
-        final int i = path.lastIndexOf('/');
-        if (i == 0) {
-            return new DecodedPath(path, null, true);
-        } else {
-            return new DecodedPath(path.substring(0, i), path.substring(i + 1), true);
-        }
+    private String getResourceName(final HttpServletRequest req) throws ResourceException {
+        // Treat null path info as root resource.
+        String resourceName = req.getPathInfo();
+        return resourceName == null ? "/" : resourceName;
     }
 
     private void dumpRequest(final HttpServletRequest req) {
@@ -553,10 +505,10 @@ public final class HttpServletAdapter {
         return result;
     }
 
-    private String getResourceId(final JsonValue content) {
-        final JsonValue tmp = content.isMap() ? content.get("_id") : null;
-        return (tmp != null && tmp.isString()) ? tmp.asString() : null;
-    }
+    //    private String getResourceId(final JsonValue content) {
+    //        final JsonValue tmp = content.isMap() ? content.get("_id") : null;
+    //        return (tmp != null && tmp.isString()) ? tmp.asString() : null;
+    //    }
 
     private Context newRequestContext(final HttpServletRequest req) {
         return newRestApiInfoContext(newHttpContext(parentContext, req));

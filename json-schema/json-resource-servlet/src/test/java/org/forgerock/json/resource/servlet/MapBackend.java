@@ -94,10 +94,10 @@ public final class MapBackend implements CollectionResourceProvider {
      * {@inheritDoc}
      */
     @Override
-    public void actionInstance(final Context context, final ActionRequest request,
+    public void actionInstance(final Context context, final String id, final ActionRequest request,
             final ResultHandler<JsonValue> handler) {
-        final ResourceException e =
-                new NotSupportedException("Actions are not supported for resource instances");
+        final ResourceException e = new NotSupportedException(
+                "Actions are not supported for resource instances");
         handler.handleError(e);
     }
 
@@ -108,13 +108,13 @@ public final class MapBackend implements CollectionResourceProvider {
     public void createInstance(final Context context, final CreateRequest request,
             final ResultHandler<Resource> handler) {
         final JsonValue value = request.getContent();
-        final String id = request.getResourceId();
+        final String id = request.getNewResourceId();
         final String rev = "0";
         try {
             final Resource resource;
             while (true) {
-                final String eid =
-                        id != null ? id : String.valueOf(nextResourceId.getAndIncrement());
+                final String eid = id != null ? id : String.valueOf(nextResourceId
+                        .getAndIncrement());
                 final Resource tmp = new Resource(eid, rev, value);
                 synchronized (writeLock) {
                     final Resource existingResource = resources.put(eid, tmp);
@@ -146,9 +146,8 @@ public final class MapBackend implements CollectionResourceProvider {
      * {@inheritDoc}
      */
     @Override
-    public void deleteInstance(final Context context, final DeleteRequest request,
+    public void deleteInstance(final Context context, final String id, final DeleteRequest request,
             final ResultHandler<Resource> handler) {
-        final String id = request.getResourceId();
         final String rev = request.getRevision();
         try {
             final Resource resource;
@@ -175,7 +174,7 @@ public final class MapBackend implements CollectionResourceProvider {
      * {@inheritDoc}
      */
     @Override
-    public void patchInstance(final Context context, final PatchRequest request,
+    public void patchInstance(final Context context, final String id, final PatchRequest request,
             final ResultHandler<Resource> handler) {
         final ResourceException e = new NotSupportedException("Patch operations are not supported");
         handler.handleError(e);
@@ -197,9 +196,8 @@ public final class MapBackend implements CollectionResourceProvider {
      * {@inheritDoc}
      */
     @Override
-    public void readInstance(final Context context, final ReadRequest request,
+    public void readInstance(final Context context, final String id, final ReadRequest request,
             final ResultHandler<Resource> handler) {
-        final String id = request.getResourceId();
         try {
             final Resource resource = resources.get(id);
             if (resource == null) {
@@ -216,9 +214,8 @@ public final class MapBackend implements CollectionResourceProvider {
      * {@inheritDoc}
      */
     @Override
-    public void updateInstance(final Context context, final UpdateRequest request,
+    public void updateInstance(final Context context, final String id, final UpdateRequest request,
             final ResultHandler<Resource> handler) {
-        final String id = request.getResourceId();
         final String rev = request.getRevision();
         try {
             final Resource resource;
@@ -253,7 +250,6 @@ public final class MapBackend implements CollectionResourceProvider {
     private void addIdAndRevision(final Resource resource) throws ResourceException {
         final JsonValue content = resource.getContent();
         try {
-            content.asMap().put("_id", resource.getId());
             content.asMap().put("_rev", resource.getRevision());
         } catch (final JsonValueException e) {
             throw new BadRequestException(
