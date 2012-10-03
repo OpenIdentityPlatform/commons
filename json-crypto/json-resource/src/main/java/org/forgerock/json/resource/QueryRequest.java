@@ -57,7 +57,7 @@ public interface QueryRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    String getComponent();
+    String getResourceName();
 
     /**
      * {@inheritDoc}
@@ -105,7 +105,7 @@ public interface QueryRequest extends Request {
      * @return The additional parameters which should be used to control the
      *         behavior of this query request (never {@code null}).
      */
-    Map<String, String> getQueryAdditionalParameters();
+    Map<String, String> getAdditionalQueryParameters();
 
     /**
      * Returns the query filter which will be used for selecting which JSON
@@ -124,12 +124,6 @@ public interface QueryRequest extends Request {
      *         a pre-defined query is not to be used.
      */
     String getQueryId();
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    String getResourceId();
 
     /**
      * Returns the sort keys which should be used for ordering the JSON
@@ -160,7 +154,7 @@ public interface QueryRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    QueryRequest setComponent(String path);
+    QueryRequest setResourceName(String name);
 
     /**
      * Sets the opaque cookie which is used by the resource provider to track
@@ -231,10 +225,4 @@ public interface QueryRequest extends Request {
      *             identifier.
      */
     QueryRequest setQueryId(String id);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    QueryRequest setResourceId(String id);
 }

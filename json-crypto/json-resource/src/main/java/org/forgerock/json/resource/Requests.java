@@ -31,17 +31,15 @@ import org.forgerock.json.fluent.JsonValue;
  */
 public final class Requests {
     private static abstract class AbstractRequestImpl<T extends Request> implements Request {
-        private String component;
+        private String resourceName;
         private final List<JsonPointer> fields = new LinkedList<JsonPointer>();
-        private String id;
 
         protected AbstractRequestImpl() {
             // Default constructor.
         }
 
         protected AbstractRequestImpl(final Request request) {
-            this.component = request.getComponent();
-            this.id = request.getResourceId();
+            this.resourceName = request.getResourceName();
             this.fields.addAll(request.getFieldFilters());
         }
 
@@ -65,18 +63,10 @@ public final class Requests {
                 for (final String field : fields) {
                     this.fields.add(new JsonPointer(field));
                 }
-            } catch (JsonException e) {
+            } catch (final JsonException e) {
                 throw new IllegalArgumentException(e.getMessage());
             }
             return getThis();
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public final String getComponent() {
-            return component;
         }
 
         /**
@@ -91,25 +81,16 @@ public final class Requests {
          * {@inheritDoc}
          */
         @Override
-        public final String getResourceId() {
-            return id;
+        public final String getResourceName() {
+            return resourceName;
         }
 
         /**
          * {@inheritDoc}
          */
         @Override
-        public final T setComponent(final String name) {
-            this.component = notNull(name);
-            return getThis();
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public final T setResourceId(final String id) {
-            this.id = id;
+        public final T setResourceName(final String name) {
+            this.resourceName = notNull(name);
             return getThis();
         }
 
@@ -206,6 +187,7 @@ public final class Requests {
     private static final class CreateRequestImpl extends AbstractRequestImpl<CreateRequest>
             implements CreateRequest {
         private JsonValue content;
+        private String newResourceId;
 
         private CreateRequestImpl() {
             // Default constructor.
@@ -214,6 +196,7 @@ public final class Requests {
         private CreateRequestImpl(final CreateRequest request) {
             super(request);
             this.content = copyJsonValue(request.getContent());
+            this.newResourceId = request.getNewResourceId();
         }
 
         /**
@@ -236,8 +219,25 @@ public final class Requests {
          * {@inheritDoc}
          */
         @Override
+        public String getNewResourceId() {
+            return newResourceId;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
         public CreateRequest setContent(final JsonValue content) {
             this.content = notNull(content);
+            return this;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public CreateRequest setNewResourceId(String id) {
+            this.newResourceId = id;
             return this;
         }
 
@@ -384,7 +384,7 @@ public final class Requests {
             this.filter = request.getQueryFilter();
             this.queryId = request.getQueryId();
             this.keys.addAll(request.getSortKeys());
-            this.parameters.putAll(request.getQueryAdditionalParameters());
+            this.parameters.putAll(request.getAdditionalQueryParameters());
             this.pageSize = request.getPageSize();
             this.pagedResultsCookie = request.getPagedResultsCookie();
         }
@@ -428,7 +428,7 @@ public final class Requests {
          * {@inheritDoc}
          */
         @Override
-        public Map<String, String> getQueryAdditionalParameters() {
+        public Map<String, String> getAdditionalQueryParameters() {
             return parameters;
         }
 
@@ -685,183 +685,94 @@ public final class Requests {
     }
 
     /**
-     * Returns a new action request with the provided component name and action
-     * ID and {@code null} resource ID.
-     *
-     * @param component
-     *            The component name.
-     * @param actionId
-     *            The action ID.
-     * @return The new action request.
-     */
-    public static ActionRequest newActionRequest(final String component, final String actionId) {
-        return new ActionRequestImpl().setComponent(component).setActionId(actionId);
-    }
-
-    /**
-     * Returns a new action request with the provided component name, resource
-     * ID, and action ID.
-     *
-     * @param component
-     *            The component name.
-     * @param resourceId
-     *            The resource ID.
-     * @param actionId
-     *            The action ID.
-     * @return The new action request.
-     */
-    public static ActionRequest newActionRequest(final String component, final String resourceId,
-            final String actionId) {
-        return new ActionRequestImpl().setComponent(component).setResourceId(resourceId)
-                .setActionId(actionId);
-    }
-
-    /**
-     * Returns a new create request with the provided component name and JSON
-     * content. The resource ID will initially be {@code null} indicating that a
-     * server-provided ID should be assigned.
-     *
-     * @param component
-     *            The component name.
-     * @param content
-     *            The JSON content.
-     * @return The new create request.
-     */
-    public static CreateRequest newCreateRequest(final String component, final JsonValue content) {
-        return new CreateRequestImpl().setComponent(component).setContent(content);
-    }
-
-    /**
-     * Returns a new create request with the provided component name, resource
-     * ID, and JSON content.
-     *
-     * @param component
-     *            The component name.
-     * @param resourceId
-     *            The resource ID or {@code null} if a server-provided ID should
-     *            be assigned.
-     * @param content
-     *            The JSON content.
-     * @return The new create request.
-     */
-    public static CreateRequest newCreateRequest(final String component, final String resourceId,
-            final JsonValue content) {
-        return new CreateRequestImpl().setComponent(component).setResourceId(resourceId)
-                .setContent(content);
-    }
-
-    /**
-     * Returns a new delete request with the provided component name and
-     * resource ID.
-     *
-     * @param component
-     *            The component name.
-     * @param resourceId
-     *            The resource ID.
-     * @return The new delete request.
-     */
-    public static DeleteRequest newDeleteRequest(final String component, final String resourceId) {
-        return new DeleteRequestImpl().setComponent(component).setResourceId(resourceId);
-    }
-
-    /**
-     * Returns a new patch request with the provided component name and JSON
-     * patch.
-     *
-     * @param component
-     *            The component name.
-     * @param changes
-     *            The JSON patch.
-     * @return The new patch request.
-     */
-    public static PatchRequest newPatchRequest(final String component, final Patch changes) {
-        return new PatchRequestImpl().setComponent(component).setPatch(changes);
-    }
-
-    /**
-     * Returns a new patch request with the provided component name, resource
-     * ID, and JSON patch.
-     *
-     * @param component
-     *            The component name.
-     * @param resourceId
-     *            The resource ID.
-     * @param changes
-     *            The JSON patch.
-     * @return The new patch request.
-     */
-    public static PatchRequest newPatchRequest(final String component, final String resourceId,
-            final Patch changes) {
-        return new PatchRequestImpl().setComponent(component).setResourceId(resourceId).setPatch(
-                changes);
-    }
-
-    /**
-     * Returns a new query request with the provided component name.
-     *
-     * @param component
-     *            The component name.
-     * @return The new query request.
-     */
-    public static QueryRequest newQueryRequest(final String component) {
-        return new QueryRequestImpl().setComponent(component);
-    }
-
-    /**
-     * Returns a new read request with the provided component name.
-     *
-     * @param component
-     *            The component name.
-     * @return The new read request.
-     */
-    public static ReadRequest newReadRequest(final String component) {
-        return new ReadRequestImpl().setComponent(component);
-    }
-
-    /**
-     * Returns a new read request with the provided component name and resource
+     * Returns a new action request with the provided resource name and action
      * ID.
      *
-     * @param component
-     *            The component name.
-     * @param resourceId
-     *            The resource ID.
+     * @param resourceName
+     *            The resource name.
+     * @param actionId
+     *            The action ID.
+     * @return The new action request.
+     */
+    public static ActionRequest newActionRequest(final String resourceName, final String actionId) {
+        return new ActionRequestImpl().setResourceName(resourceName).setActionId(actionId);
+    }
+
+    /**
+     * Returns a new create request with the provided resource name and JSON
+     * content.
+     *
+     * @param resourceName
+     *            The name of the parent resource beneath which the new resource
+     *            should be created.
+     * @param content
+     *            The JSON content.
+     * @return The new create request.
+     */
+    public static CreateRequest newCreateRequest(final String resourceName, final JsonValue content) {
+        return new CreateRequestImpl().setResourceName(resourceName).setContent(content);
+    }
+
+    /**
+     * Returns a new delete request with the provided resource name.
+     *
+     * @param resourceName
+     *            The resource name.
+     * @return The new delete request.
+     */
+    public static DeleteRequest newDeleteRequest(final String resourceName) {
+        return new DeleteRequestImpl().setResourceName(resourceName);
+    }
+
+    /**
+     * Returns a new patch request with the provided resource name and JSON
+     * patch.
+     *
+     * @param resourceName
+     *            The resource name.
+     * @param changes
+     *            The JSON patch.
+     * @return The new patch request.
+     */
+    public static PatchRequest newPatchRequest(final String resourceName, final Patch changes) {
+        return new PatchRequestImpl().setResourceName(resourceName).setPatch(changes);
+    }
+
+    /**
+     * Returns a new query request with the provided resource name.
+     *
+     * @param resourceName
+     *            The resource name.
+     * @return The new query request.
+     */
+    public static QueryRequest newQueryRequest(final String resourceName) {
+        return new QueryRequestImpl().setResourceName(resourceName);
+    }
+
+    /**
+     * Returns a new read request with the provided resource name.
+     *
+     * @param resourceName
+     *            The resource name.
      * @return The new read request.
      */
-    public static ReadRequest newReadRequest(final String component, final String resourceId) {
-        return new ReadRequestImpl().setComponent(component).setResourceId(resourceId);
+    public static ReadRequest newReadRequest(final String resourceName) {
+        return new ReadRequestImpl().setResourceName(resourceName);
     }
 
     /**
-     * Returns a new update request with the provided component name and new
-     * JSON content.
+     * Returns a new update request with the provided resource name and new JSON
+     * content.
      *
-     * @param component
-     *            The component name.
+     * @param resourceName
+     *            The resource name.
      * @param newContent
      *            The new JSON content.
      * @return The new update request.
      */
-    public static UpdateRequest newUpdateRequest(final String component, final JsonValue newContent) {
-        return new UpdateRequestImpl().setComponent(component).setNewContent(newContent);
-    }
-
-    /**
-     * Returns a new update request with the provided component name, resource
-     * ID, and new JSON content.
-     *
-     * @param component
-     *            The component name.
-     * @param resourceId
-     *            The resource ID.
-     * @param newContent
-     *            The new JSON content.
-     * @return The new update request.
-     */
-    public static UpdateRequest newUpdateRequest(final String component, final String resourceId,
+    public static UpdateRequest newUpdateRequest(final String resourceName,
             final JsonValue newContent) {
-        return new UpdateRequestImpl().setComponent(component).setResourceId(resourceId)
-                .setNewContent(newContent);
+        return new UpdateRequestImpl().setResourceName(resourceName).setNewContent(newContent);
     }
 
     private static JsonValue copyJsonValue(final JsonValue value) {

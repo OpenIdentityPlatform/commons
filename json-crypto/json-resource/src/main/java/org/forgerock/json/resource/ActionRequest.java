@@ -62,19 +62,13 @@ public interface ActionRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    String getComponent();
+    String getResourceName();
 
     /**
      * {@inheritDoc}
      */
     @Override
     List<JsonPointer> getFieldFilters();
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    String getResourceId();
 
     /**
      * Returns the content of this action request. The structure of the content
@@ -117,13 +111,7 @@ public interface ActionRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    ActionRequest setComponent(String path);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    ActionRequest setResourceId(String id);
+    ActionRequest setResourceName(String name);
 
     /**
      * Sets the content of this action request. The structure of the content is
