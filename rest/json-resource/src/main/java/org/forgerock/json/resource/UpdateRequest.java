@@ -43,19 +43,13 @@ public interface UpdateRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    String getComponent();
+    String getResourceName();
 
     /**
      * {@inheritDoc}
      */
     @Override
     List<JsonPointer> getFieldFilters();
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    String getResourceId();
 
     /**
      * Returns the new content of the JSON resource to be replaced.
@@ -84,13 +78,7 @@ public interface UpdateRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    UpdateRequest setComponent(String path);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    UpdateRequest setResourceId(String id);
+    UpdateRequest setResourceName(String name);
 
     /**
      * Sets the new content of the JSON resource to be replaced.

@@ -41,19 +41,13 @@ public interface DeleteRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    String getComponent();
+    String getResourceName();
 
     /**
      * {@inheritDoc}
      */
     @Override
     List<JsonPointer> getFieldFilters();
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    String getResourceId();
 
     /**
      * Returns the expected version information associated with the JSON
@@ -75,13 +69,7 @@ public interface DeleteRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    DeleteRequest setComponent(String path);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    DeleteRequest setResourceId(String id);
+    DeleteRequest setResourceName(String name);
 
     /**
      * Sets the expected version information associated with the JSON resource

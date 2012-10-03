@@ -13,34 +13,25 @@
  *
  * Copyright 2012 ForgeRock AS.
  */
-package org.forgerock.json.resource.servlet;
+
+package org.forgerock.json.resource.provider;
 
 /**
- * A URL which has been decoded in order to determine the component name,
- * resource ID if present, and whether or not the container is a collection.
+ * The algorithm which should be used when matching URI templates against
+ * request resource names.
  */
-final class DecodedPath {
+public enum RoutingMode {
 
-    private final String component;
-    private final boolean isCollection;
-    private final String resourceId;
+    /**
+     * The URI template must exactly match a request's resource name in order
+     * for the route to be selected.
+     */
+    EQUALS,
 
-    DecodedPath(final String component, final String resourceId, final boolean isCollection) {
-        this.component = component;
-        this.resourceId = resourceId;
-        this.isCollection = isCollection;
-    }
-
-    String getComponent() {
-        return component;
-    }
-
-    String getResourceId() {
-        return resourceId;
-    }
-
-    boolean isCollection() {
-        return isCollection;
-    }
+    /**
+     * The URI template must match the beginning of a request's resource name in
+     * order for the route to be selected.
+     */
+    STARTS_WITH;
 
 }

@@ -41,7 +41,7 @@ public interface ReadRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    String getComponent();
+    String getResourceName();
 
     /**
      * {@inheritDoc}
@@ -53,17 +53,5 @@ public interface ReadRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    String getResourceId();
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    ReadRequest setComponent(String path);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    ReadRequest setResourceId(String id);
+    ReadRequest setResourceName(String name);
 }
