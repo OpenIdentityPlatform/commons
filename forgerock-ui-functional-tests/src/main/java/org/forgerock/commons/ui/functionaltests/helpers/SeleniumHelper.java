@@ -2,11 +2,7 @@ package org.forgerock.commons.ui.functionaltests.helpers;
 
 import javax.inject.Inject;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.Cookie;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.springframework.stereotype.Component;
 
 @Component

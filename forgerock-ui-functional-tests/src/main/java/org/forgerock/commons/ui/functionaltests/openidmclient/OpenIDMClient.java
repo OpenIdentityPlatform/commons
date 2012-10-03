@@ -47,14 +47,15 @@ public class OpenIDMClient {
 		return result.get_id();
 	}
 	
+	
+//	public void logout(String cookie) {
+//		restTemplate.exchange(constants.getOpenIDMServer() + "openidm/",
+//				HttpMethod.GET, new HttpEntity<byte[]>(getHeadersForLogout(cookie)), EntityBaseInfoArray.class);
+//	}
+	
 	/**
 	 * @param cookie like JSESSIONID=ixnekr105coj11ji67xcluux8
 	 */
-	public void logout(String cookie) {
-		restTemplate.exchange(constants.getOpenIDMServer() + "openidm/",
-				HttpMethod.GET, new HttpEntity<byte[]>(getHeadersForLogout(cookie)), EntityBaseInfoArray.class);
-	}
-	
 	public String loginAndReturnCookie(String userName, String password) {
 		try {
 			ResponseEntity<EntityBaseInfoArray> response = restTemplate.exchange(constants.getOpenIDMServer() + "openidm/managed/user/?_query-id=for-credentials",
@@ -99,12 +100,12 @@ public class OpenIDMClient {
 		return userHeaders;
 	}
 	
-	private HttpHeaders getHeadersForLogout(String cookie) {
-		HttpHeaders headersForLogout = new HttpHeaders();
-		headersForLogout.add("X-OpenIDM-Logout", "true");
-		headersForLogout.add("Cookie", cookie);
-		return headersForLogout;
-	}
+//	private HttpHeaders getHeadersForLogout(String cookie) {
+//		HttpHeaders headersForLogout = new HttpHeaders();
+//		headersForLogout.add("X-OpenIDM-Logout", "true");
+//		headersForLogout.add("Cookie", cookie);
+//		return headersForLogout;
+//	}
 
 	private void initializeHeaders() {
 		getAllUsersHeaders.add("X-OpenIDM-Username", "openidm-admin");

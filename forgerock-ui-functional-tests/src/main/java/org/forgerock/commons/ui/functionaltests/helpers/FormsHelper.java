@@ -3,13 +3,13 @@ package org.forgerock.commons.ui.functionaltests.helpers;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.swing.text.html.parser.Element;
 
 import org.codehaus.jackson.JsonNode;
 import org.forgerock.commons.ui.functionaltests.helpers.SeleniumHelper.ElementType;
 import org.forgerock.commons.ui.functionaltests.utils.JsonUtils;
 import org.openqa.selenium.*;
-import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.support.ui.*;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 
@@ -35,8 +35,17 @@ public class FormsHelper {
 	 */
 	public void setField(String el, String name, String value) {
 		WebElement element = selenium.getElement(el, name, ElementType.NAME);
-		element.clear();
-		element.sendKeys(value);
+		String tagName = element.getTagName();
+		if (tagName.equals("input")) {
+			element.clear();
+			element.sendKeys(value);
+		} else if (tagName.equals("select")) {
+			Select selectBox = new Select(element);
+			selectBox.selectByValue(value);
+		} else {
+			throw new IllegalStateException("No implementation for type " + tagName);
+		}
+		
 		
 		String event = element.getAttribute("data-validator-event");
 		if(event != null) {
@@ -48,7 +57,15 @@ public class FormsHelper {
 	
 	public String getFieldValue(String el, String name) {
 		WebElement element = selenium.getElement(el, name, ElementType.NAME);
-		return element.getAttribute("value");
+		String tagName = element.getTagName();
+		if (tagName.equals("input")) {
+			return element.getAttribute("value");
+		} else if (tagName.equals("select")) {
+			Select selectBox = new Select(element);
+			return selectBox.getFirstSelectedOption().getAttribute("value");
+		} else {
+			throw new IllegalStateException("No implementation for type " + tagName);
+		}
 	}
 	
 	public void submit(String el, String name) {
@@ -158,6 +175,15 @@ public class FormsHelper {
 			Assert.fail(failMessage);
 		}
 		Assert.assertNotEquals(0, driver.findElements(By.cssSelector("#"+ el +" [name="+ name +"][data-validation-status=error]")).size(), failMessage);
+	}
+
+	public String getSelectDisplayValue(String el, String name) {
+		WebElement element = selenium.getElement(el, name, ElementType.NAME);
+		Select selectBox = new Select(element);
+		if (selectBox.getAllSelectedOptions().size() == 0 ) {
+			return null;
+		}
+		return selectBox.getFirstSelectedOption().getText();
 	}
 	
 }

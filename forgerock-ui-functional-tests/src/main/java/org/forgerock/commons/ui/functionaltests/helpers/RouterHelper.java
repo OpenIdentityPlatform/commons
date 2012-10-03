@@ -30,7 +30,10 @@ public class RouterHelper {
 		driver.navigate().to(constants.getBasePage() + url);		
 	}
 	
-	public void goToProfile() {
+	public void goToProfile(boolean refreshBeforeNavigate) {
+		if (refreshBeforeNavigate) {
+			driver.navigate().refresh();
+		}
 		this.routeTo("/#profile/");		
 		selenium.waitForElement("content", "saveButton", ElementType.NAME);
 	}
