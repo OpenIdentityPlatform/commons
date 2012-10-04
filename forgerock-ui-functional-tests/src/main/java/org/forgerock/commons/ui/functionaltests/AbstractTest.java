@@ -9,7 +9,8 @@ import org.forgerock.commons.ui.functionaltests.utils.JsonUtils;
 import org.openqa.selenium.WebDriver;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.*;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeMethod;
 
 @ContextConfiguration(locations = { "classpath:testApplicationContext.xml" })
 public class AbstractTest extends AbstractTestNGSpringContextTests {
@@ -74,5 +75,5 @@ public class AbstractTest extends AbstractTestNGSpringContextTests {
 		forms.assertValidationPasses(element, fieldName);
 		forms.assertFormValidationPasses(element);
 	}
-
+	
 }

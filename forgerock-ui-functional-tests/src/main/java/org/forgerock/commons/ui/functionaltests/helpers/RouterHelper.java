@@ -52,5 +52,12 @@ public class RouterHelper {
 		
 		Assert.assertEquals(constants.getBasePage() + url, driver.getCurrentUrl());
 	}
-	
+
+	public void goToAddMoreApps(boolean refreshBeforeNavigate) {
+		if (refreshBeforeNavigate) {
+			driver.navigate().refresh();
+		}
+		this.routeTo("/#applications/addmore/");
+		selenium.waitForElement("content", "itemize", ElementType.CLASS);
+	}
 }
