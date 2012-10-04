@@ -3,15 +3,13 @@ package org.forgerock.commons.ui.functionaltests.helpers;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.swing.text.html.parser.Element;
 
 import org.codehaus.jackson.JsonNode;
 import org.forgerock.commons.ui.functionaltests.helpers.SeleniumHelper.ElementType;
 import org.forgerock.commons.ui.functionaltests.utils.JsonUtils;
 import org.openqa.selenium.*;
-import org.openqa.selenium.support.ui.*;
+import org.openqa.selenium.support.ui.Select;
 import org.springframework.stereotype.Component;
-import org.testng.Assert;
 
 @Component
 public class FormsHelper {

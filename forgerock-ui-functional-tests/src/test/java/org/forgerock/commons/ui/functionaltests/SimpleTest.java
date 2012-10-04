@@ -1,7 +1,5 @@
 package org.forgerock.commons.ui.functionaltests;
 
-import org.codehaus.jackson.JsonNode;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 @Test(singleThreaded = true)
