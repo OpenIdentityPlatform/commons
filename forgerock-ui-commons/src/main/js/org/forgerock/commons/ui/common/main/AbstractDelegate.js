@@ -47,7 +47,7 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
 
     obj.prototype.createEntity = function(object, successCallback, errorCallback) {
         console.debug("create entity");
-        this.serviceCall({url: "/" + object.userName, type: "PUT", success: successCallback, error: errorCallback, data: JSON.stringify(object)});
+        this.serviceCall({url: "/?_action=create" , type: "POST", success: successCallback, error: errorCallback, data: JSON.stringify(object)});
     };
 
     obj.prototype.deleteEntity = function(id, successCallback, errorCallback) {
