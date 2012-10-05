@@ -58,20 +58,27 @@ define("config/AppConfiguration", [
                    moduleClass: "org/forgerock/commons/ui/common/main/Router",
                    configuration: {
                        routes: {
+                           
                            "": {
-                               view: "org/forgerock/commons/ui/user/LoginView",
-                               url: ""                                   
-                           },
-                           "profile": {
-                               view: "org/forgerock/commons/ui/user/UserProfileView",
+                               view: "org/forgerock/commons/ui/user/profile/UserProfileView",
                                role: "openidm-authorized",
+                               excludedRole: "openidm-admin",
+                               url: ""                                  
+                           },
+                           
+                         //commons
+                           "profile": {
+                               view: "org/forgerock/commons/ui/user/profile/UserProfileView",
+                               role: "openidm-authorized",
+                               excludedRole: "openidm-admin",
                                url: "profile/" 
                            },
                            "siteIdentification": {
                                base: "profile",
-                               dialog: "org/forgerock/commons/ui/user/ChangeSiteIdentificationDialog",
+                               dialog: "org/forgerock/commons/ui/user/profile/ChangeSiteIdentificationDialog",
                                url: "profile/site_identification/",
-                               role: "openidm-authorized"
+                               role: "openidm-authorized",
+                               excludedRole: "openidm-admin"
                            },
                            "register": {
                                view: "org/forgerock/commons/ui/user/UserRegistrationView",
@@ -82,21 +89,28 @@ define("config/AppConfiguration", [
                                dialog: "org/forgerock/commons/ui/user/TermsOfUseDialog",
                                url: "register/terms_of_use/"
                            },
+                           "login" : {
+                               view: "org/forgerock/commons/ui/user/LoginView",
+                               url: "login/"
+                           },                           
                            "forgottenPassword" : {
+                               base: "login",
                                dialog: "org/forgerock/commons/ui/user/ForgottenPasswordDialog",
                                url: "profile/forgotten_password/"
                            },
                            "enterOldPassword": {
                                base: "profile",
-                               dialog: "org/forgerock/commons/ui/user/EnterOldPasswordDialog",
+                               dialog: "org/forgerock/commons/ui/user/profile/EnterOldPasswordDialog",
                                role: "openidm-authorized",
-                               url: "profile/old_password/"
+                               url: "profile/old_password/",
+                               excludedRoles: "openidm-admin"
                            },
                            "changeSecurityData": {
                                base: "profile",
-                               dialog: "org/forgerock/commons/ui/user/ChangeSecurityDataDialog",
+                               dialog: "org/forgerock/commons/ui/user/profile/ChangeSecurityDataDialog",
                                role: "openidm-authorized",
-                               url: "profile/change_security_data/"
+                               url: "profile/change_security_data/",
+                               excludedRole: "openidm-admin"
                            }
                        }
                    } 
@@ -178,10 +192,6 @@ define("config/AppConfiguration", [
                                msg: "Password has been changed",
                                type: "info"
                            },
-                           "userAlreadyExists": {
-                               msg: "User already exists",
-                               type: "error"
-                           },
                            "unknown": {
                                msg: "Unknown error. Please contact with administrator",
                                type: "error"
@@ -214,9 +224,21 @@ define("config/AppConfiguration", [
                                msg: "You have been logged out.",
                                type: "info"
                            },
-                           "userApplicationsUpdate": {
-                               msg: "Application settings have been changed.",
+                           "siteIdentificationChanged": {
+                               msg: "Site identification image has been changed",
                                type: "info"
+                           },
+                           "securityDataChanged": {
+                               msg: "Security data has been changed",
+                               type: "info"
+                           },
+                           "unauthorized": {
+                               msg: "Unauthorized access",
+                               type: "error"
+                           },
+                           "userAlreadyExists": {
+                               msg: "User already exists",
+                               type: "error"
                            }
                        }
                    } 

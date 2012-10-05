@@ -32,306 +32,362 @@ define("config/ValidatorsConfiguration", [
     "org/forgerock/commons/ui/common/main/EventManager"
 ], function(constants, eventManager) {
     var obj = {
-        "required": {
-            "name": "Required field",
-            "dependencies": [
-            ],
-            "validator": function(el, input, callback) {
-                var v = $(input).val();
-                
-                if(v === "") {
-                    callback("Required");
-                    return;
-                }
-
-                callback();  
-            }
-        },    
-        "registrationEmail": {
-            "name": "Correct and unique email",
-            "dependencies": [
-                "org/forgerock/commons/ui/common/util/ValidatorsUtils",
-                "org/forgerock/commons/ui/user/delegates/UserDelegate"
-            ],
-            "validator": function(el, input, callback, utils, userDelegate) {
-                var v = $(input).val();
-                
-                if(v === "") {
-                    callback("Required");
-                    return;
-                }
-                
-                if(!utils.emailPattern.test(v)) {
-                    callback("Not a valid email address.");
-                    return;
-                }
-                
-                userDelegate.checkUserNameAvailability(v, function(available) {
-                    if(!available) {
-                        callback("Email address already exists. <br />&nbsp;&nbsp;<a href='#reset_password/' id='frgtPasswrdSelfReg' class='ice'>Forgot password?</a>");
-                    } else {
-                        callback();
+            "required": {
+                "name": "Required field",
+                "dependencies": [
+                ],
+                "validator": function(el, input, callback) {
+                    var v = $(input).val();
+                    
+                    if(v === "") {
+                        callback("Required");
+                        return;
                     }
-                });              
-            }
-        },
-        "name": {
-            "name": "Only alphabetic characters",
-            "dependencies": [
-                "org/forgerock/commons/ui/common/util/ValidatorsUtils"
-            ],
-            "validator": function(el, input, callback, utils) {
-                var v = $(input).val();
-                
-                if(v === "") {
-                    callback("Required");
-                    return;
-                }
-                
-                if(!utils.namePattern.test(v)) {
-                    callback("Only alphabetic characters");
-                    return;
-                }
 
-                callback();  
-            }
-        },
-        "phone": {
-            "name": "Only numbers etc",
-            "dependencies": [
-                "org/forgerock/commons/ui/common/util/ValidatorsUtils"
-            ],
-            "validator": function(el, input, callback, utils) {
-                var v = $(input).val();
-                
-                if(v === "") {
-                    callback("Required");
-                    return;
+                    callback();  
                 }
-                
-                if(!utils.phonePattern.test(v)) {
-                    callback("Only numbers and special characters");
-                    return;
+            },    
+            "registrationEmail": {
+                "name": "Correct and unique email",
+                "dependencies": [
+                    "org/forgerock/commons/ui/common/util/ValidatorsUtils",
+                    "org/forgerock/commons/ui/user/delegates/UserDelegate"
+                ],
+                "validator": function(el, input, callback, utils, userDelegate) {
+                    var v = $(input).val();
+                    
+                    if(v === "") {
+                        callback("Required");
+                        return;
+                    }
+                    
+                    if(!utils.emailPattern.test(v)) {
+                        callback("Not a valid email address.");
+                        return;
+                    }
+                    
+                    userDelegate.checkUserNameAvailability(v, function(available) {
+                        if(!available) {
+                            callback("Email address already exists. <br />&nbsp;&nbsp;<a href='#profile/forgotten_password/' id='frgtPasswrdSelfReg' class='ice'>Forgot password?</a>");
+                        } else {
+                            callback();
+                        }
+                    });              
                 }
+            },
+            "name": {
+                "name": "Only alphabetic characters",
+                "dependencies": [
+                    "org/forgerock/commons/ui/common/util/ValidatorsUtils"
+                ],
+                "validator": function(el, input, callback, utils) {
+                    var v = $(input).val();
+                    
+                    if(v === "") {
+                        callback("Required");
+                        return;
+                    }
+                    
+                    if(!utils.namePattern.test(v)) {
+                        callback("Only alphabetic characters");
+                        return;
+                    }
 
-                callback(); 
-            }
-        },
-        "password": {
-            "name": "Password validator",
-            "dependencies": [
-                "org/forgerock/commons/ui/common/util/ValidatorsUtils"
-            ],
-            "validator": function(el, input, callback, utils) {
-                var v = $(input).val(), reg, errors = [];
-                
-                if(v.length < 8) {
-                    errors.push("At least 8 characters");
+                    callback();  
                 }
-                
-                reg = /[(A-Z)]+/;
-                if(!reg.test(v)) {
-                    errors.push("At least one capital letter");
-                }
-                
-                reg = /[(0-9)]+/;
-                if( !reg.test(v) ) {
-                    errors.push("At least one number");
-                }
-                
-                if( v === "" || v === $(el).find("input[name=email]").val() ) {
-                    errors.push("Cannot match login");
-                }
-                
-                if(errors.length === 0) {
+            },
+            "phone": {
+                "name": "Only numbers etc",
+                "dependencies": [
+                    "org/forgerock/commons/ui/common/util/ValidatorsUtils"
+                ],
+                "validator": function(el, input, callback, utils) {
+                    var v = $(input).val();
+                    
+                    if(v === "") {
+                        callback("Required");
+                        return;
+                    }
+                    
+                    if(!utils.phonePattern.test(v)) {
+                        callback("Only numbers and special characters");
+                        return;
+                    }
+
                     callback(); 
-                } else {
-                    callback(errors);
                 }
-                
-                $(el).find("input[name=passwordConfirm]").trigger("keyup");
-            }
-        },
-        "passwordConfirm": {
-            "name": "Password confirmation",
-            "dependencies": [
-                "org/forgerock/commons/ui/common/util/ValidatorsUtils"
-            ],
-            "validator": function(el, input, callback, utils) {
-                var v = $(input).val();
-                
-                if( v === "" || v !== $(el).find("input[name=password]").val() ) {
-                    callback(["Confirmation matches password"]);
-                    return;
-                }
+            },
+            "password": {
+                "name": "Password validator",
+                "dependencies": [
+                    "org/forgerock/commons/ui/common/util/ValidatorsUtils"
+                ],
+                "validator": function(el, input, callback, utils) {
+                    var v = $(input).val(), reg, errors = [];
+                    
+                    if(el.find("input[name=oldPassword]").length !== 0) {
+                        if(el.find("input[name=oldPassword]").val() === v) {
+                            errors.push("Cannot match old password");
+                        }
+                        
+                        if(v === "" && $(el).find("input[name=passwordConfirm]").val() === "") {
+                            $(el).find("input[name=passwordConfirm]").trigger("keyup");
+                            callback("disabled");
+                            utils.hideBox(el);
+                            return;
+                        }  else {
+                            utils.showBox(el);
+                        }
+                    }
 
-                callback(); 
-            }
-        },
-        "passPhrase": {
-            "name": "Min 4 characters",
-            "dependencies": [
-            ],
-            "validator": function(el, input, callback) {
-                var v = $(input).val();
-                if($(el).find("input[name=oldPassPhrase]").length !== 0) {
-                    if($(el).find("input[name=oldPassPhrase]").val() === v) {
-                        callback("disabled");
+                    if(v.length < 8) {
+                        errors.push("At least 8 characters");
+                    }
+                    
+                    reg = /[(A-Z)]+/;
+                    if(!reg.test(v)) {
+                        errors.push("At least one capital letter");
+                    }
+                    
+                    reg = /[(0-9)]+/;
+                    if( !reg.test(v) ) {
+                        errors.push("At least one number");
+                    }
+                    
+                    if( v === "" || v === $(el).find("input[name=email]").val() ) {
+                        errors.push("Cannot match login");
+                    }
+                    
+                    if(errors.length === 0) {
+                        callback(); 
+                    } else {
+                        callback(errors);
+                    }
+                    
+                    $(el).find("input[name=passwordConfirm]").trigger("keyup");
+                }
+            },
+            "passwordConfirm": {
+                "name": "Password confirmation",
+                "dependencies": [
+                    "org/forgerock/commons/ui/common/util/ValidatorsUtils"
+                ],
+                "validator": function(el, input, callback, utils) {
+                    var v = $(input).val();
+                    
+                    if(el.find("input[name=oldPassword]").length !== 0) {
+                        if(v === "" && $(el).find("input[name=password]").val() === "") {
+                            utils.hideValidation($(el).find("input[name=password]"), el);
+                            callback("disabled");
+                            utils.hideBox(el);
+                            return;
+                        } else {
+                            utils.showBox(el);
+                        }
+                    }
+
+                    if( v === "" || v !== $(el).find("input[name=password]").val() ) {
+                        callback(["Confirmation matches password"]);
                         return;
                     }
-                }
-                
-                if(v.length < 4) {
-                    callback("Minimum 4 characters");
-                    return;
-                }
 
-                callback();  
-            }
-        },
-        "siteImage": {
-            "name": "Site image not same as old",
-            "dependencies": [
-            ],
-            "validator": function(el, input, callback) {
-                var v = $(input).val();
-                if(el.find("input[name=oldSiteImage]").length !== 0) {
-                    if(el.find("input[name=oldSiteImage]").val() === v) {
-                        callback("disabled");
+                    callback(); 
+                }
+            },
+            "passPhrase": {
+                "name": "Min 4 characters",
+                "dependencies": [
+                ],
+                "validator": function(el, input, callback) {
+                    var v = $(input).val();
+                    if($(el).find("input[name=oldPassPhrase]").length !== 0) {
+                        if($(el).find("input[name=oldPassPhrase]").val() === v) {
+                            callback("disabled");
+                            return;
+                        }
+                    }
+                    
+                    if(v.length < 4) {
+                        callback("Minimum 4 characters");
                         return;
                     }
-                }
-                
-                callback();  
-            }
-        },
-        "termsOfUse": {
-            "name": "Acceptance required",
-            "dependencies": [
-            ],
-            "validator": function(el, input, callback) {              
-                if(!$(input).is(':checked')) {
-                    callback("Acceptance required for registration");
-                    return;
-                }
 
-                callback();  
-            }
-        },
-        "profileEmail": {
-            "name": "Correct and unique email",
-            "dependencies": [
-                "org/forgerock/commons/ui/common/util/ValidatorsUtils",
-                "org/forgerock/commons/ui/user/delegates/UserDelegate",
-                "org/forgerock/commons/ui/common/main/Configuration"
-            ],
-            "validator": function(el, input, callback, utils, userDelegate, conf) {
-                var v = $(input).val();
-                
-                if(conf.loggedUser.email === v) {
-                    callback();
-                    return;
+                    callback();  
                 }
-                
-                if(v === "") {
-                    callback("Required");
-                    return;
-                }
-                
-                if(!utils.emailPattern.test(v)) {
-                    callback("Not a valid email address.");
-                    return;
-                }
-                
-                userDelegate.checkUserNameAvailability(v, function(available) {
-                    if(!available) {
-                        callback("Email address already exists.");
-                    } else {
-                        callback();
+            },
+            "siteImage": {
+                "name": "Site image not same as old",
+                "dependencies": [
+                ],
+                "validator": function(el, input, callback) {
+                    var v = $(input).val();
+                    if(el.find("input[name=oldSiteImage]").length !== 0) {
+                        if(el.find("input[name=oldSiteImage]").val() === v) {
+                            callback("disabled");
+                            return;
+                        }
                     }
-                });              
-            }
-        },
-        "oldPassword": {
-            "name": "Required field",
-            "dependencies": [
-                "org/forgerock/commons/ui/common/main/Configuration",
-                "org/forgerock/commons/ui/user/delegates/UserDelegate"
-            ],
-            "validator": function(el, input, callback, conf, userDelegate) {
-                var v = $(input).val();
-                
-                if(v === "") {
-                    callback("Incorrect password");
-                    return;
+                    
+                    callback();  
                 }
-                
-                userDelegate.checkCredentials(conf.loggedUser.userName, v, function(result) {
-                    if(result.result) {
+            },
+            "termsOfUse": {
+                "name": "Acceptance required",
+                "dependencies": [
+                ],
+                "validator": function(el, input, callback) {              
+                    if(!$(input).is(':checked')) {
+                        callback("Acceptance required for registration");
+                        return;
+                    }
+
+                    callback();  
+                }
+            },
+            "profileEmail": {
+                "name": "Correct and unique email",
+                "dependencies": [
+                    "org/forgerock/commons/ui/common/util/ValidatorsUtils",
+                    "org/forgerock/commons/ui/user/delegates/UserDelegate",
+                    "org/forgerock/commons/ui/common/main/Configuration"
+                ],
+                "validator": function(el, input, callback, utils, userDelegate, conf) {
+                    var v = $(input).val();
+                    
+                    if(conf.loggedUser.email === v) {
                         callback();
-                        $(input).attr('data-validation-status', 'ok');
-                        $("input[name='Continue']").click();
-                    } else {
+                        return;
+                    }
+                    
+                    if(v === "") {
+                        callback("Required");
+                        return;
+                    }
+                    
+                    if(!utils.emailPattern.test(v)) {
+                        callback("Not a valid email address.");
+                        return;
+                    }
+                    
+                    userDelegate.checkUserNameAvailability(v, function(available) {
+                        if(!available) {
+                            callback("Email address already exists.");
+                        } else {
+                            callback();
+                        }
+                    });              
+                }
+            },
+            "oldPassword": {
+                "name": "Required field",
+                "dependencies": [
+                    "org/forgerock/commons/ui/common/main/Configuration",
+                    "org/forgerock/commons/ui/user/delegates/UserDelegate"
+                ],
+                "validator": function(el, input, callback, conf, userDelegate) {
+                    var v = $(input).val();
+                    
+                    if(v === "") {
                         callback("Incorrect password");
+                        return;
                     }
-                });
-            }
-        },
-        "resetPasswordCorrectEmail": {
-            "name": "Reset Password Correct Email",
-            "dependencies": [
-                "org/forgerock/commons/ui/common/util/ValidatorsUtils",
-                "org/forgerock/commons/ui/user/delegates/UserDelegate"
-            ],
-            "validator": function(el, input, callback, utils, userDelegate) {
-                var v = $(input).val();
-                if(v === "") {
-                    callback("Required");
-                    $("input[name='Update']").click();
-                    return;
+                    
+                    userDelegate.checkCredentials(conf.loggedUser.userName, v, function(result) {
+                        if(result.result) {
+                            callback();
+                            $(input).attr('data-validation-status', 'ok');
+                            $("input[name='Continue']").click();
+                        } else {
+                            callback("Incorrect password");
+                        }
+                    });
                 }
-                
-                if(!utils.emailPattern.test(v)) {
-                    callback("Not a valid email address.");
-                    $("input[name='Update']").click();
-                    return;
+            },
+            "resetPasswordCorrectEmail": {
+                "name": "Reset Password Correct Email",
+                "dependencies": [
+                    "org/forgerock/commons/ui/common/util/ValidatorsUtils",
+                    "org/forgerock/commons/ui/user/delegates/UserDelegate"
+                ],
+                "validator": function(el, input, callback, utils, userDelegate) {
+                    var v = $(input).val();
+                    
+                    if(v === "") {
+                        callback("Required");
+                        $(input).attr('data-validation-status', 'error');
+                        $("input[name='Update']").click();
+                        return;
+                    }
+                    
+                    if(!utils.emailPattern.test(v)) {
+                        callback("Not a valid email address.");
+                        $(input).attr('data-validation-status', 'error');
+                        $("input[name='Update']").click();
+                        return;
+                    }
+                   
+                    userDelegate.checkUserNameAvailability(v, function(available) {
+                        if(!available) {
+                            callback();
+                            $(input).attr('data-validation-status', 'ok');
+                        } else {
+                            callback("No such user");
+                            $(input).attr('data-validation-status', 'error');
+                        }
+                        
+                        $("input[name=fgtnSecurityAnswer]").trigger("keyup");
+                        $("input[name=password]").trigger("keyup");
+                        $("input[name=passwordConfirm]").trigger("keyup");
+                        
+                        $("input[name='Update']").click();
+                    });  
                 }
-               
-                userDelegate.checkUserNameAvailability(v, function(available) {
-                    if(!available) {
+            },
+            "securityAnswer": {
+                "name": "Check if security answer is correct",
+                "dependencies": [
+                    "org/forgerock/commons/ui/common/util/ValidatorsUtils",
+                    "org/forgerock/commons/ui/user/delegates/UserDelegate"
+                ],
+                "validator": function(el, input, callback, utils, userDelegate) {
+                    var v = $(input).val(), userName;
+                    if(v === "") {
+                        callback("Required");
+                        return;
+                    }
+                    userName = $(el).find("input[name='resetEmail']").val();
+                    userDelegate.getBySecurityAnswer(userName, v, 
+                            function(result) {
                         callback();
-                    } else {
-                        callback("No such user");
-                    }
-                    $("input[name='Update']").click();
-                });   
-                
-                $("input[name=fgtnSecurityAnswer]").trigger("keyup");
-                $("input[name=password]").trigger("keyup");
-                $("input[name=passwordConfirm]").trigger("keyup");
-            }
-        },
-        "securityAnswer": {
-            "name": "Check if security answer is correct",
-            "dependencies": [
-                "org/forgerock/commons/ui/common/util/ValidatorsUtils",
-                "org/forgerock/commons/ui/user/delegates/UserDelegate"
-            ],
-            "validator": function(el, input, callback, utils, userDelegate) {
-                var v = $(input).val(), userName;
-                if(v === "") {
-                    callback("Required");
-                    return;
+                    },      function() {
+                        callback("x");
+                    });
                 }
-                userName = $(el).find("input[name='resetEmail']").val();
-                userDelegate.getBySecurityAnswer(userName, v, 
-                        function(result) {
-                    callback();
-                },      function() {
-                    callback("x");
-                });
+            },
+            "newSecurityAnswer": {
+                "name": "",
+                "dependencies": [
+                ],
+                "validator": function(el, input, callback) {
+                    var v = $(input).val();
+                    
+                    if(el.find("input[name=oldSecurityQuestion]").val() !== el.find("select[name=securityQuestion]").val()) {
+                        if(v === "") {
+                            callback("Required");
+                        } else {
+                            callback();
+                        }
+                        
+                        return;
+                    }
+                    
+                    if(v === "") {
+                        callback("disabled");
+                    } else {
+                        callback();
+                    }
+                }
             }
-        }
     };
     
     return obj;
