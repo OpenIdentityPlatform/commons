@@ -164,13 +164,11 @@ final class HttpUtils {
      *            The resource exception indicating why the request failed.
      */
     static void fail(final HttpServletResponse resp, final Exception e) {
-        if (!resp.isCommitted()) {
-            final ResourceException re = adapt(e);
-            try {
-                resp.sendError(re.getCode(), re.getMessage());
-            } catch (final IOException ignored) {
-                // Ignore the error since this was probably the cause.
-            }
+        final ResourceException re = adapt(e);
+        try {
+            resp.sendError(re.getCode(), re.getMessage());
+        } catch (final IOException ignored) {
+            // Ignore the error since this was probably the cause.
         }
     }
 

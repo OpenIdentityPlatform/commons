@@ -59,40 +59,48 @@ final class Servlet3Configurator extends ServletConfigurator {
          */
         @Override
         public void dispatchRequest(final Context context, final Request request,
-                final HttpServletRequest httpRequest, final HttpServletResponse httpResponse) {
-            try {
-                if (httpRequest.isAsyncSupported()) {
-                    // Process the request asynchronously.
-                    final AsyncContext asyncContext = httpRequest.startAsync();
+                final HttpServletRequest httpRequest, final HttpServletResponse httpResponse)
+                throws Exception {
+            if (httpRequest.isAsyncSupported()) {
+                // Process the request asynchronously.
+                final AsyncContext asyncContext = httpRequest.startAsync();
 
-                    // Disable timeouts - see http://java.net/jira/browse/GRIZZLY-1325
-                    asyncContext.setTimeout(0);
+                // Disable timeouts - see http://java.net/jira/browse/GRIZZLY-1325
+                asyncContext.setTimeout(0);
 
-                    final ResultHandler<Connection> handler =
-                            new RequestRunner(context, request, httpRequest, httpResponse,
-                                    jsonFactory) {
-                                @Override
-                                protected void onComplete() {
-                                    asyncContext.complete();
-                                }
-                            };
-                    connectionFactory.getConnectionAsync(handler);
-                } else {
-                    // Fall-back to 2.x synchronous processing.
-                    final CountDownLatch latch = new CountDownLatch(1);
-                    final ResultHandler<Connection> handler =
-                            new RequestRunner(context, request, httpRequest, httpResponse,
-                                    jsonFactory) {
-                                @Override
-                                protected void onComplete() {
-                                    latch.countDown();
-                                }
-                            };
-                    connectionFactory.getConnectionAsync(handler);
-                    latch.await();
-                }
-            } catch (final Exception e) {
-                fail(httpResponse, e);
+                final ResultHandler<Connection> handler = new RequestRunner(context, request,
+                        httpRequest, httpResponse, jsonFactory) {
+                    @Override
+                    protected void postComplete() {
+                        asyncContext.complete();
+                    }
+
+                    @Override
+                    void postError(final Exception e) {
+                        fail(httpResponse, e);
+                    }
+
+                };
+                connectionFactory.getConnectionAsync(handler);
+            } else {
+                // Fall-back to 2.x synchronous processing.
+                final CountDownLatch latch = new CountDownLatch(1);
+                final ResultHandler<Connection> handler = new RequestRunner(context, request,
+                        httpRequest, httpResponse, jsonFactory) {
+                    @Override
+                    protected void postComplete() {
+                        latch.countDown();
+                    }
+
+                    @Override
+                    void postError(final Exception e) {
+                        fail(httpResponse, e);
+                        latch.countDown();
+                    }
+
+                };
+                connectionFactory.getConnectionAsync(handler);
+                latch.await();
             }
         }
     }
