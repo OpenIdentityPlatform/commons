@@ -200,7 +200,7 @@ public final class HttpServletAdapter {
             // Invoke the request.
             final Context context = newRequestContext(req);
             dispatcher.dispatchRequest(context, request, req, resp);
-        } catch (final ResourceException e) {
+        } catch (final Exception e) {
             fail(resp, e);
         }
     }
@@ -280,7 +280,7 @@ public final class HttpServletAdapter {
                 final Context context = newRequestContext(req);
                 dispatcher.dispatchRequest(context, request, req, resp);
             }
-        } catch (final ResourceException e) {
+        } catch (final Exception e) {
             fail(resp, e);
         }
     }
@@ -346,7 +346,7 @@ public final class HttpServletAdapter {
                 final Context context = newRequestContext(req);
                 dispatcher.dispatchRequest(context, request, req, resp);
             }
-        } catch (final ResourceException e) {
+        } catch (final Exception e) {
             fail(resp, e);
         }
     }
@@ -419,7 +419,7 @@ public final class HttpServletAdapter {
                 final Context context = newRequestContext(req);
                 dispatcher.dispatchRequest(context, request, req, resp);
             }
-        } catch (final ResourceException e) {
+        } catch (final Exception e) {
             fail(resp, e);
         }
     }
