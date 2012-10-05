@@ -213,7 +213,7 @@ public final class HttpServletAdapter {
             rejectIfNoneMatch(req);
 
             final Map<String, String[]> parameters = req.getParameterMap();
-            if (parameters.containsKey("_query-id") || parameters.containsKey("_query-filter")) {
+            if (parameters.containsKey("_queryId") || parameters.containsKey("_queryFilter")) {
                 // Query against collection.
                 final QueryRequest request = Requests.newQueryRequest(getResourceName(req));
 
@@ -223,7 +223,7 @@ public final class HttpServletAdapter {
 
                     if (parseCommonParameter(name, values, request)) {
                         continue;
-                    } else if (name.equals("_sort-key")) {
+                    } else if (name.equals("_sortKey")) {
                         for (final String s : values) {
                             try {
                                 request.addSortKey(SortKey.valueOf(s));
@@ -234,13 +234,13 @@ public final class HttpServletAdapter {
                                         + "' could not be parsed as a valid sort key");
                             }
                         }
-                    } else if (name.equals("_query-id")) {
+                    } else if (name.equals("_queryId")) {
                         request.setQueryId(asSingleValue(name, values));
-                    } else if (name.equals("_paged-results-coookie")) {
+                    } else if (name.equals("_pagedResultsCoookie")) {
                         request.setPagedResultsCookie(asSingleValue(name, values));
-                    } else if (name.equals("_page-size")) {
+                    } else if (name.equals("_pageSize")) {
                         request.setPageSize(asIntValue(name, values));
-                    } else if (name.equals("_query-filter")) {
+                    } else if (name.equals("_queryFilter")) {
                         final String s = asSingleValue(name, values);
                         try {
                             request.setQueryFilter(QueryFilter.valueOf(s));
@@ -516,7 +516,7 @@ public final class HttpServletAdapter {
 
     private boolean parseCommonParameter(final String name, final String[] values,
             final Request request) throws ResourceException {
-        if (name.equals("_field-filter")) {
+        if (name.equals("_fieldFilter")) {
             for (final String s : values) {
                 try {
                     request.addFieldFilter(s);
