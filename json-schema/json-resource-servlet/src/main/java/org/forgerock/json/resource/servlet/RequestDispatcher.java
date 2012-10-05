@@ -46,8 +46,10 @@ interface RequestDispatcher {
      *            The HTTP request.
      * @param httpResponse
      *            The HTTP response.
+     * @throws Exception
+     *             If an unexpected error occurred during dispatch.
      */
     void dispatchRequest(Context context, Request request, HttpServletRequest httpRequest,
-            HttpServletResponse httpResponse);
+            HttpServletResponse httpResponse) throws Exception;
 
 }

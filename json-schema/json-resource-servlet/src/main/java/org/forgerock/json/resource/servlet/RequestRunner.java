@@ -23,7 +23,6 @@ import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_PRETTY_PRINT;
 import static org.forgerock.json.resource.servlet.HttpUtils.adapt;
 import static org.forgerock.json.resource.servlet.HttpUtils.asBooleanValue;
 import static org.forgerock.json.resource.servlet.HttpUtils.closeQuietly;
-import static org.forgerock.json.resource.servlet.HttpUtils.fail;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -33,6 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.JsonGenerator.Feature;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.Connection;
@@ -77,6 +77,7 @@ abstract class RequestRunner implements ResultHandler<Connection>, RequestVisito
         // Configure the JSON writer.
         this.os = httpResponse.getOutputStream();
         this.writer = jsonFactory.createJsonGenerator(os);
+        writer.configure(Feature.AUTO_CLOSE_TARGET, false);
 
         // Enable pretty printer if requested.
         final String[] values = httpRequest.getParameterValues(PARAM_PRETTY_PRINT);
@@ -94,7 +95,7 @@ abstract class RequestRunner implements ResultHandler<Connection>, RequestVisito
      */
     @Override
     public final void handleError(final ResourceException error) {
-        onError(error);
+        doError(error);
     }
 
     /**
@@ -119,7 +120,7 @@ abstract class RequestRunner implements ResultHandler<Connection>, RequestVisito
              */
             @Override
             public void handleError(final ResourceException error) {
-                onError(error);
+                doError(error);
             }
 
             /**
@@ -134,10 +135,9 @@ abstract class RequestRunner implements ResultHandler<Connection>, RequestVisito
                         // No content.
                         httpResponse.setStatus(HttpServletResponse.SC_NO_CONTENT);
                     }
+                    doComplete();
                 } catch (final Exception e) {
-                    fail(httpResponse, e);
-                } finally {
-                    complete();
+                    doError(e);
                 }
             }
         });
@@ -155,7 +155,7 @@ abstract class RequestRunner implements ResultHandler<Connection>, RequestVisito
              */
             @Override
             public void handleError(final ResourceException error) {
-                onError(error);
+                doError(error);
             }
 
             /**
@@ -167,10 +167,9 @@ abstract class RequestRunner implements ResultHandler<Connection>, RequestVisito
                     httpResponse.setHeader(HEADER_LOCATION, getResourceURL(request, result));
                     httpResponse.setStatus(HttpServletResponse.SC_CREATED);
                     writeResource(result);
+                    doComplete();
                 } catch (final Exception e) {
-                    fail(httpResponse, e);
-                } finally {
-                    complete();
+                    doError(e);
                 }
             }
         });
@@ -221,7 +220,7 @@ abstract class RequestRunner implements ResultHandler<Connection>, RequestVisito
                         // FIXME: can we do anything with this?
                     }
                 }
-                onError(error);
+                doError(error);
             }
 
             /**
@@ -251,10 +250,9 @@ abstract class RequestRunner implements ResultHandler<Connection>, RequestVisito
                     writer.writeNumberField("remaining-paged-results", result
                             .getRemainingPagedResults());
                     writer.writeEndObject();
+                    doComplete();
                 } catch (final Exception e) {
-                    fail(httpResponse, e);
-                } finally {
-                    complete();
+                    doError(e);
                 }
             }
 
@@ -291,13 +289,32 @@ abstract class RequestRunner implements ResultHandler<Connection>, RequestVisito
      * Performs post-completion processing such as completing the AsyncContext
      * (Servlet3) or a latch (Servlet2).
      */
-    protected abstract void onComplete();
+    abstract void postComplete();
 
-    private void complete() {
+    /**
+     * Performs post-error processing such as sending error (Servlet3) or a
+     * latch (Servlet2).
+     *
+     * @param e
+     *            The error that occurred.
+     */
+    abstract void postError(Exception e);
+
+    private void doComplete() {
         try {
-            closeQuietly(connection, writer, os);
+            closeQuietly(connection, writer);
         } finally {
-            onComplete();
+            postComplete();
+        }
+    }
+
+    private void doError(final Exception e) {
+        try {
+            // Don't close the JSON writer because the request will become
+            // "completed" which then prevents us from sending an error.
+            closeQuietly(connection);
+        } finally {
+            postError(e);
         }
     }
 
@@ -324,7 +341,7 @@ abstract class RequestRunner implements ResultHandler<Connection>, RequestVisito
              */
             @Override
             public void handleError(final ResourceException error) {
-                onError(error);
+                doError(error);
             }
 
             /**
@@ -334,21 +351,12 @@ abstract class RequestRunner implements ResultHandler<Connection>, RequestVisito
             public void handleResult(final Resource result) {
                 try {
                     writeResource(result);
+                    doComplete();
                 } catch (final Exception e) {
-                    fail(httpResponse, e);
-                } finally {
-                    complete();
+                    doError(e);
                 }
             }
         };
-    }
-
-    private void onError(final Exception e) {
-        try {
-            fail(httpResponse, e);
-        } finally {
-            complete();
-        }
     }
 
     private void writeResource(final Resource resource) throws IOException {
