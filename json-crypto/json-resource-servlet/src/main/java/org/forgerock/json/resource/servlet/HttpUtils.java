@@ -55,7 +55,7 @@ final class HttpUtils {
     static final String PARAM_ACTION = "_action";
     static final String PARAM_DEBUG = "_debug";
 
-    static final String PARAM_PRETTY_PRINT = "_pretty-print";
+    static final String PARAM_PRETTY_PRINT = "_prettyPrint";
 
     /**
      * Adapts an {@code Exception} to a {@code ResourceException}.
