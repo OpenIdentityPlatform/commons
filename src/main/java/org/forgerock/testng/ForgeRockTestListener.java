@@ -846,7 +846,24 @@ public final class ForgeRockTestListener extends TestListenerAdapter implements 
         }
 
         System.err.println();
+        System.out.println("Test environment:");
+        System.err.println();
+        System.out.println("  Java version: " + System.getProperty("java.version"));
+        System.out.println("  Java vendor:  " + System.getProperty("java.vendor"));
+        System.out.println("  JVM name:     " + System.getProperty("java.vm.name"));
+        System.out.println("  JVM version:  " + System.getProperty("java.vm.version"));
+        System.out.println("  JVM vendor:   " + System.getProperty("java.vm.vendor"));
+        System.out.println("  JVM info:     " + System.getProperty("java.vm.info"));
+        System.out.println("  Java home:    " + System.getProperty("java.home"));
+        System.out.println("  OS:           " + System.getProperty("os.name") + " "
+                + System.getProperty("os.version") + " " + System.getProperty("os.arch"));
+        System.out.println("  Processors:   " + Runtime.getRuntime().availableProcessors());
+        System.out.println("  Max memory:   " + Runtime.getRuntime().maxMemory());
+        System.out.println("  Total memory: " + Runtime.getRuntime().totalMemory());
+
+        System.err.println();
         System.err.println("How to read the progressive status info:");
+        System.err.println();
 
         if (doProgressTime) {
             System.err.println("  Test duration status: {Total min:sec.  Since last status sec.}");
