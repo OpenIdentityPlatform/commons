@@ -59,21 +59,24 @@ final class Servlet2Configurator extends ServletConfigurator {
          */
         @Override
         public void dispatchRequest(final Context context, final Request request,
-                final HttpServletRequest httpRequest, final HttpServletResponse httpResponse) {
-            try {
-                final CountDownLatch latch = new CountDownLatch(1);
-                final ResultHandler<Connection> handler =
-                        new RequestRunner(context, request, httpRequest, httpResponse, jsonFactory) {
-                            @Override
-                            protected void onComplete() {
-                                latch.countDown();
-                            }
-                        };
-                connectionFactory.getConnectionAsync(handler);
-                latch.await();
-            } catch (final Exception e) {
-                fail(httpResponse, e);
-            }
+                final HttpServletRequest httpRequest, final HttpServletResponse httpResponse)
+                throws Exception {
+            final CountDownLatch latch = new CountDownLatch(1);
+            final ResultHandler<Connection> handler = new RequestRunner(context, request,
+                    httpRequest, httpResponse, jsonFactory) {
+                @Override
+                protected void postComplete() {
+                    latch.countDown();
+                }
+
+                @Override
+                void postError(final Exception e) {
+                    fail(httpResponse, e);
+                    latch.countDown();
+                }
+            };
+            connectionFactory.getConnectionAsync(handler);
+            latch.await();
         }
 
     }
