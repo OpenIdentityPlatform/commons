@@ -34,12 +34,12 @@ public class RouterHelper {
 		if (refreshBeforeNavigate) {
 			driver.navigate().refresh();
 		}
-		this.routeTo("/#profile/");		
+		this.routeTo("#profile/");		
 		selenium.waitForElement("content", "saveButton", ElementType.NAME);
 	}
 	
 	public void goToRegistration() {
-		this.routeTo("/#register/");
+		this.routeTo("#register/");
 		selenium.waitForElement("content", "email", ElementType.NAME);
 	}
 	
@@ -57,7 +57,7 @@ public class RouterHelper {
 		if (refreshBeforeNavigate) {
 			driver.navigate().refresh();
 		}
-		this.routeTo("/#applications/addmore/");
+		this.routeTo("#applications/addmore/");
 		selenium.waitForElement("content", "itemize", ElementType.CLASS);
 	}
 }

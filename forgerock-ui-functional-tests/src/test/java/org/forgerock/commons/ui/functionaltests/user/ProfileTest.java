@@ -70,7 +70,7 @@ public class ProfileTest extends AbstractTest {
 		private void loginAndGoToProfile() {
 			userHelper.loginAsDefaultUser();
 			router.goToProfile(true);
-			router.assertUrl("/#profile/");
+			router.assertUrl("#profile/");
 			forms.validateForm("content");
 		}
 	}

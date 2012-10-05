@@ -12,13 +12,13 @@ public class SimpleTest extends AbstractTest {
 		forms.submit("content", "loginButton");
 		messages.assertInfoMessage("You have been successfully logged in.");
 		
-		router.routeTo("/#users/");
+		router.routeTo("#users/");
 	}
 	
 	/*@Test
 	public void simpleTest2() {
-		//router.routeTo("/#users/");	
-		//router.assertUrl("/#login/");
+		//router.routeTo("#users/");	
+		//router.assertUrl("#login/");
 		
 		JsonNode user = jsonUtils.readJsonFromFile("/registration/user.json");
 		
