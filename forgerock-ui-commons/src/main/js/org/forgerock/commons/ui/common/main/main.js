@@ -34,5 +34,6 @@ define("org/forgerock/commons/ui/common/main/main", [
 	"./Router",
 	"./ViewManager",
 	"./SpinnerManager",
-	"./ErrorsHandler"
+	"./ErrorsHandler",
+	"./SessionManager"
 ]);

@@ -22,19 +22,28 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define*/
+/*global $, define, require */
 
-define("org/forgerock/commons/ui/user/main", [
-    "./delegates/UserDelegate",
-    "./login/InternalLoginHelper",  
-    "./UserRegistrationView",
-    "./profile/UserProfileView",
-    "./TermsOfUseDialog",
-    "./profile/EnterOldPasswordDialog",
-	"./ForgottenPasswordDialog",
-	"./profile/ChangeSecurityDataDialog",
-    "./profile/ChangeSiteIdentificationDialog",
-	"./LoginView",
-	"./NotFoundView",
-	"./login/LoggedUserBarView"
-]);
+/**
+ * Interface
+ * @author mbilski
+ */
+define("org/forgerock/commons/ui/common/main/SessionManager", [
+    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware"
+], function(AbstractConfigurationAware) {
+    var obj = new AbstractConfigurationAware();
+    
+    obj.login = function(username, password, successCallback, errorCallback) {
+        require(obj.configuration.loginHelperClass).login(username, password, successCallback, errorCallback);
+    };
+    
+    obj.logout = function() {
+        require(obj.configuration.loginHelperClass).logout();
+    };
+    
+    obj.getLoggedUser = function(successCallback, errorCallback) {
+        require(obj.configuration.loginHelperClass).getLoggedUser(successCallback, errorCallback);
+    };
+
+    return obj;
+});

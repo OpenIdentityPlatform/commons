@@ -23,13 +23,13 @@ public class WebDriverFactory {
 	@Bean(name="WebDriver")
 	public WebDriver getInstance() {
 		WebDriver driver = WebBrowserDriver.valueOf(constants.getWebBrowser()).getDriver();
-		driver.manage().timeouts().implicitlyWait(constants.waitTime(), TimeUnit.SECONDS);
+		driver.manage().timeouts().implicitlyWait(constants.waitTime(), TimeUnit.MILLISECONDS);
 		return driver;
 	}
 	
 	@Bean(name="WebDriverWait")
 	public WebDriverWait getWebDriverWait(WebDriver driver) {
-		return new WebDriverWait(driver, constants.waitTime());
+		return new WebDriverWait(driver, constants.waitTime() * 10, constants.waitTime());
 	}
 	
 	enum WebBrowserDriver {

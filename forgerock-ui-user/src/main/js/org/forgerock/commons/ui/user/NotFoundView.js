@@ -22,19 +22,23 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define*/
+/*global define, $ */
 
-define("org/forgerock/commons/ui/user/main", [
-    "./delegates/UserDelegate",
-    "./login/InternalLoginHelper",  
-    "./UserRegistrationView",
-    "./profile/UserProfileView",
-    "./TermsOfUseDialog",
-    "./profile/EnterOldPasswordDialog",
-	"./ForgottenPasswordDialog",
-	"./profile/ChangeSecurityDataDialog",
-    "./profile/ChangeSiteIdentificationDialog",
-	"./LoginView",
-	"./NotFoundView",
-	"./login/LoggedUserBarView"
-]);
+/**
+ * @author mbilski
+ */
+define("org/forgerock/commons/ui/user/NotFoundView", [
+    "org/forgerock/commons/ui/common/main/AbstractView",
+    "org/forgerock/commons/ui/common/main/ValidatorsManager",
+    "org/forgerock/commons/ui/common/main/EventManager",
+    "org/forgerock/commons/ui/common/util/Constants"
+], function(AbstractView, validatorsManager, eventManager, constants) {
+    var NotFoundView = AbstractView.extend({
+        template: "templates/user/404.html",
+        baseTemplate: "templates/user/LoginBaseTemplate.html"
+    }); 
+    
+    return new NotFoundView();
+});
+
+

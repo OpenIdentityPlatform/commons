@@ -99,6 +99,7 @@ define("org/forgerock/commons/ui/common/main/Router", [
             obj.bindedRoutes[routeName]();
         }
         
+        params.replace = false;
         obj.router.navigate(link, params);
     };
     

@@ -36,8 +36,8 @@ public class OpenIDMClient {
 		String entityId = user.get("email").toString().replace('[', ' ').replace(']', ' ').replace('"', ' ').trim();
 		HttpEntity<JsonNode> requestEntity = new HttpEntity<JsonNode>(user, createUserHeaders);
 		
-		ResponseEntity<EntityBaseInfo> response = restTemplate.exchange(constants.getOpenIDMServer() + "openidm/managed/user/" + entityId ,
-			      HttpMethod.PUT, requestEntity, EntityBaseInfo.class);
+		ResponseEntity<EntityBaseInfo> response = restTemplate.exchange(constants.getOpenIDMServer() + "openidm/managed/user/?_action=create",
+			      HttpMethod.POST, requestEntity, EntityBaseInfo.class);
 		
 		EntityBaseInfo result = response.getBody();
 		if (result != null && result.getError() != null) {

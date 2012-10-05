@@ -33,25 +33,19 @@ define("config/AppConfiguration", [
 ], function(constants, eventManager) {
     var obj = {
             moduleDefinition: [
-                {
-                    moduleClass: "org/forgerock/commons/ui/user/login/LoginCtrl",
-                    configuration: {
-                        loginHelperClass: "org/forgerock/commons/ui/user/login/InternalLoginHelper",
-                        showCredentialFields: true,
-                        hideLoginButton: false,
-                        loginButtonDisabledByDefault: true
+               {
+                   moduleClass: "org/forgerock/commons/ui/common/main/SessionManager",
+                   configuration: {
+                       loginHelperClass: "org/forgerock/commons/ui/user/login/InternalLoginHelper"
                    } 
                },
                {
-                   moduleClass: "org/forgerock/commons/ui/user/login/OpenAMLoginHelper",
+                   moduleClass: "org/forgerock/commons/ui/common/main/ProcessConfiguration",
                    configuration: {
-                       loginURL: "http://openaminstallationdomain.com:8090/openam/UI/Login",
-                       logoutURL: "http://openaminstallationdomain.com:8090/openam/UI/Logout",
-                       passwordParameterName: "IDToken2",
-                       userNameParameterName: "IDToken1",
-                       logoutTestOnly: false,
-                       loginTestOnly: false,
-                       ajaxLogout: false
+                       processConfigurationFiles: [
+                           "config/process/UserConfig",
+                           "config/process/CommonConfig"
+                       ]
                    } 
                },
                {
@@ -66,7 +60,7 @@ define("config/AppConfiguration", [
                                url: ""                                  
                            },
                            
-                         //commons
+                           //commons
                            "profile": {
                                view: "org/forgerock/commons/ui/user/profile/UserProfileView",
                                role: "openidm-authorized",
@@ -111,17 +105,13 @@ define("config/AppConfiguration", [
                                role: "openidm-authorized",
                                url: "profile/change_security_data/",
                                excludedRole: "openidm-admin"
+                           },
+                           "404":  { //this route must be the last route
+                               view: "org/forgerock/commons/ui/user/NotFoundView",
+                               url: /^([\w\W]*)$/,
+                               pattern: "?"
                            }
                        }
-                   } 
-               },
-               {
-                   moduleClass: "org/forgerock/commons/ui/common/main/ProcessConfiguration",
-                   configuration: {
-                       processConfigurationFiles: [
-                           "config/process/UserConfig",
-                           "config/process/CommonConfig"
-                       ]
                    } 
                },
                {

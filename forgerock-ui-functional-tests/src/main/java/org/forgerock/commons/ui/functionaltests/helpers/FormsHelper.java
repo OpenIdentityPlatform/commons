@@ -120,7 +120,7 @@ public class FormsHelper {
 			protected boolean assertionCondition(WebDriver driver) {
 				return driver.findElements(By.cssSelector("#"+ el +" [data-validation-status=error]")).size() > 0;
 			}
-		};
+		}.checkAssertion();
 	}
 	
 	public void assertFormValidationPasses(final String el) {	
@@ -133,7 +133,7 @@ public class FormsHelper {
 			protected boolean assertionCondition(WebDriver driver) {
 				return driver.findElements(By.cssSelector("#"+ el +" [data-validation-status=error]")).size() == 0;
 			}
-		};
+		}.checkAssertion();
 	}
 	
 	public void assertValidationPasses(final String el, final String name) {
@@ -146,7 +146,7 @@ public class FormsHelper {
 			protected boolean assertionCondition(WebDriver driver) {
 				return driver.findElements(By.cssSelector("#"+ el +" [name="+ name +"][data-validation-status=error]")).size() == 0;
 			}
-		};
+		}.checkAssertion();
 		//TODO checking for tick
 	}
 	
@@ -160,7 +160,7 @@ public class FormsHelper {
 			protected boolean assertionCondition(WebDriver driver) {
 				return driver.findElements(By.cssSelector("#"+ el +" [name="+ name +"][data-validation-status=error]")).size() != 0;
 			}
-		};
+		}.checkAssertion();
 	}
 
 	public String getSelectDisplayValue(String el, String name) {

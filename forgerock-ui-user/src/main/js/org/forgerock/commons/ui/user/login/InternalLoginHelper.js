@@ -33,20 +33,40 @@ define("org/forgerock/commons/ui/user/login/InternalLoginHelper", [
 ], function (userDelegate, eventManager, constants, AbstractConfigurationAware, serviceInvoker) {
     var obj = new AbstractConfigurationAware();
 
-    obj.loginRequest = function(userName, password, successCallback, errorCallback) {
+    obj.login = function(userName, password, successCallback, errorCallback) {
         userDelegate.logAndGetUserDataByCredentials(userName, password, function(user) {
-            eventManager.sendEvent(constants.EVENT_SUCCESFULY_LOGGGED_IN, {user: user, userName: userName});
+            successCallback(user);
         }, function() {
             userDelegate.internalLogIn(userName, password, function(user) {
-                eventManager.sendEvent(constants.EVENT_SUCCESFULY_LOGGGED_IN, {user: user, userName: userName});
+                if(!user.userName && user._id) {
+                    user.userName = user._id;
+                }
+                
+                successCallback(user);
             }, function() {
-                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "invalidCredentials");   
+                errorCallback();
             }, {"unauthorized": { status: "401"}});
         }, {"unauthorized": { status: "401"}});
     };
 
-    obj.logoutRequest = function() {
+    obj.logout = function() {
         userDelegate.logout();
+    };
+    
+    obj.getLoggedUser = function(successCallback, errorCallback) {
+        userDelegate.getProfile(function(user) {
+            successCallback(user);
+        }, function() {
+            userDelegate.forInternalCredentials(function(user) {
+                if(!user.userName && user._id) {
+                    user.userName = user._id;
+                }
+                
+                successCallback(user);
+            }, function() {
+                errorCallback();
+            }, {"serverError": {status: "503"}, "unauthorized": {status: "401"}});
+        }, {"serverError": {status: "503"}, "unauthorized": {status: "401"}});
     };
 
     return obj;
