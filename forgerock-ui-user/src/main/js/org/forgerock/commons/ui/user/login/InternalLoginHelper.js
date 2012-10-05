@@ -54,19 +54,24 @@ define("org/forgerock/commons/ui/user/login/InternalLoginHelper", [
     };
     
     obj.getLoggedUser = function(successCallback, errorCallback) {
-        userDelegate.getProfile(function(user) {
-            successCallback(user);
-        }, function() {
-            userDelegate.forInternalCredentials(function(user) {
-                if(!user.userName && user._id) {
-                    user.userName = user._id;
-                }
-                
+        try{
+            userDelegate.getProfile(function(user) {
                 successCallback(user);
             }, function() {
-                errorCallback();
+                userDelegate.forInternalCredentials(function(user) {
+                    if(!user.userName && user._id) {
+                        user.userName = user._id;
+                    }
+                    
+                    successCallback(user);
+                }, function() {
+                    errorCallback();
+                }, {"serverError": {status: "503"}, "unauthorized": {status: "401"}});
             }, {"serverError": {status: "503"}, "unauthorized": {status: "401"}});
-        }, {"serverError": {status: "503"}, "unauthorized": {status: "401"}});
+        } catch(e) {
+            console.log(e);
+            errorCallback();
+        }
     };
 
     return obj;

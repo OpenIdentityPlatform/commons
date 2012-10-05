@@ -19,11 +19,16 @@ public class WebDriverFactory {
 	
 	@Inject
 	private Constants constants;
-
+	
+	public static WebDriver driver;
+	
 	@Bean(name="WebDriver")
 	public WebDriver getInstance() {
 		WebDriver driver = WebBrowserDriver.valueOf(constants.getWebBrowser()).getDriver();
 		driver.manage().timeouts().implicitlyWait(constants.waitTime(), TimeUnit.MILLISECONDS);
+		
+		WebDriverFactory.driver = driver;
+		
 		return driver;
 	}
 	

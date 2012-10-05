@@ -4,6 +4,7 @@ import junit.framework.Assert;
 
 import org.codehaus.jackson.JsonNode;
 import org.forgerock.commons.ui.functionaltests.AbstractTest;
+import org.forgerock.commons.ui.functionaltests.utils.AssertNoErrors;
 import org.testng.annotations.Test;
 
 public class ProfileTest extends AbstractTest {
@@ -13,6 +14,7 @@ public class ProfileTest extends AbstractTest {
 	private static final String NO_VALUE_SELECT = null;
 
 	@Test
+	@AssertNoErrors
 	public void testSetCountry() {
 		
 		new ProfileUpdateTestTemplate() {

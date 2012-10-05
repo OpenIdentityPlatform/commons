@@ -2,11 +2,13 @@ package org.forgerock.commons.ui.functionaltests.user;
 
 import org.codehaus.jackson.JsonNode;
 import org.forgerock.commons.ui.functionaltests.AbstractTest;
+import org.forgerock.commons.ui.functionaltests.utils.AssertNoErrors;
 import org.testng.annotations.Test;
 
 public class RegistrationTest extends AbstractTest {
 	
 	@Test
+	@AssertNoErrors
 	public void testEmailFieldValidation() {
 		JsonNode user = jsonUtils.readJsonFromFile("/registration/validuser.json");
 		router.goToRegistration();
@@ -20,6 +22,7 @@ public class RegistrationTest extends AbstractTest {
 	}
 	
 	@Test
+	@AssertNoErrors
 	public void testEmailAlreadyExists() {
 		JsonNode user = jsonUtils.readJsonFromFile("/registration/validuser.json");
 		router.goToRegistration();

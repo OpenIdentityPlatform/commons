@@ -4,8 +4,8 @@ public enum Consts {
 
 	BASE_PAGE("base_page", "http://localhost:28080/"), 
 	WEB_BROWSER("web_browser", "FIREFOX"),
-	WAIT_TIME("wait_time", "50"),
-	OPENIDM_SERVER("openidm_server", "http://localhost:8080");
+	WAIT_TIME("wait_time", "100"),
+	OPENIDM_SERVER("openidm_server", "http://localhost:8080/");
 
 	private String key;
 	private Object value;
