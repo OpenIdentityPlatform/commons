@@ -27,9 +27,7 @@
 /**
  * @author mbilski
  */
-define("config/ValidatorsConfiguration", [
-    "org/forgerock/commons/ui/common/util/Constants", 
-    "org/forgerock/commons/ui/common/main/EventManager"
+define("config/validators/CommonValidators", [
 ], function(constants, eventManager) {
     var obj = {
         "required": {

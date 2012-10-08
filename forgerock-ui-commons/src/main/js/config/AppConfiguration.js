@@ -47,7 +47,7 @@ define("config/AppConfiguration", [
                 defaultHandlers: {
                 },
                 loader: [
-                         {"defaultHandlers":"config/errorhandlers/CommonErrorHandlers"}, 
+                         {"defaultHandlers":"config/errorhandlers/CommonErrorHandlers"}
                 ]
             } 
         },
@@ -65,6 +65,16 @@ define("config/AppConfiguration", [
                         }    
                     }
                 }                                       
+            } 
+        },
+        {
+            moduleClass: "org/forgerock/commons/ui/common/main/ValidatorsManager",
+            configuration: {
+                validators: {
+                },
+                loader: [
+                         {"validators":"config/validators/CommonValidators"}
+                ]
             } 
         }
         ],

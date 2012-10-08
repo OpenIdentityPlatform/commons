@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -27,26 +27,9 @@
 /**
  * @author mbilski
  */
-define("config/ValidatorsConfiguration", [
-    "org/forgerock/commons/ui/common/util/Constants", 
-    "org/forgerock/commons/ui/common/main/EventManager"
+define("config/validators/UserValidators", [
 ], function(constants, eventManager) {
     var obj = {
-            "required": {
-                "name": "Required field",
-                "dependencies": [
-                ],
-                "validator": function(el, input, callback) {
-                    var v = $(input).val();
-                    
-                    if(v === "") {
-                        callback("Required");
-                        return;
-                    }
-
-                    callback();  
-                }
-            },    
             "registrationEmail": {
                 "name": "Correct and unique email",
                 "dependencies": [

@@ -28,9 +28,9 @@
  * @author mbilski
  */
 define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
-    "config/ValidatorsConfiguration"    
-], function(validators) {
-    var obj = {};
+    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware"                                                     
+], function(AbstractConfigurationAware) {
+    var obj = new AbstractConfigurationAware();
     
     obj.bindValidators = function(el) {
         var inputs, event, input;        
@@ -68,7 +68,7 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
 
     obj.validate = function(event) {       
         var parameters = [this.el, this.input, _.bind(obj.afterValidation, this)], validatorConfig, i;
-        validatorConfig = validators[this.validatorType];
+        validatorConfig = obj.configuration.validators[this.validatorType];
         
         if(validatorConfig) {
             this.el.trigger("onValidate", [this.input, "inProgress"]);

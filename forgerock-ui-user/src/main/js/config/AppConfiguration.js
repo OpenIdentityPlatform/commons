@@ -115,6 +115,17 @@ define("config/AppConfiguration", [
                                 {"messages":"config/messages/UserMessages"}
                        ]
                    } 
+               },
+               {
+                   moduleClass: "org/forgerock/commons/ui/common/main/ValidatorsManager",
+                   configuration: {
+                       validators: {
+                       },
+                       loader: [
+                                {"validators":"config/validators/UserValidators"},
+                                {"validators":"config/validators/CommonValidators"}
+                       ]
+                   } 
                }
                ],
                loggerLevel: 'debug'

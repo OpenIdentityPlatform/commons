@@ -25,12 +25,13 @@
 /*global define*/
 
 define("config/main", [
+    "./errorhandlers/CommonErrorHandlers"
+    "./validators/CommonValidators",
+    "./validators/UserValidators",
     "./routes/CommonRoutesConfig",
     "./routes/UserRoutesConfig",
     "./messages/UserMessages",
     "./AppConfiguration",
-    "./ValidatorsConfiguration",
     "./process/CommonConfig",
     "./process/UserConfig",
-    "./errorhandlers/CommonErrorHandlers"
 ]);
