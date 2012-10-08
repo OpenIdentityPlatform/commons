@@ -20,6 +20,8 @@ public class MessagesHelper {
 	private WebDriverWait wait;
 	
 	public void assertInfoMessage(String text) {
+		wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("confirmMessage")));
+		
 		WebElement message = driver.findElement(By.className("confirmMessage"));
 		WebElement element = wait.until(ExpectedConditions.visibilityOf(message));
 		

@@ -1,12 +1,18 @@
 package org.forgerock.commons.ui.functionaltests.user;
 
+import javax.inject.Inject;
+
 import junit.framework.Assert;
 
 import org.codehaus.jackson.JsonNode;
 import org.forgerock.commons.ui.functionaltests.AbstractTest;
+import org.forgerock.commons.ui.functionaltests.utils.AssertNoErrorsAspect;
 
 public class AbstractProfileTest extends AbstractTest{
-
+	
+	@Inject
+	private AssertNoErrorsAspect assertNoErrorsAspect;
+	
 	protected String formatStringFromForm(String value) {
 		return value.substring(1, value.length()-1);
 	}
@@ -26,7 +32,10 @@ public class AbstractProfileTest extends AbstractTest{
 			loginAndGoToProfile();
 			checkAndChangeData();
 			if (shouldUpdateAndRunPostUpdateAssert()) {
+				forms.validateForm("content");
+				forms.assertFormValidationPasses("content");
 				forms.submit("content", "saveButton");
+				messages.assertInfoMessage("Profile has been updated");
 				userHelper.logout();
 				loginAndGoToProfile();
 				checkIfStoredCorrectly();
@@ -35,6 +44,7 @@ public class AbstractProfileTest extends AbstractTest{
 
 		private void loginAndGoToProfile() {
 			userHelper.loginAsDefaultUser();
+			assertNoErrorsAspect.assertNoErrors();
 			router.goToProfile(true);
 			router.assertUrl("#profile/");
 			forms.validateForm("content");

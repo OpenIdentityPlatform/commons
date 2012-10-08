@@ -45,4 +45,8 @@ public class UserHelper {
 		login("test@test.test", "tesT#1#Test");
 	}
 	
+	public void loginAsOpenIDMAdmin() {
+		login("openidm-admin", "openidm-admin");
+	}
+	
 }

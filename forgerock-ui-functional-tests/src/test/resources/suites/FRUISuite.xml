@@ -1,10 +1,12 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
-<suite name="SiteImageSuite" verbose="1">
+<suite name="FRUISuite" verbose="1">
 	<parameter name="url" value="http://localhost:28080/" />
 
-	<test name="SimpleTest">
+	<test name="UITests">
 		<classes>
 			<class name="org.forgerock.commons.ui.functionaltests.SimpleTest" />
+			<class name="org.forgerock.commons.ui.functionaltests.commons.RoutingTest" />
+			<class name="org.forgerock.commons.ui.functionaltests.commons.ValidatorsTest" />
 			<class name="org.forgerock.commons.ui.functionaltests.user.RegistrationTest" />
 			<class name="org.forgerock.commons.ui.functionaltests.user.ProfileTest" />
 		</classes>

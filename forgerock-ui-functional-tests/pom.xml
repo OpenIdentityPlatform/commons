@@ -136,7 +136,7 @@
 						<configuration>
 							<skipTests>false</skipTests>
 							<suiteXmlFiles>
-								<suiteXmlFile>src/main/resources/suites/FRUISuite.xml</suiteXmlFile>
+								<suiteXmlFile>src/test/resources/suites/FRUISuite.xml</suiteXmlFile>
 							</suiteXmlFiles>
 						</configuration>
 					</plugin>

@@ -1,5 +1,6 @@
 package org.forgerock.commons.ui.functionaltests.utils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.aspectj.lang.annotation.After;
@@ -23,7 +24,7 @@ public class AssertNoErrorsAspect {
 	public void overwriteErrorHandlers() {		
 		String script = "window.jsErrors = [];"
 				+ "window.onerror = function(error) { "
-				+ "window.jsErrors[window.jsErrors.length] = error;"
+				+ "window.jsErrors.push(error.namespace);"
 				+ "}";
 		((JavascriptExecutor) WebDriverFactory.driver).executeScript(script);
 	}
@@ -31,19 +32,27 @@ public class AssertNoErrorsAspect {
 	@SuppressWarnings("unchecked")
 	@After("execution(* *.*(..)) && @annotation(AssertNoErrors) ")
 	public void assertNoErrors() {
-		List<String> errors = (List<String>) ((JavascriptExecutor) WebDriverFactory.driver).executeScript("return window.jsErrors;");
+		Object errors = ((JavascriptExecutor) WebDriverFactory.driver).executeScript("return JSON.stringify(window.jsErrors);");
 		
-		if(errors != null && errors.size() > 0) {
+		/*if(errors != null && errors.size() > 0) {
 			System.out.println(errors);
 			Assert.assertEquals(errors.size(), 0);
-		}
+		}*/
 		
 		try{
-			WebElement msg = WebDriverFactory.driver.findElement(By.className("errorMessage"));
-			Assert.fail("Error message " + msg.getText());
+			List<WebElement> messages = WebDriverFactory.driver.findElements(By.xpath("//div[contains(@class, 'errorMessage')]"));
+			
+			if(!messages.isEmpty()) {
+				List<String> messagesText = new ArrayList<String>();
+				for(WebElement message : messages) {
+					System.out.println("Error: " + message.getText());
+					messagesText.add(message.getText());					
+				}
+				
+				Assert.fail("There are error messages: " + messagesText.toString());
+			}
 		} catch(Exception e) {
-			//ok
+			e.printStackTrace();
 		}
 	}
-	
 }

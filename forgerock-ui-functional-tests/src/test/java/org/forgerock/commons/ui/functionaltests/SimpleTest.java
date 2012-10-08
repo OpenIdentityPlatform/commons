@@ -1,11 +1,13 @@
 package org.forgerock.commons.ui.functionaltests;
 
+import org.forgerock.commons.ui.functionaltests.utils.AssertNoErrors;
 import org.testng.annotations.Test;
 
 @Test(singleThreaded = true)
 public class SimpleTest extends AbstractTest {
 
 	@Test
+	@AssertNoErrors
 	public void simpleTest() {		
 		forms.setField("content", "login", "openidm-admin");
 		forms.setField("content", "password", "openidm-admin");

@@ -8,7 +8,10 @@ import org.codehaus.jackson.JsonNode;
 import org.forgerock.commons.ui.functionaltests.helpers.SeleniumHelper.ElementType;
 import org.forgerock.commons.ui.functionaltests.utils.JsonUtils;
 import org.openqa.selenium.*;
+import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -19,6 +22,9 @@ public class FormsHelper {
 
     @Inject
 	private SeleniumHelper selenium;
+    
+    @Inject
+	private WebDriverWait wait;
     
     @Inject
     private JsonUtils jsonUtils;
@@ -63,7 +69,13 @@ public class FormsHelper {
 		}
 	}
 	
-	public void submit(String el, String name) {
+	public void submit(final String el, final String name) {
+		wait.until(new ExpectedCondition<Boolean>() {
+            public Boolean apply(WebDriver d) {
+                return d.findElement(By.name(name)).getAttribute("class").contains("orange");
+            }
+        });
+		
 		selenium.getElement(el, name, ElementType.NAME).click();
 	}
 	

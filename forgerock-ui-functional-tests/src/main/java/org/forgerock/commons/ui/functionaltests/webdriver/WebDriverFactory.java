@@ -34,7 +34,7 @@ public class WebDriverFactory {
 	
 	@Bean(name="WebDriverWait")
 	public WebDriverWait getWebDriverWait(WebDriver driver) {
-		return new WebDriverWait(driver, 2);
+		return new WebDriverWait(driver, constants.waitTime() / 10);
 	}
 	
 	enum WebBrowserDriver {

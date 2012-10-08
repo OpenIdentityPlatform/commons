@@ -148,36 +148,31 @@ public class ProfileTest extends AbstractProfileTest {
 	
 	@Test
 	@AssertNoErrors
-	public void testMultipleChangesOfCountryAndStateProvince() {
+	public void testMultipleChangesOfCountryAndStateProvince() {		
+		userHelper.createDefaultUser();
+		userHelper.loginAsDefaultUser();
+		router.goToProfile(true);
+		router.assertUrl("#profile/");
 		
-		new ProfileUpdateTest() {
-			@Override
-			protected void checkAndChangeData() {
-				shouldHaveCountryAndState(EMPTY_SELECT, PLEASE_SELECT_DISPLAY_TEXT, EMPTY_SELECT, NO_VALUE_SELECT);
-				forms.setField("content", "country", "poland");
-				shouldHaveCountryAndState("poland", "Poland", EMPTY_SELECT, PLEASE_SELECT_DISPLAY_TEXT);
-				forms.setField("content", "stateProvince", "dolnoslaskie");
-				shouldHaveCountryAndState("poland", "Poland", "dolnoslaskie", "Dolnośląskie");
-				
-				forms.setField("content", "stateProvince", EMPTY_SELECT);
-				shouldHaveCountryAndState("poland", "Poland", EMPTY_SELECT, PLEASE_SELECT_DISPLAY_TEXT);
-				
-				forms.setField("content", "stateProvince", "opolskie");
-				shouldHaveCountryAndState("poland", "Poland", "opolskie", "Opolskie");
-				forms.setField("content", "country", EMPTY_SELECT);
-				shouldHaveCountryAndState(EMPTY_SELECT, PLEASE_SELECT_DISPLAY_TEXT, EMPTY_SELECT, NO_VALUE_SELECT);
-				
-				forms.setField("content", "country", "us");
-				shouldHaveCountryAndState("us", "United States", EMPTY_SELECT, PLEASE_SELECT_DISPLAY_TEXT);
-				forms.setField("content", "country", EMPTY_SELECT);
-				shouldHaveCountryAndState(EMPTY_SELECT, PLEASE_SELECT_DISPLAY_TEXT, EMPTY_SELECT, NO_VALUE_SELECT);
-			}
+		shouldHaveCountryAndState(EMPTY_SELECT, PLEASE_SELECT_DISPLAY_TEXT, EMPTY_SELECT, NO_VALUE_SELECT);
+		forms.setField("content", "country", "poland");
+		shouldHaveCountryAndState("poland", "Poland", EMPTY_SELECT, PLEASE_SELECT_DISPLAY_TEXT);
+		forms.setField("content", "stateProvince", "dolnoslaskie");
+		shouldHaveCountryAndState("poland", "Poland", "dolnoslaskie", "Dolnośląskie");
+		
+		forms.setField("content", "stateProvince", EMPTY_SELECT);
+		shouldHaveCountryAndState("poland", "Poland", EMPTY_SELECT, PLEASE_SELECT_DISPLAY_TEXT);
+		
+		forms.setField("content", "stateProvince", "opolskie");
+		shouldHaveCountryAndState("poland", "Poland", "opolskie", "Opolskie");
+		forms.setField("content", "country", EMPTY_SELECT);
+		shouldHaveCountryAndState(EMPTY_SELECT, PLEASE_SELECT_DISPLAY_TEXT, EMPTY_SELECT, NO_VALUE_SELECT);
+		
+		forms.setField("content", "country", "us");
+		shouldHaveCountryAndState("us", "United States", EMPTY_SELECT, PLEASE_SELECT_DISPLAY_TEXT);
+		forms.setField("content", "country", EMPTY_SELECT);
+		shouldHaveCountryAndState(EMPTY_SELECT, PLEASE_SELECT_DISPLAY_TEXT, EMPTY_SELECT, NO_VALUE_SELECT);
 
-			@Override
-			protected void checkIfStoredCorrectly() {
-				//no need for this in thi test
-			}
-		}.run();
 	}
 	
 	@Test

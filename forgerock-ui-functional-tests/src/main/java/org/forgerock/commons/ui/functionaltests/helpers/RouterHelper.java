@@ -30,6 +30,22 @@ public class RouterHelper {
 		driver.navigate().to(constants.getBasePage() + url);		
 	}
 	
+	public void routeTo(String url, boolean withRefresh) {
+		if (withRefresh) {
+			driver.navigate().refresh();
+		}
+		
+		driver.navigate().to(constants.getBasePage() + url);		
+	}
+	
+	public void goBack() {
+		driver.navigate().back();
+	}
+	
+	public void goForward() {
+		driver.navigate().forward();
+	}
+	
 	public void goToProfile(boolean refreshBeforeNavigate) {
 		if (refreshBeforeNavigate) {
 			driver.navigate().refresh();
