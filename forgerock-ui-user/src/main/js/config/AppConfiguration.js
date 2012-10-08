@@ -52,66 +52,11 @@ define("config/AppConfiguration", [
                    moduleClass: "org/forgerock/commons/ui/common/main/Router",
                    configuration: {
                        routes: {
-                           
-                           "": {
-                               view: "org/forgerock/commons/ui/user/profile/UserProfileView",
-                               role: "openidm-authorized",
-                               excludedRole: "openidm-admin",
-                               url: ""                                  
-                           },
-                           
-                           //commons
-                           "profile": {
-                               view: "org/forgerock/commons/ui/user/profile/UserProfileView",
-                               role: "openidm-authorized",
-                               excludedRole: "openidm-admin",
-                               url: "profile/" 
-                           },
-                           "siteIdentification": {
-                               base: "profile",
-                               dialog: "org/forgerock/commons/ui/user/profile/ChangeSiteIdentificationDialog",
-                               url: "profile/site_identification/",
-                               role: "openidm-authorized",
-                               excludedRole: "openidm-admin"
-                           },
-                           "register": {
-                               view: "org/forgerock/commons/ui/user/UserRegistrationView",
-                               url: "register/"
-                           },
-                           "termsOfUse": {
-                               base: "register",
-                               dialog: "org/forgerock/commons/ui/user/TermsOfUseDialog",
-                               url: "register/terms_of_use/"
-                           },
-                           "login" : {
-                               view: "org/forgerock/commons/ui/user/LoginView",
-                               url: "login/"
-                           },                           
-                           "forgottenPassword" : {
-                               base: "login",
-                               dialog: "org/forgerock/commons/ui/user/ForgottenPasswordDialog",
-                               url: "profile/forgotten_password/"
-                           },
-                           "enterOldPassword": {
-                               base: "profile",
-                               dialog: "org/forgerock/commons/ui/user/profile/EnterOldPasswordDialog",
-                               role: "openidm-authorized",
-                               url: "profile/old_password/",
-                               excludedRoles: "openidm-admin"
-                           },
-                           "changeSecurityData": {
-                               base: "profile",
-                               dialog: "org/forgerock/commons/ui/user/profile/ChangeSecurityDataDialog",
-                               role: "openidm-authorized",
-                               url: "profile/change_security_data/",
-                               excludedRole: "openidm-admin"
-                           },
-                           "404":  { //this route must be the last route
-                               view: "org/forgerock/commons/ui/user/NotFoundView",
-                               url: /^([\w\W]*)$/,
-                               pattern: "?"
-                           }
-                       }
+                       },
+                       loader: [
+                                {"routes":"config/routes/CommonRoutesConfig"}, 
+                                {"routes":"config/routes/UserRoutesConfig"}
+                       ]
                    } 
                },
                {
@@ -125,13 +70,33 @@ define("config/AppConfiguration", [
                    moduleClass: "org/forgerock/commons/ui/common/main/ErrorsHandler",
                    configuration: {
                        defaultHandlers: {
+                           "badRequest": {
+                               status: "400",
+                               message: "badRequestError"
+                           },
                            "unauthorized": {
                                status: "401",
                                event: constants.EVENT_UNAUTHORIZED
                            },
+                           "forbidden": {
+                               status: "403",
+                               message: "forbiddenError"
+                           },
+                           "notFound": {
+                               status: "404",
+                               message: "notFoundError"
+                           },
+                           "conflict": {
+                               status: "409",
+                               message: "conflictError"
+                           },
                            "serverError": {
                                status: "503",
                                event: constants.EVENT_SERVICE_UNAVAILABLE
+                           },
+                           "internalServerError": {
+                               status: "500",
+                               message: "internalError"
                            }
                        }
                    } 
@@ -170,67 +135,10 @@ define("config/AppConfiguration", [
                    moduleClass: "org/forgerock/commons/ui/common/components/Messages",
                    configuration: {
                        messages: {
-                           "invalidCredentials": {
-                               msg: "Login/password combination is invalid.",
-                               type: "error"
-                           },
-                           "serviceUnavailable": {
-                               msg: "Service unavailable",
-                               type: "error"
-                           },
-                           "changedPassword": {
-                               msg: "Password has been changed",
-                               type: "info"
-                           },
-                           "unknown": {
-                               msg: "Unknown error. Please contact with administrator",
-                               type: "error"
-                           },
-                           "profileUpdateFailed": {
-                               msg: "Problem during profile update",
-                               type: "error"
-                           },
-                           "profileUpdateSuccessful": {
-                               msg: "Profile has been updated",
-                               type: "info"
-                           },
-                           "userNameUpdated": {
-                               msg: "Username has been modified succesfully.",
-                               type: "info"
-                           },
-                           "afterRegistration": {
-                               msg: "User has been registered successfully",
-                               type: "info"
-                           },
-                           "loggedIn": {
-                               msg: "You have been successfully logged in.",
-                               type: "info"
-                           },
-                           "errorFetchingData": {
-                               msg: "Error fetching user data",
-                               type: "error"
-                           },
-                           "loggedOut": {
-                               msg: "You have been logged out.",
-                               type: "info"
-                           },
-                           "siteIdentificationChanged": {
-                               msg: "Site identification image has been changed",
-                               type: "info"
-                           },
-                           "securityDataChanged": {
-                               msg: "Security data has been changed",
-                               type: "info"
-                           },
-                           "unauthorized": {
-                               msg: "Unauthorized access",
-                               type: "error"
-                           },
-                           "userAlreadyExists": {
-                               msg: "User already exists",
-                               type: "error"
-                           }
-                       }
+                       },
+                       loader: [
+                                {"messages":"config/messages/UserMessages"}
+                       ]
                    } 
                }
                ],

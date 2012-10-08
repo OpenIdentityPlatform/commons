@@ -1,4 +1,4 @@
-/**
+/** 
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
@@ -24,12 +24,19 @@
 
 /*global define*/
 
-define("config/main", [
-    "./routes/CommonRoutesConfig",
-    "./routes/UserRoutesConfig",
-    "./messages/UserMessages",
-    "./AppConfiguration",
-    "./ValidatorsConfiguration",
-    "./process/CommonConfig",
-    "./process/UserConfig"
-]);
+/**
+ * @author jdabrowski
+ */
+define("config/routes/CommonRoutesConfig", [
+], function() {
+    
+    var obj = {
+        "404":  { //this route must be the first route
+            view: "org/forgerock/commons/ui/user/NotFoundView",
+            url: /^([\w\W]*)$/,
+            pattern: "?"
+        }
+    };
+    
+    return obj;
+});
