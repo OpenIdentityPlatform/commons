@@ -27,5 +27,6 @@
 define("config/main", [
     "./AppConfiguration",
     "./ValidatorsConfiguration",
-    "./process/CommonConfig"
+    "./process/CommonConfig",
+    "./errorhandlers/CommonErrorHandlers"
 ]);

@@ -60,6 +60,7 @@ define("org/forgerock/commons/ui/common/main/AbstractConfigurationAware", [
                       
                 }
             }
+            console.debug(this.configuration);
         }
         
     };
