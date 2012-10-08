@@ -1,13 +1,10 @@
 package org.forgerock.commons.ui.functionaltests.user;
 
-import junit.framework.Assert;
-
-import org.codehaus.jackson.JsonNode;
-import org.forgerock.commons.ui.functionaltests.AbstractTest;
 import org.forgerock.commons.ui.functionaltests.utils.AssertNoErrors;
 import org.testng.annotations.Test;
 
-public class ProfileTest extends AbstractTest {
+@Test(singleThreaded=true)
+public class ProfileTest extends AbstractProfileTest {
 	
 	private static final String EMPTY_SELECT = "";
 	private static final String PLEASE_SELECT_DISPLAY_TEXT = "Please Select";
@@ -15,9 +12,105 @@ public class ProfileTest extends AbstractTest {
 
 	@Test
 	@AssertNoErrors
+	public void updateAddress1() {
+		String exampleAddress1 = "Some Example Address 1";
+		new AssertValidFieldAfterChange("address1", exampleAddress1).run();
+	}
+	
+	@Test
+	@AssertNoErrors
+	public void updateAddress2() {
+		String exampleAddress2 = "Some Example Address 2";
+		new AssertValidFieldAfterChange("address2", exampleAddress2).run();
+	}
+	
+	@Test
+	@AssertNoErrors
+	public void updatePostalCode() {
+		String examplePostalCode = "Some Postal Code";
+		new AssertValidFieldAfterChange("postalCode", examplePostalCode).run();
+	}
+	
+	@Test
+	@AssertNoErrors
+	public void updateGivenNameWithValidValue() {
+		String currentGivenName = "TestName";
+		String validGivenName = "Jack";
+		new AssertValidFieldAfterChange("givenName", validGivenName, validGivenName, currentGivenName).run();
+	}
+	
+	@Test
+	@AssertNoErrors
+	public void updateGivenNameWithEmptyValue() {
+		String emptyGivenName = "";
+		new AssertNotValidFieldAfterChange("givenName", emptyGivenName).run();
+	}
+	
+	@Test
+	@AssertNoErrors
+	public void updateGivenNameWithValueWithNumbers() {
+		String emptyGivenName = "Jacek31";
+		new AssertNotValidFieldAfterChange("givenName", emptyGivenName).run();
+	}
+	
+	@Test
+	@AssertNoErrors
+	public void updateFamilyNameWithValidValue() {
+		String currentFamilyName = "TestSurname";
+		String validFamilyName = "Bloodrider";
+		new AssertValidFieldAfterChange("familyName", validFamilyName, validFamilyName, currentFamilyName).run();
+	}
+	
+	@Test
+	@AssertNoErrors
+	public void updateFamilyNameWithEmptyValue() {
+		String emptyFamilyName = "";
+		new AssertNotValidFieldAfterChange("familyName", emptyFamilyName).run();
+	}
+	
+	@Test
+	@AssertNoErrors
+	public void updateFamilyNameWithValueWithNumbers() {
+		String emptyFamilyName = "Bloodrider31";
+		new AssertNotValidFieldAfterChange("familyName", emptyFamilyName).run();
+	}
+	
+	@Test
+	@AssertNoErrors
+	public void updatePhoneNumberWithValidValue() {
+		String currentPhoneNumber = "0044123456789";
+		String validPhoneNumber = "0044987654321";
+		new AssertValidFieldAfterChange("phoneNumber", validPhoneNumber, validPhoneNumber, currentPhoneNumber).run();
+	}
+	
+	@Test
+	@AssertNoErrors
+	public void updatePhoneNumberWithValueWithLetters() {
+		String invalidPhoneNumber = "00449A87654321";
+		new AssertNotValidFieldAfterChange("phoneNumber", invalidPhoneNumber).run();
+	}
+	
+	@Test
+	@AssertNoErrors
+	public void updatePhoneNumberCheckRemoveAdditionalValidChars() {
+		String currentPhoneNumber = "0044123456789";
+		String validNotFormattedPhoneNumber = "+44 500-000-000";
+		String validFormattedPhoneNumber = "+44500000000";
+		new AssertValidFieldAfterChange("phoneNumber", validNotFormattedPhoneNumber, validFormattedPhoneNumber, currentPhoneNumber).run();
+	}
+	
+	@Test
+	@AssertNoErrors
+	public void updateCity() {
+		String exampleCity = "Some Example City";
+		new AssertValidFieldAfterChange("postalCode", exampleCity).run();
+	}
+	
+	@Test
+	@AssertNoErrors
 	public void testSetCountry() {
 		
-		new ProfileUpdateTestTemplate() {
+		new ProfileUpdateTest() {
 			@Override
 			protected void checkAndChangeData() {
 				shouldHaveCountryAndState(EMPTY_SELECT, PLEASE_SELECT_DISPLAY_TEXT, EMPTY_SELECT, NO_VALUE_SELECT);
@@ -30,51 +123,118 @@ public class ProfileTest extends AbstractTest {
 				shouldHaveCountryAndState("poland", "Poland", EMPTY_SELECT, PLEASE_SELECT_DISPLAY_TEXT);
 			}
 		}.run();
-		
 	}
 	
-	public void shouldHaveCountryAndState(String countryValue, String countryDisplayValue, String stateValue, String stateDisplayValue) {
-		JsonNode profileForm = forms.readForm("content");
+	@Test
+	@AssertNoErrors
+	public void testSetStateProvince() {
 		
-		String country = formatStringFromForm(profileForm.get("country").toString());
-		Assert.assertEquals(countryValue, country);
-		
-		String state = formatStringFromForm(profileForm.get("stateProvince").toString());
-		Assert.assertEquals(stateValue, state);
-		
-		String countryDisplay = forms.getSelectDisplayValue("content", "country");
-		Assert.assertEquals(countryDisplayValue, countryDisplay);
-		
-		String stateDisplay = forms.getSelectDisplayValue("content", "stateProvince");
-		Assert.assertEquals(stateDisplayValue, stateDisplay);
-	}
-	
-	private String formatStringFromForm(String value) {
-		return value.substring(1, value.length()-1);
-	}
-	
-	private abstract class ProfileUpdateTestTemplate {
-		
-		protected abstract void checkAndChangeData();
-		
-		protected abstract void checkIfStoredCorrectly();
-		
-		public final void run() {
-			userHelper.createDefaultUser();
-			loginAndGoToProfile();
-			checkAndChangeData();
-			forms.submit("content", "saveButton");
-			userHelper.logout();
-			loginAndGoToProfile();
-			checkIfStoredCorrectly();
-		};
+		new ProfileUpdateTest() {
+			@Override
+			protected void checkAndChangeData() {
+				shouldHaveCountryAndState(EMPTY_SELECT, PLEASE_SELECT_DISPLAY_TEXT, EMPTY_SELECT, NO_VALUE_SELECT);
+				forms.setField("content", "country", "poland");
+				shouldHaveCountryAndState("poland", "Poland", EMPTY_SELECT, PLEASE_SELECT_DISPLAY_TEXT);
+				forms.setField("content", "stateProvince", "dolnoslaskie");
+				shouldHaveCountryAndState("poland", "Poland", "dolnoslaskie", "Dolnośląskie");
+			}
 
-		private void loginAndGoToProfile() {
-			userHelper.loginAsDefaultUser();
-			router.goToProfile(true);
-			router.assertUrl("#profile/");
-			forms.validateForm("content");
-		}
+			@Override
+			protected void checkIfStoredCorrectly() {
+				shouldHaveCountryAndState("poland", "Poland", "dolnoslaskie", "Dolnośląskie");
+			}
+		}.run();
+	}
+	
+	@Test
+	@AssertNoErrors
+	public void testMultipleChangesOfCountryAndStateProvince() {
+		
+		new ProfileUpdateTest() {
+			@Override
+			protected void checkAndChangeData() {
+				shouldHaveCountryAndState(EMPTY_SELECT, PLEASE_SELECT_DISPLAY_TEXT, EMPTY_SELECT, NO_VALUE_SELECT);
+				forms.setField("content", "country", "poland");
+				shouldHaveCountryAndState("poland", "Poland", EMPTY_SELECT, PLEASE_SELECT_DISPLAY_TEXT);
+				forms.setField("content", "stateProvince", "dolnoslaskie");
+				shouldHaveCountryAndState("poland", "Poland", "dolnoslaskie", "Dolnośląskie");
+				
+				forms.setField("content", "stateProvince", EMPTY_SELECT);
+				shouldHaveCountryAndState("poland", "Poland", EMPTY_SELECT, PLEASE_SELECT_DISPLAY_TEXT);
+				
+				forms.setField("content", "stateProvince", "opolskie");
+				shouldHaveCountryAndState("poland", "Poland", "opolskie", "Opolskie");
+				forms.setField("content", "country", EMPTY_SELECT);
+				shouldHaveCountryAndState(EMPTY_SELECT, PLEASE_SELECT_DISPLAY_TEXT, EMPTY_SELECT, NO_VALUE_SELECT);
+				
+				forms.setField("content", "country", "us");
+				shouldHaveCountryAndState("us", "United States", EMPTY_SELECT, PLEASE_SELECT_DISPLAY_TEXT);
+				forms.setField("content", "country", EMPTY_SELECT);
+				shouldHaveCountryAndState(EMPTY_SELECT, PLEASE_SELECT_DISPLAY_TEXT, EMPTY_SELECT, NO_VALUE_SELECT);
+			}
+
+			@Override
+			protected void checkIfStoredCorrectly() {
+				//no need for this in thi test
+			}
+		}.run();
+	}
+	
+	@Test
+	@AssertNoErrors
+	public void testUpdateEmailNotValidEmailFormat1() {
+		String emailToSet = "email";
+		new AssertNotValidFieldAfterChange("email", emailToSet).run();
+	}
+	
+	@Test
+	@AssertNoErrors
+	public void testUpdateEmailNotValidEmailFormat2() {
+		String emailToSet = "email@";
+		new AssertNotValidFieldAfterChange("email", emailToSet).run();
+	}
+	
+	@Test
+	@AssertNoErrors
+	public void testUpdateEmailNotValidEmailFormat3() {
+		String emailToSet = "email@test.teeeest";
+		new AssertNotValidFieldAfterChange("email", emailToSet).run();
+	}
+	
+	@Test
+	@AssertNoErrors
+	public void testUpdateEmail() {
+		String emailToSet = "second@test.test";
+		String fieldName = "email";
+		
+		userHelper.createDefaultUser();
+		userHelper.loginAsDefaultUser();
+		router.goToProfile(true);
+		router.assertUrl("#profile/");
+		forms.validateForm("content");
+		forms.setField("content", fieldName , emailToSet);
+		assertFieldHasValue(fieldName, emailToSet);
+		forms.assertValidationPasses("content", fieldName);
+		forms.assertFormValidationPasses("content");
+		forms.submit("content", "saveButton");
+		
+		router.routeTo("#profile/");
+		router.assertUrl("#login/");
+		
+		userHelper.login("second@test.test", "tesT#1#Test");
+		router.goToProfile(true);
+		router.assertUrl("#profile/");
+		forms.validateForm("content");
+		
+		assertFieldHasValue(fieldName, emailToSet);
+	}
+	
+	@Test
+	@AssertNoErrors
+	public void testUpdateEmailNotValidEmailAlreadyExists() {
+		userHelper.createSecondDefaultUser();
+		String emailToSet = "second@test.test";
+		new AssertNotValidFieldAfterChange("email", emailToSet).run();
 	}
 	
 }

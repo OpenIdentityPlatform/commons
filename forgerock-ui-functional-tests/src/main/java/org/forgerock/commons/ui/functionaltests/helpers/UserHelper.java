@@ -36,6 +36,10 @@ public class UserHelper {
 	public void createDefaultUser() {
 		openIDMClient.createUser(jsonUtils.readJsonFromFile("/defaultuser.json"));
 	}
+	
+	public void createSecondDefaultUser() {
+		openIDMClient.createUser(jsonUtils.readJsonFromFile("/seconddefaultuser.json"));
+	}
 
 	public void loginAsDefaultUser() {
 		login("test@test.test", "tesT#1#Test");
