@@ -32,8 +32,9 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/util/Constants", 
-    "org/forgerock/commons/ui/common/main/EventManager"
-], function(AbstractView, uiUtils, constants, eventManager) {
+    "org/forgerock/commons/ui/common/main/EventManager",
+    "org/forgerock/commons/ui/common/main/Configuration"
+], function(AbstractView, uiUtils, constants, eventManager, conf) {
     var Dialog = AbstractView.extend({
         template: "templates/common/DialogTemplate.html",
         el: "#dialogs",
@@ -90,9 +91,9 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
          */
         loadContent: function(callback) {
             if(callback) {
-                uiUtils.renderTemplate(this.contentTemplate, this.$el.find(".dialogContent"), this.data, _.bind(callback, this), "append");
+                uiUtils.renderTemplate(this.contentTemplate, this.$el.find(".dialogContent"), _.extend(conf.globalData, this.data), _.bind(callback, this), "append");
             } else {
-                uiUtils.renderTemplate(this.contentTemplate, this.$el.find(".dialogContent"), this.data, null, "append");
+                uiUtils.renderTemplate(this.contentTemplate, this.$el.find(".dialogContent"), _.extend(conf.globalData, this.data), null, "append");
             }
         },
         

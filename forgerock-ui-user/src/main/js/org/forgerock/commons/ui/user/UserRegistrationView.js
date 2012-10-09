@@ -67,8 +67,10 @@ define("org/forgerock/commons/ui/user/UserRegistrationView", [
                 delete data.passwordConfirm;
                 data.userName = data.email.toLowerCase();
                 
-                element = this.siteImageFlow.getActiveItem().element;
-                data.siteImage = $(element).children().attr("data-site-image");
+                if(this.siteImageFlow) {
+                    element = this.siteImageFlow.getActiveItem().element;
+                    data.siteImage = $(element).children().attr("data-site-image");
+                }
                 
                 console.log("ADDING USER: " + JSON.stringify(data));                
                 userDelegate.createEntity(data, function(user) {

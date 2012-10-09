@@ -76,7 +76,7 @@
                             </div> 
                         </div>
                         <div class="clear"></div>
-                        
+                        {{#enterprise}}
                         <p style="width: 400px; margin-left: 220px; margin-bottom: 10px;">The Security Question selected and corresponding Answer provided by you will be used to help identify you in the event that you forget your password.
                         </p>
                         <div class="field">
@@ -110,7 +110,8 @@
                             <input type="text" name="passPhrase" data-validator="passPhrase" />
                             <span class="error">x</span>
                             <div class="validationMessage"></div>
-                        </div>                  
+                        </div>   
+                        {{/enterprise}}               
                     </div>
                     
                     <div class="field">

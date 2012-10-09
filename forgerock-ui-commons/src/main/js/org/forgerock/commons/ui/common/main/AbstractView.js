@@ -51,6 +51,8 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
         mode: "replace",
         
         formLock: false,
+        
+        data: {},
 
         /**
          * Change content of 'el' element with 'viewTpl', 
@@ -58,9 +60,9 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
          */
         parentRender: function(callback) {   
             this.callback = callback;
-            
+               
             if(conf.baseTemplate !== this.baseTemplate && !this.noBaseTemplate) {
-                uiUtils.renderTemplate(this.baseTemplate, $("#wrapper"), this.data, _.bind(this.loadTemplate, this), "replace");
+                uiUtils.renderTemplate(this.baseTemplate, $("#wrapper"), _.extend(conf.globalData, this.data), _.bind(this.loadTemplate, this), "replace");
             } else {
                 this.loadTemplate();
             }
@@ -79,9 +81,9 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
             }
             
             if(this.callback) {
-                uiUtils.renderTemplate(this.template, this.$el, this.data, _.bind(this.callback, this), this.mode);
+                uiUtils.renderTemplate(this.template, this.$el, _.extend(conf.globalData, this.data), _.bind(this.callback, this), this.mode);
             } else {
-                uiUtils.renderTemplate(this.template, this.$el, this.data, null, this.mode);
+                uiUtils.renderTemplate(this.template, this.$el, _.extend(conf.globalData, this.data), null, this.mode);
             }
         },
         
