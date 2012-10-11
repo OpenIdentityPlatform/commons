@@ -174,12 +174,16 @@
 			<artifactId>mustache</artifactId>
 			<type>js</type>
 		</dependency>
+		<!-- 
+		
 		<dependency>
 			<groupId>org.codehaus.jstestrunner</groupId>
 			<artifactId>jstestrunner-junit</artifactId>
 			<version>1.0.1</version>
 			<scope>test</scope>
 		</dependency>
+		
+		 -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
