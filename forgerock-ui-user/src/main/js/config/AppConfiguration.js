@@ -33,77 +33,10 @@ define("config/AppConfiguration", [
 ], function(constants, eventManager) {
     var obj = {
             moduleDefinition: [
-                {
-                    moduleClass: "org/forgerock/commons/ui/user/login/LoginCtrl",
-                    configuration: {
-                        loginHelperClass: "org/forgerock/commons/ui/user/login/InternalLoginHelper",
-                        showCredentialFields: true,
-                        hideLoginButton: false,
-                        loginButtonDisabledByDefault: true
-                   } 
-               },
                {
-                   moduleClass: "org/forgerock/commons/ui/user/login/OpenAMLoginHelper",
+                   moduleClass: "org/forgerock/commons/ui/common/main/SessionManager",
                    configuration: {
-                       loginURL: "http://openaminstallationdomain.com:8090/openam/UI/Login",
-                       logoutURL: "http://openaminstallationdomain.com:8090/openam/UI/Logout",
-                       passwordParameterName: "IDToken2",
-                       userNameParameterName: "IDToken1",
-                       logoutTestOnly: false,
-                       loginTestOnly: false,
-                       ajaxLogout: false
-                   } 
-               },
-               {
-                   moduleClass: "org/forgerock/commons/ui/common/main/Router",
-                   configuration: {
-                       routes: {
-                           "": {
-                               view: "org/forgerock/commons/ui/common/main/MainView",
-                               url: ""                                   
-                           },
-                           "profile": {
-                               view: "org/forgerock/commons/ui/user/UserProfileView",
-                               role: "openidm-authorized",
-                               url: "profile/" 
-                           },
-                           "siteIdentification": {
-                               base: "profile",
-                               dialog: "org/forgerock/commons/ui/user/ChangeSiteIdentificationDialog",
-                               url: "profile/site_identification/",
-                               role: "openidm-authorized"
-                           },
-                           "register": {
-                               view: "org/forgerock/commons/ui/user/UserRegistrationView",
-                               url: "register/"
-                           },
-                           "termsOfUse": {
-                               base: "register",
-                               dialog: "org/forgerock/commons/ui/user/TermsOfUseDialog",
-                               url: "register/terms_of_use/"
-                           },
-                           "forgottenPassword" : {
-                               dialog: "org/forgerock/commons/ui/user/ForgottenPasswordDialog",
-                               url: "profile/forgotten_password/"
-                           },
-                           "enterOldPassword": {
-                               base: "profile",
-                               dialog: "org/forgerock/commons/ui/user/EnterOldPasswordDialog",
-                               role: "openidm-authorized",
-                               url: "profile/old_password/"
-                           },
-                           "changeSecurityData": {
-                               base: "profile",
-                               dialog: "org/forgerock/commons/ui/user/ChangeSecurityDataDialog",
-                               role: "openidm-authorized",
-                               url: "profile/change_security_data/"
-                           },
-                           "apps": {
-                               view: "org/forgerock/commons/ui/user/apps/AppsView",
-                               role: "openidm-authorized",
-                               url: "applications/"
-                           }
-                       }
+                       loginHelperClass: "org/forgerock/commons/ui/user/login/InternalLoginHelper"
                    } 
                },
                {
@@ -112,6 +45,17 @@ define("config/AppConfiguration", [
                        processConfigurationFiles: [
                            "config/process/UserConfig",
                            "config/process/CommonConfig"
+                       ]
+                   } 
+               },
+               {
+                   moduleClass: "org/forgerock/commons/ui/common/main/Router",
+                   configuration: {
+                       routes: {
+                       },
+                       loader: [
+                                {"routes":"config/routes/CommonRoutesConfig"}, 
+                                {"routes":"config/routes/UserRoutesConfig"}
                        ]
                    } 
                },
@@ -126,15 +70,10 @@ define("config/AppConfiguration", [
                    moduleClass: "org/forgerock/commons/ui/common/main/ErrorsHandler",
                    configuration: {
                        defaultHandlers: {
-                           "unauthorized": {
-                               status: "401",
-                               event: constants.EVENT_UNAUTHORIZED
-                           },
-                           "serverError": {
-                               status: "503",
-                               event: constants.EVENT_SERVICE_UNAVAILABLE
-                           }
-                       }
+                       },
+                       loader: [
+                                {"defaultHandlers":"config/errorhandlers/CommonErrorHandlers"}
+                       ]
                    } 
                },
                {
@@ -161,73 +100,31 @@ define("config/AppConfiguration", [
                    } 
                },
                {
-                   moduleClass: "org/forgerock/commons/ui/user/dashboard/NotificationViewHelper",
+                   moduleClass: "org/forgerock/commons/ui/common/util/UIUtils",
                    configuration: {
-                       typeToIconMapping: {
-                           "1": "images/notifications/pending.png",
-                           "2": "images/notifications/group_added.png",
-                           "3": "images/notifications/approved.png",
-                           "4": "images/notifications/removed.png"
-                       }
+                       templateUrls: [
+                       ]
                    } 
-               },
+               },               
                {
                    moduleClass: "org/forgerock/commons/ui/common/components/Messages",
                    configuration: {
                        messages: {
-                           "invalidCredentials": {
-                               msg: "Login/password combination is invalid.",
-                               type: "error"
-                           },
-                           "serviceUnavailable": {
-                               msg: "Service unavailable",
-                               type: "error"
-                           },
-                           "changedPassword": {
-                               msg: "Password has been changed",
-                               type: "info"
-                           },
-                           "userAlreadyExists": {
-                               msg: "User already exists",
-                               type: "error"
-                           },
-                           "unknown": {
-                               msg: "Unknown error. Please contact with administrator",
-                               type: "error"
-                           },
-                           "profileUpdateFailed": {
-                               msg: "Problem during profile update",
-                               type: "error"
-                           },
-                           "profileUpdateSuccessful": {
-                               msg: "Profile has been updated",
-                               type: "info"
-                           },
-                           "userNameUpdated": {
-                               msg: "Username has been modified succesfully.",
-                               type: "info"
-                           },
-                           "afterRegistration": {
-                               msg: "User has been registered successfully",
-                               type: "info"
-                           },
-                           "loggedIn": {
-                               msg: "You have been successfully logged in.",
-                               type: "info"
-                           },
-                           "errorFetchingData": {
-                               msg: "Error fetching user data",
-                               type: "error"
-                           },
-                           "loggedOut": {
-                               msg: "You have been logged out.",
-                               type: "info"
-                           },
-                           "userApplicationsUpdate": {
-                               msg: "Application settings have been changed.",
-                               type: "info"
-                           }
-                       }
+                       },
+                       loader: [
+                                {"messages":"config/messages/UserMessages"}
+                       ]
+                   } 
+               },
+               {
+                   moduleClass: "org/forgerock/commons/ui/common/main/ValidatorsManager",
+                   configuration: {
+                       validators: {
+                       },
+                       loader: [
+                                {"validators":"config/validators/UserValidators"},
+                                {"validators":"config/validators/CommonValidators"}
+                       ]
                    } 
                }
                ],

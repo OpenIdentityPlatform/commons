@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define*/
+/*global require define*/
 
 /**
  * @author yaromin
@@ -34,8 +34,35 @@ define("org/forgerock/commons/ui/common/main/AbstractConfigurationAware", [
     };
 
     obj.prototype.updateConfigurationCallback = function(configuration) {
+        var configurationSetsToLoad = [], i, key, itemKey, singleConfigurationData, confKey, confToAdd;
         console.debug('configuration updated');
         this.configuration = configuration;
+        
+        if (configuration.loader) {
+            configurationSetsToLoad = configuration.loader;
+            
+            for (key in configurationSetsToLoad) {
+                
+                if (configurationSetsToLoad.hasOwnProperty(key)) {
+                    
+                      singleConfigurationData = configurationSetsToLoad[key];
+                      for (itemKey in singleConfigurationData) {
+                          if (singleConfigurationData.hasOwnProperty(itemKey)) {
+                              confToAdd = require(singleConfigurationData[itemKey]);
+                              for (confKey in confToAdd) {
+                                  
+                                  if (!this.configuration[itemKey][confKey]) {
+                                      this.configuration[itemKey][confKey] = confToAdd[confKey];
+                                  }
+                              }
+                          }
+                      }
+                      
+                }
+            }
+            console.debug(this.configuration);
+        }
+        
     };
 
     return obj;

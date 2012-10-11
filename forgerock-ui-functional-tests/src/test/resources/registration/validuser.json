@@ -1,0 +1,12 @@
+{
+    "email": "a@a.pl", 
+    "givenName": "Aaaaa",
+    "familyName": "Bbbbb",
+    "phoneNumber": "1234",
+    "password": "qweqweqweQ1",
+    "passwordConfirm": "qweqweqweQ1",
+    "securityQuestion": "1",
+    "securityAnswer": "qwe",
+    "passPhrase": "qwerty",
+    "terms": "yes"
+}

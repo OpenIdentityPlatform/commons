@@ -26,8 +26,6 @@
 
 define("org/forgerock/commons/ui/user/main", [
     "./delegates/UserDelegate",
-    "./login/LoginCtrl",
-    "./login/OpenAMLoginHelper",
     "./login/InternalLoginHelper",  
     "./UserRegistrationView",
     "./profile/UserProfileView",
@@ -36,5 +34,7 @@ define("org/forgerock/commons/ui/user/main", [
 	"./ForgottenPasswordDialog",
 	"./profile/ChangeSecurityDataDialog",
     "./profile/ChangeSiteIdentificationDialog",
-	"./LoginView"	
+	"./LoginView",
+	"./NotFoundView",
+	"./login/LoggedUserBarView"
 ]);

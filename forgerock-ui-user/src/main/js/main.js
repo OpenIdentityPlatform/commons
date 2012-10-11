@@ -31,14 +31,14 @@
 
 require.config({
     paths: {
-        mustache: "libs/mustache",
+        mustache: "libs/mustache-0.7.0",
         backbone: "libs/backbone-0.9.2-min",
         underscore: "libs/underscore-1.3.3-min",
-        js2form: "libs/js2form",
-        form2js: "libs/form2js",
+        js2form: "libs/js2form-1.0",
+        form2js: "libs/form2js-1.0",
         contentflow: "libs/contentflow",
         spin: "libs/spin-1.2.5-min",
-        jqueryui: "libs/jquery-ui-1.8.23.custom.min",
+        jqueryui: "libs/jquery-ui-1.8.23.custom-min",
         xdate: "libs/xdate-0.7-min"
     },
 

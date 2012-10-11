@@ -44,16 +44,11 @@ define("config/AppConfiguration", [
         {
             moduleClass: "org/forgerock/commons/ui/common/main/ErrorsHandler",
             configuration: {
-            defaultHandlers: {
-                "unauthorized": {
-                    status: "401",
-                    event: constants.EVENT_UNAUTHORIZED
+                defaultHandlers: {
                 },
-                "serverError": {
-                    status: "503",
-                    event: constants.EVENT_SERVICE_UNAVAILABLE
-                }
-            }
+                loader: [
+                         {"defaultHandlers":"config/errorhandlers/CommonErrorHandlers"}
+                ]
             } 
         },
         {
@@ -70,6 +65,16 @@ define("config/AppConfiguration", [
                         }    
                     }
                 }                                       
+            } 
+        },
+        {
+            moduleClass: "org/forgerock/commons/ui/common/main/ValidatorsManager",
+            configuration: {
+                validators: {
+                },
+                loader: [
+                         {"validators":"config/validators/CommonValidators"}
+                ]
             } 
         }
         ],

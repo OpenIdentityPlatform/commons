@@ -35,5 +35,5 @@ define("org/forgerock/commons/ui/common/main/main", [
 	"./ViewManager",
 	"./SpinnerManager",
 	"./ErrorsHandler",
-	"./WorkflowManager"
+	"./SessionManager"
 ]);

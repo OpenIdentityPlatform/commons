@@ -74,12 +74,6 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                     }
                     
                 }
-                
-                if (this.isOnDashboard()) {
-                    this.$el.find("ul:first").find("li:first").addClass('active');
-                } else {
-                    this.$el.find("ul:first").find("li:first").removeClass('active');
-                }
             },
             
             addLink: function(name, url, isActive) {
@@ -96,25 +90,18 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                 }
             },
             
-            isOnDashboard: function() {
-                var afterHash = window.location.href.split('#')[1];
-                return !afterHash || afterHash === '' || afterHash === "/";
-            },
-            
             isCurrent: function(urlName) {
                 var fromHash, afterHash = window.location.href.split('#')[1];
                 if (afterHash) {
                     fromHash = "#" + afterHash;
-                    return fromHash.indexOf(urlName) !== -1;
                 } else {
-                    return false;
+                    fromHash = "#/";
                 }
-                
-                
+                return fromHash.indexOf(urlName) !== -1;
             },
             
             clear: function() {
-                $("#menu li").not(':first').remove();
+                $("#menu li").remove();
                 $("#submenu").remove();
             },
             

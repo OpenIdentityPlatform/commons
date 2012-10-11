@@ -1,36 +1,55 @@
 package org.forgerock.commons.ui.functionaltests;
 
-import org.codehaus.jackson.JsonNode;
-import org.forgerock.commons.ui.functionaltests.helpers.SeleniumHelper.ElementType;
+import org.forgerock.commons.ui.functionaltests.utils.AssertNoErrors;
 import org.testng.annotations.Test;
 
 @Test(singleThreaded = true)
 public class SimpleTest extends AbstractTest {
 
 	@Test
+	@AssertNoErrors
 	public void simpleTest() {		
 		forms.setField("content", "login", "openidm-admin");
 		forms.setField("content", "password", "openidm-admin");
 		forms.submit("content", "loginButton");
 		messages.assertInfoMessage("You have been successfully logged in.");
 		
-		router.routeTo("/#users/");
+		router.routeTo("#users/");
 	}
 	
-	@Test
+	/*@Test
 	public void simpleTest2() {
-		//router.routeTo("/#users/");	
-		//router.assertUrl("/#login/");
+		//router.routeTo("#users/");	
+		//router.assertUrl("#login/");
 		
 		JsonNode user = jsonUtils.readJsonFromFile("/registration/user.json");
 		
-		router.routeTo("/#register/");
-		selenium.waitForElement("content", "email", ElementType.NAME);		
+		router.goToRegistration();
 		forms.fillForm("content", user);
 		forms.validateForm("content");
-		forms.assertFormValidationPasses("content");
 		
-		forms.submit("content", "register");
+		forms.assertValidationError("content", "phoneNumber");
+		forms.assertValidationPasses("content", "password");
+		
+		//forms.assertFormValidationPasses("content");
+		
+		//forms.submit("content", "register");
 	}
+	
+	@Test
+	public void simpleTest3() {		
+		forms.setField("content", "login", "a@a.pl");
+		forms.setField("content", "password", "qweqweqweQ1");
+		forms.submit("content", "loginButton");
+		messages.assertInfoMessage("You have been successfully logged in.");
+		
+		router.goToProfile();
+		JsonNode e = forms.readForm("content");
+		System.out.println(e.toString());
+		
+		JsonNode user = jsonUtils.readJsonFromFile("/profile/user.json");
+		
+		Assert.assertEquals(user, e);
+	}*/
 	
 }

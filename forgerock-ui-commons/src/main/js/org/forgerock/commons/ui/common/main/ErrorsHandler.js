@@ -29,8 +29,9 @@
  */
 define("org/forgerock/commons/ui/common/main/ErrorsHandler", [
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
-    "org/forgerock/commons/ui/common/main/EventManager"
-], function(AbstractConfigurationAware, eventManager) {
+    "org/forgerock/commons/ui/common/main/EventManager",
+    "org/forgerock/commons/ui/common/util/Constants"
+], function(AbstractConfigurationAware, eventManager, constants) {
     var obj = new AbstractConfigurationAware();
     
     obj.handleError = function(error, handlers) {
@@ -55,7 +56,12 @@ define("org/forgerock/commons/ui/common/main/ErrorsHandler", [
                 eventManager.sendEvent(handler.event, {handler: handler, error: error});
             }
             
-            //TODO add support for error message
+            if(handler.message) {
+                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, handler.message);
+            }
+        } else {
+            console.error(error.status);
+            eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unknown");
         }
     };
     

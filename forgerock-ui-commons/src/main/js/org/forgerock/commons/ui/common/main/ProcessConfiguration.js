@@ -76,7 +76,7 @@ define("org/forgerock/commons/ui/common/main/ProcessConfiguration", [
         try {
             var service = require(serviceId);
             if(service) {
-                service[methodName].apply(service, params);
+                service[methodName].apply(service, params || []);
             }
         } catch(exception) {
             if(params) {

@@ -1,4 +1,4 @@
-package org.forgerock.commons.ui.functionaltests.helpers;
+package org.forgerock.commons.ui.functionaltests.constants;
 
 import org.springframework.stereotype.Component;
 
@@ -19,6 +19,14 @@ public class Constants {
 
 	public String getWebBrowser() {
 		return get(Consts.WEB_BROWSER).toString();
+	}
+	
+	public int waitTime() {
+		return Integer.parseInt(get(Consts.WAIT_TIME).toString());
+	}
+
+	public String getOpenIDMServer() {
+		return get(Consts.OPENIDM_SERVER).toString();
 	}
 	
 }

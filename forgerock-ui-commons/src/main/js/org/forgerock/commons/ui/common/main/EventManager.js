@@ -55,8 +55,9 @@ define("org/forgerock/commons/ui/common/main/EventManager", [
     obj.unregisterListener = function (eventId, callback) {
         var proxyFunction;
         console.debug("unregistering event listener eventId=" + eventId);
-        proxyFunction = listenerProxyMap[callback];
-        $(document).off(proxyFunction);
+        //proxyFunction = listenerProxyMap[callback];
+        //$(document).off(proxyFunction);
+        $(document).off(eventId);
     };
 
     return obj;

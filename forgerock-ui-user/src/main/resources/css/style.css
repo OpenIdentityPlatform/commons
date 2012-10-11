@@ -157,8 +157,13 @@ select {
 }
 
 input[type=checkbox] {
-	height: 20px;
-	width: 20px;
+	height: auto;
+	width: auto;
+	display: inline-block;
+	background-color: "transparent";
+	padding: 0;
+	
+	
 }
 
 input.readOnly {
@@ -924,7 +929,6 @@ label.short {
 
 label.checkbox {
 	font-weight: normal;
-	width: auto;
 	position: relative;
 	padding: 4px 0 0 24px;
 	line-height: 16px;
@@ -933,11 +937,13 @@ label.checkbox {
 }
 
 label.checkbox input[type="checkbox"] {
-	position: absolute;
 	left: 0;
 	top: 0;
 	width: auto;
 	display: inline-block;
+	padding-top:0;
+	float:none;
+	margin-right:5px;
 }
 
 #notifications h3 {
@@ -1057,12 +1063,12 @@ div.underline {
     color: #fff;
 }
 
-#tasksMenu h3 {
+.tasksTable h3 {
     padding: 0;
     margin: 0;
 }
 
-#tasksMenu li {
+.tasksTable li {
     margin-left: 15px;
 }
 
@@ -1070,4 +1076,17 @@ div.underline {
 	padding: 0;
 	margin: 0;
 	color: #fff;
+}
+
+.tasksTable table {
+    border-spacing: 0px;
+    width: 100%;
+}
+
+.tasksTable tbody tr:hover {
+	background-color: #aaa;
+}
+
+.tasksTable th {
+    text-align: left;
 }

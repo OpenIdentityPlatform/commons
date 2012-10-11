@@ -1,4 +1,4 @@
-package org.forgerock.commons.ui.functionaltests.helpers;
+package org.forgerock.commons.ui.functionaltests.screenshot;
 
 import javax.inject.Inject;
 
@@ -14,11 +14,12 @@ public class ScreenShotAspect {
 	private ScreenShot screenShot;
 
 	@AfterThrowing(
-			pointcut = "execution(* org.forgerock.commons.ui.functionaltests.helpers.*.assert*(..))", 
+			pointcut = "execution(* *.*(..))", 
 			throwing = "assertionError")
 	public void makeScreenShot(AssertionError assertionError) {
-		System.err.println("Test failed, preparing screenshot...");
-		screenShot.makeScreenShot(assertionError.getLocalizedMessage());
+		//System.err.println("Test failed, preparing screenshot...");
+		//TODO fix it. screenShot is null
+		//screenShot.makeScreenShot(assertionError.getLocalizedMessage(), assertionError);
 	}
 
 }
