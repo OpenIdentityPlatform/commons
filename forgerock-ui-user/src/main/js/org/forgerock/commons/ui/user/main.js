@@ -37,5 +37,6 @@ define("org/forgerock/commons/ui/user/main", [
 	"./LoginView",
 	"./NotFoundView",
 	"./login/LoggedUserBarView",
-	"./SiteConfigurator"
+	"./SiteConfigurator",
+	"./delegates/SiteConfigurationDelegate"
 ]);

@@ -25,54 +25,76 @@
 /*global $, define, require */
 
 /**
-* Interface
 * @author mbilski
 */
 define("org/forgerock/commons/ui/user/SiteConfigurator", [
    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
    "org/forgerock/commons/ui/common/util/Constants", 
    "org/forgerock/commons/ui/common/main/EventManager",
-   "org/forgerock/commons/ui/common/main/Configuration"
-], function(AbstractConfigurationAware, constants, eventManager, conf) {
+   "org/forgerock/commons/ui/common/main/Configuration",
+   "org/forgerock/commons/ui/user/delegates/SiteConfigurationDelegate"
+], function(AbstractConfigurationAware, constants, eventManager, conf, configurationDelegate) {
    var obj = new AbstractConfigurationAware();
    
-   $(document).on(constants.EVENT_CONFIGURATION_CHANGED, function() {
+   obj.initialized = false;
+   
+   $(document).on(constants.EVENT_READ_CONFIGURATION_REQUEST, function() {
        if(!conf.globalData) {
            conf.setProperty('globalData', {});
        }
        
-       if(obj.configuration) {
-           var router, changeSecurityDataDialog;
+       console.log("READING CONFIGURATION");
+       if(obj.configuration && obj.initialized === false) {
+           obj.initialized = true;
            
-           router = require("org/forgerock/commons/ui/common/main/Router");
-           
-           if(obj.configuration.selfRegistration === true) {
-               conf.globalData.selfRegistration = true;
-           } else {               
-               if(router.configuration && router.configuration.routes.register) {
-                   console.log("Removing register route.");
-                   delete router.configuration.routes.register;
-               }
-           }
-           
-           if(obj.configuration.enterprise === true) {
-               conf.globalData.enterprise = true;             
+           if(obj.configuration.remoteConfig === true) {
+               configurationDelegate.getConfiguration(function(config) {
+                   obj.processConfiguration(config); 
+                   console.log("SENDING 1");
+                   eventManager.sendEvent(constants.EVENT_APP_INTIALIZED);
+               }, function() {
+                   console.log("SENDING 2");
+                   eventManager.sendEvent(constants.EVENT_APP_INTIALIZED);
+               });
            } else {
-               changeSecurityDataDialog = require("org/forgerock/commons/ui/user/profile/ChangeSecurityDataDialog");
-               changeSecurityDataDialog.data.height = 210;
-               
-               if(router.configuration && router.configuration.routes.siteIdentification) {
-                   console.log("Removing siteIdentification route.");
-                   delete router.configuration.routes.siteIdentification;
-               }
-               
-               if(router.configuration && router.configuration.routes.forgottenPassword) {
-                   console.log("Removing forgottenPassword route.");
-                   delete router.configuration.routes.forgottenPassword;
-               } 
-           }
+               console.log("SENDING 3");
+               obj.processConfiguration(obj.configuration); 
+               eventManager.sendEvent(constants.EVENT_APP_INTIALIZED);
+           }          
        }
    });
+   
+   obj.processConfiguration = function(config) {
+       var router, changeSecurityDataDialog;
+       
+       router = require("org/forgerock/commons/ui/common/main/Router");
+       
+       if(config.selfRegistration === true) {
+           conf.globalData.selfRegistration = true;
+       } else {               
+           if(router.configuration && router.configuration.routes.register) {
+               console.log("Removing register route.");
+               delete router.configuration.routes.register;
+           }
+       }
+       
+       if(config.enterprise === true) {
+           conf.globalData.enterprise = true;             
+       } else {
+           changeSecurityDataDialog = require("org/forgerock/commons/ui/user/profile/ChangeSecurityDataDialog");
+           changeSecurityDataDialog.data.height = 210;
+           
+           if(router.configuration && router.configuration.routes.siteIdentification) {
+               console.log("Removing siteIdentification route.");
+               delete router.configuration.routes.siteIdentification;
+           }
+           
+           if(router.configuration && router.configuration.routes.forgottenPassword) {
+               console.log("Removing forgottenPassword route.");
+               delete router.configuration.routes.forgottenPassword;
+           } 
+       }
+   };
    
    return obj;
 });
