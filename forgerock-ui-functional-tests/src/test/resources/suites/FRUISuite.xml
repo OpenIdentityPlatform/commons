@@ -8,6 +8,7 @@
 			<class name="org.forgerock.commons.ui.functionaltests.commons.RoutingTest" />
 			<class name="org.forgerock.commons.ui.functionaltests.commons.ValidatorsTest" />
 			<class name="org.forgerock.commons.ui.functionaltests.user.RegistrationTest" />
+			<class name="org.forgerock.commons.ui.functionaltests.user.RegistrationCreateUserTest" />
 			<class name="org.forgerock.commons.ui.functionaltests.user.ProfileTest" />
 		</classes>
 	</test>

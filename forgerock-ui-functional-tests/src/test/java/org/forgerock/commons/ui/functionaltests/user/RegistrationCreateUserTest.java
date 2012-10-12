@@ -10,7 +10,7 @@ public class RegistrationCreateUserTest extends AbstractRegistrationTest {
 	
 	@Test
 	@AssertNoErrors
-	public void testEmailFieldValidation() {
+	public void testRegisterUser() {
 		new RegistrationValidationTest(){
 			@Override
 			protected void checkRegistrationViewBehavior() {
