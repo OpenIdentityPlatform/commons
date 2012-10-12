@@ -38,7 +38,12 @@ public class FormsHelper {
 		WebElement element = selenium.getElement(el, name, ElementType.NAME);
 		String tagName = element.getTagName();
 		if (tagName.equals("input")) {
-			element.clear();
+			try{
+				element.clear();
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+			
 			element.sendKeys(value);
 		} else if (tagName.equals("select")) {
 			Select selectBox = new Select(element);
@@ -182,6 +187,21 @@ public class FormsHelper {
 			return null;
 		}
 		return selectBox.getFirstSelectedOption().getText();
+	}
+
+	public void assertFormFieldHasValue(final String element, final String fieldName, final String expectedValue) {
+		selenium.new AssertionWithTimeout() {
+			@Override
+			protected String getAssertionFailedMessage() {
+				return "Validation of form value returned different value";
+			}
+			@Override
+			protected boolean assertionCondition(WebDriver driver) {
+				System.out.println(getFieldValue(element, fieldName));
+				System.out.println(expectedValue);
+				return getFieldValue(element, fieldName).equals(expectedValue);
+			}
+		}.checkAssertion();
 	}
 	
 }
