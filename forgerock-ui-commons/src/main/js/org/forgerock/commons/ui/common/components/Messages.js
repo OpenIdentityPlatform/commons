@@ -53,24 +53,21 @@ define("org/forgerock/commons/ui/common/components/Messages", [
          * Usage: addMessage({message: "Some Message", type: "error"})
          */
         addMessage: function(msg) {
-            this.messages[this.numberOfMessages] = msg;
-
-            if (this.numberOfMessages === 0) {
+            this.messages.push(msg);
+            
+            if (this.messages.length === 1) {
                 this.showMessage(msg, this.messagesLoop);
-                this.numberOfMessages++;
-            } else {
-                this.numberOfMessages++;
             }
         },
 
         /**
          * Displays messages singly.
          */
-        messagesLoop: function() {        
-            this.numberOfMessages--;
-
-            if (this.numberOfMessages > 0) {                
-                this.showMessage(this.messages[this.numberOfMessages - 1], this.messagesLoop);              
+        messagesLoop: function() {       
+            var msg = this.messages.shift();
+            
+            if (this.messages.length > 0) {                
+                this.showMessage(this.messages[0], this.messagesLoop);      
             }
         },
 

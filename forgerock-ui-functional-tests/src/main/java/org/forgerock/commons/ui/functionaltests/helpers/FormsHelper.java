@@ -38,13 +38,21 @@ public class FormsHelper {
 		WebElement element = selenium.getElement(el, name, ElementType.NAME);
 		String tagName = element.getTagName();
 		if (tagName.equals("input")) {
-			try{
-				element.clear();
-			} catch (Exception e) {
-				// TODO: handle exception
+			if(element.getAttribute("type").equals("checkbox")) {
+				if(value.equals("true")) {
+					 ((JavascriptExecutor) driver).executeScript("$('#"+ el +" input[name="+ name +"]').attr('checked', true);");
+				} else {
+					((JavascriptExecutor) driver).executeScript("$('#"+ el +" input[name="+ name +"]').attr('checked', false);");
+				}
+			} else {
+				try{
+					element.clear();
+				} catch (Exception e) {
+					// TODO: handle exception
+				}
+				
+				element.sendKeys(value);
 			}
-			
-			element.sendKeys(value);
 		} else if (tagName.equals("select")) {
 			Select selectBox = new Select(element);
 			selectBox.selectByValue(value);
@@ -65,6 +73,16 @@ public class FormsHelper {
 		WebElement element = selenium.getElement(el, name, ElementType.NAME);
 		String tagName = element.getTagName();
 		if (tagName.equals("input")) {
+			if(element.getAttribute("type").equals("checkbox")) {
+				String checked = element.getAttribute("checked");
+				
+				if(checked != null && checked.equals("true")) {
+					return "true";
+				}
+				
+				return "false";
+			}
+			
 			return element.getAttribute("value");
 		} else if (tagName.equals("select")) {
 			Select selectBox = new Select(element);
@@ -197,8 +215,6 @@ public class FormsHelper {
 			}
 			@Override
 			protected boolean assertionCondition(WebDriver driver) {
-				System.out.println(getFieldValue(element, fieldName));
-				System.out.println(expectedValue);
 				return getFieldValue(element, fieldName).equals(expectedValue);
 			}
 		}.checkAssertion();

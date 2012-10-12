@@ -3,6 +3,7 @@ package org.forgerock.commons.ui.functionaltests.user;
 import org.forgerock.commons.ui.functionaltests.utils.AssertNoErrors;
 import org.testng.annotations.Test;
 
+@Test(singleThreaded = true)
 public class RegistrationTest extends AbstractRegistrationTest {
 	
 	@Test
@@ -151,8 +152,8 @@ public class RegistrationTest extends AbstractRegistrationTest {
 		new RegistrationValidationTest(){
 			@Override
 			protected void checkRegistrationViewBehavior() {
-				fieldShouldBeNotValidAfterChange("content", "terms", "no");
-				fieldShouldBeValidAfterChange("content", "terms", "yes");
+				fieldShouldBeNotValidAfterChange("content", "terms", "false");
+				fieldShouldBeValidAfterChange("content", "terms", "true");
 			}
 		}.run();
 	}
