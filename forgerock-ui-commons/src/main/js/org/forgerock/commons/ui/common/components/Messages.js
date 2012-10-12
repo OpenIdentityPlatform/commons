@@ -80,20 +80,22 @@ define("org/forgerock/commons/ui/common/components/Messages", [
             if(msg.type === "error") {
                 this.$el.append("<div class='errorMessage radious' style='display: none;'><span><img src='images/span_error.png' width='14' height='14' alt='error' align='top' /></span>" + msg.message + "</div>");
             
-                this.$el.find("div:last").fadeIn(500, function() {
+                this.$el.find("div:last").fadeIn(500, _.bind(function() {
+                    this.$el.find("div:last").remove();
                     if (callback) {
                         callback.call(obj);
                     }
-                });
+                }, this ));
             } else {
                 this.$el.find("div").fadeOut(500);
                 this.$el.append("<div class='confirmMessage radious' style='display: none;'><span><img src='images/span_ok.png' width='14' height='14' alt='error' align='top' /></span>" + msg.message + "</div>");
                                 
-                this.$el.find("div:last").fadeIn(500).delay(1000).fadeOut(500, function() {
+                this.$el.find("div:last").fadeIn(500).delay(1000).fadeOut(500, _.bind(function() {
+                    this.$el.find("div:last").remove();
                     if (callback) {
                         callback.call(obj);
                     }
-                });
+                }, this ));
             }            
         },
         

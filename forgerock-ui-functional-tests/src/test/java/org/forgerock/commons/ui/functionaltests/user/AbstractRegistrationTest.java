@@ -7,6 +7,10 @@ import org.forgerock.commons.ui.functionaltests.AbstractTest;
 
 public class AbstractRegistrationTest extends AbstractTest{
 	
+	protected String formatStringFromForm(String value) {
+		return value.substring(1, value.length()-1);
+	}
+	
 	protected abstract class RegistrationValidationTest {
 		
 		protected abstract void checkRegistrationViewBehavior();
