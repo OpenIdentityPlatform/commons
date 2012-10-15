@@ -50,14 +50,11 @@ define("org/forgerock/commons/ui/user/SiteConfigurator", [
            if(obj.configuration.remoteConfig === true) {
                configurationDelegate.getConfiguration(function(config) {
                    obj.processConfiguration(config); 
-                   console.log("SENDING 1");
                    eventManager.sendEvent(constants.EVENT_APP_INTIALIZED);
                }, function() {
-                   console.log("SENDING 2");
                    eventManager.sendEvent(constants.EVENT_APP_INTIALIZED);
                });
            } else {
-               console.log("SENDING 3");
                obj.processConfiguration(obj.configuration); 
                eventManager.sendEvent(constants.EVENT_APP_INTIALIZED);
            }          

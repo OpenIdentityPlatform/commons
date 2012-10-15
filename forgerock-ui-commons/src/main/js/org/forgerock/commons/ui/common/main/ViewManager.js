@@ -42,6 +42,12 @@ define("org/forgerock/commons/ui/common/main/ViewManager", [
     obj.changeView = function(viewPath, args, callback, forceUpdate) {        
         var view;
         
+        if(obj.currentDialog !== "null") {
+            require(obj.currentDialog).$el.remove();
+        }
+        
+        obj.currentDialog = "null";
+        
         if(obj.currentView !== viewPath || forceUpdate) {
             view = require(viewPath);
             
@@ -60,7 +66,6 @@ define("org/forgerock/commons/ui/common/main/ViewManager", [
         }
 
         obj.currentView = viewPath;
-        obj.currentDialog = "null";
     };
     
     obj.showDialog = function(dialogPath, args) {
