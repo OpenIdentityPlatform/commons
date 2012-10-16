@@ -108,6 +108,27 @@ a.buttonOrange:hover {
 	text-decoration: none;
 }
 
+a.buttonGrey {
+    background-color: #5A646D;
+    border-radius: 5px;
+    color: #FFFFFF;
+    cursor: default;
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 13px;
+    padding: 9px 10px;
+    text-align: center;
+}
+
+a.buttonGrey:hover {
+    text-decoration: none;
+}
+
+a.choosen-decision {
+    background-color: #427BD1;
+}
+
 input,select {
 	float: left;
 	border: 1px solid #dbdbdb;
