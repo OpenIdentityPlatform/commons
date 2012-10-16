@@ -139,7 +139,11 @@ define("config/process/CommonConfig", [
                 "org/forgerock/commons/ui/common/components/Navigation"
             ],
             processDescription: function(event, router, navigation) {
-                router.routeTo(event.routeName, {trigger: true, args: event.args});
+                if(event.trigger === false) {
+                    router.routeTo(event.routeName, {trigger: false, args: event.args});
+                } else {
+                    router.routeTo(event.routeName, {trigger: true, args: event.args});
+                }
                 navigation.reload();
             }
         },

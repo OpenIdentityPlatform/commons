@@ -80,12 +80,7 @@ define("org/forgerock/commons/ui/common/components/Messages", [
             if(msg.type === "error") {
                 this.$el.append("<div class='errorMessage radious' style='display: none;'><span><img src='images/span_error.png' width='14' height='14' alt='error' align='top' /></span>" + msg.message + "</div>");
             
-                this.$el.find("div:last").fadeIn(500, _.bind(function() {
-                    this.$el.find("div:last").remove();
-                    if (callback) {
-                        callback.call(obj);
-                    }
-                }, this ));
+                this.$el.find("div:last").fadeIn(500);
             } else {
                 this.$el.find("div").fadeOut(500);
                 this.$el.append("<div class='confirmMessage radious' style='display: none;'><span><img src='images/span_ok.png' width='14' height='14' alt='error' align='top' /></span>" + msg.message + "</div>");
@@ -101,6 +96,7 @@ define("org/forgerock/commons/ui/common/components/Messages", [
         
         hideMessages : function() {
             this.$el.find("div").fadeOut(500);
+            this.messagesLoop();
         }
     });
     
