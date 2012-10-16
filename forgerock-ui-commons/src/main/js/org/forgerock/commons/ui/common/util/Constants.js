@@ -101,6 +101,7 @@ define("org/forgerock/commons/ui/common/util/Constants", [
     obj.EVENT_AUTHENTICATION_DATA_CHANGED = "common.delegate.EVENT_AUTHENTICATION_DATA_CHANGED";
 
     obj.EVENT_APP_INTIALIZED = "main.EVENT_APP_INTIALIZED";
+    obj.EVENT_READ_CONFIGURATION_REQUEST = "main.EVENT_READ_CONFIGURATION_REQUEST";
     obj.EVENT_DEPENDECIES_LOADED = "main.EVENT_DEPENDECIES_LOADED";
     
     obj.ROUTE_REQUEST = "view.ROUTE_REQUEST";
@@ -120,4 +121,3 @@ define("org/forgerock/commons/ui/common/util/Constants", [
     
     return obj;
 });
-

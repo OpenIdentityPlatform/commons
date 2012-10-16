@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, window*/
+/*global define, window, _*/
 
 /**
  * @author yaromin
@@ -141,7 +141,7 @@ define("config/process/UserConfig", [
                     
                     eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: false});
                     
-                    if(conf.gotoURL) {
+                    if(conf.gotoURL && _.indexOf(["#","","#/","/#"], conf.gotoURL) === -1) {
                         console.log("Auto redirect to " + conf.gotoURL);
                         router.navigate(conf.gotoURL, {trigger: true});
                         delete conf.gotoURL;

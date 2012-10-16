@@ -60,11 +60,11 @@ define("org/forgerock/commons/ui/user/profile/ChangeSecurityDataDialog", [
             if(validatorsManager.formValidated(this.$el)) {            
                 var patchDefinitionObject = [], element;
                 
-                if(this.$el.find("input[name=password]").val() !== "") {
+                if(this.$el.find("input[name=password]").val()) {
                     patchDefinitionObject.push({replace: "password", value: this.$el.find("input[name=password]").val()});
                 }
                 
-                if(this.$el.find("input[name=securityAnswer]").val() !== "") {
+                if(this.$el.find("input[name=securityAnswer]").val()) {
                     patchDefinitionObject.push({replace: "securityQuestion", value: this.$el.find("select[name=securityQuestion]").val()});
                     patchDefinitionObject.push({replace: "securityAnswer", value: this.$el.find("input[name=securityAnswer]").val().toLowerCase()});
                 }

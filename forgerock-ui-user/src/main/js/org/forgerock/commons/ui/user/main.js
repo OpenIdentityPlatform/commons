@@ -36,5 +36,7 @@ define("org/forgerock/commons/ui/user/main", [
     "./profile/ChangeSiteIdentificationDialog",
 	"./LoginView",
 	"./NotFoundView",
-	"./login/LoggedUserBarView"
+	"./login/LoggedUserBarView",
+	"./SiteConfigurator",
+	"./delegates/SiteConfigurationDelegate"
 ]);

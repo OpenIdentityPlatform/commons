@@ -44,7 +44,7 @@ define("org/forgerock/commons/ui/common/main/ProcessConfiguration", [
     eventManager.registerListener(constants.EVENT_DEPENDECIES_LOADED, function(event) {
         obj.callService("org/forgerock/commons/ui/common/main/Configuration","sendConfigurationChangeInfo");
         obj.registerAllListenersFromConfig();
-        eventManager.sendEvent(constants.EVENT_APP_INTIALIZED);
+        eventManager.sendEvent(constants.EVENT_READ_CONFIGURATION_REQUEST);
     });
 
     obj.callRegisterListenerFromConfig = function (config) {		

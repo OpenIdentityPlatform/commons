@@ -20,14 +20,18 @@
 		</form>
 	</div>
 	<div class="floatRight" style="width: 260px; padding-left: 15px;">
+	   {{#selfRegistration}}
 	   <div class="field">
 	       <span class="bold block">Don't have an account?</span>
 	       <a href="#register/" class="ice">Register your account</a>
 	   </div>
+	   {{/selfRegistration}}
+	   {{#enterprise}}
 	   <div class="field">
 	       <span class="bold block">Having trouble logging in?</span>
 	       <a href="#profile/forgotten_password/" class="ice block">Reset my password</a>
 	   </div>
+	   {{/enterprise}}
 	</div>
 	<div class="clear"></div>
 </div>
