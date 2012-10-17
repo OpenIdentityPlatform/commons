@@ -18,7 +18,6 @@ package org.forgerock.json.resource.provider;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.PatchRequest;
@@ -53,139 +52,147 @@ public interface CollectionResourceProvider {
 
     /**
      * Performs the provided
-     * {@link RequestHandler#handleAction(Context, ActionRequest, ResultHandler)
+     * {@link RequestHandler#handleAction(ServerContext, ActionRequest, ResultHandler)
      * action} against the resource collection.
-     * 
+     *
      * @param context
-     *            The request context.
+     *            The request server context.
      * @param request
      *            The action request.
      * @param handler
      *            The result handler to be notified on completion.
-     * @see RequestHandler#handleAction(Context, ActionRequest, ResultHandler)
+     * @see RequestHandler#handleAction(ServerContext, ActionRequest,
+     *      ResultHandler)
      */
-    void actionCollection(Context context, ActionRequest request, ResultHandler<JsonValue> handler);
+    void actionCollection(ServerContext context, ActionRequest request,
+            ResultHandler<JsonValue> handler);
 
     /**
      * Performs the provided
-     * {@link RequestHandler#handleAction(Context, ActionRequest, ResultHandler)
+     * {@link RequestHandler#handleAction(ServerContext, ActionRequest, ResultHandler)
      * action} against a resource within the collection.
-     * 
+     *
      * @param context
-     *            The request context.
+     *            The request server context.
      * @param resourceId
      *            The ID of the targeted resource within the collection.
      * @param request
      *            The action request.
      * @param handler
      *            The result handler to be notified on completion.
-     * @see RequestHandler#handleAction(Context, ActionRequest, ResultHandler)
+     * @see RequestHandler#handleAction(ServerContext, ActionRequest,
+     *      ResultHandler)
      */
-    void actionInstance(Context context, String resourceId, ActionRequest request,
+    void actionInstance(ServerContext context, String resourceId, ActionRequest request,
             ResultHandler<JsonValue> handler);
 
     /**
-     * {@link RequestHandler#handleCreate(Context, CreateRequest, ResultHandler)
+     * {@link RequestHandler#handleCreate(ServerContext, CreateRequest, ResultHandler)
      * Adds} a new resource instance to the collection.
      * <p>
      * Create requests are targeted at the collection itself and may include a
      * user-provided resource ID for the new resource as part of the request
      * itself. The user-provider resource ID may be accessed using the method
      * {@link CreateRequest#getNewResourceId()}.
-     * 
+     *
      * @param context
-     *            The request context.
+     *            The request server context.
      * @param request
      *            The create request.
      * @param handler
      *            The result handler to be notified on completion.
-     * @see RequestHandler#handleCreate(Context, CreateRequest, ResultHandler)
+     * @see RequestHandler#handleCreate(ServerContext, CreateRequest,
+     *      ResultHandler)
      * @see CreateRequest#getNewResourceId()
      */
-    void createInstance(Context context, CreateRequest request, ResultHandler<Resource> handler);
+    void createInstance(ServerContext context, CreateRequest request,
+            ResultHandler<Resource> handler);
 
     /**
-     * {@link RequestHandler#handleDelete(Context, DeleteRequest, ResultHandler)
+     * {@link RequestHandler#handleDelete(ServerContext, DeleteRequest, ResultHandler)
      * Removes} a resource instance from the collection.
-     * 
+     *
      * @param context
-     *            The request context.
+     *            The request server context.
      * @param resourceId
      *            The ID of the targeted resource within the collection.
      * @param request
      *            The delete request.
      * @param handler
      *            The result handler to be notified on completion.
-     * @see RequestHandler#handleDelete(Context, DeleteRequest, ResultHandler)
+     * @see RequestHandler#handleDelete(ServerContext, DeleteRequest,
+     *      ResultHandler)
      */
-    void deleteInstance(Context context, String resourceId, DeleteRequest request,
+    void deleteInstance(ServerContext context, String resourceId, DeleteRequest request,
             ResultHandler<Resource> handler);
 
     /**
-     * {@link RequestHandler#handlePatch(Context, PatchRequest, ResultHandler)
+     * {@link RequestHandler#handlePatch(ServerContext, PatchRequest, ResultHandler)
      * Patches} an existing resource within the collection.
-     * 
+     *
      * @param context
-     *            The request context.
+     *            The request server context.
      * @param resourceId
      *            The ID of the targeted resource within the collection.
      * @param request
      *            The patch request.
      * @param handler
      *            The result handler to be notified on completion.
-     * @see RequestHandler#handlePatch(Context, PatchRequest, ResultHandler)
+     * @see RequestHandler#handlePatch(ServerContext, PatchRequest,
+     *      ResultHandler)
      */
-    void patchInstance(Context context, String resourceId, PatchRequest request,
+    void patchInstance(ServerContext context, String resourceId, PatchRequest request,
             ResultHandler<Resource> handler);
 
     /**
-     * {@link RequestHandler#handleQuery(Context, QueryRequest, QueryResultHandler)
+     * {@link RequestHandler#handleQuery(ServerContext, QueryRequest, QueryResultHandler)
      * Searches} the collection for all resources which match the query request
      * criteria.
-     * 
+     *
      * @param context
-     *            The request context.
+     *            The request server context.
      * @param request
      *            The query request.
      * @param handler
      *            The query result handler to be notified on completion.
-     * @see RequestHandler#handleQuery(Context, QueryRequest,
+     * @see RequestHandler#handleQuery(ServerContext, QueryRequest,
      *      QueryResultHandler)
      */
-    void queryCollection(Context context, QueryRequest request, QueryResultHandler handler);
+    void queryCollection(ServerContext context, QueryRequest request, QueryResultHandler handler);
 
     /**
-     * {@link RequestHandler#handleRead(Context, ReadRequest, ResultHandler)
+     * {@link RequestHandler#handleRead(ServerContext, ReadRequest, ResultHandler)
      * Reads} an existing resource within the collection.
-     * 
+     *
      * @param context
-     *            The request context.
+     *            The request server context.
      * @param resourceId
      *            The ID of the targeted resource within the collection.
      * @param request
      *            The read request.
      * @param handler
      *            The result handler to be notified on completion.
-     * @see RequestHandler#handleRead(Context, ReadRequest, ResultHandler)
+     * @see RequestHandler#handleRead(ServerContext, ReadRequest, ResultHandler)
      */
-    void readInstance(Context context, String resourceId, ReadRequest request,
+    void readInstance(ServerContext context, String resourceId, ReadRequest request,
             ResultHandler<Resource> handler);
 
     /**
-     * {@link RequestHandler#handleUpdate(Context, UpdateRequest, ResultHandler)
+     * {@link RequestHandler#handleUpdate(ServerContext, UpdateRequest, ResultHandler)
      * Updates} an existing resource within the collection.
-     * 
+     *
      * @param context
-     *            The request context.
+     *            The request server context.
      * @param resourceId
      *            The ID of the targeted resource within the collection.
      * @param request
      *            The update request.
      * @param handler
      *            The result handler to be notified on completion.
-     * @see RequestHandler#handleUpdate(Context, UpdateRequest, ResultHandler)
+     * @see RequestHandler#handleUpdate(ServerContext, UpdateRequest,
+     *      ResultHandler)
      */
-    void updateInstance(Context context, String resourceId, UpdateRequest request,
+    void updateInstance(ServerContext context, String resourceId, UpdateRequest request,
             ResultHandler<Resource> handler);
 
 }

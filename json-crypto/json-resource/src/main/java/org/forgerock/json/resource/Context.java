@@ -16,117 +16,199 @@
 
 package org.forgerock.json.resource;
 
-import static org.forgerock.json.resource.ContextAttribute.ID;
-import static org.forgerock.json.resource.ContextAttribute.PARENT;
-import static org.forgerock.json.resource.ContextAttribute.TYPE;
-
+import java.lang.reflect.Constructor;
 import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.UUID;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.util.Factory;
+import org.forgerock.json.resource.exception.ResourceException;
+import org.forgerock.json.resource.provider.PersistenceConfig;
+import org.forgerock.json.resource.provider.ServerContext;
 
 /**
  * The context associated with a request currently being processed by a JSON
  * resource provider. A request context can be used to query state information
  * about the request. Implementations may provide additional information,
- * time-stamp information, HTTP headers, etc using {@code ContextAttributes}.
+ * time-stamp information, HTTP headers, etc. Contexts are linked together to
+ * form a parent-child chain of context, whose root is a {@link RootContext}.
+ * <p>
+ * Contexts <b>MUST</b> support persistence by providing a constructor having
+ * the same declaration as {@link #Context(JsonValue, PersistenceConfig)} and by
+ * overriding the {@link #saveToJson(JsonValue, PersistenceConfig)} method. See
+ * the method's documentation for more details.
+ * <p>
+ * Here is an example of the JSON representation of the core attributes of all
+ * contexts:
+ *
+ * <pre>
+ * {
+ *   "id"     : "56f0fb7e-3837-464d-b9ec-9d3b6af665c3",
+ *   "class"  : ...Java class name..,
+ *   "parent" : {
+ *       ...
+ *   }
+ * }
+ * </pre>
  */
-public final class Context {
-    /*
-     * TODO: do we need to synchronize access to the underlying attribute map?
-     * Doing so would preclude us from sharing the map when converting to and
-     * from a JSON value, since the JSON value will not synchronize access. One
-     * possibility is to use a CHM.
-     */
+public abstract class Context {
+    // Persisted attribute names.
+    private static final String ATTR_CLASS = "class";
+    private static final String ATTR_ID = "id";
+    private static final String ATTR_PARENT = "parent";
+
+    static final <T> T checkNotNull(final T object) {
+        if (object == null) {
+            throw new NullPointerException();
+        }
+        return object;
+    }
+
+    private static Context load0(final JsonValue savedContext, final PersistenceConfig config)
+            throws ResourceException {
+        // Determine the context implementation class and instantiate it.
+        final String className = savedContext.get(ATTR_CLASS).required().asString();
+        try {
+            final Class<? extends Context> clazz = Class.forName(className, true,
+                    config.getClassLoader()).asSubclass(Context.class);
+            final Constructor<? extends Context> constructor = clazz.getDeclaredConstructor(
+                    JsonValue.class, PersistenceConfig.class);
+            return constructor.newInstance(savedContext, config);
+        } catch (final Exception e) {
+            throw new IllegalArgumentException(
+                    "Unable to instantiate Context implementation class '" + className + "'", e);
+        }
+    }
+
+    private final String id;
+    private final Context parent;
 
     /**
-     * Creates a new context whose {@link ContextAttribute#TYPE TYPE} is
-     * {@code "root"}, an {@link ContextAttribute#ID ID} automatically generated
-     * using {@code UUID.randomUUID()}, and a {@code null}
-     * {@link ContextAttribute#PARENT PARENT}.
+     * Creates a new context having the provided parent and an ID automatically
+     * generated using {@code UUID.randomUUID()}.
      *
-     * @return A new root context with an automatically generated ID.
+     * @param parent
+     *            The parent context.
      */
-    public static Context newRootContext() {
-        return newRootContext(UUID.randomUUID().toString());
+    protected Context(final Context parent) {
+        this(UUID.randomUUID().toString(), parent);
     }
 
     /**
-     * Creates a new context whose {@link ContextAttribute#TYPE TYPE} is
-     * {@code "root"}, the provided {@link ContextAttribute#ID ID}, and a
-     * {@code null} {@link ContextAttribute#PARENT PARENT}.
+     * Creates a new context from the JSON representation of a previously
+     * persisted context.
+     * <p>
+     * Sub-classes <b>MUST</b> provide a constructor having the same declaration
+     * as this constructor in order to support persistence. Implementations
+     * <b>MUST</b> take care to invoke the super class implementation before
+     * parsing their own context attributes. Below is an example implementation
+     * for a security context which stores the user name and password of the
+     * authenticated user:
+     *
+     * <pre>
+     * protected SecurityContext(JsonValue savedContext, PersistenceConfig config)
+     *         throws ResourceException {
+     *     // Invoke the super-class implementation first.
+     *     super.saveToJson(savedContext, config);
+     *
+     *     // Now parse the attributes for this context.
+     *     this.username = savedContext.get(&quot;username&quot;).required().asString();
+     *     this.password = savedContext.get(&quot;password&quot;).required().asString();
+     * }
+     * </pre>
+     *
+     * In order to creation of a context's persisted JSON representation,
+     * implementations must override
+     * {@link #saveToJson(JsonValue, PersistenceConfig)}.
+     *
+     * @param savedContext
+     *            The JSON representation from which this context's attributes
+     *            should be parsed.
+     * @param config
+     *            The persistence configuration.
+     * @throws ResourceException
+     *             If the JSON representation could not be parsed.
+     * @see #saveToJson(JsonValue, PersistenceConfig)
+     * @see ServerContext#loadFromJson(JsonValue, PersistenceConfig)
+     */
+    protected Context(final JsonValue savedContext, final PersistenceConfig config)
+            throws ResourceException {
+        this.id = savedContext.get(ATTR_ID).required().asString();
+        final JsonValue savedParentContext = savedContext.get(ATTR_PARENT);
+        this.parent = savedParentContext.isNull() ? null : load0(savedParentContext, config);
+    }
+
+    /**
+     * Creates a new context having the provided ID, and parent.
      *
      * @param id
      *            The context ID.
-     * @return A new root context with the provided ID.
+     * @param parent
+     *            The parent context.
      */
-    public static Context newRootContext(final String id) {
-        return new Context("root", id, null);
+    protected Context(final String id, final Context parent) {
+        this.id = checkNotNull(id);
+        this.parent = parent;
     }
 
     /**
-     * Creates a new context using the provided JSON representation. The JSON
-     * representation of a context is typically generated using the method
-     * {@link #toJsonValue()}.
-     * <p>
-     * The returned context will share the same underlying {@code Map} as the
-     * provided JSON value, so subsequent changes to either object will be
-     * reflected in the other.
-     * <p>
-     * <b>NOTE:</b> if the provided JSON content is not a valid context then
-     * subsequent attempts to access context attributes may fail unpredictably,
-     * usually with a {@code ClassCastException}.
+     * Returns the first context in the chain whose type is a sub-type of the
+     * provided {@code Context} class. The method first checks this context to
+     * see if it has the required type, before proceeding to the parent context,
+     * and then continuing up the chain of parents until the root context is
+     * reached.
      *
-     * @param json
-     *            The JSON representation of the context to be created.
-     * @return A new context whose content is the provided JSON representation.
+     * @param <T>
+     *            The context type.
+     * @param clazz
+     *            The class of context to be returned.
+     * @return The first context in the chain whose type is a sub-type of the
+     *         provided {@code Context} class.
+     * @throws IllegalArgumentException
+     *             If no matching context was found in this context's parent
+     *             chain.
      */
-    public static Context valueOf(final JsonValue json) {
-        return new Context(json.asMap());
-    }
-
-    private final Map<String, Object> attributes;
-
-    private Context(final Map<String, Object> attributes) {
-        this.attributes = attributes;
-    }
-
-    private Context(final String type, final String id, final Context parent) {
-        this.attributes = new LinkedHashMap<String, Object>(3);
-
-        TYPE.set(this, type);
-        ID.set(this, id);
-        PARENT.set(this, parent);
+    public final <T extends Context> T asContext(final Class<T> clazz) {
+        final T context = asContext0(clazz);
+        if (context != null) {
+            return context;
+        } else {
+            throw new IllegalArgumentException("No context of type " + clazz.getName() + " found.");
+        }
     }
 
     /**
-     * Returns the {@link ContextAttribute#ID ID} associated with this context.
+     * Returns {@code true} if there is a context in the chain whose type is a
+     * sub-type of the provided {@code Context} class. The method first checks
+     * this context to see if it has the required type, before proceeding to the
+     * parent context, and then continuing up the chain of parents until the
+     * root context is reached.
      *
-     * @return The context ID.
+     * @param clazz
+     *            The class of context to be checked.
+     * @return {@code true} if there is a context in the chain whose type is a
+     *         sub-type of the provided {@code Context} class.
      */
-    public String getId() {
-        return ID.get(this);
+    public final boolean containsContext(final Class<? extends Context> clazz) {
+        return asContext0(clazz) != null;
     }
 
     /**
-     * Returns the {@link ContextAttribute#PARENT PARENT} of this context.
+     * Returns the unique ID identifying this context, usually a UUID.
+     *
+     * @return The unique ID identifying this context.
+     */
+    public final String getId() {
+        return id;
+    }
+
+    /**
+     * Returns the parent of this context.
      *
      * @return The parent of this context, or {@code null} if this context is a
      *         root context.
      */
-    public Context getParent() {
-        return PARENT.get(this);
-    }
-
-    /**
-     * Returns the {@link ContextAttribute#TYPE TYPE} of this context.
-     *
-     * @return The context type.
-     */
-    public String getType() {
-        return TYPE.get(this);
+    public final Context getParent() {
+        return parent;
     }
 
     /**
@@ -134,145 +216,67 @@ public final class Context {
      *
      * @return {@code true} if this context is a root context.
      */
-    public boolean isRootContext() {
+    public final boolean isRootContext() {
         return getParent() == null;
     }
 
     /**
-     * Creates a new context having the provided {@link ContextAttribute#TYPE
-     * TYPE}, an {@link ContextAttribute#ID ID} automatically generated using
-     * {@code UUID.randomUUID()}, and this context as its
-     * {@link ContextAttribute#PARENT PARENT}.
-     *
-     * @param type
-     *            The context type.
-     * @return A new sub-context with the provided type and an automatically
-     *         generated ID.
-     */
-    public Context newSubContext(final String type) {
-        return newSubContext(type, UUID.randomUUID().toString());
-    }
-
-    /**
-     * Creates a new context having the provided {@link ContextAttribute#TYPE
-     * TYPE} and {@link ContextAttribute#ID ID}, and this context as its
-     * {@link ContextAttribute#PARENT PARENT}.
-     *
-     * @param type
-     *            The context type.
-     * @param id
-     *            The context ID.
-     * @return A new sub-context with the provided type and ID.
-     */
-    public Context newSubContext(final String type, final String id) {
-        return new Context(type, id, this);
-    }
-
-    /**
-     * Returns a JSON value whose content is the set of attributes contained
-     * within this context.
+     * Creates a JSON representation of this context which is suitable for
+     * persistence to long term storage.
      * <p>
-     * The returned JSON value will share the same underlying {@code Map} as
-     * this context, so subsequent changes to either object will be reflected in
-     * the other.
-     * <p>
-     * The returned JSON value may be converted back into a context using the
-     * factory method {@link #valueOf(JsonValue)}.
+     * Sub-classes <b>MUST</b> override this method in order to support
+     * persistence. Implementations <b>MUST</b> take care to invoke the super
+     * class implementation before creating their own context attributes. Below
+     * is an example implementation for a security context which stores the user
+     * name and password of the authenticated user:
      *
-     * @return A JSON value whose content is the set of attributes contained
-     *         within this context.
+     * <pre>
+     * protected void saveToJson(JsonValue savedContext, PersistenceConfig config)
+     *         throws ResourceException {
+     *     // Invoke the super-class implementation first.
+     *     super.saveToJson(savedContext, config);
+     *
+     *     // Now create attributes for this context.
+     *     savedContext.put(&quot;username&quot;, username);
+     *     savedContext.put(&quot;password&quot;, password);
+     * }
+     * </pre>
+     *
+     * In order to support reloading of a context's persisted JSON
+     * representation, implementations must provide a constructor having the
+     * same declaration as {@link #Context(JsonValue, PersistenceConfig)}.
+     *
+     * @param savedContext
+     *            The JSON representation into which this context's attributes
+     *            should be placed.
+     * @param config
+     *            The persistence configuration.
+     * @throws ResourceException
+     *             If the JSON representation could not be created.
+     * @see #Context(JsonValue, PersistenceConfig)
+     * @see ServerContext#saveToJson(ServerContext, PersistenceConfig)
      */
-    public JsonValue toJsonValue() {
-        return new JsonValue(attributes);
+    protected void saveToJson(final JsonValue savedContext, final PersistenceConfig config)
+            throws ResourceException {
+        savedContext.put(ATTR_ID, id);
+        savedContext.put(ATTR_CLASS, getClass().getName());
+
+        // Persist the parent if there is one.
+        if (parent != null) {
+            final JsonValue savedParentContext = new JsonValue(new LinkedHashMap<String, Object>(4));
+            parent.saveToJson(savedParentContext, config);
+            savedContext.put(ATTR_PARENT, savedParentContext.asMap());
+        }
     }
 
-    /**
-     * Returns the {@code String} representation of this context. The string
-     * representation will be computed as the JSON representation of the
-     * attributes contained within this context.
-     *
-     * @return The {@code String} representation of this context.
-     */
-    @Override
-    public String toString() {
-        return new JsonValue(attributes).toString();
-    }
-
-    /**
-     * Queries this context for the provided attribute, searching the parents if
-     * requested, and optionally initializing the attribute if it was not found.
-     *
-     * @param <T>
-     *            The type of value contained in the context attribute.
-     * @param attribute
-     *            The attribute to be returned.
-     * @param checkParent
-     *            {@code true} if parent contexts should be searched.
-     * @param initialValueFactory
-     *            The factory which should be used for lazy initialization, or
-     *            {@code null} if the attribute should not be lazily
-     *            initialized.
-     * @return The attribute value, or {@code null} if it was not found.
-     */
-    <T> Object getAttribute(final ContextAttribute<T> attribute, final boolean checkParent,
-            final Factory<T> initialValueFactory) {
-        final String id = attribute.id();
-
-        // Fast-path: assume that the attribute is present and non-null in this context.
-        final Object value = attributes.get(id);
-        if (value != null) {
-            return value;
-        }
-
-        // Attribute may be present, but null.
-        if (attributes.containsKey(id)) {
-            return null;
-        }
-
-        // Search parents if requested.
-        if (checkParent) {
-            for (Context parent = getParent(); parent != null; parent = parent.getParent()) {
-                // Fast-path: assume that the attribute is not present.
-                if (parent.attributes.containsKey(id)) {
-                    return parent.attributes.get(id);
-                }
+    private final <T extends Context> T asContext0(final Class<T> clazz) {
+        for (Context context = this; context != null; context = context.getParent()) {
+            final Class<?> contextClass = context.getClass();
+            if (clazz.isAssignableFrom(contextClass)) {
+                return contextClass.asSubclass(clazz).cast(context);
             }
         }
-
-        // The attribute was not present in this context or in the parents
-        // (if searched), so initialize it if requested.
-        if (initialValueFactory != null) {
-            final Object newValue = initialValueFactory.newInstance();
-            attributes.put(id, newValue);
-            return newValue;
-        }
-
-        // Not present.
         return null;
     }
 
-    /**
-     * Removes an attribute from this context.
-     *
-     * @param attribute
-     *            The attribute to be removed.
-     * @return The removed attribute value or {@code null} if it was not found.
-     */
-    Object removeAttribute(final ContextAttribute<?> attribute) {
-        return attributes.remove(attribute.id());
-    }
-
-    /**
-     * Sets an attribute in this context.
-     *
-     * @param attribute
-     *            The attribute to be set.
-     * @param newValue
-     *            The new attribute value.
-     * @return The old attribute value or {@code null} if it did not exist
-     *         beforehand.
-     */
-    Object setAttribute(final ContextAttribute<?> attribute, final Object newValue) {
-        return attributes.put(attribute.id(), newValue);
-    }
 }

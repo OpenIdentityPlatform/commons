@@ -130,6 +130,7 @@ public interface CreateRequest extends Request {
      * @param name
      *            The name of the parent JSON resource beneath which the new
      *            resource should be created.
+     * @return This create request.
      * @throws UnsupportedOperationException
      *             If this create request does not permit changes to the
      *             resource name.
