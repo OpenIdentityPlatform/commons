@@ -102,6 +102,7 @@ a.buttonOrange {
 	line-height: 13px;
 	padding: 9px 10px;
 	text-align: center;
+	margin-left: 2px;
 }
 
 a.buttonOrange:hover {
@@ -119,6 +120,7 @@ a.buttonGrey {
     line-height: 13px;
     padding: 9px 10px;
     text-align: center;
+    margin-left: 2px;
 }
 
 a.buttonGrey:hover {
