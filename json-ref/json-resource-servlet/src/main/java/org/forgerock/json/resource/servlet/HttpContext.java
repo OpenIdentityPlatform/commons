@@ -16,6 +16,7 @@
 package org.forgerock.json.resource.servlet;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -25,131 +26,216 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.Context;
-import org.forgerock.json.resource.ContextAttribute;
+import org.forgerock.json.resource.exception.ResourceException;
+import org.forgerock.json.resource.provider.PersistenceConfig;
 import org.forgerock.util.Factory;
 import org.forgerock.util.LazyMap;
 
 /**
  * A {@link Context} containing information relating to the originating HTTP
- * Servlet request. An HTTP {@link Context} will be created for each REST
- * request having the {@link #CONTEXT_TYPE type} "http" and the
- * {@link ContextAttribute}s defined in this class.
+ * Servlet request.
+ * <p>
+ * Here is an example of the JSON representation of an HTTP context:
+ *
+ * <pre>
+ * {
+ *   "id"     : "56f0fb7e-3837-464d-b9ec-9d3b6af665c3",
+ *   "class"  : "org.forgerock.json.resource.servlet",
+ *   "parent" : {
+ *       ...
+ *   },
+ *   "method"     : "GET",
+ *   "path" : "/users/bjensen",
+ *   "headers" : {
+ *       ...
+ *   },
+ *   "parameters" : {
+ *       ...
+ *   }
+ * }
+ * </pre>
  */
-public final class HttpContext {
-    /**
-     * The {@link ContextAttribute#TYPE TYPE} of this context.
-     */
-    public static final String CONTEXT_TYPE = "http";
+public final class HttpContext extends Context {
+    // TODO: security parameters such as user name, etc?
+
+    // Persisted attribute names.
+    private static final String ATTR_HEADERS = "headers";
+    private static final String ATTR_METHOD = "method";
+    private static final String ATTR_PARAMETERS = "parameters";
+    private static final String ATTR_PATH = "path";
+
+    private final Map<String, List<String>> headers;
+    private final String method;
+    private final Map<String, List<String>> parameters;
+    private final String path;
 
     /**
-     * The reserved {@code Map<String, Object>} valued attribute
-     * {@code "headers"}, containing a map of the HTTP headers.
+     * Restore from JSON representation.
+     *
+     * @param savedContext
+     *            The JSON representation from which this context's attributes
+     *            should be parsed.
+     * @param config
+     *            The persistence configuration.
+     * @throws ResourceException
+     *             If the JSON representation could not be parsed.
      */
-    public static final ContextAttribute<Map<String, Object>> HEADERS =
-            new ContextAttribute<Map<String, Object>>("headers");
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    protected HttpContext(final JsonValue savedContext, final PersistenceConfig config)
+            throws ResourceException {
+        super(savedContext, config);
+        this.method = savedContext.get(ATTR_METHOD).required().asString();
+        this.path = savedContext.get(ATTR_PATH).required().asString();
+        this.headers = (Map) savedContext.get(ATTR_HEADERS).required().asMap();
+        this.parameters = (Map) savedContext.get(ATTR_PARAMETERS).required().asMap();
+    }
 
-    /**
-     * The reserved {@code String} valued attribute {@code "method"}, containing
-     * the effective HTTP method, taking into account presence of the
-     * {@code X-HTTP-Method-Override} header.
-     */
-    public static final ContextAttribute<String> METHOD = new ContextAttribute<String>("method");
-
-    /**
-     * The reserved {@code String} valued attribute {@code "path"}, containing
-     * the HTTP request path.
-     */
-    public static final ContextAttribute<String> PATH = new ContextAttribute<String>("path");
-
-    /**
-     * The reserved {@code Map<String, Object>} valued attribute {@code "query"}
-     * , containing a map of the HTTP request parameters.
-     */
-    public static final ContextAttribute<Map<String, Object>> QUERY =
-            new ContextAttribute<Map<String, Object>>("query");
-
-    /**
-     * The reserved {@code Map<String, Object>} valued attribute
-     * {@code "security"}, containing a map of security related properties.
-     */
-    public static final ContextAttribute<Map<String, Object>> SECURITY =
-            new ContextAttribute<Map<String, Object>>("security");
-
-    static Context newHttpContext(final Context parent, final HttpServletRequest req) {
-        final Context context = parent.newSubContext(CONTEXT_TYPE);
-
-        METHOD.set(context, HttpUtils.getMethod(req));
-        PATH.set(context, req.getRequestURL().toString());
-
-        HEADERS.set(context, new LazyMap<String, Object>(new Factory<Map<String, Object>>() {
-            @Override
-            public Map<String, Object> newInstance() {
-                final Map<String, Object> result = new LinkedHashMap<String, Object>();
-                final Enumeration<String> i = req.getHeaderNames();
-                while (i.hasMoreElements()) {
-                    final String name = i.nextElement();
-                    final Enumeration<String> j = req.getHeaders(name);
-                    if (!j.hasMoreElements()) {
-                        result.put(name, null);
-                    } else {
-                        final String s = j.nextElement();
-                        if (!j.hasMoreElements()) {
-                            result.put(name, s);
-                        } else {
+    HttpContext(final Context parent, final HttpServletRequest req) {
+        super(parent);
+        this.method = HttpUtils.getMethod(req);
+        this.path = req.getRequestURL().toString();
+        this.headers = Collections.unmodifiableMap(new LazyMap<String, List<String>>(
+                new Factory<Map<String, List<String>>>() {
+                    @Override
+                    public Map<String, List<String>> newInstance() {
+                        final Map<String, List<String>> result = new LinkedHashMap<String, List<String>>();
+                        final Enumeration<String> i = req.getHeaderNames();
+                        while (i.hasMoreElements()) {
+                            final String name = i.nextElement();
+                            final Enumeration<String> j = req.getHeaders(name);
                             final List<String> values = new LinkedList<String>();
-                            values.add(s);
                             while (j.hasMoreElements()) {
                                 values.add(j.nextElement());
                             }
                             result.put(name, values);
                         }
+                        return result;
                     }
-                }
-                return result;
-            }
-        }));
-
-        QUERY.set(context, new LazyMap<String, Object>(new Factory<Map<String, Object>>() {
-            @Override
-            public Map<String, Object> newInstance() {
-                final Map<String, Object> result = new LinkedHashMap<String, Object>();
-                final Set<Map.Entry<String, String[]>> parameters =
-                        req.getParameterMap().entrySet();
-                for (final Map.Entry<String, String[]> parameter : parameters) {
-                    final String name = parameter.getKey();
-                    final String[] values = parameter.getValue();
-                    switch (values.length) {
-                    case 0:
-                        result.put(name, null);
-                        break;
-                    case 1:
-                        result.put(name, values[0]);
-                        break;
-                    default:
-                        result.put(name, Arrays.asList(values));
-                        break;
+                }));
+        this.parameters = Collections.unmodifiableMap(new LazyMap<String, List<String>>(
+                new Factory<Map<String, List<String>>>() {
+                    @Override
+                    public Map<String, List<String>> newInstance() {
+                        final Map<String, List<String>> result = new LinkedHashMap<String, List<String>>();
+                        final Set<Map.Entry<String, String[]>> parameters = req.getParameterMap()
+                                .entrySet();
+                        for (final Map.Entry<String, String[]> parameter : parameters) {
+                            final String name = parameter.getKey();
+                            final String[] values = parameter.getValue();
+                            result.put(name, Arrays.asList(values));
+                        }
+                        return result;
                     }
-                }
-                return result;
-            }
-        }));
-
-        SECURITY.set(context, new LazyMap<String, Object>(new Factory<Map<String, Object>>() {
-            @Override
-            public Map<String, Object> newInstance() {
-                final Map<String, Object> result = new LinkedHashMap<String, Object>(1);
-                // FIXME: is this sufficient?
-                result.put("user", req.getRemoteUser());
-                return result;
-            }
-        }));
-
-        return context;
+                }));
     }
 
-    private HttpContext() {
-        // Prevent instantiation.
+    /**
+     * Returns an unmodifiable list containing the values of the named HTTP
+     * request header.
+     *
+     * @param name
+     *            The name of the HTTP request header.
+     * @return An unmodifiable list containing the values of the named HTTP
+     *         request header, which may be empty if the header is not present
+     *         in the request.
+     */
+    public List<String> getHeader(final String name) {
+        final List<String> header = headers.get(name);
+        return header != null ? header : Collections.<String> emptyList();
+    }
+
+    /**
+     * Returns the first value of the named HTTP request header.
+     *
+     * @param name
+     *            The name of the HTTP request header.
+     * @return The first value of the named HTTP request header, or {@code null}
+     *         if the header is not present in the request.
+     */
+    public String getHeaderAsString(final String name) {
+        final List<String> header = getHeader(name);
+        return header.isEmpty() ? null : header.get(0);
+    }
+
+    /**
+     * Returns an unmodifiable map of the HTTP request headers.
+     *
+     * @return An unmodifiable map of the HTTP request headers.
+     */
+    public Map<String, List<String>> getHeaders() {
+        return headers;
+    }
+
+    /**
+     * Returns the effective HTTP method, taking into account presence of the
+     * {@code X-HTTP-Method-Override} header.
+     *
+     * @return The effective HTTP method, taking into account presence of the
+     *         {@code X-HTTP-Method-Override} header.
+     */
+    public String getMethod() {
+        return method;
+    }
+
+    /**
+     * Returns an unmodifiable list containing the values of the named HTTP
+     * request parameter.
+     *
+     * @param name
+     *            The name of the HTTP request parameter.
+     * @return An unmodifiable list containing the values of the named HTTP
+     *         request parameter, which may be empty if the parameter is not
+     *         present in the request.
+     */
+    public List<String> getParameter(final String name) {
+        final List<String> parameter = parameters.get(name);
+        return parameter != null ? parameter : Collections.<String> emptyList();
+    }
+
+    /**
+     * Returns the first value of the named HTTP request parameter.
+     *
+     * @param name
+     *            The name of the HTTP request parameter.
+     * @return The first value of the named HTTP request parameter, or
+     *         {@code null} if the parameter is not present in the request.
+     */
+    public String getParameterAsString(final String name) {
+        final List<String> parameter = getParameter(name);
+        return parameter.isEmpty() ? null : parameter.get(0);
+    }
+
+    /**
+     * Returns an unmodifiable map of the HTTP request parameters.
+     *
+     * @return An unmodifiable map of the HTTP request parameters.
+     */
+    public Map<String, List<String>> getParameters() {
+        return parameters;
+    }
+
+    /**
+     * Returns the HTTP request path.
+     *
+     * @return The HTTP request path.
+     */
+    public String getPath() {
+        return path;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void saveToJson(final JsonValue savedContext, final PersistenceConfig config)
+            throws ResourceException {
+        super.saveToJson(savedContext, config);
+        savedContext.put(ATTR_METHOD, method);
+        savedContext.put(ATTR_PATH, path);
+        savedContext.put(ATTR_HEADERS, headers);
+        savedContext.put(ATTR_PARAMETERS, parameters);
     }
 
 }

@@ -18,7 +18,6 @@ package org.forgerock.json.resource.provider;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Resource;
@@ -42,59 +41,64 @@ public interface SingletonResourceProvider {
 
     /**
      * Performs the provided
-     * {@link RequestHandler#handleAction(Context, ActionRequest, ResultHandler)
+     * {@link RequestHandler#handleAction(ServerContext, ActionRequest, ResultHandler)
      * action} against the single resource instance.
-     * 
+     *
      * @param context
-     *            The request context.
+     *            The request server context.
      * @param request
      *            The action request.
      * @param handler
      *            The result handler to be notified on completion.
-     * @see RequestHandler#handleAction(Context, ActionRequest, ResultHandler)
+     * @see RequestHandler#handleAction(ServerContext, ActionRequest,
+     *      ResultHandler)
      */
-    void actionInstance(Context context, ActionRequest request, ResultHandler<JsonValue> handler);
+    void actionInstance(ServerContext context, ActionRequest request,
+            ResultHandler<JsonValue> handler);
 
     /**
-     * {@link RequestHandler#handlePatch(Context, PatchRequest, ResultHandler)
+     * {@link RequestHandler#handlePatch(ServerContext, PatchRequest, ResultHandler)
      * Patches} the single resource instance.
-     * 
+     *
      * @param context
-     *            The request context.
+     *            The request server context.
      * @param request
      *            The patch request.
      * @param handler
      *            The result handler to be notified on completion.
-     * @see RequestHandler#handlePatch(Context, PatchRequest, ResultHandler)
+     * @see RequestHandler#handlePatch(ServerContext, PatchRequest,
+     *      ResultHandler)
      */
-    void patchInstance(Context context, PatchRequest request, ResultHandler<Resource> handler);
+    void patchInstance(ServerContext context, PatchRequest request, ResultHandler<Resource> handler);
 
     /**
-     * {@link RequestHandler#handleRead(Context, ReadRequest, ResultHandler)
+     * {@link RequestHandler#handleRead(ServerContext, ReadRequest, ResultHandler)
      * Reads} the single resource instance.
-     * 
+     *
      * @param context
-     *            The request context.
+     *            The request server context.
      * @param request
      *            The read request.
      * @param handler
      *            The result handler to be notified on completion.
-     * @see RequestHandler#handleRead(Context, ReadRequest, ResultHandler)
+     * @see RequestHandler#handleRead(ServerContext, ReadRequest, ResultHandler)
      */
-    void readInstance(Context context, ReadRequest request, ResultHandler<Resource> handler);
+    void readInstance(ServerContext context, ReadRequest request, ResultHandler<Resource> handler);
 
     /**
-     * {@link RequestHandler#handleUpdate(Context, UpdateRequest, ResultHandler)
+     * {@link RequestHandler#handleUpdate(ServerContext, UpdateRequest, ResultHandler)
      * Updates} the single resource instance.
-     * 
+     *
      * @param context
-     *            The request context.
+     *            The request server context.
      * @param request
      *            The update request.
      * @param handler
      *            The result handler to be notified on completion.
-     * @see RequestHandler#handleUpdate(Context, UpdateRequest, ResultHandler)
+     * @see RequestHandler#handleUpdate(ServerContext, UpdateRequest,
+     *      ResultHandler)
      */
-    void updateInstance(Context context, UpdateRequest request, ResultHandler<Resource> handler);
+    void updateInstance(ServerContext context, UpdateRequest request,
+            ResultHandler<Resource> handler);
 
 }

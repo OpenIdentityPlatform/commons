@@ -16,15 +16,11 @@
 
 package org.forgerock.json.resource.provider;
 
-import java.util.Collections;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.Context;
-import org.forgerock.json.resource.ContextAttribute;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.PatchRequest;
@@ -42,53 +38,43 @@ import org.forgerock.json.resource.provider.Route.RouteMatcher;
 /**
  * A request handler which routes requests using URI template matching against
  * the request's resource name. Examples of valid URI templates include:
- * 
+ *
  * <pre>
  * /users
  * /users/{userId}
  * /users/{userId}/devices
  * /users/{userId}/devices/{deviceId}
  * </pre>
- * 
+ *
  * Routes may be added and removed from a router as follows:
- * 
+ *
  * <pre>
  * RequestHandler users = ...;
  * Router router = new Router();
  * Route r1 = router.addRoute(EQUALS, &quot;/users&quot;, users);
  * Route r2 = router.addRoute(EQUALS, &quot;/users/{userId}&quot;, users);
- * 
+ *
  * // Deregister a route.
  * router.removeRoute(r1, r2);
  * </pre>
- * 
+ *
  * A request handler receiving a routed request may access the associated
- * route's URI template variables via the {@link Router#URI_TEMPLATE_VARIABLES}
- * context attribute. For example, a request handler processing requests for the
- * route /user/{userId} may obtain the value of {@code userId} as follows:
- * 
+ * route's URI template variables via
+ * {@link RouterContext#getUriTemplateVariables()}. For example, a request
+ * handler processing requests for the route /user/{userId} may obtain the value
+ * of {@code userId} as follows:
+ *
  * <pre>
- * String userId = URI_TEMPLATE_VARIABLES.get(context).get(&quot;userId&quot;);
+ * String userId = context.asContext(RouterContext.class).getUriTemplateVariables().get(&quot;userId&quot;);
  * </pre>
  * <p>
  * <b>NOTE:</b> for simplicity this implementation only supports a small sub-set
  * of the functionality described in RFC 6570.
- * 
+ *
  * @see <a href="http://tools.ietf.org/html/rfc6570">RFC 6570 - URI Template
  *      </a>
  */
 public final class Router implements RequestHandler {
-    /**
-     * The context attribute {@code uri-template-variables} whose value is a
-     * {@code Map} containing the parsed URI template variables, keyed on the
-     * URI template variable name. This context attribute will be added to the
-     * context once a request has been routed.
-     */
-    // @formatter:off
-    public static final ContextAttribute<Map<String, String>> URI_TEMPLATE_VARIABLES =
-            new ContextAttribute<Map<String, String>>("uri-template-variables",
-                    Collections.<String, String> emptyMap());
-    // @formatter:on
 
     private volatile RequestHandler defaultRoute = null;
     private final Set<Route> routes = new CopyOnWriteArraySet<Route>();
@@ -104,7 +90,7 @@ public final class Router implements RequestHandler {
      * Creates a new router containing the same routes and default route as the
      * provided router. Changes to the returned router's routing table will not
      * impact the provided router.
-     * 
+     *
      * @param router
      *            The router to be copied.
      */
@@ -116,7 +102,7 @@ public final class Router implements RequestHandler {
     /**
      * Adds all of the routes defined in the provided router to this router. New
      * routes may be added while this router is processing requests.
-     * 
+     *
      * @param router
      *            The router whose routes are to be copied into this router.
      * @return This router.
@@ -137,18 +123,18 @@ public final class Router implements RequestHandler {
      * resource instances. In addition, the URI template must not contain a
      * {@code id} template variable since this will be implicitly added to the
      * template in order for matching against resource instances. For example:
-     * 
+     *
      * <pre>
      * CollectionResourceProvider users = ...;
      * Router router = new Router();
-     * 
+     *
      * // This is valid usage: the template matches the resource collection.
      * router.addRoute(EQUALS, "/users", users);
-     * 
+     *
      * // This is invalid usage: the template matches resource instances.
      * router.addRoute(EQUALS, "/users/{userId}", users);
      * </pre>
-     * 
+     *
      * @param mode
      *            Indicates how the URI template should be matched against
      *            resource names.
@@ -168,7 +154,7 @@ public final class Router implements RequestHandler {
     /**
      * Adds a new route to this router for the provided request handler. New
      * routes may be added while this router is processing requests.
-     * 
+     *
      * @param mode
      *            Indicates how the URI template should be matched against
      *            resource names.
@@ -188,7 +174,7 @@ public final class Router implements RequestHandler {
      * Adds a new route to this router for the provided singleton resource
      * provider. New routes may be added while this router is processing
      * requests.
-     * 
+     *
      * @param mode
      *            Indicates how the URI template should be matched against
      *            resource names.
@@ -208,7 +194,7 @@ public final class Router implements RequestHandler {
     /**
      * Returns the request handler to be used as the default route for requests
      * which do not match any of the other defined routes.
-     * 
+     *
      * @return The request handler to be used as the default route.
      */
     public RequestHandler getDefaultRoute() {
@@ -216,70 +202,84 @@ public final class Router implements RequestHandler {
     }
 
     @Override
-    public void handleAction(final Context context, final ActionRequest request,
+    public void handleAction(final ServerContext context, final ActionRequest request,
             final ResultHandler<JsonValue> handler) {
         try {
-            getBestRoute(context, request).handleAction(context, request, handler);
+            final RouteMatcher bestMatch = getBestRoute(context, request);
+            bestMatch.getRequestHandler().handleAction(bestMatch.getServerContext(), request,
+                    handler);
         } catch (final ResourceException e) {
             handler.handleError(e);
         }
     }
 
     @Override
-    public void handleCreate(final Context context, final CreateRequest request,
+    public void handleCreate(final ServerContext context, final CreateRequest request,
             final ResultHandler<Resource> handler) {
         try {
-            getBestRoute(context, request).handleCreate(context, request, handler);
+            final RouteMatcher bestMatch = getBestRoute(context, request);
+            bestMatch.getRequestHandler().handleCreate(bestMatch.getServerContext(), request,
+                    handler);
         } catch (final ResourceException e) {
             handler.handleError(e);
         }
     }
 
     @Override
-    public void handleDelete(final Context context, final DeleteRequest request,
+    public void handleDelete(final ServerContext context, final DeleteRequest request,
             final ResultHandler<Resource> handler) {
         try {
-            getBestRoute(context, request).handleDelete(context, request, handler);
+            final RouteMatcher bestMatch = getBestRoute(context, request);
+            bestMatch.getRequestHandler().handleDelete(bestMatch.getServerContext(), request,
+                    handler);
         } catch (final ResourceException e) {
             handler.handleError(e);
         }
     }
 
     @Override
-    public void handlePatch(final Context context, final PatchRequest request,
+    public void handlePatch(final ServerContext context, final PatchRequest request,
             final ResultHandler<Resource> handler) {
         try {
-            getBestRoute(context, request).handlePatch(context, request, handler);
+            final RouteMatcher bestMatch = getBestRoute(context, request);
+            bestMatch.getRequestHandler().handlePatch(bestMatch.getServerContext(), request,
+                    handler);
         } catch (final ResourceException e) {
             handler.handleError(e);
         }
     }
 
     @Override
-    public void handleQuery(final Context context, final QueryRequest request,
+    public void handleQuery(final ServerContext context, final QueryRequest request,
             final QueryResultHandler handler) {
         try {
-            getBestRoute(context, request).handleQuery(context, request, handler);
+            final RouteMatcher bestMatch = getBestRoute(context, request);
+            bestMatch.getRequestHandler().handleQuery(bestMatch.getServerContext(), request,
+                    handler);
         } catch (final ResourceException e) {
             handler.handleError(e);
         }
     }
 
     @Override
-    public void handleRead(final Context context, final ReadRequest request,
+    public void handleRead(final ServerContext context, final ReadRequest request,
             final ResultHandler<Resource> handler) {
         try {
-            getBestRoute(context, request).handleRead(context, request, handler);
+            final RouteMatcher bestMatch = getBestRoute(context, request);
+            bestMatch.getRequestHandler()
+                    .handleRead(bestMatch.getServerContext(), request, handler);
         } catch (final ResourceException e) {
             handler.handleError(e);
         }
     }
 
     @Override
-    public void handleUpdate(final Context context, final UpdateRequest request,
+    public void handleUpdate(final ServerContext context, final UpdateRequest request,
             final ResultHandler<Resource> handler) {
         try {
-            getBestRoute(context, request).handleUpdate(context, request, handler);
+            final RouteMatcher bestMatch = getBestRoute(context, request);
+            bestMatch.getRequestHandler().handleUpdate(bestMatch.getServerContext(), request,
+                    handler);
         } catch (final ResourceException e) {
             handler.handleError(e);
         }
@@ -288,7 +288,7 @@ public final class Router implements RequestHandler {
     /**
      * Removes all of the routes from this router. Routes may be removed while
      * this router is processing requests.
-     * 
+     *
      * @return This router.
      */
     public Router removeAllRoutes() {
@@ -299,7 +299,7 @@ public final class Router implements RequestHandler {
     /**
      * Removes one or more routes from this router. Routes may be removed while
      * this router is processing requests.
-     * 
+     *
      * @param routes
      *            The routes to be removed.
      * @return {@code true} if at least one of the routes was found and removed.
@@ -320,7 +320,7 @@ public final class Router implements RequestHandler {
     /**
      * Sets the request handler to be used as the default route for requests
      * which do not match any of the other defined routes.
-     * 
+     *
      * @param handler
      *            The request handler to be used as the default route.
      * @return This router.
@@ -335,22 +335,21 @@ public final class Router implements RequestHandler {
         return route;
     }
 
-    private RequestHandler getBestRoute(final Context context, final Request request)
+    private RouteMatcher getBestRoute(final ServerContext context, final Request request)
             throws ResourceException {
         RouteMatcher bestMatcher = null;
         for (final Route route : routes) {
-            final RouteMatcher matcher = route.getRouteMatcher(request);
+            final RouteMatcher matcher = route.getRouteMatcher(context, request);
             if (matcher != null && matcher.isBetterMatchThan(bestMatcher)) {
                 bestMatcher = matcher;
             }
         }
         if (bestMatcher != null) {
-            URI_TEMPLATE_VARIABLES.set(context, bestMatcher.variables());
-            return bestMatcher.getRoute().getRequestHandler();
+            return bestMatcher;
         }
         final RequestHandler handler = defaultRoute;
         if (handler != null) {
-            return handler;
+            return new RouteMatcher(context, handler);
         }
         // TODO: i18n
         throw new NotFoundException(String.format("Resource '%s' not found", request
