@@ -113,7 +113,7 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                 for(linkName in obj.configuration.links) {
                     link = obj.configuration.links[linkName];
                     
-                    if(link.role && conf.loggedUser && conf.loggedUser.roles.indexOf(link.role) !== -1) {
+                    if(link.role && conf.loggedUser && _.contains(conf.loggedUser.roles.split(","), link.role)) {
                         this.addLinks(linkName);
                         return;
                     } else if(!link.role) {
