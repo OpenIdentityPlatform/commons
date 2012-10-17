@@ -17,6 +17,7 @@ package org.forgerock.json.resource;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.provider.RequestHandler;
+import org.forgerock.json.resource.provider.ServerContext;
 
 /**
  * This class contains methods for creating and manipulating connection
@@ -26,7 +27,6 @@ public final class Connections {
 
     // Internal connection implementation.
     private static final class InternalConnection extends AbstractAsynchronousConnection {
-        private volatile boolean isClosed = false;
         private final RequestHandler requestHandler;
 
         private InternalConnection(final RequestHandler handler) {
@@ -36,85 +36,88 @@ public final class Connections {
         @Override
         public FutureResult<JsonValue> actionAsync(final Context context,
                 final ActionRequest request, final ResultHandler<JsonValue> handler) {
-            checkConnectionState();
-            final FutureResultHandler<JsonValue> future =
-                    new FutureResultHandler<JsonValue>(handler);
-            requestHandler.handleAction(context, request, future);
+            final FutureResultHandler<JsonValue> future = new FutureResultHandler<JsonValue>(
+                    handler);
+            requestHandler.handleAction(getServerContext(context), request, future);
             return future;
         }
 
         @Override
         public void close() {
-            isClosed = true;
+            // Do nothing.
         }
 
         @Override
         public FutureResult<Resource> createAsync(final Context context,
                 final CreateRequest request, final ResultHandler<Resource> handler) {
-            checkConnectionState();
             final FutureResultHandler<Resource> future = new FutureResultHandler<Resource>(handler);
-            requestHandler.handleCreate(context, request, future);
+            requestHandler.handleCreate(getServerContext(context), request, future);
             return future;
         }
 
         @Override
         public FutureResult<Resource> deleteAsync(final Context context,
                 final DeleteRequest request, final ResultHandler<Resource> handler) {
-            checkConnectionState();
             final FutureResultHandler<Resource> future = new FutureResultHandler<Resource>(handler);
-            requestHandler.handleDelete(context, request, future);
+            requestHandler.handleDelete(getServerContext(context), request, future);
             return future;
         }
 
         @Override
         public boolean isClosed() {
-            return isClosed;
+            // Always open.
+            return false;
         }
 
         @Override
         public boolean isValid() {
-            return !isClosed;
+            // Always valid.
+            return true;
         }
 
         @Override
         public FutureResult<Resource> patchAsync(final Context context, final PatchRequest request,
                 final ResultHandler<Resource> handler) {
-            checkConnectionState();
             final FutureResultHandler<Resource> future = new FutureResultHandler<Resource>(handler);
-            requestHandler.handlePatch(context, request, future);
+            requestHandler.handlePatch(getServerContext(context), request, future);
             return future;
         }
 
         @Override
         public FutureResult<QueryResult> queryAsync(final Context context,
                 final QueryRequest request, final QueryResultHandler handler) {
-            checkConnectionState();
             final FutureQueryResultHandler future = new FutureQueryResultHandler(handler);
-            requestHandler.handleQuery(context, request, future);
+            requestHandler.handleQuery(getServerContext(context), request, future);
             return future;
         }
 
         @Override
         public FutureResult<Resource> readAsync(final Context context, final ReadRequest request,
                 final ResultHandler<Resource> handler) {
-            checkConnectionState();
             final FutureResultHandler<Resource> future = new FutureResultHandler<Resource>(handler);
-            requestHandler.handleRead(context, request, future);
+            requestHandler.handleRead(getServerContext(context), request, future);
             return future;
         }
 
         @Override
         public FutureResult<Resource> updateAsync(final Context context,
                 final UpdateRequest request, final ResultHandler<Resource> handler) {
-            checkConnectionState();
             final FutureResultHandler<Resource> future = new FutureResultHandler<Resource>(handler);
-            requestHandler.handleUpdate(context, request, future);
+            requestHandler.handleUpdate(getServerContext(context), request, future);
             return future;
         }
 
-        private void checkConnectionState() {
-            if (isClosed()) {
-                throw new IllegalStateException("Connection already closed");
+        private ServerContext getServerContext(final Context context) {
+            if (context instanceof ServerContext) {
+                return (ServerContext) context;
+            } else {
+                final Connection connection;
+                if (context.containsContext(ServerContext.class)) {
+                    connection = context.asContext(ServerContext.class).getConnection();
+                } else {
+                    connection = this;
+                }
+                return new ServerContext(context, connection);
             }
         }
 
@@ -136,8 +139,8 @@ public final class Connections {
         @Override
         public FutureResult<Connection> getConnectionAsync(final ResultHandler<Connection> handler) {
             final Connection connection = getConnection();
-            final FutureResult<Connection> future =
-                    new CompletedFutureResult<Connection>(connection);
+            final FutureResult<Connection> future = new CompletedFutureResult<Connection>(
+                    connection);
             if (handler != null) {
                 handler.handleResult(connection);
             }

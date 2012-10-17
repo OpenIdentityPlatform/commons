@@ -20,7 +20,6 @@ import static org.forgerock.json.resource.provider.RoutingMode.EQUALS;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.PatchRequest;
@@ -34,7 +33,8 @@ import org.forgerock.json.resource.exception.BadRequestException;
 import org.forgerock.json.resource.exception.ResourceException;
 
 /**
- *
+ * This class contains common utility methods for creating and manipulating
+ * request handlers and providers.
  */
 public final class RequestHandlers {
 
@@ -46,19 +46,19 @@ public final class RequestHandlers {
         }
 
         @Override
-        public void handleAction(final Context context, final ActionRequest request,
+        public void handleAction(final ServerContext context, final ActionRequest request,
                 final ResultHandler<JsonValue> handler) {
             provider.actionCollection(context, request, handler);
         }
 
         @Override
-        public void handleCreate(final Context context, final CreateRequest request,
+        public void handleCreate(final ServerContext context, final CreateRequest request,
                 final ResultHandler<Resource> handler) {
             provider.createInstance(context, request, handler);
         }
 
         @Override
-        public void handleDelete(final Context context, final DeleteRequest request,
+        public void handleDelete(final ServerContext context, final DeleteRequest request,
                 final ResultHandler<Resource> handler) {
             // TODO: i18n
             handler.handleError(newBadRequestException(
@@ -66,7 +66,7 @@ public final class RequestHandlers {
         }
 
         @Override
-        public void handlePatch(final Context context, final PatchRequest request,
+        public void handlePatch(final ServerContext context, final PatchRequest request,
                 final ResultHandler<Resource> handler) {
             // TODO: i18n
             handler.handleError(newBadRequestException(
@@ -74,13 +74,13 @@ public final class RequestHandlers {
         }
 
         @Override
-        public void handleQuery(final Context context, final QueryRequest request,
+        public void handleQuery(final ServerContext context, final QueryRequest request,
                 final QueryResultHandler handler) {
             provider.queryCollection(context, request, handler);
         }
 
         @Override
-        public void handleRead(final Context context, final ReadRequest request,
+        public void handleRead(final ServerContext context, final ReadRequest request,
                 final ResultHandler<Resource> handler) {
             // TODO: i18n
             handler.handleError(newBadRequestException("The resource collection %s cannot be read",
@@ -88,7 +88,7 @@ public final class RequestHandlers {
         }
 
         @Override
-        public void handleUpdate(final Context context, final UpdateRequest request,
+        public void handleUpdate(final ServerContext context, final UpdateRequest request,
                 final ResultHandler<Resource> handler) {
             // TODO: i18n
             handler.handleError(newBadRequestException(
@@ -104,13 +104,13 @@ public final class RequestHandlers {
         }
 
         @Override
-        public void handleAction(final Context context, final ActionRequest request,
+        public void handleAction(final ServerContext context, final ActionRequest request,
                 final ResultHandler<JsonValue> handler) {
             provider.actionInstance(context, id(context), request, handler);
         }
 
         @Override
-        public void handleCreate(final Context context, final CreateRequest request,
+        public void handleCreate(final ServerContext context, final CreateRequest request,
                 final ResultHandler<Resource> handler) {
             // TODO: i18n
             handler.handleError(newBadRequestException(
@@ -118,19 +118,19 @@ public final class RequestHandlers {
         }
 
         @Override
-        public void handleDelete(final Context context, final DeleteRequest request,
+        public void handleDelete(final ServerContext context, final DeleteRequest request,
                 final ResultHandler<Resource> handler) {
             provider.deleteInstance(context, id(context), request, handler);
         }
 
         @Override
-        public void handlePatch(final Context context, final PatchRequest request,
+        public void handlePatch(final ServerContext context, final PatchRequest request,
                 final ResultHandler<Resource> handler) {
             provider.patchInstance(context, id(context), request, handler);
         }
 
         @Override
-        public void handleQuery(final Context context, final QueryRequest request,
+        public void handleQuery(final ServerContext context, final QueryRequest request,
                 final QueryResultHandler handler) {
             // TODO: i18n
             handler.handleError(newBadRequestException(
@@ -138,19 +138,19 @@ public final class RequestHandlers {
         }
 
         @Override
-        public void handleRead(final Context context, final ReadRequest request,
+        public void handleRead(final ServerContext context, final ReadRequest request,
                 final ResultHandler<Resource> handler) {
             provider.readInstance(context, id(context), request, handler);
         }
 
         @Override
-        public void handleUpdate(final Context context, final UpdateRequest request,
+        public void handleUpdate(final ServerContext context, final UpdateRequest request,
                 final ResultHandler<Resource> handler) {
             provider.updateInstance(context, id(context), request, handler);
         }
 
-        private String id(final Context context) {
-            return Router.URI_TEMPLATE_VARIABLES.get(context).get("id");
+        private String id(final ServerContext context) {
+            return context.asContext(RouterContext.class).getUriTemplateVariables().get("id");
         }
     }
 
@@ -162,13 +162,13 @@ public final class RequestHandlers {
         }
 
         @Override
-        public void handleAction(final Context context, final ActionRequest request,
+        public void handleAction(final ServerContext context, final ActionRequest request,
                 final ResultHandler<JsonValue> handler) {
             provider.actionInstance(context, request, handler);
         }
 
         @Override
-        public void handleCreate(final Context context, final CreateRequest request,
+        public void handleCreate(final ServerContext context, final CreateRequest request,
                 final ResultHandler<Resource> handler) {
             // TODO: i18n
             handler.handleError(newBadRequestException(
@@ -176,7 +176,7 @@ public final class RequestHandlers {
         }
 
         @Override
-        public void handleDelete(final Context context, final DeleteRequest request,
+        public void handleDelete(final ServerContext context, final DeleteRequest request,
                 final ResultHandler<Resource> handler) {
             // TODO: i18n
             handler.handleError(newBadRequestException(
@@ -184,13 +184,13 @@ public final class RequestHandlers {
         }
 
         @Override
-        public void handlePatch(final Context context, final PatchRequest request,
+        public void handlePatch(final ServerContext context, final PatchRequest request,
                 final ResultHandler<Resource> handler) {
             provider.patchInstance(context, request, handler);
         }
 
         @Override
-        public void handleQuery(final Context context, final QueryRequest request,
+        public void handleQuery(final ServerContext context, final QueryRequest request,
                 final QueryResultHandler handler) {
             // TODO: i18n
             handler.handleError(newBadRequestException(
@@ -198,13 +198,13 @@ public final class RequestHandlers {
         }
 
         @Override
-        public void handleRead(final Context context, final ReadRequest request,
+        public void handleRead(final ServerContext context, final ReadRequest request,
                 final ResultHandler<Resource> handler) {
             provider.readInstance(context, request, handler);
         }
 
         @Override
-        public void handleUpdate(final Context context, final UpdateRequest request,
+        public void handleUpdate(final ServerContext context, final UpdateRequest request,
                 final ResultHandler<Resource> handler) {
             provider.updateInstance(context, request, handler);
         }
@@ -220,17 +220,17 @@ public final class RequestHandlers {
      * resource instances. In addition, the URI template must not contain a
      * {@code id} template variable since this will be implicitly added to the
      * template in order for matching against resource instances. For example:
-     * 
+     *
      * <pre>
      * CollectionResourceProvider users = ...;
-     * 
+     *
      * // This is valid usage: the template matches the resource collection.
      * RequestHandler handler = newCollection(EQUALS, "/users", users);
-     * 
+     *
      * // This is invalid usage: the template matches resource instances.
      * RequestHandler handler = newCollection(EQUALS, "/users/{userId}", users);
      * </pre>
-     * 
+     *
      * @param mode
      *            Indicates how the URI template should be matched against
      *            resource instance names.
@@ -258,7 +258,7 @@ public final class RequestHandlers {
      * provided singleton resource provider. Incoming requests which are not
      * appropriate for a singleton resource (e.g. query) will result in a bad
      * request error being returned to the client.
-     * 
+     *
      * @param provider
      *            The singleton resource provider.
      * @return A new request handler which will forward requests on to the

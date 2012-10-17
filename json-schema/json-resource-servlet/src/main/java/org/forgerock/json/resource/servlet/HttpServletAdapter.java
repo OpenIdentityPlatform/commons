@@ -15,7 +15,6 @@
  */
 package org.forgerock.json.resource.servlet;
 
-import static org.forgerock.json.resource.servlet.HttpContext.newHttpContext;
 import static org.forgerock.json.resource.servlet.HttpUtils.CONTENT_TYPE;
 import static org.forgerock.json.resource.servlet.HttpUtils.ETAG_ANY;
 import static org.forgerock.json.resource.servlet.HttpUtils.HEADER_IF_MATCH;
@@ -35,13 +34,13 @@ import static org.forgerock.json.resource.servlet.HttpUtils.asSingleValue;
 import static org.forgerock.json.resource.servlet.HttpUtils.fail;
 import static org.forgerock.json.resource.servlet.HttpUtils.getMethod;
 import static org.forgerock.json.resource.servlet.HttpUtils.isDebugRequested;
-import static org.forgerock.json.resource.servlet.RestApiInfoContext.newRestApiInfoContext;
 import static org.forgerock.json.resource.servlet.ServletConfigurator.getServletConfigurator;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Map;
+import java.util.ResourceBundle;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -50,6 +49,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ApiInfoContext;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Context;
@@ -60,6 +60,7 @@ import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.Requests;
+import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.SortKey;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.json.resource.exception.BadRequestException;
@@ -102,6 +103,15 @@ import org.forgerock.json.resource.exception.ResourceException;
  * @see HttpServlet
  */
 public final class HttpServletAdapter {
+    private static final String THIS_API_URI;
+    private static final String THIS_API_VERSION;
+
+    static {
+        final ResourceBundle bundle = ResourceBundle.getBundle(HttpServletAdapter.class.getName());
+        THIS_API_URI = bundle.getString("rest-api-uri");
+        THIS_API_VERSION = bundle.getString("rest-api-version");
+    }
+
     private final RequestDispatcher dispatcher;
     private final ObjectMapper jsonMapper = new ObjectMapper();
     private final Context parentContext;
@@ -142,7 +152,7 @@ public final class HttpServletAdapter {
     public HttpServletAdapter(final ServletContext servletContext, final ConnectionFactory factory,
             final Context parentContext) throws ServletException {
         this.servletContext = servletContext;
-        this.parentContext = parentContext != null ? parentContext : Context.newRootContext();
+        this.parentContext = parentContext != null ? parentContext : new RootContext();
         this.dispatcher = getServletConfigurator(servletContext).getRequestDispatcher(factory,
                 jsonMapper.getJsonFactory());
     }
@@ -370,8 +380,8 @@ public final class HttpServletAdapter {
             if (ETAG_ANY.equals(rev)) {
                 // This is a create with a user provided resource ID: split the
                 // path into the parent resource name and resource ID.
-                String resourceName = getResourceName(req);
-                int i = resourceName.lastIndexOf('/');
+                final String resourceName = getResourceName(req);
+                final int i = resourceName.lastIndexOf('/');
                 final CreateRequest request;
                 if (i < 0) {
                     // The Servlet specifically states that the path info
@@ -383,7 +393,7 @@ public final class HttpServletAdapter {
                 } else {
                     request = Requests.newCreateRequest(resourceName.substring(0, i), content);
                 }
-                String newResourceId = resourceName.substring(i + 1);
+                final String newResourceId = resourceName.substring(i + 1);
                 if (newResourceId.isEmpty()) {
                     // FIXME: i18n.
                     throw new BadRequestException("No new resource ID in HTTP PUT request");
@@ -422,12 +432,6 @@ public final class HttpServletAdapter {
         } catch (final Exception e) {
             fail(resp, e);
         }
-    }
-
-    private String getResourceName(final HttpServletRequest req) throws ResourceException {
-        // Treat null path info as root resource.
-        String resourceName = req.getPathInfo();
-        return resourceName == null ? "/" : resourceName;
     }
 
     private void dumpRequest(final HttpServletRequest req) {
@@ -505,13 +509,15 @@ public final class HttpServletAdapter {
         return result;
     }
 
-    //    private String getResourceId(final JsonValue content) {
-    //        final JsonValue tmp = content.isMap() ? content.get("_id") : null;
-    //        return (tmp != null && tmp.isString()) ? tmp.asString() : null;
-    //    }
+    private String getResourceName(final HttpServletRequest req) throws ResourceException {
+        // Treat null path info as root resource.
+        final String resourceName = req.getPathInfo();
+        return resourceName == null ? "/" : resourceName;
+    }
 
     private Context newRequestContext(final HttpServletRequest req) {
-        return newRestApiInfoContext(newHttpContext(parentContext, req));
+        return new ApiInfoContext(new HttpContext(parentContext, req), THIS_API_URI,
+                THIS_API_VERSION);
     }
 
     private boolean parseCommonParameter(final String name, final String[] values,

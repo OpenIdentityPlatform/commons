@@ -16,7 +16,6 @@
 
 package org.forgerock.json.resource.servlet;
 
-import static org.forgerock.json.resource.Context.newRootContext;
 import static org.forgerock.json.resource.provider.RoutingMode.EQUALS;
 
 import java.util.Arrays;
@@ -29,6 +28,7 @@ import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Connections;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.Requests;
+import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.exception.ResourceException;
 import org.forgerock.json.resource.provider.RequestHandler;
 import org.forgerock.json.resource.provider.Router;
@@ -97,7 +97,7 @@ public class Example {
 
         for (final JsonValue user : Arrays.asList(user1, user2)) {
             final CreateRequest request = Requests.newCreateRequest("/users", user);
-            connection.create(newRootContext(), request);
+            connection.create(new RootContext(), request);
         }
 
         final JsonValue group1 = new JsonValue(new LinkedHashMap<String, Object>());
@@ -110,7 +110,7 @@ public class Example {
 
         for (final JsonValue user : Arrays.asList(group1, group2)) {
             final CreateRequest request = Requests.newCreateRequest("/groups", user);
-            connection.create(newRootContext(), request);
+            connection.create(new RootContext(), request);
         }
 
         return router;
