@@ -23,7 +23,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.PatchRequest;
@@ -41,6 +40,7 @@ import org.forgerock.json.resource.exception.NotFoundException;
 import org.forgerock.json.resource.exception.NotSupportedException;
 import org.forgerock.json.resource.exception.ResourceException;
 import org.forgerock.json.resource.provider.CollectionResourceProvider;
+import org.forgerock.json.resource.provider.ServerContext;
 
 /**
  * A simple {@code Map} based collection resource provider.
@@ -69,7 +69,7 @@ public final class MapBackend implements CollectionResourceProvider {
      * {@inheritDoc}
      */
     @Override
-    public void actionCollection(final Context context, final ActionRequest request,
+    public void actionCollection(final ServerContext context, final ActionRequest request,
             final ResultHandler<JsonValue> handler) {
         try {
             if (request.getActionId().equals("clear")) {
@@ -94,8 +94,8 @@ public final class MapBackend implements CollectionResourceProvider {
      * {@inheritDoc}
      */
     @Override
-    public void actionInstance(final Context context, final String id, final ActionRequest request,
-            final ResultHandler<JsonValue> handler) {
+    public void actionInstance(final ServerContext context, final String id,
+            final ActionRequest request, final ResultHandler<JsonValue> handler) {
         final ResourceException e = new NotSupportedException(
                 "Actions are not supported for resource instances");
         handler.handleError(e);
@@ -105,7 +105,7 @@ public final class MapBackend implements CollectionResourceProvider {
      * {@inheritDoc}
      */
     @Override
-    public void createInstance(final Context context, final CreateRequest request,
+    public void createInstance(final ServerContext context, final CreateRequest request,
             final ResultHandler<Resource> handler) {
         final JsonValue value = request.getContent();
         final String id = request.getNewResourceId();
@@ -146,8 +146,8 @@ public final class MapBackend implements CollectionResourceProvider {
      * {@inheritDoc}
      */
     @Override
-    public void deleteInstance(final Context context, final String id, final DeleteRequest request,
-            final ResultHandler<Resource> handler) {
+    public void deleteInstance(final ServerContext context, final String id,
+            final DeleteRequest request, final ResultHandler<Resource> handler) {
         final String rev = request.getRevision();
         try {
             final Resource resource;
@@ -174,8 +174,8 @@ public final class MapBackend implements CollectionResourceProvider {
      * {@inheritDoc}
      */
     @Override
-    public void patchInstance(final Context context, final String id, final PatchRequest request,
-            final ResultHandler<Resource> handler) {
+    public void patchInstance(final ServerContext context, final String id,
+            final PatchRequest request, final ResultHandler<Resource> handler) {
         final ResourceException e = new NotSupportedException("Patch operations are not supported");
         handler.handleError(e);
     }
@@ -184,7 +184,7 @@ public final class MapBackend implements CollectionResourceProvider {
      * {@inheritDoc}
      */
     @Override
-    public void queryCollection(final Context context, final QueryRequest request,
+    public void queryCollection(final ServerContext context, final QueryRequest request,
             final QueryResultHandler handler) {
         for (final Resource resource : resources.values()) {
             handler.handleResource(resource);
@@ -196,8 +196,8 @@ public final class MapBackend implements CollectionResourceProvider {
      * {@inheritDoc}
      */
     @Override
-    public void readInstance(final Context context, final String id, final ReadRequest request,
-            final ResultHandler<Resource> handler) {
+    public void readInstance(final ServerContext context, final String id,
+            final ReadRequest request, final ResultHandler<Resource> handler) {
         try {
             final Resource resource = resources.get(id);
             if (resource == null) {
@@ -214,8 +214,8 @@ public final class MapBackend implements CollectionResourceProvider {
      * {@inheritDoc}
      */
     @Override
-    public void updateInstance(final Context context, final String id, final UpdateRequest request,
-            final ResultHandler<Resource> handler) {
+    public void updateInstance(final ServerContext context, final String id,
+            final UpdateRequest request, final ResultHandler<Resource> handler) {
         final String rev = request.getRevision();
         try {
             final Resource resource;

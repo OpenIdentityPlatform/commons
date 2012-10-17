@@ -35,19 +35,31 @@ import org.forgerock.json.resource.Request;
  */
 public final class Route {
     static final class RouteMatcher {
+        private final RouterContext context;
+        private final RequestHandler handler;
         private final String match;
         private final UriTemplate template;
-        private final Map<String, String> variables;
 
-        RouteMatcher(final UriTemplate template, final String match,
-                final Map<String, String> variables) {
-            this.template = template;
-            this.match = match;
-            this.variables = variables;
+        RouteMatcher(final ServerContext context, final RequestHandler handler) {
+            this.template = null;
+            this.match = null;
+            this.context = new RouterContext(context, Collections.<String, String> emptyMap());
+            this.handler = handler;
         }
 
-        Route getRoute() {
-            return template.getRoute();
+        RouteMatcher(final UriTemplate template, final String match, final RouterContext context) {
+            this.template = template;
+            this.match = match;
+            this.context = context;
+            this.handler = template.getRoute().getRequestHandler();
+        }
+
+        RequestHandler getRequestHandler() {
+            return handler;
+        }
+
+        ServerContext getServerContext() {
+            return context;
         }
 
         boolean isBetterMatchThan(final RouteMatcher matcher) {
@@ -62,12 +74,9 @@ public final class Route {
                 return template.mode == EQUALS;
             } else {
                 // Prefer a match with less variables.
-                return variables.size() < matcher.variables.size();
+                return context.getUriTemplateVariables().size() < matcher.context
+                        .getUriTemplateVariables().size();
             }
-        }
-
-        Map<String, String> variables() {
-            return variables;
         }
     }
 
@@ -146,7 +155,8 @@ public final class Route {
             return Route.this;
         }
 
-        private RouteMatcher getRouteMatcher(final Route route, final Request request) {
+        private RouteMatcher getRouteMatcher(final Route route, final ServerContext context,
+                final Request request) {
             final String uri = normalizeUri(request.getResourceName());
             final Matcher matcher = regex.matcher(uri);
             if (!matcher.matches()) {
@@ -167,7 +177,7 @@ public final class Route {
                 }
                 break;
             }
-            return new RouteMatcher(this, matcher.group(), variableMap);
+            return new RouteMatcher(this, matcher.group(), new RouterContext(context, variableMap));
         }
 
         // As per RFC.
@@ -209,8 +219,8 @@ public final class Route {
         return handler;
     }
 
-    RouteMatcher getRouteMatcher(final Request request) {
-        return template.getRouteMatcher(this, request);
+    RouteMatcher getRouteMatcher(final ServerContext context, final Request request) {
+        return template.getRouteMatcher(this, context, request);
     }
 
     Route getSubRoute() {

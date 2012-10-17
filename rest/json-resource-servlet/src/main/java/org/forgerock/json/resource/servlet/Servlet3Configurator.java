@@ -77,7 +77,9 @@ final class Servlet3Configurator extends ServletConfigurator {
 
                     @Override
                     void postError(final Exception e) {
+                        httpResponse.isCommitted();
                         fail(httpResponse, e);
+                        httpResponse.isCommitted();
                     }
 
                 };
