@@ -14,10 +14,10 @@
  * Copyright 2012 ForgeRock AS.
  */
 
-package org.forgerock.json.resource.provider;
+package org.forgerock.json.resource;
 
-import static org.forgerock.json.resource.Connections.newInternalConnection;
 import static org.forgerock.json.resource.Requests.newReadRequest;
+import static org.forgerock.json.resource.Resources.newInternalConnection;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.mock;
@@ -28,13 +28,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.forgerock.json.resource.Context;
-import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.Resource;
-import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.RootContext;
-import org.forgerock.json.resource.exception.NotFoundException;
-import org.forgerock.json.resource.exception.ResourceException;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Matchers;
 import org.testng.annotations.DataProvider;

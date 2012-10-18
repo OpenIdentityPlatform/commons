@@ -14,21 +14,23 @@
  * Copyright © 2011 ForgeRock AS. All rights reserved.
  */
 
-package org.forgerock.json.resource.exception;
+package org.forgerock.json.resource;
+
+// JSON Resource
 
 /**
- * An exception that is thrown when access to a resource is forbidden during an
- * operation on an resource.
+ * An exception that is thrown during a operation on a resource set when the
+ * specified resource version (revision) does not match the version provided.
  */
-public class ForbiddenException extends ResourceException {
+public class PreconditionRequiredException extends ResourceException {
 
     private static final long serialVersionUID = 1L;
 
     /**
      * Constructs a new exception with {@code null} as its detail message.
      */
-    public ForbiddenException() {
-        super(ResourceException.FORBIDDEN);
+    public PreconditionRequiredException() {
+        super(ResourceException.VERSION_MISMATCH);
     }
 
     /**
@@ -37,8 +39,8 @@ public class ForbiddenException extends ResourceException {
      * @param message
      *            The detail message.
      */
-    public ForbiddenException(final String message) {
-        super(ResourceException.FORBIDDEN, message);
+    public PreconditionRequiredException(final String message) {
+        super(ResourceException.VERSION_MISMATCH, message);
     }
 
     /**
@@ -49,8 +51,8 @@ public class ForbiddenException extends ResourceException {
      * @param cause
      *            The exception which caused this exception to be thrown.
      */
-    public ForbiddenException(final String message, final Throwable cause) {
-        super(ResourceException.FORBIDDEN, message, cause);
+    public PreconditionRequiredException(final String message, final Throwable cause) {
+        super(ResourceException.VERSION_MISMATCH, message, cause);
     }
 
     /**
@@ -59,7 +61,7 @@ public class ForbiddenException extends ResourceException {
      * @param cause
      *            The exception which caused this exception to be thrown.
      */
-    public ForbiddenException(final Throwable cause) {
-        super(ResourceException.FORBIDDEN, cause);
+    public PreconditionRequiredException(final Throwable cause) {
+        super(ResourceException.VERSION_MISMATCH, cause);
     }
 }

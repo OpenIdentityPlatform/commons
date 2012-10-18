@@ -11,25 +11,24 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2012 ForgeRock AS. All rights reserved.
  */
 
-package org.forgerock.json.resource.exception;
-
-// JSON Resource
+package org.forgerock.json.resource;
 
 /**
- * An exception that is thrown when a specified resource cannot be found.
+ * An exception that is thrown during an operation on a resource when the
+ * resource does not implement/support the feature to fulfill the request.
  */
-public class NotFoundException extends ResourceException {
+public class NotSupportedException extends ResourceException {
 
     private static final long serialVersionUID = 1L;
 
     /**
      * Constructs a new exception with {@code null} as its detail message.
      */
-    public NotFoundException() {
-        super(ResourceException.NOT_FOUND);
+    public NotSupportedException() {
+        super(ResourceException.NOT_SUPPORTED);
     }
 
     /**
@@ -38,8 +37,8 @@ public class NotFoundException extends ResourceException {
      * @param message
      *            The detail message.
      */
-    public NotFoundException(final String message) {
-        super(ResourceException.NOT_FOUND, message);
+    public NotSupportedException(final String message) {
+        super(ResourceException.NOT_SUPPORTED, message);
     }
 
     /**
@@ -50,8 +49,8 @@ public class NotFoundException extends ResourceException {
      * @param cause
      *            The exception which caused this exception to be thrown.
      */
-    public NotFoundException(final String message, final Throwable cause) {
-        super(ResourceException.NOT_FOUND, message, cause);
+    public NotSupportedException(final String message, final Throwable cause) {
+        super(ResourceException.NOT_SUPPORTED, message, cause);
     }
 
     /**
@@ -60,7 +59,7 @@ public class NotFoundException extends ResourceException {
      * @param cause
      *            The exception which caused this exception to be thrown.
      */
-    public NotFoundException(final Throwable cause) {
-        super(ResourceException.NOT_FOUND, cause);
+    public NotSupportedException(final Throwable cause) {
+        super(ResourceException.NOT_SUPPORTED, cause);
     }
 }

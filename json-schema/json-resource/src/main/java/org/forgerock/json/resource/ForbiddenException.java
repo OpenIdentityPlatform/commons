@@ -11,24 +11,24 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2012 ForgeRock AS. All rights reserved.
+ * Copyright © 2011 ForgeRock AS. All rights reserved.
  */
 
-package org.forgerock.json.resource.exception;
+package org.forgerock.json.resource;
 
 /**
- * An exception that is thrown during an operation on a resource when the
- * resource does not implement/support the feature to fulfill the request.
+ * An exception that is thrown when access to a resource is forbidden during an
+ * operation on an resource.
  */
-public class NotSupportedException extends ResourceException {
+public class ForbiddenException extends ResourceException {
 
     private static final long serialVersionUID = 1L;
 
     /**
      * Constructs a new exception with {@code null} as its detail message.
      */
-    public NotSupportedException() {
-        super(ResourceException.NOT_SUPPORTED);
+    public ForbiddenException() {
+        super(ResourceException.FORBIDDEN);
     }
 
     /**
@@ -37,8 +37,8 @@ public class NotSupportedException extends ResourceException {
      * @param message
      *            The detail message.
      */
-    public NotSupportedException(final String message) {
-        super(ResourceException.NOT_SUPPORTED, message);
+    public ForbiddenException(final String message) {
+        super(ResourceException.FORBIDDEN, message);
     }
 
     /**
@@ -49,8 +49,8 @@ public class NotSupportedException extends ResourceException {
      * @param cause
      *            The exception which caused this exception to be thrown.
      */
-    public NotSupportedException(final String message, final Throwable cause) {
-        super(ResourceException.NOT_SUPPORTED, message, cause);
+    public ForbiddenException(final String message, final Throwable cause) {
+        super(ResourceException.FORBIDDEN, message, cause);
     }
 
     /**
@@ -59,7 +59,7 @@ public class NotSupportedException extends ResourceException {
      * @param cause
      *            The exception which caused this exception to be thrown.
      */
-    public NotSupportedException(final Throwable cause) {
-        super(ResourceException.NOT_SUPPORTED, cause);
+    public ForbiddenException(final Throwable cause) {
+        super(ResourceException.FORBIDDEN, cause);
     }
 }

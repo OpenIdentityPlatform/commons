@@ -13,15 +13,14 @@
  *
  * Copyright 2012 ForgeRock AS.
  */
-package org.forgerock.json.resource.provider;
+package org.forgerock.json.resource;
+
+import static org.forgerock.json.resource.Resources.checkNotNull;
 
 import java.lang.reflect.Constructor;
 import java.util.LinkedHashMap;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.Connection;
-import org.forgerock.json.resource.Context;
-import org.forgerock.json.resource.exception.ResourceException;
 
 /**
  * The context associated with a request currently being processed by a JSON
@@ -103,13 +102,6 @@ public class ServerContext extends Context {
         final JsonValue savedContext = new JsonValue(new LinkedHashMap<String, Object>(4));
         context.saveToJson(savedContext, config);
         return savedContext;
-    }
-
-    static final <T> T checkNotNull(final T object) {
-        if (object == null) {
-            throw new NullPointerException();
-        }
-        return object;
     }
 
     private final Connection connection;

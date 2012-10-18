@@ -14,9 +14,9 @@
  * Copyright 2012 ForgeRock AS.
  */
 
-package org.forgerock.json.resource.provider;
+package org.forgerock.json.resource;
 
-import static org.forgerock.json.resource.provider.RoutingMode.EQUALS;
+import static org.forgerock.json.resource.RoutingMode.EQUALS;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.forgerock.json.resource.Request;
 
 /**
  * An opaque handle for a route which has been registered in a router. A

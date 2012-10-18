@@ -47,9 +47,9 @@ import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestVisitor;
 import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.json.resource.exception.ResourceException;
 
 /**
  * Common request processing used by {@link RequestDispatcher}s.

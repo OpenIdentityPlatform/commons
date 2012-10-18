@@ -14,19 +14,9 @@
  * Copyright © 2012 ForgeRock AS. All rights reserved.
  */
 
-package org.forgerock.json.resource.provider;
+package org.forgerock.json.resource;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.CreateRequest;
-import org.forgerock.json.resource.DeleteRequest;
-import org.forgerock.json.resource.PatchRequest;
-import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResultHandler;
-import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.Resource;
-import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.UpdateRequest;
 
 /**
  * An implementation interface for resource providers which exposes a collection

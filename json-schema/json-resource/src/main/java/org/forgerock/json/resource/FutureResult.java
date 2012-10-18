@@ -20,7 +20,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.forgerock.json.resource.exception.ResourceException;
 
 /**
  * A handle which can be used to retrieve the result of an asynchronous request.

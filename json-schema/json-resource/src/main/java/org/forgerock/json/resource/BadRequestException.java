@@ -14,24 +14,21 @@
  * Copyright © 2011 ForgeRock AS. All rights reserved.
  */
 
-package org.forgerock.json.resource.exception;
-
-// JSON Resource
+package org.forgerock.json.resource;
 
 /**
- * An exception that is thrown during an operation on a resource when the server
- * encountered an unexpected condition which prevented it from fulfilling the
- * request.
+ * An exception that is thrown during a operation on a resource when the
+ * requested operation is malformed.
  */
-public class InternalServerErrorException extends ResourceException {
+public class BadRequestException extends ResourceException {
 
     private static final long serialVersionUID = 1L;
 
     /**
      * Constructs a new exception with {@code null} as its detail message.
      */
-    public InternalServerErrorException() {
-        super(ResourceException.INTERNAL_ERROR);
+    public BadRequestException() {
+        super(ResourceException.BAD_REQUEST);
     }
 
     /**
@@ -40,8 +37,8 @@ public class InternalServerErrorException extends ResourceException {
      * @param message
      *            The detail message.
      */
-    public InternalServerErrorException(final String message) {
-        super(ResourceException.INTERNAL_ERROR, message);
+    public BadRequestException(final String message) {
+        super(ResourceException.BAD_REQUEST, message);
     }
 
     /**
@@ -52,8 +49,8 @@ public class InternalServerErrorException extends ResourceException {
      * @param cause
      *            The exception which caused this exception to be thrown.
      */
-    public InternalServerErrorException(final String message, final Throwable cause) {
-        super(ResourceException.INTERNAL_ERROR, message, cause);
+    public BadRequestException(final String message, final Throwable cause) {
+        super(ResourceException.BAD_REQUEST, message, cause);
     }
 
     /**
@@ -62,7 +59,8 @@ public class InternalServerErrorException extends ResourceException {
      * @param cause
      *            The exception which caused this exception to be thrown.
      */
-    public InternalServerErrorException(final Throwable cause) {
-        super(ResourceException.INTERNAL_ERROR, cause);
+    public BadRequestException(final Throwable cause) {
+        super(ResourceException.BAD_REQUEST, cause);
     }
+
 }

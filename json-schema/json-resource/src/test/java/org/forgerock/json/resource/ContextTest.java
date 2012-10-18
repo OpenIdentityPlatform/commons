@@ -14,7 +14,7 @@
  * Copyright 2012 ForgeRock AS.
  */
 
-package org.forgerock.json.resource.provider;
+package org.forgerock.json.resource;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.any;
@@ -25,9 +25,6 @@ import static org.mockito.Mockito.when;
 import java.util.LinkedHashMap;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.Connection;
-import org.forgerock.json.resource.Context;
-import org.forgerock.json.resource.RootContext;
 import org.testng.annotations.Test;
 
 /**
@@ -72,7 +69,7 @@ public final class ContextTest {
         assertThat(json.isMap()).isTrue();
         assertThat(json.size()).isEqualTo(4);
         assertThat(json.get("class").asString()).isEqualTo(
-                "org.forgerock.json.resource.provider.ServerContext");
+                "org.forgerock.json.resource.ServerContext");
         assertThat(json.get("id").asUUID()).isNotNull();
         assertThat(json.get("parent").isMap()).isTrue();
         assertThat(json.get("parent").size()).isEqualTo(2);
@@ -98,7 +95,7 @@ public final class ContextTest {
         inRoot.add("parent", null);
 
         final JsonValue in = new JsonValue(new LinkedHashMap<String, Object>());
-        in.add("class", "org.forgerock.json.resource.provider.ServerContext");
+        in.add("class", "org.forgerock.json.resource.ServerContext");
         in.add("id", "child-id");
         in.add("parent", inRoot.asMap());
         in.add("connection-id", "my-connection-id");
