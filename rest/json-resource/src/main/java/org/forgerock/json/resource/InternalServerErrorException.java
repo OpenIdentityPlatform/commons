@@ -14,23 +14,24 @@
  * Copyright © 2011 ForgeRock AS. All rights reserved.
  */
 
-package org.forgerock.json.resource.exception;
+package org.forgerock.json.resource;
 
 // JSON Resource
 
 /**
- * An exception that is thrown during a operation on a resource set when the
- * specified resource version (revision) does not match the version provided.
+ * An exception that is thrown during an operation on a resource when the server
+ * encountered an unexpected condition which prevented it from fulfilling the
+ * request.
  */
-public class PreconditionRequiredException extends ResourceException {
+public class InternalServerErrorException extends ResourceException {
 
     private static final long serialVersionUID = 1L;
 
     /**
      * Constructs a new exception with {@code null} as its detail message.
      */
-    public PreconditionRequiredException() {
-        super(ResourceException.VERSION_MISMATCH);
+    public InternalServerErrorException() {
+        super(ResourceException.INTERNAL_ERROR);
     }
 
     /**
@@ -39,8 +40,8 @@ public class PreconditionRequiredException extends ResourceException {
      * @param message
      *            The detail message.
      */
-    public PreconditionRequiredException(final String message) {
-        super(ResourceException.VERSION_MISMATCH, message);
+    public InternalServerErrorException(final String message) {
+        super(ResourceException.INTERNAL_ERROR, message);
     }
 
     /**
@@ -51,8 +52,8 @@ public class PreconditionRequiredException extends ResourceException {
      * @param cause
      *            The exception which caused this exception to be thrown.
      */
-    public PreconditionRequiredException(final String message, final Throwable cause) {
-        super(ResourceException.VERSION_MISMATCH, message, cause);
+    public InternalServerErrorException(final String message, final Throwable cause) {
+        super(ResourceException.INTERNAL_ERROR, message, cause);
     }
 
     /**
@@ -61,7 +62,7 @@ public class PreconditionRequiredException extends ResourceException {
      * @param cause
      *            The exception which caused this exception to be thrown.
      */
-    public PreconditionRequiredException(final Throwable cause) {
-        super(ResourceException.VERSION_MISMATCH, cause);
+    public InternalServerErrorException(final Throwable cause) {
+        super(ResourceException.INTERNAL_ERROR, cause);
     }
 }

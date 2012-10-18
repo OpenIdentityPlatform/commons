@@ -14,21 +14,23 @@
  * Copyright © 2011 ForgeRock AS. All rights reserved.
  */
 
-package org.forgerock.json.resource.exception;
+package org.forgerock.json.resource;
+
+// JSON Resource
 
 /**
- * An exception that is thrown during a operation on a resource when the
- * requested operation is malformed.
+ * An exception that is thrown during an operation on a resource when the server
+ * is temporarily unable to handle the request.
  */
-public class BadRequestException extends ResourceException {
+public class ServiceUnavailableException extends RetryableException {
 
     private static final long serialVersionUID = 1L;
 
     /**
      * Constructs a new exception with {@code null} as its detail message.
      */
-    public BadRequestException() {
-        super(ResourceException.BAD_REQUEST);
+    public ServiceUnavailableException() {
+        super(ResourceException.UNAVAILABLE, null, null);
     }
 
     /**
@@ -37,8 +39,8 @@ public class BadRequestException extends ResourceException {
      * @param message
      *            The detail message.
      */
-    public BadRequestException(final String message) {
-        super(ResourceException.BAD_REQUEST, message);
+    public ServiceUnavailableException(final String message) {
+        super(ResourceException.UNAVAILABLE, message, null);
     }
 
     /**
@@ -49,8 +51,8 @@ public class BadRequestException extends ResourceException {
      * @param cause
      *            The exception which caused this exception to be thrown.
      */
-    public BadRequestException(final String message, final Throwable cause) {
-        super(ResourceException.BAD_REQUEST, message, cause);
+    public ServiceUnavailableException(final String message, final Throwable cause) {
+        super(ResourceException.UNAVAILABLE, message, cause);
     }
 
     /**
@@ -59,8 +61,7 @@ public class BadRequestException extends ResourceException {
      * @param cause
      *            The exception which caused this exception to be thrown.
      */
-    public BadRequestException(final Throwable cause) {
-        super(ResourceException.BAD_REQUEST, cause);
+    public ServiceUnavailableException(final Throwable cause) {
+        super(ResourceException.UNAVAILABLE, null, cause);
     }
-
 }

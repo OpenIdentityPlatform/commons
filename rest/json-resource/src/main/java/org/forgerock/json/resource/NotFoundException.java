@@ -14,24 +14,23 @@
  * Copyright © 2011 ForgeRock AS. All rights reserved.
  */
 
-package org.forgerock.json.resource.exception;
+package org.forgerock.json.resource;
+
+// JSON Resource
 
 /**
- * An exception that indicates that a failure is permanent, i.e. that re-trying
- * alone without addressing the cause is not expected to succeed.
- *
- * @see RetryableException for failures that are temporary instead.
+ * An exception that is thrown when a specified resource cannot be found.
  */
-public class PermanentException extends ResourceException {
+public class NotFoundException extends ResourceException {
 
     private static final long serialVersionUID = 1L;
 
     /**
      * Constructs a new exception with {@code null} as its detail message.
      */
-    // public RetryableException() {
-    // super(ResourceException.BAD_REQUEST);
-    // }
+    public NotFoundException() {
+        super(ResourceException.NOT_FOUND);
+    }
 
     /**
      * Constructs a new exception with the specified detail message.
@@ -39,9 +38,21 @@ public class PermanentException extends ResourceException {
      * @param message
      *            The detail message.
      */
-    // public RetryableException(String message) {
-    // super(ResourceException.BAD_REQUEST, message);
-    // }
+    public NotFoundException(final String message) {
+        super(ResourceException.NOT_FOUND, message);
+    }
+
+    /**
+     * Constructs a new exception with the specified detail message and cause.
+     *
+     * @param message
+     *            The detail message.
+     * @param cause
+     *            The exception which caused this exception to be thrown.
+     */
+    public NotFoundException(final String message, final Throwable cause) {
+        super(ResourceException.NOT_FOUND, message, cause);
+    }
 
     /**
      * Constructs a new exception with the specified cause.
@@ -49,22 +60,7 @@ public class PermanentException extends ResourceException {
      * @param cause
      *            The exception which caused this exception to be thrown.
      */
-    // public RetryableException(Throwable cause) {
-    // super(ResourceException.BAD_REQUEST, cause);
-    // }
-
-    /**
-     * Constructs a new exception with the specified detail message and cause.
-     *
-     * @param code
-     *            The numeric code of the exception.
-     * @param message
-     *            The detail message.
-     * @param cause
-     *            The exception which caused this exception to be thrown.
-     */
-    public PermanentException(final int code, final String message, final Throwable cause) {
-        super(code, message, cause);
+    public NotFoundException(final Throwable cause) {
+        super(ResourceException.NOT_FOUND, cause);
     }
-
 }

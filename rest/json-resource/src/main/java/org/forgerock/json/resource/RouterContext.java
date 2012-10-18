@@ -13,15 +13,15 @@
  *
  * Copyright 2012 ForgeRock AS.
  */
-package org.forgerock.json.resource.provider;
+package org.forgerock.json.resource;
+
+import static org.forgerock.json.resource.Resources.checkNotNull;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.Context;
-import org.forgerock.json.resource.exception.ResourceException;
 
 /**
  * A {@link ServerContext} which is created when a request has been routed. The

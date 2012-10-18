@@ -14,26 +14,16 @@
  * Copyright 2012 ForgeRock AS.
  */
 
-package org.forgerock.json.resource.provider;
+package org.forgerock.json.resource;
+
+import static org.forgerock.json.resource.Resources.addCollectionRoutes;
+import static org.forgerock.json.resource.Resources.newSingleton;
 
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.CreateRequest;
-import org.forgerock.json.resource.DeleteRequest;
-import org.forgerock.json.resource.PatchRequest;
-import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResultHandler;
-import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.Request;
-import org.forgerock.json.resource.Resource;
-import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.json.resource.exception.NotFoundException;
-import org.forgerock.json.resource.exception.ResourceException;
-import org.forgerock.json.resource.provider.Route.RouteMatcher;
+import org.forgerock.json.resource.Route.RouteMatcher;
 
 /**
  * A request handler which routes requests using URI template matching against
@@ -148,7 +138,7 @@ public final class Router implements RequestHandler {
      */
     public Route addRoute(final RoutingMode mode, final String uriTemplate,
             final CollectionResourceProvider provider) {
-        return RequestHandlers.addCollectionRoutes(this, mode, uriTemplate, provider);
+        return addCollectionRoutes(this, mode, uriTemplate, provider);
     }
 
     /**
@@ -188,7 +178,7 @@ public final class Router implements RequestHandler {
      */
     public Route addRoute(final RoutingMode mode, final String uriTemplate,
             final SingletonResourceProvider provider) {
-        return addRoute(mode, uriTemplate, RequestHandlers.newSingleton(provider));
+        return addRoute(mode, uriTemplate, newSingleton(provider));
     }
 
     /**

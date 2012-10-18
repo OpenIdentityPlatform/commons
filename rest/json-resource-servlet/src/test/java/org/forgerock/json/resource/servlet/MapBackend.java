@@ -23,24 +23,24 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.CollectionResourceProvider;
+import org.forgerock.json.resource.ConflictException;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.NotFoundException;
+import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResultHandler;
+import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.json.resource.exception.BadRequestException;
-import org.forgerock.json.resource.exception.ConflictException;
-import org.forgerock.json.resource.exception.InternalServerErrorException;
-import org.forgerock.json.resource.exception.NotFoundException;
-import org.forgerock.json.resource.exception.NotSupportedException;
-import org.forgerock.json.resource.exception.ResourceException;
-import org.forgerock.json.resource.provider.CollectionResourceProvider;
-import org.forgerock.json.resource.provider.ServerContext;
 
 /**
  * A simple {@code Map} based collection resource provider.

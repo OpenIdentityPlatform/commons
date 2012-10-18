@@ -16,6 +16,7 @@
 
 package org.forgerock.json.resource;
 
+
 /**
  * A visitor of {@code Request}s, in the style of the visitor design pattern.
  * <p>

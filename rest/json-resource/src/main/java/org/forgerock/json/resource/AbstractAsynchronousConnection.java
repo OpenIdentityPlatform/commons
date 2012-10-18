@@ -18,8 +18,6 @@ package org.forgerock.json.resource;
 import java.util.Collection;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.exception.ResourceException;
-import org.forgerock.json.resource.exception.ServiceUnavailableException;
 
 /**
  * An abstract connection whose synchronous methods are implemented in terms of

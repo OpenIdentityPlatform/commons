@@ -16,7 +16,7 @@
 
 package org.forgerock.json.resource.servlet;
 
-import static org.forgerock.json.resource.provider.RoutingMode.EQUALS;
+import static org.forgerock.json.resource.RoutingMode.EQUALS;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -25,13 +25,13 @@ import java.util.logging.Logger;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.json.resource.Connections;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.Requests;
+import org.forgerock.json.resource.Resources;
+import org.forgerock.json.resource.RequestHandler;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.RootContext;
-import org.forgerock.json.resource.exception.ResourceException;
-import org.forgerock.json.resource.provider.RequestHandler;
-import org.forgerock.json.resource.provider.Router;
+import org.forgerock.json.resource.Router;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.servlet.ServletRegistration;
 import org.glassfish.grizzly.servlet.WebappContext;
@@ -57,7 +57,7 @@ public class Example {
     @Test
     public void example() throws Exception {
         final RequestHandler handler = createRequestHandler();
-        final ConnectionFactory factory = Connections.newInternalConnectionFactory(handler);
+        final ConnectionFactory factory = Resources.newInternalConnectionFactory(handler);
         final HttpServer httpServer = HttpServer.createSimpleServer("./", PORT);
         try {
             final WebappContext ctx = new WebappContext("example", "/example");
@@ -83,7 +83,7 @@ public class Example {
         router.addRoute(EQUALS, "/groups", new MapBackend());
 
         // Populate with some test users and groups.
-        final Connection connection = Connections.newInternalConnection(router);
+        final Connection connection = Resources.newInternalConnection(router);
 
         final JsonValue user1 = new JsonValue(new LinkedHashMap<String, Object>());
         user1.add("userName", "alice");

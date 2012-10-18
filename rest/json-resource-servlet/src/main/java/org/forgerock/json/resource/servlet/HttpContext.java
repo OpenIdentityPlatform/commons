@@ -28,8 +28,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.Context;
-import org.forgerock.json.resource.exception.ResourceException;
-import org.forgerock.json.resource.provider.PersistenceConfig;
+import org.forgerock.json.resource.PersistenceConfig;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.util.Factory;
 import org.forgerock.util.LazyMap;
 

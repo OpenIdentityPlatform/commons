@@ -13,11 +13,8 @@
  *
  * Copyright 2012 ForgeRock AS.
  */
-package org.forgerock.json.resource.provider;
+package org.forgerock.json.resource;
 
-import org.forgerock.json.resource.Connection;
-import org.forgerock.json.resource.exception.NotFoundException;
-import org.forgerock.json.resource.exception.ResourceException;
 
 /**
  * A registry of internal connections.

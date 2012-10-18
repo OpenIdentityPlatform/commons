@@ -15,8 +15,8 @@
  */
 
 /**
- * Classes and interfaces for core types including connections, resources, and
- * requests.
+ * Classes and interfaces for core types including connections, request
+ * handlers, resources, and their exceptions.
  */
 package org.forgerock.json.resource;
 
