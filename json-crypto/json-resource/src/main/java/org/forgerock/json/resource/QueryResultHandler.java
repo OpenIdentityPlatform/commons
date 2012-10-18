@@ -16,7 +16,6 @@
 
 package org.forgerock.json.resource;
 
-import org.forgerock.json.resource.exception.ResourceException;
 
 /**
  * A completion handler for consuming the results of a query request.

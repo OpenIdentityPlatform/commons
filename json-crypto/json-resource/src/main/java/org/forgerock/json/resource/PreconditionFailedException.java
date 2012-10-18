@@ -14,28 +14,23 @@
  * Copyright © 2011 ForgeRock AS. All rights reserved.
  */
 
-package org.forgerock.json.resource.exception;
+package org.forgerock.json.resource;
 
 // JSON Resource
 
 /**
- * An exception that is thrown during a operation on a resource when such an
- * operation would result in a conflict. For example: when a patch conflicts
- * with the object state. For MVCC version required/failed failures use those
- * specific exceptions instead,
- *
- * @see PreconditionFailedException
- * @see PreconditionRequiredException
+ * An exception that is thrown during a operation on a resource when the
+ * specified object version does not match the version provided.
  */
-public class ConflictException extends ResourceException {
+public class PreconditionFailedException extends ResourceException {
 
     private static final long serialVersionUID = 1L;
 
     /**
      * Constructs a new exception with {@code null} as its detail message.
      */
-    public ConflictException() {
-        super(ResourceException.CONFLICT);
+    public PreconditionFailedException() {
+        super(ResourceException.VERSION_MISMATCH);
     }
 
     /**
@@ -44,8 +39,8 @@ public class ConflictException extends ResourceException {
      * @param message
      *            The detail message.
      */
-    public ConflictException(final String message) {
-        super(ResourceException.CONFLICT, message);
+    public PreconditionFailedException(final String message) {
+        super(ResourceException.VERSION_MISMATCH, message);
     }
 
     /**
@@ -56,8 +51,8 @@ public class ConflictException extends ResourceException {
      * @param cause
      *            The exception which caused this exception to be thrown.
      */
-    public ConflictException(final String message, final Throwable cause) {
-        super(ResourceException.CONFLICT, message, cause);
+    public PreconditionFailedException(final String message, final Throwable cause) {
+        super(ResourceException.VERSION_MISMATCH, message, cause);
     }
 
     /**
@@ -66,7 +61,7 @@ public class ConflictException extends ResourceException {
      * @param cause
      *            The exception which caused this exception to be thrown.
      */
-    public ConflictException(final Throwable cause) {
-        super(ResourceException.CONFLICT, cause);
+    public PreconditionFailedException(final Throwable cause) {
+        super(ResourceException.VERSION_MISMATCH, cause);
     }
 }

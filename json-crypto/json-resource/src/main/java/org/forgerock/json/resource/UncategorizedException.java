@@ -14,7 +14,7 @@
  * Copyright © 2011 ForgeRock AS. All rights reserved.
  */
 
-package org.forgerock.json.resource.exception;
+package org.forgerock.json.resource;
 
 /**
  * An exception that indicates that a failure is not directly known to the

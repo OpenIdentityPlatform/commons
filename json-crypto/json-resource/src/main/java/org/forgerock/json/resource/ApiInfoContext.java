@@ -15,9 +15,9 @@
  */
 package org.forgerock.json.resource;
 
+import static org.forgerock.json.resource.Resources.checkNotNull;
+
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.exception.ResourceException;
-import org.forgerock.json.resource.provider.PersistenceConfig;
 
 /**
  * A {@link Context} containing information about the REST API exposed by the

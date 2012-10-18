@@ -16,8 +16,6 @@
 package org.forgerock.json.resource;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.exception.ResourceException;
-import org.forgerock.json.resource.provider.PersistenceConfig;
 
 /**
  * A {@link Context} which has an an ID but no parent. All request context

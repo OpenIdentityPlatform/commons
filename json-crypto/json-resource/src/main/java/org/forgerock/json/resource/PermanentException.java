@@ -14,24 +14,24 @@
  * Copyright © 2011 ForgeRock AS. All rights reserved.
  */
 
-package org.forgerock.json.resource.exception;
-
-// JSON Resource
+package org.forgerock.json.resource;
 
 /**
- * An exception that is thrown during a operation on a resource when the
- * specified object version does not match the version provided.
+ * An exception that indicates that a failure is permanent, i.e. that re-trying
+ * alone without addressing the cause is not expected to succeed.
+ *
+ * @see RetryableException for failures that are temporary instead.
  */
-public class PreconditionFailedException extends ResourceException {
+public class PermanentException extends ResourceException {
 
     private static final long serialVersionUID = 1L;
 
     /**
      * Constructs a new exception with {@code null} as its detail message.
      */
-    public PreconditionFailedException() {
-        super(ResourceException.VERSION_MISMATCH);
-    }
+    // public RetryableException() {
+    // super(ResourceException.BAD_REQUEST);
+    // }
 
     /**
      * Constructs a new exception with the specified detail message.
@@ -39,21 +39,9 @@ public class PreconditionFailedException extends ResourceException {
      * @param message
      *            The detail message.
      */
-    public PreconditionFailedException(final String message) {
-        super(ResourceException.VERSION_MISMATCH, message);
-    }
-
-    /**
-     * Constructs a new exception with the specified detail message and cause.
-     *
-     * @param message
-     *            The detail message.
-     * @param cause
-     *            The exception which caused this exception to be thrown.
-     */
-    public PreconditionFailedException(final String message, final Throwable cause) {
-        super(ResourceException.VERSION_MISMATCH, message, cause);
-    }
+    // public RetryableException(String message) {
+    // super(ResourceException.BAD_REQUEST, message);
+    // }
 
     /**
      * Constructs a new exception with the specified cause.
@@ -61,7 +49,22 @@ public class PreconditionFailedException extends ResourceException {
      * @param cause
      *            The exception which caused this exception to be thrown.
      */
-    public PreconditionFailedException(final Throwable cause) {
-        super(ResourceException.VERSION_MISMATCH, cause);
+    // public RetryableException(Throwable cause) {
+    // super(ResourceException.BAD_REQUEST, cause);
+    // }
+
+    /**
+     * Constructs a new exception with the specified detail message and cause.
+     *
+     * @param code
+     *            The numeric code of the exception.
+     * @param message
+     *            The detail message.
+     * @param cause
+     *            The exception which caused this exception to be thrown.
+     */
+    public PermanentException(final int code, final String message, final Throwable cause) {
+        super(code, message, cause);
     }
+
 }

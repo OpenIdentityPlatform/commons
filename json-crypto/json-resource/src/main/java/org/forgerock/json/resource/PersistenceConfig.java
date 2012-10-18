@@ -13,7 +13,7 @@
  *
  * Copyright 2012 ForgeRock AS.
  */
-package org.forgerock.json.resource.provider;
+package org.forgerock.json.resource;
 
 /**
  * The configuration which should be used when persisting {@code ServerContext}

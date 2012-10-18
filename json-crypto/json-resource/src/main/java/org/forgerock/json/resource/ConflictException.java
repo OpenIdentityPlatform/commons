@@ -14,23 +14,28 @@
  * Copyright © 2011 ForgeRock AS. All rights reserved.
  */
 
-package org.forgerock.json.resource.exception;
+package org.forgerock.json.resource;
 
 // JSON Resource
 
 /**
- * An exception that is thrown during an operation on a resource when the server
- * is temporarily unable to handle the request.
+ * An exception that is thrown during a operation on a resource when such an
+ * operation would result in a conflict. For example: when a patch conflicts
+ * with the object state. For MVCC version required/failed failures use those
+ * specific exceptions instead,
+ *
+ * @see PreconditionFailedException
+ * @see PreconditionRequiredException
  */
-public class ServiceUnavailableException extends RetryableException {
+public class ConflictException extends ResourceException {
 
     private static final long serialVersionUID = 1L;
 
     /**
      * Constructs a new exception with {@code null} as its detail message.
      */
-    public ServiceUnavailableException() {
-        super(ResourceException.UNAVAILABLE, null, null);
+    public ConflictException() {
+        super(ResourceException.CONFLICT);
     }
 
     /**
@@ -39,8 +44,8 @@ public class ServiceUnavailableException extends RetryableException {
      * @param message
      *            The detail message.
      */
-    public ServiceUnavailableException(final String message) {
-        super(ResourceException.UNAVAILABLE, message, null);
+    public ConflictException(final String message) {
+        super(ResourceException.CONFLICT, message);
     }
 
     /**
@@ -51,8 +56,8 @@ public class ServiceUnavailableException extends RetryableException {
      * @param cause
      *            The exception which caused this exception to be thrown.
      */
-    public ServiceUnavailableException(final String message, final Throwable cause) {
-        super(ResourceException.UNAVAILABLE, message, cause);
+    public ConflictException(final String message, final Throwable cause) {
+        super(ResourceException.CONFLICT, message, cause);
     }
 
     /**
@@ -61,7 +66,7 @@ public class ServiceUnavailableException extends RetryableException {
      * @param cause
      *            The exception which caused this exception to be thrown.
      */
-    public ServiceUnavailableException(final Throwable cause) {
-        super(ResourceException.UNAVAILABLE, null, cause);
+    public ConflictException(final Throwable cause) {
+        super(ResourceException.CONFLICT, cause);
     }
 }

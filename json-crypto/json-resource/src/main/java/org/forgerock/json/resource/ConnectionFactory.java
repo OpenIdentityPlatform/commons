@@ -16,7 +16,6 @@
 
 package org.forgerock.json.resource;
 
-import org.forgerock.json.resource.exception.ResourceException;
 
 /**
  * A connection factory provides an interface for obtaining a connection to a
