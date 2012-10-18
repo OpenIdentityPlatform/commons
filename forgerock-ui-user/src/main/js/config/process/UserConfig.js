@@ -141,12 +141,16 @@ define("config/process/UserConfig", [
                     
                     eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: false});
                     
-                    if(conf.gotoURL && _.indexOf(["#","","#/","/#"], conf.gotoURL) === -1) {
-                        console.log("Auto redirect to " + conf.gotoURL);
-                        router.navigate(conf.gotoURL, {trigger: true});
-                        delete conf.gotoURL;
-                    } else {
-                        router.navigate("", {trigger: true});
+                    if (! conf.backgroundLogin)
+                    {
+	                    
+	                    if(conf.gotoURL && _.indexOf(["#","","#/","/#"], conf.gotoURL) === -1) {
+	                        console.log("Auto redirect to " + conf.gotoURL);
+	                        router.navigate(conf.gotoURL, {trigger: true});
+	                        delete conf.gotoURL;
+	                    } else {
+	                        router.navigate("", {trigger: true});
+	                    }
                     }
                     
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "loggedIn");

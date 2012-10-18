@@ -35,6 +35,7 @@ define("org/forgerock/commons/ui/user/main", [
 	"./profile/ChangeSecurityDataDialog",
     "./profile/ChangeSiteIdentificationDialog",
 	"./LoginView",
+	"./LoginDialog",
 	"./NotFoundView",
 	"./login/LoggedUserBarView",
 	"./SiteConfigurator",
