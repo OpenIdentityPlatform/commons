@@ -137,6 +137,25 @@ final class HttpUtils {
     }
 
     /**
+     * Throws a {@code NullPointerException} if the provided object is
+     * {@code null}.
+     *
+     * @param <T>
+     *            The parameter type.
+     * @param object
+     *            The object to test.
+     * @return The object if not {@code null}.
+     * @throws NullPointerException
+     *             If {@code object} is {@code null}.
+     */
+    static final <T> T checkNotNull(final T object) {
+        if (object == null) {
+            throw new NullPointerException();
+        }
+        return object;
+    }
+
+    /**
      * Closes the provided {@code Closeable}s ignoring null values and any
      * exceptions.
      *
