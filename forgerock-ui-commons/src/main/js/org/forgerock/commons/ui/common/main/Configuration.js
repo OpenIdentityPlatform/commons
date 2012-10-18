@@ -35,8 +35,6 @@ define("org/forgerock/commons/ui/common/main/Configuration", [
     var obj = {};
     obj.appConfiguration = appConfiguration; 
 
-    obj.mode = 'admin';
-
     obj.setProperty = function(propertyName, propertyValue) {
         obj[propertyName] = propertyValue;
     };

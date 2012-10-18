@@ -185,6 +185,7 @@ define("config/process/UserConfig", [
                 eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, {anonymousMode: true});
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "loggedOut");
                 router.execRouteHandler("");
+                delete conf.gotoURL;
             }
          },
          {

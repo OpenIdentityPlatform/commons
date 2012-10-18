@@ -38,9 +38,6 @@ define("org/forgerock/commons/ui/common/util/Constants", [
     obj.OPENIDM_ANONYMOUS_USERNAME = "anonymous";
     obj.OPENIDM_ANONYMOUS_PASSWORD = "anonymous";
 
-    obj.MODE_ADMIN = 'admin';
-    obj.MODE_USER = 'user';
-    
     obj.EVENT_SERVICE_UNAVAILABLE = "error.SERICE_UNAVAILABLE";
 
     obj.EVENT_PROFILE_INITIALIZATION = "user.profile.EVENT_PROFILE_INITIALIZATION";
