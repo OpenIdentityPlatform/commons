@@ -31,6 +31,7 @@ import static org.forgerock.json.resource.servlet.HttpUtils.adapt;
 import static org.forgerock.json.resource.servlet.HttpUtils.asBooleanValue;
 import static org.forgerock.json.resource.servlet.HttpUtils.asIntValue;
 import static org.forgerock.json.resource.servlet.HttpUtils.asSingleValue;
+import static org.forgerock.json.resource.servlet.HttpUtils.checkNotNull;
 import static org.forgerock.json.resource.servlet.HttpUtils.fail;
 import static org.forgerock.json.resource.servlet.HttpUtils.getMethod;
 import static org.forgerock.json.resource.servlet.HttpUtils.isDebugRequested;
@@ -103,6 +104,18 @@ import org.forgerock.json.resource.UpdateRequest;
  * @see HttpServlet
  */
 public final class HttpServletAdapter {
+    /**
+     * The default context factory which will be used if none was provided
+     * during construction or initialization.
+     */
+    private static final HttpServletContextFactory DEFAULT_CONTEXT_FACTORY = new HttpServletContextFactory() {
+
+        @Override
+        public Context createContext(final HttpServletRequest request) throws ResourceException {
+            return new RootContext();
+        }
+    };
+
     private static final String THIS_API_URI;
     private static final String THIS_API_VERSION;
 
@@ -112,26 +125,26 @@ public final class HttpServletAdapter {
         THIS_API_VERSION = bundle.getString("rest-api-version");
     }
 
+    private final HttpServletContextFactory contextFactory;
     private final RequestDispatcher dispatcher;
     private final ObjectMapper jsonMapper = new ObjectMapper();
-    private final Context parentContext;
     private final ServletContext servletContext;
 
     /**
-     * Creates a new servlet adapter with the provided connection factory and no
-     * parent request context.
+     * Creates a new servlet adapter with the provided connection factory and a
+     * context factory which creates a new {@link RootContext} for each request.
      *
      * @param servletContext
      *            The servlet context.
-     * @param factory
+     * @param connectionFactory
      *            The connection factory.
      * @throws ServletException
      *             If the servlet container does not support Servlet 2.x or
      *             beyond.
      */
-    public HttpServletAdapter(final ServletContext servletContext, final ConnectionFactory factory)
-            throws ServletException {
-        this(servletContext, factory, null);
+    public HttpServletAdapter(final ServletContext servletContext,
+            final ConnectionFactory connectionFactory) throws ServletException {
+        this(servletContext, connectionFactory, (HttpServletContextFactory) null);
     }
 
     /**
@@ -140,7 +153,7 @@ public final class HttpServletAdapter {
      *
      * @param servletContext
      *            The servlet context.
-     * @param factory
+     * @param connectionFactory
      *            The connection factory.
      * @param parentContext
      *            The parent request context which should be used as the parent
@@ -149,12 +162,41 @@ public final class HttpServletAdapter {
      *             If the servlet container does not support Servlet 2.x or
      *             beyond.
      */
-    public HttpServletAdapter(final ServletContext servletContext, final ConnectionFactory factory,
-            final Context parentContext) throws ServletException {
-        this.servletContext = servletContext;
-        this.parentContext = parentContext != null ? parentContext : new RootContext();
-        this.dispatcher = getServletConfigurator(servletContext).getRequestDispatcher(factory,
-                jsonMapper.getJsonFactory());
+    public HttpServletAdapter(final ServletContext servletContext,
+            final ConnectionFactory connectionFactory, final Context parentContext)
+            throws ServletException {
+        this(servletContext, connectionFactory, new HttpServletContextFactory() {
+
+            @Override
+            public Context createContext(final HttpServletRequest request) {
+                return parentContext;
+            }
+        });
+    }
+
+    /**
+     * Creates a new servlet adapter with the provided connection factory and
+     * context factory.
+     *
+     * @param servletContext
+     *            The servlet context.
+     * @param connectionFactory
+     *            The connection factory.
+     * @param contextFactory
+     *            The context factory which will be used to obtain the parent
+     *            context of each request context, or {@code null} if a new
+     *            {@link RootContext} should be created for each request.
+     * @throws ServletException
+     *             If the servlet container does not support Servlet 2.x or
+     *             beyond.
+     */
+    public HttpServletAdapter(final ServletContext servletContext,
+            final ConnectionFactory connectionFactory,
+            final HttpServletContextFactory contextFactory) throws ServletException {
+        this.servletContext = checkNotNull(servletContext);
+        this.contextFactory = contextFactory != null ? contextFactory : DEFAULT_CONTEXT_FACTORY;
+        this.dispatcher = getServletConfigurator(servletContext).getRequestDispatcher(
+                checkNotNull(connectionFactory), jsonMapper.getJsonFactory());
     }
 
     /**
@@ -515,9 +557,9 @@ public final class HttpServletAdapter {
         return resourceName == null ? "/" : resourceName;
     }
 
-    private Context newRequestContext(final HttpServletRequest req) {
-        return new ApiInfoContext(new HttpContext(parentContext, req), THIS_API_URI,
-                THIS_API_VERSION);
+    private Context newRequestContext(final HttpServletRequest req) throws ResourceException {
+        final Context root = contextFactory.createContext(req);
+        return new ApiInfoContext(new HttpContext(root, req), THIS_API_URI, THIS_API_VERSION);
     }
 
     private boolean parseCommonParameter(final String name, final String[] values,
