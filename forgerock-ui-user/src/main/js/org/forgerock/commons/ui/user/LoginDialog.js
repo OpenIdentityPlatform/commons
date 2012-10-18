@@ -70,9 +70,10 @@ define("org/forgerock/commons/ui/user/LoginDialog", [
                 var _this = this;
                 eventManager.registerListener(constants.EVENT_DISPLAY_MESSAGE_REQUEST, _.once(function (event) {
                     console.log(event);
-                    if (event == "loggedIn")
+                    if (event === "loggedIn")
                     {
                         _this.close();
+                        eventManager.sendEvent(constants.EVENT_REQUEST_RESEND_REQUIRED);
                     }
                 }));
                 eventManager.sendEvent(constants.EVENT_LOGIN_REQUEST, {userName: this.$el.find("input[name=login]").val(), password: this.$el.find("input[name=password]").val()});

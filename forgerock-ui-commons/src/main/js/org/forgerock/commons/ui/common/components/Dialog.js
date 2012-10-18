@@ -108,7 +108,7 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
             
             eventManager.sendEvent(constants.EVENT_DIALOG_CLOSE);
             
-            this.$el.remove();
+            this.$el.empty();
         },
 
         addAction: function(name, type) {

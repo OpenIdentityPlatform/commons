@@ -60,7 +60,10 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
          */
         parentRender: function(callback) {   
             this.callback = callback;
-               
+            var _this = this;
+            eventManager.registerListener(constants.EVENT_REQUEST_RESEND_REQUIRED, function () {
+                _this.unlock();
+            });
             if(conf.baseTemplate !== this.baseTemplate && !this.noBaseTemplate) {
                 uiUtils.renderTemplate(this.baseTemplate, $("#wrapper"), _.extend(conf.globalData, this.data), _.bind(this.loadTemplate, this), "replace");
             } else {
