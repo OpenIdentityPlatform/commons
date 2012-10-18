@@ -15,6 +15,7 @@
  */
 package org.forgerock.json.resource.servlet;
 
+import static org.forgerock.json.resource.servlet.HttpUtils.checkNotNull;
 import static org.forgerock.json.resource.servlet.ServletConfigurator.getServletConfigurator;
 
 import java.io.IOException;
@@ -27,6 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Context;
+import org.forgerock.json.resource.RootContext;
 
 /**
  * An HTTP Servlet implementation which forwards requests to an
@@ -47,64 +49,98 @@ import org.forgerock.json.resource.Context;
  * Most implementations will use the second approach.
  */
 public class HttpServlet extends javax.servlet.http.HttpServlet {
-    private static final String INIT_PARAM_CLASS = "connection-factory-class";
-    private static final String INIT_PARAM_METHOD = "connection-factory-method";
-    private static final String INIT_PARAM_METHOD_DEFAULT = "getConnectionFactory";
+    private static final String INIT_CONNECTION_PARAM_CLASS = "connection-factory-class";
+    private static final String INIT_CONNECTION_PARAM_METHOD = "connection-factory-method";
+    private static final String INIT_CONNECTION_PARAM_METHOD_DEFAULT = "getConnectionFactory";
+    private static final String INIT_CONTEXT_PARAM_CLASS = "context-factory-class";
+    private static final String INIT_CONTEXT_PARAM_METHOD = "context-factory-method";
+    private static final String INIT_CONTEXT_PARAM_METHOD_DEFAULT = "getHttpServletContextFactory";
     private static final String METHOD_PATCH = "PATCH";
-
     private static final long serialVersionUID = 6089858120348026823L;
+
     private HttpServletAdapter adapter;
 
     // Provided during construction.
     private final ConnectionFactory connectionFactory;
-    private final Context parentContext;
+    private final HttpServletContextFactory contextFactory;
 
     /**
      * Default constructor called during normal Servlet initialization.
      * Implementations MUST override {@link #getConnectionFactory()} and may
-     * need to override {@link #getParentContext()} in order for the HTTP
-     * Servlet to function.
+     * need to override {@link #getHttpServletContextFactory()} in order for the
+     * HTTP Servlet to function.
      */
     public HttpServlet() {
-        this(null, null);
+        this.connectionFactory = null;
+        this.contextFactory = null;
     }
 
     /**
      * Creates a new JSON resource HTTP Servlet with the provided connection
-     * factory and no parent request context. This constructor is provided as a
+     * factory and no context factory. This constructor is provided as a
      * convenience for cases where the HTTP Servlet is instantiated
      * programmatically.
      * <p>
      * If the HTTP Servlet is created using this constructor then there is no
      * need to override {@link #getConnectionFactory()} or
-     * {@link #getParentContext()}.
+     * {@link #getHttpServletContextFactory()}.
      *
-     * @param factory
+     * @param connectionFactory
      *            The connection factory.
      */
-    public HttpServlet(final ConnectionFactory factory) {
-        this(factory, null);
+    public HttpServlet(final ConnectionFactory connectionFactory) {
+        this.connectionFactory = checkNotNull(connectionFactory);
+        this.contextFactory = null;
     }
 
     /**
      * Creates a new JSON resource HTTP Servlet with the provided connection
-     * factory and parent request context. This constructor is provided as a
-     * convenience for cases where the HTTP Servlet is instantiated
-     * programmatically.
+     * factory and a context factory which will always return the provided
+     * request context. This constructor is provided as a convenience for cases
+     * where the HTTP Servlet is instantiated programmatically.
      * <p>
      * If the HTTP Servlet is created using this constructor then there is no
      * need to override {@link #getConnectionFactory()} or
-     * {@link #getParentContext()}.
+     * {@link #getHttpServletContextFactory()}.
      *
-     * @param factory
+     * @param connectionFactory
      *            The connection factory.
      * @param parentContext
      *            The parent request context which should be used as the parent
-     *            context of each request context, may be {@code null}.
+     *            context of each request context.
      */
-    public HttpServlet(final ConnectionFactory factory, final Context parentContext) {
-        this.connectionFactory = factory;
-        this.parentContext = parentContext;
+    public HttpServlet(final ConnectionFactory connectionFactory, final Context parentContext) {
+        this.connectionFactory = checkNotNull(connectionFactory);
+        checkNotNull(parentContext);
+        this.contextFactory = new HttpServletContextFactory() {
+
+            @Override
+            public Context createContext(final HttpServletRequest request) {
+                return parentContext;
+            }
+        };
+    }
+
+    /**
+     * Creates a new JSON resource HTTP Servlet with the provided connection
+     * factory and context factory. This constructor is provided as a
+     * convenience for cases where the HTTP Servlet is instantiated
+     * programmatically.
+     * <p>
+     * If the HTTP Servlet is created using this constructor then there is no
+     * need to override {@link #getConnectionFactory()} or
+     * {@link #getHttpServletContextFactory()}.
+     *
+     * @param connectionFactory
+     *            The connection factory.
+     * @param contextFactory
+     *            The context factory which will be used to obtain the parent
+     *            context of each request context.
+     */
+    public HttpServlet(final ConnectionFactory connectionFactory,
+            final HttpServletContextFactory contextFactory) {
+        this.connectionFactory = checkNotNull(connectionFactory);
+        this.contextFactory = checkNotNull(contextFactory);
     }
 
     /**
@@ -115,10 +151,12 @@ public class HttpServlet extends javax.servlet.http.HttpServlet {
         super.init();
 
         // Construct the HTTP Servlet adapter.
-        final ConnectionFactory factory =
-                connectionFactory != null ? connectionFactory : getConnectionFactory();
-        final Context context = parentContext != null ? parentContext : getParentContext();
-        adapter = new HttpServletAdapter(getServletContext(), factory, context);
+        final ConnectionFactory tmpConnectionFactory = connectionFactory != null ? connectionFactory
+                : getConnectionFactory();
+        final HttpServletContextFactory tmpContextFactory = contextFactory != null ? contextFactory
+                : getHttpServletContextFactory();
+        adapter = new HttpServletAdapter(getServletContext(), tmpConnectionFactory,
+                tmpContextFactory);
     }
 
     /**
@@ -221,13 +259,14 @@ public class HttpServlet extends javax.servlet.http.HttpServlet {
         final ServletConfig config = getServletConfig();
         if (config != null) {
             // Check for configured connection factory class first.
-            final String className = config.getInitParameter(INIT_PARAM_CLASS);
+            final String className = config.getInitParameter(INIT_CONNECTION_PARAM_CLASS);
             if (className != null) {
                 final ClassLoader cl = getServletConfigurator(getServletContext()).getClassLoader();
                 try {
                     final Class<?> cls = Class.forName(className, true, cl);
-                    final String tmp = config.getInitParameter(INIT_PARAM_METHOD);
-                    final String methodName = tmp != null ? tmp : INIT_PARAM_METHOD_DEFAULT;
+                    final String tmp = config.getInitParameter(INIT_CONNECTION_PARAM_METHOD);
+                    final String methodName = tmp != null ? tmp
+                            : INIT_CONNECTION_PARAM_METHOD_DEFAULT;
                     try {
                         // Try method which accepts ServletConfig.
                         final Method factoryMethod = cls.getMethod(methodName, ServletConfig.class);
@@ -248,24 +287,61 @@ public class HttpServlet extends javax.servlet.http.HttpServlet {
     }
 
     /**
-     * Returns the {@code Context} which this HTTP Servlet should use as the
-     * parent context of each request context.
+     * Returns the {@code HttpServletContextFactory} which this HTTP Servlet
+     * should use as the parent context of each request context.
      * <p>
      * This method is invoked by the {@link #init()} method during Servlet
      * initialization only if the parent context wasn't set during construction
      * (which will be the case if the default constructor was called during
      * normal Servlet initialization).
      * <p>
-     * The default implementation is to return the context provided during
-     * construction which will be {@code null} if the default constructor was
-     * called.
+     * The default implementation of this method attempts to instantiate the
+     * context factory using parameters defined in the Servlet's configuration
+     * as follows:
+     * <ul>
+     * <li>it loads the class specified in the {@code context-factory-class}
+     * Servlet configuration parameter
+     * <li>it looks for a static the factory method whose name is specified in
+     * the {@code context-factory-method} Servlet configuration property
+     * (default {@code geHttpServletContextFactory})
+     * <li>it invokes the static factory method, passing in the
+     * {@code ServletConfig} as a parameter if permitted by the method.
+     * </ul>
+     * If the Servlet configuration is unavailable or if the configuration does
+     * not contain a {@code context-factory-class} parameter then a default
+     * context factory will be used which always creates a {@link RootContext}
+     * for each request.
      *
-     * @return The {@code Context} which this HTTP Servlet should use as the
-     *         parent context of each request context.
+     * @return The context factory which will be used to obtain the parent
+     *         context of each request context.
      * @throws ServletException
-     *             If the parent context could not be obtained for some reason.
+     *             If the context factory could not be obtained for some reason.
      */
-    protected Context getParentContext() throws ServletException {
+    protected HttpServletContextFactory getHttpServletContextFactory() throws ServletException {
+        final ServletConfig config = getServletConfig();
+        if (config != null) {
+            // Check for configured context factory class first.
+            final String className = config.getInitParameter(INIT_CONTEXT_PARAM_CLASS);
+            if (className != null) {
+                final ClassLoader cl = getServletConfigurator(getServletContext()).getClassLoader();
+                try {
+                    final Class<?> cls = Class.forName(className, true, cl);
+                    final String tmp = config.getInitParameter(INIT_CONTEXT_PARAM_METHOD);
+                    final String methodName = tmp != null ? tmp : INIT_CONTEXT_PARAM_METHOD_DEFAULT;
+                    try {
+                        // Try method which accepts ServletConfig.
+                        final Method factoryMethod = cls.getMethod(methodName, ServletConfig.class);
+                        return (HttpServletContextFactory) factoryMethod.invoke(null, config);
+                    } catch (final NoSuchMethodException e) {
+                        // Try no-arg method.
+                        final Method factoryMethod = cls.getMethod(methodName);
+                        return (HttpServletContextFactory) factoryMethod.invoke(null);
+                    }
+                } catch (final Exception e) {
+                    throw new ServletException(e);
+                }
+            }
+        }
         return null;
     }
 
