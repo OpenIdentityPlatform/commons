@@ -20,7 +20,6 @@ import java.io.Closeable;
 import java.util.Collection;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.exception.ResourceException;
 
 /**
  * A client connection to a JSON resource provider over which read and update

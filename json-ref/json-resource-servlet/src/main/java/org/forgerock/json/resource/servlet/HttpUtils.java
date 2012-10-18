@@ -21,9 +21,9 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.forgerock.json.resource.exception.BadRequestException;
-import org.forgerock.json.resource.exception.InternalServerErrorException;
-import org.forgerock.json.resource.exception.ResourceException;
+import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.ResourceException;
 
 /**
  * HTTP utility methods and constants.

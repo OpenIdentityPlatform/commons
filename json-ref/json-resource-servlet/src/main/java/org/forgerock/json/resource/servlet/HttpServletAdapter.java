@@ -49,26 +49,26 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.ApiInfoContext;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ApiInfoContext;
+import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.ConflictException;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.NotSupportedException;
+import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.Requests;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.SortKey;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.json.resource.exception.BadRequestException;
-import org.forgerock.json.resource.exception.ConflictException;
-import org.forgerock.json.resource.exception.InternalServerErrorException;
-import org.forgerock.json.resource.exception.NotSupportedException;
-import org.forgerock.json.resource.exception.PreconditionFailedException;
-import org.forgerock.json.resource.exception.ResourceException;
 
 /**
  * HTTP adapter from Servlet calls to JSON resource calls. This class can be

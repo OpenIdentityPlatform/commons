@@ -13,31 +13,17 @@
  *
  * Copyright 2012 ForgeRock AS.
  */
+package org.forgerock.json.resource;
 
-package org.forgerock.json.resource.provider;
-
-import static org.forgerock.json.resource.provider.RoutingMode.EQUALS;
+import static org.forgerock.json.resource.RoutingMode.EQUALS;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.CreateRequest;
-import org.forgerock.json.resource.DeleteRequest;
-import org.forgerock.json.resource.PatchRequest;
-import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResultHandler;
-import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.Resource;
-import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.json.resource.exception.BadRequestException;
-import org.forgerock.json.resource.exception.ResourceException;
 
 /**
- * This class contains common utility methods for creating and manipulating
- * request handlers and providers.
+ * This class contains methods for creating and manipulating connection
+ * factories and connections.
  */
-public final class RequestHandlers {
-
+public final class Resources {
     private static final class Collection implements RequestHandler {
         private final CollectionResourceProvider provider;
 
@@ -154,6 +140,129 @@ public final class RequestHandlers {
         }
     }
 
+    // Internal connection implementation.
+    private static final class InternalConnection extends AbstractAsynchronousConnection {
+        private final RequestHandler requestHandler;
+
+        private InternalConnection(final RequestHandler handler) {
+            this.requestHandler = handler;
+        }
+
+        @Override
+        public FutureResult<JsonValue> actionAsync(final Context context,
+                final ActionRequest request, final ResultHandler<JsonValue> handler) {
+            final FutureResultHandler<JsonValue> future = new FutureResultHandler<JsonValue>(
+                    handler);
+            requestHandler.handleAction(getServerContext(context), request, future);
+            return future;
+        }
+
+        @Override
+        public void close() {
+            // Do nothing.
+        }
+
+        @Override
+        public FutureResult<Resource> createAsync(final Context context,
+                final CreateRequest request, final ResultHandler<Resource> handler) {
+            final FutureResultHandler<Resource> future = new FutureResultHandler<Resource>(handler);
+            requestHandler.handleCreate(getServerContext(context), request, future);
+            return future;
+        }
+
+        @Override
+        public FutureResult<Resource> deleteAsync(final Context context,
+                final DeleteRequest request, final ResultHandler<Resource> handler) {
+            final FutureResultHandler<Resource> future = new FutureResultHandler<Resource>(handler);
+            requestHandler.handleDelete(getServerContext(context), request, future);
+            return future;
+        }
+
+        @Override
+        public boolean isClosed() {
+            // Always open.
+            return false;
+        }
+
+        @Override
+        public boolean isValid() {
+            // Always valid.
+            return true;
+        }
+
+        @Override
+        public FutureResult<Resource> patchAsync(final Context context, final PatchRequest request,
+                final ResultHandler<Resource> handler) {
+            final FutureResultHandler<Resource> future = new FutureResultHandler<Resource>(handler);
+            requestHandler.handlePatch(getServerContext(context), request, future);
+            return future;
+        }
+
+        @Override
+        public FutureResult<QueryResult> queryAsync(final Context context,
+                final QueryRequest request, final QueryResultHandler handler) {
+            final FutureQueryResultHandler future = new FutureQueryResultHandler(handler);
+            requestHandler.handleQuery(getServerContext(context), request, future);
+            return future;
+        }
+
+        @Override
+        public FutureResult<Resource> readAsync(final Context context, final ReadRequest request,
+                final ResultHandler<Resource> handler) {
+            final FutureResultHandler<Resource> future = new FutureResultHandler<Resource>(handler);
+            requestHandler.handleRead(getServerContext(context), request, future);
+            return future;
+        }
+
+        @Override
+        public FutureResult<Resource> updateAsync(final Context context,
+                final UpdateRequest request, final ResultHandler<Resource> handler) {
+            final FutureResultHandler<Resource> future = new FutureResultHandler<Resource>(handler);
+            requestHandler.handleUpdate(getServerContext(context), request, future);
+            return future;
+        }
+
+        private ServerContext getServerContext(final Context context) {
+            if (context instanceof ServerContext) {
+                return (ServerContext) context;
+            } else {
+                final Connection connection;
+                if (context.containsContext(ServerContext.class)) {
+                    connection = context.asContext(ServerContext.class).getConnection();
+                } else {
+                    connection = this;
+                }
+                return new ServerContext(context, connection);
+            }
+        }
+
+    }
+
+    // Internal connection factory implementation.
+    private static final class InternalConnectionFactory implements ConnectionFactory {
+        private final RequestHandler handler;
+
+        private InternalConnectionFactory(final RequestHandler handler) {
+            this.handler = handler;
+        }
+
+        @Override
+        public Connection getConnection() {
+            return newInternalConnection(handler);
+        }
+
+        @Override
+        public FutureResult<Connection> getConnectionAsync(final ResultHandler<Connection> handler) {
+            final Connection connection = getConnection();
+            final FutureResult<Connection> future = new CompletedFutureResult<Connection>(
+                    connection);
+            if (handler != null) {
+                handler.handleResult(connection);
+            }
+            return future;
+        }
+    }
+
     private static final class Singleton implements RequestHandler {
         private final SingletonResourceProvider provider;
 
@@ -254,6 +363,35 @@ public final class RequestHandlers {
     }
 
     /**
+     * Creates a new connection to a {@link RequestHandler}.
+     *
+     * @param handler
+     *            The request handler to which client requests should be
+     *            forwarded.
+     * @return The new internal connection.
+     * @throws NullPointerException
+     *             If {@code handler} was {@code null}.
+     */
+    public static Connection newInternalConnection(final RequestHandler handler) {
+        return new InternalConnection(handler);
+    }
+
+    /**
+     * Creates a new connection factory which binds internal client connections
+     * to {@link RequestHandler}s.
+     *
+     * @param handler
+     *            The request handler to which client requests should be
+     *            forwarded.
+     * @return The new internal connection factory.
+     * @throws NullPointerException
+     *             If {@code handler} was {@code null}.
+     */
+    public static ConnectionFactory newInternalConnectionFactory(final RequestHandler handler) {
+        return new InternalConnectionFactory(handler);
+    }
+
+    /**
      * Returns a new request handler which will forward requests on to the
      * provided singleton resource provider. Incoming requests which are not
      * appropriate for a singleton resource (e.g. query) will result in a bad
@@ -296,12 +434,21 @@ public final class RequestHandlers {
         return collectionRoute;
     }
 
+    static final <T> T checkNotNull(final T object) {
+        if (object == null) {
+            throw new NullPointerException();
+        }
+        return object;
+    }
+
     private static ResourceException newBadRequestException(final String fs, final Object... args) {
         final String msg = String.format(fs, args);
         return new BadRequestException(msg);
     }
 
-    private RequestHandlers() {
-        // Prevent instantiation.
+    // Prevent instantiation.
+    private Resources() {
+        // Nothing to do.
     }
+
 }

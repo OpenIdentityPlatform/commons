@@ -16,14 +16,13 @@
 
 package org.forgerock.json.resource;
 
+import static org.forgerock.json.resource.Resources.checkNotNull;
+
 import java.lang.reflect.Constructor;
 import java.util.LinkedHashMap;
 import java.util.UUID;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.exception.ResourceException;
-import org.forgerock.json.resource.provider.PersistenceConfig;
-import org.forgerock.json.resource.provider.ServerContext;
 
 /**
  * The context associated with a request currently being processed by a JSON
@@ -55,13 +54,6 @@ public abstract class Context {
     private static final String ATTR_CLASS = "class";
     private static final String ATTR_ID = "id";
     private static final String ATTR_PARENT = "parent";
-
-    static final <T> T checkNotNull(final T object) {
-        if (object == null) {
-            throw new NullPointerException();
-        }
-        return object;
-    }
 
     private static Context load0(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
