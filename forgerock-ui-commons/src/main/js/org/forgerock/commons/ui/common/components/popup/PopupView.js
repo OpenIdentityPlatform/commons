@@ -49,10 +49,10 @@ define("org/forgerock/commons/ui/common/components/popup/PopupView", [
         $("#popup").css('top', top);
 
         $("#popup").css('height', h);
-        $("#popupContent").css("margin-left", w + 10);
+        $("#popupContent").css("margin-left", 20);
 
         ph = $("#popupContent").height();
-        $("#popupContent").css("margin-top", -ph / 2);
+        $("#popupContent").css("margin-top", -ph * 1.2);
     };
 
     obj.show = function() {
