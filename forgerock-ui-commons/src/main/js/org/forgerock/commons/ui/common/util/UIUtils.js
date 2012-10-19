@@ -169,6 +169,26 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         });
     };
     
+    $.event.special.delayedkeyup = {            
+        setup: function( data, namespaces ) {
+            $(this).bind("keyup", $.event.special.delayedkeyup.handler);
+        },
+
+        teardown: function( namespaces ) {
+            $(this).unbind("keyup", $.event.special.delayedkeyup.handler);
+        },
+
+        handler: function( event ) {
+            var self = this, args = arguments;
+            
+            event.type = "delayedkeyup";
+                
+            $.doTimeout('delayedkeyup', 250, function() {
+                $.event.handle.apply(self, args);
+            });
+        }
+    };
+    
     obj.loadSelectOptions = function(data, el, empty, callback) {
         if( empty === undefined || empty === true ) {
             data = [ {

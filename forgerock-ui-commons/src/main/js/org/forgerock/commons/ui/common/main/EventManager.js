@@ -44,7 +44,7 @@ define("org/forgerock/commons/ui/common/main/EventManager", [
 
     obj.registerListener = function (eventId, callback) {
         var proxyFunction = function(element, event) {
-            console.debug("Handiling event " + element);
+            console.debug("Handiling event " + element.namespace);
             callback(event);
         };
         console.debug("registering event listener eventId=" + eventId);

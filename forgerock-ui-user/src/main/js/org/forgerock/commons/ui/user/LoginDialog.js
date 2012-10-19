@@ -31,37 +31,30 @@ define("org/forgerock/commons/ui/user/LoginDialog", [
     "org/forgerock/commons/ui/common/util/Constants", 
     "org/forgerock/commons/ui/common/components/Dialog"
 ], function(validatorsManager, conf, eventManager, constants, Dialog) {
-
     var LoginDialog = Dialog.extend({
         contentTemplate: "templates/user/LoginDialog.html",
-        element: '#dialogs',
+
         events: {
             "click input[type=submit]": "login"
         },
+        
         render: function () {
-            
-            this.callback = function () {
-                this.loadContent(function () {
-                    validatorsManager.bindValidators(this.$el);
-                    this.resize();
-                    
-                    if (conf.loggedUser.userName)
-                    {
-                        $("input[name=login]").val(conf.loggedUser.userName).trigger("keyup");
-                        $("input[name=password]").focus();
-                    }
-                    else
-                    {
-                        $("input[name=login]").focus();
-                    }
-                 
-                    
-                });
-            };
-            
-            this.loadTemplate();
-            
+            this.show(_.bind(function(){ 
+                validatorsManager.bindValidators(this.$el);
+                this.resize();
+                
+                if (conf.loggedUser.userName)
+                {
+                    $("input[name=login]").val(conf.loggedUser.userName).trigger("keyup");
+                    $("input[name=password]").focus();
+                }
+                else
+                {
+                    $("input[name=login]").focus();
+                }  
+            },this));
         },
+        
         login: function (e) {
             e.preventDefault();
             
