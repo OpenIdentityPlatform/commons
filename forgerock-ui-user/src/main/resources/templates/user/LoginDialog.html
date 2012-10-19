@@ -1,6 +1,19 @@
+<style>
+#loginDialog div.field {
+    height: auto;
+    margin-bottom: 10px;
+}
 
+#loginDialog form label {
+    text-align:left;
+}
+
+#loginDialog input {
+    float: none;
+}
+</style>
 <h1>Session Expired</h1>
-<div class="shadowFrame paddingVertical40">
+<div class="shadowFrame" id="loginDialog">
     <div style="width: 380px;">
         <form action="" method="post">
             <fieldset>
@@ -12,7 +25,7 @@
                     <label class="short">Password</label> <input type="password" name="password"
                         data-validator="required" data-validator-event="keyup" />
                 </div>
-                <div style="margin-left: 128px;">
+                <div>
                     <input type="submit" name="loginButton" class="button orange" value="Login" />
                 </div>
             </fieldset>

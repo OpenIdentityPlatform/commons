@@ -33,17 +33,20 @@ define("org/forgerock/commons/ui/user/LoginDialog", [
 ], function(validatorsManager, conf, eventManager, constants, Dialog) {
     var LoginDialog = Dialog.extend({
         contentTemplate: "templates/user/LoginDialog.html",
-
+        element: '#dialogs',
         events: {
-            "click input[type=submit]": "login"
+            "click input[type=submit]": "login",
+            "click .dialogCloseCross img": "close",
+            "click input[name='close']": "close",
+            "click": "close",
+            "click .dialogContainer": "stop"
         },
-        
         render: function () {
             this.show(_.bind(function(){ 
                 validatorsManager.bindValidators(this.$el);
                 this.resize();
                 
-                if (conf.loggedUser.userName)
+                if (conf.loggedUser && conf.loggedUser.userName)
                 {
                     $("input[name=login]").val(conf.loggedUser.userName).trigger("keyup");
                     $("input[name=password]").focus();
@@ -53,8 +56,8 @@ define("org/forgerock/commons/ui/user/LoginDialog", [
                     $("input[name=login]").focus();
                 }  
             },this));
+
         },
-        
         login: function (e) {
             e.preventDefault();
             
