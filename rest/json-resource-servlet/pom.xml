@@ -36,7 +36,7 @@
         <dependency>
             <groupId>org.glassfish.grizzly</groupId>
             <artifactId>grizzly-http-servlet</artifactId>
-            <version>2.3-SNAPSHOT</version>
+            <version>2.2.19</version>
             <scope>test</scope>
         </dependency>
         <dependency>
