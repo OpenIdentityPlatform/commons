@@ -3,13 +3,9 @@ package org.forgerock.commons.ui.functionaltests.utils;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.aspectj.lang.annotation.After;
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
+import org.aspectj.lang.annotation.*;
 import org.forgerock.commons.ui.functionaltests.webdriver.WebDriverFactory;
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 

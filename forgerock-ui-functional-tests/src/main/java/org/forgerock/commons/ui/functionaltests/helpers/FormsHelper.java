@@ -8,10 +8,7 @@ import org.codehaus.jackson.JsonNode;
 import org.forgerock.commons.ui.functionaltests.helpers.SeleniumHelper.ElementType;
 import org.forgerock.commons.ui.functionaltests.utils.JsonUtils;
 import org.openqa.selenium.*;
-import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.Select;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.support.ui.*;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -70,7 +67,12 @@ public class FormsHelper {
 	}
 	
 	public String getFieldValue(String el, String name) {
-		WebElement element = selenium.getElement(el, name, ElementType.NAME);
+		WebElement element = null;
+		if (name != null) {
+			element = selenium.getElement(el, name, ElementType.NAME);
+		} else {
+			element = selenium.getElement(el, el, ElementType.ID);
+		}
 		String tagName = element.getTagName();
 		if (tagName.equals("input")) {
 			if(element.getAttribute("type").equals("checkbox")) {
@@ -87,6 +89,8 @@ public class FormsHelper {
 		} else if (tagName.equals("select")) {
 			Select selectBox = new Select(element);
 			return selectBox.getFirstSelectedOption().getAttribute("value");
+		} else if (tagName.equals("div")) {
+			return element.getText();
 		} else {
 			throw new IllegalStateException("No implementation for type " + tagName);
 		}
@@ -211,11 +215,24 @@ public class FormsHelper {
 		selenium.new AssertionWithTimeout() {
 			@Override
 			protected String getAssertionFailedMessage() {
-				return "Validation of form value returned different value";
+				return "Validation of form value returned different value "+ getFieldValue(element, fieldName);
 			}
 			@Override
 			protected boolean assertionCondition(WebDriver driver) {
 				return getFieldValue(element, fieldName).equals(expectedValue);
+			}
+		}.checkAssertion();
+	}
+
+	public void assertValidationDisabled(final String el, final String fieldName) {
+		selenium.new AssertionWithTimeout() {
+			@Override
+			protected String getAssertionFailedMessage() {
+				return "Validation for " + fieldName + " returned 'enabled'. Expected: 'disabled'";
+			}
+			@Override
+			protected boolean assertionCondition(WebDriver driver) {
+				return driver.findElements(By.cssSelector("#"+ el +" [name="+ fieldName +"][data-validation-status=disabled]")).size() != 0;
 			}
 		}.checkAssertion();
 	}

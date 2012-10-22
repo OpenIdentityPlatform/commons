@@ -21,22 +21,18 @@ public class OpenIDMClient {
 	@Inject
 	private Constants constants;
 	
-	private RestTemplate restTemplate;
-	
 	HttpHeaders getAllUsersHeaders = new HttpHeaders();
 	HttpHeaders deleteUserHeaders = new HttpHeaders();
 	HttpHeaders createUserHeaders = new HttpHeaders();
 	
 	public OpenIDMClient() {
-		initializeRestTemplate();
 		initializeHeaders();
 	}
 	
 	public String createUser(JsonNode user) {
-		String entityId = user.get("email").toString().replace('[', ' ').replace(']', ' ').replace('"', ' ').trim();
 		HttpEntity<JsonNode> requestEntity = new HttpEntity<JsonNode>(user, createUserHeaders);
 		
-		ResponseEntity<EntityBaseInfo> response = restTemplate.exchange(constants.getOpenIDMServer() + "openidm/managed/user/?_action=create",
+		ResponseEntity<EntityBaseInfo> response = getRestTemplate().exchange(constants.getOpenIDMServer() + "openidm/managed/user/?_action=create",
 			      HttpMethod.POST, requestEntity, EntityBaseInfo.class);
 		
 		EntityBaseInfo result = response.getBody();
@@ -47,18 +43,12 @@ public class OpenIDMClient {
 		return result.get_id();
 	}
 	
-	
-//	public void logout(String cookie) {
-//		restTemplate.exchange(constants.getOpenIDMServer() + "openidm/",
-//				HttpMethod.GET, new HttpEntity<byte[]>(getHeadersForLogout(cookie)), EntityBaseInfoArray.class);
-//	}
-	
 	/**
 	 * @param cookie like JSESSIONID=ixnekr105coj11ji67xcluux8
 	 */
 	public String loginAndReturnCookie(String userName, String password) {
 		try {
-			ResponseEntity<EntityBaseInfoArray> response = restTemplate.exchange(constants.getOpenIDMServer() + "openidm/managed/user/?_query-id=for-credentials",
+			ResponseEntity<EntityBaseInfoArray> response = getRestTemplate().exchange(constants.getOpenIDMServer() + "openidm/managed/user/?_query-id=for-credentials",
 				      HttpMethod.GET, new HttpEntity<byte[]>(getHeadersForUser(userName, password)), EntityBaseInfoArray.class);
 			return response.getHeaders().get("Set-Cookie").get(0);
 		} catch (RestClientException e) {
@@ -74,7 +64,7 @@ public class OpenIDMClient {
 	}
 	
 	public void deleteUser(String entityId) {
-		ResponseEntity<BaseResult> response = restTemplate.exchange(constants.getOpenIDMServer() + "openidm/managed/user/" + entityId,
+		ResponseEntity<BaseResult> response = getRestTemplate().exchange(constants.getOpenIDMServer() + "openidm/managed/user/" + entityId,
 			      HttpMethod.DELETE, new HttpEntity<byte[]>(deleteUserHeaders), BaseResult.class);
 		BaseResult result = response.getBody();
 		if (result != null && result.getError() != null) {
@@ -83,7 +73,7 @@ public class OpenIDMClient {
 	}
 
 	public EntityBaseInfo[] getAllUsers() {
-		ResponseEntity<EntityBaseInfoArray> response = restTemplate.exchange(constants.getOpenIDMServer() + "openidm/managed/user/?_query-id=query-all-ids",
+		ResponseEntity<EntityBaseInfoArray> response = getRestTemplate().exchange(constants.getOpenIDMServer() + "openidm/managed/user/?_query-id=query-all-ids",
 			      HttpMethod.GET, new HttpEntity<byte[]>(getAllUsersHeaders), EntityBaseInfoArray.class);
 		EntityBaseInfoArray result = response.getBody();
 		if (result.getError() != null) {
@@ -100,29 +90,26 @@ public class OpenIDMClient {
 		return userHeaders;
 	}
 	
-//	private HttpHeaders getHeadersForLogout(String cookie) {
-//		HttpHeaders headersForLogout = new HttpHeaders();
-//		headersForLogout.add("X-OpenIDM-Logout", "true");
-//		headersForLogout.add("Cookie", cookie);
-//		return headersForLogout;
-//	}
-
 	private void initializeHeaders() {
+		
+		getAllUsersHeaders.clear();
 		getAllUsersHeaders.add("X-OpenIDM-Username", "openidm-admin");
 		getAllUsersHeaders.add("X-OpenIDM-Password", "openidm-admin");
 		getAllUsersHeaders.add("X-OpenIDM-NoSession", "true");
 		
+		deleteUserHeaders.clear();
 		deleteUserHeaders.add("X-OpenIDM-Username", "openidm-admin");
 		deleteUserHeaders.add("X-OpenIDM-Password", "openidm-admin");
 		deleteUserHeaders.add("If-Match", "*");
 		
+		createUserHeaders.clear();
 		createUserHeaders.add("X-OpenIDM-Username", "anonymous");
 		createUserHeaders.add("X-OpenIDM-Password", "anonymous");
 		createUserHeaders.add("X-OpenIDM-NoSession", "true");
 	}
 
-	private void initializeRestTemplate() {
-		restTemplate= new RestTemplate();
+	public RestTemplate getRestTemplate() {
+		RestTemplate restTemplate = new RestTemplate();
 		List<HttpMessageConverter<?>> mc = restTemplate.getMessageConverters();
 		MappingJacksonHttpMessageConverter json = new MappingJacksonHttpMessageConverter();
 		List<MediaType> supportedMediaTypes = new ArrayList<MediaType>();
@@ -130,6 +117,7 @@ public class OpenIDMClient {
 		json.setSupportedMediaTypes(supportedMediaTypes);
 		mc.add(json);
 		restTemplate.setMessageConverters(mc);
+		return restTemplate;
 	}
 
 }

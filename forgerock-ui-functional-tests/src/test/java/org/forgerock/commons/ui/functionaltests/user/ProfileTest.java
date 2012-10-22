@@ -48,13 +48,6 @@ public class ProfileTest extends AbstractProfileTest {
 	
 	@Test
 	@AssertNoErrors
-	public void updateGivenNameWithValueWithNumbers() {
-		String emptyGivenName = "Jacek31";
-		new AssertNotValidFieldAfterChange("givenName", emptyGivenName).run();
-	}
-	
-	@Test
-	@AssertNoErrors
 	public void updateFamilyNameWithValidValue() {
 		String currentFamilyName = "TestSurname";
 		String validFamilyName = "Bloodrider";
@@ -65,13 +58,6 @@ public class ProfileTest extends AbstractProfileTest {
 	@AssertNoErrors
 	public void updateFamilyNameWithEmptyValue() {
 		String emptyFamilyName = "";
-		new AssertNotValidFieldAfterChange("familyName", emptyFamilyName).run();
-	}
-	
-	@Test
-	@AssertNoErrors
-	public void updateFamilyNameWithValueWithNumbers() {
-		String emptyFamilyName = "Bloodrider31";
 		new AssertNotValidFieldAfterChange("familyName", emptyFamilyName).run();
 	}
 	

@@ -3,9 +3,8 @@ package org.forgerock.commons.ui.functionaltests.user;
 import junit.framework.Assert;
 
 import org.codehaus.jackson.JsonNode;
-import org.forgerock.commons.ui.functionaltests.AbstractTest;
 
-public class AbstractRegistrationTest extends AbstractTest{
+public class AbstractRegistrationTest extends AbstractEnterOldPasswordTest{
 	
 	protected String formatStringFromForm(String value) {
 		return value.substring(1, value.length()-1);

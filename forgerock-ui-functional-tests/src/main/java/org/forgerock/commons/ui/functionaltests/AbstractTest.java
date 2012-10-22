@@ -2,6 +2,8 @@ package org.forgerock.commons.ui.functionaltests;
 
 import javax.inject.Inject;
 
+import junit.framework.Assert;
+
 import org.forgerock.commons.ui.functionaltests.constants.Constants;
 import org.forgerock.commons.ui.functionaltests.helpers.*;
 import org.forgerock.commons.ui.functionaltests.openidmclient.OpenIDMClient;
@@ -41,6 +43,9 @@ public class AbstractTest extends AbstractTestNGSpringContextTests {
 	
 	@Inject
 	protected UserHelper userHelper;
+	
+	@Inject
+	protected DialogsHelper dialogsHelper;
 	
 	@BeforeMethod
 	public void cleanup() {
@@ -90,6 +95,11 @@ public class AbstractTest extends AbstractTestNGSpringContextTests {
 		forms.assertFormFieldHasValue(element, fieldName, tmpValue);
 		forms.assertValidationPasses(element, fieldName);
 		forms.assertFormValidationPasses(element);
+	}
+	
+	protected void assertFieldHasValue(String element, String fieldName, String expectedValue) {
+		String fieldValue = forms.getFieldValue(element, fieldName);
+		Assert.assertEquals(expectedValue, fieldValue);
 	}
 	
 }
