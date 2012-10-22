@@ -80,9 +80,8 @@ define("org/forgerock/commons/ui/user/UserRegistrationView", [
                     if (response.error === 'Conflict') {
                         //TODO
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "userAlreadyExists" );
-                    } else {
-                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unknown" );
-                    }
+                    } 
+                    
                     this.unlock();
                 }, this));
             }
@@ -94,6 +93,8 @@ define("org/forgerock/commons/ui/user/UserRegistrationView", [
         },
         
         render: function(args, callback) {
+            conf.setProperty("gotoURL", null);
+            
             this.parentRender(function() {
                 validatorsManager.bindValidators(this.$el);
                 this.unlock();

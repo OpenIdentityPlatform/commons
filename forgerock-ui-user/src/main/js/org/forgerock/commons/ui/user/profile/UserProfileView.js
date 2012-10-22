@@ -66,15 +66,7 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
                         conf.loggedUser = user;
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateSuccessful");
                         self.reloadData();
-                    }, function() {
-                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateFailed");
-                        self.reloadData();
                     });
-                }, function() {
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateFailed");
-                    self.reloadData();
-                }, function() {
-                    self.reloadData();
                 });
             }
         },
@@ -104,7 +96,7 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
         },
         
         loadStates: function() {
-            var country = $('#profile select[name="country"]').val(), self = this;            
+            var country = this.$el.find('select[name="country"]').val(), self = this;            
               
             if(country) {
                 this.$el.find("select[name='country'] > option:first").text("");

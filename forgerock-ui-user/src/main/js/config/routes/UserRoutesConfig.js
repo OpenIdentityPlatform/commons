@@ -66,7 +66,7 @@ define("config/routes/UserRoutesConfig", [
             url: "login/"
         },                           
         "loginDialog" : {
-            view: "org/forgerock/commons/ui/user/LoginDialog",
+            dialog: "org/forgerock/commons/ui/user/LoginDialog",
             url: "loginDialog/"
         },                           
         "forgottenPassword" : {

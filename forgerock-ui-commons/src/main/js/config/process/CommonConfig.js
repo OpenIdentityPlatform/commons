@@ -128,7 +128,6 @@ define("config/process/CommonConfig", [
             ],
             processDescription: function(error, router) {
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "serviceUnavailable");
-                router.routeTo("", {trigger: true});
             }
         },
         {

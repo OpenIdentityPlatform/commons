@@ -36,39 +36,55 @@ define("org/forgerock/commons/ui/user/LoginDialog", [
         element: '#dialogs',
         events: {
             "click input[type=submit]": "login",
-            "click .dialogCloseCross img": "close",
-            "click input[name='close']": "close",
-            "click": "close",
+            "click .dialogCloseCross img": "loginClose",
+            "click input[name='close']": "loginClose",
+            "click": "loginClose",
             "click .dialogContainer": "stop"
         },
+        
+        displayed: false,
+        
         render: function () {
-            this.show(_.bind(function(){ 
-                validatorsManager.bindValidators(this.$el);
-                this.resize();
+            if(this.displayed === false) {
+                this.displayed = true;
                 
-                if (conf.loggedUser && conf.loggedUser.userName)
-                {
-                    $("input[name=login]").val(conf.loggedUser.userName).trigger("keyup");
-                    $("input[name=password]").focus();
-                }
-                else
-                {
-                    $("input[name=login]").focus();
-                }  
-            },this));
-
+                this.show(_.bind(function(){ 
+                    validatorsManager.bindValidators(this.$el);
+                    this.resize();                 
+                                        
+                    if (conf.loggedUser && conf.loggedUser.userName)
+                    {
+                        $("input[name=login]").val(conf.loggedUser.userName).trigger("keyup");
+                        $("input[name=password]").focus();
+                    }
+                    else
+                    {
+                        $("input[name=login]").focus();
+                    }  
+                }, this));
+            }
         },
+        
+        loginClose: function(e) {
+            e.preventDefault();
+            
+            this.displayed = false;
+            this.close(e);
+        },
+        
         login: function (e) {
             e.preventDefault();
             
             if(validatorsManager.formValidated(this.$el)) {
-                conf.backgroundLogin = true;
+                conf.setProperty("backgroundLogin", true);
                 var _this = this;
                 eventManager.registerListener(constants.EVENT_DISPLAY_MESSAGE_REQUEST, _.once(function (event) {
                     console.log(event);
                     if (event === "loggedIn")
                     {
                         _this.close();
+                        _this.displayed = false;
+                        conf.setProperty("backgroundLogin", false);
                         eventManager.sendEvent(constants.EVENT_REQUEST_RESEND_REQUIRED);
                     }
                 }));

@@ -76,9 +76,6 @@ define("org/forgerock/commons/ui/user/profile/ChangeSecurityDataDialog", [
                     userDelegate.getForUserName(conf.loggedUser.userName, function(user) {
                         conf.loggedUser = user;
                     });
-                }, this), _.bind(function(r) {
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unknown");
-                    this.close();
                 }, this));
             }
         },

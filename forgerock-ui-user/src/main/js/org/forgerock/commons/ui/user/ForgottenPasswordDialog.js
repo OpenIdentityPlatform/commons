@@ -78,6 +78,9 @@ define("org/forgerock/commons/ui/user/ForgottenPasswordDialog", [
         },
         
         formSubmit: function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            
             if (validatorsManager.formValidated(this.$el)) {
                 this.changePassword();
             } else {
@@ -90,10 +93,9 @@ define("org/forgerock/commons/ui/user/ForgottenPasswordDialog", [
                     this.data.height = 210;
                 } else {
                     securityQuestionRef = this.securityQuestions;
-                    userDelegate.getSecurityQuestionForUserName(userName,
-                            function(result) {
-                                $("#fgtnSecurityQuestion").text(securityQuestionRef[result]);
-                            });
+                    userDelegate.getSecurityQuestionForUserName(userName, function(result) {
+                        $("#fgtnSecurityQuestion").text(securityQuestionRef[result]);
+                    });
                     this.$el.find("#fgtnAnswerDiv").show();
                     this.data.height = 350;
                 }
@@ -105,12 +107,9 @@ define("org/forgerock/commons/ui/user/ForgottenPasswordDialog", [
             var dialog = this, userName = this.$el.find("input[name=resetEmail]").val(), securityAnswer = this.$el.find("input[name=fgtnSecurityAnswer]").val(), newPassword = this.$el.find("input[name=password]").val();
             console.log("changing password");
             
-            userDelegate.setNewPassword(userName, securityAnswer, newPassword,
-                    function(r) {
+            userDelegate.setNewPassword(userName, securityAnswer, newPassword, function(r) {
                 eventManager.sendEvent(constants.FORGOTTEN_PASSWORD_CHANGED_SUCCESSFULLY, { userName: userName, password: newPassword});
                 dialog.close();
-            }, function(r) {
-                eventManager.sendEvent(constants.EVENT_USER_PROFILE_UPDATE_FAILED);
             });
         }
     }); 

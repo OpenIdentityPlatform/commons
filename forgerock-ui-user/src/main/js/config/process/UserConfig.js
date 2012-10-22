@@ -143,7 +143,6 @@ define("config/process/UserConfig", [
                     
                     if (! conf.backgroundLogin)
                     {
-                        
                         if(conf.gotoURL && _.indexOf(["#","","#/","/#"], conf.gotoURL) === -1) {
                             console.log("Auto redirect to " + conf.gotoURL);
                             router.navigate(conf.gotoURL, {trigger: true});

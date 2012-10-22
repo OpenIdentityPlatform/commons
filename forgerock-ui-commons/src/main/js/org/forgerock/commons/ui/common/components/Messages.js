@@ -53,6 +53,15 @@ define("org/forgerock/commons/ui/common/components/Messages", [
          * Usage: addMessage({message: "Some Message", type: "error"})
          */
         addMessage: function(msg) {
+            var i;
+            
+            for(i = 0; i < this.messages.length; i++) {
+                if(this.messages[i].message === msg.message) {
+                    console.log("duplicated message");
+                    return;
+                }
+            }
+            
             this.messages.push(msg);
             
             if (this.messages.length === 1) {
@@ -95,8 +104,9 @@ define("org/forgerock/commons/ui/common/components/Messages", [
         },
         
         hideMessages : function() {
-            this.$el.find("div").fadeOut(500);
-            this.messagesLoop();
+            this.$el.find("div").delay(1000).fadeOut(500, _.bind(function() {
+                this.messagesLoop();    
+            }, this));
         }
     });
     

@@ -28,7 +28,8 @@
  * @author mbilski
  */
 define("org/forgerock/commons/ui/common/main/ViewManager", [
-    "org/forgerock/commons/ui/common/util/UIUtils"
+    "org/forgerock/commons/ui/common/util/UIUtils",
+    "org/forgerock/commons/ui/common/components/Messages"
 ], function(uiUtils, msg) {
     var obj = {};
     
@@ -56,6 +57,8 @@ define("org/forgerock/commons/ui/common/main/ViewManager", [
             } else {
                 view.render(args, callback);
             }
+            
+            msg.messages.hideMessages();
         } else {
             view = require(obj.currentView);
             view.rebind();
@@ -71,6 +74,7 @@ define("org/forgerock/commons/ui/common/main/ViewManager", [
     obj.showDialog = function(dialogPath, args) {
         if(obj.currentDialog !== dialogPath) {
             require(dialogPath).render(args);
+            msg.messages.hideMessages();
         }
         
         obj.currentDialog = dialogPath;
