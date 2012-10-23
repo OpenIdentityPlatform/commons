@@ -1,5 +1,6 @@
 {
-    "email": "a@a.pl", 
+    "userName": "a@a.pl",
+    "email": "b@a.pl", 
     "givenName": "Aaaaa",
     "familyName": "Bbbbb",
     "phoneNumber": "1234aa",
@@ -8,5 +9,6 @@
     "securityQuestion": "1",
     "securityAnswer": "qwe",
     "passPhrase": "qwerty",
-    "terms": "yes"
+    "terms": "yes",
+    "register":""
 }

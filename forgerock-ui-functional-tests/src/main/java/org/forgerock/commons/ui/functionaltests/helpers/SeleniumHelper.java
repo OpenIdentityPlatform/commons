@@ -47,8 +47,19 @@ public class SeleniumHelper {
 		throw new RuntimeException("Incorrect element type");
 	}
 
-	public void waitForElement(String el, String value, ElementType type) {
-		getElement(el, value, type);
+	public void waitForElement(final String el, final String value, final ElementType type) {
+		new AssertionWithTimeout() {
+			
+			@Override
+			protected String getAssertionFailedMessage() {
+				return "Element " + value + " has not been found on page";
+			}
+			
+			@Override
+			protected boolean assertionCondition(WebDriver driver) {
+				return getElement(el, value, type) != null;
+			}
+		};
 	}
 
 	/**

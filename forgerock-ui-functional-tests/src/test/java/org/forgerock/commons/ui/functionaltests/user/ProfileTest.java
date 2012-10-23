@@ -184,17 +184,17 @@ public class ProfileTest extends AbstractProfileTest {
 	
 	@Test
 	@AssertNoErrors
-	public void testUpdateEmail() {
-		String emailToSet = "second@test.test";
-		String fieldName = "email";
+	public void testUpdateUserName() {
+		String userNameToSet = "second@test.test";
+		String fieldName = "userName";
 		
 		userHelper.createDefaultUser();
 		userHelper.loginAsDefaultUser();
 		router.goToProfile(true);
 		router.assertUrl("#profile/");
 		forms.validateForm("content");
-		forms.setField("content", fieldName , emailToSet);
-		assertFieldHasValue(fieldName, emailToSet);
+		forms.setField("content", fieldName , userNameToSet);
+		assertFieldHasValue(fieldName, userNameToSet);
 		forms.assertValidationPasses("content", fieldName);
 		forms.assertFormValidationPasses("content");
 		forms.submit("content", "saveButton");
@@ -207,7 +207,7 @@ public class ProfileTest extends AbstractProfileTest {
 		router.assertUrl("#profile/");
 		forms.validateForm("content");
 		
-		assertFieldHasValue(fieldName, emailToSet);
+		assertFieldHasValue(fieldName, userNameToSet);
 	}
 	
 	@Test

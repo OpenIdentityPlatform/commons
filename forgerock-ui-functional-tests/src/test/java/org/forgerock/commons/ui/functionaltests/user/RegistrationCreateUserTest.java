@@ -22,7 +22,8 @@ public class RegistrationCreateUserTest extends AbstractRegistrationTest {
 				
 				JsonNode e = forms.readForm("content");
 				Assert.assertEquals("Aaaaa", formatStringFromForm(e.get("givenName").toString()));
-				Assert.assertEquals("a@a.pl", formatStringFromForm(e.get("email").toString()));
+				Assert.assertEquals("a@a.pl", formatStringFromForm(e.get("userName").toString()));
+				Assert.assertEquals("b@a.pl", formatStringFromForm(e.get("email").toString()));
 				Assert.assertEquals("Bbbbb", formatStringFromForm(e.get("familyName").toString()));
 				Assert.assertEquals("1234", formatStringFromForm(e.get("phoneNumber").toString()));
 				Assert.assertEquals("", formatStringFromForm(e.get("address1").toString()));

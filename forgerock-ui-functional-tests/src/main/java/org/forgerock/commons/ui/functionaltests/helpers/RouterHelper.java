@@ -51,12 +51,15 @@ public class RouterHelper {
 			driver.navigate().refresh();
 		}
 		this.routeTo("#profile/");		
+		this.assertUrl("#profile/");
 		selenium.waitForElement("content", "saveButton", ElementType.NAME);
 	}
 	
 	public void goToRegistration() {
 		this.routeTo("#register/");
-		selenium.waitForElement("content", "email", ElementType.NAME);
+		this.assertUrl("#register/");
+		selenium.waitForElement("content", "terms", ElementType.NAME);
+		selenium.waitForElement("content", "securityQuestion", ElementType.NAME);
 	}
 	
 	public void assertUrl(final String url) {
@@ -74,6 +77,7 @@ public class RouterHelper {
 			driver.navigate().refresh();
 		}
 		this.routeTo("#applications/addmore/");
+		this.assertUrl("#applications/addmore/");
 		selenium.waitForElement("content", "itemize", ElementType.CLASS);
 	}
 }

@@ -134,7 +134,7 @@ public class ChangeSecurityDataTest extends AbstractChangeSecurityDataTest {
 				
 				dialogsHelper.assertActionButtonEnabled("Update");
 				
-				forms.submit("content", "Update");
+				forms.submit("dialogs", "Update");
 				router.assertUrl("#profile/");
 			}
 		}.run();
@@ -155,7 +155,7 @@ public class ChangeSecurityDataTest extends AbstractChangeSecurityDataTest {
 				
 				dialogsHelper.assertActionButtonEnabled("Update");
 				
-				forms.submit("content", "Update");
+				forms.submit("dialogs", "Update");
 				router.assertUrl("#profile/");
 			}
 			
@@ -184,7 +184,7 @@ public class ChangeSecurityDataTest extends AbstractChangeSecurityDataTest {
 				
 				dialogsHelper.assertActionButtonEnabled("Update");
 				
-				forms.submit("content", "Update");
+				forms.submit("dialogs", "Update");
 				router.assertUrl("#profile/");
 				
 				userHelper.logout();

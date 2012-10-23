@@ -113,14 +113,29 @@ public class FormsHelper {
 	public void fillForm(String el, JsonNode json) {
 		String jsonStr = jsonUtils.jsonToString(json);
 		
-		((JavascriptExecutor) driver).executeScript("js2form(document.getElementById('"+ el +"'), "+ jsonStr +");");
+		try {
+			((JavascriptExecutor) driver).executeScript("js2form(document.getElementById('"+ el +"'), "+ jsonStr +");");
+		} catch (WebDriverException e) {
+			System.err.println(e.getMessage());
+		}
+		
+		if ( !readForm(el).equals(json)) {
+			fillForm(el, json);
+		}
 	}
 	
 	/**
 	 * @param el id of root element
 	 */
 	public JsonNode readForm(String el) {
-		String json = (String) ((JavascriptExecutor) driver).executeScript("return JSON.stringify(form2js('"+ el +"', '.', false));");
+		String json = null;
+		try {
+			json = (String) ((JavascriptExecutor) driver).executeScript("return JSON.stringify(form2js('"+ el +"', '.', false));");
+		} catch (WebDriverException e) {
+			// somethimes it does not work for the first time
+			json = (String) ((JavascriptExecutor) driver).executeScript("return JSON.stringify(form2js('"+ el +"', '.', false));");
+
+		}
 		
 		//form2js includes also buttons...
 		//it's a quick fix for that
