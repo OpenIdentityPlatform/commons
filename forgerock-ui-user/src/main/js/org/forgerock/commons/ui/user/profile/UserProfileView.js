@@ -52,7 +52,7 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
             
             if(validatorsManager.formValidated(this.$el)) {
                 var data = form2js(this.$el.attr("id"), '.', false), self = this;
-                data.userName = data.email.toLowerCase();
+                //data.userName = data.email.toLowerCase();
                 data.phoneNumber = data.phoneNumber.split(' ').join('').split('-').join('').split('(').join('').split(')').join('');
                 
                 userDelegate.patchUserDifferences(conf.loggedUser, data, function() {

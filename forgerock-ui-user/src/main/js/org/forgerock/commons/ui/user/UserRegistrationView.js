@@ -65,7 +65,7 @@ define("org/forgerock/commons/ui/user/UserRegistrationView", [
                 
                 delete data.terms;
                 delete data.passwordConfirm;
-                data.userName = data.email.toLowerCase();
+                //data.userName = data.email.toLowerCase();
                 
                 if(this.siteImageFlow) {
                     element = this.siteImageFlow.getActiveItem().element;
