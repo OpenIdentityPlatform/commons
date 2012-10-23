@@ -31,7 +31,26 @@ define("config/validators/UserValidators", [
 ], function(constants, eventManager) {
     var obj = {
             "registrationEmail": {
-                "name": "Correct and unique email",
+                "name": "Present and valid email",
+                "dependencies": [
+                    "org/forgerock/commons/ui/common/util/ValidatorsUtils"
+                ],
+                "validator": function(el, input, callback, utils) {
+                    var v = $(input).val();
+                    
+                    if(v === "") {
+                        callback("Required");
+                        return;
+                    }
+                    
+                    if(!utils.emailPattern.test(v)) {
+                        callback("Not a valid email address.");
+                        return;
+                    }
+                }
+            },
+            "userName": {
+                "name": "Valid and unique username",
                 "dependencies": [
                     "org/forgerock/commons/ui/common/util/ValidatorsUtils",
                     "org/forgerock/commons/ui/user/delegates/UserDelegate"
@@ -44,14 +63,9 @@ define("config/validators/UserValidators", [
                         return;
                     }
                     
-                    if(!utils.emailPattern.test(v)) {
-                        callback("Not a valid email address.");
-                        return;
-                    }
-                    
                     userDelegate.checkUserNameAvailability(v, function(available) {
                         if(!available) {
-                            callback("Email address already exists. <br />&nbsp;&nbsp;<a href='#profile/forgotten_password/' id='frgtPasswrdSelfReg' class='ice'>Forgot password?</a>");
+                            callback("Username already exists.");
                         } else {
                             callback();
                         }

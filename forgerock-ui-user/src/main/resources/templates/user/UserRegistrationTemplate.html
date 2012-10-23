@@ -13,7 +13,7 @@
                 <div class="fields">
                     <div class="field">
                         <label>Username</label> 
-                        <input type="text" name="userName" data-validator="name" /> 
+                        <input type="text" name="userName" data-validator="userName" /> 
                         <span class="error">x</span>
                         <div class="validationMessage"></div>
                     </div>
@@ -82,7 +82,7 @@
                             </div> 
                         </div>
                         <div class="clear"></div>
-                        {{#enterprise}}
+                        {{#securityQuestions}}
                         <p style="width: 400px; margin-left: 220px; margin-bottom: 10px;">The Security Question selected and corresponding Answer provided by you will be used to help identify you in the event that you forget your password.
                         </p>
                         <div class="field">
@@ -117,7 +117,7 @@
                             <span class="error">x</span>
                             <div class="validationMessage"></div>
                         </div>   
-                        {{/enterprise}}               
+                        {{/securityQuestions}}               
                     </div>
                     
                     <div class="field">
