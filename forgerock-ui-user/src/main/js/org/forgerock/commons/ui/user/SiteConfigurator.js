@@ -42,7 +42,7 @@ define("org/forgerock/commons/ui/user/SiteConfigurator", [
        if(!conf.globalData) {
            conf.setProperty('globalData', {});
        }
-       
+
        console.log("READING CONFIGURATION");
        if(obj.configuration && obj.initialized === false) {
            obj.initialized = true;

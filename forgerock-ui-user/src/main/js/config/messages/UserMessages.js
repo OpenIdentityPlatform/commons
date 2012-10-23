@@ -32,83 +32,83 @@ define("config/messages/UserMessages", [
     
     var obj = {
             "invalidCredentials": {
-                msg: "Login/password combination is invalid.",
+                msg: "config.messages.UserMessages.invalidCredentials",
                 type: "error"
             },
             "serviceUnavailable": {
-                msg: "Service unavailable",
+                msg: "config.messages.UserMessages.serviceUnavailable",
                 type: "error"
             },
             "changedPassword": {
-                msg: "Password has been changed",
+                msg: "config.messages.UserMessages.changedPassword",
                 type: "info"
             },
             "unknown": {
-                msg: "Unknown error. Please contact with administrator",
+                msg: "config.messages.UserMessages.unknown",
                 type: "error"
             },
             "profileUpdateFailed": {
-                msg: "Problem during profile update",
+                msg: "config.messages.UserMessages.profileUpdateFailed",
                 type: "error"
             },
             "profileUpdateSuccessful": {
-                msg: "Profile has been updated",
+                msg: "config.messages.UserMessages.profileUpdateSuccessful",
                 type: "info"
             },
             "userNameUpdated": {
-                msg: "Username has been modified succesfully.",
+                msg: "config.messages.UserMessages.userNameUpdated",
                 type: "info"
             },
             "afterRegistration": {
-                msg: "User has been registered successfully",
+                msg: "config.messages.UserMessages.afterRegistration",
                 type: "info"
             },
             "loggedIn": {
-                msg: "You have been successfully logged in.",
+                msg: "config.messages.UserMessages.loggedIn",
                 type: "info"
             },
             "errorFetchingData": {
-                msg: "Error fetching user data",
+                msg: "config.messages.UserMessages.errorFetchingData",
                 type: "error"
             },
             "loggedOut": {
-                msg: "You have been logged out.",
+                msg: "config.messages.UserMessages.loggedOut",
                 type: "info"
             },
             "siteIdentificationChanged": {
-                msg: "Site identification image has been changed",
+                msg: "config.messages.UserMessages.siteIdentificationChanged",
                 type: "info"
             },
             "securityDataChanged": {
-                msg: "Security data has been changed",
+                msg: "config.messages.UserMessages.securityDataChanged",
                 type: "info"
             },
             "unauthorized": {
-                msg: "Unauthorized access or session timeout",
+                msg: "config.messages.UserMessages.unauthorized",
                 type: "error"
             },
             "userAlreadyExists": {
-                msg: "User already exists",
+                msg: "config.messages.UserMessages.userAlreadyExists",
                 type: "error"
             },
             "internalError": {
-                msg: "Internal server error",
+                msg: "config.messages.UserMessages.internalError",
                 type: "error"
             },
             "forbiddenError": {
-                msg: "Forbidden request error.",
+                msg: "config.messages.UserMessages.forbiddenError",
                 type: "error"
             },
             "notFoundError": {
-                msg: "Not found error.",
+                msg: "config.messages.UserMessages.notFoundError",
                 type: "error"
             },
             "badRequestError": {
-                msg: "Bad request error.",
+                msg: "config.messages.UserMessages.badRequestError",
                 type: "error"
             },
             "conflictError": {
-                msg: "Detected conflict in request.",
+                msg: "config.messages.UserMessages.conflictError",
                 type: "error"
             }
     };

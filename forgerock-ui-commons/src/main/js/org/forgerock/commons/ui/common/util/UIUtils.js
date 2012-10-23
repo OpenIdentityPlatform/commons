@@ -22,13 +22,14 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define, window */
+/*global $, define, window, Handlebars, i18n */
 
 define("org/forgerock/commons/ui/common/util/UIUtils", [
     "org/forgerock/commons/ui/common/util/typeextentions/String",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
-    "mustache"
-], function (String, AbstractConfigurationAware, Mustache) {
+    "handlebars",
+    "i18next"
+], function (String, AbstractConfigurationAware, handlebars, i18next) {
     var obj = new AbstractConfigurationAware();
 
     obj.getUrl = function() {
@@ -97,8 +98,8 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     obj.fillTemplateWithData = function(templateUrl, data, callback) {
         if(templateUrl) {
             if (obj.templates[templateUrl]) {
-                var code = Mustache.render(obj.templates[templateUrl], data);
-                
+                var code = Handlebars.compile(obj.templates[templateUrl])(data);
+                                
                 if(callback) {
                     callback(code);
                 }
@@ -117,7 +118,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                             obj.templates[templateUrl] = template;
 
                             //fill the template
-                            callback(Mustache.render(template, data));
+                            callback(Handlebars.compile(template)(data));
                         }
                     },
                     error: callback
@@ -188,6 +189,12 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
             });
         }
     };
+    
+    Handlebars.registerHelper('t', function(i18n_key) {
+        var result = i18n.t(i18n_key);
+       
+        return new Handlebars.SafeString(result);
+    });
     
     obj.loadSelectOptions = function(data, el, empty, callback) {
         if( empty === undefined || empty === true ) {

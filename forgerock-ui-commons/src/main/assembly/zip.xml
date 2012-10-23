@@ -93,6 +93,24 @@
             </includes>
             <outputDirectory>/libs</outputDirectory>
         </dependencySet>
+        <dependencySet>
+            <includes>
+                <include>org.forgerock.commons.ui.libs:i18next</include>
+            </includes>
+            <outputDirectory>/libs</outputDirectory>
+        </dependencySet>
+        <dependencySet>
+            <includes>
+                <include>org.forgerock.commons.ui.libs:handlebars</include>
+            </includes>
+            <outputDirectory>/libs</outputDirectory>
+        </dependencySet>
+        <dependencySet>
+            <includes>
+                <include>org.forgerock.commons.ui.libs:jquery.ba-dotimeout</include>
+            </includes>
+            <outputDirectory>/libs</outputDirectory>
+        </dependencySet>
 	</dependencySets>
 
 	<fileSets>

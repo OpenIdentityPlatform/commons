@@ -45,7 +45,7 @@ define("org/forgerock/commons/ui/common/components/Messages", [
         },
         
         displayMessageFromConfig: function(msgKey) {
-            this.addMessage({message: obj.configuration.messages[msgKey].msg, type: obj.configuration.messages[msgKey].type});
+            this.addMessage({message: $.t(obj.configuration.messages[msgKey].msg), type: obj.configuration.messages[msgKey].type});
         },
         
         /**
