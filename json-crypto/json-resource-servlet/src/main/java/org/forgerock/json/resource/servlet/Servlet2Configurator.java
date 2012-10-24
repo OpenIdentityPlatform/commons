@@ -95,14 +95,6 @@ final class Servlet2Configurator extends ServletConfigurator {
      * {@inheritDoc}
      */
     @Override
-    ClassLoader getClassLoader() {
-        return this.getClass().getClassLoader();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     RequestDispatcher getRequestDispatcher(final ConnectionFactory connectionFactory,
             final JsonFactory jsonFactory) {
         return new Servlet2RequestDispatcher(connectionFactory, jsonFactory);

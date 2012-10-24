@@ -57,13 +57,6 @@ abstract class ServletConfigurator {
     }
 
     /**
-     * Returns the class loader which should be used by the Servlet.
-     *
-     * @return The class loader which should be used by the Servlet.
-     */
-    abstract ClassLoader getClassLoader();
-
-    /**
      * Creates a new request dispatcher appropriate for Servlet container.
      *
      * @param connectionFactory

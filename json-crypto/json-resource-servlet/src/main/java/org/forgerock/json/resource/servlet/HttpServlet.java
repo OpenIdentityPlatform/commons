@@ -16,7 +16,6 @@
 package org.forgerock.json.resource.servlet;
 
 import static org.forgerock.json.resource.servlet.HttpUtils.checkNotNull;
-import static org.forgerock.json.resource.servlet.ServletConfigurator.getServletConfigurator;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -49,12 +48,12 @@ import org.forgerock.json.resource.RootContext;
  * Most implementations will use the second approach.
  */
 public class HttpServlet extends javax.servlet.http.HttpServlet {
-    private static final String INIT_CONNECTION_PARAM_CLASS = "connection-factory-class";
-    private static final String INIT_CONNECTION_PARAM_METHOD = "connection-factory-method";
-    private static final String INIT_CONNECTION_PARAM_METHOD_DEFAULT = "getConnectionFactory";
-    private static final String INIT_CONTEXT_PARAM_CLASS = "context-factory-class";
-    private static final String INIT_CONTEXT_PARAM_METHOD = "context-factory-method";
-    private static final String INIT_CONTEXT_PARAM_METHOD_DEFAULT = "getHttpServletContextFactory";
+    private static final String INIT_PARAM_CONNECTION_CLASS = "connection-factory-class";
+    private static final String INIT_PARAM_CONNECTION_METHOD = "connection-factory-method";
+    private static final String INIT_PARAM_CONNECTION_METHOD_DEFAULT = "getConnectionFactory";
+    private static final String INIT_PARAM_CONTEXT_CLASS = "context-factory-class";
+    private static final String INIT_PARAM_CONTEXT_METHOD = "context-factory-method";
+    private static final String INIT_PARAM_CONTEXT_METHOD_DEFAULT = "getHttpServletContextFactory";
     private static final String METHOD_PATCH = "PATCH";
     private static final long serialVersionUID = 6089858120348026823L;
 
@@ -259,21 +258,21 @@ public class HttpServlet extends javax.servlet.http.HttpServlet {
         final ServletConfig config = getServletConfig();
         if (config != null) {
             // Check for configured connection factory class first.
-            final String className = config.getInitParameter(INIT_CONNECTION_PARAM_CLASS);
+            final String className = config.getInitParameter(INIT_PARAM_CONNECTION_CLASS);
             if (className != null) {
-                final ClassLoader cl = getServletConfigurator(getServletContext()).getClassLoader();
                 try {
-                    final Class<?> cls = Class.forName(className, true, cl);
-                    final String tmp = config.getInitParameter(INIT_CONNECTION_PARAM_METHOD);
+                    final Class<?> cls = Class.forName(className);
+                    final String tmp = config.getInitParameter(INIT_PARAM_CONNECTION_METHOD);
                     final String methodName = tmp != null ? tmp
-                            : INIT_CONNECTION_PARAM_METHOD_DEFAULT;
+                            : INIT_PARAM_CONNECTION_METHOD_DEFAULT;
                     try {
                         // Try method which accepts ServletConfig.
-                        final Method factoryMethod = cls.getMethod(methodName, ServletConfig.class);
+                        final Method factoryMethod = cls.getDeclaredMethod(methodName,
+                                ServletConfig.class);
                         return (ConnectionFactory) factoryMethod.invoke(null, config);
                     } catch (final NoSuchMethodException e) {
                         // Try no-arg method.
-                        final Method factoryMethod = cls.getMethod(methodName);
+                        final Method factoryMethod = cls.getDeclaredMethod(methodName);
                         return (ConnectionFactory) factoryMethod.invoke(null);
                     }
                 } catch (final Exception e) {
@@ -321,20 +320,20 @@ public class HttpServlet extends javax.servlet.http.HttpServlet {
         final ServletConfig config = getServletConfig();
         if (config != null) {
             // Check for configured context factory class first.
-            final String className = config.getInitParameter(INIT_CONTEXT_PARAM_CLASS);
+            final String className = config.getInitParameter(INIT_PARAM_CONTEXT_CLASS);
             if (className != null) {
-                final ClassLoader cl = getServletConfigurator(getServletContext()).getClassLoader();
                 try {
-                    final Class<?> cls = Class.forName(className, true, cl);
-                    final String tmp = config.getInitParameter(INIT_CONTEXT_PARAM_METHOD);
-                    final String methodName = tmp != null ? tmp : INIT_CONTEXT_PARAM_METHOD_DEFAULT;
+                    final Class<?> cls = Class.forName(className);
+                    final String tmp = config.getInitParameter(INIT_PARAM_CONTEXT_METHOD);
+                    final String methodName = tmp != null ? tmp : INIT_PARAM_CONTEXT_METHOD_DEFAULT;
                     try {
                         // Try method which accepts ServletConfig.
-                        final Method factoryMethod = cls.getMethod(methodName, ServletConfig.class);
+                        final Method factoryMethod = cls.getDeclaredMethod(methodName,
+                                ServletConfig.class);
                         return (HttpServletContextFactory) factoryMethod.invoke(null, config);
                     } catch (final NoSuchMethodException e) {
                         // Try no-arg method.
-                        final Method factoryMethod = cls.getMethod(methodName);
+                        final Method factoryMethod = cls.getDeclaredMethod(methodName);
                         return (HttpServletContextFactory) factoryMethod.invoke(null);
                     }
                 } catch (final Exception e) {
