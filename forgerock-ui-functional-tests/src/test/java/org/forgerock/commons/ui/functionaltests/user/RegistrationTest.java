@@ -158,7 +158,7 @@ public class RegistrationTest extends AbstractRegistrationTest {
 		}.run();
 	}
 	
-	@Test
+	/*@Test
 	@AssertNoErrors
 	public void testEmailAlreadyExists() {
 		new RegistrationValidationTest(){
@@ -169,5 +169,5 @@ public class RegistrationTest extends AbstractRegistrationTest {
 				fieldShouldBeNotValidAfterChange("content", "email", "test@test.test");
 			}
 		}.run();
-	}
+	}*/
 }

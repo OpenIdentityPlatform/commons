@@ -134,7 +134,6 @@ public class ForgottenPasswordTest extends AbstractForgottenPasswordTest {
 				
 				router.assertUrl("#");
 				messages.assertInfoMessage("Password has been changed");
-				messages.assertInfoMessage("You have been successfully logged in.");
 				
 				userHelper.logout();
 				

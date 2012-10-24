@@ -97,7 +97,8 @@
                             <span class="error">x</span>
                             <div class="validationMessage"></div>
                         </div>  
-                        
+                        {{/securityQuestions}} 
+                        {{#siteIdentification}}
                         <p style="width: 400px; margin-left: 220px; margin-bottom: 10px;">The Site Image and Phrase selected will be shown to you upon login to confirm that you are logging in to the genuine site</p>
                         
                         <div class="ContentFlow" id="siteImageFlow">
@@ -117,7 +118,7 @@
                             <span class="error">x</span>
                             <div class="validationMessage"></div>
                         </div>   
-                        {{/securityQuestions}}               
+                        {{/siteIdentification}}              
                     </div>
                     
                     <div class="field">

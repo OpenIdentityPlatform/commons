@@ -56,13 +56,13 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
                 data.phoneNumber = data.phoneNumber.split(' ').join('').split('-').join('').split('(').join('').split(')').join('');
                 
                 userDelegate.patchUserDifferences(conf.loggedUser, data, function() {
-                    if(conf.loggedUser.userName !== data.email) {
+                    if(conf.loggedUser.userName !== data.userName) {
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateSuccessful");
                         eventManager.sendEvent(constants.EVENT_LOGOUT);
                         return;
                     }
                     
-                    userDelegate.getForUserName(data.email, function(user) {
+                    userDelegate.getForUserName(data.userName, function(user) {
                         conf.loggedUser = user;
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateSuccessful");
                         self.reloadData();

@@ -47,6 +47,8 @@ define("config/validators/UserValidators", [
                         callback("Not a valid email address.");
                         return;
                     }
+                    
+                    callback();
                 }
             },
             "userName": {
@@ -151,7 +153,7 @@ define("config/validators/UserValidators", [
                         errors.push("At least one number");
                     }
                     
-                    if( v === "" || v === $(el).find("input[name=email]").val() ) {
+                    if( v === "" || v === $(el).find("input[name=userName]").val() ) {
                         errors.push("Cannot match login");
                     }
                     
@@ -300,8 +302,8 @@ define("config/validators/UserValidators", [
                     });
                 }
             },
-            "resetPasswordCorrectEmail": {
-                "name": "Reset Password Correct Email",
+            "resetPasswordCorrectLogin": {
+                "name": "Reset Password Correct Login",
                 "dependencies": [
                     "org/forgerock/commons/ui/common/util/ValidatorsUtils",
                     "org/forgerock/commons/ui/user/delegates/UserDelegate"
@@ -311,13 +313,6 @@ define("config/validators/UserValidators", [
                     
                     if(v === "") {
                         callback("Required");
-                        $(input).attr('data-validation-status', 'error');
-                        $("input[name='Update']").click();
-                        return;
-                    }
-                    
-                    if(!utils.emailPattern.test(v)) {
-                        callback("Not a valid email address.");
                         $(input).attr('data-validation-status', 'error');
                         $("input[name='Update']").click();
                         return;

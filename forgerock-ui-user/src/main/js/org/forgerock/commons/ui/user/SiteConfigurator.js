@@ -80,11 +80,6 @@ define("org/forgerock/commons/ui/user/SiteConfigurator", [
        } else {
            changeSecurityDataDialog = require("org/forgerock/commons/ui/user/profile/ChangeSecurityDataDialog");
            changeSecurityDataDialog.data.height = 210;
-           
-           if(router.configuration && router.configuration.routes.siteIdentification) {
-               console.log("Removing siteIdentification route.");
-               delete router.configuration.routes.siteIdentification;
-           }
        }
        
        
@@ -95,6 +90,15 @@ define("org/forgerock/commons/ui/user/SiteConfigurator", [
                console.log("Removing forgottenPassword route.");
                delete router.configuration.routes.forgottenPassword;
            } 
+       }
+       
+       if(config.siteIdentification === true) {
+           conf.globalData.siteIdentification = true;
+       } else {
+           if(router.configuration && router.configuration.routes.siteIdentification) {
+               console.log("Removing siteIdentification route.");
+               delete router.configuration.routes.siteIdentification;
+           }
        }
    };
    
