@@ -13,6 +13,7 @@
 			<class name="org.forgerock.commons.ui.functionaltests.user.EnterOldPasswordTest" />
 			<class name="org.forgerock.commons.ui.functionaltests.user.ChangeSecurityDataTest" />
 			<class name="org.forgerock.commons.ui.functionaltests.user.ForgottenPasswordTest" />
+			<class name="org.forgerock.commons.ui.functionaltests.user.ChangeSiteIdentificationTest" />
 		</classes>
 	</test>
 

@@ -77,14 +77,14 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
             },
             
             addLink: function(name, url, isActive) {
-                var newLink = this.$el.find("ul:first").append('<li><a href="'+url+'">'+ name +'</a></li>');
+                var newLink = this.$el.find("ul:first").append('<li><a href="'+url+'">'+ $.t(name) +'</a></li>');
                 if (isActive) {
                     $(newLink).find("li:last").addClass('active');
                 }
             },
             
             addSubLink: function(name, url, isActive) {
-                var newSubLink = this.$el.find("ul:last").append('<li><a href="'+url+'">'+ name +'</a></li>');
+                var newSubLink = this.$el.find("ul:last").append('<li><a href="'+url+'">'+ $.t(name) +'</a></li>');
                 if (isActive) {
                     $(newSubLink).find("li:last").addClass('active');
                 }
