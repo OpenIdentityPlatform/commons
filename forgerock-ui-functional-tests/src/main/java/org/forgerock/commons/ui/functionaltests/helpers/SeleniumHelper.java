@@ -97,7 +97,7 @@ public class SeleniumHelper {
 	}
 
 	public abstract class AssertionWithTimeout {
-
+		
 		public final void checkAssertion() {
 			try {
 				webDriverWait.until(new ExpectedCondition<Boolean>() {

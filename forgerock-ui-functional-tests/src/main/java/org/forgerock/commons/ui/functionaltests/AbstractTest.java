@@ -7,6 +7,7 @@ import junit.framework.Assert;
 import org.forgerock.commons.ui.functionaltests.constants.Constants;
 import org.forgerock.commons.ui.functionaltests.helpers.*;
 import org.forgerock.commons.ui.functionaltests.openidmclient.OpenIDMClient;
+import org.forgerock.commons.ui.functionaltests.utils.AssertNoErrorsAspect;
 import org.forgerock.commons.ui.functionaltests.utils.JsonUtils;
 import org.openqa.selenium.WebDriver;
 import org.springframework.test.context.ContextConfiguration;
@@ -46,6 +47,9 @@ public class AbstractTest extends AbstractTestNGSpringContextTests {
 	
 	@Inject
 	protected DialogsHelper dialogsHelper;
+	
+	@Inject
+	protected AssertNoErrorsAspect assertNoErrorsAspect;
 	
 	@BeforeMethod
 	public void cleanup() {

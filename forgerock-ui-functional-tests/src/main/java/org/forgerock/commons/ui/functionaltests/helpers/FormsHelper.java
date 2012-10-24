@@ -251,5 +251,27 @@ public class FormsHelper {
 			}
 		}.checkAssertion();
 	}
+
+	public String getValueForContentFlow(String el) {
+		WebElement element = selenium.getElement(el, el, ElementType.ID);
+		return element.findElement(By.className("active")).findElement(By.className("portray")).getAttribute("data-site-image");
+	}
+
+	public void changeValueForContentFlow(final String el, final String valueAsText) {
+		selenium.new AssertionWithTimeout() {
+			@Override
+			protected String getAssertionFailedMessage() {
+				return "Failed to set content flow value";
+			}
+			@Override
+			protected boolean assertionCondition(WebDriver driver) {
+				WebElement element = selenium.getElement(el, el, ElementType.ID);
+				return element.findElement(By.cssSelector("[data-site-image='"+valueAsText+"']")).isDisplayed();
+			}
+		}.checkAssertion();
+		
+		WebElement element = selenium.getElement(el, el, ElementType.ID);
+		element.findElement(By.cssSelector("[data-site-image='"+valueAsText+"']")).click();
+	}
 	
 }
