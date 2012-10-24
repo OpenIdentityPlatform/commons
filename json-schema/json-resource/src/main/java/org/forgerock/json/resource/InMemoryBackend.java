@@ -13,7 +13,7 @@
  *
  * Copyright 2012 ForgeRock AS.
  */
-package org.forgerock.json.resource.servlet;
+package org.forgerock.json.resource;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -22,36 +22,19 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
-import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.BadRequestException;
-import org.forgerock.json.resource.CollectionResourceProvider;
-import org.forgerock.json.resource.ConflictException;
-import org.forgerock.json.resource.CreateRequest;
-import org.forgerock.json.resource.DeleteRequest;
-import org.forgerock.json.resource.InternalServerErrorException;
-import org.forgerock.json.resource.NotFoundException;
-import org.forgerock.json.resource.NotSupportedException;
-import org.forgerock.json.resource.PatchRequest;
-import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResult;
-import org.forgerock.json.resource.QueryResultHandler;
-import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.Resource;
-import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.ServerContext;
-import org.forgerock.json.resource.UpdateRequest;
 
 /**
- * A simple {@code Map} based collection resource provider.
+ * A simple in-memory collection resource provider which uses a {@code Map} to
+ * store resources. This resource provider is intended for testing purposes only
+ * and there are no performance guarantees.
  */
-public final class MapBackend implements CollectionResourceProvider {
+public final class InMemoryBackend implements CollectionResourceProvider {
     // TODO: filters, sorting, paged results.
 
     /*
-     * Throughout this example backend we take care not to invoke result
-     * handlers while holding locks since result handlers may perform blocking
-     * IO operations.
+     * Throughout this map backend we take care not to invoke result handlers
+     * while holding locks since result handlers may perform blocking IO
+     * operations.
      */
 
     private final AtomicLong nextResourceId = new AtomicLong();
@@ -59,9 +42,9 @@ public final class MapBackend implements CollectionResourceProvider {
     private final Object writeLock = new Object();
 
     /**
-     * Creates a new empty backend.
+     * Creates a new in-memory collection containing no resources.
      */
-    public MapBackend() {
+    public InMemoryBackend() {
         // No implementation required.
     }
 

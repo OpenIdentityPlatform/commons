@@ -107,8 +107,6 @@ final class Servlet3Configurator extends ServletConfigurator {
         }
     }
 
-    private final ServletContext servletContext;
-
     /**
      * Creates a new configurator for 3.x Servlet containers.
      *
@@ -116,15 +114,7 @@ final class Servlet3Configurator extends ServletConfigurator {
      *            The context.
      */
     Servlet3Configurator(final ServletContext servletContext) {
-        this.servletContext = servletContext;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    ClassLoader getClassLoader() {
-        return servletContext.getClassLoader();
+        // Nothing to do.
     }
 
     /**

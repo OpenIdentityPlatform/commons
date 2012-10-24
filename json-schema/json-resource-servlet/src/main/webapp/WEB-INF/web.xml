@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+    version="2.5">
+
+    <display-name>Json Resource Servlet</display-name>
+
+    <servlet>
+        <servlet-name>Users</servlet-name>
+        <servlet-class>org.forgerock.json.resource.servlet.HttpServlet</servlet-class>
+
+        <init-param>
+            <param-name>connection-factory-class</param-name>
+            <param-value>org.forgerock.json.resource.servlet.MemoryBackendConnectionFactoryProvider</param-value>
+        </init-param>
+
+        <init-param>
+            <param-name>uri-template</param-name>
+            <param-value>/</param-value>
+        </init-param>
+
+<!--  Uncomment to specify a non-default factory method name.
+        <init-param>
+            <param-name>connection-factory-method</param-name>
+            <param-value>getConnectionFactory</param-value>
+        </init-param>
+-->
+
+<!--  Uncomment to specify a context factory and non-default method name.
+        <init-param>
+            <param-name>context-factory-class</param-name>
+            <param-value>...</param-value>
+        </init-param>
+        <init-param>
+            <param-name>context-factory-method</param-name>
+            <param-value>getHttpServletContextFactory</param-value>
+        </init-param>
+-->
+    </servlet>
+
+    <servlet>
+        <servlet-name>Groups</servlet-name>
+        <servlet-class>org.forgerock.json.resource.servlet.HttpServlet</servlet-class>
+
+        <init-param>
+            <param-name>connection-factory-class</param-name>
+            <param-value>org.forgerock.json.resource.servlet.MemoryBackendConnectionFactoryProvider</param-value>
+        </init-param>
+
+        <init-param>
+            <param-name>uri-template</param-name>
+            <param-value>/</param-value>
+        </init-param>
+
+<!--  Uncomment to specify a non-default factory method name.
+        <init-param>
+            <param-name>connection-factory-method</param-name>
+            <param-value>getConnectionFactory</param-value>
+        </init-param>
+-->
+
+<!--  Uncomment to specify a context factory and non-default method name.
+        <init-param>
+            <param-name>context-factory-class</param-name>
+            <param-value>...</param-value>
+        </init-param>
+        <init-param>
+            <param-name>context-factory-method</param-name>
+            <param-value>getHttpServletContextFactory</param-value>
+        </init-param>
+-->
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>Users</servlet-name>
+        <url-pattern>/users/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>Groups</servlet-name>
+        <url-pattern>/groups/*</url-pattern>
+    </servlet-mapping>
+
+</web-app>
+ 
