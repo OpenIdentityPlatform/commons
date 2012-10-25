@@ -25,8 +25,8 @@ public class ForgottenPasswordTest extends AbstractForgottenPasswordTest {
 		new ForgottenPasswordPhase1ValidationTest() {
 			@Override
 			protected void checkForgottenPasswordViewBehavior() {
-				forms.setField("dialogs", "resetEmail", "other@test.test");
-				forms.assertValidationError("dialogs", "resetEmail");
+				forms.setField("dialogs", "resetUsername", "other@test.test");
+				forms.assertValidationError("dialogs", "resetUsername");
 			}
 		}.run();
 	}

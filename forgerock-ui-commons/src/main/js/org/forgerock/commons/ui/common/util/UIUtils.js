@@ -200,7 +200,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         if( empty === undefined || empty === true ) {
             data = [ {
                 "key" : "",
-                "value" : "Please Select"
+                "value" : $.t("common.form.pleaseSelect")
             } ].concat(data);
             }
                 

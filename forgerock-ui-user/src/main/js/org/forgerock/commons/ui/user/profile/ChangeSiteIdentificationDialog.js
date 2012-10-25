@@ -76,7 +76,7 @@ define("org/forgerock/commons/ui/user/profile/ChangeSiteIdentificationDialog", [
         
         render: function() {
             this.actions = {};
-            this.addAction("Save", "submit");
+            this.addAction($.t("common.form.save"), "submit");
             this.show(_.bind(function() {
                 validatorsManager.bindValidators(this.$el); 
 

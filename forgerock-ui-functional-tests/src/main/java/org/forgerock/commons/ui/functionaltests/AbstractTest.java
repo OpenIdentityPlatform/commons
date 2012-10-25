@@ -55,7 +55,18 @@ public class AbstractTest extends AbstractTestNGSpringContextTests {
 	public void cleanup() {
 		selenium.removeCookies();
 		driver.get(constants.getBasePage());
-		openidmClient.removeAllUsers();
+		try{
+			openidmClient.removeAllUsers();
+		} catch (Exception e) {
+			System.out.println("Error removing users. Retrying...");
+			try {
+				Thread.sleep(1000l);
+				openidmClient.removeAllUsers();
+			} catch (Exception e1) {
+				System.err.println("Failed to remove users");
+				Assert.fail("Failed to remove users from openidm");
+			}
+		}
 	}
 	
 	@AfterClass

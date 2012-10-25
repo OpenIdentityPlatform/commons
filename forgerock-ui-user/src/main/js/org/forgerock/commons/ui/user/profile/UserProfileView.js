@@ -111,8 +111,8 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
                 });
             } else {
                 this.$el.find("select[name='stateProvince']").emptySelect();
-                this.$el.find("select[name='country'] > option:first").text("Please Select");
-                this.$el.find("select[name='stateProvince'] > option:first").text("Please Select");
+                this.$el.find("select[name='country'] > option:first").text($.t("common.form.pleaseSelect"));
+                this.$el.find("select[name='stateProvince'] > option:first").text($.t("common.form.pleaseSelect"));
             }
         },
         
@@ -122,13 +122,13 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
             if(state) {
                 this.$el.find("select[name='stateProvince'] > option:first").text("");
             } else {
-                this.$el.find("select[name='stateProvince'] > option:first").text("Please Select"); 
+                this.$el.find("select[name='stateProvince'] > option:first").text($.t("common.form.pleaseSelect")); 
             }
         },
         
         reloadData: function() {
             js2form(document.getElementById(this.$el.attr("id")), conf.loggedUser);
-            this.$el.find("input[type=submit]").val("Update");
+            this.$el.find("input[type=submit]").val($.t("common.form.update"));
             validatorsManager.validateAllFields(this.$el);
         }
     }); 

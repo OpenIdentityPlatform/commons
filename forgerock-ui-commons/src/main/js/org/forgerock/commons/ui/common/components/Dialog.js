@@ -68,7 +68,7 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
             this.parentRender(_.bind(function() {
                 this.setElement(this.$el.find(".dialog:last"));
                    
-                this.$el.find(".dialogActions").append("<input type='button' name='close' value='Close' class='button orange floatRight' />");
+                this.$el.find(".dialogActions").append("<input type='button' name='close' value='" + $.t("common.form.close") + "' class='button orange floatRight' />");
                 
                 this.resize();
                 

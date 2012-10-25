@@ -82,7 +82,7 @@ define("org/forgerock/commons/ui/user/profile/ChangeSecurityDataDialog", [
         
         render: function() {
             this.actions = {};
-            this.addAction("Update", "submit");
+            this.addAction($.t("common.form.update"), "submit");
             
             this.show(_.bind(function() {
                 validatorsManager.bindValidators(this.$el);

@@ -39,12 +39,12 @@ define("config/validators/UserValidators", [
                     var v = $(input).val();
                     
                     if(v === "") {
-                        callback("Required");
+                        callback($.t("common.form.validation.required"));
                         return;
                     }
                     
                     if(!utils.emailPattern.test(v)) {
-                        callback("Not a valid email address.");
+                        callback($.t("common.form.validation.emailNotValid"));
                         return;
                     }
                     
@@ -61,13 +61,13 @@ define("config/validators/UserValidators", [
                     var v = $(input).val();
                     
                     if(v === "") {
-                        callback("Required");
+                        callback($.t("common.form.validation.required"));
                         return;
                     }
                     
                     userDelegate.checkUserNameAvailability(v, function(available) {
                         if(!available) {
-                            callback("Username already exists.");
+                            callback($.t("common.form.validation.usernameExists"));
                         } else {
                             callback();
                         }
@@ -75,7 +75,7 @@ define("config/validators/UserValidators", [
                 }
             },
             "name": {
-                "name": "Only alphabetic characters",
+                "name": $.t("common.form.validation.onlyAlphabeticCharacters"),
                 "dependencies": [
                     "org/forgerock/commons/ui/common/util/ValidatorsUtils"
                 ],
@@ -83,12 +83,12 @@ define("config/validators/UserValidators", [
                     var v = $(input).val();
                     
                     if(v === "") {
-                        callback("Required");
+                        callback($.t("common.form.validation.required"));
                         return;
                     }
                     
                     if(!utils.namePattern.test(v)) {
-                        callback("Only alphabetic characters");
+                        callback($.t("common.form.validation.onlyAlphabeticCharacters"));
                         return;
                     }
 
@@ -104,12 +104,12 @@ define("config/validators/UserValidators", [
                     var v = $(input).val();
                     
                     if(v === "") {
-                        callback("Required");
+                        callback($.t("common.form.validation.required"));
                         return;
                     }
                     
                     if(!utils.phonePattern.test(v)) {
-                        callback("Only numbers and special characters");
+                        callback($.t("common.form.validation.onlyNumbersAndSpecialCharacters"));
                         return;
                     }
 
@@ -126,7 +126,7 @@ define("config/validators/UserValidators", [
                     
                     if(el.find("input[name=oldPassword]").length !== 0) {
                         if(el.find("input[name=oldPassword]").val() === v) {
-                            errors.push("Cannot match old password");
+                            errors.push($.t("common.form.validation.cannotMatchOldPassword"));
                         }
                         
                         if(v === "" && $(el).find("input[name=passwordConfirm]").val() === "") {
@@ -140,21 +140,21 @@ define("config/validators/UserValidators", [
                     }
 
                     if(v.length < 8) {
-                        errors.push("At least 8 characters");
+                        errors.push($.t("common.form.validation.atLeast8Characters"));
                     }
                     
                     reg = /[(A-Z)]+/;
                     if(!reg.test(v)) {
-                        errors.push("At least one capital letter");
+                        errors.push($.t("common.form.validation.atLeastOneCapitalLetter"));
                     }
                     
                     reg = /[(0-9)]+/;
                     if( !reg.test(v) ) {
-                        errors.push("At least one number");
+                        errors.push($.t("common.form.validation.atLeastOneNumber"));
                     }
                     
                     if( v === "" || v === $(el).find("input[name=userName]").val() ) {
-                        errors.push("Cannot match login");
+                        errors.push($.t("common.form.validation.cannotMatchLogin"));
                     }
                     
                     if(errors.length === 0) {
@@ -186,7 +186,7 @@ define("config/validators/UserValidators", [
                     }
 
                     if( v === "" || v !== $(el).find("input[name=password]").val() ) {
-                        callback(["Confirmation matches password"]);
+                        callback([$.t("common.form.validation.confirmationMatchesPassword")]);
                         return;
                     }
 
@@ -207,7 +207,7 @@ define("config/validators/UserValidators", [
                     }
                     
                     if(v.length < 4) {
-                        callback("Minimum 4 characters");
+                        callback($.t("common.form.validation.minimum4Characters"));
                         return;
                     }
 
@@ -236,7 +236,7 @@ define("config/validators/UserValidators", [
                 ],
                 "validator": function(el, input, callback) {              
                     if(!$(input).is(':checked')) {
-                        callback("Acceptance required for registration");
+                        callback($.t("common.form.validation.acceptanceRequiredForRegistration"));
                         return;
                     }
 
@@ -259,18 +259,18 @@ define("config/validators/UserValidators", [
                     }
                     
                     if(v === "") {
-                        callback("Required");
+                        callback($.t("common.form.validation.required"));
                         return;
                     }
                     
                     if(!utils.emailPattern.test(v)) {
-                        callback("Not a valid email address.");
+                        callback($.t("common.form.validation.emailNotValid"));
                         return;
                     }
                     
                     userDelegate.checkUserNameAvailability(v, function(available) {
                         if(!available) {
-                            callback("Email address already exists.");
+                            callback($.t("common.form.validation.emailAddressAlreadyExists"));
                         } else {
                             callback();
                         }
@@ -287,7 +287,7 @@ define("config/validators/UserValidators", [
                     var v = $(input).val();
                     
                     if(v === "") {
-                        callback("Incorrect password");
+                        callback($.t("common.form.validation.incorrectPassword"));
                         return;
                     }
                     
@@ -297,7 +297,7 @@ define("config/validators/UserValidators", [
                             $(input).attr('data-validation-status', 'ok');
                             $("input[name='Continue']").click();
                         } else {
-                            callback("Incorrect password");
+                            callback($.t("common.form.validation.incorrectPassword"));
                         }
                     });
                 }
@@ -312,7 +312,7 @@ define("config/validators/UserValidators", [
                     var v = $(input).val();
                     
                     if(v === "") {
-                        callback("Required");
+                        callback($.t("common.form.validation.required"));
                         $(input).attr('data-validation-status', 'error');
                         $("input[name='Update']").click();
                         return;
@@ -344,10 +344,10 @@ define("config/validators/UserValidators", [
                 "validator": function(el, input, callback, utils, userDelegate) {
                     var v = $(input).val(), userName;
                     if(v === "") {
-                        callback("Required");
+                        callback($.t("common.form.validation.required"));
                         return;
                     }
-                    userName = $(el).find("input[name='resetEmail']").val();
+                    userName = $(el).find("input[name='resetUsername']").val();
                     userDelegate.getBySecurityAnswer(userName, v, 
                             function(result) {
                         callback();
@@ -365,7 +365,7 @@ define("config/validators/UserValidators", [
                     
                     if(el.find("input[name=oldSecurityQuestion]").val() !== el.find("select[name=securityQuestion]").val()) {
                         if(v === "") {
-                            callback("Required");
+                            callback($.t("common.form.validation.required"));
                         } else {
                             callback();
                         }

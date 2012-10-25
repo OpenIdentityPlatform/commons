@@ -57,12 +57,12 @@ define("org/forgerock/commons/ui/user/ForgottenPasswordDialog", [
             var securityQuestionRef;
             this.securityQuestions = {};
             this.actions = {};
-            this.addAction("Update", "submit");
+            this.addAction($.t("common.form.update"), "submit");
             this.show(_.bind(function() {
                 validatorsManager.bindValidators(this.$el); 
                 if (conf.forgottenPasswordUserName) {
-                    this.$el.find("input[name=resetEmail]").val(conf.forgottenPasswordUserName);
-                    this.$el.find("input[name=resetEmail]").trigger("change");
+                    this.$el.find("input[name=resetUsername]").val(conf.forgottenPasswordUserName);
+                    this.$el.find("input[name=resetUsername]").trigger("change");
                     delete conf.forgottenPasswordUserName;
                 }
                 this.data.height = 210;
@@ -84,7 +84,7 @@ define("org/forgerock/commons/ui/user/ForgottenPasswordDialog", [
             if (validatorsManager.formValidated(this.$el)) {
                 this.changePassword();
             } else {
-                var errorMessage = this.$el.find("input[name=resetEmail][data-validation-status=error]"),userName = this.$el.find("input[name=resetEmail]").val(), securityQuestionRef;
+                var errorMessage = this.$el.find("input[name=resetUsername][data-validation-status=error]"),userName = this.$el.find("input[name=resetUsername]").val(), securityQuestionRef;
                 if (errorMessage.length !== 0) {
                     this.$el.find("#fgtnAnswerDiv").hide();
                     this.$el.find("input[name=fgtnSecurityAnswer]").val("");
@@ -104,7 +104,7 @@ define("org/forgerock/commons/ui/user/ForgottenPasswordDialog", [
         },
         
         changePassword: function() {
-            var dialog = this, userName = this.$el.find("input[name=resetEmail]").val(), securityAnswer = this.$el.find("input[name=fgtnSecurityAnswer]").val(), newPassword = this.$el.find("input[name=password]").val();
+            var dialog = this, userName = this.$el.find("input[name=resetUsername]").val(), securityAnswer = this.$el.find("input[name=fgtnSecurityAnswer]").val(), newPassword = this.$el.find("input[name=password]").val();
             console.log("changing password");
             
             userDelegate.setNewPassword(userName, securityAnswer, newPassword, function(r) {

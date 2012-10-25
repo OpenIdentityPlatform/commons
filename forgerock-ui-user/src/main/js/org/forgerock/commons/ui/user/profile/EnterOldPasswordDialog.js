@@ -68,7 +68,7 @@ define("org/forgerock/commons/ui/user/profile/EnterOldPasswordDialog", [
         
         render: function() {
             this.actions = {};
-            this.addAction("Continue", "submit");
+            this.addAction($.t("common.form.continue"), "submit");
             
             this.show(_.bind(function() {
                 validatorsManager.bindValidators(this.$el); 

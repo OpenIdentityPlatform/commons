@@ -1,8 +1,8 @@
-<h1>Site Image</h1>
+<h1>{{t "common.user.siteImage"}}</h1>
 <form id='siteImageChange' action='' method='post' onsubmit="return false">
     <fieldset>
-        <label>Site Image</label> 
-        <p style="width: 410px; margin-left: 220px; margin-bottom: 10px;">The Site Image and Phrase selected will be shown to you upon login to confirm that you are logging in to the genuine site</p>
+        <label>{{t "common.user.siteImage"}}</label> 
+        <p style="width: 410px; margin-left: 220px; margin-bottom: 10px;">{{t "templates.user.ChangeSiteIdentificationDialogTemplate.siteImageAndPhaseExplanation"}}</p>
                
         <input type="hidden" name="oldSiteImage" /> 
                
@@ -21,7 +21,7 @@
 
         <input type="hidden" name="oldPassPhrase" />
 		<div class="field">
-			<label>Site Phrase</label> 
+			<label>{{t "common.user.sitePhrase"}}</label> 
 			<input type="text" name="passPhrase" data-validator="passPhrase" data-validation-status="disabled"/> 
 			<span class='error'>x</span>
 			<div class="validationMessage"></div>

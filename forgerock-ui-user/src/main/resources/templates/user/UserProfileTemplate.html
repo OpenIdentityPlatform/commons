@@ -1,11 +1,11 @@
 <div id="profile" class="center">
     <div class="shadowFrame">
         <form class="form">
-            <h1 id="userProfileHeadingLabel">User profile</h1>
+            <h1 id="userProfileHeadingLabel">{{t "common.user.userProfile"}}</h1>
             <div id="profileData">                
                         <div class="floatLeft">
                             <div class="field">
-                                <label class="light">Username</label>
+                                <label class="light">{{t "common.user.username"}}</label>
                                 <input type="text" name="userName" data-validator="name" />
                                 <span></span>
                                 <div class="validationMessage"></div>
@@ -14,13 +14,13 @@
                         <div class="clear"></div>
                         <div class="floatLeft">
                             <div class="field">
-                                <label class="light">First Name</label>
+                                <label class="light">{{t "common.user.givenName"}}</label>
                                 <input type="text" name="givenName" data-validator="name" />
                                 <span></span>
                                 <div class="validationMessage"></div>
                             </div>
                             <div class="field">
-                                <label class="light">Email address</label> 
+                                <label class="light">{{t "common.user.emailAddress"}}</label> 
                                 <input type="text" name="email" data-validator="profileEmail" /> 
                                 <span></span>
                                 <div class="validationMessage"></div>
@@ -29,13 +29,13 @@
                         
                         <div class="floatRight">
                             <div class="field">
-                                <label class="light">Last Name</label>
+                                <label class="light">{{t "common.user.familyName"}}</label>
                                 <input type="text" name="familyName" data-validator="name" />
                                 <span></span>
                                 <div class="validationMessage"></div>
                             </div>
                             <div class="field">
-                                <label class="light">Mobile Phone</label>
+                                <label class="light">{{t "common.user.phoneNumber"}}</label>
                                 <input type="text" name="phoneNumber" data-validator="phone" />
                                 <span></span>
                                 <div class="validationMessage"></div>
@@ -45,19 +45,19 @@
                     
                         <div class="floatLeft">
                             <div class="field">
-                                <label class="light">Address 1</label>
+                                <label class="light">{{t "common.user.address1"}}</label>
                                 <input type="text" name="address1" />
                                 <span></span>
                                 <div class="validationMessage"></div>
                             </div>
                             <div class="field">
-                                <label class="light">Country</label>
+                                <label class="light">{{t "common.user.country"}}</label>
                                 <select name="country" ></select>
                                 <span></span>
                                 <div class="validationMessage"></div>
                             </div>
                             <div class="field">
-                                <label class="light">State/Province</label>
+                                <label class="light">{{t "common.user.stateProvince"}}</label>
                                 <select name="stateProvince" ></select>
                                 <span></span>
                                 <div class="validationMessage"></div>
@@ -67,21 +67,21 @@
                         
                         <div class="floatRight">
                             <div class="field">
-                                <label class="light">Address 2</label>
+                                <label class="light">{{t "common.user.address2"}}</label>
                                 <input type="text" name="address2" />
                                 <span></span>
                                 <div class="validationMessage"></div>
                             </div>
                             
                             <div class="field">
-                                <label class="light">City</label>
+                                <label class="light">{{t "common.user.city"}}</label>
                                 <input type="text" name="city" />
                                 <span></span>
                                 <div class="validationMessage"></div>
                             </div>
                             
                             <div class="field">
-                                <label class="light">Postal Code</label>
+                                <label class="light">{{t "common.user.postalCode"}}</label>
                                 <input type="text" name="postalCode" />
                                 <span></span>
                                 <div class="validationMessage"></div>
@@ -93,21 +93,21 @@
                         <div class="floatLeft">
                             <div class="field">
                                 <label class="light"></label> 
-                                <a href="#profile/old_password/" id="securityDialogLink" class="ice hrefInput">Change Security Data</a>
+                                <a href="#profile/old_password/" id="securityDialogLink" class="ice hrefInput">{{t "templates.user.UserProfileTemplate.changeSecurityData"}}</a>
                             </div>
                         </div>
                         {{#siteIdentification}}
                         <div class="floatRight">
                             <div class="field">
                                 <label class="light"></label> 
-                                <a href="#profile/site_identification/" id="passPhraseLink" class="ice hrefInput">Change Site Identification</a>
+                                <a href="#profile/site_identification/" id="passPhraseLink" class="ice hrefInput">{{t "templates.user.UserProfileTemplate.changeSiteIdentification"}}</a>
                             </div>
                         </div>
                         {{/siteIdentification}}
                         <div class="clear"></div>
                     
                         <div id="actions">
-                            <input type="submit" name="saveButton" value="Update" class="button floatRight"/>                      
+                            <input type="submit" name="saveButton" value='{{t "common.form.update"}}' class="button floatRight"/>                      
                         </div>
             </div>
             <div class="clear"></div>

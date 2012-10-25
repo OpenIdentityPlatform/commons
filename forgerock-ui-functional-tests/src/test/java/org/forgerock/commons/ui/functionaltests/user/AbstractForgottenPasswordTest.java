@@ -14,7 +14,7 @@ public class AbstractForgottenPasswordTest extends AbstractTest {
 			router.routeTo("#profile/forgotten_password/");
 			router.assertUrl("#profile/forgotten_password/");
 			
-			forms.assertFormFieldHasValue("dialogs", "resetEmail", "");
+			forms.assertFormFieldHasValue("dialogs", "resetUsername", "");
 			
 			checkForgottenPasswordViewBehavior();
 		};
@@ -31,10 +31,10 @@ public class AbstractForgottenPasswordTest extends AbstractTest {
 			router.routeTo("#profile/forgotten_password/");
 			router.assertUrl("#profile/forgotten_password/");
 			
-			forms.assertFormFieldHasValue("dialogs", "resetEmail", "");
+			forms.assertFormFieldHasValue("dialogs", "resetUsername", "");
 			
-			forms.setField("dialogs", "resetEmail", "test@test.test");
-			forms.assertValidationPasses("dialogs", "resetEmail");
+			forms.setField("dialogs", "resetUsername", "test@test.test");
+			forms.assertValidationPasses("dialogs", "resetUsername");
 			
 			forms.assertFormFieldHasValue("fgtnSecurityQuestion", null, "What was your first pet's name?");
 			forms.assertFormFieldHasValue("dialogs", "fgtnSecurityAnswer", "");

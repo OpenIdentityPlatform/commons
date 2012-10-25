@@ -2,9 +2,10 @@
     
     <div class="shadowFrame">
     
-        <h2 class="floatLeft head">Register your account</h2>
+        <h2 class="floatLeft head">{{t "templates.user.UserRegistrationTemplate.registerYourAccount"}}</h2>
         <div class="floatRight" style="padding-top: 4px;">
-            Already have an account? <a href="#login/" class="button bold orange">Log in</a>
+            {{t "templates.user.UserRegistrationTemplate.haveAccoutQuestion"}} 
+            <a href="#login/" class="button bold orange">{{t "templates.user.UserRegistrationTemplate.logIn"}}</a>
         </div>
         <div class="clear"></div>
         
@@ -12,34 +13,34 @@
             <fieldset>
                 <div class="fields">
                     <div class="field">
-                        <label>Username</label> 
+                        <label>{{t "common.user.username"}}</label> 
                         <input type="text" name="userName" data-validator="userName" /> 
                         <span class="error">x</span>
                         <div class="validationMessage"></div>
                     </div>
                     <div class="field">
-                        <label>Email address</label> 
+                        <label>{{t "common.user.emailAddress"}}</label> 
                         <input type="text" name="email" data-validator="registrationEmail" /> 
                         <span class="error">x</span>
                         <div class="validationMessage"></div>
                     </div>
 
                     <div class="field">
-                        <label>First name</label> 
+                        <label>{{t "common.user.givenName"}}</label> 
                         <input type="text" name="givenName" data-validator="name" /> 
                         <span class="error">x</span>
                         <div class="validationMessage"></div>
                     </div>
 
                     <div class="field">
-                        <label>Last name</label> 
+                        <label>{{t "common.user.familyName"}}</label> 
                         <input type="text" name="familyName" data-validator="name" /> 
                         <span class="error">x</span>
                         <div class="validationMessage"></div>
                     </div>
                     
                     <div class="field">
-                        <label>Mobile phone number</label> 
+                        <label>{{t "common.user.phoneNumber"}}</label> 
                         <input type="text" name="phoneNumber" data-validator="phone" /> 
                         <span class="error">x</span>
                         <div class="validationMessage"></div>
@@ -48,13 +49,13 @@
                     <div class="groupField">
                         <div class="groupFieldInputs floatLeft">
                             <div class="field">
-                                <label>Password</label> 
+                                <label>{{t "common.user.password"}}</label> 
                                 <input type="password" name="password" value="" data-validator="password" data-validator-event="keyup" />
                                 <span class="error">x</span>
                             </div>
 
                             <div class="field">
-                                <label>Confirm Password</label> 
+                                <label>{{t "common.user.confirmPassword"}}</label> 
                                 <input type="password" name="passwordConfirm" value="" data-validator="passwordConfirm" data-validator-event="keyup" />
                                 <span class="error">x</span>
                             </div>
@@ -62,44 +63,43 @@
                         <div class="groupFieldErrors floatRight radious">
                             <div class="groupFieldErrorsRule">
                                 <span class="error">x</span> 
-                                <label data-for-validator="password">At least one capital letter</label>
+                                <label data-for-validator="password">{{t "common.form.validation.atLeastOneCapitalLetter"}}</label>
                             </div>
                             <div class="groupFieldErrorsRule">
                                 <span class="error">x</span> 
-                                <label data-for-validator="password">At least one number</label>
+                                <label data-for-validator="password">{{t "common.form.validation.atLeastOneNumber"}}</label>
                             </div>
                             <div class="groupFieldErrorsRule">
                                 <span class="error">x</span> 
-                                <label data-for-validator="password">At least 8 characters</label>
+                                <label data-for-validator="password">{{t "common.form.validation.atLeast8Characters"}}</label>
                             </div>
                             <div class="groupFieldErrorsRule">                          
                                 <span class="error">x</span> 
-                                <label data-for-validator="password">Cannot match login</label>
+                                <label data-for-validator="password">{{t "common.form.validation.cannotMatchLogin"}}</label>
                             </div>
                             <div class="groupFieldErrorsRule">
                                 <span class="error">x</span> 
-                                <label data-for-validator="passwordConfirm">Confirmation matches password</label>
+                                <label data-for-validator="passwordConfirm">{{t "common.form.validation.confirmationMatchesPassword"}}</label>
                             </div> 
                         </div>
                         <div class="clear"></div>
                         {{#securityQuestions}}
-                        <p style="width: 400px; margin-left: 220px; margin-bottom: 10px;">The Security Question selected and corresponding Answer provided by you will be used to help identify you in the event that you forget your password.
-                        </p>
+                        <p style="width: 400px; margin-left: 220px; margin-bottom: 10px;">{{t "templates.user.ChangeSecurityDataDialogTemplate.securityQuestionAndAnserExplanation"}}</p>
                         <div class="field">
-                            <label>Security question</label>
+                            <label>{{t "common.user.securityQuestion"}}</label>
                             <select name="securityQuestion" data-validator="required"></select>
                             <span class="error">x</span>
                             <div class="validationMessage"></div>
                         </div>
                         <div class="field">
-                            <label>Security answer</label> 
+                            <label>{{t "common.user.securityAnswer"}}</label> 
                             <input type="text" name="securityAnswer" data-validator="required" />
                             <span class="error">x</span>
                             <div class="validationMessage"></div>
                         </div>  
                         {{/securityQuestions}} 
                         {{#siteIdentification}}
-                        <p style="width: 400px; margin-left: 220px; margin-bottom: 10px;">The Site Image and Phrase selected will be shown to you upon login to confirm that you are logging in to the genuine site</p>
+                        <p style="width: 400px; margin-left: 220px; margin-bottom: 10px;">{{t "templates.user.ChangeSiteIdentificationDialogTemplate.siteImageAndPhaseExplanation"}}</p>
                         
                         <div class="ContentFlow" id="siteImageFlow">
 				            <div class="loadIndicator"><div class="indicator"></div></div>
@@ -113,7 +113,7 @@
 				        </div>                     
                         
                         <div class="field">
-                            <label>Site Phrase</label> 
+                            <label>{{t "common.user.sitePhrase"}}</label> 
                             <input type="text" name="passPhrase" data-validator="passPhrase" />
                             <span class="error">x</span>
                             <div class="validationMessage"></div>
@@ -128,8 +128,8 @@
                         <div class="validationMessage validationMessageCheckbox"></div>
                     </div>
                 </div>
-                <input type="submit" name="register" class="button gray" value="Register" />
-                <div class="inputValidationMessage">Form contains validation errors</div>
+                <input type="submit" name="register" class="button gray" value='{{t "common.form.register"}}' />
+                <div class="inputValidationMessage">{{t "common.form.validation.formContainsErrors"}}</div>
             </fieldset>
         </form>
     </div>
