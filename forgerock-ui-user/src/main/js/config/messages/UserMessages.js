@@ -110,6 +110,14 @@ define("config/messages/UserMessages", [
             "conflictError": {
                 msg: "config.messages.UserMessages.conflictError",
                 type: "error"
+            },
+            "errorDeletingNotification": {
+                msg: "config.messages.UserMessages.errorDeletingNotification",
+                type: "error"
+            },
+            "errorFetchingNotifications": {
+                msg: "config.messages.UserMessages.errorFetchingNotifications",
+                type: "error"
             }
     };
     

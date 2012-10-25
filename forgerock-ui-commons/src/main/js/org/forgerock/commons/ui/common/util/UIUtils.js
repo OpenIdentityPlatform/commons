@@ -196,6 +196,15 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         return new Handlebars.SafeString(result);
     });
     
+    Handlebars.registerHelper('e', function(context, options) { 
+        var paramsCommaSeparated, paramsAfterSplit, params, result;
+        paramsCommaSeparated = options.hash.sprintfParams.substr(1, options.hash.sprintfParams.length - 2);
+        paramsAfterSplit = paramsCommaSeparated.replace(/'/g,'').split(',');
+        params = { postProcess: 'sprintf', sprintf: paramsAfterSplit};
+        result = i18n.t(options.hash.key, params);
+        return new Handlebars.SafeString(result);
+     });
+    
     obj.loadSelectOptions = function(data, el, empty, callback) {
         if( empty === undefined || empty === true ) {
             data = [ {

@@ -55,7 +55,7 @@ public class AbstractChangeSecurityDataTest extends AbstractTest{
 			router.routeTo("#profile/forgotten_password/");
 			router.assertUrl("#profile/forgotten_password/");
 			
-			forms.setField("dialogs", "resetEmail", "test@test.test");
+			forms.setField("dialogs", "resetUsername", "test@test.test");
 			forms.assertValidationError("dialogs", "fgtnSecurityAnswer");
 			
 			userHelper.loginAsDefaultUser();
@@ -82,8 +82,8 @@ public class AbstractChangeSecurityDataTest extends AbstractTest{
 			router.routeTo("#profile/forgotten_password/", true);
 			router.assertUrl("#profile/forgotten_password/");
 			
-			forms.assertFormFieldHasValue("dialogs", "resetEmail", "");
-			forms.setField("dialogs", "resetEmail", "test@test.test");
+			forms.assertFormFieldHasValue("dialogs", "resetUsername", "");
+			forms.setField("dialogs", "resetUsername", "test@test.test");
 			forms.assertValidationError("dialogs", "fgtnSecurityAnswer");
 			
 			forms.assertFormFieldHasValue("fgtnSecurityQuestion", null, getSecurityQuestionAfterChange());

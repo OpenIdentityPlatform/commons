@@ -238,8 +238,7 @@ define("config/process/UserConfig", [
              dependencies: [
              ],
              processDescription: function(event) {
-                 //TODO
-                 //messagesCtrl.displayMessage('error', 'Failed to delete notification');
+                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "errorDeletingNotification");
              }
          },
          {
@@ -248,8 +247,7 @@ define("config/process/UserConfig", [
              dependencies: [
              ],
              processDescription: function(event) {
-                 //TODO
-                 //messagesCtrl.displayMessage('error', 'Unable to get notifications for user');
+                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "errorFetchingNotifications");
              }
          }
          ];
