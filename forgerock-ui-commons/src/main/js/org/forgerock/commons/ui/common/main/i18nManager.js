@@ -33,9 +33,42 @@ define("org/forgerock/commons/ui/common/main/i18nManager", [
     
     var obj = {};
     
-    $.i18n.init({ lng: consts.DEFAULT_LANGUAGE });
-
+    obj.language = consts.DEFAULT_LANGUAGE;
+    
+    obj.setLanguage = function(language) {
+        var mNames, mNamesShort, dNames, dNamesShort;
+        $.i18n.setLng(language);
+        obj.language = language;
+        
+        mNames = $.t("config.dates.monthNames").replace(/ ,/g,',').replace(/, /g,',').split(',');
+        mNamesShort = $.t("config.dates.monthNamesShort").replace(/ ,/g,',').replace(/, /g,',').split(',');
+        dNames = $.t("config.dates.dayNames").replace(/ ,/g,',').replace(/, /g,',').split(',');
+        dNamesShort = $.t("config.dates.dayNamesShort").replace(/ ,/g,',').replace(/, /g,',').split(',');
+        
+        if (
+                ! mNames.length || mNames.length < 12
+                || 
+                ! mNamesShort.length || mNamesShort.length < 12
+                || 
+                ! dNames.length || dNames.length < 7
+                || 
+                ! dNamesShort.length || dNamesShort.length < 7        
+            ) 
+        {
+            console.log("DATE NAMES ARE NOT DEFINED CORRECTLY!");
+        } else {
+            
+            XDate.locales[language] = {
+                monthNames: mNames,
+                monthNamesShort: mNamesShort,
+                dayNames: dNames,
+                dayNamesShort: dNamesShort
+            };
+            
+            XDate.defaultLocale = language;
+        }
+    }
+    
     return obj;
 
-});    
-
+});

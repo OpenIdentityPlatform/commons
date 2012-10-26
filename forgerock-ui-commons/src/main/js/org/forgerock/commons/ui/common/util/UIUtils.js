@@ -205,6 +205,13 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         return new Handlebars.SafeString(result);
      });
     
+    Handlebars.registerHelper('p', function(countValue, options) { 
+        var params, result;
+        params = { count: countValue };
+        result = i18n.t(options.hash.key, params);
+        return new Handlebars.SafeString(result);
+     });
+    
     obj.loadSelectOptions = function(data, el, empty, callback) {
         if( empty === undefined || empty === true ) {
             data = [ {

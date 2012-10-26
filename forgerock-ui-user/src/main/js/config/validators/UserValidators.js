@@ -75,7 +75,7 @@ define("config/validators/UserValidators", [
                 }
             },
             "name": {
-                "name": $.t("common.form.validation.onlyAlphabeticCharacters"),
+                "name": "Only alphabetic characters",
                 "dependencies": [
                     "org/forgerock/commons/ui/common/util/ValidatorsUtils"
                 ],
