@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global require, define, _, $ */
+/*global require, define, _, $, XDate */
 
 /**
  * @author jdabrowski
@@ -67,7 +67,7 @@ define("org/forgerock/commons/ui/common/main/i18nManager", [
             
             XDate.defaultLocale = language;
         }
-    }
+    };
     
     return obj;
 

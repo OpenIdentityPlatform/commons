@@ -93,14 +93,14 @@
                         <div class="floatLeft">
                             <div class="field">
                                 <label class="light"></label> 
-                                <a href="#profile/old_password/" id="securityDialogLink" class="ice hrefInput">{{t "templates.user.UserProfileTemplate.changeSecurityData"}}</a>
+                                <a href="{{url 'enterOldPassword'}}" id="securityDialogLink" class="ice hrefInput">{{t "templates.user.UserProfileTemplate.changeSecurityData"}}</a>
                             </div>
                         </div>
                         {{#siteIdentification}}
                         <div class="floatRight">
                             <div class="field">
                                 <label class="light"></label> 
-                                <a href="#profile/site_identification/" id="passPhraseLink" class="ice hrefInput">{{t "templates.user.UserProfileTemplate.changeSiteIdentification"}}</a>
+                                <a href="{{url 'siteIdentification'}}" id="passPhraseLink" class="ice hrefInput">{{t "templates.user.UserProfileTemplate.changeSiteIdentification"}}</a>
                             </div>
                         </div>
                         {{/siteIdentification}}

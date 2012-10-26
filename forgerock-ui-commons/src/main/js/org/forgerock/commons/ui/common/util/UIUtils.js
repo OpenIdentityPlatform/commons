@@ -22,14 +22,15 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define, window, Handlebars, i18n */
+/*global $, define, window, Handlebars, i18n, _ */
 
 define("org/forgerock/commons/ui/common/util/UIUtils", [
     "org/forgerock/commons/ui/common/util/typeextentions/String",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "handlebars",
-    "i18next"
-], function (String, AbstractConfigurationAware, handlebars, i18next) {
+    "i18next",
+    "org/forgerock/commons/ui/common/main/Router"
+], function (String, AbstractConfigurationAware, handlebars, i18next, router) {
     var obj = new AbstractConfigurationAware();
 
     obj.getUrl = function() {
@@ -190,20 +191,19 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         }
     };
     
-    Handlebars.registerHelper('t', function(i18n_key) {
-        var result = i18n.t(i18n_key);
+    Handlebars.registerHelper('t', function(i18nKey) {        
+        var params = { postProcess: 'sprintf', sprintf: _.toArray(arguments).slice(1, -1)}, result;
+        
+        result = i18n.t(i18nKey, params);
+        
+        return new Handlebars.SafeString(result);
+     });
+    
+    Handlebars.registerHelper('url', function(routeKey) {
+        var result = "#" + router.getLink(router.configuration.routes[routeKey], _.toArray(arguments).slice(1, -1));
        
         return new Handlebars.SafeString(result);
     });
-    
-    Handlebars.registerHelper('e', function(context, options) { 
-        var paramsCommaSeparated, paramsAfterSplit, params, result;
-        paramsCommaSeparated = options.hash.sprintfParams.substr(1, options.hash.sprintfParams.length - 2);
-        paramsAfterSplit = paramsCommaSeparated.replace(/'/g,'').split(',');
-        params = { postProcess: 'sprintf', sprintf: paramsAfterSplit};
-        result = i18n.t(options.hash.key, params);
-        return new Handlebars.SafeString(result);
-     });
     
     Handlebars.registerHelper('p', function(countValue, options) { 
         var params, result;

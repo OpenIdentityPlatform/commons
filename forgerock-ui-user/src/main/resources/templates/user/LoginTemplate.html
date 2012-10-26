@@ -24,13 +24,13 @@
 	   {{#selfRegistration}}
 	   <div class="field">
 	       <span class="bold block">{{t "templates.user.LoginTemplate.noAccountQuestion"}}</span>
-	       <a href="#register/" class="ice">{{t "templates.user.LoginTemplate.registerAccount"}}</a>
+	       <a href="{{url 'register'}}" class="ice">{{t "templates.user.LoginTemplate.registerAccount"}}</a>
 	   </div>
 	   {{/selfRegistration}}
 	   {{#forgottenPassword}}
 	   <div class="field">
 	       <span class="bold block">{{t "templates.user.LoginTemplate.problemLoggingQuestion"}}</span>
-	       <a href="#profile/forgotten_password/" class="ice block">{{t "templates.user.LoginTemplate.resetPassword"}}</a>
+	       <a href="{{url 'forgottenPassword'}}" class="ice block">{{t "templates.user.LoginTemplate.resetPassword"}}</a>
 	   </div>
 	   {{/forgottenPassword}}
 	</div>

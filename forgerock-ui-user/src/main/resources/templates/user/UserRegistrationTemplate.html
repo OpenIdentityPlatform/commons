@@ -5,7 +5,7 @@
         <h2 class="floatLeft head">{{t "templates.user.UserRegistrationTemplate.registerYourAccount"}}</h2>
         <div class="floatRight" style="padding-top: 4px;">
             {{t "templates.user.UserRegistrationTemplate.haveAccoutQuestion"}} 
-            <a href="#login/" class="button bold orange">{{t "templates.user.UserRegistrationTemplate.logIn"}}</a>
+            <a href="{{url 'login'}}" class="button bold orange">{{t "templates.user.UserRegistrationTemplate.logIn"}}</a>
         </div>
         <div class="clear"></div>
         
@@ -124,7 +124,7 @@
                     <div class="field">
                         <input type="checkbox" class="check" name="terms" value="yes" data-validator="termsOfUse"  /> 
                         <label class="check">
-                        {{e this key="templates.user.UserRegistrationTemplate.agreeToTerms" sprintfParams="['<a href=\"#register/terms_of_use/\" id=\"termOfUseLink\" class=\"ice\" title=\"terms\">', </a>']" }}
+                        {{t "templates.user.UserRegistrationTemplate.agreeToTerms" '<a href="#register/terms_of_use/" id="termOfUseLink" class="ice" title="terms">' '</a>'}}
                         </label>
                         <span class="error">x</span>
                         <div class="validationMessage validationMessageCheckbox"></div>

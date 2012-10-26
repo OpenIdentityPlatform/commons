@@ -2,7 +2,7 @@
     <div id="loginContainer">
         <div id="header-short">
             <div id="logo-short">
-                <a href="#" title="idm"><img src="images/logo.png" width="226" height="60" alt="idm logo" /> </a>
+                <a href="{{url ''}}" title="idm"><img src="images/logo.png" width="226" height="60" alt="idm logo" /> </a>
             </div>
         </div>
         <div id="content"></div>
@@ -16,7 +16,7 @@
             </a>
             <br /> 
             <a href="mailto: info@forgerock.com" class="orange">info@forgerock.com</a>
-            {{e this key="templates.user.DefaultBaseTemplate.orPhone" sprintfParams="['+47 21520108']" }}
+            {{t 'templates.user.DefaultBaseTemplate.orPhone' '+47 21520108' }}
             <br />
             {{t "common.form.copyright"}}
         </div>
