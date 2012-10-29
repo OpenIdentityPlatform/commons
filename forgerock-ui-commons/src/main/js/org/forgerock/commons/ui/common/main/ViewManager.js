@@ -35,6 +35,7 @@ define("org/forgerock/commons/ui/common/main/ViewManager", [
     
     obj.currentView = "null";
     obj.currentDialog = "null";
+    obj.currentArgs = "null";
     
     /**
      * Initializes view if it is not equal to current view.
@@ -49,7 +50,7 @@ define("org/forgerock/commons/ui/common/main/ViewManager", [
         
         obj.currentDialog = "null";
         
-        if(obj.currentView !== viewPath || forceUpdate) {
+        if(obj.currentView !== viewPath || forceUpdate || !_.isEqual(obj.currentArgs, args)) {
             view = require(viewPath);
             
             if(view.init) {
@@ -68,6 +69,7 @@ define("org/forgerock/commons/ui/common/main/ViewManager", [
             }
         }
 
+        obj.currentArgs = args;
         obj.currentView = viewPath;
     };
     
