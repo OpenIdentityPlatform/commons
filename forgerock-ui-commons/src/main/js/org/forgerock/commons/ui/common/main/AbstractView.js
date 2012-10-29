@@ -88,6 +88,7 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
             } else {
                 uiUtils.renderTemplate(this.template, this.$el, _.extend(conf.globalData, this.data), null, this.mode);
             }
+           
         },
         
         rebind: function() {

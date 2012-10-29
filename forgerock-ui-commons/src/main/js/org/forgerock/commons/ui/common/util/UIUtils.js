@@ -29,8 +29,9 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "handlebars",
     "i18next",
-    "org/forgerock/commons/ui/common/main/Router"
-], function (String, AbstractConfigurationAware, handlebars, i18next, router) {
+    "org/forgerock/commons/ui/common/main/Router",
+    "org/forgerock/commons/ui/common/util/DateUtil"
+], function (String, AbstractConfigurationAware, handlebars, i18next, router, dateUtil) {
     var obj = new AbstractConfigurationAware();
 
     obj.getUrl = function() {
@@ -203,6 +204,13 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         var result = "#" + router.getLink(router.configuration.routes[routeKey], _.toArray(arguments).slice(1, -1));
        
         return new Handlebars.SafeString(result);
+    });
+    
+    //format ISO8601; example: 2012-10-29T10:49:49.419+01:00
+    Handlebars.registerHelper('date', function(unformattedDate) {
+        var xdate = dateUtil.parseDateString(unformattedDate), formattedDate;
+        formattedDate = dateUtil.formatDate(xdate);
+        return new Handlebars.SafeString(formattedDate);
     });
     
     Handlebars.registerHelper('p', function(countValue, options) { 
