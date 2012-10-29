@@ -213,6 +213,41 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         return new Handlebars.SafeString(formattedDate);
     });
     
+    //map should have format key : value
+    Handlebars.registerHelper('select', function(map, elementName, selectedKey, selectedValue) {
+        var result, prePart, postPart, content = "", isSelected, entityName;
+        
+        if (elementName && _.isString(elementName)) {
+            prePart = '<select name="' + elementName + '">';
+        } else{
+            prePart = '<select>';
+        }
+        
+        postPart = '</select> ';
+        
+        for (entityName in map) {
+            isSelected = false;
+            if (selectedValue && _.isString(selectedValue)) {
+                if (selectedValue === map[entityName]) {
+                    isSelected = true;
+                }
+            } else {
+                if (selectedKey && selectedKey === entityName) {
+                    isSelected = true;
+                }
+            }
+            
+            if (isSelected) {
+                content += '<option value="' + entityName + '" selected="true">' + $.t(map[entityName]) + '</option>';
+            } else {
+                content += '<option value="' + entityName + '">' + $.t(map[entityName]) + '</option>';
+            }
+        }
+
+        result = prePart + content + postPart;
+        return new Handlebars.SafeString(result);
+    });
+    
     Handlebars.registerHelper('p', function(countValue, options) { 
         var params, result;
         params = { count: countValue };
