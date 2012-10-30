@@ -30,7 +30,7 @@
 define("config/validators/UserValidators", [
 ], function(constants, eventManager) {
     var obj = {
-            "registrationEmail": {
+            "email": {
                 "name": "Present and valid email",
                 "dependencies": [
                     "org/forgerock/commons/ui/common/util/ValidatorsUtils"
@@ -59,6 +59,35 @@ define("config/validators/UserValidators", [
                 ],
                 "validator": function(el, input, callback, utils, userDelegate) {
                     var v = $(input).val();
+                    
+                    if(v === "") {
+                        callback($.t("common.form.validation.required"));
+                        return;
+                    }
+                    
+                    userDelegate.checkUserNameAvailability(v, function(available) {
+                        if(!available) {
+                            callback($.t("common.form.validation.usernameExists"));
+                        } else {
+                            callback();
+                        }
+                    });              
+                }
+            },
+            "profileUserName": {
+                "name": "Valid and unique username or not changed",
+                "dependencies": [
+                    "org/forgerock/commons/ui/common/util/ValidatorsUtils",
+                    "org/forgerock/commons/ui/user/delegates/UserDelegate",
+                    "org/forgerock/commons/ui/common/main/Configuration"
+                ],
+                "validator": function(el, input, callback, utils, userDelegate, conf) {
+                    var v = $(input).val();
+                    
+                    if(conf.loggedUser.userName === v) {
+                        callback();
+                        return;
+                    }
                     
                     if(v === "") {
                         callback($.t("common.form.validation.required"));
@@ -244,7 +273,7 @@ define("config/validators/UserValidators", [
                 }
             },
             "profileEmail": {
-                "name": "Correct and unique email",
+                "name": "Correct email",
                 "dependencies": [
                     "org/forgerock/commons/ui/common/util/ValidatorsUtils",
                     "org/forgerock/commons/ui/user/delegates/UserDelegate",
@@ -268,13 +297,7 @@ define("config/validators/UserValidators", [
                         return;
                     }
                     
-                    userDelegate.checkUserNameAvailability(v, function(available) {
-                        if(!available) {
-                            callback($.t("common.form.validation.emailAddressAlreadyExists"));
-                        } else {
-                            callback();
-                        }
-                    });              
+                    callback();
                 }
             },
             "oldPassword": {

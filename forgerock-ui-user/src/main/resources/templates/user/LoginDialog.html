@@ -18,12 +18,16 @@
         <form action="" method="post">
             <fieldset>
                 <div class="field">
-                    <label class="short">{{t "common.user.login"}}</label> <input type="text" name="login"
-                        data-validator="required" data-validator-event="keyup" />
+                    <label class="short">{{t "common.user.login"}}</label>
+                    <input type="text" name="login" data-validator="required" data-validator-event="keyup" />
                 </div>
                 <div class="field">
-                    <label class="short">{{t "common.user.password"}}</label> <input type="password" name="password"
-                        data-validator="required" data-validator-event="keyup" />
+                    <label class="short">{{t "common.user.password"}}</label> 
+                    <input type="password" name="password" data-validator="required" data-validator-event="keyup" />
+                </div>
+                <div class="field">
+                    <label class="short">{{t "templates.user.LoginDialog.refreshOnLogin"}}</label> 
+                    <input type="checkbox" class="check" name="refreshOnLogin" value="yes" /> 
                 </div>
                 <div>
                     <input type="submit" name="loginButton" class="button orange" value="Login" />

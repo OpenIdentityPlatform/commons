@@ -29,8 +29,10 @@ define("org/forgerock/commons/ui/user/LoginDialog", [
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/EventManager", 
     "org/forgerock/commons/ui/common/util/Constants", 
-    "org/forgerock/commons/ui/common/components/Dialog"
-], function(validatorsManager, conf, eventManager, constants, Dialog) {
+    "org/forgerock/commons/ui/common/components/Dialog",
+    "org/forgerock/commons/ui/common/main/SessionManager",
+    "org/forgerock/commons/ui/common/main/ViewManager"
+], function(validatorsManager, conf, eventManager, constants, Dialog, sessionManager, viewManager) {
     var LoginDialog = Dialog.extend({
         contentTemplate: "templates/user/LoginDialog.html",
         element: '#dialogs',
@@ -66,7 +68,9 @@ define("org/forgerock/commons/ui/user/LoginDialog", [
         },
         
         loginClose: function(e) {
-            e.preventDefault();
+            if (e) {
+                e.preventDefault();
+            }
             
             this.displayed = false;
             this.close(e);
@@ -76,21 +80,25 @@ define("org/forgerock/commons/ui/user/LoginDialog", [
             e.preventDefault();
             
             if(validatorsManager.formValidated(this.$el)) {
-                conf.setProperty("backgroundLogin", true);
-                var _this = this;
-                eventManager.registerListener(constants.EVENT_DISPLAY_MESSAGE_REQUEST, _.once(function (event) {
-                    console.log(event);
-                    if (event === "loggedIn")
-                    {
-                        _this.close();
-                        _this.displayed = false;
-                        conf.setProperty("backgroundLogin", false);
-                        eventManager.sendEvent(constants.EVENT_REQUEST_RESEND_REQUIRED);
+                var userName, password, refreshOnLogin, _this = this;
+                userName = this.$el.find("input[name=login]").val();
+                password = this.$el.find("input[name=password]").val();
+                refreshOnLogin = this.$el.find("input[name=refreshOnLogin]:checked").val();
+                
+                sessionManager.login(userName, password, function(user) {
+                    conf.setProperty('loggedUser', user);
+                    eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: false});
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "loggedIn");
+                    _this.loginClose();
+                    
+                    if (refreshOnLogin) {
+                        viewManager.refresh();
                     }
-                }));
-                eventManager.sendEvent(constants.EVENT_LOGIN_REQUEST, {userName: this.$el.find("input[name=login]").val(), password: this.$el.find("input[name=password]").val()});
+                    
+                }, function() {
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "invalidCredentials"); 
+                });
             }
-            
         },
         data : {
             height: 300,

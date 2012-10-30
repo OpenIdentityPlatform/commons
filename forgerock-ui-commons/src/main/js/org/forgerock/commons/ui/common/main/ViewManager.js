@@ -35,7 +35,8 @@ define("org/forgerock/commons/ui/common/main/ViewManager", [
     
     obj.currentView = "null";
     obj.currentDialog = "null";
-    obj.currentArgs = "null";
+    obj.currentViewArgs = "null";
+    obj.currentDialogArgs = "null";
     
     /**
      * Initializes view if it is not equal to current view.
@@ -50,7 +51,7 @@ define("org/forgerock/commons/ui/common/main/ViewManager", [
         
         obj.currentDialog = "null";
         
-        if(obj.currentView !== viewPath || forceUpdate || !_.isEqual(obj.currentArgs, args)) {
+        if(obj.currentView !== viewPath || forceUpdate || !_.isEqual(obj.currentViewArgs, args)) {
             view = require(viewPath);
             
             if(view.init) {
@@ -69,17 +70,27 @@ define("org/forgerock/commons/ui/common/main/ViewManager", [
             }
         }
 
-        obj.currentArgs = args;
+        obj.currentViewArgs = args;
         obj.currentView = viewPath;
     };
     
     obj.showDialog = function(dialogPath, args) {
-        if(obj.currentDialog !== dialogPath) {
+        if(obj.currentDialog !== dialogPath || !_.isEqual(obj.currentDialogArgs, args)) {
             require(dialogPath).render(args);
             msg.messages.hideMessages();
         }
         
         obj.currentDialog = dialogPath;
+        obj.currentDialogArgs = args;
+    };
+    
+    obj.refresh = function() {
+        var cDialog = obj.currentDialog, cDialogArgs = obj.currentDialogArgs;
+        
+        obj.changeView(obj.currentView, obj.currentViewArgs, function() {}, true);
+        if (cDialog && cDialog !== 'null') {
+            obj.showDialog(cDialog, cDialogArgs);
+        }
     };
 
     return obj;

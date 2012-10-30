@@ -214,21 +214,7 @@ define("config/process/UserConfig", [
                      eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unauthorized");
                      router.routeTo("", {trigger: true});
                  }, function() {
-                     
                      loginDialog.render();
-                     
-                     /*
-                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unauthorized");
-                     
-                     console.log("Saving redirection link" + window.location.hash);
-                     if(!conf.gotoURL) {
-                         conf.setProperty("gotoURL", window.location.hash);
-                     }
-                     
-                     eventManager.sendEvent(constants.EVENT_LOGOUT);
-                     */
-                     
-                     
                  });    
              }
          },

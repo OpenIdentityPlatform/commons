@@ -214,8 +214,8 @@ public class ProfileTest extends AbstractProfileTest {
 	@AssertNoErrors
 	public void testUpdateEmailNotValidEmailAlreadyExists() {
 		userHelper.createSecondDefaultUser();
-		String emailToSet = "second@test.test";
-		new AssertNotValidFieldAfterChange("email", emailToSet).run();
+		String usernameToSet = "second@test.test";
+		new AssertNotValidFieldAfterChange("userName", usernameToSet).run();
 	}
 	
 }
