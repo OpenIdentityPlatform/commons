@@ -50,7 +50,6 @@ define("org/forgerock/commons/ui/user/profile/ChangeSecurityDataDialog", [
             "onValidate": "onValidate",
             "click .dialogCloseCross img": "close",
             "click input[name='close']": "close",
-            "click": "close",
             "click .dialogContainer": "stop"
         },
         

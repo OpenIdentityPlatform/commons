@@ -50,7 +50,6 @@ define("org/forgerock/commons/ui/user/profile/ChangeSiteIdentificationDialog", [
             "click input[type=submit]": "formSubmit",
             "click .dialogCloseCross img": "close",
             "click input[name='close']": "close",
-            "click": "close",
             "onValidate": "onValidate",
             "click .dialogContainer": "stop"
         },

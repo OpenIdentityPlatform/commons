@@ -40,8 +40,8 @@ define("org/forgerock/commons/ui/user/LoginDialog", [
             "click input[type=submit]": "login",
             "click .dialogCloseCross img": "loginClose",
             "click input[name='close']": "loginClose",
-            "click": "loginClose",
-            "click .dialogContainer": "stop"
+            "click .dialogContainer": "stop",
+            "onValidate": "onValidate"
         },
         
         displayed: false,
@@ -50,9 +50,12 @@ define("org/forgerock/commons/ui/user/LoginDialog", [
             if(this.displayed === false) {
                 this.displayed = true;
                 
+                this.addAction("Login", "submit");
                 this.show(_.bind(function(){ 
                     validatorsManager.bindValidators(this.$el);
-                    this.resize();                 
+                    this.resize();
+                    
+                    $(".dialog-background").off('click').on('click', _.bind(this.loginClose, this));
                                         
                     if (conf.loggedUser && conf.loggedUser.userName)
                     {

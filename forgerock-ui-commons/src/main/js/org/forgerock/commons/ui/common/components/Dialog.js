@@ -49,9 +49,9 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
         events: {
             "click .dialogCloseCross img": "close",
             "click input[name='close']": "close",
-            "click": "close",
             "click .dialogContainer": "stop"
         },
+        
         actions: {},
         
         stop: function(event) {
@@ -66,8 +66,11 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
         show: function(callback) {         
             this.setElement($("#dialogs"));
             this.parentRender(_.bind(function() {
-                this.setElement(this.$el.find(".dialog:last"));
-                   
+                this.setElement(this.$el.find(".dialogContainer:last"));
+                
+                $(".dialog-background").show();
+                $(".dialog-background").off('click').on('click', _.bind(this.close, this));
+                
                 this.$el.find(".dialogActions").append("<input type='button' name='close' value='" + $.t("common.form.close") + "' class='button orange floatRight' />");
                 
                 this.resize();
@@ -81,8 +84,9 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
         },
         
         resize: function() {
-            this.$el.find(".dialogContainer").css({width: this.data.width, height: this.data.height});
-            this.$el.find(".dialogContainer").css('margin-top', (window.innerHeight - this.data.height) / 2 * 0.5);
+            this.$el.css({width: this.data.width, height: this.data.height});
+            this.$el.css('margin-top', (window.innerHeight - this.data.height) / 2 * 0.5);
+            this.$el.css('margin-left', (window.innerWidth - this.data.width) / 2);
             this.$el.find(".dialogContent").css('height', this.data.height - 43);
         },
         
@@ -106,9 +110,13 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
                 event.preventDefault();
             }
             
+            if($(".dialogContainer").length < 2) {
+                $(".dialog-background").hide();
+            }
+            
             eventManager.sendEvent(constants.EVENT_DIALOG_CLOSE);
             
-            this.$el.remove();
+            $(".dialogContainer:last").remove();
         },
 
         addAction: function(name, type) {

@@ -41,7 +41,6 @@ define("org/forgerock/commons/ui/user/ForgottenPasswordDialog", [
             "click input[name=Update]": "formSubmit",
             "click .dialogCloseCross img": "close",
             "click input[name='close']": "close",
-            "click": "close",
             "click .dialogContainer": "stop",
             "onValidate": "onValidate"
         },

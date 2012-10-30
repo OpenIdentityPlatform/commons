@@ -823,7 +823,7 @@ form span,#logo,#menu ul li {
 	visibility: hidden;
 }
 
-.dialog {
+.dialog-background {
 	position: fixed;
 	top: 0;
 	left: 0;
@@ -831,6 +831,7 @@ form span,#logo,#menu ul li {
 	height: 100%;
 	z-index: 4;
 	background-image: url('../images/overlay.png');
+	display: none;
 }
 
 .dialogCloseCross {
@@ -842,7 +843,9 @@ form span,#logo,#menu ul li {
 
 .dialogContainer {
 	overflow: auto;
+	position: fixed;
 	z-index: 5;
+	top: 0;
 	margin: 0 auto;
 	background: #fff;
 	border: 1px solid #5a646d;

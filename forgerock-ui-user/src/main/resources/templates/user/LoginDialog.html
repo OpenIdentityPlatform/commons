@@ -13,7 +13,7 @@
 }
 </style>
 <h1>{{t "common.form.sessionExpired"}}</h1>
-<div class="shadowFrame" id="loginDialog">
+<div id="loginDialog">
     <div style="width: 380px;">
         <form action="" method="post">
             <fieldset>
@@ -28,9 +28,6 @@
                 <div class="field">
                     <label class="short">{{t "templates.user.LoginDialog.refreshOnLogin"}}</label> 
                     <input type="checkbox" class="check" name="refreshOnLogin" value="yes" /> 
-                </div>
-                <div>
-                    <input type="submit" name="loginButton" class="button orange" value="Login" />
                 </div>
             </fieldset>
         </form>
