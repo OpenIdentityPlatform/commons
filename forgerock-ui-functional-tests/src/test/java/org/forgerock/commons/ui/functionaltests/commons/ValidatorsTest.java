@@ -37,7 +37,7 @@ public class ValidatorsTest extends AbstractTest {
 		router.goToRegistration();
 		
 		forms.setField("content", "userName", "");
-		WebElement element = selenium.getElement("content", "validationMessage", ElementType.CLASS);
+		WebElement element = selenium.getElement("content", "validation-message", ElementType.CLASS);
 		Assert.assertEquals("Required", element.getText());
 	}
 	

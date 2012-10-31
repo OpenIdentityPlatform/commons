@@ -48,7 +48,7 @@ public class OpenIDMClient {
 	 */
 	public String loginAndReturnCookie(String userName, String password) {
 		try {
-			ResponseEntity<EntityBaseInfoArray> response = getRestTemplate().exchange(constants.getOpenIDMServer() + "openidm/managed/user/?_query-id=for-credentials",
+			ResponseEntity<EntityBaseInfoArray> response = getRestTemplate().exchange(constants.getOpenIDMServer() + "openidm/info/login",
 				      HttpMethod.GET, new HttpEntity<byte[]>(getHeadersForUser(userName, password)), EntityBaseInfoArray.class);
 			return response.getHeaders().get("Set-Cookie").get(0);
 		} catch (RestClientException e) {
