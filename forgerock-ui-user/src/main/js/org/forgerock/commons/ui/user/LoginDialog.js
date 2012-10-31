@@ -104,7 +104,7 @@ define("org/forgerock/commons/ui/user/LoginDialog", [
             }
         },
         data : {
-            height: 300,
+            height: 200, 
             width: 400
         }
     });
