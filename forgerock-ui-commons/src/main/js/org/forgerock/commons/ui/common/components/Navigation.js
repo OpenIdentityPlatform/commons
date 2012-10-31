@@ -61,7 +61,7 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                         this.addLink(url.name, url.url, true);
                         
                         if (url.urls) {
-                            this.$el.append('<div id="submenu"><ul>');
+                            this.$el.append('<div id="submenu" class="submenubar"><ul>');
                             for(subUrlName in url.urls) {
                                 subUrl = url.urls[subUrlName];
                                 this.addSubLink(subUrl.name, subUrl.url, this.isCurrent(subUrl.url));

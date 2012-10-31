@@ -71,12 +71,12 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
                 $(".dialog-background").show();
                 $(".dialog-background").off('click').on('click', _.bind(this.close, this));
                 
-                this.$el.find(".dialogActions").append("<input type='button' name='close' value='" + $.t("common.form.close") + "' class='button orange floatRight' />");
+                this.$el.find(".dialogActions").append("<input type='button' name='close' value='" + $.t("common.form.close") + "' class='button active float-right' />");
                 
                 this.resize();
                 
                 _.each(this.actions, _.bind(function(type, name) {
-                    this.$el.find(".dialogActions").append("<input type='"+ type +"' name='"+ name +"' value='"+ name +"' class='button gray floatRight' />");                    
+                    this.$el.find(".dialogActions").append("<input type='"+ type +"' name='"+ name +"' value='"+ name +"' class='button float-right' />");                    
                 }, this));
                 
                 this.loadContent(callback);

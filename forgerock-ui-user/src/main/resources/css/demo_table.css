@@ -122,6 +122,8 @@
 .dataTable th {
 	text-align: left;
 	padding-left: 30px;
+	font-weight: bold;
+    vertical-align: middle;
 
 	/*
     border-width: 1px;

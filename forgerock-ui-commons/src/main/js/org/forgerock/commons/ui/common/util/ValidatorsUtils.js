@@ -47,7 +47,7 @@ define("org/forgerock/commons/ui/common/util/ValidatorsUtils", [
     };
     
     obj.setErrors = function(el, validatorType, msg) {
-        _.each(el.find("label[data-for-validator="+validatorType+"]"), function(input) {
+        _.each(el.find("span[data-for-validator="+validatorType+"]"), function(input) {
             var type = $(input).text(), span = $(input).prev("span");
             
             if( $.inArray(type, msg) !== -1 ) {
@@ -73,11 +73,11 @@ define("org/forgerock/commons/ui/common/util/ValidatorsUtils", [
     };
     
     obj.hideBox = function(el) {
-        el.find(".groupFieldErrors").hide();
+        el.find(".group-field-errors").hide();
     };
     
     obj.showBox = function(el) {
-        el.find(".groupFieldErrors").show();
+        el.find(".group-field-errors").show();
     };
     
     return obj;

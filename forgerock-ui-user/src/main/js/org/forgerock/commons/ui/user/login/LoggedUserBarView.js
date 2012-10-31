@@ -50,6 +50,7 @@ define("org/forgerock/commons/ui/user/login/LoggedUserBarView", [
             if(conf.loggedUser) {
                 if(conf.loggedUser.roles && conf.loggedUser.roles.indexOf("openidm-admin") !== -1) {
                     this.$el.find("#profile_link").hide();
+                    this.$el.find("span.hr-vertical").hide();
                 } else {
                     this.$el.find("#profile_link").show();
                 }

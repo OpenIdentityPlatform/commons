@@ -29,7 +29,7 @@ public class DialogsHelper {
 	
 	public void assertActionButtonDisabled(String buttonName) {
 		try {
-			boolean disabled = driver.findElement(By.cssSelector(".dialogActions input[name='" + buttonName + "']")).getAttribute("class").contains("gray");
+			boolean disabled = driver.findElement(By.cssSelector(".dialogActions input[name='" + buttonName + "']")).getAttribute("class").contains("inactive");
 			Assert.assertTrue(disabled);
 		} catch (NoSuchElementException e) {
 			Assert.fail("Expected disabled button with name " + buttonName);
@@ -38,7 +38,7 @@ public class DialogsHelper {
 	
 	public void assertActionButtonEnabled(String buttonName) {
 		try {
-			boolean enabled = driver.findElement(By.cssSelector(".dialogActions input[name='" + buttonName + "']")).getAttribute("class").contains("orange");
+			boolean enabled = driver.findElement(By.cssSelector(".dialogActions input[name='" + buttonName + "']")).getAttribute("class").contains("active");
 			Assert.assertTrue(enabled);
 		} catch (NoSuchElementException e) {
 			Assert.fail("Expected enabled button with name " + buttonName);

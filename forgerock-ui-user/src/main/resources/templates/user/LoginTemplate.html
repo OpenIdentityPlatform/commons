@@ -1,38 +1,39 @@
-<div class="shadowFrame paddingVertical40">
-	<div class="floatLeft" style="width: 380px; border-right: 1px solid #C0C0C0; padding-right: 55px; margin-left: 30px;">
-		<form action="" method="post">
-			<fieldset>
+<div class="column-layout" style="padding-top: 30px;">
+	<div class="column2">
+		<form action="" method="post" class="form">
+			<fieldset style="border-right: 1px solid #C0C0C0;">
 				<div class="field">
-					<label class="short">{{t "common.user.login"}}</label> 
-					<input type="text" name="login" data-validator="required" data-validator-event="keyup" />
+					<label class="short">{{t "common.user.login"}}</label> <input type="text" name="login"
+						data-validator="required" data-validator-event="keyup" />
 				</div>
 				<div class="field">
-					<label class="short">{{t "common.user.password"}}</label> 
-					<input type="password" name="password" data-validator="required" data-validator-event="keyup" />
+					<label class="short">{{t "common.user.password"}}</label> <input type="password" name="password"
+						data-validator="required" data-validator-event="keyup" />
 				</div>
-				<div class="field" style="margin-left: 80px;">
-                    <label class="checkbox">
-                    <input type="checkbox" name="loginRemember" />{{t "templates.user.LoginTemplate.loginRemember"}}</label>
+				<div class="field field-checkbox">
+                    <label><input type="checkbox" name="loginRemember" />{{t "templates.user.LoginTemplate.loginRemember"}}</label>
                 </div>
-				<div style="margin-left: 128px;">
-					<input type="submit" name="loginButton" class="button orange" value='{{t "common.user.login"}}' />
+				<div class="field field-submit">
+					<input type="submit" name="loginButton" class="button active" value="{{t "common.user.login"}}" />
 				</div>
 			</fieldset>
 		</form>
 	</div>
-	<div class="floatRight" style="width: 260px; padding-left: 15px;">
-	   {{#selfRegistration}}
-	   <div class="field">
-	       <span class="bold block">{{t "templates.user.LoginTemplate.noAccountQuestion"}}</span>
-	       <a href="{{url 'register'}}" class="ice">{{t "templates.user.LoginTemplate.registerAccount"}}</a>
-	   </div>
-	   {{/selfRegistration}}
-	   {{#forgottenPassword}}
-	   <div class="field">
-	       <span class="bold block">{{t "templates.user.LoginTemplate.problemLoggingQuestion"}}</span>
-	       <a href="{{url 'forgottenPassword'}}" class="ice block">{{t "templates.user.LoginTemplate.resetPassword"}}</a>
-	   </div>
-	   {{/forgottenPassword}}
+	<div class="column2" style="padding-top: 20px;">
+		<div class="row-layout">
+			{{#selfRegistration}}
+			<p>
+			<div class="row">
+				<h5>{{t "templates.user.LoginTemplate.noAccountQuestion"}}?</h5>
+		    	<a href="{{url 'register'}}">{{t "templates.user.LoginTemplate.registerAccount"}}</a>
+			</div>
+			{{/selfRegistration}}
+			{{#forgottenPassword}}
+			<div class="row">
+				<h5>{{t "templates.user.LoginTemplate.problemLoggingQuestion"}}</h5>
+		    	<a href="{{url 'forgottenPassword'}}">{{t "templates.user.LoginTemplate.resetPassword"}}</a>
+			</div>
+			{{/forgottenPassword}}
+		</div>
 	</div>
-	<div class="clear"></div>
 </div>

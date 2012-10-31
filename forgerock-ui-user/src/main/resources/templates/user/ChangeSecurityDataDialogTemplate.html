@@ -1,78 +1,84 @@
 <h1>{{t "templates.user.ChangeSecurityDataDialogTemplate.securityDataChange"}}</h1>
-<form id='securityDataChange' action='' method='post' onsubmit="return false">
+<form id="securityDataChange" action="" class="form large center no-margin" method="post" onsubmit="return false">
     <fieldset>
         <div id="securityMore">      
             <p>{{t "templates.user.ChangeSecurityDataDialogTemplate.enterNewPasswordToChange"}}</p>
-            <div class="groupField">
-                <div class="groupFieldInputs floatLeft">
-                    <input type="hidden" name="oldPassword" />
-                    <div class='field'>
-                        <label>{{t "common.user.newPassword"}}</label> 
-                        <input type='password' name='password' value='' data-validator="password" data-validator-event="keyup" />
-                        <span class='error'>x</span>
-                    </div>
+            <div class="group-field" style="height: 100px;">
+                <div class="group-field">
+                    <div class="group-field-inputs">
+                        <div class="field">
+                            <label>{{t "common.user.password"}}</label> 
+                            <input type="hidden" name="oldPassword" />
+                            <input type="password" name="password" value="" data-validator="password" data-validator-event="keyup" />
+                            <span class="error">x</span>
+                        </div>
 
-                    <div class='field'>
-                        <label>{{t "common.user.confirmNewPassword"}}</label> 
-                        <input type='password' name='passwordConfirm' value='' data-validator="passwordConfirm" data-validator-event="keyup" />
-                        <span class='error'>x</span>
+                        <div class="field">
+                            <label>{{t "common.user.confirmPassword"}}</label> 
+                            <input type="password" name="passwordConfirm" value="" data-validator="passwordConfirm" data-validator-event="keyup" />
+                            <span class="error">x</span>
+                        </div>                        
                     </div>
-                </div>
-                <div class="groupFieldErrors floatRight radious">
-                    <div class="groupFieldErrorsRule">
-                        <span class='error'>x</span> 
-                        <label data-for-validator="password">{{t "common.form.validation.cannotMatchOldPassword"}}</label>
-                    </div>
-                    <div class="groupFieldErrorsRule">
-                        <span class='error'>x</span> 
-                        <label data-for-validator="password">{{t "common.form.validation.atLeastOneCapitalLetter"}}</label>
-                    </div>
-                    <div class="groupFieldErrorsRule">
-                        <span class='error'>x</span> 
-                        <label data-for-validator="password">{{t "common.form.validation.atLeastOneNumber"}}</label>
-                    </div>
-                    <div class="groupFieldErrorsRule">
-                        <span class='error'>x</span> 
-                        <label data-for-validator="password">{{t "common.form.validation.atLeast8Characters"}}</label>
-                    </div>
-                    <div class="groupFieldErrorsRule">
-                        <span class='error'>x</span> 
-                        <label data-for-validator="password">{{t "common.form.validation.cannotMatchLogin"}}</label>              
-                    </div>
-                    <div class="groupFieldErrorsRule">
-                        <span class='error'>x</span> 
-                        <label data-for-validator="passwordConfirm">{{t "common.form.validation.confirmationMatchesPassword"}}</label>
+                    <div class="group-field-errors">
+                        <div class="field-rule">
+                            <span class="error">x</span> 
+                            <span data-for-validator="password">{{t "common.form.validation.cannotMatchOldPassword"}}</span>
+                        </div>
+                        <div class="field-rule">
+                            <span class="error">x</span> 
+                            <span data-for-validator="password">{{t "common.form.validation.atLeastOneCapitalLetter"}}</span>
+                        </div>
+                        <div class="field-rule">
+                            <span class="error">x</span> 
+                            <span data-for-validator="password">{{t "common.form.validation.atLeastOneNumber"}}</span>
+                        </div>
+                        <div class="field-rule">
+                            <span class="error">x</span> 
+                            <span data-for-validator="password">{{t "common.form.validation.atLeast8Characters"}}</span>
+                        </div>
+                        <div class="field-rule">                          
+                            <span class="error">x</span> 
+                            <span data-for-validator="password">{{t "common.form.validation.cannotMatchLogin"}}</span>
+                        </div>
+                        <div class="field-rule">
+                            <span class="error">x</span> 
+                            <span data-for-validator="passwordConfirm">{{t "common.form.validation.confirmationMatchesPassword"}}</span>
+                        </div> 
                     </div>
                 </div>
                 <div class="clear"></div>
             </div>   
             {{#securityQuestions}}
-            <p>{{t "templates.user.ChangeSecurityDataDialogTemplate.selectQuestionAndAnserIfYouWant"}}</p>
-            <div class="field">
-                <label>{{t "common.user.securityQuestion"}}</label>
-                <input type="hidden" name="oldSecurityQuestion" />
-                <select name="securityQuestion"></select>
+            <div class="group-field">
+                <div class="field field-text">
+                    {{t "templates.user.ChangeSecurityDataDialogTemplate.selectQuestionAndAnserIfYouWant"}}
+                </div>
+                <div class="group-field-inputs">
+                    <div class="field">
+                        <label>{{t "common.user.securityQuestion"}}</label>
+                        <input type="hidden" name="oldSecurityQuestion" />
+                        <select name="securityQuestion"></select>
+                    </div>
+                    <div class="field">
+                        <label>{{t "common.user.securityAnswer"}}</label> 
+                        <input type="text" name="securityAnswer" data-validator="newSecurityAnswer" />
+                        <span class="error">x</span>
+                    </div>
+                </div>
+                <div class="group-field-message">
+                    {{t "templates.user.ChangeSecurityDataDialogTemplate.securityQuestionAndAnserExplanation"}}
+                </div>
+                <div class="clear"></div>
             </div>
             <div class="field">
-                <label>{{t "common.user.securityAnswer"}}</label> 
-                <input type="text" name="securityAnswer" data-validator="newSecurityAnswer" />
-                <span class='error'>x</span>
-                <div class="validationMessage"></div>
-            </div> 
-            
-            <p style="width: 270px; float: right; margin-top: -140px;">
-            {{t "templates.user.ChangeSecurityDataDialogTemplate.securityQuestionAndAnserExplanation"}}
-            </p>
-            <div class='field'>
                 <label>{{t "common.user.adaptiveAuthMethod"}}</label> 
                 <div style="margin-top: 10px; width: 200px; float: left">
-                    <div style='float: left;'>
-                    <input type='radio' name='auth' value='SMS' checked='checked'/>{{t "common.user.SMS"}}</div>
-                    <div style='float: left;'><input type='radio' name='auth' value='OAuth' disabled='disabled'/>{{t "common.user.OAuth"}}</div>
+                    <div style="float: left;">
+                    <input type="radio" name="auth" value="SMS" checked="checked"/>{{t "common.user.SMS"}}</div>
+                    <div style="float: left;"><input type="radio" name="auth" value="OAuth" disabled="disabled"/>{{t "common.user.OAuth"}}</div>
                 </div>
             </div>
             {{/securityQuestions}}
-            <div class="clear"></div>
         </div>
     </fieldset>
 </form>

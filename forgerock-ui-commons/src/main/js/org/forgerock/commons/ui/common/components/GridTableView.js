@@ -110,7 +110,7 @@ define("org/forgerock/commons/ui/common/components/GridTableView", [
             this.$el.find("#noItemsMessage").remove();
             
             if (this.items.length > 0) {
-                this.$el.append('<ul id="sortable"></ul>');
+                this.$el.append('<ul id="sortable" class="sortable"></ul>');
                 
                 this.sort();
                 for (i = 0; i < this.items.length; i++) {
@@ -121,7 +121,7 @@ define("org/forgerock/commons/ui/common/components/GridTableView", [
 
             if (this.$el.find("#sortable").children().size() === 0) {
                 if (this.noItemsMessage()) {
-                    this.$el.append('<div id="noItemsMessage">'+this.noItemsMessage()+'</div>');
+                    this.$el.append('<div id="noItemsMessage" class="offset10">'+this.noItemsMessage()+'</div>');
                 }
             }
             this.runAfterRebuildSteps();

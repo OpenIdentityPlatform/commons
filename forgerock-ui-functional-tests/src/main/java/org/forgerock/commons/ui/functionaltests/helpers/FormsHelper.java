@@ -99,7 +99,7 @@ public class FormsHelper {
 	public void submit(final String el, final String name) {
 		wait.until(new ExpectedCondition<Boolean>() {
             public Boolean apply(WebDriver d) {
-                return d.findElement(By.name(name)).getAttribute("class").contains("orange");
+                return d.findElement(By.name(name)).getAttribute("class").contains("active");
             }
         });
 		

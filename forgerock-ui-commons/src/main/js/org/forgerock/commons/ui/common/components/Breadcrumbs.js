@@ -109,7 +109,7 @@ define("org/forgerock/commons/ui/common/components/Breadcrumbs", [
          * Appends link to the breadcrumbs list and an arrow after it.
          */
         push: function(name, url) {        
-            $(this.element).find("a:last").after(' <a href="'+url+'" class="orange">' + name + '</a>');
+            $(this.element).find("a:last").after(' <a href="'+url+'" class="active">' + name + '</a>');
             $(this.element).find("a:last").before('<img src="images/navi-next.png" width="3" height="5" alt="" align="absmiddle" class="navi-next" /><span></span>');
 
             this.size++;
