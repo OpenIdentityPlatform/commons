@@ -72,7 +72,7 @@ define("org/forgerock/commons/ui/user/login/InternalLoginHelper", [
                 errorCallback();
             });
         }
-    }
+    };
 
     return obj;
 });
