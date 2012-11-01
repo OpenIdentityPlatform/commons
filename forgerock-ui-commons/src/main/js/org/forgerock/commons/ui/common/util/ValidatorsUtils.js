@@ -48,7 +48,8 @@ define("org/forgerock/commons/ui/common/util/ValidatorsUtils", [
     
     obj.setErrors = function(el, validatorType, msg) {
         _.each(el.find("span[data-for-validator="+validatorType+"]"), function(input) {
-            var type = $(input).text(), span = $(input).prev("span");
+            var type = $(input).attr("data-for-req"), span = $(input).prev("span");
+            if (!type) { type = $(input).text(); }
             
             if( $.inArray(type, msg) !== -1 ) {
                 span.removeClass('ok');

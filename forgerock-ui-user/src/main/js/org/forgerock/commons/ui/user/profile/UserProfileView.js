@@ -39,6 +39,7 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
 ], function(AbstractView, validatorsManager, uiUtils, userDelegate, eventManager, constants, conf, countryStateDelegate) {
     var UserProfileView = AbstractView.extend({
         template: "templates/user/UserProfileTemplate.html",
+        delegate: userDelegate,
         events: {
             "click input[type=submit]": "formSubmit",
             "onValidate": "onValidate",
@@ -55,43 +56,47 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
                 //data.userName = data.email.toLowerCase();
                 data.phoneNumber = data.phoneNumber.split(' ').join('').split('-').join('').split('(').join('').split(')').join('');
                 
-                userDelegate.patchUserDifferences(conf.loggedUser, data, function() {
+                this.delegate.patchUserDifferences(conf.loggedUser, data, _.bind(function() {
                     if(conf.loggedUser.userName !== data.userName) {
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateSuccessful");
                         eventManager.sendEvent(constants.EVENT_LOGOUT);
                         return;
                     }
                     
-                    userDelegate.getForUserName(data.userName, function(user) {
+                    this.delegate.getForUserName(data.userName, function(user) {
                         conf.loggedUser = user;
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateSuccessful");
                         self.reloadData();
                     });
-                });
+                }, this));
             }
         },
         
         render: function(args, callback) {
             this.parentRender(function() {
                 var self = this;
-                validatorsManager.bindValidators(this.$el);
-                
-                countryStateDelegate.getAllCountries( function(countries) {
-                    uiUtils.loadSelectOptions(countries, $("select[name='country']"), true, _.bind(function() {
-                        if(conf.loggedUser.country) {
-                            this.$el.find("select[name='country'] > option:first").text("");
-                            this.$el.find("select[name='country']").val(conf.loggedUser.country);
-                            
-                            this.loadStates();
-                        }
-                    }, self));
-                });
+                validatorsManager.bindValidators(this.$el,this.delegate.baseEntity, _.bind(function () {
+                    
+                    countryStateDelegate.getAllCountries( function(countries) {
+                        uiUtils.loadSelectOptions(countries, $("select[name='country']"), true, _.bind(function() {
+                            if(conf.loggedUser.country) {
+                                this.$el.find("select[name='country'] > option:first").text("");
+                                this.$el.find("select[name='country']").val(conf.loggedUser.country);
+                                
+                                this.loadStates();
+                            }
+                        }, self));
+                    });
 
-                this.reloadData();
+                    this.reloadData();
+
+                    if(callback) {
+                        callback();
+                    }
+                    
+                }, this));
                 
-                if(callback) {
-                    callback();
-                }
+                
             });            
         },
         

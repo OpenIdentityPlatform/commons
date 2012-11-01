@@ -121,13 +121,13 @@ public class ProfileTest extends AbstractProfileTest {
 				shouldHaveCountryAndState(EMPTY_SELECT, PLEASE_SELECT_DISPLAY_TEXT, EMPTY_SELECT, NO_VALUE_SELECT);
 				forms.setField("content", "country", "poland");
 				shouldHaveCountryAndState("poland", "Poland", EMPTY_SELECT, PLEASE_SELECT_DISPLAY_TEXT);
-				forms.setField("content", "stateProvince", "dolnoslaskie");
-				shouldHaveCountryAndState("poland", "Poland", "dolnoslaskie", "Dolnośląskie");
+				forms.setField("content", "stateProvince", "lubuskie");
+				shouldHaveCountryAndState("poland", "Poland", "lubuskie", "Lubuskie");
 			}
 
 			@Override
 			protected void checkIfStoredCorrectly() {
-				shouldHaveCountryAndState("poland", "Poland", "dolnoslaskie", "Dolnośląskie");
+				shouldHaveCountryAndState("poland", "Poland", "lubuskie", "Lubuskie");
 			}
 		}.run();
 	}
@@ -143,8 +143,8 @@ public class ProfileTest extends AbstractProfileTest {
 		shouldHaveCountryAndState(EMPTY_SELECT, PLEASE_SELECT_DISPLAY_TEXT, EMPTY_SELECT, NO_VALUE_SELECT);
 		forms.setField("content", "country", "poland");
 		shouldHaveCountryAndState("poland", "Poland", EMPTY_SELECT, PLEASE_SELECT_DISPLAY_TEXT);
-		forms.setField("content", "stateProvince", "dolnoslaskie");
-		shouldHaveCountryAndState("poland", "Poland", "dolnoslaskie", "Dolnośląskie");
+		forms.setField("content", "stateProvince", "lubuskie");
+		shouldHaveCountryAndState("poland", "Poland", "lubuskie", "Lubuskie");
 		
 		forms.setField("content", "stateProvince", EMPTY_SELECT);
 		shouldHaveCountryAndState("poland", "Poland", EMPTY_SELECT, PLEASE_SELECT_DISPLAY_TEXT);

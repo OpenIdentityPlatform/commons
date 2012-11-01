@@ -8,41 +8,41 @@
 			{{t "templates.user.UserRegistrationTemplate.haveAccoutQuestion"}} <a href="{{url 'login'}}" class="active bold">{{t "templates.user.UserRegistrationTemplate.logIn"}}</a>
 		</div>
 	</div>
-    
+
     <form action="" method="post" class="form large center">
         <fieldset>
             <div class="fields">
                 <div class="field">
                     <label>{{t "common.user.username"}}</label> 
-                    <input type="text" name="userName" data-validator="userName" /> 
+                    <input type="text" name="userName" data-validation-dependents="password"/> 
                     <span class="error">x</span>
                     <div class="validation-message"></div>
-                </div>                
+                </div>
 
                 <div class="field">
                     <label>{{t "common.user.emailAddress"}}</label> 
-                    <input type="text" name="email" data-validator="email" /> 
+                    <input type="text" name="email" /> 
                     <span class="error">x</span>
                     <div class="validation-message"></div>
                 </div>
 
                 <div class="field">
                     <label>{{t "common.user.givenName"}}</label> 
-                    <input type="text" name="givenName" data-validator="name" /> 
+                    <input type="text" name="givenName" data-validation-dependents="password"/> 
                     <span class="error">x</span>
                     <div class="validation-message"></div>
                 </div>
 
                 <div class="field">
                     <label>{{t "common.user.familyName"}}</label> 
-                    <input type="text" name="familyName" data-validator="name" /> 
+                    <input type="text" name="familyName" data-validation-dependents="password"/> 
                     <span class="error">x</span>
                     <div class="validation-message"></div>
                 </div>
                 
                 <div class="field">
                     <label>{{t "common.user.phoneNumber"}}</label> 
-                    <input type="text" name="phoneNumber" data-validator="phone" /> 
+                    <input type="text" name="phoneNumber" /> 
                     <span class="error">x</span>
                     <div class="validation-message"></div>
                 </div>
@@ -51,53 +51,38 @@
                     <div class="group-field-inputs">
                         <div class="field">
                             <label>{{t "common.user.password"}}</label> 
-                            <input type="password" name="password" value="" data-validator="password" data-validator-event="keyup" />
+                            <input type="password" name="password" value="" data-validation-dependents="passwordConfirm"/>
                             <span class="error">x</span>
                         </div>
 
                         <div class="field">
                             <label>{{t "common.user.confirmPassword"}}</label> 
-                            <input type="password" name="passwordConfirm" value="" data-validator="passwordConfirm" data-validator-event="keyup" />
+                            <input type="password" name="passwordConfirm" value="" data-validator="passwordConfirm" data-validator-event="keyup change" />
                             <span class="error">x</span>
                         </div>
                     </div>
-                    <div class="group-field-errors">
-                        <div class="field-rule">
-                            <span class="error">x</span> 
-                            <span data-for-validator="password">{{t "common.form.validation.atLeastOneCapitalLetter"}}</span>
-                        </div>
-                        <div class="field-rule">
-                            <span class="error">x</span> 
-                            <span data-for-validator="password">{{t "common.form.validation.atLeastOneNumber"}}</span>
-                        </div>
-                        <div class="field-rule">
-                            <span class="error">x</span> 
-                            <span data-for-validator="password">{{t "common.form.validation.atLeast8Characters"}}</span>
-                        </div>
-                        <div class="field-rule">                          
-                            <span class="error">x</span> 
-                            <span data-for-validator="password">{{t "common.form.validation.cannotMatchLogin"}}</span>
-                        </div>
+                    <div class="group-field-errors validationRules" data-for-validator="password passwordConfirm">
+
                         <div class="field-rule">
                             <span class="error">x</span> 
                             <span data-for-validator="passwordConfirm">{{t "common.form.validation.confirmationMatchesPassword"}}</span>
-                        </div> 
+                        </div>
                     </div>
                 </div>
-                
+
                 <div class="clear"></div>
                 {{#securityQuestions}}
-                <p style="width: 400px; margin-left: 220px; margin-bottom: 10px;">The Security Question selected and corresponding Answer provided by you will be used to help identify you in the event that you forget your password.
+                <p style="width: 400px; margin-left: 220px; margin-bottom: 10px;">{{t "templates.user.ChangeSecurityDataDialogTemplate.securityQuestionAndAnserExplanation"}}
                 </p>
                 <div class="field">
                     <label>{{t "common.user.securityQuestion"}}</label>
-                    <select name="securityQuestion" data-validator="required"></select>
+                    <select name="securityQuestion"></select>
                     <span class="error">x</span>
                     <div class="validation-message"></div>
                 </div>
                 <div class="field">
                     <label>{{t "common.user.securityAnswer"}}</label> 
-                    <input type="text" name="securityAnswer" data-validator="required" />
+                    <input type="text" name="securityAnswer" />
                     <span class="error">x</span>
                     <div class="validation-message"></div>
                 </div>  
@@ -118,15 +103,15 @@
                 
                 <div class="field">
                     <label>{{t "common.user.sitePhrase"}}</label> 
-                    <input type="text" name="passPhrase" data-validator="passPhrase" />
+                    <input type="text" name="passPhrase" />
                     <span class="error">x</span>
                     <div class="validation-message"></div>
                 </div>   
-                {{/siteIdentification}}                
+                {{/siteIdentification}}
                 
                 <div class="field field-checkbox">
                     <label>
-                    	<input type="checkbox" name="terms" value="yes" data-validator="termsOfUse" /> 
+                    	<input type="checkbox" name="terms" value="yes" data-validator="termsOfUse" data-validator-event="click" data-validation-status="error"/> 
                     	{{t "templates.user.UserRegistrationTemplate.agreeToTerms" '<a href="#register/terms_of_use/" id="termOfUseLink" class="ice" title="terms">' '</a>'}}
                         <div class="validation-message validation-message-checkbox"></div>
                     </label>

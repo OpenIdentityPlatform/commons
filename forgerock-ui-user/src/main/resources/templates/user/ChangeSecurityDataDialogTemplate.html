@@ -9,37 +9,17 @@
                         <div class="field">
                             <label>{{t "common.user.password"}}</label> 
                             <input type="hidden" name="oldPassword" />
-                            <input type="password" name="password" value="" data-validator="password" data-validator-event="keyup" />
+                            <input type="password" name="password" value="" data-validation-dependents="passwordConfirm"/>
                             <span class="error">x</span>
                         </div>
 
                         <div class="field">
                             <label>{{t "common.user.confirmPassword"}}</label> 
-                            <input type="password" name="passwordConfirm" value="" data-validator="passwordConfirm" data-validator-event="keyup" />
+                            <input type="password" name="passwordConfirm" value="" data-validator="passwordConfirm" data-validator-event="keyup change" />
                             <span class="error">x</span>
                         </div>                        
                     </div>
-                    <div class="group-field-errors">
-                        <div class="field-rule">
-                            <span class="error">x</span> 
-                            <span data-for-validator="password">{{t "common.form.validation.cannotMatchOldPassword"}}</span>
-                        </div>
-                        <div class="field-rule">
-                            <span class="error">x</span> 
-                            <span data-for-validator="password">{{t "common.form.validation.atLeastOneCapitalLetter"}}</span>
-                        </div>
-                        <div class="field-rule">
-                            <span class="error">x</span> 
-                            <span data-for-validator="password">{{t "common.form.validation.atLeastOneNumber"}}</span>
-                        </div>
-                        <div class="field-rule">
-                            <span class="error">x</span> 
-                            <span data-for-validator="password">{{t "common.form.validation.atLeast8Characters"}}</span>
-                        </div>
-                        <div class="field-rule">                          
-                            <span class="error">x</span> 
-                            <span data-for-validator="password">{{t "common.form.validation.cannotMatchLogin"}}</span>
-                        </div>
+                    <div class="group-field-errors validationRules" data-for-validator="password passwordConfirm">
                         <div class="field-rule">
                             <span class="error">x</span> 
                             <span data-for-validator="passwordConfirm">{{t "common.form.validation.confirmationMatchesPassword"}}</span>
@@ -61,7 +41,7 @@
                     </div>
                     <div class="field">
                         <label>{{t "common.user.securityAnswer"}}</label> 
-                        <input type="text" name="securityAnswer" data-validator="newSecurityAnswer" />
+                        <input type="text" name="securityAnswer" />
                         <span class="error">x</span>
                     </div>
                 </div>

@@ -122,7 +122,7 @@ define("org/forgerock/commons/ui/user/delegates/UserDelegate", [
      */
     obj.getBySecurityAnswer = function(uid, securityAnswer, successCallback, errorCallback) {
         obj.serviceCall({
-            url: "/?_query-id=for-security-answer&" + $.param({uid: uid, securityAnswer: securityAnswer.toLowerCase()}), 
+            url: "/?_query-id=for-security-answer&" + $.param({uid: uid, securityAnswer: securityAnswer}), 
             success: function (data) {
                 if(!data.result) {
                     if(errorCallback) {

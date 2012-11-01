@@ -47,7 +47,7 @@ define("org/forgerock/commons/ui/user/ForgottenPasswordDialog", [
         
         data: {         
             width: 800,
-            height: 210
+            height: 400
         },
         
         securityQuestions: {},
@@ -58,7 +58,7 @@ define("org/forgerock/commons/ui/user/ForgottenPasswordDialog", [
             this.actions = {};
             this.addAction($.t("common.form.update"), "submit");
             this.show(_.bind(function() {
-                validatorsManager.bindValidators(this.$el); 
+                validatorsManager.bindValidators(this.$el, userDelegate.baseEntity); 
                 if (conf.forgottenPasswordUserName) {
                     this.$el.find("input[name=resetUsername]").val(conf.forgottenPasswordUserName);
                     this.$el.find("input[name=resetUsername]").trigger("change");
@@ -96,7 +96,7 @@ define("org/forgerock/commons/ui/user/ForgottenPasswordDialog", [
                         $("#fgtnSecurityQuestion").text(securityQuestionRef[result]);
                     });
                     this.$el.find("#fgtnAnswerDiv").show();
-                    this.data.height = 350;
+                    this.data.height = 400;
                 }
                 this.resize();
             }

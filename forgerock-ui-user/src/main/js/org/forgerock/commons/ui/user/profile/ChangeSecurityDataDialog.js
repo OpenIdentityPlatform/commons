@@ -84,15 +84,16 @@ define("org/forgerock/commons/ui/user/profile/ChangeSecurityDataDialog", [
             this.addAction($.t("common.form.update"), "submit");
             
             this.show(_.bind(function() {
-                validatorsManager.bindValidators(this.$el);
-                
-                if(conf.passwords) {
-                    this.$el.find("input[name=oldPassword]").val(conf.passwords.password);                    
-                    delete conf.passwords;
-                }
-                
-                this.reloadData();
-            }, this));            
+                    validatorsManager.bindValidators(this.$el, userDelegate.baseEntity, _.bind(function () {
+                    
+                    if(conf.passwords) {
+                        this.$el.find("input[name=oldPassword]").val(conf.passwords.password);                    
+                        delete conf.passwords;
+                    }
+                    
+                    this.reloadData();
+                }, this));
+            }, this));
         },
         
         reloadData: function() {

@@ -3,47 +3,47 @@
     <h3>{{t "common.user.userProfile"}}</h3>
 
     <form class="form two-columns">
-
+        <input type="hidden" name="_id">
         <div class="column-layout">
             <div class="column2">
                 <div class="field">
                     <label class="light">{{t "common.user.username"}}</label>
-                    <input type="text" name="userName" data-validator="profileUserName" />
+                    <input type="text" name="userName" />
                     <span></span>
                     <div class="validation-message"></div>
                 </div>
                 
                 <div class="field">
-                    <label class="light">{{t "common.user.givenName"}}</label> 
-                    <input type="text" name="givenName" data-validator="name" /> 
+                    <label class="light">{{t "common.user.givenName"}}</label>
+                    <input type="text" name="givenName" />
                     <span></span>
                     <div class="validation-message"></div>
                 </div>
                 
                 <div class="field">
                     <label class="light">{{t "common.user.emailAddress"}}</label> 
-                    <input type="text" name="email" data-validator="profileEmail" /> 
+                    <input type="text" name="email" /> 
+                    <span></span>
+                    <div class="validation-message"></div>
+                </div>
+            
+                <div class="field">
+                    <label class="light">{{t "common.user.address1"}}</label>
+                    <input type="text" name="address1" />
                     <span></span>
                     <div class="validation-message"></div>
                 </div>
                 
                 <div class="field">
-                    <label class="light">{{t "common.user.address1"}}</label> 
-                    <input type="text" name="address1" /> 
-                    <span></span>
-                    <div class="validation-message"></div>
-                </div>
-                
-                <div class="field">
-                    <label class="light">{{t "common.user.country"}}</label> 
+                    <label class="light">{{t "common.user.country"}}</label>
                     <select name="country"></select>
                     <span></span>
                     <div class="validation-message"></div>
                 </div>
                 
                 <div class="field">
-                    <label class="light">{{t "common.user.stateProvince"}}</label> 
-                    <select name="stateProvince"></select> 
+                    <label class="light">{{t "common.user.stateProvince"}}</label>
+                    <select name="stateProvince"></select>
                     <span></span>
                     <div class="validation-message"></div>
                 </div>
@@ -59,36 +59,36 @@
                 <div class="field"></div>
                 
                 <div class="field">
-                    <label class="light">Last Name</label> 
-                    <input type="text" name="familyName" data-validator="name" /> 
+                    <label class="light">{{t "common.user.familyName"}}</label>
+                    <input type="text" name="familyName" />
                     <span></span>
                     <div class="validation-message"></div>
                 </div>
                 
                 <div class="field">
-                    <label class="light">Mobile Phone</label> 
-                    <input type="text" name="phoneNumber" data-validator="phone" /> 
+                    <label class="light">{{t "common.user.phoneNumber"}}</label>
+                    <input type="text" name="phoneNumber" />
                     <span></span>
                     <div class="validation-message"></div>
                 </div>
                 
                 <div class="field">
-                    <label class="light">Address 2</label> 
-                    <input type="text" name="address2" /> 
+                    <label class="light">{{t "common.user.address2"}}</label>
+                    <input type="text" name="address2" />
                     <span></span>
                     <div class="validation-message"></div>
                 </div>
                 
                 <div class="field">
-                    <label class="light">City</label> 
-                    <input type="text" name="city" /> 
+                    <label class="light">{{t "common.user.city"}}</label>
+                    <input type="text" name="city" />
                     <span></span>
                     <div class="validation-message"></div>
                 </div>
                 
                 <div class="field">
-                    <label class="light">Postal Code</label> 
-                    <input type="text" name="postalCode" /> 
+                    <label class="light">{{t "common.user.postalCode"}}</label>
+                    <input type="text" name="postalCode" />
                     <span></span>
                     <div class="validation-message"></div>
                 </div>

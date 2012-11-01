@@ -30,171 +30,6 @@
 define("config/validators/UserValidators", [
 ], function(constants, eventManager) {
     var obj = {
-            "email": {
-                "name": "Present and valid email",
-                "dependencies": [
-                    "org/forgerock/commons/ui/common/util/ValidatorsUtils"
-                ],
-                "validator": function(el, input, callback, utils) {
-                    var v = $(input).val();
-                    
-                    if(v === "") {
-                        callback($.t("common.form.validation.required"));
-                        return;
-                    }
-                    
-                    if(!utils.emailPattern.test(v)) {
-                        callback($.t("common.form.validation.emailNotValid"));
-                        return;
-                    }
-                    
-                    callback();
-                }
-            },
-            "userName": {
-                "name": "Valid and unique username",
-                "dependencies": [
-                    "org/forgerock/commons/ui/common/util/ValidatorsUtils",
-                    "org/forgerock/commons/ui/user/delegates/UserDelegate"
-                ],
-                "validator": function(el, input, callback, utils, userDelegate) {
-                    var v = $(input).val();
-                    
-                    if(v === "") {
-                        callback($.t("common.form.validation.required"));
-                        return;
-                    }
-                    
-                    userDelegate.checkUserNameAvailability(v, function(available) {
-                        if(!available) {
-                            callback($.t("common.form.validation.usernameExists"));
-                        } else {
-                            callback();
-                        }
-                    });              
-                }
-            },
-            "profileUserName": {
-                "name": "Valid and unique username or not changed",
-                "dependencies": [
-                    "org/forgerock/commons/ui/common/util/ValidatorsUtils",
-                    "org/forgerock/commons/ui/user/delegates/UserDelegate",
-                    "org/forgerock/commons/ui/common/main/Configuration"
-                ],
-                "validator": function(el, input, callback, utils, userDelegate, conf) {
-                    var v = $(input).val();
-                    
-                    if(conf.loggedUser.userName === v) {
-                        callback();
-                        return;
-                    }
-                    
-                    if(v === "") {
-                        callback($.t("common.form.validation.required"));
-                        return;
-                    }
-                    
-                    userDelegate.checkUserNameAvailability(v, function(available) {
-                        if(!available) {
-                            callback($.t("common.form.validation.usernameExists"));
-                        } else {
-                            callback();
-                        }
-                    });              
-                }
-            },
-            "name": {
-                "name": "Only alphabetic characters",
-                "dependencies": [
-                    "org/forgerock/commons/ui/common/util/ValidatorsUtils"
-                ],
-                "validator": function(el, input, callback, utils) {
-                    var v = $(input).val();
-                    
-                    if(v === "") {
-                        callback($.t("common.form.validation.required"));
-                        return;
-                    }
-                    
-                    if(!utils.namePattern.test(v)) {
-                        callback($.t("common.form.validation.onlyAlphabeticCharacters"));
-                        return;
-                    }
-
-                    callback();  
-                }
-            },
-            "phone": {
-                "name": "Only numbers etc",
-                "dependencies": [
-                    "org/forgerock/commons/ui/common/util/ValidatorsUtils"
-                ],
-                "validator": function(el, input, callback, utils) {
-                    var v = $(input).val();
-                    
-                    if(v === "") {
-                        callback($.t("common.form.validation.required"));
-                        return;
-                    }
-                    
-                    if(!utils.phonePattern.test(v)) {
-                        callback($.t("common.form.validation.onlyNumbersAndSpecialCharacters"));
-                        return;
-                    }
-
-                    callback(); 
-                }
-            },
-            "password": {
-                "name": "Password validator",
-                "dependencies": [
-                    "org/forgerock/commons/ui/common/util/ValidatorsUtils"
-                ],
-                "validator": function(el, input, callback, utils) {
-                    var v = $(input).val(), reg, errors = [];
-                    
-                    if(el.find("input[name=oldPassword]").length !== 0) {
-                        if(el.find("input[name=oldPassword]").val() === v) {
-                            errors.push($.t("common.form.validation.cannotMatchOldPassword"));
-                        }
-                        
-                        if(v === "" && $(el).find("input[name=passwordConfirm]").val() === "") {
-                            $(el).find("input[name=passwordConfirm]").trigger("keyup");
-                            callback("disabled");
-                            utils.hideBox(el);
-                            return;
-                        }  else {
-                            utils.showBox(el);
-                        }
-                    }
-
-                    if(v.length < 8) {
-                        errors.push($.t("common.form.validation.atLeast8Characters"));
-                    }
-                    
-                    reg = /[(A-Z)]+/;
-                    if(!reg.test(v)) {
-                        errors.push($.t("common.form.validation.atLeastOneCapitalLetter"));
-                    }
-                    
-                    reg = /[(0-9)]+/;
-                    if( !reg.test(v) ) {
-                        errors.push($.t("common.form.validation.atLeastOneNumber"));
-                    }
-                    
-                    if( v === "" || v === $(el).find("input[name=userName]").val() ) {
-                        errors.push($.t("common.form.validation.cannotMatchLogin"));
-                    }
-                    
-                    if(errors.length === 0) {
-                        callback(); 
-                    } else {
-                        callback(errors);
-                    }
-                    
-                    $(el).find("input[name=passwordConfirm]").trigger("keyup");
-                }
-            },
             "passwordConfirm": {
                 "name": "Password confirmation",
                 "dependencies": [
@@ -203,7 +38,7 @@ define("config/validators/UserValidators", [
                 "validator": function(el, input, callback, utils) {
                     var v = $(input).val();
                     
-                    if(el.find("input[name=oldPassword]").length !== 0) {
+/*                    if(el.find("input[name=oldPassword]").length !== 0) {
                         if(v === "" && $(el).find("input[name=password]").val() === "") {
                             utils.hideValidation($(el).find("input[name=password]"), el);
                             callback("disabled");
@@ -213,7 +48,7 @@ define("config/validators/UserValidators", [
                             utils.showBox(el);
                         }
                     }
-
+*/
                     if( v === "" || v !== $(el).find("input[name=password]").val() ) {
                         callback([$.t("common.form.validation.confirmationMatchesPassword")]);
                         return;
@@ -270,34 +105,6 @@ define("config/validators/UserValidators", [
                     }
 
                     callback();  
-                }
-            },
-            "profileEmail": {
-                "name": "Correct email",
-                "dependencies": [
-                    "org/forgerock/commons/ui/common/util/ValidatorsUtils",
-                    "org/forgerock/commons/ui/user/delegates/UserDelegate",
-                    "org/forgerock/commons/ui/common/main/Configuration"
-                ],
-                "validator": function(el, input, callback, utils, userDelegate, conf) {
-                    var v = $(input).val();
-                    
-                    if(conf.loggedUser.email === v) {
-                        callback();
-                        return;
-                    }
-                    
-                    if(v === "") {
-                        callback($.t("common.form.validation.required"));
-                        return;
-                    }
-                    
-                    if(!utils.emailPattern.test(v)) {
-                        callback($.t("common.form.validation.emailNotValid"));
-                        return;
-                    }
-                    
-                    callback();
                 }
             },
             "oldPassword": {

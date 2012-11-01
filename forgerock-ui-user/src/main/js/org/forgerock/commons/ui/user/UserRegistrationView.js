@@ -41,7 +41,7 @@ define("org/forgerock/commons/ui/user/UserRegistrationView", [
     var UserRegistrationView = AbstractView.extend({
         template: "templates/user/UserRegistrationTemplate.html",
         baseTemplate: "templates/user/LoginBaseTemplate.html",
-        
+        delegate: userDelegate,
         events: {
             "click input[type=submit]": "formSubmit",
             "onValidate": "onValidate",
@@ -73,7 +73,7 @@ define("org/forgerock/commons/ui/user/UserRegistrationView", [
                 }
                 
                 console.log("ADDING USER: " + JSON.stringify(data));                
-                userDelegate.createEntity(data, function(user) {
+                this.delegate.createEntity(data, function(user) {
                     eventManager.sendEvent(constants.EVENT_USER_SUCCESSFULY_REGISTERED, { user: data, selfRegistration: true });                    
                 }, _.bind(function(response) {
                     console.warn(response);
@@ -96,7 +96,7 @@ define("org/forgerock/commons/ui/user/UserRegistrationView", [
             conf.setProperty("gotoURL", null);
             
             this.parentRender(function() {
-                validatorsManager.bindValidators(this.$el);
+                validatorsManager.bindValidators(this.$el,this.delegate.baseEntity);
                 this.unlock();
                 
                 securityQuestionDelegate.getAllSecurityQuestions(function(secquestions) {

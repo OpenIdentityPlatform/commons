@@ -77,16 +77,16 @@ define("org/forgerock/commons/ui/user/profile/ChangeSiteIdentificationDialog", [
             this.actions = {};
             this.addAction($.t("common.form.save"), "submit");
             this.show(_.bind(function() {
-                validatorsManager.bindValidators(this.$el); 
-
                 this.siteImageCounter = 0;
                 $("#siteImageFlow img").load(_.bind(this.refreshFlow, this));
-                
-                this.$el.find("input[name=oldSiteImage]").val(conf.loggedUser.siteImage);                
-                this.$el.find("input[name=passPhrase]").val(conf.loggedUser.passPhrase);
-                this.$el.find("input[name=oldPassPhrase]").val(conf.loggedUser.passPhrase);
-                
-                validatorsManager.validateAllFields(this.$el);
+                validatorsManager.bindValidators(this.$el, userDelegate.baseEntity, _.bind(function () {
+                    
+                    this.$el.find("input[name=oldSiteImage]").val(conf.loggedUser.siteImage);                
+                    this.$el.find("input[name=passPhrase]").val(conf.loggedUser.passPhrase);
+                    this.$el.find("input[name=oldPassPhrase]").val(conf.loggedUser.passPhrase);
+                    
+                    validatorsManager.validateAllFields(this.$el);
+                }, this)); 
             }, this));            
         },
         
