@@ -73,7 +73,7 @@ public class RegistrationTest extends AbstractRegistrationTest {
 				fieldShouldBeNotValidAfterChange("content", "password", "Aa1234!");
 				fieldShouldBeNotValidAfterChange("content", "password", "Aa12345");
 				
-				//fieldShouldBeValidAfterChangeButFormCanBeNotValid("content", "password", "Aa12345!");
+				fieldShouldBeValidAfterChangeButFormCanBeNotValid("content", "password", "Aa12345!");
 			}
 		}.run();
 	}

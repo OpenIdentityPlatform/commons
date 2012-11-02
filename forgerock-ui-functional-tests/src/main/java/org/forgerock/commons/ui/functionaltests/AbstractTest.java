@@ -81,9 +81,23 @@ public class AbstractTest extends AbstractTestNGSpringContextTests {
 		String tmpValue = forms.getFieldValue(element, fieldName);
 		forms.assertValidationPasses(element, fieldName);
 		forms.setField(element, fieldName, valueToSet);
+		forms.assertFormFieldHasValue(element, fieldName, valueToSet);
 		forms.assertValidationPasses(element, fieldName);
 		forms.assertFormValidationPasses(element);
 		forms.setField(element, fieldName, tmpValue);
+		forms.assertFormFieldHasValue(element, fieldName, tmpValue);
+		forms.assertValidationPasses(element, fieldName);
+		forms.assertFormValidationPasses(element);
+	}
+	
+	protected void fieldShouldBeValidAfterChangeButFormCanBeNotValid(String element, String fieldName, String valueToSet) {
+		String tmpValue = forms.getFieldValue(element, fieldName);
+		forms.assertValidationPasses(element, fieldName);
+		forms.setField(element, fieldName, valueToSet);
+		forms.assertFormFieldHasValue(element, fieldName, valueToSet);
+		forms.assertValidationPasses(element, fieldName);
+		forms.setField(element, fieldName, tmpValue);
+		forms.assertFormFieldHasValue(element, fieldName, tmpValue);
 		forms.assertValidationPasses(element, fieldName);
 		forms.assertFormValidationPasses(element);
 	}
@@ -92,9 +106,11 @@ public class AbstractTest extends AbstractTestNGSpringContextTests {
 		String tmpValue = forms.getFieldValue(element, fieldName);
 		forms.assertValidationPasses(element, fieldName);
 		forms.setField(element, fieldName, valueToSet);
+		forms.assertFormFieldHasValue(element, fieldName, valueToSet);
 		forms.assertValidationError(element, fieldName);
 		forms.assertFormValidationError(element);
 		forms.setField(element, fieldName, tmpValue);
+		forms.assertFormFieldHasValue(element, fieldName, tmpValue);
 		forms.assertValidationPasses(element, fieldName);
 		forms.assertFormValidationPasses(element);
 	}

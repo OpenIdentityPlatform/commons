@@ -1,13 +1,10 @@
 package org.forgerock.commons.ui.functionaltests.helpers;
 
 import org.forgerock.commons.ui.functionaltests.webdriver.WebDriverFactory;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.*;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Component;
-import org.testng.Assert;
 
 @Component
 public class MessagesHelper {
@@ -16,24 +13,22 @@ public class MessagesHelper {
 	
 	private WebDriverWait wait = WebDriverFactory.getWebDriverWait();
 	
-	public void assertInfoMessage(String text) {
-		wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("confirmMessage")));
-		
-		WebElement message = driver.findElement(By.className("confirmMessage"));
-		WebElement element = wait.until(ExpectedConditions.visibilityOf(message));
-		
-		if(text != null) {
-			Assert.assertEquals(element.getText(), text);
-		}
+	public void assertInfoMessage(final String text) {
+		wait.until(new ExpectedCondition<Boolean>() {
+			public Boolean apply(WebDriver d) {
+				WebElement element = driver.findElement(By.className("confirmMessage"));
+				return element.isDisplayed() && element.getText().equals(text);
+			}
+		});
 	}
 	
-	public void assertErrorMessage(String text) {
-		WebElement message = driver.findElement(By.className("errorMessage"));
-		WebElement element = wait.until(ExpectedConditions.visibilityOf(message));
-		
-		if(text != null) {
-			Assert.assertEquals(element.getText(), text);
-		}
+	public void assertErrorMessage(final String text) {
+		wait.until(new ExpectedCondition<Boolean>() {
+			public Boolean apply(WebDriver d) {
+				WebElement element = driver.findElement(By.className("errorMessage"));
+				return element.getText()!=null && element.getText().equals(text);
+			}
+		});
 	}
 	
 }
