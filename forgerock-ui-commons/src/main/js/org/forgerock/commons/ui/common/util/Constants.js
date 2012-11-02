@@ -38,9 +38,6 @@ define("org/forgerock/commons/ui/common/util/Constants", [
     obj.OPENIDM_ANONYMOUS_USERNAME = "anonymous";
     obj.OPENIDM_ANONYMOUS_PASSWORD = "anonymous";
 
-    obj.MODE_ADMIN = 'admin';
-    obj.MODE_USER = 'user';
-    
     obj.EVENT_SERVICE_UNAVAILABLE = "error.SERICE_UNAVAILABLE";
 
     obj.EVENT_PROFILE_INITIALIZATION = "user.profile.EVENT_PROFILE_INITIALIZATION";
@@ -114,10 +111,13 @@ define("org/forgerock/commons/ui/common/util/Constants", [
     obj.EVENT_DISPLAY_MESSAGE_REQUEST = "messages.EVENT_DISPLAY_MESSAGE_REQUEST";
     
     obj.EVENT_USER_APPLICATION_DEFAULT_LNK_CHANGED = "messages.EVENT_USER_APPLICATION_DEFAULT_LNK_CHANGED";
+    obj.EVENT_REQUEST_RESEND_REQUIRED = "messages.EVENT_REQUEST_RESEND_REQUIRED";
     
     //user application link states
     obj.USER_APPLICATION_STATE_APPROVED = "B65FA6A2-D43D-49CB-BEA0-CE98E275A8CD";
     obj.USER_APPLICATION_STATE_PENDING = "B65FA6A2-D43D-49CD-BEA0-CE98E275A8CD";
+    
+    obj.DEFAULT_LANGUAGE = "en-US";
     
     return obj;
 });

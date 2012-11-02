@@ -35,8 +35,8 @@ define("org/forgerock/commons/ui/user/TermsOfUseDialog", [
         baseTemplate: "templates/user/LoginBaseTemplate.html",
         
         data: {         
-            width: 800,
-            height: 500
+            width: 920,
+            height: 550
         }
     }); 
     

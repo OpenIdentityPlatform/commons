@@ -41,14 +41,13 @@ define("org/forgerock/commons/ui/user/ForgottenPasswordDialog", [
             "click input[name=Update]": "formSubmit",
             "click .dialogCloseCross img": "close",
             "click input[name='close']": "close",
-            "click": "close",
             "click .dialogContainer": "stop",
             "onValidate": "onValidate"
         },
         
         data: {         
             width: 800,
-            height: 210
+            height: 400
         },
         
         securityQuestions: {},
@@ -57,12 +56,12 @@ define("org/forgerock/commons/ui/user/ForgottenPasswordDialog", [
             var securityQuestionRef;
             this.securityQuestions = {};
             this.actions = {};
-            this.addAction("Update", "submit");
+            this.addAction($.t("common.form.update"), "submit");
             this.show(_.bind(function() {
-                validatorsManager.bindValidators(this.$el); 
+                validatorsManager.bindValidators(this.$el, userDelegate.baseEntity); 
                 if (conf.forgottenPasswordUserName) {
-                    this.$el.find("input[name=resetEmail]").val(conf.forgottenPasswordUserName);
-                    this.$el.find("input[name=resetEmail]").trigger("change");
+                    this.$el.find("input[name=resetUsername]").val(conf.forgottenPasswordUserName);
+                    this.$el.find("input[name=resetUsername]").trigger("change");
                     delete conf.forgottenPasswordUserName;
                 }
                 this.data.height = 210;
@@ -78,10 +77,13 @@ define("org/forgerock/commons/ui/user/ForgottenPasswordDialog", [
         },
         
         formSubmit: function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            
             if (validatorsManager.formValidated(this.$el)) {
                 this.changePassword();
             } else {
-                var errorMessage = this.$el.find("input[name=resetEmail][data-validation-status=error]"),userName = this.$el.find("input[name=resetEmail]").val(), securityQuestionRef;
+                var errorMessage = this.$el.find("input[name=resetUsername][data-validation-status=error]"),userName = this.$el.find("input[name=resetUsername]").val(), securityQuestionRef;
                 if (errorMessage.length !== 0) {
                     this.$el.find("#fgtnAnswerDiv").hide();
                     this.$el.find("input[name=fgtnSecurityAnswer]").val("");
@@ -90,27 +92,24 @@ define("org/forgerock/commons/ui/user/ForgottenPasswordDialog", [
                     this.data.height = 210;
                 } else {
                     securityQuestionRef = this.securityQuestions;
-                    userDelegate.getSecurityQuestionForUserName(userName,
-                            function(result) {
-                                $("#fgtnSecurityQuestion").text(securityQuestionRef[result]);
-                            });
+                    userDelegate.getSecurityQuestionForUserName(userName, function(result) {
+                        console.log(result + " " + securityQuestionRef[result]);
+                        $("#fgtnSecurityQuestion").text(securityQuestionRef[result]);
+                    });
                     this.$el.find("#fgtnAnswerDiv").show();
-                    this.data.height = 350;
+                    this.data.height = 400;
                 }
                 this.resize();
             }
         },
         
         changePassword: function() {
-            var dialog = this, userName = this.$el.find("input[name=resetEmail]").val(), securityAnswer = this.$el.find("input[name=fgtnSecurityAnswer]").val(), newPassword = this.$el.find("input[name=password]").val();
+            var dialog = this, userName = this.$el.find("input[name=resetUsername]").val(), securityAnswer = this.$el.find("input[name=fgtnSecurityAnswer]").val(), newPassword = this.$el.find("input[name=password]").val();
             console.log("changing password");
             
-            userDelegate.setNewPassword(userName, securityAnswer, newPassword,
-                    function(r) {
+            userDelegate.setNewPassword(userName, securityAnswer, newPassword, function(r) {
                 eventManager.sendEvent(constants.FORGOTTEN_PASSWORD_CHANGED_SUCCESSFULLY, { userName: userName, password: newPassword});
                 dialog.close();
-            }, function(r) {
-                eventManager.sendEvent(constants.EVENT_USER_PROFILE_UPDATE_FAILED);
             });
         }
     }); 

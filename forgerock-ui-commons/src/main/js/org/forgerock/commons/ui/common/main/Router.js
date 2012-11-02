@@ -51,6 +51,7 @@ define("org/forgerock/commons/ui/common/main/Router", [
                 }
             },
             processRoute : function() {
+                
                 var route = obj.configuration.routes[this.key], baseView, i, args;
                 
                 args = _.toArray(arguments);

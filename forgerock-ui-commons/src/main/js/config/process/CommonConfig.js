@@ -128,7 +128,6 @@ define("config/process/CommonConfig", [
             ],
             processDescription: function(error, router) {
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "serviceUnavailable");
-                router.routeTo("", {trigger: true});
             }
         },
         {
@@ -139,7 +138,11 @@ define("config/process/CommonConfig", [
                 "org/forgerock/commons/ui/common/components/Navigation"
             ],
             processDescription: function(event, router, navigation) {
-                router.routeTo(event.routeName, {trigger: true, args: event.args});
+                if(event.trigger === false) {
+                    router.routeTo(event.routeName, {trigger: false, args: event.args});
+                } else {
+                    router.routeTo(event.routeName, {trigger: true, args: event.args});
+                }
                 navigation.reload();
             }
         },

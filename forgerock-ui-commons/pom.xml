@@ -117,6 +117,23 @@
 	</build>
 
 	<dependencies>
+	   <dependency>
+            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <artifactId>jquery.ba-dotimeout</artifactId>
+            <type>js</type>
+            <classifier>min</classifier>
+        </dependency>
+		<dependency>
+			<groupId>org.forgerock.commons.ui.libs</groupId>
+			<artifactId>handlebars</artifactId>
+			<type>js</type>
+		</dependency>
+		<dependency>
+			<groupId>org.forgerock.commons.ui.libs</groupId>
+			<artifactId>i18next</artifactId>
+			<type>js</type>
+			<classifier>min</classifier>
+		</dependency>
 		<dependency>
 			<groupId>org.forgerock.commons.ui.libs</groupId>
 			<artifactId>requirejs</artifactId>

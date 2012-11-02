@@ -48,13 +48,6 @@ public class ProfileTest extends AbstractProfileTest {
 	
 	@Test
 	@AssertNoErrors
-	public void updateGivenNameWithValueWithNumbers() {
-		String emptyGivenName = "Jacek31";
-		new AssertNotValidFieldAfterChange("givenName", emptyGivenName).run();
-	}
-	
-	@Test
-	@AssertNoErrors
 	public void updateFamilyNameWithValidValue() {
 		String currentFamilyName = "TestSurname";
 		String validFamilyName = "Bloodrider";
@@ -65,13 +58,6 @@ public class ProfileTest extends AbstractProfileTest {
 	@AssertNoErrors
 	public void updateFamilyNameWithEmptyValue() {
 		String emptyFamilyName = "";
-		new AssertNotValidFieldAfterChange("familyName", emptyFamilyName).run();
-	}
-	
-	@Test
-	@AssertNoErrors
-	public void updateFamilyNameWithValueWithNumbers() {
-		String emptyFamilyName = "Bloodrider31";
 		new AssertNotValidFieldAfterChange("familyName", emptyFamilyName).run();
 	}
 	
@@ -135,13 +121,13 @@ public class ProfileTest extends AbstractProfileTest {
 				shouldHaveCountryAndState(EMPTY_SELECT, PLEASE_SELECT_DISPLAY_TEXT, EMPTY_SELECT, NO_VALUE_SELECT);
 				forms.setField("content", "country", "poland");
 				shouldHaveCountryAndState("poland", "Poland", EMPTY_SELECT, PLEASE_SELECT_DISPLAY_TEXT);
-				forms.setField("content", "stateProvince", "dolnoslaskie");
-				shouldHaveCountryAndState("poland", "Poland", "dolnoslaskie", "Dolnośląskie");
+				forms.setField("content", "stateProvince", "lubuskie");
+				shouldHaveCountryAndState("poland", "Poland", "lubuskie", "Lubuskie");
 			}
 
 			@Override
 			protected void checkIfStoredCorrectly() {
-				shouldHaveCountryAndState("poland", "Poland", "dolnoslaskie", "Dolnośląskie");
+				shouldHaveCountryAndState("poland", "Poland", "lubuskie", "Lubuskie");
 			}
 		}.run();
 	}
@@ -157,8 +143,8 @@ public class ProfileTest extends AbstractProfileTest {
 		shouldHaveCountryAndState(EMPTY_SELECT, PLEASE_SELECT_DISPLAY_TEXT, EMPTY_SELECT, NO_VALUE_SELECT);
 		forms.setField("content", "country", "poland");
 		shouldHaveCountryAndState("poland", "Poland", EMPTY_SELECT, PLEASE_SELECT_DISPLAY_TEXT);
-		forms.setField("content", "stateProvince", "dolnoslaskie");
-		shouldHaveCountryAndState("poland", "Poland", "dolnoslaskie", "Dolnośląskie");
+		forms.setField("content", "stateProvince", "lubuskie");
+		shouldHaveCountryAndState("poland", "Poland", "lubuskie", "Lubuskie");
 		
 		forms.setField("content", "stateProvince", EMPTY_SELECT);
 		shouldHaveCountryAndState("poland", "Poland", EMPTY_SELECT, PLEASE_SELECT_DISPLAY_TEXT);
@@ -198,17 +184,17 @@ public class ProfileTest extends AbstractProfileTest {
 	
 	@Test
 	@AssertNoErrors
-	public void testUpdateEmail() {
-		String emailToSet = "second@test.test";
-		String fieldName = "email";
+	public void testUpdateUserName() {
+		String userNameToSet = "second@test.test";
+		String fieldName = "userName";
 		
 		userHelper.createDefaultUser();
 		userHelper.loginAsDefaultUser();
 		router.goToProfile(true);
 		router.assertUrl("#profile/");
 		forms.validateForm("content");
-		forms.setField("content", fieldName , emailToSet);
-		assertFieldHasValue(fieldName, emailToSet);
+		forms.setField("content", fieldName , userNameToSet);
+		assertFieldHasValue(fieldName, userNameToSet);
 		forms.assertValidationPasses("content", fieldName);
 		forms.assertFormValidationPasses("content");
 		forms.submit("content", "saveButton");
@@ -221,15 +207,15 @@ public class ProfileTest extends AbstractProfileTest {
 		router.assertUrl("#profile/");
 		forms.validateForm("content");
 		
-		assertFieldHasValue(fieldName, emailToSet);
+		assertFieldHasValue(fieldName, userNameToSet);
 	}
 	
 	@Test
 	@AssertNoErrors
-	public void testUpdateEmailNotValidEmailAlreadyExists() {
+	public void testUpdateUsernameNotValidUsernameAlreadyExists() {
 		userHelper.createSecondDefaultUser();
-		String emailToSet = "second@test.test";
-		new AssertNotValidFieldAfterChange("email", emailToSet).run();
+		String usernameToSet = "second@test.test";
+		new AssertNotValidFieldAfterChange("userName", usernameToSet).run();
 	}
 	
 }

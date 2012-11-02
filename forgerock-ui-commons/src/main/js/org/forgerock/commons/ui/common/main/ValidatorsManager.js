@@ -22,20 +22,52 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global require, define, _, $ */
+/*global require, define, form2js, _, $ */
 
 /**
  * @author mbilski
  */
 define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
-    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware"                                                     
-], function(AbstractConfigurationAware) {
+    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
+    "org/forgerock/commons/ui/common/util/ValidatorsUtils",
+    "org/forgerock/commons/ui/common/main/PolicyDelegate"
+], function(AbstractConfigurationAware, validatorUtils, policyDelegate) {
     var obj = new AbstractConfigurationAware();
     
-    obj.bindValidators = function(el) {
-        var inputs, event, input;        
-        
-        el.find("[data-validator]").not("[data-validation-status='error']").attr("data-validation-status", "error");
+    obj.bindValidators = function(el,baseEntity,callback) {
+        var inputs, event, input,
+            postValidation = function  (policyFailures) {
+                var simpleFailures = [], msg = [],
+                    thisInput = this.input,
+                    k;
+                
+                for (k = 0; k<policyFailures.length; k++) {
+                    if ($.inArray(policyFailures[k].policyRequirement, simpleFailures) === -1) {
+                        simpleFailures.push(policyFailures[k].policyRequirement);
+                        msg.push($.t("common.form.validation." + policyFailures[k].policyRequirement, policyFailures[k].params));
+                    }
+                }
+                validatorUtils.setErrors($(".validationRules[data-for-validator~='"+this.input.attr("name")+"']"), this.input.attr("name"), simpleFailures);
+                
+                if (policyFailures.length) {
+                    this.input.attr("data-validation-status", "error");
+                }
+                else {
+                    this.input.attr("data-validation-status", "ok");
+                }
+                
+                el.trigger("onValidate", [this.input, msg.length ? msg.join(",") : false]); 
+                
+                // re-validate dependent form fields
+                if (thisInput.attr("data-validation-dependents")) {
+                    thisInput
+                        .closest("form")
+                        .find(':input')
+                        .filter(function () { return $.inArray($(this).attr("name"), thisInput.attr("data-validation-dependents").split(",")) !== -1; })
+                        .trigger("change");
+                }
+            };
+
         
         _.each(el.find("[data-validator]"), function(input) {
             input = $(input);
@@ -48,10 +80,123 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
             
             input.on(event, _.bind(obj.validate, {input: input, el: el, validatorType: input.attr('data-validator')}));
         });
+        
+        if (baseEntity) {
+            policyDelegate.readEntity(baseEntity, _.bind(function (policy) {
+                _.each(policy.properties, _.bind(function (property, i) {
+                    var input,event;
+                    
+                    input = el.find("[name=" + property.name + "]");
+                    
+                    input.attr("data-validation-status", "error").data("prevValue", input.val());
+                    
+                    if (input.attr('data-validator-event')) {
+                        event = input.attr('data-validator-event') + "keyup change blur";
+                    } else {
+                        event = "change keyup blur";
+                    }
+                    
+                    
+                    // This adds requirement descriptions for DOM containers specifically designated to hold them
+                    _.each($(".validationRules[data-for-validator~='"+input.attr("name")+"']"), function (ruleContainer) {
+                        // allPolicyReqParams is used to compile a set of all parameters that get made 
+                        // available for policies which produce a given requirement
+                        var allPolicyReqParams = {};
+                        _.each(property.policies, function (policy) {
+
+                            if (policy.params) {
+                                _.each(policy.policyRequirements, function (policyReq) {
+                                    if (!allPolicyReqParams[policyReq]) {
+                                        allPolicyReqParams[policyReq] = policy.params;
+                                    }
+                                    else {
+                                        $.extend(allPolicyReqParams[policyReq], policy.params);
+                                    }
+                                });
+                            }
+                            
+                        });
+                        
+                        _.each(property.policyRequirements, function (req) {
+                            var reqDiv = $('<div class="field-rule"><span class="error">x</span><span/></div>');
+                            
+                            reqDiv.find("span:last")
+                                .attr("data-for-req", req)
+                                .attr("data-for-validator", input.attr("name"))
+                                .text($.t("common.form.validation." + req, allPolicyReqParams[req]));
+                            $(ruleContainer).append(reqDiv);
+                        });
+                    });
+                    
+                    // This binds the events to all of our fields which have validation policies defined by the server
+                    input.on(event, _.bind(function (e) {
+                        $.doTimeout(this.input.attr('name')+'validation'+e.type, 100, _.bind(function() {
+    
+                            var j,params,policyFailures = [],EVAL_IS_EVIL = eval; // JSLint doesn't like eval usage; this is a bit of a hack around that, while acknowledging it.
+                            
+                            if ((e.type === "change") || (this.input.data("prevValue") !== this.input.val())) // only attempt to re-validate if the value has actually changed
+                            {
+                                this.input.data("prevValue", this.input.val());
+                                this.input.siblings(".validation-message").empty();
+                                _.each(this.property.policies, _.bind(function(policy,j) {
+                                    
+                                    // The policy may return the JavaScript validation function as a string property;
+                                    // If so, we can use that validation function directly here
+                                    if (policy.policyFunction) {
+                                        
+                                        if (!policy.params) {
+                                            policy.params = {};
+                                        }
+                                        
+                                        params = policy.params;
+                                        // This instantiates the string representation of the function into an actual, executable local function
+                                        // and then calls that function, appending the resulting array into our collection of policy failures.
+                                        policyFailures = policyFailures.concat(EVAL_IS_EVIL("policyFunction = " + policy.policyFunction)(form2js(this.input.closest('form')[0]), this.input.val(), params, this.property.name));
+                                    }
+                                    // For those validation policies which cannot be performed within the browser, 
+                                    // we call to the server to do the validation for us.
+                                    else if (e.type === "change") {
+                                        policyFailures = [];
+                                        policyDelegate.validateProperty(
+                                            baseEntity,
+                                            {
+                                                "fullObject": form2js(this.input.closest("form")[0]), 
+                                                "value": this.input.val(), 
+                                                "property": this.property.name
+                                            }, 
+                                            _.bind(function (result) {
+                                                var l;
+                                                if (!result.result) {
+                                                    for (l = 0; l < result.failedPolicyRequirements.length; l++) {
+                                                        policyFailures = policyFailures.concat(result.failedPolicyRequirements[l].policyRequirements);
+                                                    }
+                                                    postValidation.call(this, policyFailures);
+                                                }
+                                            }, this)
+                                        );
+                                    }
+                                }, this));
+                                
+                                postValidation.call(this, policyFailures);
+                                
+                            }
+                        
+                        }, this));
+                        
+                    }, {property : property, input: input}));
+                }, this));
+                
+                if (callback) {
+                    callback();
+                }
+            }, this));
+        
+        }
+        
     };
     
     obj.validateAllFields = function(el) {
-        _.each(el.find("[data-validator]"), function(input){
+        _.each(el.find(":input"), function(input){
             var event = $(input).attr('data-validator-event');
             
             if(event) {
@@ -80,7 +225,7 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
             validatorConfig.validator.apply(this, parameters);
         } else {
             console.error("Could not find such validator: " + validatorConfig);
-        }           
+        }
     };
     
     obj.afterValidation = function(msg) {

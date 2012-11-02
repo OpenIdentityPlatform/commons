@@ -3,20 +3,14 @@ package org.forgerock.commons.ui.functionaltests.screenshot;
 import java.io.File;
 import java.io.IOException;
 
-import javax.inject.Inject;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.WebDriver;
-import org.springframework.stereotype.Component;
+import org.forgerock.commons.ui.functionaltests.webdriver.WebDriverFactory;
+import org.openqa.selenium.*;
 
-@Component
 public class ScreenShot {
 	
-	@Inject
-	protected WebDriver driver;
+	protected WebDriver driver = WebDriverFactory.getWebDriver();
 	
 	public void makeScreenShot() {
 		String methodName = getMethodName();
@@ -31,7 +25,8 @@ public class ScreenShot {
 	private String getMethodName() {
 		StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
 		for (StackTraceElement stackTraceElement : stackTrace) {
-			if (stackTraceElement.getMethodName().toLowerCase().contains("test")){
+			String methodName = stackTraceElement.getMethodName().toLowerCase();
+			if (methodName.contains("test") || methodName.startsWith("should")){
 				return stackTraceElement.getMethodName();
 			}
 		}

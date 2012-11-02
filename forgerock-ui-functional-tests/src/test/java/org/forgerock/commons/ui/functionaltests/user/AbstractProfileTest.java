@@ -8,7 +8,7 @@ import org.codehaus.jackson.JsonNode;
 import org.forgerock.commons.ui.functionaltests.AbstractTest;
 import org.forgerock.commons.ui.functionaltests.utils.AssertNoErrorsAspect;
 
-public class AbstractProfileTest extends AbstractTest{
+public class AbstractProfileTest extends AbstractTest {
 	
 	@Inject
 	private AssertNoErrorsAspect assertNoErrorsAspect;

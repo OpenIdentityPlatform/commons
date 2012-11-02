@@ -22,13 +22,16 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define, window */
+/*global $, define, window, Handlebars, i18n, _ */
 
 define("org/forgerock/commons/ui/common/util/UIUtils", [
     "org/forgerock/commons/ui/common/util/typeextentions/String",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
-    "mustache"
-], function (String, AbstractConfigurationAware, Mustache) {
+    "handlebars",
+    "i18next",
+    "org/forgerock/commons/ui/common/main/Router",
+    "org/forgerock/commons/ui/common/util/DateUtil"
+], function (String, AbstractConfigurationAware, handlebars, i18next, router, dateUtil) {
     var obj = new AbstractConfigurationAware();
 
     obj.getUrl = function() {
@@ -97,8 +100,8 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     obj.fillTemplateWithData = function(templateUrl, data, callback) {
         if(templateUrl) {
             if (obj.templates[templateUrl]) {
-                var code = Mustache.render(obj.templates[templateUrl], data);
-                
+                var code = Handlebars.compile(obj.templates[templateUrl])(data);
+                                
                 if(callback) {
                     callback(code);
                 }
@@ -117,7 +120,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                             obj.templates[templateUrl] = template;
 
                             //fill the template
-                            callback(Mustache.render(template, data));
+                            callback(Handlebars.compile(template)(data));
                         }
                     },
                     error: callback
@@ -169,11 +172,94 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         });
     };
     
+    $.event.special.delayedkeyup = {            
+        setup: function( data, namespaces ) {
+            $(this).bind("keyup", $.event.special.delayedkeyup.handler);
+        },
+
+        teardown: function( namespaces ) {
+            $(this).unbind("keyup", $.event.special.delayedkeyup.handler);
+        },
+
+        handler: function( event ) {
+            var self = this, args = arguments;
+            
+            event.type = "delayedkeyup";
+                
+            $.doTimeout('delayedkeyup', 250, function() {
+                $.event.handle.apply(self, args);
+            });
+        }
+    };
+    
+    Handlebars.registerHelper('t', function(i18nKey) {        
+        var params = { postProcess: 'sprintf', sprintf: _.toArray(arguments).slice(1, -1)}, result;
+        
+        result = i18n.t(i18nKey, params);
+        
+        return new Handlebars.SafeString(result);
+     });
+    
+    Handlebars.registerHelper('url', function(routeKey) {
+        var result = "#" + router.getLink(router.configuration.routes[routeKey], _.toArray(arguments).slice(1, -1));
+       
+        return new Handlebars.SafeString(result);
+    });
+    
+    //format ISO8601; example: 2012-10-29T10:49:49.419+01:00
+    Handlebars.registerHelper('date', function(unformattedDate) {
+        var xdate = dateUtil.parseDateString(unformattedDate), formattedDate;
+        formattedDate = dateUtil.formatDate(xdate);
+        return new Handlebars.SafeString(formattedDate);
+    });
+    
+    //map should have format key : value
+    Handlebars.registerHelper('select', function(map, elementName, selectedKey, selectedValue) {
+        var result, prePart, postPart, content = "", isSelected, entityName;
+        
+        if (elementName && _.isString(elementName)) {
+            prePart = '<select name="' + elementName + '">';
+        } else{
+            prePart = '<select>';
+        }
+        
+        postPart = '</select> ';
+        
+        for (entityName in map) {
+            isSelected = false;
+            if (selectedValue && _.isString(selectedValue)) {
+                if (selectedValue === map[entityName]) {
+                    isSelected = true;
+                }
+            } else {
+                if (selectedKey && selectedKey === entityName) {
+                    isSelected = true;
+                }
+            }
+            
+            if (isSelected) {
+                content += '<option value="' + entityName + '" selected="true">' + $.t(map[entityName]) + '</option>';
+            } else {
+                content += '<option value="' + entityName + '">' + $.t(map[entityName]) + '</option>';
+            }
+        }
+
+        result = prePart + content + postPart;
+        return new Handlebars.SafeString(result);
+    });
+    
+    Handlebars.registerHelper('p', function(countValue, options) { 
+        var params, result;
+        params = { count: countValue };
+        result = i18n.t(options.hash.key, params);
+        return new Handlebars.SafeString(result);
+     });
+    
     obj.loadSelectOptions = function(data, el, empty, callback) {
         if( empty === undefined || empty === true ) {
             data = [ {
                 "key" : "",
-                "value" : "Please Select"
+                "value" : $.t("common.form.pleaseSelect")
             } ].concat(data);
             }
                 

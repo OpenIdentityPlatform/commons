@@ -7,24 +7,20 @@ import javax.inject.Inject;
 import org.codehaus.jackson.JsonNode;
 import org.forgerock.commons.ui.functionaltests.helpers.SeleniumHelper.ElementType;
 import org.forgerock.commons.ui.functionaltests.utils.JsonUtils;
+import org.forgerock.commons.ui.functionaltests.webdriver.WebDriverFactory;
 import org.openqa.selenium.*;
-import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.Select;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.support.ui.*;
 import org.springframework.stereotype.Component;
 
 @Component
 public class FormsHelper {
 	
-    @Inject
-	private WebDriver driver;
+	private WebDriver driver = WebDriverFactory.getWebDriver();
 
     @Inject
 	private SeleniumHelper selenium;
     
-    @Inject
-	private WebDriverWait wait;
+	private WebDriverWait wait = WebDriverFactory.getWebDriverWait();
     
     @Inject
     private JsonUtils jsonUtils;
@@ -38,8 +34,21 @@ public class FormsHelper {
 		WebElement element = selenium.getElement(el, name, ElementType.NAME);
 		String tagName = element.getTagName();
 		if (tagName.equals("input")) {
-			element.clear();
-			element.sendKeys(value);
+			if(element.getAttribute("type").equals("checkbox")) {
+				if(value.equals("true")) {
+					 ((JavascriptExecutor) driver).executeScript("$('#"+ el +" input[name="+ name +"]').attr('checked', true);");
+				} else {
+					((JavascriptExecutor) driver).executeScript("$('#"+ el +" input[name="+ name +"]').attr('checked', false);");
+				}
+			} else {
+				try{
+					element.clear();
+				} catch (Exception e) {
+					// TODO: handle exception
+				}
+				
+				element.sendKeys(value);
+			}
 		} else if (tagName.equals("select")) {
 			Select selectBox = new Select(element);
 			selectBox.selectByValue(value);
@@ -47,6 +56,11 @@ public class FormsHelper {
 			throw new IllegalStateException("No implementation for type " + tagName);
 		}
 		
+		try {
+			Thread.sleep(200);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		
 		String event = element.getAttribute("data-validator-event");
 		if(event != null) {
@@ -57,13 +71,30 @@ public class FormsHelper {
 	}
 	
 	public String getFieldValue(String el, String name) {
-		WebElement element = selenium.getElement(el, name, ElementType.NAME);
+		WebElement element = null;
+		if (name != null) {
+			element = selenium.getElement(el, name, ElementType.NAME);
+		} else {
+			element = selenium.getElement(el, el, ElementType.ID);
+		}
 		String tagName = element.getTagName();
 		if (tagName.equals("input")) {
+			if(element.getAttribute("type").equals("checkbox")) {
+				String checked = element.getAttribute("checked");
+				
+				if(checked != null && checked.equals("true")) {
+					return "true";
+				}
+				
+				return "false";
+			}
+			
 			return element.getAttribute("value");
 		} else if (tagName.equals("select")) {
 			Select selectBox = new Select(element);
 			return selectBox.getFirstSelectedOption().getAttribute("value");
+		} else if (tagName.equals("div")) {
+			return element.getText();
 		} else {
 			throw new IllegalStateException("No implementation for type " + tagName);
 		}
@@ -72,7 +103,7 @@ public class FormsHelper {
 	public void submit(final String el, final String name) {
 		wait.until(new ExpectedCondition<Boolean>() {
             public Boolean apply(WebDriver d) {
-                return d.findElement(By.name(name)).getAttribute("class").contains("orange");
+                return d.findElement(By.name(name)).getAttribute("class").contains("active");
             }
         });
 		
@@ -86,14 +117,35 @@ public class FormsHelper {
 	public void fillForm(String el, JsonNode json) {
 		String jsonStr = jsonUtils.jsonToString(json);
 		
-		((JavascriptExecutor) driver).executeScript("js2form(document.getElementById('"+ el +"'), "+ jsonStr +");");
+		try {
+			((JavascriptExecutor) driver).executeScript("js2form(document.getElementById('"+ el +"'), "+ jsonStr +");");
+		} catch (WebDriverException e) {
+			System.err.println(e.getMessage());
+		}
+		
+		if ( !readForm(el).equals(json)) {
+			fillForm(el, json);
+		}
 	}
 	
 	/**
 	 * @param el id of root element
 	 */
 	public JsonNode readForm(String el) {
-		String json = (String) ((JavascriptExecutor) driver).executeScript("return JSON.stringify(form2js('"+ el +"', '.', false));");
+		String json = null;
+		try {
+			json = (String) ((JavascriptExecutor) driver).executeScript("return JSON.stringify(form2js('"+ el +"', '.', false));");
+		} catch (WebDriverException e) {
+			// sometimes it does not work for the first time...
+			try {
+				System.out.println("Recalling method...");
+				Thread.sleep(3000);
+			} catch (InterruptedException e1) {
+				e1.printStackTrace();
+			}
+			json = (String) ((JavascriptExecutor) driver).executeScript("return JSON.stringify(form2js('"+ el +"', '.', false));");
+
+		}
 		
 		//form2js includes also buttons...
 		//it's a quick fix for that
@@ -107,7 +159,7 @@ public class FormsHelper {
 	 * @param el id of root element
 	 */
 	public void validateForm(String el) {
-		List<WebElement> fields = driver.findElements(By.cssSelector("#"+ el +" [data-validator]"));
+		List<WebElement> fields = driver.findElements(By.cssSelector("#"+ el +" [data-validation-status]"));
 
 		for(WebElement field : fields) {
 			String event = field.getAttribute("data-validator-event");
@@ -182,6 +234,54 @@ public class FormsHelper {
 			return null;
 		}
 		return selectBox.getFirstSelectedOption().getText();
+	}
+
+	public void assertFormFieldHasValue(final String element, final String fieldName, final String expectedValue) {
+		selenium.new AssertionWithTimeout() {
+			@Override
+			protected String getAssertionFailedMessage() {
+				return "Validation of form value returned different value "+ getFieldValue(element, fieldName);
+			}
+			@Override
+			protected boolean assertionCondition(WebDriver driver) {
+				return getFieldValue(element, fieldName).equals(expectedValue);
+			}
+		}.checkAssertion();
+	}
+
+	public void assertValidationDisabled(final String el, final String fieldName) {
+		selenium.new AssertionWithTimeout() {
+			@Override
+			protected String getAssertionFailedMessage() {
+				return "Validation for " + fieldName + " returned 'enabled'. Expected: 'disabled'";
+			}
+			@Override
+			protected boolean assertionCondition(WebDriver driver) {
+				return driver.findElements(By.cssSelector("#"+ el +" [name="+ fieldName +"][data-validation-status=disabled]")).size() != 0;
+			}
+		}.checkAssertion();
+	}
+
+	public String getValueForContentFlow(String el) {
+		WebElement element = selenium.getElement(el, el, ElementType.ID);
+		return element.findElement(By.className("active")).findElement(By.className("portray")).getAttribute("data-site-image");
+	}
+
+	public void changeValueForContentFlow(final String el, final String valueAsText) {
+		selenium.new AssertionWithTimeout() {
+			@Override
+			protected String getAssertionFailedMessage() {
+				return "Failed to set content flow value";
+			}
+			@Override
+			protected boolean assertionCondition(WebDriver driver) {
+				WebElement element = selenium.getElement(el, el, ElementType.ID);
+				return element.findElement(By.cssSelector("[data-site-image='"+valueAsText+"']")).isDisplayed();
+			}
+		}.checkAssertion();
+		
+		WebElement element = selenium.getElement(el, el, ElementType.ID);
+		element.findElement(By.cssSelector("[data-site-image='"+valueAsText+"']")).click();
 	}
 	
 }

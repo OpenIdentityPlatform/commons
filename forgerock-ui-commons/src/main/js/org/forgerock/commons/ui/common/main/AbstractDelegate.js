@@ -33,7 +33,12 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
 ], function(constants, serviceInvoker) {
 
     var obj = function AbstractDelegate(serviceUrl) {
+        var baseEntity = serviceUrl.match(/\/openidm\/([\w\/]*)/);
         this.serviceUrl = serviceUrl;
+        
+        if (baseEntity && baseEntity.length > 1) {
+            this.baseEntity = baseEntity[1];
+        }
     };
 
     obj.prototype.serviceCall = function(callParams) {

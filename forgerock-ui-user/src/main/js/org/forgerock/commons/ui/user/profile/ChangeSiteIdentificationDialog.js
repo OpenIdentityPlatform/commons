@@ -50,46 +50,43 @@ define("org/forgerock/commons/ui/user/profile/ChangeSiteIdentificationDialog", [
             "click input[type=submit]": "formSubmit",
             "click .dialogCloseCross img": "close",
             "click input[name='close']": "close",
-            "click": "close",
             "onValidate": "onValidate",
             "click .dialogContainer": "stop"
         },
         
         formSubmit: function(event) {
             event.preventDefault();
+            event.stopPropagation();
             
             if(validatorsManager.formValidated(this.$el)) {            
                 var self = this, patchDefinition = [{replace: "siteImage", value: this.$el.find("input[name='siteImage']").val()}, {replace: "passPhrase", value: this.$el.find("input[name=passPhrase]").val()}];
     
-                userDelegate.patchSelectedUserAttributes(conf.loggedUser.userName,  patchDefinition,
-                        function(r) {
+                userDelegate.patchSelectedUserAttributes(conf.loggedUser.userName,  patchDefinition, _.bind(function(r) {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "siteIdentificationChanged");
                     
                     //updating in profile
                     conf.loggedUser.siteImage = self.$el.find("input[name='siteImage']").val();
                     conf.loggedUser.passPhrase = self.$el.find("input[name=passPhrase]").val();
-                }, function(r) {
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unknown");
-                });
-                
-                this.close();            
+                    
+                    this.close();
+                }, this));                
             }
         },
         
         render: function() {
             this.actions = {};
-            this.addAction("Save", "submit");
+            this.addAction($.t("common.form.save"), "submit");
             this.show(_.bind(function() {
-                validatorsManager.bindValidators(this.$el); 
-
                 this.siteImageCounter = 0;
                 $("#siteImageFlow img").load(_.bind(this.refreshFlow, this));
-                
-                this.$el.find("input[name=oldSiteImage]").val(conf.loggedUser.siteImage);                
-                this.$el.find("input[name=passPhrase]").val(conf.loggedUser.passPhrase);
-                this.$el.find("input[name=oldPassPhrase]").val(conf.loggedUser.passPhrase);
-                
-                validatorsManager.validateAllFields(this.$el);
+                validatorsManager.bindValidators(this.$el, userDelegate.baseEntity, _.bind(function () {
+                    
+                    this.$el.find("input[name=oldSiteImage]").val(conf.loggedUser.siteImage);                
+                    this.$el.find("input[name=passPhrase]").val(conf.loggedUser.passPhrase);
+                    this.$el.find("input[name=oldPassPhrase]").val(conf.loggedUser.passPhrase);
+                    
+                    validatorsManager.validateAllFields(this.$el);
+                }, this)); 
             }, this));            
         },
         

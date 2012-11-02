@@ -53,83 +53,26 @@ define("org/forgerock/commons/ui/user/delegates/UserDelegate", [
             }
         }, error: errorCallback} );
     };
-    
-    obj.getUsersByMatchingNamesWithLimit = function(userNameToMatch, limit, successCallback, errorCallback) {
-        console.info("getting users by matching username");
-
-        obj.usersCallback = successCallback;
-        obj.numberOfUsers = 0;
-
-        obj.serviceCall({url: "/?_query-id=query-matching-username&fields=*&"+ $.param({usernameToMatch: userNameToMatch, limit: limit}), success: function(data) {
-            if(successCallback) {
-                obj.users = data.result;
-                successCallback(data.result);
-            }
-        }, error: errorCallback} );
-    };
-    
-    obj.getUsersCountByMatchingNames = function(userNameToMatch, successCallback, errorCallback) {
-        console.info("getting users by matching username");
-
-        obj.usersCallback = successCallback;
-        obj.numberOfUsers = 0;
-
-        obj.serviceCall({url: "/?_query-id=query-count-matching-username&"+ $.param({usernameToMatch: userNameToMatch}), success: function(data) {
-            if(successCallback) {
-                obj.users = data.result;
-                successCallback(data.result[0]);
-            }
-        }, error: errorCallback} );
-    };
-
-    //TODO this is only test utility method should be moved to the special test package
-    obj.removeAllUsers = function() {
-        var serviceInvokerConfig, finished, serviceInvokerModuleName = "org/forgerock/commons/ui/common/main/ServiceInvoker";
-        serviceInvokerConfig = configuration.getModuleConfiguration(serviceInvokerModuleName);
-
-        serviceInvokerConfig.defaultHeaders[constants.OPENIDM_HEADER_PARAM_PASSWORD] = "openidm-admin";
-        serviceInvokerConfig.defaultHeaders[constants.OPENIDM_HEADER_PARAM_USERNAME] = "openidm-admin";
-        serviceInvokerConfig.defaultHeaders[constants.OPENIDM_HEADER_PARAM_NO_SESION] = true;
-
-        configuration.sendSingleModuleConfigurationChangeInfo(serviceInvokerModuleName);
-
-        finished = 0;
-        obj.getAllUsers(function() {
-            var i, successCallback;
-            
-            successCallback = function(){
-                finished++;
-                if(finished === obj.users.length) {
-                    console.debug("deleting finished");
-                    serviceInvokerConfig.defaultHeaders = [];
-                    eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: true});
-                }
-            };
-            
-            for(i = 0; i < obj.users.length; i++ ) {
-                obj.deleteEntity(obj.users[i]._id, successCallback);
-            }			
-        });
-    };
 
     /**
-     * Starting session. Sending username and password to authenticate and returns user data.
+     * Starting session. Sending username and password to authenticate and returns user's id.
      */
-    obj.logAndGetUserDataByCredentials = function(uid, password, successCallback, errorCallback, errorsHandlers) {
+    obj.login = function(uid, password, successCallback, errorCallback, errorsHandlers) {
         var headers = {};
         headers[constants.OPENIDM_HEADER_PARAM_USERNAME] = uid.toLowerCase();
         headers[constants.OPENIDM_HEADER_PARAM_PASSWORD] = password;
         headers[constants.OPENIDM_HEADER_PARAM_NO_SESION] = false;
         obj.serviceCall({
-            url: "/?_query-id=for-credentials",
+            serviceUrl: constants.host + "/openidm/info/login",
+            url: "",
             headers: headers,
             success: function (data) {
-                if(!data.result || _.isEmpty(data.result)) {
+                if(!data.username) {
                     if(errorCallback) {
                         errorCallback();
                     }
                 } else if(successCallback) {
-                    successCallback(data.result[0]);
+                    successCallback(data);
                 }
             },
             error: errorCallback,
@@ -137,31 +80,7 @@ define("org/forgerock/commons/ui/user/delegates/UserDelegate", [
         });
         delete headers[constants.OPENIDM_HEADER_PARAM_PASSWORD];
     };
-    
-    obj.internalLogIn = function(uid, password, successCallback, errorCallback, errorsHandlers) {
-        var headers = {};
-        headers[constants.OPENIDM_HEADER_PARAM_USERNAME] = uid.toLowerCase();
-        headers[constants.OPENIDM_HEADER_PARAM_PASSWORD] = password;
-        headers[constants.OPENIDM_HEADER_PARAM_NO_SESION] = false;
-        obj.serviceCall({
-            serviceUrl: constants.host + "/openidm/repo/internal/user",
-            url: "/?_query-id=for-internalcredentials",
-            headers: headers,
-            success: function (data) {
-                if(!data.result || _.isEmpty(data.result)) {
-                    if(errorCallback) {
-                        errorCallback();
-                    }
-                } else if(successCallback) {
-                    successCallback(data.result[0]);
-                }
-            },
-            error: errorCallback,
-            errorsHandlers: errorsHandlers
-        });
-        delete headers[constants.OPENIDM_HEADER_PARAM_PASSWORD];
-    };
-    
+       
     /**
      * Check credentials method
      */
@@ -174,18 +93,19 @@ define("org/forgerock/commons/ui/user/delegates/UserDelegate", [
     };
     
     /**
-     * Checks if logged in and returns profile
+     * Checks if logged in and returns users id
      */
     obj.getProfile = function(successCallback, errorCallback, errorsHandlers) {
         obj.serviceCall({
-            url: "/?_query-id=for-credentials",
+            serviceUrl: constants.host + "/openidm/info/login",
+            url: "",
             success: function (data) {
-                if(!data.result || data.result.length !== 1) {
+                if(!data.username) {
                     if(errorCallback) {
                         errorCallback();
                     }
                 } else if(successCallback) {
-                    successCallback(data.result[0]);
+                    successCallback(data);
                 }
             },
             error: errorCallback,
@@ -193,22 +113,8 @@ define("org/forgerock/commons/ui/user/delegates/UserDelegate", [
         });
     };
     
-    obj.forInternalCredentials = function(successCallback, errorCallback, errorsHandlers) {
-        obj.serviceCall({
-            serviceUrl: constants.host + "/openidm/repo/internal/user",
-            url: "/?_query-id=for-internalcredentials",
-            success: function (data) {
-                if(!data.result || data.result.length !== 1) {
-                    if(errorCallback) {
-                        errorCallback();
-                    }
-                } else if(successCallback) {
-                    successCallback(data.result[0]);
-                }
-            },
-            error: errorCallback,
-            errorsHandlers: errorsHandlers
-        });
+    obj.readInternalEntity = function(id, successCallback, errorCallback) {
+        this.serviceCall({serviceUrl: constants.host + "/openidm/repo/internal/user", url: "/" + id, type: "GET", success: successCallback, error: errorCallback});
     };
 
     /**
@@ -216,7 +122,7 @@ define("org/forgerock/commons/ui/user/delegates/UserDelegate", [
      */
     obj.getBySecurityAnswer = function(uid, securityAnswer, successCallback, errorCallback) {
         obj.serviceCall({
-            url: "/?_query-id=for-security-answer&" + $.param({uid: uid, securityAnswer: securityAnswer.toLowerCase()}), 
+            url: "/?_query-id=for-security-answer&" + $.param({uid: uid, securityAnswer: securityAnswer}), 
             success: function (data) {
                 if(!data.result) {
                     if(errorCallback) {
@@ -259,7 +165,7 @@ define("org/forgerock/commons/ui/user/delegates/UserDelegate", [
             error: errorCallback
         });
     };
-
+    
     /**
      * UserName availability check. 
      * If userName is available successCallback(true) is invoked, otherwise successCallback(false) is invoked

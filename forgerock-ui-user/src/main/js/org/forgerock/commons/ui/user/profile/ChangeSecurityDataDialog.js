@@ -50,7 +50,6 @@ define("org/forgerock/commons/ui/user/profile/ChangeSecurityDataDialog", [
             "onValidate": "onValidate",
             "click .dialogCloseCross img": "close",
             "click input[name='close']": "close",
-            "click": "close",
             "click .dialogContainer": "stop"
         },
         
@@ -76,27 +75,25 @@ define("org/forgerock/commons/ui/user/profile/ChangeSecurityDataDialog", [
                     userDelegate.getForUserName(conf.loggedUser.userName, function(user) {
                         conf.loggedUser = user;
                     });
-                }, this), _.bind(function(r) {
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unknown");
-                    this.close();
                 }, this));
             }
         },
         
         render: function() {
             this.actions = {};
-            this.addAction("Update", "submit");
+            this.addAction($.t("common.form.update"), "submit");
             
             this.show(_.bind(function() {
-                validatorsManager.bindValidators(this.$el);
-                
-                if(conf.passwords) {
-                    this.$el.find("input[name=oldPassword]").val(conf.passwords.password);                    
-                    delete conf.passwords;
-                }
-                
-                this.reloadData();
-            }, this));            
+                    validatorsManager.bindValidators(this.$el, userDelegate.baseEntity, _.bind(function () {
+                    
+                    if(conf.passwords) {
+                        this.$el.find("input[name=oldPassword]").val(conf.passwords.password);                    
+                        delete conf.passwords;
+                    }
+                    
+                    this.reloadData();
+                }, this));
+            }, this));
         },
         
         reloadData: function() {

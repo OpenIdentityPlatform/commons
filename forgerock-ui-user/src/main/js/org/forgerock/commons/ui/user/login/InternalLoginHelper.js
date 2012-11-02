@@ -34,18 +34,10 @@ define("org/forgerock/commons/ui/user/login/InternalLoginHelper", [
     var obj = new AbstractConfigurationAware();
 
     obj.login = function(userName, password, successCallback, errorCallback) {
-        userDelegate.logAndGetUserDataByCredentials(userName, password, function(user) {
-            successCallback(user);
+        userDelegate.login(userName, password, function(user) {
+            obj.getUserById(user.userid.id, user.userid.component, successCallback, errorCallback);
         }, function() {
-            userDelegate.internalLogIn(userName, password, function(user) {
-                if(!user.userName && user._id) {
-                    user.userName = user._id;
-                }
-                
-                successCallback(user);
-            }, function() {
                 errorCallback();
-            }, {"unauthorized": { status: "401"}});
         }, {"unauthorized": { status: "401"}});
     };
 
@@ -56,21 +48,33 @@ define("org/forgerock/commons/ui/user/login/InternalLoginHelper", [
     obj.getLoggedUser = function(successCallback, errorCallback) {
         try{
             userDelegate.getProfile(function(user) {
-                successCallback(user);
+                obj.getUserById(user.userid.id, user.userid.component, successCallback, errorCallback);
             }, function() {
-                userDelegate.forInternalCredentials(function(user) {
-                    if(!user.userName && user._id) {
-                        user.userName = user._id;
-                    }
-                    
-                    successCallback(user);
-                }, function() {
-                    errorCallback();
-                }, {"serverError": {status: "503"}, "unauthorized": {status: "401"}});
+                errorCallback();
             }, {"serverError": {status: "503"}, "unauthorized": {status: "401"}});
         } catch(e) {
             console.log(e);
             errorCallback();
+        }
+    };
+    
+    obj.getUserById = function(id, component, successCallback, errorCallback) {
+        if(component === "managed/user") {
+            userDelegate.readEntity(id, function(user) {
+                successCallback(user);
+            }, function() {
+                errorCallback();
+            });
+        } else if(component === "internal/user") {
+            userDelegate.readInternalEntity(id, function(user) {
+                if(!user.userName) {
+                    user.userName = user._id;
+                }
+                
+                successCallback(user);
+            }, function() {
+                errorCallback();
+            });
         }
     };
 

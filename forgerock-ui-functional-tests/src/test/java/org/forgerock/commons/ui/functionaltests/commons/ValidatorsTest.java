@@ -36,9 +36,10 @@ public class ValidatorsTest extends AbstractTest {
 	public void shouldDisplayValidationMessage() {
 		router.goToRegistration();
 		
-		forms.setField("content", "email", "test");
-		WebElement element = selenium.getElement("content", "validationMessage", ElementType.CLASS);
-		Assert.assertEquals("Not a valid email address.", element.getText());
+		forms.setField("content", "userName", "aaa");
+		forms.setField("content", "userName", "");
+		WebElement element = selenium.getElement("content", "validation-message", ElementType.CLASS);
+		Assert.assertEquals("Cannot be blank", element.getText());
 	}
 	
 }

@@ -6,6 +6,7 @@ import junit.framework.Assert;
 
 import org.forgerock.commons.ui.functionaltests.constants.Constants;
 import org.forgerock.commons.ui.functionaltests.helpers.SeleniumHelper.ElementType;
+import org.forgerock.commons.ui.functionaltests.webdriver.WebDriverFactory;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -14,8 +15,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class RouterHelper {
 	
-	@Inject
-	private WebDriver driver;
+	private WebDriver driver = WebDriverFactory.getWebDriver();
 	
 	@Inject
 	private Constants constants;
@@ -23,8 +23,7 @@ public class RouterHelper {
 	@Inject
 	private SeleniumHelper selenium;
 	
-	@Inject
-	private WebDriverWait webDriverWait;
+	private WebDriverWait webDriverWait = WebDriverFactory.getWebDriverWait();
 	
 	public void routeTo(String url) {	
 		driver.navigate().to(constants.getBasePage() + url);		
@@ -51,12 +50,16 @@ public class RouterHelper {
 			driver.navigate().refresh();
 		}
 		this.routeTo("#profile/");		
+		this.assertUrl("#profile/");
 		selenium.waitForElement("content", "saveButton", ElementType.NAME);
 	}
 	
 	public void goToRegistration() {
-		this.routeTo("#register/");
-		selenium.waitForElement("content", "email", ElementType.NAME);
+		this.routeTo("#register/", true);
+		this.assertUrl("#register/");
+		selenium.waitForElement("content", "terms", ElementType.NAME);
+		selenium.getElement("content", "terms", ElementType.NAME);
+		selenium.waitForElement("content", "securityQuestion", ElementType.NAME);
 	}
 	
 	public void assertUrl(final String url) {
@@ -74,6 +77,7 @@ public class RouterHelper {
 			driver.navigate().refresh();
 		}
 		this.routeTo("#applications/addmore/");
+		this.assertUrl("#applications/addmore/");
 		selenium.waitForElement("content", "itemize", ElementType.CLASS);
 	}
 }

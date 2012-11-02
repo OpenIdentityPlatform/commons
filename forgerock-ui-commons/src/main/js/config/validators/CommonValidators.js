@@ -38,7 +38,7 @@ define("config/validators/CommonValidators", [
                 var v = $(input).val();
                 
                 if(v === "") {
-                    callback("Required");
+                    callback($.t("common.form.validation.required"));
                     return;
                 }
 

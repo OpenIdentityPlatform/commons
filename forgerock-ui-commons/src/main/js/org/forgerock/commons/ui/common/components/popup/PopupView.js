@@ -39,7 +39,7 @@ define("org/forgerock/commons/ui/common/components/popup/PopupView", [
     };
 
     obj.setContent = function(content) {
-        $("#popupContent").html(content);
+        $("#popup-content").html(content);
     };
 
     obj.setPositionBy = function(element) {
@@ -49,10 +49,10 @@ define("org/forgerock/commons/ui/common/components/popup/PopupView", [
         $("#popup").css('top', top);
 
         $("#popup").css('height', h);
-        $("#popupContent").css("margin-left", w + 10);
+        $("#popup-content").css("margin-left", 20);
 
-        ph = $("#popupContent").height();
-        $("#popupContent").css("margin-top", -ph / 2);
+        ph = $("#popup-content").height();
+        $("#popup-content").css("margin-top", -ph * 1.2);
     };
 
     obj.show = function() {

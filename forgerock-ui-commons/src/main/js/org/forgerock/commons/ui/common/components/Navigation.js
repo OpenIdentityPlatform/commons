@@ -61,7 +61,7 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                         this.addLink(url.name, url.url, true);
                         
                         if (url.urls) {
-                            this.$el.append('<div id="submenu"><ul>');
+                            this.$el.append('<div id="submenu" class="submenubar"><ul>');
                             for(subUrlName in url.urls) {
                                 subUrl = url.urls[subUrlName];
                                 this.addSubLink(subUrl.name, subUrl.url, this.isCurrent(subUrl.url));
@@ -77,14 +77,14 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
             },
             
             addLink: function(name, url, isActive) {
-                var newLink = this.$el.find("ul:first").append('<li><a href="'+url+'">'+ name +'</a></li>');
+                var newLink = this.$el.find("ul:first").append('<li><a href="'+url+'">'+ $.t(name) +'</a></li>');
                 if (isActive) {
                     $(newLink).find("li:last").addClass('active');
                 }
             },
             
             addSubLink: function(name, url, isActive) {
-                var newSubLink = this.$el.find("ul:last").append('<li><a href="'+url+'">'+ name +'</a></li>');
+                var newSubLink = this.$el.find("ul:last").append('<li><a href="'+url+'">'+ $.t(name) +'</a></li>');
                 if (isActive) {
                     $(newSubLink).find("li:last").addClass('active');
                 }
@@ -113,7 +113,7 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                 for(linkName in obj.configuration.links) {
                     link = obj.configuration.links[linkName];
                     
-                    if(link.role && conf.loggedUser && conf.loggedUser.roles.indexOf(link.role) !== -1) {
+                    if(link.role && conf.loggedUser && _.contains(conf.loggedUser.roles.split(","), link.role)) {
                         this.addLinks(linkName);
                         return;
                     } else if(!link.role) {

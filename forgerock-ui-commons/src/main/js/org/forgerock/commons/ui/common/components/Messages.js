@@ -45,7 +45,7 @@ define("org/forgerock/commons/ui/common/components/Messages", [
         },
         
         displayMessageFromConfig: function(msgKey) {
-            this.addMessage({message: obj.configuration.messages[msgKey].msg, type: obj.configuration.messages[msgKey].type});
+            this.addMessage({message: $.t(obj.configuration.messages[msgKey].msg), type: obj.configuration.messages[msgKey].type});
         },
         
         /**
@@ -53,24 +53,30 @@ define("org/forgerock/commons/ui/common/components/Messages", [
          * Usage: addMessage({message: "Some Message", type: "error"})
          */
         addMessage: function(msg) {
-            this.messages[this.numberOfMessages] = msg;
-
-            if (this.numberOfMessages === 0) {
+            var i;
+            
+            for(i = 0; i < this.messages.length; i++) {
+                if(this.messages[i].message === msg.message) {
+                    console.log("duplicated message");
+                    return;
+                }
+            }
+            
+            this.messages.push(msg);
+            
+            if (this.messages.length === 1) {
                 this.showMessage(msg, this.messagesLoop);
-                this.numberOfMessages++;
-            } else {
-                this.numberOfMessages++;
             }
         },
 
         /**
          * Displays messages singly.
          */
-        messagesLoop: function() {        
-            this.numberOfMessages--;
-
-            if (this.numberOfMessages > 0) {                
-                this.showMessage(this.messages[this.numberOfMessages - 1], this.messagesLoop);              
+        messagesLoop: function() {       
+            var msg = this.messages.shift();
+            
+            if (this.messages.length > 0) {                
+                this.showMessage(this.messages[0], this.messagesLoop);      
             }
         },
 
@@ -81,27 +87,26 @@ define("org/forgerock/commons/ui/common/components/Messages", [
             var obj = this;
             
             if(msg.type === "error") {
-                this.$el.append("<div class='errorMessage radious' style='display: none;'><span><img src='images/span_error.png' width='14' height='14' alt='error' align='top' /></span>" + msg.message + "</div>");
+                this.$el.append("<div class='errorMessage' style='display: none;'><span><img src='images/span_error.png' width='14' height='14' alt='error' align='top' /></span>" + msg.message + "</div>");
             
-                this.$el.find("div:last").fadeIn(500, function() {
-                    if (callback) {
-                        callback.call(obj);
-                    }
-                });
+                this.$el.find("div:last").fadeIn(500);
             } else {
                 this.$el.find("div").fadeOut(500);
-                this.$el.append("<div class='confirmMessage radious' style='display: none;'><span><img src='images/span_ok.png' width='14' height='14' alt='error' align='top' /></span>" + msg.message + "</div>");
+                this.$el.append("<div class='confirmMessage' style='display: none;'><span><img src='images/span_ok.png' width='14' height='14' alt='error' align='top' /></span>" + msg.message + "</div>");
                                 
-                this.$el.find("div:last").fadeIn(500).delay(1000).fadeOut(500, function() {
+                this.$el.find("div:last").fadeIn(500).delay(1000).fadeOut(500, _.bind(function() {
+                    this.$el.find("div:last").remove();
                     if (callback) {
                         callback.call(obj);
                     }
-                });
+                }, this ));
             }            
         },
         
         hideMessages : function() {
-            this.$el.find("div").fadeOut(500);
+            this.$el.find("div").delay(1000).fadeOut(500, _.bind(function() {
+                this.messagesLoop();    
+            }, this));
         }
     });
     

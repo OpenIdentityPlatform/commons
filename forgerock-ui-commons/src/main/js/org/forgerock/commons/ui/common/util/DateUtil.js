@@ -47,6 +47,6 @@ define("org/forgerock/commons/ui/common/util/DateUtil", [
     obj.parseDateString = function(dateString) {
         return new XDate(dateString).toDate();
     };
-
+    
     return obj;
 });

@@ -1,0 +1,163 @@
+/* FORMS */
+input[type="text"], input[type="password"], textarea, select {
+    border: 1px solid #DBDBDB;
+    .rounded-corners(5px);
+    font-size: 15px;
+    color: #5A646D;
+    padding: 5px 10px;
+    background-color: #fff;
+    width: 200px;
+    transition: all 0.25s ease-in-out;
+    -webkit-transition: all 0.25s ease-in-out;
+    -moz-transition: all 0.25s ease-in-out;
+}
+
+input.read-only {
+    border: none;
+    background: transparent;
+}
+
+input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:focus {
+    border: 1px solid @color-active;
+    outline: none;
+    .box-shadow(0, 0, 1px, 1px, @color-active);
+}
+
+form.form {
+    padding: 20px;
+    
+    &.large {
+        width: 700px;
+        label {
+            width: 210px;        
+        }
+        div.field-checkbox {
+            margin-left: 220px;
+        }
+        div.field-submit {
+            margin-left: 220px;
+        }
+        fieldset {
+            margin-top: 20px;
+        }
+    }
+    &.two-columns {
+        label {
+            width: 165px;
+        }
+        div.validation-message {
+            padding-top: 3px;
+            margin-left: 180px;
+        }
+        div.field {
+            height: 70px;
+            margin-bottom: 0;
+        }
+    }
+    &.small {
+        label {
+            width: 110px;
+        }
+        div.field-checkbox {
+            margin-left: 117px;
+        }
+        div.field-submit {
+            margin-left: 117px;
+        }
+    }
+    &.center {
+        margin: 0 auto;
+    }
+    &.no-margin {
+        fieldset {
+            margin-top: 0;
+        }
+    }
+    label {
+        float: left;
+        text-align: right;
+        padding-right: 10px;
+        font-size: 17px;
+        padding-top: 8px;
+        font-weight: bold;
+    }
+    label.short {
+        width: 150px;
+    }
+    label.light {
+        font-weight: normal;
+    }
+    div.field-checkbox {
+        margin-left: 160px;
+        label {
+            font-weight: normal;
+            width: auto;
+            font-size: 14px;
+            float: none;
+            text-align: left;
+        }
+        input {
+            float: left;
+            margin: 3px 6px 3px 4px;
+        }
+    }
+    
+    div.field-submit {
+        margin: 20px 0 0 160px;
+    }
+    
+    div.field {
+        clear: both;
+        margin-bottom: 15px;
+        div.input-fake {
+            padding-top: 8px; 
+            height: 25px; 
+        }
+    }
+    div.field-text {
+       padding-top: 20px;
+    }
+    select {
+        width: 222px;
+    }
+    span.error {
+        color: @color-active;
+        font-weight: bold;
+        font-size: 14px;
+        padding: 0 6px;
+    }
+    span.ok {
+        color: @color-success;
+        font-weight: bold;
+        font-size: 14px;
+        padding: 0 3px 0 5px;
+    }
+    div.validation-message, div.input-validation-message {
+        color: @color-active;
+        display: inline-block;
+    }
+    div.group-field-inputs {
+        float: left;
+    }
+    div.group-field-errors {
+        padding: 1px 5px 5px 5px;
+        width: 210px;
+        margin-left: 5px;
+        border: 1px solid #DBDBDB;
+        float: left;
+        .rounded-corners(5px);
+        span {
+            font-weight: bold;
+            font-size: 12px;
+            &.ok {
+                padding: 0 5px 0 4px;
+            }
+        }
+    }
+    div.group-field-message {
+        margin-left: 15px;
+        float: left;
+        width: 210px;
+    }
+    
+}

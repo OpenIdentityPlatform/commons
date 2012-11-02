@@ -96,7 +96,7 @@ define("org/forgerock/commons/ui/common/components/LineTableView", [
         },
         
         seeMoreItemsMessage: function(item) {
-            return "see more";
+            return $.t("openidm.ui.common.components.LineTableView.seeMoreItems");
         },
         
         maxToShow: 0,
@@ -104,7 +104,7 @@ define("org/forgerock/commons/ui/common/components/LineTableView", [
         itemHeight: 65,
         
         noItemsMessage: function(item) {
-            return "No items";
+            return $.t("openidm.ui.common.components.LineTableView.noItems");
         },
         
         removeItemAndRebuild: function(itemId) {

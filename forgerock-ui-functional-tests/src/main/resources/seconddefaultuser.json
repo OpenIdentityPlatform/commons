@@ -1,6 +1,6 @@
 {
-    "email": "second@test.test", 
     "userName": "second@test.test", 
+    "email": "sec@test.test", 
     "givenName": "TestName",
     "familyName": "TestSurname",
     "phoneNumber": "0044123456789",
@@ -9,5 +9,6 @@
     "securityQuestion": "1",
     "securityAnswer": "yyyy",
     "passPhrase": "zzzz",
+    "siteImage" : "mail.png",
     "terms": "yes"
 }

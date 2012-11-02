@@ -141,12 +141,15 @@ define("config/process/UserConfig", [
                     
                     eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: false});
                     
-                    if(conf.gotoURL && _.indexOf(["#","","#/","/#"], conf.gotoURL) === -1) {
-                        console.log("Auto redirect to " + conf.gotoURL);
-                        router.navigate(conf.gotoURL, {trigger: true});
-                        delete conf.gotoURL;
-                    } else {
-                        router.navigate("", {trigger: true});
+                    if (! conf.backgroundLogin)
+                    {
+                        if(conf.gotoURL && _.indexOf(["#","","#/","/#"], conf.gotoURL) === -1) {
+                            console.log("Auto redirect to " + conf.gotoURL);
+                            router.navigate(conf.gotoURL, {trigger: true});
+                            delete conf.gotoURL;
+                        } else {
+                            router.navigate("", {trigger: true});
+                        }
                     }
                     
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "loggedIn");
@@ -185,6 +188,7 @@ define("config/process/UserConfig", [
                 eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, {anonymousMode: true});
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "loggedOut");
                 router.execRouteHandler("");
+                delete conf.gotoURL;
             }
          },
          {
@@ -193,9 +197,10 @@ define("config/process/UserConfig", [
              dependencies: [
                  "org/forgerock/commons/ui/common/main/Router",
                  "org/forgerock/commons/ui/common/main/Configuration",
-                 "org/forgerock/commons/ui/common/main/SessionManager"
+                 "org/forgerock/commons/ui/common/main/SessionManager",
+                 "org/forgerock/commons/ui/user/LoginDialog"
              ],
-             processDescription: function(error, router, conf, sessionManager) {
+             processDescription: function(error, router, conf, sessionManager, loginDialog) {
                  if(!conf.loggedUser) {
                      if(!conf.gotoURL) {
                          conf.setProperty("gotoURL", window.location.hash);
@@ -209,14 +214,7 @@ define("config/process/UserConfig", [
                      eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unauthorized");
                      router.routeTo("", {trigger: true});
                  }, function() {
-                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unauthorized");
-                     console.log("Saving redirection link" + window.location.hash);
-                     
-                     if(!conf.gotoURL) {
-                         conf.setProperty("gotoURL", window.location.hash);
-                     }
-                     
-                     eventManager.sendEvent(constants.EVENT_LOGOUT);                                     
+                     loginDialog.render();
                  });    
              }
          },
@@ -226,8 +224,7 @@ define("config/process/UserConfig", [
              dependencies: [
              ],
              processDescription: function(event) {
-                 //TODO
-                 //messagesCtrl.displayMessage('error', 'Failed to delete notification');
+                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "errorDeletingNotification");
              }
          },
          {
@@ -236,8 +233,7 @@ define("config/process/UserConfig", [
              dependencies: [
              ],
              processDescription: function(event) {
-                 //TODO
-                 //messagesCtrl.displayMessage('error', 'Unable to get notifications for user');
+                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "errorFetchingNotifications");
              }
          }
          ];

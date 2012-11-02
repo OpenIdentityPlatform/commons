@@ -60,7 +60,10 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
          */
         parentRender: function(callback) {   
             this.callback = callback;
-               
+            var _this = this;
+            eventManager.registerListener(constants.EVENT_REQUEST_RESEND_REQUIRED, function () {
+                _this.unlock();
+            });
             if(conf.baseTemplate !== this.baseTemplate && !this.noBaseTemplate) {
                 uiUtils.renderTemplate(this.baseTemplate, $("#wrapper"), _.extend(conf.globalData, this.data), _.bind(this.loadTemplate, this), "replace");
             } else {
@@ -85,6 +88,7 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
             } else {
                 uiUtils.renderTemplate(this.template, this.$el, _.extend(conf.globalData, this.data), null, this.mode);
             }
+           
         },
         
         rebind: function() {
@@ -111,11 +115,11 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
             }
             
             if(validatorsManager.formValidated(this.$el)) {
-                this.$el.find("input[type=submit]").removeClass('gray').addClass('orange');
-                this.$el.find(".inputValidationMessage").hide();
+                this.$el.find("input[type=submit]").removeClass('inactive').addClass('active');
+                this.$el.find(".input-validation-message").hide();
             } else {
-                this.$el.find("input[type=submit]").removeClass('orange').addClass('gray');
-                this.$el.find(".inputValidationMessage").show();
+                this.$el.find("input[type=submit]").removeClass('active').addClass('inactive');
+                this.$el.find(".input-validation-message").show();
             }
             
             if(msg === "disabled") {
@@ -129,8 +133,8 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
                 validatorsUtils.setTick(input, msg ? true : false);
             }
             
-            if($(input).nextAll("div.validationMessage:first")) {
-                $(input).nextAll("div.validationMessage:first").html(msg ? msg : '');
+            if($(input).nextAll("div.validation-message:first")) {
+                $(input).nextAll("div.validation-message:first").html(msg ? msg : '');
             }
             
             if(validatorType) {

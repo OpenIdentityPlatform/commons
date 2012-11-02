@@ -30,10 +30,12 @@ define("org/forgerock/commons/ui/common/main/main", [
 	"./Configuration",
 	"./EventManager",
 	"./ProcessConfiguration", 
+	"./PolicyDelegate",
 	"./ServiceInvoker",
 	"./Router",
 	"./ViewManager",
 	"./SpinnerManager",
 	"./ErrorsHandler",
-	"./SessionManager"
+	"./SessionManager",
+	"./i18nManager"
 ]);

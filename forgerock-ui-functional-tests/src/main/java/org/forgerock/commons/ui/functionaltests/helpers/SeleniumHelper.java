@@ -1,7 +1,6 @@
 package org.forgerock.commons.ui.functionaltests.helpers;
 
-import javax.inject.Inject;
-
+import org.forgerock.commons.ui.functionaltests.webdriver.WebDriverFactory;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
@@ -16,11 +15,9 @@ public class SeleniumHelper {
 		NAME, ID, CLASS, LINK_TEXT, XPATH, TAG, CSS
 	}
 
-	@Inject
-	private WebDriver driver;
+	private WebDriver driver = WebDriverFactory.getWebDriver();
 	
-	@Inject
-    private WebDriverWait webDriverWait;
+    private WebDriverWait webDriverWait = WebDriverFactory.getWebDriverWait();
 
 	/**
 	 * Returns an element. El is an id of root element.
@@ -47,8 +44,19 @@ public class SeleniumHelper {
 		throw new RuntimeException("Incorrect element type");
 	}
 
-	public void waitForElement(String el, String value, ElementType type) {
-		getElement(el, value, type);
+	public void waitForElement(final String el, final String value, final ElementType type) {
+		new AssertionWithTimeout() {
+			
+			@Override
+			protected String getAssertionFailedMessage() {
+				return "Element " + value + " has not been found on page";
+			}
+			
+			@Override
+			protected boolean assertionCondition(WebDriver driver) {
+				return getElement(el, value, type) != null;
+			}
+		};
 	}
 
 	/**
@@ -86,7 +94,7 @@ public class SeleniumHelper {
 	}
 
 	public abstract class AssertionWithTimeout {
-
+		
 		public final void checkAssertion() {
 			try {
 				webDriverWait.until(new ExpectedCondition<Boolean>() {

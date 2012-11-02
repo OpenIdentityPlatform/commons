@@ -22,20 +22,14 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-input {
-	height: 24px;
-	padding: 6px 10px 0 10px;
-}
+/* css basic configuration */
+@import "user/config.less";
 
-select {
-	height: 30px;
-	padding: 0 0 4px 7px;
-}
+/* helpers, functions, columns */
+@import "user/helpers.less"; 
 
-input.checkbox {
-	border: 0;
-}
+/* header, footer, menu, dialogs, messages, popups, basic buttons & links */
+@import "user/layout.less";
 
-input.readOnly {
-	padding: 7px 0 0 11px;
-}
+/* specific css used in specific modules */
+@import "user/forms.less";

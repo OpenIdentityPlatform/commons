@@ -1,7 +1,6 @@
 package org.forgerock.commons.ui.functionaltests.helpers;
 
-import javax.inject.Inject;
-
+import org.forgerock.commons.ui.functionaltests.webdriver.WebDriverFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -13,11 +12,9 @@ import org.testng.Assert;
 @Component
 public class MessagesHelper {
 	
-	@Inject
-	private WebDriver driver;
+	private WebDriver driver = WebDriverFactory.getWebDriver();
 	
-	@Inject
-	private WebDriverWait wait;
+	private WebDriverWait wait = WebDriverFactory.getWebDriverWait();
 	
 	public void assertInfoMessage(String text) {
 		wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("confirmMessage")));

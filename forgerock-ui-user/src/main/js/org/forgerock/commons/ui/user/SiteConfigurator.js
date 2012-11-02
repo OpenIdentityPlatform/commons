@@ -32,17 +32,19 @@ define("org/forgerock/commons/ui/user/SiteConfigurator", [
    "org/forgerock/commons/ui/common/util/Constants", 
    "org/forgerock/commons/ui/common/main/EventManager",
    "org/forgerock/commons/ui/common/main/Configuration",
-   "org/forgerock/commons/ui/user/delegates/SiteConfigurationDelegate"
-], function(AbstractConfigurationAware, constants, eventManager, conf, configurationDelegate) {
+   "org/forgerock/commons/ui/user/delegates/SiteConfigurationDelegate",
+   "org/forgerock/commons/ui/common/main/i18nManager"
+], function(AbstractConfigurationAware, constants, eventManager, conf, configurationDelegate, i18nManager) {
    var obj = new AbstractConfigurationAware();
    
    obj.initialized = false;
    
    $(document).on(constants.EVENT_READ_CONFIGURATION_REQUEST, function() {
+       
        if(!conf.globalData) {
            conf.setProperty('globalData', {});
        }
-       
+
        console.log("READING CONFIGURATION");
        if(obj.configuration && obj.initialized === false) {
            obj.initialized = true;
@@ -50,14 +52,11 @@ define("org/forgerock/commons/ui/user/SiteConfigurator", [
            if(obj.configuration.remoteConfig === true) {
                configurationDelegate.getConfiguration(function(config) {
                    obj.processConfiguration(config); 
-                   console.log("SENDING 1");
                    eventManager.sendEvent(constants.EVENT_APP_INTIALIZED);
                }, function() {
-                   console.log("SENDING 2");
                    eventManager.sendEvent(constants.EVENT_APP_INTIALIZED);
                });
            } else {
-               console.log("SENDING 3");
                obj.processConfiguration(obj.configuration); 
                eventManager.sendEvent(constants.EVENT_APP_INTIALIZED);
            }          
@@ -78,22 +77,38 @@ define("org/forgerock/commons/ui/user/SiteConfigurator", [
            }
        }
        
-       if(config.enterprise === true) {
-           conf.globalData.enterprise = true;             
+       if(config.securityQuestions === true) {
+           conf.globalData.securityQuestions = true;             
        } else {
            changeSecurityDataDialog = require("org/forgerock/commons/ui/user/profile/ChangeSecurityDataDialog");
-           changeSecurityDataDialog.data.height = 210;
-           
-           if(router.configuration && router.configuration.routes.siteIdentification) {
-               console.log("Removing siteIdentification route.");
-               delete router.configuration.routes.siteIdentification;
-           }
-           
+           changeSecurityDataDialog.data.height = 260;
+       }
+       
+       
+       if(config.forgottenPassword === true) {
+           conf.globalData.forgottenPassword = true;             
+       } else {
            if(router.configuration && router.configuration.routes.forgottenPassword) {
                console.log("Removing forgottenPassword route.");
                delete router.configuration.routes.forgottenPassword;
            } 
        }
+       
+       if(config.siteIdentification === true) {
+           conf.globalData.siteIdentification = true;
+       } else {
+           if(router.configuration && router.configuration.routes.siteIdentification) {
+               console.log("Removing siteIdentification route.");
+               delete router.configuration.routes.siteIdentification;
+           }
+       }
+       
+       if (config.language) {
+           i18nManager.setLanguage(config.language);
+       } else {
+           i18nManager.setLanguage(constants.DEFAULT_LANGUAGE);
+       }
+       
    };
    
    return obj;
