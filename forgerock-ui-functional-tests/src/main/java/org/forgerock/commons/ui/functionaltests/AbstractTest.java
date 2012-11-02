@@ -9,17 +9,15 @@ import org.forgerock.commons.ui.functionaltests.helpers.*;
 import org.forgerock.commons.ui.functionaltests.openidmclient.OpenIDMClient;
 import org.forgerock.commons.ui.functionaltests.utils.AssertNoErrorsAspect;
 import org.forgerock.commons.ui.functionaltests.utils.JsonUtils;
+import org.forgerock.commons.ui.functionaltests.webdriver.WebDriverFactory;
 import org.openqa.selenium.WebDriver;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeMethod;
-
+import org.testng.annotations.*;
 @ContextConfiguration(locations = { "classpath:testApplicationContext.xml" })
 public class AbstractTest extends AbstractTestNGSpringContextTests {
 
-	@Inject
-	protected WebDriver driver;
+	protected WebDriver driver = WebDriverFactory.getWebDriver();
 
 	@Inject
 	protected FormsHelper forms;
@@ -72,6 +70,11 @@ public class AbstractTest extends AbstractTestNGSpringContextTests {
 	@AfterClass
 	public void cleanupOnEnd() {
 		openidmClient.removeAllUsers();
+	}
+	
+	@AfterSuite
+	public void closeBrowser() {
+		driver.close();
 	}
 	
 	protected void fieldShouldBeValidAfterChange(String element, String fieldName, String valueToSet) {

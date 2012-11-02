@@ -1,7 +1,6 @@
 package org.forgerock.commons.ui.functionaltests.helpers;
 
-import javax.inject.Inject;
-
+import org.forgerock.commons.ui.functionaltests.webdriver.WebDriverFactory;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
@@ -16,11 +15,9 @@ public class SeleniumHelper {
 		NAME, ID, CLASS, LINK_TEXT, XPATH, TAG, CSS
 	}
 
-	@Inject
-	private WebDriver driver;
+	private WebDriver driver = WebDriverFactory.getWebDriver();
 	
-	@Inject
-    private WebDriverWait webDriverWait;
+    private WebDriverWait webDriverWait = WebDriverFactory.getWebDriverWait();
 
 	/**
 	 * Returns an element. El is an id of root element.

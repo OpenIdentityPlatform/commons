@@ -210,12 +210,12 @@ public class ProfileTest extends AbstractProfileTest {
 		assertFieldHasValue(fieldName, userNameToSet);
 	}
 	
-	/*@Test
+	@Test
 	@AssertNoErrors
-	public void testUpdateEmailNotValidEmailAlreadyExists() {
+	public void testUpdateUsernameNotValidUsernameAlreadyExists() {
 		userHelper.createSecondDefaultUser();
 		String usernameToSet = "second@test.test";
 		new AssertNotValidFieldAfterChange("userName", usernameToSet).run();
-	}*/
+	}
 	
 }

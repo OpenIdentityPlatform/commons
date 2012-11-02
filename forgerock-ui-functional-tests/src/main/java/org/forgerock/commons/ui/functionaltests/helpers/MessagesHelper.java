@@ -1,7 +1,6 @@
 package org.forgerock.commons.ui.functionaltests.helpers;
 
-import javax.inject.Inject;
-
+import org.forgerock.commons.ui.functionaltests.webdriver.WebDriverFactory;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -10,11 +9,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class MessagesHelper {
 	
-	@Inject
-	private WebDriver driver;
+	private WebDriver driver = WebDriverFactory.getWebDriver();
 	
-	@Inject
-	private WebDriverWait wait;
+	private WebDriverWait wait = WebDriverFactory.getWebDriverWait();
 	
 	public void assertInfoMessage(final String text) {
 		wait.until(new ExpectedCondition<Boolean>() {

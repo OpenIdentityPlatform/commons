@@ -6,6 +6,7 @@ import junit.framework.Assert;
 
 import org.forgerock.commons.ui.functionaltests.constants.Constants;
 import org.forgerock.commons.ui.functionaltests.helpers.SeleniumHelper.ElementType;
+import org.forgerock.commons.ui.functionaltests.webdriver.WebDriverFactory;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -14,8 +15,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class RouterHelper {
 	
-	@Inject
-	private WebDriver driver;
+	private WebDriver driver = WebDriverFactory.getWebDriver();
 	
 	@Inject
 	private Constants constants;
@@ -23,8 +23,7 @@ public class RouterHelper {
 	@Inject
 	private SeleniumHelper selenium;
 	
-	@Inject
-	private WebDriverWait webDriverWait;
+	private WebDriverWait webDriverWait = WebDriverFactory.getWebDriverWait();
 	
 	public void routeTo(String url) {	
 		driver.navigate().to(constants.getBasePage() + url);		

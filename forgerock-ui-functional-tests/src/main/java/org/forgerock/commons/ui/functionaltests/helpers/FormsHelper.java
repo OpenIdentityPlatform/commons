@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import org.codehaus.jackson.JsonNode;
 import org.forgerock.commons.ui.functionaltests.helpers.SeleniumHelper.ElementType;
 import org.forgerock.commons.ui.functionaltests.utils.JsonUtils;
+import org.forgerock.commons.ui.functionaltests.webdriver.WebDriverFactory;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.*;
 import org.springframework.stereotype.Component;
@@ -14,14 +15,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class FormsHelper {
 	
-    @Inject
-	private WebDriver driver;
+	private WebDriver driver = WebDriverFactory.getWebDriver();
 
     @Inject
 	private SeleniumHelper selenium;
     
-    @Inject
-	private WebDriverWait wait;
+	private WebDriverWait wait = WebDriverFactory.getWebDriverWait();
     
     @Inject
     private JsonUtils jsonUtils;
@@ -137,7 +136,13 @@ public class FormsHelper {
 		try {
 			json = (String) ((JavascriptExecutor) driver).executeScript("return JSON.stringify(form2js('"+ el +"', '.', false));");
 		} catch (WebDriverException e) {
-			// somethimes it does not work for the first time
+			// sometimes it does not work for the first time...
+			try {
+				System.out.println("Recalling method...");
+				Thread.sleep(3000);
+			} catch (InterruptedException e1) {
+				e1.printStackTrace();
+			}
 			json = (String) ((JavascriptExecutor) driver).executeScript("return JSON.stringify(form2js('"+ el +"', '.', false));");
 
 		}

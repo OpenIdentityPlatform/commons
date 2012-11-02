@@ -1,17 +1,15 @@
 package org.forgerock.commons.ui.functionaltests.helpers;
 
-import javax.inject.Inject;
-
 import junit.framework.Assert;
 
+import org.forgerock.commons.ui.functionaltests.webdriver.WebDriverFactory;
 import org.openqa.selenium.*;
 import org.springframework.stereotype.Component;
 
 @Component
 public class DialogsHelper {
 
-	@Inject
-	private WebDriver driver;
+	private WebDriver driver = WebDriverFactory.getWebDriver();
 	
 	public void closeDialog() {
 		closeDialogByButtonClick();
