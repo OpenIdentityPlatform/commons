@@ -93,6 +93,7 @@ define("org/forgerock/commons/ui/user/ForgottenPasswordDialog", [
                 } else {
                     securityQuestionRef = this.securityQuestions;
                     userDelegate.getSecurityQuestionForUserName(userName, function(result) {
+                        console.log(result + " " + securityQuestionRef[result]);
                         $("#fgtnSecurityQuestion").text(securityQuestionRef[result]);
                     });
                     this.$el.find("#fgtnAnswerDiv").show();

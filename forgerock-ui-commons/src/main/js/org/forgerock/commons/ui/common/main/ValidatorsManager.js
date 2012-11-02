@@ -56,7 +56,7 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
                     this.input.attr("data-validation-status", "ok");
                 }
                 
-                el.trigger("onValidate", [this.input, msg.length ? msg.join(",") : false]); 
+                el.trigger("onValidate", [this.input, msg.length ? _.uniq(msg).join(",") : false]); 
                 
                 // re-validate dependent form fields
                 if (thisInput.attr("data-validation-dependents")) {
@@ -130,59 +130,64 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
                     
                     // This binds the events to all of our fields which have validation policies defined by the server
                     input.on(event, _.bind(function (e) {
-                        var j,params,EVAL_IS_EVIL = eval; // JSLint doesn't like eval usage; this is a bit of a hack around that, while acknowledging it.
+                        $.doTimeout(this.input.attr('name')+'validation', 100, _.bind(function() {
                         
-                        policyFailures = [];
-                        msg = [];
-                        
-                        if ((e.type === "change") || (this.input.data("prevValue") !== this.input.val())) // only attempt to re-validate if the value has actually changed
-                        {
-                            this.input.data("prevValue", this.input.val());
-                            this.input.siblings(".validationMessage").empty();
-                            _.each(this.property.policies, _.bind(function(policy,j) {
-                                
-                                // The policy may return the JavaScript validation function as a string property;
-                                // If so, we can use that validation function directly here
-                                if (policy.policyFunction) {
+                            var j,params,EVAL_IS_EVIL = eval; // JSLint doesn't like eval usage; this is a bit of a hack around that, while acknowledging it.
+                            
+                            policyFailures = [];
+                            msg = [];
+                            
+                            if ((e.type === "change") || (this.input.data("prevValue") !== this.input.val())) // only attempt to re-validate if the value has actually changed
+                            {
+                                this.input.data("prevValue", this.input.val());
+                                this.input.siblings(".validation-message").empty();
+                                _.each(this.property.policies, _.bind(function(policy,j) {
                                     
-                                    if (!policy.params) {
-                                        policy.params = {};
+                                    // The policy may return the JavaScript validation function as a string property;
+                                    // If so, we can use that validation function directly here
+                                    if (policy.policyFunction) {
+                                        
+                                        if (!policy.params) {
+                                            policy.params = {};
+                                        }
+                                        
+                                        params = policy.params;
+                                        // This instantiates the string representation of the function into an actual, executable local function
+                                        // and then calls that function, appending the resulting array into our collection of policy failures.
+                                        policyFailures = policyFailures.concat(EVAL_IS_EVIL("policyFunction = " + policy.policyFunction)(form2js(this.input.closest('form')[0]), this.input.val(), params, this.property.name));
                                     }
-                                    
-                                    params = policy.params;
-                                    // This instantiates the string representation of the function into an actual, executable local function
-                                    // and then calls that function, appending the resulting array into our collection of policy failures.
-                                    policyFailures = policyFailures.concat(EVAL_IS_EVIL("policyFunction = " + policy.policyFunction)(form2js(this.input.closest('form')[0]), this.input.val(), params, this.property.name));
-                                }
-                                // For those validation policies which cannot be performed within the browser, 
-                                // we call to the server to do the validation for us.
-                                else if (e.type === "change") {
-                                    policyFailures = [];
-                                    policyDelegate.validateProperty(
-                                        baseEntity,
-                                        {
-                                            "fullObject": form2js(this.input.closest("form")[0]), 
-                                            "value": this.input.val(), 
-                                            "property": this.property.name
-                                        }, 
-                                        _.bind(function (result) {
-                                            var l;
-                                            if (!result.result) {
-                                                for (l = 0; l < result.failedPolicyRequirements.length; l++) {
-                                                    policyFailures = policyFailures.concat(result.failedPolicyRequirements[l].policyRequirements);
+                                    // For those validation policies which cannot be performed within the browser, 
+                                    // we call to the server to do the validation for us.
+                                    else if (e.type === "change") {
+                                        policyFailures = [];
+                                        policyDelegate.validateProperty(
+                                            baseEntity,
+                                            {
+                                                "fullObject": form2js(this.input.closest("form")[0]), 
+                                                "value": this.input.val(), 
+                                                "property": this.property.name
+                                            }, 
+                                            _.bind(function (result) {
+                                                var l;
+                                                if (!result.result) {
+                                                    for (l = 0; l < result.failedPolicyRequirements.length; l++) {
+                                                        policyFailures = policyFailures.concat(result.failedPolicyRequirements[l].policyRequirements);
+                                                    }
+                                                    postValidation.call(this);
                                                 }
-                                                postValidation.call(this);
-                                            }
-                                        }, this)
-                                    );
-                                }
-                            }, this));
-                            
-                            postValidation.call(this);
-                            
+                                            }, this)
+                                        );
+                                    }
+                                }, this));
+                                
+                                postValidation.call(this);
+                                
+                                
+                            }
                         
-                        }
-                    }, {property : property, input: input}));
+                        }, this));
+                        
+                    }, {property : property, input: input}));                      
                 }, this));
                 
                 if (callback) {

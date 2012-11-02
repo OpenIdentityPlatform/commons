@@ -56,9 +56,10 @@ public class RouterHelper {
 	}
 	
 	public void goToRegistration() {
-		this.routeTo("#register/");
+		this.routeTo("#register/", true);
 		this.assertUrl("#register/");
 		selenium.waitForElement("content", "terms", ElementType.NAME);
+		selenium.getElement("content", "terms", ElementType.NAME);
 		selenium.waitForElement("content", "securityQuestion", ElementType.NAME);
 	}
 	

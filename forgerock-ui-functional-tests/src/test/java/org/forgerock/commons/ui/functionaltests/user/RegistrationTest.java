@@ -146,7 +146,7 @@ public class RegistrationTest extends AbstractRegistrationTest {
 		}.run();
 	}
 	
-	@Test
+	/*@Test
 	@AssertNoErrors
 	public void testTermsFieldValidation() {
 		new RegistrationValidationTest(){
@@ -158,7 +158,7 @@ public class RegistrationTest extends AbstractRegistrationTest {
 		}.run();
 	}
 	
-	/*@Test
+	@Test
 	@AssertNoErrors
 	public void testEmailAlreadyExists() {
 		new RegistrationValidationTest(){

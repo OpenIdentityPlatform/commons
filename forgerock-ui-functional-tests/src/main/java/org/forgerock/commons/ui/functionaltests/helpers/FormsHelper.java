@@ -57,6 +57,11 @@ public class FormsHelper {
 			throw new IllegalStateException("No implementation for type " + tagName);
 		}
 		
+		try {
+			Thread.sleep(200);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		
 		String event = element.getAttribute("data-validator-event");
 		if(event != null) {
@@ -149,7 +154,7 @@ public class FormsHelper {
 	 * @param el id of root element
 	 */
 	public void validateForm(String el) {
-		List<WebElement> fields = driver.findElements(By.cssSelector("#"+ el +" [data-validator]"));
+		List<WebElement> fields = driver.findElements(By.cssSelector("#"+ el +" [data-validation-status]"));
 
 		for(WebElement field : fields) {
 			String event = field.getAttribute("data-validator-event");

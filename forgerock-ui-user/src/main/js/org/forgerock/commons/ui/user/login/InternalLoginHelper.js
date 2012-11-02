@@ -67,6 +67,10 @@ define("org/forgerock/commons/ui/user/login/InternalLoginHelper", [
             });
         } else if(component === "internal/user") {
             userDelegate.readInternalEntity(id, function(user) {
+                if(!user.userName) {
+                    user.userName = user._id;
+                }
+                
                 successCallback(user);
             }, function() {
                 errorCallback();

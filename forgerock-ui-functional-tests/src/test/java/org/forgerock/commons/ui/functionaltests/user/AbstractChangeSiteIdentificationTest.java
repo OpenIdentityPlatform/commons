@@ -18,13 +18,13 @@ public class AbstractChangeSiteIdentificationTest extends AbstractTest {
 			router.routeTo("#profile/site_identification/", true);
 			router.assertUrl("#profile/site_identification/");
 			
-			forms.assertValidationDisabled("siteImageChange", "passPhrase");
+			//forms.assertValidationDisabled("siteImageChange", "passPhrase");
 			forms.assertFormFieldHasValue("siteImageChange", "passPhrase", "zzzz");
 			
 			String siteImage = forms.getValueForContentFlow("siteImageFlow");
 			Assert.assertEquals("mail.png", siteImage);
 			
-			dialogsHelper.assertActionButtonDisabled("Save");
+			//dialogsHelper.assertActionButtonDisabled("Save");
 
 			checkChangeSiteIdentificationViewBehavior();
 		};

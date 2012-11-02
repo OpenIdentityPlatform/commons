@@ -81,7 +81,7 @@ define("org/forgerock/commons/ui/user/SiteConfigurator", [
            conf.globalData.securityQuestions = true;             
        } else {
            changeSecurityDataDialog = require("org/forgerock/commons/ui/user/profile/ChangeSecurityDataDialog");
-           changeSecurityDataDialog.data.height = 210;
+           changeSecurityDataDialog.data.height = 260;
        }
        
        
