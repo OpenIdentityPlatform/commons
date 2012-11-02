@@ -35,17 +35,17 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
     var obj = new AbstractConfigurationAware();
     
     obj.bindValidators = function(el,baseEntity,callback) {
-        var policyFailures = [], msg = [],
-            inputs, event, input,
-            postValidation = function  () {
-                var simpleFailures = [],
+        var inputs, event, input,
+            postValidation = function  (policyFailures) {
+                var simpleFailures = [], msg = [],
                     thisInput = this.input,
                     k;
                 
                 for (k = 0; k<policyFailures.length; k++) {
-                    msg.push($.t("common.form.validation." + policyFailures[k].policyRequirement, policyFailures[k].params));
-                    simpleFailures.push(policyFailures[k].policyRequirement);
-                        
+                    if ($.inArray(policyFailures[k].policyRequirement, simpleFailures) === -1) {
+                        simpleFailures.push(policyFailures[k].policyRequirement);
+                        msg.push($.t("common.form.validation." + policyFailures[k].policyRequirement, policyFailures[k].params));
+                    }
                 }
                 validatorUtils.setErrors($(".validationRules[data-for-validator~='"+this.input.attr("name")+"']"), this.input.attr("name"), simpleFailures);
                 
@@ -56,7 +56,7 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
                     this.input.attr("data-validation-status", "ok");
                 }
                 
-                el.trigger("onValidate", [this.input, msg.length ? _.uniq(msg).join(",") : false]); 
+                el.trigger("onValidate", [this.input, msg.length ? msg.join(",") : false]); 
                 
                 // re-validate dependent form fields
                 if (thisInput.attr("data-validation-dependents")) {
@@ -130,12 +130,9 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
                     
                     // This binds the events to all of our fields which have validation policies defined by the server
                     input.on(event, _.bind(function (e) {
-                        $.doTimeout(this.input.attr('name')+'validation', 100, _.bind(function() {
-                        
-                            var j,params,EVAL_IS_EVIL = eval; // JSLint doesn't like eval usage; this is a bit of a hack around that, while acknowledging it.
-                            
-                            policyFailures = [];
-                            msg = [];
+                        $.doTimeout(this.input.attr('name')+'validation'+e.type, 100, _.bind(function() {
+    
+                            var j,params,policyFailures = [],EVAL_IS_EVIL = eval; // JSLint doesn't like eval usage; this is a bit of a hack around that, while acknowledging it.
                             
                             if ((e.type === "change") || (this.input.data("prevValue") !== this.input.val())) // only attempt to re-validate if the value has actually changed
                             {
@@ -173,21 +170,20 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
                                                     for (l = 0; l < result.failedPolicyRequirements.length; l++) {
                                                         policyFailures = policyFailures.concat(result.failedPolicyRequirements[l].policyRequirements);
                                                     }
-                                                    postValidation.call(this);
+                                                    postValidation.call(this, policyFailures);
                                                 }
                                             }, this)
                                         );
                                     }
                                 }, this));
                                 
-                                postValidation.call(this);
-                                
+                                postValidation.call(this, policyFailures);
                                 
                             }
                         
                         }, this));
                         
-                    }, {property : property, input: input}));                      
+                    }, {property : property, input: input}));
                 }, this));
                 
                 if (callback) {
