@@ -22,19 +22,14 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/* MUST be included */
 /* css basic configuration */
-@import "config.less";
+@import "user/config.less";
 
-/* our own bootstrap - helpers, functions, columns - we can name it somehow differ than helpers  */
-@import "helpers.less"; 
+/* helpers, functions, columns */
+@import "user/helpers.less"; 
 
 /* header, footer, menu, dialogs, messages, popups, basic buttons & links */
-@import "layout.less";
+@import "user/layout.less";
 
-/* CAN be included */
 /* specific css used in specific modules */
-@import "forms.less";
-@import "apps.less";
-@import "task-table.less";
-@import "notifications.less";
+@import "user/forms.less";
