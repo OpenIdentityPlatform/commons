@@ -130,11 +130,12 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
                     
                     // This binds the events to all of our fields which have validation policies defined by the server
                     input.on(event, _.bind(function (e) {
-                        $.doTimeout(this.input.attr('name')+'validation'+e.type, 100, _.bind(function() {
+                        var validationContext = (e.type === "change" || e.type === "blur") ? "server":"client";
+                        $.doTimeout(this.input.attr('name')+'validation' + validationContext, 100, _.bind(function() {
     
                             var j,params,policyFailures = [],EVAL_IS_EVIL = eval; // JSLint doesn't like eval usage; this is a bit of a hack around that, while acknowledging it.
                             
-                            if ((e.type === "change") || (this.input.data("prevValue") !== this.input.val())) // only attempt to re-validate if the value has actually changed
+                            if (validationContext === "server" || (this.input.data("prevValue") !== this.input.val())) // only attempt to re-validate if the value has actually changed
                             {
                                 this.input.data("prevValue", this.input.val());
                                 this.input.siblings(".validation-message").empty();
@@ -155,7 +156,7 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
                                     }
                                     // For those validation policies which cannot be performed within the browser, 
                                     // we call to the server to do the validation for us.
-                                    else if (e.type === "change") {
+                                    else if (validationContext === "server") {
                                         policyFailures = [];
                                         policyDelegate.validateProperty(
                                             baseEntity,
