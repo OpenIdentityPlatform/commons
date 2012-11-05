@@ -37,6 +37,11 @@ public class UserHelper {
 		openIDMClient.createUser(jsonUtils.readJsonFromFile("/defaultuser.json"));
 	}
 	
+	public void createDefaultAdminUser() {
+		openIDMClient.createUser(jsonUtils.readJsonFromFile("/defaultadminuser.json"));
+		openIDMClient.updateUserField("admin@test.test", "roles", "openidm-authorized,admin");
+	}
+	
 	public void createSecondDefaultUser() {
 		openIDMClient.createUser(jsonUtils.readJsonFromFile("/seconddefaultuser.json"));
 	}
@@ -47,6 +52,10 @@ public class UserHelper {
 	
 	public void loginAsOpenIDMAdmin() {
 		login("openidm-admin", "openidm-admin");
+	}
+
+	public void loginAsDefaultAdminUser() {
+		login("admin@test.test", "tesT#1#Test");
 	}
 	
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.node.*;
 import org.forgerock.commons.ui.functionaltests.constants.Constants;
 import org.forgerock.commons.ui.functionaltests.openidmclient.transfer.*;
 import org.springframework.http.*;
@@ -66,6 +67,23 @@ public class OpenIDMClient {
 	public void deleteUser(String entityId) {
 		ResponseEntity<BaseResult> response = getRestTemplate().exchange(constants.getOpenIDMServer() + "openidm/managed/user/" + entityId,
 			      HttpMethod.DELETE, new HttpEntity<byte[]>(deleteUserHeaders), BaseResult.class);
+		BaseResult result = response.getBody();
+		if (result != null && result.getError() != null) {
+			throw new IllegalStateException("An error occured: " + result.getError() + "\nDetails: " + result.getReason());
+		}
+	}
+	
+	public void updateUserField(String userName, String fieldName, String fieldValue) {
+		ArrayNode arrayNode  = JsonNodeFactory.instance.arrayNode();
+		ObjectNode node = JsonNodeFactory.instance.objectNode();
+		node.put("replace", "/" + fieldName);
+		node.put("value", fieldValue);
+		arrayNode.add(node);
+		
+		HttpEntity<JsonNode> requestEntity = new HttpEntity<JsonNode>(arrayNode, getAllUsersHeaders);
+		
+		ResponseEntity<BaseResult> response = getRestTemplate().exchange(constants.getOpenIDMServer() + "openidm/managed/user?_action=patch&_query-id=for-userName&uid=" + userName,
+			      HttpMethod.POST, requestEntity, BaseResult.class);
 		BaseResult result = response.getBody();
 		if (result != null && result.getError() != null) {
 			throw new IllegalStateException("An error occured: " + result.getError() + "\nDetails: " + result.getReason());

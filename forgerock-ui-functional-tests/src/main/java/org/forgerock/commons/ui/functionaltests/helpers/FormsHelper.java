@@ -162,11 +162,13 @@ public class FormsHelper {
 		List<WebElement> fields = driver.findElements(By.cssSelector("#"+ el +" [data-validation-status]"));
 
 		for(WebElement field : fields) {
+			
 			String event = field.getAttribute("data-validator-event");
 			String name = field.getAttribute("name");
 			String tag = field.getTagName();
 			
 			if(event != null) {				
+				
 				selenium.fireEvent("#"+ el +" "+ tag +"[name="+ name +"]", event);
 			} else {
 				selenium.fireEvent("#"+ el +" "+ tag +"[name="+ name +"]", "change");

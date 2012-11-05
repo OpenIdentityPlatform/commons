@@ -58,8 +58,8 @@ public class RouterHelper {
 		this.routeTo("#register/", true);
 		this.assertUrl("#register/");
 		selenium.waitForElement("content", "terms", ElementType.NAME);
-		selenium.getElement("content", "terms", ElementType.NAME);
 		selenium.waitForElement("content", "securityQuestion", ElementType.NAME);
+		selenium.waitForElement("content", "[name=passPhrase][data-validation-status]", ElementType.CSS);
 	}
 	
 	public void assertUrl(final String url) {

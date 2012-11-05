@@ -1,6 +1,6 @@
 package org.forgerock.commons.ui.functionaltests.helpers;
 
-import junit.framework.Assert;
+import javax.inject.Inject;
 
 import org.forgerock.commons.ui.functionaltests.webdriver.WebDriverFactory;
 import org.openqa.selenium.*;
@@ -10,6 +10,9 @@ import org.springframework.stereotype.Component;
 public class DialogsHelper {
 
 	private WebDriver driver = WebDriverFactory.getWebDriver();
+	
+	@Inject
+	private SeleniumHelper selenium;
 	
 	public void closeDialog() {
 		closeDialogByButtonClick();
@@ -25,22 +28,30 @@ public class DialogsHelper {
 		element.click();
 	}
 	
-	public void assertActionButtonDisabled(String buttonName) {
-		try {
-			boolean disabled = driver.findElement(By.cssSelector(".dialogActions input[name='" + buttonName + "']")).getAttribute("class").contains("inactive");
-			Assert.assertTrue(disabled);
-		} catch (NoSuchElementException e) {
-			Assert.fail("Expected disabled button with name " + buttonName);
-		}
+	public void assertActionButtonDisabled(final String buttonName) {
+		selenium.new AssertionWithTimeout() {
+			@Override
+			protected String getAssertionFailedMessage() {
+				return "Button " + buttonName + " was expecte to be inactive";
+			}
+			@Override
+			protected boolean assertionCondition(WebDriver driver) {
+				return driver.findElement(By.cssSelector(".dialogActions input[name='" + buttonName + "']")).getAttribute("class").contains("inactive");
+			}
+		}.checkAssertion();
 	}
 	
-	public void assertActionButtonEnabled(String buttonName) {
-		try {
-			boolean enabled = driver.findElement(By.cssSelector(".dialogActions input[name='" + buttonName + "']")).getAttribute("class").contains("active");
-			Assert.assertTrue(enabled);
-		} catch (NoSuchElementException e) {
-			Assert.fail("Expected enabled button with name " + buttonName);
-		}
+	public void assertActionButtonEnabled(final String buttonName) {
+		selenium.new AssertionWithTimeout() {
+			@Override
+			protected String getAssertionFailedMessage() {
+				return "Button " + buttonName + " was expecte to be active";
+			}
+			@Override
+			protected boolean assertionCondition(WebDriver driver) {
+				return driver.findElement(By.cssSelector(".dialogActions input[name='" + buttonName + "']")).getAttribute("class").contains("active");
+			}
+		}.checkAssertion();
 	}
 	
 }
