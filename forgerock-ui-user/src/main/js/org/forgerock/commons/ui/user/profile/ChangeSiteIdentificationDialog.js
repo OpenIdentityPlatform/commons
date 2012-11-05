@@ -60,13 +60,17 @@ define("org/forgerock/commons/ui/user/profile/ChangeSiteIdentificationDialog", [
             
             if(validatorsManager.formValidated(this.$el)) {            
                 var self = this, patchDefinition = [{replace: "siteImage", value: this.$el.find("input[name='siteImage']").val()}, {replace: "passPhrase", value: this.$el.find("input[name=passPhrase]").val()}];
-    
-                userDelegate.patchSelectedUserAttributes(conf.loggedUser.userName,  patchDefinition, _.bind(function(r) {
+                
+                userDelegate.patchSelectedUserAttributes(conf.loggedUser._id, conf.loggedUser._rev,  patchDefinition, _.bind(function(r) {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "siteIdentificationChanged");
                     
                     //updating in profile
                     conf.loggedUser.siteImage = self.$el.find("input[name='siteImage']").val();
                     conf.loggedUser.passPhrase = self.$el.find("input[name=passPhrase]").val();
+                    
+                    userDelegate.getForUserName(conf.loggedUser.userName, function(user) {
+                        conf.loggedUser = user;
+                    });
                     
                     this.close();
                 }, this));                

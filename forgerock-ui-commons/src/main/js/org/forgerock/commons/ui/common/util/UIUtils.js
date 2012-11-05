@@ -214,14 +214,24 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     });
     
     //map should have format key : value
-    Handlebars.registerHelper('select', function(map, elementName, selectedKey, selectedValue) {
+    Handlebars.registerHelper('select', function(map, elementName, selectedKey, selectedValue, multiple, height) {
         var result, prePart, postPart, content = "", isSelected, entityName;
         
+        prePart = '<select';
+        
         if (elementName && _.isString(elementName)) {
-            prePart = '<select name="' + elementName + '">';
-        } else{
-            prePart = '<select>';
+            prePart += ' name="' + elementName + '"';
         }
+        
+        if(multiple) {
+            prePart += ' multiple="multiple"';
+        }
+        
+        if(height) {
+            prePart += ' style="height: '+ height +'px"';
+        }
+        
+        prePart += '>';
         
         postPart = '</select> ';
         
@@ -254,6 +264,13 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         result = i18n.t(options.hash.key, params);
         return new Handlebars.SafeString(result);
      });
+    
+    
+    Handlebars.registerHelper('equals', function(val, val2, options) {
+        if(val === val2){
+            return options.fn(this);
+        }
+    });
     
     obj.loadSelectOptions = function(data, el, empty, callback) {
         if( empty === undefined || empty === true ) {

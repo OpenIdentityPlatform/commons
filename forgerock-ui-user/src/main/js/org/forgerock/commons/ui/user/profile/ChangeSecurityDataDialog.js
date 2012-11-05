@@ -32,11 +32,12 @@ define("org/forgerock/commons/ui/user/profile/ChangeSecurityDataDialog", [
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/user/delegates/UserDelegate",
+    "org/forgerock/commons/ui/user/delegates/InternalUserDelegate",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/user/delegates/SecurityQuestionDelegate"
-], function(Dialog, validatorsManager, conf, userDelegate, uiUtils, eventManager, constants, securityQuestionDelegate) {
+], function(Dialog, validatorsManager, conf, userDelegate, internalUserDelegate, uiUtils, eventManager, constants, securityQuestionDelegate) {
     var ChangeSecurityDataDialog = Dialog.extend({    
         contentTemplate: "templates/user/ChangeSecurityDataDialogTemplate.html",
         
@@ -68,7 +69,7 @@ define("org/forgerock/commons/ui/user/profile/ChangeSecurityDataDialog", [
                     patchDefinitionObject.push({replace: "securityAnswer", value: this.$el.find("input[name=securityAnswer]").val().toLowerCase()});
                 }
                 
-                userDelegate.patchSelectedUserAttributes(conf.loggedUser.userName, patchDefinitionObject, _.bind(function(r) {
+                this.delegate.patchSelectedUserAttributes(conf.loggedUser._id, conf.loggedUser._rev, patchDefinitionObject, _.bind(function(r) {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "securityDataChanged");
                     this.close();
                     
@@ -83,8 +84,16 @@ define("org/forgerock/commons/ui/user/profile/ChangeSecurityDataDialog", [
             this.actions = {};
             this.addAction($.t("common.form.update"), "submit");
             
+            this.delegate = conf.globalData.userComponent === "internal/user" ? internalUserDelegate : userDelegate;
+            
+            if(conf.globalData.userComponent === "internal/user") {
+                this.data.height = 260;
+            } else {
+                this.data.height = 400;
+            }
+                    
             this.show(_.bind(function() {
-                    validatorsManager.bindValidators(this.$el, userDelegate.baseEntity, _.bind(function () {
+                    validatorsManager.bindValidators(this.$el, this.delegate.baseEntity, _.bind(function () {
                     
                     if(conf.passwords) {
                         this.$el.find("input[name=oldPassword]").val(conf.passwords.password);                    

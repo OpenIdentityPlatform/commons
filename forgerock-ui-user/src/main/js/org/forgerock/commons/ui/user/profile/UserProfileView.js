@@ -53,8 +53,10 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
             
             if(validatorsManager.formValidated(this.$el)) {
                 var data = form2js(this.$el.attr("id"), '.', false), self = this;
-                //data.userName = data.email.toLowerCase();
-                data.phoneNumber = data.phoneNumber.split(' ').join('').split('-').join('').split('(').join('').split(')').join('');
+                
+                if(data.phoneNumber) {
+                    data.phoneNumber = data.phoneNumber.split(' ').join('').split('-').join('').split('(').join('').split(')').join('');
+                }
                 
                 this.delegate.patchUserDifferences(conf.loggedUser, data, _.bind(function() {
                     if(conf.loggedUser.userName !== data.userName) {
@@ -69,6 +71,8 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
                         self.reloadData();
                     });
                 }, this));
+            } else {
+                console.log('dupa');
             }
         },
         

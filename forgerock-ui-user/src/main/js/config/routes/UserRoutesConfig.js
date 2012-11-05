@@ -34,7 +34,6 @@ define("config/routes/UserRoutesConfig", [
         "": {
             view: "org/forgerock/commons/ui/user/profile/UserProfileView",
             role: "openidm-authorized",
-            excludedRole: "openidm-admin",
             url: ""                                  
         },
         
@@ -42,7 +41,6 @@ define("config/routes/UserRoutesConfig", [
         "profile": {
             view: "org/forgerock/commons/ui/user/profile/UserProfileView",
             role: "openidm-authorized",
-            excludedRole: "openidm-admin",
             url: "profile/" 
         },
         "siteIdentification": {
@@ -78,15 +76,13 @@ define("config/routes/UserRoutesConfig", [
             base: "profile",
             dialog: "org/forgerock/commons/ui/user/profile/EnterOldPasswordDialog",
             role: "openidm-authorized",
-            url: "profile/old_password/",
-            excludedRoles: "openidm-admin"
+            url: "profile/old_password/"
         },
         "changeSecurityData": {
             base: "profile",
             dialog: "org/forgerock/commons/ui/user/profile/ChangeSecurityDataDialog",
             role: "openidm-authorized",
-            url: "profile/change_security_data/",
-            excludedRole: "openidm-admin"
+            url: "profile/change_security_data/"
         }
     };
     

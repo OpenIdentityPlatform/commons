@@ -13,6 +13,7 @@
                     <div class="validation-message"></div>
                 </div>
                 
+                {{#equals userComponent "managed/user" }}
                 <div class="field">
                     <label class="light">{{t "common.user.givenName"}}</label>
                     <input type="text" name="givenName" />
@@ -48,15 +49,26 @@
                     <div class="validation-message"></div>
                 </div>
                 
+                {{/equals}}               
+
+            </div>
+            <div class="column2">
+                {{#equals userComponent "internal/user"}}
+                <div class="field">
+                    <label class="light"></label> 
+                    <a href="{{url 'changeSecurityData'}}" id="securityDialogLink" class="ice hrefInput">
+                        {{t "templates.user.UserProfileTemplate.changeSecurityData"}}
+                    </a>
+                </div>
+                {{/equals}}
+                
+                {{#equals userComponent "managed/user"}}
                 <div class="field">
                     <label class="light"></label> 
                     <a href="{{url 'enterOldPassword'}}" id="securityDialogLink" class="ice hrefInput">
                         {{t "templates.user.UserProfileTemplate.changeSecurityData"}}
                     </a>
                 </div>
-            </div>
-            <div class="column2">
-                <div class="field"></div>
                 
                 <div class="field">
                     <label class="light">{{t "common.user.familyName"}}</label>
@@ -101,13 +113,14 @@
                     </a>
                 </div>
                 {{/siteIdentification}}
-
+                 
                 <div class="field" style="margin-left: 340px; margin-top: 30px; height: auto">
                     <input type="submit" name="saveButton" value="Update" class="button" />
                 </div>
-
+                
+                {{/equals}}
             </div>
-    
+        </div>
     </form>
 
 </div>

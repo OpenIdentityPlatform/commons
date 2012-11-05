@@ -208,15 +208,15 @@ define("org/forgerock/commons/ui/user/delegates/UserDelegate", [
      */
     obj.patchUserDifferences = function(oldUserData, newUserData, successCallback, errorCallback, noChangesCallback) {
         console.info("updating user");
-        obj.patchEntityDifferences({"_query-id": "for-userName", uid: oldUserData.userName.toLowerCase()}, oldUserData, newUserData, successCallback, errorCallback, noChangesCallback);
+        obj.patchEntityDifferences({id: oldUserData._id, rev: oldUserData._rev}, oldUserData, newUserData, successCallback, errorCallback, noChangesCallback);
     };
 
     /**
      * See AbstractDelegate.patchEntity
      */
-    obj.patchSelectedUserAttributes = function(userName, patchDefinitionObject, successCallback, errorCallback, noChangesCallback) {
+    obj.patchSelectedUserAttributes = function(id, rev, patchDefinitionObject, successCallback, errorCallback, noChangesCallback) {
         console.info("updating user");
-        obj.patchEntity({"_query-id": "for-userName", uid: userName.toLowerCase()}, patchDefinitionObject, successCallback, errorCallback, noChangesCallback);
+        obj.patchEntity({id: id, rev: rev}, patchDefinitionObject, successCallback, errorCallback, noChangesCallback);
     };
     
     /**

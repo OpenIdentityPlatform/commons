@@ -27,7 +27,8 @@
                     </div>
                 </div>
                 <div class="clear"></div>
-            </div>   
+            </div>
+            {{#equals userComponent "managed/user"}}   
             {{#securityQuestions}}
             <div class="group-field">
                 <div class="field field-text">
@@ -59,6 +60,7 @@
                 </div>
             </div>
             {{/securityQuestions}}
+            {{/equals}}
         </div>
     </fieldset>
 </form>

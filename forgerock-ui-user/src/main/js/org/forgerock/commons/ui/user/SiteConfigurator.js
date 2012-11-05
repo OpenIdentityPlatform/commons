@@ -109,6 +109,10 @@ define("org/forgerock/commons/ui/user/SiteConfigurator", [
            i18nManager.setLanguage(constants.DEFAULT_LANGUAGE);
        }
        
+       if(config.roles) {
+           conf.globalData.userRoles = config.roles;
+       }
+       
    };
    
    return obj;
