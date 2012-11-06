@@ -207,9 +207,13 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     });
     
     //format ISO8601; example: 2012-10-29T10:49:49.419+01:00
-    Handlebars.registerHelper('date', function(unformattedDate) {
-        var xdate = dateUtil.parseDateString(unformattedDate), formattedDate;
-        formattedDate = dateUtil.formatDate(xdate);
+    Handlebars.registerHelper('date', function(unformattedDate, datePattern) {
+        var date = dateUtil.parseDateString(unformattedDate), formattedDate;
+        if (datePattern && _.isString(datePattern)) {
+            formattedDate = dateUtil.formatDate(date,datePattern);
+        } else {
+            formattedDate = dateUtil.formatDate(date);
+        }
         return new Handlebars.SafeString(formattedDate);
     });
     

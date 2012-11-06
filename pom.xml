@@ -92,6 +92,13 @@
 
 	<dependencyManagement>
 		<dependencies>
+		  <dependency>
+                <groupId>org.forgerock.commons.ui.libs</groupId>
+                <artifactId>moment</artifactId>
+                <version>1.7.2</version>
+                <type>js</type>
+                <classifier>min</classifier>
+            </dependency>
 			<dependency>
 				<groupId>org.forgerock.commons.ui</groupId>
 				<artifactId>forgerock-ui-commons</artifactId>

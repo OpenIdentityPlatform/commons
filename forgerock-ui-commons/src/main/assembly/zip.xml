@@ -77,6 +77,12 @@
         </dependencySet>
         <dependencySet>
             <includes>
+                <include>org.forgerock.commons.ui.libs:moment</include>
+            </includes>
+            <outputDirectory>/libs</outputDirectory>
+        </dependencySet>
+        <dependencySet>
+            <includes>
                 <include>org.forgerock.commons.ui.libs:js2form</include>
             </includes>
             <outputDirectory>/libs</outputDirectory>

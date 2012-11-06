@@ -117,9 +117,15 @@
 	</build>
 
 	<dependencies>
-	   <dependency>
+	    <dependency>
             <groupId>org.forgerock.commons.ui.libs</groupId>
             <artifactId>jquery.ba-dotimeout</artifactId>
+            <type>js</type>
+            <classifier>min</classifier>
+        </dependency>
+	   <dependency>
+            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <artifactId>moment</artifactId>
             <type>js</type>
             <classifier>min</classifier>
         </dependency>

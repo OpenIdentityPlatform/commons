@@ -91,13 +91,18 @@ define("org/forgerock/commons/ui/common/util/FormGenerationUtils", [
         }
     };
     
-    obj.generateDateTypeField = function(elementName, elementDisplayName, handlebarsValueExpression, isReadable, isWritable, isRequired, dateFormat) {
+    obj.generateDateTypeField = function(elementName, elementDisplayName, value, isReadable, isWritable, isRequired, dateFormat) {
         var fieldTagStartPart = '<div class="field">', fieldTagEndPart = '</div>', label = "", input, dateFormatInput, validatorMessageTag;
         if (isReadable) {
             label = this.generateLabel(elementDisplayName);
         }
+        
+        if (value && value.startsWith("{{variables.")) {
+            value = "{{date " + value.substring(2).removeLastChars(2) + " '" + dateFormat + "'}}";
+        }      
+        
         dateFormatInput = this.generateInput("dateFormat", dateFormat, false, false, false);
-        input = this.generateInput(elementName, handlebarsValueExpression, isReadable, isWritable, isRequired, "formattedDate");
+        input = this.generateInput(elementName, value, isReadable, isWritable, isRequired, "formattedDate");
         validatorMessageTag = isReadable && isWritable ? obj.standardErrorSpan + obj.standardErrorMessageTag : '';
         return fieldTagStartPart + label + input + validatorMessageTag + dateFormatInput + fieldTagEndPart;
     };
