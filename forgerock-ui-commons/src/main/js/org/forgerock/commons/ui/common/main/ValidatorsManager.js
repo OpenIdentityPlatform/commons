@@ -211,6 +211,10 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
     obj.formValidated = function(el) {
         return el.find("[data-validation-status=error]").length === 0 && el.find("[data-validation-status=ok]").length !== 0;
     };
+    
+    obj.formNotInvalid = function(el) {
+        return el.find("[data-validation-status=error]").length === 0;
+    };
 
     obj.validate = function(event) {       
         var parameters = [this.el, this.input, _.bind(obj.afterValidation, this)], validatorConfig, i;
