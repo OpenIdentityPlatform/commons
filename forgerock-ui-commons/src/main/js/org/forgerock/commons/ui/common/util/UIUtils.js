@@ -214,7 +214,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     });
     
     //map should have format key : value
-    Handlebars.registerHelper('select', function(map, elementName, selectedKey, selectedValue, multiple, height) {
+    Handlebars.registerHelper('selectm', function(map, elementName, selectedKey, selectedValue, multiple, height) {
         var result, prePart, postPart, content = "", isSelected, entityName;
         
         prePart = '<select';
@@ -251,6 +251,50 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                 content += '<option value="' + entityName + '" selected="true">' + $.t(map[entityName]) + '</option>';
             } else {
                 content += '<option value="' + entityName + '">' + $.t(map[entityName]) + '</option>';
+            }
+        }
+  
+        result = prePart + content + postPart;
+        return new Handlebars.SafeString(result);
+    });
+    
+    Handlebars.registerHelper('select', function(map, elementName, selectedKey, selectedValue, additionalParams) {
+        var result, prePart, postPart, content = "", isSelected, entityName, entityKey;
+        
+        if (map && _.isString(map)) {
+            map = JSON.parse(map);
+        }
+        
+        if (elementName && _.isString(elementName)) {
+            prePart = '<select name="' + elementName + '" ' + additionalParams + '>';
+        } else{
+            prePart = '<select>';
+        }
+        
+        postPart = '</select> ';
+        
+        for (entityName in map) {
+            isSelected = false;
+            if (selectedValue && _.isString(selectedValue) && selectedValue !== '') {
+                if (selectedValue === map[entityName]) {
+                    isSelected = true;
+                }
+            } else {
+                if (selectedKey && selectedKey !== '' && selectedKey === entityName) {
+                    isSelected = true;
+                }
+            }
+            
+            if (entityName === '__null') {
+                entityKey = '';
+            } else {
+                entityKey = entityName;
+            }
+            
+            if (isSelected) {
+                content += '<option value="' + entityKey + '" selected="true">' + $.t(map[entityName]) + '</option>';
+            } else {
+                content += '<option value="' + entityKey + '">' + $.t(map[entityName]) + '</option>';
             }
         }
 
