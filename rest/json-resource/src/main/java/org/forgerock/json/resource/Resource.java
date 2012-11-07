@@ -21,30 +21,27 @@ import java.util.LinkedHashMap;
 import org.forgerock.json.fluent.JsonValue;
 
 /**
- * A JSON resource, comprising of a resource ID, a revision (etag), and its JSON
+ * A resource, comprising of a resource ID, a revision (etag), and its JSON
  * content.
  */
 public final class Resource {
 
-    // TODO: should we have a getter for the endpoint as well? I think the
-    // endpoint is an extrinsic property of a resource.
-
     private final JsonValue content;
-    private final String resourceName;
+    private final String id;
     private final String revision;
 
     /**
-     * Creates a new JSON resource.
+     * Creates a new resource.
      *
-     * @param resourceName
-     *            The resource name.
+     * @param id
+     *            The resource ID if applicable otherwise {@code null}.
      * @param revision
-     *            The JSON resource version, if known.
+     *            The resource version, if known.
      * @param content
-     *            The JSON resource content.
+     *            The resource content.
      */
-    public Resource(final String resourceName, final String revision, final JsonValue content) {
-        this.resourceName = resourceName;
+    public Resource(final String id, final String revision, final JsonValue content) {
+        this.id = id;
         this.revision = revision;
         this.content = content;
     }
@@ -61,34 +58,35 @@ public final class Resource {
             return true;
         } else if (obj instanceof Resource) {
             final Resource that = (Resource) obj;
-            return resourceName.equals(resourceName) && isEqual(revision, that.revision);
+            return id.equals(id) && isEqual(revision, that.revision);
         } else {
             return false;
         }
     }
 
     /**
-     * Returns the content of this JSON resource.
+     * Returns the JSON content of this resource.
      *
-     * @return The content of this JSON resource.
+     * @return The JSON content of this resource.
      */
     public JsonValue getContent() {
         return content;
     }
 
     /**
-     * Returns the name of this JSON resource.
+     * Returns the ID of this resource, if applicable.
      *
-     * @return The name of this JSON resource.
+     * @return The ID of this resource, or {@code null} if this resource does
+     *         not have an ID.
      */
-    public String getResourceName() {
-        return resourceName;
+    public String getId() {
+        return id;
     }
 
     /**
-     * Returns the version of this JSON resource, if known.
+     * Returns the revision of this resource, if known.
      *
-     * @return The version of this JSON resource, or {@code null} if version is
+     * @return The revision of this resource, or {@code null} if the version is
      *         not known.
      */
     public String getRevision() {
@@ -104,7 +102,7 @@ public final class Resource {
     @Override
     public int hashCode() {
         int hash = 17;
-        hash = hash * 31 + resourceName.hashCode();
+        hash = hash * 31 + id.hashCode();
         hash = hash * 31 + revision != null ? revision.hashCode() : 0;
         return hash;
     }
@@ -115,7 +113,7 @@ public final class Resource {
     @Override
     public String toString() {
         final JsonValue wrapper = new JsonValue(new LinkedHashMap<String, Object>(3));
-        wrapper.add("id", resourceName);
+        wrapper.add("id", id);
         wrapper.add("rev", revision);
         wrapper.add("content", content);
         return wrapper.toString();

@@ -31,8 +31,8 @@ import org.forgerock.json.fluent.JsonValue;
  */
 public final class Requests {
     private static abstract class AbstractRequestImpl<T extends Request> implements Request {
-        private String resourceName;
         private final List<JsonPointer> fields = new LinkedList<JsonPointer>();
+        private String resourceName;
 
         protected AbstractRequestImpl() {
             // Default constructor.
@@ -236,7 +236,7 @@ public final class Requests {
          * {@inheritDoc}
          */
         @Override
-        public CreateRequest setNewResourceId(String id) {
+        public CreateRequest setNewResourceId(final String id) {
             this.newResourceId = id;
             return this;
         }
@@ -412,6 +412,14 @@ public final class Requests {
          * {@inheritDoc}
          */
         @Override
+        public Map<String, String> getAdditionalQueryParameters() {
+            return parameters;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
         public String getPagedResultsCookie() {
             return pagedResultsCookie;
         }
@@ -422,14 +430,6 @@ public final class Requests {
         @Override
         public int getPageSize() {
             return pageSize;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Map<String, String> getAdditionalQueryParameters() {
-            return parameters;
         }
 
         /**
@@ -686,7 +686,17 @@ public final class Requests {
 
     /**
      * Returns a new action request with the provided resource name and action
-     * ID.
+     * ID. Invoking this method as follows:
+     *
+     * <pre>
+     * newActionRequest(&quot;/users/1&quot;, actionId);
+     * </pre>
+     *
+     * Is equivalent to:
+     *
+     * <pre>
+     * newActionRequest(&quot;/users&quot;, &quot;1&quot;, actionId);
+     * </pre>
      *
      * @param resourceName
      *            The resource name.
@@ -699,22 +709,103 @@ public final class Requests {
     }
 
     /**
-     * Returns a new create request with the provided resource name and JSON
-     * content.
+     * Returns a new action request with the provided resource container name,
+     * resource ID, and action ID. Invoking this method as follows:
      *
-     * @param resourceName
-     *            The name of the parent resource beneath which the new resource
-     *            should be created.
+     * <pre>
+     * newActionRequest(&quot;/users&quot;, &quot;1&quot;, &quot;someAction&quot;);
+     * </pre>
+     *
+     * Is equivalent to:
+     *
+     * <pre>
+     * newActionRequest(&quot;/users/1&quot;, &quot;someAction&quot;);
+     * </pre>
+     *
+     * @param resourceContainer
+     *            The name of the resource container.
+     * @param resourceId
+     *            The ID of the resource.
+     * @param actionId
+     *            The action ID.
+     * @return The new action request.
+     */
+    public static ActionRequest newActionRequest(final String resourceContainer,
+            final String resourceId, final String actionId) {
+        return newActionRequest(concat(resourceContainer, resourceId), actionId);
+    }
+
+    /**
+     * Returns a new create request with the provided resource name, and JSON
+     * content. The create request will have a {@code null} new resource ID,
+     * indicating that the server will be responsible for generating the ID of
+     * the new resource. Invoking this method as follows:
+     *
+     * <pre>
+     * newCreateRequest(&quot;/users&quot;, content);
+     * </pre>
+     *
+     * Is equivalent to:
+     *
+     * <pre>
+     * newCreateRequest(&quot;/users&quot;, null, content);
+     * </pre>
+     *
+     * @param resourceContainer
+     *            The name of the resource container beneath which the new
+     *            resource should be created.
      * @param content
      *            The JSON content.
      * @return The new create request.
      */
-    public static CreateRequest newCreateRequest(final String resourceName, final JsonValue content) {
-        return new CreateRequestImpl().setResourceName(resourceName).setContent(content);
+    public static CreateRequest newCreateRequest(final String resourceContainer,
+            final JsonValue content) {
+        return new CreateRequestImpl().setResourceName(resourceContainer).setContent(content);
     }
 
     /**
-     * Returns a new delete request with the provided resource name.
+     * Returns a new create request with the provided resource name, new
+     * resource ID, and JSON content. Invoking this method as follows:
+     *
+     * <pre>
+     * newCreateRequest(&quot;/users&quot;, &quot;1&quot;, content);
+     * </pre>
+     *
+     * Is equivalent to:
+     *
+     * <pre>
+     * newCreateRequest(&quot;/users&quot;, content).setNewResourceId(&quot;1&quot;);
+     * </pre>
+     *
+     * @param resourceContainer
+     *            The name of the resource container beneath which the new
+     *            resource should be created.
+     * @param newResourceId
+     *            The client provided ID of the resource to be created, or
+     *            {@code null} if the server should be responsible for
+     *            generating the resource ID.
+     * @param content
+     *            The JSON content.
+     * @return The new create request.
+     */
+    public static CreateRequest newCreateRequest(final String resourceContainer,
+            final String newResourceId, final JsonValue content) {
+        return newCreateRequest(resourceContainer, content).setNewResourceId(newResourceId);
+    }
+
+    /**
+     * Returns a new delete request with the provided resource name. Invoking
+     * this method as follows:
+     *
+     * <pre>
+     * newDeleteRequest(&quot;/users/1&quot;);
+     * </pre>
+     *
+     * Is equivalent to:
+     *
+     * <pre>
+     * newDeleteRequest(&quot;/users&quot;, &quot;1&quot;);
+     * </pre>
      *
      * @param resourceName
      *            The resource name.
@@ -725,8 +816,43 @@ public final class Requests {
     }
 
     /**
+     * Returns a new delete request with the provided resource container name,
+     * and resource ID. Invoking this method as follows:
+     *
+     * <pre>
+     * newDeleteRequest(&quot;/users&quot;, &quot;1&quot;);
+     * </pre>
+     *
+     * Is equivalent to:
+     *
+     * <pre>
+     * newDeleteRequest(&quot;/users/1&quot;);
+     * </pre>
+     *
+     * @param resourceContainer
+     *            The name of the resource container.
+     * @param resourceId
+     *            The ID of the resource.
+     * @return The new delete request.
+     */
+    public static DeleteRequest newDeleteRequest(final String resourceContainer,
+            final String resourceId) {
+        return newDeleteRequest(concat(resourceContainer, resourceId));
+    }
+
+    /**
      * Returns a new patch request with the provided resource name and JSON
-     * patch.
+     * patch. Invoking this method as follows:
+     *
+     * <pre>
+     * newPatchRequest(&quot;/users/1&quot;, changes);
+     * </pre>
+     *
+     * Is equivalent to:
+     *
+     * <pre>
+     * newPatchRequest(&quot;/users&quot;, &quot;1&quot;, changes);
+     * </pre>
      *
      * @param resourceName
      *            The resource name.
@@ -739,18 +865,56 @@ public final class Requests {
     }
 
     /**
-     * Returns a new query request with the provided resource name.
+     * Returns a new patch request with the provided resource container name,
+     * resource ID, and JSON patch. Invoking this method as follows:
      *
-     * @param resourceName
-     *            The resource name.
-     * @return The new query request.
+     * <pre>
+     * newPatchRequest(&quot;/users&quot;, &quot;1&quot;, changes);
+     * </pre>
+     *
+     * Is equivalent to:
+     *
+     * <pre>
+     * newPatchRequest(&quot;/users/1&quot;, changes);
+     * </pre>
+     *
+     * @param resourceContainer
+     *            The name of the resource container.
+     * @param resourceId
+     *            The ID of the resource.
+     * @param changes
+     *            The JSON patch.
+     * @return The new patch request.
      */
-    public static QueryRequest newQueryRequest(final String resourceName) {
-        return new QueryRequestImpl().setResourceName(resourceName);
+    public static PatchRequest newPatchRequest(final String resourceContainer,
+            final String resourceId, final Patch changes) {
+        return newPatchRequest(concat(resourceContainer, resourceId), changes);
     }
 
     /**
-     * Returns a new read request with the provided resource name.
+     * Returns a new query request with the provided resource container name.
+     *
+     * @param resourceContainer
+     *            The name of the resource container.
+     * @return The new query request.
+     */
+    public static QueryRequest newQueryRequest(final String resourceContainer) {
+        return new QueryRequestImpl().setResourceName(resourceContainer);
+    }
+
+    /**
+     * Returns a new read request with the provided resource name. Invoking this
+     * method as follows:
+     *
+     * <pre>
+     * newReadRequest(&quot;/users/1&quot;);
+     * </pre>
+     *
+     * Is equivalent to:
+     *
+     * <pre>
+     * newReadRequest(&quot;/users&quot;, &quot;1&quot;);
+     * </pre>
      *
      * @param resourceName
      *            The resource name.
@@ -761,8 +925,42 @@ public final class Requests {
     }
 
     /**
+     * Returns a new read request with the provided resource container name, and
+     * resource ID. Invoking this method as follows:
+     *
+     * <pre>
+     * newReadRequest(&quot;/users&quot;, &quot;1&quot;);
+     * </pre>
+     *
+     * Is equivalent to:
+     *
+     * <pre>
+     * newReadRequest(&quot;/users/1&quot;);
+     * </pre>
+     *
+     * @param resourceContainer
+     *            The name of the resource container.
+     * @param resourceId
+     *            The ID of the resource.
+     * @return The new read request.
+     */
+    public static ReadRequest newReadRequest(final String resourceContainer, final String resourceId) {
+        return newReadRequest(concat(resourceContainer, resourceId));
+    }
+
+    /**
      * Returns a new update request with the provided resource name and new JSON
-     * content.
+     * content. Invoking this method as follows:
+     *
+     * <pre>
+     * newUpdateRequest(&quot;/users/1&quot;, newContent);
+     * </pre>
+     *
+     * Is equivalent to:
+     *
+     * <pre>
+     * newUpdateRequest(&quot;/users&quot;, &quot;1&quot;, newContent);
+     * </pre>
      *
      * @param resourceName
      *            The resource name.
@@ -773,6 +971,44 @@ public final class Requests {
     public static UpdateRequest newUpdateRequest(final String resourceName,
             final JsonValue newContent) {
         return new UpdateRequestImpl().setResourceName(resourceName).setNewContent(newContent);
+    }
+
+    /**
+     * Returns a new update request with the provided resource container name,
+     * resource ID, and new JSON content. Invoking this method as follows:
+     *
+     * <pre>
+     * newUpdateRequest(&quot;/users&quot;, &quot;1&quot;, newContent);
+     * </pre>
+     *
+     * Is equivalent to:
+     *
+     * <pre>
+     * newUpdateRequest(&quot;/users/1&quot;, newContent);
+     * </pre>
+     *
+     * @param resourceContainer
+     *            The name of the resource container.
+     * @param resourceId
+     *            The ID of the resource.
+     * @param newContent
+     *            The new JSON content.
+     * @return The new update request.
+     */
+    public static UpdateRequest newUpdateRequest(final String resourceContainer,
+            final String resourceId, final JsonValue newContent) {
+        return newUpdateRequest(concat(resourceContainer, resourceId), newContent);
+    }
+
+    private static String concat(final String resourceContainer, final String resourceId) {
+        final StringBuilder builder = new StringBuilder(resourceContainer.length() + 1
+                + resourceId.length());
+        builder.append(resourceContainer);
+        if (!resourceContainer.endsWith("/") && resourceContainer.length() > 1) {
+            builder.append('/');
+        }
+        builder.append(resourceId);
+        return builder.toString();
     }
 
     private static JsonValue copyJsonValue(final JsonValue value) {
