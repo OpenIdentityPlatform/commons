@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 
 /**
  * A simple in-memory collection resource provider which uses a {@code Map} to
@@ -112,6 +113,7 @@ public final class InMemoryBackend implements CollectionResourceProvider {
                         }
                     } else {
                         // Add succeeded.
+                        addIdAndRevision(tmp);
                         resource = tmp;
                         break;
                     }
@@ -212,12 +214,31 @@ public final class InMemoryBackend implements CollectionResourceProvider {
                 } else {
                     final String newRev = getNextRevision(existingResource.getRevision());
                     resource = new Resource(id, newRev, request.getNewContent());
+                    addIdAndRevision(resource);
                     resources.put(id, resource);
                 }
             }
             handler.handleResult(resource);
         } catch (final ResourceException e) {
             handler.handleError(e);
+        }
+    }
+
+    /*
+     * Add the ID and revision to the JSON content so that they are included
+     * with subsequent responses. We shouldn't really update the passed in
+     * content in case it is shared by other components, but we'll do it here
+     * anyway for simplicity.
+     */
+    private void addIdAndRevision(final Resource resource) throws ResourceException {
+        final JsonValue content = resource.getContent();
+        try {
+            content.asMap().put("_id", resource.getId());
+            content.asMap().put("_rev", resource.getRevision());
+        } catch (final JsonValueException e) {
+            throw new BadRequestException(
+                    "The request could not be processed because the provided "
+                            + "content is not a JSON object");
         }
     }
 
