@@ -115,14 +115,14 @@ router.addRoute(EQUALS, "/users", users);
 Connection connection = newInternalConnection(router);
 
 // Create two users.
-JsonValue alice = new JsonValue(new LinkedHashMap<String, Object>());
+JsonValue alice = new JsonValue(new LinkedHashMap&lt;String, Object>());
 alice.put("name", "Alice");
 alice.put("age", 21);
 alice.put("role", "administrator");
 Resource r1 = connection.create(new RootContext(), newCreateRequest("/users", alice));
 System.out.println("Created user: " + r1);
 
-JsonValue bob = new JsonValue(new LinkedHashMap<String, Object>());
+JsonValue bob = new JsonValue(new LinkedHashMap&lt;String, Object>());
 bob.put("name", "Bob");
 bob.put("age", 40);
 bob.put("role", "sales");
@@ -140,7 +140,7 @@ Resource r4 = connection.update(new RootContext(), newUpdateRequest("/users", r2
 System.out.println("Updated user: " + r4);
 
 // Retrieve the list of users.
-List<Resource> results = new ArrayList<Resource>();
+List&lt;Resource> results = new ArrayList&lt;Resource>();
 connection.query(new RootContext(), newQueryRequest("/users"), results);
 for (Resource user : results) {
     System.out.println("Query found user: " + user);
