@@ -91,7 +91,7 @@ require.config({
         },
         moment: {
             exports: "moment"
-        },
+        }
     }
 });
 

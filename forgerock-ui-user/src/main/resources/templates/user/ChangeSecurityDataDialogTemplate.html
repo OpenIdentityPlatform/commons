@@ -1,5 +1,7 @@
 <h1>{{t "templates.user.ChangeSecurityDataDialogTemplate.securityDataChange"}}</h1>
 <form id="securityDataChange" action="" class="form large center no-margin" method="post" onsubmit="return false">
+<!-- hidden field used to help with password validation -->
+<input type="hidden" name="_id">
     <fieldset>
         <div id="securityMore">      
             <p>{{t "templates.user.ChangeSecurityDataDialogTemplate.enterNewPasswordToChange"}}</p>
@@ -9,7 +11,7 @@
                         <div class="field">
                             <label>{{t "common.user.password"}}</label> 
                             <input type="hidden" name="oldPassword" />
-                            <input type="password" name="password" value="" data-validation-dependents="passwordConfirm"/>
+                            <input type="password" name="password" value="" data-validation-dependents="passwordConfirm" data-validation-force-server="true" />
                             <span class="error">x</span>
                         </div>
 

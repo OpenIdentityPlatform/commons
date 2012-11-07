@@ -156,7 +156,7 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
                                     }
                                     // For those validation policies which cannot be performed within the browser, 
                                     // we call to the server to do the validation for us.
-                                    else if (validationContext === "server") {
+                                    if (validationContext === "server" && (!policy.policyFunction || this.input.attr("data-validation-force-server"))) {
                                         policyFailures = [];
                                         policyDelegate.validateProperty(
                                             baseEntity,

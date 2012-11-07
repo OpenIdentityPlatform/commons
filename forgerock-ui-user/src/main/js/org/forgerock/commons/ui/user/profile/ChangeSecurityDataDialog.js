@@ -66,16 +66,23 @@ define("org/forgerock/commons/ui/user/profile/ChangeSecurityDataDialog", [
                 
                 if(this.$el.find("input[name=securityAnswer]").val()) {
                     patchDefinitionObject.push({replace: "securityQuestion", value: this.$el.find("select[name=securityQuestion]").val()});
-                    patchDefinitionObject.push({replace: "securityAnswer", value: this.$el.find("input[name=securityAnswer]").val().toLowerCase()});
+                    patchDefinitionObject.push({replace: "securityAnswer", value: this.$el.find("input[name=securityAnswer]").val()});
                 }
                 
                 this.delegate.patchSelectedUserAttributes(conf.loggedUser._id, conf.loggedUser._rev, patchDefinitionObject, _.bind(function(r) {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "securityDataChanged");
                     this.close();
                     
-                    userDelegate.getForUserName(conf.loggedUser.userName, function(user) {
-                        conf.loggedUser = user;
-                    });
+                    if ($.inArray("openidm-admin", conf.loggedUser.roles.split(",")) === -1) {
+                        userDelegate.getForUserID(conf.loggedUser._id, function(user) {
+                            conf.loggedUser = user;
+                        });
+                    } else {
+                        userDelegate.getForUserName(conf.loggedUser.userName, function(user) {
+                            conf.loggedUser = user;
+                        });
+                    }
+                            
                 }, this));
             }
         },
@@ -107,7 +114,7 @@ define("org/forgerock/commons/ui/user/profile/ChangeSecurityDataDialog", [
         
         reloadData: function() {
             var user = conf.loggedUser, self = this;
-            
+            this.$el.find("input[name=_id]").val(conf.loggedUser._id);
             securityQuestionDelegate.getAllSecurityQuestions(function(secquestions) {
                 uiUtils.loadSelectOptions(secquestions, self.$el.find("select[name='securityQuestion']"), 
                     false, _.bind(function() {

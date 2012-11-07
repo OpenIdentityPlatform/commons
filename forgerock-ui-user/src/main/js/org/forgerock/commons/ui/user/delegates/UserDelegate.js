@@ -129,7 +129,7 @@ define("org/forgerock/commons/ui/user/delegates/UserDelegate", [
                         errorCallback();
                     }
                 } else if(successCallback) {
-                    successCallback(data.result[0]);
+                    successCallback(data.result);
                 }
             },
             error: errorCallback
@@ -162,6 +162,14 @@ define("org/forgerock/commons/ui/user/delegates/UserDelegate", [
                     successCallback(data.result[0]);
                 }
             },
+            error: errorCallback
+        });
+    };
+    
+    obj.getForUserID = function(uid, successCallback, errorCallback) {
+        obj.serviceCall({
+            url: "/" + uid, 
+            success: successCallback,
             error: errorCallback
         });
     };
