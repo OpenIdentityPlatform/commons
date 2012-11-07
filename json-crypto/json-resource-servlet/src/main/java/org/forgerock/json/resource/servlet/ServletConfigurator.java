@@ -18,7 +18,6 @@ package org.forgerock.json.resource.servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
-import org.codehaus.jackson.JsonFactory;
 import org.forgerock.json.resource.ConnectionFactory;
 
 /**
@@ -62,11 +61,7 @@ abstract class ServletConfigurator {
      * @param connectionFactory
      *            The underlying connection factory to which requests should be
      *            dispatched.
-     * @param jsonFactory
-     *            The JSON factory which should be used for writing and reading
-     *            JSON.
      */
-    abstract RequestDispatcher getRequestDispatcher(final ConnectionFactory connectionFactory,
-            final JsonFactory jsonFactory);
+    abstract RequestDispatcher getRequestDispatcher(final ConnectionFactory connectionFactory);
 
 }
