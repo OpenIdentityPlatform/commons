@@ -69,15 +69,14 @@ public interface CreateRequest extends Request {
     String getNewResourceId();
 
     /**
-     * Returns the name of the parent JSON resource beneath which the new
+     * Returns the name of the JSON resource container beneath which the new
      * resource should be created.
      * <p>
-     * The resource name identifies the parent resource beneath which the new
-     * resource will be created. The name of the newly created resource will be
-     * the concatenation of the resource name and either the client provided
-     * resource ID, if provided, or a server generated resource ID.
+     * The name of the newly created resource will be the concatenation of the
+     * resource name and either the client provided resource ID, if provided, or
+     * a server generated resource ID.
      *
-     * @return The name of the parent JSON resource beneath which the new
+     * @return The name of the JSON resource container beneath which the new
      *         resource should be created.
      * @see #getNewResourceId()
      */
@@ -119,16 +118,15 @@ public interface CreateRequest extends Request {
     CreateRequest setNewResourceId(String id);
 
     /**
-     * Sets the name of the parent JSON resource beneath which the new resource
-     * should be created.
+     * Sets the name of the JSON resource container beneath which the new
+     * resource should be created.
      * <p>
-     * The resource name identifies the parent resource beneath which the new
-     * resource will be created. The name of the newly created resource will be
-     * the concatenation of the resource name and either the client provided
-     * resource ID, if provided, or a server generated resource ID.
+     * The name of the newly created resource will be the concatenation of the
+     * resource name and either the client provided resource ID, if provided, or
+     * a server generated resource ID.
      *
      * @param name
-     *            The name of the parent JSON resource beneath which the new
+     *            The name of the JSON resource container beneath which the new
      *            resource should be created.
      * @return This create request.
      * @throws UnsupportedOperationException
