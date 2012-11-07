@@ -95,7 +95,7 @@ define("org/forgerock/commons/ui/user/profile/ChangeSecurityDataDialog", [
             
             if(conf.globalData.userComponent === "internal/user") {
                 this.data.height = 260;
-            } else {
+            } else if(conf.globalData.securityQuestions === true) {
                 this.data.height = 400;
             }
                     

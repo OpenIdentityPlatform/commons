@@ -118,6 +118,10 @@ define("config/messages/UserMessages", [
             "errorFetchingNotifications": {
                 msg: "config.messages.UserMessages.errorFetchingNotifications",
                 type: "error"
+            },
+            "incorrectRevisionError": {
+                msg: "config.messages.UserMessages.incorrectRevisionError",
+                type: "error"
             }
     };
     

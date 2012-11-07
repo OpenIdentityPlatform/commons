@@ -31,8 +31,9 @@ define("org/forgerock/commons/ui/user/LoginView", [
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/commons/ui/common/util/Constants"
-], function(AbstractView, validatorsManager, eventManager, constants) {
+    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/util/CookieHelper"
+], function(AbstractView, validatorsManager, eventManager, constants, cookieHelper) {
     var LoginView = AbstractView.extend({
         template: "templates/user/LoginTemplate.html",
         baseTemplate: "templates/user/LoginBaseTemplate.html",
@@ -46,6 +47,12 @@ define("org/forgerock/commons/ui/user/LoginView", [
             event.preventDefault();
             
             if(validatorsManager.formValidated(this.$el)) {
+                if(this.$el.find("[name=loginRemember]:checked").length !== 0) {
+                    var expire = new Date();
+                    expire.setDate(expire.getDate + 365*20);
+                    cookieHelper.setCookie("login", this.$el.find("input[name=login]").val(), expire);
+                }
+                
                 eventManager.sendEvent(constants.EVENT_LOGIN_REQUEST, {userName: this.$el.find("input[name=login]").val(), password: this.$el.find("input[name=password]").val()});
             }
         },
@@ -53,6 +60,9 @@ define("org/forgerock/commons/ui/user/LoginView", [
         render: function(args, callback) {
             this.parentRender(function() {                
                 validatorsManager.bindValidators(this.$el);
+                
+                var login = cookieHelper.getCookie("login");
+                this.$el.find("input[name=login]").val(login);
                 
                 if(callback) {
                     callback();

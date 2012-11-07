@@ -60,6 +60,10 @@ define("config/errorhandlers/CommonErrorHandlers", [
             "internalServerError": {
                 status: "500",
                 message: "internalError"
+            },
+            "incorrectRevision": {
+                status: "412",
+                message: "incorrectRevisionError"
             }
     };
     
