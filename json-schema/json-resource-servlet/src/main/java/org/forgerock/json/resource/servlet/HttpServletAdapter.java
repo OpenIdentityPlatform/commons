@@ -15,6 +15,7 @@
  */
 package org.forgerock.json.resource.servlet;
 
+import static org.forgerock.json.resource.servlet.HttpUtils.CHARACTER_ENCODING;
 import static org.forgerock.json.resource.servlet.HttpUtils.CONTENT_TYPE;
 import static org.forgerock.json.resource.servlet.HttpUtils.ETAG_ANY;
 import static org.forgerock.json.resource.servlet.HttpUtils.HEADER_IF_MATCH;
@@ -27,12 +28,12 @@ import static org.forgerock.json.resource.servlet.HttpUtils.METHOD_PUT;
 import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_ACTION;
 import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_DEBUG;
 import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_PRETTY_PRINT;
-import static org.forgerock.json.resource.servlet.HttpUtils.adapt;
 import static org.forgerock.json.resource.servlet.HttpUtils.asBooleanValue;
 import static org.forgerock.json.resource.servlet.HttpUtils.asIntValue;
 import static org.forgerock.json.resource.servlet.HttpUtils.asSingleValue;
 import static org.forgerock.json.resource.servlet.HttpUtils.checkNotNull;
 import static org.forgerock.json.resource.servlet.HttpUtils.fail;
+import static org.forgerock.json.resource.servlet.HttpUtils.getJsonContent;
 import static org.forgerock.json.resource.servlet.HttpUtils.getMethod;
 import static org.forgerock.json.resource.servlet.HttpUtils.isDebugRequested;
 import static org.forgerock.json.resource.servlet.ServletConfigurator.getServletConfigurator;
@@ -48,7 +49,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ApiInfoContext;
@@ -127,7 +127,6 @@ public final class HttpServletAdapter {
 
     private final HttpServletContextFactory contextFactory;
     private final RequestDispatcher dispatcher;
-    private final ObjectMapper jsonMapper = new ObjectMapper();
     private final ServletContext servletContext;
 
     /**
@@ -196,7 +195,7 @@ public final class HttpServletAdapter {
         this.servletContext = checkNotNull(servletContext);
         this.contextFactory = contextFactory != null ? contextFactory : DEFAULT_CONTEXT_FACTORY;
         this.dispatcher = getServletConfigurator(servletContext).getRequestDispatcher(
-                checkNotNull(connectionFactory), jsonMapper.getJsonFactory());
+                checkNotNull(connectionFactory));
     }
 
     /**
@@ -227,12 +226,15 @@ public final class HttpServletAdapter {
             doPut(req, resp);
         } else {
             // TODO: i18n
-            fail(resp, new NotSupportedException("Method " + method + " not supported"));
+            fail(req, resp, new NotSupportedException("Method " + method + " not supported"));
         }
     }
 
     void doDelete(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
+            // Prepare response.
+            prepareResponse(resp);
+
             // Validate request.
             preprocessRequest(req);
             rejectIfNoneMatch(req);
@@ -253,12 +255,15 @@ public final class HttpServletAdapter {
             final Context context = newRequestContext(req);
             dispatcher.dispatchRequest(context, request, req, resp);
         } catch (final Exception e) {
-            fail(resp, e);
+            fail(req, resp, e);
         }
     }
 
     void doGet(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
+            // Prepare response.
+            prepareResponse(resp);
+
             // Validate request.
             preprocessRequest(req);
             rejectIfMatch(req);
@@ -333,7 +338,7 @@ public final class HttpServletAdapter {
                 dispatcher.dispatchRequest(context, request, req, resp);
             }
         } catch (final Exception e) {
-            fail(resp, e);
+            fail(req, resp, e);
         }
     }
 
@@ -344,12 +349,15 @@ public final class HttpServletAdapter {
             rejectIfNoneMatch(req);
             throw new NotSupportedException("Patch operations are not supported");
         } catch (final ResourceException e) {
-            fail(resp, e);
+            fail(req, resp, e);
         }
     }
 
     void doPost(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
+            // Prepare response.
+            prepareResponse(resp);
+
             // Validate request.
             preprocessRequest(req);
             rejectIfNoneMatch(req);
@@ -359,7 +367,7 @@ public final class HttpServletAdapter {
             final String action = asSingleValue(PARAM_ACTION, parameters.get(PARAM_ACTION));
 
             if (action.equals("create")) {
-                final JsonValue content = getJsonContentAsMap(req);
+                final JsonValue content = getJsonContent(req);
                 final CreateRequest request = Requests.newCreateRequest(getResourceName(req),
                         content);
                 for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
@@ -380,7 +388,7 @@ public final class HttpServletAdapter {
                 dispatcher.dispatchRequest(context, request, req, resp);
             } else {
                 // Action request.
-                final JsonValue content = getJsonContentAsMap(req);
+                final JsonValue content = getJsonContent(req);
                 final ActionRequest request = Requests.newActionRequest(getResourceName(req),
                         action).setContent(content);
                 for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
@@ -399,12 +407,15 @@ public final class HttpServletAdapter {
                 dispatcher.dispatchRequest(context, request, req, resp);
             }
         } catch (final Exception e) {
-            fail(resp, e);
+            fail(req, resp, e);
         }
     }
 
     void doPut(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
+            // Prepare response.
+            prepareResponse(resp);
+
             // Validate request.
             preprocessRequest(req);
             if (req.getHeader(HEADER_IF_MATCH) != null
@@ -416,7 +427,7 @@ public final class HttpServletAdapter {
             }
 
             final Map<String, String[]> parameters = req.getParameterMap();
-            final JsonValue content = getJsonContentAsMap(req);
+            final JsonValue content = getJsonContent(req);
 
             final String rev = getIfNoneMatch(req);
             if (ETAG_ANY.equals(rev)) {
@@ -472,7 +483,7 @@ public final class HttpServletAdapter {
                 dispatcher.dispatchRequest(context, request, req, resp);
             }
         } catch (final Exception e) {
-            fail(resp, e);
+            fail(req, resp, e);
         }
     }
 
@@ -532,25 +543,6 @@ public final class HttpServletAdapter {
         return etag;
     }
 
-    private JsonValue getJsonContent(final HttpServletRequest req) throws ResourceException {
-        try {
-            final Object content = jsonMapper.readValue(req.getInputStream(), Object.class);
-            return new JsonValue(content);
-        } catch (final IOException e) {
-            throw adapt(e);
-        }
-    }
-
-    private JsonValue getJsonContentAsMap(final HttpServletRequest req) throws ResourceException {
-        final JsonValue result = getJsonContent(req);
-        if (!result.isMap()) {
-            throw new BadRequestException(
-                    "The request could not be processed because the provided "
-                            + "content is not a JSON object");
-        }
-        return result;
-    }
-
     private String getResourceName(final HttpServletRequest req) throws ResourceException {
         // Treat null path info as root resource.
         final String resourceName = req.getPathInfo();
@@ -587,6 +579,11 @@ public final class HttpServletAdapter {
             // Unrecognized - must be request specific.
             return false;
         }
+    }
+
+    private void prepareResponse(final HttpServletResponse resp) {
+        resp.setContentType(CONTENT_TYPE);
+        resp.setCharacterEncoding(CHARACTER_ENCODING);
     }
 
     private void preprocessRequest(final HttpServletRequest req) throws ResourceException {

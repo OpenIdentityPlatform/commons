@@ -15,24 +15,18 @@
  */
 package org.forgerock.json.resource.servlet;
 
-import static org.forgerock.json.resource.servlet.HttpUtils.CHARACTER_ENCODING;
-import static org.forgerock.json.resource.servlet.HttpUtils.CONTENT_TYPE;
 import static org.forgerock.json.resource.servlet.HttpUtils.HEADER_ETAG;
 import static org.forgerock.json.resource.servlet.HttpUtils.HEADER_LOCATION;
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_PRETTY_PRINT;
 import static org.forgerock.json.resource.servlet.HttpUtils.adapt;
-import static org.forgerock.json.resource.servlet.HttpUtils.asBooleanValue;
 import static org.forgerock.json.resource.servlet.HttpUtils.closeQuietly;
+import static org.forgerock.json.resource.servlet.HttpUtils.getJsonGenerator;
 
 import java.io.IOException;
-import java.io.OutputStream;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonGenerator.Feature;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.Connection;
@@ -62,32 +56,17 @@ abstract class RequestRunner implements ResultHandler<Connection>, RequestVisito
     private final Context context;
     private final HttpServletRequest httpRequest;
     private final HttpServletResponse httpResponse;
-    private final OutputStream os;
     private final Request request;
     private final JsonGenerator writer;
 
     RequestRunner(final Context context, final Request request,
-            final HttpServletRequest httpRequest, final HttpServletResponse httpResponse,
-            final JsonFactory jsonFactory) throws Exception {
+            final HttpServletRequest httpRequest, final HttpServletResponse httpResponse)
+            throws Exception {
         this.context = context;
         this.request = request;
         this.httpRequest = httpRequest;
         this.httpResponse = httpResponse;
-
-        // Configure the JSON writer.
-        this.os = httpResponse.getOutputStream();
-        this.writer = jsonFactory.createJsonGenerator(os);
-        writer.configure(Feature.AUTO_CLOSE_TARGET, false);
-
-        // Enable pretty printer if requested.
-        final String[] values = httpRequest.getParameterValues(PARAM_PRETTY_PRINT);
-        if (values != null) {
-            if (asBooleanValue(PARAM_PRETTY_PRINT, values)) {
-                writer.useDefaultPrettyPrinter();
-            }
-        }
-        httpResponse.setContentType(CONTENT_TYPE);
-        httpResponse.setCharacterEncoding(CHARACTER_ENCODING);
+        this.writer = getJsonGenerator(httpRequest, httpResponse);
     }
 
     /**
