@@ -64,12 +64,19 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
                         eventManager.sendEvent(constants.EVENT_LOGOUT);
                         return;
                     }
-                    
-                    this.delegate.getForUserName(data.userName, function(user) {
-                        conf.loggedUser = user;
-                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateSuccessful");
-                        self.reloadData();
-                    });
+                    if ($.inArray("openidm-admin", conf.loggedUser.roles.split(",")) === -1) {
+                        this.delegate.getForUserID(data._id, function(user) {
+                            conf.loggedUser = user;
+                            eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateSuccessful");
+                            self.reloadData();
+                        });
+                    } else {
+                        this.delegate.getForUserName(data.userName, function(user) {
+                            conf.loggedUser = user;
+                            eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateSuccessful");
+                            self.reloadData();
+                        });
+                    }
                 }, this));
             } else {
                 console.log('dupa');
