@@ -138,7 +138,7 @@ public final class InMemoryBackend implements CollectionResourceProvider {
                 resource = resources.remove(id);
                 if (resource == null) {
                     throw new NotFoundException("The resource with ID '" + id
-                            + " could not be deleted because it does not exist");
+                            + "' could not be deleted because it does not exist");
                 } else if (rev != null && !resource.getRevision().equals(rev)) {
                     // Mismatch - put the resource back.
                     resources.put(id, resource);
@@ -185,7 +185,7 @@ public final class InMemoryBackend implements CollectionResourceProvider {
             final Resource resource = resources.get(id);
             if (resource == null) {
                 throw new NotFoundException("The resource with ID '" + id
-                        + " could not be read because it does not exist");
+                        + "' could not be read because it does not exist");
             }
             handler.handleResult(resource);
         } catch (final ResourceException e) {
@@ -206,7 +206,7 @@ public final class InMemoryBackend implements CollectionResourceProvider {
                 final Resource existingResource = resources.get(id);
                 if (existingResource == null) {
                     throw new NotFoundException("The resource with ID '" + id
-                            + " could not be updated because it does not exist");
+                            + "' could not be updated because it does not exist");
                 } else if (rev != null && !existingResource.getRevision().equals(rev)) {
                     throw new ConflictException("The resource with ID '" + id
                             + "' could not be updated because "
