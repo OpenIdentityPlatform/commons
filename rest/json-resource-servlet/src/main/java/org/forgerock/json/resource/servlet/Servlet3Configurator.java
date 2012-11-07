@@ -24,7 +24,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.codehaus.jackson.JsonFactory;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Context;
@@ -46,12 +45,9 @@ final class Servlet3Configurator extends ServletConfigurator {
      */
     private final class Servlet3RequestDispatcher implements RequestDispatcher {
         private final ConnectionFactory connectionFactory;
-        private final JsonFactory jsonFactory;
 
-        private Servlet3RequestDispatcher(final ConnectionFactory connectionFactory,
-                final JsonFactory jsonFactory) {
+        private Servlet3RequestDispatcher(final ConnectionFactory connectionFactory) {
             this.connectionFactory = connectionFactory;
-            this.jsonFactory = jsonFactory;
         }
 
         /**
@@ -69,7 +65,7 @@ final class Servlet3Configurator extends ServletConfigurator {
                 asyncContext.setTimeout(0);
 
                 final ResultHandler<Connection> handler = new RequestRunner(context, request,
-                        httpRequest, httpResponse, jsonFactory) {
+                        httpRequest, httpResponse) {
                     @Override
                     protected void postComplete() {
                         asyncContext.complete();
@@ -77,9 +73,8 @@ final class Servlet3Configurator extends ServletConfigurator {
 
                     @Override
                     void postError(final Exception e) {
-                        httpResponse.isCommitted();
-                        fail(httpResponse, e);
-                        httpResponse.isCommitted();
+                        fail(httpRequest, httpResponse, e);
+                        asyncContext.complete();
                     }
 
                 };
@@ -88,7 +83,7 @@ final class Servlet3Configurator extends ServletConfigurator {
                 // Fall-back to 2.x synchronous processing.
                 final CountDownLatch latch = new CountDownLatch(1);
                 final ResultHandler<Connection> handler = new RequestRunner(context, request,
-                        httpRequest, httpResponse, jsonFactory) {
+                        httpRequest, httpResponse) {
                     @Override
                     protected void postComplete() {
                         latch.countDown();
@@ -96,7 +91,7 @@ final class Servlet3Configurator extends ServletConfigurator {
 
                     @Override
                     void postError(final Exception e) {
-                        fail(httpResponse, e);
+                        fail(httpRequest, httpResponse, e);
                         latch.countDown();
                     }
 
@@ -121,9 +116,8 @@ final class Servlet3Configurator extends ServletConfigurator {
      * {@inheritDoc}
      */
     @Override
-    RequestDispatcher getRequestDispatcher(final ConnectionFactory connectionFactory,
-            final JsonFactory jsonFactory) {
-        return new Servlet3RequestDispatcher(connectionFactory, jsonFactory);
+    RequestDispatcher getRequestDispatcher(final ConnectionFactory connectionFactory) {
+        return new Servlet3RequestDispatcher(connectionFactory);
     }
 
 }

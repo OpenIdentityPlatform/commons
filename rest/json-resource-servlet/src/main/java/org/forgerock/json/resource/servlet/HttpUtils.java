@@ -17,10 +17,16 @@ package org.forgerock.json.resource.servlet;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.JsonGenerator.Feature;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.ResourceException;
@@ -31,31 +37,27 @@ import org.forgerock.json.resource.ResourceException;
 final class HttpUtils {
 
     static final String CHARACTER_ENCODING = "UTF-8";
-
     static final String CONTENT_TYPE = "application/json";
     static final String CRLF = "\r\n";
-
     static final String ETAG_ANY = "*";
     static final String HEADER_ETAG = "ETag";
     static final String HEADER_LOCATION = "Location";
     static final String HEADER_IF_MATCH = "If-Match";
     static final String HEADER_IF_NONE_MATCH = "If-None-Match";
-
     static final String HEADER_X_HTTP_METHOD_OVERRIDE = "X-HTTP-Method-Override";
     static final String METHOD_DELETE = "DELETE";
     static final String METHOD_GET = "GET";
     static final String METHOD_HEAD = "HEAD";
     static final String METHOD_OPTIONS = "OPTIONS";
     static final String METHOD_PATCH = "PATCH";
-
     static final String METHOD_POST = "POST";
     static final String METHOD_PUT = "PUT";
-
     static final String METHOD_TRACE = "TRACE";
     static final String PARAM_ACTION = "_action";
     static final String PARAM_DEBUG = "_debug";
-
     static final String PARAM_PRETTY_PRINT = "_prettyPrint";
+
+    private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
 
     /**
      * Adapts an {@code Exception} to a {@code ResourceException}.
@@ -148,7 +150,7 @@ final class HttpUtils {
      * @throws NullPointerException
      *             If {@code object} is {@code null}.
      */
-    static final <T> T checkNotNull(final T object) {
+    static <T> T checkNotNull(final T object) {
         if (object == null) {
             throw new NullPointerException();
         }
@@ -177,17 +179,88 @@ final class HttpUtils {
     /**
      * Safely fail an HTTP request using the provided {@code Exception}.
      *
+     * @param req
+     *            The HTTP request.
      * @param resp
      *            The HTTP response.
      * @param e
      *            The resource exception indicating why the request failed.
      */
-    static void fail(final HttpServletResponse resp, final Exception e) {
-        final ResourceException re = adapt(e);
+    static void fail(final HttpServletRequest req, final HttpServletResponse resp, final Exception e) {
+        if (!resp.isCommitted()) {
+            final ResourceException re = adapt(e);
+            try {
+                resp.reset();
+                resp.setStatus(re.getCode());
+                final JsonGenerator writer = getJsonGenerator(req, resp);
+                writer.writeObject(re.toJsonValue().getObject());
+                closeQuietly(writer, resp.getOutputStream());
+            } catch (final IOException ignored) {
+                // Ignore the error since this was probably the cause.
+            }
+        }
+    }
+
+    /**
+     * Creates a JSON generator which can be used for serializing JSON content
+     * in HTTP responses.
+     *
+     * @param req
+     *            The HTTP request.
+     * @param resp
+     *            The HTTP response.
+     * @return A JSON generator which can be used to write out a JSON response.
+     * @throws IOException
+     *             If an error occurred while obtaining an output stream.
+     */
+    static JsonGenerator getJsonGenerator(final HttpServletRequest req,
+            final HttpServletResponse resp) throws IOException {
+        final JsonGenerator writer = JSON_MAPPER.getJsonFactory().createJsonGenerator(
+                resp.getOutputStream());
+        writer.configure(Feature.AUTO_CLOSE_TARGET, false);
+
+        // Enable pretty printer if requested.
+        final String[] values = req.getParameterValues(PARAM_PRETTY_PRINT);
+        if (values != null) {
+            try {
+                if (asBooleanValue(PARAM_PRETTY_PRINT, values)) {
+                    writer.useDefaultPrettyPrinter();
+                }
+            } catch (ResourceException e) {
+                // Ignore because we may be trying to obtain a generator in
+                // order to output an error.
+            }
+        }
+        return writer;
+    }
+
+    /**
+     * Returns the content of the provided HTTP request decoded as a JSON
+     * object.
+     *
+     * @param req
+     *            The HTTP request.
+     * @return The content of the provided HTTP request decoded as a JSON
+     *         object.
+     * @throws ResourceException
+     *             If the content could not be read or if the content was not
+     *             valid JSON.
+     */
+    static JsonValue getJsonContent(final HttpServletRequest req) throws ResourceException {
         try {
-            resp.sendError(re.getCode(), re.getMessage());
-        } catch (final IOException ignored) {
-            // Ignore the error since this was probably the cause.
+            final Object content = JSON_MAPPER.readValue(req.getInputStream(), Object.class);
+            if (!(content instanceof Map)) {
+                throw new BadRequestException(
+                        "The request could not be processed because the provided "
+                                + "content is not a JSON object");
+            }
+            return new JsonValue(content);
+        } catch (final JsonParseException e) {
+            throw new BadRequestException(
+                    "The request could not be processed because the provided "
+                            + "content is not valid JSON");
+        } catch (final IOException e) {
+            throw adapt(e);
         }
     }
 
