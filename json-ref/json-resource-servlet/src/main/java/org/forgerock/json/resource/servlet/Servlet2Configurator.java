@@ -23,7 +23,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.codehaus.jackson.JsonFactory;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Context;
@@ -46,12 +45,9 @@ final class Servlet2Configurator extends ServletConfigurator {
     private final static class Servlet2RequestDispatcher implements RequestDispatcher {
 
         private final ConnectionFactory connectionFactory;
-        private final JsonFactory jsonFactory;
 
-        private Servlet2RequestDispatcher(final ConnectionFactory connectionFactory,
-                final JsonFactory jsonFactory) {
+        private Servlet2RequestDispatcher(final ConnectionFactory connectionFactory) {
             this.connectionFactory = connectionFactory;
-            this.jsonFactory = jsonFactory;
         }
 
         /**
@@ -63,7 +59,7 @@ final class Servlet2Configurator extends ServletConfigurator {
                 throws Exception {
             final CountDownLatch latch = new CountDownLatch(1);
             final ResultHandler<Connection> handler = new RequestRunner(context, request,
-                    httpRequest, httpResponse, jsonFactory) {
+                    httpRequest, httpResponse) {
                 @Override
                 protected void postComplete() {
                     latch.countDown();
@@ -71,7 +67,7 @@ final class Servlet2Configurator extends ServletConfigurator {
 
                 @Override
                 void postError(final Exception e) {
-                    fail(httpResponse, e);
+                    fail(httpRequest, httpResponse, e);
                     latch.countDown();
                 }
             };
@@ -95,9 +91,8 @@ final class Servlet2Configurator extends ServletConfigurator {
      * {@inheritDoc}
      */
     @Override
-    RequestDispatcher getRequestDispatcher(final ConnectionFactory connectionFactory,
-            final JsonFactory jsonFactory) {
-        return new Servlet2RequestDispatcher(connectionFactory, jsonFactory);
+    RequestDispatcher getRequestDispatcher(final ConnectionFactory connectionFactory) {
+        return new Servlet2RequestDispatcher(connectionFactory);
     }
 
 }
