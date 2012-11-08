@@ -120,31 +120,26 @@ alice.put("name", "Alice");
 alice.put("age", 21);
 alice.put("role", "administrator");
 Resource r1 = connection.create(new RootContext(), newCreateRequest("/users", alice));
-System.out.println("Created user: " + r1);
 
 JsonValue bob = new JsonValue(new LinkedHashMap&lt;String, Object>());
 bob.put("name", "Bob");
 bob.put("age", 40);
 bob.put("role", "sales");
 Resource r2 = connection.create(new RootContext(), newCreateRequest("/users", bob));
-System.out.println("Created user: " + r2);
 
 // Read a single user.
 Resource r3 = connection.read(new RootContext(), newReadRequest("/users", r1.getId()));
-System.out.println("Read user: " + r3);
+assertEquals(r1, r3);
 
 // Update a single user.
 bob.put("role", "marketing");
 Resource r4 = connection.update(new RootContext(), newUpdateRequest("/users", r2.getId(),
         bob));
-System.out.println("Updated user: " + r4);
 
 // Retrieve the list of users.
-List&lt;Resource> results = new ArrayList&lt;Resource>();
+Set&lt;Resource> results = new HashSet&lt;Resource>();
 connection.query(new RootContext(), newQueryRequest("/users"), results);
-for (Resource user : results) {
-    System.out.println("Query found user: " + user);
-}</source>
+assertEquals(results, new HashSet&lt;Resource>(Arrays.asList(r3, r4)));</source>
         </section>
         <section name="Known Issues">
             <p>
