@@ -21,23 +21,27 @@ import static org.forgerock.json.resource.Requests.newReadRequest;
 import static org.forgerock.json.resource.Requests.newUpdateRequest;
 import static org.forgerock.json.resource.Resources.newInternalConnection;
 import static org.forgerock.json.resource.RoutingMode.EQUALS;
+import static org.testng.Assert.assertEquals;
 
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.Set;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.testng.annotations.Test;
 
 /**
- * Example class illustrating usage of API.
+ * Example class illustrating usage of API. This class is implemented as a unit
+ * test so that we are sure that it compiles and runs. The eventual idea is that
+ * its content will be cited in the generated site documentation, but for now
+ * its code has to be manually copied.
  */
-final class Example {
+@SuppressWarnings("javadoc")
+public final class ExampleTest {
 
-    private Example() {
-        // Do nothing.
-    }
-
-    public static void main(String[] args) throws ResourceException {
+    @Test
+    public void smokeTest() throws ResourceException {
         // Create a new in memory backend which will store user resources.
         InMemoryBackend users = new InMemoryBackend();
 
@@ -55,30 +59,25 @@ final class Example {
         alice.put("age", 21);
         alice.put("role", "administrator");
         Resource r1 = connection.create(new RootContext(), newCreateRequest("/users", alice));
-        System.out.println("Created user: " + r1);
 
         JsonValue bob = new JsonValue(new LinkedHashMap<String, Object>());
         bob.put("name", "Bob");
         bob.put("age", 40);
         bob.put("role", "sales");
         Resource r2 = connection.create(new RootContext(), newCreateRequest("/users", bob));
-        System.out.println("Created user: " + r2);
 
         // Read a single user.
         Resource r3 = connection.read(new RootContext(), newReadRequest("/users", r1.getId()));
-        System.out.println("Read user: " + r3);
+        assertEquals(r1, r3);
 
         // Update a single user.
         bob.put("role", "marketing");
         Resource r4 = connection.update(new RootContext(), newUpdateRequest("/users", r2.getId(),
                 bob));
-        System.out.println("Updated user: " + r4);
 
         // Retrieve the list of users.
-        List<Resource> results = new ArrayList<Resource>();
+        Set<Resource> results = new HashSet<Resource>();
         connection.query(new RootContext(), newQueryRequest("/users"), results);
-        for (Resource user : results) {
-            System.out.println("Query found user: " + user);
-        }
+        assertEquals(results, new HashSet<Resource>(Arrays.asList(r3, r4)));
     }
 }
