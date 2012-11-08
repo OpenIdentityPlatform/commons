@@ -49,12 +49,14 @@ define("org/forgerock/commons/ui/user/SiteConfigurator", [
        if(obj.configuration && obj.initialized === false) {
            obj.initialized = true;
            
+           i18nManager.setLanguage(constants.DEFAULT_LANGUAGE);
+           
            if(obj.configuration.remoteConfig === true) {
                configurationDelegate.getConfiguration(function(config) {
                    obj.processConfiguration(config); 
                    eventManager.sendEvent(constants.EVENT_APP_INTIALIZED);
                }, function() {
-                   eventManager.sendEvent(constants.EVENT_APP_INTIALIZED);
+                   eventManager.sendEvent(constants.EVENT_APP_INTIALIZED);                   
                });
            } else {
                obj.processConfiguration(obj.configuration); 
@@ -107,6 +109,10 @@ define("org/forgerock/commons/ui/user/SiteConfigurator", [
            i18nManager.setLanguage(config.language);
        } else {
            i18nManager.setLanguage(constants.DEFAULT_LANGUAGE);
+       }
+       
+       if(config.roles) {
+           conf.globalData.userRoles = config.roles;
        }
        
    };

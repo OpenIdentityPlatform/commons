@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define*/
+/*global define unescape*/
 
 define("org/forgerock/commons/ui/common/util/CookieHelper", [
 ], function () {
@@ -44,6 +44,18 @@ define("org/forgerock/commons/ui/common/util/CookieHelper", [
     
     obj.setCookie = function(cookieName, cookieValue, expirationDate, cookiePath, cookieDomain, secureCookie) {
         document.cookie = obj.createCookie(cookieName, cookieValue, expirationDate, cookiePath, cookieDomain, secureCookie);
+    };
+    
+    obj.getCookie = function(c_name) {
+        var i, x, y, ARRcookies = document.cookie.split(";");
+        for (i=0; i < ARRcookies.length; i++) {
+            x = ARRcookies[i].substr(0,ARRcookies[i].indexOf("="));
+            y = ARRcookies[i].substr(ARRcookies[i].indexOf("=")+1);
+            x = x.replace(/^\s+|\s+$/g,"");
+            if ( x === c_name) {
+                return unescape(y);
+            }
+        }
     };
     
     return obj;

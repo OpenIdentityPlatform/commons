@@ -76,7 +76,21 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
 
     obj.prototype.updateEntity = function(objectParam, successCallback, errorCallback) {
         console.debug("update entity");
-        this.serviceCall({url: "/" + objectParam._id, type: "POST", success: successCallback, error: errorCallback, data: objectParam});
+        var headers = {};
+        
+        if(objectParam._rev) {
+            headers["If-Match"] = '"' + objectParam._rev + '"';
+        } else {
+            headers["If-Match"] = '"' + "*" + '"';
+        }
+        
+        this.serviceCall({url: "/" + objectParam._id,
+            type: "PUT",
+            success: successCallback, 
+            error: errorCallback, 
+            data: JSON.stringify(objectParam),
+            headers: headers
+        });
     };
 
     /**
@@ -105,7 +119,15 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
         for(i = 0; i < patchDefinition.length; i++) {
             patchDefinition[i].replace = "/" + patchDefinition[i].replace;
         }
-        this.serviceCall({url: "/?_action=patch&" + $.param(queryParameters), type: "POST", success: successCallback, error: errorCallback, data: JSON.stringify(patchDefinition)});
+        this.serviceCall({url: "/" + queryParameters.id, 
+            type: "PATCH", 
+            success: successCallback, 
+            error: errorCallback, 
+            data: JSON.stringify(patchDefinition),
+            headers: {
+                "If-Match": '"' + queryParameters.rev + '"'
+            }
+        });
     };
 
     /**

@@ -32,11 +32,12 @@ define("org/forgerock/commons/ui/user/profile/ChangeSecurityDataDialog", [
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/user/delegates/UserDelegate",
+    "org/forgerock/commons/ui/user/delegates/InternalUserDelegate",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/user/delegates/SecurityQuestionDelegate"
-], function(Dialog, validatorsManager, conf, userDelegate, uiUtils, eventManager, constants, securityQuestionDelegate) {
+], function(Dialog, validatorsManager, conf, userDelegate, internalUserDelegate, uiUtils, eventManager, constants, securityQuestionDelegate) {
     var ChangeSecurityDataDialog = Dialog.extend({    
         contentTemplate: "templates/user/ChangeSecurityDataDialogTemplate.html",
         
@@ -65,16 +66,23 @@ define("org/forgerock/commons/ui/user/profile/ChangeSecurityDataDialog", [
                 
                 if(this.$el.find("input[name=securityAnswer]").val()) {
                     patchDefinitionObject.push({replace: "securityQuestion", value: this.$el.find("select[name=securityQuestion]").val()});
-                    patchDefinitionObject.push({replace: "securityAnswer", value: this.$el.find("input[name=securityAnswer]").val().toLowerCase()});
+                    patchDefinitionObject.push({replace: "securityAnswer", value: this.$el.find("input[name=securityAnswer]").val()});
                 }
                 
-                userDelegate.patchSelectedUserAttributes(conf.loggedUser.userName, patchDefinitionObject, _.bind(function(r) {
+                this.delegate.patchSelectedUserAttributes(conf.loggedUser._id, conf.loggedUser._rev, patchDefinitionObject, _.bind(function(r) {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "securityDataChanged");
                     this.close();
                     
-                    userDelegate.getForUserName(conf.loggedUser.userName, function(user) {
-                        conf.loggedUser = user;
-                    });
+                    if ($.inArray("openidm-admin", conf.loggedUser.roles.split(",")) === -1) {
+                        userDelegate.getForUserID(conf.loggedUser._id, function(user) {
+                            conf.loggedUser = user;
+                        });
+                    } else {
+                        userDelegate.getForUserName(conf.loggedUser.userName, function(user) {
+                            conf.loggedUser = user;
+                        });
+                    }
+                            
                 }, this));
             }
         },
@@ -83,8 +91,16 @@ define("org/forgerock/commons/ui/user/profile/ChangeSecurityDataDialog", [
             this.actions = {};
             this.addAction($.t("common.form.update"), "submit");
             
+            this.delegate = conf.globalData.userComponent === "internal/user" ? internalUserDelegate : userDelegate;
+            
+            if(conf.globalData.userComponent === "internal/user") {
+                this.data.height = 260;
+            } else if(conf.globalData.securityQuestions === true) {
+                this.data.height = 400;
+            }
+                    
             this.show(_.bind(function() {
-                    validatorsManager.bindValidators(this.$el, userDelegate.baseEntity, _.bind(function () {
+                    validatorsManager.bindValidators(this.$el, this.delegate.baseEntity, _.bind(function () {
                     
                     if(conf.passwords) {
                         this.$el.find("input[name=oldPassword]").val(conf.passwords.password);                    
@@ -98,7 +114,7 @@ define("org/forgerock/commons/ui/user/profile/ChangeSecurityDataDialog", [
         
         reloadData: function() {
             var user = conf.loggedUser, self = this;
-            
+            this.$el.find("input[name=_id]").val(conf.loggedUser._id);
             securityQuestionDelegate.getAllSecurityQuestions(function(secquestions) {
                 uiUtils.loadSelectOptions(secquestions, self.$el.find("select[name='securityQuestion']"), 
                     false, _.bind(function() {

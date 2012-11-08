@@ -129,7 +129,7 @@ define("org/forgerock/commons/ui/user/delegates/UserDelegate", [
                         errorCallback();
                     }
                 } else if(successCallback) {
-                    successCallback(data.result[0]);
+                    successCallback(data.result);
                 }
             },
             error: errorCallback
@@ -162,6 +162,14 @@ define("org/forgerock/commons/ui/user/delegates/UserDelegate", [
                     successCallback(data.result[0]);
                 }
             },
+            error: errorCallback
+        });
+    };
+    
+    obj.getForUserID = function(uid, successCallback, errorCallback) {
+        obj.serviceCall({
+            url: "/" + uid, 
+            success: successCallback,
             error: errorCallback
         });
     };
@@ -208,15 +216,15 @@ define("org/forgerock/commons/ui/user/delegates/UserDelegate", [
      */
     obj.patchUserDifferences = function(oldUserData, newUserData, successCallback, errorCallback, noChangesCallback) {
         console.info("updating user");
-        obj.patchEntityDifferences({"_query-id": "for-userName", uid: oldUserData.userName.toLowerCase()}, oldUserData, newUserData, successCallback, errorCallback, noChangesCallback);
+        obj.patchEntityDifferences({id: oldUserData._id, rev: oldUserData._rev}, oldUserData, newUserData, successCallback, errorCallback, noChangesCallback);
     };
 
     /**
      * See AbstractDelegate.patchEntity
      */
-    obj.patchSelectedUserAttributes = function(userName, patchDefinitionObject, successCallback, errorCallback, noChangesCallback) {
+    obj.patchSelectedUserAttributes = function(id, rev, patchDefinitionObject, successCallback, errorCallback, noChangesCallback) {
         console.info("updating user");
-        obj.patchEntity({"_query-id": "for-userName", uid: userName.toLowerCase()}, patchDefinitionObject, successCallback, errorCallback, noChangesCallback);
+        obj.patchEntity({id: id, rev: rev}, patchDefinitionObject, successCallback, errorCallback, noChangesCallback);
     };
     
     /**

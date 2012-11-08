@@ -9,6 +9,10 @@ require.config({
         name : "xdate",
         main : "xdate-0.7-min",
         location : "libs"
+    }, {
+        name : "moment",
+        main : "moment-1.7.2-min",
+        location : "libs"
     }]
 });
 

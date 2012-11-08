@@ -179,11 +179,14 @@ define("config/validators/UserValidators", [
                     }
                     userName = $(el).find("input[name='resetUsername']").val();
                     userDelegate.getBySecurityAnswer(userName, v, 
-                            function(result) {
-                        callback();
-                    },      function() {
+                        function(result) {
+                            $(el).find("input[name=_id]").val(result);
+                            callback();
+                        },      
+                        function() {
                         callback("x");
-                    });
+                        }
+                    );
                 }
             },
             "newSecurityAnswer": {

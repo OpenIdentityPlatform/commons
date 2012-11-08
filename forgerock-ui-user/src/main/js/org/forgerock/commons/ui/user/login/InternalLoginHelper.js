@@ -29,12 +29,15 @@ define("org/forgerock/commons/ui/user/login/InternalLoginHelper", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
-    "org/forgerock/commons/ui/common/main/ServiceInvoker"
-], function (userDelegate, eventManager, constants, AbstractConfigurationAware, serviceInvoker) {
+    "org/forgerock/commons/ui/common/main/ServiceInvoker",
+    "org/forgerock/commons/ui/common/main/Configuration"
+], function (userDelegate, eventManager, constants, AbstractConfigurationAware, serviceInvoker, conf) {
     var obj = new AbstractConfigurationAware();
 
     obj.login = function(userName, password, successCallback, errorCallback) {
         userDelegate.login(userName, password, function(user) {
+            conf.globalData.userComponent = user.userid.component;
+            
             obj.getUserById(user.userid.id, user.userid.component, successCallback, errorCallback);
         }, function() {
                 errorCallback();
@@ -48,6 +51,8 @@ define("org/forgerock/commons/ui/user/login/InternalLoginHelper", [
     obj.getLoggedUser = function(successCallback, errorCallback) {
         try{
             userDelegate.getProfile(function(user) {
+                conf.globalData.userComponent = user.userid.component;
+                
                 obj.getUserById(user.userid.id, user.userid.component, successCallback, errorCallback);
             }, function() {
                 errorCallback();

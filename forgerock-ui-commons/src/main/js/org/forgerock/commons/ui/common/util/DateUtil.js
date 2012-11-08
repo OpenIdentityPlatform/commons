@@ -25,15 +25,27 @@
 /*global define, XDate*/
 
 define("org/forgerock/commons/ui/common/util/DateUtil", [
-    "xdate"
-], function (xdate) {
+    "xdate", "moment"
+], function (xdate, moment) {
     
     var obj = {};
     
     obj.defaultDateFormat = "MMMM dd, yyyy";
     
-    obj.formatDate = function (date) {
-        return new XDate(date).toString(obj.defaultDateFormat);
+    obj.formatDate = function (date, datePattern) {
+        if (datePattern){
+            return new XDate(date).toString(datePattern);
+        } else {
+            return new XDate(date).toString(obj.defaultDateFormat);
+        }
+    };
+    
+    obj.isDateStringValid = function(dateString, datePattern) {
+        return dateString.length === datePattern.length && moment(dateString, datePattern).isValid();
+    };
+    
+    obj.parseStringValid = function(dateString, datePattern) {
+        return dateString.length === datePattern.length && moment(dateString, datePattern).isValid();
     };
     
     obj.getDateFromEpochString = function(stringWithMilisFromEpoch) {
@@ -44,8 +56,14 @@ define("org/forgerock/commons/ui/common/util/DateUtil", [
         return new XDate().toDate();
     };
     
-    obj.parseDateString = function(dateString) {
-        return new XDate(dateString).toDate();
+    obj.parseDateString = function(dateString, datePattern) {
+        if (datePattern) {
+            datePattern = datePattern.replace(/d/g,'D');
+            datePattern = datePattern.replace(/y/g,'Y');
+            return moment(dateString, datePattern).toDate();
+        } else {
+            return new XDate(dateString).toDate();
+        }
     };
     
     return obj;
