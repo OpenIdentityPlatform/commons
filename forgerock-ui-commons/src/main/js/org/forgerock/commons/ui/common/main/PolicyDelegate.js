@@ -37,7 +37,13 @@ define("org/forgerock/commons/ui/common/main/PolicyDelegate", [
     var obj = new AbstractDelegate(constants.host + "/openidm/policy");
     
     obj.validateProperty = function (baseEntity, args, callback) {
-        
+        /* 
+         * We are calling the validateObject action here instead of validateProperty
+         * because we need to pass in entire object context in order to support policies
+         * which may depend upon other properties.  From the response, we look to see if the 
+         * particular property we are attempting to validate was included in the list of those
+         * with errors.
+         */
         obj.serviceCall({
             url: "/" + baseEntity + "?_action=validateObject",
             data: JSON.stringify(args.fullObject),

@@ -41,8 +41,10 @@ define("org/forgerock/commons/ui/user/ForgottenPasswordDialog", [
             "click input[name=Update]": "formSubmit",
             "click .dialogCloseCross img": "close",
             "click input[name='close']": "close",
+            "click input[name='submitAnswer']": "submitAnswer",
             "click .dialogContainer": "stop",
-            "onValidate": "onValidate"
+            "onValidate": "onValidate",
+            "customValidate": "customValidate"
         },
         
         data: {         
@@ -58,7 +60,7 @@ define("org/forgerock/commons/ui/user/ForgottenPasswordDialog", [
             this.actions = {};
             this.addAction($.t("common.form.update"), "submit");
             this.show(_.bind(function() {
-                validatorsManager.bindValidators(this.$el, userDelegate.baseEntity); 
+                validatorsManager.bindValidators(this.$el); 
                 if (conf.forgottenPasswordUserName) {
                     this.$el.find("input[name=resetUsername]").val(conf.forgottenPasswordUserName);
                     this.$el.find("input[name=resetUsername]").trigger("change");
@@ -90,16 +92,18 @@ define("org/forgerock/commons/ui/user/ForgottenPasswordDialog", [
                     this.$el.find("input[name=password]").val("");
                     this.$el.find("input[name=passwordConfirm]").val("");
                     this.data.height = 210;
+                    this.resize();
                 } else {
                     securityQuestionRef = this.securityQuestions;
-                    userDelegate.getSecurityQuestionForUserName(userName, function(result) {
+                    userDelegate.getSecurityQuestionForUserName(userName, _.bind(function(result) {
                         console.log(result + " " + securityQuestionRef[result]);
                         $("#fgtnSecurityQuestion").text(securityQuestionRef[result]);
-                    });
-                    this.$el.find("#fgtnAnswerDiv").show();
-                    this.data.height = 400;
+                        this.data.height = 300;
+                        this.resize();
+                        this.$el.find("#fgtnAnswerDiv").show();
+                        this.$el.find("input[name=fgtnSecurityAnswer]").focus();
+                    }, this));
                 }
-                this.resize();
             }
         },
         
@@ -111,6 +115,31 @@ define("org/forgerock/commons/ui/user/ForgottenPasswordDialog", [
                 eventManager.sendEvent(constants.FORGOTTEN_PASSWORD_CHANGED_SUCCESSFULLY, { userName: userName, password: newPassword});
                 dialog.close();
             });
+        },
+        submitAnswer : function () {
+            this.$el.find("input[name=fgtnSecurityAnswer]").trigger("validate");
+        },
+        customValidate: function(event, input, msg, validatorType) {
+
+            if (validatorType === "securityAnswer") {
+                
+                if (typeof(msg) === "undefined") {
+                    validatorsManager.bindValidators(this.$el, userDelegate.baseEntity + "/" + this.$el.find("input[name=_id]").val(), _.bind(function () {
+                        this.$el.find("#fgtnPasswordDiv").show();
+                        this.data.height = 400;
+                        this.resize();
+                    }, this)); 
+                }
+                else {
+                    this.$el.find(".group-field-errors.validationRules .field-rule").not(":first").remove();
+                    this.$el.find("#fgtnPasswordDiv").hide();
+                    this.data.height = 300;
+                    this.resize();
+                    this.$el.find("input[name=_id]").val("");
+                }
+                
+            }
+            
         }
     }); 
     

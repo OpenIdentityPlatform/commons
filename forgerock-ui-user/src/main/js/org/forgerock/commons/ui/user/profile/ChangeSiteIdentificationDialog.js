@@ -89,7 +89,7 @@ define("org/forgerock/commons/ui/user/profile/ChangeSiteIdentificationDialog", [
             this.show(_.bind(function() {
                 this.siteImageCounter = 0;
                 $("#siteImageFlow img").load(_.bind(this.refreshFlow, this));
-                validatorsManager.bindValidators(this.$el, userDelegate.baseEntity, _.bind(function () {
+                validatorsManager.bindValidators(this.$el, userDelegate.baseEntity + "/" + conf.loggedUser._id, _.bind(function () {
                     
                     this.$el.find("input[name=oldSiteImage]").val(conf.loggedUser.siteImage);                
                     this.$el.find("input[name=passPhrase]").val(conf.loggedUser.passPhrase);

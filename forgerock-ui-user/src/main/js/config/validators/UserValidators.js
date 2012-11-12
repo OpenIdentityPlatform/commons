@@ -184,7 +184,8 @@ define("config/validators/UserValidators", [
                             callback();
                         },      
                         function() {
-                        callback("x");
+                            $(el).find("input[name=_id]").val("");
+                            callback($.t("common.form.validation.incorrectSecurityAnswer"));
                         }
                     );
                 }

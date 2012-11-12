@@ -86,7 +86,7 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
         render: function(args, callback) {
             this.parentRender(function() {
                 var self = this;
-                validatorsManager.bindValidators(this.$el,this.delegate.baseEntity, _.bind(function () {
+                validatorsManager.bindValidators(this.$el,this.delegate.baseEntity + "/" + conf.loggedUser._id, _.bind(function () {
                     
                     countryStateDelegate.getAllCountries( function(countries) {
                         uiUtils.loadSelectOptions(countries, $("select[name='country']"), true, _.bind(function() {

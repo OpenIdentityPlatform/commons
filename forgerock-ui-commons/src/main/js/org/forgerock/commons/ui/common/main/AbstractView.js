@@ -133,13 +133,15 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
                 validatorsUtils.setTick(input, msg ? true : false);
             }
             
-            if($(input).nextAll("div.validation-message:first")) {
-                $(input).nextAll("div.validation-message:first").html(msg ? msg : '');
-            }
+            $(input).nextAll("div.validation-message:first").html(msg ? msg : '');
+            $("div.validation-message[for="+$(input).attr('name')+"]").html(msg ? msg : '');
             
             if(validatorType) {
                 validatorsUtils.setErrors(this.$el, validatorType, msg);
             }    
+
+            this.$el.trigger("customValidate", [input, msg, validatorType]); 
+            
         },
         
         lock: function() {

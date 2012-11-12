@@ -25,7 +25,8 @@
 /*global $, define*/
 
 define("org/forgerock/commons/ui/common/util/FormGenerationUtils", [
-], function () {
+    "org/forgerock/commons/ui/common/util/DateUtil"                                                                    
+], function (dateUtil) {
     
     var obj = {};
     
@@ -173,6 +174,57 @@ define("org/forgerock/commons/ui/common/util/FormGenerationUtils", [
     
     obj.generateLabel = function(labelValue) {
         return '<label class="light">{{t "' + labelValue +'"}}</label>';
+    };
+    
+    obj.buildPropertyTypeMap = function(formProperties) {
+        var typeName, datePattern, property, formFieldType, formFieldDescription, result = {};
+        for(property in formProperties) {
+            formFieldDescription = formProperties[property];
+            if (property !== '_formGenerationTemplate') {
+                formFieldType = formFieldDescription.type;
+                if (!formFieldType.name || formFieldType.name === '') {
+                    typeName = 'string';
+                } else {
+                    typeName = formFieldType.name;
+                    if (typeName === 'date') {
+                        datePattern = formFieldType.datePattern;
+                    }
+                }
+                property = formFieldDescription.variableName ? formFieldDescription.variableName : property;
+                result[property] = {type: typeName, datePattern: datePattern};
+            }
+        }
+        return result;
+    };
+    
+    obj.changeParamsToMeetTheirTypes = function(params, propertyTypeMapping) {
+        var param, typeName, paramValue, dateFormat, date;
+        for (param in params) {
+            typeName = propertyTypeMapping[param].type;
+            paramValue = params[param];
+            if ("date" === typeName) {
+                if (paramValue === '') {
+                    params[param] = null;
+                } else {
+                    dateFormat = propertyTypeMapping[param].datePattern;
+                    date = dateUtil.parseDateString(paramValue, dateFormat);
+//                    params[param] = date;
+                    params[param] = "2012-06-30T00:00:00Z";
+                }
+            } else if ("long" === typeName) {
+                if (paramValue === '') {
+                    params[param] = null;
+                } else {
+                    params[param] = parseInt(paramValue, 10);
+                }
+            } else if ("boolean" === typeName) {
+                if (paramValue === '') {
+                    params[param] = null;
+                } else {
+                    params[param] = "true"===paramValue ? true : false ;
+                }
+            }
+        }
     };
     
     return obj;

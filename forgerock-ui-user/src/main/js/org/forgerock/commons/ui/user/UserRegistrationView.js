@@ -96,7 +96,7 @@ define("org/forgerock/commons/ui/user/UserRegistrationView", [
             conf.setProperty("gotoURL", null);
             
             this.parentRender(function() {
-                validatorsManager.bindValidators(this.$el,this.delegate.baseEntity);
+                validatorsManager.bindValidators(this.$el,this.delegate.baseEntity + "/");
                 this.unlock();
                 
                 securityQuestionDelegate.getAllSecurityQuestions(function(secquestions) {

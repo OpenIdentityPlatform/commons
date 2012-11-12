@@ -65,12 +65,14 @@ define("org/forgerock/commons/ui/common/util/ValidatorsUtils", [
     
     obj.hideValidation = function(input, el) {
         $(input).nextAll("span").hide();
-        $(input).nextAll("div.validationMessage:first").hide();
+        $(input).nextAll("div.validation-message:first").hide();
+        $("div.validation-message[for="+$(input).attr('name')+"]").hide();
     };
     
     obj.showValidation = function(input, el) {
         $(input).nextAll("span").show();
-        $(input).nextAll("div.validationMessage:first").show();
+        $(input).nextAll("div.validation-message:first").show();
+        $("div.validation-message[for="+$(input).attr('name')+"]").show();
     };
     
     obj.hideBox = function(el) {
