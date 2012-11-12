@@ -348,7 +348,7 @@ Accept: application/json</source>
                     </tr>
                     <tr>
                         <td>
-                            <tt>_pagedResultsCoookie=<i>STRING</i></tt>
+                            <tt>_pagedResultsCookie=<i>STRING</i></tt>
                         </td>
                         <td>
                             <p>

@@ -293,7 +293,7 @@ public final class HttpServletAdapter {
                         }
                     } else if (name.equals("_queryId")) {
                         request.setQueryId(asSingleValue(name, values));
-                    } else if (name.equals("_pagedResultsCoookie")) {
+                    } else if (name.equals("_pagedResultsCookie")) {
                         request.setPagedResultsCookie(asSingleValue(name, values));
                     } else if (name.equals("_pageSize")) {
                         request.setPageSize(asIntValue(name, values));
