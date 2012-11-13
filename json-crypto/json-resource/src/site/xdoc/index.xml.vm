@@ -201,7 +201,7 @@ assertEquals(results, new HashSet&lt;Resource>(Arrays.asList(r3, r4)));</source>
                     - it is likely that JSON Resource implementations
                     may expose extensions to the core API. For example,
                     for performing bulk updates, or performing proxied
-                    operations. These are analagous to LDAP's extended
+                    operations. These are analogous to LDAP's extended
                     operations and controls.
                 </li>
                 <li>

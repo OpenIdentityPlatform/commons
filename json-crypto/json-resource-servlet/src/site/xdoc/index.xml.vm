@@ -379,14 +379,14 @@ Accept: application/json</source>
                         </td>
                         <td>
                             <p>
-                                Optional paramter indicating that query results are
+                                Optional parameter indicating that query results are
                                 returned in pages of the specified size. For all
                                 paged result requests other than the initial
                                 request, a cookie should be provided with the query
                                 request.
                             </p>
                             <p>
-                                Default behavior is to not returned paged
+                                Default behavior is to not return paged
                                 query results.
                             </p>
                         </td>
