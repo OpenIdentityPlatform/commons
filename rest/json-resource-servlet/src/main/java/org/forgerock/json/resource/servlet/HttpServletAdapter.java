@@ -35,6 +35,8 @@ import static org.forgerock.json.resource.servlet.HttpUtils.checkNotNull;
 import static org.forgerock.json.resource.servlet.HttpUtils.fail;
 import static org.forgerock.json.resource.servlet.HttpUtils.getJsonContent;
 import static org.forgerock.json.resource.servlet.HttpUtils.getMethod;
+import static org.forgerock.json.resource.servlet.HttpUtils.getParameter;
+import static org.forgerock.json.resource.servlet.HttpUtils.hasParameter;
 import static org.forgerock.json.resource.servlet.HttpUtils.isDebugRequested;
 import static org.forgerock.json.resource.servlet.ServletConfigurator.getServletConfigurator;
 
@@ -258,7 +260,7 @@ public final class HttpServletAdapter {
             rejectIfNoneMatch(req);
 
             final Map<String, String[]> parameters = req.getParameterMap();
-            if (parameters.containsKey("_queryId") || parameters.containsKey("_queryFilter")) {
+            if (hasParameter(req, "_queryId") || hasParameter(req, "_queryFilter")) {
                 // Query against collection.
                 final QueryRequest request = Requests.newQueryRequest(getResourceName(req));
 
@@ -268,7 +270,7 @@ public final class HttpServletAdapter {
 
                     if (parseCommonParameter(name, values, request)) {
                         continue;
-                    } else if (name.equals("_sortKey")) {
+                    } else if (name.equalsIgnoreCase("_sortKey")) {
                         for (final String s : values) {
                             try {
                                 request.addSortKey(SortKey.valueOf(s));
@@ -279,13 +281,13 @@ public final class HttpServletAdapter {
                                         + "' could not be parsed as a valid sort key");
                             }
                         }
-                    } else if (name.equals("_queryId")) {
+                    } else if (name.equalsIgnoreCase("_queryId")) {
                         request.setQueryId(asSingleValue(name, values));
-                    } else if (name.equals("_pagedResultsCookie")) {
+                    } else if (name.equalsIgnoreCase("_pagedResultsCookie")) {
                         request.setPagedResultsCookie(asSingleValue(name, values));
-                    } else if (name.equals("_pageSize")) {
+                    } else if (name.equalsIgnoreCase("_pageSize")) {
                         request.setPageSize(asIntValue(name, values));
-                    } else if (name.equals("_queryFilter")) {
+                    } else if (name.equalsIgnoreCase("_queryFilter")) {
                         final String s = asSingleValue(name, values);
                         try {
                             request.setQueryFilter(QueryFilter.valueOf(s));
@@ -352,9 +354,9 @@ public final class HttpServletAdapter {
             rejectIfMatch(req);
 
             final Map<String, String[]> parameters = req.getParameterMap();
-            final String action = asSingleValue(PARAM_ACTION, parameters.get(PARAM_ACTION));
+            final String action = asSingleValue(PARAM_ACTION, getParameter(req, PARAM_ACTION));
 
-            if (action.equals("create")) {
+            if (action.equalsIgnoreCase("create")) {
                 final JsonValue content = getJsonContent(req);
                 final CreateRequest request = Requests.newCreateRequest(getResourceName(req),
                         content);
@@ -363,7 +365,7 @@ public final class HttpServletAdapter {
                     final String[] values = p.getValue();
                     if (parseCommonParameter(name, values, request)) {
                         continue;
-                    } else if (name.equals(PARAM_ACTION)) {
+                    } else if (name.equalsIgnoreCase(PARAM_ACTION)) {
                         // Ignore - already handled.
                     } else {
                         // FIXME: i18n.
@@ -384,7 +386,7 @@ public final class HttpServletAdapter {
                     final String[] values = p.getValue();
                     if (parseCommonParameter(name, values, request)) {
                         continue;
-                    } else if (name.equals(PARAM_ACTION)) {
+                    } else if (name.equalsIgnoreCase(PARAM_ACTION)) {
                         // Ignore - already handled.
                     } else {
                         request.setAdditionalActionParameter(name, asSingleValue(name, values));
@@ -544,7 +546,7 @@ public final class HttpServletAdapter {
 
     private boolean parseCommonParameter(final String name, final String[] values,
             final Request request) throws ResourceException {
-        if (name.equals("_fieldFilter")) {
+        if (name.equalsIgnoreCase("_fieldFilter")) {
             for (final String s : values) {
                 try {
                     request.addFieldFilter(s);
@@ -555,11 +557,11 @@ public final class HttpServletAdapter {
                 }
             }
             return true;
-        } else if (name.equals(PARAM_PRETTY_PRINT)) {
+        } else if (name.equalsIgnoreCase(PARAM_PRETTY_PRINT)) {
             // This will be handled by the dispatcher, so just validate.
             asBooleanValue(name, values);
             return true;
-        } else if (name.equals(PARAM_DEBUG)) {
+        } else if (name.equalsIgnoreCase(PARAM_DEBUG)) {
             // This will be handled by the dispatcher, so just validate.
             asBooleanValue(name, values);
             return true;
