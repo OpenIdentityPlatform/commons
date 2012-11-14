@@ -27,7 +27,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Context;
-import org.forgerock.json.resource.RootContext;
 
 /**
  * An HTTP Servlet implementation which forwards requests to an
@@ -307,9 +306,8 @@ public class HttpServlet extends javax.servlet.http.HttpServlet {
      * {@code ServletConfig} as a parameter if permitted by the method.
      * </ul>
      * If the Servlet configuration is unavailable or if the configuration does
-     * not contain a {@code context-factory-class} parameter then a default
-     * context factory will be used which always creates a {@link RootContext}
-     * for each request.
+     * not contain a {@code context-factory-class} parameter then the
+     * {@link SecurityContextFactory} will be used.
      *
      * @return The context factory which will be used to obtain the parent
      *         context of each request context.
