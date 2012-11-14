@@ -29,7 +29,7 @@
 <!--  Uncomment to specify a context factory and non-default method name.
         <init-param>
             <param-name>context-factory-class</param-name>
-            <param-value>...</param-value>
+            <param-value>org.forgerock.json.resource.servlet.SecurityContextFactory</param-value>
         </init-param>
         <init-param>
             <param-name>context-factory-method</param-name>
@@ -62,7 +62,7 @@
 <!--  Uncomment to specify a context factory and non-default method name.
         <init-param>
             <param-name>context-factory-class</param-name>
-            <param-value>...</param-value>
+            <param-value>org.forgerock.json.resource.servlet.SecurityContextFactory</param-value>
         </init-param>
         <init-param>
             <param-name>context-factory-method</param-name>
