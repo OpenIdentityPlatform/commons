@@ -220,7 +220,7 @@ final class HttpUtils {
         writer.configure(Feature.AUTO_CLOSE_TARGET, false);
 
         // Enable pretty printer if requested.
-        final String[] values = req.getParameterValues(PARAM_PRETTY_PRINT);
+        final String[] values = getParameter(req, PARAM_PRETTY_PRINT);
         if (values != null) {
             try {
                 if (asBooleanValue(PARAM_PRETTY_PRINT, values)) {
@@ -279,6 +279,40 @@ final class HttpUtils {
             method = req.getHeader(HttpUtils.HEADER_X_HTTP_METHOD_OVERRIDE);
         }
         return method;
+    }
+
+    /**
+     * Returns the named parameter from the provided HTTP request using case
+     * insensitive matching.
+     *
+     * @param req
+     *            The HTTP request.
+     * @param parameter
+     *            The parameter to return.
+     * @return The parameter values or {@code null} if it wasn't present.
+     */
+    static String[] getParameter(final HttpServletRequest req, String parameter) {
+        // Need to do case-insensitive matching.
+        for (final Map.Entry<String, String[]> p : req.getParameterMap().entrySet()) {
+            if (p.getKey().equalsIgnoreCase(parameter)) {
+                return p.getValue();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns {@code true} if the named parameter is present in the provided
+     * HTTP request using case insensitive matching.
+     *
+     * @param req
+     *            The HTTP request.
+     * @param parameter
+     *            The parameter to return.
+     * @return {@code true} if the named parameter is present.
+     */
+    static boolean hasParameter(final HttpServletRequest req, String parameter) {
+        return getParameter(req, parameter) != null;
     }
 
     /**
