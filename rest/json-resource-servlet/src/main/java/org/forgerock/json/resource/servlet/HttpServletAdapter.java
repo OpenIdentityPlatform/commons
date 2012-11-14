@@ -67,7 +67,6 @@ import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.SortKey;
 import org.forgerock.json.resource.UpdateRequest;
 
@@ -104,18 +103,6 @@ import org.forgerock.json.resource.UpdateRequest;
  * @see HttpServlet
  */
 public final class HttpServletAdapter {
-    /**
-     * The default context factory which will be used if none was provided
-     * during construction or initialization.
-     */
-    private static final HttpServletContextFactory DEFAULT_CONTEXT_FACTORY = new HttpServletContextFactory() {
-
-        @Override
-        public Context createContext(final HttpServletRequest request) throws ResourceException {
-            return new RootContext();
-        }
-    };
-
     private static final String THIS_API_URI;
     private static final String THIS_API_VERSION;
 
@@ -131,7 +118,7 @@ public final class HttpServletAdapter {
 
     /**
      * Creates a new servlet adapter with the provided connection factory and a
-     * context factory which creates a new {@link RootContext} for each request.
+     * context factory the {@link SecurityContextFactory}.
      *
      * @param servletContext
      *            The servlet context.
@@ -183,8 +170,8 @@ public final class HttpServletAdapter {
      *            The connection factory.
      * @param contextFactory
      *            The context factory which will be used to obtain the parent
-     *            context of each request context, or {@code null} if a new
-     *            {@link RootContext} should be created for each request.
+     *            context of each request context, or {@code null} if the
+     *            {@link SecurityContextFactory} should be used.
      * @throws ServletException
      *             If the servlet container does not support Servlet 2.x or
      *             beyond.
@@ -193,7 +180,8 @@ public final class HttpServletAdapter {
             final ConnectionFactory connectionFactory,
             final HttpServletContextFactory contextFactory) throws ServletException {
         this.servletContext = checkNotNull(servletContext);
-        this.contextFactory = contextFactory != null ? contextFactory : DEFAULT_CONTEXT_FACTORY;
+        this.contextFactory = contextFactory != null ? contextFactory : SecurityContextFactory
+                .getHttpServletContextFactory();
         this.dispatcher = getServletConfigurator(servletContext).getRequestDispatcher(
                 checkNotNull(connectionFactory));
     }
