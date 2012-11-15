@@ -58,5 +58,11 @@ define("org/forgerock/commons/ui/common/util/CookieHelper", [
         }
     };
     
+    obj.deleteCookie = function(name, path, domain) {
+        var date = new Date();
+        date.setTime(date.getTime()+(-1*24*60*60*1000));
+        obj.setCookie(name, "", date, path, domain);
+    };
+    
     return obj;
 });

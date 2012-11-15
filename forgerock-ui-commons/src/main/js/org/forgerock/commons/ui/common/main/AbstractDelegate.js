@@ -29,8 +29,9 @@
  */
 define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
 	"org/forgerock/commons/ui/common/util/Constants", 
+    "org/forgerock/commons/ui/common/main/Configuration",
 	"org/forgerock/commons/ui/common/main/ServiceInvoker"
-], function(constants, serviceInvoker) {
+], function(constants, configuration, serviceInvoker) {
 
     var obj = function AbstractDelegate(serviceUrl) {
         var baseEntity = serviceUrl.match(/\/openidm\/([\w\/]*)/);
@@ -42,6 +43,13 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
     };
 
     obj.prototype.serviceCall = function(callParams) {
+
+        if (!callParams.hasOwnProperty('headers')) {
+            callParams.headers = {};
+        }
+        if (configuration.hasOwnProperty('passwords') && configuration.passwords.hasOwnProperty('password')) {
+            callParams.headers[constants.OPENIDM_HEADER_PARAM_REAUTH]=configuration.passwords.password;
+        }
         if(callParams.serviceUrl) {
             callParams.url = callParams.serviceUrl + callParams.url;
         } else {

@@ -46,7 +46,7 @@ define("org/forgerock/commons/ui/common/main/ViewManager", [
         var view;
         
         if(obj.currentDialog !== "null") {
-            require(obj.currentDialog).$el.remove();
+            require(obj.currentDialog).close();
         }
         
         obj.currentDialog = "null";

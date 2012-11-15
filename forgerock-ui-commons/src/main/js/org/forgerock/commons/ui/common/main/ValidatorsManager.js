@@ -88,7 +88,7 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
                     
                     input = el.find("[name=" + property.name + "]");
                     
-                    input.attr("data-validation-status", "error").data("prevValue", input.val());
+                    input.attr("data-validation-status", "ok").data("prevValue", input.val());
                     
                     if (input.attr('data-validator-event')) {
                         event = input.attr('data-validator-event') + "keyup change blur";
@@ -96,6 +96,12 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
                         event = "change keyup blur";
                     }
                     
+
+                    _.each(property.policyRequirements, function (req) {
+                        if (req === "REAUTH_REQUIRED") {
+                            el.trigger("check_reauth", property.name);
+                        }
+                    });
                     
                     // This adds requirement descriptions for DOM containers specifically designated to hold them
                     _.each($(".validationRules[data-for-validator~='"+input.attr("name")+"']"), function (ruleContainer) {
@@ -120,65 +126,80 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
                         _.each(property.policyRequirements, function (req) {
                             var reqDiv = $('<div class="field-rule"><span class="error">x</span><span/></div>');
                             
-                            reqDiv.find("span:last")
-                                .attr("data-for-req", req)
-                                .attr("data-for-validator", input.attr("name"))
-                                .text($.t("common.form.validation." + req, allPolicyReqParams[req]));
-                            $(ruleContainer).append(reqDiv);
+                            // if there is no text to show for this rule, then don't display it.
+                            if ($.t("common.form.validation." + req, allPolicyReqParams[req]).length) {
+                                reqDiv.find("span:last")
+                                    .attr("data-for-req", req)
+                                    .attr("data-for-validator", input.attr("name"))
+                                    .text($.t("common.form.validation." + req, allPolicyReqParams[req]));
+                                $(ruleContainer).append(reqDiv);
+                            }
                         });
                     });
                     
                     // This binds the events to all of our fields which have validation policies defined by the server
                     input.on(event, _.bind(function (e) {
                         var validationContext = (e.type === "change" || e.type === "blur") ? "server":"client";
+                        
                         $.doTimeout(this.input.attr('name')+'validation' + validationContext, 100, _.bind(function() {
     
-                            var j,params,policyFailures = [],EVAL_IS_EVIL = eval; // JSLint doesn't like eval usage; this is a bit of a hack around that, while acknowledging it.
+                            var j,params,policyFailures = [],
+                                hasServerPolicies = false,
+                                EVAL_IS_EVIL = eval; // JSLint doesn't like eval usage; this is a bit of a hack around that, while acknowledging it.
                             
-                            if (validationContext === "server" || (this.input.data("prevValue") !== this.input.val())) // only attempt to re-validate if the value has actually changed
+                            if (validationContext === "server" || (this.input.data("prevValue") !== this.input.val())) // only attempt to re-validate if the value has actually changed since the last time this was triggered
                             {
                                 this.input.data("prevValue", this.input.val());
                                 this.input.siblings(".validation-message").empty();
-                                _.each(this.property.policies, _.bind(function(policy,j) {
-                                    
-                                    // The policy may return the JavaScript validation function as a string property;
-                                    // If so, we can use that validation function directly here
-                                    if (policy.policyFunction) {
-                                        
-                                        if (!policy.params) {
-                                            policy.params = {};
-                                        }
-                                        
-                                        params = policy.params;
-                                        // This instantiates the string representation of the function into an actual, executable local function
-                                        // and then calls that function, appending the resulting array into our collection of policy failures.
-                                        policyFailures = policyFailures.concat(EVAL_IS_EVIL("policyFunction = " + policy.policyFunction)(form2js(this.input.closest('form')[0]), this.input.val(), params, this.property.name));
-                                    }
-                                    // For those validation policies which cannot be performed within the browser, 
-                                    // we call to the server to do the validation for us.
-                                    if (validationContext === "server" && (!policy.policyFunction || this.input.attr("data-validation-force-server"))) {
-                                        policyFailures = [];
-                                        policyDelegate.validateProperty(
-                                            baseEntity,
-                                            {
-                                                "fullObject": form2js(this.input.closest("form")[0]), 
-                                                "value": this.input.val(), 
-                                                "property": this.property.name
-                                            }, 
-                                            _.bind(function (result) {
-                                                var l;
-                                                if (!result.result) {
-                                                    for (l = 0; l < result.failedPolicyRequirements.length; l++) {
-                                                        policyFailures = policyFailures.concat(result.failedPolicyRequirements[l].policyRequirements);
-                                                    }
-                                                    postValidation.call(this, policyFailures);
-                                                }
-                                            }, this)
-                                        );
-                                    }
-                                }, this));
                                 
-                                postValidation.call(this, policyFailures);
+                                if (!this.input.attr("data-validation-force-server")) {
+                                    _.each(this.property.policies, _.bind(function(policy,j) {
+                                        
+                                        // The policy may return the JavaScript validation function as a string property;
+                                        // If so, we can use that validation function directly here
+                                        if (policy.policyFunction) {
+                                            
+                                            if (!policy.params) {
+                                                policy.params = {};
+                                            }
+                                            
+                                            params = policy.params;
+                                            // This instantiates the string representation of the function into an actual, executable local function
+                                            // and then calls that function, appending the resulting array into our collection of policy failures.
+                                            policyFailures = policyFailures.concat(EVAL_IS_EVIL("policyFunction = " + policy.policyFunction)(form2js(this.input.closest('form')[0]), this.input.val(), params, this.property.name));
+                                        }
+                                        // we have a special case for reauth required, since that is kind of a strange case.
+                                        else if (!($.inArray("REAUTH_REQUIRED", policy.policyRequirements) !== -1 && policy.policyRequirements.length === 1)) {
+                                            hasServerPolicies = true;
+                                        }
+                                    }, this));
+                                }
+                                
+                                // For those validation policies which cannot be performed within the browser, 
+                                // we call to the server to do the validation for us.
+                                if (validationContext === "server" && (hasServerPolicies || this.input.attr("data-validation-force-server"))) {
+                                    policyFailures = [];
+                                    policyDelegate.validateProperty(
+                                        baseEntity,
+                                        {
+                                            "fullObject": form2js(this.input.closest("form")[0], '.', false), 
+                                            "value": this.input.val(), 
+                                            "property": this.property.name
+                                        }, 
+                                        _.bind(function (result) {
+                                            var l;
+                                            if (!result.result) {
+                                                for (l = 0; l < result.failedPolicyRequirements.length; l++) {
+                                                    policyFailures = policyFailures.concat(result.failedPolicyRequirements[l].policyRequirements);
+                                                }
+                                            }
+                                            postValidation.call(this, policyFailures);
+                                        }, this)
+                                    );
+                                }
+                                else {
+                                    postValidation.call(this, policyFailures);
+                                }
                                 
                             }
                         

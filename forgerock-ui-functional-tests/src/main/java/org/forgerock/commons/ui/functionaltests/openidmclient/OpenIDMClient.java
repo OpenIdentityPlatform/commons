@@ -82,7 +82,7 @@ public class OpenIDMClient {
 		
 		HttpEntity<JsonNode> requestEntity = new HttpEntity<JsonNode>(arrayNode, getAllUsersHeaders);
 		
-		ResponseEntity<BaseResult> response = getRestTemplate().exchange(constants.getOpenIDMServer() + "openidm/managed/user?_action=patch&_query-id=for-userName&uid=" + userName,
+		ResponseEntity<BaseResult> response = getRestTemplate().exchange(constants.getOpenIDMServer() + "openidm/managed/user?_action=patch&_queryId=for-userName&uid=" + userName,
 			      HttpMethod.POST, requestEntity, BaseResult.class);
 		BaseResult result = response.getBody();
 		if (result != null && result.getError() != null) {
@@ -91,7 +91,7 @@ public class OpenIDMClient {
 	}
 
 	public EntityBaseInfo[] getAllUsers() {
-		ResponseEntity<EntityBaseInfoArray> response = getRestTemplate().exchange(constants.getOpenIDMServer() + "openidm/managed/user/?_query-id=query-all-ids",
+		ResponseEntity<EntityBaseInfoArray> response = getRestTemplate().exchange(constants.getOpenIDMServer() + "openidm/managed/user/?_queryId=query-all-ids",
 			      HttpMethod.GET, new HttpEntity<byte[]>(getAllUsersHeaders), EntityBaseInfoArray.class);
 		EntityBaseInfoArray result = response.getBody();
 		if (result.getError() != null) {

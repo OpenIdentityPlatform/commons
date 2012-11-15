@@ -41,6 +41,12 @@ define("org/forgerock/commons/ui/common/main/ErrorsHandler", [
             error.status = error.error;
         }
         
+        if (error.hasOwnProperty('responseText')) {
+            try {
+                error.responseObj = $.parseJSON(error.responseText);
+            } catch (parseErr) { /* Must not be JSON */ }
+        }
+        
         if(handlers) {
             //find match in handlers
             handler = obj.matchError(error, handlers);
@@ -52,12 +58,15 @@ define("org/forgerock/commons/ui/common/main/ErrorsHandler", [
         }
         
         if(handler) {
-            if(handler.event) {
-                eventManager.sendEvent(handler.event, {handler: handler, error: error});
-            }
-            
-            if(handler.message) {
-                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, handler.message);
+            // conditional check needed here until calls to authentication?_action=reauthenticate no longer produce 403 status
+            if (!error.hasOwnProperty("responseObj") || !(error.responseObj.error === 403 && error.responseObj.message === "Reauthentication failed")) {
+                if(handler.event) {
+                    eventManager.sendEvent(handler.event, {handler: handler, error: error});
+                }
+                
+                if(handler.message) {
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, handler.message);
+                }
             }
         } else {
             console.error(error.status);

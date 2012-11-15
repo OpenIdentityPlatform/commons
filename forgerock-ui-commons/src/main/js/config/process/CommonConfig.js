@@ -106,13 +106,16 @@ define("config/process/CommonConfig", [
             dependencies: [
                 "org/forgerock/commons/ui/common/main/ViewManager",
                 "org/forgerock/commons/ui/common/main/Router",
-                "org/forgerock/commons/ui/common/main/Configuration"
+                "org/forgerock/commons/ui/common/main/Configuration",
+                "org/forgerock/commons/ui/common/components/Navigation"
             ],
-            processDescription: function(args, viewManager, router, conf) {
+            processDescription: function(args, viewManager, router, conf, navigation) {
                 var route = args.route, params = args.args;
                 
                 conf.setProperty("baseView", args.base); 
                 conf.setProperty("baseViewArgs", params); 
+                
+                navigation.init();
                 
                 viewManager.changeView(route.baseView.view, params, function() {  
                     viewManager.showDialog(route.dialog, params);

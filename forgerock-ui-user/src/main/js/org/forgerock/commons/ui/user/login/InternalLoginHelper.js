@@ -40,7 +40,7 @@ define("org/forgerock/commons/ui/user/login/InternalLoginHelper", [
             
             obj.getUserById(user.userid.id, user.userid.component, successCallback, errorCallback);
         }, function() {
-                errorCallback();
+            errorCallback();
         }, {"unauthorized": { status: "401"}});
     };
 

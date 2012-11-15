@@ -60,7 +60,7 @@ define("org/forgerock/commons/ui/common/main/UniversalDelegate", [
     };
     
     obj.readByName = function(serviceUrl, name, successCallback, errorCallback) {
-        obj.serviceCall({url: serviceUrl + "/?_query-id=get-"+serviceUrl+"-by-name&" + $.param({name: name}), success: function(data) {
+        obj.serviceCall({url: serviceUrl + "/?_queryId=get-"+serviceUrl+"-by-name&" + $.param({name: name}), success: function(data) {
             if(successCallback) {
                 successCallback(data.result);
             }
@@ -68,7 +68,7 @@ define("org/forgerock/commons/ui/common/main/UniversalDelegate", [
     };
     
     obj.getAll = function(serviceUrl, successCallback, errorCallback) {
-        obj.serviceCall({url: serviceUrl + "/?_query-id=query-all-"+serviceUrl+"s", success: function(data) {
+        obj.serviceCall({url: serviceUrl + "/?_queryId=query-all-"+serviceUrl+"s", success: function(data) {
             if(successCallback) {
                 successCallback(data.result);
             }

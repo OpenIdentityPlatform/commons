@@ -70,7 +70,7 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
                 this.loadTemplate();
             }
             
-            $(window).scrollTop(0);
+            //$(window).scrollTop(0);
         },
         
         loadTemplate: function() {

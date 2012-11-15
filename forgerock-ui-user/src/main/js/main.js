@@ -32,7 +32,7 @@
 require.config({
     paths: {
         mustache: "libs/mustache-0.7.0",
-        i18next: "libs/i18next-1.5.7-min",
+        i18next: "libs/i18next-1.5.8-min",
         backbone: "libs/backbone-0.9.2-min",
         underscore: "libs/underscore-1.3.3-min",
         js2form: "libs/js2form-1.0",
@@ -119,9 +119,7 @@ require([
     "org/forgerock/commons/ui/common/main/EventManager",
     "config/main",
     "org/forgerock/commons/ui/user/main",
-    "org/forgerock/commons/ui/common/main",
-    "org/forgerock/openidm/ui/apps/main",
-    "org/forgerock/openidm/ui/admin/main" 
+    "org/forgerock/commons/ui/common/main"
 ], function(a, b, c, d, e, f, g, h, i, j, k, l, m, n, i18n, constants, eventManager) { 
     eventManager.sendEvent(constants.EVENT_DEPENDECIES_LOADED);
 });

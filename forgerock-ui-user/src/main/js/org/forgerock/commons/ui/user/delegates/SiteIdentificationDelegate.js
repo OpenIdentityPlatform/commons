@@ -22,24 +22,30 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define*/
+/*global $, define, _ */
 
-define("org/forgerock/commons/ui/user/main", [
-    "./delegates/UserDelegate",
-    "./delegates/InternalUserDelegate",
-    "./login/InternalLoginHelper",  
-    "./UserRegistrationView",
-    "./profile/UserProfileView",
-    "./TermsOfUseDialog",
-    "./profile/EnterOldPasswordDialog",
-	"./ForgottenPasswordDialog",
-	"./profile/ChangeSecurityDataDialog",
-    "./profile/ChangeSiteIdentificationDialog",
-	"./LoginView",
-	"./LoginDialog",
-	"./NotFoundView",
-	"./login/LoggedUserBarView",
-	"./SiteConfigurator",
-	"./delegates/SiteConfigurationDelegate",
-	"./delegates/SiteIdentificationDelegate"
-]);
+/**
+ * @author mbilski
+ */
+define("org/forgerock/commons/ui/user/delegates/SiteIdentificationDelegate", [
+    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/main/AbstractDelegate",
+    "org/forgerock/commons/ui/common/main/Configuration",
+    "org/forgerock/commons/ui/common/main/EventManager"
+], function(constants, AbstractDelegate, configuration, eventManager) {
+
+    var obj = new AbstractDelegate(constants.host + "/openidm/endpoint/siteIdentification");
+
+    obj.getSiteIdentificationForLogin = function(login, successCallback, errorCallback) {            
+        obj.serviceCall({url: "?login=" + login, success: function(data) {
+            if(successCallback) {
+                successCallback(data);
+            }
+        }, error: errorCallback});
+    };
+    
+    return obj;
+});
+
+
+

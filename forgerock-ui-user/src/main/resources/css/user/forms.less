@@ -12,6 +12,10 @@ input[type="text"], input[type="password"], textarea, select {
     -moz-transition: all 0.25s ease-in-out;
 }
 
+.select-static-medium {
+	width: 130px;
+}
+
 input.read-only {
     border: none;
     background: transparent;
@@ -114,6 +118,33 @@ form.form {
             height: 25px; 
         }
     }
+    
+    div.input-icon {
+    	span.icon {
+    	   height: 28px;
+    	   width: 36px;
+    	   display: inline-block;
+    	   vertical-align: top;
+    	   margin-right: -1px;
+    	   border: 1px solid #DBDBDB;
+    	   .rounded-left-corners;
+    	   .linear-gradient;
+    	}
+    	span.icon-user {
+		   .linear-gradient-with-image("../../images/icon-user.png");
+    	}
+    	span.icon-key {
+    	   .linear-gradient-with-image("../../images/icon-key.png");
+    	}
+    	input {
+	    	position: relative;
+			margin-bottom: 0;
+			vertical-align: top;
+			height: 18px;
+    		.rounded-left-corners(0);
+    	}
+    }
+    
     div.field-text {
        padding-top: 20px;
     }

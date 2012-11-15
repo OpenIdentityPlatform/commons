@@ -34,6 +34,7 @@ define("org/forgerock/commons/ui/common/util/Constants", [
     obj.OPENIDM_HEADER_PARAM_USERNAME = "X-OpenIDM-Username";
     obj.OPENIDM_HEADER_PARAM_LOGOUT = "X-OpenIDM-Logout";
     obj.OPENIDM_HEADER_PARAM_NO_SESION = "X-OpenIDM-NoSession";
+    obj.OPENIDM_HEADER_PARAM_REAUTH = "X-OpenIDM-Reauth-Password";
 
     obj.OPENIDM_ANONYMOUS_USERNAME = "anonymous";
     obj.OPENIDM_ANONYMOUS_PASSWORD = "anonymous";

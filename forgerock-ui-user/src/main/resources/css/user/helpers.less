@@ -96,6 +96,13 @@ a:hover {
     text-decoration: none;
 }
 
+a.img-close {
+	background: url('../../images/cross.png') no-repeat;
+	width: 20px;
+	height: 20px;
+	display-inline: block;
+}
+
 /* HELPERS */
 .align-center {
     text-align: center;
@@ -143,6 +150,15 @@ a:hover {
     border-bottom-left-radius: @radius;
 }
 
+.rounded-right-corners (@radius: 5px) {
+    -webkit-border-top-right-radius: 5px;
+	-webkit-border-bottom-right-radius: 5px;
+	-moz-border-radius-topright: 5px;
+	-moz-border-radius-bottomright: 5px;
+	border-top-right-radius: 5px;
+	border-bottom-right-radius: 5px;
+}
+
 .box-shadow (@x: 0, @y: 0, @blur: 1px, @spread: 1px, @color: #888) {
   box-shadow: @arguments;
   -moz-box-shadow: @arguments;
@@ -155,6 +171,24 @@ a:hover {
 	background-image: -moz-linear-gradient(@position, @color-start, @color-end);
 	background-image: -webkit-linear-gradient(@position, @color-start, @color-end);
 	background-image: -ms-linear-gradient(@position, @color-start, @color-end);
+}
+
+.linear-gradient-reverse(@position: left top, @color-start: #ededed 0%, @color-end: #fcfcfc 53%) {
+	background-image: linear-gradient(@position, @color-start, @color-end);
+	background-image: -o-linear-gradient(@position, @color-start, @color-end);
+	background-image: -moz-linear-gradient(@position, @color-start, @color-end);
+	background-image: -webkit-linear-gradient(@position, @color-start, @color-end);
+	background-image: -ms-linear-gradient(@position, @color-start, @color-end);
+}
+
+.linear-gradient-with-image (@background-url: none, @background-repeat: no-repeat, @background-position: center center, @position: left top, @color-start: #fcfcfc 0%, @color-end: #ededed 53%) {
+	background-image: url("@{background-url}"), linear-gradient(@position, @color-start, @color-end);
+	background-image: url("@{background-url}"), -o-linear-gradient(@position, @color-start, @color-end);
+	background-image: url("@{background-url}"), -moz-linear-gradient(@position, @color-start, @color-end);
+	background-image: url("@{background-url}"), -webkit-linear-gradient(@position, @color-start, @color-end);
+	background-image: url("@{background-url}"), -ms-linear-gradient(@position, @color-start, @color-end);
+	background-repeat: @background-repeat;
+	background-position: @background-position;
 }
 
 /* */
@@ -261,6 +295,22 @@ a:hover {
 .offset15 {
     margin-bottom: 15px;
 }
+.offset16 {
+    margin-bottom: 16px;
+}
+.offset17 {
+    margin-bottom: 17px;
+}
+.offset18 {
+    margin-bottom: 18px;
+}
+.offset19 {
+    margin-bottom: 19px;
+}
+.offset20 {
+    margin-bottom: 20px;
+}
+
 
 .container-shadow {
     .container;
@@ -286,4 +336,40 @@ a:hover {
 
 .row {
     margin-bottom: 10px;
+}
+
+.shadow {
+	.box-shadow;
+}
+.round {
+	.rounded-corners;
+}
+.bg-gradient {
+	.linear-gradient;
+}
+.bg-white {
+	background-color: #ffffff;
+}
+.border-gray {
+	border: 1px solid #c9c9c9;
+}
+
+.checkboxList {
+    .rounded-corners;
+    .border-gray;
+    .content;
+    float: left;
+    max-height: 80px;
+    width: 200px;
+    overflow: auto;
+    ol {
+        list-style-type:none;
+        li label {
+            width: auto;
+            float: none;
+            text-align: left;
+            display: inline;
+            font-weight: normal;
+        }
+    }
 }

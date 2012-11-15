@@ -32,15 +32,37 @@ define("org/forgerock/commons/ui/user/LoginView", [
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/util/CookieHelper"
-], function(AbstractView, validatorsManager, eventManager, constants, cookieHelper) {
+    "org/forgerock/commons/ui/common/util/CookieHelper",
+    "org/forgerock/commons/ui/user/delegates/SiteIdentificationDelegate",
+    "org/forgerock/commons/ui/common/main/Configuration"
+], function(AbstractView, validatorsManager, eventManager, constants, cookieHelper, siteIdentificationDelegate, conf) {
     var LoginView = AbstractView.extend({
         template: "templates/user/LoginTemplate.html",
         baseTemplate: "templates/user/LoginBaseTemplate.html",
         
         events: {
             "click input[type=submit]": "formSubmit",
+            "change input[name=login]": "getSiteIdentification",
             "onValidate": "onValidate"
+        },
+        
+        getSiteIdentification: function() {
+            var login = this.$el.find("input[name=login]").val();
+            
+            if(conf.globalData.siteIdentification) {
+                if (login.length) {
+                    siteIdentificationDelegate.getSiteIdentificationForLogin(login, _.bind(function(data) {
+                        this.$el.find("#siteImage").html('<img src="images/passphrase/'+ data.siteImage +'" />');
+                        this.$el.find("#passPhrase").html(data.passPhrase);
+                        this.$el.find("#identificationMessage").hide();
+                    }, this));
+                }
+                else {
+                    this.$el.find("#siteImage").hide();
+                    this.$el.find("#passPhrase").hide();
+                    this.$el.find("#identificationMessage").show();
+                }
+            }
         },
         
         formSubmit: function(event) {
@@ -51,6 +73,8 @@ define("org/forgerock/commons/ui/user/LoginView", [
                     var expire = new Date();
                     expire.setDate(expire.getDate + 365*20);
                     cookieHelper.setCookie("login", this.$el.find("input[name=login]").val(), expire);
+                } else {
+                    cookieHelper.deleteCookie("login");
                 }
                 
                 eventManager.sendEvent(constants.EVENT_LOGIN_REQUEST, {userName: this.$el.find("input[name=login]").val(), password: this.$el.find("input[name=password]").val()});
@@ -62,7 +86,12 @@ define("org/forgerock/commons/ui/user/LoginView", [
                 validatorsManager.bindValidators(this.$el);
                 
                 var login = cookieHelper.getCookie("login");
-                this.$el.find("input[name=login]").val(login);
+                
+                if(login) {
+                    this.$el.find("input[name=login]").val(login);
+                    this.$el.find("[name=loginRemember]").attr("checked","true");
+                    this.getSiteIdentification();
+                } 
                 
                 if(callback) {
                     callback();

@@ -46,7 +46,7 @@ define("org/forgerock/commons/ui/user/delegates/UserDelegate", [
         obj.usersCallback = successCallback;
         obj.numberOfUsers = 0;
 
-        obj.serviceCall({url: "/?_query-id=query-all&fields=*", success: function(data) {
+        obj.serviceCall({url: "/?_queryId=query-all&fields=*", success: function(data) {
             if(successCallback) {
                 obj.users = data.result;
                 successCallback(data.result);
@@ -84,9 +84,15 @@ define("org/forgerock/commons/ui/user/delegates/UserDelegate", [
     /**
      * Check credentials method
      */
-    obj.checkCredentials = function(uid, password, successCallback, errorCallback) {
+    obj.checkCredentials = function(password, successCallback, errorCallback) {
+
+        var headers = {};
+        headers[constants.OPENIDM_HEADER_PARAM_REAUTH] = password;
         obj.serviceCall({
-            url: "/?_query-id=for-credentials&" + $.param({password: password, uid: uid.toLowerCase()}),
+            serviceUrl: constants.host + "/openidm/authentication?_action=reauthenticate",
+            url: "",
+            type: "POST",
+            headers: headers,
             success: successCallback,
             error: errorCallback
         });
@@ -117,34 +123,55 @@ define("org/forgerock/commons/ui/user/delegates/UserDelegate", [
         this.serviceCall({serviceUrl: constants.host + "/openidm/repo/internal/user", url: "/" + id, type: "GET", success: successCallback, error: errorCallback});
     };
 
-    /**
-     * Check security answer method
-     */
-    obj.getBySecurityAnswer = function(uid, securityAnswer, successCallback, errorCallback) {
+    obj.getSecurityQuestionForUserName = function(uid, successCallback, errorCallback) {
         obj.serviceCall({
-            url: "/?_query-id=for-security-answer&" + $.param({uid: uid, securityAnswer: securityAnswer}), 
+            serviceUrl: constants.host + "/openidm/endpoint/securityQA?_action=securityQuestionForUserName&" + $.param({uid: uid.toLowerCase()}),
+            url: "",
             success: function (data) {
-                if(!data.result) {
-                    if(errorCallback) {
-                        errorCallback();
-                    }
-                } else if(successCallback) {
-                    successCallback(data.result);
+                if(data.hasOwnProperty('securityQuestion')) {
+                    successCallback(data.securityQuestion);
+                } else if(errorCallback) {
+                    errorCallback();
                 }
             },
             error: errorCallback
         });
     };
-
-    obj.getSecurityQuestionForUserName = function(uid, successCallback, errorCallback) {
+    /**
+     * Check security answer method
+     */
+    obj.getBySecurityAnswer = function(uid, securityAnswer, successCallback, errorCallback) {
         obj.serviceCall({
-            url: "/?_query-id=get-security-question&" + $.param({uid: uid.toLowerCase()}), 
+            serviceUrl: constants.host + "/openidm/endpoint/securityQA?_action=checkSecurityAnswerForUserName&" + $.param({uid: uid.toLowerCase(), securityAnswer: securityAnswer}),
+            url: "",
             success: function (data) {
-                if(data.result.length !== 1) {
-                    successCallback();
-                } else if(successCallback) {
-                    successCallback(data.result[0].securityQuestion);
+                if(data.result === "correct" && successCallback) {
+                    successCallback(data);
+                } else if (data.result === "error" && errorCallback) {
+                    errorCallback(data);
                 }
+                
+            },
+            error: errorCallback
+        });
+    };
+
+    
+    /**
+     * Setting new password for username if security answer is correct
+     */
+    obj.setNewPassword = function(userName, securityAnswer, newPassword, successCallback, errorCallback) {
+        console.info("setting new password for user and security question");
+        obj.serviceCall({
+            serviceUrl: constants.host + "/openidm/endpoint/securityQA?_action=setNewPasswordForUserName&" + $.param({newPassword: newPassword, uid: userName, securityAnswer: securityAnswer}),
+            url: "",
+            success: function (data) {
+                if(data.result === "correct" && successCallback) {
+                    successCallback(data);
+                } else if (data.result === "error") {
+                    errorCallback(data);
+                }
+                
             },
             error: errorCallback
         });
@@ -152,7 +179,7 @@ define("org/forgerock/commons/ui/user/delegates/UserDelegate", [
 
     obj.getForUserName = function(uid, successCallback, errorCallback) {
         obj.serviceCall({
-            url: "/?_query-id=for-userName&" + $.param({uid: uid.toLowerCase()}), 
+            url: "/?_queryId=for-userName&" + $.param({uid: uid.toLowerCase()}), 
             success: function (data) {
                 if(data.result.length !== 1) {
                     if(errorCallback) {
@@ -170,27 +197,6 @@ define("org/forgerock/commons/ui/user/delegates/UserDelegate", [
         obj.serviceCall({
             url: "/" + uid, 
             success: successCallback,
-            error: errorCallback
-        });
-    };
-    
-    /**
-     * UserName availability check. 
-     * If userName is available successCallback(true) is invoked, otherwise successCallback(false) is invoked
-     * If error occurred, errorCallback is invoked. 
-     */
-    obj.checkUserNameAvailability = function(uid, successCallback, errorCallback) {
-        obj.serviceCall({
-            url: "/?_query-id=check-userName-availability&" + $.param({uid: uid.toLowerCase()}), 
-            success: function (data) {
-                if(successCallback) {
-                    if(data.result.length === 0) { 
-                        successCallback(true);
-                    } else {
-                        successCallback(false);
-                    }
-                }
-            },
             error: errorCallback
         });
     };
@@ -225,18 +231,6 @@ define("org/forgerock/commons/ui/user/delegates/UserDelegate", [
     obj.patchSelectedUserAttributes = function(id, rev, patchDefinitionObject, successCallback, errorCallback, noChangesCallback) {
         console.info("updating user");
         obj.patchEntity({id: id, rev: rev}, patchDefinitionObject, successCallback, errorCallback, noChangesCallback);
-    };
-    
-    /**
-     * Setting new password for username if security answer is correct
-     */
-    obj.setNewPassword = function(userName, securityAnswer, newPassword, successCallback, errorCallback) {
-        console.info("setting new password for user and security question");
-        obj.serviceCall({
-            url: "/?_query-id=set-newPassword-for-userName-and-security-answer&" + $.param({newpassword: newPassword, username: userName, securityAnswer: securityAnswer}),
-            success: successCallback,
-            error: errorCallback
-        });
     };
 
     return obj;

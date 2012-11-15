@@ -44,7 +44,8 @@ define("org/forgerock/commons/ui/user/ForgottenPasswordDialog", [
             "click input[name='submitAnswer']": "submitAnswer",
             "click .dialogContainer": "stop",
             "onValidate": "onValidate",
-            "customValidate": "customValidate"
+            "customValidate": "customValidate",
+            "userNameFound": "userNameFound"
         },
         
         data: {         
@@ -93,20 +94,17 @@ define("org/forgerock/commons/ui/user/ForgottenPasswordDialog", [
                     this.$el.find("input[name=passwordConfirm]").val("");
                     this.data.height = 210;
                     this.resize();
-                } else {
-                    securityQuestionRef = this.securityQuestions;
-                    userDelegate.getSecurityQuestionForUserName(userName, _.bind(function(result) {
-                        console.log(result + " " + securityQuestionRef[result]);
-                        $("#fgtnSecurityQuestion").text(securityQuestionRef[result]);
-                        this.data.height = 300;
-                        this.resize();
-                        this.$el.find("#fgtnAnswerDiv").show();
-                        this.$el.find("input[name=fgtnSecurityAnswer]").focus();
-                    }, this));
                 }
             }
         },
-        
+        userNameFound: function (event, securityQuestion) {
+            console.log(this.securityQuestions[securityQuestion]);
+            $("#fgtnSecurityQuestion").text(this.securityQuestions[securityQuestion]);
+            this.data.height = 300;
+            this.resize();
+            this.$el.find("#fgtnAnswerDiv").show();
+            this.$el.find("input[name=fgtnSecurityAnswer]").focus();
+        },
         changePassword: function() {
             var dialog = this, userName = this.$el.find("input[name=resetUsername]").val(), securityAnswer = this.$el.find("input[name=fgtnSecurityAnswer]").val(), newPassword = this.$el.find("input[name=password]").val();
             console.log("changing password");
@@ -114,7 +112,12 @@ define("org/forgerock/commons/ui/user/ForgottenPasswordDialog", [
             userDelegate.setNewPassword(userName, securityAnswer, newPassword, function(r) {
                 eventManager.sendEvent(constants.FORGOTTEN_PASSWORD_CHANGED_SUCCESSFULLY, { userName: userName, password: newPassword});
                 dialog.close();
-            });
+            },
+            function (r) {
+                console.log("Failed to set password for some reason....");
+                console.log(r);
+            } 
+            );
         },
         submitAnswer : function () {
             this.$el.find("input[name=fgtnSecurityAnswer]").trigger("validate");
