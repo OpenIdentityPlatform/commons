@@ -19,6 +19,7 @@ import static org.forgerock.json.resource.servlet.HttpUtils.HEADER_ETAG;
 import static org.forgerock.json.resource.servlet.HttpUtils.HEADER_LOCATION;
 import static org.forgerock.json.resource.servlet.HttpUtils.adapt;
 import static org.forgerock.json.resource.servlet.HttpUtils.closeQuietly;
+import static org.forgerock.json.resource.servlet.HttpUtils.getIfNoneMatch;
 import static org.forgerock.json.resource.servlet.HttpUtils.getJsonGenerator;
 
 import java.io.IOException;
@@ -329,6 +330,16 @@ abstract class RequestRunner implements ResultHandler<Connection>, RequestVisito
             @Override
             public void handleResult(final Resource result) {
                 try {
+                    // Don't return the resource if this is a read request and the
+                    // If-None-Match header was specified.
+                    if (request instanceof ReadRequest) {
+                        final String rev = getIfNoneMatch(httpRequest);
+                        if (rev != null && rev.equals(result.getRevision())) {
+                            // No change so 304.
+                            throw ResourceException.getException(304, "Not Modified", null, null);
+                        }
+                    }
+
                     writeResource(result);
                     doComplete();
                 } catch (final Exception e) {

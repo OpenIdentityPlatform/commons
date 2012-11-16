@@ -29,6 +29,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.ResourceException;
 
 /**
@@ -41,9 +42,9 @@ final class HttpUtils {
     static final String CRLF = "\r\n";
     static final String ETAG_ANY = "*";
     static final String HEADER_ETAG = "ETag";
-    static final String HEADER_LOCATION = "Location";
     static final String HEADER_IF_MATCH = "If-Match";
     static final String HEADER_IF_NONE_MATCH = "If-None-Match";
+    static final String HEADER_LOCATION = "Location";
     static final String HEADER_X_HTTP_METHOD_OVERRIDE = "X-HTTP-Method-Override";
     static final String METHOD_DELETE = "DELETE";
     static final String METHOD_GET = "GET";
@@ -201,37 +202,36 @@ final class HttpUtils {
         }
     }
 
-    /**
-     * Creates a JSON generator which can be used for serializing JSON content
-     * in HTTP responses.
-     *
-     * @param req
-     *            The HTTP request.
-     * @param resp
-     *            The HTTP response.
-     * @return A JSON generator which can be used to write out a JSON response.
-     * @throws IOException
-     *             If an error occurred while obtaining an output stream.
-     */
-    static JsonGenerator getJsonGenerator(final HttpServletRequest req,
-            final HttpServletResponse resp) throws IOException {
-        final JsonGenerator writer = JSON_MAPPER.getJsonFactory().createJsonGenerator(
-                resp.getOutputStream());
-        writer.configure(Feature.AUTO_CLOSE_TARGET, false);
-
-        // Enable pretty printer if requested.
-        final String[] values = getParameter(req, PARAM_PRETTY_PRINT);
-        if (values != null) {
-            try {
-                if (asBooleanValue(PARAM_PRETTY_PRINT, values)) {
-                    writer.useDefaultPrettyPrinter();
+    static String getIfMatch(final HttpServletRequest req) {
+        final String etag = req.getHeader(HEADER_IF_MATCH);
+        if (etag != null) {
+            if (etag.length() >= 2) {
+                // Remove quotes.
+                if (etag.charAt(0) == '"') {
+                    return etag.substring(1, etag.length() - 1);
                 }
-            } catch (ResourceException e) {
-                // Ignore because we may be trying to obtain a generator in
-                // order to output an error.
+            } else if (etag.equals(ETAG_ANY)) {
+                // If-Match * is implied anyway.
+                return null;
             }
         }
-        return writer;
+        return etag;
+    }
+
+    static String getIfNoneMatch(final HttpServletRequest req) {
+        final String etag = req.getHeader(HEADER_IF_NONE_MATCH);
+        if (etag != null) {
+            if (etag.length() >= 2) {
+                // Remove quotes.
+                if (etag.charAt(0) == '"') {
+                    return etag.substring(1, etag.length() - 1);
+                }
+            } else if (etag.equals(ETAG_ANY)) {
+                // If-None-Match *.
+                return ETAG_ANY;
+            }
+        }
+        return etag;
     }
 
     /**
@@ -265,6 +265,39 @@ final class HttpUtils {
     }
 
     /**
+     * Creates a JSON generator which can be used for serializing JSON content
+     * in HTTP responses.
+     *
+     * @param req
+     *            The HTTP request.
+     * @param resp
+     *            The HTTP response.
+     * @return A JSON generator which can be used to write out a JSON response.
+     * @throws IOException
+     *             If an error occurred while obtaining an output stream.
+     */
+    static JsonGenerator getJsonGenerator(final HttpServletRequest req,
+            final HttpServletResponse resp) throws IOException {
+        final JsonGenerator writer = JSON_MAPPER.getJsonFactory().createJsonGenerator(
+                resp.getOutputStream());
+        writer.configure(Feature.AUTO_CLOSE_TARGET, false);
+
+        // Enable pretty printer if requested.
+        final String[] values = getParameter(req, PARAM_PRETTY_PRINT);
+        if (values != null) {
+            try {
+                if (asBooleanValue(PARAM_PRETTY_PRINT, values)) {
+                    writer.useDefaultPrettyPrinter();
+                }
+            } catch (final ResourceException e) {
+                // Ignore because we may be trying to obtain a generator in
+                // order to output an error.
+            }
+        }
+        return writer;
+    }
+
+    /**
      * Returns the effective method name for an HTTP request taking into account
      * the "X-HTTP-Method-Override" header.
      *
@@ -291,7 +324,7 @@ final class HttpUtils {
      *            The parameter to return.
      * @return The parameter values or {@code null} if it wasn't present.
      */
-    static String[] getParameter(final HttpServletRequest req, String parameter) {
+    static String[] getParameter(final HttpServletRequest req, final String parameter) {
         // Need to do case-insensitive matching.
         for (final Map.Entry<String, String[]> p : req.getParameterMap().entrySet()) {
             if (p.getKey().equalsIgnoreCase(parameter)) {
@@ -311,7 +344,7 @@ final class HttpUtils {
      *            The parameter to return.
      * @return {@code true} if the named parameter is present.
      */
-    static boolean hasParameter(final HttpServletRequest req, String parameter) {
+    static boolean hasParameter(final HttpServletRequest req, final String parameter) {
         return getParameter(req, parameter) != null;
     }
 
@@ -327,6 +360,24 @@ final class HttpUtils {
     static boolean isDebugRequested(final HttpServletRequest req) throws ResourceException {
         final String[] values = req.getParameterValues(PARAM_DEBUG);
         return (values != null && asBooleanValue(PARAM_DEBUG, values));
+    }
+
+    static void rejectIfMatch(final HttpServletRequest req) throws ResourceException,
+            PreconditionFailedException {
+        if (req.getHeader(HEADER_IF_MATCH) != null) {
+            // FIXME: i18n
+            throw new PreconditionFailedException("If-Match not supported for " + getMethod(req)
+                    + " requests");
+        }
+    }
+
+    static void rejectIfNoneMatch(final HttpServletRequest req) throws ResourceException,
+            PreconditionFailedException {
+        if (req.getHeader(HEADER_IF_NONE_MATCH) != null) {
+            // FIXME: i18n
+            throw new PreconditionFailedException("If-None-Match not supported for "
+                    + getMethod(req) + " requests");
+        }
     }
 
     private HttpUtils() {
