@@ -228,8 +228,8 @@ abstract class RequestRunner implements ResultHandler<Connection>, RequestVisito
                 try {
                     writeHeader();
                     writer.writeEndArray();
-                    writer.writeStringField("paged-results-cookie", result.getPagedResultsCookie());
-                    writer.writeNumberField("remaining-paged-results", result
+                    writer.writeStringField("pagedResultsCookie", result.getPagedResultsCookie());
+                    writer.writeNumberField("remainingPagedResults", result
                             .getRemainingPagedResults());
                     writer.writeEndObject();
                     doComplete();
