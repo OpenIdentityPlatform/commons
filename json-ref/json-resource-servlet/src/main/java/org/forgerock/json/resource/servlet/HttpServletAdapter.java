@@ -69,7 +69,6 @@ import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.SortKey;
 import org.forgerock.json.resource.UpdateRequest;
 
 /**
@@ -273,12 +272,13 @@ public final class HttpServletAdapter {
                     } else if (name.equalsIgnoreCase("_sortKey")) {
                         for (final String s : values) {
                             try {
-                                request.addSortKey(SortKey.valueOf(s));
+                                request.addSortKey(s.split(","));
                             } catch (final IllegalArgumentException e) {
                                 // FIXME: i18n.
                                 throw new BadRequestException("The value '" + s
                                         + "' for parameter '" + name
-                                        + "' could not be parsed as a valid sort key");
+                                        + "' could not be parsed as a comma "
+                                        + "separated list of sort keys");
                             }
                         }
                     } else if (name.equalsIgnoreCase("_queryId")) {
@@ -549,11 +549,11 @@ public final class HttpServletAdapter {
         if (name.equalsIgnoreCase("_fieldFilter")) {
             for (final String s : values) {
                 try {
-                    request.addFieldFilter(s);
+                    request.addFieldFilter(s.split(","));
                 } catch (final IllegalArgumentException e) {
                     // FIXME: i18n.
                     throw new BadRequestException("The value '" + s + "' for parameter '" + name
-                            + "' could not be parsed as a valid JSON pointer");
+                            + "' could not be parsed as a comma separated list of JSON pointers");
                 }
             }
             return true;
