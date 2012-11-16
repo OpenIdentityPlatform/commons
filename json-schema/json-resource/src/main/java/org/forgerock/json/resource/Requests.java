@@ -412,6 +412,17 @@ public final class Requests {
          * {@inheritDoc}
          */
         @Override
+        public final QueryRequest addSortKey(final String... keys) {
+            for (final String key : keys) {
+                this.keys.add(SortKey.valueOf(key));
+            }
+            return this;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
         public Map<String, String> getAdditionalQueryParameters() {
             return parameters;
         }
