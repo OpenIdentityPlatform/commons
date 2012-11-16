@@ -33,11 +33,15 @@ import static org.forgerock.json.resource.servlet.HttpUtils.asIntValue;
 import static org.forgerock.json.resource.servlet.HttpUtils.asSingleValue;
 import static org.forgerock.json.resource.servlet.HttpUtils.checkNotNull;
 import static org.forgerock.json.resource.servlet.HttpUtils.fail;
+import static org.forgerock.json.resource.servlet.HttpUtils.getIfMatch;
+import static org.forgerock.json.resource.servlet.HttpUtils.getIfNoneMatch;
 import static org.forgerock.json.resource.servlet.HttpUtils.getJsonContent;
 import static org.forgerock.json.resource.servlet.HttpUtils.getMethod;
 import static org.forgerock.json.resource.servlet.HttpUtils.getParameter;
 import static org.forgerock.json.resource.servlet.HttpUtils.hasParameter;
 import static org.forgerock.json.resource.servlet.HttpUtils.isDebugRequested;
+import static org.forgerock.json.resource.servlet.HttpUtils.rejectIfMatch;
+import static org.forgerock.json.resource.servlet.HttpUtils.rejectIfNoneMatch;
 import static org.forgerock.json.resource.servlet.ServletConfigurator.getServletConfigurator;
 
 import java.io.IOException;
@@ -256,10 +260,12 @@ public final class HttpServletAdapter {
             // Validate request.
             preprocessRequest(req);
             rejectIfMatch(req);
-            rejectIfNoneMatch(req);
 
             final Map<String, String[]> parameters = req.getParameterMap();
             if (hasParameter(req, "_queryId") || hasParameter(req, "_queryFilter")) {
+                // Additional pre-validation for queries.
+                rejectIfNoneMatch(req);
+
                 // Query against collection.
                 final QueryRequest request = Requests.newQueryRequest(getResourceName(req));
 
@@ -313,6 +319,13 @@ public final class HttpServletAdapter {
                 dispatcher.dispatchRequest(context, request, req, resp);
             } else {
                 // Read of instance within collection or singleton.
+                final String rev = getIfNoneMatch(req);
+                if (ETAG_ANY.equals(rev)) {
+                    // FIXME: i18n
+                    throw new PreconditionFailedException("If-None-Match * not appropriate for "
+                            + getMethod(req) + " requests");
+                }
+
                 final ReadRequest request = Requests.newReadRequest(getResourceName(req));
                 for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
                     final String name = p.getKey();
@@ -501,38 +514,6 @@ public final class HttpServletAdapter {
         servletContext.log(builder.toString());
     }
 
-    private String getIfMatch(final HttpServletRequest req) throws ResourceException {
-        final String etag = req.getHeader(HEADER_IF_MATCH);
-        if (etag != null) {
-            if (etag.length() >= 2) {
-                // Remove quotes.
-                if (etag.charAt(0) == '"') {
-                    return etag.substring(1, etag.length() - 1);
-                }
-            } else if (etag.equals(ETAG_ANY)) {
-                // If-Match * is implied anyway.
-                return null;
-            }
-        }
-        return etag;
-    }
-
-    private String getIfNoneMatch(final HttpServletRequest req) throws ResourceException {
-        final String etag = req.getHeader(HEADER_IF_NONE_MATCH);
-        if (etag != null) {
-            if (etag.length() >= 2) {
-                // Remove quotes.
-                if (etag.charAt(0) == '"') {
-                    return etag.substring(1, etag.length() - 1);
-                }
-            } else if (etag.equals(ETAG_ANY)) {
-                // If-None-Match *.
-                return ETAG_ANY;
-            }
-        }
-        return etag;
-    }
-
     private String getResourceName(final HttpServletRequest req) throws ResourceException {
         // Treat null path info as root resource.
         final String resourceName = req.getPathInfo();
@@ -598,24 +579,6 @@ public final class HttpServletAdapter {
         if (req.getHeader("If-Unmodified-Since") != null) {
             // TODO: i18n
             throw new ConflictException("Header If-Unmodified-Since not supported");
-        }
-    }
-
-    private void rejectIfMatch(final HttpServletRequest req) throws ResourceException,
-            PreconditionFailedException {
-        if (req.getHeader(HEADER_IF_MATCH) != null) {
-            // FIXME: i18n
-            throw new PreconditionFailedException("If-Match not supported for " + getMethod(req)
-                    + " requests");
-        }
-    }
-
-    private void rejectIfNoneMatch(final HttpServletRequest req) throws ResourceException,
-            PreconditionFailedException {
-        if (req.getHeader(HEADER_IF_NONE_MATCH) != null) {
-            // FIXME: i18n
-            throw new PreconditionFailedException("If-None-Match not supported for "
-                    + getMethod(req) + " requests");
         }
     }
 
