@@ -31,13 +31,13 @@ public interface UpdateRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    UpdateRequest addFieldFilter(JsonPointer... fields);
+    UpdateRequest addField(JsonPointer... fields);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    UpdateRequest addFieldFilter(String... fields);
+    UpdateRequest addField(String... fields);
 
     /**
      * {@inheritDoc}

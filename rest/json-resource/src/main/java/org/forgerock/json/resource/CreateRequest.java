@@ -30,13 +30,13 @@ public interface CreateRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    CreateRequest addFieldFilter(JsonPointer... fields);
+    CreateRequest addField(JsonPointer... fields);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    CreateRequest addFieldFilter(String... fields);
+    CreateRequest addField(String... fields);
 
     /**
      * Returns the content of the JSON resource to be created.

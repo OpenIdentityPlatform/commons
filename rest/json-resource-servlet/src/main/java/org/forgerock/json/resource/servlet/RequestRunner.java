@@ -144,7 +144,9 @@ abstract class RequestRunner implements ResultHandler<Connection>, RequestVisito
             @Override
             public void handleResult(final Resource result) {
                 try {
-                    httpResponse.setHeader(HEADER_LOCATION, getResourceURL(request, result));
+                    if (result.getId() != null) {
+                        httpResponse.setHeader(HEADER_LOCATION, getResourceURL(request, result));
+                    }
                     httpResponse.setStatus(HttpServletResponse.SC_CREATED);
                     writeResource(result);
                     doComplete();
@@ -308,8 +310,12 @@ abstract class RequestRunner implements ResultHandler<Connection>, RequestVisito
         buffer.append(httpRequest.getContextPath());
         buffer.append(httpRequest.getServletPath());
 
-        // Add new resource name.
+        // Add new resource name and resource ID.
         buffer.append(request.getResourceName());
+        if (!request.getResourceName().endsWith("/")) {
+            buffer.append('/');
+        }
+        buffer.append(resource.getId());
 
         return buffer.toString();
     }
