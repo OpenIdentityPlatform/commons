@@ -18,6 +18,7 @@ package org.forgerock.json.resource;
 
 // Java SE
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import org.forgerock.json.fluent.JsonValue;
@@ -270,6 +271,9 @@ public class ResourceException extends ExecutionException {
     /** The short reason phrase of the exception. */
     private String reason;
 
+    /** Additional detail which can be evaluated by applications. */
+    private final JsonValue detail = new JsonValue(null);
+
     /**
      * Constructs a new exception with the specified exception code, and
      * {@code null} as its detail message. If the error code corresponds with a
@@ -365,6 +369,19 @@ public class ResourceException extends ExecutionException {
     }
 
     /**
+     * Returns the additional detail which can be evaluated by applications. By
+     * default there is no additional detail (
+     * {@code getDetail().isNull() == true}), and it is the responsibility of
+     * the resource provider to add it if needed.
+     *
+     * @return The additional detail which can be evaluated by applications
+     *         (never {@code null}).
+     */
+    public JsonValue getDetail() {
+        return detail;
+    }
+
+    /**
      * Returns the short reason phrase of the exception.
      *
      * @return The short reason phrase of the exception.
@@ -391,15 +408,16 @@ public class ResourceException extends ExecutionException {
      *         in the entity of an HTTP error response.
      */
     public JsonValue toJsonValue() {
-        final LinkedHashMap<String, Object> result = new LinkedHashMap<String, Object>();
+        final Map<String, Object> result = new LinkedHashMap<String, Object>(4);
         result.put("error", code); // required
         if (reason != null) { // optional
             result.put("reason", reason);
         }
-        final String detail = getMessage();
-        if (detail != null) { // optional
-            result.put("detail", detail);
+        final String message = getMessage();
+        if (message != null) { // optional
+            result.put("message", message);
         }
+        result.put("detail", detail.getObject());
         return new JsonValue(result);
     }
 }
