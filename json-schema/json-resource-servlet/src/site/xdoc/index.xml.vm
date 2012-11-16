@@ -363,7 +363,7 @@ Accept: application/json</source>
                                 initial query request. Subsequent query
                                 requests must include the cookie returned with
                                 the previous query result
-                                <tt>paged-results-cookie</tt> field, until the
+                                <tt>pagedResultsCookie</tt> field, until the
                                 server returns a <tt>null</tt> cookie indicating
                                 that the final page of results has been returned.
                             </p>
@@ -422,13 +422,13 @@ Accept: application/json</source>
                                     requested.
                                 </li>
                                 <li>
-                                    <b>paged-results-cookie</b> - the opaque
+                                    <b>pagedResultsCookie</b> - the opaque
                                     cookie which should be included with the
                                     next paged results query if paged results
                                     have been requested, otherwise <tt>null</tt>. 
                                 </li>
                                 <li>
-                                    <b>remaining-paged-results</b> - an estimate
+                                    <b>remainingPagedResults</b> - an estimate
                                     of the number of remaining paged results, or
                                     <tt>-1</tt> if the number is not known, or
                                     if paged results have not been requested.
