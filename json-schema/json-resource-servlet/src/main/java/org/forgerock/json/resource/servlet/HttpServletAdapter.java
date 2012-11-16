@@ -262,7 +262,7 @@ public final class HttpServletAdapter {
             rejectIfMatch(req);
 
             final Map<String, String[]> parameters = req.getParameterMap();
-            if (hasParameter(req, "_queryId") || hasParameter(req, "_queryFilter")) {
+            if (hasParameter(req, "_queryId") || hasParameter(req, "_filter")) {
                 // Additional pre-validation for queries.
                 rejectIfNoneMatch(req);
 
@@ -275,7 +275,7 @@ public final class HttpServletAdapter {
 
                     if (parseCommonParameter(name, values, request)) {
                         continue;
-                    } else if (name.equalsIgnoreCase("_sortKey")) {
+                    } else if (name.equalsIgnoreCase("_sortKeys")) {
                         for (final String s : values) {
                             try {
                                 request.addSortKey(s.split(","));
@@ -293,7 +293,7 @@ public final class HttpServletAdapter {
                         request.setPagedResultsCookie(asSingleValue(name, values));
                     } else if (name.equalsIgnoreCase("_pageSize")) {
                         request.setPageSize(asIntValue(name, values));
-                    } else if (name.equalsIgnoreCase("_queryFilter")) {
+                    } else if (name.equalsIgnoreCase("_filter")) {
                         final String s = asSingleValue(name, values);
                         try {
                             request.setQueryFilter(QueryFilter.valueOf(s));
@@ -311,7 +311,14 @@ public final class HttpServletAdapter {
                 if (request.getQueryId() != null && request.getQueryFilter() != null) {
                     // FIXME: i18n.
                     throw new BadRequestException(
-                            "The parameters _query_id and _query_filter are mutually exclusive");
+                            "The parameters _queryId and _filter are mutually exclusive");
+                }
+
+                if (request.getQueryId() == null
+                        && !request.getAdditionalQueryParameters().isEmpty()) {
+                    // FIXME: i18n.
+                    throw new BadRequestException("Additional query parameters can only be used "
+                            + "with the parameter _queryId, not _filter");
                 }
 
                 // Invoke the request.
@@ -527,10 +534,10 @@ public final class HttpServletAdapter {
 
     private boolean parseCommonParameter(final String name, final String[] values,
             final Request request) throws ResourceException {
-        if (name.equalsIgnoreCase("_fieldFilter")) {
+        if (name.equalsIgnoreCase("_fields")) {
             for (final String s : values) {
                 try {
-                    request.addFieldFilter(s.split(","));
+                    request.addField(s.split(","));
                 } catch (final IllegalArgumentException e) {
                     // FIXME: i18n.
                     throw new BadRequestException("The value '" + s + "' for parameter '" + name

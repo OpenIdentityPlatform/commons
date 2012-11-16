@@ -58,7 +58,7 @@ public interface Request {
      * @throws UnsupportedOperationException
      *             If this request does not permit changes to the fields.
      */
-    Request addFieldFilter(JsonPointer... fields);
+    Request addField(JsonPointer... fields);
 
     /**
      * Adds one or more fields which should be included with each JSON resource
@@ -74,7 +74,7 @@ public interface Request {
      * @throws UnsupportedOperationException
      *             If this request does not permit changes to the fields.
      */
-    Request addFieldFilter(String... fields);
+    Request addField(String... fields);
 
     /**
      * Returns the name of the JSON resource to which this request should be

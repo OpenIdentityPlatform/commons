@@ -30,13 +30,13 @@ public interface PatchRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    PatchRequest addFieldFilter(JsonPointer... fields);
+    PatchRequest addField(JsonPointer... fields);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    PatchRequest addFieldFilter(String... fields);
+    PatchRequest addField(String... fields);
 
     /**
      * {@inheritDoc}

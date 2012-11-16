@@ -31,13 +31,13 @@ public interface QueryRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    QueryRequest addFieldFilter(JsonPointer... fields);
+    QueryRequest addField(JsonPointer... fields);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    QueryRequest addFieldFilter(String... fields);
+    QueryRequest addField(String... fields);
 
     /**
      * Adds one or more sort keys which will be used for ordering the JSON

@@ -29,13 +29,13 @@ public interface ReadRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    ReadRequest addFieldFilter(JsonPointer... fields);
+    ReadRequest addField(JsonPointer... fields);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    ReadRequest addFieldFilter(String... fields);
+    ReadRequest addField(String... fields);
 
     /**
      * {@inheritDoc}

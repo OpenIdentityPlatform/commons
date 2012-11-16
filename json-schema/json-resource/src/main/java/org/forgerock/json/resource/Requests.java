@@ -47,7 +47,7 @@ public final class Requests {
          * {@inheritDoc}
          */
         @Override
-        public final T addFieldFilter(final JsonPointer... fields) {
+        public final T addField(final JsonPointer... fields) {
             for (final JsonPointer field : fields) {
                 this.fields.add(notNull(field));
             }
@@ -58,7 +58,7 @@ public final class Requests {
          * {@inheritDoc}
          */
         @Override
-        public final T addFieldFilter(final String... fields) {
+        public final T addField(final String... fields) {
             try {
                 for (final String field : fields) {
                     this.fields.add(new JsonPointer(field));
