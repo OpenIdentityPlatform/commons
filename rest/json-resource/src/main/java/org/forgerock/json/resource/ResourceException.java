@@ -417,7 +417,9 @@ public class ResourceException extends ExecutionException {
         if (message != null) { // optional
             result.put("message", message);
         }
-        result.put("detail", detail.getObject());
+        if (!detail.isNull()) {
+            result.put("detail", detail.getObject());
+        }
         return new JsonValue(result);
     }
 }
