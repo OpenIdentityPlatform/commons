@@ -31,13 +31,13 @@ public interface ActionRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    ActionRequest addFieldFilter(JsonPointer... fields);
+    ActionRequest addField(JsonPointer... fields);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    ActionRequest addFieldFilter(String... fields);
+    ActionRequest addField(String... fields);
 
     /**
      * Returns the identifier of the type of operation to be performed by this

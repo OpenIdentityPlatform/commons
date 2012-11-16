@@ -29,13 +29,13 @@ public interface DeleteRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    DeleteRequest addFieldFilter(JsonPointer... fields);
+    DeleteRequest addField(JsonPointer... fields);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    DeleteRequest addFieldFilter(String... fields);
+    DeleteRequest addField(String... fields);
 
     /**
      * {@inheritDoc}
