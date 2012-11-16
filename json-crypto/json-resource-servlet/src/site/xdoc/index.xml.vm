@@ -297,7 +297,7 @@ Accept: application/json</source>
                     To search or list the resources contained within a resource
                     container send a GET request targeting the resource
                     container and including either a <tt>_queryId</tt> or
-                    <tt>_queryFilter</tt> parameter.
+                    <tt>_filter</tt> parameter.
                 </p>
                 <table>
                     <tr>
@@ -314,13 +314,13 @@ Accept: application/json</source>
                         </td>
                         <td>
                             <p>A string identifying a server side "stored" query.
-                            This parameter is mandatory if <tt>_queryFilter</tt>
+                            This parameter is mandatory if <tt>_filter</tt>
                             is not specified.</p>
                         </td>
                     </tr>
                     <tr>
                         <td>
-                            <tt>_queryFilter=<i>FILTER</i></tt>
+                            <tt>_filter=<i>FILTER</i></tt>
                         </td>
                         <td>
                             <p>A filter expression which will be used to determine
@@ -334,7 +334,7 @@ Accept: application/json</source>
                     </tr>
                     <tr>
                         <td>
-                            <tt>_sortKey=<i>[+-]FIELD,...</i></tt>
+                            <tt>_sortKeys=<i>[+-]FIELD,...</i></tt>
                         </td>
                         <td>
                             <p>Optional parameter containing a comma separated
@@ -399,7 +399,7 @@ Accept: application/json</source>
                             <p>Additional parameters supported by the stored query.
                             By convention argument names should not begin with
                             an underscore. It is an error to include additional
-                            parameters if a <tt>_queryFilter</tt> is specified.</p>
+                            parameters if a <tt>_filter</tt> is specified.</p>
                         </td>
                     </tr>
                     <tr>
@@ -606,7 +606,7 @@ Accept: application/json</source>
                     </tr>
                     <tr>
                         <td>
-                            <tt>_fieldFilter=FIELD,...</tt>
+                            <tt>_fields=FIELD,...</tt>
                         </td>
                         <td>
                             <p>
