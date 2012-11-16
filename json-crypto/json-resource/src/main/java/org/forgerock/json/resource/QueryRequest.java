@@ -54,6 +54,23 @@ public interface QueryRequest extends Request {
     QueryRequest addSortKey(SortKey... keys);
 
     /**
+     * Adds one or more sort keys which will be used for ordering the JSON
+     * resources returned by this query request.
+     *
+     * @param keys
+     *            The sort keys which will be used for ordering the JSON
+     *            resources returned by this query request.
+     * @return This query request.
+     * @throws IllegalArgumentException
+     *             If one or more of the provided sort keys could not be
+     *             parsed.
+     * @throws UnsupportedOperationException
+     *             If this query request does not permit changes to the sort
+     *             keys.
+     */
+    QueryRequest addSortKey(String... keys);
+
+    /**
      * {@inheritDoc}
      */
     @Override
