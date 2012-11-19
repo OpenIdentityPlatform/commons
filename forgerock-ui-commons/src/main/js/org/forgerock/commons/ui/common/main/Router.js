@@ -64,7 +64,9 @@ define("org/forgerock/commons/ui/common/main/Router", [
                 }                
                 
                 if(route.role) {
-                    if(!conf.loggedUser || conf.loggedUser.roles.indexOf(route.role) === -1) {
+                    if(!conf.loggedUser || !_.find(route.role.split(','), function(role) {
+                        return conf.loggedUser.roles.indexOf(role) !== -1
+                    })) {
                         eventManager.sendEvent(constants.EVENT_UNAUTHORIZED);
                         return;
                     }
