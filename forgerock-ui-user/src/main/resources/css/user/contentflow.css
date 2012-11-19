@@ -69,7 +69,7 @@
         margin: 0px auto;
         margin-top: 10px;
         height: 16px;
-        background: url(../img/scrollbar_grey.png) left center repeat-x;
+        background: url(../../img/scrollbar_grey.png) left center repeat-x;
         position: relative;
         overflow: visible;
         margin-bottom: 15px;
@@ -78,7 +78,7 @@
         .ContentFlow .scrollbar .slider {
             width: 16px;
             height: 16px;
-            background: url(../img/slider_grey.png) center center no-repeat;
+            background: url(../../img/slider_grey.png) center center no-repeat;
             cursor: move;
         }
         
@@ -129,7 +129,7 @@
         background: #fff;
     }
         .ContentFlow .loadIndicator .indicator {
-            background: url(../img/loader.gif) center center no-repeat;
+            background: url(../../img/loader.gif) center center no-repeat;
             width: 100%;
             height: 100%;
         }

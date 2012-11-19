@@ -29,7 +29,8 @@
                 "badRequestError" : "Bad request error.",
                 "conflictError" : "Detected conflict in request.",
                 "errorDeletingNotification" : "Error deleting notification.",
-                "errorFetchingNotifications" : "Error Fetching notifications."
+                "errorFetchingNotifications" : "Error Fetching notifications.",
+                "incorrectRevisionError" : "Cannot update the record because the version is not the latest."
             },
             "AdminMessages" : {
                 "cannotDeleteYourself" : "You can't delete yourself",
@@ -38,7 +39,8 @@
                 "userApplicationsUpdate" : "Application settings have been changed.",
                 "completedTask" : "Task has been completed.",
                 "claimedTask" : "Task has been claimed.",
-                "unclaimedTask" : "Task has been unclaimed."
+                "unclaimedTask" : "Task has been unclaimed.",
+                "startedProcess" : "Process has been started"
             }
         },
         "AppConfiguration" : {
@@ -52,19 +54,25 @@
                     "groups" : "Groups",
                     "tasksMenu" : "Tasks",
                     "allTasks" : "Tasks that are in my group's queue",
-                    "myTasks" : "My tasks"
+                    "myTasks" : "My tasks",
+                    "startProcess" : "Start process"
                 }
             }
         }
     },
     "templates" : {
         "user" : {
+            "LoginDialog" : {
+                "refreshOnLogin" : "Should refresh on login" 
+            },
             "LoginTemplate" : {
                 "loginRemember" : "Remember my username",
                 "noAccountQuestion" : "Don't have an account?",
                 "registerAccount" : "Register your account",
                 "problemLoggingQuestion" : "Having trouble logging in?",
-                "resetPassword" : "Reset my password"
+                "resetPassword" : "Reset my password",
+                "siteIdentificationHeader": "Site Identification",
+                "siteIdentificationExplanation": "Please enter your login name.<br />Your site image and pass phrase will be displayed here."
             },
             "404" : {
                 "pageNotFound" : "Page not found",
@@ -128,6 +136,8 @@
     },
     "common" : {
          "form" : {
+            "true" : "True",
+            "false" : "False",
             "update" : "Update",
             "save" : "Save",
             "cancel" : "Cancel",
@@ -135,9 +145,10 @@
             "logout" : "Log out",
             "register" : "Register",
             "home" : "Home",
+            "start" : "Start",
             "continue" : "Continue",
             "back" : "Back",
-            "delete" : "Delele",
+            "delete" : "Delete",
             "details" : "Details",
             "pleaseSelect" : "Please Select",
             "addUser" : "Add user",
@@ -146,10 +157,22 @@
             "reject" : "Reject",
             "createdAt" : "Created at",
             "search" : "Search",
+            "submit" : "Submit",
             "actions" : "Actions",
-            "copyright" : "Copyright (c) 2010-11 ForgeRock, all rights reserved.",
+            "complete" : "Complete",
+            "copyright" : "Copyright (c) 2010-12 ForgeRock, all rights reserved.",
             "sessionExpired" : "Session Expired",
             "validation" : {
+                "VALID_PHONE_FORMAT": "Contains invalid characters",
+                "VALID_NAME_FORMAT": "Contains invalid characters",
+                "VALID_EMAIL_ADDRESS_FORMAT": "Not a valid email address",
+                "AT_LEAST_X_CAPITAL_LETTERS" : "At least __numCaps__ capital letters",
+                "AT_LEAST_X_NUMBERS" : "At least __numNums__ numbers",
+                "CANNOT_CONTAIN_OTHERS" : "Cannot contain values from: __disallowedFields__",
+                "MIN_LENGTH" : "At least __minLength__ characters",
+                "REQUIRED" : "Cannot be blank",
+                "UNIQUE" : "Already exists",
+                "REAUTH_REQUIRED" : "",
                 "formContainsErrors" : "Form contains validation errors",
                 "atLeastOneCapitalLetter" : "At least one capital letter",
                 "atLeastOneNumber" : "At least one number",
@@ -164,9 +187,12 @@
                 "minimum4Characters" : "Minimum 4 characters",
                 "acceptanceRequiredForRegistration" : "Acceptance required for registration",
                 "incorrectPassword" : "Incorrect password",
+                "incorrectSecurityAnswer" : "Incorrect answer",
                 "required" : "Required",
                 "emailNotValid" : "Not a valid email address.",
-                "emailExists" : "Email address already exists."
+                "emailExists" : "Email address already exists.",
+                "shouldBeLong" : "Should be long value",
+                "wrongDateFormat" : "Wrong format"
             }
          },
          "user" : {
@@ -188,6 +214,7 @@
             "address2" : "Address 2",
             "country" : "Country",
             "city" : "City",
+            "role" : "Admin Role",
             "stateProvince" : "State/Province",
             "phoneNumber" : "Mobile Phone",
             "postalCode" : "Postal Code",
@@ -199,7 +226,7 @@
             "adaptiveAuthMethod" : "Adaptive auth method",
             "SMS" : "SMS",
             "OAuth" : "OAuth",
-            "registerNewAccount" : "Create new account",
+            "createNewAccount" : "Create new account",
             "password" : "Password",
             "confirmPassword" : "Confirm Password",
             "newPassword" : "New password",
@@ -224,10 +251,13 @@
             "deny" : "Deny",
             "requeue" : "Requeue",
             "taskName" : "Task Name",
+            "processName" : "Process Name",
+            "startProcess" : "Start Process",
             "assignee" : "Assignee",
             "taskDetails" : "Task Details",
             "myTasks" : "My tasks",
-            "tasksList" : "Tasks list"
+            "tasksList" : "Tasks list",
+            "processes" : "Processes"
          },
          "application" : {
             "applicationName" : "Application Name",
@@ -241,7 +271,14 @@
          },
          "notification" : {
             "notifications" : "Notifications",
-            "deleteThisMessage" : "Delete this message"
+            "deleteThisMessage" : "Delete this message",
+            "type" : "Notification type",
+            "message" : "Message",
+            "types" : {
+                "info" : "Info",
+                "warning" : "Warning",
+                "error" : "Error"
+            }
          }
     },
     "openidm" : {
@@ -265,10 +302,22 @@
                             "application" : "Application",
                             "requested" : "Requested",
                             "actions" : "Actions"                            
-                        }       
+                        },
+                        "headers" : {
+                            "initiator" : "Initiator",
+                            "key" : "Key",
+                            "requested" : "Requested",
+                            "inQueue" : "In queue",
+                            "actions" : "Actions"    
+                        }   
                     },
                     "TasksWithMenuView" : {
                         "chooseTask" : "Choose a task"
+                    },
+                    "StartProcessDashboardView" : {
+                        "chooseProcess" : "Please choose a process to start",
+                        "noProcesses": "No processes",
+                        "noDataRequired": "No data required"
                     }
                 },
                 "users" : {
