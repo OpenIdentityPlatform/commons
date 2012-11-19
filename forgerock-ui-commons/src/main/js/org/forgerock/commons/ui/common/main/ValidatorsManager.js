@@ -147,61 +147,55 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
                                 hasServerPolicies = false,
                                 EVAL_IS_EVIL = eval; // JSLint doesn't like eval usage; this is a bit of a hack around that, while acknowledging it.
                             
-                            if (validationContext === "server" || (this.input.data("prevValue") !== this.input.val())) // only attempt to re-validate if the value has actually changed since the last time this was triggered
-                            {
-                                this.input.data("prevValue", this.input.val());
-                                this.input.siblings(".validation-message").empty();
+                            this.input.siblings(".validation-message").empty();
+                            
+                            _.each(this.property.policies, _.bind(function(policy,j) {
                                 
-                                if (!this.input.attr("data-validation-force-server")) {
-                                    _.each(this.property.policies, _.bind(function(policy,j) {
-                                        
-                                        // The policy may return the JavaScript validation function as a string property;
-                                        // If so, we can use that validation function directly here
-                                        if (policy.policyFunction) {
-                                            
-                                            if (!policy.params) {
-                                                policy.params = {};
+                                // The policy may return the JavaScript validation function as a string property;
+                                // If so, we can use that validation function directly here
+                                if (policy.policyFunction) {
+                                    
+                                    if (!policy.params) {
+                                        policy.params = {};
+                                    }
+                                    
+                                    params = policy.params;
+                                    // This instantiates the string representation of the function into an actual, executable local function
+                                    // and then calls that function, appending the resulting array into our collection of policy failures.
+                                    policyFailures = policyFailures.concat(EVAL_IS_EVIL("policyFunction = " + policy.policyFunction)(form2js(this.input.closest('form')[0]), this.input.val(), params, this.property.name));
+                                }
+                                // we have a special case for reauth required, since that is kind of a strange case.
+                                else if (!($.inArray("REAUTH_REQUIRED", policy.policyRequirements) !== -1 && policy.policyRequirements.length === 1)) {
+                                    hasServerPolicies = true;
+                                }
+                            }, this));
+                            
+                            // For those validation policies which cannot be performed within the browser, 
+                            // we call to the server to do the validation for us.
+                            if (validationContext === "server" && (hasServerPolicies || this.input.attr("data-validation-force-server"))) {
+                                policyFailures = [];
+                                policyDelegate.validateProperty(
+                                    baseEntity,
+                                    {
+                                        "fullObject": form2js(this.input.closest("form")[0], '.', false), 
+                                        "value": this.input.val(), 
+                                        "property": this.property.name
+                                    }, 
+                                    _.bind(function (result) {
+                                        var l;
+                                        if (!result.result) {
+                                            for (l = 0; l < result.failedPolicyRequirements.length; l++) {
+                                                policyFailures = policyFailures.concat(result.failedPolicyRequirements[l].policyRequirements);
                                             }
-                                            
-                                            params = policy.params;
-                                            // This instantiates the string representation of the function into an actual, executable local function
-                                            // and then calls that function, appending the resulting array into our collection of policy failures.
-                                            policyFailures = policyFailures.concat(EVAL_IS_EVIL("policyFunction = " + policy.policyFunction)(form2js(this.input.closest('form')[0]), this.input.val(), params, this.property.name));
                                         }
-                                        // we have a special case for reauth required, since that is kind of a strange case.
-                                        else if (!($.inArray("REAUTH_REQUIRED", policy.policyRequirements) !== -1 && policy.policyRequirements.length === 1)) {
-                                            hasServerPolicies = true;
-                                        }
-                                    }, this));
-                                }
-                                
-                                // For those validation policies which cannot be performed within the browser, 
-                                // we call to the server to do the validation for us.
-                                if (validationContext === "server" && (hasServerPolicies || this.input.attr("data-validation-force-server"))) {
-                                    policyFailures = [];
-                                    policyDelegate.validateProperty(
-                                        baseEntity,
-                                        {
-                                            "fullObject": form2js(this.input.closest("form")[0], '.', false), 
-                                            "value": this.input.val(), 
-                                            "property": this.property.name
-                                        }, 
-                                        _.bind(function (result) {
-                                            var l;
-                                            if (!result.result) {
-                                                for (l = 0; l < result.failedPolicyRequirements.length; l++) {
-                                                    policyFailures = policyFailures.concat(result.failedPolicyRequirements[l].policyRequirements);
-                                                }
-                                            }
-                                            postValidation.call(this, policyFailures);
-                                        }, this)
-                                    );
-                                }
-                                else {
-                                    postValidation.call(this, policyFailures);
-                                }
-                                
+                                        postValidation.call(this, policyFailures);
+                                    }, this)
+                                );
                             }
+                            else {
+                                postValidation.call(this, policyFailures);
+                            }
+                                
                         
                         }, this));
                         
