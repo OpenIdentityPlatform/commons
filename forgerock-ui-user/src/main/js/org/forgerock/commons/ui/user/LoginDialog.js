@@ -41,10 +41,17 @@ define("org/forgerock/commons/ui/user/LoginDialog", [
             "click .dialogCloseCross img": "loginClose",
             "click input[name='close']": "loginClose",
             "click .dialogContainer": "stop",
-            "onValidate": "onValidate"
+            "onValidate": "onValidate",
+            "keypress input": "submitForm"
         },
         
         displayed: false,
+        
+        submitForm: function(event) {
+            if(event.which === 13) {
+                this.login(event);
+            }
+        },
         
         render: function () {
             if(this.displayed === false) {

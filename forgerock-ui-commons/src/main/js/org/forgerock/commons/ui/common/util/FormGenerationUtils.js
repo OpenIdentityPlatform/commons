@@ -34,23 +34,37 @@ define("org/forgerock/commons/ui/common/util/FormGenerationUtils", [
     
     obj.standardErrorMessageTag = '<div class="validation-message"></div>';
     
-    obj.generateTemplateFromFormProperties = function(definition) {
-        var property, formTemplate = "", formFieldType, formFieldDescription;
-        for(property in definition.formProperties) {
-            if (property !== '_formGenerationTemplate') {
-                formFieldDescription = definition.formProperties[property];
+    obj.generateTemplateFromFormProperties = function(definition, formValues) {
+        var property, formTemplate = "", formFieldType, formFieldDescription, i;
+        for(i = 0; i < definition.formProperties.length; i++) {
+            formFieldDescription = definition.formProperties[i];
+            formFieldDescription.value = obj.getValueForKey(formFieldDescription._id, formValues);
+            if (formFieldDescription._id !== '_formGenerationTemplate') {
                 formFieldType = formFieldDescription.type;
-                formTemplate = formTemplate + this.generateTemplateLine(property, formFieldDescription);
+                formTemplate = formTemplate + this.generateTemplateLine(formFieldDescription._id, formFieldDescription);
             }
         }
         return formTemplate;
+    };
+    
+    obj.getValueForKey = function(key, formValues) {
+        var i, formValueEntry;
+        if (!formValues) {
+            return null;
+        }
+        for(i = 0; i < formValues.length; i++) {
+            formValueEntry = formValues[i];
+            if (formValueEntry[key]) {
+                return formValueEntry[key];
+            }
+        }
     };
     
     obj.generateTemplateLine = function(formFieldId, formFieldDescription) {
         
         var enumValues, handlebarsValueExpression, fieldValue, valueExpression, formFieldDisplayName,
         formFieldIsReadable, formFieldIsWritable, formFieldIsRequired, formFieldType, formFieldVariableExpression, 
-        formFieldVariableName, formFieldDefaultExpression, formFieldDateFormat; 
+        formFieldVariableName, formFieldDefaultExpression, formFieldValue, formFieldDateFormat; 
         
         formFieldIsReadable = formFieldDescription.readable;
         
@@ -66,11 +80,16 @@ define("org/forgerock/commons/ui/common/util/FormGenerationUtils", [
         
         formFieldVariableExpression = formFieldDescription.variableExpression ? formFieldDescription.variableExpression.expressionText : null; 
         formFieldDefaultExpression = formFieldDescription.defaultExpression ? formFieldDescription.defaultExpression.expressionText : null;
+        formFieldValue = formFieldDescription.value ? formFieldDescription.value : null;
         
-        if (formFieldVariableExpression) {
-            valueExpression = formFieldVariableExpression;
-        } else if (formFieldDefaultExpression) {
-            valueExpression = formFieldDefaultExpression;
+        if (formFieldValue) {
+            valueExpression = formFieldValue;
+        } else {
+            if (formFieldVariableExpression) {
+                valueExpression = formFieldVariableExpression;
+            } else if (formFieldDefaultExpression) {
+                valueExpression = formFieldDefaultExpression;
+            }
         }
         
         if (valueExpression) {
@@ -177,10 +196,10 @@ define("org/forgerock/commons/ui/common/util/FormGenerationUtils", [
     };
     
     obj.buildPropertyTypeMap = function(formProperties) {
-        var typeName, datePattern, property, formFieldType, formFieldDescription, result = {};
-        for(property in formProperties) {
-            formFieldDescription = formProperties[property];
-            if (property !== '_formGenerationTemplate') {
+        var typeName, datePattern, property, formFieldType, formFieldDescription, result = {}, i, propName;
+        for (i = 0; i < formProperties.length; i++) {
+            formFieldDescription = formProperties[i];
+            if (formFieldDescription._id !== '_formGenerationTemplate') {
                 formFieldType = formFieldDescription.type;
                 if (!formFieldType.name || formFieldType.name === '') {
                     typeName = 'string';
@@ -190,8 +209,8 @@ define("org/forgerock/commons/ui/common/util/FormGenerationUtils", [
                         datePattern = formFieldType.datePattern;
                     }
                 }
-                property = formFieldDescription.variableName ? formFieldDescription.variableName : property;
-                result[property] = {type: typeName, datePattern: datePattern};
+                propName = formFieldDescription.variableName ? formFieldDescription.variableName : formFieldDescription._id;
+                result[propName] = {type: typeName, datePattern: datePattern};
             }
         }
         return result;
@@ -208,8 +227,7 @@ define("org/forgerock/commons/ui/common/util/FormGenerationUtils", [
                 } else {
                     dateFormat = propertyTypeMapping[param].datePattern;
                     date = dateUtil.parseDateString(paramValue, dateFormat);
-//                    params[param] = date;
-                    params[param] = "2012-06-30T00:00:00Z";
+                    params[param] = date;
                 }
             } else if ("long" === typeName) {
                 if (paramValue === '') {

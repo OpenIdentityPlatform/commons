@@ -40,6 +40,13 @@ define("org/forgerock/commons/ui/common/util/DateUtil", [
         }
     };
     
+    obj.isDateValid = function(date) {
+        if ( Object.prototype.toString.call(date) !== "[object Date]" ) {
+            return false;
+        }
+        return !isNaN(date.getTime());
+    };
+    
     obj.isDateStringValid = function(dateString, datePattern) {
         return dateString.length === datePattern.length && moment(dateString, datePattern).isValid();
     };

@@ -179,7 +179,7 @@ define("org/forgerock/commons/ui/user/delegates/UserDelegate", [
 
     obj.getForUserName = function(uid, successCallback, errorCallback) {
         obj.serviceCall({
-            url: "/?_queryId=for-userName&" + $.param({uid: uid.toLowerCase()}), 
+            url: "/?_queryId=for-userName&" + $.param({uid: uid}), 
             success: function (data) {
                 if(data.result.length !== 1) {
                     if(errorCallback) {

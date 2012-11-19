@@ -127,8 +127,8 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
         for(i = 0; i < patchDefinition.length; i++) {
             patchDefinition[i].replace = "/" + patchDefinition[i].replace;
         }
-        this.serviceCall({url: "/" + queryParameters.id, 
-            type: "PATCH", 
+        this.serviceCall({url: "/" + queryParameters.id + "?_action=patch", 
+            type: "POST", 
             success: successCallback, 
             error: errorCallback, 
             data: JSON.stringify(patchDefinition),
