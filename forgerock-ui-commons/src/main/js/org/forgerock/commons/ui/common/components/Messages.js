@@ -64,9 +64,7 @@ define("org/forgerock/commons/ui/common/components/Messages", [
             
             this.messages.push(msg);
             
-            if (this.messages.length === 1) {
-                this.showMessage(msg, this.messagesLoop);
-            }
+            this.showMessage(msg, this.messagesLoop);
         },
 
         /**

@@ -126,7 +126,6 @@ public class RegistrationTest extends AbstractRegistrationTest {
 			@Override
 			protected void checkRegistrationViewBehavior() {
 				fieldShouldBeNotValidAfterChange("content", "securityAnswer", "");
-				fieldShouldBeValidAfterChange("content", "securityAnswer", "a");
 				fieldShouldBeValidAfterChange("content", "securityAnswer", "+XS321$#ASDFcdas-");
 			}
 		}.run();

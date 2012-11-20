@@ -2,6 +2,7 @@ package org.forgerock.commons.ui.functionaltests.user;
 
 import junit.framework.Assert;
 
+import org.forgerock.commons.ui.functionaltests.helpers.SeleniumHelper.ElementType;
 import org.forgerock.commons.ui.functionaltests.utils.AssertNoErrors;
 import org.testng.annotations.Test;
 
@@ -49,6 +50,9 @@ public class ForgottenPasswordTest extends AbstractForgottenPasswordTest {
 			@Override
 			protected void checkForgottenPasswordViewBehavior() {
 				forms.setField("dialogs", "fgtnSecurityAnswer", "wrongAnswer");
+				
+				selenium.getElement("dialogs", "submitAnswer", ElementType.NAME).click();
+				
 				forms.assertFormFieldHasValue("dialogs", "fgtnSecurityAnswer", "wrongAnswer");
 				forms.assertValidationError("dialogs", "fgtnSecurityAnswer");
 			}
@@ -61,8 +65,11 @@ public class ForgottenPasswordTest extends AbstractForgottenPasswordTest {
 		new ForgottenPasswordPhase2ValidationTest() {
 			@Override
 			protected void checkForgottenPasswordViewBehavior() {
-				forms.setField("dialogs", "fgtnSecurityAnswer", "yyyy");
-				forms.assertFormFieldHasValue("dialogs", "fgtnSecurityAnswer", "yyyy");
+				forms.setField("dialogs", "fgtnSecurityAnswer", "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy");
+				
+				selenium.getElement("dialogs", "submitAnswer", ElementType.NAME).click();
+				
+				forms.assertFormFieldHasValue("dialogs", "fgtnSecurityAnswer", "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy");
 				forms.assertValidationPasses("dialogs", "fgtnSecurityAnswer");
 			}
 		}.run();
@@ -74,8 +81,8 @@ public class ForgottenPasswordTest extends AbstractForgottenPasswordTest {
 		new ForgottenPasswordPhase2ValidationTest() {
 			@Override
 			protected void checkForgottenPasswordViewBehavior() {
-				forms.setField("dialogs", "fgtnSecurityAnswer", "yyyy");
-				forms.assertFormFieldHasValue("dialogs", "fgtnSecurityAnswer", "yyyy");
+				forms.setField("dialogs", "fgtnSecurityAnswer", "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy");
+				forms.assertFormFieldHasValue("dialogs", "fgtnSecurityAnswer", "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy");
 				forms.assertValidationPasses("dialogs", "fgtnSecurityAnswer");
 				
 				forms.setField("dialogs", "password", "notValidPassword");
@@ -95,8 +102,8 @@ public class ForgottenPasswordTest extends AbstractForgottenPasswordTest {
 		new ForgottenPasswordPhase2ValidationTest() {
 			@Override
 			protected void checkForgottenPasswordViewBehavior() {
-				forms.setField("dialogs", "fgtnSecurityAnswer", "yyyy");
-				forms.assertFormFieldHasValue("dialogs", "fgtnSecurityAnswer", "yyyy");
+				forms.setField("dialogs", "fgtnSecurityAnswer", "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy");
+				forms.assertFormFieldHasValue("dialogs", "fgtnSecurityAnswer", "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy");
 				forms.assertValidationPasses("dialogs", "fgtnSecurityAnswer");
 				
 				forms.setField("dialogs", "password", "Aa12345!");
@@ -116,8 +123,8 @@ public class ForgottenPasswordTest extends AbstractForgottenPasswordTest {
 		new ForgottenPasswordPhase2ValidationTest() {
 			@Override
 			protected void checkForgottenPasswordViewBehavior() {
-				forms.setField("dialogs", "fgtnSecurityAnswer", "yyyy");
-				forms.assertFormFieldHasValue("dialogs", "fgtnSecurityAnswer", "yyyy");
+				forms.setField("dialogs", "fgtnSecurityAnswer", "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy");
+				forms.assertFormFieldHasValue("dialogs", "fgtnSecurityAnswer", "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy");
 				forms.assertValidationPasses("dialogs", "fgtnSecurityAnswer");
 				
 				forms.setField("dialogs", "password", "Aa12345!");
