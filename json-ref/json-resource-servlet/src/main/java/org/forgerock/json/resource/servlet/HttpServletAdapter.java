@@ -262,7 +262,8 @@ public final class HttpServletAdapter {
             rejectIfMatch(req);
 
             final Map<String, String[]> parameters = req.getParameterMap();
-            if (hasParameter(req, "_queryId") || hasParameter(req, "_filter")) {
+            if (hasParameter(req, "_queryId") || hasParameter(req, "_queryExpression")
+                    || hasParameter(req, "_filter")) {
                 // Additional pre-validation for queries.
                 rejectIfNoneMatch(req);
 
@@ -289,6 +290,8 @@ public final class HttpServletAdapter {
                         }
                     } else if (name.equalsIgnoreCase("_queryId")) {
                         request.setQueryId(asSingleValue(name, values));
+                    } else if (name.equalsIgnoreCase("_queryExpression")) {
+                        request.setQueryExpression(asSingleValue(name, values));
                     } else if (name.equalsIgnoreCase("_pagedResultsCookie")) {
                         request.setPagedResultsCookie(asSingleValue(name, values));
                     } else if (name.equalsIgnoreCase("_pageSize")) {
@@ -312,6 +315,18 @@ public final class HttpServletAdapter {
                     // FIXME: i18n.
                     throw new BadRequestException(
                             "The parameters _queryId and _filter are mutually exclusive");
+                }
+
+                if (request.getQueryId() != null && request.getQueryExpression() != null) {
+                    // FIXME: i18n.
+                    throw new BadRequestException(
+                            "The parameters _queryExpression and _queryId are mutually exclusive");
+                }
+
+                if (request.getQueryFilter() != null && request.getQueryExpression() != null) {
+                    // FIXME: i18n.
+                    throw new BadRequestException(
+                            "The parameters _queryExpression and _filter are mutually exclusive");
                 }
 
                 if (request.getQueryId() == null
