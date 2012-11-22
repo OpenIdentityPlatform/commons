@@ -24,6 +24,22 @@ import org.forgerock.json.fluent.JsonPointer;
 /**
  * A request to search for all JSON resources matching a user specified set of
  * criteria.
+ * <p>
+ * There are four types of query request:
+ * <ul>
+ * <li>default query: when neither a filter, expression or query ID are
+ * specified all resources will be returned
+ * <li>query by filter: returns all resources which match the
+ * {@link QueryFilter} specified using {@link #setQueryFilter(QueryFilter)}
+ * <li>query by ID: returns all resources which match the named prepared query
+ * specified using {@link #setQueryId(String)}
+ * <li>query by expression: returns all resources which match a native
+ * expression specified using {@link #setQueryExpression(String)}. Note that
+ * this type of query should only be used in very rare cases since it introduces
+ * a tight coupling between the application and the underlying JSON resource. In
+ * addition, applications should take care to prevent users from directly
+ * accessing this form of query for security reasons.
+ * </ul>
  */
 public interface QueryRequest extends Request {
 
@@ -62,8 +78,7 @@ public interface QueryRequest extends Request {
      *            resources returned by this query request.
      * @return This query request.
      * @throws IllegalArgumentException
-     *             If one or more of the provided sort keys could not be
-     *             parsed.
+     *             If one or more of the provided sort keys could not be parsed.
      * @throws UnsupportedOperationException
      *             If this query request does not permit changes to the sort
      *             keys.
@@ -125,20 +140,47 @@ public interface QueryRequest extends Request {
     Map<String, String> getAdditionalQueryParameters();
 
     /**
+     * Returns the native query expression which will be used for processing the
+     * query request. An example of a native query expression is a SQL
+     * statement.
+     * <p>
+     * <b>NOTE:</b> the native query expression, query filter, and query ID
+     * parameters are mutually exclusive and only one of them may be specified.
+     *
+     * @return The native query expression which will be used for processing the
+     *         query request, or {@code null} if another type of query is to be
+     *         performed.
+     * @see QueryRequest#getQueryFilter()
+     * @see QueryRequest#getQueryId()
+     */
+    String getQueryExpression();
+
+    /**
      * Returns the query filter which will be used for selecting which JSON
      * resources will be returned.
+     * <p>
+     * <b>NOTE:</b> the native query expression, query filter, and query ID
+     * parameters are mutually exclusive and only one of them may be specified.
      *
      * @return The query filter which will be used for selecting which JSON
-     *         resources will be returned, or {@code null} if all JSON resources
-     *         should be returned.
+     *         resources will be returned, or {@code null} if another type of
+     *         query is to be performed.
+     * @see QueryRequest#getQueryExpression()
+     * @see QueryRequest#getQueryId()
      */
     QueryFilter getQueryFilter();
 
     /**
      * Returns the query identifier for pre-defined queries.
+     * <p>
+     * <b>NOTE:</b> the native query expression, query filter, and query ID
+     * parameters are mutually exclusive and only one of them may be specified.
      *
      * @return The query identifier for pre-defined queries, or {@code null} if
-     *         a pre-defined query is not to be used.
+     *         a pre-defined query is not to be used, or {@code null} if another
+     *         type of query is to be performed.
+     * @see QueryRequest#getQueryExpression()
+     * @see QueryRequest#getQueryFilter()
      */
     String getQueryId();
 
@@ -216,30 +258,61 @@ public interface QueryRequest extends Request {
     QueryRequest setPageSize(int size);
 
     /**
+     * Sets the native query expression which will be used for processing the
+     * query request. An example of a native query expression is a SQL
+     * statement.
+     * <p>
+     * <b>NOTE:</b> the native query expression, query filter, and query ID
+     * parameters are mutually exclusive and only one of them may be specified.
+     *
+     * @param expression
+     *            The native query expression which will be used for processing
+     *            the query request, or {@code null} if another type of query is
+     *            to be performed.
+     * @return This query request.
+     * @throws UnsupportedOperationException
+     *             If this query request does not permit changes to the query
+     *             identifier.
+     * @see QueryRequest#setQueryFilter(QueryFilter)
+     * @see QueryRequest#setQueryId(String)
+     */
+    QueryRequest setQueryExpression(String expression);
+
+    /**
      * Sets the query filter which will be used for selecting which JSON
      * resources will be returned.
+     * <p>
+     * <b>NOTE:</b> the native query expression, query filter, and query ID
+     * parameters are mutually exclusive and only one of them may be specified.
      *
      * @param filter
      *            The query filter which will be used for selecting which JSON
-     *            resources will be returned, or {@code null} if all JSON
-     *            resources should be returned.
+     *            resources will be returned, or {@code null} if another type of
+     *            query is to be performed.
      * @return This query request.
      * @throws UnsupportedOperationException
      *             If this query request does not permit changes to the query
      *             filter.
+     * @see QueryRequest#setQueryExpression(String)
+     * @see QueryRequest#setQueryId(String)
      */
     QueryRequest setQueryFilter(QueryFilter filter);
 
     /**
      * Sets the query identifier for pre-defined queries.
+     * <p>
+     * <b>NOTE:</b> the native query expression, query filter, and query ID
+     * parameters are mutually exclusive and only one of them may be specified.
      *
      * @param id
      *            The query identifier for pre-defined queries, or {@code null}
-     *            if a pre-defined query is not to be used.
+     *            if another type of query is to be performed.
      * @return This query request.
      * @throws UnsupportedOperationException
      *             If this query request does not permit changes to the query
      *             identifier.
+     * @see QueryRequest#setQueryExpression(String)
+     * @see QueryRequest#setQueryFilter(QueryFilter)
      */
     QueryRequest setQueryId(String id);
 }
