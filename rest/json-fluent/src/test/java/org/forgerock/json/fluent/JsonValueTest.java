@@ -12,13 +12,15 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright © 2010–2011 ApexIdentity Inc. All rights reserved.
- * Portions Copyrighted 2011 ForgeRock AS.
+ * Portions Copyrighted 2011-2012 ForgeRock AS.
  */
 
 package org.forgerock.json.fluent;
 
 // Java SE
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,8 +33,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /**
- * @author László Hordós
- * @author Paul C. Bryan
+ * Unit tests for JsonValue.
  */
 public class JsonValueTest {
 
@@ -46,14 +47,13 @@ public class JsonValueTest {
 
     @BeforeMethod
     public void beforeMethod() {
-        mapValue = new JsonValue(new HashMap());
-        listValue = new JsonValue(new ArrayList());
+        mapValue = new JsonValue(new HashMap<String, Object>());
+        listValue = new JsonValue(new ArrayList<Object>());
     }
 
     // ----- manipulation tests ----------
 
     @Test
-    @SuppressWarnings("unchecked")
     public void getMapPointer() {
         Map<String, Object> m = mapValue.asMap();
         m.put("a", (m = new HashMap<String, Object>()));
@@ -119,7 +119,7 @@ public class JsonValueTest {
         listObject2.add("valueF");
 
         JsonValue listValue = new JsonValue(listObject1);
-        JsonValue mapValue = new JsonValue(new HashMap());
+        JsonValue mapValue = new JsonValue(new HashMap<String, Object>());
 
         mapValue.put("keyA", "valueA");
         mapValue.put("keyB", "valueB");
@@ -141,5 +141,51 @@ public class JsonValueTest {
 
         mapValue.put(new JsonPointer("/keyE/keyJ/keyF/2"), "testValueH");
         assertThat(mapValue.get(new JsonPointer("/keyE/keyJ/keyF/2")).getObject()).isEqualTo("testValueH");
+    }
+
+    /**
+     * Check {@link JsonValue#getObject()} hash code stability - see CREST-52.
+     */
+    @Test
+    public void testHashCodeStability() {
+        JsonValue v1 = new JsonValue(new HashMap<String, Object>());
+        v1.put("key1", "value1");
+        v1.put("key2", "value2");
+
+        // Reverse order, but should be equivalent.
+        JsonValue v2 = new JsonValue(new HashMap<String, Object>());
+        v2.put("key2", "value2");
+        v2.put("key1", "value1");
+        assertThat(v1.getObject().hashCode()).isEqualTo(v2.getObject().hashCode());
+
+        // Now add a sub-object.
+        Map<String, Object> o1 = new HashMap<String, Object>();
+        o1.put("skey1", "svalue1");
+        o1.put("skey2", "svalue2");
+        v1.add("object", o1);
+        assertThat(v1.getObject().hashCode()).isNotEqualTo(v2.getObject().hashCode());
+
+        Map<String, Object> o2 = new HashMap<String, Object>();
+        o2.put("skey2", "svalue2");
+        o2.put("skey1", "svalue1");
+        v2.add("object", o2);
+        assertThat(v1.getObject().hashCode()).isEqualTo(v2.getObject().hashCode());
+
+        // Now add a sub-array.
+        List<Object> a1 = Arrays.<Object>asList("one", "two", "three");
+        v1.add("array", a1);
+        assertThat(v1.getObject().hashCode()).isNotEqualTo(v2.getObject().hashCode());
+
+        List<Object> a2 = Arrays.<Object>asList("one", "two", "three");
+        v2.add("array", a2);
+        assertThat(v1.getObject().hashCode()).isEqualTo(v2.getObject().hashCode());
+
+        // Arrays are ordered, so mutations should change the hash code.
+        Collections.reverse(a2);
+        assertThat(v1.getObject().hashCode()).isNotEqualTo(v2.getObject().hashCode());
+
+        // There and back again.
+        Collections.reverse(a2);
+        assertThat(v1.getObject().hashCode()).isEqualTo(v2.getObject().hashCode());
     }
 }
