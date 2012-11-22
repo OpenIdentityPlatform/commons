@@ -374,6 +374,7 @@ public final class Requests {
         private int pageSize = 0;
         private final Map<String, String> parameters = new LinkedHashMap<String, String>(2);
         private String queryId;
+        private String queryExpression;
 
         private QueryRequestImpl() {
             // Default constructor.
@@ -383,6 +384,7 @@ public final class Requests {
             super(request);
             this.filter = request.getQueryFilter();
             this.queryId = request.getQueryId();
+            this.queryExpression = request.getQueryExpression();
             this.keys.addAll(request.getSortKeys());
             this.parameters.putAll(request.getAdditionalQueryParameters());
             this.pageSize = request.getPageSize();
@@ -463,6 +465,14 @@ public final class Requests {
          * {@inheritDoc}
          */
         @Override
+        public String getQueryExpression() {
+            return queryExpression;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
         public List<SortKey> getSortKeys() {
             return keys;
         }
@@ -491,6 +501,15 @@ public final class Requests {
         @Override
         public QueryRequest setPageSize(final int size) {
             this.pageSize = size;
+            return this;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public QueryRequest setQueryExpression(final String expression) {
+            this.queryExpression = expression;
             return this;
         }
 
