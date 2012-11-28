@@ -160,6 +160,7 @@ define("config/validators/UserValidators", [
                     _.bind(function () {
                         callback("No such user");
                         $(input).attr('data-validation-status', 'error');
+                        $(this.el).trigger("userNameNotFound");
                     }, this)
                     );  
                 }
