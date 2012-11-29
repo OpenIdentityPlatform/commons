@@ -44,6 +44,7 @@ import org.apache.maven.plugin.MojoExecutionException;
  * @goal clean-messages
  * @threadSafe
  */
+@SuppressWarnings("resource")
 public final class CleanMessagesMojo extends AbstractMojo {
 
     /**
@@ -106,8 +107,7 @@ public final class CleanMessagesMojo extends AbstractMojo {
     /**
      * The target directory in which the source files should be generated.
      *
-     * @parameter expression="${sourceDirectory}"
-     *            default-value="${project.build.sourceDirectory}"
+     * @parameter default-value="${project.build.sourceDirectory}"
      * @required
      */
     private File sourceDirectory;
@@ -115,7 +115,7 @@ public final class CleanMessagesMojo extends AbstractMojo {
     /**
      * The message message file to be cleaned.
      *
-     * @parameter expression="${messageFile}"
+     * @parameter
      * @required
      */
     private File messageFile;
@@ -123,8 +123,7 @@ public final class CleanMessagesMojo extends AbstractMojo {
     /**
      * The encoding argument used by Java source files.
      *
-     * @parameter expression="${encoding}"
-     *            default-value="${project.build.sourceEncoding}"
+     * @parameter default-value="${project.build.sourceEncoding}"
      * @required
      */
     private String encoding;

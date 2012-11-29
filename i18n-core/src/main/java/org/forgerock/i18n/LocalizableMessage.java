@@ -12,7 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  *      Copyright 2009 Sun Microsystems, Inc.
- *      Portions copyright 2011 ForgeRock AS
+ *      Portions copyright 2011-2012 ForgeRock AS
  */
 
 package org.forgerock.i18n;
@@ -442,6 +442,7 @@ public final class LocalizableMessage implements CharSequence, Formattable,
      * @throws NullPointerException
      *             If {@code locale} was {@code null}.
      */
+    @SuppressWarnings("resource")
     public String toString(final Locale locale) {
         String s;
         final String fmt = descriptor.getFormatString(locale);
