@@ -17,6 +17,11 @@ package org.forgerock.json.resource;
 
 import static org.forgerock.json.resource.RoutingMode.EQUALS;
 
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 
 /**
@@ -24,10 +29,10 @@ import org.forgerock.json.fluent.JsonValue;
  * factories and connections.
  */
 public final class Resources {
-    private static final class Collection implements RequestHandler {
+    private static final class CollectionHandler implements RequestHandler {
         private final CollectionResourceProvider provider;
 
-        private Collection(final CollectionResourceProvider provider) {
+        private CollectionHandler(final CollectionResourceProvider provider) {
             this.provider = provider;
         }
 
@@ -263,10 +268,10 @@ public final class Resources {
         }
     }
 
-    private static final class Singleton implements RequestHandler {
+    private static final class SingletonHandler implements RequestHandler {
         private final SingletonResourceProvider provider;
 
-        private Singleton(final SingletonResourceProvider provider) {
+        private SingletonHandler(final SingletonResourceProvider provider) {
             this.provider = provider;
         }
 
@@ -316,6 +321,70 @@ public final class Resources {
         public void handleUpdate(final ServerContext context, final UpdateRequest request,
                 final ResultHandler<Resource> handler) {
             provider.updateInstance(context, request, handler);
+        }
+    }
+
+    /**
+     * Returns a JSON object containing only the specified fields from the
+     * provided resource. If the list of fields is empty then the resource is
+     * returned unchanged.
+     * <p>
+     * <b>NOTE:</b> this method only performs a shallow copy of extracted
+     * fields, so changes to the filtered resource may impact the original
+     * resource, and vice-versa.
+     *
+     * @param resource
+     *            The resource whose fields are to be filtered.
+     * @param fields
+     *            The list of fields to be extracted.
+     * @return The filtered resource.
+     */
+    public static Resource filterResource(final Resource resource,
+            final Collection<JsonPointer> fields) {
+        final JsonValue unfiltered = resource.getContent();
+        final JsonValue filtered = filterResource(unfiltered, fields);
+        if (filtered == unfiltered) {
+            return resource; // Unchanged.
+        } else {
+            return new Resource(resource.getId(), resource.getRevision(), filtered);
+        }
+    }
+
+    /**
+     * Returns a JSON object containing only the specified fields from the
+     * provided JSON value. If the list of fields is empty then the value is
+     * returned unchanged.
+     * <p>
+     * <b>NOTE:</b> this method only performs a shallow copy of extracted
+     * fields, so changes to the filtered JSON value may impact the original
+     * JSON value, and vice-versa.
+     *
+     * @param resource
+     *            The JSON value whose fields are to be filtered.
+     * @param fields
+     *            The list of fields to be extracted.
+     * @return The filtered JSON value.
+     */
+    public static JsonValue filterResource(final JsonValue resource,
+            final Collection<JsonPointer> fields) {
+        if (fields.isEmpty() || resource.isNull() || resource.size() == 0) {
+            return resource;
+        } else {
+            final Map<String, Object> filtered = new LinkedHashMap<String, Object>(fields.size());
+            for (JsonPointer field : fields) {
+                if (field.isEmpty()) {
+                    // Special case - copy resource fields (assumes Map).
+                    filtered.putAll(resource.asMap());
+                } else {
+                    // FIXME: what should we do if the field refers to an array element?
+                    final JsonValue value = resource.get(field);
+                    if (value != null) {
+                        final String key = field.leaf();
+                        filtered.put(key, value.getObject());
+                    }
+                }
+            }
+            return new JsonValue(filtered);
         }
     }
 
@@ -403,7 +472,7 @@ public final class Resources {
      *         provided singleton resource provider.
      */
     public static RequestHandler newSingleton(final SingletonResourceProvider provider) {
-        return new Singleton(provider);
+        return new SingletonHandler(provider);
     }
 
     static Route addCollectionRoutes(final Router router, final RoutingMode mode,
@@ -423,7 +492,7 @@ public final class Resources {
         final Route instanceRoute = new Route(mode, builder.toString(), instanceHandler, null);
 
         // Create a route for the collection.
-        final RequestHandler collectionHandler = new Collection(provider);
+        final RequestHandler collectionHandler = new CollectionHandler(provider);
         final Route collectionRoute = new Route(EQUALS, uriTemplate, collectionHandler,
                 instanceRoute);
 
