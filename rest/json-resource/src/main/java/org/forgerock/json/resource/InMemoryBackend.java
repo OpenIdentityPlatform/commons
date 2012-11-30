@@ -119,7 +119,7 @@ public final class InMemoryBackend implements CollectionResourceProvider {
                     }
                 }
             }
-            handler.handleResult(resource);
+            handler.handleResult(filter(resource, request));
         } catch (final ResourceException e) {
             handler.handleError(e);
         }
@@ -147,7 +147,7 @@ public final class InMemoryBackend implements CollectionResourceProvider {
                             + "it does not have the required version");
                 }
             }
-            handler.handleResult(resource);
+            handler.handleResult(filter(resource, request));
         } catch (final ResourceException e) {
             handler.handleError(e);
         }
@@ -170,7 +170,7 @@ public final class InMemoryBackend implements CollectionResourceProvider {
     public void queryCollection(final ServerContext context, final QueryRequest request,
             final QueryResultHandler handler) {
         for (final Resource resource : resources.values()) {
-            handler.handleResource(resource);
+            handler.handleResource(filter(resource, request));
         }
         handler.handleResult(new QueryResult());
     }
@@ -187,7 +187,7 @@ public final class InMemoryBackend implements CollectionResourceProvider {
                 throw new NotFoundException("The resource with ID '" + id
                         + "' could not be read because it does not exist");
             }
-            handler.handleResult(resource);
+            handler.handleResult(filter(resource, request));
         } catch (final ResourceException e) {
             handler.handleError(e);
         }
@@ -218,7 +218,7 @@ public final class InMemoryBackend implements CollectionResourceProvider {
                     resources.put(id, resource);
                 }
             }
-            handler.handleResult(resource);
+            handler.handleResult(filter(resource, request));
         } catch (final ResourceException e) {
             handler.handleError(e);
         }
@@ -240,6 +240,10 @@ public final class InMemoryBackend implements CollectionResourceProvider {
                     "The request could not be processed because the provided "
                             + "content is not a JSON object");
         }
+    }
+
+    private Resource filter(Resource resource, Request request) {
+        return Resources.filterResource(resource, request.getFieldFilters());
     }
 
     private String getNextRevision(final String rev) throws ResourceException {
