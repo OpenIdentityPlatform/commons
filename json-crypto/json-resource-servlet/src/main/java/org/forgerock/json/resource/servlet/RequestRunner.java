@@ -47,7 +47,7 @@ import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.UpdateRequest;
 
 /**
- * Common request processing used by {@link RequestDispatcher}s.
+ * Common request processing used by {@code RequestDispatcher}s.
  */
 abstract class RequestRunner implements ResultHandler<Connection>, RequestVisitor<Void, Void> {
 
