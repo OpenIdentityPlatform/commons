@@ -15,6 +15,7 @@
  */
 package org.forgerock.json.resource.servlet;
 
+import static org.forgerock.json.resource.Resources.filterResource;
 import static org.forgerock.json.resource.servlet.HttpUtils.HEADER_ETAG;
 import static org.forgerock.json.resource.servlet.HttpUtils.HEADER_LOCATION;
 import static org.forgerock.json.resource.servlet.HttpUtils.adapt;
@@ -110,7 +111,7 @@ abstract class RequestRunner implements ResultHandler<Connection>, RequestVisito
             public void handleResult(final JsonValue result) {
                 try {
                     if (result != null) {
-                        writer.writeObject(result.getObject());
+                        writeJsonValue(result);
                     } else {
                         // No content.
                         httpResponse.setStatus(HttpServletResponse.SC_NO_CONTENT);
@@ -212,7 +213,7 @@ abstract class RequestRunner implements ResultHandler<Connection>, RequestVisito
             public boolean handleResource(final Resource resource) {
                 try {
                     writeHeader();
-                    writer.writeObject(resource.getContent().getObject());
+                    writeJsonValue(resource.getContent());
                     return true;
                 } catch (final Exception e) {
                     handleError(adapt(e));
@@ -355,6 +356,10 @@ abstract class RequestRunner implements ResultHandler<Connection>, RequestVisito
         };
     }
 
+    private void writeJsonValue(JsonValue json) throws IOException {
+        writer.writeObject(filterResource(json, request.getFieldFilters()).getObject());
+    }
+
     private void writeResource(final Resource resource) throws IOException {
         if (resource.getRevision() != null) {
             final StringBuilder builder = new StringBuilder();
@@ -363,6 +368,6 @@ abstract class RequestRunner implements ResultHandler<Connection>, RequestVisito
             builder.append('"');
             httpResponse.setHeader(HEADER_ETAG, builder.toString());
         }
-        writer.writeObject(resource.getContent().getObject());
+        writeJsonValue(resource.getContent());
     }
 }
