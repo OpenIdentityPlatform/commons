@@ -90,6 +90,14 @@ public interface Request {
      * resource returned by this request. The returned list may be modified if
      * permitted by this query request. An empty list indicates that all fields
      * should be included.
+     * <p>
+     * <b>NOTE:</b> field filtering alters the structure of a JSON resource and
+     * MUST only be performed once while processing a request. It is therefore
+     * the responsibility of front-end implementations (e.g. HTTP listeners,
+     * Servlets, etc) to perform field filtering. Request handler and resource
+     * provider implementations SHOULD NOT filter fields, but MAY choose to
+     * optimise their processing in order to return a resource containing only
+     * the fields targeted by the field filters.
      *
      * @return The list of fields which should be included with each JSON
      *         resource returned by this request (never {@code null}).
