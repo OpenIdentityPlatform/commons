@@ -192,6 +192,7 @@ final class HttpUtils {
             final ResourceException re = adapt(e);
             try {
                 resp.reset();
+                prepareResponse(resp);
                 resp.setStatus(re.getCode());
                 final JsonGenerator writer = getJsonGenerator(req, resp);
                 writer.writeObject(re.toJsonValue().getObject());
@@ -360,6 +361,11 @@ final class HttpUtils {
     static boolean isDebugRequested(final HttpServletRequest req) throws ResourceException {
         final String[] values = req.getParameterValues(PARAM_DEBUG);
         return (values != null && asBooleanValue(PARAM_DEBUG, values));
+    }
+
+    static void prepareResponse(final HttpServletResponse resp) {
+        resp.setContentType(CONTENT_TYPE);
+        resp.setCharacterEncoding(CHARACTER_ENCODING);
     }
 
     static void rejectIfMatch(final HttpServletRequest req) throws ResourceException,
