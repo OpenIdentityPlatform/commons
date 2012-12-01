@@ -30,6 +30,14 @@ import org.forgerock.json.fluent.JsonValue;
  * </ul>
  * More specifically, a singleton resource cannot be created, deleted, or
  * queried and may only support a limited sub-set of actions.
+ * <p>
+ * <b>NOTE:</b> field filtering alters the structure of a JSON resource and MUST
+ * only be performed once while processing a request. It is therefore the
+ * responsibility of front-end implementations (e.g. HTTP listeners, Servlets,
+ * etc) to perform field filtering. Request handler and resource provider
+ * implementations SHOULD NOT filter fields, but MAY choose to optimise their
+ * processing in order to return a resource containing only the fields targeted
+ * by the field filters.
  */
 public interface SingletonResourceProvider {
 
