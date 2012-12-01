@@ -15,7 +15,6 @@
  */
 package org.forgerock.json.resource.servlet;
 
-import static org.forgerock.json.resource.servlet.HttpUtils.CHARACTER_ENCODING;
 import static org.forgerock.json.resource.servlet.HttpUtils.CONTENT_TYPE;
 import static org.forgerock.json.resource.servlet.HttpUtils.ETAG_ANY;
 import static org.forgerock.json.resource.servlet.HttpUtils.HEADER_IF_MATCH;
@@ -40,6 +39,7 @@ import static org.forgerock.json.resource.servlet.HttpUtils.getMethod;
 import static org.forgerock.json.resource.servlet.HttpUtils.getParameter;
 import static org.forgerock.json.resource.servlet.HttpUtils.hasParameter;
 import static org.forgerock.json.resource.servlet.HttpUtils.isDebugRequested;
+import static org.forgerock.json.resource.servlet.HttpUtils.prepareResponse;
 import static org.forgerock.json.resource.servlet.HttpUtils.rejectIfMatch;
 import static org.forgerock.json.resource.servlet.HttpUtils.rejectIfNoneMatch;
 import static org.forgerock.json.resource.servlet.ServletConfigurator.getServletConfigurator;
@@ -572,11 +572,6 @@ public final class HttpServletAdapter {
             // Unrecognized - must be request specific.
             return false;
         }
-    }
-
-    private void prepareResponse(final HttpServletResponse resp) {
-        resp.setContentType(CONTENT_TYPE);
-        resp.setCharacterEncoding(CHARACTER_ENCODING);
     }
 
     private void preprocessRequest(final HttpServletRequest req) throws ResourceException {
