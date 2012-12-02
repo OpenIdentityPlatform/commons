@@ -18,6 +18,7 @@ package org.forgerock.json.resource.servlet;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -39,6 +40,8 @@ final class HttpUtils {
 
     static final String CHARACTER_ENCODING = "UTF-8";
     static final String CONTENT_TYPE = "application/json";
+    static final Pattern CONTENT_TYPE_REGEX = Pattern.compile(
+            "^application/json([ ]*;[ ]*charset=utf-8)?$", Pattern.CASE_INSENSITIVE);
     static final String CRLF = "\r\n";
     static final String ETAG_ANY = "*";
     static final String HEADER_ETAG = "ETag";
