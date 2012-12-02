@@ -16,6 +16,7 @@
 package org.forgerock.json.resource.servlet;
 
 import static org.forgerock.json.resource.servlet.HttpUtils.CONTENT_TYPE;
+import static org.forgerock.json.resource.servlet.HttpUtils.CONTENT_TYPE_REGEX;
 import static org.forgerock.json.resource.servlet.HttpUtils.ETAG_ANY;
 import static org.forgerock.json.resource.servlet.HttpUtils.HEADER_IF_MATCH;
 import static org.forgerock.json.resource.servlet.HttpUtils.HEADER_IF_NONE_MATCH;
@@ -579,8 +580,11 @@ public final class HttpServletAdapter {
             dumpRequest(req);
         }
 
-        // Perform preliminary request validation.
-        if (req.getContentType() != null && !req.getContentType().equals(CONTENT_TYPE)) {
+        // TODO: check Accept (including charset parameter) and Accept-Charset headers
+
+        // Check content-type.
+        final String contentType = req.getContentType();
+        if (contentType != null && !CONTENT_TYPE_REGEX.matcher(contentType).matches()) {
             // TODO: i18n
             throw new BadRequestException(
                     "The request could not be processed because it specified the content-type '"
