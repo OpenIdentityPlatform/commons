@@ -30,14 +30,6 @@ import org.forgerock.json.fluent.JsonPointer;
  */
 public final class QueryFilter {
 
-    /*
-     * TODO: should value assertions be Objects or Strings? Objects allows use
-     * of numbers, during construction, but visitors may need to handle
-     * different types (e.g. Date or String representation of a date).
-     */
-
-    // TODO: string based field name constructors.
-
     private static final class AndImpl extends Impl {
         private final List<QueryFilter> subFilters;
 
@@ -50,6 +42,14 @@ public final class QueryFilter {
             return v.visitAndFilter(p, subFilters);
         }
     }
+
+    /*
+     * TODO: should value assertions be Objects or Strings? Objects allows use
+     * of numbers, during construction, but visitors may need to handle
+     * different types (e.g. Date or String representation of a date).
+     */
+
+    // TODO: string based field name constructors.
 
     private static final class BooleanLiteralImpl extends Impl {
         private final boolean value;
@@ -207,6 +207,130 @@ public final class QueryFilter {
     private static final QueryFilter ALWAYS_FALSE = new QueryFilter(new BooleanLiteralImpl(false));
     private static final QueryFilter ALWAYS_TRUE = new QueryFilter(new BooleanLiteralImpl(true));
 
+    private static final QueryFilterVisitor<StringBuilder, StringBuilder> TO_STRING_VISITOR =
+            new QueryFilterVisitor<StringBuilder, StringBuilder>() {
+
+                @Override
+                public StringBuilder visitAndFilter(final StringBuilder p,
+                        final List<QueryFilter> subFilters) {
+                    p.append('(');
+                    boolean isFirst = true;
+                    for (final QueryFilter subFilter : subFilters) {
+                        if (isFirst) {
+                            isFirst = false;
+                        } else {
+                            p.append(" and ");
+                        }
+                        subFilter.accept(this, p);
+                    }
+                    p.append(')');
+                    return p;
+                }
+
+                @Override
+                public StringBuilder visitBooleanLiteralFilter(final StringBuilder p,
+                        final boolean value) {
+                    // This is not officially supported in SCIM.
+                    p.append(value);
+                    return p;
+                }
+
+                @Override
+                public StringBuilder visitEqualsFilter(final StringBuilder p,
+                        final JsonPointer field, final Object valueAssertion) {
+                    return visitComparator(p, "eq", field, valueAssertion);
+                }
+
+                @Override
+                public StringBuilder visitExtendedMatchFilter(final StringBuilder p,
+                        final JsonPointer field, final String matchingRuleId,
+                        final Object valueAssertion) {
+                    return visitComparator(p, matchingRuleId, field, valueAssertion);
+                }
+
+                @Override
+                public StringBuilder visitGreaterThanFilter(final StringBuilder p,
+                        final JsonPointer field, final Object valueAssertion) {
+                    return visitComparator(p, "gt", field, valueAssertion);
+                }
+
+                @Override
+                public StringBuilder visitGreaterThanOrEqualToFilter(final StringBuilder p,
+                        final JsonPointer field, final Object valueAssertion) {
+                    return visitComparator(p, "ge", field, valueAssertion);
+                }
+
+                @Override
+                public StringBuilder visitLessThanFilter(final StringBuilder p,
+                        final JsonPointer field, final Object valueAssertion) {
+                    return visitComparator(p, "lt", field, valueAssertion);
+                }
+
+                @Override
+                public StringBuilder visitLessThanOrEqualToFilter(final StringBuilder p,
+                        final JsonPointer field, final Object valueAssertion) {
+                    return visitComparator(p, "le", field, valueAssertion);
+                }
+
+                /*
+                 * TODO: This will probably need refining once we implement the
+                 * parser, since recursive not operators will make parsing more
+                 * difficult.
+                 */
+                @Override
+                public StringBuilder visitNotFilter(final StringBuilder p,
+                        final QueryFilter subFilter) {
+                    // This is not officially supported in SCIM.
+                    p.append("nt ");
+                    subFilter.accept(this, p);
+                    return p;
+                }
+
+                @Override
+                public StringBuilder visitOrFilter(final StringBuilder p,
+                        final List<QueryFilter> subFilters) {
+                    p.append('(');
+                    boolean isFirst = true;
+                    for (final QueryFilter subFilter : subFilters) {
+                        if (isFirst) {
+                            isFirst = false;
+                        } else {
+                            p.append(" or ");
+                        }
+                        subFilter.accept(this, p);
+                    }
+                    p.append(')');
+                    return p;
+                }
+
+                @Override
+                public StringBuilder visitPresentFilter(final StringBuilder p,
+                        final JsonPointer field) {
+                    p.append(field.toString());
+                    p.append(' ');
+                    p.append("pr");
+                    return p;
+                }
+
+                private StringBuilder visitComparator(final StringBuilder p,
+                        final String comparator, final JsonPointer field,
+                        final Object valueAssertion) {
+                    p.append(field.toString());
+                    p.append(' ');
+                    p.append(comparator);
+                    p.append(' ');
+                    if (valueAssertion instanceof Boolean || valueAssertion instanceof Number) {
+                        // No need for quotes.
+                        p.append(valueAssertion);
+                    } else {
+                        p.append('"');
+                        p.append(valueAssertion);
+                        p.append('"');
+                    }
+                    return p;
+                }
+            };
+
     /**
      * Returns a filter which does not match any resources.
      *
@@ -271,8 +395,22 @@ public final class QueryFilter {
      *            The assertion value.
      * @return The newly created {@code equality} filter.
      */
-    public static QueryFilter equals(final JsonPointer field, final Object valueAssertion) {
+    public static QueryFilter equalTo(final JsonPointer field, final Object valueAssertion) {
         return new QueryFilter(new EqualsImpl(field, valueAssertion));
+    }
+
+    /**
+     * Creates a new {@code equality} filter using the provided field name and
+     * value assertion.
+     *
+     * @param field
+     *            The name of field within the JSON resource to be compared.
+     * @param valueAssertion
+     *            The assertion value.
+     * @return The newly created {@code equality} filter.
+     */
+    public static QueryFilter equalTo(final String field, final Object valueAssertion) {
+        return equalTo(new JsonPointer(field), valueAssertion);
     }
 
     /**
@@ -293,6 +431,23 @@ public final class QueryFilter {
     }
 
     /**
+     * Creates a new {@code extended match} filter using the provided field
+     * name, matching rule identifier, and value assertion.
+     *
+     * @param field
+     *            The name of field within the JSON resource to be compared.
+     * @param matchingRuleId
+     *            The name of the matching rule to use for the comparison.
+     * @param valueAssertion
+     *            The assertion value.
+     * @return The newly created {@code extended match} filter.
+     */
+    public static QueryFilter extendedMatch(final String field, final String matchingRuleId,
+            final Object valueAssertion) {
+        return extendedMatch(new JsonPointer(field), matchingRuleId, valueAssertion);
+    }
+
+    /**
      * Creates a new {@code greater than} filter using the provided field name
      * and value assertion.
      *
@@ -304,6 +459,20 @@ public final class QueryFilter {
      */
     public static QueryFilter greaterThan(final JsonPointer field, final Object valueAssertion) {
         return new QueryFilter(new GreaterThanImpl(field, valueAssertion));
+    }
+
+    /**
+     * Creates a new {@code greater than} filter using the provided field name
+     * and value assertion.
+     *
+     * @param field
+     *            The name of field within the JSON resource to be compared.
+     * @param valueAssertion
+     *            The assertion value.
+     * @return The newly created {@code greater than} filter.
+     */
+    public static QueryFilter greaterThan(final String field, final Object valueAssertion) {
+        return greaterThan(new JsonPointer(field), valueAssertion);
     }
 
     /**
@@ -322,6 +491,20 @@ public final class QueryFilter {
     }
 
     /**
+     * Creates a new {@code greater than or equal to} filter using the provided
+     * field name and value assertion.
+     *
+     * @param field
+     *            The name of field within the JSON resource to be compared.
+     * @param valueAssertion
+     *            The assertion value.
+     * @return The newly created {@code greater than or equal to} filter.
+     */
+    public static QueryFilter greaterThanOrEqualTo(final String field, final Object valueAssertion) {
+        return greaterThanOrEqualTo(new JsonPointer(field), valueAssertion);
+    }
+
+    /**
      * Creates a new {@code less than} filter using the provided field name and
      * value assertion.
      *
@@ -336,6 +519,20 @@ public final class QueryFilter {
     }
 
     /**
+     * Creates a new {@code less than} filter using the provided field name and
+     * value assertion.
+     *
+     * @param field
+     *            The name of field within the JSON resource to be compared.
+     * @param valueAssertion
+     *            The assertion value.
+     * @return The newly created {@code less than} filter.
+     */
+    public static QueryFilter lessThan(final String field, final Object valueAssertion) {
+        return lessThan(new JsonPointer(field), valueAssertion);
+    }
+
+    /**
      * Creates a new {@code less than or equal to} filter using the provided
      * field name and value assertion.
      *
@@ -347,6 +544,20 @@ public final class QueryFilter {
      */
     public static QueryFilter lessThanOrEqualTo(final JsonPointer field, final Object valueAssertion) {
         return new QueryFilter(new LessThanOrEqualToImpl(field, valueAssertion));
+    }
+
+    /**
+     * Creates a new {@code less than or equal to} filter using the provided
+     * field name and value assertion.
+     *
+     * @param field
+     *            The name of field within the JSON resource to be compared.
+     * @param valueAssertion
+     *            The assertion value.
+     * @return The newly created {@code less than or equal to} filter.
+     */
+    public static QueryFilter lessThanOrEqualTo(final String field, final Object valueAssertion) {
+        return lessThanOrEqualTo(new JsonPointer(field), valueAssertion);
     }
 
     /**
@@ -409,6 +620,18 @@ public final class QueryFilter {
     }
 
     /**
+     * Creates a new {@code presence} filter using the provided field name.
+     *
+     * @param field
+     *            The name of field within the JSON resource which must be
+     *            present.
+     * @return The newly created {@code presence} filter.
+     */
+    public static QueryFilter present(final String field) {
+        return present(new JsonPointer(field));
+    }
+
+    /**
      * Parses the provided string representation of a query filter as a
      * {@code QueryFilter}.
      *
@@ -451,16 +674,21 @@ public final class QueryFilter {
     }
 
     /**
-     * {@inheritDoc}
+     * Returns the string representation of this query filter. The string
+     * representation is defined to be similar to that of SCIM's, with the
+     * following differences:
+     * <ul>
+     * <li>field references are JSON pointers
+     * <li>support for boolean literal expressions, e.g. {@code (true)}
+     * <li>support for the logical not operator, e.g.
+     * {@code (nt /role eq "user")}
+     * </ul>
+     *
+     * @return The string representation of this query filter.
      */
+    @Override
     public String toString() {
-        /*
-         * TODO: use visitor to generate string representation. LDAP uses a
-         * prefix notation, but most REST APIs seem to prefer infix notation. In
-         * addition, we should use URL friendly operators, so use names rather
-         * than URL sensitive characters, e.g. "eq" instead of "&".
-         */
-        return super.toString();
+        return accept(TO_STRING_VISITOR, new StringBuilder()).toString();
     }
 
 }
