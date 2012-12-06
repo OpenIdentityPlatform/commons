@@ -1,11 +1,11 @@
 /* FORMS */
 input[type="text"], input[type="password"], textarea, select {
-    border: 1px solid #DBDBDB;
+    border: 1px solid @input-border-basic;
     .rounded-corners(5px);
     font-size: 15px;
-    color: #5A646D;
+    color: @font-color;
     padding: 5px 10px;
-    background-color: #fff;
+    background-color: @content-background;
     width: 200px;
     transition: all 0.25s ease-in-out;
     -webkit-transition: all 0.25s ease-in-out;
@@ -126,7 +126,7 @@ form.form {
     	   display: inline-block;
     	   vertical-align: top;
     	   margin-right: -1px;
-    	   border: 1px solid #DBDBDB;
+    	   border: 1px solid @input-border-basic;
     	   .rounded-left-corners;
     	   .linear-gradient;
     	}
@@ -166,6 +166,8 @@ form.form {
     div.validation-message, div.input-validation-message {
         color: @color-active;
         display: inline-block;
+        float: right;
+        width: 220px;
     }
     div.group-field-inputs {
         float: left;
@@ -174,7 +176,7 @@ form.form {
         padding: 1px 5px 5px 5px;
         width: 210px;
         margin-left: 5px;
-        border: 1px solid #DBDBDB;
+        border: 1px solid @input-border-basic;
         float: left;
         .rounded-corners(5px);
         span {
