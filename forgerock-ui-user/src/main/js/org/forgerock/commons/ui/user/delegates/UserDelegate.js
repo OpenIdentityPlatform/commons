@@ -59,7 +59,7 @@ define("org/forgerock/commons/ui/user/delegates/UserDelegate", [
      */
     obj.login = function(uid, password, successCallback, errorCallback, errorsHandlers) {
         var headers = {};
-        headers[constants.OPENIDM_HEADER_PARAM_USERNAME] = uid.toLowerCase();
+        headers[constants.OPENIDM_HEADER_PARAM_USERNAME] = uid;
         headers[constants.OPENIDM_HEADER_PARAM_PASSWORD] = password;
         headers[constants.OPENIDM_HEADER_PARAM_NO_SESION] = false;
         obj.serviceCall({
@@ -125,7 +125,7 @@ define("org/forgerock/commons/ui/user/delegates/UserDelegate", [
 
     obj.getSecurityQuestionForUserName = function(uid, successCallback, errorCallback) {
         obj.serviceCall({
-            serviceUrl: constants.host + "/openidm/endpoint/securityQA?_action=securityQuestionForUserName&" + $.param({uid: uid.toLowerCase()}),
+            serviceUrl: constants.host + "/openidm/endpoint/securityQA?_action=securityQuestionForUserName&" + $.param({uid: uid}),
             url: "",
             success: function (data) {
                 if(data.hasOwnProperty('securityQuestion')) {
@@ -142,7 +142,7 @@ define("org/forgerock/commons/ui/user/delegates/UserDelegate", [
      */
     obj.getBySecurityAnswer = function(uid, securityAnswer, successCallback, errorCallback) {
         obj.serviceCall({
-            serviceUrl: constants.host + "/openidm/endpoint/securityQA?_action=checkSecurityAnswerForUserName&" + $.param({uid: uid.toLowerCase(), securityAnswer: securityAnswer}),
+            serviceUrl: constants.host + "/openidm/endpoint/securityQA?_action=checkSecurityAnswerForUserName&" + $.param({uid: uid, securityAnswer: securityAnswer}),
             url: "",
             success: function (data) {
                 if(data.result === "correct" && successCallback) {
