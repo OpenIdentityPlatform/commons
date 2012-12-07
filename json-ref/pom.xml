@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.forgerock</groupId>
         <artifactId>forgerock-parent</artifactId>
-        <version>1.1.0-SNAPSHOT</version>
+        <version>1.1.0</version>
     </parent>
     <groupId>org.forgerock.commons</groupId>
     <artifactId>forgerock-rest</artifactId>
@@ -48,7 +48,7 @@
                 <sendOnFailure>true</sendOnFailure>
                 <sendOnSuccess>false</sendOnSuccess>
                 <sendOnWarning>false</sendOnWarning>
-        <!-- TODO: need mailing list -->
+                <!-- TODO: need mailing list -->
                 <address>opendj-dev@forgerock.org</address>
             </notifier>
         </notifiers>
