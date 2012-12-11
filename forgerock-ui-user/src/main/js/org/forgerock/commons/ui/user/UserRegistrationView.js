@@ -99,10 +99,11 @@ define("org/forgerock/commons/ui/user/UserRegistrationView", [
                 validatorsManager.bindValidators(this.$el,this.delegate.baseEntity + "/");
                 this.unlock();
                 
-                securityQuestionDelegate.getAllSecurityQuestions(function(secquestions) {
-                    uiUtils.loadSelectOptions(secquestions, $("select[name='securityQuestion']"));
-                });
-                
+                if (conf.globalData.securityQuestions) {
+                    securityQuestionDelegate.getAllSecurityQuestions(function(secquestions) {
+                        uiUtils.loadSelectOptions(secquestions, $("select[name='securityQuestion']"));
+                    });
+                }
                 this.siteImageCounter = 0;
                 $("#siteImageFlow img").load(_.bind(this.refreshFlow, this));
                                 
