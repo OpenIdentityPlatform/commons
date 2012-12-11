@@ -52,8 +52,8 @@ define("org/forgerock/commons/ui/user/LoginView", [
             if(conf.globalData.siteIdentification) {
                 if (login.length) {
                     siteIdentificationDelegate.getSiteIdentificationForLogin(login, _.bind(function(data) {
-                        this.$el.find("#siteImage").html('<img src="images/passphrase/'+ data.siteImage +'" />');
-                        this.$el.find("#passPhrase").html(data.passPhrase);
+                        this.$el.find("#siteImage").html('<img src="images/passphrase/'+ encodeURIComponent(data.siteImage) +'" />');
+                        this.$el.find("#passPhrase").text(data.passPhrase);
                         this.$el.find("#identificationMessage").hide();
                     }, this));
                 }

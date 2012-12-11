@@ -49,7 +49,7 @@ define("org/forgerock/commons/ui/user/login/LoggedUserBarView", [
             
             if(conf.loggedUser) {
                 this.$el.find("#profile_link").show();
-                this.$el.find("#user_name").html(conf.loggedUser.userName);
+                this.$el.find("#user_name").text(conf.loggedUser.userName);
                 
                 this.$el.show();
             } else {

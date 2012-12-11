@@ -201,7 +201,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
      });
     
     Handlebars.registerHelper('url', function(routeKey) {
-        var result = "#" + router.getLink(router.configuration.routes[routeKey], _.toArray(arguments).slice(1, -1));
+        var result = "#" + router.getLink(router.configuration.routes[routeKey], _.toArray([encodeURIComponent(arguments[1])]));
        
         return new Handlebars.SafeString(result);
     });
