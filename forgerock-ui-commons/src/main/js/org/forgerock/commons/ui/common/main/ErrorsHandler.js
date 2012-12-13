@@ -58,8 +58,9 @@ define("org/forgerock/commons/ui/common/main/ErrorsHandler", [
         }
         
         if(handler) {
-            // conditional check needed here until calls to authentication?_action=reauthenticate no longer produce 403 status
-            if (!error.hasOwnProperty("responseObj") || !(error.responseObj.error === 403 && error.responseObj.message === "Reauthentication failed")) {
+            // conditional check needed here until calls to authentication?_action=reauthenticate and OpenAM authentication no longer produce 403 status
+            if (!error.hasOwnProperty("responseObj") || !(error.responseObj.error === 403 && 
+                (error.responseObj.message === "Reauthentication failed" || error.responseObj.message === "SSO Token cannot be retrieved."))) {
                 if(handler.event) {
                     eventManager.sendEvent(handler.event, {handler: handler, error: error});
                 }

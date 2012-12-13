@@ -283,6 +283,12 @@
             }
          }
     },
+    "openam" : {
+        "apps" : {
+            "header" : "My Applications",
+            "noneFound": "You have no applications assigned to you"
+        }
+    },    
     "openidm" : {
         "ui" : {
             "common" : {

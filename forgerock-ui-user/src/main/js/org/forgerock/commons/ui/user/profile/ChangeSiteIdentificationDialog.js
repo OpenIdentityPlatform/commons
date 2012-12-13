@@ -32,7 +32,7 @@ define("org/forgerock/commons/ui/user/profile/ChangeSiteIdentificationDialog", [
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/Router",
-    "org/forgerock/commons/ui/user/delegates/UserDelegate",
+    "UserDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants"
 ], function(Dialog, validatorsManager, conf, router, userDelegate, eventManager, constants) {

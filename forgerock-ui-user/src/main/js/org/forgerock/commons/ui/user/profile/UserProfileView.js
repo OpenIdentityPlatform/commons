@@ -31,7 +31,7 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/util/UIUtils",
-    "org/forgerock/commons/ui/user/delegates/UserDelegate",
+    "UserDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration",
@@ -39,6 +39,7 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
 ], function(AbstractView, validatorsManager, uiUtils, userDelegate, eventManager, constants, conf, countryStateDelegate) {
     var UserProfileView = AbstractView.extend({
         template: "templates/user/UserProfileTemplate.html",
+        baseTemplate: "templates/user/DefaultBaseTemplate.html",
         delegate: userDelegate,
         events: {
             "click input[type=submit]": "formSubmit",

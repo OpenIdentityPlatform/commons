@@ -25,7 +25,7 @@
 /*global define*/
 
 define("org/forgerock/commons/ui/user/login/InternalLoginHelper", [
-	"org/forgerock/commons/ui/user/delegates/UserDelegate",
+	"UserDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
@@ -38,7 +38,7 @@ define("org/forgerock/commons/ui/user/login/InternalLoginHelper", [
         userDelegate.login(userName, password, function(user) {
             conf.globalData.userComponent = user.userid.component;
             
-            obj.getUserById(user.userid.id, user.userid.component, successCallback, errorCallback);
+            userDelegate.getUserById(user.userid.id, user.userid.component, successCallback, errorCallback);
         }, function() {
             errorCallback();
         }, {"unauthorized": { status: "401"}});
@@ -53,7 +53,7 @@ define("org/forgerock/commons/ui/user/login/InternalLoginHelper", [
             userDelegate.getProfile(function(user) {
                 conf.globalData.userComponent = user.userid.component;
                 
-                obj.getUserById(user.userid.id, user.userid.component, successCallback, errorCallback);
+                userDelegate.getUserById(user.userid.id, user.userid.component, successCallback, errorCallback);
             }, function() {
                 errorCallback();
             }, {"serverError": {status: "503"}, "unauthorized": {status: "401"}});
@@ -62,26 +62,5 @@ define("org/forgerock/commons/ui/user/login/InternalLoginHelper", [
             errorCallback();
         }
     };
-    
-    obj.getUserById = function(id, component, successCallback, errorCallback) {
-        if(component === "managed/user") {
-            userDelegate.readEntity(id, function(user) {
-                successCallback(user);
-            }, function() {
-                errorCallback();
-            });
-        } else if(component === "internal/user") {
-            userDelegate.readInternalEntity(id, function(user) {
-                if(!user.userName) {
-                    user.userName = user._id;
-                }
-                
-                successCallback(user);
-            }, function() {
-                errorCallback();
-            });
-        }
-    };
-
     return obj;
 });

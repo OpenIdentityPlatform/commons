@@ -111,7 +111,7 @@ define("config/validators/UserValidators", [
                 "name": "Required field",
                 "dependencies": [
                     "org/forgerock/commons/ui/common/main/Configuration",
-                    "org/forgerock/commons/ui/user/delegates/UserDelegate"
+                    "UserDelegate"
                 ],
                 "validator": function(el, input, callback, conf, userDelegate) {
                     var v = $(input).val();
@@ -139,7 +139,7 @@ define("config/validators/UserValidators", [
                 "name": "Reset Password Correct Login",
                 "dependencies": [
                     "org/forgerock/commons/ui/common/util/ValidatorsUtils",
-                    "org/forgerock/commons/ui/user/delegates/UserDelegate"
+                    "UserDelegate"
                 ],
                 "validator": function(el, input, callback, utils, userDelegate) {
                     var v = $(input).val();
@@ -169,7 +169,7 @@ define("config/validators/UserValidators", [
                 "name": "Check if security answer is correct",
                 "dependencies": [
                     "org/forgerock/commons/ui/common/util/ValidatorsUtils",
-                    "org/forgerock/commons/ui/user/delegates/UserDelegate"
+                    "UserDelegate"
                 ],
                 "validator": function(el, input, callback, utils, userDelegate) {
                     var v = $(input).val(), userName;

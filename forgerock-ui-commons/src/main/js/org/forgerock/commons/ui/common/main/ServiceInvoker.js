@@ -37,9 +37,13 @@ define("org/forgerock/commons/ui/common/main/ServiceInvoker", [
     var obj = new AbstractConfigurationAware();
 
     obj.restCall = function(callParamsParam) {
-        var current = this, callParams, realSuccess, realError;
-
-        callParamsParam.contentType = 'application/json; charset=utf-8';
+        var current = this, callParams, realSuccess, realError, nonJsonRequest = false;
+        
+        nonJsonRequest = (callParamsParam.hasOwnProperty('dataType') && callParamsParam.dataType !== "json");
+        
+        if (!nonJsonRequest) {
+            callParamsParam.contentType = 'application/json';
+        }
         callParams = callParamsParam;
         obj.applyDefaultHeadersIfNecessary(callParams, obj.configuration.defaultHeaders);
 
@@ -71,10 +75,11 @@ define("org/forgerock/commons/ui/common/main/ServiceInvoker", [
                 realError(data);
             }
         };
-        callParams.dataType = "json";
-        callParams.contentType = "application/json";
-
-        $.ajax(callParams);	
+        if (!nonJsonRequest) {
+            callParams.dataType = "json";
+            callParams.contentType = "application/json";
+        }
+        $.ajax(callParams); 
     };
 
     /**

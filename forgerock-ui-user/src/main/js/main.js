@@ -119,6 +119,7 @@ require([
     "org/forgerock/commons/ui/common/main/EventManager",
     "config/main",
     "org/forgerock/commons/ui/user/main",
+    "org/forgerock/commons/ui/user/delegates/UserDelegate",
     "org/forgerock/commons/ui/common/main"
 ], function(a, b, c, d, e, f, g, h, i, j, k, l, m, n, i18n, constants, eventManager) { 
     eventManager.sendEvent(constants.EVENT_DEPENDECIES_LOADED);

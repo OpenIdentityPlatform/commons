@@ -37,13 +37,33 @@ define("config/validators/CommonValidators", [
             "validator": function(el, input, callback) {
                 var v = $(input).val();
                 if (!v || v === "") {
-                    callback($.t("common.form.validation.required"));
+                    callback([$.t("common.form.validation.required")]);
                     return;
                 }
 
                 callback();  
             }
-        }
+        },
+        "minLength": {
+            "name": "Password validator",
+            "dependencies": [
+                "org/forgerock/commons/ui/common/util/ValidatorsUtils"
+            ],
+            "validator": function(el, input, callback, utils) {
+                var v = $(input).val(), reg, errors = [], len = $(input).attr('minLength');
+                
+                if(v.length < len) {
+                    errors.push($.t("common.form.validation.MIN_LENGTH", {minLength: len}));
+                }
+
+                if(errors.length === 0) {
+                    callback(); 
+                } else {
+                    callback(errors);
+                }
+                
+            }
+        }        
     };
     
     return obj;

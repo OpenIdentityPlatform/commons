@@ -25,16 +25,19 @@
 /*global $, define, _ */
 
 /**
- * @author yaromin
+ * This file is a sample, to be copied into a specific application and modified to use the
+ * endpoints available in that system.  References to the copy of this module will still 
+ * be made with the name "UserDelegate", so keep that the same as it is here. It is up to the 
+ * root main.js file to load the proper copy.
  */
-define("org/forgerock/commons/ui/user/delegates/UserDelegate", [
+define("UserDelegate", [
 	"org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/EventManager"
 ], function(constants, AbstractDelegate, configuration, eventManager) {
 
-    var obj = new AbstractDelegate(constants.host + "/openidm/managed/user");
+    var obj = new AbstractDelegate(constants.host + "USER_ENDPOINT");
 
     obj.usersCallback = null;
     obj.users = null;
@@ -45,13 +48,15 @@ define("org/forgerock/commons/ui/user/delegates/UserDelegate", [
 
         obj.usersCallback = successCallback;
         obj.numberOfUsers = 0;
-
-        obj.serviceCall({url: "/?_queryId=query-all&fields=*", success: function(data) {
+        /*
+        obj.serviceCall({url: "ALL_USERS_ENDPOINT", success: function(data) {
             if(successCallback) {
                 obj.users = data.result;
                 successCallback(data.result);
             }
         }, error: errorCallback} );
+        */
+        successCallback([]); // stub return all users
     };
 
     /**
@@ -59,11 +64,12 @@ define("org/forgerock/commons/ui/user/delegates/UserDelegate", [
      */
     obj.login = function(uid, password, successCallback, errorCallback, errorsHandlers) {
         var headers = {};
+        /*
         headers[constants.OPENIDM_HEADER_PARAM_USERNAME] = uid;
         headers[constants.OPENIDM_HEADER_PARAM_PASSWORD] = password;
         headers[constants.OPENIDM_HEADER_PARAM_NO_SESION] = false;
         obj.serviceCall({
-            serviceUrl: constants.host + "/openidm/info/login",
+            serviceUrl: constants.host + "GET_SESSION_DETAILS_ENDPOINT",
             url: "",
             headers: headers,
             success: function (data) {
@@ -79,6 +85,8 @@ define("org/forgerock/commons/ui/user/delegates/UserDelegate", [
             errorsHandlers: errorsHandlers
         });
         delete headers[constants.OPENIDM_HEADER_PARAM_PASSWORD];
+        */
+        successCallback({username: 'stubUsername', userid: {id : 'stubUserid', component: '' }}); // stub return
     };
        
     /**
@@ -87,23 +95,27 @@ define("org/forgerock/commons/ui/user/delegates/UserDelegate", [
     obj.checkCredentials = function(password, successCallback, errorCallback) {
 
         var headers = {};
+        /*
         headers[constants.OPENIDM_HEADER_PARAM_REAUTH] = password;
         obj.serviceCall({
-            serviceUrl: constants.host + "/openidm/authentication?_action=reauthenticate",
+            serviceUrl: constants.host + "REAUTH_PASSWORD_ENDPOINT",
             url: "",
             type: "POST",
             headers: headers,
             success: successCallback,
             error: errorCallback
         });
+        */
+        successCallback();
     };
     
     /**
      * Checks if logged in and returns users id
      */
     obj.getProfile = function(successCallback, errorCallback, errorsHandlers) {
+        /*
         obj.serviceCall({
-            serviceUrl: constants.host + "/openidm/info/login",
+            serviceUrl: constants.host + "GET_SESSION_DETAILS_ENDPOINT",
             url: "",
             success: function (data) {
                 if(!data.username) {
@@ -117,44 +129,17 @@ define("org/forgerock/commons/ui/user/delegates/UserDelegate", [
             error: errorCallback,
             errorsHandlers: errorsHandlers
         });
+        */
+        successCallback({username: 'stubUsername', userid: {id : 'stubUserid', component: 'stub' }});
+        
     };
     
-    obj.readInternalEntity = function(id, successCallback, errorCallback) {
-        this.serviceCall({serviceUrl: constants.host + "/openidm/repo/internal/user", url: "/" + id, type: "GET", success: successCallback, error: errorCallback});
+    obj.getUserById = function(id, component, successCallback, errorCallback) {
+        if(component === "stub") {
+                successCallback({"_id":"stubUserid","_rev":"0","familyName":"User","givenName":"Stub","userName":"stubUsername","email":"stub@example.com", "roles": "openidm-authorized"});
+        }
     };
 
-    obj.getSecurityQuestionForUserName = function(uid, successCallback, errorCallback) {
-        obj.serviceCall({
-            serviceUrl: constants.host + "/openidm/endpoint/securityQA?_action=securityQuestionForUserName&" + $.param({uid: uid}),
-            url: "",
-            success: function (data) {
-                if(data.hasOwnProperty('securityQuestion')) {
-                    successCallback(data.securityQuestion);
-                } else if(errorCallback) {
-                    errorCallback();
-                }
-            },
-            error: errorCallback
-        });
-    };
-    /**
-     * Check security answer method
-     */
-    obj.getBySecurityAnswer = function(uid, securityAnswer, successCallback, errorCallback) {
-        obj.serviceCall({
-            serviceUrl: constants.host + "/openidm/endpoint/securityQA?_action=checkSecurityAnswerForUserName&" + $.param({uid: uid, securityAnswer: securityAnswer}),
-            url: "",
-            success: function (data) {
-                if(data.result === "correct" && successCallback) {
-                    successCallback(data);
-                } else if (data.result === "error" && errorCallback) {
-                    errorCallback(data);
-                }
-                
-            },
-            error: errorCallback
-        });
-    };
 
     
     /**
@@ -202,6 +187,7 @@ define("org/forgerock/commons/ui/user/delegates/UserDelegate", [
     };
 
     obj.logout = function() {
+        /*
         var callParams = {
                 url: "/",
                 headers: {  },
@@ -215,6 +201,7 @@ define("org/forgerock/commons/ui/user/delegates/UserDelegate", [
         callParams.headers[constants.OPENIDM_HEADER_PARAM_LOGOUT] = true;
 
         obj.serviceCall(callParams);
+        */
     };
 
     /**

@@ -25,7 +25,6 @@
 /*global define*/
 
 define("org/forgerock/commons/ui/user/main", [
-    "./delegates/UserDelegate",
     "./delegates/InternalUserDelegate",
     "./login/InternalLoginHelper",  
     "./UserRegistrationView",

@@ -30,15 +30,6 @@ define("org/forgerock/commons/ui/common/util/Constants", [
 
     obj.host = "";
 
-    obj.OPENIDM_HEADER_PARAM_PASSWORD = "X-OpenIDM-Password";
-    obj.OPENIDM_HEADER_PARAM_USERNAME = "X-OpenIDM-Username";
-    obj.OPENIDM_HEADER_PARAM_LOGOUT = "X-OpenIDM-Logout";
-    obj.OPENIDM_HEADER_PARAM_NO_SESION = "X-OpenIDM-NoSession";
-    obj.OPENIDM_HEADER_PARAM_REAUTH = "X-OpenIDM-Reauth-Password";
-
-    obj.OPENIDM_ANONYMOUS_USERNAME = "anonymous";
-    obj.OPENIDM_ANONYMOUS_PASSWORD = "anonymous";
-
     obj.EVENT_SERVICE_UNAVAILABLE = "error.SERICE_UNAVAILABLE";
 
     obj.EVENT_PROFILE_INITIALIZATION = "user.profile.EVENT_PROFILE_INITIALIZATION";

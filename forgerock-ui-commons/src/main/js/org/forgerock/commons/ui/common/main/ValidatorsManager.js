@@ -71,6 +71,8 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
         
         _.each(el.find("[data-validator]"), function(input) {
             input = $(input);
+
+            input.attr("data-validation-status", "error");
             
             if(input.attr('data-validator-event')) {
                 event = input.attr('data-validator-event');
