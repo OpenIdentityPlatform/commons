@@ -92,8 +92,13 @@ define("org/forgerock/commons/ui/user/LoginView", [
                 if(login) {
                     this.$el.find("input[name=login]").val(login);
                     this.$el.find("[name=loginRemember]").attr("checked","true");
+                    validatorsManager.validateAllFields(this.$el);
+                    this.$el.find("[name=password]").focus();
                     this.getSiteIdentification();
-                } 
+                } else {
+                    this.$el.find("input[name=login]").focus();
+                }
+                
                 
                 if(callback) {
                     callback();
