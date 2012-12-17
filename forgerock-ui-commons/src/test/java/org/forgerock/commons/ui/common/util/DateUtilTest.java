@@ -6,7 +6,7 @@ import org.codehaus.jstestrunner.junit.JSTestSuiteRunner.ResourceBase;
 import org.junit.runner.RunWith;
 
 @RunWith(JSTestSuiteRunner.class)
-@ResourceBase({ "target/test-classes", "target/forgerock-ui-commons-1.0.0-SNAPSHOT-www" })
+@ResourceBase({ "target/test-classes", "target/forgerock-ui-commons-1.0.0-www" })
 @Include({ "test.html" })
 public class DateUtilTest {
 }
