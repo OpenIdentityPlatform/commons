@@ -86,6 +86,18 @@
 						<strictWhiteSpace>false</strictWhiteSpace>
 					</configuration>
 				</plugin>
+				
+				<plugin>
+					<artifactId>maven-release-plugin</artifactId>
+					<version>2.3.2</version>
+					<configuration>
+						<mavenExecutorId>forked-path</mavenExecutorId>
+						<useReleaseProfile>false</useReleaseProfile>
+						<suppressCommitBeforeTag>false</suppressCommitBeforeTag>
+						<goals>deploy</goals>
+						<arguments>-Pforgerock-release</arguments>
+					</configuration>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 	</build>
@@ -93,12 +105,12 @@
 	<dependencyManagement>
 		<dependencies>
 		  <dependency>
-                <groupId>org.forgerock.commons.ui.libs</groupId>
-                <artifactId>moment</artifactId>
-                <version>1.7.2</version>
-                <type>js</type>
-                <classifier>min</classifier>
-            </dependency>
+				<groupId>org.forgerock.commons.ui.libs</groupId>
+				<artifactId>moment</artifactId>
+				<version>1.7.2</version>
+				<type>js</type>
+				<classifier>min</classifier>
+			</dependency>
 			<dependency>
 				<groupId>org.forgerock.commons.ui</groupId>
 				<artifactId>forgerock-ui-commons</artifactId>
