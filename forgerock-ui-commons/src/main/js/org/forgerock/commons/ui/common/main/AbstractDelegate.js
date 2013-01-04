@@ -22,15 +22,15 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define*/
+/*global $, define, _ */
 
 /**
  * @author yaromin
  */
 define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
-	"org/forgerock/commons/ui/common/util/Constants", 
+    "org/forgerock/commons/ui/common/util/Constants", 
     "org/forgerock/commons/ui/common/main/Configuration",
-	"org/forgerock/commons/ui/common/main/ServiceInvoker"
+    "org/forgerock/commons/ui/common/main/ServiceInvoker"
 ], function(constants, configuration, serviceInvoker) {
 
     var obj = function AbstractDelegate(serviceUrl) {
@@ -74,7 +74,7 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
                 callParams.headers["If-Match"] = '"' + data._rev + '"';
             }
             current.serviceCall(callParams);
-        }, errorCallback);		
+        }, errorCallback);      
 
     };
 
@@ -116,7 +116,12 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
             }
             return;
         }
-        this.patchEntity(queryParameters, differences, successCallback, errorCallback, noChangesCallback);
+        this.patchEntity(queryParameters, differences, successCallback, 
+            _.bind(function () { 
+                this.patchEntity(queryParameters, this.getDifferences(oldObject, newObject, "add"), successCallback, 
+                                    errorCallback, noChangesCallback); 
+            }, this), 
+            noChangesCallback);
     };
 
     /**
@@ -126,7 +131,13 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
         //simple transformation
         var i;
         for(i = 0; i < patchDefinition.length; i++) {
-            patchDefinition[i].replace = "/" + patchDefinition[i].replace;
+            if (typeof(patchDefinition[i].replace) !== "undefined") {
+                patchDefinition[i].replace = "/" + patchDefinition[i].replace;
+            }
+            if (typeof(patchDefinition[i].add) !== "undefined") {
+                patchDefinition[i].add = "/" + patchDefinition[i].add;
+            }
+            
         }
         this.serviceCall({url: "/" + queryParameters.id + "?_action=patch", 
             type: "POST", 
@@ -149,15 +160,21 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
     /**
      * Returns differences between new and old object as a PATCH action compatible JSON object
      */
-    obj.prototype.getDifferences = function(oldObject, newObject) {
-        var newValue, oldValue, field, fieldContents, result = [];
+    obj.prototype.getDifferences = function(oldObject, newObject, method) {
+        var newValue, oldValue, field, fieldContents, result = [],patchCmd = {};
+        if (!method) {
+            method = "replace";
+        }
         for ( field in newObject) {
             fieldContents = newObject[field];
             if ( typeof (fieldContents) !== "function") {
                 newValue = newObject[field];
                 oldValue = oldObject[field];
                 if((newValue!=="" || oldValue) && newValue !== oldValue){
-                    result.push( { replace: field, value: newValue});
+                    patchCmd = {};
+                    patchCmd[method] = field;
+                    patchCmd.value = newValue;
+                    result.push( patchCmd );
                 }
             }
         }
