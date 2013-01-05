@@ -20,7 +20,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.forgerock.json.fluent.JsonPointer;
 
@@ -48,8 +51,6 @@ public final class QueryFilter {
      * of numbers, during construction, but visitors may need to handle
      * different types (e.g. Date or String representation of a date).
      */
-
-    // TODO: string based field name constructors.
 
     private static final class BooleanLiteralImpl extends Impl {
         private final boolean value;
@@ -94,6 +95,106 @@ public final class QueryFilter {
         @Override
         protected <R, P> R accept(final QueryFilterVisitor<R, P> v, final P p) {
             return v.visitExtendedMatchFilter(p, field, matchingRuleId, valueAssertion);
+        }
+    }
+
+    private static final class FilterTokenizer implements Iterator<String> {
+        private static final int NEED_END_STRING = 2;
+        private static final int NEED_START_STRING = 1;
+        private static final int NEED_TOKEN = 0;
+
+        private final String filterString;
+        private String nextToken;
+        private int pos;
+        private int state;
+
+        private FilterTokenizer(final String filterString) {
+            this.filterString = filterString;
+            this.pos = 0;
+            this.state = NEED_TOKEN;
+            readNextToken();
+        }
+
+        @Override
+        public boolean hasNext() {
+            return nextToken != null;
+        }
+
+        @Override
+        public String next() {
+            final String next = peek();
+            readNextToken();
+            return next;
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public String toString() {
+            return filterString;
+        }
+
+        private String peek() {
+            if (nextToken == null) {
+                throw new NoSuchElementException();
+            }
+            return nextToken;
+        }
+
+        private void readNextToken() {
+            switch (state) {
+            case NEED_START_STRING:
+                final int stringStart = pos;
+                for (; pos < filterString.length() && filterString.charAt(pos) != '"'; pos++) {
+                    // Do nothing
+                }
+                nextToken = filterString.substring(stringStart, pos);
+                state = NEED_END_STRING;
+                break;
+            case NEED_END_STRING:
+                // NEED_START_STRING guarantees that we are either at the end of the string
+                // or the next character is a quote.
+                if (pos < filterString.length()) {
+                    nextToken = filterString.substring(pos, ++pos);
+                } else {
+                    nextToken = null;
+                }
+                state = NEED_TOKEN;
+                break;
+            default: // NEED_TOKEN:
+                if (!skipWhiteSpace()) {
+                    nextToken = null;
+                } else {
+                    final int tokenStart = pos;
+                    switch (filterString.charAt(pos++)) {
+                    case '(':
+                    case ')':
+                        break;
+                    case '"':
+                        state = NEED_START_STRING;
+                        break;
+                    default:
+                        for (; pos < filterString.length(); pos++) {
+                            final char c = filterString.charAt(pos);
+                            if (c == '(' || c == ')' || c == ' ') {
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                    nextToken = filterString.substring(tokenStart, pos);
+                }
+            }
+        }
+
+        private boolean skipWhiteSpace() {
+            for (; pos < filterString.length() && filterString.charAt(pos) == ' '; pos++) {
+                // Do nothing
+            }
+            return pos < filterString.length();
         }
     }
 
@@ -205,6 +306,7 @@ public final class QueryFilter {
     }
 
     private static final QueryFilter ALWAYS_FALSE = new QueryFilter(new BooleanLiteralImpl(false));
+
     private static final QueryFilter ALWAYS_TRUE = new QueryFilter(new BooleanLiteralImpl(true));
 
     private static final QueryFilterVisitor<StringBuilder, StringBuilder> TO_STRING_VISITOR =
@@ -272,17 +374,13 @@ public final class QueryFilter {
                     return visitComparator(p, "le", field, valueAssertion);
                 }
 
-                /*
-                 * TODO: This will probably need refining once we implement the
-                 * parser, since recursive not operators will make parsing more
-                 * difficult.
-                 */
                 @Override
                 public StringBuilder visitNotFilter(final StringBuilder p,
                         final QueryFilter subFilter) {
                     // This is not officially supported in SCIM.
-                    p.append("nt ");
+                    p.append("nt (");
                     subFilter.accept(this, p);
+                    p.append(')');
                     return p;
                 }
 
@@ -643,10 +741,148 @@ public final class QueryFilter {
      *             query filter.
      */
     public static QueryFilter valueOf(final String string) {
-        /*
-         * TODO: parse a filter from the toString() representation.
-         */
-        return alwaysFalse();
+        // Use recursive descent of following grammar:
+        //
+        // Expr          = OrExpr
+        // OrExpr        = AndExpr ( 'or' AndExpr ) *
+        // AndExpr       = NotExpr ( 'and' NotExpr ) *
+        // NotExpr       = 'nt' Expr | PrimaryExpr
+        // PrimaryExpr   = '(' Expr ')' | Pointer OpName JsonValue | Pointer 'pr' | 'true' | 'false'
+        // Pointer       = STRING
+        // OpName        = STRING
+        // JsonValue     = NUMBER | BOOLEAN | '"' UTF8STRING '"'
+        // STRING        = ASCII string not containing white-space
+        // UTF8STRING    = UTF-8 string possibly containing white-space
+        //
+        // See: http://en.wikipedia.org/wiki/Operator-precedence_parser or
+        // http://www.engr.mun.ca/~theo/Misc/exp_parsing.htm
+
+        // TODO: protect against stack overflow.
+
+        final FilterTokenizer tokenizer = new FilterTokenizer(string);
+        final QueryFilter filter = valueOfOrExpr(tokenizer);
+        if (tokenizer.hasNext()) {
+            return valueOfIllegalArgument(tokenizer);
+        } else {
+            return filter;
+        }
+    }
+
+    private static QueryFilter valueOfAndExpr(final FilterTokenizer tokenizer) {
+        QueryFilter filter = valueOfNotExpr(tokenizer);
+        List<QueryFilter> subFilters = null;
+        while (tokenizer.hasNext() && tokenizer.peek().equals("and")) {
+            tokenizer.next();
+            if (subFilters == null) {
+                subFilters = new LinkedList<QueryFilter>();
+                subFilters.add(filter);
+            }
+            subFilters.add(valueOfNotExpr(tokenizer));
+        }
+        if (subFilters != null) {
+            filter = QueryFilter.and(subFilters);
+        }
+        return filter;
+    }
+
+    private static QueryFilter valueOfIllegalArgument(final FilterTokenizer tokenizer) {
+        throw new IllegalArgumentException("Invalid filter '" + tokenizer + "'");
+    }
+
+    private static QueryFilter valueOfNotExpr(final FilterTokenizer tokenizer) {
+        if (tokenizer.hasNext() && tokenizer.peek().equals("nt")) {
+            tokenizer.next();
+            final QueryFilter rhs = valueOfOrExpr(tokenizer);
+            return QueryFilter.not(rhs);
+        } else {
+            return valueOfPrimaryExpr(tokenizer);
+        }
+    }
+
+    private static QueryFilter valueOfOrExpr(final FilterTokenizer tokenizer) {
+        QueryFilter filter = valueOfAndExpr(tokenizer);
+        List<QueryFilter> subFilters = null;
+        while (tokenizer.hasNext() && tokenizer.peek().equals("or")) {
+            tokenizer.next();
+            if (subFilters == null) {
+                subFilters = new LinkedList<QueryFilter>();
+                subFilters.add(filter);
+            }
+            subFilters.add(valueOfAndExpr(tokenizer));
+        }
+        if (subFilters != null) {
+            filter = QueryFilter.or(subFilters);
+        }
+        return filter;
+    }
+
+    private static QueryFilter valueOfPrimaryExpr(final FilterTokenizer tokenizer) {
+        if (!tokenizer.hasNext()) {
+            return valueOfIllegalArgument(tokenizer);
+        }
+        String nextToken = tokenizer.next();
+        if (nextToken.equals("(")) {
+            // Nested expression.
+            final QueryFilter filter = valueOfOrExpr(tokenizer);
+            if (!tokenizer.hasNext() || !tokenizer.next().equals(")")) {
+                return valueOfIllegalArgument(tokenizer);
+            }
+            return filter;
+        } else if (nextToken.equals("true")) {
+            return QueryFilter.alwaysTrue();
+        } else if (nextToken.equals("false")) {
+            return QueryFilter.alwaysFalse();
+        } else if (nextToken.equals("\"")) {
+            return valueOfIllegalArgument(tokenizer);
+        } else {
+            // Assertion.
+            final JsonPointer pointer = new JsonPointer(nextToken);
+            if (!tokenizer.hasNext()) {
+                return valueOfIllegalArgument(tokenizer);
+            }
+            final String operator = tokenizer.next();
+            if (operator.equals("pr")) {
+                return QueryFilter.present(pointer);
+            } else {
+                // Read assertion value: NUMBER | BOOLEAN | '"' UTF8STRING '"'
+                if (!tokenizer.hasNext()) {
+                    return valueOfIllegalArgument(tokenizer);
+                }
+                final Object assertionValue;
+                nextToken = tokenizer.next();
+                if (nextToken.equals("\"")) {
+                    // UTFSTRING
+                    if (!tokenizer.hasNext()) {
+                        return valueOfIllegalArgument(tokenizer);
+                    }
+                    assertionValue = tokenizer.next();
+                    if (!tokenizer.hasNext() || !tokenizer.next().equals("\"")) {
+                        return valueOfIllegalArgument(tokenizer);
+                    }
+                } else if (nextToken.equals("true") || nextToken.equals("false")) {
+                    assertionValue = Boolean.parseBoolean(nextToken);
+                } else {
+                    // Must be a number.
+                    assertionValue = Long.parseLong(nextToken);
+                }
+
+                if (operator.equals("eq")) {
+                    return QueryFilter.equalTo(pointer, assertionValue);
+                } else if (operator.equals("gt")) {
+                    return QueryFilter.greaterThan(pointer, assertionValue);
+                } else if (operator.equals("ge")) {
+                    return QueryFilter.greaterThanOrEqualTo(pointer, assertionValue);
+                } else if (operator.equals("lt")) {
+                    return QueryFilter.lessThan(pointer, assertionValue);
+                } else if (operator.equals("le")) {
+                    return QueryFilter.lessThanOrEqualTo(pointer, assertionValue);
+                } else if (operator.matches("[a-zA-Z_0-9.]+")) {
+                    return QueryFilter.extendedMatch(pointer, operator, assertionValue);
+                } else {
+                    return valueOfIllegalArgument(tokenizer);
+                }
+            }
+        }
     }
 
     private final Impl pimpl;
