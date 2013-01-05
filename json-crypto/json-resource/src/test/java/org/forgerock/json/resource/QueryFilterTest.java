@@ -66,14 +66,19 @@ public final class QueryFilterTest {
                 "(/role eq \"a\" or (/role eq \"b\" and /role eq \"c\"))" },
             { and(equalTo("/role", "a"), or(equalTo("/role", "b"), equalTo("/role", "c"))),
                 "(/role eq \"a\" and (/role eq \"b\" or /role eq \"c\"))" },
-            { not(equalTo("/age", 1234)), "nt /age eq 1234" },
-            { not(not(equalTo("/age", 1234))), "nt nt /age eq 1234" }, // Yuk!
+            { not(equalTo("/age", 1234)), "nt (/age eq 1234)" },
+            { not(not(equalTo("/age", 1234))), "nt (nt (/age eq 1234))" }, // Yuk!
             // @formatter:on
         };
     }
 
     @Test(dataProvider = "toStringData")
-    public void testToString(QueryFilter filter, String expected) {
-        assertThat(filter.toString()).isEqualTo(expected);
+    public void testToString(QueryFilter filter, String filterString) {
+        assertThat(filter.toString()).isEqualTo(filterString);
+    }
+
+    @Test(dataProvider = "toStringData")
+    public void testValueOf(QueryFilter filter, String filterString) {
+        assertThat(QueryFilter.valueOf(filterString).toString()).isEqualTo(filter.toString());
     }
 }
