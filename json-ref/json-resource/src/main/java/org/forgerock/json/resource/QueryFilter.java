@@ -33,16 +33,26 @@ import org.forgerock.json.fluent.JsonPointer;
  * representation:
  *
  * <pre>
- * Expr          = OrExpr
- * OrExpr        = AndExpr ( 'or' AndExpr ) *
- * AndExpr       = NotExpr ( 'and' NotExpr ) *
- * NotExpr       = '!' PrimaryExpr | PrimaryExpr
- * PrimaryExpr   = '(' Expr ')' | Pointer OpName JsonValue | Pointer 'pr' | 'true' | 'false'
- * Pointer       = JSONPOINTER
- * OpName        = STRING
- * JsonValue     = NUMBER | BOOLEAN | '"' UTF8STRING '"'
- * STRING        = ASCII string not containing white-space
- * UTF8STRING    = UTF-8 string possibly containing white-space
+ * Expr           = OrExpr
+ * OrExpr         = AndExpr ( 'or' AndExpr ) *
+ * AndExpr        = NotExpr ( 'and' NotExpr ) *
+ * NotExpr        = '!' PrimaryExpr | PrimaryExpr
+ * PrimaryExpr    = '(' Expr ')' | ComparisonExpr | PresenceExpr | LiteralExpr
+ * ComparisonExpr = Pointer OpName JsonValue
+ * PresenceExpr   = Pointer 'pr'
+ * LiteralExpr    = 'true' | 'false'
+ * Pointer        = JSON pointer
+ * OpName         = 'eq' |  # equal to
+ *                  'co' |  # contains
+ *                  'sw' |  # starts with
+ *                  'lt' |  # less than
+ *                  'le' |  # less than or equal to
+ *                  'gt' |  # greater than
+ *                  'ge' |  # greater than or equal to
+ *                  STRING  # extended operator
+ * JsonValue      = NUMBER | BOOLEAN | '"' UTF8STRING '"'
+ * STRING         = ASCII string not containing white-space
+ * UTF8STRING     = UTF-8 string possibly containing white-space
  * </pre>
  *
  * Note that white space, parentheses, and exclamation characters need URL
@@ -77,6 +87,21 @@ public final class QueryFilter {
         protected <R, P> R accept(final QueryFilterVisitor<R, P> v, final P p) {
             return v.visitAndFilter(p, subFilters);
         }
+
+        @Override
+        protected void toString(final StringBuilder builder) {
+            builder.append('(');
+            boolean isFirst = true;
+            for (final QueryFilter subFilter : subFilters) {
+                if (isFirst) {
+                    isFirst = false;
+                } else {
+                    builder.append(" and ");
+                }
+                subFilter.pimpl.toString(builder);
+            }
+            builder.append(')');
+        }
     }
 
     private static final class BooleanLiteralImpl extends Impl {
@@ -106,6 +131,11 @@ public final class QueryFilter {
         protected <R, P> R accept(final QueryFilterVisitor<R, P> v, final P p) {
             return v.visitBooleanLiteralFilter(p, value);
         }
+
+        @Override
+        protected void toString(final StringBuilder builder) {
+            builder.append(value);
+        }
     }
 
     /*
@@ -114,57 +144,22 @@ public final class QueryFilter {
      * different types (e.g. Date or String representation of a date).
      */
 
-    private static final class EqualsImpl extends Impl {
-        private final JsonPointer field;
-        private final Object valueAssertion;
+    private static abstract class ComparatorImpl extends Impl {
+        protected final JsonPointer field;
+        protected final Object valueAssertion;
 
-        private EqualsImpl(final JsonPointer field, final Object valueAssertion) {
+        protected ComparatorImpl(final JsonPointer field, final Object valueAssertion) {
             this.field = field;
             this.valueAssertion = valueAssertion;
         }
 
         @Override
-        public boolean equals(final Object obj) {
+        public final boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
-            } else if (obj instanceof EqualsImpl) {
-                final EqualsImpl o = (EqualsImpl) obj;
-                return field.equals(o.field) && valueAssertion.equals(o.valueAssertion);
-            } else {
-                return false;
-            }
-        }
-
-        @Override
-        public int hashCode() {
-            return field.hashCode() * 31 + valueAssertion.hashCode();
-        }
-
-        @Override
-        protected <R, P> R accept(final QueryFilterVisitor<R, P> v, final P p) {
-            return v.visitEqualsFilter(p, field, valueAssertion);
-        }
-    }
-
-    private static final class ExtendedMatchImpl extends Impl {
-        private final JsonPointer field;
-        private final String matchingRuleId;
-        private final Object valueAssertion;
-
-        private ExtendedMatchImpl(final JsonPointer field, final String matchingRuleId,
-                final Object valueAssertion) {
-            this.field = field;
-            this.matchingRuleId = matchingRuleId;
-            this.valueAssertion = valueAssertion;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            } else if (obj instanceof ExtendedMatchImpl) {
-                final ExtendedMatchImpl o = (ExtendedMatchImpl) obj;
-                return field.equals(o.field) && matchingRuleId.equalsIgnoreCase(o.matchingRuleId)
+            } else if (obj instanceof ComparatorImpl) {
+                final ComparatorImpl o = (ComparatorImpl) obj;
+                return field.equals(o.field) && getOperator().equals(o.getOperator())
                         && valueAssertion.equals(o.valueAssertion);
             } else {
                 return false;
@@ -172,14 +167,79 @@ public final class QueryFilter {
         }
 
         @Override
-        public int hashCode() {
-            return (field.hashCode() * 31 + matchingRuleId.hashCode()) * 31
+        public final int hashCode() {
+            return (field.hashCode() * 31 + getOperator().hashCode()) * 31
                     + valueAssertion.hashCode();
+        }
+
+        protected abstract String getOperator();
+
+        @Override
+        protected final void toString(final StringBuilder builder) {
+            builder.append(field.toString());
+            builder.append(' ');
+            builder.append(getOperator());
+            builder.append(' ');
+            if (valueAssertion instanceof Boolean || valueAssertion instanceof Number) {
+                // No need for quotes.
+                builder.append(valueAssertion);
+            } else {
+                builder.append('"');
+                builder.append(valueAssertion);
+                builder.append('"');
+            }
+        }
+    }
+
+    private static final class ContainsImpl extends ComparatorImpl {
+        private ContainsImpl(final JsonPointer field, final Object valueAssertion) {
+            super(field, valueAssertion);
         }
 
         @Override
         protected <R, P> R accept(final QueryFilterVisitor<R, P> v, final P p) {
-            return v.visitExtendedMatchFilter(p, field, matchingRuleId, valueAssertion);
+            return v.visitContainsFilter(p, field, valueAssertion);
+        }
+
+        @Override
+        protected String getOperator() {
+            return "co";
+        }
+    }
+
+    private static final class EqualsImpl extends ComparatorImpl {
+        private EqualsImpl(final JsonPointer field, final Object valueAssertion) {
+            super(field, valueAssertion);
+        }
+
+        @Override
+        protected <R, P> R accept(final QueryFilterVisitor<R, P> v, final P p) {
+            return v.visitEqualsFilter(p, field, valueAssertion);
+        }
+
+        @Override
+        protected String getOperator() {
+            return "eq";
+        }
+    }
+
+    private static final class ExtendedMatchImpl extends ComparatorImpl {
+        private final String operator;
+
+        private ExtendedMatchImpl(final JsonPointer field, final String operator,
+                final Object valueAssertion) {
+            super(field, valueAssertion);
+            this.operator = operator;
+        }
+
+        @Override
+        protected <R, P> R accept(final QueryFilterVisitor<R, P> v, final P p) {
+            return v.visitExtendedMatchFilter(p, field, operator, valueAssertion);
+        }
+
+        @Override
+        protected String getOperator() {
+            return operator;
         }
 
     }
@@ -284,67 +344,35 @@ public final class QueryFilter {
         }
     }
 
-    private static final class GreaterThanImpl extends Impl {
-        private final JsonPointer field;
-        private final Object valueAssertion;
-
+    private static final class GreaterThanImpl extends ComparatorImpl {
         private GreaterThanImpl(final JsonPointer field, final Object valueAssertion) {
-            this.field = field;
-            this.valueAssertion = valueAssertion;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            } else if (obj instanceof GreaterThanImpl) {
-                final GreaterThanImpl o = (GreaterThanImpl) obj;
-                return field.equals(o.field) && valueAssertion.equals(o.valueAssertion);
-            } else {
-                return false;
-            }
-        }
-
-        @Override
-        public int hashCode() {
-            return field.hashCode() * 31 + valueAssertion.hashCode();
+            super(field, valueAssertion);
         }
 
         @Override
         protected <R, P> R accept(final QueryFilterVisitor<R, P> v, final P p) {
             return v.visitGreaterThanFilter(p, field, valueAssertion);
         }
+
+        @Override
+        protected String getOperator() {
+            return "gt";
+        }
     }
 
-    private static final class GreaterThanOrEqualToImpl extends Impl {
-        private final JsonPointer field;
-        private final Object valueAssertion;
-
+    private static final class GreaterThanOrEqualToImpl extends ComparatorImpl {
         private GreaterThanOrEqualToImpl(final JsonPointer field, final Object valueAssertion) {
-            this.field = field;
-            this.valueAssertion = valueAssertion;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            } else if (obj instanceof GreaterThanOrEqualToImpl) {
-                final GreaterThanOrEqualToImpl o = (GreaterThanOrEqualToImpl) obj;
-                return field.equals(o.field) && valueAssertion.equals(o.valueAssertion);
-            } else {
-                return false;
-            }
-        }
-
-        @Override
-        public int hashCode() {
-            return field.hashCode() * 31 + valueAssertion.hashCode();
+            super(field, valueAssertion);
         }
 
         @Override
         protected <R, P> R accept(final QueryFilterVisitor<R, P> v, final P p) {
             return v.visitGreaterThanOrEqualToFilter(p, field, valueAssertion);
+        }
+
+        @Override
+        protected String getOperator() {
+            return "ge";
         }
     }
 
@@ -360,69 +388,39 @@ public final class QueryFilter {
         public abstract int hashCode();
 
         protected abstract <R, P> R accept(QueryFilterVisitor<R, P> v, P p);
+
+        protected abstract void toString(StringBuilder builder);
     }
 
-    private static final class LessThanImpl extends Impl {
-        private final JsonPointer field;
-        private final Object valueAssertion;
-
+    private static final class LessThanImpl extends ComparatorImpl {
         private LessThanImpl(final JsonPointer field, final Object valueAssertion) {
-            this.field = field;
-            this.valueAssertion = valueAssertion;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            } else if (obj instanceof LessThanImpl) {
-                final LessThanImpl o = (LessThanImpl) obj;
-                return field.equals(o.field) && valueAssertion.equals(o.valueAssertion);
-            } else {
-                return false;
-            }
-        }
-
-        @Override
-        public int hashCode() {
-            return field.hashCode() * 31 + valueAssertion.hashCode();
+            super(field, valueAssertion);
         }
 
         @Override
         protected <R, P> R accept(final QueryFilterVisitor<R, P> v, final P p) {
             return v.visitLessThanFilter(p, field, valueAssertion);
         }
+
+        @Override
+        protected String getOperator() {
+            return "lt";
+        }
     }
 
-    private static final class LessThanOrEqualToImpl extends Impl {
-        private final JsonPointer field;
-        private final Object valueAssertion;
-
+    private static final class LessThanOrEqualToImpl extends ComparatorImpl {
         private LessThanOrEqualToImpl(final JsonPointer field, final Object valueAssertion) {
-            this.field = field;
-            this.valueAssertion = valueAssertion;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            } else if (obj instanceof LessThanOrEqualToImpl) {
-                final LessThanOrEqualToImpl o = (LessThanOrEqualToImpl) obj;
-                return field.equals(o.field) && valueAssertion.equals(o.valueAssertion);
-            } else {
-                return false;
-            }
-        }
-
-        @Override
-        public int hashCode() {
-            return field.hashCode() * 31 + valueAssertion.hashCode();
+            super(field, valueAssertion);
         }
 
         @Override
         protected <R, P> R accept(final QueryFilterVisitor<R, P> v, final P p) {
             return v.visitLessThanOrEqualToFilter(p, field, valueAssertion);
+        }
+
+        @Override
+        protected String getOperator() {
+            return "le";
         }
     }
 
@@ -453,6 +451,14 @@ public final class QueryFilter {
         protected <R, P> R accept(final QueryFilterVisitor<R, P> v, final P p) {
             return v.visitNotFilter(p, subFilter);
         }
+
+        @Override
+        protected void toString(final StringBuilder builder) {
+            // This is not officially supported in SCIM.
+            builder.append("! (");
+            subFilter.pimpl.toString(builder);
+            builder.append(')');
+        }
     }
 
     private static final class OrImpl extends Impl {
@@ -481,6 +487,21 @@ public final class QueryFilter {
         @Override
         protected <R, P> R accept(final QueryFilterVisitor<R, P> v, final P p) {
             return v.visitOrFilter(p, subFilters);
+        }
+
+        @Override
+        protected void toString(final StringBuilder builder) {
+            builder.append('(');
+            boolean isFirst = true;
+            for (final QueryFilter subFilter : subFilters) {
+                if (isFirst) {
+                    isFirst = false;
+                } else {
+                    builder.append(" or ");
+                }
+                subFilter.pimpl.toString(builder);
+            }
+            builder.append(')');
         }
     }
 
@@ -512,131 +533,33 @@ public final class QueryFilter {
         protected <R, P> R accept(final QueryFilterVisitor<R, P> v, final P p) {
             return v.visitPresentFilter(p, field);
         }
+
+        @Override
+        protected void toString(final StringBuilder builder) {
+            builder.append(field.toString());
+            builder.append(' ');
+            builder.append("pr");
+        }
+    }
+
+    private static final class StartsWithImpl extends ComparatorImpl {
+        private StartsWithImpl(final JsonPointer field, final Object valueAssertion) {
+            super(field, valueAssertion);
+        }
+
+        @Override
+        protected <R, P> R accept(final QueryFilterVisitor<R, P> v, final P p) {
+            return v.visitStartsWithFilter(p, field, valueAssertion);
+        }
+
+        @Override
+        protected String getOperator() {
+            return "sw";
+        }
     }
 
     private static final QueryFilter ALWAYS_FALSE = new QueryFilter(new BooleanLiteralImpl(false));
-
     private static final QueryFilter ALWAYS_TRUE = new QueryFilter(new BooleanLiteralImpl(true));
-
-    private static final QueryFilterVisitor<StringBuilder, StringBuilder> TO_STRING_VISITOR =
-            new QueryFilterVisitor<StringBuilder, StringBuilder>() {
-
-                @Override
-                public StringBuilder visitAndFilter(final StringBuilder p,
-                        final List<QueryFilter> subFilters) {
-                    p.append('(');
-                    boolean isFirst = true;
-                    for (final QueryFilter subFilter : subFilters) {
-                        if (isFirst) {
-                            isFirst = false;
-                        } else {
-                            p.append(" and ");
-                        }
-                        subFilter.accept(this, p);
-                    }
-                    p.append(')');
-                    return p;
-                }
-
-                @Override
-                public StringBuilder visitBooleanLiteralFilter(final StringBuilder p,
-                        final boolean value) {
-                    // This is not officially supported in SCIM.
-                    p.append(value);
-                    return p;
-                }
-
-                @Override
-                public StringBuilder visitEqualsFilter(final StringBuilder p,
-                        final JsonPointer field, final Object valueAssertion) {
-                    return visitComparator(p, "eq", field, valueAssertion);
-                }
-
-                @Override
-                public StringBuilder visitExtendedMatchFilter(final StringBuilder p,
-                        final JsonPointer field, final String matchingRuleId,
-                        final Object valueAssertion) {
-                    return visitComparator(p, matchingRuleId, field, valueAssertion);
-                }
-
-                @Override
-                public StringBuilder visitGreaterThanFilter(final StringBuilder p,
-                        final JsonPointer field, final Object valueAssertion) {
-                    return visitComparator(p, "gt", field, valueAssertion);
-                }
-
-                @Override
-                public StringBuilder visitGreaterThanOrEqualToFilter(final StringBuilder p,
-                        final JsonPointer field, final Object valueAssertion) {
-                    return visitComparator(p, "ge", field, valueAssertion);
-                }
-
-                @Override
-                public StringBuilder visitLessThanFilter(final StringBuilder p,
-                        final JsonPointer field, final Object valueAssertion) {
-                    return visitComparator(p, "lt", field, valueAssertion);
-                }
-
-                @Override
-                public StringBuilder visitLessThanOrEqualToFilter(final StringBuilder p,
-                        final JsonPointer field, final Object valueAssertion) {
-                    return visitComparator(p, "le", field, valueAssertion);
-                }
-
-                @Override
-                public StringBuilder visitNotFilter(final StringBuilder p,
-                        final QueryFilter subFilter) {
-                    // This is not officially supported in SCIM.
-                    p.append("! (");
-                    subFilter.accept(this, p);
-                    p.append(')');
-                    return p;
-                }
-
-                @Override
-                public StringBuilder visitOrFilter(final StringBuilder p,
-                        final List<QueryFilter> subFilters) {
-                    p.append('(');
-                    boolean isFirst = true;
-                    for (final QueryFilter subFilter : subFilters) {
-                        if (isFirst) {
-                            isFirst = false;
-                        } else {
-                            p.append(" or ");
-                        }
-                        subFilter.accept(this, p);
-                    }
-                    p.append(')');
-                    return p;
-                }
-
-                @Override
-                public StringBuilder visitPresentFilter(final StringBuilder p,
-                        final JsonPointer field) {
-                    p.append(field.toString());
-                    p.append(' ');
-                    p.append("pr");
-                    return p;
-                }
-
-                private StringBuilder visitComparator(final StringBuilder p,
-                        final String comparator, final JsonPointer field,
-                        final Object valueAssertion) {
-                    p.append(field.toString());
-                    p.append(' ');
-                    p.append(comparator);
-                    p.append(' ');
-                    if (valueAssertion instanceof Boolean || valueAssertion instanceof Number) {
-                        // No need for quotes.
-                        p.append(valueAssertion);
-                    } else {
-                        p.append('"');
-                        p.append(valueAssertion);
-                        p.append('"');
-                    }
-                    return p;
-                }
-            };
 
     // Maximum permitted query filter nesting depth.
     private static final int VALUE_OF_MAX_DEPTH = 256;
@@ -696,6 +619,103 @@ public final class QueryFilter {
     }
 
     /**
+     * Creates a new generic comparison filter using the provided field name,
+     * operator, and value assertion. When the provided operator name represents
+     * a core operator, e.g. "eq", then this method is equivalent to calling the
+     * equivalent constructor, e.g. {@link #equalTo(JsonPointer, Object)}.
+     * Otherwise, when the operator name does not correspond to a core operator,
+     * an extended comparison filter will be returned.
+     *
+     * @param field
+     *            The name of field within the JSON resource to be compared.
+     * @param operator
+     *            The operator to use for the comparison, which must be one of
+     *            the core operator names, or a string matching the regular
+     *            expression {@code [a-zA-Z_0-9.]+}.
+     * @param valueAssertion
+     *            The assertion value.
+     * @return The newly created generic comparison filter.
+     * @throws IllegalArgumentException
+     *             If {@code operator} is not a valid operator name.
+     */
+    public static QueryFilter comparisonFilter(final JsonPointer field, final String operator,
+            final Object valueAssertion) {
+        if (operator.equalsIgnoreCase("eq")) {
+            return QueryFilter.equalTo(field, valueAssertion);
+        } else if (operator.equalsIgnoreCase("gt")) {
+            return QueryFilter.greaterThan(field, valueAssertion);
+        } else if (operator.equalsIgnoreCase("ge")) {
+            return QueryFilter.greaterThanOrEqualTo(field, valueAssertion);
+        } else if (operator.equalsIgnoreCase("lt")) {
+            return QueryFilter.lessThan(field, valueAssertion);
+        } else if (operator.equalsIgnoreCase("le")) {
+            return QueryFilter.lessThanOrEqualTo(field, valueAssertion);
+        } else if (operator.equalsIgnoreCase("co")) {
+            return QueryFilter.contains(field, valueAssertion);
+        } else if (operator.equalsIgnoreCase("sw")) {
+            return QueryFilter.startsWith(field, valueAssertion);
+        } else if (operator.matches("[a-zA-Z_0-9.]+")) {
+            return new QueryFilter(new ExtendedMatchImpl(field, operator, valueAssertion));
+        } else {
+            throw new IllegalArgumentException("\"" + operator
+                    + "\" is not a valid filter operator");
+        }
+    }
+
+    /**
+     * Creates a new generic comparison filter using the provided field name,
+     * operator, and value assertion. When the provided operator name represents
+     * a core operator, e.g. "eq", then this method is equivalent to calling the
+     * equivalent constructor, e.g. {@link #equalTo(String, Object)}. Otherwise,
+     * when the operator name does not correspond to a core operator, an
+     * extended comparison filter will be returned.
+     *
+     * @param field
+     *            The name of field within the JSON resource to be compared.
+     * @param operator
+     *            The operator to use for the comparison, which must be one of
+     *            the core operator names, or a string matching the regular
+     *            expression {@code [a-zA-Z_0-9.]+}.
+     * @param valueAssertion
+     *            The assertion value.
+     * @return The newly created generic comparison filter.
+     * @throws IllegalArgumentException
+     *             If {@code operator} is not a valid operator name.
+     */
+    public static QueryFilter comparisonFilter(final String field, final String operator,
+            final Object valueAssertion) {
+        return comparisonFilter(new JsonPointer(field), operator, valueAssertion);
+    }
+
+    /**
+     * Creates a new {@code contains} filter using the provided field name and
+     * value assertion.
+     *
+     * @param field
+     *            The name of field within the JSON resource to be compared.
+     * @param valueAssertion
+     *            The assertion value.
+     * @return The newly created {@code contains} filter.
+     */
+    public static QueryFilter contains(final JsonPointer field, final Object valueAssertion) {
+        return new QueryFilter(new ContainsImpl(field, valueAssertion));
+    }
+
+    /**
+     * Creates a new {@code contains} filter using the provided field name and
+     * value assertion.
+     *
+     * @param field
+     *            The name of field within the JSON resource to be compared.
+     * @param valueAssertion
+     *            The assertion value.
+     * @return The newly created {@code contains} filter.
+     */
+    public static QueryFilter contains(final String field, final Object valueAssertion) {
+        return contains(new JsonPointer(field), valueAssertion);
+    }
+
+    /**
      * Creates a new {@code equality} filter using the provided field name and
      * value assertion.
      *
@@ -721,40 +741,6 @@ public final class QueryFilter {
      */
     public static QueryFilter equalTo(final String field, final Object valueAssertion) {
         return equalTo(new JsonPointer(field), valueAssertion);
-    }
-
-    /**
-     * Creates a new {@code extended match} filter using the provided field
-     * name, matching rule identifier, and value assertion.
-     *
-     * @param field
-     *            The name of field within the JSON resource to be compared.
-     * @param matchingRuleId
-     *            The name of the matching rule to use for the comparison.
-     * @param valueAssertion
-     *            The assertion value.
-     * @return The newly created {@code extended match} filter.
-     */
-    public static QueryFilter extendedMatch(final JsonPointer field, final String matchingRuleId,
-            final Object valueAssertion) {
-        return new QueryFilter(new ExtendedMatchImpl(field, matchingRuleId, valueAssertion));
-    }
-
-    /**
-     * Creates a new {@code extended match} filter using the provided field
-     * name, matching rule identifier, and value assertion.
-     *
-     * @param field
-     *            The name of field within the JSON resource to be compared.
-     * @param matchingRuleId
-     *            The name of the matching rule to use for the comparison.
-     * @param valueAssertion
-     *            The assertion value.
-     * @return The newly created {@code extended match} filter.
-     */
-    public static QueryFilter extendedMatch(final String field, final String matchingRuleId,
-            final Object valueAssertion) {
-        return extendedMatch(new JsonPointer(field), matchingRuleId, valueAssertion);
     }
 
     /**
@@ -942,6 +928,34 @@ public final class QueryFilter {
     }
 
     /**
+     * Creates a new {@code starts with} filter using the provided field name
+     * and value assertion.
+     *
+     * @param field
+     *            The name of field within the JSON resource to be compared.
+     * @param valueAssertion
+     *            The assertion value.
+     * @return The newly created {@code starts with} filter.
+     */
+    public static QueryFilter startsWith(final JsonPointer field, final Object valueAssertion) {
+        return new QueryFilter(new StartsWithImpl(field, valueAssertion));
+    }
+
+    /**
+     * Creates a new {@code starts with} filter using the provided field name
+     * and value assertion.
+     *
+     * @param field
+     *            The name of field within the JSON resource to be compared.
+     * @param valueAssertion
+     *            The assertion value.
+     * @return The newly created {@code starts with} filter.
+     */
+    public static QueryFilter startsWith(final String field, final Object valueAssertion) {
+        return startsWith(new JsonPointer(field), valueAssertion);
+    }
+
+    /**
      * Parses the provided string representation of a query filter as a
      * {@code QueryFilter}.
      *
@@ -1073,20 +1087,9 @@ public final class QueryFilter {
                     // Must be a number.
                     assertionValue = Integer.parseInt(nextToken);
                 }
-
-                if (operator.equalsIgnoreCase("eq")) {
-                    return QueryFilter.equalTo(pointer, assertionValue);
-                } else if (operator.equalsIgnoreCase("gt")) {
-                    return QueryFilter.greaterThan(pointer, assertionValue);
-                } else if (operator.equalsIgnoreCase("ge")) {
-                    return QueryFilter.greaterThanOrEqualTo(pointer, assertionValue);
-                } else if (operator.equalsIgnoreCase("lt")) {
-                    return QueryFilter.lessThan(pointer, assertionValue);
-                } else if (operator.equalsIgnoreCase("le")) {
-                    return QueryFilter.lessThanOrEqualTo(pointer, assertionValue);
-                } else if (operator.matches("[a-zA-Z_0-9.]+")) {
-                    return QueryFilter.extendedMatch(pointer, operator, assertionValue);
-                } else {
+                try {
+                    return QueryFilter.comparisonFilter(pointer, operator, assertionValue);
+                } catch (final IllegalArgumentException e) {
                     return valueOfIllegalArgument(tokenizer);
                 }
             }
@@ -1148,7 +1151,9 @@ public final class QueryFilter {
      */
     @Override
     public String toString() {
-        return accept(TO_STRING_VISITOR, new StringBuilder()).toString();
+        final StringBuilder builder = new StringBuilder();
+        pimpl.toString(builder);
+        return builder.toString();
     }
 
 }
