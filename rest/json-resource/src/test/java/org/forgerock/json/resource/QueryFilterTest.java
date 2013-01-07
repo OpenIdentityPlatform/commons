@@ -37,6 +37,7 @@ import org.testng.annotations.Test;
  */
 @SuppressWarnings("javadoc")
 public final class QueryFilterTest {
+
     @DataProvider
     public Object[][] toStringData() {
         return new Object[][] {
@@ -66,8 +67,8 @@ public final class QueryFilterTest {
                 "(/role eq \"a\" or (/role eq \"b\" and /role eq \"c\"))" },
             { and(equalTo("/role", "a"), or(equalTo("/role", "b"), equalTo("/role", "c"))),
                 "(/role eq \"a\" and (/role eq \"b\" or /role eq \"c\"))" },
-            { not(equalTo("/age", 1234)), "nt (/age eq 1234)" },
-            { not(not(equalTo("/age", 1234))), "nt (nt (/age eq 1234))" }, // Yuk!
+            { not(equalTo("/age", 1234)), "! (/age eq 1234)" },
+            { not(not(equalTo("/age", 1234))), "! (! (/age eq 1234))" },
             // @formatter:on
         };
     }
@@ -79,6 +80,37 @@ public final class QueryFilterTest {
 
     @Test(dataProvider = "toStringData")
     public void testValueOf(QueryFilter filter, String filterString) {
-        assertThat(QueryFilter.valueOf(filterString).toString()).isEqualTo(filter.toString());
+        assertThat(QueryFilter.valueOf(filterString)).isEqualTo(filter);
+    }
+
+    @DataProvider
+    public Object[][] toIllegalStringData() {
+        return new Object[][] {
+            // @formatter:off
+            { "" },
+            { "(" },
+            { ")" },
+            { "()" },
+            { "xxx" },
+            { "x and y" },
+            { "x or y" },
+            { "true and" },
+            { "true or" },
+            { "true and true and" },
+            { "true or false or" },
+            { "nt" },
+            { "foo eq bar" },   // missing quotes
+            { "foo eq \"bar" }, // unmatched quotes
+            { "foo eq bar\"" }, // unmatched quotes
+            { "foo eq" },
+            { "foo pr 123" },   // trailing token
+            { "true foo" },     // trailing token
+            // @formatter:on
+        };
+    }
+
+    @Test(dataProvider = "toIllegalStringData", expectedExceptions = IllegalArgumentException.class)
+    public void testValueOfIllegalArgument(String filterString) {
+        QueryFilter.valueOf(filterString);
     }
 }
