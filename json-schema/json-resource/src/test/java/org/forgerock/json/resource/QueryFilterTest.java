@@ -16,18 +16,7 @@
 package org.forgerock.json.resource;
 
 import static org.fest.assertions.Assertions.assertThat;
-import static org.forgerock.json.resource.QueryFilter.alwaysFalse;
-import static org.forgerock.json.resource.QueryFilter.alwaysTrue;
-import static org.forgerock.json.resource.QueryFilter.and;
-import static org.forgerock.json.resource.QueryFilter.equalTo;
-import static org.forgerock.json.resource.QueryFilter.extendedMatch;
-import static org.forgerock.json.resource.QueryFilter.greaterThan;
-import static org.forgerock.json.resource.QueryFilter.greaterThanOrEqualTo;
-import static org.forgerock.json.resource.QueryFilter.lessThan;
-import static org.forgerock.json.resource.QueryFilter.lessThanOrEqualTo;
-import static org.forgerock.json.resource.QueryFilter.not;
-import static org.forgerock.json.resource.QueryFilter.or;
-import static org.forgerock.json.resource.QueryFilter.present;
+import static org.forgerock.json.resource.QueryFilter.*;
 
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -51,7 +40,8 @@ public final class QueryFilterTest {
             { lessThanOrEqualTo("/age", 1234), "/age le 1234" },
             { greaterThan("/age", 1234), "/age gt 1234" },
             { greaterThanOrEqualTo("/age", 1234), "/age ge 1234" },
-            { extendedMatch("/name", "regex", "al.*"), "/name regex \"al.*\"" },
+            { contains("/name", "al"), "/name co \"al\"" },
+            { startsWith("/name", "al"), "/name sw \"al\"" },
             { present("/name"), "/name pr" },
             { or(), "false" }, // zero operand or is always false
             { and(), "true" }, // zero operand and is always true
@@ -69,6 +59,8 @@ public final class QueryFilterTest {
                 "(/role eq \"a\" and (/role eq \"b\" or /role eq \"c\"))" },
             { not(equalTo("/age", 1234)), "! (/age eq 1234)" },
             { not(not(equalTo("/age", 1234))), "! (! (/age eq 1234))" },
+            { comparisonFilter("/name", "regex", "al.*"), "/name regex \"al.*\"" },
+            { comparisonFilter("/name", "eq", "alice"), "/name eq \"alice\"" },
             // @formatter:on
         };
     }
@@ -102,9 +94,10 @@ public final class QueryFilterTest {
             { "foo eq bar" },   // missing quotes
             { "foo eq \"bar" }, // unmatched quotes
             { "foo eq bar\"" }, // unmatched quotes
-            { "foo eq" },
+            { "foo eq" },       // missing value
             { "foo pr 123" },   // trailing token
             { "true foo" },     // trailing token
+            { "name op! 123" }, // bad operator
             // @formatter:on
         };
     }

@@ -65,6 +65,19 @@ public interface QueryFilterVisitor<R, P> {
     R visitBooleanLiteralFilter(P p, boolean value);
 
     /**
+     * Visits a {@code contains} filter.
+     *
+     * @param p
+     *            A visitor specified parameter.
+     * @param field
+     *            A pointer to the field within JSON resource to be compared.
+     * @param valueAssertion
+     *            The value assertion.
+     * @return Returns a visitor specified result.
+     */
+    R visitContainsFilter(P p, JsonPointer field, Object valueAssertion);
+
+    /**
      * Visits a {@code equality} filter.
      *
      * @param p
@@ -180,5 +193,18 @@ public interface QueryFilterVisitor<R, P> {
      * @return Returns a visitor specified result.
      */
     R visitPresentFilter(P p, JsonPointer field);
+
+    /**
+     * Visits a {@code starts with} filter.
+     *
+     * @param p
+     *            A visitor specified parameter.
+     * @param field
+     *            A pointer to the field within JSON resource to be compared.
+     * @param valueAssertion
+     *            The value assertion.
+     * @return Returns a visitor specified result.
+     */
+    R visitStartsWithFilter(P p, JsonPointer field, Object valueAssertion);
 
 }
