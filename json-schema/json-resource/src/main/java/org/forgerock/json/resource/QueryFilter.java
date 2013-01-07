@@ -29,7 +29,24 @@ import org.forgerock.json.fluent.JsonPointer;
 
 /**
  * A filter which can be used to select which JSON resources should be included
- * in the results of a query request.
+ * in the results of a query request. A query string has the following string
+ * representation:
+ *
+ * <pre>
+ * Expr          = OrExpr
+ * OrExpr        = AndExpr ( 'or' AndExpr ) *
+ * AndExpr       = NotExpr ( 'and' NotExpr ) *
+ * NotExpr       = '!' PrimaryExpr | PrimaryExpr
+ * PrimaryExpr   = '(' Expr ')' | Pointer OpName JsonValue | Pointer 'pr' | 'true' | 'false'
+ * Pointer       = JSONPOINTER
+ * OpName        = STRING
+ * JsonValue     = NUMBER | BOOLEAN | '"' UTF8STRING '"'
+ * STRING        = ASCII string not containing white-space
+ * UTF8STRING    = UTF-8 string possibly containing white-space
+ * </pre>
+ *
+ * Note that white space, parentheses, and exclamation characters need URL
+ * encoding in HTTP query strings.
  */
 public final class QueryFilter {
 
@@ -41,16 +58,26 @@ public final class QueryFilter {
         }
 
         @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            } else if (obj instanceof AndImpl) {
+                return subFilters.equals(((AndImpl) obj).subFilters);
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public int hashCode() {
+            return subFilters.hashCode();
+        }
+
+        @Override
         protected <R, P> R accept(final QueryFilterVisitor<R, P> v, final P p) {
             return v.visitAndFilter(p, subFilters);
         }
     }
-
-    /*
-     * TODO: should value assertions be Objects or Strings? Objects allows use
-     * of numbers, during construction, but visitors may need to handle
-     * different types (e.g. Date or String representation of a date).
-     */
 
     private static final class BooleanLiteralImpl extends Impl {
         private final boolean value;
@@ -60,10 +87,32 @@ public final class QueryFilter {
         }
 
         @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            } else if (obj instanceof BooleanLiteralImpl) {
+                return value == ((BooleanLiteralImpl) obj).value;
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public int hashCode() {
+            return Boolean.valueOf(value).hashCode();
+        }
+
+        @Override
         protected <R, P> R accept(final QueryFilterVisitor<R, P> v, final P p) {
             return v.visitBooleanLiteralFilter(p, value);
         }
     }
+
+    /*
+     * TODO: should value assertions be Objects or Strings? Objects allows use
+     * of numbers, during construction, but visitors may need to handle
+     * different types (e.g. Date or String representation of a date).
+     */
 
     private static final class EqualsImpl extends Impl {
         private final JsonPointer field;
@@ -72,6 +121,23 @@ public final class QueryFilter {
         private EqualsImpl(final JsonPointer field, final Object valueAssertion) {
             this.field = field;
             this.valueAssertion = valueAssertion;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            } else if (obj instanceof EqualsImpl) {
+                final EqualsImpl o = (EqualsImpl) obj;
+                return field.equals(o.field) && valueAssertion.equals(o.valueAssertion);
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public int hashCode() {
+            return field.hashCode() * 31 + valueAssertion.hashCode();
         }
 
         @Override
@@ -93,9 +159,29 @@ public final class QueryFilter {
         }
 
         @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            } else if (obj instanceof ExtendedMatchImpl) {
+                final ExtendedMatchImpl o = (ExtendedMatchImpl) obj;
+                return field.equals(o.field) && matchingRuleId.equalsIgnoreCase(o.matchingRuleId)
+                        && valueAssertion.equals(o.valueAssertion);
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public int hashCode() {
+            return (field.hashCode() * 31 + matchingRuleId.hashCode()) * 31
+                    + valueAssertion.hashCode();
+        }
+
+        @Override
         protected <R, P> R accept(final QueryFilterVisitor<R, P> v, final P p) {
             return v.visitExtendedMatchFilter(p, field, matchingRuleId, valueAssertion);
         }
+
     }
 
     private static final class FilterTokenizer implements Iterator<String> {
@@ -208,6 +294,23 @@ public final class QueryFilter {
         }
 
         @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            } else if (obj instanceof GreaterThanImpl) {
+                final GreaterThanImpl o = (GreaterThanImpl) obj;
+                return field.equals(o.field) && valueAssertion.equals(o.valueAssertion);
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public int hashCode() {
+            return field.hashCode() * 31 + valueAssertion.hashCode();
+        }
+
+        @Override
         protected <R, P> R accept(final QueryFilterVisitor<R, P> v, final P p) {
             return v.visitGreaterThanFilter(p, field, valueAssertion);
         }
@@ -223,6 +326,23 @@ public final class QueryFilter {
         }
 
         @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            } else if (obj instanceof GreaterThanOrEqualToImpl) {
+                final GreaterThanOrEqualToImpl o = (GreaterThanOrEqualToImpl) obj;
+                return field.equals(o.field) && valueAssertion.equals(o.valueAssertion);
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public int hashCode() {
+            return field.hashCode() * 31 + valueAssertion.hashCode();
+        }
+
+        @Override
         protected <R, P> R accept(final QueryFilterVisitor<R, P> v, final P p) {
             return v.visitGreaterThanOrEqualToFilter(p, field, valueAssertion);
         }
@@ -232,6 +352,12 @@ public final class QueryFilter {
         protected Impl() {
             // Nothing to do.
         }
+
+        @Override
+        public abstract boolean equals(Object obj);
+
+        @Override
+        public abstract int hashCode();
 
         protected abstract <R, P> R accept(QueryFilterVisitor<R, P> v, P p);
     }
@@ -243,6 +369,23 @@ public final class QueryFilter {
         private LessThanImpl(final JsonPointer field, final Object valueAssertion) {
             this.field = field;
             this.valueAssertion = valueAssertion;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            } else if (obj instanceof LessThanImpl) {
+                final LessThanImpl o = (LessThanImpl) obj;
+                return field.equals(o.field) && valueAssertion.equals(o.valueAssertion);
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public int hashCode() {
+            return field.hashCode() * 31 + valueAssertion.hashCode();
         }
 
         @Override
@@ -261,6 +404,23 @@ public final class QueryFilter {
         }
 
         @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            } else if (obj instanceof LessThanOrEqualToImpl) {
+                final LessThanOrEqualToImpl o = (LessThanOrEqualToImpl) obj;
+                return field.equals(o.field) && valueAssertion.equals(o.valueAssertion);
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public int hashCode() {
+            return field.hashCode() * 31 + valueAssertion.hashCode();
+        }
+
+        @Override
         protected <R, P> R accept(final QueryFilterVisitor<R, P> v, final P p) {
             return v.visitLessThanOrEqualToFilter(p, field, valueAssertion);
         }
@@ -271,6 +431,22 @@ public final class QueryFilter {
 
         private NotImpl(final QueryFilter subFilter) {
             this.subFilter = subFilter;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            } else if (obj instanceof NotImpl) {
+                return subFilter.equals(((NotImpl) obj).subFilter);
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public int hashCode() {
+            return subFilter.hashCode();
         }
 
         @Override
@@ -287,6 +463,22 @@ public final class QueryFilter {
         }
 
         @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            } else if (obj instanceof OrImpl) {
+                return subFilters.equals(((OrImpl) obj).subFilters);
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public int hashCode() {
+            return subFilters.hashCode();
+        }
+
+        @Override
         protected <R, P> R accept(final QueryFilterVisitor<R, P> v, final P p) {
             return v.visitOrFilter(p, subFilters);
         }
@@ -297,6 +489,23 @@ public final class QueryFilter {
 
         private PresentImpl(final JsonPointer field) {
             this.field = field;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            } else if (obj instanceof PresentImpl) {
+                final PresentImpl o = (PresentImpl) obj;
+                return field.equals(o.field);
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public int hashCode() {
+            return field.hashCode();
         }
 
         @Override
@@ -378,7 +587,7 @@ public final class QueryFilter {
                 public StringBuilder visitNotFilter(final StringBuilder p,
                         final QueryFilter subFilter) {
                     // This is not officially supported in SCIM.
-                    p.append("nt (");
+                    p.append("! (");
                     subFilter.accept(this, p);
                     p.append(')');
                     return p;
@@ -428,6 +637,9 @@ public final class QueryFilter {
                     return p;
                 }
             };
+
+    // Maximum permitted query filter nesting depth.
+    private static final int VALUE_OF_MAX_DEPTH = 256;
 
     /**
      * Returns a filter which does not match any resources.
@@ -741,26 +953,9 @@ public final class QueryFilter {
      *             query filter.
      */
     public static QueryFilter valueOf(final String string) {
-        // Use recursive descent of following grammar:
-        //
-        // Expr          = OrExpr
-        // OrExpr        = AndExpr ( 'or' AndExpr ) *
-        // AndExpr       = NotExpr ( 'and' NotExpr ) *
-        // NotExpr       = 'nt' Expr | PrimaryExpr
-        // PrimaryExpr   = '(' Expr ')' | Pointer OpName JsonValue | Pointer 'pr' | 'true' | 'false'
-        // Pointer       = STRING
-        // OpName        = STRING
-        // JsonValue     = NUMBER | BOOLEAN | '"' UTF8STRING '"'
-        // STRING        = ASCII string not containing white-space
-        // UTF8STRING    = UTF-8 string possibly containing white-space
-        //
-        // See: http://en.wikipedia.org/wiki/Operator-precedence_parser or
-        // http://www.engr.mun.ca/~theo/Misc/exp_parsing.htm
-
-        // TODO: protect against stack overflow.
-
+        // Use recursive descent of grammar described in class Javadoc.
         final FilterTokenizer tokenizer = new FilterTokenizer(string);
-        final QueryFilter filter = valueOfOrExpr(tokenizer);
+        final QueryFilter filter = valueOfOrExpr(tokenizer, 0);
         if (tokenizer.hasNext()) {
             return valueOfIllegalArgument(tokenizer);
         } else {
@@ -768,16 +963,25 @@ public final class QueryFilter {
         }
     }
 
-    private static QueryFilter valueOfAndExpr(final FilterTokenizer tokenizer) {
-        QueryFilter filter = valueOfNotExpr(tokenizer);
+    private static void checkDepth(final FilterTokenizer tokenizer, final int depth) {
+        if (depth > VALUE_OF_MAX_DEPTH) {
+            throw new IllegalArgumentException("The query filter '" + tokenizer
+                    + "' cannot be parsed because it contains more than " + VALUE_OF_MAX_DEPTH
+                    + " nexted expressions");
+        }
+    }
+
+    private static QueryFilter valueOfAndExpr(final FilterTokenizer tokenizer, final int depth) {
+        checkDepth(tokenizer, depth);
+        QueryFilter filter = valueOfNotExpr(tokenizer, depth + 1);
         List<QueryFilter> subFilters = null;
-        while (tokenizer.hasNext() && tokenizer.peek().equals("and")) {
+        while (tokenizer.hasNext() && tokenizer.peek().equalsIgnoreCase("and")) {
             tokenizer.next();
             if (subFilters == null) {
                 subFilters = new LinkedList<QueryFilter>();
                 subFilters.add(filter);
             }
-            subFilters.add(valueOfNotExpr(tokenizer));
+            subFilters.add(valueOfNotExpr(tokenizer, depth + 1));
         }
         if (subFilters != null) {
             filter = QueryFilter.and(subFilters);
@@ -786,29 +990,31 @@ public final class QueryFilter {
     }
 
     private static QueryFilter valueOfIllegalArgument(final FilterTokenizer tokenizer) {
-        throw new IllegalArgumentException("Invalid filter '" + tokenizer + "'");
+        throw new IllegalArgumentException("Invalid query filter '" + tokenizer + "'");
     }
 
-    private static QueryFilter valueOfNotExpr(final FilterTokenizer tokenizer) {
-        if (tokenizer.hasNext() && tokenizer.peek().equals("nt")) {
+    private static QueryFilter valueOfNotExpr(final FilterTokenizer tokenizer, final int depth) {
+        checkDepth(tokenizer, depth);
+        if (tokenizer.hasNext() && tokenizer.peek().equalsIgnoreCase("!")) {
             tokenizer.next();
-            final QueryFilter rhs = valueOfOrExpr(tokenizer);
+            final QueryFilter rhs = valueOfPrimaryExpr(tokenizer, depth + 1);
             return QueryFilter.not(rhs);
         } else {
-            return valueOfPrimaryExpr(tokenizer);
+            return valueOfPrimaryExpr(tokenizer, depth + 1);
         }
     }
 
-    private static QueryFilter valueOfOrExpr(final FilterTokenizer tokenizer) {
-        QueryFilter filter = valueOfAndExpr(tokenizer);
+    private static QueryFilter valueOfOrExpr(final FilterTokenizer tokenizer, final int depth) {
+        checkDepth(tokenizer, depth);
+        QueryFilter filter = valueOfAndExpr(tokenizer, depth + 1);
         List<QueryFilter> subFilters = null;
-        while (tokenizer.hasNext() && tokenizer.peek().equals("or")) {
+        while (tokenizer.hasNext() && tokenizer.peek().equalsIgnoreCase("or")) {
             tokenizer.next();
             if (subFilters == null) {
                 subFilters = new LinkedList<QueryFilter>();
                 subFilters.add(filter);
             }
-            subFilters.add(valueOfAndExpr(tokenizer));
+            subFilters.add(valueOfAndExpr(tokenizer, depth + 1));
         }
         if (subFilters != null) {
             filter = QueryFilter.or(subFilters);
@@ -816,22 +1022,23 @@ public final class QueryFilter {
         return filter;
     }
 
-    private static QueryFilter valueOfPrimaryExpr(final FilterTokenizer tokenizer) {
+    private static QueryFilter valueOfPrimaryExpr(final FilterTokenizer tokenizer, final int depth) {
+        checkDepth(tokenizer, depth);
         if (!tokenizer.hasNext()) {
             return valueOfIllegalArgument(tokenizer);
         }
         String nextToken = tokenizer.next();
         if (nextToken.equals("(")) {
             // Nested expression.
-            final QueryFilter filter = valueOfOrExpr(tokenizer);
+            final QueryFilter filter = valueOfOrExpr(tokenizer, depth + 1);
             if (!tokenizer.hasNext() || !tokenizer.next().equals(")")) {
                 return valueOfIllegalArgument(tokenizer);
             }
             return filter;
-        } else if (nextToken.equals("true")) {
-            return QueryFilter.alwaysTrue();
-        } else if (nextToken.equals("false")) {
-            return QueryFilter.alwaysFalse();
+        } else if (nextToken.equalsIgnoreCase("true")) {
+            return alwaysTrue();
+        } else if (nextToken.equalsIgnoreCase("false")) {
+            return alwaysFalse();
         } else if (nextToken.equals("\"")) {
             return valueOfIllegalArgument(tokenizer);
         } else {
@@ -841,7 +1048,7 @@ public final class QueryFilter {
                 return valueOfIllegalArgument(tokenizer);
             }
             final String operator = tokenizer.next();
-            if (operator.equals("pr")) {
+            if (operator.equalsIgnoreCase("pr")) {
                 return QueryFilter.present(pointer);
             } else {
                 // Read assertion value: NUMBER | BOOLEAN | '"' UTF8STRING '"'
@@ -859,22 +1066,23 @@ public final class QueryFilter {
                     if (!tokenizer.hasNext() || !tokenizer.next().equals("\"")) {
                         return valueOfIllegalArgument(tokenizer);
                     }
-                } else if (nextToken.equals("true") || nextToken.equals("false")) {
+                } else if (nextToken.equalsIgnoreCase("true")
+                        || nextToken.equalsIgnoreCase("false")) {
                     assertionValue = Boolean.parseBoolean(nextToken);
                 } else {
                     // Must be a number.
-                    assertionValue = Long.parseLong(nextToken);
+                    assertionValue = Integer.parseInt(nextToken);
                 }
 
-                if (operator.equals("eq")) {
+                if (operator.equalsIgnoreCase("eq")) {
                     return QueryFilter.equalTo(pointer, assertionValue);
-                } else if (operator.equals("gt")) {
+                } else if (operator.equalsIgnoreCase("gt")) {
                     return QueryFilter.greaterThan(pointer, assertionValue);
-                } else if (operator.equals("ge")) {
+                } else if (operator.equalsIgnoreCase("ge")) {
                     return QueryFilter.greaterThanOrEqualTo(pointer, assertionValue);
-                } else if (operator.equals("lt")) {
+                } else if (operator.equalsIgnoreCase("lt")) {
                     return QueryFilter.lessThan(pointer, assertionValue);
-                } else if (operator.equals("le")) {
+                } else if (operator.equalsIgnoreCase("le")) {
                     return QueryFilter.lessThanOrEqualTo(pointer, assertionValue);
                 } else if (operator.matches("[a-zA-Z_0-9.]+")) {
                     return QueryFilter.extendedMatch(pointer, operator, assertionValue);
@@ -909,6 +1117,22 @@ public final class QueryFilter {
         return pimpl.accept(v, p);
     }
 
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        } else if (obj instanceof QueryFilter) {
+            return pimpl.equals(((QueryFilter) obj).pimpl);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return pimpl.hashCode();
+    }
+
     /**
      * Returns the string representation of this query filter. The string
      * representation is defined to be similar to that of SCIM's, with the
@@ -917,7 +1141,7 @@ public final class QueryFilter {
      * <li>field references are JSON pointers
      * <li>support for boolean literal expressions, e.g. {@code (true)}
      * <li>support for the logical not operator, e.g.
-     * {@code (nt /role eq "user")}
+     * {@code (! /role eq "user")}
      * </ul>
      *
      * @return The string representation of this query filter.
