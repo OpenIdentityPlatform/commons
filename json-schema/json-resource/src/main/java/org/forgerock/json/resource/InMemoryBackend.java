@@ -16,10 +16,13 @@
 package org.forgerock.json.resource;
 
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 
@@ -29,7 +32,217 @@ import org.forgerock.json.fluent.JsonValueException;
  * and there are no performance guarantees.
  */
 public final class InMemoryBackend implements CollectionResourceProvider {
-    // TODO: filters, sorting, paged results.
+    private static enum FilterResult {
+        FALSE, TRUE, UNDEFINED;
+
+        static FilterResult valueOf(final boolean b) {
+            return b ? TRUE : FALSE;
+        }
+
+        boolean toBoolean() {
+            return this == TRUE; // UNDEFINED collapses to FALSE.
+        }
+    }
+
+    private static final QueryFilterVisitor<FilterResult, Resource> FILTER_VISITOR =
+            new QueryFilterVisitor<FilterResult, Resource>() {
+
+                @Override
+                public FilterResult visitAndFilter(final Resource p,
+                        final List<QueryFilter> subFilters) {
+                    FilterResult result = FilterResult.TRUE;
+                    for (final QueryFilter subFilter : subFilters) {
+                        final FilterResult r = subFilter.accept(this, p);
+                        if (r.ordinal() < result.ordinal()) {
+                            result = r;
+                        }
+                        if (result == FilterResult.FALSE) {
+                            break;
+                        }
+                    }
+                    return result;
+                }
+
+                @Override
+                public FilterResult visitBooleanLiteralFilter(final Resource p, final boolean value) {
+                    return FilterResult.valueOf(value);
+                }
+
+                @Override
+                public FilterResult visitContainsFilter(final Resource p, final JsonPointer field,
+                        final Object valueAssertion) {
+                    final JsonValue value = p.getContent().get(field);
+                    if (isCompatible(valueAssertion, value)) {
+                        if (valueAssertion instanceof String) {
+                            final String s1 = ((String) valueAssertion).toLowerCase(Locale.ENGLISH);
+                            final String s2 = value.asString().toLowerCase(Locale.ENGLISH);
+                            return FilterResult.valueOf(s2.contains(s1));
+                        } else {
+                            // Use equality matching for numbers and booleans.
+                            return FilterResult
+                                    .valueOf(compare(valueAssertion, value.getObject()) == 0);
+                        }
+                    } else {
+                        return FilterResult.UNDEFINED;
+                    }
+                }
+
+                @Override
+                public FilterResult visitEqualsFilter(final Resource p, final JsonPointer field,
+                        final Object valueAssertion) {
+                    final JsonValue value = p.getContent().get(field);
+                    if (isCompatible(valueAssertion, value)) {
+                        return FilterResult
+                                .valueOf(compare(valueAssertion, value.getObject()) == 0);
+                    } else {
+                        return FilterResult.UNDEFINED;
+                    }
+                }
+
+                @Override
+                public FilterResult visitExtendedMatchFilter(final Resource p,
+                        final JsonPointer field, final String matchingRuleId,
+                        final Object valueAssertion) {
+                    // This backend does not support any extended filters.
+                    return FilterResult.UNDEFINED;
+                }
+
+                @Override
+                public FilterResult visitGreaterThanFilter(final Resource p,
+                        final JsonPointer field, final Object valueAssertion) {
+                    final JsonValue value = p.getContent().get(field);
+                    if (isCompatible(valueAssertion, value)) {
+                        return FilterResult.valueOf(compare(valueAssertion, value.getObject()) < 0);
+                    } else {
+                        return FilterResult.UNDEFINED;
+                    }
+                }
+
+                @Override
+                public FilterResult visitGreaterThanOrEqualToFilter(final Resource p,
+                        final JsonPointer field, final Object valueAssertion) {
+                    final JsonValue value = p.getContent().get(field);
+                    if (isCompatible(valueAssertion, value)) {
+                        return FilterResult
+                                .valueOf(compare(valueAssertion, value.getObject()) <= 0);
+                    } else {
+                        return FilterResult.UNDEFINED;
+                    }
+                }
+
+                @Override
+                public FilterResult visitLessThanFilter(final Resource p, final JsonPointer field,
+                        final Object valueAssertion) {
+                    final JsonValue value = p.getContent().get(field);
+                    if (isCompatible(valueAssertion, value)) {
+                        return FilterResult.valueOf(compare(valueAssertion, value.getObject()) > 0);
+                    } else {
+                        return FilterResult.UNDEFINED;
+                    }
+                }
+
+                @Override
+                public FilterResult visitLessThanOrEqualToFilter(final Resource p,
+                        final JsonPointer field, final Object valueAssertion) {
+                    final JsonValue value = p.getContent().get(field);
+                    if (isCompatible(valueAssertion, value)) {
+                        return FilterResult
+                                .valueOf(compare(valueAssertion, value.getObject()) >= 0);
+                    } else {
+                        return FilterResult.UNDEFINED;
+                    }
+                }
+
+                @Override
+                public FilterResult visitNotFilter(final Resource p, final QueryFilter subFilter) {
+                    switch (subFilter.accept(this, p)) {
+                    case FALSE:
+                        return FilterResult.TRUE;
+                    case UNDEFINED:
+                        return FilterResult.UNDEFINED;
+                    default: // TRUE
+                        return FilterResult.FALSE;
+                    }
+                }
+
+                @Override
+                public FilterResult visitOrFilter(final Resource p,
+                        final List<QueryFilter> subFilters) {
+                    FilterResult result = FilterResult.FALSE;
+                    for (final QueryFilter subFilter : subFilters) {
+                        final FilterResult r = subFilter.accept(this, p);
+                        if (r.ordinal() > result.ordinal()) {
+                            result = r;
+                        }
+                        if (result == FilterResult.TRUE) {
+                            break;
+                        }
+                    }
+                    return result;
+                }
+
+                @Override
+                public FilterResult visitPresentFilter(final Resource p, final JsonPointer field) {
+                    final JsonValue value = p.getContent().get(field);
+                    return FilterResult.valueOf(value != null);
+                }
+
+                @Override
+                public FilterResult visitStartsWithFilter(final Resource p,
+                        final JsonPointer field, final Object valueAssertion) {
+                    final JsonValue value = p.getContent().get(field);
+                    if (isCompatible(valueAssertion, value)) {
+                        if (valueAssertion instanceof String) {
+                            final String s1 = ((String) valueAssertion).toLowerCase(Locale.ENGLISH);
+                            final String s2 = value.asString().toLowerCase(Locale.ENGLISH);
+                            return FilterResult.valueOf(s2.startsWith(s1));
+                        } else {
+                            // Use equality matching for numbers and booleans.
+                            return FilterResult
+                                    .valueOf(compare(valueAssertion, value.getObject()) == 0);
+                        }
+                    } else {
+                        return FilterResult.UNDEFINED;
+                    }
+                }
+
+                private int compare(final Object valueAssertion, final Object object) {
+                    if (valueAssertion instanceof String) {
+                        final String s1 = (String) valueAssertion;
+                        final String s2 = (String) object;
+                        return s1.compareToIgnoreCase(s2);
+                    } else if (valueAssertion instanceof Number) {
+                        final Double n1 = ((Number) valueAssertion).doubleValue();
+                        final Double n2 = ((Number) object).doubleValue();
+                        return n1.compareTo(n2);
+                    } else if (valueAssertion instanceof Boolean) {
+                        final boolean b1 = (Boolean) valueAssertion;
+                        final boolean b2 = (Boolean) object;
+                        if (b1 == b2) {
+                            return 0;
+                        } else {
+                            return b1 ? 1 : -1;
+                        }
+                    } else {
+                        throw new IllegalStateException();
+                    }
+                }
+
+                private boolean isCompatible(final Object valueAssertion, final JsonValue value) {
+                    if (value == null) {
+                        return false;
+                    } else if (valueAssertion instanceof String && value.isString()) {
+                        return true;
+                    } else if (valueAssertion instanceof Number && value.isNumber()) {
+                        return true;
+                    } else {
+                        return valueAssertion instanceof Boolean && value.isBoolean();
+                    }
+                }
+
+            };
+
+    // TODO: sorting, paged results.
 
     /*
      * Throughout this map backend we take care not to invoke result handlers
@@ -79,8 +292,8 @@ public final class InMemoryBackend implements CollectionResourceProvider {
     @Override
     public void actionInstance(final ServerContext context, final String id,
             final ActionRequest request, final ResultHandler<JsonValue> handler) {
-        final ResourceException e = new NotSupportedException(
-                "Actions are not supported for resource instances");
+        final ResourceException e =
+                new NotSupportedException("Actions are not supported for resource instances");
         handler.handleError(e);
     }
 
@@ -96,8 +309,8 @@ public final class InMemoryBackend implements CollectionResourceProvider {
         try {
             final Resource resource;
             while (true) {
-                final String eid = id != null ? id : String.valueOf(nextResourceId
-                        .getAndIncrement());
+                final String eid =
+                        id != null ? id : String.valueOf(nextResourceId.getAndIncrement());
                 final Resource tmp = new Resource(eid, rev, value);
                 synchronized (writeLock) {
                     final Resource existingResource = resources.put(eid, tmp);
@@ -169,10 +382,22 @@ public final class InMemoryBackend implements CollectionResourceProvider {
     @Override
     public void queryCollection(final ServerContext context, final QueryRequest request,
             final QueryResultHandler handler) {
-        for (final Resource resource : resources.values()) {
-            handler.handleResource(resource);
+        if (request.getQueryId() != null) {
+            handler.handleError(new NotSupportedException("Query by ID not supported"));
+            return;
+        } else if (request.getQueryExpression() != null) {
+            handler.handleError(new NotSupportedException("Query by expression not supported"));
+            return;
+        } else {
+            // No filtering or query by filter.
+            final QueryFilter filter = request.getQueryFilter();
+            for (final Resource resource : resources.values()) {
+                if (filter == null || filter.accept(FILTER_VISITOR, resource).toBoolean()) {
+                    handler.handleResource(resource);
+                }
+            }
+            handler.handleResult(new QueryResult());
         }
-        handler.handleResult(new QueryResult());
     }
 
     /**
