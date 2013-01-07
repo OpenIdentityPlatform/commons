@@ -29,26 +29,29 @@ public final class QueryFilterTest {
 
     @DataProvider
     public Object[][] toStringData() {
+        // Use longs for integer values because valueOf parses integers as Longs and
+        // equals() is sensitive to the type.
         return new Object[][] {
             // @formatter:off
             { alwaysTrue(), "true" },
             { alwaysFalse(), "false" },
             { equalTo("/name", "alice"), "/name eq \"alice\""},
-            { equalTo("/age", 1234), "/age eq 1234" },
+            { equalTo("/age", 1234L), "/age eq 1234" },
+            { equalTo("/balance", 3.14159), "/balance eq 3.14159" },
             { equalTo("/isAdmin", false), "/isAdmin eq false" },
-            { lessThan("/age", 1234), "/age lt 1234" },
-            { lessThanOrEqualTo("/age", 1234), "/age le 1234" },
-            { greaterThan("/age", 1234), "/age gt 1234" },
-            { greaterThanOrEqualTo("/age", 1234), "/age ge 1234" },
+            { lessThan("/age", 1234L), "/age lt 1234" },
+            { lessThanOrEqualTo("/age", 1234L), "/age le 1234" },
+            { greaterThan("/age", 1234L), "/age gt 1234" },
+            { greaterThanOrEqualTo("/age", 1234L), "/age ge 1234" },
             { contains("/name", "al"), "/name co \"al\"" },
             { startsWith("/name", "al"), "/name sw \"al\"" },
             { present("/name"), "/name pr" },
             { or(), "false" }, // zero operand or is always false
             { and(), "true" }, // zero operand and is always true
-            { or(equalTo("/age", 1234)), "/age eq 1234" }, // single operand or is no-op
-            { and(equalTo("/age", 1234)), "/age eq 1234" }, // single operand and is no-op
-            { or(lessThan("/age", 18), greaterThan("/age", 30)), "(/age lt 18 or /age gt 30)" },
-            { and(lessThan("/age", 18), greaterThan("/age", 30)), "(/age lt 18 and /age gt 30)" },
+            { or(equalTo("/age", 1234L)), "/age eq 1234" }, // single operand or is no-op
+            { and(equalTo("/age", 1234L)), "/age eq 1234" }, // single operand and is no-op
+            { or(lessThan("/age", 18L), greaterThan("/age", 30L)), "(/age lt 18 or /age gt 30)" },
+            { and(lessThan("/age", 18L), greaterThan("/age", 30L)), "(/age lt 18 and /age gt 30)" },
             { or(equalTo("/role", "a"), equalTo("/role", "b"), equalTo("/role", "c")),
                 "(/role eq \"a\" or /role eq \"b\" or /role eq \"c\")" },
             { and(equalTo("/role", "a"), equalTo("/role", "b"), equalTo("/role", "c")),
@@ -57,8 +60,8 @@ public final class QueryFilterTest {
                 "(/role eq \"a\" or (/role eq \"b\" and /role eq \"c\"))" },
             { and(equalTo("/role", "a"), or(equalTo("/role", "b"), equalTo("/role", "c"))),
                 "(/role eq \"a\" and (/role eq \"b\" or /role eq \"c\"))" },
-            { not(equalTo("/age", 1234)), "! (/age eq 1234)" },
-            { not(not(equalTo("/age", 1234))), "! (! (/age eq 1234))" },
+            { not(equalTo("/age", 1234L)), "! (/age eq 1234)" },
+            { not(not(equalTo("/age", 1234L))), "! (! (/age eq 1234))" },
             { comparisonFilter("/name", "regex", "al.*"), "/name regex \"al.*\"" },
             { comparisonFilter("/name", "eq", "alice"), "/name eq \"alice\"" },
             // @formatter:on

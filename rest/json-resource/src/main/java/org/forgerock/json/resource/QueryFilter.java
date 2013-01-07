@@ -1083,9 +1083,12 @@ public final class QueryFilter {
                 } else if (nextToken.equalsIgnoreCase("true")
                         || nextToken.equalsIgnoreCase("false")) {
                     assertionValue = Boolean.parseBoolean(nextToken);
+                } else if (nextToken.indexOf('.') >= 0) {
+                    // Floating point number.
+                    assertionValue = Double.parseDouble(nextToken);
                 } else {
-                    // Must be a number.
-                    assertionValue = Integer.parseInt(nextToken);
+                    // Must be an integer.
+                    assertionValue = Long.parseLong(nextToken);
                 }
                 try {
                     return QueryFilter.comparisonFilter(pointer, operator, assertionValue);
