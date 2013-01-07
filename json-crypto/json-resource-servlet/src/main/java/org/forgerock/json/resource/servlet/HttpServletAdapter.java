@@ -304,7 +304,7 @@ public final class HttpServletAdapter {
                         } catch (final IllegalArgumentException e) {
                             // FIXME: i18n.
                             throw new BadRequestException("The value '" + s + "' for parameter '"
-                                    + name + "' could not be parsed as a valid sort key");
+                                    + name + "' could not be parsed as a valid query filter");
                         }
                     } else {
                         request.setAdditionalQueryParameter(name, asSingleValue(name, values));
