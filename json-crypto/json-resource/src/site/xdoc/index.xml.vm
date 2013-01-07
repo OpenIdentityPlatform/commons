@@ -156,53 +156,9 @@ assertEquals(results, new HashSet&lt;Resource>(Arrays.asList(r3, r4)));</source>
             <ul>
                 <li>
                     <a
-                        href="https://bugster.forgerock.org/jira/browse/CREST-10">Add support for query filter</a>
-                    - at the moment the
-                    <a
-                        href="http://commons.forgerock.org/forgerock-rest/json-resource/apidocs/org/forgerock/json/resource/QueryFilter.html">QueryFilter</a>
-                    class permits clients to perform complex queries
-                    returning only those resources matching a given set
-                    of criteria defined by the filter. However, this
-                    class does not currently define a string
-                    representation so it is not supported in the HTTP
-                    Servlet implementation.
-                </li>
-                <li>
-                    <a
                         href="https://bugster.forgerock.org/jira/browse/CREST-3">Add patch support</a>
                     - patch requests are currently not supported until
                     we have an agreed patch specification.
-                </li>
-                <li>
-                    <a
-                        href="https://bugster.forgerock.org/jira/browse/CREST-8">Investigate how we should support
-                        authentication
-                    </a>
-                    - JSON Resource implementations must be decoupled
-                    from authentication. However, it is the
-                    responsibility of JSON Resource implementations to
-                    perform authorization (access control). This means
-                    that an authentication mechanism must have a means
-                    of communicating information about the authenticated
-                    user to the underlying JSON Resource so that it can
-                    perform authorization. Information may include an
-                    authentication ID, authorization ID, groups, roles,
-                    etc, and perhaps even information relating to the
-                    client's connection (e.g. whether their connection
-                    is secure or not). This information will probably be
-                    exposed by a common Security
-                    <a
-                        href="http://commons.forgerock.org/forgerock-rest/json-resource/apidocs/org/forgerock/json/resource/Context.html">Context</a>
-                    implementation.
-                </li>
-                <li>
-                    <a
-                        href="https://bugster.forgerock.org/jira/browse/CREST-9">Consider adding support for extensions</a>
-                    - it is likely that JSON Resource implementations
-                    may expose extensions to the core API. For example,
-                    for performing bulk updates, or performing proxied
-                    operations. These are analogous to LDAP's extended
-                    operations and controls.
                 </li>
                 <li>
                     <a
@@ -214,8 +170,7 @@ assertEquals(results, new HashSet&lt;Resource>(Arrays.asList(r3, r4)));</source>
                     <a
                         href="http://commons.forgerock.org/forgerock-rest/json-resource/apidocs/org/forgerock/json/resource/InMemoryBackend.html">InMemoryBackend</a>
                     . However, the implementation is not yet complete:
-                    it does not support query filters, field filters,
-                    server-side sorting, nor paged results.
+                    it does not support server-side sorting, nor paged results.
                 </li>
             </ul>
         </section>
