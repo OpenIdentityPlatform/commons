@@ -319,8 +319,6 @@ public final class InMemoryBackend implements CollectionResourceProvider {
                 || (v1 instanceof Boolean && v2 instanceof Boolean);
     }
 
-    // TODO: sorting, paged results.
-
     /*
      * Throughout this map backend we take care not to invoke result handlers
      * while holding locks since result handlers may perform blocking IO
