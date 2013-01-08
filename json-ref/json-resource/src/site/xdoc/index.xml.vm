@@ -160,18 +160,6 @@ assertEquals(results, new HashSet&lt;Resource>(Arrays.asList(r3, r4)));</source>
                     - patch requests are currently not supported until
                     we have an agreed patch specification.
                 </li>
-                <li>
-                    <a
-                        href="https://bugster.forgerock.org/jira/browse/CREST-19">Add simple in-memory RequestHandler
-                        implementation
-                    </a>
-                    - a simple in-memory resource backend is implemented
-                    by
-                    <a
-                        href="http://commons.forgerock.org/forgerock-rest/json-resource/apidocs/org/forgerock/json/resource/InMemoryBackend.html">InMemoryBackend</a>
-                    . However, the implementation is not yet complete:
-                    it does not support server-side sorting, nor paged results.
-                </li>
             </ul>
         </section>
     </body>
