@@ -342,7 +342,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         var ret = "", i;
         
         for(i = 0; i < images.length; i++) {
-            ret += '<img class="item" src="images/passphrase/'+ images[i] +'" data-site-image="'+ images[i] +'" />';
+            ret += '<img class="item" src="' + encodeURI(images[i]) +'" data-site-image="'+ encodeURI(images[i]) +'" />';
         }
         
         return new Handlebars.SafeString(ret);
