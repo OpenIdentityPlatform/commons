@@ -15,6 +15,7 @@
  */
 package org.forgerock.json.resource;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -71,32 +72,36 @@ public final class InMemoryBackend implements CollectionResourceProvider {
                 @Override
                 public FilterResult visitContainsFilter(final Resource p, final JsonPointer field,
                         final Object valueAssertion) {
-                    final JsonValue value = p.getContent().get(field);
-                    if (isCompatible(valueAssertion, value)) {
-                        if (valueAssertion instanceof String) {
-                            final String s1 = ((String) valueAssertion).toLowerCase(Locale.ENGLISH);
-                            final String s2 = value.asString().toLowerCase(Locale.ENGLISH);
-                            return FilterResult.valueOf(s2.contains(s1));
-                        } else {
-                            // Use equality matching for numbers and booleans.
-                            return FilterResult
-                                    .valueOf(compare(valueAssertion, value.getObject()) == 0);
+                    for (final Object value : getValues(p, field)) {
+                        if (isCompatible(valueAssertion, value)) {
+                            if (valueAssertion instanceof String) {
+                                final String s1 =
+                                        ((String) valueAssertion).toLowerCase(Locale.ENGLISH);
+                                final String s2 = ((String) value).toLowerCase(Locale.ENGLISH);
+                                if (s2.contains(s1)) {
+                                    return FilterResult.TRUE;
+                                }
+                            } else {
+                                // Use equality matching for numbers and booleans.
+                                if (compare(valueAssertion, value) == 0) {
+                                    return FilterResult.TRUE;
+                                }
+                            }
                         }
-                    } else {
-                        return FilterResult.UNDEFINED;
                     }
+                    return FilterResult.FALSE;
                 }
 
                 @Override
                 public FilterResult visitEqualsFilter(final Resource p, final JsonPointer field,
                         final Object valueAssertion) {
-                    final JsonValue value = p.getContent().get(field);
-                    if (isCompatible(valueAssertion, value)) {
-                        return FilterResult
-                                .valueOf(compare(valueAssertion, value.getObject()) == 0);
-                    } else {
-                        return FilterResult.UNDEFINED;
+                    for (final Object value : getValues(p, field)) {
+                        if (isCompatible(valueAssertion, value)
+                                && compare(valueAssertion, value) == 0) {
+                            return FilterResult.TRUE;
+                        }
                     }
+                    return FilterResult.FALSE;
                 }
 
                 @Override
@@ -110,47 +115,49 @@ public final class InMemoryBackend implements CollectionResourceProvider {
                 @Override
                 public FilterResult visitGreaterThanFilter(final Resource p,
                         final JsonPointer field, final Object valueAssertion) {
-                    final JsonValue value = p.getContent().get(field);
-                    if (isCompatible(valueAssertion, value)) {
-                        return FilterResult.valueOf(compare(valueAssertion, value.getObject()) < 0);
-                    } else {
-                        return FilterResult.UNDEFINED;
+                    for (final Object value : getValues(p, field)) {
+                        if (isCompatible(valueAssertion, value)
+                                && compare(valueAssertion, value) < 0) {
+                            return FilterResult.TRUE;
+                        }
                     }
+                    return FilterResult.FALSE;
                 }
 
                 @Override
                 public FilterResult visitGreaterThanOrEqualToFilter(final Resource p,
                         final JsonPointer field, final Object valueAssertion) {
-                    final JsonValue value = p.getContent().get(field);
-                    if (isCompatible(valueAssertion, value)) {
-                        return FilterResult
-                                .valueOf(compare(valueAssertion, value.getObject()) <= 0);
-                    } else {
-                        return FilterResult.UNDEFINED;
+                    for (final Object value : getValues(p, field)) {
+                        if (isCompatible(valueAssertion, value)
+                                && compare(valueAssertion, value) <= 0) {
+                            return FilterResult.TRUE;
+                        }
                     }
+                    return FilterResult.FALSE;
                 }
 
                 @Override
                 public FilterResult visitLessThanFilter(final Resource p, final JsonPointer field,
                         final Object valueAssertion) {
-                    final JsonValue value = p.getContent().get(field);
-                    if (isCompatible(valueAssertion, value)) {
-                        return FilterResult.valueOf(compare(valueAssertion, value.getObject()) > 0);
-                    } else {
-                        return FilterResult.UNDEFINED;
+                    for (final Object value : getValues(p, field)) {
+                        if (isCompatible(valueAssertion, value)
+                                && compare(valueAssertion, value) > 0) {
+                            return FilterResult.TRUE;
+                        }
                     }
+                    return FilterResult.FALSE;
                 }
 
                 @Override
                 public FilterResult visitLessThanOrEqualToFilter(final Resource p,
                         final JsonPointer field, final Object valueAssertion) {
-                    final JsonValue value = p.getContent().get(field);
-                    if (isCompatible(valueAssertion, value)) {
-                        return FilterResult
-                                .valueOf(compare(valueAssertion, value.getObject()) >= 0);
-                    } else {
-                        return FilterResult.UNDEFINED;
+                    for (final Object value : getValues(p, field)) {
+                        if (isCompatible(valueAssertion, value)
+                                && compare(valueAssertion, value) >= 0) {
+                            return FilterResult.TRUE;
+                        }
                     }
+                    return FilterResult.FALSE;
                 }
 
                 @Override
@@ -190,20 +197,24 @@ public final class InMemoryBackend implements CollectionResourceProvider {
                 @Override
                 public FilterResult visitStartsWithFilter(final Resource p,
                         final JsonPointer field, final Object valueAssertion) {
-                    final JsonValue value = p.getContent().get(field);
-                    if (isCompatible(valueAssertion, value)) {
-                        if (valueAssertion instanceof String) {
-                            final String s1 = ((String) valueAssertion).toLowerCase(Locale.ENGLISH);
-                            final String s2 = value.asString().toLowerCase(Locale.ENGLISH);
-                            return FilterResult.valueOf(s2.startsWith(s1));
-                        } else {
-                            // Use equality matching for numbers and booleans.
-                            return FilterResult
-                                    .valueOf(compare(valueAssertion, value.getObject()) == 0);
+                    for (final Object value : getValues(p, field)) {
+                        if (isCompatible(valueAssertion, value)) {
+                            if (valueAssertion instanceof String) {
+                                final String s1 =
+                                        ((String) valueAssertion).toLowerCase(Locale.ENGLISH);
+                                final String s2 = ((String) value).toLowerCase(Locale.ENGLISH);
+                                if (s2.startsWith(s1)) {
+                                    return FilterResult.TRUE;
+                                }
+                            } else {
+                                // Use equality matching for numbers and booleans.
+                                if (compare(valueAssertion, value) == 0) {
+                                    return FilterResult.TRUE;
+                                }
+                            }
                         }
-                    } else {
-                        return FilterResult.UNDEFINED;
                     }
+                    return FilterResult.FALSE;
                 }
 
                 private int compare(final Object valueAssertion, final Object object) {
@@ -228,15 +239,26 @@ public final class InMemoryBackend implements CollectionResourceProvider {
                     }
                 }
 
-                private boolean isCompatible(final Object valueAssertion, final JsonValue value) {
+                private List<Object> getValues(final Resource resource, final JsonPointer field) {
+                    final JsonValue value = resource.getContent().get(field);
+                    if (value == null) {
+                        return Collections.emptyList();
+                    } else if (value.isList()) {
+                        return value.asList();
+                    } else {
+                        return Collections.singletonList(value.getObject());
+                    }
+                }
+
+                private boolean isCompatible(final Object valueAssertion, final Object value) {
                     if (value == null) {
                         return false;
-                    } else if (valueAssertion instanceof String && value.isString()) {
+                    } else if (valueAssertion instanceof String && value instanceof String) {
                         return true;
-                    } else if (valueAssertion instanceof Number && value.isNumber()) {
+                    } else if (valueAssertion instanceof Number && value instanceof Number) {
                         return true;
                     } else {
-                        return valueAssertion instanceof Boolean && value.isBoolean();
+                        return valueAssertion instanceof Boolean && value instanceof Boolean;
                     }
                 }
 
