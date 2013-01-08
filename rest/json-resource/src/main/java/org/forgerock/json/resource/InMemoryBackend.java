@@ -468,11 +468,38 @@ public final class InMemoryBackend implements CollectionResourceProvider {
         } else {
             // No filtering or query by filter.
             final QueryFilter filter = request.getQueryFilter();
+
+            // If paged results are requested then decode the cookie in order to determine
+            // the index of the first result to be returned.
+            final int pageSize = request.getPageSize();
+            final String pagedResultsCookie = request.getPagedResultsCookie();
+            final boolean pagedResultsRequested = pageSize > 0;
+            final int firstResultIndex;
+            if (!pagedResultsRequested || pagedResultsCookie == null
+                    || pagedResultsCookie.isEmpty()) {
+                firstResultIndex = 0;
+            } else {
+                try {
+                    firstResultIndex = Integer.parseInt(pagedResultsCookie);
+                } catch (final NumberFormatException e) {
+                    handler.handleError(new BadRequestException("Invalid paged results cookie"));
+                    return;
+                }
+            }
+            final int lastResultIndex =
+                    pagedResultsRequested ? firstResultIndex + pageSize : Integer.MAX_VALUE;
+
+            // Select, filter, and return the results. These can be streamed if server
+            // side sorting has not been requested.
+            int resultIndex = 0;
             if (request.getSortKeys().isEmpty()) {
                 // No sorting so stream the results.
                 for (final Resource resource : resources.values()) {
                     if (filter == null || filter.accept(RESOURCE_FILTER, resource).toBoolean()) {
-                        handler.handleResource(resource);
+                        if (resultIndex >= firstResultIndex && resultIndex < lastResultIndex) {
+                            handler.handleResource(resource);
+                        }
+                        resultIndex++;
                     }
                 }
             } else {
@@ -481,7 +508,10 @@ public final class InMemoryBackend implements CollectionResourceProvider {
                 final List<Resource> results = new ArrayList<Resource>();
                 for (final Resource resource : resources.values()) {
                     if (filter == null || filter.accept(RESOURCE_FILTER, resource).toBoolean()) {
-                        results.add(resource);
+                        if (resultIndex >= firstResultIndex && resultIndex < lastResultIndex) {
+                            results.add(resource);
+                        }
+                        resultIndex++;
                     }
                 }
                 Collections.sort(results, new ResourceComparator(request.getSortKeys()));
@@ -489,7 +519,15 @@ public final class InMemoryBackend implements CollectionResourceProvider {
                     handler.handleResource(resource);
                 }
             }
-            handler.handleResult(new QueryResult());
+
+            if (pagedResultsRequested) {
+                final String nextCookie =
+                        resultIndex > lastResultIndex ? String.valueOf(lastResultIndex) : null;
+                final int remaining = Math.max(resultIndex - lastResultIndex, 0);
+                handler.handleResult(new QueryResult(nextCookie, remaining));
+            } else {
+                handler.handleResult(new QueryResult());
+            }
         }
     }
 
