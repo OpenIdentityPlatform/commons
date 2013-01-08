@@ -15,7 +15,9 @@
  */
 package org.forgerock.json.resource;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -45,7 +47,61 @@ public final class InMemoryBackend implements CollectionResourceProvider {
         }
     }
 
-    private static final QueryFilterVisitor<FilterResult, Resource> FILTER_VISITOR =
+    private static final class ResourceComparator implements Comparator<Resource> {
+        private final List<SortKey> sortKeys;
+
+        private ResourceComparator(final List<SortKey> sortKeys) {
+            this.sortKeys = sortKeys;
+        }
+
+        @Override
+        public int compare(final Resource r1, final Resource r2) {
+            for (final SortKey sortKey : sortKeys) {
+                final int result = compare(r1, r2, sortKey);
+                if (result != 0) {
+                    return result;
+                }
+            }
+            return 0;
+        }
+
+        private int compare(final Resource r1, final Resource r2, final SortKey sortKey) {
+            final List<Object> vs1 = getValuesSorted(r1, sortKey.getField());
+            final List<Object> vs2 = getValuesSorted(r2, sortKey.getField());
+            if (vs1.isEmpty() && vs2.isEmpty()) {
+                return 0;
+            } else if (vs1.isEmpty()) {
+                // Sort resources with missing attributes last.
+                return 1;
+            } else if (vs2.isEmpty()) {
+                // Sort resources with missing attributes last.
+                return -1;
+            } else {
+                // Compare first values only (consistent with LDAP sort control).
+                final Object v1 = vs1.get(0);
+                final Object v2 = vs2.get(0);
+                return sortKey.isAscendingOrder() ? compareValues(v1, v2) : -compareValues(v1, v2);
+            }
+        }
+
+        private List<Object> getValuesSorted(final Resource resource, final JsonPointer field) {
+            final JsonValue value = resource.getContent().get(field);
+            if (value == null) {
+                return Collections.emptyList();
+            } else if (value.isList()) {
+                List<Object> results = value.asList();
+                if (results.size() > 1) {
+                    results = new ArrayList<Object>(results);
+                    Collections.sort(results, VALUE_COMPARATOR);
+                }
+                return results;
+            } else {
+                return Collections.singletonList(value.getObject());
+            }
+        }
+    }
+
+    private static final QueryFilterVisitor<FilterResult, Resource> RESOURCE_FILTER =
             new QueryFilterVisitor<FilterResult, Resource>() {
 
                 @Override
@@ -83,7 +139,7 @@ public final class InMemoryBackend implements CollectionResourceProvider {
                                 }
                             } else {
                                 // Use equality matching for numbers and booleans.
-                                if (compare(valueAssertion, value) == 0) {
+                                if (compareValues(valueAssertion, value) == 0) {
                                     return FilterResult.TRUE;
                                 }
                             }
@@ -97,7 +153,7 @@ public final class InMemoryBackend implements CollectionResourceProvider {
                         final Object valueAssertion) {
                     for (final Object value : getValues(p, field)) {
                         if (isCompatible(valueAssertion, value)
-                                && compare(valueAssertion, value) == 0) {
+                                && compareValues(valueAssertion, value) == 0) {
                             return FilterResult.TRUE;
                         }
                     }
@@ -117,7 +173,7 @@ public final class InMemoryBackend implements CollectionResourceProvider {
                         final JsonPointer field, final Object valueAssertion) {
                     for (final Object value : getValues(p, field)) {
                         if (isCompatible(valueAssertion, value)
-                                && compare(valueAssertion, value) < 0) {
+                                && compareValues(valueAssertion, value) < 0) {
                             return FilterResult.TRUE;
                         }
                     }
@@ -129,7 +185,7 @@ public final class InMemoryBackend implements CollectionResourceProvider {
                         final JsonPointer field, final Object valueAssertion) {
                     for (final Object value : getValues(p, field)) {
                         if (isCompatible(valueAssertion, value)
-                                && compare(valueAssertion, value) <= 0) {
+                                && compareValues(valueAssertion, value) <= 0) {
                             return FilterResult.TRUE;
                         }
                     }
@@ -141,7 +197,7 @@ public final class InMemoryBackend implements CollectionResourceProvider {
                         final Object valueAssertion) {
                     for (final Object value : getValues(p, field)) {
                         if (isCompatible(valueAssertion, value)
-                                && compare(valueAssertion, value) > 0) {
+                                && compareValues(valueAssertion, value) > 0) {
                             return FilterResult.TRUE;
                         }
                     }
@@ -153,7 +209,7 @@ public final class InMemoryBackend implements CollectionResourceProvider {
                         final JsonPointer field, final Object valueAssertion) {
                     for (final Object value : getValues(p, field)) {
                         if (isCompatible(valueAssertion, value)
-                                && compare(valueAssertion, value) >= 0) {
+                                && compareValues(valueAssertion, value) >= 0) {
                             return FilterResult.TRUE;
                         }
                     }
@@ -208,35 +264,13 @@ public final class InMemoryBackend implements CollectionResourceProvider {
                                 }
                             } else {
                                 // Use equality matching for numbers and booleans.
-                                if (compare(valueAssertion, value) == 0) {
+                                if (compareValues(valueAssertion, value) == 0) {
                                     return FilterResult.TRUE;
                                 }
                             }
                         }
                     }
                     return FilterResult.FALSE;
-                }
-
-                private int compare(final Object valueAssertion, final Object object) {
-                    if (valueAssertion instanceof String) {
-                        final String s1 = (String) valueAssertion;
-                        final String s2 = (String) object;
-                        return s1.compareToIgnoreCase(s2);
-                    } else if (valueAssertion instanceof Number) {
-                        final Double n1 = ((Number) valueAssertion).doubleValue();
-                        final Double n2 = ((Number) object).doubleValue();
-                        return n1.compareTo(n2);
-                    } else if (valueAssertion instanceof Boolean) {
-                        final boolean b1 = (Boolean) valueAssertion;
-                        final boolean b2 = (Boolean) object;
-                        if (b1 == b2) {
-                            return 0;
-                        } else {
-                            return b1 ? 1 : -1;
-                        }
-                    } else {
-                        throw new IllegalStateException();
-                    }
                 }
 
                 private List<Object> getValues(final Resource resource, final JsonPointer field) {
@@ -250,19 +284,40 @@ public final class InMemoryBackend implements CollectionResourceProvider {
                     }
                 }
 
-                private boolean isCompatible(final Object valueAssertion, final Object value) {
-                    if (value == null) {
-                        return false;
-                    } else if (valueAssertion instanceof String && value instanceof String) {
-                        return true;
-                    } else if (valueAssertion instanceof Number && value instanceof Number) {
-                        return true;
-                    } else {
-                        return valueAssertion instanceof Boolean && value instanceof Boolean;
-                    }
-                }
-
             };
+
+    private static final Comparator<Object> VALUE_COMPARATOR = new Comparator<Object>() {
+        @Override
+        public int compare(final Object o1, final Object o2) {
+            return compareValues(o1, o2);
+        }
+    };
+
+    private static int compareValues(final Object v1, final Object v2) {
+        if (v1 instanceof String && v2 instanceof String) {
+            final String s1 = (String) v1;
+            final String s2 = (String) v2;
+            return s1.compareToIgnoreCase(s2);
+        } else if (v1 instanceof Number && v2 instanceof Number) {
+            final Double n1 = ((Number) v1).doubleValue();
+            final Double n2 = ((Number) v2).doubleValue();
+            return n1.compareTo(n2);
+        } else if (v1 instanceof Boolean && v2 instanceof Boolean) {
+            final Boolean b1 = (Boolean) v1;
+            final Boolean b2 = (Boolean) v2;
+            return b1.compareTo(b2);
+        } else {
+            // Different types: we need to ensure predictable ordering,
+            // so use class name as secondary key.
+            return v1.getClass().getName().compareTo(v2.getClass().getName());
+        }
+    }
+
+    private static boolean isCompatible(final Object v1, final Object v2) {
+        return (v1 instanceof String && v2 instanceof String)
+                || (v1 instanceof Number && v2 instanceof Number)
+                || (v1 instanceof Boolean && v2 instanceof Boolean);
+    }
 
     // TODO: sorting, paged results.
 
@@ -413,8 +468,24 @@ public final class InMemoryBackend implements CollectionResourceProvider {
         } else {
             // No filtering or query by filter.
             final QueryFilter filter = request.getQueryFilter();
-            for (final Resource resource : resources.values()) {
-                if (filter == null || filter.accept(FILTER_VISITOR, resource).toBoolean()) {
+            if (request.getSortKeys().isEmpty()) {
+                // No sorting so stream the results.
+                for (final Resource resource : resources.values()) {
+                    if (filter == null || filter.accept(RESOURCE_FILTER, resource).toBoolean()) {
+                        handler.handleResource(resource);
+                    }
+                }
+            } else {
+                // Server side sorting: aggregate the result set then sort. A robust implementation
+                // would need to impose administrative limits in order to control memory utilization.
+                final List<Resource> results = new ArrayList<Resource>();
+                for (final Resource resource : resources.values()) {
+                    if (filter == null || filter.accept(RESOURCE_FILTER, resource).toBoolean()) {
+                        results.add(resource);
+                    }
+                }
+                Collections.sort(results, new ResourceComparator(request.getSortKeys()));
+                for (final Resource resource : results) {
                     handler.handleResource(resource);
                 }
             }
