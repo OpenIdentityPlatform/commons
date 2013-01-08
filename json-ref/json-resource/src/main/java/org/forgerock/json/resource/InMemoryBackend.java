@@ -506,15 +506,15 @@ public final class InMemoryBackend implements CollectionResourceProvider {
                 final List<Resource> results = new ArrayList<Resource>();
                 for (final Resource resource : resources.values()) {
                     if (filter == null || filter.accept(RESOURCE_FILTER, resource).toBoolean()) {
-                        if (resultIndex >= firstResultIndex && resultIndex < lastResultIndex) {
-                            results.add(resource);
-                        }
-                        resultIndex++;
+                        results.add(resource);
                     }
                 }
                 Collections.sort(results, new ResourceComparator(request.getSortKeys()));
                 for (final Resource resource : results) {
-                    handler.handleResource(resource);
+                    if (resultIndex >= firstResultIndex && resultIndex < lastResultIndex) {
+                        handler.handleResource(resource);
+                    }
+                    resultIndex++;
                 }
             }
 
