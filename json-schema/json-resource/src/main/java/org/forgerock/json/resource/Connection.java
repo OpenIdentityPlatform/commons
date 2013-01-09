@@ -251,9 +251,6 @@ public interface Connection extends Closeable {
      * Searches for all JSON resources matching a user specified set of
      * criteria, and places the results in the provided collection.
      *
-     * @param <T>
-     *            The type of the collection in which the results should be
-     *            placed.
      * @param context
      *            The request context, such as associated principal.
      * @param request
@@ -270,8 +267,8 @@ public interface Connection extends Closeable {
      *             If this connection has already been closed, i.e. if
      *             {@code isClosed() == true}.
      */
-    <T extends Collection<? super Resource>> QueryResult query(Context context,
-            QueryRequest request, T results) throws ResourceException;
+    QueryResult query(Context context, QueryRequest request, Collection<? super Resource> results)
+            throws ResourceException;
 
     /**
      * Asynchronously searches for all JSON resources matching a user specified
