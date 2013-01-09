@@ -102,8 +102,8 @@ public abstract class AbstractAsynchronousConnection implements Connection {
     }
 
     @Override
-    public <T extends Collection<? super Resource>> QueryResult query(final Context context,
-            final QueryRequest request, final T results) throws ResourceException {
+    public QueryResult query(final Context context, final QueryRequest request,
+            final Collection<? super Resource> results) throws ResourceException {
         final QueryResultHandler handler = new QueryResultHandler() {
 
             @Override
