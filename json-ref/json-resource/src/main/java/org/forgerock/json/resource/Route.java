@@ -11,12 +11,13 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012 ForgeRock AS.
+ * Copyright 2012-2013 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
 
 import static org.forgerock.json.resource.RoutingMode.EQUALS;
+import static org.forgerock.json.resource.RoutingMode.STARTS_WITH;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -25,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 
 /**
  * An opaque handle for a route which has been registered in a router. A
@@ -87,12 +87,12 @@ public final class Route {
 
         private UriTemplate(final RoutingMode mode, final String uriTemplate) {
             final String t = normalizeUri(uriTemplate);
-            final StringBuilder builder = new StringBuilder(t.length());
+            final StringBuilder builder = new StringBuilder(t.length() + 8);
 
             // Parse the template.
             boolean isInVariable = false;
             int elementStart = 0;
-            builder.append('^'); // Anchor to start.
+            builder.append('('); // Group 1 does not include trailing portion for STARTS_WITH.
             for (int i = 0; i < t.length(); i++) {
                 final char c = t.charAt(i);
                 if (isInVariable) {
@@ -112,12 +112,11 @@ public final class Route {
                         // Continue counting characters in variable.
                     }
                 } else if (c == '{') {
+                    // Escape and add literal substring.
+                    builder.append(Pattern.quote(t.substring(elementStart, i)));
+
                     isInVariable = true;
                     elementStart = i + 1;
-                } else {
-                    // Add string literal character.
-                    // FIXME: which characters need escaping?
-                    builder.append(c);
                 }
             }
 
@@ -128,8 +127,13 @@ public final class Route {
                         + " contains a trailing unclosed variable");
             }
 
-            if (mode == EQUALS) {
-                builder.append('$'); // Anchor to end.
+            // Escape and add remaining literal substring.
+            builder.append(Pattern.quote(t.substring(elementStart)));
+            builder.append(')');
+
+            if (mode == STARTS_WITH) {
+                // Add wild-card match for remaining unmatched path (not included in group 1).
+                builder.append(".*");
             }
 
             this.uriTemplate = uriTemplate;
@@ -167,12 +171,14 @@ public final class Route {
                 variableMap = Collections.emptyMap();
                 break;
             case 1:
-                variableMap = Collections.singletonMap(variables.get(0), matcher.group(1));
+                // Group 0 matches entire URL, group 1 matches entire template.
+                variableMap = Collections.singletonMap(variables.get(0), matcher.group(2));
                 break;
             default:
                 variableMap = new LinkedHashMap<String, String>(variables.size());
                 for (int i = 0; i < variables.size(); i++) {
-                    variableMap.put(variables.get(i), matcher.group(i + 1));
+                    // Group 0 matches entire URL, group 1 matches entire template.
+                    variableMap.put(variables.get(i), matcher.group(i + 2));
                 }
                 break;
             }
