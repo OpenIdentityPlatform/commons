@@ -79,6 +79,10 @@ public interface Request {
     /**
      * Returns the name of the JSON resource to which this request should be
      * targeted.
+     * <p>
+     * <b>NOTE</b>: for resource provider implementations the resource name is
+     * relative to the current resource being accessed. See the description of
+     * {@link RouterContext} for more information.
      *
      * @return The name of the JSON resource to which this request should be
      *         targeted.
@@ -107,6 +111,10 @@ public interface Request {
     /**
      * Sets the name of the JSON resource to which this request should be
      * targeted.
+     * <p>
+     * <b>NOTE</b>: for resource provider implementations the resource name is
+     * relative to the current resource being accessed. See the description of
+     * {@link RouterContext} for more information.
      *
      * @param name
      *            The name of the JSON resource to which this request should be

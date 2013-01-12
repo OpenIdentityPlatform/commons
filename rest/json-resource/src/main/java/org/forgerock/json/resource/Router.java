@@ -11,11 +11,17 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012 ForgeRock AS.
+ * Copyright 2012-2013 ForgeRock AS.
  */
-
 package org.forgerock.json.resource;
 
+import static org.forgerock.json.resource.Requests.copyOfActionRequest;
+import static org.forgerock.json.resource.Requests.copyOfCreateRequest;
+import static org.forgerock.json.resource.Requests.copyOfDeleteRequest;
+import static org.forgerock.json.resource.Requests.copyOfPatchRequest;
+import static org.forgerock.json.resource.Requests.copyOfQueryRequest;
+import static org.forgerock.json.resource.Requests.copyOfReadRequest;
+import static org.forgerock.json.resource.Requests.copyOfUpdateRequest;
 import static org.forgerock.json.resource.Resources.addCollectionRoutes;
 import static org.forgerock.json.resource.Resources.newSingleton;
 
@@ -196,7 +202,10 @@ public final class Router implements RequestHandler {
             final ResultHandler<JsonValue> handler) {
         try {
             final RouteMatcher bestMatch = getBestRoute(context, request);
-            bestMatch.getRequestHandler().handleAction(bestMatch.getServerContext(), request,
+            final ActionRequest routedRequest =
+                    bestMatch.wasRouted() ? copyOfActionRequest(request).setResourceName(
+                            bestMatch.getRemaining()) : request;
+            bestMatch.getRequestHandler().handleAction(bestMatch.getServerContext(), routedRequest,
                     handler);
         } catch (final ResourceException e) {
             handler.handleError(e);
@@ -208,7 +217,10 @@ public final class Router implements RequestHandler {
             final ResultHandler<Resource> handler) {
         try {
             final RouteMatcher bestMatch = getBestRoute(context, request);
-            bestMatch.getRequestHandler().handleCreate(bestMatch.getServerContext(), request,
+            final CreateRequest routedRequest =
+                    bestMatch.wasRouted() ? copyOfCreateRequest(request).setResourceName(
+                            bestMatch.getRemaining()) : request;
+            bestMatch.getRequestHandler().handleCreate(bestMatch.getServerContext(), routedRequest,
                     handler);
         } catch (final ResourceException e) {
             handler.handleError(e);
@@ -220,7 +232,10 @@ public final class Router implements RequestHandler {
             final ResultHandler<Resource> handler) {
         try {
             final RouteMatcher bestMatch = getBestRoute(context, request);
-            bestMatch.getRequestHandler().handleDelete(bestMatch.getServerContext(), request,
+            final DeleteRequest routedRequest =
+                    bestMatch.wasRouted() ? copyOfDeleteRequest(request).setResourceName(
+                            bestMatch.getRemaining()) : request;
+            bestMatch.getRequestHandler().handleDelete(bestMatch.getServerContext(), routedRequest,
                     handler);
         } catch (final ResourceException e) {
             handler.handleError(e);
@@ -232,7 +247,10 @@ public final class Router implements RequestHandler {
             final ResultHandler<Resource> handler) {
         try {
             final RouteMatcher bestMatch = getBestRoute(context, request);
-            bestMatch.getRequestHandler().handlePatch(bestMatch.getServerContext(), request,
+            final PatchRequest routedRequest =
+                    bestMatch.wasRouted() ? copyOfPatchRequest(request).setResourceName(
+                            bestMatch.getRemaining()) : request;
+            bestMatch.getRequestHandler().handlePatch(bestMatch.getServerContext(), routedRequest,
                     handler);
         } catch (final ResourceException e) {
             handler.handleError(e);
@@ -244,7 +262,10 @@ public final class Router implements RequestHandler {
             final QueryResultHandler handler) {
         try {
             final RouteMatcher bestMatch = getBestRoute(context, request);
-            bestMatch.getRequestHandler().handleQuery(bestMatch.getServerContext(), request,
+            final QueryRequest routedRequest =
+                    bestMatch.wasRouted() ? copyOfQueryRequest(request).setResourceName(
+                            bestMatch.getRemaining()) : request;
+            bestMatch.getRequestHandler().handleQuery(bestMatch.getServerContext(), routedRequest,
                     handler);
         } catch (final ResourceException e) {
             handler.handleError(e);
@@ -256,8 +277,11 @@ public final class Router implements RequestHandler {
             final ResultHandler<Resource> handler) {
         try {
             final RouteMatcher bestMatch = getBestRoute(context, request);
-            bestMatch.getRequestHandler()
-                    .handleRead(bestMatch.getServerContext(), request, handler);
+            final ReadRequest routedRequest =
+                    bestMatch.wasRouted() ? copyOfReadRequest(request).setResourceName(
+                            bestMatch.getRemaining()) : request;
+            bestMatch.getRequestHandler().handleRead(bestMatch.getServerContext(), routedRequest,
+                    handler);
         } catch (final ResourceException e) {
             handler.handleError(e);
         }
@@ -268,7 +292,10 @@ public final class Router implements RequestHandler {
             final ResultHandler<Resource> handler) {
         try {
             final RouteMatcher bestMatch = getBestRoute(context, request);
-            bestMatch.getRequestHandler().handleUpdate(bestMatch.getServerContext(), request,
+            final UpdateRequest routedRequest =
+                    bestMatch.wasRouted() ? copyOfUpdateRequest(request).setResourceName(
+                            bestMatch.getRemaining()) : request;
+            bestMatch.getRequestHandler().handleUpdate(bestMatch.getServerContext(), routedRequest,
                     handler);
         } catch (final ResourceException e) {
             handler.handleError(e);
