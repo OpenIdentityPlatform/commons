@@ -16,6 +16,8 @@
 
 package org.forgerock.json.resource;
 
+import static org.forgerock.json.resource.Resources.normalizeUri;
+import static org.forgerock.json.resource.Resources.removeUriTrailingSlash;
 import static org.forgerock.json.resource.RoutingMode.EQUALS;
 import static org.forgerock.json.resource.RoutingMode.STARTS_WITH;
 
@@ -37,20 +39,28 @@ public final class Route {
         private final RouterContext context;
         private final RequestHandler handler;
         private final String match;
+        private final String remaining;
         private final UriTemplate template;
 
         RouteMatcher(final ServerContext context, final RequestHandler handler) {
             this.template = null;
             this.match = null;
-            this.context = new RouterContext(context, Collections.<String, String> emptyMap());
+            this.remaining = null;
+            this.context = new RouterContext(context, "/", Collections.<String, String> emptyMap());
             this.handler = handler;
         }
 
-        RouteMatcher(final UriTemplate template, final String match, final RouterContext context) {
+        RouteMatcher(final UriTemplate template, final String match, final String remaining,
+                final RouterContext context) {
             this.template = template;
             this.match = match;
+            this.remaining = remaining;
             this.context = context;
             this.handler = template.getRoute().getRequestHandler();
+        }
+
+        String getRemaining() {
+            return remaining;
         }
 
         RequestHandler getRequestHandler() {
@@ -76,6 +86,10 @@ public final class Route {
                 return context.getUriTemplateVariables().size() < matcher.context
                         .getUriTemplateVariables().size();
             }
+        }
+
+        boolean wasRouted() {
+            return remaining != null;
         }
     }
 
@@ -114,7 +128,6 @@ public final class Route {
                 } else if (c == '{') {
                     // Escape and add literal substring.
                     builder.append(Pattern.quote(t.substring(elementStart, i)));
-
                     isInVariable = true;
                     elementStart = i + 1;
                 }
@@ -182,19 +195,17 @@ public final class Route {
                 }
                 break;
             }
-            return new RouteMatcher(this, matcher.group(), new RouterContext(context, variableMap));
+
+            final String remaining = removeUriTrailingSlash(uri.substring(matcher.end(1) - 1));
+            final String matched = removeUriTrailingSlash(matcher.group(1));
+            return new RouteMatcher(this, matcher.group(1), remaining, new RouterContext(context,
+                    matched, variableMap));
         }
 
         // As per RFC.
         private boolean isValidVariableCharacter(final char c) {
             return ((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z'))
                     || ((c >= '0') && (c <= '9')) || (c == '_');
-        }
-
-        // Ensure that URI contains a trailing '/' in order to make parsing a
-        // matching simpler.
-        private String normalizeUri(final String uri) {
-            return uri.endsWith("/") ? uri : uri + "/";
         }
     }
 

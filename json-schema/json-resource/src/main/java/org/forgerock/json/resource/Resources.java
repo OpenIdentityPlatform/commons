@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012 ForgeRock AS.
+ * Copyright 2012-2013 ForgeRock AS.
  */
 package org.forgerock.json.resource;
 
@@ -156,8 +156,8 @@ public final class Resources {
         @Override
         public FutureResult<JsonValue> actionAsync(final Context context,
                 final ActionRequest request, final ResultHandler<JsonValue> handler) {
-            final FutureResultHandler<JsonValue> future = new FutureResultHandler<JsonValue>(
-                    handler);
+            final FutureResultHandler<JsonValue> future =
+                    new FutureResultHandler<JsonValue>(handler);
             requestHandler.handleAction(getServerContext(context), request, future);
             return future;
         }
@@ -259,8 +259,8 @@ public final class Resources {
         @Override
         public FutureResult<Connection> getConnectionAsync(final ResultHandler<Connection> handler) {
             final Connection connection = getConnection();
-            final FutureResult<Connection> future = new CompletedFutureResult<Connection>(
-                    connection);
+            final FutureResult<Connection> future =
+                    new CompletedFutureResult<Connection>(connection);
             if (handler != null) {
                 handler.handleResult(connection);
             }
@@ -493,8 +493,8 @@ public final class Resources {
 
         // Create a route for the collection.
         final RequestHandler collectionHandler = new CollectionHandler(provider);
-        final Route collectionRoute = new Route(EQUALS, uriTemplate, collectionHandler,
-                instanceRoute);
+        final Route collectionRoute =
+                new Route(EQUALS, uriTemplate, collectionHandler, instanceRoute);
 
         // Register the two routes - the instance route is a subroute of the
         // collection so it will be removed when the collection is removed.
@@ -503,11 +503,25 @@ public final class Resources {
         return collectionRoute;
     }
 
-    static final <T> T checkNotNull(final T object) {
+    static <T> T checkNotNull(final T object) {
         if (object == null) {
             throw new NullPointerException();
         }
         return object;
+    }
+
+    // Ensure that URI contains a trailing '/' in order to make parsing a
+    // matching simpler.
+    static String normalizeUri(final String uri) {
+        return uri.endsWith("/") ? uri : uri + "/";
+    }
+
+    static String removeUriLeadingSlash(final String uri) {
+        return (uri.length() > 1 && uri.startsWith("/")) ? uri.substring(1, uri.length()) : uri;
+    }
+
+    static String removeUriTrailingSlash(final String uri) {
+        return (uri.length() > 1 && uri.endsWith("/")) ? uri.substring(0, uri.length() - 1) : uri;
     }
 
     private static ResourceException newBadRequestException(final String fs, final Object... args) {

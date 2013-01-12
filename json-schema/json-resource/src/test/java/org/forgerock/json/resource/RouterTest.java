@@ -140,7 +140,7 @@ public final class RouterTest {
         final ServerContext c = newServerContext(router);
         final ReadRequest r = newReadRequest(resourceName);
         router.handleRead(c, r, null);
-        verify(h).handleRead(argThat(isRouteContext(c)), same(r),
+        verify(h).handleRead(argThat(isRouteContext(c)), Matchers.<ReadRequest> any(),
                 Matchers.<ResultHandler<Resource>> any());
     }
 
@@ -191,12 +191,12 @@ public final class RouterTest {
         final ServerContext c = newServerContext(router);
         final ReadRequest r1 = newReadRequest("/object");
         router.handleRead(c, r1, null);
-        verify(h1).handleRead(argThat(isRouteContext(c)), same(r1),
+        verify(h1).handleRead(argThat(isRouteContext(c)), Matchers.<ReadRequest> any(),
                 Matchers.<ResultHandler<Resource>> any());
         final ReadRequest r2 = newReadRequest("/thing");
         router.handleRead(c, r2, null);
-        verify(h2).handleRead(argThat(isRouteContext(c, "objectId", "thing")), same(r2),
-                Matchers.<ResultHandler<Resource>> any());
+        verify(h2).handleRead(argThat(isRouteContext(c, "objectId", "thing")),
+                Matchers.<ReadRequest> any(), Matchers.<ResultHandler<Resource>> any());
     }
 
     @Test
@@ -210,12 +210,12 @@ public final class RouterTest {
         final ServerContext c = newServerContext(router);
         final ReadRequest r1 = newReadRequest("/users");
         router.handleRead(c, r1, null);
-        verify(h1).handleRead(argThat(isRouteContext(c)), same(r1),
+        verify(h1).handleRead(argThat(isRouteContext(c)), Matchers.<ReadRequest> any(),
                 Matchers.<ResultHandler<Resource>> any());
 
         final ReadRequest r2 = newReadRequest("/groups");
         router.handleRead(c, r2, null);
-        verify(h2).handleRead(argThat(isRouteContext(c)), same(r2),
+        verify(h2).handleRead(argThat(isRouteContext(c)), Matchers.<ReadRequest> any(),
                 Matchers.<ResultHandler<Resource>> any());
     }
 
@@ -248,7 +248,7 @@ public final class RouterTest {
         for (int i = 0; i < expectedVars.length; i += 2) {
             expectedMap.put(expectedVars[i], expectedVars[i + 1]);
         }
-        verify(h).handleRead(argThat(isRouteContext(c, expectedMap)), same(r),
+        verify(h).handleRead(argThat(isRouteContext(c, expectedMap)), Matchers.<ReadRequest> any(),
                 Matchers.<ResultHandler<Resource>> any());
     }
 

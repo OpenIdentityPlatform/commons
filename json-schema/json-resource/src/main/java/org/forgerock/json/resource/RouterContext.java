@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012 ForgeRock AS.
+ * Copyright 2012-2013 ForgeRock AS.
  */
 package org.forgerock.json.resource;
 
@@ -25,8 +25,40 @@ import org.forgerock.json.fluent.JsonValue;
 
 /**
  * A {@link ServerContext} which is created when a request has been routed. The
- * context includes a map which contains the parsed URI template variables,
- * keyed on the URI template variable name.
+ * context includes:
+ * <ul>
+ * <li>the portion of the request URI which matched the URI template
+ * <li>a method for obtaining the base URI, which represents the portion of the
+ * request URI which has been routed so far. This is obtained dynamically by
+ * concatenating the matched URI with matched URIs in parent router contexts
+ * <li>a map which contains the parsed URI template variables, keyed on the URI
+ * template variable name.
+ * </ul>
+ * <p>
+ * When a request is routed the request is duplicated and the
+ * {@link Request#getResourceName() resource name} trimmed so that it is
+ * relative to the current resource being accessed. More specifically, the
+ * "relativized" resource name represents the portion of the resource URI which
+ * follows the portion matched during routing by the URI template or "/" if the
+ * URI template matched exactly. The matched portion of the resource URI and the
+ * base URI may be accessed via this router context. Example:
+ *
+ * <pre>
+ * Router top = new Router();
+ * Router users = new Router();
+ * Router devices = new Router();
+ * top.addRoute(RoutingMode.STARTS_WITH, &quot;/users/{userId}&quot;, users);
+ * users.addRouter(RoutingMode.STARTS_WITH, &quot;/devices/{deviceId}&quot;, devices);
+ * </pre>
+ *
+ * A request against "/users/1" will be routed to the users router with a base
+ * URI of "/users/1", a matched URI of "/users/1", and a resource name of "/".
+ * <p>
+ * A request against "/users/1/devices/0" will be routed to the users router
+ * with a base URI of "/users/1", a matched URI of "/users/1", and a resource
+ * name of "/devices/0". It will then be routed to the devices router with a
+ * base URI of "/users/1/devices/0", a matched URI of "/devices/0", and a
+ * resource name of "/".
  * <p>
  * Here is an example of the JSON representation of a routing context:
  *
@@ -37,6 +69,7 @@ import org.forgerock.json.fluent.JsonValue;
  *   "parent" : {
  *       ...
  *   },
+ *   "matched-uri" : "/users/bjensen",
  *   "uri-template-variables" : {
  *       "userId" : "bjensen",
  *       "deviceId" : "0"
@@ -46,43 +79,11 @@ import org.forgerock.json.fluent.JsonValue;
  */
 public final class RouterContext extends ServerContext {
     // Persisted attribute names.
+    private static final String ATTR_MATCHED_URI = "matched-uri";
     private static final String ATTR_URI_TEMPLATE_VARIABLES = "uri-template-variables";
 
+    private final String matchedUri;
     private final Map<String, String> uriTemplateVariables;
-
-    /**
-     * Creates a new routing context having the provided parent, URI template
-     * variables, and an ID automatically generated using
-     * {@code UUID.randomUUID()}.
-     *
-     * @param parent
-     *            The parent server context.
-     * @param uriTemplateVariables
-     *            A {@code Map} containing the parsed URI template variables,
-     *            keyed on the URI template variable name.
-     */
-    public RouterContext(final ServerContext parent, final Map<String, String> uriTemplateVariables) {
-        super(checkNotNull(parent));
-        this.uriTemplateVariables = Collections.unmodifiableMap(uriTemplateVariables);
-    }
-
-    /**
-     * Creates a new routing context having the provided ID, parent, and URI
-     * template variables.
-     *
-     * @param id
-     *            The context ID.
-     * @param parent
-     *            The parent context.
-     * @param uriTemplateVariables
-     *            A {@code Map} containing the parsed URI template variables,
-     *            keyed on the URI template variable name.
-     */
-    public RouterContext(final String id, final Context parent,
-            final Map<String, String> uriTemplateVariables) {
-        super(id, checkNotNull(parent));
-        this.uriTemplateVariables = Collections.unmodifiableMap(uriTemplateVariables);
-    }
 
     /**
      * Restore from JSON representation.
@@ -98,13 +99,68 @@ public final class RouterContext extends ServerContext {
     protected RouterContext(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
         super(savedContext, config);
-        final Map<String, Object> savedMap = savedContext.get(ATTR_URI_TEMPLATE_VARIABLES)
-                .required().asMap();
+        this.matchedUri = savedContext.get(ATTR_MATCHED_URI).required().asString();
+        final Map<String, Object> savedMap =
+                savedContext.get(ATTR_URI_TEMPLATE_VARIABLES).required().asMap();
         final Map<String, String> newMap = new LinkedHashMap<String, String>(savedMap.size());
         for (final Map.Entry<String, Object> e : savedMap.entrySet()) {
             newMap.put(e.getKey(), String.valueOf(e.getValue()));
         }
         this.uriTemplateVariables = Collections.unmodifiableMap(newMap);
+    }
+
+    /**
+     * Creates a new routing context having the provided parent, URI template
+     * variables, and an ID automatically generated using
+     * {@code UUID.randomUUID()}.
+     *
+     * @param parent
+     *            The parent server context.
+     * @param uriTemplateVariables
+     *            A {@code Map} containing the parsed URI template variables,
+     *            keyed on the URI template variable name.
+     */
+    RouterContext(final ServerContext parent, final String matchedUri,
+            final Map<String, String> uriTemplateVariables) {
+        super(checkNotNull(parent));
+        this.matchedUri = matchedUri;
+        this.uriTemplateVariables = Collections.unmodifiableMap(uriTemplateVariables);
+    }
+
+    /**
+     * Returns the portion of the request URI which has been routed so far. This
+     * is obtained dynamically by concatenating the matched URI with the base
+     * URI of the parent router context if present. The base URI is never
+     * {@code null} and will contain at least a single "/" character.
+     *
+     * @return The non-{@code null} portion of the request URI which has been
+     *         routed so far.
+     */
+    public String getBaseUri() {
+        final Context parent = getParent();
+        final StringBuilder builder = new StringBuilder();
+        if (parent.containsContext(RouterContext.class)) {
+            final String baseUri = parent.asContext(RouterContext.class).getBaseUri();
+            if (baseUri.length() > 1) {
+                builder.append(baseUri);
+            }
+        }
+        if (builder.length() == 0 || matchedUri.length() > 1) {
+            builder.append(matchedUri);
+        }
+        return builder.toString();
+    }
+
+    /**
+     * Returns the portion of the request URI which matched the URI template.
+     * The matched URI is never {@code null} and will contain at least a single
+     * "/" path separator.
+     *
+     * @return The non-{@code null} portion of the request URI which matched the
+     *         URI template.
+     */
+    public String getMatchedUri() {
+        return matchedUri;
     }
 
     /**
@@ -125,6 +181,7 @@ public final class RouterContext extends ServerContext {
     protected void saveToJson(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
         super.saveToJson(savedContext, config);
+        savedContext.put(ATTR_MATCHED_URI, matchedUri);
         savedContext.put(ATTR_URI_TEMPLATE_VARIABLES, uriTemplateVariables);
     }
 }
