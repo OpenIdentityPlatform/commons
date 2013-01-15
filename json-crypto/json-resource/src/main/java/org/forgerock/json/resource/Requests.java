@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright 2012 ForgeRock AS. All rights reserved.
+ * Copyright 2012-2013 ForgeRock AS. All rights reserved.
  */
 
 package org.forgerock.json.resource;
@@ -371,6 +371,7 @@ public final class Requests {
         private QueryFilter filter;
         private final List<SortKey> keys = new LinkedList<SortKey>();
         private String pagedResultsCookie;
+        private int pagedResultsOffset = 0;
         private int pageSize = 0;
         private final Map<String, String> parameters = new LinkedHashMap<String, String>(2);
         private String queryId;
@@ -389,19 +390,14 @@ public final class Requests {
             this.parameters.putAll(request.getAdditionalQueryParameters());
             this.pageSize = request.getPageSize();
             this.pagedResultsCookie = request.getPagedResultsCookie();
+            this.pagedResultsOffset = request.getPagedResultsOffset();
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public <R, P> R accept(final RequestVisitor<R, P> v, final P p) {
             return v.visitQueryRequest(p, this);
         };
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public QueryRequest addSortKey(final SortKey... keys) {
             for (final SortKey key : keys) {
@@ -410,9 +406,6 @@ public final class Requests {
             return this;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public final QueryRequest addSortKey(final String... keys) {
             for (final String key : keys) {
@@ -421,119 +414,88 @@ public final class Requests {
             return this;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public Map<String, String> getAdditionalQueryParameters() {
             return parameters;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public String getPagedResultsCookie() {
             return pagedResultsCookie;
         }
 
-        /**
-         * {@inheritDoc}
-         */
+        @Override
+        public int getPagedResultsOffset() {
+            return pagedResultsOffset;
+        }
+
         @Override
         public int getPageSize() {
             return pageSize;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public QueryFilter getQueryFilter() {
             return filter;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public String getQueryId() {
             return queryId;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public String getQueryExpression() {
             return queryExpression;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public List<SortKey> getSortKeys() {
             return keys;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public QueryRequest setAdditionalQueryParameter(final String name, final String value) {
             parameters.put(notNull(name), notNull(value));
             return this;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public QueryRequest setPagedResultsCookie(final String cookie) {
             this.pagedResultsCookie = cookie;
             return this;
         }
 
-        /**
-         * {@inheritDoc}
-         */
+        @Override
+        public QueryRequest setPagedResultsOffset(int offset) {
+            this.pagedResultsOffset = offset;
+            return this;
+        }
+
         @Override
         public QueryRequest setPageSize(final int size) {
             this.pageSize = size;
             return this;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public QueryRequest setQueryExpression(final String expression) {
             this.queryExpression = expression;
             return this;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public QueryRequest setQueryFilter(final QueryFilter filter) {
             this.filter = filter;
             return this;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public QueryRequest setQueryId(final String id) {
             this.queryId = id;
             return this;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         protected QueryRequest getThis() {
             return this;

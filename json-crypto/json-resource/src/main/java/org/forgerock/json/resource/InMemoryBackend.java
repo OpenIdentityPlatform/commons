@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012 ForgeRock AS.
+ * Copyright 2012-2013 ForgeRock AS.
  */
 package org.forgerock.json.resource;
 
@@ -474,8 +474,8 @@ public final class InMemoryBackend implements CollectionResourceProvider {
             final boolean pagedResultsRequested = pageSize > 0;
             final int firstResultIndex;
             if (!pagedResultsRequested || pagedResultsCookie == null
-                    || pagedResultsCookie.isEmpty()) {
-                firstResultIndex = 0;
+                    || pagedResultsCookie.isEmpty() || request.getPagedResultsOffset() > 0) {
+                firstResultIndex = Math.max(0, request.getPagedResultsOffset() - 1);
             } else {
                 try {
                     firstResultIndex = Integer.parseInt(pagedResultsCookie);
