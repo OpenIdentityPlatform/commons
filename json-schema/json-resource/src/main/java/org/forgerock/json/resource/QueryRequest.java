@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2012 ForgeRock AS. All rights reserved.
+ * Copyright © 2012-2013 ForgeRock AS. All rights reserved.
  */
 
 package org.forgerock.json.resource;
@@ -114,8 +114,24 @@ public interface QueryRequest extends Request {
      *         the first page of results is being requested (when the page size
      *         is non-zero).
      * @see #getPageSize()
+     * @see #getPagedResultsOffset()
      */
     String getPagedResultsCookie();
+
+    /**
+     * Returns the index within the result set of the first result which should
+     * be returned. Paged results will be enabled if and only if the page size
+     * is non-zero. If the parameter is not present or a value less than 1 is
+     * specified then then the page following the previous page returned will be
+     * returned. A value equal to or greater than 1 indicates that a specific
+     * page should be returned starting from the position specified.
+     *
+     * @return The index within the result set of the first result which should
+     *         be returned.
+     * @see #getPageSize()
+     * @see #getPagedResultsCookie()
+     */
+    int getPagedResultsOffset();
 
     /**
      * Returns the requested page results page size or {@code 0} if paged
@@ -126,6 +142,7 @@ public interface QueryRequest extends Request {
      * @return The requested page results page size or {@code 0} if paged
      *         results are not required.
      * @see #getPagedResultsCookie()
+     * @see #getPagedResultsOffset()
      */
     int getPageSize();
 
@@ -237,8 +254,29 @@ public interface QueryRequest extends Request {
      *             If this query request does not permit changes to the paged
      *             results cookie.
      * @see #setPageSize(int)
+     * @see #setPagedResultsOffset(int)
      */
     QueryRequest setPagedResultsCookie(String cookie);
+
+    /**
+     * Sets the index within the result set of the first result which should be
+     * returned. Paged results will be enabled if and only if the page size is
+     * non-zero. If the parameter is not present or a value less than 1 is
+     * specified then then the page following the previous page returned will be
+     * returned. A value equal to or greater than 1 indicates that a specific
+     * page should be returned starting from the position specified.
+     *
+     * @param offset
+     *            The index within the result set of the first result which
+     *            should be returned.
+     * @return This query request.
+     * @throws UnsupportedOperationException
+     *             If this query request does not permit changes to the paged
+     *             results offset.
+     * @see #setPageSize(int)
+     * @see #setPagedResultsCookie(String)
+     */
+    QueryRequest setPagedResultsOffset(int offset);
 
     /**
      * Sets the requested page results page size or {@code 0} if paged results
@@ -254,6 +292,7 @@ public interface QueryRequest extends Request {
      *             If this query request does not permit changes to the page
      *             size.
      * @see #getPagedResultsCookie()
+     * @see #setPagedResultsOffset(int)
      */
     QueryRequest setPageSize(int size);
 

@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2012 ForgeRock AS
+  !      Copyright 2012-2013 ForgeRock AS
   !    
 -->
 <document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -370,6 +370,29 @@ Accept: application/json</source>
                             <p>
                                 Default behavior is to not return paged query
                                 results.
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <tt>_pagedResultsOffset=<i>INTEGER</i></tt>
+                        </td>
+                        <td>
+                            <p>
+                                Optional parameter specifying the index within
+                                the result set of the first result which should
+                                be returned. Paged results will be enabled if
+                                and only if the page size is non-zero. If the
+                                parameter is not present or a value less than 1
+                                is specified then the page following the last
+                                page returned will be returned. A value equal
+                                to or greater than 1 indicates that a specific
+                                page should be returned starting from the position
+                                specified.
+                            </p>
+                            <p>
+                                Default behavior is to return the page following the
+                                previous returned page.
                             </p>
                         </td>
                     </tr>

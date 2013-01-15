@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012 ForgeRock AS.
+ * Copyright 2012-2013 ForgeRock AS.
  */
 package org.forgerock.json.resource.servlet;
 
@@ -295,6 +295,8 @@ public final class HttpServletAdapter {
                         request.setQueryExpression(asSingleValue(name, values));
                     } else if (name.equalsIgnoreCase("_pagedResultsCookie")) {
                         request.setPagedResultsCookie(asSingleValue(name, values));
+                    } else if (name.equalsIgnoreCase("_pagedResultsOffset")) {
+                        request.setPagedResultsOffset(asIntValue(name, values));
                     } else if (name.equalsIgnoreCase("_pageSize")) {
                         request.setPageSize(asIntValue(name, values));
                     } else if (name.equalsIgnoreCase("_filter")) {
