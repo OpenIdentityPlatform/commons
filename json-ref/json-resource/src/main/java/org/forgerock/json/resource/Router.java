@@ -22,8 +22,10 @@ import static org.forgerock.json.resource.Requests.copyOfPatchRequest;
 import static org.forgerock.json.resource.Requests.copyOfQueryRequest;
 import static org.forgerock.json.resource.Requests.copyOfReadRequest;
 import static org.forgerock.json.resource.Requests.copyOfUpdateRequest;
-import static org.forgerock.json.resource.Resources.addCollectionRoutes;
+import static org.forgerock.json.resource.Resources.newCollection;
 import static org.forgerock.json.resource.Resources.newSingleton;
+import static org.forgerock.json.resource.RoutingMode.EQUALS;
+import static org.forgerock.json.resource.RoutingMode.STARTS_WITH;
 
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -125,15 +127,12 @@ public final class Router implements RequestHandler {
      * Router router = new Router();
      *
      * // This is valid usage: the template matches the resource collection.
-     * router.addRoute(EQUALS, "/users", users);
+     * router.addRoute("/users", users);
      *
      * // This is invalid usage: the template matches resource instances.
-     * router.addRoute(EQUALS, "/users/{userId}", users);
+     * router.addRoute("/users/{userId}", users);
      * </pre>
      *
-     * @param mode
-     *            Indicates how the URI template should be matched against
-     *            resource names.
      * @param uriTemplate
      *            The URI template which request resource names must match.
      * @param provider
@@ -142,9 +141,9 @@ public final class Router implements RequestHandler {
      * @return An opaque handle for the route which may be used for removing the
      *         route later.
      */
-    public Route addRoute(final RoutingMode mode, final String uriTemplate,
+    public Route addRoute(final String uriTemplate,
             final CollectionResourceProvider provider) {
-        return addCollectionRoutes(this, mode, uriTemplate, provider);
+        return addRoute(STARTS_WITH, uriTemplate, newCollection(provider));
     }
 
     /**
@@ -163,7 +162,7 @@ public final class Router implements RequestHandler {
      */
     public Route addRoute(final RoutingMode mode, final String uriTemplate,
             final RequestHandler handler) {
-        return addRoute(new Route(mode, uriTemplate, handler, null));
+        return addRoute(new Route(mode, uriTemplate, handler));
     }
 
     /**
@@ -171,9 +170,6 @@ public final class Router implements RequestHandler {
      * provider. New routes may be added while this router is processing
      * requests.
      *
-     * @param mode
-     *            Indicates how the URI template should be matched against
-     *            resource names.
      * @param uriTemplate
      *            The URI template which request resource names must match.
      * @param provider
@@ -182,9 +178,9 @@ public final class Router implements RequestHandler {
      * @return An opaque handle for the route which may be used for removing the
      *         route later.
      */
-    public Route addRoute(final RoutingMode mode, final String uriTemplate,
+    public Route addRoute(final String uriTemplate,
             final SingletonResourceProvider provider) {
-        return addRoute(mode, uriTemplate, newSingleton(provider));
+        return addRoute(EQUALS, uriTemplate, newSingleton(provider));
     }
 
     /**
@@ -325,11 +321,6 @@ public final class Router implements RequestHandler {
         boolean isModified = false;
         for (final Route route : routes) {
             isModified |= this.routes.remove(route);
-
-            // Remove the sub-route if present (e.g. for collections).
-            if (route.getSubRoute() != null) {
-                this.routes.remove(route.getSubRoute());
-            }
         }
         return isModified;
     }
