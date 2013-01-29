@@ -393,41 +393,24 @@ public final class Resources {
      * provided collection resource provider. Incoming requests which are not
      * appropriate for a resource collection or resource instance will result in
      * a bad request error being returned to the client.
-     * <p>
-     * The provided URI template must match the resource collection itself, not
-     * resource instances. In addition, the URI template must not contain a
-     * {@code id} template variable since this will be implicitly added to the
-     * template in order for matching against resource instances. For example:
      *
-     * <pre>
-     * CollectionResourceProvider users = ...;
-     *
-     * // This is valid usage: the template matches the resource collection.
-     * RequestHandler handler = newCollection(EQUALS, "/users", users);
-     *
-     * // This is invalid usage: the template matches resource instances.
-     * RequestHandler handler = newCollection(EQUALS, "/users/{userId}", users);
-     * </pre>
-     *
-     * @param mode
-     *            Indicates how the URI template should be matched against
-     *            resource instance names.
-     * @param uriTemplate
-     *            The URI template which should be used for matching against the
-     *            resource collection.
      * @param provider
      *            The collection resource provider.
      * @return A new request handler which will forward requests on to the
      *         provided collection resource provider.
-     * @throws IllegalArgumentException
-     *             If {@code uriTemplate} contained a template variable called
-     *             {@code id}.
      */
-    public static RequestHandler newCollection(final RoutingMode mode, final String uriTemplate,
-            final CollectionResourceProvider provider) {
+    public static RequestHandler newCollection(final CollectionResourceProvider provider) {
         // Route requests to the collection/instance using a router.
         final Router router = new Router();
-        addCollectionRoutes(router, mode, uriTemplate, provider);
+
+        // Create a route for the collection.
+        final RequestHandler collectionHandler = new CollectionHandler(provider);
+        router.addRoute(EQUALS, "/", collectionHandler);
+
+        // Create a route for the instances within the collection.
+        final RequestHandler instanceHandler = new CollectionInstance(provider);
+        router.addRoute(EQUALS, "/{id}", instanceHandler);
+
         return router;
     }
 
@@ -475,33 +458,7 @@ public final class Resources {
         return new SingletonHandler(provider);
     }
 
-    static Route addCollectionRoutes(final Router router, final RoutingMode mode,
-            final String uriTemplate, final CollectionResourceProvider provider) {
-        if (uriTemplate.contains("{id}")) {
-            throw new IllegalArgumentException("uriTemplate contains the variable {id}");
-        }
 
-        // Create a route for the instances within the collection.
-        final StringBuilder builder = new StringBuilder();
-        builder.append(uriTemplate);
-        if (!uriTemplate.endsWith("/")) {
-            builder.append('/');
-        }
-        builder.append("{id}");
-        final RequestHandler instanceHandler = new CollectionInstance(provider);
-        final Route instanceRoute = new Route(mode, builder.toString(), instanceHandler, null);
-
-        // Create a route for the collection.
-        final RequestHandler collectionHandler = new CollectionHandler(provider);
-        final Route collectionRoute =
-                new Route(EQUALS, uriTemplate, collectionHandler, instanceRoute);
-
-        // Register the two routes - the instance route is a subroute of the
-        // collection so it will be removed when the collection is removed.
-        router.addRoute(collectionRoute);
-        router.addRoute(instanceRoute);
-        return collectionRoute;
-    }
 
     static <T> T checkNotNull(final T object) {
         if (object == null) {
