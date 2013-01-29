@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012 ForgeRock AS.
+ * Copyright 2012-2013 ForgeRock AS.
  */
 package org.forgerock.json.resource;
 
@@ -20,7 +20,6 @@ import static org.forgerock.json.resource.Requests.newQueryRequest;
 import static org.forgerock.json.resource.Requests.newReadRequest;
 import static org.forgerock.json.resource.Requests.newUpdateRequest;
 import static org.forgerock.json.resource.Resources.newInternalConnection;
-import static org.forgerock.json.resource.RoutingMode.EQUALS;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
@@ -48,7 +47,7 @@ public final class ExampleTest {
         // Create a router request handler and route requests for user
         // resources to the in memory backend.
         Router router = new Router();
-        router.addRoute(EQUALS, "/users", users);
+        router.addRoute("/users", users);
 
         // Obtain an internal connection to the router.
         Connection connection = newInternalConnection(router);

@@ -11,11 +11,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012 ForgeRock AS.
+ * Copyright 2012-2013 ForgeRock AS.
  */
 package org.forgerock.json.resource.servlet;
-
-import static org.forgerock.json.resource.RoutingMode.EQUALS;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -44,7 +42,7 @@ final class MemoryBackendConnectionFactoryProvider {
                     + INIT_PARAM_URI_TEMPLATE + "' not specified");
         }
         final Router router = new Router();
-        router.addRoute(EQUALS, uriTemplate, new InMemoryBackend());
+        router.addRoute(uriTemplate, new InMemoryBackend());
         return Resources.newInternalConnectionFactory(router);
     }
 }

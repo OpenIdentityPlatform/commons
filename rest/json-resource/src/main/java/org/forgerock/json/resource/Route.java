@@ -210,14 +210,11 @@ public final class Route {
     }
 
     private final RequestHandler handler;
-    private final Route subRoute;
     private final UriTemplate template;
 
-    Route(final RoutingMode mode, final String uriTemplate, final RequestHandler handler,
-            final Route subRoute) {
+    Route(final RoutingMode mode, final String uriTemplate, final RequestHandler handler) {
         this.template = new UriTemplate(mode, uriTemplate);
         this.handler = handler;
-        this.subRoute = subRoute;
     }
 
     @Override
@@ -237,9 +234,5 @@ public final class Route {
 
     RouteMatcher getRouteMatcher(final ServerContext context, final Request request) {
         return template.getRouteMatcher(this, context, request);
-    }
-
-    Route getSubRoute() {
-        return subRoute;
     }
 }
