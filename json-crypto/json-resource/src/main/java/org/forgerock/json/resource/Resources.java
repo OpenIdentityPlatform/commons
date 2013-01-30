@@ -39,13 +39,13 @@ public final class Resources {
         @Override
         public void handleAction(final ServerContext context, final ActionRequest request,
                 final ResultHandler<JsonValue> handler) {
-            provider.actionCollection(context, request, handler);
+            provider.actionCollection(parentOf(context), request, handler);
         }
 
         @Override
         public void handleCreate(final ServerContext context, final CreateRequest request,
                 final ResultHandler<Resource> handler) {
-            provider.createInstance(context, request, handler);
+            provider.createInstance(parentOf(context), request, handler);
         }
 
         @Override
@@ -67,7 +67,7 @@ public final class Resources {
         @Override
         public void handleQuery(final ServerContext context, final QueryRequest request,
                 final QueryResultHandler handler) {
-            provider.queryCollection(context, request, handler);
+            provider.queryCollection(parentOf(context), request, handler);
         }
 
         @Override
@@ -97,7 +97,7 @@ public final class Resources {
         @Override
         public void handleAction(final ServerContext context, final ActionRequest request,
                 final ResultHandler<JsonValue> handler) {
-            provider.actionInstance(context, id(context), request, handler);
+            provider.actionInstance(parentOf(context), idOf(context), request, handler);
         }
 
         @Override
@@ -111,13 +111,13 @@ public final class Resources {
         @Override
         public void handleDelete(final ServerContext context, final DeleteRequest request,
                 final ResultHandler<Resource> handler) {
-            provider.deleteInstance(context, id(context), request, handler);
+            provider.deleteInstance(parentOf(context), idOf(context), request, handler);
         }
 
         @Override
         public void handlePatch(final ServerContext context, final PatchRequest request,
                 final ResultHandler<Resource> handler) {
-            provider.patchInstance(context, id(context), request, handler);
+            provider.patchInstance(parentOf(context), idOf(context), request, handler);
         }
 
         @Override
@@ -131,17 +131,13 @@ public final class Resources {
         @Override
         public void handleRead(final ServerContext context, final ReadRequest request,
                 final ResultHandler<Resource> handler) {
-            provider.readInstance(context, id(context), request, handler);
+            provider.readInstance(parentOf(context), idOf(context), request, handler);
         }
 
         @Override
         public void handleUpdate(final ServerContext context, final UpdateRequest request,
                 final ResultHandler<Resource> handler) {
-            provider.updateInstance(context, id(context), request, handler);
-        }
-
-        private String id(final ServerContext context) {
-            return context.asContext(RouterContext.class).getUriTemplateVariables().get("id");
+            provider.updateInstance(parentOf(context), idOf(context), request, handler);
         }
     }
 
@@ -484,6 +480,17 @@ public final class Resources {
     private static ResourceException newBadRequestException(final String fs, final Object... args) {
         final String msg = String.format(fs, args);
         return new BadRequestException(msg);
+    }
+
+    // Strips off the unwanted leaf routing context which was added when routing
+    // requests to a collection.
+    private static ServerContext parentOf(ServerContext context) {
+        assert context instanceof RouterContext;
+        return (ServerContext) context.getParent();
+    }
+
+    private static String idOf(final ServerContext context) {
+        return context.asContext(RouterContext.class).getUriTemplateVariables().get("id");
     }
 
     // Prevent instantiation.
