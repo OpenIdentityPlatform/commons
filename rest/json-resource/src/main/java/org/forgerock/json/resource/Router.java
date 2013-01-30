@@ -118,9 +118,7 @@ public final class Router implements RequestHandler {
      * requests.
      * <p>
      * The provided URI template must match the resource collection itself, not
-     * resource instances. In addition, the URI template must not contain a
-     * {@code id} template variable since this will be implicitly added to the
-     * template in order for matching against resource instances. For example:
+     * resource instances. For example:
      *
      * <pre>
      * CollectionResourceProvider users = ...;
