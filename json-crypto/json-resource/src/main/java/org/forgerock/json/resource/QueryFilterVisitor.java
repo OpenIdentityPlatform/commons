@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright © 2012 ForgeRock AS. All rights reserved.
+ * Copyright 2012-2013 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -97,14 +97,14 @@ public interface QueryFilterVisitor<R, P> {
      *            A visitor specified parameter.
      * @param field
      *            A pointer to the field within JSON resource to be compared.
-     * @param matchingRuleId
-     *            The ID of the matching rule to be used for performing the
-     *            comparison.
+     * @param operator
+     *            The operator to use for the comparison, which will not be one of
+     *            the core operator names.
      * @param valueAssertion
      *            The value assertion.
      * @return Returns a visitor specified result.
      */
-    R visitExtendedMatchFilter(P p, JsonPointer field, String matchingRuleId, Object valueAssertion);
+    R visitExtendedMatchFilter(P p, JsonPointer field, String operator, Object valueAssertion);
 
     /**
      * Visits a {@code greater than} filter.
