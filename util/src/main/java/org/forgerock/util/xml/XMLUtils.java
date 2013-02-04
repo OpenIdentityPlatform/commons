@@ -56,4 +56,28 @@ public class XMLUtils {
         db.setEntityResolver(new XMLHandler());
         return db;
     }
+
+    /**
+     * Provides a secure SAXParser instance, which is protected against different
+     * types of entity expension, DoS attacks and makes sure that only locally
+     * available DTDs can be referenced within the XML document.
+     * @param validating Whether the returned DocumentBuilder should validate input.
+     * @return A secure SAXParser instance.
+     * @throws ParserConfigurationException In case Xerces does not support one of
+     * the required features.
+     * @throws SAXException In case Xerces does not support one of the required
+     * features.
+     */
+    public static SAXParser getSafeSAXParser(boolean validating) throws ParserConfigurationException, SAXException {
+        SAXParserFactory saxFactory = SAXParserFactory.newInstance();
+        saxFactory.setValidating(validating);
+        saxFactory.setNamespaceAware(true);
+        saxFactory.setXIncludeAware(false);
+        saxFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+        saxFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+        saxFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        SAXParser sp = saxFactory.newSAXParser();
+        sp.getXMLReader().setEntityResolver(new XMLHandler());
+        return sp;
+    }
 }
