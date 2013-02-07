@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, form2js, _, js2form, document */
+/*global window, define, $, form2js, _, js2form, document */
 
 /**
  * @author mbilski
