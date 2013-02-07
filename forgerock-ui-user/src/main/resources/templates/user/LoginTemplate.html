@@ -36,12 +36,22 @@
                 <a href="{{url 'register'}}">{{t "templates.user.LoginTemplate.registerAccount"}}</a>
             </div>
             {{/selfRegistration}}
-            {{#securityQuestions}}
+            
+            {{#if passwordResetLink}}
             <div class="row">
                 <h5>{{t "templates.user.LoginTemplate.problemLoggingQuestion"}}</h5>
-                <a href="{{url 'forgottenPassword'}}">{{t "templates.user.LoginTemplate.resetPassword"}}</a>
+                <a href="{{passwordResetLink}}">{{t "templates.user.LoginTemplate.resetPassword"}}</a>
             </div>
-            {{/securityQuestions}}
+            {{else}}
+            
+                {{#if securityQuestions}}
+                <div class="row">
+                    <h5>{{t "templates.user.LoginTemplate.problemLoggingQuestion"}}</h5>
+                    <a href="{{url 'forgottenPassword'}}">{{t "templates.user.LoginTemplate.resetPassword"}}</a>
+                </div>
+                {{/if}}
+            
+            {{/if}}
         </div>
     </div>
     {{else}}

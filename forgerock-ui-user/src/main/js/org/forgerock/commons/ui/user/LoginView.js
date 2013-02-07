@@ -83,7 +83,10 @@ define("org/forgerock/commons/ui/user/LoginView", [
         },
         
         render: function(args, callback) {
-            this.data.hasOptionalUIFeatures = conf.globalData.selfRegistration || conf.globalData.securityQuestions || conf.globalData.siteIdentification;
+            if (window.location.hash === "#logout/") {
+                eventManager.sendEvent(constants.EVENT_LOGOUT);
+            }
+            this.data.hasOptionalUIFeatures = conf.globalData.selfRegistration || conf.globalData.securityQuestions || conf.globalData.siteIdentification || conf.globalData.passwordResetLink;
 
             this.parentRender(function() {                
                 validatorsManager.bindValidators(this.$el);

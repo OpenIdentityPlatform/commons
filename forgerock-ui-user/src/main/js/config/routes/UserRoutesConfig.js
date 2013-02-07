@@ -63,6 +63,10 @@ define("config/routes/UserRoutesConfig", [
             view: "org/forgerock/commons/ui/user/LoginView",
             url: "login/"
         },                           
+        "logout" : {
+            view: "org/forgerock/commons/ui/user/LoginView",
+            url: "logout/"
+        },                           
         "loginDialog" : {
             dialog: "org/forgerock/commons/ui/user/LoginDialog",
             url: "loginDialog/"

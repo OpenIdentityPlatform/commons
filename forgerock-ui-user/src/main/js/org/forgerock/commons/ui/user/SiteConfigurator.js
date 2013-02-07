@@ -109,6 +109,10 @@ define("org/forgerock/commons/ui/user/SiteConfigurator", [
            conf.globalData.siteImages = config.siteImages;
        }
        
+       if (config.passwordResetLink) {
+           conf.globalData.passwordResetLink = config.passwordResetLink;
+       }
+       
        if (config.language) {
            i18nManager.setLanguage(config.language);
        } else {
