@@ -58,7 +58,7 @@ public final class Resource {
             return true;
         } else if (obj instanceof Resource) {
             final Resource that = (Resource) obj;
-            return id.equals(id) && isEqual(revision, that.revision);
+            return isEqual(id, that.id) && isEqual(revision, that.revision);
         } else {
             return false;
         }
@@ -102,7 +102,7 @@ public final class Resource {
     @Override
     public int hashCode() {
         int hash = 17;
-        hash = hash * 31 + id.hashCode();
+        hash = hash * 31 + id != null ? id.hashCode() : 0;
         hash = hash * 31 + revision != null ? revision.hashCode() : 0;
         return hash;
     }
