@@ -211,7 +211,7 @@ abstract class AbstractGenerateMessagesMojo extends AbstractMojo {
             } else if ("h".equals(sa5) /* Hashcode */) {
                 c = Object.class;
             } else if ("s".equals(sa5)) {
-                c = CharSequence.class;
+                c = Object.class; /* Conversion using toString() */
             } else if ("c".equals(sa5)) {
                 c = Character.class;
             } else if ("d".equals(sa5) || "o".equals(sa5) || "x".equals(sa5)
