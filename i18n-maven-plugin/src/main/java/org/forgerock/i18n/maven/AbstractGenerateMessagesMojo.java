@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- *      Copyright 2011 ForgeRock AS
+ *      Copyright 2011-2013 ForgeRock AS
  */
 package org.forgerock.i18n.maven;
 
@@ -426,8 +426,7 @@ abstract class AbstractGenerateMessagesMojo extends AbstractMojo {
             while (i < s.length()) {
                 if (m.find(i)) {
                     // Anything between the start of the string and the
-                    // beginning
-                    // of the format specifier is either fixed text or contains
+                    // beginning of the format specifier is either fixed text or contains
                     // an invalid format string.
                     if (m.start() != i) {
                         // Make sure we didn't miss any invalid format
@@ -447,8 +446,7 @@ abstract class AbstractGenerateMessagesMojo extends AbstractMojo {
                     i = m.end();
                 } else {
                     // No more valid format specifiers. Check for possible
-                    // invalid
-                    // format specifiers.
+                    // invalid format specifiers.
                     checkText(s.substring(i));
 
                     // The rest of the string is fixed text
@@ -711,8 +709,7 @@ abstract class AbstractGenerateMessagesMojo extends AbstractMojo {
                         outputWriter.println();
 
                         // Keep track of when we use the generic descriptor so
-                        // that we can
-                        // report it later
+                        // that we can report it later
                         if (message.useGenericMessageTypeClass()) {
                             usesOfGenericDescriptor++;
                         }
@@ -738,8 +735,7 @@ abstract class AbstractGenerateMessagesMojo extends AbstractMojo {
             }
         } catch (final IOException e) {
             // Don't leave a malformed file laying around. Delete it so it will
-            // be
-            // forced to be regenerated.
+            // be forced to be regenerated.
             if (outputFile.exists()) {
                 outputFile.deleteOnExit();
             }
