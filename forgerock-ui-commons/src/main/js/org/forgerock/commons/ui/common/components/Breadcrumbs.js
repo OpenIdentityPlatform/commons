@@ -55,24 +55,25 @@ define("org/forgerock/commons/ui/common/components/Breadcrumbs", [
             path = window.location.href.match(/#([a-zA-Z\/_.@]+)/);
             
             if(path === null) {
-                path = 'Dashboard';
+                document.title = this.baseTitle;
             } else {
                 path = path[1];
+            
+                parts = _.compact(path.split('/'));
+                humanized = this.getHumanizedUrls(parts);
+                
+                url = "#";     
+                
+                this.clear();            
+                for(i = 0; i < parts.length - 1; i++) {
+                    url += parts[i] + "/";
+                    this.push(humanized[i], url);
+                }
+                this.set(humanized[humanized.length-1]);
+                
+                document.title = this.baseTitle + " - " + humanized.join(" - ");
+
             }
-            
-            parts = _.compact(path.split('/'));
-            humanized = this.getHumanizedUrls(parts);
-            
-            url = "#";     
-            
-            this.clear();            
-            for(i = 0; i < parts.length - 1; i++) {
-                url += parts[i] + "/";
-                this.push(humanized[i], url);
-            }
-            this.set(humanized[humanized.length-1]);
-            
-            document.title = this.baseTitle + " - " + humanized.join(" - ");
         },
         
         /**
