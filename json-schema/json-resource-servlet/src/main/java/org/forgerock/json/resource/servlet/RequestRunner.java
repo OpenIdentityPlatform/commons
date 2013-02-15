@@ -183,27 +183,28 @@ abstract class RequestRunner implements ResultHandler<Connection>, RequestVisito
     @Override
     public final Void visitQueryRequest(final Void p, final QueryRequest request) {
         connection.queryAsync(context, request, new QueryResultHandler() {
-            private boolean needsHeader = true;
+            private boolean isFirstResult = true;
+            private int resultCount = 0;
 
             /**
              * {@inheritDoc}
              */
             @Override
             public void handleError(final ResourceException error) {
-                if (!needsHeader) {
-                    // Partial results.
+                if (isFirstResult) {
+                    doError(error);
+                } else {
+                    // Partial results - it's to late to set the status.
                     try {
                         writer.writeEndArray();
-                        writer.writeObjectFieldStart("error");
-                        writer.writeNumberField("code", error.getCode());
-                        writer.writeStringField("message", error.getMessage());
+                        writer.writeNumberField("resultCount", resultCount);
+                        writer.writeObjectField("error", error.toJsonValue().getObject());
                         writer.writeEndObject();
-                        writer.writeEndObject();
-                    } catch (final IOException e) {
-                        // FIXME: can we do anything with this?
+                        doComplete();
+                    } catch (final Exception e) {
+                        doError(e);
                     }
                 }
-                doError(error);
             }
 
             /**
@@ -214,6 +215,7 @@ abstract class RequestRunner implements ResultHandler<Connection>, RequestVisito
                 try {
                     writeHeader();
                     writeJsonValue(resource.getContent());
+                    resultCount++;
                     return true;
                 } catch (final Exception e) {
                     handleError(adapt(e));
@@ -229,6 +231,7 @@ abstract class RequestRunner implements ResultHandler<Connection>, RequestVisito
                 try {
                     writeHeader();
                     writer.writeEndArray();
+                    writer.writeNumberField("resultCount", resultCount);
                     writer.writeStringField("pagedResultsCookie", result.getPagedResultsCookie());
                     writer.writeNumberField("remainingPagedResults", result
                             .getRemainingPagedResults());
@@ -240,10 +243,10 @@ abstract class RequestRunner implements ResultHandler<Connection>, RequestVisito
             }
 
             private void writeHeader() throws IOException {
-                if (needsHeader) {
+                if (isFirstResult) {
                     writer.writeStartObject();
                     writer.writeArrayFieldStart("result");
-                    needsHeader = false;
+                    isFirstResult = false;
                 }
             }
         });
@@ -343,7 +346,7 @@ abstract class RequestRunner implements ResultHandler<Connection>, RequestVisito
                         final String rev = getIfNoneMatch(httpRequest);
                         if (rev != null && rev.equals(result.getRevision())) {
                             // No change so 304.
-                            throw ResourceException.getException(304, "Not Modified", null, null);
+                            throw ResourceException.getException(304).setReason("Not Modified");
                         }
                     }
 

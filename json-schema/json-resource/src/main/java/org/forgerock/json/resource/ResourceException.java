@@ -36,6 +36,38 @@ import org.forgerock.json.fluent.JsonValue;
 public class ResourceException extends ExecutionException {
 
     /**
+     * The name of the JSON field used for the detail.
+     *
+     * @see #getDetail()
+     * @see #toJsonValue()
+     */
+    public static final String FIELD_DETAIL = "detail";
+
+    /**
+     * The name of the JSON field used for the message.
+     *
+     * @see #getMessage()
+     * @see #toJsonValue()
+     */
+    public static final String FIELD_MESSAGE = "message";
+
+    /**
+     * The name of the JSON field used for the reason.
+     *
+     * @see #getReason()
+     * @see #toJsonValue()
+     */
+    public static final String FIELD_REASON = "reason";
+
+    /**
+     * The name of the JSON field used for the code.
+     *
+     * @see #getCode()
+     * @see #toJsonValue()
+     */
+    public static final String FIELD_CODE = "code";
+
+    /**
      * Indicates that the request could not be understood by the resource due to
      * malformed syntax. Equivalent to HTTP status: 400 Bad Request.
      */
@@ -96,26 +128,53 @@ public class ResourceException extends ExecutionException {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Returns an exception with the specified exception code, reason phrase,
-     * detail message and cause. Useful for translating HTTP status codes to the
-     * relevant Java exception type. The type of the returned exception will be
-     * a sub-type of ResourceException.
+     * Returns an exception with the specified HTTP error code, but no detail
+     * message or cause, and a default reason phrase. Useful for translating
+     * HTTP status codes to the relevant Java exception type. The type of the
+     * returned exception will be a sub-type of {@code ResourceException}.
      *
      * @param code
-     *            The numeric code of the exception.
-     * @param reason
-     *            The short reason phrase of the exception, or null if this
-     *            implementation should assign a short reason phrase.
+     *            The HTTP error code.
+     * @return A resource exception having the provided HTTP error code.
+     */
+    public static ResourceException getException(final int code) {
+        return getException(code, null);
+    }
+
+    /**
+     * Returns an exception with the specified HTTP error code and detail
+     * message, but no cause, and a default reason phrase. Useful for
+     * translating HTTP status codes to the relevant Java exception type. The
+     * type of the returned exception will be a sub-type of
+     * {@code ResourceException}.
+     *
+     * @param code
+     *            The HTTP error code.
+     * @param message
+     *            The detail message.
+     * @return A resource exception having the provided HTTP error code.
+     */
+    public static ResourceException getException(final int code, final String message) {
+        return getException(code, message, null);
+    }
+
+    /**
+     * Returns an exception with the specified HTTP error code, detail message,
+     * and cause, and a default reason phrase. Useful for translating HTTP
+     * status codes to the relevant Java exception type. The type of the
+     * returned exception will be a sub-type of {@code ResourceException}.
+     *
+     * @param code
+     *            The HTTP error code.
      * @param message
      *            The detail message.
      * @param cause
      *            The exception which caused this exception to be thrown.
-     * @return A resource exception having the provided code, reason, message,
-     *         and cause.
+     * @return A resource exception having the provided HTTP error code.
      */
-    public static ResourceException getException(final int code, final String reason,
-            final String message, final Throwable cause) {
-        ResourceException ex = null;
+    public static ResourceException getException(final int code, final String message,
+            final Throwable cause) {
+        final ResourceException ex;
         switch (code) {
         case BAD_REQUEST:
             ex = new BadRequestException(message, cause);
@@ -171,10 +230,6 @@ public class ResourceException extends ExecutionException {
         default:
             ex = new UncategorizedException(code, message, cause);
         }
-        if (reason != null) {
-            ex.setReason(reason);
-        }
-
         return ex;
     }
 
@@ -272,7 +327,7 @@ public class ResourceException extends ExecutionException {
     private String reason;
 
     /** Additional detail which can be evaluated by applications. */
-    private final JsonValue detail = new JsonValue(null);
+    private JsonValue detail = new JsonValue(null);
 
     /**
      * Constructs a new exception with the specified exception code, and
@@ -285,8 +340,7 @@ public class ResourceException extends ExecutionException {
      *            The numeric code of the exception.
      */
     protected ResourceException(final int code) {
-        this.code = code;
-        this.reason = reason(code);
+        this(code, null, null);
     }
 
     /**
@@ -299,40 +353,25 @@ public class ResourceException extends ExecutionException {
      *            The detail message.
      */
     protected ResourceException(final int code, final String message) {
-        super(message);
-        this.code = code;
-        this.reason = reason(code);
+        this(code, message, null);
+    }
+
+    /**
+     * Constructs a new exception with the specified exception code and detail
+     * message.
+     *
+     * @param code
+     *            The numeric code of the exception.
+     * @param cause
+     *            The exception which caused this exception to be thrown.
+     */
+    protected ResourceException(final int code, final Throwable cause) {
+        this(code, null, cause);
     }
 
     /**
      * Constructs a new exception with the specified exception code, reason
      * phrase, detail message and cause.
-     *
-     * @param code
-     *            The numeric code of the exception.
-     * @param reason
-     *            The short reason phrase of the exception, or null to have this
-     *            implementation assign a reason String
-     * @param message
-     *            The detail message.
-     * @param cause
-     *            The exception which caused this exception to be thrown.
-     */
-    protected ResourceException(final int code, final String reason, final String message,
-            final Throwable cause) {
-        super(message, cause);
-        this.code = code;
-        if (reason != null) {
-            this.reason = reason;
-        } else {
-            this.reason = reason(code);
-        }
-    }
-
-    /**
-     * Constructs a new exception with the specified exception code, reason
-     * phrase and cause. The detail message is initialized to the detail message
-     * from the specified cause.
      *
      * @param code
      *            The numeric code of the exception.
@@ -342,21 +381,9 @@ public class ResourceException extends ExecutionException {
      *            The exception which caused this exception to be thrown.
      */
     protected ResourceException(final int code, final String message, final Throwable cause) {
-        this(code, reason(code), message, cause);
-    }
-
-    /**
-     * Constructs a new exception with the specified exception code and cause.
-     *
-     * @param code
-     *            The numeric code of the exception.
-     * @param cause
-     *            The exception which caused this exception to be thrown.
-     */
-    protected ResourceException(final int code, final Throwable cause) {
-        super(cause);
+        super(message, cause);
         this.code = code;
-        this.reason = reason(code);
+        reason(code);
     }
 
     /**
@@ -364,7 +391,7 @@ public class ResourceException extends ExecutionException {
      *
      * @return The numeric code of the exception.
      */
-    public int getCode() {
+    public final int getCode() {
         return code;
     }
 
@@ -377,7 +404,7 @@ public class ResourceException extends ExecutionException {
      * @return The additional detail which can be evaluated by applications
      *         (never {@code null}).
      */
-    public JsonValue getDetail() {
+    public final JsonValue getDetail() {
         return detail;
     }
 
@@ -386,8 +413,23 @@ public class ResourceException extends ExecutionException {
      *
      * @return The short reason phrase of the exception.
      */
-    public String getReason() {
+    public final String getReason() {
         return reason;
+    }
+
+    /**
+     * Sets the additional detail which can be evaluated by applications. By
+     * default there is no additional detail (
+     * {@code getDetail().isNull() == true}), and it is the responsibility of
+     * the resource provider to add it if needed.
+     *
+     * @param detail
+     *            The additional detail which can be evaluated by applications.
+     * @return This resource exception.
+     */
+    public final ResourceException setDetail(JsonValue detail) {
+        this.detail = detail != null ? detail : new JsonValue(null);
+        return this;
     }
 
     /**
@@ -395,30 +437,42 @@ public class ResourceException extends ExecutionException {
      *
      * @param reason
      *            The short reason phrase of the exception.
+     * @return This resource exception.
      */
-    public void setReason(final String reason) {
+    public final ResourceException setReason(final String reason) {
         this.reason = reason;
+        return this;
     }
 
     /**
      * Returns the exception in a JSON object structure, suitable for inclusion
-     * in the entity of an HTTP error response.
+     * in the entity of an HTTP error response. The JSON representation looks
+     * like this:
+     *
+     * <pre>
+     * {
+     *     "code"    : 404,
+     *     "reason"  : "...",  // optional
+     *     "message" : "...",  // optional
+     *     "detail"  : { ... } // optional
+     * }
+     * </pre>
      *
      * @return The exception in a JSON object structure, suitable for inclusion
      *         in the entity of an HTTP error response.
      */
-    public JsonValue toJsonValue() {
+    public final JsonValue toJsonValue() {
         final Map<String, Object> result = new LinkedHashMap<String, Object>(4);
-        result.put("error", code); // required
+        result.put(FIELD_CODE, code); // required
         if (reason != null) { // optional
-            result.put("reason", reason);
+            result.put(FIELD_REASON, reason);
         }
         final String message = getMessage();
         if (message != null) { // optional
-            result.put("message", message);
+            result.put(FIELD_MESSAGE, message);
         }
         if (!detail.isNull()) {
-            result.put("detail", detail.getObject());
+            result.put(FIELD_DETAIL, detail.getObject());
         }
         return new JsonValue(result);
     }
