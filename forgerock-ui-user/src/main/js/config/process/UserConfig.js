@@ -136,7 +136,7 @@ define("config/process/UserConfig", [
                 "org/forgerock/commons/ui/common/main/Router"
             ],
             processDescription: function(event, sessionManager, conf, router) {
-                sessionManager.login(event.userName, event.password, function(user) {
+                sessionManager.login(event, function(user) {
                     conf.setProperty('loggedUser', user);
                     
                     eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: false});

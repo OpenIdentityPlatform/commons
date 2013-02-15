@@ -56,18 +56,18 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
         } else {
             callParams.url = this.serviceUrl + callParams.url;
         }
-        serviceInvoker.restCall(callParams);
+        return serviceInvoker.restCall(callParams);
     };
 
     obj.prototype.createEntity = function(object, successCallback, errorCallback) {
         console.debug("create entity");
-        this.serviceCall({url: "/?_action=create" , type: "POST", success: successCallback, error: errorCallback, data: JSON.stringify(object)});
+        return this.serviceCall({url: "/?_action=create" , type: "POST", success: successCallback, error: errorCallback, data: JSON.stringify(object)});
     };
 
     obj.prototype.deleteEntity = function(id, successCallback, errorCallback) {
         console.debug("delete entity");
         var current = this;
-        this.readEntity(id, function(data) {
+        return this.readEntity(id, function(data) {
             var callParams = {url: "/" + id, type: "DELETE", success: successCallback, error: errorCallback };
             if(data._rev) {
                 callParams.headers = [];
@@ -80,7 +80,7 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
 
     obj.prototype.readEntity = function(id, successCallback, errorCallback) {
         console.debug("get entity");
-        this.serviceCall({url: "/" + id, type: "GET", success: successCallback, error: errorCallback});
+        return this.serviceCall({url: "/" + id, type: "GET", success: successCallback, error: errorCallback});
     };
 
     obj.prototype.updateEntity = function(objectParam, successCallback, errorCallback) {
@@ -93,7 +93,7 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
             headers["If-Match"] = '"' + "*" + '"';
         }
         
-        this.serviceCall({url: "/" + objectParam._id,
+        return this.serviceCall({url: "/" + objectParam._id,
             type: "PUT",
             success: successCallback, 
             error: errorCallback, 
@@ -116,7 +116,7 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
             }
             return;
         }
-        this.patchEntity(queryParameters, differences, successCallback, 
+        return this.patchEntity(queryParameters, differences, successCallback, 
             _.bind(function () { 
                 this.patchEntity(queryParameters, this.getDifferences(oldObject, newObject, "add"), successCallback, 
                                     errorCallback, noChangesCallback); 
@@ -139,7 +139,7 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
             }
             
         }
-        this.serviceCall({url: "/" + queryParameters.id + "?_action=patch", 
+        return this.serviceCall({url: "/" + queryParameters.id + "?_action=patch", 
             type: "POST", 
             success: successCallback, 
             error: errorCallback, 
@@ -154,7 +154,7 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
      *  Patches single attribute
      */
     obj.prototype.patchEntityAttribute = function(queryParameters, attributeName, newValue, successCallback, errorCallback, noChangesCallback, fields) {
-        this.patchEntity(queryParameters, [{replace: attributeName, value: newValue}], successCallback, errorCallback, noChangesCallback);
+        return this.patchEntity(queryParameters, [{replace: attributeName, value: newValue}], successCallback, errorCallback, noChangesCallback);
     };
 
     /**

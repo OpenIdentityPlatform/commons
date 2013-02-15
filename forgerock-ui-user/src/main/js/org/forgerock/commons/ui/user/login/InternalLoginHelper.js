@@ -34,8 +34,8 @@ define("org/forgerock/commons/ui/user/login/InternalLoginHelper", [
 ], function (userDelegate, eventManager, constants, AbstractConfigurationAware, serviceInvoker, conf) {
     var obj = new AbstractConfigurationAware();
 
-    obj.login = function(userName, password, successCallback, errorCallback) {
-        userDelegate.login(userName, password, function(user) {
+    obj.login = function(params, successCallback, errorCallback) {
+        userDelegate.login(params.userName, params.password, function(user) {
             conf.globalData.userComponent = user.userid.component;
             
             userDelegate.getUserById(user.userid.id, user.userid.component, successCallback, errorCallback);

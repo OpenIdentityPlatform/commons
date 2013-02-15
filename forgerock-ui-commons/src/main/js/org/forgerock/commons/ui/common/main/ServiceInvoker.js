@@ -79,7 +79,7 @@ define("org/forgerock/commons/ui/common/main/ServiceInvoker", [
             callParams.dataType = "json";
             callParams.contentType = "application/json";
         }
-        $.ajax(callParams); 
+        return $.ajax(callParams); 
     };
 
     /**
