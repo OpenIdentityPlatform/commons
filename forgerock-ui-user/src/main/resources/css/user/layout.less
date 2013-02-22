@@ -18,6 +18,7 @@
                 color: #f9f9f9;
                 font-size: 16px;
                 padding: 10px 20px 10px 20px;
+                text-decoration: none;
             }
         }
 
@@ -82,6 +83,13 @@
     padding: 45px 0 45px 0;
     color: #696E72;
     text-align: center;
+}
+/* DATATABLES */
+
+.dataTable {
+    tbody tr:hover {
+        cursor: pointer;
+    }
 }
 
 /* DIALOGS */
@@ -175,14 +183,14 @@
 
 /* POPUP */
 #popup {
-	display: none;
-	position: absolute;
+    display: none;
+    position: absolute;
 }
 
 #popup-content {
-	background: #fff;
-	border: 1px solid @font-color;
-	padding: 10px;
+    background: #fff;
+    border: 1px solid @font-color;
+    padding: 10px;
 }
 
 /* BUTTONS */
@@ -211,13 +219,13 @@ button.button, a.button, input.button {
             background-color: lighten(@color-active, @button-hover-lightness);    
         }
         &.gray {
-        	.linear-gradient;
-        	border: 1px solid #C2C2C2;
-        	color: #636D76;
-        	&:hover {
-        		/*background-color: lighten(#EFEFEF, @button-hover-lightness);*/
-        		.linear-gradient-reverse; 
-        	}
+            .linear-gradient;
+            border: 1px solid #C2C2C2;
+            color: #636D76;
+            &:hover {
+                /*background-color: lighten(#EFEFEF, @button-hover-lightness);*/
+                .linear-gradient-reverse; 
+            }
         }
     }
     
@@ -264,6 +272,6 @@ span.hr-vertical {
 h3.black {
     a {
        display: block;
-	   font-size: 15px;
+       font-size: 15px;
     }
 }

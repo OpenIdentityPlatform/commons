@@ -35,21 +35,16 @@ define("org/forgerock/commons/ui/user/login/LoggedUserBarView", [
     var LoggedUserBarView = Backbone.View.extend({
         element: "#loginContent",
         
-        events: {
-            "click #logout_link": "logout"
-        },
-        
-        logout: function() {
-            this.$el.hide();
-            eventManager.sendEvent(constants.EVENT_LOGOUT);            
-        },
-        
         render: function() {
             this.setElement(this.element);
             
             if(conf.loggedUser) {
                 this.$el.find("#profile_link").show();
-                this.$el.find("#user_name").text(conf.loggedUser.userName);
+                if (conf.loggedUser.userName) {
+                    this.$el.find("#user_name").text(conf.loggedUser.userName); //idm
+                } else if (conf.loggedUser.cn) {
+                    this.$el.find("#user_name").text(conf.loggedUser.cn); //am
+                }
                 
                 this.$el.show();
             } else {

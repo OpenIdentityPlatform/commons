@@ -89,18 +89,15 @@ label {
 
 a, a:visited {
     color: @href-color;
+}
+a.button {
     text-decoration: none;
 }
-
-a:hover {
-    text-decoration: none;
-}
-
 a.img-close {
-	background: url('../../images/cross.png') no-repeat;
-	width: 20px;
-	height: 20px;
-	display-inline: block;
+    background: url('../../images/cross.png') no-repeat;
+    width: 20px;
+    height: 20px;
+    display-inline: block;
 }
 
 /* HELPERS */
@@ -152,11 +149,11 @@ a.img-close {
 
 .rounded-right-corners (@radius: 5px) {
     -webkit-border-top-right-radius: 5px;
-	-webkit-border-bottom-right-radius: 5px;
-	-moz-border-radius-topright: 5px;
-	-moz-border-radius-bottomright: 5px;
-	border-top-right-radius: 5px;
-	border-bottom-right-radius: 5px;
+    -webkit-border-bottom-right-radius: 5px;
+    -moz-border-radius-topright: 5px;
+    -moz-border-radius-bottomright: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
 }
 
 .box-shadow (@x: 0, @y: 0, @blur: 1px, @spread: 1px, @color: #888) {
@@ -166,29 +163,29 @@ a.img-close {
 }
 
 .linear-gradient (@position: left top, @color-start: #fcfcfc 0%, @color-end: #ededed 53%) {
-	background-image: linear-gradient(@position, @color-start, @color-end);
-	background-image: -o-linear-gradient(@position, @color-start, @color-end);
-	background-image: -moz-linear-gradient(@position, @color-start, @color-end);
-	background-image: -webkit-linear-gradient(@position, @color-start, @color-end);
-	background-image: -ms-linear-gradient(@position, @color-start, @color-end);
+    background-image: linear-gradient(@position, @color-start, @color-end);
+    background-image: -o-linear-gradient(@position, @color-start, @color-end);
+    background-image: -moz-linear-gradient(@position, @color-start, @color-end);
+    background-image: -webkit-linear-gradient(@position, @color-start, @color-end);
+    background-image: -ms-linear-gradient(@position, @color-start, @color-end);
 }
 
 .linear-gradient-reverse(@position: left top, @color-start: #ededed 0%, @color-end: #fcfcfc 53%) {
-	background-image: linear-gradient(@position, @color-start, @color-end);
-	background-image: -o-linear-gradient(@position, @color-start, @color-end);
-	background-image: -moz-linear-gradient(@position, @color-start, @color-end);
-	background-image: -webkit-linear-gradient(@position, @color-start, @color-end);
-	background-image: -ms-linear-gradient(@position, @color-start, @color-end);
+    background-image: linear-gradient(@position, @color-start, @color-end);
+    background-image: -o-linear-gradient(@position, @color-start, @color-end);
+    background-image: -moz-linear-gradient(@position, @color-start, @color-end);
+    background-image: -webkit-linear-gradient(@position, @color-start, @color-end);
+    background-image: -ms-linear-gradient(@position, @color-start, @color-end);
 }
 
 .linear-gradient-with-image (@background-url: none, @background-repeat: no-repeat, @background-position: center center, @position: left top, @color-start: #fcfcfc 0%, @color-end: #ededed 53%) {
-	background-image: url("@{background-url}"), linear-gradient(@position, @color-start, @color-end);
-	background-image: url("@{background-url}"), -o-linear-gradient(@position, @color-start, @color-end);
-	background-image: url("@{background-url}"), -moz-linear-gradient(@position, @color-start, @color-end);
-	background-image: url("@{background-url}"), -webkit-linear-gradient(@position, @color-start, @color-end);
-	background-image: url("@{background-url}"), -ms-linear-gradient(@position, @color-start, @color-end);
-	background-repeat: @background-repeat;
-	background-position: @background-position;
+    background-image: url("@{background-url}"), linear-gradient(@position, @color-start, @color-end);
+    background-image: url("@{background-url}"), -o-linear-gradient(@position, @color-start, @color-end);
+    background-image: url("@{background-url}"), -moz-linear-gradient(@position, @color-start, @color-end);
+    background-image: url("@{background-url}"), -webkit-linear-gradient(@position, @color-start, @color-end);
+    background-image: url("@{background-url}"), -ms-linear-gradient(@position, @color-start, @color-end);
+    background-repeat: @background-repeat;
+    background-position: @background-position;
 }
 
 /* */
@@ -316,7 +313,7 @@ a.img-close {
     .container;
     .rounded-corners(5px);
     border: 1px solid #e6e6e6;
-	background-color: @content-background;
+    background-color: @content-background;
     .box-shadow(0, 2px, 8px, 0, #888);
 }
 .content {
@@ -339,19 +336,19 @@ a.img-close {
 }
 
 .shadow {
-	.box-shadow;
+    .box-shadow;
 }
 .round {
-	.rounded-corners;
+    .rounded-corners;
 }
 .bg-gradient {
-	.linear-gradient;
+    .linear-gradient;
 }
 .bg-white {
-	background-color: #ffffff;
+    background-color: #ffffff;
 }
 .border-gray {
-	border: 1px solid lighten(@header-color, 42.5%);
+    border: 1px solid lighten(@header-color, 42.5%);
 }
 
 .checkboxList {
