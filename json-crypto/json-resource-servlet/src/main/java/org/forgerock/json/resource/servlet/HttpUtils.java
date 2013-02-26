@@ -38,12 +38,14 @@ import org.forgerock.json.resource.ResourceException;
  */
 final class HttpUtils {
 
+    static final String CACHE_CONTROL = "no-cache";
     static final String CHARACTER_ENCODING = "UTF-8";
     static final String CONTENT_TYPE = "application/json";
     static final Pattern CONTENT_TYPE_REGEX = Pattern.compile(
             "^application/json([ ]*;[ ]*charset=utf-8)?$", Pattern.CASE_INSENSITIVE);
     static final String CRLF = "\r\n";
     static final String ETAG_ANY = "*";
+    static final String HEADER_CACHE_CONTROL = "Cache-Control";
     static final String HEADER_ETAG = "ETag";
     static final String HEADER_IF_MATCH = "If-Match";
     static final String HEADER_IF_NONE_MATCH = "If-None-Match";
@@ -369,6 +371,7 @@ final class HttpUtils {
     static void prepareResponse(final HttpServletResponse resp) {
         resp.setContentType(CONTENT_TYPE);
         resp.setCharacterEncoding(CHARACTER_ENCODING);
+        resp.setHeader(HEADER_CACHE_CONTROL, CACHE_CONTROL);
     }
 
     static void rejectIfMatch(final HttpServletRequest req) throws ResourceException,
