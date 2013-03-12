@@ -15,34 +15,44 @@
  */
 package org.forgerock.json.resource;
 
-import java.util.ArrayList;
+import static org.forgerock.json.resource.Resources.checkNotNull;
+
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.forgerock.json.fluent.JsonValue;
 
 /**
- * A chain of filters terminated by a target request handler.
+ * A chain of filters terminated by a target request handler. The filter chain
+ * is thread safe and supports updates to the list of filters and the target
+ * request handler while actively processing requests.
  */
 public final class FilterChain implements RequestHandler {
+    /*
+     * A request handler which represents the current position in the filter
+     * chain. Maintains a reference to the filter chain which was in use at the
+     * time when the cursor was created.
+     */
     private final class Cursor implements RequestHandler {
         private final int pos;
+        private final Filter[] snapshot;
 
         private Cursor() {
-            this(0);
+            this(filters.toArray(new Filter[0]), 0);
         }
 
-        private Cursor(final int pos) {
+        private Cursor(final Filter[] snapshot, final int pos) {
+            this.snapshot = snapshot;
             this.pos = pos;
         }
 
         @Override
         public void handleAction(final ServerContext context, final ActionRequest request,
                 final ResultHandler<JsonValue> handler) {
-            if (pos < filters.size()) {
-                filters.get(pos).filterAction(context, request, handler, new Cursor(pos + 1));
+            if (hasNext()) {
+                get().filterAction(context, request, handler, next());
             } else {
                 target.handleAction(context, request, handler);
             }
@@ -51,8 +61,8 @@ public final class FilterChain implements RequestHandler {
         @Override
         public void handleCreate(final ServerContext context, final CreateRequest request,
                 final ResultHandler<Resource> handler) {
-            if (pos < filters.size()) {
-                filters.get(pos).filterCreate(context, request, handler, new Cursor(pos + 1));
+            if (hasNext()) {
+                get().filterCreate(context, request, handler, next());
             } else {
                 target.handleCreate(context, request, handler);
             }
@@ -61,8 +71,8 @@ public final class FilterChain implements RequestHandler {
         @Override
         public void handleDelete(final ServerContext context, final DeleteRequest request,
                 final ResultHandler<Resource> handler) {
-            if (pos < filters.size()) {
-                filters.get(pos).filterDelete(context, request, handler, new Cursor(pos + 1));
+            if (hasNext()) {
+                get().filterDelete(context, request, handler, next());
             } else {
                 target.handleDelete(context, request, handler);
             }
@@ -71,8 +81,8 @@ public final class FilterChain implements RequestHandler {
         @Override
         public void handlePatch(final ServerContext context, final PatchRequest request,
                 final ResultHandler<Resource> handler) {
-            if (pos < filters.size()) {
-                filters.get(pos).filterPatch(context, request, handler, new Cursor(pos + 1));
+            if (hasNext()) {
+                get().filterPatch(context, request, handler, next());
             } else {
                 target.handlePatch(context, request, handler);
             }
@@ -81,8 +91,8 @@ public final class FilterChain implements RequestHandler {
         @Override
         public void handleQuery(final ServerContext context, final QueryRequest request,
                 final QueryResultHandler handler) {
-            if (pos < filters.size()) {
-                filters.get(pos).filterQuery(context, request, handler, new Cursor(pos + 1));
+            if (hasNext()) {
+                get().filterQuery(context, request, handler, next());
             } else {
                 target.handleQuery(context, request, handler);
             }
@@ -91,8 +101,8 @@ public final class FilterChain implements RequestHandler {
         @Override
         public void handleRead(final ServerContext context, final ReadRequest request,
                 final ResultHandler<Resource> handler) {
-            if (pos < filters.size()) {
-                filters.get(pos).filterRead(context, request, handler, new Cursor(pos + 1));
+            if (hasNext()) {
+                get().filterRead(context, request, handler, next());
             } else {
                 target.handleRead(context, request, handler);
             }
@@ -101,63 +111,92 @@ public final class FilterChain implements RequestHandler {
         @Override
         public void handleUpdate(final ServerContext context, final UpdateRequest request,
                 final ResultHandler<Resource> handler) {
-            if (pos < filters.size()) {
-                filters.get(pos).filterUpdate(context, request, handler, new Cursor(pos + 1));
+            if (hasNext()) {
+                get().filterUpdate(context, request, handler, next());
             } else {
                 target.handleUpdate(context, request, handler);
             }
         }
 
-        @Override
-        public String toString() {
-            return String.valueOf(pos);
+        private Filter get() {
+            return snapshot[pos];
+        }
+
+        private boolean hasNext() {
+            return pos < snapshot.length;
+        }
+
+        private Cursor next() {
+            return new Cursor(snapshot, pos + 1);
         }
 
     }
 
-    private final List<Filter> filters;
-    private final RequestHandler target;
+    private final List<Filter> filters = new CopyOnWriteArrayList<Filter>();
+    private volatile RequestHandler target;
 
     /**
      * Creates an empty filter chain.
      *
      * @param target
-     *            The target request handler to be invoked once processing has
-     *            reached the end of the chain.
+     *            The target request handler which will be invoked once
+     *            processing has reached the end of the filter chain.
      */
     public FilterChain(final RequestHandler target) {
-        this.target = target;
-        this.filters = Collections.emptyList();
+        this.target = checkNotNull(target);
     }
 
     /**
      * Creates a filter chain containing the provided list of filters.
      *
      * @param target
-     *            The target request handler to be invoked once processing has
-     *            reached the end of the chain.
+     *            The target request handler which will be invoked once
+     *            processing has reached the end of the filter chain.
      * @param filters
      *            The list of filters to be processed before invoking the
      *            target.
      */
     public FilterChain(final RequestHandler target, final Collection<Filter> filters) {
-        this.target = target;
-        this.filters = new ArrayList<Filter>(filters);
+        this.target = checkNotNull(target);
+        this.filters.addAll(filters);
     }
 
     /**
      * Creates a filter chain containing the provided list of filters.
      *
      * @param target
-     *            The target request handler to be invoked once processing has
-     *            reached the end of the chain.
+     *            The target request handler which will be invoked once
+     *            processing has reached the end of the filter chain.
      * @param filters
      *            The list of filters to be processed before invoking the
      *            target.
      */
     public FilterChain(final RequestHandler target, final Filter... filters) {
-        this.target = target;
-        this.filters = Arrays.asList(filters);
+        this.target = checkNotNull(target);
+        this.filters.addAll(Arrays.asList(filters));
+    }
+
+    /**
+     * Returns a modifiable list containing the list of filters in this filter
+     * chain. Updates to the filter chain are thread safe and may be performed
+     * while the processing requests.
+     *
+     * @return A modifiable list containing the list of filters in this filter
+     *         chain.
+     */
+    public List<Filter> getFilters() {
+        return filters;
+    }
+
+    /**
+     * Returns the target request handler which will be invoked once processing
+     * has reached the end of the filter chain.
+     *
+     * @return The target request handler which will be invoked once processing
+     *         has reached the end of the filter chain.
+     */
+    public RequestHandler getTarget() {
+        return target;
     }
 
     @Override
@@ -200,6 +239,21 @@ public final class FilterChain implements RequestHandler {
     public void handleUpdate(final ServerContext context, final UpdateRequest request,
             final ResultHandler<Resource> handler) {
         new Cursor().handleUpdate(context, request, handler);
+    }
+
+    /**
+     * Sets the target request handler which will be invoked once processing has
+     * reached the end of the filter chain. The target request handler may be
+     * updated while the processing requests.
+     *
+     * @param target
+     *            The target request handler which will be invoked once
+     *            processing has reached the end of the filter chain.
+     * @return This a reference to this filter chain.
+     */
+    public FilterChain setTarget(final RequestHandler target) {
+        this.target = checkNotNull(target);
+        return this;
     }
 
     @Override
