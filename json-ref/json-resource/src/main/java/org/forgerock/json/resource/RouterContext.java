@@ -96,7 +96,7 @@ public final class RouterContext extends ServerContext {
      * @throws ResourceException
      *             If the JSON representation could not be parsed.
      */
-    protected RouterContext(final JsonValue savedContext, final PersistenceConfig config)
+    RouterContext(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
         super(savedContext, config);
         this.matchedUri = savedContext.get(ATTR_MATCHED_URI).required().asString();

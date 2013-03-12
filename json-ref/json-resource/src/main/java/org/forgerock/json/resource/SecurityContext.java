@@ -179,7 +179,7 @@ public final class SecurityContext extends Context {
      * @throws ResourceException
      *             If the JSON representation could not be parsed.
      */
-    protected SecurityContext(final JsonValue savedContext, final PersistenceConfig config)
+    SecurityContext(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
         super(savedContext, config);
         this.authcid = savedContext.get(ATTR_AUTHCID).required().asString();
