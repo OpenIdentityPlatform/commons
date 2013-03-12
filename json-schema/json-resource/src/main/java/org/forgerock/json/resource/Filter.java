@@ -21,6 +21,8 @@ import org.forgerock.json.fluent.JsonValue;
 /**
  * An interface for implementing request handler filters. Filters are linked
  * together using a {@link FilterChain}.
+ *
+ * @see Filters
  */
 public interface Filter {
 
