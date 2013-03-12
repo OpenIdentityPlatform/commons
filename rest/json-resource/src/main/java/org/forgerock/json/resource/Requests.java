@@ -90,7 +90,32 @@ public final class Requests {
          */
         @Override
         public final T setResourceName(final String name) {
-            this.resourceName = notNull(name);
+            // Ensure that the resource name contains a leading '/' and no trailing '/'.
+            switch (name.length()) {
+            case 0:
+                resourceName = "/";
+                break;
+            case 1:
+                resourceName = (name.charAt(0) == '/') ? name : ("/" + name);
+                break;
+            default:
+                if (name.charAt(0) == '/' && name.charAt(name.length() - 1) != '/') {
+                    // Fast-path - avoid copy.
+                    resourceName = name;
+                } else {
+                    final StringBuilder builder = new StringBuilder(name.length() + 1);
+                    if (name.charAt(0) != '/') {
+                        builder.append('/');
+                    }
+                    if (name.charAt(name.length() - 1) != '/') {
+                        builder.append(name);
+                    } else {
+                        builder.append(name, 0, name.length() - 1);
+                    }
+                    resourceName = builder.toString();
+                }
+                break;
+            }
             return getThis();
         }
 
@@ -115,73 +140,53 @@ public final class Requests {
             this.parameters.putAll(request.getAdditionalActionParameters());
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public <R, P> R accept(final RequestVisitor<R, P> v, final P p) {
             return v.visitActionRequest(p, this);
         };
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public String getActionId() {
             return actionId;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public Map<String, String> getAdditionalActionParameters() {
             return parameters;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public JsonValue getContent() {
             return content;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public ActionRequest setActionId(final String id) {
             this.actionId = notNull(id);
             return this;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public ActionRequest setAdditionalActionParameter(final String name, final String value) {
             parameters.put(notNull(name), notNull(value));
             return this;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public ActionRequest setContent(final JsonValue content) {
             this.content = content;
             return this;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         protected ActionRequest getThis() {
             return this;
         }
 
+        @Override
+        public RequestType getRequestType() {
+            return RequestType.ACTION;
+        }
     }
 
     private static final class CreateRequestImpl extends AbstractRequestImpl<CreateRequest>
@@ -199,54 +204,41 @@ public final class Requests {
             this.newResourceId = request.getNewResourceId();
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public <R, P> R accept(final RequestVisitor<R, P> v, final P p) {
             return v.visitCreateRequest(p, this);
         };
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public JsonValue getContent() {
             return content;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public String getNewResourceId() {
             return newResourceId;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public CreateRequest setContent(final JsonValue content) {
             this.content = notNull(content);
             return this;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public CreateRequest setNewResourceId(final String id) {
             this.newResourceId = id;
             return this;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         protected CreateRequest getThis() {
             return this;
+        }
+
+        @Override
+        public RequestType getRequestType() {
+            return RequestType.CREATE;
         }
 
     }
@@ -264,37 +256,30 @@ public final class Requests {
             this.version = request.getRevision();
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public <R, P> R accept(final RequestVisitor<R, P> v, final P p) {
             return v.visitDeleteRequest(p, this);
         };
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public String getRevision() {
             return version;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public DeleteRequest setRevision(final String version) {
             this.version = version;
             return this;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         protected DeleteRequest getThis() {
             return this;
+        }
+
+        @Override
+        public RequestType getRequestType() {
+            return RequestType.DELETE;
         }
 
     }
@@ -314,56 +299,42 @@ public final class Requests {
             this.version = request.getRevision();
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public <R, P> R accept(final RequestVisitor<R, P> v, final P p) {
             return v.visitPatchRequest(p, this);
         };
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public Patch getPatch() {
             return patch;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public String getRevision() {
             return version;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public PatchRequest setPatch(final Patch changes) {
             this.patch = notNull(changes);
             return this;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public PatchRequest setRevision(final String version) {
             this.version = version;
             return this;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         protected PatchRequest getThis() {
             return this;
         }
 
+        @Override
+        public RequestType getRequestType() {
+            return RequestType.PATCH;
+        }
     }
 
     private static final class QueryRequestImpl extends AbstractRequestImpl<QueryRequest> implements
@@ -501,6 +472,11 @@ public final class Requests {
             return this;
         }
 
+        @Override
+        public RequestType getRequestType() {
+            return RequestType.QUERY;
+        }
+
     }
 
     private static final class ReadRequestImpl extends AbstractRequestImpl<ReadRequest> implements
@@ -514,22 +490,20 @@ public final class Requests {
             super(request);
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public <R, P> R accept(final RequestVisitor<R, P> v, final P p) {
             return v.visitReadRequest(p, this);
         };
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         protected ReadRequest getThis() {
             return this;
         }
 
+        @Override
+        public RequestType getRequestType() {
+            return RequestType.READ;
+        }
     }
 
     private static final class UpdateRequestImpl extends AbstractRequestImpl<UpdateRequest>
@@ -547,54 +521,41 @@ public final class Requests {
             this.content = copyJsonValue(request.getNewContent());
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public <R, P> R accept(final RequestVisitor<R, P> v, final P p) {
             return v.visitUpdateRequest(p, this);
         };
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public JsonValue getNewContent() {
             return content;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public String getRevision() {
             return version;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public UpdateRequest setNewContent(final JsonValue content) {
             this.content = notNull(content);
             return this;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public UpdateRequest setRevision(final String version) {
             this.version = version;
             return this;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         protected UpdateRequest getThis() {
             return this;
+        }
+
+        @Override
+        public RequestType getRequestType() {
+            return RequestType.UPDATE;
         }
 
     }
@@ -993,8 +954,8 @@ public final class Requests {
     }
 
     private static String concat(final String resourceContainer, final String resourceId) {
-        final StringBuilder builder = new StringBuilder(resourceContainer.length() + 1
-                + resourceId.length());
+        final StringBuilder builder =
+                new StringBuilder(resourceContainer.length() + 1 + resourceId.length());
         builder.append(resourceContainer);
         if (!resourceContainer.endsWith("/") && resourceContainer.length() > 1) {
             builder.append('/');
