@@ -322,6 +322,44 @@ public final class Resources {
 
     /**
      * Returns a JSON object containing only the specified fields from the
+     * provided JSON value. If the list of fields is empty then the value is
+     * returned unchanged.
+     * <p>
+     * <b>NOTE:</b> this method only performs a shallow copy of extracted
+     * fields, so changes to the filtered JSON value may impact the original
+     * JSON value, and vice-versa.
+     *
+     * @param resource
+     *            The JSON value whose fields are to be filtered.
+     * @param fields
+     *            The list of fields to be extracted.
+     * @return The filtered JSON value.
+     */
+    public static JsonValue filterResource(final JsonValue resource,
+            final Collection<JsonPointer> fields) {
+        if (fields.isEmpty() || resource.isNull() || resource.size() == 0) {
+            return resource;
+        } else {
+            final Map<String, Object> filtered = new LinkedHashMap<String, Object>(fields.size());
+            for (final JsonPointer field : fields) {
+                if (field.isEmpty()) {
+                    // Special case - copy resource fields (assumes Map).
+                    filtered.putAll(resource.asMap());
+                } else {
+                    // FIXME: what should we do if the field refers to an array element?
+                    final JsonValue value = resource.get(field);
+                    if (value != null) {
+                        final String key = field.leaf();
+                        filtered.put(key, value.getObject());
+                    }
+                }
+            }
+            return new JsonValue(filtered);
+        }
+    }
+
+    /**
+     * Returns a JSON object containing only the specified fields from the
      * provided resource. If the list of fields is empty then the resource is
      * returned unchanged.
      * <p>
@@ -343,44 +381,6 @@ public final class Resources {
             return resource; // Unchanged.
         } else {
             return new Resource(resource.getId(), resource.getRevision(), filtered);
-        }
-    }
-
-    /**
-     * Returns a JSON object containing only the specified fields from the
-     * provided JSON value. If the list of fields is empty then the value is
-     * returned unchanged.
-     * <p>
-     * <b>NOTE:</b> this method only performs a shallow copy of extracted
-     * fields, so changes to the filtered JSON value may impact the original
-     * JSON value, and vice-versa.
-     *
-     * @param resource
-     *            The JSON value whose fields are to be filtered.
-     * @param fields
-     *            The list of fields to be extracted.
-     * @return The filtered JSON value.
-     */
-    public static JsonValue filterResource(final JsonValue resource,
-            final Collection<JsonPointer> fields) {
-        if (fields.isEmpty() || resource.isNull() || resource.size() == 0) {
-            return resource;
-        } else {
-            final Map<String, Object> filtered = new LinkedHashMap<String, Object>(fields.size());
-            for (JsonPointer field : fields) {
-                if (field.isEmpty()) {
-                    // Special case - copy resource fields (assumes Map).
-                    filtered.putAll(resource.asMap());
-                } else {
-                    // FIXME: what should we do if the field refers to an array element?
-                    final JsonValue value = resource.get(field);
-                    if (value != null) {
-                        final String key = field.leaf();
-                        filtered.put(key, value.getObject());
-                    }
-                }
-            }
-            return new JsonValue(filtered);
         }
     }
 
@@ -454,8 +454,6 @@ public final class Resources {
         return new SingletonHandler(provider);
     }
 
-
-
     static <T> T checkNotNull(final T object) {
         if (object == null) {
             throw new NullPointerException();
@@ -477,6 +475,10 @@ public final class Resources {
         return (uri.length() > 1 && uri.endsWith("/")) ? uri.substring(0, uri.length() - 1) : uri;
     }
 
+    private static String idOf(final ServerContext context) {
+        return context.asContext(RouterContext.class).getUriTemplateVariables().get("id");
+    }
+
     private static ResourceException newBadRequestException(final String fs, final Object... args) {
         final String msg = String.format(fs, args);
         return new BadRequestException(msg);
@@ -484,13 +486,9 @@ public final class Resources {
 
     // Strips off the unwanted leaf routing context which was added when routing
     // requests to a collection.
-    private static ServerContext parentOf(ServerContext context) {
+    private static ServerContext parentOf(final ServerContext context) {
         assert context instanceof RouterContext;
         return (ServerContext) context.getParent();
-    }
-
-    private static String idOf(final ServerContext context) {
-        return context.asContext(RouterContext.class).getUriTemplateVariables().get("id");
     }
 
     // Prevent instantiation.
