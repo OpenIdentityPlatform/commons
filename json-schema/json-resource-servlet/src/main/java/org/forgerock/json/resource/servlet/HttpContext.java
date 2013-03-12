@@ -72,7 +72,8 @@ public final class HttpContext extends Context {
     private final String path;
 
     /**
-     * Restore from JSON representation.
+     * Restore from JSON representation. This method is for internal use only
+     * and should not be called directly.
      *
      * @param savedContext
      *            The JSON representation from which this context's attributes
@@ -83,7 +84,7 @@ public final class HttpContext extends Context {
      *             If the JSON representation could not be parsed.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    protected HttpContext(final JsonValue savedContext, final PersistenceConfig config)
+    public HttpContext(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
         super(savedContext, config);
         this.method = savedContext.get(ATTR_METHOD).required().asString();

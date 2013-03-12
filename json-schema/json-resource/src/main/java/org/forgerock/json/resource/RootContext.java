@@ -62,7 +62,7 @@ public final class RootContext extends Context {
      * @throws ResourceException
      *             If the JSON representation could not be parsed.
      */
-    protected RootContext(final JsonValue savedContext, final PersistenceConfig config)
+    RootContext(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
         super(savedContext, config);
     }

@@ -101,7 +101,7 @@ public final class ApiInfoContext extends Context {
      * @throws ResourceException
      *             If the JSON representation could not be parsed.
      */
-    protected ApiInfoContext(final JsonValue savedContext, final PersistenceConfig config)
+    ApiInfoContext(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
         super(savedContext, config);
         this.apiName = savedContext.get(ATTR_API_NAME).required().asString();
