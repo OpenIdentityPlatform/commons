@@ -77,19 +77,6 @@ public interface Request {
     Request addField(String... fields);
 
     /**
-     * Returns the name of the JSON resource to which this request should be
-     * targeted.
-     * <p>
-     * <b>NOTE</b>: for resource provider implementations the resource name is
-     * relative to the current resource being accessed. See the description of
-     * {@link RouterContext} for more information.
-     *
-     * @return The name of the JSON resource to which this request should be
-     *         targeted.
-     */
-    String getResourceName();
-
-    /**
      * Returns the list of fields which should be included with each JSON
      * resource returned by this request. The returned list may be modified if
      * permitted by this query request. An empty list indicates that all fields
@@ -109,8 +96,32 @@ public interface Request {
     List<JsonPointer> getFieldFilters();
 
     /**
+     * Returns the type of this request.
+     *
+     * @return The type of this request.
+     */
+    RequestType getRequestType();
+
+    /**
+     * Returns the name of the JSON resource to which this request should be
+     * targeted. The resource name always begins with a forward slash, '/', and
+     * never ends with one unless the resource name comprises of a
+     * forward-slash.
+     * <p>
+     * <b>NOTE</b>: for resource provider implementations the resource name is
+     * relative to the current resource being accessed. See the description of
+     * {@link RouterContext} for more information.
+     *
+     * @return The name of the JSON resource to which this request should be
+     *         targeted.
+     */
+    String getResourceName();
+
+    /**
      * Sets the name of the JSON resource to which this request should be
-     * targeted.
+     * targeted. The resource name always begins with a forward slash, '/', and
+     * never ends with one unless the resource name comprises of a
+     * forward-slash.
      * <p>
      * <b>NOTE</b>: for resource provider implementations the resource name is
      * relative to the current resource being accessed. See the description of
