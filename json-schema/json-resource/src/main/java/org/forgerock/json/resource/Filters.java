@@ -17,6 +17,7 @@
 package org.forgerock.json.resource;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -113,6 +114,40 @@ public final class Filters {
     }
 
     /**
+     * Returns a {@code FilterPredicate} which will only match requests which
+     * match all the provided predicates.
+     *
+     * @param predicates
+     *            The predicates which requests must match.
+     * @return The filter predicate.
+     */
+    public static FilterPredicate and(final Collection<FilterPredicate> predicates) {
+        return new FilterPredicate() {
+            @Override
+            public boolean matches(final Request request) {
+                for (final FilterPredicate predicate : predicates) {
+                    if (!predicate.matches(request)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        };
+    }
+
+    /**
+     * Returns a {@code FilterPredicate} which will only match requests which
+     * match all the provided predicates.
+     *
+     * @param predicates
+     *            The predicates which requests must match.
+     * @return The filter predicate.
+     */
+    public static FilterPredicate and(final FilterPredicate... predicates) {
+        return and(Arrays.asList(predicates));
+    }
+
+    /**
      * Returns a {@code FilterPredicate} which will only match requests whose
      * type is contained in {@code types}.
      *
@@ -174,6 +209,57 @@ public final class Filters {
      */
     public static FilterPredicate matchResourceName(final String regex) {
         return matchResourceName(Pattern.compile(regex));
+    }
+
+    /**
+     * Returns a {@code FilterPredicate} which will match requests which do not
+     * match the provided predicate.
+     *
+     * @param predicate
+     *            The predicate which requests must not match.
+     * @return The filter predicate.
+     */
+    public static FilterPredicate not(final FilterPredicate predicate) {
+        return new FilterPredicate() {
+            @Override
+            public boolean matches(final Request request) {
+                return !predicate.matches(request);
+            }
+        };
+    }
+
+    /**
+     * Returns a {@code FilterPredicate} which will match requests which match
+     * any of the provided predicates.
+     *
+     * @param predicates
+     *            The predicates which requests may match.
+     * @return The filter predicate.
+     */
+    public static FilterPredicate or(final Collection<FilterPredicate> predicates) {
+        return new FilterPredicate() {
+            @Override
+            public boolean matches(final Request request) {
+                for (final FilterPredicate predicate : predicates) {
+                    if (predicate.matches(request)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        };
+    }
+
+    /**
+     * Returns a {@code FilterPredicate} which will match requests which match
+     * any of the provided predicates.
+     *
+     * @param predicates
+     *            The predicates which requests may match.
+     * @return The filter predicate.
+     */
+    public static FilterPredicate or(final FilterPredicate... predicates) {
+        return or(Arrays.asList(predicates));
     }
 
     /**
