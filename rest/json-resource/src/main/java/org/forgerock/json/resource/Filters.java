@@ -45,7 +45,7 @@ public final class Filters {
         @Override
         public void filterAction(final ServerContext context, final ActionRequest request,
                 final ResultHandler<JsonValue> handler, final RequestHandler next) {
-            if (predicate.matches(request)) {
+            if (predicate.matches(context, request)) {
                 subFilter.filterAction(context, request, handler, next);
             } else {
                 next.handleAction(context, request, handler);
@@ -55,7 +55,7 @@ public final class Filters {
         @Override
         public void filterCreate(final ServerContext context, final CreateRequest request,
                 final ResultHandler<Resource> handler, final RequestHandler next) {
-            if (predicate.matches(request)) {
+            if (predicate.matches(context, request)) {
                 subFilter.filterCreate(context, request, handler, next);
             } else {
                 next.handleCreate(context, request, handler);
@@ -65,7 +65,7 @@ public final class Filters {
         @Override
         public void filterDelete(final ServerContext context, final DeleteRequest request,
                 final ResultHandler<Resource> handler, final RequestHandler next) {
-            if (predicate.matches(request)) {
+            if (predicate.matches(context, request)) {
                 subFilter.filterDelete(context, request, handler, next);
             } else {
                 next.handleDelete(context, request, handler);
@@ -75,7 +75,7 @@ public final class Filters {
         @Override
         public void filterPatch(final ServerContext context, final PatchRequest request,
                 final ResultHandler<Resource> handler, final RequestHandler next) {
-            if (predicate.matches(request)) {
+            if (predicate.matches(context, request)) {
                 subFilter.filterPatch(context, request, handler, next);
             } else {
                 next.handlePatch(context, request, handler);
@@ -85,7 +85,7 @@ public final class Filters {
         @Override
         public void filterQuery(final ServerContext context, final QueryRequest request,
                 final QueryResultHandler handler, final RequestHandler next) {
-            if (predicate.matches(request)) {
+            if (predicate.matches(context, request)) {
                 subFilter.filterQuery(context, request, handler, next);
             } else {
                 next.handleQuery(context, request, handler);
@@ -95,7 +95,7 @@ public final class Filters {
         @Override
         public void filterRead(final ServerContext context, final ReadRequest request,
                 final ResultHandler<Resource> handler, final RequestHandler next) {
-            if (predicate.matches(request)) {
+            if (predicate.matches(context, request)) {
                 subFilter.filterRead(context, request, handler, next);
             } else {
                 next.handleRead(context, request, handler);
@@ -105,7 +105,7 @@ public final class Filters {
         @Override
         public void filterUpdate(final ServerContext context, final UpdateRequest request,
                 final ResultHandler<Resource> handler, final RequestHandler next) {
-            if (predicate.matches(request)) {
+            if (predicate.matches(context, request)) {
                 subFilter.filterUpdate(context, request, handler, next);
             } else {
                 next.handleUpdate(context, request, handler);
@@ -124,9 +124,9 @@ public final class Filters {
     public static FilterPredicate and(final Collection<FilterPredicate> predicates) {
         return new FilterPredicate() {
             @Override
-            public boolean matches(final Request request) {
+            public boolean matches(final ServerContext context, final Request request) {
                 for (final FilterPredicate predicate : predicates) {
-                    if (!predicate.matches(request)) {
+                    if (!predicate.matches(context, request)) {
                         return false;
                     }
                 }
@@ -172,7 +172,7 @@ public final class Filters {
     public static FilterPredicate matchRequestType(final Set<RequestType> types) {
         return new FilterPredicate() {
             @Override
-            public boolean matches(final Request request) {
+            public boolean matches(final ServerContext context, final Request request) {
                 return types.contains(request.getRequestType());
             }
         };
@@ -191,7 +191,7 @@ public final class Filters {
     public static FilterPredicate matchResourceName(final Pattern regex) {
         return new FilterPredicate() {
             @Override
-            public boolean matches(final Request request) {
+            public boolean matches(final ServerContext context, final Request request) {
                 return regex.matcher(request.getResourceName()).matches();
             }
         };
@@ -222,8 +222,8 @@ public final class Filters {
     public static FilterPredicate not(final FilterPredicate predicate) {
         return new FilterPredicate() {
             @Override
-            public boolean matches(final Request request) {
-                return !predicate.matches(request);
+            public boolean matches(final ServerContext context, final Request request) {
+                return !predicate.matches(context, request);
             }
         };
     }
@@ -239,9 +239,9 @@ public final class Filters {
     public static FilterPredicate or(final Collection<FilterPredicate> predicates) {
         return new FilterPredicate() {
             @Override
-            public boolean matches(final Request request) {
+            public boolean matches(final ServerContext context, final Request request) {
                 for (final FilterPredicate predicate : predicates) {
-                    if (predicate.matches(request)) {
+                    if (predicate.matches(context, request)) {
                         return true;
                     }
                 }
@@ -280,4 +280,5 @@ public final class Filters {
     private Filters() {
         // Nothing to do.
     }
+
 }
