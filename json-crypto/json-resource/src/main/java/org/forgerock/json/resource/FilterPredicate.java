@@ -27,9 +27,11 @@ public interface FilterPredicate {
      * {@code false} if processing should continue directly to the next filter
      * in the filter chain.
      *
+     * @param context
+     *            The filter chain context.
      * @param request
      *            The request to be filtered.
      * @return {@code true} if the predicated filter should be invoked.
      */
-    boolean matches(Request request);
+    boolean matches(ServerContext context, Request request);
 }
