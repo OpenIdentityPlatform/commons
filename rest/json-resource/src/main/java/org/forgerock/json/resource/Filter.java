@@ -21,6 +21,100 @@ import org.forgerock.json.fluent.JsonValue;
 /**
  * An interface for implementing request handler filters. Filters are linked
  * together using a {@link FilterChain}.
+ * <p>
+ * On receipt of a request a filter implementation may either:
+ * <ul>
+ * <li><i>stop processing</i> the request and return a result or error
+ * immediately. This is achieved by invoking the passed in result handler's
+ * {@link ResultHandler#handleResult handleResult} or
+ * {@link ResultHandler#handleError handleError} methods and returning
+ * <li><i>continue processing</i> the request using the next filter in the
+ * filter chain. This is achieved by invoking the appropriate {@code handlerXXX}
+ * method on the passed in request handler. Implementations are permitted to
+ * modify the context or request before forwarding. They may also wrap the
+ * provided result handler in order to be notified when a response is returned,
+ * allowing a filter to interact with responses before they are sent to the
+ * client.
+ * </ul>
+ * Implementations are allowed to invoke arbitrary {@code handleXXX} methods on
+ * the request handler if needed before deciding to stop or continue processing.
+ * However, implementations should take care to ensure that the passed in result
+ * handler is invoked at most once per request. This is useful in the case where
+ * a filter implements some functionality as a composite of other operations
+ * (e.g. theoretically, a password modify action could be intercepted within a
+ * filter and converted into a read + update).
+ * <p>
+ * Filter chains are fully asynchronous: filters and request handlers may
+ * delegate work to separate threads either directly (i.e. new Thread() ...) or
+ * indirectly (e.g. via NIO completion handlers).
+ * <p>
+ * The following example illustrates how an authorization filter could be
+ * implemented:
+ *
+ * <pre>
+ * public class AuthzFilter implements Filter {
+ *
+ *     public void filterRead(final ServerContext context, final ReadRequest request,
+ *                            final ResultHandler&lt;Resource&gt; handler, final RequestHandler next) {
+ *         /*
+ *          * Only forward the request if the request is allowed.
+ *          &#42;/
+ *         if (isAuthorized(context, request) {
+ *             /*
+ *              * Continue processing the request since it is allowed. Wrap the result handler
+ *              * so that we can filter the returned resource.
+ *              &#42;/
+ *             next.handleRead(context, request, new ResultHandler&lt;Resource&gt;() {
+ *                 public void handleResult(final Resource result) {
+ *                     /*
+ *                      * Filter the resource and its attributes.
+ *                      &#42;/
+ *                     if (isAuthorized(context, result)) {
+ *                         handler.handleResult(filterResource(context, result));
+ *                     } else {
+ *                         handler.handleError(new NotFoundException(..));
+ *                     }
+ *                 }
+ *
+ *                 public void handleError(final ResourceException error) {
+ *                     // Forward - assumes no authorization is required.
+ *                     handler.handleError(error);
+ *                 }
+ *             });
+ *         } else {
+ *             /*
+ *              * Stop processing the request since it is not allowed.
+ *              &#42;/
+ *             handler.handleError(new ForbiddenException(..));
+ *         }
+ *     }
+ *
+ *     // Remaining filterXXX methods...
+ * }
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ * </pre>
  *
  * @see Filters
  */
