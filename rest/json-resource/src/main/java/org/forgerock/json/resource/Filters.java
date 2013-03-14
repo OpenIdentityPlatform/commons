@@ -30,6 +30,166 @@ import org.forgerock.json.fluent.JsonValue;
  */
 public final class Filters {
 
+    private static final class CrossCutFilterAdapter<C> implements Filter {
+        private static abstract class Handler<C, R> implements CrossCutFilterResultHandler<C, R> {
+            private final ResultHandler<R> handler;
+
+            Handler(final ResultHandler<R> handler) {
+                this.handler = handler;
+            }
+
+            @Override
+            public void handleError(final ResourceException error) {
+                handler.handleError(error);
+            }
+
+            @Override
+            public void handleResult(final R response) {
+                handler.handleResult(response);
+            }
+        }
+
+        private final CrossCutFilter<C> filter;
+
+        private CrossCutFilterAdapter(final CrossCutFilter<C> filter) {
+            this.filter = filter;
+        }
+
+        @Override
+        public void filterAction(final ServerContext context, final ActionRequest request,
+                final ResultHandler<JsonValue> handler, final RequestHandler next) {
+            filter.handleActionRequest(context, request, next, new Handler<C, JsonValue>(handler) {
+                @Override
+                public void handleContinue(final ServerContext newContext, final C filterContext) {
+                    next.handleAction(newContext, request, wrapAction(newContext, filterContext,
+                            handler));
+                }
+            });
+        }
+
+        @Override
+        public void filterCreate(final ServerContext context, final CreateRequest request,
+                final ResultHandler<Resource> handler, final RequestHandler next) {
+            filter.handleGenericRequest(context, request, next, new Handler<C, Resource>(handler) {
+                @Override
+                public void handleContinue(final ServerContext newContext, final C filterContext) {
+                    next.handleCreate(newContext, request, wrapGeneric(newContext, filterContext,
+                            handler));
+                }
+            });
+        }
+
+        @Override
+        public void filterDelete(final ServerContext context, final DeleteRequest request,
+                final ResultHandler<Resource> handler, final RequestHandler next) {
+            filter.handleGenericRequest(context, request, next, new Handler<C, Resource>(handler) {
+                @Override
+                public void handleContinue(final ServerContext newContext, final C filterContext) {
+                    next.handleDelete(newContext, request, wrapGeneric(newContext, filterContext,
+                            handler));
+                }
+            });
+        }
+
+        @Override
+        public void filterPatch(final ServerContext context, final PatchRequest request,
+                final ResultHandler<Resource> handler, final RequestHandler next) {
+            filter.handleGenericRequest(context, request, next, new Handler<C, Resource>(handler) {
+                @Override
+                public void handleContinue(final ServerContext newContext, final C filterContext) {
+                    next.handlePatch(newContext, request, wrapGeneric(newContext, filterContext,
+                            handler));
+                }
+            });
+        }
+
+        @Override
+        public void filterQuery(final ServerContext context, final QueryRequest request,
+                final QueryResultHandler handler, final RequestHandler next) {
+            filter.handleQueryRequest(context, request, next, new Handler<C, QueryResult>(handler) {
+                @Override
+                public void handleContinue(final ServerContext newContext, final C filterContext) {
+                    next.handleQuery(newContext, request, wrapQuery(newContext, filterContext,
+                            handler));
+                }
+            });
+        }
+
+        @Override
+        public void filterRead(final ServerContext context, final ReadRequest request,
+                final ResultHandler<Resource> handler, final RequestHandler next) {
+            filter.handleGenericRequest(context, request, next, new Handler<C, Resource>(handler) {
+                @Override
+                public void handleContinue(final ServerContext newContext, final C filterContext) {
+                    next.handleRead(newContext, request, wrapGeneric(newContext, filterContext,
+                            handler));
+                }
+            });
+        }
+
+        @Override
+        public void filterUpdate(final ServerContext context, final UpdateRequest request,
+                final ResultHandler<Resource> handler, final RequestHandler next) {
+            filter.handleGenericRequest(context, request, next, new Handler<C, Resource>(handler) {
+                @Override
+                public void handleContinue(final ServerContext newContext, final C filterContext) {
+                    next.handleUpdate(newContext, request, wrapGeneric(newContext, filterContext,
+                            handler));
+                }
+            });
+        }
+
+        private ResultHandler<JsonValue> wrapAction(final ServerContext context,
+                final C filterContext, final ResultHandler<JsonValue> handler) {
+            return new ResultHandler<JsonValue>() {
+                @Override
+                public void handleError(final ResourceException error) {
+                    filter.handleActionError(context, filterContext, error, handler);
+                }
+
+                @Override
+                public void handleResult(final JsonValue result) {
+                    filter.handleActionResult(context, filterContext, result, handler);
+                }
+            };
+        }
+
+        private ResultHandler<Resource> wrapGeneric(final ServerContext context,
+                final C filterContext, final ResultHandler<Resource> handler) {
+            return new ResultHandler<Resource>() {
+                @Override
+                public void handleError(final ResourceException error) {
+                    filter.handleGenericError(context, filterContext, error, handler);
+                }
+
+                @Override
+                public void handleResult(final Resource result) {
+                    filter.handleGenericResult(context, filterContext, result, handler);
+                }
+            };
+        }
+
+        private QueryResultHandler wrapQuery(final ServerContext context, final C filterContext,
+                final QueryResultHandler handler) {
+            return new QueryResultHandler() {
+                @Override
+                public void handleError(final ResourceException error) {
+                    filter.handleQueryError(context, filterContext, error, handler);
+                }
+
+                @Override
+                public boolean handleResource(final Resource resource) {
+                    return handler.handleResource(resource);
+                }
+
+                @Override
+                public void handleResult(final QueryResult result) {
+                    filter.handleQueryResult(context, filterContext, result, handler);
+                }
+            };
+        }
+    }
+
     /**
      * A filter which invokes a sub-filter if a predicate matches the request.
      */
@@ -113,6 +273,123 @@ public final class Filters {
         }
     }
 
+    private static final class UntypedCrossCutFilterAdapter<C> implements CrossCutFilter<C> {
+        private final UntypedCrossCutFilter<C> filter;
+
+        private UntypedCrossCutFilterAdapter(final UntypedCrossCutFilter<C> filter) {
+            this.filter = filter;
+        }
+
+        @Override
+        public void handleActionError(final ServerContext context, final C filterContext,
+                final ResourceException error, final ResultHandler<JsonValue> handler) {
+            filter.handleGenericError(context, filterContext, error, checked(handler,
+                    JsonValue.class));
+        }
+
+        @Override
+        public void handleActionRequest(final ServerContext context, final ActionRequest request,
+                final RequestHandler next, final CrossCutFilterResultHandler<C, JsonValue> handler) {
+            filter.handleGenericRequest(context, request, next, checked(handler, JsonValue.class));
+        }
+
+        @Override
+        public void handleActionResult(final ServerContext context, final C filterContext,
+                final JsonValue result, final ResultHandler<JsonValue> handler) {
+            filter.handleGenericResult(context, filterContext, result, checked(handler,
+                    JsonValue.class));
+        }
+
+        @Override
+        public void handleGenericError(final ServerContext context, final C filterContext,
+                final ResourceException error, final ResultHandler<Resource> handler) {
+            filter.handleGenericError(context, filterContext, error, checked(handler,
+                    Resource.class));
+        }
+
+        @Override
+        public void handleGenericRequest(final ServerContext context, final Request request,
+                final RequestHandler next, final CrossCutFilterResultHandler<C, Resource> handler) {
+            filter.handleGenericRequest(context, request, next, checked(handler, Resource.class));
+        }
+
+        @Override
+        public void handleGenericResult(final ServerContext context, final C filterContext,
+                final Resource result, final ResultHandler<Resource> handler) {
+            filter.handleGenericResult(context, filterContext, result, checked(handler,
+                    Resource.class));
+        }
+
+        @Override
+        public void handleQueryError(final ServerContext context, final C filterContext,
+                final ResourceException error, final ResultHandler<QueryResult> handler) {
+            filter.handleGenericError(context, filterContext, error, checked(handler,
+                    QueryResult.class));
+        }
+
+        @Override
+        public void handleQueryRequest(final ServerContext context, final QueryRequest request,
+                final RequestHandler next, final CrossCutFilterResultHandler<C, QueryResult> handler) {
+            filter.handleGenericRequest(context, request, next, checked(handler, QueryResult.class));
+        }
+
+        @Override
+        public void handleQueryResource(final ServerContext context, final C filterContext,
+                final Resource resource, final ResultHandler<Resource> handler) {
+            filter.handleQueryResource(context, filterContext, resource, handler);
+        }
+
+        @Override
+        public void handleQueryResult(final ServerContext context, final C filterContext,
+                final QueryResult result, final ResultHandler<QueryResult> handler) {
+            filter.handleGenericResult(context, filterContext, result, checked(handler,
+                    QueryResult.class));
+        }
+
+        private <R> CrossCutFilterResultHandler<C, Object> checked(
+                final CrossCutFilterResultHandler<C, R> handler, final Class<R> clazz) {
+            return new CrossCutFilterResultHandler<C, Object>() {
+                @Override
+                public void handleContinue(final ServerContext context, final C filterContext) {
+                    handler.handleContinue(context, filterContext);
+                }
+
+                @Override
+                public void handleError(final ResourceException error) {
+                    handler.handleError(error);
+                }
+
+                @Override
+                public void handleResult(final Object response) {
+                    try {
+                        handler.handleResult(clazz.cast(response));
+                    } catch (final ClassCastException e) {
+                        handler.handleError(new InternalServerErrorException(e));
+                    }
+                }
+            };
+        }
+
+        private <R> ResultHandler<Object> checked(final ResultHandler<R> handler,
+                final Class<R> clazz) {
+            return new ResultHandler<Object>() {
+                @Override
+                public void handleError(final ResourceException error) {
+                    handler.handleError(error);
+                }
+
+                @Override
+                public void handleResult(final Object response) {
+                    try {
+                        handler.handleResult(clazz.cast(response));
+                    } catch (final ClassCastException e) {
+                        handler.handleError(new InternalServerErrorException(e));
+                    }
+                }
+            };
+        }
+    }
+
     /**
      * Returns a {@code FilterPredicate} which will only match requests which
      * match all the provided predicates.
@@ -145,6 +422,28 @@ public final class Filters {
      */
     public static FilterPredicate and(final FilterPredicate... predicates) {
         return and(Arrays.asList(predicates));
+    }
+
+    /**
+     * Returns a {@code Filter} adapter for the provided cross-cutting filter.
+     *
+     * @param crossCutFilter
+     *            The cross-cutting filter to be adapted.
+     * @return The adapted filter.
+     */
+    public static Filter asFilter(final CrossCutFilter<?> crossCutFilter) {
+        return asFilter0(crossCutFilter);
+    }
+
+    /**
+     * Returns a {@code Filter} adapter for the provided cross-cutting filter.
+     *
+     * @param crossCutFilter
+     *            The cross-cutting filter to be adapted.
+     * @return The adapted filter.
+     */
+    public static Filter asFilter(final UntypedCrossCutFilter<?> crossCutFilter) {
+        return asFilter0(crossCutFilter);
     }
 
     /**
@@ -274,6 +573,14 @@ public final class Filters {
      */
     public static Filter predicatedFilter(final FilterPredicate predicate, final Filter subFilter) {
         return new PredicatedFilter(predicate, subFilter);
+    }
+
+    private static <C> Filter asFilter0(final CrossCutFilter<C> filter) {
+        return new CrossCutFilterAdapter<C>(filter);
+    }
+
+    private static <C> Filter asFilter0(final UntypedCrossCutFilter<C> filter) {
+        return new CrossCutFilterAdapter<C>(new UntypedCrossCutFilterAdapter<C>(filter));
     }
 
     // Prevent instantiation.
