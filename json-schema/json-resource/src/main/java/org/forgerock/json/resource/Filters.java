@@ -26,7 +26,7 @@ import org.forgerock.json.fluent.JsonValue;
 
 /**
  * This class contains methods for creating various kinds of {@code Filter} and
- * {@code FilterPredicate}s.
+ * {@code FilterCondition}s.
  */
 public final class Filters {
 
@@ -191,21 +191,21 @@ public final class Filters {
     }
 
     /**
-     * A filter which invokes a sub-filter if a predicate matches the request.
+     * A filter which invokes a sub-filter if a condition matches the request.
      */
-    private static final class PredicatedFilter implements Filter {
-        private final FilterPredicate predicate;
+    private static final class ConditionalFilter implements Filter {
+        private final FilterCondition condition;
         private final Filter subFilter;
 
-        private PredicatedFilter(final FilterPredicate predicate, final Filter filter) {
-            this.predicate = predicate;
+        private ConditionalFilter(final FilterCondition condition, final Filter filter) {
+            this.condition = condition;
             this.subFilter = filter;
         }
 
         @Override
         public void filterAction(final ServerContext context, final ActionRequest request,
                 final ResultHandler<JsonValue> handler, final RequestHandler next) {
-            if (predicate.matches(context, request)) {
+            if (condition.matches(context, request)) {
                 subFilter.filterAction(context, request, handler, next);
             } else {
                 next.handleAction(context, request, handler);
@@ -215,7 +215,7 @@ public final class Filters {
         @Override
         public void filterCreate(final ServerContext context, final CreateRequest request,
                 final ResultHandler<Resource> handler, final RequestHandler next) {
-            if (predicate.matches(context, request)) {
+            if (condition.matches(context, request)) {
                 subFilter.filterCreate(context, request, handler, next);
             } else {
                 next.handleCreate(context, request, handler);
@@ -225,7 +225,7 @@ public final class Filters {
         @Override
         public void filterDelete(final ServerContext context, final DeleteRequest request,
                 final ResultHandler<Resource> handler, final RequestHandler next) {
-            if (predicate.matches(context, request)) {
+            if (condition.matches(context, request)) {
                 subFilter.filterDelete(context, request, handler, next);
             } else {
                 next.handleDelete(context, request, handler);
@@ -235,7 +235,7 @@ public final class Filters {
         @Override
         public void filterPatch(final ServerContext context, final PatchRequest request,
                 final ResultHandler<Resource> handler, final RequestHandler next) {
-            if (predicate.matches(context, request)) {
+            if (condition.matches(context, request)) {
                 subFilter.filterPatch(context, request, handler, next);
             } else {
                 next.handlePatch(context, request, handler);
@@ -245,7 +245,7 @@ public final class Filters {
         @Override
         public void filterQuery(final ServerContext context, final QueryRequest request,
                 final QueryResultHandler handler, final RequestHandler next) {
-            if (predicate.matches(context, request)) {
+            if (condition.matches(context, request)) {
                 subFilter.filterQuery(context, request, handler, next);
             } else {
                 next.handleQuery(context, request, handler);
@@ -255,7 +255,7 @@ public final class Filters {
         @Override
         public void filterRead(final ServerContext context, final ReadRequest request,
                 final ResultHandler<Resource> handler, final RequestHandler next) {
-            if (predicate.matches(context, request)) {
+            if (condition.matches(context, request)) {
                 subFilter.filterRead(context, request, handler, next);
             } else {
                 next.handleRead(context, request, handler);
@@ -265,7 +265,7 @@ public final class Filters {
         @Override
         public void filterUpdate(final ServerContext context, final UpdateRequest request,
                 final ResultHandler<Resource> handler, final RequestHandler next) {
-            if (predicate.matches(context, request)) {
+            if (condition.matches(context, request)) {
                 subFilter.filterUpdate(context, request, handler, next);
             } else {
                 next.handleUpdate(context, request, handler);
@@ -391,19 +391,19 @@ public final class Filters {
     }
 
     /**
-     * Returns a {@code FilterPredicate} which will only match requests which
-     * match all the provided predicates.
+     * Returns a {@code FilterCondition} which will only match requests which
+     * match all the provided conditions.
      *
-     * @param predicates
-     *            The predicates which requests must match.
-     * @return The filter predicate.
+     * @param conditions
+     *            The conditions which requests must match.
+     * @return The filter condition.
      */
-    public static FilterPredicate and(final Collection<FilterPredicate> predicates) {
-        return new FilterPredicate() {
+    public static FilterCondition and(final Collection<FilterCondition> conditions) {
+        return new FilterCondition() {
             @Override
             public boolean matches(final ServerContext context, final Request request) {
-                for (final FilterPredicate predicate : predicates) {
-                    if (!predicate.matches(context, request)) {
+                for (final FilterCondition condition : conditions) {
+                    if (!condition.matches(context, request)) {
                         return false;
                     }
                 }
@@ -413,15 +413,15 @@ public final class Filters {
     }
 
     /**
-     * Returns a {@code FilterPredicate} which will only match requests which
-     * match all the provided predicates.
+     * Returns a {@code FilterCondition} which will only match requests which
+     * match all the provided conditions.
      *
-     * @param predicates
-     *            The predicates which requests must match.
-     * @return The filter predicate.
+     * @param conditions
+     *            The conditions which requests must match.
+     * @return The filter condition.
      */
-    public static FilterPredicate and(final FilterPredicate... predicates) {
-        return and(Arrays.asList(predicates));
+    public static FilterCondition and(final FilterCondition... conditions) {
+        return and(Arrays.asList(conditions));
     }
 
     /**
@@ -447,29 +447,29 @@ public final class Filters {
     }
 
     /**
-     * Returns a {@code FilterPredicate} which will only match requests whose
+     * Returns a {@code FilterCondition} which will only match requests whose
      * type is contained in {@code types}.
      *
      * @param types
      *            The request types which should be handled by the filter.
-     * @return The filter predicate.
+     * @return The filter condition.
      * @see Request#getRequestType()
      */
-    public static FilterPredicate matchRequestType(final RequestType... types) {
+    public static FilterCondition matchRequestType(final RequestType... types) {
         return matchRequestType(EnumSet.copyOf(Arrays.asList(types)));
     }
 
     /**
-     * Returns a {@code FilterPredicate} which will only match requests whose
+     * Returns a {@code FilterCondition} which will only match requests whose
      * type is contained in {@code types}.
      *
      * @param types
      *            The request types which should be handled by the filter.
-     * @return The filter predicate.
+     * @return The filter condition.
      * @see Request#getRequestType()
      */
-    public static FilterPredicate matchRequestType(final Set<RequestType> types) {
-        return new FilterPredicate() {
+    public static FilterCondition matchRequestType(final Set<RequestType> types) {
+        return new FilterCondition() {
             @Override
             public boolean matches(final ServerContext context, final Request request) {
                 return types.contains(request.getRequestType());
@@ -478,17 +478,17 @@ public final class Filters {
     }
 
     /**
-     * Returns a {@code FilterPredicate} which will only match requests whose
+     * Returns a {@code FilterCondition} which will only match requests whose
      * resource name matches the provided regular expression.
      *
      * @param regex
      *            The regular expression which must match a request's resource
      *            name.
-     * @return The filter predicate.
+     * @return The filter condition.
      * @see Request#getResourceName()
      */
-    public static FilterPredicate matchResourceName(final Pattern regex) {
-        return new FilterPredicate() {
+    public static FilterCondition matchResourceName(final Pattern regex) {
+        return new FilterCondition() {
             @Override
             public boolean matches(final ServerContext context, final Request request) {
                 return regex.matcher(request.getResourceName()).matches();
@@ -497,50 +497,50 @@ public final class Filters {
     }
 
     /**
-     * Returns a {@code FilterPredicate} which will only match requests whose
+     * Returns a {@code FilterCondition} which will only match requests whose
      * resource name matches the provided regular expression.
      *
      * @param regex
      *            The regular expression which must match a request's resource
      *            name.
-     * @return The filter predicate.
+     * @return The filter condition.
      * @see Request#getResourceName()
      */
-    public static FilterPredicate matchResourceName(final String regex) {
+    public static FilterCondition matchResourceName(final String regex) {
         return matchResourceName(Pattern.compile(regex));
     }
 
     /**
-     * Returns a {@code FilterPredicate} which will match requests which do not
-     * match the provided predicate.
+     * Returns a {@code FilterCondition} which will match requests which do not
+     * match the provided condition.
      *
-     * @param predicate
-     *            The predicate which requests must not match.
-     * @return The filter predicate.
+     * @param condition
+     *            The condition which requests must not match.
+     * @return The filter condition.
      */
-    public static FilterPredicate not(final FilterPredicate predicate) {
-        return new FilterPredicate() {
+    public static FilterCondition not(final FilterCondition condition) {
+        return new FilterCondition() {
             @Override
             public boolean matches(final ServerContext context, final Request request) {
-                return !predicate.matches(context, request);
+                return !condition.matches(context, request);
             }
         };
     }
 
     /**
-     * Returns a {@code FilterPredicate} which will match requests which match
-     * any of the provided predicates.
+     * Returns a {@code FilterCondition} which will match requests which match
+     * any of the provided conditions.
      *
-     * @param predicates
-     *            The predicates which requests may match.
-     * @return The filter predicate.
+     * @param conditions
+     *            The conditions which requests may match.
+     * @return The filter condition.
      */
-    public static FilterPredicate or(final Collection<FilterPredicate> predicates) {
-        return new FilterPredicate() {
+    public static FilterCondition or(final Collection<FilterCondition> conditions) {
+        return new FilterCondition() {
             @Override
             public boolean matches(final ServerContext context, final Request request) {
-                for (final FilterPredicate predicate : predicates) {
-                    if (predicate.matches(context, request)) {
+                for (final FilterCondition condition : conditions) {
+                    if (condition.matches(context, request)) {
                         return true;
                     }
                 }
@@ -550,29 +550,29 @@ public final class Filters {
     }
 
     /**
-     * Returns a {@code FilterPredicate} which will match requests which match
-     * any of the provided predicates.
+     * Returns a {@code FilterCondition} which will match requests which match
+     * any of the provided conditions.
      *
-     * @param predicates
-     *            The predicates which requests may match.
-     * @return The filter predicate.
+     * @param conditions
+     *            The conditions which requests may match.
+     * @return The filter condition.
      */
-    public static FilterPredicate or(final FilterPredicate... predicates) {
-        return or(Arrays.asList(predicates));
+    public static FilterCondition or(final FilterCondition... conditions) {
+        return or(Arrays.asList(conditions));
     }
 
     /**
      * Returns a {@code Filter} which will only invoke {@code subFilter} when
-     * the provided filter predicate matches the request being processed.
+     * the provided filter condition matches the request being processed.
      *
-     * @param predicate
-     *            The filter predicate.
+     * @param condition
+     *            The filter condition.
      * @param subFilter
-     *            The sub-filter to be invoked when the predicate matches.
+     *            The sub-filter to be invoked when the condition matches.
      * @return The wrapped filter.
      */
-    public static Filter predicatedFilter(final FilterPredicate predicate, final Filter subFilter) {
-        return new PredicatedFilter(predicate, subFilter);
+    public static Filter conditionalFilter(final FilterCondition condition, final Filter subFilter) {
+        return new ConditionalFilter(condition, subFilter);
     }
 
     private static <C> Filter asFilter0(final CrossCutFilter<C> filter) {

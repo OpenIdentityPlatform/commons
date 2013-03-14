@@ -17,13 +17,14 @@
 package org.forgerock.json.resource;
 
 /**
- * A predicate which controls whether or not a predicate filter will be invoked
- * or not.
+ * A condition which controls whether or not a filter will be invoked or not.
+ *
+ * @see Filters#conditionalFilter(FilterCondition, Filter)
  */
-public interface FilterPredicate {
+public interface FilterCondition {
 
     /**
-     * Returns {@code true} if the predicated filter should be invoked, or
+     * Returns {@code true} if the conditional filter should be invoked, or
      * {@code false} if processing should continue directly to the next filter
      * in the filter chain.
      *
@@ -31,7 +32,7 @@ public interface FilterPredicate {
      *            The filter chain context.
      * @param request
      *            The request to be filtered.
-     * @return {@code true} if the predicated filter should be invoked.
+     * @return {@code true} if the conditional filter should be invoked.
      */
     boolean matches(ServerContext context, Request request);
 }
