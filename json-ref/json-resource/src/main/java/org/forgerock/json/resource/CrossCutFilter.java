@@ -22,9 +22,9 @@ import org.forgerock.json.fluent.JsonValue;
  * A strongly typed version of {@link UntypedCrossCutFilter}.
  *
  * @param <C>
- *            The type of filter context to be maintained between request
+ *            The type of filter state to be maintained between request
  *            notification and response notification. Use {@code Void} if the
- *            filter is stateless and no filtering context information is
+ *            filter is stateless and no filtering state information is
  *            required.
  * @see UntypedCrossCutFilter
  * @see Filters#asFilter(CrossCutFilter)
@@ -39,8 +39,8 @@ public interface CrossCutFilter<C> {
      *
      * @param context
      *            The filter chain context.
-     * @param filterContext
-     *            The filter context which was passed to
+     * @param state
+     *            The filter state which was passed to
      *            {@link CrossCutFilterResultHandler#handleContinue}.
      * @param error
      *            The error to be filtered.
@@ -48,7 +48,7 @@ public interface CrossCutFilter<C> {
      *            The result handler which must be invoked once the error has
      *            been filtered.
      */
-    void filterActionError(ServerContext context, C filterContext, ResourceException error,
+    void filterActionError(ServerContext context, C state, ResourceException error,
             ResultHandler<JsonValue> handler);
 
     /**
@@ -80,8 +80,8 @@ public interface CrossCutFilter<C> {
      *
      * @param context
      *            The filter chain context.
-     * @param filterContext
-     *            The filter context which was passed to
+     * @param state
+     *            The filter state which was passed to
      *            {@link CrossCutFilterResultHandler#handleContinue}.
      * @param result
      *            The result to be filtered.
@@ -89,7 +89,7 @@ public interface CrossCutFilter<C> {
      *            The result handler which must be invoked once the result has
      *            been filtered.
      */
-    void filterActionResult(ServerContext context, C filterContext, JsonValue result,
+    void filterActionResult(ServerContext context, C state, JsonValue result,
             ResultHandler<JsonValue> handler);
 
     /**
@@ -101,8 +101,8 @@ public interface CrossCutFilter<C> {
      *
      * @param context
      *            The filter chain context.
-     * @param filterContext
-     *            The filter context which was passed to
+     * @param state
+     *            The filter state which was passed to
      *            {@link CrossCutFilterResultHandler#handleContinue}.
      * @param error
      *            The error to be filtered.
@@ -110,7 +110,7 @@ public interface CrossCutFilter<C> {
      *            The result handler which must be invoked once the error has
      *            been filtered.
      */
-    void filterGenericError(ServerContext context, C filterContext, ResourceException error,
+    void filterGenericError(ServerContext context, C state, ResourceException error,
             ResultHandler<Resource> handler);
 
     /**
@@ -143,8 +143,8 @@ public interface CrossCutFilter<C> {
      *
      * @param context
      *            The filter chain context.
-     * @param filterContext
-     *            The filter context which was passed to
+     * @param state
+     *            The filter state which was passed to
      *            {@link CrossCutFilterResultHandler#handleContinue}.
      * @param result
      *            The result to be filtered.
@@ -152,7 +152,7 @@ public interface CrossCutFilter<C> {
      *            The result handler which must be invoked once the result has
      *            been filtered.
      */
-    void filterGenericResult(ServerContext context, C filterContext, Resource result,
+    void filterGenericResult(ServerContext context, C state, Resource result,
             ResultHandler<Resource> handler);
 
     /**
@@ -163,8 +163,8 @@ public interface CrossCutFilter<C> {
      *
      * @param context
      *            The filter chain context.
-     * @param filterContext
-     *            The filter context which was passed to
+     * @param state
+     *            The filter state which was passed to
      *            {@link CrossCutFilterResultHandler#handleContinue}.
      * @param error
      *            The error to be filtered.
@@ -172,8 +172,8 @@ public interface CrossCutFilter<C> {
      *            The result handler which must be invoked once the error has
      *            been filtered.
      */
-    void filterQueryError(ServerContext context, C filterContext, ResourceException error,
-            ResultHandler<QueryResult> handler);
+    void filterQueryError(ServerContext context, C state, ResourceException error,
+            QueryResultHandler handler);
 
     /**
      * Filters the provided query request. Implementations may modify the
@@ -198,16 +198,27 @@ public interface CrossCutFilter<C> {
 
     /**
      * Filters the provided query resource response (see
-     * {@link QueryResultHandler#handleResource}). Implementations may modify
-     * the provided resource. Once filtering has completed implementations must
-     * invoke one of the {@code handler.handleXXX()} methods. If the resource is
-     * not to be included in the query results then implementations should
-     * invoke {@code handler.handleResult(null)}.
+     * {@link QueryResultHandler#handleResource}). Once filtering has completed
+     * implementations may do any of the following:
+     * <ul>
+     * <li>forward zero or more resources to the client by invoking
+     * {@link QueryResultHandler#handleResource handler.handleResource}.
+     * Implementations will typically invoke this once per resource, but may
+     * choose not to invoke it at all if the resource is to be excluded from the
+     * query results, or multiple times if, for example, the resource is to be
+     * decomposed into multiple related resources,
+     * <li>signal that no more resources will be returned to the client and that
+     * an error should be sent instead by invoking
+     * {@link QueryResultHandler#handleError handler.handleError},
+     * <li>signal that no more resources will be returned to the client and that
+     * a query result should be sent instead by invoking
+     * {@link QueryResultHandler#handleResult handler.handleResult}.
+     * </ul>
      *
      * @param context
      *            The filter chain context.
-     * @param filterContext
-     *            The filter context which was passed to
+     * @param state
+     *            The filter state which was passed to
      *            {@link CrossCutFilterResultHandler#handleContinue}.
      * @param resource
      *            The resource to be filtered.
@@ -215,8 +226,8 @@ public interface CrossCutFilter<C> {
      *            The result handler which must be invoked once the resource has
      *            been filtered.
      */
-    void filterQueryResource(ServerContext context, C filterContext, Resource resource,
-            ResultHandler<Resource> handler);
+    void filterQueryResource(ServerContext context, C state, Resource resource,
+            QueryResultHandler handler);
 
     /**
      * Filters the provided query request result. Implementations may modify the
@@ -226,8 +237,8 @@ public interface CrossCutFilter<C> {
      *
      * @param context
      *            The filter chain context.
-     * @param filterContext
-     *            The filter context which was passed to
+     * @param state
+     *            The filter state which was passed to
      *            {@link CrossCutFilterResultHandler#handleContinue}.
      * @param result
      *            The result to be filtered.
@@ -235,7 +246,7 @@ public interface CrossCutFilter<C> {
      *            The result handler which must be invoked once the result has
      *            been filtered.
      */
-    void filterQueryResult(ServerContext context, C filterContext, QueryResult result,
-            ResultHandler<QueryResult> handler);
+    void filterQueryResult(ServerContext context, C state, QueryResult result,
+            QueryResultHandler handler);
 
 }

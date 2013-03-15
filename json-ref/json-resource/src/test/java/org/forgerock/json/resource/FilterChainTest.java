@@ -36,10 +36,6 @@ import org.testng.annotations.Test;
  */
 @SuppressWarnings({ "javadoc", "unchecked" })
 public final class FilterChainTest {
-    private enum RequestType {
-        ACTION, CREATE, DELETE, PATCH, QUERY, READ, UPDATE
-    }
-
     private static final JsonValue JSON = new JsonValue(Collections.singletonMap("test", "value"));
     private static final QueryResult QUERY_RESULT = new QueryResult();
     private static final Resource RESOURCE = new Resource("id", "rev", JSON);
@@ -54,7 +50,7 @@ public final class FilterChainTest {
     public void testFilterCanInvokeMultipleSubRequests() {
         final RequestHandler target = target();
         final Filter filter1 = mock(Filter.class);
-        doAnswer(invoke(RequestType.READ, 2)).when(filter1).filterRead(any(ServerContext.class),
+        doAnswer(invoke(2)).when(filter1).filterRead(any(ServerContext.class),
                 any(ReadRequest.class), any(ResultHandler.class), any(RequestHandler.class));
         final Filter filter2 = filter();
         final FilterChain chain = new FilterChain(target, filter1, filter2);
@@ -314,19 +310,19 @@ public final class FilterChainTest {
 
     private Filter filter() {
         final Filter filter = mock(Filter.class);
-        doAnswer(invoke(RequestType.ACTION)).when(filter).filterAction(any(ServerContext.class),
+        doAnswer(invoke()).when(filter).filterAction(any(ServerContext.class),
                 any(ActionRequest.class), any(ResultHandler.class), any(RequestHandler.class));
-        doAnswer(invoke(RequestType.CREATE)).when(filter).filterCreate(any(ServerContext.class),
+        doAnswer(invoke()).when(filter).filterCreate(any(ServerContext.class),
                 any(CreateRequest.class), any(ResultHandler.class), any(RequestHandler.class));
-        doAnswer(invoke(RequestType.DELETE)).when(filter).filterDelete(any(ServerContext.class),
+        doAnswer(invoke()).when(filter).filterDelete(any(ServerContext.class),
                 any(DeleteRequest.class), any(ResultHandler.class), any(RequestHandler.class));
-        doAnswer(invoke(RequestType.PATCH)).when(filter).filterPatch(any(ServerContext.class),
+        doAnswer(invoke()).when(filter).filterPatch(any(ServerContext.class),
                 any(PatchRequest.class), any(ResultHandler.class), any(RequestHandler.class));
-        doAnswer(invoke(RequestType.QUERY)).when(filter).filterQuery(any(ServerContext.class),
+        doAnswer(invoke()).when(filter).filterQuery(any(ServerContext.class),
                 any(QueryRequest.class), any(QueryResultHandler.class), any(RequestHandler.class));
-        doAnswer(invoke(RequestType.READ)).when(filter).filterRead(any(ServerContext.class),
+        doAnswer(invoke()).when(filter).filterRead(any(ServerContext.class),
                 any(ReadRequest.class), any(ResultHandler.class), any(RequestHandler.class));
-        doAnswer(invoke(RequestType.UPDATE)).when(filter).filterUpdate(any(ServerContext.class),
+        doAnswer(invoke()).when(filter).filterUpdate(any(ServerContext.class),
                 any(UpdateRequest.class), any(ResultHandler.class), any(RequestHandler.class));
         return filter;
     }
@@ -335,11 +331,11 @@ public final class FilterChainTest {
         return mock(ResultHandler.class);
     }
 
-    private Answer<Void> invoke(final RequestType type) {
-        return invoke(type, 1);
+    private Answer<Void> invoke() {
+        return invoke(1);
     }
 
-    private Answer<Void> invoke(final RequestType type, final int count) {
+    private Answer<Void> invoke(final int count) {
         return new Answer<Void>() {
             @Override
             public Void answer(final InvocationOnMock invocation) throws Throwable {
@@ -349,7 +345,7 @@ public final class FilterChainTest {
                 final ResultHandler<?> handler = (ResultHandler<?>) args[2];
                 final RequestHandler next = (RequestHandler) args[3];
                 for (int i = 0; i < count; i++) {
-                    switch (type) {
+                    switch (request.getRequestType()) {
                     case ACTION:
                         next.handleAction(context, (ActionRequest) request,
                                 (ResultHandler<JsonValue>) handler);
