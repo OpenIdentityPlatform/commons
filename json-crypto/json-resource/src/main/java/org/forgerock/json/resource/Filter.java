@@ -55,14 +55,14 @@ import org.forgerock.json.fluent.JsonValue;
  * public class AuthzFilter implements Filter {
  *
  *     public void filterRead(final ServerContext context, final ReadRequest request,
- *                            final ResultHandler&lt;Resource&gt; handler, final RequestHandler next) {
+ *             final ResultHandler&lt;Resource&gt; handler, final RequestHandler next) {
  *         /*
  *          * Only forward the request if the request is allowed.
  *          &#42;/
- *         if (isAuthorized(context, request) {
+ *         if (isAuthorized(context, request)) {
  *             /*
- *              * Continue processing the request since it is allowed. Wrap the result handler
- *              * so that we can filter the returned resource.
+ *              * Continue processing the request since it is allowed. Wrap the
+ *              * result handler so that we can filter the returned resource.
  *              &#42;/
  *             next.handleRead(context, request, new ResultHandler&lt;Resource&gt;() {
  *                 public void handleResult(final Resource result) {
@@ -72,7 +72,7 @@ import org.forgerock.json.fluent.JsonValue;
  *                     if (isAuthorized(context, result)) {
  *                         handler.handleResult(filterResource(context, result));
  *                     } else {
- *                         handler.handleError(new NotFoundException(..));
+ *                         handler.handleError(new NotFoundException());
  *                     }
  *                 }
  *
@@ -85,7 +85,7 @@ import org.forgerock.json.fluent.JsonValue;
  *             /*
  *              * Stop processing the request since it is not allowed.
  *              &#42;/
- *             handler.handleError(new ForbiddenException(..));
+ *             handler.handleError(new ForbiddenException());
  *         }
  *     }
  *
