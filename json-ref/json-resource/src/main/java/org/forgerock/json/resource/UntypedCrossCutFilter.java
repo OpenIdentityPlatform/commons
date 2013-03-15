@@ -20,6 +20,75 @@ package org.forgerock.json.resource;
  * An interface for implementing generic cross-cutting filters. Cross cutting
  * filters can be converted as normal {@link Filter} by calling
  * {@link Filters#asFilter}.
+ * <p>
+ * The following example illustrates how an authorization filter could be
+ * implemented:
+ *
+ * <pre>
+ * public static final class AuthzFilter implements UntypedCrossCutFilter&lt;Void&gt; {
+ *
+ *     public void filterGenericRequest(final ServerContext context, final Request request,
+ *             final RequestHandler next, final CrossCutFilterResultHandler&lt;Void, Object&gt; handler) {
+ *         /*
+ *          * Only forward the request if the request is allowed.
+ *          &#42;/
+ *         if (isAuthorized(context, request)) {
+ *             /*
+ *              * Continue processing the request since it is allowed.
+ *              &#42;/
+ *             handler.handleContinue(context, null);
+ *         } else {
+ *             /*
+ *              * Stop processing the request since it is not allowed.
+ *              &#42;/
+ *             handler.handleError(new ForbiddenException());
+ *         }
+ *     }
+ *
+ *     public void filterGenericError(ServerContext context, Void filterContext,
+ *             ResourceException error, ResultHandler&lt;Object&gt; handler) {
+ *         /*
+ *          * Forward - assumes no authorization is required.
+ *          &#42;/
+ *         handler.handleError(error);
+ *     }
+ *
+ *     public &lt;R&gt; void filterGenericResult(ServerContext context, Void filterContext, R result,
+ *             ResultHandler&lt;R&gt; handler) {
+ *         /*
+ *          * Filter the result if it is a resource.
+ *          &#42;/
+ *         if (result instanceof Resource) {
+ *             if (isAuthorized(context, (Resource) result)) {
+ *                 handler.handleResult(filterResource(context, result));
+ *             } else {
+ *                 handler.handleError(new NotFoundException());
+ *             }
+ *         } else {
+ *             /*
+ *              * Forward - assumes no authorization is required.
+ *              &#42;/
+ *             handler.handleResult(result);
+ *         }
+ *     }
+ *
+ *     public void filterQueryResource(ServerContext context, Void filterContext, Resource resource,
+ *             ResultHandler&lt;Resource&gt; handler) {
+ *         /*
+ *          * Filter the resource.
+ *          &#42;/
+ *         if (isAuthorized(context, resource)) {
+ *             handler.handleResult(filterResource(context, resource));
+ *         } else {
+ *             /*
+ *              * Don't include this resource in the query results if it is
+ *              * disallowed.
+ *              &#42;/
+ *             handler.handleResult(null);
+ *         }
+ *     }
+ * }
+ * </pre>
  *
  * @param <C>
  *            The type of filter context to be maintained between request
@@ -55,7 +124,7 @@ public interface UntypedCrossCutFilter<C> {
      *            The result handler which must be invoked once the error has
      *            been filtered.
      */
-    void handleGenericError(ServerContext context, C filterContext, ResourceException error,
+    void filterGenericError(ServerContext context, C filterContext, ResourceException error,
             ResultHandler<Object> handler);
 
     /**
@@ -83,7 +152,7 @@ public interface UntypedCrossCutFilter<C> {
      *            The result handler which must be invoked once the request has
      *            been filtered.
      */
-    void handleGenericRequest(ServerContext context, Request request, RequestHandler next,
+    void filterGenericRequest(ServerContext context, Request request, RequestHandler next,
             CrossCutFilterResultHandler<C, Object> handler);
 
     /**
@@ -105,14 +174,16 @@ public interface UntypedCrossCutFilter<C> {
      *            The result handler which must be invoked once the result has
      *            been filtered.
      */
-    <R> void handleGenericResult(ServerContext context, C filterContext, R result,
+    <R> void filterGenericResult(ServerContext context, C filterContext, R result,
             ResultHandler<R> handler);
 
     /**
      * Filters the provided query resource response (see
      * {@link QueryResultHandler#handleResource}). Implementations may modify
      * the provided resource. Once filtering has completed implementations must
-     * invoke one of the {@code handler.handleXXX()} methods.
+     * invoke one of the {@code handler.handleXXX()} methods. If the resource is
+     * not to be included in the query results then implementations should
+     * invoke {@code handler.handleResult(null)}.
      *
      * @param context
      *            The filter chain context.
@@ -125,7 +196,7 @@ public interface UntypedCrossCutFilter<C> {
      *            The result handler which must be invoked once the resource has
      *            been filtered.
      */
-    void handleQueryResource(ServerContext context, C filterContext, Resource resource,
+    void filterQueryResource(ServerContext context, C filterContext, Resource resource,
             ResultHandler<Resource> handler);
 
 }
