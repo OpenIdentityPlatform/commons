@@ -58,7 +58,7 @@ public final class Filters {
         @Override
         public void filterAction(final ServerContext context, final ActionRequest request,
                 final ResultHandler<JsonValue> handler, final RequestHandler next) {
-            filter.handleActionRequest(context, request, next, new Handler<C, JsonValue>(handler) {
+            filter.filterActionRequest(context, request, next, new Handler<C, JsonValue>(handler) {
                 @Override
                 public void handleContinue(final ServerContext newContext, final C filterContext) {
                     next.handleAction(newContext, request, wrapAction(newContext, filterContext,
@@ -70,7 +70,7 @@ public final class Filters {
         @Override
         public void filterCreate(final ServerContext context, final CreateRequest request,
                 final ResultHandler<Resource> handler, final RequestHandler next) {
-            filter.handleGenericRequest(context, request, next, new Handler<C, Resource>(handler) {
+            filter.filterGenericRequest(context, request, next, new Handler<C, Resource>(handler) {
                 @Override
                 public void handleContinue(final ServerContext newContext, final C filterContext) {
                     next.handleCreate(newContext, request, wrapGeneric(newContext, filterContext,
@@ -82,7 +82,7 @@ public final class Filters {
         @Override
         public void filterDelete(final ServerContext context, final DeleteRequest request,
                 final ResultHandler<Resource> handler, final RequestHandler next) {
-            filter.handleGenericRequest(context, request, next, new Handler<C, Resource>(handler) {
+            filter.filterGenericRequest(context, request, next, new Handler<C, Resource>(handler) {
                 @Override
                 public void handleContinue(final ServerContext newContext, final C filterContext) {
                     next.handleDelete(newContext, request, wrapGeneric(newContext, filterContext,
@@ -94,7 +94,7 @@ public final class Filters {
         @Override
         public void filterPatch(final ServerContext context, final PatchRequest request,
                 final ResultHandler<Resource> handler, final RequestHandler next) {
-            filter.handleGenericRequest(context, request, next, new Handler<C, Resource>(handler) {
+            filter.filterGenericRequest(context, request, next, new Handler<C, Resource>(handler) {
                 @Override
                 public void handleContinue(final ServerContext newContext, final C filterContext) {
                     next.handlePatch(newContext, request, wrapGeneric(newContext, filterContext,
@@ -106,7 +106,7 @@ public final class Filters {
         @Override
         public void filterQuery(final ServerContext context, final QueryRequest request,
                 final QueryResultHandler handler, final RequestHandler next) {
-            filter.handleQueryRequest(context, request, next, new Handler<C, QueryResult>(handler) {
+            filter.filterQueryRequest(context, request, next, new Handler<C, QueryResult>(handler) {
                 @Override
                 public void handleContinue(final ServerContext newContext, final C filterContext) {
                     next.handleQuery(newContext, request, wrapQuery(newContext, filterContext,
@@ -118,7 +118,7 @@ public final class Filters {
         @Override
         public void filterRead(final ServerContext context, final ReadRequest request,
                 final ResultHandler<Resource> handler, final RequestHandler next) {
-            filter.handleGenericRequest(context, request, next, new Handler<C, Resource>(handler) {
+            filter.filterGenericRequest(context, request, next, new Handler<C, Resource>(handler) {
                 @Override
                 public void handleContinue(final ServerContext newContext, final C filterContext) {
                     next.handleRead(newContext, request, wrapGeneric(newContext, filterContext,
@@ -130,7 +130,7 @@ public final class Filters {
         @Override
         public void filterUpdate(final ServerContext context, final UpdateRequest request,
                 final ResultHandler<Resource> handler, final RequestHandler next) {
-            filter.handleGenericRequest(context, request, next, new Handler<C, Resource>(handler) {
+            filter.filterGenericRequest(context, request, next, new Handler<C, Resource>(handler) {
                 @Override
                 public void handleContinue(final ServerContext newContext, final C filterContext) {
                     next.handleUpdate(newContext, request, wrapGeneric(newContext, filterContext,
@@ -144,12 +144,12 @@ public final class Filters {
             return new ResultHandler<JsonValue>() {
                 @Override
                 public void handleError(final ResourceException error) {
-                    filter.handleActionError(context, filterContext, error, handler);
+                    filter.filterActionError(context, filterContext, error, handler);
                 }
 
                 @Override
                 public void handleResult(final JsonValue result) {
-                    filter.handleActionResult(context, filterContext, result, handler);
+                    filter.filterActionResult(context, filterContext, result, handler);
                 }
             };
         }
@@ -159,12 +159,12 @@ public final class Filters {
             return new ResultHandler<Resource>() {
                 @Override
                 public void handleError(final ResourceException error) {
-                    filter.handleGenericError(context, filterContext, error, handler);
+                    filter.filterGenericError(context, filterContext, error, handler);
                 }
 
                 @Override
                 public void handleResult(final Resource result) {
-                    filter.handleGenericResult(context, filterContext, result, handler);
+                    filter.filterGenericResult(context, filterContext, result, handler);
                 }
             };
         }
@@ -174,17 +174,18 @@ public final class Filters {
             return new QueryResultHandler() {
                 @Override
                 public void handleError(final ResourceException error) {
-                    filter.handleQueryError(context, filterContext, error, handler);
+                    filter.filterQueryError(context, filterContext, error, handler);
                 }
 
                 @Override
                 public boolean handleResource(final Resource resource) {
-                    return handler.handleResource(resource);
+                    // The resource may be null if it was filtered out.
+                    return resource == null || handler.handleResource(resource);
                 }
 
                 @Override
                 public void handleResult(final QueryResult result) {
-                    filter.handleQueryResult(context, filterContext, result, handler);
+                    filter.filterQueryResult(context, filterContext, result, handler);
                 }
             };
         }
@@ -281,68 +282,68 @@ public final class Filters {
         }
 
         @Override
-        public void handleActionError(final ServerContext context, final C filterContext,
+        public void filterActionError(final ServerContext context, final C filterContext,
                 final ResourceException error, final ResultHandler<JsonValue> handler) {
-            filter.handleGenericError(context, filterContext, error, checked(handler,
+            filter.filterGenericError(context, filterContext, error, checked(handler,
                     JsonValue.class));
         }
 
         @Override
-        public void handleActionRequest(final ServerContext context, final ActionRequest request,
+        public void filterActionRequest(final ServerContext context, final ActionRequest request,
                 final RequestHandler next, final CrossCutFilterResultHandler<C, JsonValue> handler) {
-            filter.handleGenericRequest(context, request, next, checked(handler, JsonValue.class));
+            filter.filterGenericRequest(context, request, next, checked(handler, JsonValue.class));
         }
 
         @Override
-        public void handleActionResult(final ServerContext context, final C filterContext,
+        public void filterActionResult(final ServerContext context, final C filterContext,
                 final JsonValue result, final ResultHandler<JsonValue> handler) {
-            filter.handleGenericResult(context, filterContext, result, checked(handler,
+            filter.filterGenericResult(context, filterContext, result, checked(handler,
                     JsonValue.class));
         }
 
         @Override
-        public void handleGenericError(final ServerContext context, final C filterContext,
+        public void filterGenericError(final ServerContext context, final C filterContext,
                 final ResourceException error, final ResultHandler<Resource> handler) {
-            filter.handleGenericError(context, filterContext, error, checked(handler,
+            filter.filterGenericError(context, filterContext, error, checked(handler,
                     Resource.class));
         }
 
         @Override
-        public void handleGenericRequest(final ServerContext context, final Request request,
+        public void filterGenericRequest(final ServerContext context, final Request request,
                 final RequestHandler next, final CrossCutFilterResultHandler<C, Resource> handler) {
-            filter.handleGenericRequest(context, request, next, checked(handler, Resource.class));
+            filter.filterGenericRequest(context, request, next, checked(handler, Resource.class));
         }
 
         @Override
-        public void handleGenericResult(final ServerContext context, final C filterContext,
+        public void filterGenericResult(final ServerContext context, final C filterContext,
                 final Resource result, final ResultHandler<Resource> handler) {
-            filter.handleGenericResult(context, filterContext, result, checked(handler,
+            filter.filterGenericResult(context, filterContext, result, checked(handler,
                     Resource.class));
         }
 
         @Override
-        public void handleQueryError(final ServerContext context, final C filterContext,
+        public void filterQueryError(final ServerContext context, final C filterContext,
                 final ResourceException error, final ResultHandler<QueryResult> handler) {
-            filter.handleGenericError(context, filterContext, error, checked(handler,
+            filter.filterGenericError(context, filterContext, error, checked(handler,
                     QueryResult.class));
         }
 
         @Override
-        public void handleQueryRequest(final ServerContext context, final QueryRequest request,
+        public void filterQueryRequest(final ServerContext context, final QueryRequest request,
                 final RequestHandler next, final CrossCutFilterResultHandler<C, QueryResult> handler) {
-            filter.handleGenericRequest(context, request, next, checked(handler, QueryResult.class));
+            filter.filterGenericRequest(context, request, next, checked(handler, QueryResult.class));
         }
 
         @Override
-        public void handleQueryResource(final ServerContext context, final C filterContext,
+        public void filterQueryResource(final ServerContext context, final C filterContext,
                 final Resource resource, final ResultHandler<Resource> handler) {
-            filter.handleQueryResource(context, filterContext, resource, handler);
+            filter.filterQueryResource(context, filterContext, resource, handler);
         }
 
         @Override
-        public void handleQueryResult(final ServerContext context, final C filterContext,
+        public void filterQueryResult(final ServerContext context, final C filterContext,
                 final QueryResult result, final ResultHandler<QueryResult> handler) {
-            filter.handleGenericResult(context, filterContext, result, checked(handler,
+            filter.filterGenericResult(context, filterContext, result, checked(handler,
                     QueryResult.class));
         }
 

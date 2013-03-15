@@ -48,7 +48,7 @@ public interface CrossCutFilter<C> {
      *            The result handler which must be invoked once the error has
      *            been filtered.
      */
-    void handleActionError(ServerContext context, C filterContext, ResourceException error,
+    void filterActionError(ServerContext context, C filterContext, ResourceException error,
             ResultHandler<JsonValue> handler);
 
     /**
@@ -69,7 +69,7 @@ public interface CrossCutFilter<C> {
      *            The result handler which must be invoked once the request has
      *            been filtered.
      */
-    void handleActionRequest(ServerContext context, ActionRequest request, RequestHandler next,
+    void filterActionRequest(ServerContext context, ActionRequest request, RequestHandler next,
             CrossCutFilterResultHandler<C, JsonValue> handler);
 
     /**
@@ -89,7 +89,7 @@ public interface CrossCutFilter<C> {
      *            The result handler which must be invoked once the result has
      *            been filtered.
      */
-    void handleActionResult(ServerContext context, C filterContext, JsonValue result,
+    void filterActionResult(ServerContext context, C filterContext, JsonValue result,
             ResultHandler<JsonValue> handler);
 
     /**
@@ -110,7 +110,7 @@ public interface CrossCutFilter<C> {
      *            The result handler which must be invoked once the error has
      *            been filtered.
      */
-    void handleGenericError(ServerContext context, C filterContext, ResourceException error,
+    void filterGenericError(ServerContext context, C filterContext, ResourceException error,
             ResultHandler<Resource> handler);
 
     /**
@@ -131,7 +131,7 @@ public interface CrossCutFilter<C> {
      *            The result handler which must be invoked once the request has
      *            been filtered.
      */
-    void handleGenericRequest(ServerContext context, Request request, RequestHandler next,
+    void filterGenericRequest(ServerContext context, Request request, RequestHandler next,
             CrossCutFilterResultHandler<C, Resource> handler);
 
     /**
@@ -152,7 +152,7 @@ public interface CrossCutFilter<C> {
      *            The result handler which must be invoked once the result has
      *            been filtered.
      */
-    void handleGenericResult(ServerContext context, C filterContext, Resource result,
+    void filterGenericResult(ServerContext context, C filterContext, Resource result,
             ResultHandler<Resource> handler);
 
     /**
@@ -172,7 +172,7 @@ public interface CrossCutFilter<C> {
      *            The result handler which must be invoked once the error has
      *            been filtered.
      */
-    void handleQueryError(ServerContext context, C filterContext, ResourceException error,
+    void filterQueryError(ServerContext context, C filterContext, ResourceException error,
             ResultHandler<QueryResult> handler);
 
     /**
@@ -193,14 +193,16 @@ public interface CrossCutFilter<C> {
      *            The result handler which must be invoked once the request has
      *            been filtered.
      */
-    void handleQueryRequest(ServerContext context, QueryRequest request, RequestHandler next,
+    void filterQueryRequest(ServerContext context, QueryRequest request, RequestHandler next,
             CrossCutFilterResultHandler<C, QueryResult> handler);
 
     /**
      * Filters the provided query resource response (see
      * {@link QueryResultHandler#handleResource}). Implementations may modify
      * the provided resource. Once filtering has completed implementations must
-     * invoke one of the {@code handler.handleXXX()} methods.
+     * invoke one of the {@code handler.handleXXX()} methods. If the resource is
+     * not to be included in the query results then implementations should
+     * invoke {@code handler.handleResult(null)}.
      *
      * @param context
      *            The filter chain context.
@@ -213,7 +215,7 @@ public interface CrossCutFilter<C> {
      *            The result handler which must be invoked once the resource has
      *            been filtered.
      */
-    void handleQueryResource(ServerContext context, C filterContext, Resource resource,
+    void filterQueryResource(ServerContext context, C filterContext, Resource resource,
             ResultHandler<Resource> handler);
 
     /**
@@ -233,7 +235,7 @@ public interface CrossCutFilter<C> {
      *            The result handler which must be invoked once the result has
      *            been filtered.
      */
-    void handleQueryResult(ServerContext context, C filterContext, QueryResult result,
+    void filterQueryResult(ServerContext context, C filterContext, QueryResult result,
             ResultHandler<QueryResult> handler);
 
 }
