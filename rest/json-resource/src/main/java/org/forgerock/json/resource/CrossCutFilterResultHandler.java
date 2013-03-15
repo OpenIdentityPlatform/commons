@@ -21,9 +21,9 @@ package org.forgerock.json.resource;
  * been filtered.
  *
  * @param <C>
- *            The type of filter context to be maintained between request
+ *            The type of filter state to be maintained between request
  *            notification and response notification. Use {@code Void} if the
- *            filter is stateless and no filtering context information is
+ *            filter is stateless and no filtering state information is
  *            required.
  * @param <R>
  *            The type of result to be returned if processing of the request is
@@ -36,10 +36,10 @@ public interface CrossCutFilterResultHandler<C, R> {
      *
      * @param context
      *            The filter chain context.
-     * @param filterContext
-     *            The filter context to be included when filtering the response.
+     * @param state
+     *            The filter state to be included when filtering the response.
      */
-    void handleContinue(ServerContext context, C filterContext);
+    void handleContinue(ServerContext context, C state);
 
     /**
      * Indicates that processing of the request should stop and an error
