@@ -45,15 +45,15 @@ package org.forgerock.json.resource;
  *         }
  *     }
  *
- *     public void filterGenericError(ServerContext context, Void filterContext,
- *             ResourceException error, ResultHandler&lt;Object&gt; handler) {
+ *     public void filterGenericError(ServerContext context, Void state, ResourceException error,
+ *             ResultHandler&lt;Object&gt; handler) {
  *         /*
  *          * Forward - assumes no authorization is required.
  *          &#42;/
  *         handler.handleError(error);
  *     }
  *
- *     public &lt;R&gt; void filterGenericResult(ServerContext context, Void filterContext, R result,
+ *     public &lt;R&gt; void filterGenericResult(ServerContext context, Void state, R result,
  *             ResultHandler&lt;R&gt; handler) {
  *         /*
  *          * Filter the result if it is a resource.
@@ -72,28 +72,22 @@ package org.forgerock.json.resource;
  *         }
  *     }
  *
- *     public void filterQueryResource(ServerContext context, Void filterContext, Resource resource,
- *             ResultHandler&lt;Resource&gt; handler) {
+ *     public void filterQueryResource(ServerContext context, Void state, Resource resource,
+ *             QueryResultHandler handler) {
  *         /*
  *          * Filter the resource.
  *          &#42;/
  *         if (isAuthorized(context, resource)) {
- *             handler.handleResult(filterResource(context, resource));
- *         } else {
- *             /*
- *              * Don't include this resource in the query results if it is
- *              * disallowed.
- *              &#42;/
- *             handler.handleResult(null);
+ *             handler.handleResource(filterResource(context, resource));
  *         }
  *     }
  * }
  * </pre>
  *
  * @param <C>
- *            The type of filter context to be maintained between request
+ *            The type of filter state to be maintained between request
  *            notification and response notification. Use {@code Void} if the
- *            filter is stateless and no filtering context information is
+ *            filter is stateless and no filtering state information is
  *            required.
  * @see CrossCutFilter
  * @see Filters#asFilter(UntypedCrossCutFilter)
@@ -115,8 +109,8 @@ public interface UntypedCrossCutFilter<C> {
      *
      * @param context
      *            The filter chain context.
-     * @param filterContext
-     *            The filter context which was passed to
+     * @param state
+     *            The filter state which was passed to
      *            {@link CrossCutFilterResultHandler#handleContinue}.
      * @param error
      *            The error to be filtered.
@@ -124,7 +118,7 @@ public interface UntypedCrossCutFilter<C> {
      *            The result handler which must be invoked once the error has
      *            been filtered.
      */
-    void filterGenericError(ServerContext context, C filterContext, ResourceException error,
+    void filterGenericError(ServerContext context, C state, ResourceException error,
             ResultHandler<Object> handler);
 
     /**
@@ -165,8 +159,8 @@ public interface UntypedCrossCutFilter<C> {
      *            The type of result to be filtered.
      * @param context
      *            The filter chain context.
-     * @param filterContext
-     *            The filter context which was passed to
+     * @param state
+     *            The filter state which was passed to
      *            {@link CrossCutFilterResultHandler#handleContinue}.
      * @param result
      *            The result to be filtered.
@@ -174,21 +168,32 @@ public interface UntypedCrossCutFilter<C> {
      *            The result handler which must be invoked once the result has
      *            been filtered.
      */
-    <R> void filterGenericResult(ServerContext context, C filterContext, R result,
-            ResultHandler<R> handler);
+    <R> void filterGenericResult(ServerContext context, C state, R result, ResultHandler<R> handler);
 
     /**
      * Filters the provided query resource response (see
      * {@link QueryResultHandler#handleResource}). Implementations may modify
-     * the provided resource. Once filtering has completed implementations must
-     * invoke one of the {@code handler.handleXXX()} methods. If the resource is
-     * not to be included in the query results then implementations should
-     * invoke {@code handler.handleResult(null)}.
+     * the provided resource. Once filtering has completed implementations may
+     * do any of the following:
+     * <ul>
+     * <li>forward zero or more resources to the client by invoking
+     * {@link QueryResultHandler#handleResource handler.handleResource}.
+     * Implementations will typically invoke this once per resource, but may
+     * choose not to invoke it at all if the resource is to be excluded from the
+     * query results, or multiple times if, for example, the resource is to be
+     * decomposed into multiple related resources,
+     * <li>signal that no more resources will be returned to the client and that
+     * an error should be sent instead by invoking
+     * {@link QueryResultHandler#handleError handler.handleError},
+     * <li>signal that no more resources will be returned to the client and that
+     * a query result should be sent instead by invoking
+     * {@link QueryResultHandler#handleResult handler.handleResult}.
+     * </ul>
      *
      * @param context
      *            The filter chain context.
-     * @param filterContext
-     *            The filter context which was passed to
+     * @param state
+     *            The filter state which was passed to
      *            {@link CrossCutFilterResultHandler#handleContinue}.
      * @param resource
      *            The resource to be filtered.
@@ -196,7 +201,7 @@ public interface UntypedCrossCutFilter<C> {
      *            The result handler which must be invoked once the resource has
      *            been filtered.
      */
-    void filterQueryResource(ServerContext context, C filterContext, Resource resource,
-            ResultHandler<Resource> handler);
+    void filterQueryResource(ServerContext context, C state, Resource resource,
+            QueryResultHandler handler);
 
 }
