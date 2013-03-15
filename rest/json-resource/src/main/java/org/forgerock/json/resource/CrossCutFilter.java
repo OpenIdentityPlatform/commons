@@ -19,7 +19,9 @@ package org.forgerock.json.resource;
 import org.forgerock.json.fluent.JsonValue;
 
 /**
- * A strongly typed version of {@link UntypedCrossCutFilter}.
+ * A strongly typed version of {@link UntypedCrossCutFilter}. Cross cutting
+ * filters can be converted to {@link Filter}s by calling
+ * {@link Filters#asFilter(CrossCutFilter)}.
  *
  * @param <C>
  *            The type of filter state to be maintained between request
@@ -41,7 +43,8 @@ public interface CrossCutFilter<C> {
      *            The filter chain context.
      * @param state
      *            The filter state which was passed to
-     *            {@link CrossCutFilterResultHandler#handleContinue}.
+     *            {@link CrossCutFilterResultHandler#handleContinue(ServerContext, Object)}
+     *            .
      * @param error
      *            The error to be filtered.
      * @param handler
@@ -82,7 +85,8 @@ public interface CrossCutFilter<C> {
      *            The filter chain context.
      * @param state
      *            The filter state which was passed to
-     *            {@link CrossCutFilterResultHandler#handleContinue}.
+     *            {@link CrossCutFilterResultHandler#handleContinue(ServerContext, Object)}
+     *            .
      * @param result
      *            The result to be filtered.
      * @param handler
@@ -103,7 +107,8 @@ public interface CrossCutFilter<C> {
      *            The filter chain context.
      * @param state
      *            The filter state which was passed to
-     *            {@link CrossCutFilterResultHandler#handleContinue}.
+     *            {@link CrossCutFilterResultHandler#handleContinue(ServerContext, Object)}
+     *            .
      * @param error
      *            The error to be filtered.
      * @param handler
@@ -145,7 +150,8 @@ public interface CrossCutFilter<C> {
      *            The filter chain context.
      * @param state
      *            The filter state which was passed to
-     *            {@link CrossCutFilterResultHandler#handleContinue}.
+     *            {@link CrossCutFilterResultHandler#handleContinue(ServerContext, Object)}
+     *            .
      * @param result
      *            The result to be filtered.
      * @param handler
@@ -165,7 +171,8 @@ public interface CrossCutFilter<C> {
      *            The filter chain context.
      * @param state
      *            The filter state which was passed to
-     *            {@link CrossCutFilterResultHandler#handleContinue}.
+     *            {@link CrossCutFilterResultHandler#handleContinue(ServerContext, Object)}
+     *            .
      * @param error
      *            The error to be filtered.
      * @param handler
@@ -198,8 +205,8 @@ public interface CrossCutFilter<C> {
 
     /**
      * Filters the provided query resource response (see
-     * {@link QueryResultHandler#handleResource}). Once filtering has completed
-     * implementations may do any of the following:
+     * {@link QueryResultHandler#handleResource(Resource)}). Once filtering has
+     * completed implementations may do any of the following:
      * <ul>
      * <li>forward zero or more resources to the client by invoking
      * {@link QueryResultHandler#handleResource handler.handleResource}.
@@ -219,7 +226,8 @@ public interface CrossCutFilter<C> {
      *            The filter chain context.
      * @param state
      *            The filter state which was passed to
-     *            {@link CrossCutFilterResultHandler#handleContinue}.
+     *            {@link CrossCutFilterResultHandler#handleContinue(ServerContext, Object)}
+     *            .
      * @param resource
      *            The resource to be filtered.
      * @param handler
@@ -239,7 +247,8 @@ public interface CrossCutFilter<C> {
      *            The filter chain context.
      * @param state
      *            The filter state which was passed to
-     *            {@link CrossCutFilterResultHandler#handleContinue}.
+     *            {@link CrossCutFilterResultHandler#handleContinue(ServerContext, Object)}
+     *            .
      * @param result
      *            The result to be filtered.
      * @param handler
