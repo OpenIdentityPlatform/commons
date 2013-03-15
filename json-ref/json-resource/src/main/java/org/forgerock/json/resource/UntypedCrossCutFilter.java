@@ -18,8 +18,8 @@ package org.forgerock.json.resource;
 
 /**
  * An interface for implementing generic cross-cutting filters. Cross cutting
- * filters can be converted as normal {@link Filter} by calling
- * {@link Filters#asFilter}.
+ * filters can be converted to {@link Filter}s by calling
+ * {@link Filters#asFilter(UntypedCrossCutFilter)}.
  * <p>
  * The following example illustrates how an authorization filter could be
  * implemented:
@@ -101,7 +101,7 @@ public interface UntypedCrossCutFilter<C> {
      * {@code handler.handleXXX()} methods.
      * <p>
      * <b>NOTE:</b> implementations which return a non-error result using
-     * {@link CrossCutFilterResultHandler#handleResult
+     * {@link CrossCutFilterResultHandler#handleResult(Object)
      * handler.handleResult(Object)} MUST take care to ensure that the result
      * has the correct type, i.e. {@code JsonValue} for actions,
      * {@code QueryResult} for queries, and {@code Resource} for all other
@@ -111,7 +111,8 @@ public interface UntypedCrossCutFilter<C> {
      *            The filter chain context.
      * @param state
      *            The filter state which was passed to
-     *            {@link CrossCutFilterResultHandler#handleContinue}.
+     *            {@link CrossCutFilterResultHandler#handleContinue(ServerContext, Object)}
+     *            .
      * @param error
      *            The error to be filtered.
      * @param handler
@@ -129,7 +130,8 @@ public interface UntypedCrossCutFilter<C> {
      * {@code handler.handleXXX()} methods.
      * <p>
      * <b>NOTE:</b> implementations which stop processing and immediately return
-     * a non-error result using {@link CrossCutFilterResultHandler#handleResult
+     * a non-error result using
+     * {@link CrossCutFilterResultHandler#handleResult(Object)
      * handler.handleResult(Object)} MUST take care to ensure that the result
      * has the correct type, i.e. {@code JsonValue} for actions,
      * {@code QueryResult} for queries, and {@code Resource} for all other
@@ -161,7 +163,8 @@ public interface UntypedCrossCutFilter<C> {
      *            The filter chain context.
      * @param state
      *            The filter state which was passed to
-     *            {@link CrossCutFilterResultHandler#handleContinue}.
+     *            {@link CrossCutFilterResultHandler#handleContinue(ServerContext, Object)}
+     *            .
      * @param result
      *            The result to be filtered.
      * @param handler
@@ -172,29 +175,31 @@ public interface UntypedCrossCutFilter<C> {
 
     /**
      * Filters the provided query resource response (see
-     * {@link QueryResultHandler#handleResource}). Implementations may modify
-     * the provided resource. Once filtering has completed implementations may
-     * do any of the following:
+     * {@link QueryResultHandler#handleResource(Resource)}). Implementations may
+     * modify the provided resource. Once filtering has completed
+     * implementations may do any of the following:
      * <ul>
      * <li>forward zero or more resources to the client by invoking
-     * {@link QueryResultHandler#handleResource handler.handleResource}.
-     * Implementations will typically invoke this once per resource, but may
-     * choose not to invoke it at all if the resource is to be excluded from the
-     * query results, or multiple times if, for example, the resource is to be
-     * decomposed into multiple related resources,
+     * {@link QueryResultHandler#handleResource(Resource)
+     * handler.handleResource}. Implementations will typically invoke this once
+     * per resource, but may choose not to invoke it at all if the resource is
+     * to be excluded from the query results, or multiple times if, for example,
+     * the resource is to be decomposed into multiple related resources,
      * <li>signal that no more resources will be returned to the client and that
      * an error should be sent instead by invoking
-     * {@link QueryResultHandler#handleError handler.handleError},
+     * {@link QueryResultHandler#handleError(ResourceException)
+     * handler.handleError},
      * <li>signal that no more resources will be returned to the client and that
      * a query result should be sent instead by invoking
-     * {@link QueryResultHandler#handleResult handler.handleResult}.
+     * {@link QueryResultHandler#handleResult(QueryResult) handler.handleResult}.
      * </ul>
      *
      * @param context
      *            The filter chain context.
      * @param state
      *            The filter state which was passed to
-     *            {@link CrossCutFilterResultHandler#handleContinue}.
+     *            {@link CrossCutFilterResultHandler#handleContinue(ServerContext, Object)}
+     *            .
      * @param resource
      *            The resource to be filtered.
      * @param handler

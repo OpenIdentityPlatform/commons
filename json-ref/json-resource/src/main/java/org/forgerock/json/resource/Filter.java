@@ -36,6 +36,7 @@ import org.forgerock.json.fluent.JsonValue;
  * allowing a filter to interact with responses before they are sent to the
  * client.
  * </ul>
+ * <p>
  * Implementations are allowed to invoke arbitrary {@code handleXXX} methods on
  * the request handler if needed before deciding to stop or continue processing.
  * However, implementations should take care to ensure that the passed in result
