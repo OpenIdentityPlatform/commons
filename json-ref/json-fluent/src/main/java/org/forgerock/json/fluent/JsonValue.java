@@ -307,7 +307,7 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
      * Returns the JSON value as a {@link List} object. If the JSON value is {@code null},
      * this method returns {@code null}.
      *
-     * @return the list value, or {@code} null if no value.
+     * @return the list value, or {@code null} if no value.
      * @throws JsonValueException if the JSON value is not a {@code List}.
      */
     public List<Object> asList() throws JsonValueException {
@@ -321,8 +321,8 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
      * {@code JsonValueException} is thrown.
      *
      * @param type the type of object that all elements are expected to be.
-     * @return the list value, or {@code} null if no value.
-     * @throws JsonVaueException if the JSON value is not a {@code List} or contains an unexpected type.
+     * @return the list value, or {@code null} if no value.
+     * @throws JsonValueException if the JSON value is not a {@code List} or contains an unexpected type.
      * @throws NullPointerException if {@code type} is {@code null}.
      */
     @SuppressWarnings("unchecked")
@@ -465,6 +465,7 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
                 for (T constant : constants) {
                     sb.append(' ').append(constant.toString());
                 }
+                throw new JsonValueException(this, sb.toString());
             }
         }
         return result;
