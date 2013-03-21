@@ -67,7 +67,7 @@ define("org/forgerock/commons/ui/common/util/Constants", [
     obj.EVENT_ENTER_OLD_PASSWORD_REQUEST = "user.profile.EVENT_ENTER_OLD_PASSWORD_REQUEST";
 
     //registration
-    obj.EVENT_USER_SUCCESSFULY_REGISTERED = "user.registration.EVENT_USER_SUCCESSFULY_REGISTERED";
+    obj.EVENT_USER_SUCCESSFULLY_REGISTERED = "user.registration.EVENT_USER_SUCCESSFULLY_REGISTERED";
     obj.EVENT_USER_REGISTRATION_ERROR = "user.registration.EVENT_USER_REGISTRATION_ERROR";
     obj.EVENT_TERMS_OF_USE_REQUEST = "user.registration.EVENT_TERMS_OF_USE_REQUEST";
 

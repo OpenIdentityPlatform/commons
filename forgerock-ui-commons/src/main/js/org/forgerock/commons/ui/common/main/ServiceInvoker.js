@@ -57,7 +57,7 @@ define("org/forgerock/commons/ui/common/main/ServiceInvoker", [
         realError = callParams.error;
         callParams.success = function (data,textStatus, jqXHR) {
             if(data && data.error) {
-                em.sendEvent(constants.EVENT_REST_CALL_ERROR, { data: data, textStatus: textStatus, jqXHR: jqXHR, errorsHandlers: callParams.errorsHandlers});
+                em.sendEvent(constants.EVENT_REST_CALL_ERROR, { data: $.extend({}, data, {type: this.type}), textStatus: textStatus, jqXHR: jqXHR, errorsHandlers: callParams.errorsHandlers});
                 if(realError) {
                     realError(data);
                 }
@@ -68,11 +68,11 @@ define("org/forgerock/commons/ui/common/main/ServiceInvoker", [
                 }
             }
         };
-        callParams.error = function (data,textStatus, jqXHR) {
+        callParams.error = function (jqXHR, textStatus, errorThrown ) {
             //TODO try to handle error
-            em.sendEvent(constants.EVENT_REST_CALL_ERROR, { data: data, textStatus: textStatus, jqXHR: jqXHR, errorsHandlers: callParams.errorsHandlers});
+            em.sendEvent(constants.EVENT_REST_CALL_ERROR, { data: $.extend({}, jqXHR, {type: this.type}), textStatus: textStatus, errorThrown: errorThrown, errorsHandlers: callParams.errorsHandlers});
             if(realError) {
-                realError(data);
+                realError(jqXHR);
             }
         };
         if (!nonJsonRequest) {

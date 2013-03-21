@@ -95,8 +95,8 @@ define("config/process/CommonConfig", [
                 conf.setProperty("baseView", ""); 
                 conf.setProperty("baseViewArgs", ""); 
                                         
-                viewManager.changeView(route.view, params, undefined, route.forceUpdate);
                 router.navigate(router.getLink(route, params));
+                viewManager.changeView(route.view, params, undefined, route.forceUpdate);
                 navigation.reload();
             }
         },

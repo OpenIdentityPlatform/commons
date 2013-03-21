@@ -83,12 +83,9 @@ define("org/forgerock/commons/ui/user/LoginView", [
         },
         
         render: function(args, callback) {
-            if (window.location.hash === "#logout/") {
-                eventManager.sendEvent(constants.EVENT_LOGOUT);
-            }
             this.data.hasOptionalUIFeatures = conf.globalData.selfRegistration || conf.globalData.securityQuestions || conf.globalData.siteIdentification || conf.globalData.passwordResetLink;
 
-            this.parentRender(function() {                
+            this.parentRender(function() {
                 validatorsManager.bindValidators(this.$el);
                 
                 var login = cookieHelper.getCookie("login");
@@ -107,7 +104,7 @@ define("org/forgerock/commons/ui/user/LoginView", [
                 if(callback) {
                     callback();
                 }
-            });            
+            });
         }
     }); 
     

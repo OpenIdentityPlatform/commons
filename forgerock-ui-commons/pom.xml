@@ -128,6 +128,13 @@
             <type>js</type>
             <classifier>min</classifier>
         </dependency>
+       <dependency>
+            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <artifactId>less</artifactId>
+            <version>1.3.3</version>
+            <type>js</type>
+            <classifier>min</classifier>
+        </dependency>
         <dependency>
             <groupId>org.forgerock.commons.ui.libs</groupId>
             <artifactId>handlebars</artifactId>

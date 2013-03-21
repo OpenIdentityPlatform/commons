@@ -43,6 +43,7 @@ define("org/forgerock/commons/ui/user/SiteConfigurator", [
        
        if(!conf.globalData) {
            conf.setProperty('globalData', {});
+           conf.globalData.auth = {};
        }
 
        console.log("READING CONFIGURATION");

@@ -28,7 +28,8 @@
  * @author jdabrowski
  */
 define("config/routes/UserRoutesConfig", [
-], function() {
+    "org/forgerock/commons/ui/common/util/Constants"
+], function(constants) {
     
     var obj = {
         "": {
@@ -64,7 +65,7 @@ define("config/routes/UserRoutesConfig", [
             url: "login/"
         },                           
         "logout" : {
-            view: "org/forgerock/commons/ui/user/LoginView",
+            event: constants.EVENT_LOGOUT,
             url: "logout/"
         },                           
         "loginDialog" : {

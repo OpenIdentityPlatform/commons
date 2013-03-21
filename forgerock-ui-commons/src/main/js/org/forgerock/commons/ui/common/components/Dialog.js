@@ -52,7 +52,9 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
             "click .dialogContainer": "stop"
         },
         
-        actions: {},
+        actions: {
+            "close": "button"
+        },
         
         stop: function(event) {
             event.stopPropagation();
@@ -71,8 +73,6 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
                 $(".dialog-background").show();
                 $(".dialog-background").off('click').on('click', _.bind(this.close, this));
                 
-                this.$el.find(".dialogActions").append("<input type='button' name='close' value='" + $.t("common.form.close") + "' class='button active float-right' />");
-                
                 this.resize();
                 
                 _.each(this.actions, _.bind(function(type, name) {
@@ -85,7 +85,12 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
         
         resize: function() {
             this.$el.css({width: this.data.width, height: this.data.height});
-            this.$el.css('margin-top', (window.innerHeight - this.data.height) / 2 * 0.5);
+            
+            if (this.data.height) {
+                this.$el.css('margin-top', (window.innerHeight - this.data.height) / 2 * 0.5);
+            } else {
+                this.$el.css('margin-top', "50px");
+            }
             this.$el.css('margin-left', (window.innerWidth - this.data.width) / 2);
             this.$el.find(".dialogContent").css('height', this.data.height - 43);
         },

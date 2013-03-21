@@ -75,6 +75,10 @@ define("config/messages/UserMessages", [
                 msg: "config.messages.UserMessages.loggedOut",
                 type: "info"
             },
+            "loginTimeout": {
+                msg: "config.messages.UserMessages.loginTimeout",
+                type: "info"
+            },
             "siteIdentificationChanged": {
                 msg: "config.messages.UserMessages.siteIdentificationChanged",
                 type: "info"

@@ -43,6 +43,7 @@ define("config/errorhandlers/CommonErrorHandlers", [
             },
             "forbidden": {
                 status: "403",
+                event: constants.EVENT_UNAUTHORIZED,
                 message: "forbiddenError"
             },
             "notFound": {

@@ -116,7 +116,7 @@ define("org/forgerock/commons/ui/common/main/Router", [
     
     obj.getLink = function(route, args) {
         var i, pattern;
-        
+        args = args || route.defaults;
         if(!_.isRegExp(route.url)) {
             pattern = route.url.replace(/:[A-Za-z@.]+/, "?");
         } else {
@@ -125,7 +125,11 @@ define("org/forgerock/commons/ui/common/main/Router", [
         
         if(args) {            
             for(i = 0; i < args.length; i++) {
-                pattern = pattern.replace("?", args[i]);
+                if (args[i] !== undefined) {
+                    pattern = pattern.replace("?", args[i]);
+                } else {
+                    break;
+                }
             }
             
             pattern = pattern.replace(/\?/g, "");

@@ -6,7 +6,7 @@
 
     .menu {
         .rounded-corners(5px);     
-        background-color: #5d6871;
+        background-color: @inactive-menu-color;
         height: 38px;
        
         li {
@@ -75,14 +75,31 @@
     margin: 5px 10px 0 0;
 }
 
+/* MAIN CONTENT */
+
+#wrapper {
+    min-height: 100%;
+}
+
+#content {
+    overflow: auto;
+    height: 100%;
+    padding-bottom: @footer-height+10;
+}
+
+
 /* FOOTER */
 #footer {
-    background: url(../../images/footer_bg.png) repeat-x #F2F2F2;
+    position: relative;
+    clear: both;
+    background: url(../images/footer_bg.png) repeat-x @footer-background-color;
     font-size: 11px;
-    margin-top: 55px;
+    margin-top: -@footer-height;
     padding: 45px 0 45px 0;
-    color: #696E72;
     text-align: center;
+    .container {
+        width: auto;
+    }
 }
 /* DATATABLES */
 
@@ -162,8 +179,8 @@
         font-size: 14px;
         line-height: 14px;
         padding: 5px;
-        border: 1px solid #a6a8ad;
-        background: #F9F9F9;
+        border: 1px solid darken(@input-border-basic, 20%);
+        background: @message-background-color;
         z-index: 10;
     }
 
@@ -172,11 +189,11 @@
     }
 
     .confirmMessage { 
-        color: #6ec563;
+        color: @color-success;
     }
 
     .errorMessage {
-        color: #fd0000;
+        color: @color-error;
     }
 
 }

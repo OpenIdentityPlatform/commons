@@ -28,6 +28,7 @@ define("org/forgerock/commons/ui/common/components/main", [
 	"./Breadcrumbs",
 	"./popup/PopupCtrl",
 	"./Dialog",
+	"./Footer",
 	"./Navigation",
 	"./GridTableView",
 	"./LineTableView",

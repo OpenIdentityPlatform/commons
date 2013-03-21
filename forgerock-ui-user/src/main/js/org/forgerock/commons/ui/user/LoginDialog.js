@@ -95,7 +95,7 @@ define("org/forgerock/commons/ui/user/LoginDialog", [
                 password = this.$el.find("input[name=password]").val();
                 refreshOnLogin = this.$el.find("input[name=refreshOnLogin]:checked").val();
                 
-                sessionManager.login(userName, password, function(user) {
+                sessionManager.login({"userName":userName, "password":password}, function(user) {
                     conf.setProperty('loggedUser', user);
                     eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: false});
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "loggedIn");

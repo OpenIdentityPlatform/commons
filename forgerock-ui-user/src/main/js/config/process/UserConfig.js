@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, window, _*/
+/*global define, require, window, _*/
 
 /**
  * @author yaromin
@@ -39,6 +39,7 @@ define("config/process/UserConfig", [
                 "org/forgerock/commons/ui/common/components/Navigation",
                 "org/forgerock/commons/ui/common/components/popup/PopupCtrl",
                 "org/forgerock/commons/ui/common/components/Breadcrumbs",
+                "org/forgerock/commons/ui/common/components/Footer",
                 "org/forgerock/commons/ui/common/main/Router",
                 "UserDelegate",
                 "org/forgerock/commons/ui/common/main/Configuration",
@@ -49,6 +50,7 @@ define("config/process/UserConfig", [
                     navigation, 
                     popupCtrl, 
                     breadcrumbs, 
+                    footer, 
                     router,
                     userDelegate,
                     conf,
@@ -56,6 +58,7 @@ define("config/process/UserConfig", [
                     sessionManager) {
                               
                 breadcrumbs.init();
+                footer.render();
                 uiUtils.preloadTemplates();
                 
                 sessionManager.getLoggedUser(function(user) {
@@ -133,9 +136,10 @@ define("config/process/UserConfig", [
             dependencies: [
                 "org/forgerock/commons/ui/common/main/SessionManager",
                 "org/forgerock/commons/ui/common/main/Configuration",
-                "org/forgerock/commons/ui/common/main/Router"
+                "org/forgerock/commons/ui/common/main/Router",
+                "org/forgerock/commons/ui/common/main/ViewManager"
             ],
-            processDescription: function(event, sessionManager, conf, router) {
+            processDescription: function(event, sessionManager, conf, router, viewManager) {
                 sessionManager.login(event, function(user) {
                     conf.setProperty('loggedUser', user);
                     
@@ -150,6 +154,8 @@ define("config/process/UserConfig", [
                         } else {
                             router.navigate("", {trigger: true});
                         }
+                    } else if (viewManager.currentDialog !== "null") {
+                        require(viewManager.currentDialog).close();
                     }
                     
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "loggedIn");
@@ -159,7 +165,7 @@ define("config/process/UserConfig", [
             }
         },
         {
-            startEvent: constants.EVENT_USER_SUCCESSFULY_REGISTERED,
+            startEvent: constants.EVENT_USER_SUCCESSFULLY_REGISTERED,
             description: "User registered",
             dependencies: [
                 "org/forgerock/commons/ui/common/main/Router"
@@ -185,9 +191,8 @@ define("config/process/UserConfig", [
             processDescription: function(event, router, conf, sessionManager) {
                 sessionManager.logout();
                 conf.setProperty('loggedUser', null);
-                eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, {anonymousMode: true});
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "loggedOut");
-                router.execRouteHandler("");
+                eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
                 delete conf.gotoURL;
             }
          },
@@ -195,26 +200,35 @@ define("config/process/UserConfig", [
              startEvent: constants.EVENT_UNAUTHORIZED,
              description: "",
              dependencies: [
+                 "org/forgerock/commons/ui/common/main/ViewManager",
                  "org/forgerock/commons/ui/common/main/Router",
                  "org/forgerock/commons/ui/common/main/Configuration",
                  "org/forgerock/commons/ui/common/main/SessionManager",
                  "org/forgerock/commons/ui/user/LoginDialog"
              ],
-             processDescription: function(error, router, conf, sessionManager, loginDialog) {
+             processDescription: function(error, viewManager, router, conf, sessionManager, loginDialog) {
                  if(!conf.loggedUser) {
                      if(!conf.gotoURL) {
                          conf.setProperty("gotoURL", window.location.hash);
                      }
                      
-                     router.routeTo("login", {trigger: true});
+                     eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
                      return;
                  }
                  
-                 sessionManager.getLoggedUser(function(user) {   
+                 sessionManager.getLoggedUser(function(user) {
+                     sessionManager.logout();
                      eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unauthorized");
-                     router.routeTo("", {trigger: true});
+                     eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
                  }, function() {
-                     loginDialog.render();
+                     if (error.error.type === "GET") {
+                         conf.setProperty("gotoURL", window.location.hash); 
+                         sessionManager.logout();
+                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unauthorized");
+                         eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
+                     } else {
+                         viewManager.showDialog(router.configuration.routes.loginDialog.dialog);
+                     }
                  });    
              }
          },

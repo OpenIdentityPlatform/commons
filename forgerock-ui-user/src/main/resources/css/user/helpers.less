@@ -12,13 +12,23 @@ table, caption, tbody, tfoot, thead, tr, th, td {
     font: inherit;
     vertical-align: baseline;
 }
-
+html,body { 
+    height: 100%;
+}
 body {
     line-height: @line-height;
-    background-color: @footer-background-color;
+    background-color: @background-color;
     color: @font-color;
     font-size: @font-size;
     font-family: @font-family;
+}
+/*Opera Fix*/
+body:before {
+    content:"";
+    height:100%;
+    float:left;
+    width:0;
+    margin-top:-32767px;
 }
 
 ol, ul, ul li, li {
@@ -45,7 +55,7 @@ h2 {
   line-height: 40px;
   &.header {
     font-weight: normal;
-    border-bottom: 2px solid @header-color;
+    border-bottom: 2px solid @header-border-color;
     line-height: 25px;
     margin-bottom: 15px;
   }
@@ -217,7 +227,7 @@ a.img-close {
 }
 
 .column-header {
-    border-bottom: 2px solid @header-color;
+    border-bottom: 2px solid @header-border-color;
     margin-bottom: 15px;
     h2 {
         border-bottom: 0;
@@ -348,7 +358,7 @@ a.img-close {
     background-color: #ffffff;
 }
 .border-gray {
-    border: 1px solid lighten(@header-color, 42.5%);
+    border: 1px solid lighten(@header-border-color, 42.5%);
 }
 
 .checkboxList {
