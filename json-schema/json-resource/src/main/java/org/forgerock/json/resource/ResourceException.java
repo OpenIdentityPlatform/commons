@@ -320,6 +320,19 @@ public class ResourceException extends ExecutionException {
         return result;
     }
 
+    /**
+     * Returns the message which should be returned by {@link #getMessage()}.
+     */
+    private static String message(final int code, final String message, final Throwable cause) {
+        if (message != null) {
+            return message;
+        } else if (cause != null && cause.getMessage() != null) {
+            return cause.getMessage();
+        } else {
+            return reason(code);
+        }
+    }
+
     /** The numeric code of the exception. */
     private final int code;
 
@@ -381,9 +394,9 @@ public class ResourceException extends ExecutionException {
      *            The exception which caused this exception to be thrown.
      */
     protected ResourceException(final int code, final String message, final Throwable cause) {
-        super(message, cause);
+        super(message(code, message, cause), cause);
         this.code = code;
-        reason(code);
+        this.reason = reason(code);
     }
 
     /**
@@ -453,7 +466,7 @@ public class ResourceException extends ExecutionException {
      * {
      *     "code"    : 404,
      *     "reason"  : "...",  // optional
-     *     "message" : "...",  // optional
+     *     "message" : "...",  // required
      *     "detail"  : { ... } // optional
      * }
      * </pre>
@@ -468,7 +481,7 @@ public class ResourceException extends ExecutionException {
             result.put(FIELD_REASON, reason);
         }
         final String message = getMessage();
-        if (message != null) { // optional
+        if (message != null) { // should always be present
             result.put(FIELD_MESSAGE, message);
         }
         if (!detail.isNull()) {
