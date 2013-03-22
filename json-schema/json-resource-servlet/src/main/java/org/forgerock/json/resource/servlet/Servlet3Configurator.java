@@ -59,7 +59,9 @@ final class Servlet3Configurator extends ServletConfigurator {
                 throws Exception {
             if (httpRequest.isAsyncSupported()) {
                 // Process the request asynchronously.
-                final AsyncContext asyncContext = httpRequest.startAsync();
+                final AsyncContext asyncContext =
+                        httpRequest.isAsyncStarted() ? httpRequest.getAsyncContext() : httpRequest
+                                .startAsync();
 
                 // Disable timeouts - see http://java.net/jira/browse/GRIZZLY-1325
                 asyncContext.setTimeout(0);
