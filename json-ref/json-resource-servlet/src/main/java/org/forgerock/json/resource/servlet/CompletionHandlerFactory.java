@@ -11,30 +11,32 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012 ForgeRock AS.
+ * Copyright 2012-2013 ForgeRock AS.
  */
 package org.forgerock.json.resource.servlet;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-
-import org.forgerock.json.resource.ConnectionFactory;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * A configurator is used to configure the Servlet based on the version of the
  * Servlet container.
  */
-abstract class ServletConfigurator {
+public abstract class CompletionHandlerFactory {
     /**
-     * Returns a configurator appropriate for the Servlet container.
+     * Returns a completion handler factory appropriate for use with the Servlet
+     * container.
      *
      * @param servletContext
      *            The context.
-     * @return A configurator appropriate for the Servlet container.
+     * @return A completion handler factory appropriate for the Servlet
+     *         container.
      * @throws ServletException
-     *             If an appropriate configurator could not be obtained.
+     *             If the Servlet container is not supported.
      */
-    static ServletConfigurator getServletConfigurator(final ServletContext servletContext)
+    public static CompletionHandlerFactory getInstance(final ServletContext servletContext)
             throws ServletException {
         switch (servletContext.getMajorVersion()) {
         case 1:
@@ -42,26 +44,30 @@ abstract class ServletConfigurator {
             throw new ServletException("Unsupported Servlet version "
                     + servletContext.getMajorVersion());
         case 2:
-            return new Servlet2Configurator(servletContext);
+            return new Servlet2CompletionHandlerFactory();
         default:
-            return new Servlet3Configurator(servletContext);
+            return new Servlet3CompletionHandlerFactory();
         }
     }
 
     /**
-     * Creates a servlet configurator.
+     * Prevent sub-classing and instantiation outside this package.
      */
-    ServletConfigurator() {
+    CompletionHandlerFactory() {
         // Nothing to do.
     }
 
     /**
-     * Creates a new request dispatcher appropriate for Servlet container.
+     * Creates a new completion handler appropriate for the Servlet container.
      *
-     * @param connectionFactory
-     *            The underlying connection factory to which requests should be
-     *            dispatched.
+     * @param httpRequest
+     *            The HTTP request.
+     * @param httpResponse
+     *            The HTTP response.
+     * @return Returns a new completion handler appropriate for the Servlet
+     *         container.
      */
-    abstract RequestDispatcher getRequestDispatcher(final ConnectionFactory connectionFactory);
+    public abstract CompletionHandler createCompletionHandler(final HttpServletRequest httpRequest,
+            final HttpServletResponse httpResponse);
 
 }

@@ -15,6 +15,7 @@
  */
 package org.forgerock.json.resource.servlet;
 
+import static org.forgerock.json.resource.servlet.CompletionHandlerFactory.getInstance;
 import static org.forgerock.json.resource.servlet.HttpUtils.CONTENT_TYPE;
 import static org.forgerock.json.resource.servlet.HttpUtils.CONTENT_TYPE_REGEX;
 import static org.forgerock.json.resource.servlet.HttpUtils.ETAG_ANY;
@@ -43,7 +44,6 @@ import static org.forgerock.json.resource.servlet.HttpUtils.isDebugRequested;
 import static org.forgerock.json.resource.servlet.HttpUtils.prepareResponse;
 import static org.forgerock.json.resource.servlet.HttpUtils.rejectIfMatch;
 import static org.forgerock.json.resource.servlet.HttpUtils.rejectIfNoneMatch;
-import static org.forgerock.json.resource.servlet.ServletConfigurator.getServletConfigurator;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -118,8 +118,9 @@ public final class HttpServletAdapter {
         THIS_API_VERSION = bundle.getString("rest-api-version");
     }
 
+    private final CompletionHandlerFactory completionHandlerFactory;
+    private final ConnectionFactory connectionFactory;
     private final HttpServletContextFactory contextFactory;
-    private final RequestDispatcher dispatcher;
     private final ServletContext servletContext;
 
     /**
@@ -186,10 +187,11 @@ public final class HttpServletAdapter {
             final ConnectionFactory connectionFactory,
             final HttpServletContextFactory contextFactory) throws ServletException {
         this.servletContext = checkNotNull(servletContext);
-        this.contextFactory = contextFactory != null ? contextFactory : SecurityContextFactory
-                .getHttpServletContextFactory();
-        this.dispatcher = getServletConfigurator(servletContext).getRequestDispatcher(
-                checkNotNull(connectionFactory));
+        this.contextFactory =
+                contextFactory != null ? contextFactory : SecurityContextFactory
+                        .getHttpServletContextFactory();
+        this.connectionFactory = checkNotNull(connectionFactory);
+        this.completionHandlerFactory = getInstance(servletContext);
     }
 
     /**
@@ -234,8 +236,8 @@ public final class HttpServletAdapter {
             rejectIfNoneMatch(req);
 
             final Map<String, String[]> parameters = req.getParameterMap();
-            final DeleteRequest request = Requests.newDeleteRequest(getResourceName(req))
-                    .setRevision(getIfMatch(req));
+            final DeleteRequest request =
+                    Requests.newDeleteRequest(getResourceName(req)).setRevision(getIfMatch(req));
             for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
                 final String name = p.getKey();
                 final String[] values = p.getValue();
@@ -245,9 +247,7 @@ public final class HttpServletAdapter {
                             + "'");
                 }
             }
-            // Invoke the request.
-            final Context context = newRequestContext(req);
-            dispatcher.dispatchRequest(context, request, req, resp);
+            doRequest(req, resp, request);
         } catch (final Exception e) {
             fail(req, resp, e);
         }
@@ -338,10 +338,7 @@ public final class HttpServletAdapter {
                     throw new BadRequestException("Additional query parameters can only be used "
                             + "with the parameter _queryId, not _filter");
                 }
-
-                // Invoke the request.
-                final Context context = newRequestContext(req);
-                dispatcher.dispatchRequest(context, request, req, resp);
+                doRequest(req, resp, request);
             } else {
                 // Read of instance within collection or singleton.
                 final String rev = getIfNoneMatch(req);
@@ -361,9 +358,7 @@ public final class HttpServletAdapter {
                                 + name + "'");
                     }
                 }
-                // Invoke the request.
-                final Context context = newRequestContext(req);
-                dispatcher.dispatchRequest(context, request, req, resp);
+                doRequest(req, resp, request);
             }
         } catch (final Exception e) {
             fail(req, resp, e);
@@ -396,8 +391,8 @@ public final class HttpServletAdapter {
 
             if (action.equalsIgnoreCase("create")) {
                 final JsonValue content = getJsonContent(req);
-                final CreateRequest request = Requests.newCreateRequest(getResourceName(req),
-                        content);
+                final CreateRequest request =
+                        Requests.newCreateRequest(getResourceName(req), content);
                 for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
                     final String name = p.getKey();
                     final String[] values = p.getValue();
@@ -411,14 +406,12 @@ public final class HttpServletAdapter {
                                 + name + "'");
                     }
                 }
-                // Invoke the request.
-                final Context context = newRequestContext(req);
-                dispatcher.dispatchRequest(context, request, req, resp);
+                doRequest(req, resp, request);
             } else {
                 // Action request.
                 final JsonValue content = getJsonContent(req);
-                final ActionRequest request = Requests.newActionRequest(getResourceName(req),
-                        action).setContent(content);
+                final ActionRequest request =
+                        Requests.newActionRequest(getResourceName(req), action).setContent(content);
                 for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
                     final String name = p.getKey();
                     final String[] values = p.getValue();
@@ -430,9 +423,7 @@ public final class HttpServletAdapter {
                         request.setAdditionalActionParameter(name, asSingleValue(name, values));
                     }
                 }
-                // Invoke the request.
-                final Context context = newRequestContext(req);
-                dispatcher.dispatchRequest(context, request, req, resp);
+                doRequest(req, resp, request);
             }
         } catch (final Exception e) {
             fail(req, resp, e);
@@ -489,13 +480,11 @@ public final class HttpServletAdapter {
                                 + name + "'");
                     }
                 }
-
-                // Invoke the request.
-                final Context context = newRequestContext(req);
-                dispatcher.dispatchRequest(context, request, req, resp);
+                doRequest(req, resp, request);
             } else {
-                final UpdateRequest request = Requests.newUpdateRequest(getResourceName(req),
-                        content).setRevision(getIfMatch(req));
+                final UpdateRequest request =
+                        Requests.newUpdateRequest(getResourceName(req), content).setRevision(
+                                getIfMatch(req));
                 for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
                     final String name = p.getKey();
                     final String[] values = p.getValue();
@@ -505,14 +494,22 @@ public final class HttpServletAdapter {
                                 + name + "'");
                     }
                 }
-
-                // Invoke the request.
-                final Context context = newRequestContext(req);
-                dispatcher.dispatchRequest(context, request, req, resp);
+                doRequest(req, resp, request);
             }
         } catch (final Exception e) {
             fail(req, resp, e);
         }
+    }
+
+    private void doRequest(final HttpServletRequest req, final HttpServletResponse resp,
+            final Request request) throws ResourceException, Exception {
+        final Context context = newRequestContext(req);
+        final CompletionHandler completionHandler =
+                completionHandlerFactory.createCompletionHandler(req, resp);
+        final RequestRunner runner =
+                new RequestRunner(context, request, req, resp, completionHandler);
+        connectionFactory.getConnectionAsync(runner);
+        completionHandler.awaitIfNeeded();
     }
 
     private void dumpRequest(final HttpServletRequest req) {
@@ -564,11 +561,11 @@ public final class HttpServletAdapter {
             }
             return true;
         } else if (name.equalsIgnoreCase(PARAM_PRETTY_PRINT)) {
-            // This will be handled by the dispatcher, so just validate.
+            // This will be handled by the completionHandlerFactory, so just validate.
             asBooleanValue(name, values);
             return true;
         } else if (name.equalsIgnoreCase(PARAM_DEBUG)) {
-            // This will be handled by the dispatcher, so just validate.
+            // This will be handled by the completionHandlerFactory, so just validate.
             asBooleanValue(name, values);
             return true;
         } else {
