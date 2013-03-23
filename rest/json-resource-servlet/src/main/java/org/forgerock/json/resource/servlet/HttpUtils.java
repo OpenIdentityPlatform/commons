@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012 ForgeRock AS.
+ * Copyright 2012-2013 ForgeRock AS.
  */
 package org.forgerock.json.resource.servlet;
 
@@ -68,15 +68,15 @@ final class HttpUtils {
     /**
      * Adapts an {@code Exception} to a {@code ResourceException}.
      *
-     * @param e
+     * @param t
      *            The exception which caused the request to fail.
      * @return The equivalent resource exception.
      */
-    static ResourceException adapt(final Exception e) {
-        if (e instanceof ResourceException) {
-            return (ResourceException) e;
+    static ResourceException adapt(final Throwable t) {
+        if (t instanceof ResourceException) {
+            return (ResourceException) t;
         } else {
-            return new InternalServerErrorException(e);
+            return new InternalServerErrorException(t);
         }
     }
 
@@ -189,12 +189,12 @@ final class HttpUtils {
      *            The HTTP request.
      * @param resp
      *            The HTTP response.
-     * @param e
+     * @param t
      *            The resource exception indicating why the request failed.
      */
-    static void fail(final HttpServletRequest req, final HttpServletResponse resp, final Exception e) {
+    static void fail(final HttpServletRequest req, final HttpServletResponse resp, final Throwable t) {
         if (!resp.isCommitted()) {
-            final ResourceException re = adapt(e);
+            final ResourceException re = adapt(t);
             try {
                 resp.reset();
                 prepareResponse(resp);
@@ -284,8 +284,8 @@ final class HttpUtils {
      */
     static JsonGenerator getJsonGenerator(final HttpServletRequest req,
             final HttpServletResponse resp) throws IOException {
-        final JsonGenerator writer = JSON_MAPPER.getJsonFactory().createJsonGenerator(
-                resp.getOutputStream());
+        final JsonGenerator writer =
+                JSON_MAPPER.getJsonFactory().createJsonGenerator(resp.getOutputStream());
         writer.configure(Feature.AUTO_CLOSE_TARGET, false);
 
         // Enable pretty printer if requested.

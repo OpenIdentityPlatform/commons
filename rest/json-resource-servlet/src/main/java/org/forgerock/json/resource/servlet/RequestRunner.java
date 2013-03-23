@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012 ForgeRock AS.
+ * Copyright 2012-2013 ForgeRock AS.
  */
 package org.forgerock.json.resource.servlet;
 
@@ -48,13 +48,14 @@ import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.UpdateRequest;
 
 /**
- * Common request processing used by {@code RequestDispatcher}s.
+ * Common request processing.
  */
-abstract class RequestRunner implements ResultHandler<Connection>, RequestVisitor<Void, Void> {
+final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<Void, Void> {
+
+    private final CompletionHandler completionHandler;
 
     // Connection set on handleResult(Connection).
     private Connection connection = null;
-
     private final Context context;
     private final HttpServletRequest httpRequest;
     private final HttpServletResponse httpResponse;
@@ -62,13 +63,14 @@ abstract class RequestRunner implements ResultHandler<Connection>, RequestVisito
     private final JsonGenerator writer;
 
     RequestRunner(final Context context, final Request request,
-            final HttpServletRequest httpRequest, final HttpServletResponse httpResponse)
-            throws Exception {
+            final HttpServletRequest httpRequest, final HttpServletResponse httpResponse,
+            final CompletionHandler completionHandler) throws Exception {
         this.context = context;
         this.request = request;
         this.httpRequest = httpRequest;
         this.httpResponse = httpResponse;
         this.writer = getJsonGenerator(httpRequest, httpResponse);
+        this.completionHandler = completionHandler;
     }
 
     /**
@@ -271,21 +273,6 @@ abstract class RequestRunner implements ResultHandler<Connection>, RequestVisito
         return null; // return Void.
     }
 
-    /**
-     * Performs post-completion processing such as completing the AsyncContext
-     * (Servlet3) or a latch (Servlet2).
-     */
-    abstract void postComplete();
-
-    /**
-     * Performs post-error processing such as sending error (Servlet3) or a
-     * latch (Servlet2).
-     *
-     * @param e
-     *            The error that occurred.
-     */
-    abstract void postError(Exception e);
-
     private void doComplete() {
         try {
             closeQuietly(connection, writer);
@@ -359,7 +346,15 @@ abstract class RequestRunner implements ResultHandler<Connection>, RequestVisito
         };
     }
 
-    private void writeJsonValue(JsonValue json) throws IOException {
+    private void postComplete() {
+        completionHandler.onComplete();
+    }
+
+    private void postError(final Throwable t) {
+        completionHandler.onError(t);
+    }
+
+    private void writeJsonValue(final JsonValue json) throws IOException {
         writer.writeObject(filterResource(json, request.getFieldFilters()).getObject());
     }
 
