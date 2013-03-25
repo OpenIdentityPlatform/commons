@@ -23,12 +23,42 @@ package org.forgerock.json.resource;
  * state information if result paging has been enabled for the query.
  */
 public final class QueryResult {
+
+    /**
+     * The name of the field which contains the error in the JSON
+     * representation.
+     */
+    public static final String FIELD_ERROR = "error";
+    /**
+     * The name of the field which contains the paged results cookie in the JSON
+     * representation.
+     */
+    public static final String FIELD_PAGED_RESULTS_COOKIE = QueryRequest.FIELD_PAGED_RESULTS_COOKIE;
+
+    /**
+     * The name of the field which contains the remaining paged results in the
+     * JSON representation.
+     */
+    public static final String FIELD_REMAINING_PAGED_RESULTS = "remainingPagedResults";
+
+    /**
+     * The name of the field which contains the result count in the JSON
+     * representation.
+     */
+    public static final String FIELD_RESULT_COUNT = "resultCount";
+
+    /**
+     * The name of the field which contains the array of matching resources in
+     * the JSON representation.
+     */
+    public static final String FIELD_RESULT = "result";
+
     private final String pagedResultsCookie;
     private final int remainingPagedResults;
 
     /**
-     * Creates a new query result with a {@code null} paged results cookie and no
-     * estimate of the total number of remaining results.
+     * Creates a new query result with a {@code null} paged results cookie and
+     * no estimate of the total number of remaining results.
      */
     public QueryResult() {
         this(null, -1);

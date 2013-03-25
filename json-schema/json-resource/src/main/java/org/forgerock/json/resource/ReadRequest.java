@@ -47,7 +47,7 @@ public interface ReadRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    List<JsonPointer> getFieldFilters();
+    List<JsonPointer> getFields();
 
     /**
      * {@inheritDoc}
