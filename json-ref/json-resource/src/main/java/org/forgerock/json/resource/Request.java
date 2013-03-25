@@ -9,9 +9,9 @@
  * When distributing Covered Software, include this CDDL Header Notice in each file and include
  * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
- * information: "Portions Copyrighted [year] [name of copyright owner]".
+ * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright © 2012 ForgeRock AS. All rights reserved.
+ * Copyright 2012-2013 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -30,6 +30,18 @@ public interface Request {
     // any of these parameters.
 
     // TODO: include support for something similar to LDAP controls?
+
+    /**
+     * The name of the field which contains the fields in the JSON
+     * representation.
+     */
+    public static final String FIELD_FIELDS = "fields";
+
+    /**
+     * The name of the field which contains the resource name in the JSON
+     * representation.
+     */
+    public static final String FIELD_RESOURCE_NAME = "resourceName";
 
     /**
      * Applies a {@code RequestVisitor} to this {@code Request}.
@@ -93,7 +105,7 @@ public interface Request {
      * @return The list of fields which should be included with each JSON
      *         resource returned by this request (never {@code null}).
      */
-    List<JsonPointer> getFieldFilters();
+    List<JsonPointer> getFields();
 
     /**
      * Returns the type of this request.

@@ -15,6 +15,7 @@
  */
 package org.forgerock.json.resource.servlet;
 
+import static org.forgerock.json.resource.ActionRequest.ACTION_ID_CREATE;
 import static org.forgerock.json.resource.servlet.CompletionHandlerFactory.getInstance;
 import static org.forgerock.json.resource.servlet.HttpUtils.CONTENT_TYPE;
 import static org.forgerock.json.resource.servlet.HttpUtils.CONTENT_TYPE_REGEX;
@@ -28,7 +29,15 @@ import static org.forgerock.json.resource.servlet.HttpUtils.METHOD_POST;
 import static org.forgerock.json.resource.servlet.HttpUtils.METHOD_PUT;
 import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_ACTION;
 import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_DEBUG;
+import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_FIELDS;
+import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_PAGED_RESULTS_COOKIE;
+import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_PAGED_RESULTS_OFFSET;
+import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_PAGE_SIZE;
 import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_PRETTY_PRINT;
+import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_EXPRESSION;
+import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_FILTER;
+import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_ID;
+import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_SORT_KEYS;
 import static org.forgerock.json.resource.servlet.HttpUtils.asBooleanValue;
 import static org.forgerock.json.resource.servlet.HttpUtils.asIntValue;
 import static org.forgerock.json.resource.servlet.HttpUtils.asSingleValue;
@@ -263,8 +272,8 @@ public final class HttpServletAdapter {
             rejectIfMatch(req);
 
             final Map<String, String[]> parameters = req.getParameterMap();
-            if (hasParameter(req, "_queryId") || hasParameter(req, "_queryExpression")
-                    || hasParameter(req, "_filter")) {
+            if (hasParameter(req, PARAM_QUERY_ID) || hasParameter(req, PARAM_QUERY_EXPRESSION)
+                    || hasParameter(req, PARAM_QUERY_FILTER)) {
                 // Additional pre-validation for queries.
                 rejectIfNoneMatch(req);
 
@@ -277,7 +286,7 @@ public final class HttpServletAdapter {
 
                     if (parseCommonParameter(name, values, request)) {
                         continue;
-                    } else if (name.equalsIgnoreCase("_sortKeys")) {
+                    } else if (name.equalsIgnoreCase(PARAM_SORT_KEYS)) {
                         for (final String s : values) {
                             try {
                                 request.addSortKey(s.split(","));
@@ -289,17 +298,17 @@ public final class HttpServletAdapter {
                                         + "separated list of sort keys");
                             }
                         }
-                    } else if (name.equalsIgnoreCase("_queryId")) {
+                    } else if (name.equalsIgnoreCase(PARAM_QUERY_ID)) {
                         request.setQueryId(asSingleValue(name, values));
-                    } else if (name.equalsIgnoreCase("_queryExpression")) {
+                    } else if (name.equalsIgnoreCase(PARAM_QUERY_EXPRESSION)) {
                         request.setQueryExpression(asSingleValue(name, values));
-                    } else if (name.equalsIgnoreCase("_pagedResultsCookie")) {
+                    } else if (name.equalsIgnoreCase(PARAM_PAGED_RESULTS_COOKIE)) {
                         request.setPagedResultsCookie(asSingleValue(name, values));
-                    } else if (name.equalsIgnoreCase("_pagedResultsOffset")) {
+                    } else if (name.equalsIgnoreCase(PARAM_PAGED_RESULTS_OFFSET)) {
                         request.setPagedResultsOffset(asIntValue(name, values));
-                    } else if (name.equalsIgnoreCase("_pageSize")) {
+                    } else if (name.equalsIgnoreCase(PARAM_PAGE_SIZE)) {
                         request.setPageSize(asIntValue(name, values));
-                    } else if (name.equalsIgnoreCase("_filter")) {
+                    } else if (name.equalsIgnoreCase(PARAM_QUERY_FILTER)) {
                         final String s = asSingleValue(name, values);
                         try {
                             request.setQueryFilter(QueryFilter.valueOf(s));
@@ -316,27 +325,27 @@ public final class HttpServletAdapter {
                 // Check for incompatible arguments.
                 if (request.getQueryId() != null && request.getQueryFilter() != null) {
                     // FIXME: i18n.
-                    throw new BadRequestException(
-                            "The parameters _queryId and _filter are mutually exclusive");
+                    throw new BadRequestException("The parameters " + PARAM_QUERY_ID + " and "
+                            + PARAM_QUERY_FILTER + " are mutually exclusive");
                 }
 
                 if (request.getQueryId() != null && request.getQueryExpression() != null) {
                     // FIXME: i18n.
-                    throw new BadRequestException(
-                            "The parameters _queryExpression and _queryId are mutually exclusive");
+                    throw new BadRequestException("The parameters " + PARAM_QUERY_ID + " and "
+                            + PARAM_QUERY_EXPRESSION + " are mutually exclusive");
                 }
 
                 if (request.getQueryFilter() != null && request.getQueryExpression() != null) {
                     // FIXME: i18n.
-                    throw new BadRequestException(
-                            "The parameters _queryExpression and _filter are mutually exclusive");
+                    throw new BadRequestException("The parameters " + PARAM_QUERY_FILTER + " and "
+                            + PARAM_QUERY_EXPRESSION + " are mutually exclusive");
                 }
 
                 if (request.getQueryId() == null
                         && !request.getAdditionalQueryParameters().isEmpty()) {
                     // FIXME: i18n.
                     throw new BadRequestException("Additional query parameters can only be used "
-                            + "with the parameter _queryId, not _filter");
+                            + "with the parameter " + PARAM_QUERY_ID);
                 }
                 doRequest(req, resp, request);
             } else {
@@ -388,8 +397,7 @@ public final class HttpServletAdapter {
 
             final Map<String, String[]> parameters = req.getParameterMap();
             final String action = asSingleValue(PARAM_ACTION, getParameter(req, PARAM_ACTION));
-
-            if (action.equalsIgnoreCase("create")) {
+            if (action.equalsIgnoreCase(ACTION_ID_CREATE)) {
                 final JsonValue content = getJsonContent(req);
                 final CreateRequest request =
                         Requests.newCreateRequest(getResourceName(req), content);
@@ -549,7 +557,7 @@ public final class HttpServletAdapter {
 
     private boolean parseCommonParameter(final String name, final String[] values,
             final Request request) throws ResourceException {
-        if (name.equalsIgnoreCase("_fields")) {
+        if (name.equalsIgnoreCase(PARAM_FIELDS)) {
             for (final String s : values) {
                 try {
                     request.addField(s.split(","));

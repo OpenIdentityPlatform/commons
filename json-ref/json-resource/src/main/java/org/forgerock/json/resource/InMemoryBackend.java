@@ -343,7 +343,7 @@ public final class InMemoryBackend implements CollectionResourceProvider {
     public void actionCollection(final ServerContext context, final ActionRequest request,
             final ResultHandler<JsonValue> handler) {
         try {
-            if (request.getActionId().equals("clear")) {
+            if (request.getAction().equals("clear")) {
                 final int size;
                 synchronized (writeLock) {
                     size = resources.size();
@@ -353,7 +353,7 @@ public final class InMemoryBackend implements CollectionResourceProvider {
                 result.put("cleared", size);
                 handler.handleResult(result);
             } else {
-                throw new NotSupportedException("Unrecognized action ID '" + request.getActionId()
+                throw new NotSupportedException("Unrecognized action ID '" + request.getAction()
                         + "'. Supported action IDs: clear");
             }
         } catch (final ResourceException e) {
@@ -587,8 +587,8 @@ public final class InMemoryBackend implements CollectionResourceProvider {
     private void addIdAndRevision(final Resource resource) throws ResourceException {
         final JsonValue content = resource.getContent();
         try {
-            content.asMap().put("_id", resource.getId());
-            content.asMap().put("_rev", resource.getRevision());
+            content.asMap().put(Resource.FIELD_CONTENT_ID, resource.getId());
+            content.asMap().put(Resource.FIELD_CONTENT_REVISION, resource.getRevision());
         } catch (final JsonValueException e) {
             throw new BadRequestException(
                     "The request could not be processed because the provided "

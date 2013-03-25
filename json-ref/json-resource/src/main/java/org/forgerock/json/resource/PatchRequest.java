@@ -9,9 +9,9 @@
  * When distributing Covered Software, include this CDDL Header Notice in each file and include
  * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
- * information: "Portions Copyrighted [year] [name of copyright owner]".
+ * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright © 2012 ForgeRock AS. All rights reserved.
+ * Copyright 2012-2013 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -25,6 +25,18 @@ import org.forgerock.json.fluent.JsonPointer;
  * existing content.
  */
 public interface PatchRequest extends Request {
+
+    /**
+     * The name of the field which contains the resource version in the JSON
+     * representation.
+     */
+    public static final String FIELD_REVISION = "revision";
+
+    /**
+     * The name of the field which contains the patch content in the JSON
+     * representation.
+     */
+    public static final String FIELD_PATCH = "patch";
 
     /**
      * {@inheritDoc}
@@ -48,7 +60,7 @@ public interface PatchRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    List<JsonPointer> getFieldFilters();
+    List<JsonPointer> getFields();
 
     /**
      * Returns the patch which should be applied to the JSON resource.
