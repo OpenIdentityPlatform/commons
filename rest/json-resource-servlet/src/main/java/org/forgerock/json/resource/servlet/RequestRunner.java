@@ -15,6 +15,11 @@
  */
 package org.forgerock.json.resource.servlet;
 
+import static org.forgerock.json.resource.QueryResult.FIELD_ERROR;
+import static org.forgerock.json.resource.QueryResult.FIELD_PAGED_RESULTS_COOKIE;
+import static org.forgerock.json.resource.QueryResult.FIELD_REMAINING_PAGED_RESULTS;
+import static org.forgerock.json.resource.QueryResult.FIELD_RESULT;
+import static org.forgerock.json.resource.QueryResult.FIELD_RESULT_COUNT;
 import static org.forgerock.json.resource.Resources.filterResource;
 import static org.forgerock.json.resource.servlet.HttpUtils.HEADER_ETAG;
 import static org.forgerock.json.resource.servlet.HttpUtils.HEADER_LOCATION;
@@ -199,8 +204,8 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
                     // Partial results - it's to late to set the status.
                     try {
                         writer.writeEndArray();
-                        writer.writeNumberField("resultCount", resultCount);
-                        writer.writeObjectField("error", error.toJsonValue().getObject());
+                        writer.writeNumberField(FIELD_RESULT_COUNT, resultCount);
+                        writer.writeObjectField(FIELD_ERROR, error.toJsonValue().getObject());
                         writer.writeEndObject();
                         doComplete();
                     } catch (final Exception e) {
@@ -233,9 +238,10 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
                 try {
                     writeHeader();
                     writer.writeEndArray();
-                    writer.writeNumberField("resultCount", resultCount);
-                    writer.writeStringField("pagedResultsCookie", result.getPagedResultsCookie());
-                    writer.writeNumberField("remainingPagedResults", result
+                    writer.writeNumberField(FIELD_RESULT_COUNT, resultCount);
+                    writer.writeStringField(FIELD_PAGED_RESULTS_COOKIE, result
+                            .getPagedResultsCookie());
+                    writer.writeNumberField(FIELD_REMAINING_PAGED_RESULTS, result
                             .getRemainingPagedResults());
                     writer.writeEndObject();
                     doComplete();
@@ -247,7 +253,7 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
             private void writeHeader() throws IOException {
                 if (isFirstResult) {
                     writer.writeStartObject();
-                    writer.writeArrayFieldStart("result");
+                    writer.writeArrayFieldStart(FIELD_RESULT);
                     isFirstResult = false;
                 }
             }
@@ -355,7 +361,7 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
     }
 
     private void writeJsonValue(final JsonValue json) throws IOException {
-        writer.writeObject(filterResource(json, request.getFieldFilters()).getObject());
+        writer.writeObject(filterResource(json, request.getFields()).getObject());
     }
 
     private void writeResource(final Resource resource) throws IOException {

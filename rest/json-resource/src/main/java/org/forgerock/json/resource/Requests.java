@@ -9,9 +9,9 @@
  * When distributing Covered Software, include this CDDL Header Notice in each file and include
  * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
- * information: "Portions Copyrighted [year] [name of copyright owner]".
+ * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2013 ForgeRock AS. All rights reserved.
+ * Copyright 2012-2013 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -40,7 +40,7 @@ public final class Requests {
 
         protected AbstractRequestImpl(final Request request) {
             this.resourceName = request.getResourceName();
-            this.fields.addAll(request.getFieldFilters());
+            this.fields.addAll(request.getFields());
         }
 
         /**
@@ -73,7 +73,7 @@ public final class Requests {
          * {@inheritDoc}
          */
         @Override
-        public final List<JsonPointer> getFieldFilters() {
+        public final List<JsonPointer> getFields() {
             return fields;
         }
 
@@ -135,7 +135,7 @@ public final class Requests {
 
         private ActionRequestImpl(final ActionRequest request) {
             super(request);
-            this.actionId = request.getActionId();
+            this.actionId = request.getAction();
             this.content = copyJsonValue(request.getContent());
             this.parameters.putAll(request.getAdditionalActionParameters());
         }
@@ -146,7 +146,7 @@ public final class Requests {
         };
 
         @Override
-        public String getActionId() {
+        public String getAction() {
             return actionId;
         }
 
@@ -161,7 +161,7 @@ public final class Requests {
         }
 
         @Override
-        public ActionRequest setActionId(final String id) {
+        public ActionRequest setAction(final String id) {
             this.actionId = notNull(id);
             return this;
         }
@@ -658,7 +658,7 @@ public final class Requests {
      * @return The new action request.
      */
     public static ActionRequest newActionRequest(final String resourceName, final String actionId) {
-        return new ActionRequestImpl().setResourceName(resourceName).setActionId(actionId);
+        return new ActionRequestImpl().setResourceName(resourceName).setAction(actionId);
     }
 
     /**
