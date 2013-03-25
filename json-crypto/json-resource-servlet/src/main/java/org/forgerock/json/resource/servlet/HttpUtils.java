@@ -28,9 +28,12 @@ import org.codehaus.jackson.JsonGenerator.Feature;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.PreconditionFailedException;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.ResourceException;
 
 /**
@@ -45,12 +48,14 @@ final class HttpUtils {
             "^application/json([ ]*;[ ]*charset=utf-8)?$", Pattern.CASE_INSENSITIVE);
     static final String CRLF = "\r\n";
     static final String ETAG_ANY = "*";
+
     static final String HEADER_CACHE_CONTROL = "Cache-Control";
     static final String HEADER_ETAG = "ETag";
     static final String HEADER_IF_MATCH = "If-Match";
     static final String HEADER_IF_NONE_MATCH = "If-None-Match";
     static final String HEADER_LOCATION = "Location";
     static final String HEADER_X_HTTP_METHOD_OVERRIDE = "X-HTTP-Method-Override";
+
     static final String METHOD_DELETE = "DELETE";
     static final String METHOD_GET = "GET";
     static final String METHOD_HEAD = "HEAD";
@@ -59,9 +64,18 @@ final class HttpUtils {
     static final String METHOD_POST = "POST";
     static final String METHOD_PUT = "PUT";
     static final String METHOD_TRACE = "TRACE";
-    static final String PARAM_ACTION = "_action";
+
+    static final String PARAM_ACTION = param(ActionRequest.FIELD_ACTION);
     static final String PARAM_DEBUG = "_debug";
+    static final String PARAM_FIELDS = param(Request.FIELD_FIELDS);
+    static final String PARAM_PAGE_SIZE = param(QueryRequest.FIELD_PAGE_SIZE);
+    static final String PARAM_PAGED_RESULTS_COOKIE = param(QueryRequest.FIELD_PAGED_RESULTS_COOKIE);
+    static final String PARAM_PAGED_RESULTS_OFFSET = param(QueryRequest.FIELD_PAGED_RESULTS_OFFSET);
     static final String PARAM_PRETTY_PRINT = "_prettyPrint";
+    static final String PARAM_QUERY_EXPRESSION = param(QueryRequest.FIELD_QUERY_EXPRESSION);
+    static final String PARAM_QUERY_FILTER = param(QueryRequest.FIELD_QUERY_FILTER);
+    static final String PARAM_QUERY_ID = param(QueryRequest.FIELD_QUERY_ID);
+    static final String PARAM_SORT_KEYS = param(QueryRequest.FIELD_SORT_KEYS);
 
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
 
@@ -390,6 +404,10 @@ final class HttpUtils {
             throw new PreconditionFailedException("If-None-Match not supported for "
                     + getMethod(req) + " requests");
         }
+    }
+
+    private static String param(final String field) {
+        return "_" + field;
     }
 
     private HttpUtils() {
