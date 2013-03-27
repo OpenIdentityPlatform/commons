@@ -21,22 +21,23 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * A configurator is used to configure the Servlet based on the version of the
- * Servlet container.
+ * A Servlet API version adapter provides an abstraction which allows Servlet
+ * and Filter implementations to interact with the Servlet container
+ * independently of the Servlet API version. At the moment the adapter only
+ * provides an abstraction for performing asynchronous processing, but other API
+ * features could be added in future (such as async IO).
  */
-public abstract class CompletionHandlerFactory {
+public abstract class ServletApiVersionAdapter {
     /**
-     * Returns a completion handler factory appropriate for use with the Servlet
-     * container.
+     * Returns an adapter configured for the current Servlet API version.
      *
      * @param servletContext
      *            The context.
-     * @return A completion handler factory appropriate for the Servlet
-     *         container.
+     * @return An adapter appropriate for the Servlet container.
      * @throws ServletException
-     *             If the Servlet container is not supported.
+     *             If the Servlet container version is not supported.
      */
-    public static CompletionHandlerFactory getInstance(final ServletContext servletContext)
+    public static ServletApiVersionAdapter getInstance(final ServletContext servletContext)
             throws ServletException {
         switch (servletContext.getMajorVersion()) {
         case 1:
@@ -44,30 +45,29 @@ public abstract class CompletionHandlerFactory {
             throw new ServletException("Unsupported Servlet version "
                     + servletContext.getMajorVersion());
         case 2:
-            return new Servlet2CompletionHandlerFactory();
+            return new Servlet2Adapter();
         default:
-            return new Servlet3CompletionHandlerFactory();
+            return new Servlet3Adapter();
         }
     }
 
     /**
      * Prevent sub-classing and instantiation outside this package.
      */
-    CompletionHandlerFactory() {
+    ServletApiVersionAdapter() {
         // Nothing to do.
     }
 
     /**
-     * Creates a new completion handler appropriate for the Servlet container.
+     * Creates a new synchronizer appropriate for the provided HTTP request.
      *
      * @param httpRequest
      *            The HTTP request.
      * @param httpResponse
      *            The HTTP response.
-     * @return Returns a new completion handler appropriate for the Servlet
-     *         container.
+     * @return Returns a new synchronizer appropriate for the HTTP request.
      */
-    public abstract CompletionHandler createCompletionHandler(final HttpServletRequest httpRequest,
-            final HttpServletResponse httpResponse);
+    public abstract ServletSynchronizer createServletSynchronizer(
+            final HttpServletRequest httpRequest, final HttpServletResponse httpResponse);
 
 }

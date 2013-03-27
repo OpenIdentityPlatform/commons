@@ -23,28 +23,28 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * A factory which creates blocking completion handlers suitable for use in
- * Servlet 2.x containers or when asynchronous dispatch is not supported.
+ * An adapter for use in Servlet 2.x containers.
  */
-final class Servlet2CompletionHandlerFactory extends CompletionHandlerFactory {
+final class Servlet2Adapter extends ServletApiVersionAdapter {
 
     /**
-     * Completion handler implementation. Package private because it is used as
-     * the fall-back implementation in Servlet 3 when async is not supported.
+     * Synchronization implementation. Package private because it is used as the
+     * fall-back implementation in Servlet 3 when async is not supported.
      */
-    final static class Servlet2Impl implements CompletionHandler {
+    final static class Servlet2Synchronizer implements ServletSynchronizer {
         private final HttpServletRequest httpRequest;
         private final HttpServletResponse httpResponse;
         private final CountDownLatch latch = new CountDownLatch(1);
 
-        Servlet2Impl(final HttpServletRequest httpRequest, final HttpServletResponse httpResponse) {
+        Servlet2Synchronizer(final HttpServletRequest httpRequest,
+                final HttpServletResponse httpResponse) {
             this.httpRequest = httpRequest;
             this.httpResponse = httpResponse;
         }
 
         @Override
-        public void addCompletionListener(final Runnable runnable) {
-            throw new IllegalStateException();
+        public void addAsyncListener(final Runnable runnable) {
+            // Do nothing - this dispatcher is blocking.
         }
 
         @Override
@@ -53,31 +53,35 @@ final class Servlet2CompletionHandlerFactory extends CompletionHandlerFactory {
         }
 
         @Override
-        public boolean isAsynchronous() {
+        public boolean isAsync() {
             return false;
         }
 
         @Override
-        public void onComplete() {
+        public void signal() {
             latch.countDown();
         }
 
         @Override
-        public void onError(final Throwable t) {
-            fail(httpRequest, httpResponse, t);
+        public void signalAndComplete() {
             latch.countDown();
         }
 
+        @Override
+        public void signalAndComplete(final Throwable t) {
+            fail(httpRequest, httpResponse, t);
+            latch.countDown();
+        }
     }
 
-    Servlet2CompletionHandlerFactory() {
+    Servlet2Adapter() {
         // Nothing to do.
     }
 
     @Override
-    public CompletionHandler createCompletionHandler(final HttpServletRequest httpRequest,
+    public ServletSynchronizer createServletSynchronizer(final HttpServletRequest httpRequest,
             final HttpServletResponse httpResponse) {
-        return new Servlet2Impl(httpRequest, httpResponse);
+        return new Servlet2Synchronizer(httpRequest, httpResponse);
     }
 
 }
