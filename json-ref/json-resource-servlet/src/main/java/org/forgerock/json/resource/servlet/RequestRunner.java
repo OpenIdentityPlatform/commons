@@ -57,8 +57,6 @@ import org.forgerock.json.resource.UpdateRequest;
  */
 final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<Void, Void> {
 
-    private final CompletionHandler completionHandler;
-
     // Connection set on handleResult(Connection).
     private Connection connection = null;
     private final Context context;
@@ -66,16 +64,17 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
     private final HttpServletResponse httpResponse;
     private final Request request;
     private final JsonGenerator writer;
+    private final ServletSynchronizer sync;
 
     RequestRunner(final Context context, final Request request,
             final HttpServletRequest httpRequest, final HttpServletResponse httpResponse,
-            final CompletionHandler completionHandler) throws Exception {
+            final ServletSynchronizer sync) throws Exception {
         this.context = context;
         this.request = request;
         this.httpRequest = httpRequest;
         this.httpResponse = httpResponse;
         this.writer = getJsonGenerator(httpRequest, httpResponse);
-        this.completionHandler = completionHandler;
+        this.sync = sync;
     }
 
     /**
@@ -83,7 +82,7 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
      */
     @Override
     public final void handleError(final ResourceException error) {
-        doError(error);
+        onError(error);
     }
 
     /**
@@ -108,7 +107,7 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
              */
             @Override
             public void handleError(final ResourceException error) {
-                doError(error);
+                onError(error);
             }
 
             /**
@@ -123,9 +122,9 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
                         // No content.
                         httpResponse.setStatus(HttpServletResponse.SC_NO_CONTENT);
                     }
-                    doComplete();
+                    onSuccess();
                 } catch (final Exception e) {
-                    doError(e);
+                    onError(e);
                 }
             }
         });
@@ -143,7 +142,7 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
              */
             @Override
             public void handleError(final ResourceException error) {
-                doError(error);
+                onError(error);
             }
 
             /**
@@ -157,9 +156,9 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
                     }
                     httpResponse.setStatus(HttpServletResponse.SC_CREATED);
                     writeResource(result);
-                    doComplete();
+                    onSuccess();
                 } catch (final Exception e) {
-                    doError(e);
+                    onError(e);
                 }
             }
         });
@@ -199,7 +198,7 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
             @Override
             public void handleError(final ResourceException error) {
                 if (isFirstResult) {
-                    doError(error);
+                    onError(error);
                 } else {
                     // Partial results - it's to late to set the status.
                     try {
@@ -207,9 +206,9 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
                         writer.writeNumberField(FIELD_RESULT_COUNT, resultCount);
                         writer.writeObjectField(FIELD_ERROR, error.toJsonValue().getObject());
                         writer.writeEndObject();
-                        doComplete();
+                        onSuccess();
                     } catch (final Exception e) {
-                        doError(e);
+                        onError(e);
                     }
                 }
             }
@@ -244,9 +243,9 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
                     writer.writeNumberField(FIELD_REMAINING_PAGED_RESULTS, result
                             .getRemainingPagedResults());
                     writer.writeEndObject();
-                    doComplete();
+                    onSuccess();
                 } catch (final Exception e) {
-                    doError(e);
+                    onError(e);
                 }
             }
 
@@ -279,21 +278,21 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
         return null; // return Void.
     }
 
-    private void doComplete() {
+    private void onSuccess() {
         try {
             closeQuietly(connection, writer);
         } finally {
-            postComplete();
+            sync.signalAndComplete();
         }
     }
 
-    private void doError(final Exception e) {
+    private void onError(final Exception e) {
         try {
             // Don't close the JSON writer because the request will become
             // "completed" which then prevents us from sending an error.
             closeQuietly(connection);
         } finally {
-            postError(e);
+            sync.signalAndComplete(e);
         }
     }
 
@@ -324,7 +323,7 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
              */
             @Override
             public void handleError(final ResourceException error) {
-                doError(error);
+                onError(error);
             }
 
             /**
@@ -344,20 +343,12 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
                     }
 
                     writeResource(result);
-                    doComplete();
+                    onSuccess();
                 } catch (final Exception e) {
-                    doError(e);
+                    onError(e);
                 }
             }
         };
-    }
-
-    private void postComplete() {
-        completionHandler.onComplete();
-    }
-
-    private void postError(final Throwable t) {
-        completionHandler.onError(t);
     }
 
     private void writeJsonValue(final JsonValue json) throws IOException {

@@ -16,7 +16,6 @@
 package org.forgerock.json.resource.servlet;
 
 import static org.forgerock.json.resource.ActionRequest.ACTION_ID_CREATE;
-import static org.forgerock.json.resource.servlet.CompletionHandlerFactory.getInstance;
 import static org.forgerock.json.resource.servlet.HttpUtils.CONTENT_TYPE;
 import static org.forgerock.json.resource.servlet.HttpUtils.CONTENT_TYPE_REGEX;
 import static org.forgerock.json.resource.servlet.HttpUtils.ETAG_ANY;
@@ -127,7 +126,7 @@ public final class HttpServletAdapter {
         THIS_API_VERSION = bundle.getString("rest-api-version");
     }
 
-    private final CompletionHandlerFactory completionHandlerFactory;
+    private final ServletApiVersionAdapter syncFactory;
     private final ConnectionFactory connectionFactory;
     private final HttpServletContextFactory contextFactory;
     private final ServletContext servletContext;
@@ -200,7 +199,7 @@ public final class HttpServletAdapter {
                 contextFactory != null ? contextFactory : SecurityContextFactory
                         .getHttpServletContextFactory();
         this.connectionFactory = checkNotNull(connectionFactory);
-        this.completionHandlerFactory = getInstance(servletContext);
+        this.syncFactory = ServletApiVersionAdapter.getInstance(servletContext);
     }
 
     /**
@@ -512,12 +511,10 @@ public final class HttpServletAdapter {
     private void doRequest(final HttpServletRequest req, final HttpServletResponse resp,
             final Request request) throws ResourceException, Exception {
         final Context context = newRequestContext(req);
-        final CompletionHandler completionHandler =
-                completionHandlerFactory.createCompletionHandler(req, resp);
-        final RequestRunner runner =
-                new RequestRunner(context, request, req, resp, completionHandler);
+        final ServletSynchronizer sync = syncFactory.createServletSynchronizer(req, resp);
+        final RequestRunner runner = new RequestRunner(context, request, req, resp, sync);
         connectionFactory.getConnectionAsync(runner);
-        completionHandler.awaitIfNeeded();
+        sync.awaitIfNeeded(); // Only blocks when async is not supported.
     }
 
     private void dumpRequest(final HttpServletRequest req) {
