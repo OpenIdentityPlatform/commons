@@ -25,34 +25,34 @@ import javax.servlet.AsyncListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.forgerock.json.resource.servlet.Servlet2CompletionHandlerFactory.Servlet2Impl;
+import org.forgerock.json.resource.servlet.Servlet2Adapter.Servlet2Synchronizer;
 
 /**
- * A factory which creates non-blocking completion handlers suitable for use in
- * Servlet 3.x containers when asynchronous dispatch is supported.
+ * An adapter for use in Servlet 3.x containers.
  */
-final class Servlet3CompletionHandlerFactory extends CompletionHandlerFactory {
+final class Servlet3Adapter extends ServletApiVersionAdapter {
     /**
-     * Completion handler implementation.
+     * Synchronization implementation - only used when the container supports
+     * asynchronous processing.
      */
-    private final static class Servlet3Impl implements CompletionHandler {
+    private final static class Servlet3Synchronizer implements ServletSynchronizer {
         private final AsyncContext asyncContext;
         private final HttpServletRequest httpRequest;
         private final HttpServletResponse httpResponse;
 
-        private Servlet3Impl(final HttpServletRequest httpRequest,
+        private Servlet3Synchronizer(final HttpServletRequest httpRequest,
                 final HttpServletResponse httpResponse) {
             this.httpRequest = httpRequest;
             this.httpResponse = httpResponse;
             this.asyncContext =
                     httpRequest.isAsyncStarted() ? httpRequest.getAsyncContext() : httpRequest
                             .startAsync();
-            // Disable timeouts - see http://java.net/jira/browse/GRIZZLY-1325
+            // Disable timeouts for certain containers - see http://java.net/jira/browse/GRIZZLY-1325
             asyncContext.setTimeout(0);
         }
 
         @Override
-        public void addCompletionListener(final Runnable runnable) {
+        public void addAsyncListener(final Runnable runnable) {
             asyncContext.addListener(new AsyncListener() {
 
                 @Override
@@ -80,38 +80,43 @@ final class Servlet3CompletionHandlerFactory extends CompletionHandlerFactory {
 
         @Override
         public void awaitIfNeeded() throws Exception {
-            // Nothing to do: this dispatcher is non-blocking.
+            // Nothing to signal: this dispatcher is non-blocking.
         }
 
         @Override
-        public boolean isAsynchronous() {
+        public boolean isAsync() {
             return true;
         }
 
         @Override
-        public void onComplete() {
+        public void signal() {
+            // Nothing to signal: this dispatcher is non-blocking.
+        }
+
+        @Override
+        public void signalAndComplete() {
             asyncContext.complete();
         }
 
         @Override
-        public void onError(final Throwable t) {
+        public void signalAndComplete(final Throwable t) {
             fail(httpRequest, httpResponse, t);
             asyncContext.complete();
         }
     }
 
-    Servlet3CompletionHandlerFactory() {
+    Servlet3Adapter() {
         // Nothing to do.
     }
 
     @Override
-    public CompletionHandler createCompletionHandler(final HttpServletRequest httpRequest,
+    public ServletSynchronizer createServletSynchronizer(final HttpServletRequest httpRequest,
             final HttpServletResponse httpResponse) {
         if (httpRequest.isAsyncSupported()) {
-            return new Servlet3Impl(httpRequest, httpResponse);
+            return new Servlet3Synchronizer(httpRequest, httpResponse);
         } else {
-            // Fall-back to blocking.
-            return new Servlet2Impl(httpRequest, httpResponse);
+            // Fall-back to Servlet 2 blocking implementation.
+            return new Servlet2Synchronizer(httpRequest, httpResponse);
         }
     }
 
