@@ -1,13 +1,13 @@
-<div class="content">
+<div class="content container-shadow">
     
-	<div class="column-layout">
-		<div class="float-left">
-			<h2 class="float-left">{{t "templates.user.UserRegistrationTemplate.registerYourAccount"}}</h2>	
-		</div>
-		<div class="float-right" style="padding-top: 10px;">
-			{{t "templates.user.UserRegistrationTemplate.haveAccoutQuestion"}} <a href="{{url 'login'}}" class="active bold">{{t "templates.user.UserRegistrationTemplate.logIn"}}</a>
-		</div>
-	</div>
+    <div class="column-layout">
+        <div class="float-left">
+            <h2 class="float-left">{{t "templates.user.UserRegistrationTemplate.registerYourAccount"}}</h2>    
+        </div>
+        <div class="float-right" style="padding-top: 10px;">
+            {{t "templates.user.UserRegistrationTemplate.haveAccoutQuestion"}} <a href="{{url 'login'}}" class="active bold">{{t "templates.user.UserRegistrationTemplate.logIn"}}</a>
+        </div>
+    </div>
 
     <form action="" method="post" class="form large center">
         <fieldset>
@@ -91,12 +91,12 @@
                 <p style="width: 400px; margin-left: 220px; margin-bottom: 10px;">{{t "templates.user.ChangeSiteIdentificationDialogTemplate.siteImageAndPhaseExplanation"}}</p>
                 
                 <div class="ContentFlow" id="siteImageFlow">
-		            <div class="loadIndicator"><div class="indicator"></div></div>
-		            <div class="flow">
-		                {{siteImages siteImages}}
-		            </div>
-		            <div class="scrollbar"><div class="slider"></div></div>
-		        </div>                     
+                    <div class="loadIndicator"><div class="indicator"></div></div>
+                    <div class="flow">
+                        {{siteImages siteImages}}
+                    </div>
+                    <div class="scrollbar"><div class="slider"></div></div>
+                </div>                     
                 
                 <div class="field">
                     <label>{{t "common.user.sitePhrase"}}</label> 
@@ -108,16 +108,16 @@
                 
                 <div class="field field-checkbox">
                     <label>
-                    	<input type="checkbox" name="terms" value="yes" data-validator="termsOfUse" data-validator-event="click" data-validation-status="error"/> 
-                    	{{t "templates.user.UserRegistrationTemplate.agreeToTerms" '<a href="#register/terms_of_use/" id="termOfUseLink" class="ice" title="terms">' '</a>'}}
+                        <input type="checkbox" name="terms" value="yes" data-validator="termsOfUse" data-validator-event="click" data-validation-status="error"/> 
+                        {{t "templates.user.UserRegistrationTemplate.agreeToTerms" '<a href="#register/terms_of_use/" id="termOfUseLink" class="ice" title="terms">' '</a>'}}
                         <div class="validation-message validation-message-checkbox"></div>
                     </label>
                     
                 </div>
                 
                 <div class="field field-submit">
-                	<input type="submit" name="register" class="button" value="{{t "common.form.register"}}" />
-                	<div class="input-validation-message">{{t "common.form.validation.formContainsErrors"}}</div>
+                    <input type="submit" name="register" class="button" value="{{t "common.form.register"}}" />
+                    <div class="input-validation-message">{{t "common.form.validation.formContainsErrors"}}</div>
                 </div>
                 
             </div>
