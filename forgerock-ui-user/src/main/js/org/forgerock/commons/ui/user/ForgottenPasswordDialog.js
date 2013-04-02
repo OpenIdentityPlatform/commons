@@ -142,7 +142,7 @@ define("org/forgerock/commons/ui/user/ForgottenPasswordDialog", [
             if (validatorType === "securityAnswer") {
                 
                 if (typeof(msg) === "undefined") {
-                    validatorsManager.bindValidators(this.$el, userDelegate.baseEntity + "/" + this.$el.find("input[name=_id]").val(), _.bind(function () {
+                    validatorsManager.bindValidators(this.$el.find('#fgtnPasswordDiv'), userDelegate.baseEntity + "/" + this.$el.find("input[name=_id]").val(), _.bind(function () {
                         this.$el.trigger("onValidate");
                         this.$el.find("#fgtnPasswordDiv").show();
                         this.$el.find(".dialogActions input[type=submit]").show();
