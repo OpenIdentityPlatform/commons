@@ -20,6 +20,9 @@ import static org.forgerock.json.resource.RoutingMode.EQUALS;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
@@ -29,6 +32,100 @@ import org.forgerock.json.fluent.JsonValue;
  * factories and connections.
  */
 public final class Resources {
+
+    /**
+     * An abstract future result which acts as a result handler.
+     */
+    private static abstract class AbstractFutureResultHandler<V, H extends ResultHandler<V>>
+            implements FutureResult<V>, ResultHandler<V> {
+        private ResourceException error = null;
+        private final H innerHandler;
+        private final CountDownLatch latch = new CountDownLatch(1);
+        private V result = null;
+
+        /**
+         * Creates a new future.
+         */
+        private AbstractFutureResultHandler(final H innerHandler) {
+            this.innerHandler = innerHandler;
+        }
+
+        @Override
+        public final boolean cancel(final boolean mayInterruptIfRunning) {
+            // Cancellation not supported.
+            return false;
+        }
+
+        @Override
+        public final V get() throws ResourceException, InterruptedException {
+            latch.await();
+            return get0();
+        }
+
+        @Override
+        public final V get(final long timeout, final TimeUnit unit) throws ResourceException,
+                TimeoutException, InterruptedException {
+            if (latch.await(timeout, unit)) {
+                return get0();
+            } else {
+                throw new TimeoutException();
+            }
+        }
+
+        @Override
+        public final void handleError(final ResourceException error) {
+            try {
+                if (innerHandler != null) {
+                    innerHandler.handleError(error);
+                }
+            } finally {
+                this.error = error;
+                latch.countDown();
+            }
+        }
+
+        @Override
+        public final void handleResult(final V result) {
+            final V transformedResult = transform(result);
+            try {
+                if (innerHandler != null) {
+                    innerHandler.handleResult(transformedResult);
+                }
+            } finally {
+                this.result = transformedResult;
+                latch.countDown();
+            }
+        }
+
+        @Override
+        public final boolean isCancelled() {
+            // Cancellation not supported.
+            return false;
+        }
+
+        @Override
+        public final boolean isDone() {
+            return latch.getCount() == 0;
+        }
+
+        final H getInnerHandler() {
+            return innerHandler;
+        }
+
+        V transform(final V result) {
+            return result;
+        }
+
+        private V get0() throws ResourceException {
+            if (error == null) {
+                return result;
+            } else {
+                throw error;
+            }
+        }
+
+    }
+
     private static final class CollectionHandler implements RequestHandler {
         private final CollectionResourceProvider provider;
 
@@ -141,6 +238,59 @@ public final class Resources {
         }
     }
 
+    /**
+     * A future JsonValue which acts as a result handler.
+     */
+    private static final class FutureJsonValueHandler extends
+            AbstractFutureResultHandler<JsonValue, ResultHandler<JsonValue>> {
+        private FutureJsonValueHandler(final ResultHandler<JsonValue> handler) {
+            super(handler);
+        }
+    }
+
+    /**
+     * A future query result which acts as a query result handler.
+     */
+    private static final class FutureQueryResultHandler extends
+            AbstractFutureResultHandler<QueryResult, QueryResultHandler> implements
+            QueryResultHandler {
+        private final QueryRequest request;
+
+        private FutureQueryResultHandler(final QueryRequest request,
+                final QueryResultHandler handler) {
+            super(handler);
+            this.request = request;
+        }
+
+        @Override
+        public boolean handleResource(final Resource resource) {
+            final QueryResultHandler handler = getInnerHandler();
+            if (handler != null) {
+                return handler.handleResource(filterResource(resource, request.getFields()));
+            } else {
+                return true;
+            }
+        }
+    }
+
+    /**
+     * A future resource which acts as a result handler.
+     */
+    private static final class FutureResourceHandler extends
+            AbstractFutureResultHandler<Resource, ResultHandler<Resource>> {
+        private final Request request;
+
+        private FutureResourceHandler(final Request request, final ResultHandler<Resource> handler) {
+            super(handler);
+            this.request = request;
+        }
+
+        @Override
+        protected Resource transform(final Resource result) {
+            return filterResource(result, request.getFields());
+        }
+    }
+
     // Internal connection implementation.
     private static final class InternalConnection extends AbstractAsynchronousConnection {
         private final RequestHandler requestHandler;
@@ -152,8 +302,7 @@ public final class Resources {
         @Override
         public FutureResult<JsonValue> actionAsync(final Context context,
                 final ActionRequest request, final ResultHandler<JsonValue> handler) {
-            final FutureResultHandler<JsonValue> future =
-                    new FutureResultHandler<JsonValue>(handler);
+            final FutureJsonValueHandler future = new FutureJsonValueHandler(handler);
             requestHandler.handleAction(getServerContext(context), request, future);
             return future;
         }
@@ -166,7 +315,7 @@ public final class Resources {
         @Override
         public FutureResult<Resource> createAsync(final Context context,
                 final CreateRequest request, final ResultHandler<Resource> handler) {
-            final FutureResultHandler<Resource> future = new FutureResultHandler<Resource>(handler);
+            final FutureResourceHandler future = new FutureResourceHandler(request, handler);
             requestHandler.handleCreate(getServerContext(context), request, future);
             return future;
         }
@@ -174,7 +323,7 @@ public final class Resources {
         @Override
         public FutureResult<Resource> deleteAsync(final Context context,
                 final DeleteRequest request, final ResultHandler<Resource> handler) {
-            final FutureResultHandler<Resource> future = new FutureResultHandler<Resource>(handler);
+            final FutureResourceHandler future = new FutureResourceHandler(request, handler);
             requestHandler.handleDelete(getServerContext(context), request, future);
             return future;
         }
@@ -194,7 +343,7 @@ public final class Resources {
         @Override
         public FutureResult<Resource> patchAsync(final Context context, final PatchRequest request,
                 final ResultHandler<Resource> handler) {
-            final FutureResultHandler<Resource> future = new FutureResultHandler<Resource>(handler);
+            final FutureResourceHandler future = new FutureResourceHandler(request, handler);
             requestHandler.handlePatch(getServerContext(context), request, future);
             return future;
         }
@@ -202,7 +351,7 @@ public final class Resources {
         @Override
         public FutureResult<QueryResult> queryAsync(final Context context,
                 final QueryRequest request, final QueryResultHandler handler) {
-            final FutureQueryResultHandler future = new FutureQueryResultHandler(handler);
+            final FutureQueryResultHandler future = new FutureQueryResultHandler(request, handler);
             requestHandler.handleQuery(getServerContext(context), request, future);
             return future;
         }
@@ -210,7 +359,7 @@ public final class Resources {
         @Override
         public FutureResult<Resource> readAsync(final Context context, final ReadRequest request,
                 final ResultHandler<Resource> handler) {
-            final FutureResultHandler<Resource> future = new FutureResultHandler<Resource>(handler);
+            final FutureResourceHandler future = new FutureResourceHandler(request, handler);
             requestHandler.handleRead(getServerContext(context), request, future);
             return future;
         }
@@ -218,7 +367,7 @@ public final class Resources {
         @Override
         public FutureResult<Resource> updateAsync(final Context context,
                 final UpdateRequest request, final ResultHandler<Resource> handler) {
-            final FutureResultHandler<Resource> future = new FutureResultHandler<Resource>(handler);
+            final FutureResourceHandler future = new FutureResourceHandler(request, handler);
             requestHandler.handleUpdate(getServerContext(context), request, future);
             return future;
         }
