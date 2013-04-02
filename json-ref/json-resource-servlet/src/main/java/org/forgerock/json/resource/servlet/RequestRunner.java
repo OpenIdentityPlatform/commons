@@ -20,7 +20,6 @@ import static org.forgerock.json.resource.QueryResult.FIELD_PAGED_RESULTS_COOKIE
 import static org.forgerock.json.resource.QueryResult.FIELD_REMAINING_PAGED_RESULTS;
 import static org.forgerock.json.resource.QueryResult.FIELD_RESULT;
 import static org.forgerock.json.resource.QueryResult.FIELD_RESULT_COUNT;
-import static org.forgerock.json.resource.Resources.filterResource;
 import static org.forgerock.json.resource.servlet.HttpUtils.HEADER_ETAG;
 import static org.forgerock.json.resource.servlet.HttpUtils.HEADER_LOCATION;
 import static org.forgerock.json.resource.servlet.HttpUtils.adapt;
@@ -352,7 +351,7 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
     }
 
     private void writeJsonValue(final JsonValue json) throws IOException {
-        writer.writeObject(filterResource(json, request.getFields()).getObject());
+        writer.writeObject(json.getObject());
     }
 
     private void writeResource(final Resource resource) throws IOException {
