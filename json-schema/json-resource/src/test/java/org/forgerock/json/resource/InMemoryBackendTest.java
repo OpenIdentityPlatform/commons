@@ -169,6 +169,21 @@ public final class InMemoryBackendTest {
                 userAliceWithIdAndRev(0, 0).getObject());
     }
 
+    /**
+     * See CREST-84: Field filtering should be performed by internal client
+     * connection not the Servlet
+     */
+    @Test(enabled = false)
+    public void testReadInstanceWithFieldFilter() throws Exception {
+        final Connection connection = getConnection();
+        connection.create(ctx(), newCreateRequest("/users", userAlice()));
+        final Resource resource =
+                connection.read(ctx(), newReadRequest("/users/0").addField("_id"));
+        assertThat(resource.getId()).isEqualTo("0");
+        assertThat(resource.getRevision()).isEqualTo("0");
+        assertThat(resource.getContent().getObject()).isEqualTo(object(field("_id", 0)));
+    }
+
     @Test(expectedExceptions = BadRequestException.class)
     public void testUpdateCollection() throws Exception {
         final Connection connection = getConnection();
