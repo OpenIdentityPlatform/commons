@@ -11,18 +11,14 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012 ForgeRock AS.
+ * Copyright 2012-2013 ForgeRock AS.
  */
 package org.forgerock.json.resource;
 
 import static org.fest.assertions.Assertions.*;
+import static org.forgerock.json.resource.TestUtils.*;
 
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
@@ -30,7 +26,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
- *
+ * Tests {@link Resources}.
  */
 @SuppressWarnings("javadoc")
 public final class ResourcesTest {
@@ -153,39 +149,5 @@ public final class ResourcesTest {
     public void testFilter(List<JsonPointer> filter, JsonValue content, JsonValue expected) {
         assertThat(Resources.filterResource(content, filter).getObject()).isEqualTo(
                 expected.getObject());
-    }
-
-    private JsonValue content(Object object) {
-        return new JsonValue(object);
-    }
-
-    private JsonValue expected(Object object) {
-        return new JsonValue(object);
-    }
-
-    private List<JsonPointer> filter(String... fields) {
-        List<JsonPointer> result = new ArrayList<JsonPointer>(fields.length);
-        for (String field : fields) {
-            result.add(new JsonPointer(field));
-        }
-        return result;
-    }
-
-    @SuppressWarnings("unused")
-    private Object array(Object... objects) {
-        return Arrays.asList(objects);
-    }
-
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    private Object object(Map.Entry... fields) {
-        Map<String, Object> object = new LinkedHashMap<String, Object>(fields.length);
-        for (Map.Entry<String, Object> field : fields) {
-            object.put(field.getKey(), field.getValue());
-        }
-        return object;
-    }
-
-    private Map.Entry<String, Object> field(String key, Object value) {
-        return new AbstractMap.SimpleImmutableEntry<String, Object>(key, value);
     }
 }
