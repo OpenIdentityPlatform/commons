@@ -9,18 +9,17 @@
  * When distributing Covered Software, include this CDDL Header Notice in each file and include
  * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
- * information: "Portions Copyrighted [year] [name of copyright owner]".
+ * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2013 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
 
-// JSON Resource
-
 /**
- * An exception that is thrown during a operation on a resource set when the
- * specified resource version (revision) does not match the version provided.
+ * An exception that is thrown to indicate that a resource requires a version,
+ * but no version was supplied in the request. Equivalent to
+ * draft-nottingham-http-new-status-03 HTTP status: 428 Precondition Required.
  */
 public class PreconditionRequiredException extends ResourceException {
 
@@ -30,7 +29,7 @@ public class PreconditionRequiredException extends ResourceException {
      * Constructs a new exception with {@code null} as its detail message.
      */
     public PreconditionRequiredException() {
-        super(ResourceException.VERSION_MISMATCH);
+        super(ResourceException.VERSION_REQUIRED);
     }
 
     /**
@@ -40,7 +39,7 @@ public class PreconditionRequiredException extends ResourceException {
      *            The detail message.
      */
     public PreconditionRequiredException(final String message) {
-        super(ResourceException.VERSION_MISMATCH, message);
+        super(ResourceException.VERSION_REQUIRED, message);
     }
 
     /**
@@ -52,7 +51,7 @@ public class PreconditionRequiredException extends ResourceException {
      *            The exception which caused this exception to be thrown.
      */
     public PreconditionRequiredException(final String message, final Throwable cause) {
-        super(ResourceException.VERSION_MISMATCH, message, cause);
+        super(ResourceException.VERSION_REQUIRED, message, cause);
     }
 
     /**
@@ -62,6 +61,6 @@ public class PreconditionRequiredException extends ResourceException {
      *            The exception which caused this exception to be thrown.
      */
     public PreconditionRequiredException(final Throwable cause) {
-        super(ResourceException.VERSION_MISMATCH, cause);
+        super(ResourceException.VERSION_REQUIRED, cause);
     }
 }
