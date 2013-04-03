@@ -9,18 +9,17 @@
  * When distributing Covered Software, include this CDDL Header Notice in each file and include
  * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
- * information: "Portions Copyrighted [year] [name of copyright owner]".
+ * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2013 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
 
-// JSON Resource
-
 /**
- * An exception that is thrown during a operation on a resource when the
- * specified object version does not match the version provided.
+ * An exception that is thrown to indicate that a resource's current version
+ * does not match the version provided. Equivalent to HTTP status: 412
+ * Precondition Failed.
  */
 public class PreconditionFailedException extends ResourceException {
 
