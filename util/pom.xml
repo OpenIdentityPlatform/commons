@@ -64,7 +64,10 @@
                 <configuration>
                     <instructions>
                         <Import-Package>*</Import-Package>
-                        <Export-Package>org.forgerock.util;version=${project.version}</Export-Package>
+                        <Export-Package>
+				org.forgerock.util;version=${project.version},
+				org.forgerock.util.xml;version=${project.version}
+			</Export-Package>
                     </instructions>
                 </configuration>
             </plugin>
