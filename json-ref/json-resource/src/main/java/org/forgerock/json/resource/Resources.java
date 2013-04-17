@@ -397,6 +397,11 @@ public final class Resources {
         }
 
         @Override
+        public void close() {
+            // Do nothing.
+        }
+
+        @Override
         public Connection getConnection() {
             return newInternalConnection(handler);
         }
@@ -601,6 +606,52 @@ public final class Resources {
      */
     public static RequestHandler newSingleton(final SingletonResourceProvider provider) {
         return new SingletonHandler(provider);
+    }
+
+    /**
+     * Returns an uncloseable view of the provided connection. Attempts to call
+     * {@link Connection#close()} will be ignored.
+     *
+     * @param connection
+     *            The connection whose {@code close} method is to be disabled.
+     * @return An uncloseable view of the provided connection.
+     */
+    public static Connection uncloseable(Connection connection) {
+        return new AbstractConnectionWrapper<Connection>(connection) {
+            @Override
+            public void close() {
+                // Do nothing.
+            }
+        };
+    }
+
+    /**
+     * Returns an uncloseable view of the provided connection factory. Attempts
+     * to call {@link ConnectionFactory#close()} will be ignored.
+     *
+     * @param factory
+     *            The connection factory whose {@code close} method is to be
+     *            disabled.
+     * @return An uncloseable view of the provided connection factory.
+     */
+    public static ConnectionFactory uncloseable(final ConnectionFactory factory) {
+        return new ConnectionFactory() {
+
+            @Override
+            public FutureResult<Connection> getConnectionAsync(ResultHandler<Connection> handler) {
+                return factory.getConnectionAsync(handler);
+            }
+
+            @Override
+            public Connection getConnection() throws ResourceException {
+                return factory.getConnection();
+            }
+
+            @Override
+            public void close() {
+                // Do nothing.
+            }
+        };
     }
 
     static <T> T checkNotNull(final T object) {

@@ -16,6 +16,7 @@
 
 package org.forgerock.json.resource;
 
+import java.io.Closeable;
 
 /**
  * A connection factory provides an interface for obtaining a connection to a
@@ -34,7 +35,27 @@ package org.forgerock.json.resource;
  * should aim to close connections as soon as possible in order to avoid
  * resource contention.
  */
-public interface ConnectionFactory {
+public interface ConnectionFactory extends Closeable {
+
+    /**
+     * Releases any resources associated with this connection factory. Depending
+     * on the implementation a factory may:
+     * <ul>
+     * <li>do nothing
+     * <li>close underlying connection factories (e.g. load-balancers)
+     * <li>close pooled connections (e.g. connection pools)
+     * <li>shutdown IO event service and related thread pools (e.g. Grizzly).
+     * </ul>
+     * Calling {@code close} on a connection factory which is already closed has
+     * no effect.
+     * <p>
+     * Applications should avoid closing connection factories while there are
+     * remaining active connections in use or connection attempts in progress.
+     *
+     * @see Resources#uncloseable(ConnectionFactory)
+     */
+    @Override
+    public void close();
 
     /**
      * Returns a connection to the JSON resource provider associated with this
