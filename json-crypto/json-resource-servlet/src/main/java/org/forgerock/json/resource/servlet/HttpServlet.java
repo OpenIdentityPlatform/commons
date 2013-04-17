@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012 ForgeRock AS.
+ * Copyright 2012-2013 ForgeRock AS.
  */
 package org.forgerock.json.resource.servlet;
 
@@ -57,10 +57,8 @@ public class HttpServlet extends javax.servlet.http.HttpServlet {
     private static final long serialVersionUID = 6089858120348026823L;
 
     private HttpServletAdapter adapter;
-
-    // Provided during construction.
-    private final ConnectionFactory connectionFactory;
-    private final HttpServletContextFactory contextFactory;
+    private ConnectionFactory connectionFactory;
+    private HttpServletContextFactory contextFactory;
 
     /**
      * Default constructor called during normal Servlet initialization.
@@ -141,25 +139,25 @@ public class HttpServlet extends javax.servlet.http.HttpServlet {
         this.contextFactory = checkNotNull(contextFactory);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void init() throws ServletException {
-        super.init();
-
-        // Construct the HTTP Servlet adapter.
-        final ConnectionFactory tmpConnectionFactory = connectionFactory != null ? connectionFactory
-                : getConnectionFactory();
-        final HttpServletContextFactory tmpContextFactory = contextFactory != null ? contextFactory
-                : getHttpServletContextFactory();
-        adapter = new HttpServletAdapter(getServletContext(), tmpConnectionFactory,
-                tmpContextFactory);
+    public void destroy() {
+        if (connectionFactory != null) {
+            connectionFactory.close();
+        }
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
+    public void init() throws ServletException {
+        // Construct the HTTP Servlet adapter.
+        if (connectionFactory == null) {
+            connectionFactory = getConnectionFactory();
+        }
+        if (contextFactory == null) {
+            contextFactory = getHttpServletContextFactory();
+        }
+        adapter = new HttpServletAdapter(getServletContext(), connectionFactory, contextFactory);
+    }
+
     @Override
     protected void doDelete(final HttpServletRequest req, final HttpServletResponse resp)
             throws ServletException, IOException {
@@ -167,9 +165,6 @@ public class HttpServlet extends javax.servlet.http.HttpServlet {
         adapter.doDelete(req, resp);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp)
             throws ServletException, IOException {
@@ -177,9 +172,6 @@ public class HttpServlet extends javax.servlet.http.HttpServlet {
         adapter.doGet(req, resp);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void doOptions(final HttpServletRequest req, final HttpServletResponse resp)
             throws ServletException, IOException {
@@ -205,9 +197,6 @@ public class HttpServlet extends javax.servlet.http.HttpServlet {
         adapter.doPatch(req, resp);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void doPost(final HttpServletRequest req, final HttpServletResponse resp)
             throws ServletException, IOException {
@@ -215,9 +204,6 @@ public class HttpServlet extends javax.servlet.http.HttpServlet {
         adapter.doPost(req, resp);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void doPut(final HttpServletRequest req, final HttpServletResponse resp)
             throws ServletException, IOException {
@@ -262,12 +248,12 @@ public class HttpServlet extends javax.servlet.http.HttpServlet {
                 try {
                     final Class<?> cls = Class.forName(className);
                     final String tmp = config.getInitParameter(INIT_PARAM_CONNECTION_METHOD);
-                    final String methodName = tmp != null ? tmp
-                            : INIT_PARAM_CONNECTION_METHOD_DEFAULT;
+                    final String methodName =
+                            tmp != null ? tmp : INIT_PARAM_CONNECTION_METHOD_DEFAULT;
                     try {
                         // Try method which accepts ServletConfig.
-                        final Method factoryMethod = cls.getDeclaredMethod(methodName,
-                                ServletConfig.class);
+                        final Method factoryMethod =
+                                cls.getDeclaredMethod(methodName, ServletConfig.class);
                         return (ConnectionFactory) factoryMethod.invoke(null, config);
                     } catch (final NoSuchMethodException e) {
                         // Try no-arg method.
@@ -326,8 +312,8 @@ public class HttpServlet extends javax.servlet.http.HttpServlet {
                     final String methodName = tmp != null ? tmp : INIT_PARAM_CONTEXT_METHOD_DEFAULT;
                     try {
                         // Try method which accepts ServletConfig.
-                        final Method factoryMethod = cls.getDeclaredMethod(methodName,
-                                ServletConfig.class);
+                        final Method factoryMethod =
+                                cls.getDeclaredMethod(methodName, ServletConfig.class);
                         return (HttpServletContextFactory) factoryMethod.invoke(null, config);
                     } catch (final NoSuchMethodException e) {
                         // Try no-arg method.
@@ -342,9 +328,6 @@ public class HttpServlet extends javax.servlet.http.HttpServlet {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp)
             throws ServletException, IOException {
