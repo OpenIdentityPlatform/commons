@@ -30,6 +30,7 @@ import org.forgerock.json.fluent.JsonValue;
  * objects.
  */
 public final class TestUtils {
+
     /**
      * Creates a JSON array object.
      *
@@ -39,6 +40,18 @@ public final class TestUtils {
      */
     public static Object array(final Object... objects) {
         return Arrays.asList(objects);
+    }
+
+    /**
+     * Returns a {@code Resource} containing the provided JSON content. The ID
+     * and revision will be taken from the "_id" and "_rev" fields respectively.
+     *
+     * @param content
+     *            The JSON content.
+     * @return A {@code Resource} containing the provided JSON content.
+     */
+    public static Resource asResource(final JsonValue content) {
+        return new Resource(content.get("_id").asString(), content.get("_rev").asString(), content);
     }
 
     /**
