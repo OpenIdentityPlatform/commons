@@ -24,6 +24,7 @@ import static org.forgerock.json.resource.Requests.newQueryRequest;
 import static org.forgerock.json.resource.Requests.newReadRequest;
 import static org.forgerock.json.resource.Requests.newUpdateRequest;
 import static org.forgerock.json.resource.Resources.newInternalConnection;
+import static org.forgerock.json.resource.TestUtils.asResource;
 import static org.forgerock.json.resource.TestUtils.content;
 import static org.forgerock.json.resource.TestUtils.ctx;
 import static org.forgerock.json.resource.TestUtils.field;
@@ -210,10 +211,6 @@ public final class InMemoryBackendTest {
         assertThat(resource.getRevision()).isEqualTo("1");
         assertThat(resource.getContent().getObject()).isEqualTo(
                 userBobWithIdAndRev(0, 1).getObject());
-    }
-
-    private Resource asResource(final JsonValue content) {
-        return new Resource(content.get("_id").asString(), content.get("_rev").asString(), content);
     }
 
     private Connection getConnection() {
