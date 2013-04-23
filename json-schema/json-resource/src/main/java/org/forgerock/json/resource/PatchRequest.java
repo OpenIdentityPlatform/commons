@@ -19,6 +19,7 @@ package org.forgerock.json.resource;
 import java.util.List;
 
 import org.forgerock.json.fluent.JsonPointer;
+import org.forgerock.json.fluent.JsonValue;
 
 /**
  * A request to update a JSON resource by applying a set of changes to its
@@ -27,16 +28,22 @@ import org.forgerock.json.fluent.JsonPointer;
 public interface PatchRequest extends Request {
 
     /**
-     * The name of the field which contains the resource version in the JSON
-     * representation.
-     */
-    public static final String FIELD_REVISION = "revision";
-
-    /**
      * The name of the field which contains the patch content in the JSON
      * representation.
      */
     public static final String FIELD_PATCH = "patch";
+
+    /**
+     * The name of the field which contains the patch operations in the JSON
+     * representation.
+     */
+    public static final String FIELD_PATCH_OPERATIONS = "patchOperations";
+
+    /**
+     * The name of the field which contains the resource version in the JSON
+     * representation.
+     */
+    public static final String FIELD_REVISION = "revision";
 
     /**
      * {@inheritDoc}
@@ -51,10 +58,35 @@ public interface PatchRequest extends Request {
     PatchRequest addField(String... fields);
 
     /**
-     * {@inheritDoc}
+     * Adds one or more patch operations which should be performed against the
+     * targeted resource.
+     *
+     * @param operations
+     *            One or more patch operations which should be performed against
+     *            the targeted resource.
+     * @return This patch request.
+     * @throws UnsupportedOperationException
+     *             If this patch request does not permit changes to the patch
+     *             operations.
      */
-    @Override
-    String getResourceName();
+    PatchRequest addPatchOperation(PatchOperation... operations);
+
+    /**
+     * Adds a single patch operation which should be performed against the
+     * targeted resource.
+     *
+     * @param operation
+     *            The type of patch operation to be performed.
+     * @param field
+     *            The field targeted by the patch operation.
+     * @param value
+     *            The possibly {@code null} value for the patch operation.
+     * @return This patch request.
+     * @throws UnsupportedOperationException
+     *             If this patch request does not permit changes to the patch
+     *             operations.
+     */
+    PatchRequest addPatchOperation(String operation, String field, JsonValue value);
 
     /**
      * {@inheritDoc}
@@ -63,11 +95,19 @@ public interface PatchRequest extends Request {
     List<JsonPointer> getFields();
 
     /**
-     * Returns the patch which should be applied to the JSON resource.
+     * Returns the list of patch operations which should be performed against
+     * the targeted resource.
      *
-     * @return The patch which should be applied to the JSON resource.
+     * @return The list of patch operations which should be performed against
+     *         the targeted resource (never null).
      */
-    Patch getPatch();
+    List<PatchOperation> getPatchOperations();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    String getResourceName();
 
     /**
      * Returns the expected version information associated with the JSON
@@ -90,17 +130,6 @@ public interface PatchRequest extends Request {
      */
     @Override
     PatchRequest setResourceName(String name);
-
-    /**
-     * Sets the patch which should be applied to the JSON resource.
-     *
-     * @param changes
-     *            The patch which should be applied to the JSON resource.
-     * @return This patch request.
-     * @throws UnsupportedOperationException
-     *             If this patch request does not permit changes to the patch.
-     */
-    PatchRequest setPatch(Patch changes);
 
     /**
      * Sets the expected version information associated with the JSON resource
