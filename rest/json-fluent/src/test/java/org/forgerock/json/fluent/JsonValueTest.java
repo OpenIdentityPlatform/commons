@@ -12,7 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright © 2010–2011 ApexIdentity Inc. All rights reserved.
- * Portions Copyrighted 2011-2012 ForgeRock AS.
+ * Portions Copyrighted 2011-2013 ForgeRock AS.
  */
 
 package org.forgerock.json.fluent;
@@ -35,6 +35,7 @@ import org.testng.annotations.Test;
 /**
  * Unit tests for JsonValue.
  */
+@SuppressWarnings("javadoc")
 public class JsonValueTest {
 
     /** JSON value encapsulating a map. */
@@ -140,7 +141,8 @@ public class JsonValueTest {
         assertThat(mapValue.get(new JsonPointer("/keyE/keyH")).getObject()).isEqualTo("testValueH");
 
         mapValue.put(new JsonPointer("/keyE/keyJ/keyF/2"), "testValueH");
-        assertThat(mapValue.get(new JsonPointer("/keyE/keyJ/keyF/2")).getObject()).isEqualTo("testValueH");
+        assertThat(mapValue.get(new JsonPointer("/keyE/keyJ/keyF/2")).getObject()).isEqualTo(
+                "testValueH");
     }
 
     /**
@@ -172,11 +174,11 @@ public class JsonValueTest {
         assertThat(v1.getObject().hashCode()).isEqualTo(v2.getObject().hashCode());
 
         // Now add a sub-array.
-        List<Object> a1 = Arrays.<Object>asList("one", "two", "three");
+        List<Object> a1 = Arrays.<Object> asList("one", "two", "three");
         v1.add("array", a1);
         assertThat(v1.getObject().hashCode()).isNotEqualTo(v2.getObject().hashCode());
 
-        List<Object> a2 = Arrays.<Object>asList("one", "two", "three");
+        List<Object> a2 = Arrays.<Object> asList("one", "two", "three");
         v2.add("array", a2);
         assertThat(v1.getObject().hashCode()).isEqualTo(v2.getObject().hashCode());
 
