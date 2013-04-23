@@ -240,8 +240,7 @@ public final class FiltersTest {
             .newActionRequest("/test", "action");
     private static final CreateRequest CREATE_REQUEST = Requests.newCreateRequest("/test", JSON);
     private static final DeleteRequest DELETE_REQUEST = Requests.newDeleteRequest("/test", "id");
-    private static final PatchRequest PATCH_REQUEST = Requests
-            .newPatchRequest("/test", new Patch());
+    private static final PatchRequest PATCH_REQUEST = Requests.newPatchRequest("/test");
     private static final QueryRequest QUERY_REQUEST = Requests.newQueryRequest("/test");
     private static final ReadRequest READ_REQUEST = Requests.newReadRequest("/test", "id");
     private static final UpdateRequest UPDATE_REQUEST = Requests.newUpdateRequest("/test", "id",
