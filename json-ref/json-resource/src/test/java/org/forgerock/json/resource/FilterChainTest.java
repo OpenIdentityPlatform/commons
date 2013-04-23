@@ -215,7 +215,7 @@ public final class FilterChainTest {
         final Filter filter2 = filter();
         final FilterChain chain = new FilterChain(target, filter1, filter2);
         final ServerContext context = context(target);
-        final PatchRequest request = Requests.newPatchRequest("/patch", new Patch());
+        final PatchRequest request = Requests.newPatchRequest("/patch");
         final ResultHandler<Resource> handler = handler();
 
         // Test twice to ensure that no state is carried over.

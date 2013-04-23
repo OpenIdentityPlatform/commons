@@ -286,16 +286,16 @@ public final class Requests {
 
     private static final class PatchRequestImpl extends AbstractRequestImpl<PatchRequest> implements
             PatchRequest {
-        private Patch patch;
+        private List<PatchOperation> operations;
         private String version;
 
         private PatchRequestImpl() {
-            // Default constructor.
+            operations = new LinkedList<PatchOperation>();
         }
 
         private PatchRequestImpl(final PatchRequest request) {
             super(request);
-            this.patch = request.getPatch(); // FIXME: is Patch immutable?
+            this.operations = new LinkedList<PatchOperation>(request.getPatchOperations());
             this.version = request.getRevision();
         }
 
@@ -305,18 +305,26 @@ public final class Requests {
         };
 
         @Override
-        public Patch getPatch() {
-            return patch;
-        }
-
-        @Override
         public String getRevision() {
             return version;
         }
 
         @Override
-        public PatchRequest setPatch(final Patch changes) {
-            this.patch = notNull(changes);
+        public PatchRequest addPatchOperation(PatchOperation... operations) {
+            for (PatchOperation operation : operations) {
+                this.operations.add(operation);
+            }
+            return this;
+        }
+
+        @Override
+        public List<PatchOperation> getPatchOperations() {
+            return operations;
+        }
+
+        @Override
+        public PatchRequest addPatchOperation(String operation, String field, JsonValue value) {
+            operations.add(PatchOperation.operation(operation, field, value));
             return this;
         }
 
@@ -795,53 +803,54 @@ public final class Requests {
 
     /**
      * Returns a new patch request with the provided resource name and JSON
-     * patch. Invoking this method as follows:
+     * patch operations. Invoking this method as follows:
      *
      * <pre>
-     * newPatchRequest(&quot;/users/1&quot;, changes);
+     * newPatchRequest(&quot;/users/1&quot;, operations);
      * </pre>
      *
      * Is equivalent to:
      *
      * <pre>
-     * newPatchRequest(&quot;/users&quot;, &quot;1&quot;, changes);
+     * newPatchRequest(&quot;/users&quot;, &quot;1&quot;, operations);
      * </pre>
      *
      * @param resourceName
      *            The resource name.
-     * @param changes
-     *            The JSON patch.
+     * @param operations
+     *            The JSON patch operations.
      * @return The new patch request.
      */
-    public static PatchRequest newPatchRequest(final String resourceName, final Patch changes) {
-        return new PatchRequestImpl().setResourceName(resourceName).setPatch(changes);
+    public static PatchRequest newPatchRequest(final String resourceName,
+            final PatchOperation... operations) {
+        return new PatchRequestImpl().setResourceName(resourceName).addPatchOperation(operations);
     }
 
     /**
      * Returns a new patch request with the provided resource container name,
-     * resource ID, and JSON patch. Invoking this method as follows:
+     * resource ID, and JSON patch operations. Invoking this method as follows:
      *
      * <pre>
-     * newPatchRequest(&quot;/users&quot;, &quot;1&quot;, changes);
+     * newPatchRequest(&quot;/users&quot;, &quot;1&quot;, operations);
      * </pre>
      *
      * Is equivalent to:
      *
      * <pre>
-     * newPatchRequest(&quot;/users/1&quot;, changes);
+     * newPatchRequest(&quot;/users/1&quot;, operations);
      * </pre>
      *
      * @param resourceContainer
      *            The name of the resource container.
      * @param resourceId
      *            The ID of the resource.
-     * @param changes
-     *            The JSON patch.
+     * @param operations
+     *            The JSON patch operations.
      * @return The new patch request.
      */
     public static PatchRequest newPatchRequest(final String resourceContainer,
-            final String resourceId, final Patch changes) {
-        return newPatchRequest(concat(resourceContainer, resourceId), changes);
+            final String resourceId, final PatchOperation... operations) {
+        return newPatchRequest(concat(resourceContainer, resourceId), operations);
     }
 
     /**
