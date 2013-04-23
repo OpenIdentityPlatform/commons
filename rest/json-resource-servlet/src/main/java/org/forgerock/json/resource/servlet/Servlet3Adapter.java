@@ -44,11 +44,13 @@ final class Servlet3Adapter extends ServletApiVersionAdapter {
                 final HttpServletResponse httpResponse) {
             this.httpRequest = httpRequest;
             this.httpResponse = httpResponse;
-            this.asyncContext =
-                    httpRequest.isAsyncStarted() ? httpRequest.getAsyncContext() : httpRequest
-                            .startAsync();
-            // Disable timeouts for certain containers - see http://java.net/jira/browse/GRIZZLY-1325
-            asyncContext.setTimeout(0);
+            if (httpRequest.isAsyncStarted()) {
+                this.asyncContext = httpRequest.getAsyncContext();
+            } else {
+                this.asyncContext = httpRequest.startAsync();
+                // Disable timeouts for certain containers - see http://java.net/jira/browse/GRIZZLY-1325
+                asyncContext.setTimeout(0);
+            }
         }
 
         @Override
