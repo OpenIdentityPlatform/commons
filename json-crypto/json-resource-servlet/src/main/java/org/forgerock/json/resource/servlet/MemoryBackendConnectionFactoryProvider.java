@@ -19,7 +19,7 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
 import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.json.resource.InMemoryBackend;
+import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.Router;
 
@@ -42,7 +42,7 @@ final class MemoryBackendConnectionFactoryProvider {
                     + INIT_PARAM_URI_TEMPLATE + "' not specified");
         }
         final Router router = new Router();
-        router.addRoute(uriTemplate, new InMemoryBackend());
+        router.addRoute(uriTemplate, new MemoryBackend());
         return Resources.newInternalConnectionFactory(router);
     }
 }
