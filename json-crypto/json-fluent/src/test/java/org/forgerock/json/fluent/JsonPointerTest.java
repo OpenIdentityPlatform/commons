@@ -12,7 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright © 2010–2011 ApexIdentity Inc. All rights reserved.
- * Portions Copyrighted 2011 ForgeRock AS.
+ * Portions Copyrighted 2011-2013 ForgeRock AS.
  */
 
 package org.forgerock.json.fluent;
@@ -23,8 +23,9 @@ import static org.fest.assertions.Assertions.assertThat;
 import org.testng.annotations.Test;
 
 /**
- * @author Paul C. Bryan
+ * Test JsonPointer.
  */
+@SuppressWarnings("javadoc")
 public class JsonPointerTest {
 
     // ----- parsing unit tests ----------
