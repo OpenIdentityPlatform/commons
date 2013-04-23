@@ -190,4 +190,14 @@ public class JsonValueTest {
         Collections.reverse(a2);
         assertThat(v1.getObject().hashCode()).isEqualTo(v2.getObject().hashCode());
     }
+
+    @Test
+    public void testAddToList() {
+        JsonValue value = new JsonValue(new ArrayList<Object>());
+        value.add("one");
+        value.add("two");
+        value.add("three");
+        assertThat(value.size()).isEqualTo(3);
+        assertThat(value.asList()).containsExactly("one", "two", "three");
+    }
 }

@@ -12,7 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright © 2010–2011 ApexIdentity Inc. All rights reserved.
- * Portions Copyrighted 2011 ForgeRock AS.
+ * Portions Copyrighted 2011-2013 ForgeRock AS.
  */
 
 package org.forgerock.json.fluent;
@@ -175,6 +175,24 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
         if (this.transformers.size() > 0) {
             applyTransformers();
         }
+    }
+
+    /**
+     * Adds the specified value to the end of the list. This is method is
+     * equivalent to the following code:
+     *
+     * <pre>
+     * add(size(), object);
+     * </pre>
+     *
+     * @param object
+     *            the java object to add.
+     * @return this JSON value.
+     * @throws JsonValueException
+     *             if this JSON value is not a {@code List}.
+     */
+    public JsonValue add(final Object object) {
+        return add(size(), object);
     }
 
     /**
