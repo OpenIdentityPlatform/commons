@@ -37,7 +37,7 @@ import org.forgerock.json.fluent.JsonValue;
 import org.testng.annotations.Test;
 
 /**
- * Tests for {@link InMemoryBackend}.
+ * Tests for {@link MemoryBackend}.
  */
 @SuppressWarnings("javadoc")
 public final class InMemoryBackendTest {
@@ -214,7 +214,7 @@ public final class InMemoryBackendTest {
     }
 
     private Connection getConnection() {
-        final InMemoryBackend users = new InMemoryBackend();
+        final MemoryBackend users = new MemoryBackend();
         final Router router = new Router();
         router.addRoute("/users", users);
         return newInternalConnection(router);

@@ -34,7 +34,7 @@ import org.forgerock.json.fluent.JsonValueException;
  * store resources. This resource provider is intended for testing purposes only
  * and there are no performance guarantees.
  */
-public final class InMemoryBackend implements CollectionResourceProvider {
+public final class MemoryBackend implements CollectionResourceProvider {
     private static enum FilterResult {
         FALSE, TRUE, UNDEFINED;
 
@@ -332,7 +332,7 @@ public final class InMemoryBackend implements CollectionResourceProvider {
     /**
      * Creates a new in-memory collection containing no resources.
      */
-    public InMemoryBackend() {
+    public MemoryBackend() {
         // No implementation required.
     }
 
