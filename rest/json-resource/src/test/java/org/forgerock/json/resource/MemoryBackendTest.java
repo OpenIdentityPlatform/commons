@@ -40,7 +40,7 @@ import org.testng.annotations.Test;
  * Tests for {@link MemoryBackend}.
  */
 @SuppressWarnings("javadoc")
-public final class InMemoryBackendTest {
+public final class MemoryBackendTest {
 
     @Test
     public void testActionCollectionClear() throws Exception {
