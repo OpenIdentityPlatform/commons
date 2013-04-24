@@ -17,20 +17,22 @@
 
 package org.forgerock.json.fluent;
 
-// Java SE
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
+import java.util.AbstractMap;
 import java.util.AbstractSet;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,8 +41,6 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import org.forgerock.util.RangeSet;
-
-// Utilities
 
 /**
  * Represents a value in a JSON object model structure. JSON values are
@@ -54,10 +54,85 @@ import org.forgerock.util.RangeSet;
  * then all transformers are re-applied, in sequence. This repeats until the
  * value is no longer affected. Transformers are inherited by and applied to
  * member values.
- *
- * @author Paul C. Bryan
  */
 public class JsonValue implements Cloneable, Iterable<JsonValue> {
+
+    /**
+     * Returns a mutable JSON array containing the provided objects. This method
+     * is provided as a convenience method for constructing JSON arrays. Example
+     * usage:
+     *
+     * <pre>
+     * JsonValue value = json(array(1, 2, 3));
+     * </pre>
+     *
+     * @param objects
+     *            The array elements.
+     * @return A JSON array.
+     */
+    public static List<Object> array(final Object... objects) {
+        return new ArrayList<Object>(Arrays.asList(objects));
+    }
+
+    /**
+     * Returns a JSON field for inclusion in a JSON object using
+     * {@link #object(java.util.Map.Entry...) object}. This method is provided
+     * as a convenience method for constructing JSON objects. Example usage:
+     *
+     * <pre>
+     * JsonValue value = json(object(field(&quot;uid&quot;, &quot;bjensen&quot;), field(&quot;age&quot;, 30)));
+     * </pre>
+     *
+     * @param key
+     *            The JSON field name.
+     * @param value
+     *            The JSON field value.
+     * @return The JSON field for inclusion in a JSON object.
+     */
+    public static Map.Entry<String, Object> field(final String key, final Object value) {
+        return new AbstractMap.SimpleImmutableEntry<String, Object>(key, value);
+    }
+
+    /**
+     * Returns a JSON value whose content is the provided object. This method is
+     * provided as a convenience method for constructing JSON objects, instead
+     * of using {@link #JsonValue(Object)}. Example usage:
+     *
+     * <pre>
+     * JsonValue value =
+     *         json(object(field(&quot;uid&quot;, &quot;bjensen&quot;), field(&quot;roles&quot;, array(&quot;sales&quot;, &quot;marketing&quot;))));
+     * </pre>
+     *
+     * @param object
+     *            the Java object representing the JSON value.
+     * @return The JSON value.
+     */
+    public static JsonValue json(final Object object) {
+        return object instanceof JsonValue ? (JsonValue) object : new JsonValue(object);
+    }
+
+    /**
+     * Returns a JSON object comprised of the provided JSON
+     * {@link #field(String, Object) fields}. This method is provided as a
+     * convenience method for constructing JSON objects. Example usage:
+     *
+     * <pre>
+     * JsonValue value = json(object(field(&quot;uid&quot;, &quot;bjensen&quot;), field(&quot;age&quot;, 30)));
+     * </pre>
+     *
+     * @param fields
+     *            The list of {@link #field(String, Object) fields} to include
+     *            in the JSON object.
+     * @return The JSON object.
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static Object object(final Map.Entry... fields) {
+        final Map<String, Object> object = new LinkedHashMap<String, Object>(fields.length);
+        for (final Map.Entry<String, Object> field : fields) {
+            object.put(field.getKey(), field.getValue());
+        }
+        return object;
+    }
 
     /**
      * Returns {@code true} if the values are === equal.
@@ -99,7 +174,7 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
      * {@link JsonValue} objects.
      *
      * @param object
-     *            the Java object representing JSON value.
+     *            the Java object representing the JSON value.
      */
     public JsonValue(final Object object) {
         this(object, null, null);
@@ -178,24 +253,6 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
     }
 
     /**
-     * Adds the specified value to the end of the list. This is method is
-     * equivalent to the following code:
-     *
-     * <pre>
-     * add(size(), object);
-     * </pre>
-     *
-     * @param object
-     *            the java object to add.
-     * @return this JSON value.
-     * @throws JsonValueException
-     *             if this JSON value is not a {@code List}.
-     */
-    public JsonValue add(final Object object) {
-        return add(size(), object);
-    }
-
-    /**
      * Adds the specified value to the list. Adding a value to a list shifts any
      * existing elements at or above the specified index to the right by one.
      *
@@ -215,6 +272,46 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
         }
         list.add(index, object);
         return this;
+    }
+
+    /**
+     * Adds the value identified by the specified pointer, relative to this
+     * value as root. If doing so would require the creation of a new object or
+     * list, a {@code JsonValueException} will be thrown.
+     * <p>
+     * NOTE: values may be added to a list using the reserved JSON pointer token
+     * "-". For example, the pointer "/a/b/-" will add a new element to the list
+     * referenced by "/a/b".
+     *
+     * @param pointer
+     *            identifies the child value to add.
+     * @param object
+     *            the Java object value to add.
+     * @return this JSON value.
+     * @throws JsonValueException
+     *             if the specified pointer is invalid.
+     */
+    public JsonValue add(final JsonPointer pointer, final Object object) {
+        navigateToParentOf(pointer).required().addToken(pointer.leaf(), object);
+        return this;
+    }
+
+    /**
+     * Adds the specified value to the end of the list. This is method is
+     * equivalent to the following code:
+     *
+     * <pre>
+     * add(size(), object);
+     * </pre>
+     *
+     * @param object
+     *            the java object to add.
+     * @return this JSON value.
+     * @throws JsonValueException
+     *             if this JSON value is not a {@code List}.
+     */
+    public JsonValue add(final Object object) {
+        return add(size(), object);
     }
 
     /**
@@ -246,6 +343,27 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
         } else {
             throw new JsonValueException(this, "Expecting a Map or List");
         }
+        return this;
+    }
+
+    /**
+     * Adds the value identified by the specified pointer, relative to this
+     * value as root. Missing parent objects or lists will be created on demand.
+     * <p>
+     * NOTE: values may be added to a list using the reserved JSON pointer token
+     * "-". For example, the pointer "/a/b/-" will add a new element to the list
+     * referenced by "/a/b".
+     *
+     * @param pointer
+     *            identifies the child value to add.
+     * @param object
+     *            the Java object value to add.
+     * @return this JSON value.
+     * @throws JsonValueException
+     *             if the specified pointer is invalid.
+     */
+    public JsonValue addPermissive(final JsonPointer pointer, final Object object) {
+        navigateToParentOfPermissive(pointer).addToken(pointer.leaf(), object);
         return this;
     }
 
@@ -1015,9 +1133,13 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
     }
 
     /**
-     * Sets the value of the value identified by the specified pointer, relative
-     * to this value as root. If doing so would require the creation of a new
-     * object or list, a {@code JsonValueException} will be thrown.
+     * Sets the value identified by the specified pointer, relative to this
+     * value as root. If doing so would require the creation of a new object or
+     * list, a {@code JsonValueException} will be thrown.
+     * <p>
+     * NOTE: values may be added to a list using the reserved JSON pointer token
+     * "-". For example, the pointer "/a/b/-" will add a new element to the list
+     * referenced by "/a/b".
      *
      * @param pointer
      *            identifies the child value to set.
@@ -1028,12 +1150,7 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
      *             if the specified pointer is invalid.
      */
     public JsonValue put(final JsonPointer pointer, final Object object) {
-        JsonValue jv = this;
-        final String[] tokens = pointer.toArray();
-        for (int n = 0; n < tokens.length - 1; n++) {
-            jv = jv.get(tokens[n]).required();
-        }
-        jv.put(tokens[tokens.length - 1], object);
+        navigateToParentOf(pointer).required().putToken(pointer.leaf(), object);
         return this;
     }
 
@@ -1069,6 +1186,27 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
     }
 
     /**
+     * Sets the value identified by the specified pointer, relative to this
+     * value as root. Missing parent objects or lists will be created on demand.
+     * <p>
+     * NOTE: values may be added to a list using the reserved JSON pointer token
+     * "-". For example, the pointer "/a/b/-" will add a new element to the list
+     * referenced by "/a/b".
+     *
+     * @param pointer
+     *            identifies the child value to set.
+     * @param object
+     *            the Java object value to set.
+     * @return this JSON value.
+     * @throws JsonValueException
+     *             if the specified pointer is invalid.
+     */
+    public JsonValue putPermissive(final JsonPointer pointer, final Object object) {
+        navigateToParentOfPermissive(pointer).putToken(pointer.leaf(), object);
+        return this;
+    }
+
+    /**
      * Removes the specified child value, shifting any subsequent elements to
      * the left. If the JSON value is not a {@code List}, calling this method
      * has no effect.
@@ -1083,6 +1221,18 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
                 list.remove(index);
             }
         }
+    }
+
+    /**
+     * Removes the specified child value with a pointer, relative to this value
+     * as root. If the specified child value is not defined, calling this method
+     * has no effect.
+     *
+     * @param pointer
+     *            the JSON pointer identifying the child value to remove.
+     */
+    public void remove(final JsonPointer pointer) {
+        navigateToParentOf(pointer).remove(pointer.leaf());
     }
 
     /**
@@ -1190,6 +1340,79 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
             sb.append(object.toString());
         }
         return sb.toString();
+    }
+
+    private void addToken(final String token, final Object object) {
+        if (isEndOfListToken(token) && isList()) {
+            add(object);
+        } else {
+            add(token, object);
+        }
+    }
+
+    private boolean isEndOfListToken(final String token) {
+        return token.equals("-");
+    }
+
+    private boolean isIndexToken(final String token) {
+        if (token.isEmpty()) {
+            return false;
+        } else {
+            for (int i = 0; i < token.length(); i++) {
+                final char c = token.charAt(i);
+                if (!Character.isDigit(c)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+
+    private JsonValue navigateToParentOf(final JsonPointer pointer) {
+        JsonValue jv = this;
+        final int size = pointer.size();
+        for (int n = 0; n < size - 1; n++) {
+            jv = jv.get(pointer.get(n));
+            if (jv.isNull()) {
+                break;
+            }
+        }
+        return jv;
+    }
+
+    private JsonValue navigateToParentOfPermissive(final JsonPointer pointer) {
+        JsonValue jv = this;
+        final int size = pointer.size();
+        for (int n = 0; n < size - 1; n++) {
+            final String token = pointer.get(n);
+            final JsonValue next = jv.get(token);
+            if (!next.isNull()) {
+                jv = next;
+            } else if (isIndexToken(token)) {
+                throw new JsonValueException(this, "Expecting a value");
+            } else {
+                // Create the field based on the type of the next token.
+                final String nextToken = pointer.get(n + 1);
+                if (isEndOfListToken(nextToken)) {
+                    jv.add(token, new ArrayList<Object>());
+                    jv = jv.get(token);
+                } else if (isIndexToken(nextToken)) {
+                    throw new JsonValueException(this, "Expecting a value");
+                } else {
+                    jv.add(token, new LinkedHashMap<String, Object>());
+                    jv = jv.get(token);
+                }
+            }
+        }
+        return jv;
+    }
+
+    private void putToken(final String token, final Object object) {
+        if (isEndOfListToken(token) && isList()) {
+            add(object);
+        } else {
+            put(token, object);
+        }
     }
 
     /**
