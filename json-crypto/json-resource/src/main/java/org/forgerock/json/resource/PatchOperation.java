@@ -114,6 +114,8 @@ public final class PatchOperation {
      *            The new value(s) to be added, which may be a {@link JsonValue}
      *            or a JSON object, such as a {@code String}, {@code Map}, etc.
      * @return The new patch operation.
+     * @throws NullPointerException
+     *             If the value is {@code null}.
      */
     public static PatchOperation add(final JsonPointer field, final Object value) {
         return operation(OPERATION_ADD, field, json(value));
@@ -129,6 +131,8 @@ public final class PatchOperation {
      *            The new value(s) to be added, which may be a {@link JsonValue}
      *            or a JSON object, such as a {@code String}, {@code Map}, etc.
      * @return The new patch operation.
+     * @throws NullPointerException
+     *             If the value is {@code null}.
      */
     public static PatchOperation add(final String field, final Object value) {
         return add(new JsonPointer(field), value);
@@ -158,6 +162,8 @@ public final class PatchOperation {
      *            The amount to be added or removed (if negative) from the
      *            field's value(s).
      * @return The new patch operation.
+     * @throws NullPointerException
+     *             If the amount is {@code null}.
      */
     public static PatchOperation increment(final JsonPointer field, final Number amount) {
         return operation(OPERATION_INCREMENT, field, new JsonValue(amount));
@@ -173,6 +179,8 @@ public final class PatchOperation {
      *            The amount to be added or removed (if negative) from the
      *            field's value(s).
      * @return The new patch operation.
+     * @throws NullPointerException
+     *             If the amount is {@code null}.
      */
     public static PatchOperation increment(final String field, final Number amount) {
         return increment(new JsonPointer(field), amount);
@@ -191,6 +199,12 @@ public final class PatchOperation {
      *            may be a {@link JsonValue} or a JSON object, such as a
      *            {@code String}, {@code Map}, etc.
      * @return The new patch operation.
+     * @throws NullPointerException
+     *             If the operation is an add or increment and the value is
+     *             {@code null}.
+     * @throws IllegalArgumentException
+     *             If the operation is an increment an the value was not a
+     *             number.
      */
     public static PatchOperation operation(final String operation, final JsonPointer field,
             final Object value) {
@@ -318,6 +332,7 @@ public final class PatchOperation {
         this.operation = checkNotNull(operation);
         this.field = checkNotNull(field);
         this.value = value != null ? value : new JsonValue(null);
+        checkOperationValue();
     }
 
     /**
@@ -393,6 +408,19 @@ public final class PatchOperation {
             json.put(FIELD_VALUE, value.getObject());
         }
         return json.toString();
+    }
+
+    private void checkOperationValue() {
+        if (isAdd() && value.isNull()) {
+            throw new NullPointerException("No value provided for add patch operation");
+        } else if (isIncrement()) {
+            if (value.isNull()) {
+                throw new NullPointerException("No value provided for increment patch operation");
+            } else if (!value.isNumber()) {
+                throw new IllegalArgumentException(
+                        "Non-numeric value provided for increment patch operation");
+            }
+        }
     }
 
     private boolean is(final String type) {

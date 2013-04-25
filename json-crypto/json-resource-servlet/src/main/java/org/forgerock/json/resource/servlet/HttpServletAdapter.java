@@ -45,6 +45,7 @@ import static org.forgerock.json.resource.servlet.HttpUtils.fail;
 import static org.forgerock.json.resource.servlet.HttpUtils.getIfMatch;
 import static org.forgerock.json.resource.servlet.HttpUtils.getIfNoneMatch;
 import static org.forgerock.json.resource.servlet.HttpUtils.getJsonContent;
+import static org.forgerock.json.resource.servlet.HttpUtils.getJsonPatchContent;
 import static org.forgerock.json.resource.servlet.HttpUtils.getMethod;
 import static org.forgerock.json.resource.servlet.HttpUtils.getParameter;
 import static org.forgerock.json.resource.servlet.HttpUtils.hasParameter;
@@ -75,6 +76,7 @@ import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotSupportedException;
+import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.QueryRequest;
@@ -375,11 +377,32 @@ public final class HttpServletAdapter {
 
     void doPatch(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
+            // Prepare response.
+            prepareResponse(resp);
+
             // Validate request.
             preprocessRequest(req);
-            rejectIfNoneMatch(req);
-            throw new NotSupportedException("Patch operations are not supported");
-        } catch (final ResourceException e) {
+            if (req.getHeader(HEADER_IF_NONE_MATCH) != null) {
+                // FIXME: i18n
+                throw new PreconditionFailedException(
+                        "Use of If-None-Match not supported for PATCH requests");
+            }
+
+            final Map<String, String[]> parameters = req.getParameterMap();
+            final PatchRequest request =
+                    Requests.newPatchRequest(getResourceName(req)).setRevision(getIfMatch(req));
+            request.getPatchOperations().addAll(getJsonPatchContent(req));
+            for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
+                final String name = p.getKey();
+                final String[] values = p.getValue();
+                if (!parseCommonParameter(name, values, request)) {
+                    // FIXME: i18n.
+                    throw new BadRequestException("Unrecognized update request parameter '" + name
+                            + "'");
+                }
+            }
+            doRequest(req, resp, request);
+        } catch (final Exception e) {
             fail(req, resp, e);
         }
     }
