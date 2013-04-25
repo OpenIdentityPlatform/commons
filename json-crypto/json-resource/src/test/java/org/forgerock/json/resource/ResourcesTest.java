@@ -15,8 +15,12 @@
  */
 package org.forgerock.json.resource;
 
-import static org.fest.assertions.Assertions.*;
-import static org.forgerock.json.resource.TestUtils.*;
+import static org.fest.assertions.Assertions.assertThat;
+import static org.forgerock.json.fluent.JsonValue.field;
+import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.json.resource.TestUtils.content;
+import static org.forgerock.json.resource.TestUtils.expected;
+import static org.forgerock.json.resource.TestUtils.filter;
 
 import java.util.List;
 

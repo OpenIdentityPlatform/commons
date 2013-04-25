@@ -17,6 +17,8 @@ package org.forgerock.json.resource;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.fest.assertions.Fail.fail;
+import static org.forgerock.json.fluent.JsonValue.field;
+import static org.forgerock.json.fluent.JsonValue.object;
 import static org.forgerock.json.resource.PatchOperation.add;
 import static org.forgerock.json.resource.PatchOperation.increment;
 import static org.forgerock.json.resource.PatchOperation.remove;
@@ -32,8 +34,6 @@ import static org.forgerock.json.resource.Resources.newInternalConnection;
 import static org.forgerock.json.resource.TestUtils.asResource;
 import static org.forgerock.json.resource.TestUtils.content;
 import static org.forgerock.json.resource.TestUtils.ctx;
-import static org.forgerock.json.resource.TestUtils.field;
-import static org.forgerock.json.resource.TestUtils.object;
 
 import java.util.ArrayList;
 import java.util.Collection;
