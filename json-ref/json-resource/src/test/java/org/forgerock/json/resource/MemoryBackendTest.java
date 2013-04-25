@@ -17,9 +17,14 @@ package org.forgerock.json.resource;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.fest.assertions.Fail.fail;
+import static org.forgerock.json.resource.PatchOperation.add;
+import static org.forgerock.json.resource.PatchOperation.increment;
+import static org.forgerock.json.resource.PatchOperation.remove;
+import static org.forgerock.json.resource.PatchOperation.replace;
 import static org.forgerock.json.resource.Requests.newActionRequest;
 import static org.forgerock.json.resource.Requests.newCreateRequest;
 import static org.forgerock.json.resource.Requests.newDeleteRequest;
+import static org.forgerock.json.resource.Requests.newPatchRequest;
 import static org.forgerock.json.resource.Requests.newQueryRequest;
 import static org.forgerock.json.resource.Requests.newReadRequest;
 import static org.forgerock.json.resource.Requests.newUpdateRequest;
@@ -123,14 +128,23 @@ public final class MemoryBackendTest {
         }
     }
 
-    @Test(enabled = false)
+    @Test(expectedExceptions = BadRequestException.class)
     public void testPatchCollection() throws Exception {
-        fail("Patch not supported yet");
+        final Connection connection = getConnection();
+        connection.patch(ctx(), newPatchRequest("/users", add("/test", "value")));
     }
 
-    @Test(enabled = false)
+    @Test
     public void testPatchInstance() throws Exception {
-        fail("Patch not supported yet");
+        final Connection connection = getConnection();
+        connection.create(ctx(), newCreateRequest("/users", userAlice()));
+        final Resource resource =
+                connection.patch(ctx(), newPatchRequest("/users/0", replace("/name", "bob"),
+                        increment("/age", 10), remove("/role"), add("/role", "it")));
+        assertThat(resource.getId()).isEqualTo("0");
+        assertThat(resource.getRevision()).isEqualTo("1");
+        assertThat(resource.getContent().getObject()).isEqualTo(
+                userBobWithIdAndRev(0, 1).getObject());
     }
 
     @Test

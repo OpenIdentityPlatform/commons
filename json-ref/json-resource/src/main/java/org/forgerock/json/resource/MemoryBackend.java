@@ -18,6 +18,7 @@ package org.forgerock.json.resource;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -423,17 +424,8 @@ public final class MemoryBackend implements CollectionResourceProvider {
         try {
             final Resource resource;
             synchronized (writeLock) {
-                resource = resources.remove(id);
-                if (resource == null) {
-                    throw new NotFoundException("The resource with ID '" + id
-                            + "' could not be deleted because it does not exist");
-                } else if (rev != null && !resource.getRevision().equals(rev)) {
-                    // Mismatch - put the resource back.
-                    resources.put(id, resource);
-                    throw new ConflictException("The resource with ID '" + id
-                            + "' could not be deleted because "
-                            + "it does not have the required version");
-                }
+                resource = getResourceForUpdate(id, rev);
+                resources.remove(id);
             }
             handler.handleResult(resource);
         } catch (final ResourceException e) {
@@ -447,8 +439,80 @@ public final class MemoryBackend implements CollectionResourceProvider {
     @Override
     public void patchInstance(final ServerContext context, final String id,
             final PatchRequest request, final ResultHandler<Resource> handler) {
-        final ResourceException e = new NotSupportedException("Patch operations are not supported");
-        handler.handleError(e);
+        final String rev = request.getRevision();
+        try {
+            final Resource resource;
+            synchronized (writeLock) {
+                final Resource existingResource = getResourceForUpdate(id, rev);
+                final String newRev = getNextRevision(existingResource.getRevision());
+                final JsonValue newContent = existingResource.getContent().copy();
+                for (final PatchOperation operation : request.getPatchOperations()) {
+                    try {
+                        if (operation.isAdd()) {
+                            newContent.putPermissive(operation.getField(), operation.getValue()
+                                    .getObject());
+                        } else if (operation.isRemove()) {
+                            if (operation.getValue().isNull()) {
+                                // Remove entire value.
+                                newContent.remove(operation.getField());
+                            } else {
+                                // Find matching value(s) and remove (assumes reference to array).
+                                final JsonValue value = newContent.get(operation.getField());
+                                if (value != null) {
+                                    if (value.isList()) {
+                                        final Object valueToBeRemoved =
+                                                operation.getValue().getObject();
+                                        final Iterator<Object> iterator = value.asList().iterator();
+                                        while (iterator.hasNext()) {
+                                            if (valueToBeRemoved.equals(iterator.next())) {
+                                                iterator.remove();
+                                            }
+                                        }
+                                    } else {
+                                        // Single valued field.
+                                        final Object valueToBeRemoved =
+                                                operation.getValue().getObject();
+                                        if (valueToBeRemoved.equals(value.getObject())) {
+                                            newContent.remove(operation.getField());
+                                        }
+                                    }
+                                }
+                            }
+                        } else if (operation.isReplace()) {
+                            newContent.remove(operation.getField());
+                            if (!operation.getValue().isNull()) {
+                                newContent.putPermissive(operation.getField(), operation.getValue()
+                                        .getObject());
+                            }
+                        } else if (operation.isIncrement()) {
+                            final JsonValue value = newContent.get(operation.getField());
+                            final Number amount = operation.getValue().asNumber();
+                            if (value == null) {
+                                throw new BadRequestException("The field '" + operation.getField()
+                                        + "' does not exist");
+                            } else if (value.isList()) {
+                                final List<Object> elements = value.asList();
+                                for (int i = 0; i < elements.size(); i++) {
+                                    elements.set(i, increment(operation, elements.get(i), amount));
+                                }
+                            } else {
+                                newContent.put(operation.getField(), increment(operation, value
+                                        .getObject(), amount));
+                            }
+                        }
+                    } catch (final JsonValueException e) {
+                        throw new ConflictException("The field '" + operation.getField()
+                                + "' does not exist");
+                    }
+                }
+                resource = new Resource(id, newRev, newContent);
+                addIdAndRevision(resource);
+                resources.put(id, resource);
+            }
+            handler.handleResult(resource);
+        } catch (final ResourceException e) {
+            handler.handleError(e);
+        }
     }
 
     /**
@@ -557,20 +621,11 @@ public final class MemoryBackend implements CollectionResourceProvider {
         try {
             final Resource resource;
             synchronized (writeLock) {
-                final Resource existingResource = resources.get(id);
-                if (existingResource == null) {
-                    throw new NotFoundException("The resource with ID '" + id
-                            + "' could not be updated because it does not exist");
-                } else if (rev != null && !existingResource.getRevision().equals(rev)) {
-                    throw new ConflictException("The resource with ID '" + id
-                            + "' could not be updated because "
-                            + "it does not have the required version");
-                } else {
-                    final String newRev = getNextRevision(existingResource.getRevision());
-                    resource = new Resource(id, newRev, request.getNewContent());
-                    addIdAndRevision(resource);
-                    resources.put(id, resource);
-                }
+                final Resource existingResource = getResourceForUpdate(id, rev);
+                final String newRev = getNextRevision(existingResource.getRevision());
+                resource = new Resource(id, newRev, request.getNewContent());
+                addIdAndRevision(resource);
+                resources.put(id, resource);
             }
             handler.handleResult(resource);
         } catch (final ResourceException e) {
@@ -602,6 +657,35 @@ public final class MemoryBackend implements CollectionResourceProvider {
         } catch (final NumberFormatException e) {
             throw new InternalServerErrorException("Malformed revision number '" + rev
                     + "' encountered while updating a resource");
+        }
+    }
+
+    private Resource getResourceForUpdate(final String id, final String rev)
+            throws NotFoundException, ConflictException {
+        final Resource existingResource = resources.get(id);
+        if (existingResource == null) {
+            throw new NotFoundException("The resource with ID '" + id
+                    + "' could not be updated because it does not exist");
+        } else if (rev != null && !existingResource.getRevision().equals(rev)) {
+            throw new ConflictException("The resource with ID '" + id
+                    + "' could not be updated because " + "it does not have the required version");
+        }
+        return existingResource;
+    }
+
+    private Object increment(final PatchOperation operation, final Object object,
+            final Number amount) throws BadRequestException {
+        if (object instanceof Long) {
+            return ((Long) object) + amount.longValue();
+        } else if (object instanceof Integer) {
+            return ((Integer) object) + amount.intValue();
+        } else if (object instanceof Float) {
+            return ((Float) object) + amount.floatValue();
+        } else if (object instanceof Double) {
+            return ((Double) object) + amount.doubleValue();
+        } else {
+            throw new BadRequestException("The field '" + operation.getField()
+                    + "' is not a number");
         }
     }
 }

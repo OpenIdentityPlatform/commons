@@ -17,6 +17,8 @@ package org.forgerock.json.resource.servlet;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -27,10 +29,12 @@ import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonGenerator.Feature;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.Request;
@@ -315,6 +319,59 @@ final class HttpUtils {
             }
         }
         return writer;
+    }
+
+    /**
+     * Returns the content of the provided HTTP request decoded as a JSON patch
+     * object.
+     *
+     * @param req
+     *            The HTTP request.
+     * @return The content of the provided HTTP request decoded as a JSON patch
+     *         object.
+     * @throws ResourceException
+     *             If the content could not be read or if the content was not a
+     *             valid JSON patch.
+     */
+    static List<PatchOperation> getJsonPatchContent(final HttpServletRequest req)
+            throws ResourceException {
+        try {
+            final Object content = JSON_MAPPER.readValue(req.getInputStream(), Object.class);
+            final JsonValue json = new JsonValue(content);
+            if (!json.isList()) {
+                throw new BadRequestException(
+                        "The request could not be processed because the provided "
+                                + "content is not a JSON array");
+            }
+            final List<PatchOperation> patch = new ArrayList<PatchOperation>(json.size());
+            for (final JsonValue operation : json) {
+                if (operation.isMap()) {
+                    try {
+                        final String type =
+                                operation.get(PatchOperation.FIELD_OPERATION).required().asString();
+                        final JsonPointer field =
+                                operation.get(PatchOperation.FIELD_FIELD).required().asPointer();
+                        final JsonValue value = operation.get(PatchOperation.FIELD_VALUE);
+                        patch.add(PatchOperation.operation(type, field, value));
+                    } catch (final Exception e) {
+                        throw new BadRequestException(
+                                "The request could not be processed because the provided "
+                                        + "content is not a valid JSON patch: " + e.getMessage());
+                    }
+                } else {
+                    throw new BadRequestException(
+                            "The request could not be processed because the provided "
+                                    + "content is not a JSON array of patch operations");
+                }
+            }
+            return patch;
+        } catch (final JsonParseException e) {
+            throw new BadRequestException(
+                    "The request could not be processed because the provided "
+                            + "content is not valid JSON");
+        } catch (final IOException e) {
+            throw adapt(e);
+        }
     }
 
     /**
