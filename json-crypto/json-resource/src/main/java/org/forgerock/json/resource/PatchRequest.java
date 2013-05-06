@@ -23,7 +23,8 @@ import org.forgerock.json.fluent.JsonValue;
 
 /**
  * A request to update a JSON resource by applying a set of changes to its
- * existing content.
+ * existing content. See the documentation for {@link PatchOperation} for more
+ * details regarding the various types of patch operation, and their semantics.
  */
 public interface PatchRequest extends Request {
 
