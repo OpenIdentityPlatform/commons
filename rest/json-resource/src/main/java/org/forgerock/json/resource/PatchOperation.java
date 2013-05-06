@@ -27,33 +27,84 @@ import org.forgerock.json.fluent.JsonValue;
  * An individual patch operation which is to be performed against a field within
  * a resource. This class defines four core types of operation as well as
  * allowing for extensibility by supporting user-defined operations. The core
- * operations are:
+ * operations are defined below and their behavior depends on the type of the
+ * field being targeted by the operation:
+ * <p>
+ * <ul>
+ * <li>an object (Java {@code Map}) or primitive (Java {@code String},
+ * {@code Boolean}, or {@code Number}): these are considered to be
+ * <i>single-valued</i> fields
+ * <p>
+ * <li>an array (Java {@code List}): these are considered to be
+ * <i>multi-valued</i> fields exhibiting either:
+ * <ul>
+ * <li><i>list</i> semantics - an ordered collection of potentially non-unique
+ * values, or
+ * <li><i>set</i> semantics - a collection of unique values whose ordering is
+ * implementation defined.
+ * </ul>
+ * The choice of semantic (list or set) associated with a multi-valued field is
+ * implementation defined, although it is usual for it to be defined using a
+ * schema.
+ * </ul>
+ * <p>
+ * The four core patch operations are:
+ * <p>
  * <ul>
  * <li>{@link #add(String, Object) add} - ensures that the targeted field
  * contains the provided value(s). Missing parent fields will be created as
  * needed. If the targeted field is already present and it is single-valued
  * (i.e. not an array) then the existing value will be replaced. If the targeted
  * field is already present and it is multi-valued (i.e. an array) then the
- * value(s) will be merged with the existing values. If the field targets a
- * specific index within a multi-valued field then the new values will be
- * inserted at the specified position. Note that some resource implementations
- * may not support indexed based patching, especially where the field exhibits
- * unordered set semantics.
+ * behavior depends on whether the field is a <i>list</i> or a <i>set</i>:
+ * <ul>
+ * <li>list - the provided array of values will be appended to the existing list
+ * of values,
+ * <li>set - the provided array of values will be merged with the existing set
+ * of values and duplicates removed.
+ * </ul>
+ * Add operations which target a specific index of a multi-valued field are
+ * permitted as long as the field is a <i>list</i>. In this case the patch value
+ * must represent a single element of the list (i.e. it must not be an array of
+ * new elements) which will be inserted at the specified position. Indexed
+ * updates to <i>set</i>s are not permitted, although implementations may
+ * support the special index "-" which can be used to add a single value to a
+ * list or set.
+ * <p>
  * <li>{@link #remove(String, Object) remove} - ensures that the targeted field
- * does not contain the provided value(s). If no values are provided with the
- * patch operation then the entire field will be removed. If the field targets a
- * specific index within a multi-valued field then the value at the index will
- * be removed. Note that indexed based removals must not include a value to be
- * removed. In addition, some resource implementations may not support indexed
- * based patching, especially where the field exhibits unordered set semantics.
- * <li>{@link #replace(String, Object) replace} - removes any existing values of
- * the targeted field and replaces them with the provided values. This patch
+ * does not contain the provided value(s) if present. If no values are provided
+ * with the remove operation then the entire field will be removed if it is
+ * present. If the remove operation targets a single-valued field and a patch
+ * value is provided then it must match the existing value for it to be removed,
+ * otherwise the field is left unchanged. If the remove operation targets a
+ * multi-valued field then the behavior depends on whether the field is a
+ * <i>list</i> or a <i>set</i>:
+ * <ul>
+ * <li>list - the provided array of values will be removed from the existing
+ * list of values. Each value in the remove operation will result in at most one
+ * value being removed from the existing list. In other words, if the existing
+ * list contains a pair of duplicate values and both of them need to be removed,
+ * then the values must be include twice in the remove operation,
+ * <li>set - the provided array of values will be removed from the existing set
+ * of values.
+ * </ul>
+ * Remove operations which target a specific index of a multi-valued field are
+ * permitted as long as the field is a <i>list</i>. If a patch value is provided
+ * then it must match the existing value for it to be removed, otherwise the
+ * field is left unchanged. Indexed updates to <i>set</i>s are not permitted.
+ * <p>
+ * <li>{@link #replace(String, Object) replace} - removes any existing value(s)
+ * of the targeted field and replaces them with the provided value(s). A replace
  * operation is semantically equivalent to a {@code remove} followed by an
- * {@code add}.
+ * {@code add}, except that indexed updates are not permitted regardless of
+ * whether or not the field is a list.
+ * <p>
  * <li>{@link #increment(String, Number) increment} - increments or decrements
  * the targeted numerical field value(s) by the specified amount. If the amount
- * is negative then the value(s) are decrement. It is an error to attempt to
- * increment a field which does not contain a number or an array of numbers.
+ * is negative then the value(s) are decremented. It is an error to attempt to
+ * increment a field which does not contain a number or an array of numbers. It
+ * is also an error if the patch value is not a single value.
+ * <p>
  * </ul>
  * Additional types of patch operation are supported via the
  * {@link #operation(String, String, Object) operation} methods.
