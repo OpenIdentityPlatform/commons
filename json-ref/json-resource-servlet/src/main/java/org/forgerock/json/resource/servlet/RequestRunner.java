@@ -295,15 +295,22 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
         }
     }
 
+    private String forceEmptyIfNull(final String s) {
+        return s != null ? s : "";
+    }
+
     private String getResourceURL(final CreateRequest request, final Resource resource) {
         final StringBuffer buffer = httpRequest.getRequestURL();
 
         // Strip out everything except the scheme and host.
         buffer.setLength(buffer.length() - httpRequest.getRequestURI().length());
 
-        // Add back the context and servlet paths.
-        buffer.append(httpRequest.getContextPath());
-        buffer.append(httpRequest.getServletPath());
+        /*
+         * Add back the context and servlet paths (these should never be null
+         * but in some cases they are, e.g. when running Jetty from Maven).
+         */
+        buffer.append(forceEmptyIfNull(httpRequest.getContextPath()));
+        buffer.append(forceEmptyIfNull(httpRequest.getServletPath()));
 
         // Add new resource name and resource ID.
         buffer.append(request.getResourceName());
