@@ -41,14 +41,36 @@ public class RequestRunnerTest {
 
     private static final ResourceException EXCEPTION = ResourceException.getException(ResourceException.NOT_FOUND);
 
+    final class MyPojo {
+
+        private int intValue;
+        private String stringValue;
+
+        public MyPojo(int intValue, String stringValue) {
+            this.intValue = intValue;
+            this.stringValue = stringValue;
+        }
+
+        public int getintField() {
+            return intValue;
+        }
+
+        public String getStringField() {
+            return stringValue;
+        }
+    }
+
     @Test
     public void testHandleResultAnonymousQueryResultHandlerInVisitQueryAsync()
             throws Exception {
         StringBuilder output = new StringBuilder();
         QueryResultHandler resultHandler = getAnonymousQueryResultHandler(output);
         resultHandler.handleResult(new QueryResult());
-        assertEquals(output.toString(),
-                "{\"result\":[],\"resultCount\":0,\"pagedResultsCookie\":null,\"remainingPagedResults\":-1}");
+        assertEquals(output.toString(), ""
+                + "{"
+                + "\"result\":[],"
+                + "\"resultCount\":0,\"pagedResultsCookie\":null,\"remainingPagedResults\":-1"
+                + "}");
     }
 
     @Test
@@ -58,9 +80,29 @@ public class RequestRunnerTest {
         QueryResultHandler resultHandler = getAnonymousQueryResultHandler(output);
         resultHandler.handleResource(new Resource("id", "revision", new JsonValue("jsonValue")));
         resultHandler.handleResult(new QueryResult());
-        assertEquals(output.toString(),
-                "{\"result\":[\"jsonValue\"],"
-                    + "\"resultCount\":1,\"pagedResultsCookie\":null,\"remainingPagedResults\":-1}");
+        assertEquals(output.toString(), ""
+                + "{"
+                + "\"result\":[\"jsonValue\"],"
+                + "\"resultCount\":1,\"pagedResultsCookie\":null,\"remainingPagedResults\":-1"
+                + "}");
+    }
+
+    @Test
+    public void testHandleResourceTwoAnonymousQueryResultHandlerInVisitQueryAsync()
+            throws Exception {
+        StringBuilder output = new StringBuilder();
+        QueryResultHandler resultHandler = getAnonymousQueryResultHandler(output);
+        resultHandler.handleResource(new Resource("id", "revision", new JsonValue(new MyPojo(42, "stringValue"))));
+        resultHandler.handleResource(new Resource("id", "revision", new JsonValue(new MyPojo(43, "otherString"))));
+        resultHandler.handleResult(new QueryResult());
+        assertEquals(output.toString(), ""
+                + "{"
+                + "\"result\":["
+                + "{\"intField\":42,\"stringField\":\"stringValue\"},"
+                + "{\"intField\":43,\"stringField\":\"otherString\"}"
+                + "],"
+                + "\"resultCount\":2,\"pagedResultsCookie\":null,\"remainingPagedResults\":-1"
+                + "}");
     }
 
     @Test
@@ -70,6 +112,21 @@ public class RequestRunnerTest {
         QueryResultHandler resultHandler = getAnonymousQueryResultHandler(output);
         resultHandler.handleError(EXCEPTION);
         assertEquals(output.toString(), "");
+    }
+
+    @Test
+    public void testHandleResourceWithErrorAnonymousQueryResultHandlerInVisitQueryAsync()
+            throws Exception {
+        StringBuilder output = new StringBuilder();
+        QueryResultHandler resultHandler = getAnonymousQueryResultHandler(output);
+        resultHandler.handleResource(new Resource("id", "revision", new JsonValue("jsonValue")));
+        resultHandler.handleError(EXCEPTION);
+        assertEquals(output.toString(), ""
+                + "{"
+                + "\"result\":[\"jsonValue\"],"
+                + "\"resultCount\":1,"
+                + "\"error\":{\"code\":404,\"reason\":\"Not Found\",\"message\":\"Not Found\"}"
+                + "}");
     }
 
     private QueryResultHandler getAnonymousQueryResultHandler(StringBuilder output)
@@ -90,7 +147,7 @@ public class RequestRunnerTest {
         RequestRunner requestRunner = new RequestRunner(context, request, httpRequest, httpResponse, sync);
         requestRunner.handleResult(connection);
 
-        // Retrive the anonymous class (phewww!)
+        // Retrieve the anonymous class (phewww!)
         ArgumentCaptor<QueryResultHandler> arg = ArgumentCaptor.forClass(QueryResultHandler.class);
         verify(connection).queryAsync(eq(context), eq(request), arg.capture());
         return arg.getValue();
