@@ -16,7 +16,7 @@
 
 package org.forgerock.json.jwt;
 
-import com.sun.identity.shared.encode.Base64;
+import org.forgerock.json.jwt.openam.shared.Base64;
 import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonValue;
 
