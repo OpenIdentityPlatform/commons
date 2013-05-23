@@ -16,8 +16,7 @@
 
 package org.forgerock.json.jwt;
 
-import com.sun.identity.shared.encode.Base64;
-import org.json.JSONException;
+import org.forgerock.json.jwt.openam.shared.Base64;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -111,7 +110,7 @@ public class JwtTest {
     }
 
     @Test
-    public void shouldReconstructPlaintextJwt() throws JSONException {
+    public void shouldReconstructPlaintextJwt() {
 
         //Given
 
@@ -223,7 +222,7 @@ public class JwtTest {
     }
 
     @Test
-    public void shouldReconstructSignedHS256Jwt() throws JSONException, CertificateException, NoSuchAlgorithmException, IOException, KeyStoreException, JWTBuilderException, UnrecoverableKeyException {
+    public void shouldReconstructSignedHS256Jwt() throws CertificateException, NoSuchAlgorithmException, IOException, KeyStoreException, JWTBuilderException, UnrecoverableKeyException {
 
         //Given
         PrivateKey key = getPrivateKey("jwt-test-ks", "password".toCharArray());
@@ -314,8 +313,8 @@ public class JwtTest {
     }
 
     @Test
-    public void shouldReconstructSignedRS256Jwt() throws JSONException, CertificateException,
-            NoSuchAlgorithmException, IOException, KeyStoreException, JWTBuilderException, UnrecoverableKeyException {
+    public void shouldReconstructSignedRS256Jwt() throws CertificateException, NoSuchAlgorithmException, IOException,
+            KeyStoreException, JWTBuilderException, UnrecoverableKeyException {
 
         //Given
         PrivateKey key = getPrivateKey("jwt-test-ks", "password".toCharArray());
