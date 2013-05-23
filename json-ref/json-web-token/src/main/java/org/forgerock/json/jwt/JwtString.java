@@ -16,7 +16,7 @@
 
 package org.forgerock.json.jwt;
 
-import com.sun.identity.shared.encode.Base64;
+import org.forgerock.json.jwt.openam.shared.Base64;
 
 /**
  * Simple object to represent a JWT as a String.
