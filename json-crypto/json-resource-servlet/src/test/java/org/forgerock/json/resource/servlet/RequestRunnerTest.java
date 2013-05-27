@@ -24,7 +24,9 @@ import java.util.Collections;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import static org.forgerock.json.fluent.JsonValue.*;
 import org.forgerock.json.fluent.JsonValue;
+
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.QueryRequest;
@@ -39,35 +41,15 @@ import org.testng.annotations.Test;
 @SuppressWarnings("javadoc")
 public class RequestRunnerTest {
 
-    private static final ResourceException EXCEPTION = ResourceException.getException(ResourceException.NOT_FOUND);
-
-    final class MyPojo {
-
-        private int intValue;
-        private String stringValue;
-
-        public MyPojo(int intValue, String stringValue) {
-            this.intValue = intValue;
-            this.stringValue = stringValue;
-        }
-
-        public int getintField() {
-            return intValue;
-        }
-
-        public String getStringField() {
-            return stringValue;
-        }
-    }
+    private static final ResourceException EXCEPTION = ResourceException
+            .getException(ResourceException.NOT_FOUND);
 
     @Test
     public void testHandleResultAnonymousQueryResultHandlerInVisitQueryAsync() throws Exception {
         StringBuilder output = new StringBuilder();
         QueryResultHandler resultHandler = getAnonymousQueryResultHandler(output);
         resultHandler.handleResult(new QueryResult());
-        assertEquals(output.toString(), ""
-                + "{"
-                + "\"result\":[],"
+        assertEquals(output.toString(), "" + "{" + "\"result\":[],"
                 + "\"resultCount\":0,\"pagedResultsCookie\":null,\"remainingPagedResults\":-1"
                 + "}");
     }
@@ -78,26 +60,24 @@ public class RequestRunnerTest {
         QueryResultHandler resultHandler = getAnonymousQueryResultHandler(output);
         resultHandler.handleResource(new Resource("id", "revision", new JsonValue("jsonValue")));
         resultHandler.handleResult(new QueryResult());
-        assertEquals(output.toString(), ""
-                + "{"
-                + "\"result\":[\"jsonValue\"],"
+        assertEquals(output.toString(), "" + "{" + "\"result\":[\"jsonValue\"],"
                 + "\"resultCount\":1,\"pagedResultsCookie\":null,\"remainingPagedResults\":-1"
                 + "}");
     }
 
     @Test
-    public void testHandleResourceTwoAnonymousQueryResultHandlerInVisitQueryAsync() throws Exception {
+    public void testHandleResourceTwoAnonymousQueryResultHandlerInVisitQueryAsync()
+            throws Exception {
         StringBuilder output = new StringBuilder();
         QueryResultHandler resultHandler = getAnonymousQueryResultHandler(output);
-        resultHandler.handleResource(new Resource("id", "revision", new JsonValue(new MyPojo(42, "stringValue"))));
-        resultHandler.handleResource(new Resource("id", "revision", new JsonValue(new MyPojo(43, "otherString"))));
+        resultHandler.handleResource(new Resource("id", "revision", json(object(field("intField",
+                42), field("stringField", "stringValue")))));
+        resultHandler.handleResource(new Resource("id", "revision", json(object(field("intField",
+                43), field("stringField", "otherString")))));
         resultHandler.handleResult(new QueryResult());
-        assertEquals(output.toString(), ""
-                + "{"
-                + "\"result\":["
+        assertEquals(output.toString(), "" + "{" + "\"result\":["
                 + "{\"intField\":42,\"stringField\":\"stringValue\"},"
-                + "{\"intField\":43,\"stringField\":\"otherString\"}"
-                + "],"
+                + "{\"intField\":43,\"stringField\":\"otherString\"}" + "],"
                 + "\"resultCount\":2,\"pagedResultsCookie\":null,\"remainingPagedResults\":-1"
                 + "}");
     }
@@ -111,17 +91,15 @@ public class RequestRunnerTest {
     }
 
     @Test
-    public void testHandleResourceThenErrorAnonymousQueryResultHandlerInVisitQueryAsync() throws Exception {
+    public void testHandleResourceThenErrorAnonymousQueryResultHandlerInVisitQueryAsync()
+            throws Exception {
         StringBuilder output = new StringBuilder();
         QueryResultHandler resultHandler = getAnonymousQueryResultHandler(output);
-        resultHandler.handleResource(new Resource("id", "revision", new JsonValue(new MyPojo(42, "stringValue"))));
+        resultHandler.handleResource(new Resource("id", "revision", json(object(field("intField",
+                42), field("stringField", "stringValue")))));
         resultHandler.handleError(EXCEPTION);
-        assertEquals(output.toString(), ""
-                + "{"
-                + "\"result\":["
-                + "{\"intField\":42,\"stringField\":\"stringValue\"}"
-                + "],"
-                + "\"resultCount\":1,"
+        assertEquals(output.toString(), "" + "{" + "\"result\":["
+                + "{\"intField\":42,\"stringField\":\"stringValue\"}" + "]," + "\"resultCount\":1,"
                 + "\"error\":{\"code\":404,\"reason\":\"Not Found\",\"message\":\"Not Found\"}"
                 + "}");
     }
@@ -138,10 +116,11 @@ public class RequestRunnerTest {
 
         // set the expectations
         when(httpResponse.getOutputStream()).thenReturn(new StringBuilderOutputStream(output));
-        when(httpRequest.getParameterMap()).thenReturn(Collections.<String, String[]>emptyMap());
+        when(httpRequest.getParameterMap()).thenReturn(Collections.<String, String[]> emptyMap());
 
         // run the code to access the anonymous class
-        RequestRunner requestRunner = new RequestRunner(context, request, httpRequest, httpResponse, sync);
+        RequestRunner requestRunner =
+                new RequestRunner(context, request, httpRequest, httpResponse, sync);
         requestRunner.handleResult(connection);
 
         // Retrieve the anonymous class (phewww!)
