@@ -61,8 +61,7 @@ public class RequestRunnerTest {
     }
 
     @Test
-    public void testHandleResultAnonymousQueryResultHandlerInVisitQueryAsync()
-            throws Exception {
+    public void testHandleResultAnonymousQueryResultHandlerInVisitQueryAsync() throws Exception {
         StringBuilder output = new StringBuilder();
         QueryResultHandler resultHandler = getAnonymousQueryResultHandler(output);
         resultHandler.handleResult(new QueryResult());
@@ -74,8 +73,7 @@ public class RequestRunnerTest {
     }
 
     @Test
-    public void testHandleResourceAnonymousQueryResultHandlerInVisitQueryAsync()
-            throws Exception {
+    public void testHandleResourceAnonymousQueryResultHandlerInVisitQueryAsync() throws Exception {
         StringBuilder output = new StringBuilder();
         QueryResultHandler resultHandler = getAnonymousQueryResultHandler(output);
         resultHandler.handleResource(new Resource("id", "revision", new JsonValue("jsonValue")));
@@ -88,8 +86,7 @@ public class RequestRunnerTest {
     }
 
     @Test
-    public void testHandleResourceTwoAnonymousQueryResultHandlerInVisitQueryAsync()
-            throws Exception {
+    public void testHandleResourceTwoAnonymousQueryResultHandlerInVisitQueryAsync() throws Exception {
         StringBuilder output = new StringBuilder();
         QueryResultHandler resultHandler = getAnonymousQueryResultHandler(output);
         resultHandler.handleResource(new Resource("id", "revision", new JsonValue(new MyPojo(42, "stringValue"))));
@@ -106,8 +103,7 @@ public class RequestRunnerTest {
     }
 
     @Test
-    public void testHandleErrorAnonymousQueryResultHandlerInVisitQueryAsync()
-            throws Exception {
+    public void testHandleErrorAnonymousQueryResultHandlerInVisitQueryAsync() throws Exception {
         StringBuilder output = new StringBuilder();
         QueryResultHandler resultHandler = getAnonymousQueryResultHandler(output);
         resultHandler.handleError(EXCEPTION);
@@ -115,15 +111,16 @@ public class RequestRunnerTest {
     }
 
     @Test
-    public void testHandleResourceWithErrorAnonymousQueryResultHandlerInVisitQueryAsync()
-            throws Exception {
+    public void testHandleResourceThenErrorAnonymousQueryResultHandlerInVisitQueryAsync() throws Exception {
         StringBuilder output = new StringBuilder();
         QueryResultHandler resultHandler = getAnonymousQueryResultHandler(output);
-        resultHandler.handleResource(new Resource("id", "revision", new JsonValue("jsonValue")));
+        resultHandler.handleResource(new Resource("id", "revision", new JsonValue(new MyPojo(42, "stringValue"))));
         resultHandler.handleError(EXCEPTION);
         assertEquals(output.toString(), ""
                 + "{"
-                + "\"result\":[\"jsonValue\"],"
+                + "\"result\":["
+                + "{\"intField\":42,\"stringField\":\"stringValue\"}"
+                + "],"
                 + "\"resultCount\":1,"
                 + "\"error\":{\"code\":404,\"reason\":\"Not Found\",\"message\":\"Not Found\"}"
                 + "}");
