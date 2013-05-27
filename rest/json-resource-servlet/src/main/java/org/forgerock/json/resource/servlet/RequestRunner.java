@@ -199,7 +199,7 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
                 if (isFirstResult) {
                     onError(error);
                 } else {
-                    // Partial results - it's to late to set the status.
+                    // Partial results - it's too late to set the status.
                     try {
                         writer.writeEndArray();
                         writer.writeNumberField(FIELD_RESULT_COUNT, resultCount);
