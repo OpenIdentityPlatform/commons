@@ -16,7 +16,6 @@
 
 package org.forgerock.json.resource;
 
-
 /**
  * A completion handler for consuming the results of a query request.
  * <p>
@@ -29,6 +28,16 @@ package org.forgerock.json.resource;
  * Implementations of these methods should complete in a timely manner so as to
  * avoid keeping the invoking thread from dispatching to other completion
  * handlers.
+ * <p>
+ * <b>Synchronization note:</b> each invocation of
+ * {@link #handleResource(Resource) handleResource} for a resource <i><a href=
+ * "http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/package-summary.html#MemoryVisibility"
+ * >happens-before</a></i> the invocation of {@code handleResource} for the next
+ * resource. Invocation of {@code handleResource} for the final resource
+ * <i>happens-before</i> either {@link #handleResult(QueryResult) handleResult}
+ * or {@link #handleError(ResourceException) handleError} are invoked with the
+ * final query status. In other words, query result handler method invocations
+ * will occur sequentially and one at a time.
  */
 public interface QueryResultHandler extends ResultHandler<QueryResult> {
 
