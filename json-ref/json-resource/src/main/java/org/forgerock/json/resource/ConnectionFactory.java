@@ -9,9 +9,9 @@
  * When distributing Covered Software, include this CDDL Header Notice in each file and include
  * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
- * information: "Portions Copyrighted [year] [name of copyright owner]".
+ * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2012 ForgeRock AS. All rights reserved.
+ * Copyright 2012-2013 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -81,5 +81,5 @@ public interface ConnectionFactory extends Closeable {
      *            used.
      * @return A future which can be used to retrieve the connection.
      */
-    FutureResult<Connection> getConnectionAsync(ResultHandler<Connection> handler);
+    FutureResult<Connection> getConnectionAsync(ResultHandler<? super Connection> handler);
 }

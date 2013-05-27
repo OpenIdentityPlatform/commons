@@ -58,7 +58,7 @@ public abstract class AbstractConnectionWrapper<C extends Connection> implements
      * The default implementation is to delegate.
      */
     public FutureResult<JsonValue> actionAsync(Context context, ActionRequest request,
-            ResultHandler<JsonValue> handler) {
+            ResultHandler<? super JsonValue> handler) {
         return connection.actionAsync(context, request, handler);
     }
 
@@ -86,7 +86,7 @@ public abstract class AbstractConnectionWrapper<C extends Connection> implements
      * The default implementation is to delegate.
      */
     public FutureResult<Resource> createAsync(Context context, CreateRequest request,
-            ResultHandler<Resource> handler) {
+            ResultHandler<? super Resource> handler) {
         return connection.createAsync(context, request, handler);
     }
 
@@ -105,7 +105,7 @@ public abstract class AbstractConnectionWrapper<C extends Connection> implements
      * The default implementation is to delegate.
      */
     public FutureResult<Resource> deleteAsync(Context context, DeleteRequest request,
-            ResultHandler<Resource> handler) {
+            ResultHandler<? super Resource> handler) {
         return connection.deleteAsync(context, request, handler);
     }
 
@@ -142,7 +142,7 @@ public abstract class AbstractConnectionWrapper<C extends Connection> implements
      * The default implementation is to delegate.
      */
     public FutureResult<Resource> patchAsync(Context context, PatchRequest request,
-            ResultHandler<Resource> handler) {
+            ResultHandler<? super Resource> handler) {
         return connection.patchAsync(context, request, handler);
     }
 
@@ -191,7 +191,7 @@ public abstract class AbstractConnectionWrapper<C extends Connection> implements
      * The default implementation is to delegate.
      */
     public FutureResult<Resource> readAsync(Context context, ReadRequest request,
-            ResultHandler<Resource> handler) {
+            ResultHandler<? super Resource> handler) {
         return connection.readAsync(context, request, handler);
     }
 
@@ -210,7 +210,7 @@ public abstract class AbstractConnectionWrapper<C extends Connection> implements
      * The default implementation is to delegate.
      */
     public FutureResult<Resource> updateAsync(Context context, UpdateRequest request,
-            ResultHandler<Resource> handler) {
+            ResultHandler<? super Resource> handler) {
         return connection.updateAsync(context, request, handler);
     }
 
