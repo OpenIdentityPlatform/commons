@@ -9,9 +9,9 @@
  * When distributing Covered Software, include this CDDL Header Notice in each file and include
  * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
- * information: "Portions Copyrighted [year] [name of copyright owner]".
+ * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright © 2012 ForgeRock AS. All rights reserved.
+ * Copyright 2012-2013 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -26,8 +26,6 @@ import org.forgerock.json.fluent.JsonValue;
  * requests may be performed.
  */
 public interface Connection extends Closeable {
-
-    // TODO: do we need to expose a method for obtaining the endpoints/schema?
 
     /**
      * Performs an action against a specific resource, or set of resources. Bulk
@@ -68,7 +66,7 @@ public interface Connection extends Closeable {
      *             {@code isClosed() == true}.
      */
     FutureResult<JsonValue> actionAsync(Context context, ActionRequest request,
-            ResultHandler<JsonValue> handler);
+            ResultHandler<? super JsonValue> handler);
 
     /**
      * Releases any resources associated with this connection. For physical
@@ -119,7 +117,7 @@ public interface Connection extends Closeable {
      *             {@code isClosed() == true}.
      */
     FutureResult<Resource> createAsync(Context context, CreateRequest request,
-            ResultHandler<Resource> handler);
+            ResultHandler<? super Resource> handler);
 
     /**
      * Deletes a JSON resource.
@@ -157,7 +155,7 @@ public interface Connection extends Closeable {
      *             {@code isClosed() == true}.
      */
     FutureResult<Resource> deleteAsync(Context context, DeleteRequest request,
-            ResultHandler<Resource> handler);
+            ResultHandler<? super Resource> handler);
 
     /**
      * Indicates whether or not this connection has been explicitly closed by
@@ -219,7 +217,7 @@ public interface Connection extends Closeable {
      *             {@code isClosed() == true}.
      */
     FutureResult<Resource> patchAsync(Context context, PatchRequest request,
-            ResultHandler<Resource> handler);
+            ResultHandler<? super Resource> handler);
 
     /**
      * Searches for all JSON resources matching a user specified set of
@@ -330,7 +328,7 @@ public interface Connection extends Closeable {
      *             {@code isClosed() == true}.
      */
     FutureResult<Resource> readAsync(Context context, ReadRequest request,
-            ResultHandler<Resource> handler);
+            ResultHandler<? super Resource> handler);
 
     /**
      * Updates a JSON resource by replacing its existing content with new
@@ -370,5 +368,5 @@ public interface Connection extends Closeable {
      *             {@code isClosed() == true}.
      */
     FutureResult<Resource> updateAsync(Context context, UpdateRequest request,
-            ResultHandler<Resource> handler);
+            ResultHandler<? super Resource> handler);
 }
