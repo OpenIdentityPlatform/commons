@@ -16,7 +16,7 @@
 
 package org.forgerock.json.jwt;
 
-import org.forgerock.json.jwt.openam.shared.SignatureUtil;
+import org.forgerock.util.SignatureUtil;
 
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;

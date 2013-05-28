@@ -16,9 +16,9 @@
 
 package org.forgerock.json.jwt;
 
-import org.forgerock.json.jwt.openam.shared.Base64;
 import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.util.encode.Base64;
 
 import java.security.PrivateKey;
 import java.util.HashMap;
