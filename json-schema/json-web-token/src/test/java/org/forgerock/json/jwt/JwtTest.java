@@ -16,7 +16,7 @@
 
 package org.forgerock.json.jwt;
 
-import org.forgerock.json.jwt.openam.shared.Base64;
+import org.forgerock.util.encode.Base64;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
