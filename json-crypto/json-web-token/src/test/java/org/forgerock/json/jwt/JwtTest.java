@@ -79,9 +79,9 @@ public class JwtTest {
                 .build();
 
         //Then
-        String expectedHeader = "{ \"H2\": \"HEADER2\", \"H1\": \"HEADER1\", \"typ\": \"JWT\" }";
+        String expectedHeader = "{ \"H1\": \"HEADER1\", \"H2\": \"HEADER2\", \"typ\": \"JWT\" }";
         String expectedEncodedHeader = Base64.encode(expectedHeader.getBytes());
-        String expectedContent = "{ \"KEY2\": true, \"KEY1\": \"VALUE1\", \"KEY4\": 1362397486273, \"KEY3\": 123, " +
+        String expectedContent = "{ \"KEY1\": \"VALUE1\", \"KEY2\": true, \"KEY3\": 123, \"KEY4\": 1362397486273, " +
                 "\"KEY5\": 45.43 }";
         String expectedEncodedContent = Base64.encode(expectedContent.getBytes());
         String expectedThirdPart = "";
@@ -195,12 +195,12 @@ public class JwtTest {
                 .build();
 
         //Then
-        String expectedHeader = "{ \"alg\": \"HS256\", \"H2\": \"HEADER2\", \"H1\": \"HEADER1\", \"typ\": \"JWT\" }";
+        String expectedHeader = "{ \"H1\": \"HEADER1\", \"H2\": \"HEADER2\", \"alg\": \"HS256\", \"typ\": \"JWT\" }";
         String expectedEncodedHeader = Base64.encode(expectedHeader.getBytes());
-        String expectedContent = "{ \"KEY2\": true, \"KEY1\": \"VALUE1\", \"KEY4\": 1362397486273, " +
-                "\"KEY3\": 123, \"KEY5\": 45.43 }";
+        String expectedContent = "{ \"KEY1\": \"VALUE1\", \"KEY2\": true, \"KEY3\": 123, \"KEY4\": 1362397486273, " +
+                "\"KEY5\": 45.43 }";
         String expectedEncodedContent = Base64.encode(expectedContent.getBytes());
-        String expectedEncodedThirdPart = "bFPwBcagnfyCbNv6Cx8QH6Xf51Ps5HmEdvAuoKQfUr8=";
+        String expectedEncodedThirdPart = "HuI18yFtU9mL8KHu8WSgGtIObcq85Sbiv0dRCypvEK0=";
 
         int headerEndIndex = signedJwt.indexOf(".");
         String actualEncodedHeader = signedJwt.substring(0, headerEndIndex);
@@ -283,15 +283,15 @@ public class JwtTest {
                 .build();
 
         //Then
-        String expectedHeader = "{ \"alg\": \"RS256\", \"H2\": \"HEADER2\", \"H1\": \"HEADER1\", \"typ\": \"JWT\" }";
+        String expectedHeader = "{ \"H1\": \"HEADER1\", \"H2\": \"HEADER2\", \"alg\": \"RS256\", \"typ\": \"JWT\" }";
         String expectedEncodedHeader = Base64.encode(expectedHeader.getBytes());
-        String expectedContent = "{ \"KEY2\": true, \"KEY1\": \"VALUE1\", \"KEY4\": 1362397486273, " +
-                "\"KEY3\": 123, \"KEY5\": 45.43 }";
+        String expectedContent = "{ \"KEY1\": \"VALUE1\", \"KEY2\": true, \"KEY3\": 123, \"KEY4\": 1362397486273, " +
+                "\"KEY5\": 45.43 }";
         String expectedEncodedContent = Base64.encode(expectedContent.getBytes());
-        String expectedEncodedThirdPart = "meSd7BUEhKJyMYwNd8Ydtg4gAenJNHsYLucWxmPi5i8roOm8JFKjV5x0Czt6sm8LRXA8i" +
-                "/2zAwgGBnXC1cxvYJMcFGGHOJ5vPImIffcFBc8wGUcvg6G5ooKMkxjKKFSt3eQPBmYAsKVymMYUBGDFCBgdm+mk7ptYO6Pk" +
-                "oeAmvQUt9JRTkMKEuJNwiLtkif6OakB+RuRDIT/lBQGdYp/Qqxm/pt8WBTuF/EYvZVWisVnxRI8WlsBofcfpP4VhFRPE15T" +
-                "+wVSfnlaxuKY0Boy1+xcU91Tg9/Mh2PsXgYYWe6CbXxSazXTKcdzhrrziyMh+6pYmHVkUOXgx0a/vjXSfcg==";
+        String expectedEncodedThirdPart = "mTDaO18tBGrZg1jHgopTe/jRXunjCEK4qugZ8WaXwThlo6XLNkoUJSHj+cDf36gUXZj" +
+                "19rNXvHpCnJIvc5iLTxEkny1CQEnZQ3fjslWmfzbGwRx8OBqnsozfiqkM1fJ4gXL1iR9nw0oRAOtlyt0m0Pm4/mzdfNT0" +
+                "nu+m1aCzmNaNvnXZa6tAAe5AYvcZt6qHVwh8n8BhHvWe+muh1h/jcsfmWL6WVGUdy9rq2t09MAsWCs+lr2gmX/djG2Qp7" +
+                "WZElapZBQo8wMC8buK4rKWcHmJCA8s+A/1ZdEnHoYEpYNjPLBnNM6GkP7FMjpK0UeJVwZ6crHhP7Ylmx6dUmfc+Xg==";
 
         int headerEndIndex = signedJwt.indexOf(".");
         String actualEncodedHeader = signedJwt.substring(0, headerEndIndex);
