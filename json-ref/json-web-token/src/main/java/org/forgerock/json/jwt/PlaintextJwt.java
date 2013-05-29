@@ -21,7 +21,6 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.util.encode.Base64;
 
 import java.security.PrivateKey;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -31,14 +30,13 @@ import java.util.TreeMap;
  */
 public class PlaintextJwt implements Jwt {
 
-    private final Map<String, String> headers;
-    private final Map<String, Object> content;
+    private final Map<String, String> headers = new TreeMap<String, String>();
+    private final Map<String, Object> content = new TreeMap<String, Object>();
 
     /**
      * Constructs a PlaintextJwt with no headers or content.
      */
     PlaintextJwt() {
-        this(new HashMap<String, String>(), new HashMap<String, Object>());
     }
 
     /**
@@ -48,8 +46,8 @@ public class PlaintextJwt implements Jwt {
      * @param content The Jwt content.
      */
     PlaintextJwt(Map<String, String> headers, Map<String, Object> content) {
-        this.headers = new TreeMap<String, String>(headers);
-        this.content = new TreeMap<String, Object>(content);
+        header(headers);
+        content(content);
     }
 
     /**
@@ -87,7 +85,15 @@ public class PlaintextJwt implements Jwt {
      * @return The content value.
      */
     public Object getContent(String key) {
-        return content.get(key);
+        Object value = content.get(key);
+        if (String.class.isAssignableFrom(value.getClass())) {
+            String s = (String) value;
+            if (s.contains("\\\\\"")) {
+                s = s.replaceAll("\\\\\"", "\"");
+            }
+            return s;
+        }
+        return value;
     }
 
     /**
@@ -110,7 +116,14 @@ public class PlaintextJwt implements Jwt {
      * @return This PlaintextJwt.
      */
     public PlaintextJwt header(String key, String value) {
-        headers.put(key, value);
+        headers.put(key, processString(value));
+        return this;
+    }
+
+    private PlaintextJwt header(Map<String, String> values) {
+        for (String key : values.keySet()) {
+            header(key, values.get(key));
+        }
         return this;
     }
 
@@ -122,7 +135,7 @@ public class PlaintextJwt implements Jwt {
      * @return This PlaintextJwt.
      */
     public PlaintextJwt content(String key, Object value) {
-        content.put(key, value);
+        content.put(key, processJwtValue(value));
         return this;
     }
 
@@ -133,8 +146,25 @@ public class PlaintextJwt implements Jwt {
      * @return This PlaintextJwt.
      */
     public PlaintextJwt content(Map<String, Object> values) {
-        content.putAll(values);
+        for (String key : values.keySet()) {
+            content(key, values.get(key));
+        }
         return this;
+    }
+
+    private Object processJwtValue(Object value) {
+        if (String.class.isAssignableFrom(value.getClass())) {
+            return processString((String) value);
+        } else {
+            return value;
+        }
+    }
+
+    private String processString(String s) {
+        if (s.contains("\"")) {
+            s = s.replaceAll("\"", "\\\\\"");
+        }
+        return s;
     }
 
     /**
