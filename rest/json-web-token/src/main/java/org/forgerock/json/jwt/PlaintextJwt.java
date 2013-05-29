@@ -24,6 +24,7 @@ import java.security.PrivateKey;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * Represents a Plaintext JWT, with no signing or encryption.
@@ -47,8 +48,8 @@ public class PlaintextJwt implements Jwt {
      * @param content The Jwt content.
      */
     PlaintextJwt(Map<String, String> headers, Map<String, Object> content) {
-        this.headers = headers;
-        this.content = content;
+        this.headers = new TreeMap<String, String>(headers);
+        this.content = new TreeMap<String, Object>(content);
     }
 
     /**
