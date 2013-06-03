@@ -164,10 +164,17 @@
                 The following sub-sections describe each of the core operations
                 in more detail:
             </p>
-            <subsection name="Creating resources with a server provided resource ID">
+            <subsection name="Creating resources using POST">
                 <p>
-                    To create a new resource with a server provided resource ID
-                    send a POST request targeting the resource container.
+                    A POST create request should be used when the resource to be
+                    created will have a server provided resource ID (e.g. a
+                    UUID). It may also be used in cases where the resource ID
+                    is client provided, but only as long as the resource ID is
+                    included as a field within the new resource.
+                </p>
+                <p>
+                    POST create requests should target the resource container
+                    and must include the parameter <tt>_action=create</tt>.
                 </p>
                 <table>
                     <tr>
@@ -180,7 +187,7 @@
                     </tr>
                     <tr>
                         <td>
-                            <tt>__action=create</tt>
+                            <tt>_action=create</tt>
                         </td>
                         <td>
                             <p>
@@ -216,11 +223,17 @@ Content-Length: ...
   "email" : "alice@example.com"
 }</source>
             </subsection>
-            <subsection name="Creating resources with a client provided resource ID">
+            <subsection name="Creating resources using PUT">
                 <p>
-                    To create a new resource with a client provided resource ID
-                    send a PUT request targeting the new resource and include
-                    the HTTP header "If-None-Match: *".
+                    A PUT create request should be used when the resource to be
+                    created has a known resource ID. The resource ID is 
+                    specified as part of the target resource name, and may also
+                    be included as a field within the new resource, in which
+                    case the two must be equivalent.
+                </p>
+                <p>
+                    PUT create requests should target the new resource and
+                    include the HTTP header <tt>If-None-Match: *</tt>.
                 </p>
                 <table>
                     <tr>
