@@ -105,7 +105,7 @@ public class PlaintextJwt implements Jwt {
      * @return The content value.
      */
     public <T> T getContent(String key, Class<? extends T> clazz) {
-        return (T) content.get(key);
+        return (T) getContent(key);
     }
 
     /**
