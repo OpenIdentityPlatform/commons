@@ -13,7 +13,6 @@
  *
  * Copyright © 2011 ForgeRock AS. All rights reserved.
  */
-
 package org.forgerock.json.fluent;
 
 import java.net.URI;
@@ -264,7 +263,7 @@ public class JsonPointer implements Iterable<String> {
      * @return the last (leaf) reference token of the JSON pointer if it exists, {@code null} otherwise
      */
     public String leaf() {
-        return (tokens.length > 0 ? tokens[tokens.length - 1] : null);
+        return tokens.length > 0 ? tokens[tokens.length - 1] : null;
     }
 
     /**
@@ -346,9 +345,12 @@ public class JsonPointer implements Iterable<String> {
      */
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         for (String token : tokens) {
             sb.append('/').append(encode(token));
+        }
+        if (sb.length() == 0) {
+            sb.append('/');
         }
         return sb.toString();
     }
@@ -363,8 +365,7 @@ public class JsonPointer implements Iterable<String> {
      */
     @Override
     public boolean equals(Object o) {
-        return o != null
-                && o instanceof JsonPointer
+        return o instanceof JsonPointer
                 && ((JsonPointer) o).size() == size()
                 && Arrays.equals(tokens, ((JsonPointer) o).tokens);
     }
