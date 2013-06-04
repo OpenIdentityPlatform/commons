@@ -24,116 +24,78 @@
  */
 package org.forgerock.json.schema.validator.validators;
 
-import org.forgerock.json.schema.validator.validators.Validator;
+import java.util.Map;
+
 import org.forgerock.json.schema.validator.ErrorHandler;
 import org.forgerock.json.schema.validator.ObjectValidatorFactory;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
 import org.forgerock.json.schema.validator.exceptions.ValidationException;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.testng.annotations.Test;
 
-import java.util.Map;
-
+@SuppressWarnings("javadoc")
 public class BooleanTypeValidatorTest {
 
-    private String schema1 = "{"
+    private static final String SCHEMA = "{"
             + "\"type\": \"boolean\","
             + "\"required\": true"
             + "}";
 
     @Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "WrongType")
-    public void RequiredValueNotBoolean() throws SchemaException {
-        try {
-            JSONParser parser = new JSONParser();
-            Map<String, Object> schema = (Map<String, Object>) parser.parse(schema1);
-            Validator v = ObjectValidatorFactory.getTypeValidator(schema);
-            v.validate("test", null, new ErrorHandler() {
+    public void requiredValueNotBoolean() throws Exception {
+        JSONParser parser = new JSONParser();
+        Map<String, Object> schema = (Map<String, Object>) parser.parse(SCHEMA);
+        Validator v = ObjectValidatorFactory.getTypeValidator(schema);
+        v.validate("test", null, new ErrorHandler() {
 
-                @Override
-                public void error(ValidationException exception) throws ValidationException {
-                    throw new ValidationException("WrongType");
-                }
+            @Override
+            public void error(ValidationException exception) throws ValidationException {
+                throw new ValidationException("WrongType");
+            }
 
-                @Override
-                public void assembleException() throws ValidationException {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-            });
-        } catch (ParseException ex) {
-        }
+            @Override
+            public void assembleException() throws ValidationException {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+        });
     }
 
     @Test(expectedExceptions = ValidationException.class)
-    public void RequiredValueNull() throws SchemaException {
-        try {
-            JSONParser parser = new JSONParser();
-            Map<String, Object> schema = (Map<String, Object>) parser.parse(schema1);
-            Validator v = ObjectValidatorFactory.getTypeValidator(schema);
-            v.validate(null, null, new ErrorHandler() {
+    public void requiredValueNull() throws Exception {
+        JSONParser parser = new JSONParser();
+        Map<String, Object> schema = (Map<String, Object>) parser.parse(SCHEMA);
+        Validator v = ObjectValidatorFactory.getTypeValidator(schema);
+        v.validate(null, null, new ErrorHandler() {
 
-                @Override
-                public void error(ValidationException exception) throws ValidationException {
-                    throw new ValidationException("RequiredValueNull");
-                }
+            @Override
+            public void error(ValidationException exception) throws ValidationException {
+                throw new ValidationException("requiredValueNull");
+            }
 
-                @Override
-                public void assembleException() throws ValidationException {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-            });
-        } catch (ParseException ex) {
-        }
+            @Override
+            public void assembleException() throws ValidationException {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+        });
     }
 
     @Test
-    public void RequiredValueNotNull() throws SchemaException {
-        try {
-            JSONParser parser = new JSONParser();
-            Map<String, Object> schema = (Map<String, Object>) parser.parse(schema1);
-            Validator v = ObjectValidatorFactory.getTypeValidator(schema);
-            v.validate(false, null, new ErrorHandler() {
+    public void requiredValueNotNull() throws Exception {
+        JSONParser parser = new JSONParser();
+        Map<String, Object> schema = (Map<String, Object>) parser.parse(SCHEMA);
+        Validator v = ObjectValidatorFactory.getTypeValidator(schema);
+        v.validate(false, null, new ErrorHandler() {
 
-                @Override
-                public void error(ValidationException exception) throws SchemaException {
-                    throw new ValidationException("RequiredValueNull");
-                }
+            @Override
+            public void error(ValidationException exception) throws SchemaException {
+                throw new ValidationException("requiredValueNotNull");
+            }
 
-                @Override
-                public void assembleException() throws ValidationException {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-            });
-        } catch (ParseException ex) {
-        }
+            @Override
+            public void assembleException() throws ValidationException {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+        });
     }
 
-//    @Test(dataProvider = "dp", threadPoolSize = 10)
-//    public void f(Map<String, Object> schema, boolean b) {
-//        Validator v = ObjectValidatorFactory.getTypeValidator(schema);
-//        Assert.assertNotNull(v, "Schema helpers can not be null");
-//        v.validate(b, v.AT_ROOT, new ErrorHandler() {
-//
-//            @Override
-//            public void error(SchemaException exception) throws SchemaException {
-//                throw new ValidationException("TestException");
-//            }
-//
-//            @Override
-//            public void assembleException() throws ValidationException {
-//                throw new UnsupportedOperationException("Not supported yet.");
-//            }
-//        });
-//    }
-//
-//    @DataProvider
-//    public Object[][] dp() throws ParseException {
-//        Map<String, Object> schemaObject1 = (Map<String, Object>) parser.parse(schema1);
-//
-//        Object[][] stressTest = new Object[1000][2];
-//        for (int i = 0; i < stressTest.length; i++) {
-//            stressTest[i] = new Object[]{schemaObject1, true};
-//        }
-//        return stressTest;
-//    }
 }
