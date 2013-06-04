@@ -16,7 +16,6 @@
 
 package org.forgerock.json.fluent;
 
-// Java SE
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -46,7 +45,7 @@ public class JsonPointer implements Iterable<String> {
      * Constructs a JSON pointer, identifying the specified pointer value.
      *
      * @param pointer a string containing the JSON pointer of the value to identify.
-     * @throws JsonPointerException if the pointer is malformed.
+     * @throws JsonException if the pointer is malformed.
      */
     public JsonPointer(String pointer) throws JsonException {
         String[] split = pointer.split("/", -1);
@@ -55,7 +54,7 @@ public class JsonPointer implements Iterable<String> {
         for (int n = 0; n < length; n++) {
             if (n == 0 && split[n].length() == 0) {
                 continue; // leading slash ignored
-            } else if (n == length -1 && split[n].length() == 0) {
+            } else if (n == length - 1 && split[n].length() == 0) {
                 continue; // trailing slash ignored
             } else {
                 list.add(decode(split[n]));
@@ -118,6 +117,8 @@ public class JsonPointer implements Iterable<String> {
 
     /**
      * Returns the number of reference tokens in the pointer.
+     *
+     * @return the number of reference tokens in the pointer.
      */
     public int size() {
         return tokens.length;
@@ -141,6 +142,8 @@ public class JsonPointer implements Iterable<String> {
      * Returns a newly allocated array of strings, containing the pointer's reference tokens.
      * No references to the array are maintained by the pointer. Hence, the caller is free to
      * modify it.
+     *
+     * @return a newly allocated array of strings, containing the pointer's reference tokens.
      */
     public String[] toArray() {
         return Arrays.copyOf(tokens, tokens.length);
@@ -149,6 +152,8 @@ public class JsonPointer implements Iterable<String> {
     /**
      * Returns a pointer to the parent of the JSON value identified by this JSON pointer,
      * or {@code null} if the pointer has no parent JSON value (i.e. references document root).
+     *
+     * @return a pointer to the parent of of this JSON pointer. Can be null.
      */
     public JsonPointer parent() {
         JsonPointer parent = null;
@@ -255,9 +260,11 @@ public class JsonPointer implements Iterable<String> {
     /**
      * Returns the last (leaf) reference token of the JSON pointer, or {@code null} if the
      * pointer contains no reference tokens (i.e. references document root).
+     *
+     * @return the last (leaf) reference token of the JSON pointer if it exists, {@code null} otherwise
      */
     public String leaf() {
-        return (tokens.length > 0 ? tokens[tokens.length - 1]: null);
+        return (tokens.length > 0 ? tokens[tokens.length - 1] : null);
     }
 
     /**
@@ -307,19 +314,25 @@ public class JsonPointer implements Iterable<String> {
 
     /**
      * Returns an iterator over the pointer's reference tokens.
+     *
+     * @return an iterator over the pointer's reference tokens.
      */
+    @Override
     public Iterator<String> iterator() {
         return new Iterator<String>() {
             int cursor = 0;
+            @Override
             public boolean hasNext() {
                 return cursor < tokens.length;
             }
+            @Override
             public String next() {
                 if (cursor >= tokens.length) {
                     throw new NoSuchElementException();
                 }
                 return tokens[cursor++];
             }
+            @Override
             public void remove() {
                 throw new UnsupportedOperationException();
             }
@@ -328,6 +341,8 @@ public class JsonPointer implements Iterable<String> {
 
     /**
      * Returns the JSON pointer string value.
+     *
+     * @return the JSON pointer string value.
      */
     @Override
     public String toString() {
@@ -348,12 +363,16 @@ public class JsonPointer implements Iterable<String> {
      */
     @Override
     public boolean equals(Object o) {
-        return (o != null && o instanceof JsonPointer &&
-         ((JsonPointer)o).size() == size() && Arrays.equals(tokens, ((JsonPointer)o).tokens));
+        return o != null
+                && o instanceof JsonPointer
+                && ((JsonPointer) o).size() == size()
+                && Arrays.equals(tokens, ((JsonPointer) o).tokens);
     }
 
     /**
      * Returns the hash code value for this pointer.
+     *
+     * @return the hash code value for this pointer.
      */
     @Override
     public int hashCode() {
