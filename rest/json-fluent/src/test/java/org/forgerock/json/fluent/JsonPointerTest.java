@@ -18,6 +18,7 @@ package org.forgerock.json.fluent;
 
 import static org.fest.assertions.Assertions.*;
 
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
@@ -172,6 +173,21 @@ public class JsonPointerTest {
     public void relativePointerOffset3_3() {
         JsonPointer p = new JsonPointer("/a/b/c");
         assertThat((Object) p.relativePointer(3)).isSameAs(p);
+    }
+
+    @DataProvider(name = "validJsonPointers")
+    public Object[][] getValidJsonPointers() {
+        return new Object[][] {
+            { "/" }, { "/a" }, { "/a/b" }, { "/a/b/c" },
+            { "/a/b/c/%2F" }, { "/a/b/c/%2f" },
+    };
+    }
+
+    @Test(dataProvider = "validJsonPointers")
+    public void toString(final String pointer) {
+        JsonPointer p = new JsonPointer(pointer);
+    // with URI encoded data, "%2f" and "%2F" are equivalent
+        assertThat(p.toString()).isEqualTo(pointer.replace("%2f", "%2F"));
     }
 
     // ----- exception unit tests ----------
