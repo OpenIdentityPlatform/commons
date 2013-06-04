@@ -14,11 +14,9 @@
  * Copyright © 2010–2011 ApexIdentity Inc. All rights reserved.
  * Portions Copyrighted 2011-2013 ForgeRock AS.
  */
-
 package org.forgerock.json.fluent;
 
-// Java SE
-import static org.fest.assertions.Assertions.assertThat;
+import static org.fest.assertions.Assertions.*;
 
 import org.testng.annotations.Test;
 
@@ -34,56 +32,56 @@ public class JsonPointerTest {
     public void identicalPathEquality() {
         JsonPointer p1 = new JsonPointer("/a/b/c");
         JsonPointer p2 = new JsonPointer("/a/b/c");
-        assertThat((Object)p1).isEqualTo((Object)p2);
+        assertThat((Object) p1).isEqualTo(p2);
     }
 
     @Test
     public void differentPathInequality() {
         JsonPointer p1 = new JsonPointer("/a/b/c");
         JsonPointer p2 = new JsonPointer("/d/e/f");
-        assertThat((Object)p1).isNotEqualTo((Object)p2);
+        assertThat((Object) p1).isNotEqualTo(p2);
     }
 
     @Test
     public void simpleEscape() throws JsonException {
         JsonPointer p1 = new JsonPointer("/a/%65%73%63%61%70%65");
         JsonPointer p2 = new JsonPointer("/a/escape");
-        assertThat((Object)p1).isEqualTo((Object)p2);
+        assertThat((Object) p1).isEqualTo(p2);
     }
 
     @Test
     public void parseVsStringRootEquality1() {
         JsonPointer p1 = new JsonPointer("");
         JsonPointer p2 = new JsonPointer();
-        assertThat((Object)p1).isEqualTo((Object)p2);
+        assertThat((Object) p1).isEqualTo(p2);
     }
 
     @Test
     public void parseVsStringRootEqualityTrailingSlash() {
         JsonPointer p1 = new JsonPointer("/");
         JsonPointer p2 = new JsonPointer();
-        assertThat((Object)p1).isEqualTo((Object)p2);
+        assertThat((Object) p1).isEqualTo(p2);
     }
 
     @Test
     public void parseVsStringChildEquality() {
         JsonPointer p1 = new JsonPointer("/a/b/c");
         JsonPointer p2 = new JsonPointer().child("a").child("b").child("c");
-        assertThat((Object)p1).isEqualTo((Object)p2);
+        assertThat((Object) p1).isEqualTo(p2);
     }
 
     @Test
     public void parseVsStringChildEqualityTrailingSlash() {
         JsonPointer p1 = new JsonPointer("/a/b/c/");
         JsonPointer p2 = new JsonPointer().child("a").child("b").child("c");
-        assertThat((Object)p1).isEqualTo((Object)p2);
+        assertThat((Object) p1).isEqualTo(p2);
     }
 
     @Test
     public void parseVsIntegerChildEquality() {
         JsonPointer p1 = new JsonPointer("/1/2");
         JsonPointer p2 = new JsonPointer().child(1).child(2);
-        assertThat((Object)p1).isEqualTo((Object)p2);
+        assertThat((Object) p1).isEqualTo(p2);
     }
 
     @Test
@@ -178,17 +176,17 @@ public class JsonPointerTest {
 
     // ----- exception unit tests ----------
 
-    @Test(expectedExceptions=JsonException.class)
+    @Test(expectedExceptions = JsonException.class)
     public void uriSyntaxException() throws JsonException {
         new JsonPointer("%%%");
     }
 
-    @Test(expectedExceptions=IndexOutOfBoundsException.class)
+    @Test(expectedExceptions = IndexOutOfBoundsException.class)
     public void relativePathOffsetNegative() {
         new JsonPointer("/a/b/c").relativePointer(-1);
     }
 
-    @Test(expectedExceptions=IndexOutOfBoundsException.class)
+    @Test(expectedExceptions = IndexOutOfBoundsException.class)
     public void relativePathOffsetTooLarge() {
         new JsonPointer("/a/b/c").relativePointer(4);
     }
