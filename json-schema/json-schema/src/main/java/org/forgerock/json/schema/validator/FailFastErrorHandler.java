@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -20,25 +20,21 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * $Id$
  */
 package org.forgerock.json.schema.validator;
 
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
 import org.forgerock.json.schema.validator.exceptions.ValidationException;
-import org.forgerock.json.schema.validator.validators.Validator;
 
 /**
  * FailFastErrorHandler implements the {@link ErrorHandler} in a way it re-throws the exception
  * at first time.
  * <p/>
  * The exception prevents the validator to continue the validation of an already invalid object.
- *
- * @author $author$
- * @version $Revision$ $Date$
  */
 public class FailFastErrorHandler extends ErrorHandler {
+
     private SchemaException ex = null;
 
     /**
