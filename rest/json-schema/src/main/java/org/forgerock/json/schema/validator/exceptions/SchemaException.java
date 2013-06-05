@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2013 ForgeRock AS. All rights reserved.
  * 
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -20,28 +20,20 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * $Id$
  */
-
-
 package org.forgerock.json.schema.validator.exceptions;
-
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 
-import java.io.OutputStream;
-
 /**
  * Encapsulate a general JSON validator error.
- * <p/>
- * <p>If the validator needs to include information about a
+ * <p>
+ * If the validator needs to include information about a
  * specific location in an JSON document, it should use the
  * {@link org.forgerock.json.schema.validator.exceptions.ValidationException ValidationException} subclass.
  * </p>
  *
- * @author $author$
- * @version $Revision$ $Date$
  * @see org.forgerock.json.schema.validator.exceptions.ValidationException
  */
 public class SchemaException extends JsonValueException {
@@ -96,6 +88,7 @@ public class SchemaException extends JsonValueException {
      *
      * @return The error or warning message.
      */
+    @Override
     public String getMessage() {
         String message = super.getMessage();
 
@@ -122,6 +115,7 @@ public class SchemaException extends JsonValueException {
      *
      * @return A string representation of this exception.
      */
+    @Override
     public String toString() {
         if (exception != null) {
             return exception.toString();
@@ -137,7 +131,7 @@ public class SchemaException extends JsonValueException {
 
 
     /**
-     * @serial The embedded exception if tunnelling, or null.
+     * @serial The embedded exception if tunneling, or null.
      */
     private Exception exception;
 
