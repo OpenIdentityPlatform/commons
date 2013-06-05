@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2013 ForgeRock AS. All rights reserved.
  * 
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -20,17 +20,12 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * $Id$
  */
 package org.forgerock.json.schema.validator.validators;
 
-//import org.apache.oro.text.regex.MalformedPatternException;
-//import org.apache.oro.text.regex.Pattern;
-//import org.apache.oro.text.regex.Perl5Compiler;
-//import org.apache.oro.text.regex.Perl5Matcher;
 import java.util.regex.Matcher;
-import java.util.regex.PatternSyntaxException;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.schema.validator.ErrorHandler;
@@ -65,8 +60,6 @@ import static org.forgerock.json.schema.validator.Constants.*;
  * }
  * </code>
  *
- * @author $author$
- * @version $Revision$ $Date$
  * @see <a href="http://tools.ietf.org/html/draft-zyp-json-schema-03#section-5.1">type</a>
  */
 public class StringTypeValidator extends Validator {
@@ -107,20 +100,12 @@ public class StringTypeValidator extends Validator {
      */
     private FormatHelper formatHelper = null;
 
-    public StringTypeValidator(Map<String, Object> schema) {
-        super(schema);
+    public StringTypeValidator(Map<String, Object> schema, List<String> jsonPointer) {
+        super(schema, jsonPointer);
         for (Map.Entry<String, Object> e : schema.entrySet()) {
             if (PATTERN.equals(e.getKey())) {
                 if (e.getValue() instanceof String) {
                     String pattern = (String) e.getValue();
-
-//                    try {
-//                        Perl5Compiler compiler = new Perl5Compiler();
-//                        p = compiler.compile(pattern);
-//                    } catch (MalformedPatternException e1) {
-//                        //LOG.error("Failed to apply pattern on " + at + ": Invalid RE syntax [" + pattern + "]", pse);
-//                    }
-
                     try {
                         Pattern p = Pattern.compile(pattern, Pattern.UNICODE_CASE);
                     } catch (PatternSyntaxException pse) {
@@ -156,6 +141,7 @@ public class StringTypeValidator extends Validator {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void validate(Object node, JsonPointer at, ErrorHandler handler) throws SchemaException {
         if (node instanceof String) {
             String nodeValue = (String) node;
@@ -166,18 +152,10 @@ public class StringTypeValidator extends Validator {
                 handler.error(new ValidationException("maxLength error", getPath(at, null)));
             }
             if (null != p) {
-
                 Matcher m = p.matcher(nodeValue);
                 if (!m.matches()) {
                     handler.error(new ValidationException(getPath(at, null) + ": does not match the regex pattern " + p.pattern(), getPath(at, null)));
                 }
-//                Perl5Matcher matcher = new Perl5Matcher();
-//                if (!matcher.matches(nodeValue, p)) {
-//                    System.out.println("PATTERN: " + p.getPattern());
-//                    handler.error(new ValidationException(getPath(at, null) + ": does not match the regex pattern " + p.getPattern(), getPath(at, null)));
-//
-//                }
-
             }
             if (null != enumHelper) {
                 enumHelper.validate(node, at, handler);

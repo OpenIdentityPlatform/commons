@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -20,7 +20,6 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * $Id$
  */
 package org.forgerock.json.schema.validator.validators;
 
@@ -29,6 +28,7 @@ import org.forgerock.json.schema.validator.ErrorHandler;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
 import org.forgerock.json.schema.validator.exceptions.ValidationException;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.forgerock.json.schema.validator.Constants.*;
@@ -44,15 +44,12 @@ import static org.forgerock.json.schema.validator.Constants.*;
  * }
  * </code>
  *
- * @author $author$
- * @version $Revision$ $Date$
  * @see <a href="http://tools.ietf.org/html/draft-zyp-json-schema-03#section-5.1">type</a>
  */
-
 public class BooleanTypeValidator extends Validator {
 
-    public BooleanTypeValidator(Map<String, Object> schema) {
-        super(schema);
+    public BooleanTypeValidator(Map<String, Object> schema, List<String> jsonPointer) {
+        super(schema, jsonPointer);
     }
 
     /**

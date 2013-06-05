@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -20,7 +20,6 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * $Id$
  */
 package org.forgerock.json.schema.validator.validators;
 
@@ -43,7 +42,7 @@ import static org.forgerock.json.schema.validator.Constants.*;
  * Sample JSON Schema:
  * </code>
  * {
- * "type"             : "number",
+ * "type"             : "integer",
  * "required"         : false,
  * "minimum"          : -500,
  * "maximum"          : 753,
@@ -58,9 +57,6 @@ import static org.forgerock.json.schema.validator.Constants.*;
  * }
  * </code>
  *
- *
- * @author $author$
- * @version $Revision$ $Date$
  * @see <a href="http://tools.ietf.org/html/draft-zyp-json-schema-03#section-5.1">type</a>
  */
 public class IntegerTypeValidator extends Validator {
@@ -85,15 +81,14 @@ public class IntegerTypeValidator extends Validator {
 
     private final long LONG_HIGH_BITS = 0xFFFFFFFF80000000L;
 
-    public IntegerTypeValidator(Map<String, Object> schema) {
-        super(schema);
+    public IntegerTypeValidator(Map<String, Object> schema, List<String> jsonPointer) {
+        super(schema, jsonPointer);
         int minimum = Integer.MIN_VALUE;
         int maximum = Integer.MAX_VALUE;
         boolean exclusiveMinimum = false;
         boolean exclusiveMaximum = false;
 
         for (Map.Entry<String, Object> e : schema.entrySet()) {
-
             if (MINIMUM.equals(e.getKey())) {
                 if (e.getValue() instanceof Number) {
                     minimum = Math.max(((Number) e.getValue()).intValue(), minimum);
@@ -130,7 +125,6 @@ public class IntegerTypeValidator extends Validator {
         if (Integer.MIN_VALUE != maximum) {
             maximumValidator = new MaximumHelper(maximum, exclusiveMaximum);
         }
-
     }
 
     /**

@@ -1,20 +1,7 @@
-package org.forgerock.json.schema.validator.validators;
-
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.schema.validator.validators.Validator;
-import org.forgerock.json.schema.validator.Constants;
-import org.forgerock.json.schema.validator.ErrorHandler;
-import org.forgerock.json.schema.validator.exceptions.SchemaException;
-import org.testng.Assert;
-import org.testng.annotations.Test;
-
-import java.util.HashMap;
-import java.util.Map;
-
 /*
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright © 2011 ForgeRock AS. All rights reserved.
+* Copyright © 2011-2013 ForgeRock AS. All rights reserved.
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -33,14 +20,27 @@ import java.util.Map;
 * with the fields enclosed by brackets [] replaced by
 * your own identifying information:
 * "Portions Copyrighted [year] [name of copyright owner]"
-* $Id$
 */
+package org.forgerock.json.schema.validator.validators;
+
+import org.forgerock.json.fluent.JsonPointer;
+import org.forgerock.json.schema.validator.Constants;
+import org.forgerock.json.schema.validator.ErrorHandler;
+import org.forgerock.json.schema.validator.exceptions.SchemaException;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+import java.util.HashMap;
+import java.util.Map;
+
 public class ValidatorTest {
+
     @Test
     public void getPathTest()  throws SchemaException {
         Map<String, Object> schema =  new HashMap<String, Object>();
         schema.put(Constants.REQUIRED, Boolean.TRUE);
-        Validator validator = new Validator(schema) {
+        Validator validator = new Validator(schema, null) {
+            @Override
             public void validate(Object node, JsonPointer at, ErrorHandler handler) throws SchemaException {
             }
         };
