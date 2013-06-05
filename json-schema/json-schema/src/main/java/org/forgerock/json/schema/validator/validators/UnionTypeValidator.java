@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2013 ForgeRock AS. All rights reserved.
  * 
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -20,7 +20,6 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * $Id$
  */
 package org.forgerock.json.schema.validator.validators;
 
@@ -49,22 +48,20 @@ import static org.forgerock.json.schema.validator.Constants.*;
  * <p/>
  * <code>{"type":["string","number"]}</code>
  *
- * @author $author$
- * @version $Revision$ $Date$
  * @see <a href="http://tools.ietf.org/html/draft-zyp-json-schema-03#section-5.1">type</a>
  */
 public class UnionTypeValidator extends Validator {
 
     private final List<Validator> validators;
 
-    public UnionTypeValidator(Map<String, Object> schema) {
-        super(schema);
+    public UnionTypeValidator(Map<String, Object> schema, List<String> jsonPointer) {
+        super(schema, jsonPointer);
         this.validators = new ArrayList<Validator>(2);
         for (Object o : (List<Object>) schema.get(TYPE)) {
             if (o instanceof String) {
-                validators.add(ObjectValidatorFactory.getTypeValidator((String) o, schema));
+                validators.add(ObjectValidatorFactory.getTypeValidator((String) o, schema, jsonPointer));
             } else if (o instanceof Map) {
-                Validator v = ObjectValidatorFactory.getTypeValidator((Map<String, Object>) o);
+                Validator v = ObjectValidatorFactory.getTypeValidator((Map<String, Object>) o, jsonPointer);
                 validators.add(v);
                 required = v instanceof NullTypeValidator ? required = false : required;
             }
@@ -74,6 +71,7 @@ public class UnionTypeValidator extends Validator {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void validate(Object node, JsonPointer at, ErrorHandler handler) throws SchemaException {
         for (Validator v : validators) {
             try {

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2013 ForgeRock AS. All rights reserved.
  * 
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -20,7 +20,6 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * $Id$
  */
 package org.forgerock.json.schema.validator.validators;
 
@@ -59,8 +58,6 @@ import static org.forgerock.json.schema.validator.Constants.*;
  * }
  * </code>
  *
- * @author $author$
- * @version $Revision$ $Date$
  * @see <a href="http://tools.ietf.org/html/draft-zyp-json-schema-03#section-5.1">type</a>
  */
 public class ArrayTypeValidator extends Validator {
@@ -69,12 +66,12 @@ public class ArrayTypeValidator extends Validator {
      * This attribute defines the minimum number of values in an array when
      * the array is the instance value.
      */
-    int minItems = -1;
+    private int minItems = -1;
     /**
      * This attribute defines the maximum number of values in an array when
      * the array is the instance value.
      */
-    int maxItems = -1;
+    private int maxItems = -1;
     /**
      * This attribute indicates that all items in an array instance MUST be
      * unique (contains no two identical values).
@@ -87,20 +84,21 @@ public class ArrayTypeValidator extends Validator {
      * in the object is equal to the corresponding property in the other
      * object
      */
-    boolean uniqueItems = false;
+    private boolean uniqueItems = false;
     /**
      * This provides a definition for additional items in an array instance
      * when tuple definitions of the items is provided.  This can be false
      * to indicate additional items in the array are not allowed, or it can
      * be a schema that defines the schema of the additional items.
      */
-    boolean additionalItems = true;
-    List<Validator> tupleValidators = null;
-    Validator singleValidator = null;
-    Validator additionalItemsValidator = null;
+    private boolean additionalItems = true;
+    private List<Validator> tupleValidators = null;
+    private Validator singleValidator = null;
+    private Validator additionalItemsValidator = null;
 
-    public ArrayTypeValidator(Map<String, Object> schema) {
-        super(schema);
+    public ArrayTypeValidator(Map<String, Object> schema, List<String> jsonPointer) {
+        super(schema, jsonPointer);
+        int count = 0;
         for (Map.Entry<String, Object> e : schema.entrySet()) {
             if (UNIQUEITEMS.equals(e.getKey())) {
                 if (e.getValue() instanceof Boolean) {
@@ -122,22 +120,24 @@ public class ArrayTypeValidator extends Validator {
                 } else if (e.getValue() instanceof String) {
                     additionalItems = Boolean.parseBoolean((String) e.getValue());
                 } else if (e.getValue() instanceof Map) {
-                    additionalItemsValidator = ObjectValidatorFactory.getTypeValidator((Map<String, Object>) e.getValue());
+                    final List<String> newPointer = newList(jsonPointer, ADDITIONALITEMS, Integer.toString(count));
+                    additionalItemsValidator = ObjectValidatorFactory.getTypeValidator((Map<String, Object>) e.getValue(), newPointer);
                 }
             } else if (ITEMS.equals(e.getKey())) {
+                final List<String> newPointer = newList(jsonPointer, ITEMS, Integer.toString(count));
                 if (e.getValue() instanceof Map) {
-                    singleValidator = ObjectValidatorFactory.getTypeValidator((Map<String, Object>) e.getValue());
+                    singleValidator = ObjectValidatorFactory.getTypeValidator((Map<String, Object>) e.getValue(), newPointer);
                 } else if (e.getValue() instanceof List) {
                     tupleValidators = new ArrayList<Validator>(2);
                     for (Object o : (List<Object>) e.getValue()) {
                         if (o instanceof Map) {
-                            tupleValidators.add(ObjectValidatorFactory.getTypeValidator((Map<String, Object>) o));
+                            tupleValidators.add(ObjectValidatorFactory.getTypeValidator((Map<String, Object>) o, newPointer));
                         }
                     }
                 }
             }
+            ++count;
         }
-
     }
 
     /**
@@ -178,17 +178,11 @@ public class ArrayTypeValidator extends Validator {
         } else if (required) {
             handler.error(new ValidationException(ERROR_MSG_REQUIRED_PROPERTY, getPath(at, null)));
         }
-
-
     }
 
     private void checkUniqueItems(List<Object> nodeValue, JsonPointer at, ErrorHandler handler) throws SchemaException {
         if (uniqueItems && nodeValue.size() > 1) {
-            Set<Object> set = new HashSet<Object>();
-            for (Object n : nodeValue) {
-                set.add(n);
-            }
-
+            Set<Object> set = new HashSet<Object>(nodeValue);
             if (set.size() < nodeValue.size()) {
                 handler.error(new ValidationException("The items in the array must be unique", getPath(at, null)));
             }
