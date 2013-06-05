@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -20,23 +20,20 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * $Id$
  */
 package org.forgerock.json.schema.validator.helpers;
 
-import org.forgerock.json.schema.validator.helpers.MinimumHelper;
-import org.forgerock.json.schema.validator.TestErrorHandler;
-import org.forgerock.json.schema.validator.exceptions.ValidationException;
+import org.forgerock.json.schema.validator.CollectErrorsHandler;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+@SuppressWarnings("javadoc")
 public class MinimumHelperTest {
+
     @Test
     public void testValidateFloat() throws Exception {
-
         MinimumHelper instance = new MinimumHelper(new Float("99.03"), true);
-        ValidationException exception = null;
-        TestErrorHandler handler = new TestErrorHandler();
+        CollectErrorsHandler handler = new CollectErrorsHandler();
         instance.validate(new Float("100.01"), null, handler);
         Assert.assertTrue(handler.getExceptions().isEmpty());
         instance.validate(new Double("100.02"), null, handler);
@@ -45,23 +42,21 @@ public class MinimumHelperTest {
         Assert.assertTrue(handler.getExceptions().isEmpty());
         //Exceptions
         instance.validate(new Float("95.01"), null, handler);
-        Assert.assertTrue(handler.getExceptions().size() == 1);
+        Assert.assertEquals(handler.getExceptions().size(), 1);
         instance.validate(new Double("95.02"), null, handler);
-        Assert.assertTrue(handler.getExceptions().size() == 2);
+        Assert.assertEquals(handler.getExceptions().size(), 2);
         instance.validate(95, null, handler);
-        Assert.assertTrue(handler.getExceptions().size() == 3);
+        Assert.assertEquals(handler.getExceptions().size(), 3);
         instance.validate(new Float("99.03"), null, handler);
-        Assert.assertTrue(handler.getExceptions().size() == 4);
+        Assert.assertEquals(handler.getExceptions().size(), 4);
         instance.validate(new Double("99.03"), null, handler);
-        Assert.assertTrue(handler.getExceptions().size() == 5);
+        Assert.assertEquals(handler.getExceptions().size(), 5);
     }
 
     @Test
     public void testValidateDouble() throws Exception {
-
         MinimumHelper instance = new MinimumHelper(new Double("99.03"), false);
-        ValidationException exception = null;
-        TestErrorHandler handler = new TestErrorHandler();
+        CollectErrorsHandler handler = new CollectErrorsHandler();
         instance.validate(new Float("100.01"), null, handler);
         Assert.assertTrue(handler.getExceptions().isEmpty());
         instance.validate(new Double("100.02"), null, handler);
@@ -70,15 +65,15 @@ public class MinimumHelperTest {
         Assert.assertTrue(handler.getExceptions().isEmpty());
         //Exceptions
         instance.validate(new Float("95.01"), null, handler);
-        Assert.assertTrue(handler.getExceptions().size() == 1);
+        Assert.assertEquals(handler.getExceptions().size(), 1);
         instance.validate(new Double("95.02"), null, handler);
-        Assert.assertTrue(handler.getExceptions().size() == 2);
+        Assert.assertEquals(handler.getExceptions().size(), 2);
         instance.validate(95, null, handler);
-        Assert.assertTrue(handler.getExceptions().size() == 3);
+        Assert.assertEquals(handler.getExceptions().size(), 3);
 //        1 == new Double("99.03").compareTo((new Float("99.03")).doubleValue());
 //        instance.validate(new Float("99.03"), null, handler);
-//        Assert.assertTrue(handler.getExceptions().size() == 3);
+//        Assert.assertEquals(handler.getExceptions().size(), 3);
         instance.validate(new Double("99.03"), null, handler);
-        Assert.assertTrue(handler.getExceptions().size() == 3);
+        Assert.assertEquals(handler.getExceptions().size(), 3);
     }
 }

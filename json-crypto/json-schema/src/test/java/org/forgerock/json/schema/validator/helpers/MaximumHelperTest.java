@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -20,22 +20,20 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * $Id$
  */
 package org.forgerock.json.schema.validator.helpers;
 
-import org.forgerock.json.schema.validator.helpers.MaximumHelper;
-import org.forgerock.json.schema.validator.TestErrorHandler;
-import org.forgerock.json.schema.validator.exceptions.ValidationException;
+import org.forgerock.json.schema.validator.CollectErrorsHandler;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+@SuppressWarnings("javadoc")
 public class MaximumHelperTest {
+
     @Test
     public void testValidateFloat() throws Exception {
-
         MaximumHelper instance = new MaximumHelper(new Float("102.03"), true);
-        TestErrorHandler handler = new TestErrorHandler();
+        CollectErrorsHandler handler = new CollectErrorsHandler();
         instance.validate(new Float("100.01"), null, handler);
         Assert.assertTrue(handler.getExceptions().isEmpty());
         instance.validate(new Double("100.02"), null, handler);
@@ -44,22 +42,21 @@ public class MaximumHelperTest {
         Assert.assertTrue(handler.getExceptions().isEmpty());
         //Exceptions
         instance.validate(new Float("103.01"), null, handler);
-        Assert.assertTrue(handler.getExceptions().size() == 1);
+        Assert.assertEquals(handler.getExceptions().size(), 1);
         instance.validate(new Double("103.02"), null, handler);
-        Assert.assertTrue(handler.getExceptions().size() == 2);
+        Assert.assertEquals(handler.getExceptions().size(), 2);
         instance.validate(104, null, handler);
-        Assert.assertTrue(handler.getExceptions().size() == 3);
+        Assert.assertEquals(handler.getExceptions().size(), 3);
         instance.validate(new Float("102.03"), null, handler);
-        Assert.assertTrue(handler.getExceptions().size() == 4);
+        Assert.assertEquals(handler.getExceptions().size(), 4);
         instance.validate(new Double("102.03"), null, handler);
-        Assert.assertTrue(handler.getExceptions().size() == 5);
+        Assert.assertEquals(handler.getExceptions().size(), 5);
     }
 
     @Test
     public void testValidateDouble() throws Exception {
-
         MaximumHelper instance = new MaximumHelper(new Double("102.03"), false);
-        TestErrorHandler handler = new TestErrorHandler();
+        CollectErrorsHandler handler = new CollectErrorsHandler();
         instance.validate(new Float("100.01"), null, handler);
         Assert.assertTrue(handler.getExceptions().isEmpty());
         instance.validate(new Double("100.02"), null, handler);
@@ -68,22 +65,21 @@ public class MaximumHelperTest {
         Assert.assertTrue(handler.getExceptions().isEmpty());
         //Exceptions
         instance.validate(new Float("103.01"), null, handler);
-        Assert.assertTrue(handler.getExceptions().size() == 1);
+        Assert.assertEquals(handler.getExceptions().size(), 1);
         instance.validate(new Double("103.02"), null, handler);
-        Assert.assertTrue(handler.getExceptions().size() == 2);
+        Assert.assertEquals(handler.getExceptions().size(), 2);
         instance.validate(104, null, handler);
-        Assert.assertTrue(handler.getExceptions().size() == 3);
+        Assert.assertEquals(handler.getExceptions().size(), 3);
         instance.validate(new Float("102.03"), null, handler);
-        Assert.assertTrue(handler.getExceptions().size() == 3);
+        Assert.assertEquals(handler.getExceptions().size(), 3);
         instance.validate(new Double("102.03"), null, handler);
-        Assert.assertTrue(handler.getExceptions().size() == 3);
+        Assert.assertEquals(handler.getExceptions().size(), 3);
     }
 
     @Test
     public void testValidateInteger() throws Exception {
-
         MaximumHelper instance = new MaximumHelper(102, false);
-        TestErrorHandler handler = new TestErrorHandler();
+        CollectErrorsHandler handler = new CollectErrorsHandler();
         instance.validate(new Float("100.01"), null, handler);
         Assert.assertTrue(handler.getExceptions().isEmpty());
         instance.validate(new Double("100.02"), null, handler);
@@ -92,16 +88,15 @@ public class MaximumHelperTest {
         Assert.assertTrue(handler.getExceptions().isEmpty());
         //Exceptions
         instance.validate(new Float("103.01"), null, handler);
-        Assert.assertTrue(handler.getExceptions().size() == 1);
+        Assert.assertEquals(handler.getExceptions().size(), 1);
         instance.validate(new Double("103.02"), null, handler);
-        Assert.assertTrue(handler.getExceptions().size() == 2);
+        Assert.assertEquals(handler.getExceptions().size(), 2);
         instance.validate(104, null, handler);
-        Assert.assertTrue(handler.getExceptions().size() == 3);
+        Assert.assertEquals(handler.getExceptions().size(), 3);
         instance.validate(new Float("102.00"), null, handler);
-        Assert.assertTrue(handler.getExceptions().size() == 3);
+        Assert.assertEquals(handler.getExceptions().size(), 3);
         instance.validate(new Double("102.00"), null, handler);
-        Assert.assertTrue(handler.getExceptions().size() == 3);
+        Assert.assertEquals(handler.getExceptions().size(), 3);
     }
-
 
 }
