@@ -16,15 +16,6 @@
 
 package org.forgerock.util.encode;
 
-import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.NoSuchAlgorithmException;
-import java.security.Provider;
-import java.security.Security;
-import java.security.spec.AlgorithmParameterSpec;
-
 public class Base64url {
 
     public static String encode(byte[] content) {
@@ -42,46 +33,11 @@ public class Base64url {
 
         int modulus;
         if ((modulus = content.length() % 4) != 0) {
-            for (int i = 0; i < modulus; i++) {
+            for (int i = 0; i < (4 - modulus); i++) {
                 content += "=";
             }
         }
 
         return Base64.decode(content);
-    }
-}
-
-class SecurityListings
-{
-    public static void main(String[] args)
-    {
-        for (Provider provider : Security.getProviders())
-        {
-            System.out.println("Provider: " + provider.getName());
-            for (Provider.Service service : provider.getServices())
-            {
-                System.out.println("  Algorithm: " + service.getAlgorithm());
-            }
-        }
-
-
-        try {
-            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-
-
-            Key key = null;
-            AlgorithmParameterSpec algorithmParameterSpec;
-
-
-            cipher.init(Cipher.ENCRYPT_MODE, key);
-
-            int a = 1;
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        } catch (NoSuchPaddingException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        } catch (InvalidKeyException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
     }
 }
