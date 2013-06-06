@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -20,16 +20,15 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * $Id$
  */
 package org.forgerock.json.schema.validator.validators;
 
+import static org.testng.Assert.*;
+
 import java.util.Map;
 
-import org.forgerock.json.schema.validator.ErrorHandler;
+import org.forgerock.json.schema.validator.CollectErrorsHandler;
 import org.forgerock.json.schema.validator.ObjectValidatorFactory;
-import org.forgerock.json.schema.validator.exceptions.SchemaException;
-import org.forgerock.json.schema.validator.exceptions.ValidationException;
 import org.json.simple.parser.JSONParser;
 import org.testng.annotations.Test;
 
@@ -41,42 +40,24 @@ public class BooleanTypeValidatorTest {
             + "\"required\": true"
             + "}";
 
-    @Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "WrongType")
+    @Test
     public void requiredValueNotBoolean() throws Exception {
         JSONParser parser = new JSONParser();
         Map<String, Object> schema = (Map<String, Object>) parser.parse(SCHEMA);
         Validator v = ObjectValidatorFactory.getTypeValidator(schema);
-        v.validate("test", null, new ErrorHandler() {
-
-            @Override
-            public void error(ValidationException exception) throws ValidationException {
-                throw new ValidationException("WrongType");
-            }
-
-            @Override
-            public void assembleException() throws ValidationException {
-                throw new UnsupportedOperationException("Not supported yet.");
-            }
-        });
+        CollectErrorsHandler errorHandler = new CollectErrorsHandler();
+        v.validate("test", null, errorHandler);
+        assertTrue(errorHandler.hasError());
     }
 
-    @Test(expectedExceptions = ValidationException.class)
+    @Test
     public void requiredValueNull() throws Exception {
         JSONParser parser = new JSONParser();
         Map<String, Object> schema = (Map<String, Object>) parser.parse(SCHEMA);
         Validator v = ObjectValidatorFactory.getTypeValidator(schema);
-        v.validate(null, null, new ErrorHandler() {
-
-            @Override
-            public void error(ValidationException exception) throws ValidationException {
-                throw new ValidationException("requiredValueNull");
-            }
-
-            @Override
-            public void assembleException() throws ValidationException {
-                throw new UnsupportedOperationException("Not supported yet.");
-            }
-        });
+        CollectErrorsHandler errorHandler = new CollectErrorsHandler();
+        v.validate(null, null, errorHandler);
+        assertTrue(errorHandler.hasError());
     }
 
     @Test
@@ -84,18 +65,9 @@ public class BooleanTypeValidatorTest {
         JSONParser parser = new JSONParser();
         Map<String, Object> schema = (Map<String, Object>) parser.parse(SCHEMA);
         Validator v = ObjectValidatorFactory.getTypeValidator(schema);
-        v.validate(false, null, new ErrorHandler() {
-
-            @Override
-            public void error(ValidationException exception) throws SchemaException {
-                throw new ValidationException("requiredValueNotNull");
-            }
-
-            @Override
-            public void assembleException() throws ValidationException {
-                throw new UnsupportedOperationException("Not supported yet.");
-            }
-        });
+        CollectErrorsHandler errorHandler = new CollectErrorsHandler();
+        v.validate(false, null, errorHandler);
+        assertFalse(errorHandler.hasError());
     }
 
 }

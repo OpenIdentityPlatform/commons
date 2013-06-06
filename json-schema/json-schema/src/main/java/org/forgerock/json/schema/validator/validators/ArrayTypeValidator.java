@@ -128,8 +128,9 @@ public class ArrayTypeValidator extends Validator {
                 if (e.getValue() instanceof Map) {
                     singleValidator = ObjectValidatorFactory.getTypeValidator((Map<String, Object>) e.getValue(), newPointer);
                 } else if (e.getValue() instanceof List) {
-                    tupleValidators = new ArrayList<Validator>(2);
-                    for (Object o : (List<Object>) e.getValue()) {
+                    final List<Object> arrayTypes = (List<Object>) e.getValue();
+                    tupleValidators = new ArrayList<Validator>(arrayTypes.size());
+                    for (Object o : arrayTypes) {
                         if (o instanceof Map) {
                             tupleValidators.add(ObjectValidatorFactory.getTypeValidator((Map<String, Object>) o, newPointer));
                         }

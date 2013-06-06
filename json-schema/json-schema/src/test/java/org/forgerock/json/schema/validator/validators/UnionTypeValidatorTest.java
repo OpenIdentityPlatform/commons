@@ -1,16 +1,39 @@
+/*
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ *
+ * Copyright © 2011-2013 ForgeRock AS. All rights reserved.
+ *
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License). You may not use this file except in
+ * compliance with the License.
+ *
+ * You can obtain a copy of the License at
+ * http://forgerock.org/license/CDDLv1.0.html
+ * See the License for the specific language governing
+ * permission and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at http://forgerock.org/license/CDDLv1.0.html
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * your own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
+ */
 package org.forgerock.json.schema.validator.validators;
 
+import static org.testng.Assert.*;
+
 import org.forgerock.json.schema.validator.validators.Validator;
-import org.forgerock.json.schema.validator.ErrorHandler;
+import org.forgerock.json.schema.validator.CollectErrorsHandler;
 import org.forgerock.json.schema.validator.ObjectValidatorFactory;
-import org.forgerock.json.schema.validator.exceptions.SchemaException;
-import org.forgerock.json.schema.validator.exceptions.ValidationException;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.testng.annotations.Test;
 
 import java.util.Map;
 
+@SuppressWarnings("javadoc")
 public class UnionTypeValidatorTest {
 
     private String schema1 = "{"
@@ -33,46 +56,22 @@ public class UnionTypeValidatorTest {
             + "}";
 
     @Test
-    public void unionWithNullType() throws SchemaException  {
-        try {
-            JSONParser parser = new JSONParser();
-            Map<String, Object> schema = (Map<String, Object>) parser.parse(schema3);
-            Validator v = ObjectValidatorFactory.getTypeValidator(schema);
-            v.validate(null, null, new ErrorHandler() {
-
-                @Override
-                public void error(ValidationException exception) throws SchemaException {
-                    throw new ValidationException("RequiredValueNull");
-                }
-
-                @Override
-                public void assembleException() throws ValidationException {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-            });
-        } catch (ParseException ex) {
-        }
+    public void unionWithNullType() throws Exception  {
+        JSONParser parser = new JSONParser();
+        Map<String, Object> schema = (Map<String, Object>) parser.parse(schema3);
+        Validator v = ObjectValidatorFactory.getTypeValidator(schema);
+        CollectErrorsHandler errorHandler = new CollectErrorsHandler();
+        v.validate(null, null, errorHandler);
+        assertFalse(errorHandler.hasError());
     }
 
-    @Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "BooleanNotAllowed")
-    public void unionWithBooleanType()  throws SchemaException {
-        try {
-            JSONParser parser = new JSONParser();
-            Map<String, Object> schema = (Map<String, Object>) parser.parse(schema3);
-            Validator v = ObjectValidatorFactory.getTypeValidator(schema);
-            v.validate(Boolean.TRUE, null, new ErrorHandler() {
-
-                @Override
-                public void error(ValidationException exception) throws SchemaException {
-                    throw new ValidationException("BooleanNotAllowed");
-                }
-
-                @Override
-                public void assembleException() throws ValidationException {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-            });
-        } catch (ParseException ex) {
-        }
+    @Test
+    public void unionWithBooleanType()  throws Exception {
+        JSONParser parser = new JSONParser();
+        Map<String, Object> schema = (Map<String, Object>) parser.parse(schema3);
+        Validator v = ObjectValidatorFactory.getTypeValidator(schema);
+        CollectErrorsHandler errorHandler = new CollectErrorsHandler();
+        v.validate(Boolean.TRUE, null, errorHandler);
+        assertTrue(errorHandler.hasError());
     }
 }
