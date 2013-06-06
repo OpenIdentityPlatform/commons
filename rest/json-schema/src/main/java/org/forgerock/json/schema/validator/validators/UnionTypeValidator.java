@@ -25,6 +25,7 @@ package org.forgerock.json.schema.validator.validators;
 
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.schema.validator.ErrorHandler;
+import org.forgerock.json.schema.validator.FailFastErrorHandler;
 import org.forgerock.json.schema.validator.ObjectValidatorFactory;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
 import org.forgerock.json.schema.validator.exceptions.ValidationException;
@@ -56,14 +57,17 @@ public class UnionTypeValidator extends Validator {
 
     public UnionTypeValidator(Map<String, Object> schema, List<String> jsonPointer) {
         super(schema, jsonPointer);
-        this.validators = new ArrayList<Validator>(2);
-        for (Object o : (List<Object>) schema.get(TYPE)) {
+        final List<?> unionTypes = (List<?>) schema.get(TYPE);
+        this.validators = new ArrayList<Validator>(unionTypes.size());
+        for (Object o : unionTypes) {
             if (o instanceof String) {
                 validators.add(ObjectValidatorFactory.getTypeValidator((String) o, schema, jsonPointer));
             } else if (o instanceof Map) {
                 Validator v = ObjectValidatorFactory.getTypeValidator((Map<String, Object>) o, jsonPointer);
                 validators.add(v);
-                required = v instanceof NullTypeValidator ? required = false : required;
+                if (v instanceof NullTypeValidator) {
+                    required = false;
+                }
             }
         }
     }
@@ -75,17 +79,7 @@ public class UnionTypeValidator extends Validator {
     public void validate(Object node, JsonPointer at, ErrorHandler handler) throws SchemaException {
         for (Validator v : validators) {
             try {
-                v.validate(node, at, new ErrorHandler() {
-                    @Override
-                    public void error(ValidationException exception) throws SchemaException {
-                        throw exception;
-                    }
-
-                    @Override
-                    public void assembleException() throws ValidationException {
-                        throw new UnsupportedOperationException("Not supported yet.");
-                    }
-                });
+                v.validate(node, at, new FailFastErrorHandler());
                 return;
             } catch (ValidationException e) {
                 //Only one helpers should success to be overall success.

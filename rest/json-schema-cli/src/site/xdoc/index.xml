@@ -33,13 +33,13 @@
  <body>
   <section name="About Json Schema">
    <p>The JSON Schema Validator is a tool to validates simple java object against the <a
-        href="http://tools.ietf.org/html/draft-zyp-json-schema-03"
-        title="A JSON Media Type for Describing the Structure and Meaning of JSON Documents" target="_new">draft-zyp-json-schema-03</a>
+        href="http://tools.ietf.org/html/draft-fge-json-schema-validation-00"
+        title="A JSON Media Type for Describing the Structure and Meaning of JSON Documents" target="_new">draft-fge-json-schema-validation-00</a>
     schema. </p>
     
 <p>This is a command line tool.</p>
 <code>
-    java -jar json-schema-cli-1.0.0-SNAPSHOT.jar<br/>
+    java -jar json-schema-cli-2.0.0-SNAPSHOT.jar<br/>
 <br/>
     Option "-f (-file, -dir)" is required<br/>
     java Main [options...] arguments...<br/>

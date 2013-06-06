@@ -14,6 +14,35 @@
     },
     {
         "schema" : {
+            "type"     : "object",
+            "properties": {
+                "p1": {}
+            },
+            "patternProperties": {
+                "p": {},
+                "[0-9]": {}
+            },
+            "additionalProperties": false
+        },
+        "valid" : [
+            {
+                "p1": true,
+                "p2": null,
+                "a32&o": "foobar",
+                "apple": "pie"
+            }
+        ],
+        "invalid" : [
+            {
+                "": [],
+            },
+            {
+                "fiddle": 42,
+            }
+        ]
+    },
+    {
+        "schema" : {
             "type"                 : "object",
             "additionalProperties" : false,
             "properties" : {
@@ -40,18 +69,26 @@
             {
                 "test1" : "12345",
                 "test3" : 100
+            },
+            {
+                "test1" : "1234",
+                "test3" : 101
+            },
+            {
+                "test1" : "12345",
+                "test4" : 100
             }
         ],
         "invalid" : [
             { },
             {
                 "test1" : "12345",
-                "test2" : "12345",
+                "test5" : "12345",
                 "test3" : 100
             },
             {
                 "test1" : "1234",
-                "test3" : 101
+                "test4" : 101
             }
         ]
     },
