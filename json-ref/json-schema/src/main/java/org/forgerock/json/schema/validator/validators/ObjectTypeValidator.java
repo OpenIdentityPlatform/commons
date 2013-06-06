@@ -23,6 +23,16 @@
  */
 package org.forgerock.json.schema.validator.validators;
 
+import static org.forgerock.json.schema.validator.Constants.*;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -33,10 +43,6 @@ import org.forgerock.json.schema.validator.ObjectValidatorFactory;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
 import org.forgerock.json.schema.validator.exceptions.ValidationException;
 import org.forgerock.json.schema.validator.helpers.EnumHelper;
-
-import java.util.*;
-
-import static org.forgerock.json.schema.validator.Constants.*;
 
 /**
  * ObjectTypeValidator applies all the constraints of a <code>object</code> type.
@@ -64,7 +70,6 @@ public class ObjectTypeValidator extends Validator {
      * order of the instance properties MAY be in any order.
      */
     private final Map<String, PropertyValidatorBag> propertyValidators;
-    private final Set<String> propertyNames;
     /**
      * This attribute is an object that defines the requirements of a
      * property on an instance object.  If an object instance has a property
@@ -89,7 +94,7 @@ public class ObjectTypeValidator extends Validator {
      * This attribute is an object that defines the schema for a set of
      * property names of an object instance.  The name of each property of
      * this attribute's object is a regular expression pattern in the ECMA
-     * 262/Perl 5 format, while the value is a schema.  If the pattern
+     * 262 format, while the value is a schema.  If the pattern
      * matches the name of a property on the instance object, the value of
      * the instance's property MUST be valid against the pattern name's
      * schema value.
@@ -141,10 +146,8 @@ public class ObjectTypeValidator extends Validator {
                 Validator validator = ObjectValidatorFactory.getTypeValidator((Map<String, Object>) entry.getValue(), newPointer);
                 propertyValidators.put(entry.getKey(), new PropertyValidatorBag(validator));
             }
-            propertyNames = Collections.unmodifiableSet(propertyValidators.keySet());
         } else {
             propertyValidators = Collections.emptyMap();
-            propertyNames = Collections.emptySet();
         }
         for (Map.Entry<String, Object> e : schema.entrySet()) {
             if (ADDITIONALPROPERTIES.equals(e.getKey())) {
@@ -166,11 +169,6 @@ public class ObjectTypeValidator extends Validator {
                             List<String> newPointer = newList(jsonPointer, PATTERNPROPERTIES, entry.getKey());
                             Validator validator = ObjectValidatorFactory.getTypeValidator((Map<String, Object>) entry.getValue(), newPointer);
                             patternPropertyValidators.put(p, validator);
-                            for (Map.Entry<String, PropertyValidatorBag> schemaProperty : propertyValidators.entrySet()) {
-                                if (p.matcher(schemaProperty.getKey()).matches()) {
-                                    schemaProperty.getValue().addPatternValidator(validator);
-                                }
-                            }
                         } catch (PatternSyntaxException pse) {
                             //LOG.error("Failed to apply pattern on " + at + ": Invalid RE syntax [" + pattern + "]", pse);
                         }
@@ -213,34 +211,26 @@ public class ObjectTypeValidator extends Validator {
     public void validate(Object value, JsonPointer at, ErrorHandler handler) throws SchemaException {
         if (value instanceof Map) {
             Map<String, Object> mapValue = (Map<String, Object>) value;
-            Set<String> additionalPropertyNames = new HashSet<String>(mapValue.keySet());
-            additionalPropertyNames.removeAll(propertyNames);
 
-            if (!allowAdditionalProperties && !additionalPropertyNames.isEmpty()) {
-                // @TODO: Add exception message: Additional Properties not allowed
-                handler.error(new ValidationException("Error: Additional Properties not allowed", getPath(at, null)));
-            }
+            Set<String> additionalPropertyNames = new HashSet<String>(mapValue.keySet());
+            additionalPropertyNames.removeAll(propertyValidators.keySet());
 
             Set<String> instancePropertyKeySet = Collections.unmodifiableSet(mapValue.keySet());
 
             for (Map.Entry<String, PropertyValidatorBag> schemaProperty : propertyValidators.entrySet()) {
-                Map.Entry<String, Object> entry = null;
                 //null == entry.getValue() can not used for Null type
-                for (Map.Entry<String, Object> instanceProperty : mapValue.entrySet()) {
-                    if (schemaProperty.getKey().equals(instanceProperty.getKey())) {
-                        entry = instanceProperty;
-                        break;
-                    }
-                }
-                if (null != entry) {
-                    schemaProperty.getValue().validate(entry.getValue(), instancePropertyKeySet, getPath(at, schemaProperty.getKey()), handler);
+                // so first need to check the map contains the key before getting the potential null value
+                if (mapValue.containsKey(schemaProperty.getKey())) {
+                    Object entryValue = mapValue.get(schemaProperty.getKey());
+                    schemaProperty.getValue().validate(entryValue, instancePropertyKeySet, getPath(at, schemaProperty.getKey()), handler);
                 } else if (schemaProperty.getValue().isRequired()) {
                     // @TODO: Add exception message: Required property value is null
-                    handler.error(new ValidationException("", getPath(at, schemaProperty.getKey())));
+                    handler.error(new ValidationException("Required property value is null", getPath(at, schemaProperty.getKey())));
                 }
             }
 
-            for (String additionalPropertyName : additionalPropertyNames) {
+            for (Iterator<String> iter = additionalPropertyNames.iterator(); iter.hasNext();) {
+                String additionalPropertyName = iter.next();
                 Object propertyValue = mapValue.get(additionalPropertyName);
 
                 if (null != additionalPropertyValidator) {
@@ -256,11 +246,23 @@ public class ObjectTypeValidator extends Validator {
                 if (null != patternPropertyValidators) {
                     for (Map.Entry<Pattern, Validator> v : patternPropertyValidators.entrySet()) {
                         Matcher matcher = v.getKey().matcher(additionalPropertyName);
-                        if (matcher.matches()) {
+                        // Quoting "3.3 Regular expressions":
+                        // http://tools.ietf.org/html/draft-fge-json-schema-validation-00#section-3.3
+                        // "Finally, implementations MUST NOT consider that regular expressions
+                        // are anchored, neither at the beginning nor at the end.  This means,
+                        // for instance, that "es" matches "expression"."
+                        if (matcher.find()) {
+                            iter.remove();
                             v.getValue().validate(propertyValue, getPath(at, additionalPropertyName), handler);
+                            break;
                         }
                     }
                 }
+            }
+
+            if (!allowAdditionalProperties && !additionalPropertyNames.isEmpty()) {
+                // @TODO: Add exception message: Additional Properties not allowed
+                handler.error(new ValidationException("Error: Additional Properties not allowed", getPath(at, null)));
             }
         } else if (null != value) {
             handler.error(new ValidationException(ERROR_MSG_TYPE_MISMATCH, getPath(at, null)));
@@ -272,19 +274,11 @@ public class ObjectTypeValidator extends Validator {
     private static class PropertyValidatorBag implements SimpleValidator<Object> {
 
         private final Validator propertyValidator;
-        private Set<Validator> patternValidators = null;
         private Validator dependencyValidator = null;
         private Set<String> requiredProperties = null;
 
         private PropertyValidatorBag(Validator propertyValidator) {
             this.propertyValidator = propertyValidator;
-        }
-
-        private void addPatternValidator(final Validator v) {
-            if (null == patternValidators) {
-                patternValidators = new HashSet<Validator>(1);
-            }
-            patternValidators.add(v);
         }
 
         private void setDependencyValidator(Validator dependencyValidator) {
@@ -293,8 +287,7 @@ public class ObjectTypeValidator extends Validator {
 
         private void setDependencyValue(Object dependencyValue) {
             if (dependencyValue instanceof String) {
-                requiredProperties = new HashSet<String>(1);
-                requiredProperties.add((String) dependencyValue);
+                requiredProperties = Collections.singleton((String) dependencyValue);
             } else if (dependencyValue instanceof Collection) {
                 requiredProperties = new HashSet<String>((Collection<String>) dependencyValue);
             }
@@ -307,11 +300,6 @@ public class ObjectTypeValidator extends Validator {
         @Override
         public void validate(Object value, JsonPointer at, ErrorHandler handler) throws SchemaException {
             propertyValidator.validate(value, at, handler);
-            if (null != patternValidators) {
-                for (Validator v : patternValidators) {
-                    v.validate(value, at, handler);
-                }
-            }
             if (null != dependencyValidator) {
                 dependencyValidator.validate(value, at, handler);
             }

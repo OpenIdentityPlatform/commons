@@ -107,7 +107,7 @@ public class StringTypeValidator extends Validator {
                 if (e.getValue() instanceof String) {
                     String pattern = (String) e.getValue();
                     try {
-                        Pattern p = Pattern.compile(pattern, Pattern.UNICODE_CASE);
+                        p = Pattern.compile(pattern, Pattern.UNICODE_CASE);
                     } catch (PatternSyntaxException pse) {
                         //LOG.error("Failed to apply pattern on " + at + ": Invalid RE syntax [" + pattern + "]", pse);
                     }
