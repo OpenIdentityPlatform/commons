@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -20,22 +20,20 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * $Id$
  */
 package org.forgerock.json.schema.validator.validators;
 
+import static org.testng.Assert.*;
+
 import org.forgerock.json.schema.validator.validators.Validator;
-import org.forgerock.json.schema.validator.ErrorHandler;
+import org.forgerock.json.schema.validator.CollectErrorsHandler;
 import org.forgerock.json.schema.validator.ObjectValidatorFactory;
-import org.forgerock.json.schema.validator.exceptions.SchemaException;
-import org.forgerock.json.schema.validator.exceptions.ValidationException;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.Map;
 
+@SuppressWarnings("javadoc")
 public class NullTypeValidatorTest {
 
     private String schema1 = "{"
@@ -57,48 +55,24 @@ public class NullTypeValidatorTest {
             + "}";
 
     @Test
-    public void ValueIsNull() throws SchemaException  {
-        try {
-            JSONParser parser = new JSONParser();
-            Map<String, Object> schema = (Map<String, Object>) parser.parse(schema2);
-            Validator v = ObjectValidatorFactory.getTypeValidator(schema);
-            Assert.assertTrue(v.isRequired(), "Required MUST be true");
-            v.validate(null, null, new ErrorHandler() {
-
-                @Override
-                public void error(ValidationException exception) throws SchemaException {
-                    throw new ValidationException("ValueIsNull");
-                }
-
-                @Override
-                public void assembleException() throws ValidationException {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-            });
-        } catch (ParseException ex) {
-        }
+    public void valueIsNull() throws Exception  {
+        JSONParser parser = new JSONParser();
+        Map<String, Object> schema = (Map<String, Object>) parser.parse(schema2);
+        Validator v = ObjectValidatorFactory.getTypeValidator(schema);
+        assertTrue(v.isRequired(), "Required MUST be true");
+        CollectErrorsHandler errorHandler = new CollectErrorsHandler();
+        v.validate(null, null, errorHandler);
+        assertFalse(errorHandler.hasError());
     }
 
-    @Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "ValueIsNotNull")
-    public void ValueIsNotNull()  throws SchemaException {
-        try {
-            JSONParser parser = new JSONParser();
-            Map<String, Object> schema = (Map<String, Object>) parser.parse(schema3);
-            Validator v = ObjectValidatorFactory.getTypeValidator(schema);
-            Assert.assertTrue(v.isRequired(), "Required MUST be true");
-            v.validate(Boolean.TRUE, null, new ErrorHandler() {
-
-                @Override
-                public void error(ValidationException exception) throws SchemaException {
-                    throw new ValidationException("ValueIsNotNull");
-                }
-
-                @Override
-                public void assembleException() throws ValidationException {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-            });
-        } catch (ParseException ex) {
-        }
+    @Test
+    public void valueIsNotNull()  throws Exception {
+        JSONParser parser = new JSONParser();
+        Map<String, Object> schema = (Map<String, Object>) parser.parse(schema3);
+        Validator v = ObjectValidatorFactory.getTypeValidator(schema);
+        assertTrue(v.isRequired(), "Required MUST be true");
+        CollectErrorsHandler errorHandler = new CollectErrorsHandler();
+        v.validate(Boolean.TRUE, null, errorHandler);
+        assertTrue(errorHandler.hasError());
     }
 }

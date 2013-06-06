@@ -24,8 +24,8 @@
     </parent>
     <artifactId>json-schema-cli</artifactId>
     <packaging>jar</packaging>
-    <name>JSON Schema Draft-03 validator command line tool</name>
-    <description>Simple tool to validate objects with draft-zyp-json-schema-03.</description>
+    <name>JSON Schema Draft-04 validator command line tool</name>
+    <description>Simple tool to validate objects with draft-fge-json-schema-validation-00.</description>
     <dependencies>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
