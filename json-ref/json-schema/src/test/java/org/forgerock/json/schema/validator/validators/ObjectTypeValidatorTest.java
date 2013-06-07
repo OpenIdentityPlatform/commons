@@ -25,13 +25,13 @@ package org.forgerock.json.schema.validator.validators;
 
 import static org.testng.Assert.*;
 
+import java.util.Iterator;
+import java.util.List;
+
 import org.forgerock.json.schema.validator.CollectErrorsHandler;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import java.util.Iterator;
-import java.util.List;
 
 @SuppressWarnings("javadoc")
 public class ObjectTypeValidatorTest extends ValidatorTestBase {
@@ -56,7 +56,7 @@ public class ObjectTypeValidatorTest extends ValidatorTestBase {
         assertFalse(errorHandler.hasError());
     }
 
-    @Test(dataProvider = "invalid-schema-objects" )
+    @Test(dataProvider = "invalid-schema-objects")
     public void validateInvalidObjects(Validator validator, Object instance) throws Exception {
         Assert.assertNotNull(validator);
         CollectErrorsHandler errorHandler = new CollectErrorsHandler();
