@@ -27,8 +27,12 @@ import static org.testng.Assert.*;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.forgerock.json.schema.validator.CollectErrorsHandler;
+import org.forgerock.json.schema.validator.ObjectValidatorFactory;
+import org.forgerock.json.schema.validator.exceptions.SchemaException;
+import org.json.simple.parser.JSONParser;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -53,7 +57,7 @@ public class ObjectTypeValidatorTest extends ValidatorTestBase {
         Assert.assertNotNull(validator);
         CollectErrorsHandler errorHandler = new CollectErrorsHandler();
         validator.validate(instance, null, errorHandler);
-        assertFalse(errorHandler.hasError());
+        assertFalse(errorHandler.hasError(), errorHandler.getExceptions().toString());
     }
 
     @Test(dataProvider = "invalid-schema-objects")
@@ -61,6 +65,14 @@ public class ObjectTypeValidatorTest extends ValidatorTestBase {
         Assert.assertNotNull(validator);
         CollectErrorsHandler errorHandler = new CollectErrorsHandler();
         validator.validate(instance, null, errorHandler);
-        assertTrue(errorHandler.hasError());
+        assertTrue(errorHandler.hasError(), errorHandler.getExceptions().toString());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test(expectedExceptions = SchemaException.class)
+    public void invalidReferenceInSchema() throws Exception {
+        JSONParser parser = new JSONParser();
+        Object o = parser.parse("{ \"$ref\" : \"#/definitions/unknown\" }");
+        ObjectValidatorFactory.getTypeValidator((Map<String, Object>) o);
     }
 }

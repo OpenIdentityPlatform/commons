@@ -34,10 +34,37 @@
         ],
         "invalid" : [
             {
-                "": [],
+                "": []
             },
             {
-                "fiddle": 42,
+                "fiddle": 42
+            }
+        ]
+    },
+    {
+        "schema" : {
+            "type"     : "object",
+            "properties": {
+                "p1": {},
+                "p2": {}
+            },
+            "required" : [ "p1" ]
+        },
+        "valid" : [
+            {
+                "p1": true
+            },
+            {
+                "p1": true,
+                "p2": ""
+            }
+        ],
+        "invalid" : [
+            {
+                "p2": ""
+            },
+            {
+                "p3": ""
             }
         ]
     },
@@ -89,6 +116,88 @@
             {
                 "test1" : "1234",
                 "test4" : 101
+            }
+        ]
+    },
+    {
+        "schema" : {
+            "type"     : "object",
+            "oneOf"    : [
+                {
+                    "type"       : "object",
+                    "properties" : {
+                        "p1" : {}
+                    },
+                    "additionalProperties" : false
+                },
+                {
+                    "type"       : "object",
+                    "properties" : {
+                        "p2" : {}
+                    },
+                    "additionalProperties" : false
+                }
+            ],
+            "additionalProperties" : false
+        },
+        "valid" : [
+            {
+                "p1": true
+            },
+            {
+                "p2": true
+            }
+        ],
+        "invalid" : [
+            {
+                "p1": "",
+                "p2": ""
+            },
+            {
+                "p3": ""
+            }
+        ]
+    },
+    {
+        "schema" : {
+            "type"     : "object",
+            "oneOf"    : [
+                { "$ref" : "#/definitions/def1" },
+                { "$ref" : "#/definitions/def2" }
+            ],
+            "definitions" : {
+                "def1" : {
+                    "type"       : "object",
+                    "properties" : {
+                        "p1" : {}
+                    },
+                    "additionalProperties" : false
+                },
+                "def2" : {
+                    "type"       : "object",
+                    "properties" : {
+                        "p2" : {}
+                    },
+                    "additionalProperties" : false
+                }
+            },
+            "additionalProperties" : true
+        },
+        "valid" : [
+            {
+                "p1": true
+            },
+            {
+                "p2": true
+            }
+        ],
+        "invalid" : [
+            {
+                "p1": "",
+                "p2": ""
+            },
+            {
+                "p3": ""
             }
         ]
     },

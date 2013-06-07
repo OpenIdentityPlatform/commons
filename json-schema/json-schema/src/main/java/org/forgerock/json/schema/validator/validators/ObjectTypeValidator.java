@@ -25,6 +25,7 @@ package org.forgerock.json.schema.validator.validators;
 
 import static org.forgerock.json.schema.validator.Constants.*;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -38,9 +39,9 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import org.forgerock.json.fluent.JsonPointer;
+import org.forgerock.json.schema.validator.CollectErrorsHandler;
 import org.forgerock.json.schema.validator.ErrorHandler;
 import org.forgerock.json.schema.validator.ObjectValidatorFactory;
-import org.forgerock.json.schema.validator.exceptions.SchemaException;
 import org.forgerock.json.schema.validator.exceptions.ValidationException;
 import org.forgerock.json.schema.validator.helpers.EnumHelper;
 
@@ -48,7 +49,7 @@ import org.forgerock.json.schema.validator.helpers.EnumHelper;
  * ObjectTypeValidator applies all the constraints of a <code>object</code> type.
  * <p/>
  * Sample JSON Schema:
- * </code>
+ * <code>
  * {
  * "type"        : "object"
  * }
@@ -70,6 +71,15 @@ public class ObjectTypeValidator extends Validator {
      * order of the instance properties MAY be in any order.
      */
     private final Map<String, PropertyValidatorBag> propertyValidators;
+    /**
+     * An object instance is valid against this keyword if its property set
+     * contains all elements in this keyword's array value.
+     *
+     * @see <a
+     *      href=http://tools.ietf.org/html/draft-fge-json-schema-validation-00#
+     *      section-5.4.3">required</a>
+     */
+    private final Set<String> requiredPropertyNames = new HashSet<String>();
     /**
      * This attribute is an object that defines the requirements of a
      * property on an instance object.  If an object instance has a property
@@ -134,7 +144,31 @@ public class ObjectTypeValidator extends Validator {
      * schemas are possible, but are not required.
      */
     private List<Validator> extendsValidators = null;
+    /**
+     * An instance validates successfully against this keyword if it validates
+     * successfully against exactly one schema defined by this keyword's value.
+     *
+     * @see <a
+     *      href="http://tools.ietf.org/html/draft-fge-json-schema-validation-00#section-5.5.5">oneOf</a>
+     */
+    private List<Validator> oneOfValidators;
+    /**
+     * This keyword plays no role in validation per se. Its role is to provide a
+     * standardized location for schema authors to inline JSON Schemas into a more
+     * general schema.
+     *
+     * @see <a
+     *      href="http://tools.ietf.org/html/draft-fge-json-schema-validation-00#section-5.5.7">definitions</a>
+     */
+    private Map<String, Validator> definitionValidators;
 
+    /**
+     * Default ctor.
+     *
+     * @param schema the schema holding the reference to this validator
+     * @param jsonPointer the JSON pointer locating where this validator was defined in the schema.
+     */
+    @SuppressWarnings("unchecked")
     public ObjectTypeValidator(Map<String, Object> schema, List<String> jsonPointer) {
         super(schema, jsonPointer);
         Map<String, Object> objectProperties = (Map<String, Object>) schema.get(PROPERTIES);
@@ -200,6 +234,40 @@ public class ObjectTypeValidator extends Validator {
                         }
                     }
                 }
+            } else if (REQUIRED.equals(e.getKey())) {
+                if (e.getValue() instanceof List) {
+                    for (Object o : (List<Object>) e.getValue()) {
+                        if (o instanceof String) {
+                            requiredPropertyNames.add((String) o);
+                        }
+                    }
+                }
+            } else if (ONEOF.equals(e.getKey())) {
+                if (e.getValue() instanceof List) {
+                    final List<Object> l = (List<Object>) e.getValue();
+                    oneOfValidators = new ArrayList<Validator>(l.size());
+                    for (int i = 0; i < l.size(); i++) {
+                        Object obj = l.get(i);
+                        if (obj instanceof Map) {
+                            final List<String> newPointer = newList(jsonPointer, ONEOF, Integer.toString(i));
+                            oneOfValidators.add(
+                                    ObjectValidatorFactory.getTypeValidator((Map<String, Object>) obj, newPointer));
+                        }
+                    }
+                }
+            } else if (DEFINITIONS.equals(e.getKey())) {
+                if (e.getValue() instanceof Map) {
+                    Map<String, Object> definitions = (Map<String, Object>) e.getValue();
+                    definitionValidators = new HashMap<String, Validator>(definitions.size());
+                    for (Map.Entry<String, Object> entry : definitions.entrySet()) {
+                        if (entry.getValue() instanceof Map) {
+                            final List<String> newPointer = newList(jsonPointer, DEFINITIONS, entry.getKey());
+                            Validator validator = ObjectValidatorFactory.getTypeValidator(
+                                    (Map<String, Object>) entry.getValue(), newPointer);
+                            definitionValidators.put(entry.getKey(), validator);
+                        }
+                    }
+                }
             }
         }
     }
@@ -208,24 +276,35 @@ public class ObjectTypeValidator extends Validator {
      * {@inheritDoc}
      */
     @Override
-    public void validate(Object value, JsonPointer at, ErrorHandler handler) throws SchemaException {
+    public void validate(Object value, JsonPointer at, ErrorHandler handler) {
         if (value instanceof Map) {
+            @SuppressWarnings("unchecked")
             Map<String, Object> mapValue = (Map<String, Object>) value;
 
-            Set<String> additionalPropertyNames = new HashSet<String>(mapValue.keySet());
-            additionalPropertyNames.removeAll(propertyValidators.keySet());
+            if (!mapValue.keySet().containsAll(requiredPropertyNames)) {
+                Set<String> missingRequiredProperties = new HashSet<String>(requiredPropertyNames);
+                missingRequiredProperties.removeAll(mapValue.keySet());
+                // @TODO: Add exception message: Missing required property names
+                handler.error(new ValidationException(
+                        "Missing required property names: " + missingRequiredProperties, getPath(at, null)));
+            }
 
+            Set<String> additionalPropertyNames = new HashSet<String>(mapValue.keySet());
             Set<String> instancePropertyKeySet = Collections.unmodifiableSet(mapValue.keySet());
 
             for (Map.Entry<String, PropertyValidatorBag> schemaProperty : propertyValidators.entrySet()) {
+                final String propertyName = schemaProperty.getKey();
+                final PropertyValidatorBag propertyValue = schemaProperty.getValue();
                 //null == entry.getValue() can not used for Null type
                 // so first need to check the map contains the key before getting the potential null value
-                if (mapValue.containsKey(schemaProperty.getKey())) {
-                    Object entryValue = mapValue.get(schemaProperty.getKey());
-                    schemaProperty.getValue().validate(entryValue, instancePropertyKeySet, getPath(at, schemaProperty.getKey()), handler);
-                } else if (schemaProperty.getValue().isRequired()) {
+                if (mapValue.containsKey(propertyName)) {
+                    final Object entryValue = mapValue.get(propertyName);
+                    propertyValue.validate(entryValue, instancePropertyKeySet, getPath(at, propertyName), handler);
+                    additionalPropertyNames.remove(propertyName);
+                } else if (propertyValue.isRequired()) {
                     // @TODO: Add exception message: Required property value is null
-                    handler.error(new ValidationException("Required property value is null", getPath(at, schemaProperty.getKey())));
+                    handler.error(new ValidationException(
+                            "Required property value is null", getPath(at, propertyName)));
                 }
             }
 
@@ -260,9 +339,29 @@ public class ObjectTypeValidator extends Validator {
                 }
             }
 
+            if (null != this.oneOfValidators) {
+                boolean oneIsvalid = false;
+                for (Validator validator : this.oneOfValidators) {
+                    CollectErrorsHandler collectErrorsHandler = new CollectErrorsHandler();
+                    validator.validate(mapValue, getPath(at, null), collectErrorsHandler);
+                    if (!collectErrorsHandler.hasError()) {
+                        oneIsvalid = true;
+                        break;
+                    }
+                }
+                if (oneIsvalid) {
+                    additionalPropertyNames.remove(mapValue.keySet().iterator().next());
+                } else {
+                    // @TODO: Add exception message
+                    handler.error(new ValidationException(
+                            "Error: Expected one of the validators to validate value", getPath(at, null)));
+                }
+            }
+
             if (!allowAdditionalProperties && !additionalPropertyNames.isEmpty()) {
                 // @TODO: Add exception message: Additional Properties not allowed
-                handler.error(new ValidationException("Error: Additional Properties not allowed", getPath(at, null)));
+                handler.error(new ValidationException(
+                        "Error: Additional Properties not allowed: " + additionalPropertyNames, getPath(at, null)));
             }
         } else if (null != value) {
             handler.error(new ValidationException(ERROR_MSG_TYPE_MISMATCH, getPath(at, null)));
@@ -271,7 +370,23 @@ public class ObjectTypeValidator extends Validator {
         }
     }
 
-    private static class PropertyValidatorBag implements SimpleValidator<Object> {
+    /** {@inheritDoc} */
+    @Override
+    protected void collectAllValidators(Collection<Validator> results) {
+        results.add(this);
+        final ObjectTypeValidator val = this;
+        for (PropertyValidatorBag v : val.propertyValidators.values()) {
+            v.collectAllValidators(results);
+        }
+        collectAllValidators(results, val.patternPropertyValidators);
+        if (val.additionalPropertyValidator != null) {
+            val.additionalPropertyValidator.collectAllValidators(results);
+        }
+        collectAllValidators(results, val.oneOfValidators);
+        collectAllValidators(results, val.definitionValidators);
+    }
+
+    private static final class PropertyValidatorBag implements SimpleValidator<Object> {
 
         private final Validator propertyValidator;
         private Validator dependencyValidator = null;
@@ -285,6 +400,7 @@ public class ObjectTypeValidator extends Validator {
             this.dependencyValidator = dependencyValidator;
         }
 
+        @SuppressWarnings("unchecked")
         private void setDependencyValue(Object dependencyValue) {
             if (dependencyValue instanceof String) {
                 requiredProperties = Collections.singleton((String) dependencyValue);
@@ -297,15 +413,24 @@ public class ObjectTypeValidator extends Validator {
             return propertyValidator.isRequired();
         }
 
+        private void collectAllValidators(Collection<Validator> results) {
+            if (this.propertyValidator != null) {
+                this.propertyValidator.collectAllValidators(results);
+            }
+            if (this.dependencyValidator != null) {
+                this.dependencyValidator.collectAllValidators(results);
+            }
+        }
+
         @Override
-        public void validate(Object value, JsonPointer at, ErrorHandler handler) throws SchemaException {
+        public void validate(Object value, JsonPointer at, ErrorHandler handler) {
             propertyValidator.validate(value, at, handler);
             if (null != dependencyValidator) {
                 dependencyValidator.validate(value, at, handler);
             }
         }
 
-        public void validate(Object value, Set<String> propertyKeySet, JsonPointer at, ErrorHandler handler) throws SchemaException {
+        public void validate(Object value, Set<String> propertyKeySet, JsonPointer at, ErrorHandler handler) {
             if (null != requiredProperties && !propertyKeySet.containsAll(requiredProperties)) {
                 handler.error(new ValidationException("Dependency ERROR: Missing properties", at));
             }
