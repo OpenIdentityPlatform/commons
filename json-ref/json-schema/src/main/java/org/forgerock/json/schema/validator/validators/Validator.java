@@ -23,13 +23,18 @@
  */
 package org.forgerock.json.schema.validator.validators;
 
-import org.forgerock.json.fluent.JsonPointer;
+import static org.forgerock.json.schema.validator.Constants.*;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.forgerock.json.schema.validator.Constants.*;
+import org.forgerock.json.fluent.JsonPointer;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.schema.validator.Constants;
+import org.forgerock.json.schema.validator.exceptions.SchemaException;
 
 /**
  * Validator is the abstract base class of all typed validator.
@@ -38,9 +43,16 @@ import static org.forgerock.json.schema.validator.Constants.*;
  */
 public abstract class Validator implements SimpleValidator<Object> {
 
+    /** Whether the schema represented by this validator is required. */
     protected boolean required = false;
     private JsonPointer pointer;
 
+    /**
+     * Default ctor.
+     *
+     * @param schema the schema holding the reference to this validator
+     * @param jsonPointer the JSON pointer locating where this validator was defined in the schema.
+     */
     public Validator(Map<String, Object> schema, List<String> jsonPointer) {
         Object o = schema.get(REQUIRED);
         if (o instanceof Boolean) {
@@ -86,12 +98,11 @@ public abstract class Validator implements SimpleValidator<Object> {
     protected List<String> newList(List<String> list, String... newElems) {
         final List<String> results = new ArrayList<String>(list.size() + newElems.length);
         results.addAll(list);
-        for (String elem : newElems)
-        {
-          if (elem == null) {
-            throw new IllegalArgumentException();
-          }
-          results.add(elem);
+        for (String elem : newElems) {
+            if (elem == null) {
+                throw new IllegalArgumentException();
+            }
+            results.add(elem);
         }
         return results;
     }
@@ -102,11 +113,90 @@ public abstract class Validator implements SimpleValidator<Object> {
      * @return the pointer
      */
     public JsonPointer getJsonPointer() {
-      return pointer;
+        return pointer;
     }
 
+    /**
+     * Returns whether the schema represented by this validator is required.
+     *
+     * @return true if the schema represented by this validator is required, false otherwise
+     */
     public boolean isRequired() {
         return required;
+    }
+
+    /**
+     * Resolves schema references for this validator.
+     *
+     * @see Constants#REF
+     */
+    public void resolveSchemaReferences() {
+        final List<Validator> validators = new ArrayList<Validator>();
+        collectAllValidators(validators);
+
+        final List<ReferenceTypeValidator> references = new ArrayList<ReferenceTypeValidator>();
+        final Map<JsonPointer, Validator> jsonPointers = new HashMap<JsonPointer, Validator>();
+        for (Validator validator : validators) {
+            if (validator.getJsonPointer() != null) {
+                jsonPointers.put(validator.getJsonPointer(), validator);
+            }
+            if (validator instanceof ReferenceTypeValidator) {
+                ReferenceTypeValidator val = (ReferenceTypeValidator) validator;
+                if (val.getReference() != null) {
+                    references.add(val);
+                }
+            }
+        }
+
+        for (ReferenceTypeValidator v : references) {
+            String ref = v.getReference();
+            if (ref.startsWith("#")) {
+                ref = ref.substring(1);
+            }
+            final JsonPointer path = new JsonPointer(ref);
+            final Validator referencedValidator = jsonPointers.get(path);
+            if (referencedValidator == null) {
+                throw new SchemaException(new JsonValue(null, path), "Could not dereference JSON reference " + ref);
+            }
+            v.setReferencedValidator(referencedValidator);
+        }
+    }
+
+    /**
+     * Collects all the sub-validators held in this validator and aggregates them in the passed in Collection.
+     *
+     * @param results where collected validators are aggregated
+     */
+    protected void collectAllValidators(Collection<Validator> results) {
+        results.add(this);
+    }
+
+    /**
+     * Collects all the sub-validators held in this validator and aggregates them in the passed in Collection.
+     *
+     * @param results where collected validators are aggregated
+     * @param col the sub-validators for which to collect other sub-validators
+     */
+    protected static void collectAllValidators(Collection<Validator> results,
+            final Collection<? extends Validator> col) {
+        if (col != null) {
+            for (Validator v : col) {
+                v.collectAllValidators(results);
+            }
+        }
+    }
+
+    /**
+     * Collects all the sub-validators held in this validator and aggregates them in the passed in Collection.
+     *
+     * @param results where collected validators are aggregated
+     * @param map the sub-validators for which to collect other sub-validators
+     */
+    protected static void collectAllValidators(final Collection<Validator> results,
+            final Map<?, ? extends Validator> map) {
+        if (map != null) {
+            collectAllValidators(results, map.values());
+        }
     }
 
     /** {@inheritDoc} */
