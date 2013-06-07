@@ -28,7 +28,7 @@ import java.net.URI;
 /**
  * Constants is the collection of all constant values used by the object validator implementation.
  */
-public class Constants {
+public final class Constants {
 
     // Prevents instantiation
     private Constants() {
@@ -54,6 +54,11 @@ public class Constants {
     public static final String TYPE_OBJECT = "object";
     public static final String TYPE_ARRAY = "array";
     public static final String TYPE_NULL = "null";
+    /**
+     * @deprecated removed in JSON schema draft 04
+     * @see <a href="http://tools.ietf.org/html/draft-fge-json-schema-validation-00#appendix-A"> JSON schema draft 04 - any</a>
+     */
+    @Deprecated
     public static final String TYPE_ANY = "any";
     /**
      * @see <a href="http://tools.ietf.org/html/draft-zyp-json-schema-03#section-5.1">JSON schema draft 03 - type</a>
@@ -166,6 +171,7 @@ public class Constants {
      * @see <a href="http://tools.ietf.org/html/draft-fge-json-schema-validation-00#appendix-A">JSON schema draft 04 - renamed</a>
      * @see #MULTIPLEOF
      */
+    @Deprecated
     public static final String DIVISIBLEBY = "divisibleBy";
     /**
      * @see <a href="http://tools.ietf.org/html/draft-fge-json-schema-validation-00#section-5.2.3">JSON schema draft 04 - multipleOf</a>
@@ -176,13 +182,23 @@ public class Constants {
      * @see <a href="http://tools.ietf.org/html/draft-zyp-json-schema-03#section-5.25">JSON schema draft 03 - disallow</a>
      * @see <a href="http://tools.ietf.org/html/draft-fge-json-schema-validation-00#appendix-A">JSON schema draft 04 - removed</a>
      */
+    @Deprecated
     public static final String DISALLOW = "disallow";
     /**
      * @deprecated removed in JSON schema draft 04
      * @see <a href="http://tools.ietf.org/html/draft-zyp-json-schema-03#section-5.26">JSON schema draft 03 - extends</a>
      * @see <a href="http://tools.ietf.org/html/draft-fge-json-schema-validation-00#appendix-A">JSON schema draft 04 - removed</a>
      */
+    @Deprecated
     public static final String EXTENDS = "extends";
+    /**
+     * @see <a href="http://tools.ietf.org/html/draft-fge-json-schema-validation-00#section-5.5.5">JSON schema draft 04 - oneOf</a>
+     */
+    public static final String ONEOF = "oneOf";
+    /**
+     * @see <a href="http://tools.ietf.org/html/draft-fge-json-schema-validation-00#section-5.5.7">JSON schema draft 04 - definitions</a>
+     */
+    public static final String DEFINITIONS = "definitions";
     /**
      * @see <a href="http://tools.ietf.org/html/draft-zyp-json-schema-03#section-5.27">JSON schema draft 03 - id</a>
      * @see <a href="http://tools.ietf.org/html/draft-fge-json-schema-validation-00#section-7.2">JSON schema draft 04 - id</a>
@@ -198,6 +214,7 @@ public class Constants {
      * @see <a href="http://tools.ietf.org/html/draft-fge-json-schema-validation-00#section-6">JSON schema draft 04 - $schema</a>
      */
     public static final String SCHEMA = "$schema";
+
     /**
      * date-time  This SHOULD be a date in ISO 8601 format of YYYY-MM-
      * DDThh:mm:ssZ in UTC time.  This is the recommended form of date/timestamp.

@@ -1,18 +1,18 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
+ *
  * Copyright © 2011-2013 ForgeRock AS. All rights reserved.
- * 
+ *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
  * (the License). You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the License at
  * http://forgerock.org/license/CDDLv1.0.html
  * See the License for the specific language governing
  * permission and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at http://forgerock.org/license/CDDLv1.0.html
@@ -23,21 +23,25 @@
  */
 package org.forgerock.json.schema.validator.validators;
 
+import static org.forgerock.json.schema.validator.Constants.*;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.schema.validator.ErrorHandler;
 import org.forgerock.json.schema.validator.ObjectValidatorFactory;
-import org.forgerock.json.schema.validator.exceptions.SchemaException;
 import org.forgerock.json.schema.validator.exceptions.ValidationException;
-
-import java.util.*;
-
-import static org.forgerock.json.schema.validator.Constants.*;
 
 /**
  * ArrayTypeValidator applies all the constraints of a <code>array</code> type.
  * <p/>
  * Sample JSON Schema:
- * </code>
+ * <code>
  * {
  * "type"            : "array",
  * "required"        : true,
@@ -96,6 +100,13 @@ public class ArrayTypeValidator extends Validator {
     private Validator singleValidator = null;
     private Validator additionalItemsValidator = null;
 
+    /**
+     * Default ctor.
+     *
+     * @param schema the schema holding the reference to this validator
+     * @param jsonPointer the JSON pointer locating where this validator was defined in the schema.
+     */
+    @SuppressWarnings("unchecked")
     public ArrayTypeValidator(Map<String, Object> schema, List<String> jsonPointer) {
         super(schema, jsonPointer);
         int count = 0;
@@ -121,18 +132,21 @@ public class ArrayTypeValidator extends Validator {
                     additionalItems = Boolean.parseBoolean((String) e.getValue());
                 } else if (e.getValue() instanceof Map) {
                     final List<String> newPointer = newList(jsonPointer, ADDITIONALITEMS, Integer.toString(count));
-                    additionalItemsValidator = ObjectValidatorFactory.getTypeValidator((Map<String, Object>) e.getValue(), newPointer);
+                    additionalItemsValidator =
+                            ObjectValidatorFactory.getTypeValidator((Map<String, Object>) e.getValue(), newPointer);
                 }
             } else if (ITEMS.equals(e.getKey())) {
                 final List<String> newPointer = newList(jsonPointer, ITEMS, Integer.toString(count));
                 if (e.getValue() instanceof Map) {
-                    singleValidator = ObjectValidatorFactory.getTypeValidator((Map<String, Object>) e.getValue(), newPointer);
+                    singleValidator =
+                            ObjectValidatorFactory.getTypeValidator((Map<String, Object>) e.getValue(), newPointer);
                 } else if (e.getValue() instanceof List) {
                     final List<Object> arrayTypes = (List<Object>) e.getValue();
                     tupleValidators = new ArrayList<Validator>(arrayTypes.size());
                     for (Object o : arrayTypes) {
                         if (o instanceof Map) {
-                            tupleValidators.add(ObjectValidatorFactory.getTypeValidator((Map<String, Object>) o, newPointer));
+                            tupleValidators.add(
+                                    ObjectValidatorFactory.getTypeValidator((Map<String, Object>) o, newPointer));
                         }
                     }
                 }
@@ -144,8 +158,10 @@ public class ArrayTypeValidator extends Validator {
     /**
      * {@inheritDoc}
      */
-    public void validate(Object node, JsonPointer at, ErrorHandler handler) throws SchemaException {
+    @Override
+    public void validate(Object node, JsonPointer at, ErrorHandler handler) {
         if (node instanceof List) {
+            @SuppressWarnings("unchecked")
             List<Object> nodeValue = (List<Object>) node;
             if (minItems > -1 && nodeValue.size() < minItems) {
                 handler.error(new ValidationException(("minItems error")));
@@ -181,12 +197,25 @@ public class ArrayTypeValidator extends Validator {
         }
     }
 
-    private void checkUniqueItems(List<Object> nodeValue, JsonPointer at, ErrorHandler handler) throws SchemaException {
+    private void checkUniqueItems(List<Object> nodeValue, JsonPointer at, ErrorHandler handler) {
         if (uniqueItems && nodeValue.size() > 1) {
             Set<Object> set = new HashSet<Object>(nodeValue);
             if (set.size() < nodeValue.size()) {
                 handler.error(new ValidationException("The items in the array must be unique", getPath(at, null)));
             }
+        }
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    protected void collectAllValidators(Collection<Validator> results) {
+        results.add(this);
+        collectAllValidators(results, this.tupleValidators);
+        if (this.singleValidator != null) {
+            this.singleValidator.collectAllValidators(results);
+        }
+        if (this.additionalItemsValidator != null) {
+            this.additionalItemsValidator.collectAllValidators(results);
         }
     }
 }
