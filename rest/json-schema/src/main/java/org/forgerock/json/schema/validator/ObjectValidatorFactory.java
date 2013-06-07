@@ -23,36 +23,51 @@
  */
 package org.forgerock.json.schema.validator;
 
-import org.forgerock.json.schema.validator.validators.*;
-import org.forgerock.json.schema.validator.validators.Validator;
+import static org.forgerock.json.schema.validator.Constants.*;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.forgerock.json.schema.validator.Constants.*;
+import org.forgerock.json.schema.validator.validators.AnyTypeValidator;
+import org.forgerock.json.schema.validator.validators.ArrayTypeValidator;
+import org.forgerock.json.schema.validator.validators.BooleanTypeValidator;
+import org.forgerock.json.schema.validator.validators.IntegerTypeValidator;
+import org.forgerock.json.schema.validator.validators.NullTypeValidator;
+import org.forgerock.json.schema.validator.validators.NumberTypeValidator;
+import org.forgerock.json.schema.validator.validators.ObjectTypeValidator;
+import org.forgerock.json.schema.validator.validators.ReferenceTypeValidator;
+import org.forgerock.json.schema.validator.validators.StringTypeValidator;
+import org.forgerock.json.schema.validator.validators.UnionTypeValidator;
+import org.forgerock.json.schema.validator.validators.Validator;
 
 /**
  * ObjectValidatorFactory initialises the validator instances for given schemas.
  */
 public class ObjectValidatorFactory {
 
-    private static final Map<String, Class<? extends Validator>> validators;
+    private static final Map<String, Class<? extends Validator>> VALIDATORS;
 
     static {
-        validators = new HashMap<String, Class<? extends Validator>>(8);
-        validators.put(TYPE_STRING, StringTypeValidator.class);
-        validators.put(TYPE_NUMBER, NumberTypeValidator.class);
-        validators.put(TYPE_INTEGER, IntegerTypeValidator.class);
-        validators.put(TYPE_BOOLEAN, BooleanTypeValidator.class);
-        validators.put(TYPE_OBJECT, ObjectTypeValidator.class);
-        validators.put(TYPE_ARRAY, ArrayTypeValidator.class);
-        validators.put(TYPE_NULL, NullTypeValidator.class);
-        validators.put(TYPE_ANY, AnyTypeValidator.class);
+        VALIDATORS = new HashMap<String, Class<? extends Validator>>(8);
+        VALIDATORS.put(TYPE_STRING, StringTypeValidator.class);
+        VALIDATORS.put(TYPE_NUMBER, NumberTypeValidator.class);
+        VALIDATORS.put(TYPE_INTEGER, IntegerTypeValidator.class);
+        VALIDATORS.put(TYPE_BOOLEAN, BooleanTypeValidator.class);
+        VALIDATORS.put(TYPE_OBJECT, ObjectTypeValidator.class);
+        VALIDATORS.put(TYPE_ARRAY, ArrayTypeValidator.class);
+        VALIDATORS.put(TYPE_NULL, NullTypeValidator.class);
+        VALIDATORS.put(TYPE_ANY, AnyTypeValidator.class);
+    }
+
+    private ObjectValidatorFactory() {
+        // hide ctor of utility class
     }
 
     /**
+     * Returns a validator validating the schema.
+     *
      * @param schema JSON Schema Draft-03 object
      * @return Pre-configured {@link Validator} instance.
      * @throws NullPointerException when the <code>schema</code> is null.
@@ -63,17 +78,32 @@ public class ObjectValidatorFactory {
     }
 
     /**
-     * Returns a validator validating the schema.
+     * Returns a validator validating the schema. It uses the passed in JSON pointer as a relative location of the
+     * validator in the schema.
      *
      * @param schema JSON Schema Draft-03 object
-     * @param jsonPointer the list of tokens representing the JSON pointer leading to this validator 
+     * @param jsonPointer the list of tokens representing the JSON pointer leading to this validator
      * @return Pre-configured {@link Validator} instance.
      * @throws NullPointerException when the <code>schema</code> is null.
      * @throws RuntimeException     when the validators in the <code>schema</code> is not supported.
      */
     public static Validator getTypeValidator(Map<String, Object> schema, List<String> jsonPointer) {
+        Validator v = getTypeValidatorInner(schema, jsonPointer);
+        if (jsonPointer.isEmpty()) {
+            v.resolveSchemaReferences();
+        }
+        return v;
+    }
+
+    private static Validator getTypeValidatorInner(Map<String, Object> schema, List<String> jsonPointer) {
         Object typeValue = schema.get(TYPE);
         if (null == typeValue) {
+            Object refValue = schema.get(REF);
+            if (refValue instanceof String) {
+                // the $ref actually is a reference to another yet unknown schema
+                return new ReferenceTypeValidator(schema, (String) refValue, jsonPointer);
+            }
+            // type "any" is invalid for JSON schema draft 04
             return getTypeValidator(TYPE_ANY, schema, jsonPointer);
         } else if (typeValue instanceof String) {
             return getTypeValidator((String) typeValue, schema, jsonPointer);
@@ -85,10 +115,10 @@ public class ObjectValidatorFactory {
 
     /**
      * Instantiates a validator of the passed in type with the given schema.
-     * 
+     *
      * @param type the type of Validator to instantiate
-     * @param schema the schema that the instantiated validator will validate 
-     * @param jsonPointer the list of tokens representing the JSON pointer leading to this validator 
+     * @param schema the schema that the instantiated validator will validate
+     * @param jsonPointer the list of tokens representing the JSON pointer leading to this validator
      * @return the instantiated validator. Cannot be null.
      * @throws RuntimeException when the validators in the <code>schema</code> is not supported.
      */
@@ -105,6 +135,6 @@ public class ObjectValidatorFactory {
     }
 
     private static Class<? extends Validator> findClass(String type) {
-        return validators.get(type);
+        return VALIDATORS.get(type);
     }
 }
