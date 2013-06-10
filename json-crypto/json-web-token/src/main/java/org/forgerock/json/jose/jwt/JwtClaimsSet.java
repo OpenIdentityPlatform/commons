@@ -16,170 +16,237 @@
 
 package org.forgerock.json.jose.jwt;
 
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.jose.utils.StringOrURI;
-
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-public class JwtClaimsSet extends JsonValue {
+import static org.forgerock.json.jose.jwt.JwtClaimsSetKey.*;
 
-    private String type;
-    private String jwtId;
-    private StringOrURI issuer;
-    private StringOrURI principal;
-    private Set<StringOrURI> audience = new HashSet<StringOrURI>();
-    private Long issuedAtTime;
-    private Long notBeforeTime;
-    private Long expirationTime;
-
-//    public final Map<String, Object> claims = new HashMap<String, Object>();
+public class JwtClaimsSet extends JWObject {
 
     public JwtClaimsSet() {
-        //TODO need to convert Dates to Longs!!
-        super(new HashMap<String, Object>());
-    }
-
-    public JwtClaimsSet(JsonValue value) {
-        super(value);
     }
 
     public JwtClaimsSet(Map<String, Object> claims) {
-        super(claims);
+        setClaims(claims);
     }
 
     public void setType(String type) {
-        this.type = type;
+        put(TYP.value(), type);
     }
 
     public String getType() {
-        return type;
+        return get(TYP.value()).asString();
     }
 
     public void setJwtId(String jwtId) {
-        this.jwtId = jwtId;
+        put(JTI.value(), jwtId);
     }
 
     public String getJwtId() {
-        return jwtId;
+        return get(JTI.value()).asString();
     }
 
     public void setIssuer(String issuer) {
-        this.issuer = new StringOrURI(issuer);
+        put(ISS.value(), issuer);
     }
 
     public void setIssuer(URI issuer) {
-        this.issuer = new StringOrURI(issuer);
+        put(ISS.value(), issuer.toString());
     }
 
     public String getIssuer() {
-        return issuer.toString();
+        return get(ISS.value()).asString();
     }
 
     public void setPrincipal(String principal) {
-        this.principal = new StringOrURI(principal);
+        put(PRN.value(), principal);
     }
 
     public void setPrincipal(URI principal) {
-        this.principal = new StringOrURI(principal);
+        put(PRN.value(), principal.toString());
     }
 
     public String getPrincipal() {
-        return principal.toString();
+        return get(PRN.value()).asString();
     }
 
     public void addAudience(String audience) {
-        this.audience.add(new StringOrURI(audience));
+        List<String> audienceList = getAudience();
+        if (audienceList == null) {
+            audienceList = new ArrayList<String>();
+            put(AUD.value(), audienceList);
+        }
+        audienceList.add(audience);
     }
 
     public void addAudience(URI audience) {
-        this.audience.add(new StringOrURI(audience));
+        addAudience(audience.toString());
     }
 
-    public Set<String> getAudience() {
-        Set<String> aud = new HashSet<String>();
-
-        for (StringOrURI s : audience) {
-            aud.add(s.toString());
-        }
-
-        return aud;
+    public List<String> getAudience() {
+        return get(AUD.value()).asList(String.class);
     }
 
     public void setIssuedAtTime(Date issuedAtTime) {
-        this.issuedAtTime = issuedAtTime.getTime();
+        put(IAT.value(), issuedAtTime.getTime() / 1000);
     }
 
-    public Date getIssuedAtTime() {
-        return new Date(issuedAtTime);
+    public Date getIssuedAtTime() {    //TODO check not null!
+        return new Date(get(IAT.value()).asLong() * 1000);
     }
 
     public void setNotBeforeTime(Date notBeforeTime) {
-        this.notBeforeTime = notBeforeTime.getTime();
+        put(NBF.value(), notBeforeTime.getTime() / 1000);
     }
 
     public Date getNotBeforeTime() {
-        return new Date(notBeforeTime);
+        return new Date(get(NBF.value()).asLong() * 1000);
     }
 
     public void setExpirationTime(Date expirationTime) {
-        this.expirationTime = expirationTime.getTime();
+        put(EXP.value(), expirationTime.getTime() / 1000);  //TODO Use class level Calendar and method to set millis to 0
     }
 
     public Date getExpirationTime() {
-        return new Date(expirationTime);
+        return new Date(get(EXP.value()).asLong() * 1000);
     }
 
-    public void addClaim(String key, Object value) {
-        put(key, value);          //TODO include required claims
+    public void setClaim(String key, Object value) {
+
+        JwtClaimsSetKey claimsSetKey = getClaimSetKey(key.toUpperCase());
+
+        switch (claimsSetKey) {
+            case TYP: {
+                checkValueIsOfType(value, String.class);
+                setType((String) value);
+                break;
+            }
+            case JTI: {
+                checkValueIsOfType(value, String.class);
+                setJwtId((String) value);
+                break;
+            }
+            case ISS: {
+                if (isValueOfType(value, URI.class)) {
+                    setIssuer((URI) value);
+                } else {
+                    checkValueIsOfType(value, String.class);
+                    setIssuer((String) value);
+                }
+                break;
+            }
+            case PRN: {
+                if (isValueOfType(value, URI.class)) {
+                    setPrincipal((URI) value);
+                } else {
+                    checkValueIsOfType(value, String.class);
+                    setPrincipal((String) value);
+                }
+                break;
+            }
+            case AUD: {
+                if (isValueOfType(value, List.class)) {
+                    List<?> audienceList = (List<?>) value;
+                    for (Object audience : audienceList) {
+                        if (isValueOfType(audience, URI.class)) {
+                            addAudience((URI) audience);
+                        } else {
+                            checkValueIsOfType(audience, String.class);
+                            addAudience((String) audience);
+                        }
+                    }
+                } else {
+                    if (isValueOfType(value, URI.class)) {
+                        addAudience((URI) value);
+                    } else {
+                        checkValueIsOfType(value, String.class);
+                        addAudience((String) value);
+                    }
+                }
+                break;
+            }
+            case IAT: {
+                checkValueIsOfType(value, Date.class);
+                setIssuedAtTime((Date) value);
+                break;
+            }
+            case NBF: {
+                checkValueIsOfType(value, Date.class);
+                setNotBeforeTime((Date) value);
+                break;
+            }
+            case EXP: {
+                checkValueIsOfType(value, Date.class);
+                setExpirationTime((Date) value);
+                break;
+            }
+            default: {
+                put(key, value);
+            }
+        }
     }
 
-    public void addClaims(Map<String, Object> claims) {
+    public void setClaims(Map<String, Object> claims) {
         for (String key : claims.keySet()) {
-            addClaim(key, claims.get(key));
+            setClaim(key, claims.get(key));
         }
     }
 
     public Object getClaim(String key) {
-        return get(key);                     //TODO include required claims
+
+        JwtClaimsSetKey claimsSetKey = getClaimSetKey(key.toUpperCase());
+
+        Object value;
+
+        switch (claimsSetKey) {
+            case TYP: {
+                value = getType();
+                break;
+            }
+            case JTI: {
+                value = getJwtId();
+                break;
+            }
+            case ISS: {
+                value = getIssuer();
+                break;
+            }
+            case PRN: {
+                value = getPrincipal();
+                break;
+            }
+            case AUD: {
+                value = getAudience();
+                break;
+            }
+            case IAT: {
+                value = getIssuedAtTime();
+                break;
+            }
+            case NBF: {
+                value = getNotBeforeTime();
+                break;
+            }
+            case EXP: {
+                value = getExpirationTime();
+                break;
+            }
+            default: {
+                value = get(key).getObject();
+            }
+        }
+
+        return value;
     }
 
-    public <T> T getClaim(String key, T clazz) {
+    public <T> T getClaim(String key, Class<T> clazz) {
         return (T) getClaim(key);
     }
 
-    public Map<String, Object> getClaims() {
-        Map<String, Object> claims = new HashMap<String, Object>();
-        for (String key : keys()) {
-            claims.put(key, get(key));
-        }
-        return claims;//TODO include required claims
-    }
-
     public String build() {
-        JsonValue jsonValue = new JsonValue(this);
-
-        addClaimToJson(jsonValue, "typ", type);
-        addClaimToJson(jsonValue, "jwi", jwtId);
-        addClaimToJson(jsonValue, "iss", issuer);
-        addClaimToJson(jsonValue, "prn", principal);
-        if (audience.size() > 0) {
-            addClaimToJson(jsonValue, "aud", audience);
-        }
-        addClaimToJson(jsonValue, "iat", issuedAtTime);
-        addClaimToJson(jsonValue, "nbf", notBeforeTime);
-        addClaimToJson(jsonValue, "exp", expirationTime);
-
-        return jsonValue.toString();
-    }
-
-    private void addClaimToJson(JsonValue jsonValue, String key, Object value) {
-        if (value != null) {
-            jsonValue.add(key, value);
-        }
+        return toString();
     }
 }

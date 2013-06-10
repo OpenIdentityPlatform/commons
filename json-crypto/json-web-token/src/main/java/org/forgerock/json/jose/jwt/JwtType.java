@@ -21,4 +21,9 @@ public enum JwtType {
     JWT,
     JWS,
     JWE;
+
+    @Override
+    public String toString() {
+        return super.toString().toLowerCase();
+    }
 }

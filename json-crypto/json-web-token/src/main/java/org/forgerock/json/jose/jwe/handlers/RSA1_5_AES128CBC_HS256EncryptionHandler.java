@@ -54,7 +54,7 @@ public class RSA1_5_AES128CBC_HS256EncryptionHandler extends AbstractEncryptionH
 
     @Override
     public byte[] encryptContentEncryptionKey(Key key, Key contentEncryptionKey) {
-        return encrypt(ALGORITHM.getTransformation(), key, contentEncryptionKey.getEncoded());
+        return encrypt(ALGORITHM.getAlgorithm(), key, contentEncryptionKey.getEncoded());
     }
 
     @Override
@@ -99,7 +99,7 @@ public class RSA1_5_AES128CBC_HS256EncryptionHandler extends AbstractEncryptionH
     @Override
     public Key decryptContentEncryptionKey(Key key, byte[] encryptedContentEncryptionKey) {
 
-        byte[] contentEncryptionKey = decrypt(ALGORITHM.getTransformation(), key, encryptedContentEncryptionKey);
+        byte[] contentEncryptionKey = decrypt(ALGORITHM.getAlgorithm(), key, encryptedContentEncryptionKey);
 
         return new SecretKeySpec(contentEncryptionKey, ENCRYPTION_METHOD.getEncryptionAlgorithm());
     }

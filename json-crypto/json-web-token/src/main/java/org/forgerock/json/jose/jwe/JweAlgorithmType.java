@@ -19,4 +19,9 @@ package org.forgerock.json.jose.jwe;
 public enum JweAlgorithmType {
 
     RSA;
+
+    @Override
+    public String toString() {
+        return '"' + super.toString() + '"';
+    }
 }
