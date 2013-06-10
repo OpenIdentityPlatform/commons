@@ -191,36 +191,36 @@ public class JwtTest {
         jwtReconstruction = new JwtReconstruction();
     }
 
-    @Test
-    public void shouldJWEUsingRSAES_PKCS1_V1_5andAES_128_CBC_HMAC_SHA_256() {
-
-
-
+//    @Test      //TODO
+//    public void shouldJWEUsingRSAES_PKCS1_V1_5andAES_128_CBC_HMAC_SHA_256() {
 //
-//        String encodedJweHeader = Base64url.encode(jweHeader.getBytes(Utils.CHARSET));
 //
-//        byte[] plaintextBytes = plaintext.getBytes(Utils.CHARSET);
 //
-//        Cipher cipher = Cipher.getInstance(algorithm.getTransformation());
-//        cipher.init(Cipher.ENCRYPT_MODE, key);
-//        encryptedContentEncryptionKey = cipher.doFinal(contentEncryptionKey.getEncoded());
+////
+////        String encodedJweHeader = Base64url.encode(jweHeader.getBytes(Utils.CHARSET));
+////
+////        byte[] plaintextBytes = plaintext.getBytes(Utils.CHARSET);
+////
+////        Cipher cipher = Cipher.getInstance(algorithm.getTransformation());
+////        cipher.init(Cipher.ENCRYPT_MODE, key);
+////        encryptedContentEncryptionKey = cipher.doFinal(contentEncryptionKey.getEncoded());
+////
 //
-
-
-        JweHeader header = new JweHeader();
-        header.setAlgorithm(JweAlgorithm.RSAES_PKCS1_V1_5);
-        header.setEncryptionMethod(EncryptionMethod.A128CBC_HS256);
-
-        Map<String, Object> claims = new HashMap<String, Object>();
-        claims.put("CLAIM1", "VALUE1");
-        JwtClaimsSet claimsSet = new JwtClaimsSet();
-        claimsSet.setClaims(claims);
-
-        EncryptedJwt encryptedJwt = new EncryptedJwt(header, claimsSet, publicKey);
-        String jwt = encryptedJwt.build();
-
-        int a = 1;
-    }
+//
+//        JweHeader header = new JweHeader();
+//        header.setAlgorithm(JweAlgorithm.RSAES_PKCS1_V1_5);
+//        header.setEncryptionMethod(EncryptionMethod.A128CBC_HS256);
+//
+//        Map<String, Object> claims = new HashMap<String, Object>();
+//        claims.put("CLAIM1", "VALUE1");
+//        JwtClaimsSet claimsSet = new JwtClaimsSet();
+//        claimsSet.setClaims(claims);
+//
+//        EncryptedJwt encryptedJwt = new EncryptedJwt(header, claimsSet, publicKey);
+//        String jwt = encryptedJwt.build();
+//
+//        int a = 1;
+//    }
 
 
 
@@ -258,23 +258,23 @@ public class JwtTest {
         int a = 1;
     }
 
-    @Test
-    public void shouldCreateEncryptedJwt() {
-
-        JweHeader header = new JweHeader();
-        header.setAlgorithm(JweAlgorithm.RSAES_PKCS1_V1_5);
-        header.setEncryptionMethod(EncryptionMethod.A128CBC_HS256);
-        header.setHeader("custom1", "v1");
-
-        JwtClaimsSet claimsSet = new JwtClaimsSet();
-        claimsSet.setClaim("claim1", "v2");
-
-        EncryptedJwt encryptedJwt = new EncryptedJwt(header, claimsSet, publicKey);
-
-        String jwt = encryptedJwt.build();
-
-        int a = 1;
-    }
+//    @Test                  //TODO
+//    public void shouldCreateEncryptedJwt() {
+//
+//        JweHeader header = new JweHeader();
+//        header.setAlgorithm(JweAlgorithm.RSAES_PKCS1_V1_5);
+//        header.setEncryptionMethod(EncryptionMethod.A128CBC_HS256);
+//        header.setHeader("custom1", "v1");
+//
+//        JwtClaimsSet claimsSet = new JwtClaimsSet();
+//        claimsSet.setClaim("claim1", "v2");
+//
+//        EncryptedJwt encryptedJwt = new EncryptedJwt(header, claimsSet, publicKey);
+//
+//        String jwt = encryptedJwt.build();
+//
+//        int a = 1;
+//    }
 
     @Test
     public void shouldReconstructPlaintextJwt() {
@@ -312,116 +312,116 @@ public class JwtTest {
 
 
 
-    @Test
-    public void shouldTestBuilders() throws MalformedURLException {
-        //Uses cases
-
-
-        JwtBuilder jwtBuilder = new JwtBuilder();
-
-        //Create a Plaintext JWT
-        String plaintextJwt = jwtBuilder           //TODO make builder so Plaintext JWT cannot specify Algorithm
-                .jwt()
-                    .headers()
-                        .header("header1", "v1")
-                        .done()
-                    .claims()
-                        .claim("claim1", "v2")
-                        .typ("typ")
-                        .jti("jti")
-                        .iss("iss")
-                        .prn("prn")
-                        .aud(Arrays.asList(new String[]{"aud1", "aud2"}))
-//                        .iat(new Date())       //TODO need to convert Dates to Longs!!
-//                        .nbf(new Date())       //TODO need to convert Dates to Longs!!
-//                        .exp(new Date())       //TODO need to convert Dates to Longs!!
-                        .done()
-                    .build();
-
-
-        //Create a Signed JWT
-        String signedJwt = jwtBuilder
-                .jws(privateKey)
-                    .headers()
-                        .alg(JwsAlgorithm.HS256)
-//                        .jku(new URL("http://example.com"))    //TODO need to process reserved values first!!!
-                        .jwk(new JWK() {
-                            @Override
-                            public String toString() {
-                                return "\"JWK\"";
-                            }
-                        })
-//                        .x5u(new URL("http://example.com"))    //TODO need to process reserved values first!!!
-                        .x5t("x5t")
-                        .x5c(Arrays.asList(new String[]{"x5c1", "x5c2"}))
-                        .kid("kid")
-                        .cty("cty")
-                        .crit(Arrays.asList(new String[]{"jku", "cty"}))
-                        .header("header1", "v1")
-                        .done()
-                    .claims()
-                        .claim("claim1", "v2")
-                        .typ("typ")
-                        .jti("jti")
-                        .iss("iss")
-                        .prn("prn")
-                        .aud(Arrays.asList(new String[]{"aud1", "aud2"}))
-//                        .iat(new Date())       //TODO need to convert Dates to Longs!!
-//                        .nbf(new Date())       //TODO need to convert Dates to Longs!!
-//                        .exp(new Date())       //TODO need to convert Dates to Longs!!
-                        .done()
-                    .build();
-
-
-        //Create a Encrypted JWT
-        String encryptedJwt = jwtBuilder
-                .jwe(publicKey)
-                    .headers()
-                        .alg(JweAlgorithm.RSAES_PKCS1_V1_5)
-//                        .jku(new URL("http://example.com"))         //TODO need to process reserved values first!!!
-                        .jwk(new JWK() {
-                            @Override
-                            public String toString() {
-                                return "\"JWK\"";
-                            }
-                        })
-//                        .x5u(new URL("http://example.com"))           //TODO need to process reserved values first!!!
-                        .x5t("x5t")
-                        .x5c(Arrays.asList(new String[]{"x5c1", "x5c2"}))
-                        .kid("kid")
-                        .cty("cty")
-                        .crit(Arrays.asList(new String[]{"jku", "cty"}))
-                        .enc(EncryptionMethod.A128CBC_HS256)
-                        .epk("epk")
-                        .zip(CompressionAlgorithm.DEF)
-                        .apu("apu")
-                        .header("header1", "v1")
-                        .done()
-                    .claims()
-                        .claim("claim1", "v2")
-                        .typ("typ")
-                        .jti("jti")
-                        .iss("iss")
-                        .prn("prn")
-                        .aud(Arrays.asList(new String[]{"aud1", "aud2"}))
-//                        .iat(new Date())       //TODO need to convert Dates to Longs!!
-//                        .nbf(new Date())       //TODO need to convert Dates to Longs!!
-//                        .exp(new Date())       //TODO need to convert Dates to Longs!!
-                        .done()
-                    .build();
-
-
-        //Reconstruct a Plaintext JWT
-        Jwt pJwt = jwtBuilder.reconstruct(plaintextJwt, Jwt.class);
-
-        //Reconstruct a Signed JWT
-        SignedJwt sJwt = jwtBuilder.reconstruct(signedJwt, SignedJwt.class);
-        sJwt.verify(privateKey);
-
-        //Reconstruct a Encrypted JWT
-        EncryptedJwt eJwt = jwtBuilder.reconstruct(encryptedJwt, EncryptedJwt.class);
-        eJwt.decrypt(privateKey);
-
-        int a = 1;
-    }
+//    @Test              //TODO
+//    public void shouldTestBuilders() throws MalformedURLException {
+//        //Uses cases
+//
+//
+//        JwtBuilder jwtBuilder = new JwtBuilder();
+//
+//        //Create a Plaintext JWT
+//        String plaintextJwt = jwtBuilder           //TODO make builder so Plaintext JWT cannot specify Algorithm
+//                .jwt()
+//                    .headers()
+//                        .header("header1", "v1")
+//                        .done()
+//                    .claims()
+//                        .claim("claim1", "v2")
+//                        .typ("typ")
+//                        .jti("jti")
+//                        .iss("iss")
+//                        .prn("prn")
+//                        .aud(Arrays.asList(new String[]{"aud1", "aud2"}))
+////                        .iat(new Date())       //TODO need to convert Dates to Longs!!
+////                        .nbf(new Date())       //TODO need to convert Dates to Longs!!
+////                        .exp(new Date())       //TODO need to convert Dates to Longs!!
+//                        .done()
+//                    .build();
+//
+//
+//        //Create a Signed JWT
+//        String signedJwt = jwtBuilder
+//                .jws(privateKey)
+//                    .headers()
+//                        .alg(JwsAlgorithm.HS256)
+////                        .jku(new URL("http://example.com"))    //TODO need to process reserved values first!!!
+//                        .jwk(new JWK() {
+//                            @Override
+//                            public String toString() {
+//                                return "\"JWK\"";
+//                            }
+//                        })
+////                        .x5u(new URL("http://example.com"))    //TODO need to process reserved values first!!!
+//                        .x5t("x5t")
+//                        .x5c(Arrays.asList(new String[]{"x5c1", "x5c2"}))
+//                        .kid("kid")
+//                        .cty("cty")
+//                        .crit(Arrays.asList(new String[]{"jku", "cty"}))
+//                        .header("header1", "v1")
+//                        .done()
+//                    .claims()
+//                        .claim("claim1", "v2")
+//                        .typ("typ")
+//                        .jti("jti")
+//                        .iss("iss")
+//                        .prn("prn")
+//                        .aud(Arrays.asList(new String[]{"aud1", "aud2"}))
+////                        .iat(new Date())       //TODO need to convert Dates to Longs!!
+////                        .nbf(new Date())       //TODO need to convert Dates to Longs!!
+////                        .exp(new Date())       //TODO need to convert Dates to Longs!!
+//                        .done()
+//                    .build();
+//
+//
+//        //Create a Encrypted JWT
+//        String encryptedJwt = jwtBuilder
+//                .jwe(publicKey)
+//                    .headers()
+//                        .alg(JweAlgorithm.RSAES_PKCS1_V1_5)
+////                        .jku(new URL("http://example.com"))         //TODO need to process reserved values first!!!
+//                        .jwk(new JWK() {
+//                            @Override
+//                            public String toString() {
+//                                return "\"JWK\"";
+//                            }
+//                        })
+////                        .x5u(new URL("http://example.com"))           //TODO need to process reserved values first!!!
+//                        .x5t("x5t")
+//                        .x5c(Arrays.asList(new String[]{"x5c1", "x5c2"}))
+//                        .kid("kid")
+//                        .cty("cty")
+//                        .crit(Arrays.asList(new String[]{"jku", "cty"}))
+//                        .enc(EncryptionMethod.A128CBC_HS256)
+//                        .epk("epk")
+//                        .zip(CompressionAlgorithm.DEF)
+//                        .apu("apu")
+//                        .header("header1", "v1")
+//                        .done()
+//                    .claims()
+//                        .claim("claim1", "v2")
+//                        .typ("typ")
+//                        .jti("jti")
+//                        .iss("iss")
+//                        .prn("prn")
+//                        .aud(Arrays.asList(new String[]{"aud1", "aud2"}))
+////                        .iat(new Date())       //TODO need to convert Dates to Longs!!
+////                        .nbf(new Date())       //TODO need to convert Dates to Longs!!
+////                        .exp(new Date())       //TODO need to convert Dates to Longs!!
+//                        .done()
+//                    .build();
+//
+//
+//        //Reconstruct a Plaintext JWT
+//        Jwt pJwt = jwtBuilder.reconstruct(plaintextJwt, Jwt.class);
+//
+//        //Reconstruct a Signed JWT
+//        SignedJwt sJwt = jwtBuilder.reconstruct(signedJwt, SignedJwt.class);
+//        sJwt.verify(privateKey);
+//
+//        //Reconstruct a Encrypted JWT
+//        EncryptedJwt eJwt = jwtBuilder.reconstruct(encryptedJwt, EncryptedJwt.class);
+//        eJwt.decrypt(privateKey);
+//
+//        int a = 1;
+//    }
 }
