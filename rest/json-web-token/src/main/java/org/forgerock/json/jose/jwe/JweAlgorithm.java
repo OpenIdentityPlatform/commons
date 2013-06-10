@@ -30,11 +30,17 @@ public enum JweAlgorithm implements Algorithm {
         this.algorithmType = algorithmType;
     }
 
-    public String getTransformation() {
+    @Override
+    public String getAlgorithm() {
         return transformation;
     }
 
     public JweAlgorithmType getAlgorithmType() {
         return algorithmType;
+    }
+
+    @Override
+    public String toString() {
+        return '"' + super.toString() + '"';
     }
 }

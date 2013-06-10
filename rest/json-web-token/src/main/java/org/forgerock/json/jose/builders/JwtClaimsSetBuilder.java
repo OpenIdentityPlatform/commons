@@ -38,12 +38,17 @@ public class JwtClaimsSetBuilder {
         return this;
     }
 
+    public JwtClaimsSetBuilder claims(Map<String, Object> claims) {
+        this.claims.putAll(claims);
+        return this;
+    }
+
     public JwtClaimsSetBuilder typ(String typ) {
         return claim("typ", typ);
     }
 
-    public JwtClaimsSetBuilder jid(String jid) {
-        return claim("jid", jid);
+    public JwtClaimsSetBuilder jti(String jti) {
+        return claim("jti", jti);
     }
 
     public JwtClaimsSetBuilder iss(String iss) {
