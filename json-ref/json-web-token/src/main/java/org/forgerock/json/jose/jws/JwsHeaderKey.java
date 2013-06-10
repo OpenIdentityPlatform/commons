@@ -14,14 +14,34 @@
  * Copyright 2013 ForgeRock Inc.
  */
 
-package org.forgerock.json.jose.jwe;
+package org.forgerock.json.jose.jws;
 
-public enum CompressionAlgorithm {
+public enum JwsHeaderKey {
 
-    DEF;
+    JKU,
+    JWK,
+    X5U,
+    X5T,  //Base64url
+    X5C,   //List<Base64>
+    KID,
+    CTY,
+    CRIT,
+    CUSTOM;
+
+    public String value() {
+        return toString();
+    }
+
+    public static JwsHeaderKey getHeaderKey(String headerKey) {
+        try {
+            return JwsHeaderKey.valueOf(headerKey);
+        } catch (IllegalArgumentException e) {
+            return CUSTOM;
+        }
+    }
 
     @Override
     public String toString() {
-        return '"' + super.toString() + '"';
+        return super.toString().toLowerCase();
     }
 }

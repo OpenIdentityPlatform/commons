@@ -14,14 +14,34 @@
  * Copyright 2013 ForgeRock Inc.
  */
 
-package org.forgerock.json.jose.jwe;
+package org.forgerock.json.jose.jwt;
 
-public enum CompressionAlgorithm {
+public enum JwtClaimsSetKey {
 
-    DEF;
+    TYP,
+    JTI,
+    ISS,
+    PRN,
+    AUD,
+    IAT,
+    NBF,
+    EXP,
+    CUSTOM;
+
+    public String value() {
+        return toString();
+    }
+
+    public static JwtClaimsSetKey getClaimSetKey(String claimSetKey) {
+        try {
+            return JwtClaimsSetKey.valueOf(claimSetKey);
+        } catch (IllegalArgumentException e) {
+            return CUSTOM;
+        }
+    }
 
     @Override
     public String toString() {
-        return '"' + super.toString() + '"';
+        return super.toString().toLowerCase();
     }
 }

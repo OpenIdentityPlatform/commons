@@ -14,14 +14,28 @@
  * Copyright 2013 ForgeRock Inc.
  */
 
-package org.forgerock.json.jose.jwe;
+package org.forgerock.json.jose.jwt;
 
-public enum CompressionAlgorithm {
+public enum JwtHeaderKey {
 
-    DEF;
+    TYP,      //TODO can actually by media types to in the case of JWS
+    ALG,
+    CUSTOM;
+
+    public String value() {
+        return toString();
+    }
+
+    public static JwtHeaderKey getHeaderKey(String headerKey) {
+        try {
+            return JwtHeaderKey.valueOf(headerKey);
+        } catch (IllegalArgumentException e) {
+            return CUSTOM;
+        }
+    }
 
     @Override
     public String toString() {
-        return '"' + super.toString() + '"';
+        return super.toString().toLowerCase();
     }
 }
