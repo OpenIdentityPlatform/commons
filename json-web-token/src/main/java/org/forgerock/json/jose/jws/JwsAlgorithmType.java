@@ -21,4 +21,9 @@ public enum JwsAlgorithmType {
     NONE,
     HMAC,
     RSA;
+
+    @Override
+    public String toString() {
+        return '"' + super.toString() + '"';
+    }
 }

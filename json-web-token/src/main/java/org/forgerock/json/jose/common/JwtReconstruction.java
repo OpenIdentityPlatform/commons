@@ -25,6 +25,7 @@ import org.forgerock.json.jose.jws.JwsHeader;
 import org.forgerock.json.jose.jws.SignedJwt;
 import org.forgerock.json.jose.jwt.Jwt;
 import org.forgerock.json.jose.jwt.JwtClaimsSet;
+import org.forgerock.json.jose.jwt.JwtHeader;
 import org.forgerock.json.jose.utils.Utils;
 import org.forgerock.util.encode.Base64url;
 
@@ -46,7 +47,7 @@ public class JwtReconstruction {
 
         //first part always header
         //turn into json value
-        JsonValue headerJson = parseHeader(new String(Base64url.decode(jwtParts[0]), Utils.CHARSET));
+        JsonValue headerJson = new JsonValue(parseJson(new String(Base64url.decode(jwtParts[0]), Utils.CHARSET)));
 
         if (headerJson.isDefined("enc")) {
             //is encrypted jwt
@@ -59,11 +60,11 @@ public class JwtReconstruction {
         return (T) jwt;
     }
 
-    private JsonValue parseHeader(String headerString) {
+    private Map<String, Object> parseJson(String headerString) {
 
         ObjectMapper mapper = new ObjectMapper();
         try {
-            return new JsonValue(mapper.readValue(headerString, Map.class));
+            return mapper.readValue(headerString, Map.class);
         } catch (IOException e) {
             throw new JsonException("Failed to parse json", e);
         }
@@ -80,9 +81,9 @@ public class JwtReconstruction {
         String claimsSetString = new String (Base64url.decode(encodedClaimsSet), Utils.CHARSET);
         byte[] signature = Base64url.decode(encodedSignature);
 
-        JwsHeader jwsHeader = new JwsHeader(parseHeader(header));
+        JwsHeader jwsHeader = new JwsHeader(parseJson(header));
 
-        JwtClaimsSet claimsSet = new JwtClaimsSet(parseHeader(claimsSetString));
+        JwtClaimsSet claimsSet = new JwtClaimsSet(parseJson(claimsSetString));
 
         return new SignedJwt(jwsHeader, claimsSet, (encodedHeader + "." + encodedClaimsSet).getBytes(Utils.CHARSET), signature);
     }
@@ -103,7 +104,7 @@ public class JwtReconstruction {
         byte[] authenticationTag = Base64url.decode(encodedAuthenticationTag);
 
 
-        JweHeader jweHeader = new JweHeader(parseHeader(header));
+        JweHeader jweHeader = new JweHeader(parseJson(header));
 
 
         return new EncryptedJwt(jweHeader, encryptedContentEncryptionKey, initialisationVector, ciphertext, authenticationTag);
