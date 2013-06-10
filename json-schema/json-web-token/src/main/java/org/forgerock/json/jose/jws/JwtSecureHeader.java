@@ -16,7 +16,6 @@
 
 package org.forgerock.json.jose.jws;
 
-import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.jose.jwk.JWK;
 import org.forgerock.json.jose.jwt.JwtHeader;
 
@@ -25,36 +24,24 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
+import static org.forgerock.json.jose.jws.JwsHeaderKey.*;
+
 public abstract class JwtSecureHeader extends JwtHeader {
 
-    private static final String JWK_SET_URL_HEADER_KEY = "jku";
-    private static final String JWK_HEADER_KEY = "jwk";
-    private static final String X509_URL_HEADER_KEY = "x5u";
-    private static final String X509_CERTIFICATE_THUMBPRINT_HEADER_KEY = "x5t";     //Base64url
-    private static final String X509_CERTIFICATE_CHAIN_HEADER_KEY = "x5c";          //List<Base64>
-    private static final String KEY_ID_HEADER_KEY = "kid";
-    private static final String CONTENT_TYPE_HEADER_KEY = "cty";
-    private static final String CRITICAL_HEADERS_HEADER_KEY = "ctri";
-
     public JwtSecureHeader() {
-        super();
     }
 
-    public JwtSecureHeader(JsonValue value) {
-        super(value);
-    }
-
-    public JwtSecureHeader(Map<String, Object> headerParameters) {  //TODO need to process reserved values first!!!
-        super(headerParameters);
+    public JwtSecureHeader(Map<String, Object> headers) {
+        setHeaders(headers);
     }
 
     public void setJwkSetUrl(URL jwkSetUrl) {
-        put(JWK_SET_URL_HEADER_KEY, new String(jwkSetUrl.toString()));
+        put(JKU.value(), new String(jwkSetUrl.toString()));  //TODO JsonValue has problems with to String not being a "String"?!?!
     }
 
     public URL getJwkSetUrl() {
         try {
-            return get(JWK_SET_URL_HEADER_KEY).asURI().toURL();
+            return get(JKU.value()).asURI().toURL();
         } catch (MalformedURLException e) {
             //TODO
             throw new RuntimeException(e);
@@ -62,20 +49,20 @@ public abstract class JwtSecureHeader extends JwtHeader {
     }
 
     public void setJsonWebKey(JWK jsonWebKey) {
-        put(JWK_HEADER_KEY, jsonWebKey);
+        put(JWK.value(), jsonWebKey);
     }
 
-    public JWK getJsonWebKey() { //TODO need custom mapper for jackson!
-        return (JWK) get(JWK_HEADER_KEY);
+    public JWK getJsonWebKey() { //TODO need custom mapper for jackson! or do it here??
+        return (JWK) get(JWK.value()).getObject();
     }
 
     public void setX509Url(URL x509Url) {
-        put(X509_URL_HEADER_KEY, new String(x509Url.toString()));
+        put(X5U.value(), new String(x509Url.toString()));
     }
 
     public URL getX509Url() {
         try {
-            return get(X509_URL_HEADER_KEY).asURI().toURL();
+            return get(X5U.value()).asURI().toURL();
         } catch (MalformedURLException e) {
             //TODO
             throw new RuntimeException(e);
@@ -83,42 +70,142 @@ public abstract class JwtSecureHeader extends JwtHeader {
     }
 
     public void setX509CertificateThumbprint(String x509CertificateThumbprint) {
-        put(X509_CERTIFICATE_THUMBPRINT_HEADER_KEY, x509CertificateThumbprint);
+        put(X5T.value(), x509CertificateThumbprint);
     }
 
-    public String getX509CertificateThumbprintHeader() {
-        return get(X509_CERTIFICATE_THUMBPRINT_HEADER_KEY).asString();
+    public String getX509CertificateThumbprint() {
+        return get(X5T.value()).asString();
     }
 
     public void setX509CertificateChain(List<String> x509CertificateChain) {
-        put(X509_CERTIFICATE_CHAIN_HEADER_KEY, x509CertificateChain);
+        put(X5C.value(), x509CertificateChain);
     }
 
     public List<String> getX509CertificateChain() {
-        return get(X509_CERTIFICATE_CHAIN_HEADER_KEY).asList(String.class);
+        return get(X5C.value()).asList(String.class);
     }
 
     public void setKeyId(String keyId) {
-        put(KEY_ID_HEADER_KEY, keyId);
+        put(KID.value(), keyId);
     }
 
     public String getKeyId() {
-        return get(KEY_ID_HEADER_KEY).asString();
+        return get(KID.value()).asString();
     }
 
     public void setContentType(String contentType) {
-        put(CONTENT_TYPE_HEADER_KEY, contentType);
+        put(CTY.value(), contentType);
     }
 
     public String getContentType() {
-        return get(CONTENT_TYPE_HEADER_KEY).asString();
+        return get(CTY.value()).asString();
     }
 
     public void setCriticalHeaders(List<String> criticalHeaders) {
-        put(CRITICAL_HEADERS_HEADER_KEY, criticalHeaders);
+        put(CRIT.value(), criticalHeaders);
     }
 
     public List<String> getCriticalHeaders() {
-        return get(CRITICAL_HEADERS_HEADER_KEY).asList(String.class);
+        return get(CRIT.value()).asList(String.class);
+    }
+
+    @Override
+    public void setHeader(String key, Object value) {
+        JwsHeaderKey headerKey = getHeaderKey(key.toUpperCase());
+
+        switch (headerKey) {
+            case JKU: {
+                checkValueIsOfType(value, URL.class);
+                setJwkSetUrl((URL) value);
+                break;
+            }
+            case JWK: {
+                checkValueIsOfType(value, JWK.class);
+                setJsonWebKey((JWK) value);
+                break;
+            }
+            case X5U: {
+                checkValueIsOfType(value, URL.class);
+                setX509Url((URL) value);
+                break;
+            }
+            case X5T: {
+                checkValueIsOfType(value, String.class);
+                setX509CertificateThumbprint((String) value);
+                break;
+            }
+            case X5C: {
+                checkValueIsOfType(value, List.class);
+                checkListValuesAreOfType((List) value, String.class);
+                setX509CertificateChain((List<String>) value);
+                break;
+            }
+            case KID: {
+                checkValueIsOfType(value, String.class);
+                setKeyId((String) value);
+                break;
+            }
+            case CTY: {
+                checkValueIsOfType(value, String.class);
+                setContentType((String) value);
+                break;
+            }
+            case CRIT: {
+                checkValueIsOfType(value, List.class);
+                checkListValuesAreOfType((List) value, String.class);
+                setCriticalHeaders((List<String>) value);
+                break;
+            }
+            default: {
+                super.setHeader(key, value);
+            }
+        }
+    }
+
+    @Override
+    public Object getHeader(String key) {
+        JwsHeaderKey headerKey = getHeaderKey(key.toUpperCase());
+
+        Object value;
+
+        switch (headerKey) {
+            case JKU: {
+                value = getJwkSetUrl();
+                break;
+            }
+            case JWK: {
+                value = getJsonWebKey();
+                break;
+            }
+            case X5U: {
+                value = getX509Url();
+                break;
+            }
+            case X5T: {
+                value = getX509CertificateThumbprint();
+                break;
+            }
+            case X5C: {
+                value = getX509CertificateChain();
+                break;
+            }
+            case KID: {
+                value = getKeyId();
+                break;
+            }
+            case CTY: {
+                value = getContentType();
+                break;
+            }
+            case CRIT: {
+                value = getCriticalHeaders();
+                break;
+            }
+            default: {
+                value = super.getHeader(key);
+            }
+        }
+
+        return value;
     }
 }

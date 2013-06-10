@@ -214,7 +214,7 @@ public class JwtTest {
         Map<String, Object> claims = new HashMap<String, Object>();
         claims.put("CLAIM1", "VALUE1");
         JwtClaimsSet claimsSet = new JwtClaimsSet();
-        claimsSet.addClaims(claims);
+        claimsSet.setClaims(claims);
 
         EncryptedJwt encryptedJwt = new EncryptedJwt(header, claimsSet, publicKey);
         String jwt = encryptedJwt.build();
@@ -229,10 +229,10 @@ public class JwtTest {
 
         JwsHeader header = new JwsHeader();
         header.setAlgorithm(JwsAlgorithm.NONE);
-        header.addHeaderParameter("custom1", "v1");
+        header.setHeader("custom1", "v1");
 
         JwtClaimsSet claimsSet = new JwtClaimsSet();
-        claimsSet.addClaim("claim1", "v2");
+        claimsSet.setClaim("claim1", "v2");
 
         SignedJwt signedJwt = new SignedJwt(header, claimsSet, privateKey);
 
@@ -246,10 +246,10 @@ public class JwtTest {
 
         JwsHeader header = new JwsHeader();
         header.setAlgorithm(JwsAlgorithm.HS256);
-        header.addHeaderParameter("custom1", "v1");
+        header.setHeader("custom1", "v1");
 
         JwtClaimsSet claimsSet = new JwtClaimsSet();
-        claimsSet.addClaim("claim1", "v2");
+        claimsSet.setClaim("claim1", "v2");
 
         SignedJwt signedJwt = new SignedJwt(header, claimsSet, privateKey);
 
@@ -264,10 +264,10 @@ public class JwtTest {
         JweHeader header = new JweHeader();
         header.setAlgorithm(JweAlgorithm.RSAES_PKCS1_V1_5);
         header.setEncryptionMethod(EncryptionMethod.A128CBC_HS256);
-        header.addHeaderParameter("custom1", "v1");
+        header.setHeader("custom1", "v1");
 
         JwtClaimsSet claimsSet = new JwtClaimsSet();
-        claimsSet.addClaim("claim1", "v2");
+        claimsSet.setClaim("claim1", "v2");
 
         EncryptedJwt encryptedJwt = new EncryptedJwt(header, claimsSet, publicKey);
 
@@ -328,7 +328,7 @@ public class JwtTest {
                     .claims()
                         .claim("claim1", "v2")
                         .typ("typ")
-                        .jid("jid")
+                        .jti("jti")
                         .iss("iss")
                         .prn("prn")
                         .aud(Arrays.asList(new String[]{"aud1", "aud2"}))
@@ -362,7 +362,7 @@ public class JwtTest {
                     .claims()
                         .claim("claim1", "v2")
                         .typ("typ")
-                        .jid("jid")
+                        .jti("jti")
                         .iss("iss")
                         .prn("prn")
                         .aud(Arrays.asList(new String[]{"aud1", "aud2"}))
@@ -400,7 +400,7 @@ public class JwtTest {
                     .claims()
                         .claim("claim1", "v2")
                         .typ("typ")
-                        .jid("jid")
+                        .jti("jti")
                         .iss("iss")
                         .prn("prn")
                         .aud(Arrays.asList(new String[]{"aud1", "aud2"}))

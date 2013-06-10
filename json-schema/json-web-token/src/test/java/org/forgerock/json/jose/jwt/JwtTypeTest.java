@@ -16,7 +16,40 @@
 
 package org.forgerock.json.jose.jwt;
 
-public interface Algorithm {
+import org.testng.annotations.Test;
 
-    String getAlgorithm();
+import java.util.Arrays;
+import java.util.List;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
+public class JwtTypeTest {
+
+    @Test
+    public void shouldToString() {
+
+        //Given
+
+        //When
+        String value = JwtType.JWT.toString();
+
+        //Then
+        assertEquals(value, "jwt");
+    }
+
+    @Test
+    public void shouldBeThreeTypesOfJwts() {
+
+        //Given
+
+        //When
+        List<JwtType> jwtTypes = Arrays.asList(JwtType.values());
+
+        //Then
+        assertEquals(jwtTypes.size(), 3);
+        assertTrue(jwtTypes.contains(JwtType.JWT));
+        assertTrue(jwtTypes.contains(JwtType.JWS));
+        assertTrue(jwtTypes.contains(JwtType.JWE));
+    }
 }

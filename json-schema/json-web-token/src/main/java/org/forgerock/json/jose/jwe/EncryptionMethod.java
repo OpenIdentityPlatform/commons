@@ -60,4 +60,9 @@ public enum EncryptionMethod {
     public int getKeySize() {
         return keySize;
     }
+
+    @Override
+    public String toString() {
+        return '"' + super.toString() + '"';
+    }
 }

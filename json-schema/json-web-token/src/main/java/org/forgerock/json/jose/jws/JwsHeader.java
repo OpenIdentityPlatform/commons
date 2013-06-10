@@ -16,18 +16,12 @@
 
 package org.forgerock.json.jose.jws;
 
-import org.forgerock.json.fluent.JsonValue;
-
 import java.util.Map;
 
 public class JwsHeader extends JwtSecureHeader {
 
     public JwsHeader() {
         super();
-    }
-
-    public JwsHeader(JsonValue value) {
-        super(value);
     }
 
     public JwsHeader(Map<String, Object> headerParameters) {

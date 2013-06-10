@@ -86,7 +86,7 @@ public class PlaintextJwt implements Jwt {
      */
     public Object getContent(String key) {
         Object value = content.get(key);
-        if (String.class.isAssignableFrom(value.getClass())) {
+        if (value != null && String.class.isAssignableFrom(value.getClass())) {
             String s = (String) value;
             if (s.contains("\\\\\"")) {
                 s = s.replaceAll("\\\\\"", "\"");

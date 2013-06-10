@@ -33,11 +33,17 @@ public enum JwsAlgorithm implements Algorithm {
         this.algorithmType = algorithmType;
     }
 
+    @Override
     public String getAlgorithm() {
         return algorithm;
     }
 
     public JwsAlgorithmType getAlgorithmType() {
         return algorithmType;
+    }
+
+    @Override
+    public String toString() {
+        return super.toString();
     }
 }
