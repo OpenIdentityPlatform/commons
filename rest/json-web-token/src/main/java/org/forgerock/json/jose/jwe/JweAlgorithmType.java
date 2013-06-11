@@ -22,6 +22,6 @@ public enum JweAlgorithmType {
 
     @Override
     public String toString() {
-        return '"' + super.toString() + '"';
+        return super.toString();
     }
 }

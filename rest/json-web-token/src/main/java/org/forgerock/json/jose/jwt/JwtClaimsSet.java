@@ -94,6 +94,10 @@ public class JwtClaimsSet extends JWObject {
         put(IAT.value(), issuedAtTime.getTime() / 1000);
     }
 
+    private void setIssuedAtTime(long expirationTime) {
+        put(IAT.value(), expirationTime * 1000);
+    }
+
     public Date getIssuedAtTime() {    //TODO check not null!
         return new Date(get(IAT.value()).asLong() * 1000);
     }
@@ -102,12 +106,20 @@ public class JwtClaimsSet extends JWObject {
         put(NBF.value(), notBeforeTime.getTime() / 1000);
     }
 
+    private void setNotBeforeTime(long expirationTime) {
+        put(NBF.value(), expirationTime * 1000);
+    }
+
     public Date getNotBeforeTime() {
         return new Date(get(NBF.value()).asLong() * 1000);
     }
 
     public void setExpirationTime(Date expirationTime) {
         put(EXP.value(), expirationTime.getTime() / 1000);  //TODO Use class level Calendar and method to set millis to 0
+    }
+
+    private void setExpirationTime(long expirationTime) {
+        put(EXP.value(), expirationTime * 1000);
     }
 
     public Date getExpirationTime() {
@@ -169,18 +181,30 @@ public class JwtClaimsSet extends JWObject {
                 break;
             }
             case IAT: {
-                checkValueIsOfType(value, Date.class);
-                setIssuedAtTime((Date) value);
+                if (isValueOfType(value, Number.class)) {
+                    setIssuedAtTime(((Number) value).intValue());
+                } else {
+                    checkValueIsOfType(value, Date.class);
+                    setIssuedAtTime((Date) value);
+                }
                 break;
             }
             case NBF: {
-                checkValueIsOfType(value, Date.class);
-                setNotBeforeTime((Date) value);
+                if (isValueOfType(value, Number.class)) {
+                    setNotBeforeTime(((Number) value).intValue());
+                } else {
+                    checkValueIsOfType(value, Date.class);
+                    setNotBeforeTime((Date) value);
+                }
                 break;
             }
             case EXP: {
-                checkValueIsOfType(value, Date.class);
-                setExpirationTime((Date) value);
+                if (isValueOfType(value, Number.class)) {
+                    setExpirationTime(((Number) value).intValue());
+                } else {
+                    checkValueIsOfType(value, Date.class);
+                    setExpirationTime((Date) value);
+                }
                 break;
             }
             default: {
