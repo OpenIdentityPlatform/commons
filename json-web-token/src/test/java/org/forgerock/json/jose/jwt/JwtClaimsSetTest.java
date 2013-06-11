@@ -433,7 +433,7 @@ public class JwtClaimsSetTest {
         String jsonString = claimsSet.build();
 
         //Then
-        assertEquals(jsonString, "{ \"KEY2\": true, \"KEY1\": \"CLAIM1\", \"jti\": \"JWT_ID\" }");
+        assertEquals(jsonString, "{\"KEY2\":true,\"KEY1\":\"CLAIM1\",\"jti\":\"JWT_ID\"}");
     }
 
     @Test
