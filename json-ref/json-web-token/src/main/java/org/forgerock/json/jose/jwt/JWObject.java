@@ -70,6 +70,6 @@ public abstract class JWObject {
 
     @Override
     public String toString() {
-        return jsonValue.toString();
+        return jsonValue.toString().replaceAll("\\s","");
     }
 }
