@@ -72,7 +72,16 @@ public abstract class Context {
         }
     }
 
-    private final String id;
+    /**
+     * This should only be accessed via getId() in order to ensure that it is
+     * lazily initialized.
+     * <p>
+     * Benchmarking has shown that generating random UUID is a significant point
+     * of contention because the underlying SecureRandom implementation performs
+     * single threaded blocking reads to get entropy from /dev/urandom.
+     */
+    private volatile String id;
+
     private final Context parent;
 
     /**
@@ -83,7 +92,8 @@ public abstract class Context {
      *            The parent context.
      */
     protected Context(final Context parent) {
-        this(UUID.randomUUID().toString(), parent);
+        /* ID will be generated lazily in getId() */
+        this.parent = parent;
     }
 
     /**
@@ -191,6 +201,16 @@ public abstract class Context {
      * @return The unique ID identifying this context.
      */
     public final String getId() {
+        /*
+         * Lazily initialize the ID. See field documentation for details.
+         */
+        if (id == null) {
+            synchronized (this) {
+                if (id == null) {
+                    id = UUID.randomUUID().toString();
+                }
+            }
+        }
         return id;
     }
 
@@ -251,7 +271,7 @@ public abstract class Context {
      */
     protected void saveToJson(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
-        savedContext.put(ATTR_ID, id);
+        savedContext.put(ATTR_ID, getId());
         savedContext.put(ATTR_CLASS, getClass().getName());
 
         // Persist the parent if there is one.
