@@ -21,6 +21,7 @@ import org.forgerock.json.fluent.JsonValueException;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 public abstract class JWObject {
 
@@ -61,6 +62,10 @@ public abstract class JWObject {
 
     public boolean isDefined(String key) {
         return jsonValue.isDefined(key);
+    }
+
+    public Set<String> keys() {
+        return jsonValue.keys();
     }
 
     @Override
