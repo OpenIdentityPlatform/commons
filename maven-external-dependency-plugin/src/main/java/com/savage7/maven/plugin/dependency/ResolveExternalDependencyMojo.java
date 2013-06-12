@@ -132,9 +132,15 @@ public class ResolveExternalDependencyMojo extends
                 // getLocalRepoFile(artifact).exists();
                 boolean artifactResolved = resolveArtifactItem(artifact);
 
+                // now that the file has been successfully downloaded
+                // and the checksum verification
+                // has passed (if required), lets copy the temporary
+                // file to the staging location
+                final File artifactFile = getFullyQualifiedArtifactFilePath(artifactItem);
+                
                 // only proceed with this artifact if it is not already
                 // installed or it is configured to be forced.
-                if (!artifactResolved || artifactItem.getForce() || force)
+                if (!artifactResolved || (artifactItem.getForce() && !artifactFile.exists()) || (force && !artifactFile.exists()) )
                 {
 
                     if (artifactItem.getForce())
@@ -224,11 +230,6 @@ public class ResolveExternalDependencyMojo extends
                         verifyArtifactItemChecksum(artifactItem,
                             tempDownloadFile);
 
-                        // now that the file has been successfully downloaded
-                        // and the checksum verification
-                        // has passed (if required), lets copy the temporary
-                        // file to the staging location
-                        final File artifactFile = getFullyQualifiedArtifactFilePath(artifactItem);
 
                         // if this artifact is not configured to extract a file,
                         // then
