@@ -254,10 +254,24 @@ public class ResolveExternalDependencyMojo extends
                                     + "compressed file: "
                                     + artifactItem.getExtractFile());
 
+                            File tempOutputDir = FileUtils.createTempFile(tempDownloadFile.getName(), ".dir", null);
+                            tempOutputDir.mkdirs();
+                            File extractedFile = new File(tempOutputDir, artifactItem.getExtractFile());
+                            
                             UnArchiver unarchiver;
                             try
                             {
-                                unarchiver = archiverManager.getUnArchiver(tempDownloadFile);
+                                try
+                                {
+                                    unarchiver = archiverManager.getUnArchiver(tempDownloadFile);
+                                }
+                                catch (NoSuchArchiverException e){
+                                    if (tempDownloadFile.getName().endsWith(".gz")){
+                                        unarchiver = archiverManager.getUnArchiver("gzip");
+                                        unarchiver.setDestFile(extractedFile);
+                                    }else
+                                        throw e;
+                                }
                             }
                             catch (NoSuchArchiverException e)
                             {
@@ -266,20 +280,17 @@ public class ResolveExternalDependencyMojo extends
                             
                             // ensure the path exists to write the file to
                             File parentDirectory = artifactFile.getParentFile();
-                            if (parentDirectory != null
-                                && !parentDirectory.exists())
+                            if (parentDirectory != null && !parentDirectory.exists())
                             {
                                 artifactFile.getParentFile().mkdirs();
                             }
 
-                            File tempOutputDir = FileUtils.createTempFile(tempDownloadFile.getName(), ".dir", null);
-                            tempOutputDir.mkdirs();
-
                             unarchiver.setSourceFile(tempDownloadFile);
-                            unarchiver.setDestDirectory(tempOutputDir);
+                            if (unarchiver.getDestFile()==null)
+                                unarchiver.setDestDirectory(tempOutputDir);
                             unarchiver.extract();//will extract nothing, the file selector will do the trick
                             
-                            File extractedFile = new File(tempOutputDir, artifactItem.getExtractFile());
+                            
 
                             // if a zip entry was not found, then throw a Mojo
                             // exception
