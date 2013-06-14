@@ -99,7 +99,7 @@ public class JwtClaimsSet extends JWObject {
     }
 
     public Date getIssuedAtTime() {    //TODO check not null!
-        return new Date(get(IAT.value()).asLong());
+        return new Date(get(IAT.value()).asLong() * 1000L);
     }
 
     public void setNotBeforeTime(Date notBeforeTime) {
@@ -111,7 +111,7 @@ public class JwtClaimsSet extends JWObject {
     }
 
     public Date getNotBeforeTime() {
-        return new Date(get(NBF.value()).asLong());
+        return new Date(get(NBF.value()).asLong() * 1000L);
     }
 
     public void setExpirationTime(Date expirationTime) {
@@ -123,7 +123,7 @@ public class JwtClaimsSet extends JWObject {
     }
 
     public Date getExpirationTime() {
-        return new Date(get(EXP.value()).asLong());
+        return new Date(get(EXP.value()).asLong() * 1000L);
     }
 
     public void setClaim(String key, Object value) {
