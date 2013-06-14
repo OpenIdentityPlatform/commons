@@ -13,10 +13,8 @@
  *
  * Copyright © 2011 ForgeRock AS. All rights reserved.
  */
-
 package org.forgerock.json.fluent;
 
-// Java SE
 import java.io.Serializable;
 import java.util.AbstractSet;
 import java.util.Iterator;
@@ -61,15 +59,18 @@ class RangeSet extends AbstractSet<String> implements Set<String>, Cloneable, Se
     public Iterator<String> iterator() {
         return new Iterator<String>() {
             int cursor = start;
+            @Override
             public boolean hasNext() {
                 return cursor <= end;
             }
+            @Override
             public String next() {
                 if (cursor > end) {
                     throw new NoSuchElementException();
                 }
                 return Integer.toString(cursor++);
             }
+            @Override
             public void remove() {
                 throw new UnsupportedOperationException();
             }
@@ -100,7 +101,7 @@ class RangeSet extends AbstractSet<String> implements Set<String>, Cloneable, Se
         boolean result = false;
         if (o != null && o instanceof String) {
             try {
-                int n = Integer.parseInt((String)o);
+                int n = Integer.parseInt((String) o);
                 result = (n >= start && n <= end);
             } catch (NumberFormatException nfe) {
                 // result remains false

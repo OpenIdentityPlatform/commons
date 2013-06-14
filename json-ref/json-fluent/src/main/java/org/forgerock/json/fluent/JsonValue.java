@@ -100,7 +100,8 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
      *
      * <pre>
      * JsonValue value =
-     *         json(object(field(&quot;uid&quot;, &quot;bjensen&quot;), field(&quot;roles&quot;, array(&quot;sales&quot;, &quot;marketing&quot;))));
+     *         json(object(field(&quot;uid&quot;, &quot;bjensen&quot;),
+     *                     field(&quot;roles&quot;, array(&quot;sales&quot;, &quot;marketing&quot;))));
      * </pre>
      *
      * @param object
@@ -673,6 +674,27 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
     }
 
     /**
+     * Returns a subclass of JsonValue that records which keys are accessed in this {@link JsonValue} and its children.
+     * Call #verifyAllKeysAccessed() to verify that all keys were accessed. The returned JsonValue provides an
+     * immutable view on the monitored underlying JsonValue.
+     * 
+     * @return a JsonValue monitoring which properties are accessed
+     * @see #verifyAllKeysAccessed()
+     */
+    public JsonValue recordKeyAccesses() {
+        return new JsonValueKeyAccessChecker(this);
+    }
+
+    /**
+     * Verifies that all keys in this {@link JsonValue} and its children have been accessed. #recordKeyAccesses() must
+     * have been called before, otherwise this method will do nothing.
+     *
+     * @see #recordKeyAccesses()
+     */
+    public void verifyAllKeysAccessed() {
+    }
+
+    /**
      * Removes all child values from this JSON value, if it has any.
      */
     public void clear() {
@@ -1060,7 +1082,7 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
             }
         } else if (isList()) {
             result = new AbstractSet<String>() {
-                RangeSet range = new RangeSet(size()); // 0 through size-1 inclusive
+                final RangeSet range = new RangeSet(JsonValue.this.size()); // 0 through size-1 inclusive
 
                 @Override
                 public boolean contains(final Object o) {
