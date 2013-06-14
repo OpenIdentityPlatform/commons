@@ -197,6 +197,6 @@ public class JWObjectTest {
         String jwString = jwObject.toString();
 
         //Then
-        assertEquals(jwString, "{\"KEY2\":\"VALUE2\",\"KEY1\":\"VALUE1\"}");
+        assertEquals(jwString, "{ \"KEY2\": \"VALUE2\", \"KEY1\": \"VALUE1\" }");
     }
 }
