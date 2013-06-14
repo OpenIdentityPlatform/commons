@@ -16,8 +16,19 @@
 
 package org.forgerock.util.encode;
 
+/**
+ * Makes use of the very fast and memory efficient Base64 class to encode and decode to and from BASE64 in full
+ * accordance with RFC 2045. And then replaces + and / for - and _ respectively and removes the padding character =
+ * to be in accordance with RFC 4648.
+ */
 public class Base64url {
 
+    /**
+     * Encodes the given byte array into a Base64url encoded String.
+     *
+     * @param content The byte array to encode.
+     * @return The Base64url encoded byte array.
+     */
     public static String encode(byte[] content) {
         String base64EncodedString = Base64.encode(content);
 
@@ -26,14 +37,21 @@ public class Base64url {
                 .replaceAll("=", "");
     }
 
+    /**
+     * Decodes the given Base64url encoded String into a byte array.
+     *
+     * @param content The Base64url encoded String to decode.
+     * @return The decoded byte[] array.
+     */
     public static byte[] decode(String content) {
 
         content = content.replaceAll("-", "+")
                 .replaceAll("_", "/");
 
-        int modulus;
-        if ((modulus = content.length() % 4) != 0) {
-            for (int i = 0; i < (4 - modulus); i++) {
+        int modulus = content.length() % 4;
+        int numberOfPaddingChars = 4 - modulus;
+        if (modulus != 0) {
+            for (int i = 0; i < numberOfPaddingChars; i++) {
                 content += "=";
             }
         }

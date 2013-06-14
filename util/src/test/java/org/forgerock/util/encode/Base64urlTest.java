@@ -46,12 +46,15 @@ public class Base64urlTest {
     public void shouldBase54urlDecode() {
 
         //Given
-        String content = "NDN1aW4gOThlMiArIDM0M18ge30gNDNxYWZkZ2ZSRUVSXCdGRGogaW9uay8uLDw-YGZqIGlvZCBIZGZqbA";
+        String content1 = "NDN1aW4gOThlMiArIDM0M18ge30gNDNxYWZkZ2ZSRUVSXCdGRGogaW9uay8uLDw-YGZqIGlvZCBIZGZqbA";
+        String content2 = "NDN1aW4gOThlMiArIDM0M18ge30gNDNxYWZkZ2ZSRUVSXCdGRGogaW9uay8uLDw-YGZqIGlvZCBIZGZqbGE";
 
         //When
-        byte[] decodedBytes = Base64url.decode(content);
+        byte[] decodedBytes1 = Base64url.decode(content1);
+        byte[] decodedBytes2 = Base64url.decode(content2);
 
         //Then
-        assertEquals(new String(decodedBytes, Charset.forName("UTF-8")), "43uin 98e2 + 343_ {} 43qafdgfREER\\'FDj ionk/.,<>`fj iod Hdfjl");
+        assertEquals(new String(decodedBytes1, Charset.forName("UTF-8")), "43uin 98e2 + 343_ {} 43qafdgfREER\\'FDj ionk/.,<>`fj iod Hdfjl");
+        assertEquals(new String(decodedBytes2, Charset.forName("UTF-8")), "43uin 98e2 + 343_ {} 43qafdgfREER\\'FDj ionk/.,<>`fj iod Hdfjla");
     }
 }
