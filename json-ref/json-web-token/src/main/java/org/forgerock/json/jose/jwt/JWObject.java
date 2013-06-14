@@ -70,6 +70,6 @@ public abstract class JWObject {
 
     @Override
     public String toString() {
-        return jsonValue.toString().replaceAll("\\s","");
+        return jsonValue.toString();//.replaceAll("\\s",""); //TODO need to test this out as seemed to break the session-jwt in the bridge for some reason?...
     }
 }
