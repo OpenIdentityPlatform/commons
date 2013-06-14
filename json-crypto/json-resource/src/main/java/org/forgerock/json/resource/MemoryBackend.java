@@ -394,7 +394,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
                         if (id != null) {
                             // Already exists - put the existing resource back.
                             resources.put(id, existingResource);
-                            throw new ConflictException("The resource with ID '" + id
+                            throw new PreconditionFailedException("The resource with ID '" + id
                                     + "' could not be created because "
                                     + "there is already another resource with the same ID");
                         } else {
@@ -661,13 +661,13 @@ public final class MemoryBackend implements CollectionResourceProvider {
     }
 
     private Resource getResourceForUpdate(final String id, final String rev)
-            throws NotFoundException, ConflictException {
+            throws NotFoundException, PreconditionFailedException {
         final Resource existingResource = resources.get(id);
         if (existingResource == null) {
             throw new NotFoundException("The resource with ID '" + id
                     + "' could not be updated because it does not exist");
         } else if (rev != null && !existingResource.getRevision().equals(rev)) {
-            throw new ConflictException("The resource with ID '" + id
+            throw new PreconditionFailedException("The resource with ID '" + id
                     + "' could not be updated because " + "it does not have the required version");
         }
         return existingResource;
