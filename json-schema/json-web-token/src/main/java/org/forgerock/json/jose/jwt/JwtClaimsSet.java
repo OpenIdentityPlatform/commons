@@ -91,39 +91,39 @@ public class JwtClaimsSet extends JWObject {
     }
 
     public void setIssuedAtTime(Date issuedAtTime) {
-        put(IAT.value(), issuedAtTime.getTime() / 1000);
+        put(IAT.value(), issuedAtTime.getTime() / 1000L);
     }
 
     private void setIssuedAtTime(long expirationTime) {
-        put(IAT.value(), expirationTime * 1000);
+        put(IAT.value(), expirationTime * 1000L);
     }
 
     public Date getIssuedAtTime() {    //TODO check not null!
-        return new Date(get(IAT.value()).asLong() * 1000);
+        return new Date(get(IAT.value()).asLong());
     }
 
     public void setNotBeforeTime(Date notBeforeTime) {
-        put(NBF.value(), notBeforeTime.getTime() / 1000);
+        put(NBF.value(), notBeforeTime.getTime() / 1000L);
     }
 
     private void setNotBeforeTime(long expirationTime) {
-        put(NBF.value(), expirationTime * 1000);
+        put(NBF.value(), expirationTime * 1000L);
     }
 
     public Date getNotBeforeTime() {
-        return new Date(get(NBF.value()).asLong() * 1000);
+        return new Date(get(NBF.value()).asLong());
     }
 
     public void setExpirationTime(Date expirationTime) {
-        put(EXP.value(), expirationTime.getTime() / 1000);  //TODO Use class level Calendar and method to set millis to 0
+        put(EXP.value(), expirationTime.getTime() / 1000L);  //TODO Use class level Calendar and method to set millis to 0
     }
 
     private void setExpirationTime(long expirationTime) {
-        put(EXP.value(), expirationTime * 1000);
+        put(EXP.value(), expirationTime * 1000L);
     }
 
     public Date getExpirationTime() {
-        return new Date(get(EXP.value()).asLong() * 1000);
+        return new Date(get(EXP.value()).asLong());
     }
 
     public void setClaim(String key, Object value) {
@@ -182,7 +182,7 @@ public class JwtClaimsSet extends JWObject {
             }
             case IAT: {
                 if (isValueOfType(value, Number.class)) {
-                    setIssuedAtTime(((Number) value).intValue());
+                    setIssuedAtTime(((Number) value).longValue());
                 } else {
                     checkValueIsOfType(value, Date.class);
                     setIssuedAtTime((Date) value);
@@ -191,7 +191,7 @@ public class JwtClaimsSet extends JWObject {
             }
             case NBF: {
                 if (isValueOfType(value, Number.class)) {
-                    setNotBeforeTime(((Number) value).intValue());
+                    setNotBeforeTime(((Number) value).longValue());
                 } else {
                     checkValueIsOfType(value, Date.class);
                     setNotBeforeTime((Date) value);
@@ -200,7 +200,7 @@ public class JwtClaimsSet extends JWObject {
             }
             case EXP: {
                 if (isValueOfType(value, Number.class)) {
-                    setExpirationTime(((Number) value).intValue());
+                    setExpirationTime(((Number) value).longValue());
                 } else {
                     checkValueIsOfType(value, Date.class);
                     setExpirationTime((Date) value);
