@@ -75,7 +75,7 @@
         <module>json-crypto-cli</module>
         <module>json-resource</module>
         <module>json-resource-servlet</module>
-<!--    <module>json-web-token</module> -->
+        <module>json-web-token</module>
     </modules>
     <dependencies>
         <dependency>
