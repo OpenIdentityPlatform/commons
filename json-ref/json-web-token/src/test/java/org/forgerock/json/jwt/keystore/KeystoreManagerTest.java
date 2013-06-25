@@ -18,15 +18,18 @@ package org.forgerock.json.jwt.keystore;
 
 import org.testng.annotations.Test;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.security.PrivateKey;
 
 public class KeystoreManagerTest {
 
     @Test
-    public void should() {
+    public void should() throws URISyntaxException, UnsupportedEncodingException {
 
         KeystoreManager keystoreManager = new KeystoreManager("password", "JKS",
-                ClassLoader.getSystemResource("keystore.jks").getFile(), "password");
+                URLDecoder.decode(ClassLoader.getSystemResource("keystore.jks").getFile(), "UTF-8"), "password");
 
         PrivateKey privateKey = keystoreManager.getPrivateKey("jwt-test-ks");
     }
