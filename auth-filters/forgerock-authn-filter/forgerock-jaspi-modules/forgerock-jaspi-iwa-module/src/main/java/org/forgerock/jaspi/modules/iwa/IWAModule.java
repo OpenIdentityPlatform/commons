@@ -1,3 +1,19 @@
+/*
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
+ *
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
+ *
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Copyright 2013 ForgeRock Inc.
+ */
+
 package org.forgerock.jaspi.modules.iwa;
 
 import org.forgerock.jaspi.modules.iwa.wdsso.WDSSO;
@@ -17,6 +33,12 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.Map;
 
+/**
+ * Authentication module that uses IWA for authentication.
+ *
+ * @author Phill Cunningon
+ * @since 1.0.0
+ */
 public class IWAModule implements ServerAuthModule {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IWAModule.class);
@@ -26,6 +48,9 @@ public class IWAModule implements ServerAuthModule {
     private CallbackHandler handler;
     private Map options;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler,
             Map options) throws AuthException {
@@ -33,19 +58,32 @@ public class IWAModule implements ServerAuthModule {
         this.options = options;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Class[] getSupportedMessageTypes() {
         return new Class[]{HttpServletRequest.class, HttpServletResponse.class};
     }
 
+    /**
+     * Validates the request by checking the Authorization header in the request for a IWA token and processes that
+     * for authentication.
+     *
+     * @param messageInfo {@inheritDoc}
+     * @param clientSubject {@inheritDoc}
+     * @param serviceSubject {@inheritDoc}
+     * @return {@inheritDoc}
+     * @throws AuthException {@inheritDoc}
+     */
     @Override
     public AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject)
             throws AuthException {
 
         LOGGER.debug("IWAModule: validateRequest START");
 
-        HttpServletRequest request = (HttpServletRequest)messageInfo.getRequestMessage();
-        HttpServletResponse response = (HttpServletResponse)messageInfo.getResponseMessage();
+        HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
+        HttpServletResponse response = (HttpServletResponse) messageInfo.getResponseMessage();
 
         String httpAuthorization = request.getHeader("Authorization");
 
@@ -86,13 +124,22 @@ public class IWAModule implements ServerAuthModule {
         }
     }
 
+    /**
+     * Always returns AuthStatus.SEND_SUCCESS.
+     *
+     * @param messageInfo {@inheritDoc}
+     * @param serviceSubject {@inheritDoc}
+     * @return {@inheritDoc}
+     */
     @Override
-    public AuthStatus secureResponse(MessageInfo messageInfo, Subject serviceSubject) throws AuthException {
+    public AuthStatus secureResponse(MessageInfo messageInfo, Subject serviceSubject) {
         return AuthStatus.SEND_SUCCESS;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void cleanSubject(MessageInfo messageInfo, Subject subject) throws AuthException {
-        //To change body of implemented methods use File | Settings | File Templates.
     }
 }

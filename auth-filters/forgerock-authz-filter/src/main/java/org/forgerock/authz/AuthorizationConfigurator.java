@@ -16,7 +16,7 @@
 
 package org.forgerock.authz;
 
-import org.forgerock.auth.common.Configurator;
+import org.forgerock.auth.common.LoggingConfigurator;
 
 /**
  * Base interface for all Authorization Configurators, responsible for providing configuration to the AuthZFilter.
@@ -27,7 +27,7 @@ import org.forgerock.auth.common.Configurator;
  * @author Phill Cunnington
  * @since 1.0.0
  */
-public interface AuthorizationConfigurator extends Configurator {
+public interface AuthorizationConfigurator extends LoggingConfigurator {
 
     /**
      * Gets the instance of the Authorization Filter, which contains the logic to determine

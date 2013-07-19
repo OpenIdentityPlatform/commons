@@ -21,6 +21,9 @@ import javax.security.auth.message.config.AuthConfigFactory;
 /**
  * Represents the layer identifier, application context identifier, and description components of an AuthConfigProvider
  * registration at the factory.
+ *
+ * @author Phill Cunningon
+ * @since 1.0.0
  */
 public class RegistrationContextImpl implements AuthConfigFactory.RegistrationContext {
 

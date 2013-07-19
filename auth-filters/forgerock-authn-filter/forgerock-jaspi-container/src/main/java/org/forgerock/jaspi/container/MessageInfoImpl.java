@@ -27,6 +27,9 @@ import java.util.Map;
 /**
  * Used to pass messages and message processing state to authentication contexts for processing by authentication
  * modules.
+ *
+ * @author Phill Cunningon
+ * @since 1.0.0
  */
 public class MessageInfoImpl implements MessageInfo {
 

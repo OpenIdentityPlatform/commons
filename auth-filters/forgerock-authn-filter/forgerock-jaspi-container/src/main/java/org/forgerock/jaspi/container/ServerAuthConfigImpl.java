@@ -35,6 +35,9 @@ import java.util.Map;
 
 /**
  * Defines the configuration of ServerAuthModules at a given message layer, and for a particular application context.
+ *
+ * @author Phill Cunningon
+ * @since 1.0.0
  */
 public class ServerAuthConfigImpl implements ServerAuthConfig {
 

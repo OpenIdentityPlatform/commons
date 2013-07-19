@@ -11,27 +11,10 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013 ForgeRock AS.
  */
-
-package org.forgerock.jaspi.container;
-
-import javax.security.auth.message.MessageInfo;
 
 /**
- * Interface for logging authentication attempts.
- *
- * @author Phill Cunningon
- * @since 1.0.0
+ * This package defines an implementation of a Servlet Filter that can be used to authorize Http Requests.
  */
-public interface AuditLogger {
-
-    /**
-     * Performs the auditing of an authentication attempt. Implemented Authentication modules can add details
-     * about the authentication attempt into the MessageInfo object and the implementation of this class can
-     * use that information to create the audit entry.
-     *
-     * @param messageInfo The MessageInfo instance used in the authentication process.
-     */
-    void audit(MessageInfo messageInfo);
-}
+package org.forgerock.authz;

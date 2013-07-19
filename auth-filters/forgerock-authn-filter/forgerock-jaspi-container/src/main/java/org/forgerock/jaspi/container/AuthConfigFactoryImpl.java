@@ -47,6 +47,9 @@ import java.util.Map;
  * </ol>
  *
  * A system-wide AuthConfigFactory implementation can be set by invoking setFactory, and retrieved using getFactory.
+ *
+ * @author Phill Cunningon
+ * @since 1.0.0
  */
 public class AuthConfigFactoryImpl extends AuthConfigFactory {
 

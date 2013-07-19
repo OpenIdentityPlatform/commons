@@ -18,6 +18,9 @@ package org.forgerock.jaspi.container;
 
 /**
  * Singleton pattern for ensuring only one instance of the AuditLogger is ever created.
+ *
+ * @author Phill Cunningon
+ * @since 1.0.0
  */
 public enum AuditLoggerHolder {
 

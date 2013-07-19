@@ -19,7 +19,7 @@ package org.forgerock.authz;
 import org.forgerock.auth.common.AuditLogger;
 import org.forgerock.auth.common.AuditRecord;
 import org.forgerock.auth.common.AuthResult;
-import org.forgerock.auth.common.Configurator;
+import org.forgerock.auth.common.LoggingConfigurator;
 import org.forgerock.auth.common.DebugLogger;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
@@ -95,7 +95,7 @@ public class AuthZFilterTest {
         verify(authorizationConfigurator).getAuditLogger();
         verify(authorizationConfigurator).getDebugLogger();
         verify(authorizationConfigurator).getAuthorizationFilter();
-        verify(authorizationFilter).initialise(Matchers.<Configurator>anyObject(), eq(auditLogger), eq(debugLogger));
+        verify(authorizationFilter).initialise(Matchers.<LoggingConfigurator>anyObject(), eq(auditLogger), eq(debugLogger));
     }
 
     @Test
@@ -113,7 +113,7 @@ public class AuthZFilterTest {
         verify(authorizationConfigurator).getAuditLogger();
         verify(authorizationConfigurator).getDebugLogger();
         verify(authorizationConfigurator).getAuthorizationFilter();
-        verify(authorizationFilter).initialise(Matchers.<Configurator>anyObject(), eq(auditLogger), eq(debugLogger));
+        verify(authorizationFilter).initialise(Matchers.<LoggingConfigurator>anyObject(), eq(auditLogger), eq(debugLogger));
     }
 
     @Test

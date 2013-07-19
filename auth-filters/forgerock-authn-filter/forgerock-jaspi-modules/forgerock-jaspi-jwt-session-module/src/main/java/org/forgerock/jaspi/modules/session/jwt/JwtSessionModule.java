@@ -56,7 +56,8 @@ import java.util.UUID;
  * as a Cookie on the response. Then on subsequent requests checks for the presents of the JWT as a Cookie on the
  * request and validates the signature and decrypts it and checks the expiration time of the JWT.
  *
- * @author Phill Cunnington
+ * @author Phill Cunningon
+ * @since 1.0.0
  */
 public class JwtSessionModule implements ServerAuthModule {
 

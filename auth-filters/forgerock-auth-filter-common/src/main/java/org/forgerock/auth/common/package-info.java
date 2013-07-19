@@ -14,24 +14,8 @@
  * Copyright 2013 ForgeRock Inc.
  */
 
-package org.forgerock.jaspi.container;
-
-import javax.security.auth.message.MessageInfo;
-
 /**
- * Interface for logging authentication attempts.
- *
- * @author Phill Cunningon
- * @since 1.0.0
+ * This package defines common interfaces for both the Authentication and Authorization filters, to be able to
+ * configure the filter instance and provide Audit and Debug logging implementations.
  */
-public interface AuditLogger {
-
-    /**
-     * Performs the auditing of an authentication attempt. Implemented Authentication modules can add details
-     * about the authentication attempt into the MessageInfo object and the implementation of this class can
-     * use that information to create the audit entry.
-     *
-     * @param messageInfo The MessageInfo instance used in the authentication process.
-     */
-    void audit(MessageInfo messageInfo);
-}
+package org.forgerock.auth.common;

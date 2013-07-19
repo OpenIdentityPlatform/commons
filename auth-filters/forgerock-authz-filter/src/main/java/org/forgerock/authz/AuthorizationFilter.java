@@ -17,11 +17,13 @@
 package org.forgerock.authz;
 
 import org.forgerock.auth.common.AuditLogger;
-import org.forgerock.auth.common.Configurator;
+import org.forgerock.auth.common.LoggingConfigurator;
 import org.forgerock.auth.common.DebugLogger;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Base interface for all Authorization Filter implementations, which will contain the logic required
@@ -40,7 +42,7 @@ public interface AuthorizationFilter {
      * @param auditLogger The AuditLogger instance.
      * @param debugLogger The DebugLogger instance.
      */
-    void initialise(Configurator configuration, AuditLogger auditLogger, DebugLogger debugLogger);
+    void initialise(LoggingConfigurator configuration, AuditLogger auditLogger, DebugLogger debugLogger);
 
     /**
      * Determines whether the request is authorized to proceed or not.
@@ -49,5 +51,5 @@ public interface AuthorizationFilter {
      * @param servletResponse The HttpServletResponse.
      * @return <code>true</code> if the request is authorized to proceed, otherwise <code>false</code>.
      */
-    boolean authorize(ServletRequest servletRequest, ServletResponse servletResponse);
+    boolean authorize(HttpServletRequest servletRequest, HttpServletResponse servletResponse);
 }

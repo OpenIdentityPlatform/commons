@@ -41,6 +41,9 @@ import java.util.Map;
  * </ol>
  *
  * The initialization component typically performs these calls to set up the provider.
+ *
+ * @author Phill Cunningon
+ * @since 1.0.0
  */
 public class AuthConfigProviderImpl implements AuthConfigProvider {
 

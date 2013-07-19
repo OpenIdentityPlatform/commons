@@ -24,6 +24,9 @@ import java.util.Map;
 
 /**
  * A builder class to create the configuration for an Auth Context.
+ *
+ * @author Phill Cunningon
+ * @since 1.0.0
  */
 public class AuthContextConfiguration {
 
@@ -67,8 +70,8 @@ public class AuthContextConfiguration {
      * Expects that the "className" property is already set in the given module properties map and the class is
      * a sub type of the {@link ServerAuthModule}.
      *
-     * @param moduleProperties
-     * @return
+     * @param moduleProperties The configuration properties for the Session Module.
+     * @return This AuthContextConfiguration instance.
      * @see #setSessionModule(Class, java.util.Map)
      */
     public AuthContextConfiguration setSessionModule(Map<String, Object> moduleProperties) {

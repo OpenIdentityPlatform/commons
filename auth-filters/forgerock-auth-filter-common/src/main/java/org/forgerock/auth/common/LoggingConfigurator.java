@@ -24,7 +24,7 @@ package org.forgerock.auth.common;
  * @author Phill Cunnington
  * @since 1.0.0
  */
-public interface Configurator {
+public interface LoggingConfigurator {
 
     /**
      * Gets the instance of the Debug Logger.

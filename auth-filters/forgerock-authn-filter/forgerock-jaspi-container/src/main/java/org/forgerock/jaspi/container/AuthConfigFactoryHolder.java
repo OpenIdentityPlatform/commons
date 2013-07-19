@@ -20,6 +20,9 @@ import javax.security.auth.message.config.AuthConfigFactory;
 
 /**
  * Singleton pattern for ensuring only one instance of the AuthConfigFactory is ever created.
+ *
+ * @author Phill Cunningon
+ * @since 1.0.0
  */
 enum AuthConfigFactoryHolder {
 

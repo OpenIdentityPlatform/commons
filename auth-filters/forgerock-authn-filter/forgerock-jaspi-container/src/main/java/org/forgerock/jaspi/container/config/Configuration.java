@@ -23,6 +23,9 @@ import java.util.Set;
 
 /**
  * A builder class to create the configuration for a set of Auth Contexts.
+ *
+ * @author Phill Cunningon
+ * @since 1.0.0
  */
 public class Configuration {
 

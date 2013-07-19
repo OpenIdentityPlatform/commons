@@ -31,6 +31,9 @@ import javax.security.auth.message.config.AuthConfigFactory;
 
 /**
  * Responsible for configuring the Auth Contexts for the Authentication Filter.
+ *
+ * @author Phill Cunningon
+ * @since 1.0.0
  */
 public final class ConfigurationManager {
 

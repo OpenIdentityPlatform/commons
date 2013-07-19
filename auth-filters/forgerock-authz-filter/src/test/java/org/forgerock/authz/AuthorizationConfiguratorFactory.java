@@ -18,16 +18,16 @@ package org.forgerock.authz;
 
 public class AuthorizationConfiguratorFactory {
 
-    private static AuthorizationConfigurator INSTANCE;
+    private static AuthorizationConfigurator instance;
 
     private AuthorizationConfiguratorFactory() {
     }
 
     public static void setAuthorizationConfigurator(AuthorizationConfigurator authorizationConfigurator) {
-        INSTANCE = authorizationConfigurator;
+        instance = authorizationConfigurator;
     }
 
     public static AuthorizationConfigurator getInstance() {
-        return INSTANCE;
+        return instance;
     }
 }

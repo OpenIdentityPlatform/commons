@@ -57,6 +57,9 @@ import static javax.security.auth.message.AuthStatus.SUCCESS;
  * To select the chain of modules that this Authentication Filter should use to authenticate request is set in the
  * web.xml as an init-param with the name of "moduleConfiguration" the value of this param must match are valid Module
  * Chain name.
+ *
+ * @author Phill Cunningon
+ * @since 1.0.0
  */
 public class AuthNFilter implements Filter {
 

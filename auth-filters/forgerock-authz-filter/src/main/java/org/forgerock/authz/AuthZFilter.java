@@ -38,14 +38,14 @@ import java.io.IOException;
  * Uses the Configurator implementation given as a init-param, to delegate the authorization processing to
  * the configured implementation of a AuthorizationFilter interface.
  *
- * <filter>
- *     <filter-name>SessionAdminOnlyFilter</filter-name>
- *     <filter-class>org.forgerock.authz.AuthZFilter</filter-class>
- *     <init-param>
- *         <param-name>configurationImpl</param-name>
- *         <param-value>org.forgerock.openam.authz.filter.AdminOnlyAuthZConfigurator</param-value>
- *     </init-param>
- * </filter>
+ * &lt;filter&gt;
+ *     &lt;filter-name&gt;SessionAdminOnlyFilter&lt;/filter-name&gt;
+ *     &lt;filter-class&gt;org.forgerock.authz.AuthZFilter&lt;/filter-class&gt;
+ *     &lt;init-param&gt;
+ *         &lt;param-name&gt;configurationImpl&lt;/param-name&gt;
+ *         &lt;param-value&gt;org.forgerock.openam.authz.filter.AdminOnlyAuthZConfigurator&lt;/param-value&gt;
+ *     &lt;/init-param&gt;
+ * &lt;/filter&gt;
  *
  * @author Phill Cunnington
  * @since 1.0.0
@@ -88,7 +88,7 @@ public class AuthZFilter implements Filter {
      * Lazily initialises the AuditLogger, DebugLogger and AuthorizationFilter member variables from the AuthZFilter
      * Configurator instance.
      */
-    private void init() {
+    private synchronized void init() {
         if (authorizationFilter == null) {
 
             auditLogger = configurator.getAuditLogger();

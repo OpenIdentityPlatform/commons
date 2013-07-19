@@ -55,6 +55,9 @@ import java.util.Map;
  * <li>Send secured response to client.</li>
  * <li>Invoke cleanSubject (as necessary) to clean up any authentication state in Subject(s).</li>
  * </ol>
+ *
+ * @author Phill Cunningon
+ * @since 1.0.0
  */
 public class ServerAuthContextImpl implements ServerAuthContext {
 

@@ -30,6 +30,9 @@ import java.util.Set;
 /**
  * Manages the data structure to store AuthConfigProvider, RegistrationListeners and RegistrationContext
  * registrations keyed by a registration id.
+ *
+ * @author Phill Cunningon
+ * @since 1.0.0
  */
 public class AuthConfigProviderMap {
 

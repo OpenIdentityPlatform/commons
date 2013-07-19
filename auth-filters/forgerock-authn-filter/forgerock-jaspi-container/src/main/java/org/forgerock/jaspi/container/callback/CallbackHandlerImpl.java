@@ -33,6 +33,9 @@ import java.util.Set;
 /**
  * Default CallbackHandler for Authentication modules to use to request more information about the request and
  * response messages from the JASPI Container.
+ *
+ * @author Phill Cunningon
+ * @since 1.0.0
  */
 public class CallbackHandlerImpl implements CallbackHandler {
 

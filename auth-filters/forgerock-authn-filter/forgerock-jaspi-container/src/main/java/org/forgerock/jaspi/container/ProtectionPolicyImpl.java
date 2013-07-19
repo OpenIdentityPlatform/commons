@@ -20,6 +20,9 @@ import javax.security.auth.message.MessagePolicy;
 
 /**
  * Represents a ProtectionPolicy for a message authentication policy.
+ *
+ * @author Phill Cunningon
+ * @since 1.0.0
  */
 public class ProtectionPolicyImpl implements MessagePolicy.ProtectionPolicy {
 
