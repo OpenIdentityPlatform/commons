@@ -77,8 +77,10 @@ public class CallbackHandlerImpl implements CallbackHandler {
                             return name;
                         }
                     });
-                } else {
+                } else if (principal != null) {
                     subject.getPrincipals().add(principal);
+                } else {
+                    //Both name and principal are null so not adding either.
                 }
 
             } else if (GroupPrincipalCallback.class.isAssignableFrom(callback.getClass())) {

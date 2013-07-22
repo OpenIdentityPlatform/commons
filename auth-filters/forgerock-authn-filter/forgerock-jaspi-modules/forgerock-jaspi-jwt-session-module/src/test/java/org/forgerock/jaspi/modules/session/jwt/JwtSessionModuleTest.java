@@ -464,7 +464,7 @@ public class JwtSessionModuleTest {
         given(claimsSet.getClaim("prn", String.class)).willReturn("PRINCIPAL");
         Map<String, Object> newContext = new HashMap<String, Object>();
         newContext.put("KEY", "VALUE");
-        given(claimsSet.getClaim("context", Map.class)).willReturn(newContext);
+        given(claimsSet.getClaim("org.forgerock.security.context", Map.class)).willReturn(newContext);
 
         //When
         AuthStatus authStatus = jwtSessionModule.validateRequest(messageInfo, clientSubject, serviceSubject);
@@ -543,7 +543,7 @@ public class JwtSessionModuleTest {
         given(claimsSet.getClaim("prn", String.class)).willReturn("PRINCIPAL");
         Map<String, Object> newContext = new HashMap<String, Object>();
         newContext.put("KEY", "VALUE");
-        given(claimsSet.getClaim("context", Map.class)).willReturn(newContext);
+        given(claimsSet.getClaim("org.forgerock.security.context", Map.class)).willReturn(newContext);
 
         //When
         AuthStatus authStatus = jwtSessionModule.validateRequest(messageInfo, clientSubject, serviceSubject);

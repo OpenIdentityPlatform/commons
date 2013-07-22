@@ -179,7 +179,10 @@ public class JwtSessionModule implements ServerAuthModule {
                     new CallerPrincipalCallback(clientSubject, jwt.getClaimsSet().getClaim("prn", String.class))
                 });
                 Map<String, Object> context = (Map<String, Object>) messageInfo.getMap().get(CONTEXT_REQUEST_KEY);
-                context.putAll(jwt.getClaimsSet().getClaim("context", Map.class));
+                Map<String, Object> claimsSetContext = jwt.getClaimsSet().getClaim(CONTEXT_REQUEST_KEY, Map.class);
+                if (claimsSetContext != null) {
+                    context.putAll(claimsSetContext);
+                }
             } catch (IOException e) {
                 DEBUG.error("Error setting user principal", e);
                 throw new AuthException(e.getMessage());
@@ -218,9 +221,9 @@ public class JwtSessionModule implements ServerAuthModule {
             Jwt jwt = verifySessionJwt(jwtSessionCookie.getValue());
             if (jwt != null) {
                 //if all goes well!
-                JwtClaimsSet jwtClaimsSet = jwt.getClaimsSet();
-                for (String key : jwtClaimsSet.keys()) {
-                    request.setAttribute(key, jwtClaimsSet.get(key));
+                Map<String, Object> claimsSetContext = jwt.getClaimsSet().getClaim(CONTEXT_REQUEST_KEY, Map.class);
+                for (String key : claimsSetContext.keySet()) {
+                    request.setAttribute(key, claimsSetContext.get(key));
                 }
 
                 // If request is made within one minute of the Jwt being issued the idle timeout is not reset.
@@ -364,8 +367,8 @@ public class JwtSessionModule implements ServerAuthModule {
         if (authcid != null) {
             jwtParameters.put("prn", authcid);
         }
-        if (map.containsKey("context")) {
-            jwtParameters.put("context", map.get("context"));
+        if (map.containsKey(CONTEXT_REQUEST_KEY)) {
+            jwtParameters.put(CONTEXT_REQUEST_KEY, map.get(CONTEXT_REQUEST_KEY));
         }
 
         if (map.containsKey(SKIP_SESSION_PARAMETER_NAME) && ((Boolean) map.get(SKIP_SESSION_PARAMETER_NAME))) {
