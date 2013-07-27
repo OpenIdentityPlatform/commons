@@ -39,7 +39,6 @@ define("config/process/UserConfig", [
                 "org/forgerock/commons/ui/common/components/Navigation",
                 "org/forgerock/commons/ui/common/components/popup/PopupCtrl",
                 "org/forgerock/commons/ui/common/components/Breadcrumbs",
-                "org/forgerock/commons/ui/common/components/Footer",
                 "org/forgerock/commons/ui/common/main/Router",
                 "UserDelegate",
                 "org/forgerock/commons/ui/common/main/Configuration",
@@ -50,7 +49,6 @@ define("config/process/UserConfig", [
                     navigation, 
                     popupCtrl, 
                     breadcrumbs, 
-                    footer, 
                     router,
                     userDelegate,
                     conf,
@@ -58,7 +56,6 @@ define("config/process/UserConfig", [
                     sessionManager) {
                               
                 breadcrumbs.init();
-                footer.render();
                 uiUtils.preloadTemplates();
                 
                 sessionManager.getLoggedUser(function(user) {
@@ -79,14 +76,16 @@ define("config/process/UserConfig", [
                 "org/forgerock/commons/ui/common/components/popup/PopupCtrl",
                 "org/forgerock/commons/ui/common/components/Breadcrumbs",
                 "org/forgerock/commons/ui/common/main/Configuration",
-                "org/forgerock/commons/ui/user/login/LoggedUserBarView"
+                "org/forgerock/commons/ui/user/login/LoggedUserBarView",
+                "org/forgerock/commons/ui/common/components/Footer"
             ],
-            processDescription: function(event, navigation, popupCtrl, breadcrumbs, conf, loggedUserBarView) {
+            processDescription: function(event, navigation, popupCtrl, breadcrumbs, conf, loggedUserBarView,footer) {
                 navigation.init();
                 popupCtrl.init();                
                 
                 breadcrumbs.buildByUrl();
                 loggedUserBarView.render();
+                footer.render();
             }
         },
         {

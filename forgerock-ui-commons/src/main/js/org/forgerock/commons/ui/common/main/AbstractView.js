@@ -33,8 +33,9 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
     "org/forgerock/commons/ui/common/util/ValidatorsUtils",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/EventManager", 
-    "org/forgerock/commons/ui/common/util/Constants"
-], function(uiUtils, validatorsManager, validatorsUtils, conf, eventManager, constants) {
+    "org/forgerock/commons/ui/common/util/Constants",
+    "ThemeManager"
+], function(uiUtils, validatorsManager, validatorsUtils, conf, eventManager, constants, themeManager) {
     var View = Backbone.View.extend({
 
         /**
@@ -64,11 +65,16 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
             eventManager.registerListener(constants.EVENT_REQUEST_RESEND_REQUIRED, function () {
                 _this.unlock();
             });
-            if(conf.baseTemplate !== this.baseTemplate && !this.noBaseTemplate) {
-                uiUtils.renderTemplate(this.baseTemplate, $("#wrapper"), _.extend(conf.globalData, this.data), _.bind(this.loadTemplate, this), "replace");
-            } else {
-                this.loadTemplate();
-            }
+            
+            themeManager.getTheme().then(function(theme){
+                _this.data.theme = theme;
+                
+                if(conf.baseTemplate !== _this.baseTemplate && !_this.noBaseTemplate) {
+                    uiUtils.renderTemplate(_this.data.theme.path + _this.baseTemplate, $("#wrapper"), _.extend(conf.globalData, _this.data), _.bind(_this.loadTemplate, _this), "replace");
+                } else {
+                    _this.loadTemplate();
+                }
+            });
             
             //$(window).scrollTop(0);
         },
@@ -84,9 +90,9 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
             }
             
             if(this.callback) {
-                uiUtils.renderTemplate(this.template, this.$el, _.extend(conf.globalData, this.data), _.bind(this.callback, this), this.mode);
+                uiUtils.renderTemplate(this.data.theme.path + this.template, this.$el, _.extend(conf.globalData, this.data), _.bind(this.callback, this), this.mode);
             } else {
-                uiUtils.renderTemplate(this.template, this.$el, _.extend(conf.globalData, this.data), null, this.mode);
+                uiUtils.renderTemplate(this.data.theme.path + this.template, this.$el, _.extend(conf.globalData, this.data), null, this.mode);
             }
            
         },

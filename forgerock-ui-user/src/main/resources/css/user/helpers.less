@@ -18,7 +18,10 @@ html,body {
 body {
     line-height: @line-height;
     background-color: @background-color;
-    color: @font-color;
+    background-image: @background-image;
+    background-repeat: @background-repeat;
+    background-position: @background-position;
+    color: @background-font-color;
     font-size: @font-size;
     font-family: @font-family;
 }
@@ -379,5 +382,12 @@ a.img-close {
             display: inline;
             font-weight: normal;
         }
+    }
+}
+
+#login-container {
+    width: @login-container-width;
+    label {
+        text-align:@login-container-label-align;
     }
 }

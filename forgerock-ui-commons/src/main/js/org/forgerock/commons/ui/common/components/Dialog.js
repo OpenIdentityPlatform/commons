@@ -100,9 +100,9 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
          */
         loadContent: function(callback) {
             if(callback) {
-                uiUtils.renderTemplate(this.contentTemplate, this.$el.find(".dialogContent"), _.extend(conf.globalData, this.data), _.bind(callback, this), "append");
+                uiUtils.renderTemplate(this.data.theme.path + this.contentTemplate, this.$el.find(".dialogContent"), _.extend(conf.globalData, this.data), _.bind(callback, this), "append");
             } else {
-                uiUtils.renderTemplate(this.contentTemplate, this.$el.find(".dialogContent"), _.extend(conf.globalData, this.data), null, "append");
+                uiUtils.renderTemplate(this.data.theme.path + this.contentTemplate, this.$el.find(".dialogContent"), _.extend(conf.globalData, this.data), null, "append");
             }
         },
         
