@@ -16,8 +16,10 @@
 package org.forgerock.json.resource.servlet;
 
 import java.io.Closeable;
+import java.io.EOFException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -260,7 +262,25 @@ final class HttpUtils {
 
     /**
      * Returns the content of the provided HTTP request decoded as a JSON
-     * object.
+     * object. The content is allowed to be empty, in which case an empty JSON
+     * object is returned.
+     *
+     * @param req
+     *            The HTTP request.
+     * @return The content of the provided HTTP request decoded as a JSON
+     *         object.
+     * @throws ResourceException
+     *             If the content could not be read or if the content was not
+     *             valid JSON.
+     */
+    static JsonValue getJsonContentIfPresent(final HttpServletRequest req) throws ResourceException {
+        return getJsonContent0(req, true);
+    }
+
+    /**
+     * Returns the content of the provided HTTP request decoded as a JSON
+     * object. If there is no content then a {@link BadRequestException} will be
+     * thrown.
      *
      * @param req
      *            The HTTP request.
@@ -271,21 +291,7 @@ final class HttpUtils {
      *             valid JSON.
      */
     static JsonValue getJsonContent(final HttpServletRequest req) throws ResourceException {
-        try {
-            final Object content = JSON_MAPPER.readValue(req.getInputStream(), Object.class);
-            if (!(content instanceof Map)) {
-                throw new BadRequestException(
-                        "The request could not be processed because the provided "
-                                + "content is not a JSON object");
-            }
-            return new JsonValue(content);
-        } catch (final JsonParseException e) {
-            throw new BadRequestException(
-                    "The request could not be processed because the provided "
-                            + "content is not valid JSON");
-        } catch (final IOException e) {
-            throw adapt(e);
-        }
+        return getJsonContent0(req, false);
     }
 
     /**
@@ -460,6 +466,32 @@ final class HttpUtils {
             // FIXME: i18n
             throw new PreconditionFailedException("If-None-Match not supported for "
                     + getMethod(req) + " requests");
+        }
+    }
+
+    private static JsonValue getJsonContent0(final HttpServletRequest req, final boolean allowEmpty)
+            throws ResourceException {
+        try {
+            final Object content = JSON_MAPPER.readValue(req.getInputStream(), Object.class);
+            if (!(content instanceof Map)) {
+                throw new BadRequestException(
+                        "The request could not be processed because the provided "
+                                + "content is not a JSON object");
+            }
+            return new JsonValue(content);
+        } catch (final JsonParseException e) {
+            throw new BadRequestException(
+                    "The request could not be processed because the provided "
+                            + "content is not valid JSON");
+        } catch (final EOFException e) {
+            if (allowEmpty) {
+                return new JsonValue(new LinkedHashMap<String, Object>());
+            } else {
+                throw new BadRequestException("The request could not be processed "
+                        + "because it did not contain any JSON content");
+            }
+        } catch (final IOException e) {
+            throw adapt(e);
         }
     }
 
