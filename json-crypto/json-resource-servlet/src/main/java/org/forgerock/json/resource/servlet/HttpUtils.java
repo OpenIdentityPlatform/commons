@@ -18,6 +18,7 @@ package org.forgerock.json.resource.servlet;
 import java.io.Closeable;
 import java.io.EOFException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -28,7 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonGenerator.Feature;
+import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonPointer;
@@ -83,7 +84,9 @@ final class HttpUtils {
     static final String PARAM_QUERY_ID = param(QueryRequest.FIELD_QUERY_ID);
     static final String PARAM_SORT_KEYS = param(QueryRequest.FIELD_SORT_KEYS);
 
-    private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
+    private static final ObjectMapper JSON_MAPPER = new ObjectMapper().configure(
+            JsonGenerator.Feature.AUTO_CLOSE_TARGET, false).configure(
+            JsonParser.Feature.AUTO_CLOSE_SOURCE, false);
 
     /**
      * Adapts an {@code Exception} to a {@code ResourceException}.
@@ -310,8 +313,6 @@ final class HttpUtils {
             final HttpServletResponse resp) throws IOException {
         final JsonGenerator writer =
                 JSON_MAPPER.getJsonFactory().createJsonGenerator(resp.getOutputStream());
-        writer.configure(Feature.AUTO_CLOSE_TARGET, false);
-
         // Enable pretty printer if requested.
         final String[] values = getParameter(req, PARAM_PRETTY_PRINT);
         if (values != null) {
@@ -341,43 +342,34 @@ final class HttpUtils {
      */
     static List<PatchOperation> getJsonPatchContent(final HttpServletRequest req)
             throws ResourceException {
-        try {
-            final Object content = JSON_MAPPER.readValue(req.getInputStream(), Object.class);
-            final JsonValue json = new JsonValue(content);
-            if (!json.isList()) {
-                throw new BadRequestException(
-                        "The request could not be processed because the provided "
-                                + "content is not a JSON array");
-            }
-            final List<PatchOperation> patch = new ArrayList<PatchOperation>(json.size());
-            for (final JsonValue operation : json) {
-                if (operation.isMap()) {
-                    try {
-                        final String type =
-                                operation.get(PatchOperation.FIELD_OPERATION).required().asString();
-                        final JsonPointer field =
-                                operation.get(PatchOperation.FIELD_FIELD).required().asPointer();
-                        final JsonValue value = operation.get(PatchOperation.FIELD_VALUE);
-                        patch.add(PatchOperation.operation(type, field, value));
-                    } catch (final Exception e) {
-                        throw new BadRequestException(
-                                "The request could not be processed because the provided "
-                                        + "content is not a valid JSON patch: " + e.getMessage());
-                    }
-                } else {
-                    throw new BadRequestException(
-                            "The request could not be processed because the provided "
-                                    + "content is not a JSON array of patch operations");
-                }
-            }
-            return patch;
-        } catch (final JsonParseException e) {
+        final JsonValue json = new JsonValue(parseJsonBody(req, false));
+        if (!json.isList()) {
             throw new BadRequestException(
                     "The request could not be processed because the provided "
-                            + "content is not valid JSON");
-        } catch (final IOException e) {
-            throw adapt(e);
+                            + "content is not a JSON array");
         }
+        final List<PatchOperation> patch = new ArrayList<PatchOperation>(json.size());
+        for (final JsonValue operation : json) {
+            if (operation.isMap()) {
+                try {
+                    final String type =
+                            operation.get(PatchOperation.FIELD_OPERATION).required().asString();
+                    final JsonPointer field =
+                            operation.get(PatchOperation.FIELD_FIELD).required().asPointer();
+                    final JsonValue value = operation.get(PatchOperation.FIELD_VALUE);
+                    patch.add(PatchOperation.operation(type, field, value));
+                } catch (final Exception e) {
+                    throw new BadRequestException(
+                            "The request could not be processed because the provided "
+                                    + "content is not a valid JSON patch: " + e.getMessage());
+                }
+            } else {
+                throw new BadRequestException(
+                        "The request could not be processed because the provided "
+                                + "content is not a JSON array of patch operations");
+            }
+        }
+        return patch;
     }
 
     /**
@@ -471,27 +463,63 @@ final class HttpUtils {
 
     private static JsonValue getJsonContent0(final HttpServletRequest req, final boolean allowEmpty)
             throws ResourceException {
+        final Object body = parseJsonBody(req, allowEmpty);
+        if (body == null) {
+            return new JsonValue(new LinkedHashMap<String, Object>(0));
+        } else if (!(body instanceof Map)) {
+            throw new BadRequestException(
+                    "The request could not be processed because the provided "
+                            + "content is not a JSON object");
+        } else {
+            return new JsonValue(body);
+        }
+    }
+
+    private static Object parseJsonBody(final HttpServletRequest req, final boolean allowEmpty)
+            throws BadRequestException, ResourceException {
+        InputStream body = null;
         try {
-            final Object content = JSON_MAPPER.readValue(req.getInputStream(), Object.class);
-            if (!(content instanceof Map)) {
+            body = req.getInputStream();
+            final Object content = JSON_MAPPER.readValue(body, Object.class);
+
+            // Ensure that there is no trailing data following the JSON resource.
+
+            /*
+             * FIXME: this does not seem to work. It looks like the input stream
+             * has been fully read during the previous call to readValue.
+             */
+            boolean hasTrailingGarbage;
+            try {
+                JSON_MAPPER.readValue(body, Object.class);
+                hasTrailingGarbage = true;
+            } catch (EOFException expected) {
+                // Ignore - there should not be any remaining content.
+                hasTrailingGarbage = false;
+            } catch (JsonParseException e) {
+                hasTrailingGarbage = true;
+            }
+            if (hasTrailingGarbage) {
                 throw new BadRequestException(
                         "The request could not be processed because the provided "
-                                + "content is not a JSON object");
+                                + "content contained trailing data after the JSON resource");
             }
-            return new JsonValue(content);
+
+            return content;
         } catch (final JsonParseException e) {
             throw new BadRequestException(
                     "The request could not be processed because the provided "
                             + "content is not valid JSON");
         } catch (final EOFException e) {
             if (allowEmpty) {
-                return new JsonValue(new LinkedHashMap<String, Object>());
+                return null;
             } else {
                 throw new BadRequestException("The request could not be processed "
                         + "because it did not contain any JSON content");
             }
         } catch (final IOException e) {
             throw adapt(e);
+        } finally {
+            closeQuietly(body);
         }
     }
 
