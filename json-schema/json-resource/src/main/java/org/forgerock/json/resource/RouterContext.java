@@ -76,6 +76,8 @@ import org.forgerock.json.fluent.JsonValue;
  *   }
  * }
  * </pre>
+ *
+ * @see Router
  */
 public final class RouterContext extends ServerContext {
     // Persisted attribute names.
