@@ -19,7 +19,6 @@ import java.io.IOException;
 
 import javax.servlet.ServletOutputStream;
 
-@SuppressWarnings("javadoc")
 class StringBuilderOutputStream extends ServletOutputStream {
 
     private final StringBuilder output;
