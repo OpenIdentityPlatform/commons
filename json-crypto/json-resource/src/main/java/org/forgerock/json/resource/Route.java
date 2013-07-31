@@ -30,9 +30,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * An opaque handle for a route which has been registered in a router. A
- * reference to a route should be maintained if there is a chance that the route
- * will need to be removed from the router at a later time.
+ * An opaque handle for a route which has been registered in a {@link Router
+ * router}. A reference to a route should be maintained if there is a chance
+ * that the route will need to be removed from the router at a later time.
+ *
+ * @see Router
  */
 public final class Route {
     static final class RouteMatcher {

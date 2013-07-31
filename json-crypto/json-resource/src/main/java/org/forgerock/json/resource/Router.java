@@ -65,10 +65,16 @@ import org.forgerock.json.resource.Route.RouteMatcher;
  * <pre>
  * String userId = context.asContext(RouterContext.class).getUriTemplateVariables().get(&quot;userId&quot;);
  * </pre>
+ *
+ * During routing resource names are "relativized" by removing the leading path
+ * components which matched the template. See the documentation for
+ * {@link RouterContext} for more information.
  * <p>
  * <b>NOTE:</b> for simplicity this implementation only supports a small sub-set
  * of the functionality described in RFC 6570.
  *
+ * @see RouterContext
+ * @see Router
  * @see <a href="http://tools.ietf.org/html/rfc6570">RFC 6570 - URI Template
  *      </a>
  */
