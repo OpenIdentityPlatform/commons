@@ -45,6 +45,7 @@ import static org.forgerock.json.resource.servlet.HttpUtils.fail;
 import static org.forgerock.json.resource.servlet.HttpUtils.getIfMatch;
 import static org.forgerock.json.resource.servlet.HttpUtils.getIfNoneMatch;
 import static org.forgerock.json.resource.servlet.HttpUtils.getJsonContent;
+import static org.forgerock.json.resource.servlet.HttpUtils.getJsonContentIfPresent;
 import static org.forgerock.json.resource.servlet.HttpUtils.getJsonPatchContent;
 import static org.forgerock.json.resource.servlet.HttpUtils.getMethod;
 import static org.forgerock.json.resource.servlet.HttpUtils.getParameter;
@@ -439,7 +440,7 @@ public final class HttpServletAdapter {
                 doRequest(req, resp, request);
             } else {
                 // Action request.
-                final JsonValue content = getJsonContent(req);
+                final JsonValue content = getJsonContentIfPresent(req);
                 final ActionRequest request =
                         Requests.newActionRequest(getResourceName(req), action).setContent(content);
                 for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
