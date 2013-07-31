@@ -18,7 +18,6 @@ package org.forgerock.json.resource.servlet;
 import java.io.Closeable;
 import java.io.EOFException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -84,9 +83,7 @@ final class HttpUtils {
     static final String PARAM_QUERY_ID = param(QueryRequest.FIELD_QUERY_ID);
     static final String PARAM_SORT_KEYS = param(QueryRequest.FIELD_SORT_KEYS);
 
-    private static final ObjectMapper JSON_MAPPER = new ObjectMapper().configure(
-            JsonGenerator.Feature.AUTO_CLOSE_TARGET, false).configure(
-            JsonParser.Feature.AUTO_CLOSE_SOURCE, false);
+    private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
 
     /**
      * Adapts an {@code Exception} to a {@code ResourceException}.
@@ -313,6 +310,8 @@ final class HttpUtils {
             final HttpServletResponse resp) throws IOException {
         final JsonGenerator writer =
                 JSON_MAPPER.getJsonFactory().createJsonGenerator(resp.getOutputStream());
+        writer.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
+
         // Enable pretty printer if requested.
         final String[] values = getParameter(req, PARAM_PRETTY_PRINT);
         if (values != null) {
@@ -477,24 +476,15 @@ final class HttpUtils {
 
     private static Object parseJsonBody(final HttpServletRequest req, final boolean allowEmpty)
             throws BadRequestException, ResourceException {
-        InputStream body = null;
+        JsonParser parser = null;
         try {
-            body = req.getInputStream();
-            final Object content = JSON_MAPPER.readValue(body, Object.class);
+            parser = JSON_MAPPER.getJsonFactory().createJsonParser(req.getInputStream());
+            final Object content = parser.readValueAs(Object.class);
 
             // Ensure that there is no trailing data following the JSON resource.
-
-            /*
-             * FIXME: this does not seem to work. It looks like the input stream
-             * has been fully read during the previous call to readValue.
-             */
             boolean hasTrailingGarbage;
             try {
-                JSON_MAPPER.readValue(body, Object.class);
-                hasTrailingGarbage = true;
-            } catch (EOFException expected) {
-                // Ignore - there should not be any remaining content.
-                hasTrailingGarbage = false;
+                hasTrailingGarbage = parser.nextToken() != null;
             } catch (JsonParseException e) {
                 hasTrailingGarbage = true;
             }
@@ -508,7 +498,8 @@ final class HttpUtils {
         } catch (final JsonParseException e) {
             throw new BadRequestException(
                     "The request could not be processed because the provided "
-                            + "content is not valid JSON");
+                            + "content is not valid JSON", e).setDetail(new JsonValue(e
+                            .getMessage()));
         } catch (final EOFException e) {
             if (allowEmpty) {
                 return null;
@@ -519,7 +510,7 @@ final class HttpUtils {
         } catch (final IOException e) {
             throw adapt(e);
         } finally {
-            closeQuietly(body);
+            closeQuietly(parser);
         }
     }
 
