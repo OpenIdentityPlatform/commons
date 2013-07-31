@@ -490,8 +490,8 @@ final class HttpUtils {
             }
             if (hasTrailingGarbage) {
                 throw new BadRequestException(
-                        "The request could not be processed because the provided "
-                                + "content contained trailing data after the JSON resource");
+                        "The request could not be processed because there is "
+                                + "trailing data after the JSON content");
             }
 
             return content;
