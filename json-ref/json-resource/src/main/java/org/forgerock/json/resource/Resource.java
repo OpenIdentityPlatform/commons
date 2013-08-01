@@ -142,10 +142,8 @@ public final class Resource {
      */
     @Override
     public int hashCode() {
-        int hash = 17;
-        hash = hash * 31 + id != null ? id.hashCode() : 0;
-        hash = hash * 31 + revision != null ? revision.hashCode() : 0;
-        return hash;
+        final int hash = id != null ? id.hashCode() : 17;
+        return (hash * 31) + (revision != null ? revision.hashCode() : 0);
     }
 
     /**
