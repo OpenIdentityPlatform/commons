@@ -15,11 +15,13 @@
  */
 package org.forgerock.json.resource;
 
+import static java.util.Collections.singletonMap;
 import static org.fest.assertions.Assertions.assertThat;
 
 import java.util.HashMap;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
@@ -28,11 +30,55 @@ import org.testng.annotations.Test;
 @SuppressWarnings("javadoc")
 public final class ResourceTest {
 
-    @Test(expectedExceptions = NullPointerException.class)
-    public void testResource() throws Exception {
-        Resource resource =
-                new Resource("751E0000000oRV1IAM", null, new JsonValue(
-                        new HashMap<String, Object>()));
+    @Test(dataProvider = "resources")
+    public void testEquals(final Resource resource) {
+        /*
+         * The content is ignored since the id and revision should uniquely
+         * identify a resource.
+         */
+        final Resource similar =
+                new Resource(resource.getId(), resource.getRevision(), new JsonValue(singletonMap(
+                        "ignored", (Object) "content")));
+        assertThat(resource).isEqualTo(similar);
+    }
+
+    @Test(dataProvider = "differentResources")
+    public void testEqualsNotSame(final Resource first, final Resource second) {
+        assertThat(first).isNotEqualTo(second);
+    }
+
+    @Test(dataProvider = "resources")
+    public void testHashCode(final Resource resource) {
         assertThat(resource.hashCode()).isNotEqualTo(0);
+    }
+
+    @Test(dataProvider = "differentResources")
+    public void testHashCodeNotSame(final Resource first, final Resource second) {
+        assertThat(first.hashCode()).isNotEqualTo(second.hashCode());
+    }
+
+    @DataProvider
+    Object[][] differentResources() {
+        return new Object[][] {
+            {
+                new Resource("751E0000000oRV1IAM", "123", new JsonValue(
+                        new HashMap<String, Object>())),
+                new Resource("751E0000000oRV1IAM", "124", new JsonValue(
+                        new HashMap<String, Object>())) },
+            {
+                new Resource("751E0000000oRV1IAM", "123", new JsonValue(
+                        new HashMap<String, Object>())),
+                new Resource("751E0000000oRV1IAN", "123", new JsonValue(
+                        new HashMap<String, Object>())) } };
+    }
+
+    @DataProvider
+    Object[][] resources() {
+        return new Object[][] {
+            { new Resource("751E0000000oRV1IAM", "123",
+                    new JsonValue(new HashMap<String, Object>())) },
+            { new Resource("751E0000000oRV1IAM", null, new JsonValue(new HashMap<String, Object>())) },
+            { new Resource(null, "123", new JsonValue(new HashMap<String, Object>())) },
+            { new Resource(null, null, new JsonValue(new HashMap<String, Object>())) }, };
     }
 }
