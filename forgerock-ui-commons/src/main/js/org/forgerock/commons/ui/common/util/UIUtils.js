@@ -43,7 +43,12 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     };
 
     obj.getCurrentUrlQueryParameters = function() {
-        return window.location.search.substr(1,window.location.search.lenght);  
+        if(window.location.hash.length > 1 && window.location.hash.indexOf('&') > -1){
+            return window.location.hash.substring(window.location.hash.indexOf('&') + 1);
+        }
+        else{
+            return window.location.search.substr(1,window.location.search.length);
+        }  
     };
 
     obj.getCurrentPathName = function() {

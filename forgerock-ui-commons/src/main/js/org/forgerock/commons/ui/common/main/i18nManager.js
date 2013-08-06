@@ -28,15 +28,28 @@
  * @author jdabrowski
  */
 define("org/forgerock/commons/ui/common/main/i18nManager", [
-    "org/forgerock/commons/ui/common/util/Constants"
-], function(consts) {
+    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/util/UIUtils",
+    "org/forgerock/commons/ui/common/util/CookieHelper"
+], function(consts,uiUtils,cookieHelper) {
     
     var obj = {};
     
     obj.language = consts.DEFAULT_LANGUAGE;
     
     obj.setLanguage = function(language) {
-        var mNames, mNamesShort, dNames, dNamesShort;
+        var mNames, mNamesShort, dNames, dNamesShort,
+            urlParams = uiUtils.convertCurrentUrlToJSON().params,
+            i18nCookie = cookieHelper.getCookie('i18next');
+        
+        //if there is already a cookie then use that value as the language
+        if(i18nCookie){
+            language = i18nCookie;
+            //if locale is set in the url and is different from the cookie value use the locale param
+            if(urlParams && urlParams.locale !== i18nCookie){
+                language = urlParams.locale;
+            }
+        }
         $.i18n.setLng(language);
         obj.language = language;
         
