@@ -11,17 +11,32 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jws;
 
+/**
+ * An Enum of the possible types of JWS algorithms that can be used to sign a JWT.
+ * @see JwsAlgorithm
+ *
+ * @author Phill Cunnington
+ * @since 2.0.0
+ */
 public enum JwsAlgorithmType {
 
+    /** No digital signature or MAC value included. */
     NONE,
+    /** HMAC signing algorithm. */
     HMAC,
+    /** RSA signing algorithm. */
     RSA;
 
+    /**
+     * Turns the JwsAlgorithmType constant into a JSON value string.
+     *
+     * @return {@inheritDoc}
+     */
     @Override
     public String toString() {
         return '"' + super.toString() + '"';

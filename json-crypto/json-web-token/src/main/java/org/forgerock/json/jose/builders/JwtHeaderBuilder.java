@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.builders;
@@ -22,33 +22,83 @@ import org.forgerock.json.jose.jwt.JwtHeader;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class JwtHeaderBuilder {
+/**
+ * A base implementation of a JWT header builder that provides a fluent builder pattern to creating JWT headers.
+ * <p>
+ * See {@link JwtHeader} for information on the JwtHeader object that this builder creates.
+ *
+ * @param <T> the type of JwtBuilder that parents this JwtHeaderBuilder.
+ * @param <B> the type of this JwtHeaderBuilder
+ *
+ * @author Phill Cunnington
+ * @since 2.0.0
+ */
+public abstract class JwtHeaderBuilder<T extends JwtBuilder, B extends JwtHeaderBuilder> {
 
-    private final AbstractJwtBuilder jwtBuilder;
+    private final T jwtBuilder;
 
     private final Map<String, Object> headers = new HashMap<String, Object>();
 
-    public JwtHeaderBuilder(AbstractJwtBuilder jwtBuilder) {
+    /**
+     * Constructs a new JwtHeaderBuilder, parented by the given JwtBuilder.
+     *
+     * @param jwtBuilder The JwtBuilder instance that this JwtHeaderBuilder is a child of.
+     */
+    public JwtHeaderBuilder(T jwtBuilder) {
         this.jwtBuilder = jwtBuilder;
     }
 
-    public JwtHeaderBuilder header(String key, Object value) {
+    /**
+     * Adds a custom header parameter to the JWT header.
+     * <p>
+     * @see JwtHeader#setParameter(String, Object)
+     *
+     * @param key The header parameter key.
+     * @param value The header parameter value.
+     * @return This JwtHeaderBuilder.
+     */
+    @SuppressWarnings("unchecked")
+    public B header(String key, Object value) {
         headers.put(key, value);
-        return this;
+        return (B) this;
     }
 
-    public JwtHeaderBuilder alg(Algorithm algorithm) {
+    /**
+     * Sets the algorithm used to perform cryptographic signing and/or encryption on the JWT.
+     * <p>
+     * @see JwtHeader#setAlgorithm(org.forgerock.json.jose.jwt.Algorithm)
+     *
+     * @param algorithm The algorithm.
+     * @return This JwtHeaderBuilder.
+     */
+    @SuppressWarnings("unchecked")
+    public B alg(Algorithm algorithm) {
         header("alg", algorithm.toString());
-        return this;
+        return (B) this;
     }
 
-    public AbstractJwtBuilder done() {
+    /**
+     * Marks the end to the building of the JWT header.
+     *
+     * @return The parent JwtBuilder for this JwtHeaderBuilder instance.
+     */
+    public T done() {
         return jwtBuilder;
     }
 
+    /**
+     * Gets the header parameters for the JWT.
+     *
+     * @return The JWT's header parameters.
+     */
     protected Map<String, Object> getHeaders() {
         return headers;
     }
 
+    /**
+     * Creates a JwtHeader instance from the header parameters set in this builder.
+     *
+     * @return A JwtHeader instance.
+     */
     protected abstract JwtHeader build();
 }

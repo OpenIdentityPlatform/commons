@@ -11,34 +11,66 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.builders;
 
-public abstract class AbstractJwtBuilder {
+import org.forgerock.json.jose.jwt.JwtClaimsSet;
+
+/**
+ * A base implementation for all JwtBuilders that provides the basis of the JWT builder methods.
+ *
+ * @author Phill Cunnington
+ * @since 2.0.0
+ */
+public abstract class AbstractJwtBuilder implements JwtBuilder {
 
     private JwtHeaderBuilder headerBuilder;
-    private JwtClaimsSetBuilder claimsSetBuilder;
+    private JwtClaimsSet claimsSet;
 
+    /**
+     * Gets the JwtHeaderBuilder that this JwtBuilder will use to build the JWT's header parameters.
+     *
+     * @return The JwtHeaderBuilder instance.
+     */
     public abstract JwtHeaderBuilder headers();
 
+    /**
+     * Sets the JwtHeaderBuilder that this JwtBuilder will use to build the JWT's header parameters.
+     *
+     * @param headerBuilder The JwtHeaderBuilder instance.
+     */
     void setJwtHeaderBuilder(JwtHeaderBuilder headerBuilder) {
         this.headerBuilder = headerBuilder;
     }
 
+    /**
+     * Gets the JwtHeaderBuilder that is used to build the JWT's header parameters.
+     *
+     * @return The JwtHeaderBuilder instance.
+     */
     JwtHeaderBuilder getHeaderBuilder() {
         return headerBuilder;
     }
 
-    public JwtClaimsSetBuilder claims() {
-        claimsSetBuilder = new JwtClaimsSetBuilder(this);
-        return claimsSetBuilder;
+    /**
+     * Sets the JwtClaimsSet for this JwtBuilder.
+     *
+     * @param claimsSet The JwtClaimsSet containing the JWT's claims.
+     * @return This AbstractJwtBuilder.
+     */
+    public AbstractJwtBuilder claims(JwtClaimsSet claimsSet) {
+        this.claimsSet = claimsSet;
+        return this;
     }
 
-    JwtClaimsSetBuilder getClaimsSetBuilder() {
-        return claimsSetBuilder;
+    /**
+     * Gets the JwtClaimsSet that has been set in this JwtBuilder.
+     *
+     * @return The JwtClaimsSet containing the JWT's claims.
+     */
+    JwtClaimsSet getClaimsSet() {
+        return claimsSet;
     }
-
-    public abstract String build();
 }

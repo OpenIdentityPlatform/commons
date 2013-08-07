@@ -11,10 +11,13 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwk;
 
-public interface JWK {
+/**
+ * Placeholder for the JSON Web Key implementation.
+ */
+public interface JWK { //TODO
 }
