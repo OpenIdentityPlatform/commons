@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwt;
@@ -20,14 +20,10 @@ import org.forgerock.json.jose.jws.JwsAlgorithm;
 import org.forgerock.json.jose.jws.JwsHeader;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 public class JwtHeaderTest {
@@ -51,7 +47,7 @@ public class JwtHeaderTest {
 
         //Given
         JwtHeader header = new JwsHeader();
-        header.setHeader("alg", "NONE");
+        header.setParameter("alg", "NONE");
 
         //When
         String algorithm = header.getAlgorithmString();
@@ -67,25 +63,10 @@ public class JwtHeaderTest {
         JwtHeader header = new JwsHeader();
 
         //When
-        JwtType jwtType = header.getJwtType();
+        JwtType jwtType = header.getType();
 
         //Then
         assertEquals(jwtType, JwtType.JWT);
-    }
-
-    @Test
-    public void shouldNotSetTypeWhenAddingClaim() {
-
-        //Given
-        JwtHeader header = new JwsHeader();
-
-        //When
-        header.setHeader("typ", "jws");
-
-        //Then
-        assertTrue(header.isDefined("typ"));
-        assertTrue(header.get("typ").required().isString());
-        assertEquals(header.get("typ").asString(), "jwt");
     }
 
     @Test
@@ -95,7 +76,7 @@ public class JwtHeaderTest {
         JwtHeader header = new JwsHeader();
 
         //When
-        header.setHeader("KEY", "VALUE");
+        header.setParameter("KEY", "VALUE");
 
         //Then
         assertTrue(header.isDefined("KEY"));
@@ -115,7 +96,7 @@ public class JwtHeaderTest {
         headers.put("KEY4", 1234);
 
         //When
-        header.setHeaders(headers);
+        header.setParameters(headers);
 
         //Then
         assertTrue(header.isDefined("KEY1"));
@@ -146,10 +127,10 @@ public class JwtHeaderTest {
         header.put("KEY4", 1234);
 
         //When
-        Object key1 = header.getHeader("KEY1");
-        Object key2 = header.getHeader("KEY2");
-        Object key3 = header.getHeader("KEY3");
-        Object key4 = header.getHeader("KEY4");
+        Object key1 = header.getParameter("KEY1");
+        Object key2 = header.getParameter("KEY2");
+        Object key3 = header.getParameter("KEY3");
+        Object key4 = header.getParameter("KEY4");
 
         //Then
         assertEquals(key1, "HEADER1");
@@ -169,10 +150,10 @@ public class JwtHeaderTest {
         header.put("KEY4", 1234);
 
         //When
-        String key1 = header.getHeader("KEY1", String.class);
-        boolean key2 = header.getHeader("KEY2", Boolean.class);
-        long key3 = header.getHeader("KEY3", Long.class);
-        int key4 = header.getHeader("KEY4", Integer.class);
+        String key1 = header.getParameter("KEY1", String.class);
+        boolean key2 = header.getParameter("KEY2", Boolean.class);
+        long key3 = header.getParameter("KEY3", Long.class);
+        int key4 = header.getParameter("KEY4", Integer.class);
 
         //Then
         assertEquals(key1, "HEADER1");
@@ -187,8 +168,8 @@ public class JwtHeaderTest {
         //Given
         JwtHeader header = new JwsHeader();
         header.setAlgorithm(JwsAlgorithm.NONE);
-        header.setHeader("KEY1", "HEADER1");
-        header.setHeader("KEY2", true);
+        header.setParameter("KEY1", "HEADER1");
+        header.setParameter("KEY2", true);
 
         //When
         String jsonString = header.build();
@@ -202,7 +183,7 @@ public class JwtHeaderTest {
 
         //Given
         Map<String, Object> headers = new HashMap<String, Object>();
-        headers.put("typ", "TYPE");
+        headers.put("typ", "JWT");
         headers.put("alg", JwsAlgorithm.NONE);
         headers.put("KEY1", "HEADER1");
         headers.put("KEY2", true);
