@@ -11,44 +11,92 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwt;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.json.jose.exceptions.JwtRuntimeException;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * A base implementation class for a JSON Web object.
+ * <p>
+ * Provides a set of methods which are common across JWT, JWS, JWE and JWK implementations.
+ *
+ * @author Phill Cunnington
+ * @since 2.0.0
+ */
 public abstract class JWObject {
 
     private final JsonValue jsonValue;
 
+    /**
+     * Constructs a new, empty JWObject.
+     */
     public JWObject() {
         this.jsonValue = new JsonValue(new HashMap<String, Object>());
     }
 
+    /**
+     * Checks that the given value is of an assignable type from the required class.
+     * <p>
+     * Will throw a JwtRuntimeException if the value is not of the required type
+     *
+     * @param value The value to check is of the required type.
+     * @param requiredClazz The class of the required type.
+     * @see #isValueOfType(Object, Class)
+     */
     protected void checkValueIsOfType(Object value, Class<?> requiredClazz) {
         if (!requiredClazz.isAssignableFrom(value.getClass())) {
-            //TODO throw appropriate exception
-            throw new RuntimeException("Casting exception!");
+            throw new JwtRuntimeException("Value is not of the required type. Required, " + requiredClazz.getName()
+                    + ", actual, " + value.getClass().getName());
         }
     }
 
+    /**
+     * Checks that the given List's type is of an assignable type from the required class.
+     * <p>
+     * Will throw a JwtRuntimeException if the value is not of the required type
+     *
+     * @param value The List to check the type is of the required type.
+     * @param requiredClazz The class of the required type.
+     * @see #checkValueIsOfType(Object, Class)
+     */
     protected void checkListValuesAreOfType(List value, Class<?> requiredClazz) {
         if (value.size() > 0) {
             checkValueIsOfType(value.get(0), requiredClazz);
         }
     }
 
+    /**
+     * Checks to see if the given value is of an assignable type from the required class.
+     *
+     * @param value The value to check is of the required type.
+     * @param requiredClazz The class of the required type.
+     * @return <code>true</code> if the value if of the required type.
+     * @see #checkValueIsOfType(Object, Class)
+     */
     protected boolean isValueOfType(Object value, Class<?> requiredClazz) {
         return requiredClazz.isAssignableFrom(value.getClass());
     }
 
-    public void put(String key, Object value) throws JsonValueException {
+    /**
+     * Sets or removes the value of the specified member.
+     * <p>
+     * If the value is not null, then the value is set as the value of the given key.
+     * <p>
+     * Otherwise, if the value is null and the key already exist with a value assigned to it, then the key and its value
+     * will be removed. If the specified key is not defined, calling this method has no effect.
+     *
+     * @param key the {@code Map} key identifying the value to set or to remove.
+     * @param value the object value to assign to the member.
+     */
+    public void put(String key, Object value) {
         if (value != null) {
             jsonValue.put(key, value);
         } else if (jsonValue.isDefined(key)) {
@@ -56,20 +104,46 @@ public abstract class JWObject {
         }
     }
 
+    /**
+     * Returns the specified item value. If no such member value exists, then a JSON value containing {@code null} is
+     * returned.
+     *
+     * @param key the {@code Map} key identifying the item to return.
+     * @return a JSON value containing the value or {@code null}.
+     */
     public JsonValue get(String key) {
         return jsonValue.get(key);
     }
 
+    /**
+     * Returns {@code true} if this JWObject contains the specified item.
+     *
+     * @param key the {@code Map} key of the item to seek.
+     * @return {@code true} if this JSON value contains the specified member.
+     */
     public boolean isDefined(String key) {
         return jsonValue.isDefined(key);
     }
 
+    /**
+     * Returns the set of keys for this JWObject's values.
+     * <p>
+     * The order of the resulting keys is undefined. If there are no values set, this method returns an empty set.
+     *
+     * @return A Set of keys.
+     */
     public Set<String> keys() {
         return jsonValue.keys();
     }
 
+    /**
+     * Returns a string representation of the JWObject. The result resembles-but is not guaranteed to conform to-JSON
+     * syntax.
+     *
+     * @return A JSON String representation.
+     */
     @Override
     public String toString() {
-        return jsonValue.toString();//.replaceAll("\\s",""); //TODO need to test this out as seemed to break the session-jwt in the bridge for some reason?...
+        return jsonValue.toString();
     }
 }

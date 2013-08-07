@@ -11,123 +11,53 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jws;
 
-import org.forgerock.json.jose.utils.Utils;
+import org.forgerock.json.jose.exceptions.JwsException;
+import org.forgerock.json.jose.jws.handlers.HmacSigningHandler;
+import org.forgerock.json.jose.jws.handlers.NOPSigningHandler;
+import org.forgerock.json.jose.jws.handlers.RSASigningHandler;
+import org.forgerock.json.jose.jws.handlers.SigningHandler;
 import org.forgerock.util.SignatureUtil;
 
-import javax.crypto.Mac;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SignatureException;
-import java.security.cert.X509Certificate;
-import java.util.Arrays;
-
+/**
+ * A service to get the appropriate SigningHandler for a specific Java Cryptographic signing algorithm.
+ * <p>
+ * For details of all supported signing algorithms see {@link JwsAlgorithm}
+ *
+ * @author Phill Cunnington
+ * @since 2.0.0
+ */
 public class SigningManager {
 
     private final SignatureUtil signatureUtil = SignatureUtil.getInstance();
 
-    public byte[] sign(JwsAlgorithm algorithm, PrivateKey privateKey, String data) {
-
-        byte[] signature;
-
-        switch (algorithm.getAlgorithmType()) {
-            case NONE: {
-                signature = "".getBytes(Utils.CHARSET);
-                break;
-            }
-            case HMAC: {
-                signature = signWithHMAC(algorithm.getAlgorithm(), privateKey, data.getBytes(Utils.CHARSET));
-                break;
-            }
-            case RSA: {
-                signature = signWithRSA(algorithm.getAlgorithm(), privateKey, data);
-                break;
-            }
-            default: {
-                //TODO exception
-                throw new RuntimeException("Blah blah");
-            }
-        }
-
-        return signature;
-    }
-
-    public byte[] signWithHMAC(String algorithm, Key key, byte[] data) {
-        try {
-            Mac mac = Mac.getInstance(algorithm);
-            byte[] secretByte = key.getEncoded();
-            SecretKey secretKey = new SecretKeySpec(secretByte, algorithm.toUpperCase());
-            mac.init(secretKey);
-            return mac.doFinal(data);
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-            throw new RuntimeException(e);
-        } catch (InvalidKeyException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-            throw new RuntimeException(e);
-        }
-    }
-
-    public byte[] signWithRSA(String algorithm, PrivateKey key, String data) {
-        try {
-            return signatureUtil.sign(key, algorithm, data);
-        } catch (SignatureException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-            throw new RuntimeException(e);
-        }
-    }
-
-    public boolean verify(JwsAlgorithm algorithm, PrivateKey privateKey, byte[] data, byte[] signature) {
-
-        boolean verified;
+    /**
+     * Gets the appropriate SigningHandler that can perform the required signing algorithm, as described by the given
+     * JwsAlgorithm.
+     *
+     * @param algorithm The JwsAlgorithm to get the SigningHandler for.
+     * @return The SigningHandler.
+     */
+    public SigningHandler getSigningHandler(JwsAlgorithm algorithm) {
 
         switch (algorithm.getAlgorithmType()) {
-            case NONE: {
-
-                if (signature.length == 0) {
-                    verified = true;
-                } else {
-                    verified = false;
-                }
-                break;
-            }
-            case HMAC: {
-                verified = verifyWithHmac(algorithm.getAlgorithm(), privateKey, data, signature);
-                break;
-            }
-            case RSA: {
-                verified = verifyWithRSA(algorithm.getAlgorithm(), null, data, signature);  //TODO get cert/key
-                break;
-            }
-            default: {
-                //TODO exception
-                throw new RuntimeException("Blah blah");
-            }
+        case NONE: {
+            return new NOPSigningHandler();
         }
-
-        return verified;
-    }
-
-    private boolean verifyWithHmac(String algorithm, PrivateKey privateKey, byte[] data, byte[] signature) {
-        byte[] signed = signWithHMAC(algorithm, privateKey, data);
-        return Arrays.equals(signed, signature);
-    }
-
-    private boolean verifyWithRSA(String algorithm, X509Certificate certificate, byte[] data, byte[] signature) {
-        try {
-            return signatureUtil.verify(certificate, algorithm, new String(data, Utils.CHARSET), signature);  //TODO
-        } catch (SignatureException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-            throw new RuntimeException(e);
+        case HMAC: {
+            return new HmacSigningHandler();
+        }
+        case RSA: {
+            return new RSASigningHandler(signatureUtil);
+        }
+        default: {
+            throw new JwsException("No Signing Handler for unknown signing algorithm type, "
+                    + algorithm.getAlgorithmType() + ".");
+        }
         }
     }
 }

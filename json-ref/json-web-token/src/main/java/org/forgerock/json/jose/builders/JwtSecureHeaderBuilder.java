@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.builders;
@@ -21,49 +21,140 @@ import org.forgerock.json.jose.jwk.JWK;
 import java.net.URL;
 import java.util.List;
 
-public abstract class JwtSecureHeaderBuilder extends JwtHeaderBuilder {
+/**
+ * A base implementation of a JWT header builder, for the common security header parameters shared by the JWS and JWE
+ * headers, that provides a fluent builder pattern to creating JWT headers.
+ * <p>
+ * See {@link org.forgerock.json.jose.jws.JwtSecureHeader} for information on the JwtSecureHeader object that this
+ * builder creates.
+ *
+ * @param <T> the type of JwtBuilder that parents this JwtHeaderBuilder.
+ * @param <B> the type of this JwtHeaderBuilder
+ *
+ * @author Phill Cunnington
+ * @since 2.0.0
+ */
+public abstract class JwtSecureHeaderBuilder<T extends JwtBuilder, B extends JwtSecureHeaderBuilder>
+        extends JwtHeaderBuilder<T, B> {
 
-    public JwtSecureHeaderBuilder(AbstractJwtBuilder jwtBuilder) {
+    /**
+     * Constructs a new JwtSecureHeaderBuilder, parented by the given JwtBuilder.
+     *
+     * @param jwtBuilder The JwtBuilder instance that this JwtSecureHeaderBuilder is a child of.
+     */
+    public JwtSecureHeaderBuilder(T jwtBuilder) {
         super(jwtBuilder);
     }
 
-    public JwtSecureHeaderBuilder jku(URL jku) {
+    /**
+     * Sets the JWK Set URL header parameter for this JWS.
+     * <p>
+     * @see org.forgerock.json.jose.jws.JwtSecureHeader#setJwkSetUrl(java.net.URL)
+     *
+     * @param jku The JWK Set URL.
+     * @return This JwtSecureHeaderBuilder.
+     */
+    @SuppressWarnings("unchecked")
+    public B jku(URL jku) {
         header("jku", jku);
-        return this;
+        return (B) this;
     }
 
-    public JwtSecureHeaderBuilder jwk(JWK jwk) {
+    /**
+     * Sets the JSON Web Key header parameter for this JWS.
+     * <p>
+     * @see org.forgerock.json.jose.jws.JwtSecureHeader#setJsonWebKey(org.forgerock.json.jose.jwk.JWK)
+     *
+     * @param jwk The JSON Web Key.
+     * @return This JwtSecureHeaderBuilder.
+     */
+    @SuppressWarnings("unchecked")
+    public B jwk(JWK jwk) {
         header("jwk", jwk);
-        return this;
+        return (B) this;
     }
 
-    public JwtSecureHeaderBuilder x5u(URL x5u) {
+    /**
+     * Sets the X.509 URL header parameter for this JWS.
+     * <p>
+     * @see org.forgerock.json.jose.jws.JwtSecureHeader#setX509Url(java.net.URL)
+     *
+     * @param x5u THe X.509 URL.
+     * @return This JwtSecureHeaderBuilder.
+     */
+    @SuppressWarnings("unchecked")
+    public B x5u(URL x5u) {
         header("x5u", x5u);
-        return this;
+        return (B) this;
     }
 
-    public JwtSecureHeaderBuilder x5t(String x5t) {
+    /**
+     * Sets the X.509 Certificate Thumbprint header parameter for this JWS.
+     * <p>
+     * @see org.forgerock.json.jose.jws.JwtSecureHeader#setX509CertificateThumbprint(String)
+     *
+     * @param x5t The X.509 Certificate Thumbprint.
+     * @return This JwtSecureHeaderBuilder.
+     */
+    @SuppressWarnings("unchecked")
+    public B x5t(String x5t) {
         header("x5t", x5t);
-        return this;
+        return (B) this;
     }
 
-    public JwtSecureHeaderBuilder x5c(List<String> x5c) {
+    /**
+     * Sets the X.509 Certificate Chain header parameter for this JWS.
+     * <p>
+     * @see org.forgerock.json.jose.jws.JwtSecureHeader#setX509CertificateChain(java.util.List)
+     *
+     * @param x5c The X.509 Certificate Chain.
+     * @return This JwtSecureHeaderBuilder.
+     */
+    @SuppressWarnings("unchecked")
+    public B x5c(List<String> x5c) {
         header("x5c", x5c);
-        return this;
+        return (B) this;
     }
 
-    public JwtSecureHeaderBuilder kid(String kid) {
+    /**
+     * Sets the Key ID header parameter for this JWS.
+     * <p>
+     * @see org.forgerock.json.jose.jws.JwtSecureHeader#setKeyId(String)
+     *
+     * @param kid The Key ID.
+     * @return This JwtSecureHeaderBuilder.
+     */
+    @SuppressWarnings("unchecked")
+    public B kid(String kid) {
         header("kid", kid);
-        return this;
+        return (B) this;
     }
 
-    public JwtSecureHeaderBuilder cty(String cty) {
+    /**
+     * Sets the content type header parameter for this JWS.
+     * <p>
+     * @see org.forgerock.json.jose.jws.JwtSecureHeader#setContentType(String)
+     *
+     * @param cty The content type of the JWS payload.
+     * @return This JwtSecureHeaderBuilder.
+     */
+    @SuppressWarnings("unchecked")
+    public B cty(String cty) {
         header("cty", cty);
-        return this;
+        return (B) this;
     }
 
-    public JwtSecureHeaderBuilder crit(List<String> crit) {
+    /**
+     * Sets the critical header parameters for this JWS.
+     * <p>
+     * @see org.forgerock.json.jose.jws.JwtSecureHeader#setCriticalHeaders(java.util.List)
+     *
+     * @param crit A List of the JWS critical parameters.
+     * @return This JwtSecureHeaderBuilder.
+     */
+    @SuppressWarnings("unchecked")
+    public B crit(List<String> crit) {
         header("crit", crit);
-        return this;
+        return (B) this;
     }
 }

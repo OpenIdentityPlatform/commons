@@ -11,15 +11,22 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwe;
 
+import org.forgerock.json.jose.jwk.JWK;
 import org.forgerock.json.jose.jws.JwtSecureHeader;
 
 import java.util.Map;
 
+/**
+ * An implementation for the JWE Header parameters.
+ *
+ * @author Phill Cunnington
+ * @since 2.0.0
+ */
 public class JweHeader extends JwtSecureHeader {
 
     private static final String ENCRYPTION_METHOD_HEADER_KEY = "enc";
@@ -27,53 +34,194 @@ public class JweHeader extends JwtSecureHeader {
     private static final String COMPRESSION_ALGORITHM_HEADER_KEY = "zip";
     private static final String AGREEMENT_PARTY_UINFO_HEADER_KEY = "apu";   //Base64url
 
+    /**
+     * Constructs an new, empty JweHeader.
+     */
     public JweHeader() {
         super();
     }
 
-    public JweHeader(Map<String, Object> headerParameters) {
+    /**
+     * Constructs a new JweHeader with its parameters set to the contents of the given Map.
+     *
+     * @param headerParameters A Map containing the parameters to be set in the header.
+     */
+    public JweHeader(Map<String, Object> headerParameters)  {
         super(headerParameters);
     }
 
+    /**
+     * Gets the Algorithm set in the JWT header.
+     * <p>
+     * If there is no algorithm set in the JWT header, then the JweAlgorithm NONE will be returned.
+     *
+     * @return {@inheritDoc}
+     */
     @Override
     public JweAlgorithm getAlgorithm() {
         return JweAlgorithm.valueOf(getAlgorithmString());
     }
 
+    /**
+     * Sets the Encryption Method header parameter for this JWE.
+     * <p>
+     * Identifies the block encryption algorithm used to encrypt the Plaintext to produce the Ciphertext.
+     *
+     * @param encryptionMethod The Encryption Method.
+     */
     public void setEncryptionMethod(EncryptionMethod encryptionMethod) {
         put(ENCRYPTION_METHOD_HEADER_KEY, encryptionMethod.toString());
     }
 
+    /**
+     * Gets the Encryption Method header parameter for this JWE.
+     *
+     * @return The Encryption Method.
+     */
     public EncryptionMethod getEncryptionMethod() {
         return EncryptionMethod.valueOf(get(ENCRYPTION_METHOD_HEADER_KEY).asString());
     }
 
-    public void setEphemeralPublicKey(String ephemeralPublicKey) {
-        put(EPHEMERAL_PUBLIC_KEY_HEADER_KEY, ephemeralPublicKey);
+    /**
+     * Sets the Ephemeral Public Key header parameter for this JWE.
+     * <p>
+     * For use in key agreement algorithms. When the Algorithm header parameter value specified identifies an algorithm
+     * for which "epk" is a parameter, this parameter MUST be present if REQUIRED by the algorithm.
+     *
+     * @param ephemeralPublicKey The Ephemeral Public Key.
+     */
+    public void setEphemeralPublicKey(JWK ephemeralPublicKey) {
+        put(EPHEMERAL_PUBLIC_KEY_HEADER_KEY, ephemeralPublicKey.toString());
     }
 
+    /**
+     * Gets the Ephemeral Public Key header parameter for this JWE.
+     *
+     * @return The Ephemeral Public Key.
+     */
     public String getEphemeralPublicKey() {
         return get(EPHEMERAL_PUBLIC_KEY_HEADER_KEY).asString();
     }
 
+    /**
+     * Sets the Compression Algorithm header parameter for this JWE.
+     * <p>
+     * If present, the value of the Compression Algorithm header parameter MUST be CompressionAlgorithm constant DEF.
+     *
+     * @param compressionAlgorithm The Compression Algorithm.
+     */
     public void setCompressionAlgorithm(CompressionAlgorithm compressionAlgorithm) {
         put(COMPRESSION_ALGORITHM_HEADER_KEY, compressionAlgorithm.toString());
     }
 
+    /**
+     * Gets the Compression Algorithm header parameter for this JWE.
+     *
+     * @return The Compression Algorithm.
+     */
     public CompressionAlgorithm getCompressionAlgorithm() {
         String compressionAlgorithm = get(COMPRESSION_ALGORITHM_HEADER_KEY).asString();
         if (compressionAlgorithm == null) {
-            return null;
+            return CompressionAlgorithm.NONE;
         } else {
             return CompressionAlgorithm.valueOf(compressionAlgorithm);
         }
     }
 
+    /**
+     * Sets the Agreement PartyUInfo header parameter for this JWE.
+     * <p>
+     * For use with key agreement algorithms (such as "ECDH-ES"), represented as a base64url encoded string.
+     * <p>
+     * This method will perform the base64url encoding so the agreementPartyUInfo must be the un-encoded String value
+     * of the Agreement PartyUInfo.
+     *
+     * @param agreementPartyUInfo The Agreement PartyUInfo.
+     */
     public void setAgreementPartyUInfo(String agreementPartyUInfo) {
         put(AGREEMENT_PARTY_UINFO_HEADER_KEY, agreementPartyUInfo);
     }
 
+    /**
+     * Gets the Agreement PartyUInfo header parameter for this JWE.
+     *
+     * @return The Agreement PartyUInfo.
+     */
     public String getAgreementPartyUInfo() {
         return get(AGREEMENT_PARTY_UINFO_HEADER_KEY).asString();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setParameter(String key, Object value) {
+        JweHeaderKey headerKey = JweHeaderKey.getHeaderKey(key.toUpperCase());
+
+        switch (headerKey) {
+        case ENC: {
+            if (isValueOfType(value, EncryptionMethod.class)) {
+                setEncryptionMethod((EncryptionMethod) value);
+            }
+            checkValueIsOfType(value, String.class);
+            setEncryptionMethod(EncryptionMethod.parseMethod((String) value));
+            break;
+        }
+        case EPK: {
+            checkValueIsOfType(value, JWK.class);
+            setEphemeralPublicKey((JWK) value);
+            break;
+        }
+        case ZIP: {
+            if (isValueOfType(value, CompressionAlgorithm.class)) {
+                setCompressionAlgorithm((CompressionAlgorithm) value);
+            }
+            checkValueIsOfType(value, String.class);
+            setCompressionAlgorithm(CompressionAlgorithm.parseAlgorithm((String) value));
+            break;
+        }
+        case APU: {
+            checkValueIsOfType(value, String.class);
+            setAgreementPartyUInfo((String) value);
+            break;
+        }
+        default: {
+            super.setParameter(key, value);
+        }
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Object getParameter(String key) {
+        JweHeaderKey headerKey = JweHeaderKey.getHeaderKey(key.toUpperCase());
+
+        Object value;
+
+        switch (headerKey) {
+        case ENC: {
+            value = getEncryptionMethod();
+            break;
+        }
+        case EPK: {
+            value = getEphemeralPublicKey();
+            break;
+        }
+        case ZIP: {
+            value = getCompressionAlgorithm();
+            break;
+        }
+        case APU: {
+            value = getAgreementPartyUInfo();
+            break;
+        }
+        default: {
+            value = super.getParameter(key);
+        }
+        }
+
+        return value;
     }
 }

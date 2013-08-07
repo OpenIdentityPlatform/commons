@@ -11,10 +11,13 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwt;
+
+import org.forgerock.json.jose.utils.IntDate;
+import org.forgerock.json.jose.utils.StringOrURI;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -24,201 +27,402 @@ import java.util.Map;
 
 import static org.forgerock.json.jose.jwt.JwtClaimsSetKey.*;
 
-public class JwtClaimsSet extends JWObject {
+/**
+ * An implementation that holds a JWT's Claims Set.
+ * <p>
+ * Provides methods to set claims for all the reserved claim names as well as custom claims.
+ *
+ * @author Phill Cunnington
+ * @since 2.0.0
+ */
+public class JwtClaimsSet extends JWObject implements Payload {
 
+    /**
+     * Constructs a new, empty JwtClaimsSet.
+     */
     public JwtClaimsSet() {
     }
 
+    /**
+     * Constructs a new JwtClaimsSet, with its claims set to the contents of the given Map.
+     *
+     * @param claims A Map containing the claims to be set in the Claims Set.
+     */
     public JwtClaimsSet(Map<String, Object> claims) {
         setClaims(claims);
     }
 
+    /**
+     * Gets the type of the contents of the Claims Set.
+     * <p>
+     * The values used for this claim SHOULD come from the same value space as the JWT header parameter "typ",
+     * with the same rules applying.
+     *
+     * @param type The Claims Set content type.
+     */
     public void setType(String type) {
         put(TYP.value(), type);
     }
 
+    /**
+     * Gets the type of the contents of the Claims Set.
+     * <p>
+     * The values used for this claim SHOULD come from the same value space as the JWT header parameter "typ",
+     * with the same rules applying.
+     *
+     * @return The Claims Set content type.
+     */
     public String getType() {
         return get(TYP.value()).asString();
     }
 
+    /**
+     * Sets the unique ID of the JWT.
+     *
+     * @param jwtId The JWT's ID.
+     */
     public void setJwtId(String jwtId) {
         put(JTI.value(), jwtId);
     }
 
+    /**
+     * Gets the unique ID of the JWT.
+     *
+     * @return The JWT's ID.
+     */
     public String getJwtId() {
         return get(JTI.value()).asString();
     }
 
+    /**
+     * Sets the issuer this JWT was issued by.
+     * <p>
+     * The given issuer can be any arbitrary string without any ":" characters, if the string does contain a ":"
+     * character then it must be a valid URI.
+     *
+     * @param issuer The JWT's issuer.
+     */
     public void setIssuer(String issuer) {
+        StringOrURI.validateStringOrURI(issuer);
         put(ISS.value(), issuer);
     }
 
+    /**
+     * Sets the issuer this JWT was issued by.
+     *
+     * @param issuer The JWT's issuer.
+     */
     public void setIssuer(URI issuer) {
         put(ISS.value(), issuer.toString());
     }
 
+    /**
+     *
+     * Gets the issuer this JWT was issued by.
+     *
+     * @return The JWT's issuer.
+     */
     public String getIssuer() {
         return get(ISS.value()).asString();
     }
 
+    /**
+     * Sets the principal this JWT is issued to.
+     * <p>
+     * The given principal can be any arbitrary string without any ":" characters, if the string does contain a ":"
+     * character then it must be a valid URI.
+     *
+     * @param principal The JWT's principal.
+     * @see #setPrincipal(java.net.URI)
+     */
     public void setPrincipal(String principal) {
+        StringOrURI.validateStringOrURI(principal);
         put(PRN.value(), principal);
     }
 
+    /**
+     * Sets the principal this JWT is issued to.
+     *
+     * @param principal The JWT's principal.
+     * @see #setPrincipal(String)
+     */
     public void setPrincipal(URI principal) {
         put(PRN.value(), principal.toString());
     }
 
+    /**
+     * Gets the principal this JWT is issued to.
+     *
+     * @return The JWT's principal.
+     */
     public String getPrincipal() {
         return get(PRN.value()).asString();
     }
 
+    /**
+     * Adds an entry to the JWT's intended audience list, in the Claims Set.
+     * <p>
+     * The given audience can be any arbitrary string without any ":" characters, if the string does contain a ":"
+     * character then it must be a valid URI.
+     *
+     * @param audience The JWT's intended audience.
+     * @see #addAudience(java.net.URI)
+     */
     public void addAudience(String audience) {
+        StringOrURI.validateStringOrURI(audience);
+        getAudienceNullCheck().add(audience);
+    }
+
+    /**
+     * Adds an entry to the JWT's intended audience list, in the Claims Set.
+     *
+     * @param audience The JWT's intended audience.
+     * @see #addAudience(String)
+     */
+    public void addAudience(URI audience) {
+        getAudienceNullCheck().add(audience.toString());
+    }
+
+    /**
+     * Gets the JWT's intended audience list from the Claims Set.
+     * <p>If audience claim has not been set before, the method will create the list to contain the audience
+     * claim and set it in the Claims Set.
+     *
+     * @return The list of the JWT's intended audience.
+     */
+    private List<String> getAudienceNullCheck() {
         List<String> audienceList = getAudience();
         if (audienceList == null) {
             audienceList = new ArrayList<String>();
             put(AUD.value(), audienceList);
         }
-        audienceList.add(audience);
+        return audienceList;
     }
 
-    public void addAudience(URI audience) {
-        addAudience(audience.toString());
-    }
-
+    /**
+     * Gets the intended audience for the JWT from the Claims Set.
+     *
+     * @return The JWT's intended audience.
+     */
     public List<String> getAudience() {
         return get(AUD.value()).asList(String.class);
     }
 
+    /**
+     * Sets the time the JWT was issued at, in the Claims Set.
+     * <p>
+     * The given date will be converted into an {@link IntDate} to be stored in the JWT Claims Set.
+     *
+     * @param issuedAtTime The JWT's issued at time.
+     * @see #setIssuedAtTime(long)
+     */
     public void setIssuedAtTime(Date issuedAtTime) {
-        put(IAT.value(), issuedAtTime.getTime() / 1000L);
+        put(IAT.value(), IntDate.toIntDate(issuedAtTime));
     }
 
-    private void setIssuedAtTime(long expirationTime) {
-        put(IAT.value(), expirationTime);
+    /**
+     * Sets the time the JWT was issued at, in the Claims Set.
+     * <p>
+     * This method takes a long representation of the number of <strong>seconds</strong> have passed since epoch.
+     *
+     * @param issuedAtTime The JWT's issued at time as a long in seconds.
+     * @see #setIssuedAtTime(java.util.Date)
+     */
+    private void setIssuedAtTime(long issuedAtTime) {
+        put(IAT.value(), issuedAtTime);
     }
 
-    public Date getIssuedAtTime() {    //TODO check not null!
-        return new Date(get(IAT.value()).asLong() * 1000L);
+    /**
+     * Gets the time the JWT was issued at, from the Claims Set.
+     *
+     * @return The JWT's issued at time.
+     */
+    public Date getIssuedAtTime() {
+        return IntDate.fromIntDate(get(IAT.value()).asLong());
     }
 
+    /**
+     * Sets the time the JWT is not allowed to be processed before, in the Claims Set.
+     * <p>
+     * The given date will be converted into an {@link IntDate} to be stored in the JWT Claims Set.
+     *
+     * @param notBeforeTime The JWT's not before time.
+     * @see #setNotBeforeTime(long)
+     */
     public void setNotBeforeTime(Date notBeforeTime) {
-        put(NBF.value(), notBeforeTime.getTime() / 1000L);
+        put(NBF.value(), IntDate.toIntDate(notBeforeTime));
     }
 
-    private void setNotBeforeTime(long expirationTime) {
-        put(NBF.value(), expirationTime);
+    /**
+     * Sets the time the JWT is not allowed to be processed before, in the Claims Set.
+     * <p>
+     * The method takes a long representation of the number of <strong>seconds</strong> have passed since epoch.
+     *
+     * @param notBeforeTime The JWT's not before time.
+     * @see #setNotBeforeTime(java.util.Date)
+     */
+    private void setNotBeforeTime(long notBeforeTime) {
+        put(NBF.value(), notBeforeTime);
     }
 
+    /**
+     * Gets the time the JWT is not allowed to be processed before, from the Claims Set.
+     *
+     * @return The JWT's not before time.
+     */
     public Date getNotBeforeTime() {
-        return new Date(get(NBF.value()).asLong() * 1000L);
+        return IntDate.fromIntDate(get(NBF.value()).asLong());
     }
 
+    /**
+     * Sets the expiration time of the JWT in the Claims Set.
+     * <p>
+     * The given date will be converted into an {@link IntDate} to be stored in the JWT Claims Set.
+     *
+     * @param expirationTime The JWT's expiration time.
+     * @see #setExpirationTime(long)
+     */
     public void setExpirationTime(Date expirationTime) {
-        put(EXP.value(), expirationTime.getTime() / 1000L);  //TODO Use class level Calendar and method to set millis to 0
+        put(EXP.value(), IntDate.toIntDate(expirationTime));
     }
 
+    /**
+     * Sets the expiration time of the JWT in the Claims Set.
+     * <p>
+     * This method takes a long representation of the number of <strong>seconds</strong> have passed since epoch.
+     *
+     * @param expirationTime The JWT's expiration time as a long in seconds.
+     * @see #setExpirationTime(java.util.Date)
+     */
     private void setExpirationTime(long expirationTime) {
         put(EXP.value(), expirationTime);
     }
 
+    /**
+     * Gets the expiration time of the JWT from the Claims Set.
+     *
+     * @return The JWT's expiration time.
+     */
     public Date getExpirationTime() {
-        return new Date(get(EXP.value()).asLong() * 1000L);
+        return IntDate.fromIntDate(get(EXP.value()).asLong());
     }
 
+    /**
+     * Sets a claim with the specified name and value.
+     * <p>
+     * If the key matches one of the reserved claim names, then the relevant <tt>set</tt> method is called to set that
+     * claim with the specified name and value.
+     *
+     * @param key The claim name.
+     * @param value The claim value.
+     */
     public void setClaim(String key, Object value) {
 
         JwtClaimsSetKey claimsSetKey = getClaimSetKey(key.toUpperCase());
 
         switch (claimsSetKey) {
-            case TYP: {
+        case TYP: {
+            checkValueIsOfType(value, String.class);
+            setType((String) value);
+            break;
+        }
+        case JTI: {
+            checkValueIsOfType(value, String.class);
+            setJwtId((String) value);
+            break;
+        }
+        case ISS: {
+            if (isValueOfType(value, URI.class)) {
+                setIssuer((URI) value);
+            } else {
                 checkValueIsOfType(value, String.class);
-                setType((String) value);
-                break;
+                setIssuer((String) value);
             }
-            case JTI: {
+            break;
+        }
+        case PRN: {
+            if (isValueOfType(value, URI.class)) {
+                setPrincipal((URI) value);
+            } else {
                 checkValueIsOfType(value, String.class);
-                setJwtId((String) value);
-                break;
+                setPrincipal((String) value);
             }
-            case ISS: {
-                if (isValueOfType(value, URI.class)) {
-                    setIssuer((URI) value);
-                } else {
-                    checkValueIsOfType(value, String.class);
-                    setIssuer((String) value);
-                }
-                break;
-            }
-            case PRN: {
-                if (isValueOfType(value, URI.class)) {
-                    setPrincipal((URI) value);
-                } else {
-                    checkValueIsOfType(value, String.class);
-                    setPrincipal((String) value);
-                }
-                break;
-            }
-            case AUD: {
-                if (isValueOfType(value, List.class)) {
-                    List<?> audienceList = (List<?>) value;
-                    for (Object audience : audienceList) {
-                        if (isValueOfType(audience, URI.class)) {
-                            addAudience((URI) audience);
-                        } else {
-                            checkValueIsOfType(audience, String.class);
-                            addAudience((String) audience);
-                        }
-                    }
-                } else {
-                    if (isValueOfType(value, URI.class)) {
-                        addAudience((URI) value);
+            break;
+        }
+        case AUD: {
+            if (isValueOfType(value, List.class)) {
+                List<?> audienceList = (List<?>) value;
+                for (Object audience : audienceList) {
+                    if (isValueOfType(audience, URI.class)) {
+                        addAudience((URI) audience);
                     } else {
-                        checkValueIsOfType(value, String.class);
-                        addAudience((String) value);
+                        checkValueIsOfType(audience, String.class);
+                        addAudience((String) audience);
                     }
                 }
-                break;
-            }
-            case IAT: {
-                if (isValueOfType(value, Number.class)) {
-                    setIssuedAtTime(((Number) value).longValue());
+            } else {
+                if (isValueOfType(value, URI.class)) {
+                    addAudience((URI) value);
                 } else {
-                    checkValueIsOfType(value, Date.class);
-                    setIssuedAtTime((Date) value);
+                    checkValueIsOfType(value, String.class);
+                    addAudience((String) value);
                 }
-                break;
             }
-            case NBF: {
-                if (isValueOfType(value, Number.class)) {
-                    setNotBeforeTime(((Number) value).longValue());
-                } else {
-                    checkValueIsOfType(value, Date.class);
-                    setNotBeforeTime((Date) value);
-                }
-                break;
+            break;
+        }
+        case IAT: {
+            if (isValueOfType(value, Number.class)) {
+                setIssuedAtTime(((Number) value).longValue());
+            } else {
+                checkValueIsOfType(value, Date.class);
+                setIssuedAtTime((Date) value);
             }
-            case EXP: {
-                if (isValueOfType(value, Number.class)) {
-                    setExpirationTime(((Number) value).longValue());
-                } else {
-                    checkValueIsOfType(value, Date.class);
-                    setExpirationTime((Date) value);
-                }
-                break;
+            break;
+        }
+        case NBF: {
+            if (isValueOfType(value, Number.class)) {
+                setNotBeforeTime(((Number) value).longValue());
+            } else {
+                checkValueIsOfType(value, Date.class);
+                setNotBeforeTime((Date) value);
             }
-            default: {
-                put(key, value);
+            break;
+        }
+        case EXP: {
+            if (isValueOfType(value, Number.class)) {
+                setExpirationTime(((Number) value).longValue());
+            } else {
+                checkValueIsOfType(value, Date.class);
+                setExpirationTime((Date) value);
             }
+            break;
+        }
+        default: {
+            put(key, value);
+        }
         }
     }
 
+    /**
+     * Sets claims using the values contained in the specified map.
+     *
+     * @param claims The Map to use to set the claims.
+     */
     public void setClaims(Map<String, Object> claims) {
         for (String key : claims.keySet()) {
             setClaim(key, claims.get(key));
         }
     }
 
+    /**
+     * Gets a claim value for the specified key.
+     * <p>
+     * If the key matches one of the reserved claim names, then the relevant <tt>get</tt> method is called to get that
+     * claim value.
+     *
+     * @param key The claim name.
+     * @return The value stored against the claim name.
+     */
     public Object getClaim(String key) {
 
         JwtClaimsSetKey claimsSetKey = getClaimSetKey(key.toUpperCase());
@@ -226,50 +430,64 @@ public class JwtClaimsSet extends JWObject {
         Object value;
 
         switch (claimsSetKey) {
-            case TYP: {
-                value = getType();
-                break;
-            }
-            case JTI: {
-                value = getJwtId();
-                break;
-            }
-            case ISS: {
-                value = getIssuer();
-                break;
-            }
-            case PRN: {
-                value = getPrincipal();
-                break;
-            }
-            case AUD: {
-                value = getAudience();
-                break;
-            }
-            case IAT: {
-                value = getIssuedAtTime();
-                break;
-            }
-            case NBF: {
-                value = getNotBeforeTime();
-                break;
-            }
-            case EXP: {
-                value = getExpirationTime();
-                break;
-            }
-            default: {
-                value = get(key).getObject();
-            }
+        case TYP: {
+            value = getType();
+            break;
+        }
+        case JTI: {
+            value = getJwtId();
+            break;
+        }
+        case ISS: {
+            value = getIssuer();
+            break;
+        }
+        case PRN: {
+            value = getPrincipal();
+            break;
+        }
+        case AUD: {
+            value = getAudience();
+            break;
+        }
+        case IAT: {
+            value = getIssuedAtTime();
+            break;
+        }
+        case NBF: {
+            value = getNotBeforeTime();
+            break;
+        }
+        case EXP: {
+            value = getExpirationTime();
+            break;
+        }
+        default: {
+            value = get(key).getObject();
+        }
         }
 
         return value;
     }
 
+    /**
+     * Gets a claim value for the specified claim name and then casts it to the specified type.
+     *
+     * @param key The claim name.
+     * @param clazz The class of the required type.
+     * @param <T> The required type for the claim value.
+     * @return The value stored against the claim name.
+     * @see #getClaim(String)
+     */
     public <T> T getClaim(String key, Class<T> clazz) {
-        return (T) getClaim(key);
+        return clazz.cast(getClaim(key));
     }
 
+    /**
+     * Builds the JWT's Claims Set into a <code>String</code> representation of a JSON object.
+     *
+     * @return A JSON string.
+     */
     public String build() {
         return toString();
     }
