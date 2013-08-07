@@ -16,7 +16,7 @@
 
 package org.forgerock.jaspi.modules.session.jwt;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.jose.builders.JwtBuilderFactory;
 import org.forgerock.json.jose.jwe.EncryptedJwt;
