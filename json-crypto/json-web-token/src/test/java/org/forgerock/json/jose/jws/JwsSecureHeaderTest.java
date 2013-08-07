@@ -16,7 +16,10 @@
 
 package org.forgerock.json.jose.jws;
 
+import org.forgerock.json.jose.jwk.EcJWK;
 import org.forgerock.json.jose.jwk.JWK;
+import org.forgerock.json.jose.jwk.KeyUse;
+import org.forgerock.json.jose.jwk.OctJWK;
 import org.forgerock.json.jose.utils.Utils;
 import org.forgerock.util.encode.Base64;
 import org.testng.annotations.Test;
@@ -67,19 +70,14 @@ public class JwsSecureHeaderTest {
 
         //Given
         JwsHeader header = new JwsHeader();
-        JWK jsonWebKey = new JWK() {
-            @Override
-            public String toString() {
-                return "JWK";
-            }
-        };
+        JWK jsonWebKey = new OctJWK(KeyUse.ENC, "", "1", "5", null, null, null);
         header.setParameter("jwk", jsonWebKey);
 
         //When
         JWK actualJsonWebKey = header.getJsonWebKey();
 
         //Then
-        assertEquals(actualJsonWebKey, jsonWebKey);
+        assertEquals(actualJsonWebKey.toString(), jsonWebKey.toString());
     }
 
     @Test
