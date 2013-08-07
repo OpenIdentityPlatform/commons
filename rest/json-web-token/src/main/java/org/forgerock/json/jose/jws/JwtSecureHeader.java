@@ -16,6 +16,7 @@
 
 package org.forgerock.json.jose.jws;
 
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.jose.exceptions.JwtRuntimeException;
 import org.forgerock.json.jose.jwk.JWK;
 import org.forgerock.json.jose.jwt.JwtHeader;
@@ -101,7 +102,7 @@ public abstract class JwtSecureHeader extends JwtHeader {
      * @return The JSON Web Key.
      */
     public JWK getJsonWebKey() {
-        return (JWK) get(JWK.value()).getObject();
+        return (JWK)get(JWK.value()).getObject();
     }
 
     /**
