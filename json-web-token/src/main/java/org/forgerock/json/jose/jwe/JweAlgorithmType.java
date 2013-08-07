@@ -11,15 +11,28 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwe;
 
+/**
+ * An Enum of the possible types of JWE algorithms that can be used to encrypt a JWT.
+ * @see JweAlgorithm
+ *
+ * @author Phill Cunnington
+ * @since 2.0.0
+ */
 public enum JweAlgorithmType {
 
+    /** RSA encryption algorithm. */
     RSA;
 
+    /**
+     * Turns the JweAlgorithmType constant into a JSON value string.
+     *
+     * @return {@inheritDoc}
+     */
     @Override
     public String toString() {
         return super.toString();

@@ -11,34 +11,34 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.builders;
 
-import org.forgerock.json.jose.common.JwtReconstruction;
-import org.forgerock.json.jose.jwe.EncryptedJwt;
-import org.forgerock.json.jose.jws.SignedJwt;
 import org.forgerock.json.jose.jwt.Jwt;
 
-import java.security.Key;
-import java.util.Date;
+/**
+ * The base interface for all JwtBuilders for each type of JWT (plaintext, signed or encrypted).
+ *
+ * @author Phill Cunnington
+ * @since 2.0.0
+ */
+public interface JwtBuilder {
 
-public class JwtBuilder {
+    /**
+     * Builds the JWT object from its constituent parts.
+     *
+     * @return The Jwt.
+     */
+    Jwt asJwt();
 
-    public AbstractJwtBuilder jwt() {
-        return new SignedJwtBuilder(null);
-    }
-
-    public SignedJwtBuilder jws(Key privateKey) {
-        return new SignedJwtBuilder(privateKey);
-    }
-
-    public EncryptedJwtBuilder jwe(Key publicKey) {
-        return new EncryptedJwtBuilder(publicKey);
-    }
-
-    public <T extends Jwt> T reconstruct(String jwtString, Class<T> jwtClass) {
-        return new JwtReconstruction().reconstructJwt(jwtString, jwtClass);
-    }
+    /**
+     * Builds the JWT into a <code>String</code> by calling the <tt>build</tt> method on the JWT object.
+     * <p>
+     * @see org.forgerock.json.jose.jwt.Jwt#build()
+     *
+     * @return The base64url encoded UTF-8 parts of the JWT.
+     */
+    String build();
 }

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.builders;
@@ -19,89 +19,85 @@ package org.forgerock.json.jose.builders;
 import org.forgerock.json.jose.jwe.CompressionAlgorithm;
 import org.forgerock.json.jose.jwe.EncryptionMethod;
 import org.forgerock.json.jose.jwe.JweHeader;
-import org.forgerock.json.jose.jwk.JWK;
-import org.forgerock.json.jose.jwt.Algorithm;
 import org.forgerock.json.jose.jwt.JwtHeader;
 
-import java.net.URL;
-import java.util.List;
+/**
+ * An implementation of a JWE Header builder that provides a fluent builder pattern to create JWE headers.
+ * <p>
+ * See {@link JweHeader} for information on the JweHeader object that this builder creates.
+ *
+ * @author Phill Cunnington
+ * @since 2.0.0
+ */
+public class JweHeaderBuilder extends JwtSecureHeaderBuilder<EncryptedJwtBuilder, JweHeaderBuilder> {
 
-public class JweHeaderBuilder extends JwtSecureHeaderBuilder {
-
+    /**
+     * Constructs a new JweHeaderBuilder, parented by the given JwtBuilder.
+     *
+     * @param jwtBuilder The JwtBuilder instance that this JweHeaderBuilder is a child of.
+     */
     public JweHeaderBuilder(EncryptedJwtBuilder jwtBuilder) {
         super(jwtBuilder);
     }
 
-    @Override
-    public JweHeaderBuilder header(String key, Object value) {
-        return (JweHeaderBuilder) super.header(key, value);
-    }
-
-    @Override
-    public JweHeaderBuilder alg(Algorithm algorithm) {
-        return (JweHeaderBuilder) super.alg(algorithm);
-    }
-
-    @Override
-    public JweHeaderBuilder jku(URL jku) {
-        return (JweHeaderBuilder) super.jku(jku);
-    }
-
-    @Override
-    public JweHeaderBuilder jwk(JWK jwk) {
-        return (JweHeaderBuilder) super.jwk(jwk);
-    }
-
-    @Override
-    public JweHeaderBuilder x5u(URL x5u) {
-        return (JweHeaderBuilder) super.x5u(x5u);
-    }
-
-    @Override
-    public JweHeaderBuilder x5t(String x5t) {
-        return (JweHeaderBuilder) super.x5t(x5t);
-    }
-
-    @Override
-    public JweHeaderBuilder x5c(List<String> x5c) {
-        return (JweHeaderBuilder) super.x5c(x5c);
-    }
-
-    @Override
-    public JweHeaderBuilder kid(String kid) {
-        return (JweHeaderBuilder) super.kid(kid);
-    }
-
-    @Override
-    public JweHeaderBuilder cty(String cty) {
-        return (JweHeaderBuilder) super.cty(cty);
-    }
-
-    @Override
-    public JweHeaderBuilder crit(List<String> crit) {
-        return (JweHeaderBuilder) super.crit(crit);
-    }
-
+    /**
+     * Sets the Encryption Method header parameter for this JWE.
+     * <p>
+     * @see org.forgerock.json.jose.jwe.JweHeader#setEncryptionMethod(org.forgerock.json.jose.jwe.EncryptionMethod)
+     *
+     * @param enc The Encryption Method.
+     * @return This JweHeaderBuilder.
+     */
     public JweHeaderBuilder enc(EncryptionMethod enc) {
         header("enc", enc.toString());
         return this;
     }
 
+    /**
+     * Sets the Ephemeral Public Key header parameter for this JWE.
+     * <p>
+     * @see org.forgerock.json.jose.jwe.JweHeader#setEphemeralPublicKey(org.forgerock.json.jose.jwk.JWK)
+     *
+     * @param epk The Ephemeral Public Key.
+     * @return This JweHeaderBuilder.
+     */
     public JweHeaderBuilder epk(String epk) {
         header("epk", epk);
         return this;
     }
 
+    /**
+     * Sets the Compression Algorithm header parameter for this JWE.
+     * <p>
+     * @see org.forgerock.json.jose.jwe.JweHeader#setCompressionAlgorithm(
+     * org.forgerock.json.jose.jwe.CompressionAlgorithm)
+     *
+     * @param zip The Compression Algorithm.
+     * @return This JweHeaderBuilder.
+     */
     public JweHeaderBuilder zip(CompressionAlgorithm zip) {
         header("zip", zip.toString());
         return this;
     }
 
+    /**
+     * Sets the Agreement PartyUInfo header parameter for this JWE.
+     * <p>
+     * @see org.forgerock.json.jose.jwe.JweHeader#setAgreementPartyUInfo(String)
+     *
+     * @param apu The Agreement PartyUInfo.
+     * @return This JweHeaderBuilder.
+     */
     public JweHeaderBuilder apu(String apu) {
         header("apu", apu);
         return this;
     }
 
+    /**
+     * Creates a JweHeader instance from the header parameters set in this builder.
+     *
+     * @return A JweHeader instance.
+     */
     @Override
     protected JwtHeader build() {
         return new JweHeader(getHeaders());
