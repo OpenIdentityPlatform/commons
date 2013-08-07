@@ -18,14 +18,14 @@ package org.forgerock.jaspi.modules.session.jwt;
 
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.fluent.JsonException;
-import org.forgerock.json.jose.builders.JwtBuilder;
+import org.forgerock.json.jose.builders.JwtBuilderFactory;
 import org.forgerock.json.jose.jwe.EncryptedJwt;
 import org.forgerock.json.jose.jwe.EncryptionMethod;
 import org.forgerock.json.jose.jwe.JweAlgorithm;
 import org.forgerock.json.jose.jwe.JweHeader;
 import org.forgerock.json.jose.jwt.Jwt;
 import org.forgerock.json.jose.jwt.JwtClaimsSet;
-import org.forgerock.json.jwt.keystore.KeystoreManager;
+import org.forgerock.util.KeystoreManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,7 +87,7 @@ public class JwtSessionModule implements ServerAuthModule {
     /** The Jwt Validated configuration proprety key. */
     public static final String JWT_VALIDATED_KEY = "jwtValidated";
 
-    private final JwtBuilder jwtBuilder;
+    private final JwtBuilderFactory jwtBuilderFactory;
 
     private CallbackHandler handler;
 
@@ -103,16 +103,16 @@ public class JwtSessionModule implements ServerAuthModule {
      * Constructs an instance of the JwtSessionModule.
      */
     public JwtSessionModule() {
-        jwtBuilder = new JwtBuilder();
+        jwtBuilderFactory = new JwtBuilderFactory();
     }
 
     /**
      * Constructs an instance of the JwtSessionModule.
      *
-     * @param jwtBuilder An instance of the JwtBuilder.
+     * @param jwtBuilderFactory An instance of the jwtBuilderFactory.
      */
-    public JwtSessionModule(JwtBuilder jwtBuilder) {
-        this.jwtBuilder = jwtBuilder;
+    public JwtSessionModule(JwtBuilderFactory jwtBuilderFactory) {
+        this.jwtBuilderFactory = jwtBuilderFactory;
     }
 
     /**
@@ -261,7 +261,7 @@ public class JwtSessionModule implements ServerAuthModule {
 
         RSAPrivateKey privateKey = (RSAPrivateKey) keystoreManager.getPrivateKey(keyAlias);
 
-        EncryptedJwt jwt = jwtBuilder.reconstruct(sessionJwt, EncryptedJwt.class);
+        EncryptedJwt jwt = jwtBuilderFactory.reconstruct(sessionJwt, EncryptedJwt.class);
         try {
             jwt.decrypt(privateKey);
         } catch (JsonException e) {
@@ -416,20 +416,22 @@ public class JwtSessionModule implements ServerAuthModule {
         Date tokenIdleTime = calendar.getTime();
         String jti = UUID.randomUUID().toString();
 
-        String jwtString = jwtBuilder
-                .jwe(publicKey)
-                .headers()
-                .alg(JweAlgorithm.RSAES_PKCS1_V1_5)
-                .enc(EncryptionMethod.A128CBC_HS256)
-                .done()
-                .claims()
+        JwtClaimsSet claimsSet = jwtBuilderFactory.claims()
                 .jti(jti)
                 .exp(exp)
                 .nbf(nbf)
                 .iat(iat)
                 .claim(TOKEN_IDLE_TIME_CLAIM_KEY, tokenIdleTime.getTime() / 1000L)
                 .claims(jwtParameters)
+                .build();
+
+        String jwtString = jwtBuilderFactory
+                .jwe(publicKey)
+                .headers()
+                .alg(JweAlgorithm.RSAES_PKCS1_V1_5)
+                .enc(EncryptionMethod.A128CBC_HS256)
                 .done()
+                .claims(claimsSet)
                 .build();
 
 
