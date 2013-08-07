@@ -11,74 +11,37 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.builders;
 
-import org.forgerock.json.jose.jwk.JWK;
 import org.forgerock.json.jose.jws.JwsHeader;
-import org.forgerock.json.jose.jwt.Algorithm;
 
-import java.net.URL;
-import java.util.List;
+/**
+ * An implementation of a JWS Header builder that provides a fluent builder pattern to create JWS headers.
+ * <p>
+ * See {@link JwsHeader} for information on the JwsHeader object that this builder creates.
+ *
+ * @author Phill Cunnington
+ * @since 2.0.0
+ */
+public class JwsHeaderBuilder extends JwtSecureHeaderBuilder<SignedJwtBuilderImpl, JwsHeaderBuilder> {
 
-public class JwsHeaderBuilder extends JwtSecureHeaderBuilder {
-
-    public JwsHeaderBuilder(SignedJwtBuilder jwtBuilder) {
+    /**
+     * Constructs a new JwsHeaderBuilder, parented by the given JwtBuilder.
+     *
+     * @param jwtBuilder The JwtBuilder instance that this JwsHeaderBuilder is a child of.
+     */
+    public JwsHeaderBuilder(SignedJwtBuilderImpl jwtBuilder) {
         super(jwtBuilder);
     }
 
-    @Override
-    public JwsHeaderBuilder header(String key, Object value) {
-        return (JwsHeaderBuilder) super.header(key, value);
-    }
-
-    @Override
-    public JwsHeaderBuilder alg(Algorithm algorithm) {
-        return (JwsHeaderBuilder) super.alg(algorithm);
-    }
-
-    @Override
-    public JwsHeaderBuilder jku(URL jku) {
-        return (JwsHeaderBuilder) super.jku(jku);
-    }
-
-    @Override
-    public JwsHeaderBuilder jwk(JWK jwk) {
-        return (JwsHeaderBuilder) super.jwk(jwk);
-    }
-
-    @Override
-    public JwsHeaderBuilder x5u(URL x5u) {
-        return (JwsHeaderBuilder) super.x5u(x5u);
-    }
-
-    @Override
-    public JwsHeaderBuilder x5t(String x5t) {
-        return (JwsHeaderBuilder) super.x5t(x5t);
-    }
-
-    @Override
-    public JwsHeaderBuilder x5c(List<String> x5c) {
-        return (JwsHeaderBuilder) super.x5c(x5c);
-    }
-
-    @Override
-    public JwsHeaderBuilder kid(String kid) {
-        return (JwsHeaderBuilder) super.kid(kid);
-    }
-
-    @Override
-    public JwsHeaderBuilder cty(String cty) {
-        return (JwsHeaderBuilder) super.cty(cty);
-    }
-
-    @Override
-    public JwsHeaderBuilder crit(List<String> crit) {
-        return (JwsHeaderBuilder) super.crit(crit);
-    }
-
+    /**
+     * Creates a JwsHeader instance from the header parameters set in this builder.
+     *
+     * @return A JwsHeader instance.
+     */
     @Override
     protected JwsHeader build() {
         return new JwsHeader(getHeaders());

@@ -11,37 +11,47 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.utils;
 
-import java.net.URI;
+import org.forgerock.json.jose.exceptions.JwtRuntimeException;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
+/**
+ * This class provides an utility method for validating that a String is either an arbitrary string without any ":"
+ * characters or if the String does contain a ":" character then the String is a valid URI.
+ *
+ * @see <a href="http://tools.ietf.org/html/draft-jones-json-web-token-10#section-2">StringOrURI</a>
+ *
+ * @author Phill Cunnington
+ * @since 2.0.0
+ */
 public final class StringOrURI {
 
-    private final String string;
-    private final URI uri;
-
-    public StringOrURI(String string) {
-        this(string, null);
+    /**
+     * Private constructor.
+     */
+    private StringOrURI() {
     }
 
-    public StringOrURI(URI uri) {
-        this(null, uri);
-    }
-
-    private StringOrURI(String string, URI uri) {
-        this.string = string;
-        this.uri = uri;
-    }
-
-    @Override
-    public String toString() {
-        if (string != null) {
-            return string;
-        } else {
-            return uri.toString();
+    /**
+     * Validates that the given String is either an arbitrary string without any ":" characters, otherwise validates
+     * that the String is a valid URI.
+     *
+     * @param s The String to validate.
+     * @throws JwtRuntimeException if the given String contains a ":" character and is not a valid URI.
+     */
+    public static void validateStringOrURI(String s) {
+        if (s != null && s.contains(":")) {
+            try {
+                new URI(s);
+            } catch (URISyntaxException e) {
+                throw new JwtRuntimeException(e);
+            }
         }
     }
 }

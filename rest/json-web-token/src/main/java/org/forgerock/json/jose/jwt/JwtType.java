@@ -11,17 +11,46 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwt;
 
+/**
+ * An Enum for the possible types of JWTs.
+ * <p>
+ * There are only three possible types of JWTs, plaintext, signed or encrypted. For non-nested JWTs then the "JWT" type
+ * is RECOMMENDED to be used but it is OPTIONAL to set the "typ" property in the JWT header. For nested signed or
+ * encrypted JWTs the JWT type MUST be "JWS" and "JWE" respectively and the "typ" property in the JWT header MUST be
+ * set.
+ *
+ * @author Phill Cunnington
+ * @since 2.0.0
+ */
 public enum JwtType {
 
+    /** Used for plaintext, non-nested signed or non-nested encrypted JWTs. */
     JWT,
+    /** Used when signing a nested JWT. */
     JWS,
+    /** Used when encrypting a nested JWT. */
     JWE;
 
+    /**
+     * Finds the value of the String representation of the given JWT type.
+     *
+     * @param jwtType The JWT type.
+     * @return The JWT type enum.
+     */
+    public static JwtType jwtType(String jwtType) {
+        return valueOf(jwtType.toUpperCase());
+    }
+
+    /**
+     * Turns the JwtType constant into a lowercase String.
+     *
+     * @return {@inheritDoc}
+     */
     @Override
     public String toString() {
         return super.toString().toLowerCase();

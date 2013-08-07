@@ -11,11 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwt;
 
+import org.forgerock.json.jose.exceptions.JwtRuntimeException;
 import org.testng.annotations.Test;
 
 import java.net.URI;
@@ -620,8 +621,8 @@ public class JwtClaimsSetTest {
         assertTrue(claimsSet.get("aud").asList(String.class).contains("AUDIENCE"));
     }
 
-    @Test (expectedExceptions = RuntimeException.class)                        //TODO update test when sorted exception out in class being tested
-    public void shouldThrowXXXExceptionWhenValueIsOfWrongType() throws URISyntaxException {
+    @Test (expectedExceptions = JwtRuntimeException.class)
+    public void shouldThrowJwtRuntimeExceptionWhenValueIsOfWrongType() throws URISyntaxException {
 
         //Given
         Map<String, Object> claims = new HashMap<String, Object>();

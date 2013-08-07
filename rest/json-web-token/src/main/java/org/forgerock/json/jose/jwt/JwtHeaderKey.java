@@ -11,29 +11,64 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwt;
 
+/**
+ * An Enum for the JWT Header parameter names.
+ * <p>
+ * As described in the JWT specification, the reserved JWT header parameters are listed,
+ * <ul>
+ *     <li>"typ"</li>
+ *     <li>"alg"</li>
+ * </ul>
+ * Any other header parameter name is deemed as a "custom" header parameter.
+ *
+ * @author Phill Cunnington
+ * @since 2.0.0
+ */
 public enum JwtHeaderKey {
 
-    TYP,      //TODO can actually by media types to in the case of JWS
+    /** Type JWT header parameter.. */
+    TYP,
+    /** Algorithm JWT header parameter. */
     ALG,
+    /** Generic header key for a custom header parameter. */
     CUSTOM;
 
+    /**
+     * Returns a lowercase String of the JwtHeaderKey constant.
+     *
+     * @return Lowercase String representation of the constant.
+     * @see #toString()
+     */
     public String value() {
         return toString();
     }
 
+    /**
+     * Gets the JwtHeaderKey constant that matches the given String.
+     * <p>
+     * If the given String does not match any of the constants, then CUSTOM is returned.
+     *
+     * @param headerKey The String representation of a JwtHeaderKey.
+     * @return The matching JwtHeaderKey.
+     */
     public static JwtHeaderKey getHeaderKey(String headerKey) {
         try {
-            return JwtHeaderKey.valueOf(headerKey);
+            return JwtHeaderKey.valueOf(headerKey.toUpperCase());
         } catch (IllegalArgumentException e) {
             return CUSTOM;
         }
     }
 
+    /**
+     * Turns the JwtHeaderKey constant into a lowercase String.
+     *
+     * @return {@inheritDoc}
+     */
     @Override
     public String toString() {
         return super.toString().toLowerCase();

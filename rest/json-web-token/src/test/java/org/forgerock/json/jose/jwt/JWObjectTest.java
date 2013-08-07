@@ -11,11 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwt;
 
+import org.forgerock.json.jose.exceptions.JwtRuntimeException;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
@@ -32,7 +33,7 @@ public class JWObjectTest {
     public void shouldNotPutNullValues() {
 
         //Given
-        JWObject jwObject = new JWObject() {};
+        JWObject jwObject = new JWObject() { };
 
         //When
         jwObject.put("KEY1", null);
@@ -45,7 +46,7 @@ public class JWObjectTest {
     public void shouldRemoveExistingValueWhenPuttingNewValueIsNull() {
 
         //Given
-        JWObject jwObject = new JWObject() {};
+        JWObject jwObject = new JWObject() { };
         jwObject.put("KEY1", "VALUE1");
 
         //When
@@ -59,7 +60,7 @@ public class JWObjectTest {
     public void shouldGetValue() {
 
         //Given
-        JWObject jwObject = new JWObject() {};
+        JWObject jwObject = new JWObject() { };
         jwObject.put("KEY", "VALUE");
 
         //When
@@ -73,7 +74,7 @@ public class JWObjectTest {
     public void shouldCheckIfIsDefined() {
 
         //Given
-        JWObject jwObject = new JWObject() {};
+        JWObject jwObject = new JWObject() { };
 
         //When
         jwObject.put("KEY", "VALUE");
@@ -86,7 +87,7 @@ public class JWObjectTest {
     public void shouldCheckValueIsOfType() {
 
         //Given
-        JWObject jwObject = new JWObject() {};
+        JWObject jwObject = new JWObject() { };
 
         //When
         jwObject.checkValueIsOfType("VALUE", String.class);
@@ -96,11 +97,11 @@ public class JWObjectTest {
         //Then
     }
 
-    @Test (expectedExceptions = RuntimeException.class)   //TODO update test when sorted exception out in class being tested
-    public void shouldThrowXXXExceptionWhenValueIsOfWrongType() {
+    @Test (expectedExceptions = JwtRuntimeException.class)
+    public void shouldThrowJwtRuntimeExceptionWhenValueIsOfWrongType() {
 
         //Given
-        JWObject jwObject = new JWObject() {};
+        JWObject jwObject = new JWObject() { };
 
         //When
         jwObject.checkValueIsOfType("VALUE", String.class);
@@ -114,7 +115,7 @@ public class JWObjectTest {
     public void shouldCheckListValuesAreOfType() {
 
         //Given
-        JWObject jwObject = new JWObject() {};
+        JWObject jwObject = new JWObject() { };
         List<String> strings = new ArrayList<String>();
         strings.add("STRING");
         List<Date> dates = new ArrayList<Date>();
@@ -133,7 +134,7 @@ public class JWObjectTest {
     public void shouldCheckListValuesAreOfTypeOkIfWrongListTypeIsEmpty() {
 
         //Given
-        JWObject jwObject = new JWObject() {};
+        JWObject jwObject = new JWObject() { };
         List<String> strings = new ArrayList<String>();
         strings.add("STRING");
         List<Integer> dates = new ArrayList<Integer>();
@@ -148,11 +149,11 @@ public class JWObjectTest {
         //Then
     }
 
-    @Test (expectedExceptions = RuntimeException.class)   //TODO update test when sorted exception out in class being tested
-    public void shouldThrowXXXExceptionWhenListValuesAreOfWrongType() {
+    @Test (expectedExceptions = JwtRuntimeException.class)
+    public void shouldThrowJwtRuntimeExceptionWhenListValuesAreOfWrongType() {
 
         //Given
-        JWObject jwObject = new JWObject() {};
+        JWObject jwObject = new JWObject() { };
         List<String> strings = new ArrayList<String>();
         strings.add("STRING");
         List<Integer> dates = new ArrayList<Integer>();
@@ -172,7 +173,7 @@ public class JWObjectTest {
     public void shouldCheckIfIsValueOfType() {
 
         //Given
-        JWObject jwObject = new JWObject() {};
+        JWObject jwObject = new JWObject() { };
 
         //When
         boolean isString = jwObject.isValueOfType("VALUE", String.class);
@@ -189,7 +190,7 @@ public class JWObjectTest {
     public void shouldToString() {
 
         //Given
-        JWObject jwObject = new JWObject() {};
+        JWObject jwObject = new JWObject() { };
         jwObject.put("KEY1", "VALUE1");
         jwObject.put("KEY2", "VALUE2");
 

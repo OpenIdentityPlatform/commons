@@ -11,23 +11,43 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jws;
 
 import java.util.Map;
 
+/**
+ * An implementation for the JWS Header parameters.
+ *
+ * @author Phill Cunnington
+ * @since 2.0.0
+ */
 public class JwsHeader extends JwtSecureHeader {
 
+    /**
+     * Constructs a new, empty JwsHeader.
+     */
     public JwsHeader() {
-        super();
     }
 
+    /**
+     * Constructs a new JwsHeader, with its parameters set to the contents of the given Map.
+     *
+     * @param headerParameters A Map containing the parameters to be set in the header.
+     */
     public JwsHeader(Map<String, Object> headerParameters) {
         super(headerParameters);
     }
 
+    /**
+     * Gets the Algorithm set in the JWT header.
+     * <p>
+     * If there is no algorithm set in the JWT header, then the JwsAlgorithm NONE will be returned.
+     *
+     * @return {@inheritDoc}
+     */
     @Override
     public JwsAlgorithm getAlgorithm() {
         String algorithm = getAlgorithmString();

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwt;
@@ -20,87 +20,184 @@ import java.util.Map;
 
 import static org.forgerock.json.jose.jwt.JwtHeaderKey.*;
 
+/**
+ * A base implementation class for JWT Headers.
+ * <p>
+ * Provides methods to set header parameters for all types of JWT Headers.
+ *
+ * @see org.forgerock.json.jose.jws.JwsHeader
+ * @see org.forgerock.json.jose.jwe.JweHeader
+ *
+ * @author Phill Cunnington
+ * @since 2.0.0
+ */
 public abstract class JwtHeader extends JWObject {
 
+    /**
+     * Constructs a new JwtHeader, with the "typ" parameter set to "JWT".
+     */
     public JwtHeader() {
-        put(TYP.value(), JwtType.JWT.toString()); //TODO determine dynamically, i.e. when signing and encrypted JWT
+        put(TYP.value(), JwtType.JWT.toString());
     }
 
+    /**
+     * Constructs a new JwtHeader, with its parameters set to the contents of the given Map.
+     *
+     * @param headers A Map containing the parameters to be set in the header.
+     */
     public JwtHeader(Map<String, Object> headers) {
         this();
-        setHeaders(headers);
+        setParameters(headers);
     }
 
+    /**
+     * Sets the type of JWT this header represents.
+     * <p>
+     * For non-nested JWTs then the "JWT" type is RECOMMENDED to be used but it is OPTIONAL to set the "typ" property.
+     * For nested signed or encrypted JWTs the JWT type MUST be "JWS" and "JWE" respectively and the "typ" property
+     * MUST be set.
+     *
+     * @see JwtType
+     *
+     * @param jwtType The JwtType.
+     */
+    public void setType(JwtType jwtType) {
+        put(TYP.value(), jwtType.toString());
+    }
+
+    /**
+     * Gets the type of JWT this header represents.
+     *
+     * @return The JwtType.
+     */
+    public JwtType getType() {
+        return JwtType.valueOf(get(TYP.value()).asString().toUpperCase());
+    }
+
+    /**
+     * Sets the algorithm used to perform cryptographic signing and/or encryption on the JWT.
+     *
+     * @param algorithm The Algorithm.
+     */
     public void setAlgorithm(Algorithm algorithm) {
         put(ALG.value(), algorithm.toString());
     }
 
+    /**
+     * Gets the Algorithm set in the JWT header.
+     *
+     * @return The Algorithm.
+     */
     public abstract Algorithm getAlgorithm();
 
+    /**
+     * Gets the string representation of the Algorithm set in the JWT header.
+     *
+     * @return The algorithm as a String.
+     */
     protected String getAlgorithmString() {
         return get(ALG.value()).asString();
     }
 
-    public JwtType getJwtType() {
-        return JwtType.valueOf(get(TYP.value()).asString().toUpperCase());
-    }
-
-    public void setHeader(String key, Object value) {
+    /**
+     * Sets a header parameter with the specified key and value.
+     * <p>
+     * If the key matches one of the reserved header parameter names, then the relevant <tt>set</tt> method is
+     * called to set that header parameter with the specified value.
+     *
+     * @param key The key of the header parameter.
+     * @param value The value of the header parameter.
+     */
+    public void setParameter(String key, Object value) {
         JwtHeaderKey headerKey = getHeaderKey(key.toUpperCase());
 
         switch (headerKey) {
-            case TYP: {
-//                checkValueIsOfType(value, String.class);
-//                setType((String) value);    //TODO what to do here as only system can set typ header???
-                break;
+        case TYP: {
+            if (isValueOfType(value, JwtType.class)) {
+                setType((JwtType) value);
+            } else {
+                checkValueIsOfType(value, String.class);
+                setType(JwtType.jwtType((String) value));
             }
-            case ALG: {
-                if (isValueOfType(value, Algorithm.class)) {
-                    setAlgorithm((Algorithm) value);
-                } else {
-                    checkValueIsOfType(value, String.class);
-                    put(ALG.value(), value);
-                }
-                break;
+            break;
+        }
+        case ALG: {
+            if (isValueOfType(value, Algorithm.class)) {
+                setAlgorithm((Algorithm) value);
+            } else {
+                checkValueIsOfType(value, String.class);
+                put(ALG.value(), value);
             }
-            default: {
-                put(key, value);
-            }
+            break;
+        }
+        default: {
+            put(key, value);
+        }
         }
     }
 
-    public void setHeaders(Map<String, Object> headers) {
+    /**
+     * Sets header parameters using the values contained in the specified map.
+     *
+     * @param headers The Map to use to set header parameters.
+     * @see #setParameter(String, Object)
+     */
+    public void setParameters(Map<String, Object> headers) {
         for (String key : headers.keySet()) {
-            setHeader(key, headers.get(key));
+            setParameter(key, headers.get(key));
         }
     }
 
-    public Object getHeader(String key) {
+    /**
+     * Gets a header parameter for the specified key.
+     * <p>
+     * If the key matches one of the reserved header parameter names, then the relevant <tt>get</tt> method is
+     * called to get that header parameter.
+     *
+     * @param key The header parameter key.
+     * @return The value stored against the header parameter key.
+     */
+    public Object getParameter(String key) {
         JwtHeaderKey headerKey = getHeaderKey(key.toUpperCase());
 
         Object value;
 
         switch (headerKey) {
-            case TYP: {
-                value = getJwtType();
-                break;
-            }
-            case ALG: {
-                value = getAlgorithm();
-                break;
-            }
-            default: {
-                value = get(key).getObject();
-            }
+        case TYP: {
+            value = getType();
+            break;
+        }
+        case ALG: {
+            value = getAlgorithm();
+            break;
+        }
+        default: {
+            value = get(key).getObject();
+        }
         }
 
         return value;
     }
 
-    public <T> T getHeader(String key, Class<T> clazz) {
-        return (T) getHeader(key);
+    /**
+     * Gets a header parameter for the specified key and then casts it to the specified type.
+     *
+     * @param key The header parameter key.
+     * @param clazz The class of the required type.
+     * @param <T> The required type for the header parameter value.
+     * @return The value stored against the header parameter key.
+     * @see #getParameter(String)
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T getParameter(String key, Class<T> clazz) {
+        return clazz.cast(getParameter(key));
     }
 
+    /**
+     * Builds the JWT's header into a <code>String</code> representation of a JSON object.
+     *
+     * @return A JSON string.
+     */
     public String build() {
         return toString();
     }
