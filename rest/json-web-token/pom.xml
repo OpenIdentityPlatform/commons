@@ -25,7 +25,6 @@
 
     <artifactId>json-web-token</artifactId>
     <name>JSON Web Token</name>
-    <version>2.0.0</version>
     <description>ForgeRock JSON Web Token library</description>
     <packaging>bundle</packaging>
     <properties>
