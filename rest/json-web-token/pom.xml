@@ -25,6 +25,7 @@
 
     <artifactId>json-web-token</artifactId>
     <name>JSON Web Token</name>
+    <version>2.0.0</version>
     <description>ForgeRock JSON Web Token library</description>
     <packaging>bundle</packaging>
     <properties>
@@ -40,7 +41,6 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <!--<Private-Package>org.forgerock.util</Private-Package>-->
                         <Export-Package>
                             org.forgerock.common.util;version=${project.version},
                             org.forgerock.json.jose.builders;version=${project.version},
@@ -55,7 +55,6 @@
                             org.forgerock.json.jose.jws.handlers;version=${project.version},
                             org.forgerock.json.jose.utils;version=${project.version}
                         </Export-Package>
-                        <!--org.forgerock.json.jose.jwe.handlers;version=${project.version},-->
                     </instructions>
                 </configuration>
             </plugin>
