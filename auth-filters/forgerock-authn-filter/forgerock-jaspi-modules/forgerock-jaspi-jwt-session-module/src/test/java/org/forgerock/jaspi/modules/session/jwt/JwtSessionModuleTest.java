@@ -16,10 +16,8 @@
 
 package org.forgerock.jaspi.modules.session.jwt;
 
-import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.jose.builders.EncryptedJwtBuilder;
 import org.forgerock.json.jose.builders.JweHeaderBuilder;
-import org.forgerock.json.jose.builders.JwtBuilder;
 import org.forgerock.json.jose.builders.JwtBuilderFactory;
 import org.forgerock.json.jose.builders.JwtClaimsSetBuilder;
 import org.forgerock.json.jose.jwe.EncryptedJwt;
@@ -243,48 +241,6 @@ public class JwtSessionModuleTest {
         given(cookie2.getName()).willReturn("COOKIE2");
         given(jwtSessionCookie.getName()).willReturn("session-jwt");
         given(jwtSessionCookie.getValue()).willReturn("");
-
-        //When
-        AuthStatus authStatus = jwtSessionModule.validateRequest(messageInfo, clientSubject, serviceSubject);
-
-        //Then
-        assertEquals(authStatus, AuthStatus.SEND_FAILURE);
-        verifyZeroInteractions(response);
-    }
-
-    @Test
-    public void shouldValidateRequestWhenJwtSessionCookiePresentButNotValidEncryption() throws AuthException,
-            UnsupportedEncodingException {
-
-        //Given
-        MessagePolicy requestPolicy = null;
-        MessagePolicy responsePolicy = null;
-        CallbackHandler callbackHandler = null;
-        Map<String, Object> options = getOptionsMap(1, 2);
-
-        jwtSessionModule.initialize(requestPolicy, responsePolicy, callbackHandler, options);
-
-        MessageInfo messageInfo = mock(MessageInfo.class);
-        Subject clientSubject = null;
-        Subject serviceSubject = null;
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        HttpServletResponse response = mock(HttpServletResponse.class);
-        Cookie cookie1 = mock(Cookie.class);
-        Cookie cookie2 = mock(Cookie.class);
-        Cookie jwtSessionCookie = mock(Cookie.class);
-        Cookie[] cookies = new Cookie[]{cookie1, jwtSessionCookie, cookie2};
-        EncryptedJwt encryptedJwt = mock(EncryptedJwt.class);
-
-        given(messageInfo.getRequestMessage()).willReturn(request);
-        given(messageInfo.getResponseMessage()).willReturn(response);
-
-        given(request.getCookies()).willReturn(cookies);
-        given(cookie1.getName()).willReturn("COOKIE1");
-        given(cookie2.getName()).willReturn("COOKIE2");
-        given(jwtSessionCookie.getName()).willReturn("session-jwt");
-        given(jwtSessionCookie.getValue()).willReturn("SESSION_JWT");
-        given(jwtBuilderFactory.reconstruct("SESSION_JWT", EncryptedJwt.class)).willReturn(encryptedJwt);
-        doThrow(JsonException.class).when(encryptedJwt).decrypt(Matchers.<Key>anyObject());
 
         //When
         AuthStatus authStatus = jwtSessionModule.validateRequest(messageInfo, clientSubject, serviceSubject);

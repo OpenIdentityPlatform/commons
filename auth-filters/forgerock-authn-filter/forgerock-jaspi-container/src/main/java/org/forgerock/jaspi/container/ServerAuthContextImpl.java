@@ -16,7 +16,7 @@
 
 package org.forgerock.jaspi.container;
 
-import org.forgerock.json.resource.JsonResourceException;
+import org.forgerock.json.resource.ResourceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -191,7 +191,7 @@ public class ServerAuthContextImpl implements ServerAuthContext {
         // Once all the Auth modules have had the change to authenticate, set error message in response if failed.
         if (authenticatingAuthStatus == null) {
             HttpServletResponse response = (HttpServletResponse) messageInfo.getResponseMessage();
-            JsonResourceException jre = new JsonResourceException(401, "Access denied");
+            ResourceException jre = ResourceException.getException(401, "Access denied");
             try {
                 response.getWriter().write(jre.toJsonValue().toString());
                 response.setContentType("application/json");

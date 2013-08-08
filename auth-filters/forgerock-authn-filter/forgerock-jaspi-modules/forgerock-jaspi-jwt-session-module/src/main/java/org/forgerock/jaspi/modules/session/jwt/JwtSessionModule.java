@@ -17,7 +17,6 @@
 package org.forgerock.jaspi.modules.session.jwt;
 
 import org.apache.commons.lang.StringUtils;
-import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.jose.builders.JwtBuilderFactory;
 import org.forgerock.json.jose.jwe.EncryptedJwt;
 import org.forgerock.json.jose.jwe.EncryptionMethod;
@@ -25,7 +24,7 @@ import org.forgerock.json.jose.jwe.JweAlgorithm;
 import org.forgerock.json.jose.jwe.JweHeader;
 import org.forgerock.json.jose.jwt.Jwt;
 import org.forgerock.json.jose.jwt.JwtClaimsSet;
-import org.forgerock.util.KeystoreManager;
+import org.forgerock.common.util.KeystoreManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -262,12 +261,7 @@ public class JwtSessionModule implements ServerAuthModule {
         RSAPrivateKey privateKey = (RSAPrivateKey) keystoreManager.getPrivateKey(keyAlias);
 
         EncryptedJwt jwt = jwtBuilderFactory.reconstruct(sessionJwt, EncryptedJwt.class);
-        try {
-            jwt.decrypt(privateKey);
-        } catch (JsonException e) {
-            DEBUG.error("Failed to decrypt Jwt");
-            return null;
-        }
+        jwt.decrypt(privateKey);
 
         Date expirationTime = jwt.getClaimsSet().getExpirationTime();
         Date tokenIdleTime = new Date(jwt.getClaimsSet().getClaim(TOKEN_IDLE_TIME_CLAIM_KEY, Integer.class)

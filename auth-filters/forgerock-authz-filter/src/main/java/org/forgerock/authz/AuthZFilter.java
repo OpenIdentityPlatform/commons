@@ -20,7 +20,7 @@ import org.forgerock.auth.common.AuditLogger;
 import org.forgerock.auth.common.AuditRecord;
 import org.forgerock.auth.common.AuthResult;
 import org.forgerock.auth.common.DebugLogger;
-import org.forgerock.json.resource.JsonResourceException;
+import org.forgerock.json.resource.ResourceException;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -148,7 +148,7 @@ public class AuthZFilter implements Filter {
      * @throws IOException If there is a problem writing to the response.
      */
     private void handleUnauthorisedException(HttpServletResponse response) throws IOException {
-        JsonResourceException jre = new JsonResourceException(403, "Access denied");
+        ResourceException jre = ResourceException.getException(403, "Access denied");
         response.setStatus(403);
         try {
             handleException(response, jre);
@@ -164,7 +164,7 @@ public class AuthZFilter implements Filter {
      * @throws IOException If there is a problem writing to the response.
      */
     private void handleServerException(HttpServletResponse response) throws IOException {
-        JsonResourceException jre = new JsonResourceException(500, "Server Error");
+        ResourceException jre = ResourceException.getException(500, "Server Error");
         response.setStatus(500);
         handleException(response, jre);
     }
@@ -176,7 +176,7 @@ public class AuthZFilter implements Filter {
      * @param jsonResourceException The JsonResourceException containing the Http code and message.
      * @throws IOException If there is a problem writing to the response.
      */
-    private void handleException(HttpServletResponse response, JsonResourceException jsonResourceException)
+    private void handleException(HttpServletResponse response, ResourceException jsonResourceException)
             throws IOException {
         response.setContentType("application/json");
         response.getWriter().write(jsonResourceException.toJsonValue().toString());
