@@ -14,9 +14,9 @@
  * Copyright 2013 ForgeRock Inc.
  */
 
-package org.forgerock.json.util;
+package org.forgerock.json.common.util;
 
-import org.forgerock.util.KeystoreManager;
+import org.forgerock.common.util.KeystoreManager;
 import org.testng.annotations.Test;
 
 import java.io.UnsupportedEncodingException;

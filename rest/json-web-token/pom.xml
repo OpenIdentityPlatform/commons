@@ -38,6 +38,26 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <!--<Private-Package>org.forgerock.util</Private-Package>-->
+                        <Export-Package>
+                            org.forgerock.common.util;version=${project.version},
+                            org.forgerock.json.jose.builders;version=${project.version},
+                            org.forgerock.json.jose.jwt;version=${project.version},
+                            org.forgerock.json.jose.jwk;version=${project.version},
+                            org.forgerock.json.jose.jws;version=${project.version},
+                            org.forgerock.json.jose.jwe;version=${project.version},
+                            org.forgerock.json.jose.common;version=${project.version},
+                            org.forgerock.json.jose.exceptions;version=${project.version},
+                            org.forgerock.json.jose.jwe.handlers.compression;version=${project.version},
+                            org.forgerock.json.jose.jwe.handlers.encryption;version=${project.version},
+                            org.forgerock.json.jose.jws.handlers;version=${project.version},
+                            org.forgerock.json.jose.utils;version=${project.version}
+                        </Export-Package>
+                        <!--org.forgerock.json.jose.jwe.handlers;version=${project.version},-->
+                    </instructions>
+                </configuration>
             </plugin>
         </plugins>
     </build>
