@@ -126,8 +126,8 @@
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
-                <artifactId>org.forgerock.util</artifactId>
-                <version>1.0.0</version>
+                <artifactId>forgerock-util</artifactId>
+                <version>1.1.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

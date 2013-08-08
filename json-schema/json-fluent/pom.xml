@@ -28,7 +28,7 @@
     <dependencies>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
-            <artifactId>org.forgerock.util</artifactId>
+            <artifactId>forgerock-util</artifactId>
         </dependency>
     </dependencies>
     <build>
