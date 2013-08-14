@@ -51,7 +51,7 @@ public class EncryptedJwt implements Jwt, Payload {
     private final byte[] encryptedContentEncryptionKey;
     private final byte[] initialisationVector;
     private final byte[] ciphertext;
-    private final byte[] additionalAuthenticatedData;
+    private final byte[] authenticationTag;
 
     /**
      * Constructs a fresh, new EncryptedJwt from the given JweHeader and JwtClaimsSet.
@@ -70,7 +70,7 @@ public class EncryptedJwt implements Jwt, Payload {
         this.encryptedContentEncryptionKey = null;
         this.initialisationVector = null;
         this.ciphertext = null;
-        this.additionalAuthenticatedData = null;
+        this.authenticationTag = null;
     }
 
     /**
@@ -84,15 +84,15 @@ public class EncryptedJwt implements Jwt, Payload {
      * @param encryptedContentEncryptionKey The encrypted Content Encryption Key (CEK).
      * @param initialisationVector The initialisation vector.
      * @param ciphertext The ciphertext.
-     * @param additionalAuthenticatedData The additional authentication data.
+     * @param authenticationTag The authentication tag.
      */
     public EncryptedJwt(JweHeader header, byte[] encryptedContentEncryptionKey, byte[] initialisationVector,
-            byte[] ciphertext, byte[] additionalAuthenticatedData) {
+            byte[] ciphertext, byte[] authenticationTag) {
         this.header = header;
         this.encryptedContentEncryptionKey = encryptedContentEncryptionKey;
         this.initialisationVector = initialisationVector;
         this.ciphertext = ciphertext;
-        this.additionalAuthenticatedData = additionalAuthenticatedData;
+        this.authenticationTag = authenticationTag;
 
         this.publicKey = null;
     }
@@ -179,8 +179,12 @@ public class EncryptedJwt implements Jwt, Payload {
         Key contentEncryptionKey = encryptionHandler.decryptContentEncryptionKey(privateKey,
                 encryptedContentEncryptionKey);
 
+        String jweHeader = header.build();
+        String encodedJweHeader = Utils.base64urlEncode(jweHeader);
+        byte[] additionalAuthenticatedData = encodedJweHeader.getBytes(Utils.CHARSET);
+
         byte[] plaintext = encryptionHandler.decryptCiphertext(contentEncryptionKey, initialisationVector, ciphertext,
-                additionalAuthenticatedData);
+                authenticationTag, additionalAuthenticatedData);
 
         String claimsSetString = new String(plaintext, Utils.CHARSET);
 
