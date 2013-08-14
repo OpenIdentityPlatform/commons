@@ -176,7 +176,7 @@ public class RSA15AES128CBCHS256EncryptionHandler extends AbstractEncryptionHand
      */
     @Override
     public byte[] decryptCiphertext(Key contentEncryptionKey, byte[] initialisationVector, byte[] ciphertext,
-            byte[] additionalAuthenticatedData) {
+            byte[] authenticationTag, byte[] additionalAuthenticatedData) {
 
         int keyOffset = ENCRYPTION_METHOD.getKeyOffset();
 
@@ -200,7 +200,7 @@ public class RSA15AES128CBCHS256EncryptionHandler extends AbstractEncryptionHand
         byte[] expectedAuthenticationTag = Arrays.copyOf(hmac, ENCRYPTION_METHOD.getKeyOffset());
 
         boolean macValid = false;
-        if (Utils.constantEquals(expectedAuthenticationTag, additionalAuthenticatedData)) {
+        if (Utils.constantEquals(expectedAuthenticationTag, authenticationTag)) {
             macValid = true;
         }
 
