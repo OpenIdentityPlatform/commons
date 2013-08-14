@@ -107,9 +107,10 @@ public interface EncryptionHandler {
      * @param contentEncryptionKey The Content Encryption Key.
      * @param initialisationVector The Initialisation Vector.
      * @param ciphertext The ciphertext to decrypt.
+     * @param authenticationTag The authentication tag.
      * @param additionalAuthenticatedData An array of bytes representing the additional authenticated data.
      * @return An array of bytes representing the decrypted ciphertext.
      */
     byte[] decryptCiphertext(Key contentEncryptionKey, byte[] initialisationVector, byte[] ciphertext,
-            byte[] additionalAuthenticatedData);
+            byte[] authenticationTag, byte[] additionalAuthenticatedData);
 }
