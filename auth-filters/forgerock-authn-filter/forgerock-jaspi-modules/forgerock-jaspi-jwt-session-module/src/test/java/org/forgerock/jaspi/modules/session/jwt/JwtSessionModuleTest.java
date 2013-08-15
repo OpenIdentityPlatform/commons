@@ -16,6 +16,7 @@
 
 package org.forgerock.jaspi.modules.session.jwt;
 
+import org.forgerock.jaspi.filter.AuthNFilter;
 import org.forgerock.json.jose.builders.EncryptedJwtBuilder;
 import org.forgerock.json.jose.builders.JweHeaderBuilder;
 import org.forgerock.json.jose.builders.JwtBuilderFactory;
@@ -405,7 +406,7 @@ public class JwtSessionModuleTest {
         given(messageInfo.getRequestMessage()).willReturn(request);
         given(messageInfo.getResponseMessage()).willReturn(response);
         given(messageInfo.getMap()).willReturn(map);
-        map.put("org.forgerock.security.context", contextMap);
+        map.put(AuthNFilter.ATTRIBUTE_AUTH_CONTEXT, contextMap);
 
         given(request.getCookies()).willReturn(cookies);
         given(cookie1.getName()).willReturn("COOKIE1");
@@ -421,7 +422,7 @@ public class JwtSessionModuleTest {
         given(claimsSet.getClaim("prn", String.class)).willReturn("PRINCIPAL");
         Map<String, Object> newContext = new HashMap<String, Object>();
         newContext.put("KEY", "VALUE");
-        given(claimsSet.getClaim("org.forgerock.security.context", Map.class)).willReturn(newContext);
+        given(claimsSet.getClaim(AuthNFilter.ATTRIBUTE_AUTH_CONTEXT, Map.class)).willReturn(newContext);
 
         //When
         AuthStatus authStatus = jwtSessionModule.validateRequest(messageInfo, clientSubject, serviceSubject);
@@ -484,7 +485,7 @@ public class JwtSessionModuleTest {
         given(messageInfo.getRequestMessage()).willReturn(request);
         given(messageInfo.getResponseMessage()).willReturn(response);
         given(messageInfo.getMap()).willReturn(map);
-        map.put("org.forgerock.security.context", contextMap);
+        map.put(AuthNFilter.ATTRIBUTE_AUTH_CONTEXT, contextMap);
 
         given(request.getCookies()).willReturn(cookies);
         given(cookie1.getName()).willReturn("COOKIE1");
@@ -500,7 +501,7 @@ public class JwtSessionModuleTest {
         given(claimsSet.getClaim("prn", String.class)).willReturn("PRINCIPAL");
         Map<String, Object> newContext = new HashMap<String, Object>();
         newContext.put("KEY", "VALUE");
-        given(claimsSet.getClaim("org.forgerock.security.context", Map.class)).willReturn(newContext);
+        given(claimsSet.getClaim(AuthNFilter.ATTRIBUTE_AUTH_CONTEXT, Map.class)).willReturn(newContext);
 
         //When
         AuthStatus authStatus = jwtSessionModule.validateRequest(messageInfo, clientSubject, serviceSubject);

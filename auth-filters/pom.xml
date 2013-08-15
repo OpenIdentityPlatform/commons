@@ -13,7 +13,7 @@
 
     <groupId>org.forgerock.commons</groupId>
     <artifactId>forgerock-auth-filters</artifactId>
-    <version>1.1.0-SNAPSHOT</version>
+    <version>1.2.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>ForgeRock Auth Filters</name>
@@ -31,7 +31,7 @@
         <maven.compiler.target>1.6</maven.compiler.target>
         <maven.compiler.source>1.6</maven.compiler.source>
 
-        <forgerock-rest.version>2.0.0</forgerock-rest.version>
+        <forgerock-rest.version>2.0.1-SNAPSHOT</forgerock-rest.version>
     </properties>
 
     <repositories>
@@ -73,9 +73,14 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.forgerock</groupId>
+                <groupId>org.forgerock.commons</groupId>
                 <artifactId>forgerock-jaspi-container</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons</groupId>
+                <artifactId>json-resource</artifactId>
+                <version>${forgerock-rest.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
@@ -103,11 +108,6 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
                 <version>1.7.2</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-lang</groupId>
-                <artifactId>commons-lang</artifactId>
-                <version>2.6</version>
             </dependency>
 
             <dependency>

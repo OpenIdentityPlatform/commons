@@ -16,6 +16,7 @@
 
 package org.forgerock.jaspi.filter;
 
+import org.forgerock.jaspi.container.AuthHttpServletRequestWrapper;
 import org.forgerock.jaspi.container.config.Configuration;
 import org.forgerock.jaspi.container.config.ConfigurationManager;
 import org.forgerock.jaspi.filter.modules.SecureSendContinueAuthModule;
@@ -148,7 +149,6 @@ public class IntTest {
 
         verify(filterRunner.getFilterChain()).doFilter(requestArgumentCaptor.capture(),
                 responseArgumentCaptor.capture());
-        assertEquals(requestArgumentCaptor.getValue().getRequest(), filterRunner.getRequest());
         assertEquals(responseArgumentCaptor.getValue().getResponse(), filterRunner.getResponse());
         verify(filterRunner.getResponse()).addHeader("session", ValidateSuccessSessionModule.class.getSimpleName());
         verifyNoMoreInteractions(filterRunner.getResponse());
@@ -244,7 +244,6 @@ public class IntTest {
 
         verify(filterRunner.getFilterChain()).doFilter(requestArgumentCaptor.capture(),
                 responseArgumentCaptor.capture());
-        assertEquals(requestArgumentCaptor.getValue().getRequest(), filterRunner.getRequest());
         assertEquals(responseArgumentCaptor.getValue().getResponse(), filterRunner.getResponse());
         verify(filterRunner.getResponse()).addHeader(eq("AUTH_SUCCESS"), anyString());
     }
@@ -341,7 +340,6 @@ public class IntTest {
 
         verify(filterRunner.getFilterChain()).doFilter(requestArgumentCaptor.capture(),
                 responseArgumentCaptor.capture());
-        assertEquals(requestArgumentCaptor.getValue().getRequest(), filterRunner.getRequest());
         assertEquals(responseArgumentCaptor.getValue().getResponse(), filterRunner.getResponse());
         verify(filterRunner.getResponse()).addHeader("session", ValidateSuccessSessionModule.class.getSimpleName());
         verifyNoMoreInteractions(filterRunner.getResponse());
@@ -421,7 +419,6 @@ public class IntTest {
 
         verify(filterRunner.getFilterChain()).doFilter(requestArgumentCaptor.capture(),
                 responseArgumentCaptor.capture());
-        assertEquals(requestArgumentCaptor.getValue().getRequest(), filterRunner.getRequest());
         assertEquals(responseArgumentCaptor.getValue().getResponse(), filterRunner.getResponse());
         verify(filterRunner.getResponse()).addHeader(eq("session"), anyString());
         verify(filterRunner.getResponse()).addHeader(eq("AUTH_SUCCESS"), anyString());
@@ -531,7 +528,6 @@ public class IntTest {
 
         verify(filterRunner.getFilterChain()).doFilter(requestArgumentCaptor.capture(),
                 responseArgumentCaptor.capture());
-        assertEquals(requestArgumentCaptor.getValue().getRequest(), filterRunner.getRequest());
         assertEquals(responseArgumentCaptor.getValue().getResponse(), filterRunner.getResponse());
         verify(filterRunner.getResponse()).addHeader(eq("session"), anyString());
         verify(filterRunner.getResponse()).addHeader(eq("AUTH_SUCCESS"), anyString());
@@ -564,7 +560,6 @@ public class IntTest {
 
         verify(filterRunner.getFilterChain()).doFilter(requestArgumentCaptor.capture(),
                 responseArgumentCaptor.capture());
-        assertEquals(requestArgumentCaptor.getValue().getRequest(), filterRunner.getRequest());
         assertEquals(responseArgumentCaptor.getValue().getResponse(), filterRunner.getResponse());
         verify(filterRunner.getResponse(), never()).addHeader(anyString(), anyString());
         verify(filterRunner.getResponse()).setStatus(100);
@@ -596,7 +591,6 @@ public class IntTest {
 
         verify(filterRunner.getFilterChain()).doFilter(requestArgumentCaptor.capture(),
                 responseArgumentCaptor.capture());
-        assertEquals(requestArgumentCaptor.getValue().getRequest(), filterRunner.getRequest());
         assertEquals(responseArgumentCaptor.getValue().getResponse(), filterRunner.getResponse());
         verify(filterRunner.getResponse(), never()).addHeader(anyString(), anyString());
         verify(filterRunner.getResponse()).setStatus(500);

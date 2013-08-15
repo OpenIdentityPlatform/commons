@@ -16,7 +16,8 @@
 
 package org.forgerock.jaspi.modules.session.jwt;
 
-import org.apache.commons.lang.StringUtils;
+import org.forgerock.common.util.KeystoreManager;
+import org.forgerock.jaspi.filter.AuthNFilter;
 import org.forgerock.json.jose.builders.JwtBuilderFactory;
 import org.forgerock.json.jose.jwe.EncryptedJwt;
 import org.forgerock.json.jose.jwe.EncryptionMethod;
@@ -24,7 +25,6 @@ import org.forgerock.json.jose.jwe.JweAlgorithm;
 import org.forgerock.json.jose.jwe.JweHeader;
 import org.forgerock.json.jose.jwt.Jwt;
 import org.forgerock.json.jose.jwt.JwtClaimsSet;
-import org.forgerock.common.util.KeystoreManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,10 +64,6 @@ public class JwtSessionModule implements ServerAuthModule {
 
     private static final String JWT_SESSION_COOKIE_NAME = "session-jwt";
     private static final String SKIP_SESSION_PARAMETER_NAME = "skipSession";
-
-    //TODO change to CREST constant when AM and IDM have been updated to use 2.0.0 version
-    private static final String AUTHC_ID_REQUEST_KEY = "org.forgerock.security.authcid";
-    private static final String CONTEXT_REQUEST_KEY = "org.forgerock.security.context";
 
     /** The Key Alias configuration property key. */
     public static final String KEY_ALIAS_KEY = "keyAlias";
@@ -133,12 +129,12 @@ public class JwtSessionModule implements ServerAuthModule {
         this.keystoreFile = (String) options.get(KEYSTORE_FILE_KEY);
         this.keystorePassword = (String) options.get(KEYSTORE_PASSWORD_KEY);
         String tokenIdleTime = (String) options.get(TOKEN_IDLE_TIME_CLAIM_KEY);
-        if (StringUtils.isEmpty(tokenIdleTime)) {
+        if (isEmpty(tokenIdleTime)) {
             tokenIdleTime = "0";
         }
         this.tokenIdleTime = Integer.parseInt(tokenIdleTime);
         String maxTokenLife = (String) options.get(MAX_TOKEN_LIFE_KEY);
-        if (StringUtils.isEmpty(maxTokenLife)) {
+        if (isEmpty(maxTokenLife)) {
             maxTokenLife = "0";
         }
         this.maxTokenLife = Integer.parseInt(maxTokenLife);
@@ -177,8 +173,9 @@ public class JwtSessionModule implements ServerAuthModule {
                 handler.handle(new Callback[]{
                     new CallerPrincipalCallback(clientSubject, jwt.getClaimsSet().getClaim("prn", String.class))
                 });
-                Map<String, Object> context = (Map<String, Object>) messageInfo.getMap().get(CONTEXT_REQUEST_KEY);
-                Map<String, Object> claimsSetContext = jwt.getClaimsSet().getClaim(CONTEXT_REQUEST_KEY, Map.class);
+                //TODO also include ATTRIBUTE_AUTHCID!
+                Map<String, Object> context = (Map<String, Object>) messageInfo.getMap().get(AuthNFilter.ATTRIBUTE_AUTH_CONTEXT);
+                Map<String, Object> claimsSetContext = jwt.getClaimsSet().getClaim(AuthNFilter.ATTRIBUTE_AUTH_CONTEXT, Map.class);
                 if (claimsSetContext != null) {
                     context.putAll(claimsSetContext);
                 }
@@ -191,6 +188,16 @@ public class JwtSessionModule implements ServerAuthModule {
             }
             return AuthStatus.SUCCESS;
         }
+    }
+
+    /**
+     * Checks if the String is non-null and a non-empty String.
+     *
+     * @param s The String to check.
+     * @return <code>true</code> if the String is non-null and non-empty.
+     */
+    private boolean isEmpty(String s) {
+        return s == null || "".equals(s);
     }
 
     /**
@@ -215,12 +222,12 @@ public class JwtSessionModule implements ServerAuthModule {
             }
         }
 
-        if (jwtSessionCookie != null && !StringUtils.isEmpty(jwtSessionCookie.getValue())) {
+        if (jwtSessionCookie != null && !isEmpty(jwtSessionCookie.getValue())) {
 
             Jwt jwt = verifySessionJwt(jwtSessionCookie.getValue());
             if (jwt != null) {
                 //if all goes well!
-                Map<String, Object> claimsSetContext = jwt.getClaimsSet().getClaim(CONTEXT_REQUEST_KEY, Map.class);
+                Map<String, Object> claimsSetContext = jwt.getClaimsSet().getClaim(AuthNFilter.ATTRIBUTE_AUTH_CONTEXT, Map.class);
                 for (String key : claimsSetContext.keySet()) {
                     request.setAttribute(key, claimsSetContext.get(key));
                 }
@@ -357,12 +364,12 @@ public class JwtSessionModule implements ServerAuthModule {
 
         Map<String, Object> map = messageInfo.getMap();
         HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
-        Object authcid = request.getAttribute(AUTHC_ID_REQUEST_KEY);
-        if (authcid != null) {
-            jwtParameters.put("prn", authcid);
+        Object principal = request.getHeader(AuthNFilter.ATTRIBUTE_AUTH_PRINCIPAL);
+        if (principal != null) {
+            jwtParameters.put("prn", principal);
         }
-        if (map.containsKey(CONTEXT_REQUEST_KEY)) {
-            jwtParameters.put(CONTEXT_REQUEST_KEY, map.get(CONTEXT_REQUEST_KEY));
+        if (map.containsKey(AuthNFilter.ATTRIBUTE_AUTH_CONTEXT)) {
+            jwtParameters.put(AuthNFilter.ATTRIBUTE_AUTH_CONTEXT, map.get(AuthNFilter.ATTRIBUTE_AUTH_CONTEXT));
         }
 
         if (map.containsKey(SKIP_SESSION_PARAMETER_NAME) && ((Boolean) map.get(SKIP_SESSION_PARAMETER_NAME))) {

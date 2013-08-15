@@ -16,6 +16,7 @@
 
 package org.forgerock.jaspi.container;
 
+import org.forgerock.jaspi.filter.AuthNFilter;
 import org.forgerock.json.resource.ResourceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,9 +30,12 @@ import javax.security.auth.message.MessagePolicy;
 import javax.security.auth.message.config.ServerAuthContext;
 import javax.security.auth.message.module.ServerAuthModule;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.Principal;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,10 +66,6 @@ import java.util.Map;
 public class ServerAuthContextImpl implements ServerAuthContext {
 
     private static final Logger DEBUG = LoggerFactory.getLogger(ServerAuthContextImpl.class);
-
-    //TODO change to CREST constant when AM and IDM have been updated to use 2.0.0 version
-    private static final String AUTHC_ID_REQUEST_KEY = "org.forgerock.security.authcid";
-    private static final String CONTEXT_REQUEST_KEY = "org.forgerock.security.context";
 
     private final ServerAuthModule sessionAuthModule;
     private final List<ServerAuthModule> serverAuthModules;
@@ -140,7 +140,7 @@ public class ServerAuthContextImpl implements ServerAuthContext {
     public AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject)
             throws AuthException {
 
-        messageInfo.getMap().put(CONTEXT_REQUEST_KEY, new HashMap<String, Object>());
+        messageInfo.getMap().put(AuthNFilter.ATTRIBUTE_AUTH_CONTEXT, new HashMap<String, Object>());
 
         AuthStatus authStatus = null;
         if (sessionAuthModule != null) {
@@ -224,14 +224,13 @@ public class ServerAuthContextImpl implements ServerAuthContext {
     private void setAuthenticationRequestAttributes(MessageInfo messageInfo, Subject clientSubject) {
 
         HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
-        String authnId = null;
+        String principalName = null;
         for (Principal principal : clientSubject.getPrincipals()) {
-            authnId = principal.getName();
+            principalName = principal.getName();
             break;
         }
-        request.setAttribute(AUTHC_ID_REQUEST_KEY, authnId);
-        Map<String, Object> context = (Map<String, Object>) messageInfo.getMap().get(CONTEXT_REQUEST_KEY);
-        request.setAttribute(CONTEXT_REQUEST_KEY, context);
+        Map<String, Object> context = (Map<String, Object>) messageInfo.getMap().get(AuthNFilter.ATTRIBUTE_AUTH_CONTEXT);
+        messageInfo.setRequestMessage(new AuthHttpServletRequestWrapper(request, principalName, context));
     }
 
     /**

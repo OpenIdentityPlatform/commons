@@ -63,6 +63,9 @@ import static javax.security.auth.message.AuthStatus.SUCCESS;
  */
 public class AuthNFilter implements Filter {
 
+    public static final String ATTRIBUTE_AUTH_PRINCIPAL = "org.forgerock.authentication.principal";
+    public static final String ATTRIBUTE_AUTH_CONTEXT = "org.forgerock.authentication.context";
+
     private final static Logger DEBUG = LoggerFactory.getLogger(AuthNFilter.class);
 
     private final static String MESSAGE_LAYER = "HttpServlet";
