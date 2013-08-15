@@ -1,0 +1,11 @@
+{
+  "name": "qunittests",
+  "author": "Jake Feasel <jake.feasel@forgerock.com>",
+  "version": "0.0.1",
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-watch": "~0.4.4",
+    "grunt-contrib-qunit": "0.2.2",
+    "grunt-notify": "0.2.4"
+  }
+}
