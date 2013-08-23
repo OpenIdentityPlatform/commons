@@ -161,7 +161,7 @@
 			<dependency>
 				<groupId>org.forgerock.commons.ui.libs</groupId>
 				<artifactId>underscore</artifactId>
-				<version>1.3.3</version>
+				<version>1.4.4</version>
 				<type>js</type>
 				<classifier>min</classifier>
 			</dependency>
