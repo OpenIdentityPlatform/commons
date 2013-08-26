@@ -23,7 +23,7 @@
  */
 
 /*global $, define, window, Handlebars, i18n, _ */
-
+/*jslint regexp: false*/
 define("org/forgerock/commons/ui/common/util/UIUtils", [
     "org/forgerock/commons/ui/common/util/typeextentions/String",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
@@ -77,11 +77,9 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     };
     
     obj.convertQueryParametersToJSON = function(queryParameters) {
-        var parsedQueryParams;
-        
         if(queryParameters) {
-            parsedQueryParams = decodeURI(queryParameters.replace(/&/g, "\",\"").replace(/\=/g,"\":\""));
-            return JSON.parse('{"' + parsedQueryParams + '"}');
+            queryParameters = decodeURIComponent(queryParameters);
+            return _.object(_.map(queryParameters.match(/([^&]+)/g), function (pair) { return pair.match(/([^=]+)=?(.*)/).slice(1); }));
         }
         return null;
     };
