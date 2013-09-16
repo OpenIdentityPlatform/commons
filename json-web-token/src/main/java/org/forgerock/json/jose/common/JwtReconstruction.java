@@ -49,6 +49,8 @@ public final class JwtReconstruction {
      * @param jwtClass The JWT class to reconstruct the JWT string to.
      * @param <T> The type of JWT the JWT string represents.
      * @return The reconstructed JWT object.
+     * @throws InvalidJwtException If the jwt does not consist of the correct number of parts.
+     * @throws JwtReconstructionException If the jwt does not consist of the correct number of parts.
      */
     @SuppressWarnings("unchecked")
     public <T extends Jwt> T reconstructJwt(String jwtString, Class<T> jwtClass) {
@@ -97,6 +99,7 @@ public final class JwtReconstruction {
      *
      * @param jwtParts The JWT parts.
      * @param required The required number of parts.
+     * @throws JwtReconstructionException If the jwt does not consist of the correct number of parts.
      */
     private void verifyNumberOfParts(String[] jwtParts, int required) {
         if (jwtParts.length != required) {
