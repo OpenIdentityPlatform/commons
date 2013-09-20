@@ -46,6 +46,7 @@ public class ServerAuthConfigImpl implements ServerAuthConfig {
     private final String layer;
     private final String appContext;
     private final CallbackHandler handler;
+    private final Map<String, ServerAuthContext> serverAuthContextMap = new HashMap<String, ServerAuthContext>();
 
     private Map<String, Map<String, Object>> contexts;
 
@@ -94,31 +95,37 @@ public class ServerAuthConfigImpl implements ServerAuthConfig {
     public ServerAuthContext getAuthContext(String authContextID, Subject serviceSubject, Map properties)
             throws AuthException {
 
-        Map<String, Object> contextProperties = contexts.get(authContextID);
+        ServerAuthContext serverAuthContext = serverAuthContextMap.get(authContextID);
+        if (serverAuthContext == null) {
+            Map<String, Object> contextProperties = contexts.get(authContextID);
 
-        // Verify that a context was found
-        if (contextProperties == null || contextProperties.size() == 0) {
-            throw new AuthException("No auth context found for authContextID: " + authContextID);
-        }
+            // Verify that a context was found
+            if (contextProperties == null || contextProperties.size() == 0) {
+                throw new AuthException("No auth context found for authContextID: " + authContextID);
+            }
 
-        // Create the modules
-        List<ServerAuthModule> serverAuthModules = new ArrayList<ServerAuthModule>(2);
-        Map<String, String> sessionModule = (Map<String, String>) contextProperties.get("sessionModule");
-        ServerAuthModule sessionAuthModule = createModule(sessionModule);
+            // Create the modules
+            List<ServerAuthModule> serverAuthModules = new ArrayList<ServerAuthModule>(2);
+            Map<String, String> sessionModule = (Map<String, String>) contextProperties.get("sessionModule");
+            ServerAuthModule sessionAuthModule = createModule(sessionModule);
 
-        List<Map<String, String>> authModules = (List<Map<String, String>>) contextProperties.get("authModules");
-        if (authModules != null) {
-            for (Map<String, String> authModule : authModules) {
-                ServerAuthModule serverAuthModule = createModule(authModule);
-                if (serverAuthModule != null) {
-                    serverAuthModules.add(serverAuthModule);
+            List<Map<String, String>> authModules = (List<Map<String, String>>) contextProperties.get("authModules");
+            if (authModules != null) {
+                for (Map<String, String> authModule : authModules) {
+                    ServerAuthModule serverAuthModule = createModule(authModule);
+                    if (serverAuthModule != null) {
+                        serverAuthModules.add(serverAuthModule);
+                    }
                 }
             }
+
+            // Now create the context
+            serverAuthContext = new ServerAuthContextImpl(sessionAuthModule, serverAuthModules,
+                    createRequestMessagePolicy(), null, properties, handler);
+            serverAuthContextMap.put(authContextID, serverAuthContext);
         }
 
-        // Now create the context
-        return new ServerAuthContextImpl(sessionAuthModule, serverAuthModules, createRequestMessagePolicy(), null,
-                properties, handler);
+        return serverAuthContext;
     }
 
     /**
