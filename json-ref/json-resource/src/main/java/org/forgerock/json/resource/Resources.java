@@ -557,11 +557,11 @@ public final class Resources {
 
         // Create a route for the collection.
         final RequestHandler collectionHandler = new CollectionHandler(provider);
-        router.addRoute(EQUALS, "/", collectionHandler);
+        router.addRoute(EQUALS, "", collectionHandler);
 
         // Create a route for the instances within the collection.
         final RequestHandler instanceHandler = new CollectionInstance(provider);
-        router.addRoute(EQUALS, "/{id}", instanceHandler);
+        router.addRoute(EQUALS, "{id}", instanceHandler);
 
         return router;
     }
@@ -664,18 +664,16 @@ public final class Resources {
         return object;
     }
 
-    // Ensure that URI contains a trailing '/' in order to make parsing a
-    // matching simpler.
-    static String normalizeUri(final String uri) {
-        return uri.endsWith("/") ? uri : uri + "/";
-    }
-
-    static String removeUriLeadingSlash(final String uri) {
-        return (uri.length() > 1 && uri.startsWith("/")) ? uri.substring(1, uri.length()) : uri;
-    }
-
-    static String removeUriTrailingSlash(final String uri) {
-        return (uri.length() > 1 && uri.endsWith("/")) ? uri.substring(0, uri.length() - 1) : uri;
+    // Ensures that the resource name does not begin or end with forward slashes.
+    static String normalizeResourceName(final String name) {
+        String tmp = name;
+        if (tmp.startsWith("/")) {
+            tmp = tmp.substring(1);
+        }
+        if (tmp.endsWith("/")) {
+            tmp = tmp.substring(0, tmp.length() - 1);
+        }
+        return tmp;
     }
 
     private static String idOf(final ServerContext context) {

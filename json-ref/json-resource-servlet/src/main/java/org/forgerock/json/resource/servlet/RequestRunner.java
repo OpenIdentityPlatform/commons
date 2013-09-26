@@ -313,8 +313,12 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
         buffer.append(forceEmptyIfNull(httpRequest.getServletPath()));
 
         // Add new resource name and resource ID.
-        buffer.append(request.getResourceName());
-        if (!request.getResourceName().endsWith("/")) {
+        final String resourceName = request.getResourceName();
+        if (!resourceName.startsWith("/")) {
+            buffer.append('/');
+        }
+        buffer.append(resourceName);
+        if (!resourceName.endsWith("/")) {
             buffer.append('/');
         }
         buffer.append(resource.getId());

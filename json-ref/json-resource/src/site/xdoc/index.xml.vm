@@ -109,7 +109,7 @@ InMemoryBackend users = new InMemoryBackend();
 // Create a router request handler and route requests for user
 // resources to the in memory backend.
 Router router = new Router();
-router.addRoute(EQUALS, "/users", users);
+router.addRoute(EQUALS, "users", users);
 
 // Obtain an internal connection to the router.
 Connection connection = newInternalConnection(router);
@@ -119,26 +119,26 @@ JsonValue alice = new JsonValue(new LinkedHashMap&lt;String, Object>());
 alice.put("name", "Alice");
 alice.put("age", 21);
 alice.put("role", "administrator");
-Resource r1 = connection.create(new RootContext(), newCreateRequest("/users", alice));
+Resource r1 = connection.create(new RootContext(), newCreateRequest("users", alice));
 
 JsonValue bob = new JsonValue(new LinkedHashMap&lt;String, Object>());
 bob.put("name", "Bob");
 bob.put("age", 40);
 bob.put("role", "sales");
-Resource r2 = connection.create(new RootContext(), newCreateRequest("/users", bob));
+Resource r2 = connection.create(new RootContext(), newCreateRequest("users", bob));
 
 // Read a single user.
-Resource r3 = connection.read(new RootContext(), newReadRequest("/users", r1.getId()));
+Resource r3 = connection.read(new RootContext(), newReadRequest("users", r1.getId()));
 assertEquals(r1, r3);
 
 // Update a single user.
 bob.put("role", "marketing");
-Resource r4 = connection.update(new RootContext(), newUpdateRequest("/users", r2.getId(),
+Resource r4 = connection.update(new RootContext(), newUpdateRequest("users", r2.getId(),
         bob));
 
 // Retrieve the list of users.
 Set&lt;Resource> results = new HashSet&lt;Resource>();
-connection.query(new RootContext(), newQueryRequest("/users"), results);
+connection.query(new RootContext(), newQueryRequest("users"), results);
 assertEquals(results, new HashSet&lt;Resource>(Arrays.asList(r3, r4)));</source>
         </section>
         <section name="Known Issues">
@@ -151,16 +151,8 @@ assertEquals(results, new HashSet&lt;Resource>(Arrays.asList(r3, r4)));</source>
                 notable missing features which are being tracked in our
                 <a
                     href="https://bugster.forgerock.org/jira/secure/IssueNavigator.jspa">issue tracker</a>
-                . In particular:
+                .
             </p>
-            <ul>
-                <li>
-                    <a
-                        href="https://bugster.forgerock.org/jira/browse/CREST-3">Add patch support</a>
-                    - patch requests are currently not supported until
-                    we have an agreed patch specification.
-                </li>
-            </ul>
         </section>
     </body>
 </document>

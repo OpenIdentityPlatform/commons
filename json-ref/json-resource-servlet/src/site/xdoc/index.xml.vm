@@ -118,7 +118,7 @@
 
     &lt;init-param>
         &lt;param-name>uri-template&lt;/param-name>
-        &lt;param-value>/&lt;/param-value>
+        &lt;param-value>&lt;/param-value>
     &lt;/init-param>
 &lt;/servlet>
 
@@ -136,7 +136,7 @@
             <p>
                 JSON Resource Servlet is a library and as such provides a common
                 framework for developing ForgeRock REST APIs. It does not expose
-                any end-points itself, e.g. <tt>/users</tt>, apart from the
+                any end-points itself, e.g. <tt>users</tt>, apart from the
                 example Servlet configuration. More specifically, this library
                 defines the types of operations and their parameters, but it
                 is left to the application to define the following:

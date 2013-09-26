@@ -16,7 +16,7 @@
 
         <init-param>
             <param-name>uri-template</param-name>
-            <param-value>/</param-value>
+            <param-value></param-value>
         </init-param>
 
 <!--  Uncomment to specify a non-default factory method name.
@@ -49,7 +49,7 @@
 
         <init-param>
             <param-name>uri-template</param-name>
-            <param-value>/</param-value>
+            <param-value></param-value>
         </init-param>
 
 <!--  Uncomment to specify a non-default factory method name.
@@ -82,4 +82,3 @@
     </servlet-mapping>
 
 </web-app>
- 
