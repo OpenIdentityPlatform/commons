@@ -16,8 +16,7 @@
 
 package org.forgerock.json.resource;
 
-import static org.forgerock.json.resource.Resources.normalizeUri;
-import static org.forgerock.json.resource.Resources.removeUriTrailingSlash;
+import static org.forgerock.json.resource.Resources.normalizeResourceName;
 import static org.forgerock.json.resource.RoutingMode.EQUALS;
 import static org.forgerock.json.resource.RoutingMode.STARTS_WITH;
 
@@ -44,14 +43,16 @@ public final class Route {
         private final String remaining;
         private final UriTemplate template;
 
+        // Constructor for default route.
         RouteMatcher(final ServerContext context, final RequestHandler handler) {
             this.template = null;
             this.match = null;
             this.remaining = null;
-            this.context = new RouterContext(context, "/", Collections.<String, String> emptyMap());
+            this.context = new RouterContext(context, "", Collections.<String, String> emptyMap());
             this.handler = handler;
         }
 
+        // Constructor for matching template.
         RouteMatcher(final UriTemplate template, final String match, final String remaining,
                 final RouterContext context) {
             this.template = template;
@@ -102,7 +103,7 @@ public final class Route {
         private final List<String> variables = new LinkedList<String>();
 
         private UriTemplate(final RoutingMode mode, final String uriTemplate) {
-            final String t = normalizeUri(uriTemplate);
+            final String t = normalizeResourceName(uriTemplate);
             final StringBuilder builder = new StringBuilder(t.length() + 8);
 
             // Parse the template.
@@ -136,8 +137,6 @@ public final class Route {
             }
 
             if (isInVariable) {
-                // This shouldn't happen because the template always contains a
-                // trailing '/' which is not a valid variable character.
                 throw new IllegalArgumentException("URI template " + t
                         + " contains a trailing unclosed variable");
             }
@@ -175,8 +174,8 @@ public final class Route {
 
         private RouteMatcher getRouteMatcher(final Route route, final ServerContext context,
                 final Request request) {
-            final String uri = normalizeUri(request.getResourceName());
-            final Matcher matcher = regex.matcher(uri);
+            final String resourceName = request.getResourceName();
+            final Matcher matcher = regex.matcher(resourceName);
             if (!matcher.matches()) {
                 return null;
             }
@@ -197,11 +196,17 @@ public final class Route {
                 }
                 break;
             }
-
-            final String remaining = removeUriTrailingSlash(uri.substring(matcher.end(1) - 1));
-            final String matched = removeUriTrailingSlash(matcher.group(1));
+            final String remaining = removeLeadingSlash(resourceName.substring(matcher.end(1)));
+            final String matched = matcher.group(1);
             return new RouteMatcher(this, matcher.group(1), remaining, new RouterContext(context,
                     matched, variableMap));
+        }
+
+        private String removeLeadingSlash(final String resourceName) {
+            if (resourceName.startsWith("/")) {
+                return resourceName.substring(1);
+            }
+            return resourceName;
         }
 
         // As per RFC.

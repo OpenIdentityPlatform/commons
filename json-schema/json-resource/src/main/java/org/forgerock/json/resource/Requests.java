@@ -16,6 +16,8 @@
 
 package org.forgerock.json.resource;
 
+import static org.forgerock.json.resource.Resources.normalizeResourceName;
+
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -90,32 +92,7 @@ public final class Requests {
          */
         @Override
         public final T setResourceName(final String name) {
-            // Ensure that the resource name contains a leading '/' and no trailing '/'.
-            switch (name.length()) {
-            case 0:
-                resourceName = "/";
-                break;
-            case 1:
-                resourceName = (name.charAt(0) == '/') ? name : ("/" + name);
-                break;
-            default:
-                if (name.charAt(0) == '/' && name.charAt(name.length() - 1) != '/') {
-                    // Fast-path - avoid copy.
-                    resourceName = name;
-                } else {
-                    final StringBuilder builder = new StringBuilder(name.length() + 1);
-                    if (name.charAt(0) != '/') {
-                        builder.append('/');
-                    }
-                    if (name.charAt(name.length() - 1) != '/') {
-                        builder.append(name);
-                    } else {
-                        builder.append(name, 0, name.length() - 1);
-                    }
-                    resourceName = builder.toString();
-                }
-                break;
-            }
+            resourceName = normalizeResourceName(name);
             return getThis();
         }
 
@@ -650,13 +627,13 @@ public final class Requests {
      * ID. Invoking this method as follows:
      *
      * <pre>
-     * newActionRequest(&quot;/users/1&quot;, actionId);
+     * newActionRequest(&quot;users/1&quot;, actionId);
      * </pre>
      *
      * Is equivalent to:
      *
      * <pre>
-     * newActionRequest(&quot;/users&quot;, &quot;1&quot;, actionId);
+     * newActionRequest(&quot;users&quot;, &quot;1&quot;, actionId);
      * </pre>
      *
      * @param resourceName
@@ -674,13 +651,13 @@ public final class Requests {
      * resource ID, and action ID. Invoking this method as follows:
      *
      * <pre>
-     * newActionRequest(&quot;/users&quot;, &quot;1&quot;, &quot;someAction&quot;);
+     * newActionRequest(&quot;users&quot;, &quot;1&quot;, &quot;someAction&quot;);
      * </pre>
      *
      * Is equivalent to:
      *
      * <pre>
-     * newActionRequest(&quot;/users/1&quot;, &quot;someAction&quot;);
+     * newActionRequest(&quot;users/1&quot;, &quot;someAction&quot;);
      * </pre>
      *
      * @param resourceContainer
@@ -703,13 +680,13 @@ public final class Requests {
      * the new resource. Invoking this method as follows:
      *
      * <pre>
-     * newCreateRequest(&quot;/users&quot;, content);
+     * newCreateRequest(&quot;users&quot;, content);
      * </pre>
      *
      * Is equivalent to:
      *
      * <pre>
-     * newCreateRequest(&quot;/users&quot;, null, content);
+     * newCreateRequest(&quot;users&quot;, null, content);
      * </pre>
      *
      * @param resourceContainer
@@ -729,13 +706,13 @@ public final class Requests {
      * resource ID, and JSON content. Invoking this method as follows:
      *
      * <pre>
-     * newCreateRequest(&quot;/users&quot;, &quot;1&quot;, content);
+     * newCreateRequest(&quot;users&quot;, &quot;1&quot;, content);
      * </pre>
      *
      * Is equivalent to:
      *
      * <pre>
-     * newCreateRequest(&quot;/users&quot;, content).setNewResourceId(&quot;1&quot;);
+     * newCreateRequest(&quot;users&quot;, content).setNewResourceId(&quot;1&quot;);
      * </pre>
      *
      * @param resourceContainer
@@ -759,13 +736,13 @@ public final class Requests {
      * this method as follows:
      *
      * <pre>
-     * newDeleteRequest(&quot;/users/1&quot;);
+     * newDeleteRequest(&quot;users/1&quot;);
      * </pre>
      *
      * Is equivalent to:
      *
      * <pre>
-     * newDeleteRequest(&quot;/users&quot;, &quot;1&quot;);
+     * newDeleteRequest(&quot;users&quot;, &quot;1&quot;);
      * </pre>
      *
      * @param resourceName
@@ -781,13 +758,13 @@ public final class Requests {
      * and resource ID. Invoking this method as follows:
      *
      * <pre>
-     * newDeleteRequest(&quot;/users&quot;, &quot;1&quot;);
+     * newDeleteRequest(&quot;users&quot;, &quot;1&quot;);
      * </pre>
      *
      * Is equivalent to:
      *
      * <pre>
-     * newDeleteRequest(&quot;/users/1&quot;);
+     * newDeleteRequest(&quot;users/1&quot;);
      * </pre>
      *
      * @param resourceContainer
@@ -806,13 +783,13 @@ public final class Requests {
      * patch operations. Invoking this method as follows:
      *
      * <pre>
-     * newPatchRequest(&quot;/users/1&quot;, operations);
+     * newPatchRequest(&quot;users/1&quot;, operations);
      * </pre>
      *
      * Is equivalent to:
      *
      * <pre>
-     * newPatchRequest(&quot;/users&quot;, &quot;1&quot;, operations);
+     * newPatchRequest(&quot;users&quot;, &quot;1&quot;, operations);
      * </pre>
      *
      * @param resourceName
@@ -831,13 +808,13 @@ public final class Requests {
      * resource ID, and JSON patch operations. Invoking this method as follows:
      *
      * <pre>
-     * newPatchRequest(&quot;/users&quot;, &quot;1&quot;, operations);
+     * newPatchRequest(&quot;users&quot;, &quot;1&quot;, operations);
      * </pre>
      *
      * Is equivalent to:
      *
      * <pre>
-     * newPatchRequest(&quot;/users/1&quot;, operations);
+     * newPatchRequest(&quot;users/1&quot;, operations);
      * </pre>
      *
      * @param resourceContainer
@@ -855,6 +832,11 @@ public final class Requests {
 
     /**
      * Returns a new query request with the provided resource container name.
+     * Example:
+     *
+     * <pre>
+     * newQueryRequest(&quot;users&quot;);
+     * </pre>
      *
      * @param resourceContainer
      *            The name of the resource container.
@@ -869,13 +851,13 @@ public final class Requests {
      * method as follows:
      *
      * <pre>
-     * newReadRequest(&quot;/users/1&quot;);
+     * newReadRequest(&quot;users/1&quot;);
      * </pre>
      *
      * Is equivalent to:
      *
      * <pre>
-     * newReadRequest(&quot;/users&quot;, &quot;1&quot;);
+     * newReadRequest(&quot;users&quot;, &quot;1&quot;);
      * </pre>
      *
      * @param resourceName
@@ -891,13 +873,13 @@ public final class Requests {
      * resource ID. Invoking this method as follows:
      *
      * <pre>
-     * newReadRequest(&quot;/users&quot;, &quot;1&quot;);
+     * newReadRequest(&quot;users&quot;, &quot;1&quot;);
      * </pre>
      *
      * Is equivalent to:
      *
      * <pre>
-     * newReadRequest(&quot;/users/1&quot;);
+     * newReadRequest(&quot;users/1&quot;);
      * </pre>
      *
      * @param resourceContainer
@@ -915,13 +897,13 @@ public final class Requests {
      * content. Invoking this method as follows:
      *
      * <pre>
-     * newUpdateRequest(&quot;/users/1&quot;, newContent);
+     * newUpdateRequest(&quot;users/1&quot;, newContent);
      * </pre>
      *
      * Is equivalent to:
      *
      * <pre>
-     * newUpdateRequest(&quot;/users&quot;, &quot;1&quot;, newContent);
+     * newUpdateRequest(&quot;users&quot;, &quot;1&quot;, newContent);
      * </pre>
      *
      * @param resourceName
@@ -940,13 +922,13 @@ public final class Requests {
      * resource ID, and new JSON content. Invoking this method as follows:
      *
      * <pre>
-     * newUpdateRequest(&quot;/users&quot;, &quot;1&quot;, newContent);
+     * newUpdateRequest(&quot;users&quot;, &quot;1&quot;, newContent);
      * </pre>
      *
      * Is equivalent to:
      *
      * <pre>
-     * newUpdateRequest(&quot;/users/1&quot;, newContent);
+     * newUpdateRequest(&quot;users/1&quot;, newContent);
      * </pre>
      *
      * @param resourceContainer
