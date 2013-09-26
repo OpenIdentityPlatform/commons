@@ -50,17 +50,17 @@ public final class MemoryBackendTest {
     @Test
     public void testActionCollectionClear() throws Exception {
         final Connection connection = getConnection();
-        connection.create(ctx(), newCreateRequest("/users", userAlice()));
-        connection.create(ctx(), newCreateRequest("/users", userBob()));
-        connection.action(ctx(), newActionRequest("/users", "clear"));
+        connection.create(ctx(), newCreateRequest("users", userAlice()));
+        connection.create(ctx(), newCreateRequest("users", userBob()));
+        connection.action(ctx(), newActionRequest("users", "clear"));
         try {
-            connection.read(ctx(), newReadRequest("/users/0"));
+            connection.read(ctx(), newReadRequest("users/0"));
             fail("Read succeeded unexpectedly");
         } catch (final Exception e) {
             assertThat(e).isInstanceOf(NotFoundException.class);
         }
         try {
-            connection.read(ctx(), newReadRequest("/users/1"));
+            connection.read(ctx(), newReadRequest("users/1"));
             fail("Read succeeded unexpectedly");
         } catch (final Exception e) {
             assertThat(e).isInstanceOf(NotFoundException.class);
@@ -70,21 +70,21 @@ public final class MemoryBackendTest {
     @Test(expectedExceptions = NotSupportedException.class)
     public void testActionCollectionUnknown() throws Exception {
         final Connection connection = getConnection();
-        connection.action(ctx(), newActionRequest("/users", "unknown"));
+        connection.action(ctx(), newActionRequest("users", "unknown"));
     }
 
     @Test(expectedExceptions = NotSupportedException.class)
     public void testActionInstanceUnknown() throws Exception {
         final Connection connection = getConnection();
-        connection.action(ctx(), newActionRequest("/users/0", "unknown"));
+        connection.action(ctx(), newActionRequest("users/0", "unknown"));
     }
 
     @Test
     public void testCreateCollection() throws Exception {
         final Connection connection = getConnection();
         final Resource resource1 =
-                connection.create(ctx(), newCreateRequest("/users", userAlice()));
-        final Resource resource2 = connection.read(ctx(), newReadRequest("/users/0"));
+                connection.create(ctx(), newCreateRequest("users", userAlice()));
+        final Resource resource2 = connection.read(ctx(), newReadRequest("users/0"));
         assertThat(resource1).isEqualTo(resource2);
         assertThat(resource1.getId()).isEqualTo("0");
         assertThat(resource1.getRevision()).isEqualTo("0");
@@ -96,8 +96,8 @@ public final class MemoryBackendTest {
     public void testCreateInstance() throws Exception {
         final Connection connection = getConnection();
         final Resource resource1 =
-                connection.create(ctx(), newCreateRequest("/users", "123", userAlice()));
-        final Resource resource2 = connection.read(ctx(), newReadRequest("/users/123"));
+                connection.create(ctx(), newCreateRequest("users", "123", userAlice()));
+        final Resource resource2 = connection.read(ctx(), newReadRequest("users/123"));
         assertThat(resource1).isEqualTo(resource2);
         assertThat(resource1.getId()).isEqualTo("123");
         assertThat(resource1.getRevision()).isEqualTo("0");
@@ -108,20 +108,20 @@ public final class MemoryBackendTest {
     @Test(expectedExceptions = BadRequestException.class)
     public void testDeleteCollection() throws Exception {
         final Connection connection = getConnection();
-        connection.delete(ctx(), newDeleteRequest("/users"));
+        connection.delete(ctx(), newDeleteRequest("users"));
     }
 
     @Test
     public void testDeleteInstance() throws Exception {
         final Connection connection = getConnection();
-        connection.create(ctx(), newCreateRequest("/users", userAlice()));
-        final Resource resource = connection.delete(ctx(), newDeleteRequest("/users/0"));
+        connection.create(ctx(), newCreateRequest("users", userAlice()));
+        final Resource resource = connection.delete(ctx(), newDeleteRequest("users/0"));
         assertThat(resource.getId()).isEqualTo("0");
         assertThat(resource.getRevision()).isEqualTo("0");
         assertThat(resource.getContent().getObject()).isEqualTo(
                 userAliceWithIdAndRev(0, 0).getObject());
         try {
-            connection.read(ctx(), newReadRequest("/users/0"));
+            connection.read(ctx(), newReadRequest("users/0"));
             fail("Read succeeded unexpectedly");
         } catch (final NotFoundException e) {
             // Expected.
@@ -131,15 +131,15 @@ public final class MemoryBackendTest {
     @Test(expectedExceptions = BadRequestException.class)
     public void testPatchCollection() throws Exception {
         final Connection connection = getConnection();
-        connection.patch(ctx(), newPatchRequest("/users", add("/test", "value")));
+        connection.patch(ctx(), newPatchRequest("users", add("/test", "value")));
     }
 
     @Test
     public void testPatchInstance() throws Exception {
         final Connection connection = getConnection();
-        connection.create(ctx(), newCreateRequest("/users", userAlice()));
+        connection.create(ctx(), newCreateRequest("users", userAlice()));
         final Resource resource =
-                connection.patch(ctx(), newPatchRequest("/users/0", replace("/name", "bob"),
+                connection.patch(ctx(), newPatchRequest("users/0", replace("/name", "bob"),
                         increment("/age", 10), remove("/role"), add("/role", "it")));
         assertThat(resource.getId()).isEqualTo("0");
         assertThat(resource.getRevision()).isEqualTo("1");
@@ -150,10 +150,10 @@ public final class MemoryBackendTest {
     @Test
     public void testQueryCollection() throws Exception {
         final Connection connection = getConnection();
-        connection.create(ctx(), newCreateRequest("/users", userAlice()));
-        connection.create(ctx(), newCreateRequest("/users", userBob()));
+        connection.create(ctx(), newCreateRequest("users", userAlice()));
+        connection.create(ctx(), newCreateRequest("users", userBob()));
         final Collection<Resource> results = new ArrayList<Resource>();
-        connection.query(ctx(), newQueryRequest("/users"), results);
+        connection.query(ctx(), newQueryRequest("users"), results);
         assertThat(results).containsOnly(asResource(userAliceWithIdAndRev(0, 0)),
                 asResource(userBobWithIdAndRev(1, 0)));
     }
@@ -161,10 +161,10 @@ public final class MemoryBackendTest {
     @Test
     public void testQueryCollectionWithFilters() throws Exception {
         final Connection connection = getConnection();
-        connection.create(ctx(), newCreateRequest("/users", userAlice()));
-        connection.create(ctx(), newCreateRequest("/users", userBob()));
+        connection.create(ctx(), newCreateRequest("users", userAlice()));
+        connection.create(ctx(), newCreateRequest("users", userBob()));
         final Collection<Resource> results = new ArrayList<Resource>();
-        connection.query(ctx(), newQueryRequest("/users").setQueryFilter(
+        connection.query(ctx(), newQueryRequest("users").setQueryFilter(
                 QueryFilter.equalTo("name", "alice")).addField("_id"), results);
         assertThat(results).hasSize(1);
         final Resource resource = results.iterator().next();
@@ -176,23 +176,23 @@ public final class MemoryBackendTest {
     @Test(expectedExceptions = BadRequestException.class)
     public void testQueryInstance() throws Exception {
         final Connection connection = getConnection();
-        connection.create(ctx(), newCreateRequest("/users", userAlice()));
-        connection.create(ctx(), newCreateRequest("/users", userBob()));
+        connection.create(ctx(), newCreateRequest("users", userAlice()));
+        connection.create(ctx(), newCreateRequest("users", userBob()));
         final Collection<Resource> results = new ArrayList<Resource>();
-        connection.query(ctx(), newQueryRequest("/users/0"), results);
+        connection.query(ctx(), newQueryRequest("users/0"), results);
     }
 
     @Test(expectedExceptions = BadRequestException.class)
     public void testReadCollection() throws Exception {
         final Connection connection = getConnection();
-        connection.read(ctx(), newReadRequest("/users"));
+        connection.read(ctx(), newReadRequest("users"));
     }
 
     @Test
     public void testReadInstance() throws Exception {
         final Connection connection = getConnection();
-        connection.create(ctx(), newCreateRequest("/users", userAlice()));
-        final Resource resource = connection.read(ctx(), newReadRequest("/users/0"));
+        connection.create(ctx(), newCreateRequest("users", userAlice()));
+        final Resource resource = connection.read(ctx(), newReadRequest("users/0"));
         assertThat(resource.getId()).isEqualTo("0");
         assertThat(resource.getRevision()).isEqualTo("0");
         assertThat(resource.getContent().getObject()).isEqualTo(
@@ -202,9 +202,9 @@ public final class MemoryBackendTest {
     @Test
     public void testReadInstanceWithFieldFilter() throws Exception {
         final Connection connection = getConnection();
-        connection.create(ctx(), newCreateRequest("/users", userAlice()));
+        connection.create(ctx(), newCreateRequest("users", userAlice()));
         final Resource resource =
-                connection.read(ctx(), newReadRequest("/users/0").addField("_id"));
+                connection.read(ctx(), newReadRequest("users/0").addField("_id"));
         assertThat(resource.getId()).isEqualTo("0");
         assertThat(resource.getRevision()).isEqualTo("0");
         assertThat(resource.getContent().getObject()).isEqualTo(object(field("_id", "0")));
@@ -213,14 +213,14 @@ public final class MemoryBackendTest {
     @Test(expectedExceptions = BadRequestException.class)
     public void testUpdateCollection() throws Exception {
         final Connection connection = getConnection();
-        connection.update(ctx(), newUpdateRequest("/users", userAlice()));
+        connection.update(ctx(), newUpdateRequest("users", userAlice()));
     }
 
     @Test
     public void testUpdateInstance() throws Exception {
         final Connection connection = getConnection();
-        connection.create(ctx(), newCreateRequest("/users", userAlice()));
-        final Resource resource = connection.update(ctx(), newUpdateRequest("/users/0", userBob()));
+        connection.create(ctx(), newCreateRequest("users", userAlice()));
+        final Resource resource = connection.update(ctx(), newUpdateRequest("users/0", userBob()));
         assertThat(resource.getId()).isEqualTo("0");
         assertThat(resource.getRevision()).isEqualTo("1");
         assertThat(resource.getContent().getObject()).isEqualTo(
@@ -230,7 +230,7 @@ public final class MemoryBackendTest {
     private Connection getConnection() {
         final MemoryBackend users = new MemoryBackend();
         final Router router = new Router();
-        router.addRoute("/users", users);
+        router.addRoute("users", users);
         return newInternalConnection(router);
     }
 

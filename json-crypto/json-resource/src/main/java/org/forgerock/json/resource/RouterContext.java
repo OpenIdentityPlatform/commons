@@ -39,26 +39,28 @@ import org.forgerock.json.fluent.JsonValue;
  * {@link Request#getResourceName() resource name} trimmed so that it is
  * relative to the current resource being accessed. More specifically, the
  * "relativized" resource name represents the portion of the resource URI which
- * follows the portion matched during routing by the URI template or "/" if the
- * URI template matched exactly. The matched portion of the resource URI and the
- * base URI may be accessed via this router context. Example:
+ * follows the portion matched during routing by the URI template or "" (empty
+ * string) if the URI template matched exactly. The matched portion of the
+ * resource URI and the base URI may be accessed via this router context.
+ * Example:
  *
  * <pre>
  * Router top = new Router();
  * Router users = new Router();
  * Router devices = new Router();
- * top.addRoute(RoutingMode.STARTS_WITH, &quot;/users/{userId}&quot;, users);
- * users.addRouter(RoutingMode.STARTS_WITH, &quot;/devices/{deviceId}&quot;, devices);
+ * top.addRoute(RoutingMode.STARTS_WITH, &quot;users/{userId}&quot;, users);
+ * users.addRouter(RoutingMode.STARTS_WITH, &quot;devices/{deviceId}&quot;, devices);
  * </pre>
  *
- * A request against "/users/1" will be routed to the users router with a base
- * URI of "/users/1", a matched URI of "/users/1", and a resource name of "/".
+ * A request against "users/1" will be routed to the users router with a base
+ * URI of "users/1", a matched URI of "users/1", and a resource name of ""
+ * (empty string).
  * <p>
- * A request against "/users/1/devices/0" will be routed to the users router
- * with a base URI of "/users/1", a matched URI of "/users/1", and a resource
- * name of "/devices/0". It will then be routed to the devices router with a
- * base URI of "/users/1/devices/0", a matched URI of "/devices/0", and a
- * resource name of "/".
+ * A request against "users/1/devices/0" will be routed to the users router with
+ * a base URI of "users/1", a matched URI of "users/1", and a resource name of
+ * "devices/0". It will then be routed to the devices router with a base URI of
+ * "users/1/devices/0", a matched URI of "devices/0", and a resource name of ""
+ * (empty string).
  * <p>
  * Here is an example of the JSON representation of a routing context:
  *
@@ -69,7 +71,7 @@ import org.forgerock.json.fluent.JsonValue;
  *   "parent" : {
  *       ...
  *   },
- *   "matched-uri" : "/users/bjensen",
+ *   "matched-uri" : "users/bjensen",
  *   "uri-template-variables" : {
  *       "userId" : "bjensen",
  *       "deviceId" : "0"
@@ -133,7 +135,7 @@ public final class RouterContext extends ServerContext {
      * Returns the portion of the request URI which has been routed so far. This
      * is obtained dynamically by concatenating the matched URI with the base
      * URI of the parent router context if present. The base URI is never
-     * {@code null} and will contain at least a single "/" character.
+     * {@code null} but may be "" (empty string).
      *
      * @return The non-{@code null} portion of the request URI which has been
      *         routed so far.
@@ -147,7 +149,10 @@ public final class RouterContext extends ServerContext {
                 builder.append(baseUri);
             }
         }
-        if (builder.length() == 0 || matchedUri.length() > 1) {
+        if (matchedUri.length() > 0) {
+            if (builder.length() > 0) {
+                builder.append('/');
+            }
             builder.append(matchedUri);
         }
         return builder.toString();
@@ -155,8 +160,7 @@ public final class RouterContext extends ServerContext {
 
     /**
      * Returns the portion of the request URI which matched the URI template.
-     * The matched URI is never {@code null} and will contain at least a single
-     * "/" path separator.
+     * The matched URI is never {@code null} but may be "" (empty string).
      *
      * @return The non-{@code null} portion of the request URI which matched the
      *         URI template.

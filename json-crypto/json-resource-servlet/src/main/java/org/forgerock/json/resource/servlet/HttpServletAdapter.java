@@ -75,7 +75,6 @@ import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
-import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.PreconditionFailedException;
@@ -487,21 +486,12 @@ public final class HttpServletAdapter {
                 final int i = resourceName.lastIndexOf('/');
                 final CreateRequest request;
                 if (i < 0) {
-                    // The Servlet specifically states that the path info
-                    // contains a forward slash so this is an internal error.
                     // FIXME: i18n.
-                    throw new InternalServerErrorException("Invalid HTTP servlet request path info");
-                } else if (i == 0) {
-                    request = Requests.newCreateRequest("/", content);
+                    throw new BadRequestException("No new resource ID in HTTP PUT request");
                 } else {
                     request = Requests.newCreateRequest(resourceName.substring(0, i), content);
                 }
-                final String newResourceId = resourceName.substring(i + 1);
-                if (newResourceId.isEmpty()) {
-                    // FIXME: i18n.
-                    throw new BadRequestException("No new resource ID in HTTP PUT request");
-                }
-                request.setNewResourceId(newResourceId);
+                request.setNewResourceId(resourceName.substring(i + 1));
                 for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
                     final String name = p.getKey();
                     final String[] values = p.getValue();
@@ -565,10 +555,22 @@ public final class HttpServletAdapter {
         servletContext.log(builder.toString());
     }
 
+    /*
+     * Removes leading and trailing forward slashes.
+     */
     private String getResourceName(final HttpServletRequest req) throws ResourceException {
         // Treat null path info as root resource.
-        final String resourceName = req.getPathInfo();
-        return resourceName == null ? "/" : resourceName;
+        String resourceName = req.getPathInfo();
+        if (resourceName == null) {
+            return "";
+        }
+        if (resourceName.startsWith("/")) {
+            resourceName = resourceName.substring(1);
+        }
+        if (resourceName.endsWith("/")) {
+            resourceName = resourceName.substring(1, resourceName.length() - 1);
+        }
+        return resourceName;
     }
 
     private Context newRequestContext(final HttpServletRequest req) throws ResourceException {

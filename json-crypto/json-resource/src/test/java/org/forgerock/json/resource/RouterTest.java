@@ -16,9 +16,9 @@
 
 package org.forgerock.json.resource;
 
+import static org.fest.assertions.Assertions.assertThat;
 import static org.forgerock.json.resource.Requests.newReadRequest;
 import static org.forgerock.json.resource.Resources.newInternalConnection;
-import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -28,7 +28,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.mockito.ArgumentMatcher;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -44,90 +44,16 @@ public final class RouterTest {
     // TODO: test collection/singleton
     // TODO: route registration/deregistation
 
-    private static final class IsRouteContext extends ArgumentMatcher<ServerContext> {
-        private final Map<String, String> expectedUriTemplateVariables;
-        private final ServerContext parent;
-
-        private IsRouteContext(final ServerContext parent,
-                final Map<String, String> expectedUriTemplateVariables) {
-            this.parent = parent;
-            this.expectedUriTemplateVariables = expectedUriTemplateVariables;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public boolean matches(final Object argument) {
-            if (argument instanceof RouterContext) {
-                final RouterContext context = (RouterContext) argument;
-                return context.getParent() == parent
-                        && context.getUriTemplateVariables().equals(expectedUriTemplateVariables);
-            } else {
-                return false;
-            }
-        }
-    }
-
-    private static ArgumentMatcher<ServerContext> isRouteContext(final ServerContext parent) {
-        return new IsRouteContext(parent, Collections.<String, String> emptyMap());
-    }
-
-    private static ArgumentMatcher<ServerContext> isRouteContext(final ServerContext parent,
-            final Map<String, String> expectedUriTemplateVariables) {
-        return new IsRouteContext(parent, expectedUriTemplateVariables);
-    }
-
-    private static ArgumentMatcher<ServerContext> isRouteContext(final ServerContext parent,
-            final String key, final String value) {
-        return new IsRouteContext(parent, Collections.singletonMap(key, value));
-    }
-
     @DataProvider
     public Object[][] absoluteRouteHitTestData() {
         // @formatter:off
         return new Object[][] {
+            /* resource name */
             { "" },
-            { "/" },
-            { "/a" },
-            { "/a/" },
-            { "/a/b" },
-            { "/a/b/" },
-            { "/a/b/c" },
-            { "/a/b/c/" },
-            { "/one/two/three" }, // Check multi-char path elements.
-        };
-        // @formatter:on
-    }
-
-    @DataProvider
-    public Object[][] invalidTemplatesTestData() {
-        // @formatter:off
-        return new Object[][] {
-            { "/{" },
-            { "/{}" },
-            { "/{a" },
-            { "/{a/b" },
-            { "/{a/{b}" }
-        };
-        // @formatter:on
-    }
-
-    @DataProvider
-    public Object[][] routeMissTestData() {
-        // @formatter:off
-        return new Object[][] {
-            { "/", "/a" },
-            { "/a", "/" },
-            { "/a", "/b" },
-            { "/a/b", "/a" },
-            { "/a", "/a/b" },
-            { "/a/b", "/b/b" },
-            { "/one/two", "/one/twox" },
-            { "/one/twox", "/one/two" },
-            { "/{a}", "/one/two" },
-            { "/{a}/{b}", "/one/two/three" },
-            { "/one/{a}/{b}", "/one/two" },
+            { "a" },
+            { "a/b" },
+            { "a/b/c" },
+            { "one/two/three" }, // Check multi-char path elements.
         };
         // @formatter:on
     }
@@ -140,23 +66,44 @@ public final class RouterTest {
         final ServerContext c = newServerContext(router);
         final ReadRequest r = newReadRequest(resourceName);
         router.handleRead(c, r, null);
-        verify(h).handleRead(argThat(isRouteContext(c)), Matchers.<ReadRequest> any(),
+        final ArgumentCaptor<RouterContext> rc = ArgumentCaptor.forClass(RouterContext.class);
+        verify(h).handleRead(rc.capture(), Matchers.<ReadRequest> any(),
                 Matchers.<ResultHandler<Resource>> any());
+        checkRouterContext(rc, c, resourceName);
+    }
+
+    private void checkRouterContext(ArgumentCaptor<RouterContext> rc, final ServerContext c,
+            final String expectedMatchedUri, final String key, final String value) {
+        checkRouterContext(rc, c, expectedMatchedUri, Collections.singletonMap(key, value));
+    }
+
+    private void checkRouterContext(ArgumentCaptor<RouterContext> rc, final ServerContext c,
+            final String expectedMatchedUri) {
+        checkRouterContext(rc, c, expectedMatchedUri, Collections.<String, String> emptyMap());
+    }
+
+    private void checkRouterContext(ArgumentCaptor<RouterContext> rc, final ServerContext c,
+            final String expectedMatchedUri, final Map<String, String> expectedUriTemplateVariables) {
+        assertThat(rc.getValue().getParent()).isSameAs(c);
+        assertThat(rc.getValue().getMatchedUri()).isEqualTo(expectedMatchedUri);
+        assertThat(rc.getValue().getBaseUri()).isEqualTo(expectedMatchedUri);
+        assertThat(rc.getValue().getUriTemplateVariables()).isEqualTo(expectedUriTemplateVariables);
     }
 
     @Test
     public void testDefaultRouteWithOne() throws ResourceException {
         final Router router = new Router();
         final RequestHandler h1 = mock(RequestHandler.class);
-        router.addRoute(RoutingMode.EQUALS, "/users", h1);
+        router.addRoute(RoutingMode.EQUALS, "users", h1);
         final RequestHandler h2 = mock(RequestHandler.class);
         router.setDefaultRoute(h2);
 
         final ServerContext c = newServerContext(router);
-        final ReadRequest r = newReadRequest("/object");
+        final ReadRequest r = newReadRequest("object");
         router.handleRead(c, r, null);
-        verify(h2).handleRead(argThat(isRouteContext(c)), same(r),
-                Matchers.<ResultHandler<Resource>> any());
+        final ArgumentCaptor<RouterContext> rc = ArgumentCaptor.forClass(RouterContext.class);
+        verify(h2).handleRead(rc.capture(), same(r), Matchers.<ResultHandler<Resource>> any());
+        checkRouterContext(rc, c, "");
     }
 
     @Test
@@ -166,10 +113,25 @@ public final class RouterTest {
         router.setDefaultRoute(h);
 
         final ServerContext c = newServerContext(router);
-        final ReadRequest r = newReadRequest("/object");
+        final ReadRequest r = newReadRequest("object");
         router.handleRead(c, r, null);
-        verify(h).handleRead(argThat(isRouteContext(c)), same(r),
-                Matchers.<ResultHandler<Resource>> any());
+        final ArgumentCaptor<RouterContext> rc = ArgumentCaptor.forClass(RouterContext.class);
+        verify(h).handleRead(rc.capture(), same(r), Matchers.<ResultHandler<Resource>> any());
+        checkRouterContext(rc, c, "");
+    }
+
+    @DataProvider
+    public Object[][] invalidTemplatesTestData() {
+        // @formatter:off
+        return new Object[][] {
+            /* invalid template */
+            { "{" },
+            { "{}" },
+            { "{a" },
+            { "{a/b" },
+            { "{a/{b}" }
+        };
+        // @formatter:on
     }
 
     @Test(dataProvider = "invalidTemplatesTestData",
@@ -184,39 +146,68 @@ public final class RouterTest {
     public void testMultipleRoutePrecedence() throws ResourceException {
         final Router router = new Router();
         final RequestHandler h1 = mock(RequestHandler.class);
-        router.addRoute(RoutingMode.EQUALS, "/object", h1);
+        router.addRoute(RoutingMode.EQUALS, "object", h1);
         final RequestHandler h2 = mock(RequestHandler.class);
-        router.addRoute(RoutingMode.EQUALS, "/{objectId}", h2);
+        router.addRoute(RoutingMode.EQUALS, "{objectId}", h2);
 
         final ServerContext c = newServerContext(router);
-        final ReadRequest r1 = newReadRequest("/object");
+        final ReadRequest r1 = newReadRequest("object");
         router.handleRead(c, r1, null);
-        verify(h1).handleRead(argThat(isRouteContext(c)), Matchers.<ReadRequest> any(),
+        final ArgumentCaptor<RouterContext> rc1 = ArgumentCaptor.forClass(RouterContext.class);
+        verify(h1).handleRead(rc1.capture(), Matchers.<ReadRequest> any(),
                 Matchers.<ResultHandler<Resource>> any());
-        final ReadRequest r2 = newReadRequest("/thing");
+        checkRouterContext(rc1, c, "object");
+
+        final ReadRequest r2 = newReadRequest("thing");
         router.handleRead(c, r2, null);
-        verify(h2).handleRead(argThat(isRouteContext(c, "objectId", "thing")),
-                Matchers.<ReadRequest> any(), Matchers.<ResultHandler<Resource>> any());
+        final ArgumentCaptor<RouterContext> rc2 = ArgumentCaptor.forClass(RouterContext.class);
+        verify(h2).handleRead(rc2.capture(), Matchers.<ReadRequest> any(),
+                Matchers.<ResultHandler<Resource>> any());
+        checkRouterContext(rc2, c, "thing", "objectId", "thing");
     }
 
     @Test
     public void testMultipleRoutes() throws ResourceException {
         final Router router = new Router();
         final RequestHandler h1 = mock(RequestHandler.class);
-        router.addRoute(RoutingMode.EQUALS, "/users", h1);
+        router.addRoute(RoutingMode.EQUALS, "users", h1);
         final RequestHandler h2 = mock(RequestHandler.class);
-        router.addRoute(RoutingMode.EQUALS, "/groups", h2);
+        router.addRoute(RoutingMode.EQUALS, "groups", h2);
 
         final ServerContext c = newServerContext(router);
-        final ReadRequest r1 = newReadRequest("/users");
+        final ReadRequest r1 = newReadRequest("users");
         router.handleRead(c, r1, null);
-        verify(h1).handleRead(argThat(isRouteContext(c)), Matchers.<ReadRequest> any(),
+        final ArgumentCaptor<RouterContext> rc1 = ArgumentCaptor.forClass(RouterContext.class);
+        verify(h1).handleRead(rc1.capture(), Matchers.<ReadRequest> any(),
                 Matchers.<ResultHandler<Resource>> any());
+        checkRouterContext(rc1, c, "users");
 
-        final ReadRequest r2 = newReadRequest("/groups");
+        final ReadRequest r2 = newReadRequest("groups");
         router.handleRead(c, r2, null);
-        verify(h2).handleRead(argThat(isRouteContext(c)), Matchers.<ReadRequest> any(),
+        final ArgumentCaptor<RouterContext> rc2 = ArgumentCaptor.forClass(RouterContext.class);
+        verify(h2).handleRead(rc2.capture(), Matchers.<ReadRequest> any(),
                 Matchers.<ResultHandler<Resource>> any());
+        checkRouterContext(rc2, c, "groups");
+    }
+
+    @DataProvider
+    public Object[][] routeMissTestData() {
+        // @formatter:off
+        return new Object[][] {
+            /* template - resource name */
+            { "", "a" },
+            { "a", "" },
+            { "a", "b" },
+            { "a/b", "a" },
+            { "a", "a/b" },
+            { "a/b", "b/b" },
+            { "one/two", "one/twox" },
+            { "one/twox", "one/two" },
+            { "{a}", "one/two" },
+            { "{a}/{b}", "one/two/three" },
+            { "one/{a}/{b}", "one/two" },
+        };
+        // @formatter:on
     }
 
     @Test(dataProvider = "routeMissTestData", expectedExceptions = NotFoundException.class)
@@ -235,6 +226,21 @@ public final class RouterTest {
         }
     }
 
+    @DataProvider
+    public Object[][] variableRouteHitTestData() {
+        // @formatter:off
+        return new Object[][] {
+            /* template - resource name - variables */
+            { "{userId}", "a", new String[] {"userId", "a" }},
+            { "{userId}", "test", new String[] {"userId", "test" }},
+            { "x{userId}", "xtest", new String[] {"userId", "test" }},
+            { "{userId}/devices", "test/devices", new String[] {"userId", "test" }},
+            { "{a}/{b}", "aaa/bbb", new String[] {"a", "aaa", "b", "bbb" }},
+            { "{a}/b/{c}", "aaa/b/ccc", new String[] {"a", "aaa", "c", "ccc" }},
+        };
+        // @formatter:on
+    }
+
     @Test(dataProvider = "variableRouteHitTestData")
     public void testVariableRouteHit(final String template, final String resourceName,
             final String[] expectedVars) throws ResourceException {
@@ -248,32 +254,18 @@ public final class RouterTest {
         for (int i = 0; i < expectedVars.length; i += 2) {
             expectedMap.put(expectedVars[i], expectedVars[i + 1]);
         }
-        verify(h).handleRead(argThat(isRouteContext(c, expectedMap)), Matchers.<ReadRequest> any(),
+        final ArgumentCaptor<RouterContext> rc = ArgumentCaptor.forClass(RouterContext.class);
+        verify(h).handleRead(rc.capture(), Matchers.<ReadRequest> any(),
                 Matchers.<ResultHandler<Resource>> any());
+        checkRouterContext(rc, c, resourceName, expectedMap);
     }
 
     @Test(expectedExceptions = NotFoundException.class)
     public void testZeroRoutes() throws ResourceException {
         final Router router = new Router();
         final Context c = new RootContext();
-        final ReadRequest r = newReadRequest("/object");
+        final ReadRequest r = newReadRequest("object");
         newInternalConnection(router).read(c, r);
-    }
-
-    @DataProvider
-    public Object[][] variableRouteHitTestData() {
-        // @formatter:off
-        return new Object[][] {
-            { "/{userId}", "/a", new String[] {"userId", "a" }},
-            { "/{userId}", "/a/", new String[] {"userId", "a" }},
-            { "/{userId}", "/test", new String[] {"userId", "test" }},
-            { "/{userId}", "/test/", new String[] {"userId", "test" }},
-            { "/x{userId}", "/xtest", new String[] {"userId", "test" }},
-            { "/{userId}/devices", "/test/devices", new String[] {"userId", "test" }},
-            { "/{a}/{b}", "/aaa/bbb", new String[] {"a", "aaa", "b", "bbb" }},
-            { "/{a}/b/{c}", "/aaa/b/ccc", new String[] {"a", "aaa", "c", "ccc" }},
-        };
-        // @formatter:on
     }
 
     private ServerContext newServerContext(final RequestHandler handler) {
