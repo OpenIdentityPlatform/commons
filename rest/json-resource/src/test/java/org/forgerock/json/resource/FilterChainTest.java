@@ -55,7 +55,7 @@ public final class FilterChainTest {
         final Filter filter2 = filter();
         final FilterChain chain = new FilterChain(target, filter1, filter2);
         final ServerContext context = context(target);
-        final ReadRequest request = Requests.newReadRequest("/read");
+        final ReadRequest request = Requests.newReadRequest("read");
 
         // The handler will be invoked twice which is obviously unrealistic. In practice,
         // filter1 will wrap the result handler and combine/reduce the result of the two
@@ -98,7 +98,7 @@ public final class FilterChainTest {
         final Filter filter2 = filter();
         final FilterChain chain = new FilterChain(target, filter1, filter2);
         final ServerContext context = context(target);
-        final ReadRequest request = Requests.newReadRequest("/read");
+        final ReadRequest request = Requests.newReadRequest("read");
 
         final ResultHandler<Resource> handler = handler();
         chain.handleRead(context, request, handler);
@@ -127,7 +127,7 @@ public final class FilterChainTest {
         final Filter filter2 = filter();
         final FilterChain chain = new FilterChain(target, filter1, filter2);
         final ServerContext context = context(target);
-        final ReadRequest request = Requests.newReadRequest("/read");
+        final ReadRequest request = Requests.newReadRequest("read");
 
         final ResultHandler<Resource> handler = handler();
         chain.handleRead(context, request, handler);
@@ -146,7 +146,7 @@ public final class FilterChainTest {
         final Filter filter2 = filter();
         final FilterChain chain = new FilterChain(target, filter1, filter2);
         final ServerContext context = context(target);
-        final ActionRequest request = Requests.newActionRequest("/action", "test");
+        final ActionRequest request = Requests.newActionRequest("action", "test");
         final ResultHandler<JsonValue> handler = handler();
 
         // Test twice to ensure that no state is carried over.
@@ -169,7 +169,7 @@ public final class FilterChainTest {
         final Filter filter2 = filter();
         final FilterChain chain = new FilterChain(target, filter1, filter2);
         final ServerContext context = context(target);
-        final CreateRequest request = Requests.newCreateRequest("/create", JSON);
+        final CreateRequest request = Requests.newCreateRequest("create", JSON);
         final ResultHandler<Resource> handler = handler();
 
         // Test twice to ensure that no state is carried over.
@@ -192,7 +192,7 @@ public final class FilterChainTest {
         final Filter filter2 = filter();
         final FilterChain chain = new FilterChain(target, filter1, filter2);
         final ServerContext context = context(target);
-        final DeleteRequest request = Requests.newDeleteRequest("/delete");
+        final DeleteRequest request = Requests.newDeleteRequest("delete");
         final ResultHandler<Resource> handler = handler();
 
         // Test twice to ensure that no state is carried over.
@@ -215,7 +215,7 @@ public final class FilterChainTest {
         final Filter filter2 = filter();
         final FilterChain chain = new FilterChain(target, filter1, filter2);
         final ServerContext context = context(target);
-        final PatchRequest request = Requests.newPatchRequest("/patch");
+        final PatchRequest request = Requests.newPatchRequest("patch");
         final ResultHandler<Resource> handler = handler();
 
         // Test twice to ensure that no state is carried over.
@@ -238,7 +238,7 @@ public final class FilterChainTest {
         final Filter filter2 = filter();
         final FilterChain chain = new FilterChain(target, filter1, filter2);
         final ServerContext context = context(target);
-        final QueryRequest request = Requests.newQueryRequest("/query");
+        final QueryRequest request = Requests.newQueryRequest("query");
         final QueryResultHandler handler = mock(QueryResultHandler.class);
 
         // Test twice to ensure that no state is carried over.
@@ -265,7 +265,7 @@ public final class FilterChainTest {
         final Filter filter2 = filter();
         final FilterChain chain = new FilterChain(target, filter1, filter2);
         final ServerContext context = context(target);
-        final ReadRequest request = Requests.newReadRequest("/read");
+        final ReadRequest request = Requests.newReadRequest("read");
         final ResultHandler<Resource> handler = handler();
 
         // Test twice to ensure that no state is carried over.
@@ -288,7 +288,7 @@ public final class FilterChainTest {
         final Filter filter2 = filter();
         final FilterChain chain = new FilterChain(target, filter1, filter2);
         final ServerContext context = context(target);
-        final UpdateRequest request = Requests.newUpdateRequest("/update", JSON);
+        final UpdateRequest request = Requests.newUpdateRequest("update", JSON);
         final ResultHandler<Resource> handler = handler();
 
         // Test twice to ensure that no state is carried over.

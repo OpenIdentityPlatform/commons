@@ -237,13 +237,13 @@ public final class FiltersTest {
     private static final Resource RESOURCE2 = new Resource("id2", "rev", JSON);
 
     private static final ActionRequest ACTION_REQUEST = Requests
-            .newActionRequest("/test", "action");
-    private static final CreateRequest CREATE_REQUEST = Requests.newCreateRequest("/test", JSON);
-    private static final DeleteRequest DELETE_REQUEST = Requests.newDeleteRequest("/test", "id");
-    private static final PatchRequest PATCH_REQUEST = Requests.newPatchRequest("/test");
-    private static final QueryRequest QUERY_REQUEST = Requests.newQueryRequest("/test");
-    private static final ReadRequest READ_REQUEST = Requests.newReadRequest("/test", "id");
-    private static final UpdateRequest UPDATE_REQUEST = Requests.newUpdateRequest("/test", "id",
+            .newActionRequest("test", "action");
+    private static final CreateRequest CREATE_REQUEST = Requests.newCreateRequest("test", JSON);
+    private static final DeleteRequest DELETE_REQUEST = Requests.newDeleteRequest("test", "id");
+    private static final PatchRequest PATCH_REQUEST = Requests.newPatchRequest("test");
+    private static final QueryRequest QUERY_REQUEST = Requests.newQueryRequest("test");
+    private static final ReadRequest READ_REQUEST = Requests.newReadRequest("test", "id");
+    private static final UpdateRequest UPDATE_REQUEST = Requests.newUpdateRequest("test", "id",
             JSON);
 
     @DataProvider
@@ -276,7 +276,7 @@ public final class FiltersTest {
     public void testAnd(final List<FilterCondition> conditions, final boolean andExpected,
             final boolean orExpected) {
         final FilterCondition condition = Filters.and(conditions.toArray(new FilterCondition[0]));
-        final Request request = Requests.newActionRequest("/", "test");
+        final Request request = Requests.newActionRequest("", "test");
         assertThat(condition.matches(null, request)).isEqualTo(andExpected);
     }
 
@@ -380,7 +380,7 @@ public final class FiltersTest {
     public void testMatchRequestTypeManyFalse() {
         final FilterCondition condition =
                 Filters.matchRequestType(RequestType.READ, RequestType.DELETE);
-        final Request request = Requests.newActionRequest("/", "test");
+        final Request request = Requests.newActionRequest("", "test");
         assertThat(condition.matches(null, request)).isFalse();
     }
 
@@ -388,49 +388,49 @@ public final class FiltersTest {
     public void testMatchRequestTypeManyTrue() {
         final FilterCondition condition =
                 Filters.matchRequestType(RequestType.ACTION, RequestType.DELETE);
-        final Request request = Requests.newActionRequest("/", "test");
+        final Request request = Requests.newActionRequest("", "test");
         assertThat(condition.matches(null, request)).isTrue();
     }
 
     @Test
     public void testMatchRequestTypeSingleFalse() {
         final FilterCondition condition = Filters.matchRequestType(RequestType.READ);
-        final Request request = Requests.newActionRequest("/", "test");
+        final Request request = Requests.newActionRequest("", "test");
         assertThat(condition.matches(null, request)).isFalse();
     }
 
     @Test
     public void testMatchRequestTypeSingleTrue() {
         final FilterCondition condition = Filters.matchRequestType(RequestType.ACTION);
-        final Request request = Requests.newActionRequest("/", "test");
+        final Request request = Requests.newActionRequest("", "test");
         assertThat(condition.matches(null, request)).isTrue();
     }
 
     @Test
     public void testMatchResourceNameFalse() {
-        final FilterCondition condition = Filters.matchResourceName("/nomatch/name");
-        final Request request = Requests.newActionRequest("/resource/name", "test");
+        final FilterCondition condition = Filters.matchResourceName("nomatch/name");
+        final Request request = Requests.newActionRequest("resource/name", "test");
         assertThat(condition.matches(null, request)).isFalse();
     }
 
     @Test
     public void testMatchResourceNameTrue() {
-        final FilterCondition condition = Filters.matchResourceName("/resource/.*");
-        final Request request = Requests.newActionRequest("/resource/name", "test");
+        final FilterCondition condition = Filters.matchResourceName("resource/.*");
+        final Request request = Requests.newActionRequest("resource/name", "test");
         assertThat(condition.matches(null, request)).isTrue();
     }
 
     @Test
     public void testNotFalse() {
         final FilterCondition condition = Filters.not(c(true));
-        final Request request = Requests.newActionRequest("/", "test");
+        final Request request = Requests.newActionRequest("", "test");
         assertThat(condition.matches(null, request)).isFalse();
     }
 
     @Test
     public void testNotTrue() {
         final FilterCondition condition = Filters.not(c(false));
-        final Request request = Requests.newActionRequest("/", "test");
+        final Request request = Requests.newActionRequest("", "test");
         assertThat(condition.matches(null, request)).isTrue();
     }
 
@@ -438,7 +438,7 @@ public final class FiltersTest {
     public void testOr(final List<FilterCondition> conditions, final boolean andExpected,
             final boolean orExpected) {
         final FilterCondition condition = Filters.or(conditions.toArray(new FilterCondition[0]));
-        final Request request = Requests.newActionRequest("/", "test");
+        final Request request = Requests.newActionRequest("", "test");
         assertThat(condition.matches(null, request)).isEqualTo(orExpected);
     }
 

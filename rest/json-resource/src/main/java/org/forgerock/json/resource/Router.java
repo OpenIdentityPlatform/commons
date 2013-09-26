@@ -38,10 +38,10 @@ import org.forgerock.json.resource.Route.RouteMatcher;
  * the request's resource name. Examples of valid URI templates include:
  *
  * <pre>
- * /users
- * /users/{userId}
- * /users/{userId}/devices
- * /users/{userId}/devices/{deviceId}
+ * users
+ * users/{userId}
+ * users/{userId}/devices
+ * users/{userId}/devices/{deviceId}
  * </pre>
  *
  * Routes may be added and removed from a router as follows:
@@ -49,8 +49,8 @@ import org.forgerock.json.resource.Route.RouteMatcher;
  * <pre>
  * RequestHandler users = ...;
  * Router router = new Router();
- * Route r1 = router.addRoute(EQUALS, &quot;/users&quot;, users);
- * Route r2 = router.addRoute(EQUALS, &quot;/users/{userId}&quot;, users);
+ * Route r1 = router.addRoute(EQUALS, &quot;users&quot;, users);
+ * Route r2 = router.addRoute(EQUALS, &quot;users/{userId}&quot;, users);
  *
  * // Deregister a route.
  * router.removeRoute(r1, r2);
@@ -59,7 +59,7 @@ import org.forgerock.json.resource.Route.RouteMatcher;
  * A request handler receiving a routed request may access the associated
  * route's URI template variables via
  * {@link RouterContext#getUriTemplateVariables()}. For example, a request
- * handler processing requests for the route /user/{userId} may obtain the value
+ * handler processing requests for the route users/{userId} may obtain the value
  * of {@code userId} as follows:
  *
  * <pre>
@@ -131,10 +131,10 @@ public final class Router implements RequestHandler {
      * Router router = new Router();
      *
      * // This is valid usage: the template matches the resource collection.
-     * router.addRoute("/users", users);
+     * router.addRoute("users", users);
      *
      * // This is invalid usage: the template matches resource instances.
-     * router.addRoute("/users/{userId}", users);
+     * router.addRoute("users/{userId}", users);
      * </pre>
      *
      * @param uriTemplate
