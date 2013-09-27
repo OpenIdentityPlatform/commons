@@ -14,7 +14,7 @@
  * Copyright 2013 ForgeRock AS.
  */
 
-package org.forgerock.util;
+package org.forgerock.json.jose.utils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,10 +25,10 @@ import java.util.Map;
  * This HashMap sub-implementation behaves the same as a HashMap except for the fact that any entry the is added into
  * the map and the map already has an entry with the same given key, a DuplicateMapEntryException will be thrown.
  *
- * @param <K> {@inheritDoc}
- * @param <V> {@inheritDoc}
  *
  * @author Phill Cunnington
+ * @param <K> Key type.
+ * @param <V> Value type.
  * @since 2.0.0
  * @see Map
  * @see HashMap

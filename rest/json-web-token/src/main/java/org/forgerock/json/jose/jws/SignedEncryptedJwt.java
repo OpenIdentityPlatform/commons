@@ -16,11 +16,11 @@
 
 package org.forgerock.json.jose.jws;
 
+import java.security.Key;
+
 import org.forgerock.json.jose.jwe.EncryptedJwt;
 import org.forgerock.json.jose.jwt.Jwt;
 import org.forgerock.json.jose.jwt.JwtClaimsSet;
-
-import java.security.Key;
 
 /**
  * An implementation of a JWS with a nested JWE as its payload.

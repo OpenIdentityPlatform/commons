@@ -28,6 +28,7 @@ import java.security.spec.RSAPublicKeySpec;
  *
  * @author Phill Cunnington
  */
+@SuppressWarnings("javadoc")
 public class KeysHelper {
 
     private static final byte[] MOD = {

@@ -23,10 +23,7 @@
  */
 package org.forgerock.json.jose.jwk;
 
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.util.encode.Base64url;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertFalse;
 
 import java.math.BigInteger;
 import java.security.KeyPair;
@@ -36,8 +33,12 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.HashMap;
 
-import static org.testng.Assert.assertFalse;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.util.encode.Base64url;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
+@SuppressWarnings("javadoc")
 public class RsaJWKTest {
 
     //RSA parameter values

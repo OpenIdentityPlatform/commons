@@ -16,16 +16,17 @@
 
 package org.forgerock.json.jose.jwt;
 
-import org.forgerock.json.jose.jws.JwsAlgorithm;
-import org.forgerock.json.jose.jws.JwsHeader;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import org.forgerock.json.jose.jws.JwsAlgorithm;
+import org.forgerock.json.jose.jws.JwsHeader;
+import org.testng.annotations.Test;
 
+@SuppressWarnings("javadoc")
 public class JwtHeaderTest {
 
     @Test

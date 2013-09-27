@@ -26,7 +26,7 @@ import org.forgerock.json.jose.jwt.JwtClaimsSet;
  */
 public abstract class AbstractJwtBuilder implements JwtBuilder {
 
-    private JwtHeaderBuilder headerBuilder;
+    private JwtHeaderBuilder<?, ?> headerBuilder;
     private JwtClaimsSet claimsSet;
 
     /**
@@ -34,14 +34,14 @@ public abstract class AbstractJwtBuilder implements JwtBuilder {
      *
      * @return The JwtHeaderBuilder instance.
      */
-    public abstract JwtHeaderBuilder headers();
+    public abstract JwtHeaderBuilder<?, ?> headers();
 
     /**
      * Sets the JwtHeaderBuilder that this JwtBuilder will use to build the JWT's header parameters.
      *
      * @param headerBuilder The JwtHeaderBuilder instance.
      */
-    void setJwtHeaderBuilder(JwtHeaderBuilder headerBuilder) {
+    void setJwtHeaderBuilder(JwtHeaderBuilder<?, ?> headerBuilder) {
         this.headerBuilder = headerBuilder;
     }
 
@@ -50,7 +50,7 @@ public abstract class AbstractJwtBuilder implements JwtBuilder {
      *
      * @return The JwtHeaderBuilder instance.
      */
-    JwtHeaderBuilder getHeaderBuilder() {
+    JwtHeaderBuilder<?, ?> getHeaderBuilder() {
         return headerBuilder;
     }
 

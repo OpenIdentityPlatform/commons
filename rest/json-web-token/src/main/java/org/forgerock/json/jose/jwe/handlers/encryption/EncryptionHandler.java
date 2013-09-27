@@ -16,9 +16,9 @@
 
 package org.forgerock.json.jose.jwe.handlers.encryption;
 
-import org.forgerock.json.jose.jwe.JweEncryption;
-
 import java.security.Key;
+
+import org.forgerock.json.jose.jwe.JweEncryption;
 
 /**
  * The interface for EncryptionHandlers for all the different encryption algorithms.

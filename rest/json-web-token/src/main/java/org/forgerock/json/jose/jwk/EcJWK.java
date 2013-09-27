@@ -24,22 +24,14 @@
 
 package org.forgerock.json.jose.jwk;
 
-import org.forgerock.json.fluent.JsonException;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.util.encode.Base64;
-import org.forgerock.util.encode.Base64url;
-//import sun.security.ec.ECKeyFactory;
-//import sun.security.ec.NamedCurve;
-
-import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
-import java.security.spec.ECParameterSpec;
-import java.security.spec.ECPoint;
-import java.security.spec.ECPrivateKeySpec;
-import java.security.spec.ECPublicKeySpec;
 import java.util.List;
+
+import org.forgerock.json.fluent.JsonException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.util.encode.Base64;
 
 /**
  * This class implements an Elliptical Curve Json Web Key storage and manipulation class.
@@ -172,7 +164,7 @@ public class EcJWK extends JWK {
         KeyUse use = null;
         String x = null, y = null, d = null, curve = null, alg = null, kid = null;
         String x5u = null, x5t = null;
-        List x5c = null;
+        List<Base64> x5c = null;
 
         kty = KeyType.getKeyType(json.get(KTY).asString());
 
@@ -191,7 +183,7 @@ public class EcJWK extends JWK {
 
         x5u = json.get(X5U).asString();
         x5t = json.get(X5T).asString();
-        x5c = json.get(X5C).asList();
+        x5c = json.get(X5C).asList(Base64.class);
 
         return new EcJWK(use, alg, kid, x, y, d, curve, x5u, x5t, x5c);
     }

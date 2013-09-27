@@ -42,7 +42,6 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            org.forgerock.common.util;version=${project.version},
                             org.forgerock.json.jose.builders;version=${project.version},
                             org.forgerock.json.jose.jwt;version=${project.version},
                             org.forgerock.json.jose.jwk;version=${project.version},
