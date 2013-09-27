@@ -16,7 +16,14 @@
 
 package org.forgerock.json.jose.jws;
 
-import org.forgerock.json.jose.jwk.EcJWK;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.forgerock.json.jose.jwk.JWK;
 import org.forgerock.json.jose.jwk.KeyUse;
 import org.forgerock.json.jose.jwk.OctJWK;
@@ -24,14 +31,7 @@ import org.forgerock.json.jose.utils.Utils;
 import org.forgerock.util.encode.Base64;
 import org.testng.annotations.Test;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-
+@SuppressWarnings("javadoc")
 public class JwsSecureHeaderTest {
 
     @Test

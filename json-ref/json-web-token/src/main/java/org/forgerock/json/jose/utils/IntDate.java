@@ -16,9 +16,9 @@
 
 package org.forgerock.json.jose.utils;
 
-import org.forgerock.json.jose.exceptions.JwtRuntimeException;
-
 import java.util.Date;
+
+import org.forgerock.json.jose.exceptions.JwtRuntimeException;
 
 /**
  * This class provides utility methods for converting Java Date objects into and from IntDates.

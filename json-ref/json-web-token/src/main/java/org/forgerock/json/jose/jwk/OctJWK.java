@@ -23,11 +23,11 @@
  */
 package org.forgerock.json.jose.jwk;
 
+import java.util.List;
+
 import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.util.encode.Base64;
-
-import java.util.List;
 
 /**
  * Creates an Octet JWK.
@@ -89,7 +89,7 @@ public class OctJWK extends JWK {
 
         String k = null, alg = null, kid = null;
         String x5u = null, x5t = null;
-        List x5c = null;
+        List<Base64> x5c = null;
 
         k = json.get(K).asString();
 
@@ -104,7 +104,7 @@ public class OctJWK extends JWK {
 
         x5u = json.get(X5U).asString();
         x5t = json.get(X5T).asString();
-        x5c = json.get(X5C).asList();
+        x5c = json.get(X5C).asList(Base64.class);
 
         return new OctJWK(use, alg, kid, k, x5u, x5t, x5c);
     }

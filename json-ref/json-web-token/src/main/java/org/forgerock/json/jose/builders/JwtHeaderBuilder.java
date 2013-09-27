@@ -16,11 +16,11 @@
 
 package org.forgerock.json.jose.builders;
 
-import org.forgerock.json.jose.jwt.Algorithm;
-import org.forgerock.json.jose.jwt.JwtHeader;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import org.forgerock.json.jose.jwt.Algorithm;
+import org.forgerock.json.jose.jwt.JwtHeader;
 
 /**
  * A base implementation of a JWT header builder that provides a fluent builder pattern to creating JWT headers.
@@ -33,7 +33,7 @@ import java.util.Map;
  * @author Phill Cunnington
  * @since 2.0.0
  */
-public abstract class JwtHeaderBuilder<T extends JwtBuilder, B extends JwtHeaderBuilder> {
+public abstract class JwtHeaderBuilder<T extends JwtBuilder, B extends JwtHeaderBuilder<T, B>> {
 
     private final T jwtBuilder;
 

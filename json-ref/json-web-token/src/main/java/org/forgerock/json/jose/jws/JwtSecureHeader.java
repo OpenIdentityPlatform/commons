@@ -16,12 +16,15 @@
 
 package org.forgerock.json.jose.jws;
 
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.jose.exceptions.JwtRuntimeException;
-import org.forgerock.json.jose.jwk.JWK;
-import org.forgerock.json.jose.jwt.JwtHeader;
-import org.forgerock.json.jose.utils.Utils;
-import org.forgerock.util.encode.Base64;
+import static org.forgerock.json.jose.jws.JwsHeaderKey.CRIT;
+import static org.forgerock.json.jose.jws.JwsHeaderKey.CTY;
+import static org.forgerock.json.jose.jws.JwsHeaderKey.JKU;
+import static org.forgerock.json.jose.jws.JwsHeaderKey.JWK;
+import static org.forgerock.json.jose.jws.JwsHeaderKey.KID;
+import static org.forgerock.json.jose.jws.JwsHeaderKey.X5C;
+import static org.forgerock.json.jose.jws.JwsHeaderKey.X5T;
+import static org.forgerock.json.jose.jws.JwsHeaderKey.X5U;
+import static org.forgerock.json.jose.jws.JwsHeaderKey.getHeaderKey;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -29,7 +32,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.forgerock.json.jose.jws.JwsHeaderKey.*;
+import org.forgerock.json.jose.exceptions.JwtRuntimeException;
+import org.forgerock.json.jose.jwk.JWK;
+import org.forgerock.json.jose.jwt.JwtHeader;
+import org.forgerock.json.jose.utils.Utils;
+import org.forgerock.util.encode.Base64;
 
 /**
  * A base implementation for the common security header parameters shared by the JWS and JWE headers.
@@ -291,7 +298,7 @@ public abstract class JwtSecureHeader extends JwtHeader {
         }
         case X5C: {
             checkValueIsOfType(value, List.class);
-            checkListValuesAreOfType((List) value, String.class);
+            checkListValuesAreOfType((List<?>) value, String.class);
             setX509CertificateChain((List<String>) value);
             break;
         }
@@ -307,7 +314,7 @@ public abstract class JwtSecureHeader extends JwtHeader {
         }
         case CRIT: {
             checkValueIsOfType(value, List.class);
-            checkListValuesAreOfType((List) value, String.class);
+            checkListValuesAreOfType((List<?>) value, String.class);
             setCriticalHeaders((List<String>) value);
             break;
         }
