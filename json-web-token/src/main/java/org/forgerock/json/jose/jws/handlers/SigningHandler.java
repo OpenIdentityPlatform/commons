@@ -16,9 +16,9 @@
 
 package org.forgerock.json.jose.jws.handlers;
 
-import org.forgerock.json.jose.jws.JwsAlgorithm;
-
 import java.security.Key;
+
+import org.forgerock.json.jose.jws.JwsAlgorithm;
 
 /**
  * The interface for SigningHandlers for all the different signing algorithms.

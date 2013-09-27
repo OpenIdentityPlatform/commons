@@ -16,6 +16,15 @@
 
 package org.forgerock.json.jose.jwe.handlers.encryption;
 
+import java.nio.ByteBuffer;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.Arrays;
+
+import javax.crypto.KeyGenerator;
+import javax.crypto.spec.SecretKeySpec;
+
 import org.forgerock.json.jose.exceptions.JweDecryptionException;
 import org.forgerock.json.jose.exceptions.JweEncryptionException;
 import org.forgerock.json.jose.jwe.EncryptionMethod;
@@ -25,14 +34,6 @@ import org.forgerock.json.jose.jws.JwsAlgorithm;
 import org.forgerock.json.jose.jws.SigningManager;
 import org.forgerock.json.jose.jws.handlers.SigningHandler;
 import org.forgerock.json.jose.utils.Utils;
-
-import javax.crypto.KeyGenerator;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.ByteBuffer;
-import java.security.Key;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.util.Arrays;
 
 /**
  * An implementation of an EncryptionHandler that provides encryption and decryption methods using the JweAlgorithm

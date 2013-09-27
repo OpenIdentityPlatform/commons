@@ -16,12 +16,12 @@
 
 package org.forgerock.json.jose.jwt;
 
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.jose.exceptions.JwtRuntimeException;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.jose.exceptions.JwtRuntimeException;
 
 /**
  * A base implementation class for a JSON Web object.
@@ -67,7 +67,7 @@ public abstract class JWObject {
      * @param requiredClazz The class of the required type.
      * @see #checkValueIsOfType(Object, Class)
      */
-    protected void checkListValuesAreOfType(List value, Class<?> requiredClazz) {
+    protected void checkListValuesAreOfType(List<?> value, Class<?> requiredClazz) {
         if (value.size() > 0) {
             checkValueIsOfType(value.get(0), requiredClazz);
         }

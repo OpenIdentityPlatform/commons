@@ -16,8 +16,6 @@
 
 package org.forgerock.json.jose.jwe.handlers.compression;
 
-import org.forgerock.json.jose.exceptions.JweCompressionException;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -25,6 +23,8 @@ import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
+
+import org.forgerock.json.jose.exceptions.JweCompressionException;
 
 /**
  * An implementation of the CompressionHandler for DEFLATE Compressed Data Format Specification.

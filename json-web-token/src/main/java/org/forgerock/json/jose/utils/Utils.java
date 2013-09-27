@@ -16,14 +16,13 @@
 
 package org.forgerock.json.jose.utils;
 
-import org.codehaus.jackson.map.ObjectMapper;
-import org.forgerock.json.jose.exceptions.InvalidJwtException;
-import org.forgerock.util.NoDuplicatesMap;
-import org.forgerock.util.encode.Base64url;
-
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Map;
+
+import org.codehaus.jackson.map.ObjectMapper;
+import org.forgerock.json.jose.exceptions.InvalidJwtException;
+import org.forgerock.util.encode.Base64url;
 
 /**
  * This class provides utility methods to share common behaviour.

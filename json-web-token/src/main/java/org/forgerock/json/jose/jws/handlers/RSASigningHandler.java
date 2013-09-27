@@ -16,17 +16,17 @@
 
 package org.forgerock.json.jose.jws.handlers;
 
-import org.forgerock.json.jose.exceptions.JwsSigningException;
-import org.forgerock.json.jose.exceptions.JwsVerifyingException;
-import org.forgerock.json.jose.jws.JwsAlgorithm;
-import org.forgerock.json.jose.utils.Utils;
-import org.forgerock.util.SignatureUtil;
-
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.SignatureException;
 import java.security.cert.X509Certificate;
+
+import org.forgerock.json.jose.exceptions.JwsSigningException;
+import org.forgerock.json.jose.exceptions.JwsVerifyingException;
+import org.forgerock.json.jose.jws.JwsAlgorithm;
+import org.forgerock.json.jose.utils.Utils;
+import org.forgerock.util.SignatureUtil;
 
 /**
  * An implementation of the SigningHandler which can sign and verify using algorithms from the RSA family.

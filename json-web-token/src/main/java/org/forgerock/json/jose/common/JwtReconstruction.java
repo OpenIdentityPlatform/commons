@@ -52,7 +52,6 @@ public final class JwtReconstruction {
      * @throws InvalidJwtException If the jwt does not consist of the correct number of parts.
      * @throws JwtReconstructionException If the jwt does not consist of the correct number of parts.
      */
-    @SuppressWarnings("unchecked")
     public <T extends Jwt> T reconstructJwt(String jwtString, Class<T> jwtClass) {
 
         Jwt jwt;

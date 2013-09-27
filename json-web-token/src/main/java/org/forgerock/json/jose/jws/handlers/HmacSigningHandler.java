@@ -16,17 +16,18 @@
 
 package org.forgerock.json.jose.jws.handlers;
 
-import org.forgerock.json.jose.exceptions.JwsSigningException;
-import org.forgerock.json.jose.jws.JwsAlgorithm;
-import org.forgerock.json.jose.utils.Utils;
-
-import javax.crypto.Mac;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+
+import javax.crypto.Mac;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
+import org.forgerock.json.jose.exceptions.JwsSigningException;
+import org.forgerock.json.jose.jws.JwsAlgorithm;
+import org.forgerock.json.jose.utils.Utils;
 
 /**
  * An implementation of the SigningHandler which can sign and verify using algorithms from the HMAC family.

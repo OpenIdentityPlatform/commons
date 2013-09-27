@@ -14,7 +14,7 @@
  * Copyright 2013 ForgeRock Inc.
  */
 
-package org.forgerock.common.util;
+package org.forgerock.json.jose.utils;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

@@ -16,14 +16,14 @@
 
 package org.forgerock.json.jose.builders;
 
-import org.forgerock.json.jose.jwt.JwtClaimsSet;
-import org.forgerock.json.jose.jwt.JwtType;
-
 import java.net.URI;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.forgerock.json.jose.jwt.JwtClaimsSet;
+import org.forgerock.json.jose.jwt.JwtType;
 
 /**
  * An implementation of a JWT Claims Set builder that provides a fluent builder pattern to creating JWT Claims Sets.

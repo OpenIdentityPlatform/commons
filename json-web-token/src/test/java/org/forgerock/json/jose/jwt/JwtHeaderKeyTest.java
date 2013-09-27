@@ -16,10 +16,11 @@
 
 package org.forgerock.json.jose.jwt;
 
-import org.testng.annotations.Test;
-
 import static org.testng.Assert.assertEquals;
 
+import org.testng.annotations.Test;
+
+@SuppressWarnings("javadoc")
 public class JwtHeaderKeyTest {
 
     @Test
