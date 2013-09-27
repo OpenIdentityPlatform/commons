@@ -568,7 +568,7 @@ public final class HttpServletAdapter {
             resourceName = resourceName.substring(1);
         }
         if (resourceName.endsWith("/")) {
-            resourceName = resourceName.substring(1, resourceName.length() - 1);
+            resourceName = resourceName.substring(0, resourceName.length() - 1);
         }
         return resourceName;
     }
