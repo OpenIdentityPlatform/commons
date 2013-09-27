@@ -16,10 +16,10 @@
 
 package org.forgerock.json.jose.builders;
 
+import java.security.Key;
+
 import org.forgerock.json.jose.common.JwtReconstruction;
 import org.forgerock.json.jose.jwt.Jwt;
-
-import java.security.Key;
 
 /**
  * A factory for getting builders for plaintext, signed and encrypted JWTs and reconstructing JWT strings back into

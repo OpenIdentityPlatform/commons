@@ -16,10 +16,10 @@
 
 package org.forgerock.json.jose.jws.handlers;
 
+import java.security.Key;
+
 import org.forgerock.json.jose.jws.JwsAlgorithm;
 import org.forgerock.json.jose.utils.Utils;
-
-import java.security.Key;
 
 /**
  * An implementation of the SigningHandler which does not perform any signing or verifying.

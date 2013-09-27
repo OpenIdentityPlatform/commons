@@ -16,10 +16,10 @@
 
 package org.forgerock.json.jose.builders;
 
-import org.forgerock.json.jose.jwk.JWK;
-
 import java.net.URL;
 import java.util.List;
+
+import org.forgerock.json.jose.jwk.JWK;
 
 /**
  * A base implementation of a JWT header builder, for the common security header parameters shared by the JWS and JWE
@@ -34,7 +34,7 @@ import java.util.List;
  * @author Phill Cunnington
  * @since 2.0.0
  */
-public abstract class JwtSecureHeaderBuilder<T extends JwtBuilder, B extends JwtSecureHeaderBuilder>
+public abstract class JwtSecureHeaderBuilder<T extends JwtBuilder, B extends JwtSecureHeaderBuilder<T, B>>
         extends JwtHeaderBuilder<T, B> {
 
     /**

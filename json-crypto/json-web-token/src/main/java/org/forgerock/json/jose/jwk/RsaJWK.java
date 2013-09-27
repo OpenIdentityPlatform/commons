@@ -23,11 +23,6 @@
  */
 package org.forgerock.json.jose.jwk;
 
-import org.forgerock.json.fluent.JsonException;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.util.encode.Base64;
-import org.forgerock.util.encode.Base64url;
-
 import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -43,6 +38,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+
+import org.forgerock.json.fluent.JsonException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.util.encode.Base64;
+import org.forgerock.util.encode.Base64url;
 
 /**
  * Implements a RsaJWK.
@@ -512,7 +512,7 @@ public class RsaJWK extends JWK {
 
         String n = null, e = null, d = null, p = null, q = null, dq = null, dp = null, qi = null;
         String x5u = null, x5t = null;
-        List x5c = null;
+        List<Base64> x5c = null;
         List<Object> factors = null;
         List<OtherFactors> listOfFactors = null;
 
@@ -540,7 +540,7 @@ public class RsaJWK extends JWK {
         factors = json.get(FACTORS).asList();
         x5u = json.get(X5U).asString();
         x5t = json.get(X5T).asString();
-        x5c = json.get(X5C).asList();
+        x5c = json.get(X5C).asList(Base64.class);
         if (factors != null && !factors.isEmpty()) {
             listOfFactors = new ArrayList<OtherFactors>(factors.size());
             for (Object factor : factors) {

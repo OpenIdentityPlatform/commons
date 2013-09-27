@@ -16,14 +16,14 @@
 
 package org.forgerock.json.common.util;
 
-import org.forgerock.common.util.KeystoreManager;
-import org.testng.annotations.Test;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
-import java.security.PrivateKey;
 
+import org.forgerock.json.jose.utils.KeystoreManager;
+import org.testng.annotations.Test;
+
+@SuppressWarnings("javadoc")
 public class KeystoreManagerTest {
 
     @Test
@@ -32,6 +32,6 @@ public class KeystoreManagerTest {
         KeystoreManager keystoreManager = new KeystoreManager("password", "JKS",
                 URLDecoder.decode(ClassLoader.getSystemResource("keystore.jks").getFile(), "UTF-8"), "password");
 
-        PrivateKey privateKey = keystoreManager.getPrivateKey("jwt-test-ks");
+        keystoreManager.getPrivateKey("jwt-test-ks");
     }
 }

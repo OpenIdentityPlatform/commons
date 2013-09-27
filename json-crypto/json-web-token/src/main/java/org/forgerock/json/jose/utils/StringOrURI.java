@@ -16,10 +16,10 @@
 
 package org.forgerock.json.jose.utils;
 
-import org.forgerock.json.jose.exceptions.JwtRuntimeException;
-
 import java.net.URI;
 import java.net.URISyntaxException;
+
+import org.forgerock.json.jose.exceptions.JwtRuntimeException;
 
 /**
  * This class provides an utility method for validating that a String is either an arbitrary string without any ":"

@@ -16,12 +16,12 @@
 
 package org.forgerock.json.jose.builders;
 
+import java.security.Key;
+
 import org.forgerock.json.jose.jwe.EncryptedJwt;
 import org.forgerock.json.jose.jwe.JweHeader;
 import org.forgerock.json.jose.jws.JwsAlgorithm;
 import org.forgerock.json.jose.jwt.JwtClaimsSet;
-
-import java.security.Key;
 
 /**
  * An implementation of a JwtBuilder that can build a JWT and encrypt it, resulting in an EncryptedJwt object.
@@ -81,7 +81,7 @@ public class EncryptedJwtBuilder extends AbstractJwtBuilder {
      */
     @Override
     public EncryptedJwt asJwt() {
-        JwtHeaderBuilder headerBuilder = getHeaderBuilder();
+        JwtHeaderBuilder<?, ?> headerBuilder = getHeaderBuilder();
         JweHeader header;
         if (headerBuilder == null) {
             header = new JweHeader();

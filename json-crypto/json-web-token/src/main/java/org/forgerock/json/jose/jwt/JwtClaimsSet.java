@@ -16,8 +16,15 @@
 
 package org.forgerock.json.jose.jwt;
 
-import org.forgerock.json.jose.utils.IntDate;
-import org.forgerock.json.jose.utils.StringOrURI;
+import static org.forgerock.json.jose.jwt.JwtClaimsSetKey.AUD;
+import static org.forgerock.json.jose.jwt.JwtClaimsSetKey.EXP;
+import static org.forgerock.json.jose.jwt.JwtClaimsSetKey.IAT;
+import static org.forgerock.json.jose.jwt.JwtClaimsSetKey.ISS;
+import static org.forgerock.json.jose.jwt.JwtClaimsSetKey.JTI;
+import static org.forgerock.json.jose.jwt.JwtClaimsSetKey.NBF;
+import static org.forgerock.json.jose.jwt.JwtClaimsSetKey.PRN;
+import static org.forgerock.json.jose.jwt.JwtClaimsSetKey.TYP;
+import static org.forgerock.json.jose.jwt.JwtClaimsSetKey.getClaimSetKey;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -25,7 +32,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import static org.forgerock.json.jose.jwt.JwtClaimsSetKey.*;
+import org.forgerock.json.jose.utils.IntDate;
+import org.forgerock.json.jose.utils.StringOrURI;
 
 /**
  * An implementation that holds a JWT's Claims Set.
@@ -214,7 +222,6 @@ public class JwtClaimsSet extends JWObject implements Payload {
      * The given date will be converted into an {@link IntDate} to be stored in the JWT Claims Set.
      *
      * @param issuedAtTime The JWT's issued at time.
-     * @see #setIssuedAtTime(long)
      */
     public void setIssuedAtTime(Date issuedAtTime) {
         put(IAT.value(), IntDate.toIntDate(issuedAtTime));
@@ -247,7 +254,6 @@ public class JwtClaimsSet extends JWObject implements Payload {
      * The given date will be converted into an {@link IntDate} to be stored in the JWT Claims Set.
      *
      * @param notBeforeTime The JWT's not before time.
-     * @see #setNotBeforeTime(long)
      */
     public void setNotBeforeTime(Date notBeforeTime) {
         put(NBF.value(), IntDate.toIntDate(notBeforeTime));
@@ -280,7 +286,6 @@ public class JwtClaimsSet extends JWObject implements Payload {
      * The given date will be converted into an {@link IntDate} to be stored in the JWT Claims Set.
      *
      * @param expirationTime The JWT's expiration time.
-     * @see #setExpirationTime(long)
      */
     public void setExpirationTime(Date expirationTime) {
         put(EXP.value(), IntDate.toIntDate(expirationTime));

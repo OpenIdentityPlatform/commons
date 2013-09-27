@@ -16,8 +16,10 @@
 
 package org.forgerock.json.jose.jwe.handlers.encryption;
 
-import org.forgerock.json.jose.exceptions.JweDecryptionException;
-import org.forgerock.json.jose.exceptions.JweEncryptionException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -25,10 +27,9 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.NoSuchAlgorithmException;
+
+import org.forgerock.json.jose.exceptions.JweDecryptionException;
+import org.forgerock.json.jose.exceptions.JweEncryptionException;
 
 /**
  * A base implementation of an EncryptionHandler that provides common encryption and decryption methods for all

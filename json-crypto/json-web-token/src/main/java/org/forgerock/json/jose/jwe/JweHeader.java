@@ -16,10 +16,10 @@
 
 package org.forgerock.json.jose.jwe;
 
+import java.util.Map;
+
 import org.forgerock.json.jose.jwk.JWK;
 import org.forgerock.json.jose.jws.JwtSecureHeader;
-
-import java.util.Map;
 
 /**
  * An implementation for the JWE Header parameters.

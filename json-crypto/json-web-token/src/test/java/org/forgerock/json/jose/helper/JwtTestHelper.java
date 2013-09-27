@@ -16,10 +16,6 @@
 
 package org.forgerock.json.jose.helper;
 
-import org.codehaus.jackson.map.ObjectMapper;
-import org.forgerock.json.jose.utils.Utils;
-import org.forgerock.util.encode.Base64url;
-
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -28,11 +24,16 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.util.Map;
 
+import org.codehaus.jackson.map.ObjectMapper;
+import org.forgerock.json.jose.utils.Utils;
+import org.forgerock.util.encode.Base64url;
+
 /**
  * Helper class to create encoded JWT strings.
  *
  * @author Phill Cunnington
  */
+@SuppressWarnings("javadoc")
 public class JwtTestHelper {
 
     @SuppressWarnings("unchecked")

@@ -11,31 +11,39 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013 ForgeRock Inc.
  */
 
-package org.forgerock.util;
+package org.forgerock.json.jose.utils;
 
 /**
- * A DuplicateMapEntryException is thrown when an entry is attempted to be added to a {@link NoDuplicatesMap} which
- * already contains an entry with the same key.
+ * Represents an exception from an operation using the KeystoreManager class.
  *
  * @author Phill Cunnington
  * @since 2.0.0
  */
-public class DuplicateMapEntryException extends RuntimeException {
+public class KeystoreManagerException extends RuntimeException {
 
     /** Serializable class version number. */
     private static final long serialVersionUID = 1L;
 
     /**
-     * Constructs a new DuplicateMapEntryException with the specified detail message. The cause is not initialized,
+     * Constructs a new KeystoreManagerException with the specified detail message. The cause is not initialized,
      * and may subsequently be initialized by a call to {@link #initCause}.
      *
      * @param message The detail message. The detail message is saved for later retrieval by the
      *                {@link #getMessage()} method.
      */
-    public DuplicateMapEntryException(String message) {
+    public KeystoreManagerException(String message) {
         super(message);
+    }
+
+    /**
+     * Constructs a new KeyStoreManagerException with the specified throwable.
+     *
+     * @param t The cause of the Exception.
+     */
+    public KeystoreManagerException(Throwable t) {
+        super(t);
     }
 }
