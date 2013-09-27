@@ -23,16 +23,16 @@
  */
 package org.forgerock.json.jose.jwk;
 
-import org.codehaus.jackson.map.ObjectMapper;
-import org.forgerock.json.fluent.JsonException;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.jose.jwt.JWObject;
-
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import org.codehaus.jackson.map.ObjectMapper;
+import org.forgerock.json.fluent.JsonException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.jose.jwt.JWObject;
 
 /**
  * Holds a Set of JWKs.
@@ -98,7 +98,6 @@ public class JWKSet extends JWObject {
      * @return a list of JWKs as JsonValues
      */
     public JsonValue getJWKsAsJsonValue() {
-        List<JWK> listOfJWKs = new LinkedList<JWK>();
         return get("keys");
     }
 

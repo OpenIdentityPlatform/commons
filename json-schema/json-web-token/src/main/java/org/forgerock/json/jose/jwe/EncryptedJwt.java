@@ -16,16 +16,16 @@
 
 package org.forgerock.json.jose.jwe;
 
-import org.forgerock.json.jose.jwe.handlers.encryption.EncryptionHandler;
+import java.security.Key;
+
 import org.forgerock.json.jose.jwe.handlers.compression.CompressionHandler;
+import org.forgerock.json.jose.jwe.handlers.encryption.EncryptionHandler;
 import org.forgerock.json.jose.jwt.Jwt;
 import org.forgerock.json.jose.jwt.JwtClaimsSet;
 import org.forgerock.json.jose.jwt.JwtHeader;
 import org.forgerock.json.jose.jwt.Payload;
 import org.forgerock.json.jose.utils.Utils;
 import org.forgerock.util.encode.Base64url;
-
-import java.security.Key;
 
 /**
  * A JWE implementation of the <tt>Jwt</tt> interface.

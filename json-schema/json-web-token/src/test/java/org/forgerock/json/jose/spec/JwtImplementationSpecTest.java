@@ -16,21 +16,9 @@
 
 package org.forgerock.json.jose.spec;
 
-import org.forgerock.json.jose.builders.JwtBuilderFactory;
-import org.forgerock.json.jose.exceptions.JwtRuntimeException;
-import org.forgerock.json.jose.helper.JwtTestHelper;
-import org.forgerock.json.jose.helper.KeysHelper;
-import org.forgerock.json.jose.jwe.EncryptionMethod;
-import org.forgerock.json.jose.jwe.JweAlgorithm;
-import org.forgerock.json.jose.jws.JwsAlgorithm;
-import org.forgerock.json.jose.jwt.Jwt;
-import org.forgerock.json.jose.jwt.JwtClaimsSet;
-import org.forgerock.json.jose.jwt.JwtType;
-import org.forgerock.json.jose.utils.IntDate;
-import org.forgerock.json.jose.utils.StringOrURI;
-import org.forgerock.util.DuplicateMapEntryException;
-import org.forgerock.util.encode.Base64url;
-import org.testng.annotations.Test;
+import static org.fest.assertions.Fail.fail;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.URI;
@@ -44,10 +32,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.fest.assertions.Fail.fail;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import org.forgerock.json.jose.builders.JwtBuilderFactory;
+import org.forgerock.json.jose.exceptions.JwtRuntimeException;
+import org.forgerock.json.jose.helper.JwtTestHelper;
+import org.forgerock.json.jose.helper.KeysHelper;
+import org.forgerock.json.jose.jwe.EncryptionMethod;
+import org.forgerock.json.jose.jwe.JweAlgorithm;
+import org.forgerock.json.jose.jws.JwsAlgorithm;
+import org.forgerock.json.jose.jwt.Jwt;
+import org.forgerock.json.jose.jwt.JwtClaimsSet;
+import org.forgerock.json.jose.jwt.JwtType;
+import org.forgerock.json.jose.utils.DuplicateMapEntryException;
+import org.forgerock.json.jose.utils.IntDate;
+import org.forgerock.json.jose.utils.StringOrURI;
+import org.forgerock.util.encode.Base64url;
+import org.testng.annotations.Test;
 
+@SuppressWarnings("javadoc")
 public class JwtImplementationSpecTest {
 
     /**

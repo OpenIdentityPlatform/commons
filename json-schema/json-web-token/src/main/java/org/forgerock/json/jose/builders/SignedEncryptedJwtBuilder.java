@@ -16,14 +16,14 @@
 
 package org.forgerock.json.jose.builders;
 
+import java.security.Key;
+
 import org.forgerock.json.jose.jwe.EncryptedJwt;
 import org.forgerock.json.jose.jws.JwsAlgorithm;
 import org.forgerock.json.jose.jws.JwsHeader;
 import org.forgerock.json.jose.jws.SignedEncryptedJwt;
 import org.forgerock.json.jose.jws.SignedJwt;
 import org.forgerock.json.jose.jwt.JwtType;
-
-import java.security.Key;
 
 /**
  * An implementation of a JwtBuilder that can build a JWT and encrypt it and nest it within another signed JWT,

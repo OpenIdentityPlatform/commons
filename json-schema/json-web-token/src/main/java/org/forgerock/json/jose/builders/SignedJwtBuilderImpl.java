@@ -16,11 +16,11 @@
 
 package org.forgerock.json.jose.builders;
 
+import java.security.Key;
+
 import org.forgerock.json.jose.jws.JwsHeader;
 import org.forgerock.json.jose.jws.SignedJwt;
 import org.forgerock.json.jose.jwt.JwtClaimsSet;
-
-import java.security.Key;
 
 /**
  * An implementation of a JwtBuilder that can build a JWT and sign it, resulting in a SignedJwt object.
@@ -68,7 +68,7 @@ public class SignedJwtBuilderImpl extends AbstractJwtBuilder implements SignedJw
      */
     @Override
     public SignedJwt asJwt() {
-        JwtHeaderBuilder headerBuilder = getHeaderBuilder();
+        JwtHeaderBuilder<?, ?> headerBuilder = getHeaderBuilder();
         JwsHeader header;
         if (headerBuilder == null) {
             header = new JwsHeader();

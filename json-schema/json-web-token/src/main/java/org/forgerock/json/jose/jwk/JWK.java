@@ -24,15 +24,15 @@
 
 package org.forgerock.json.jose.jwk;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.jose.jwt.JWObject;
 import org.forgerock.util.encode.Base64;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 
 /**
  * The abstract base class for the 3 implementations of JWK.
@@ -230,7 +230,7 @@ public abstract class JWK extends JWObject {
      * Gets a List of base64 encoded chain certs.
      * @return X509 Cert Chain
      */
-    public List getX509Chain() {
-        return get(X5C).asList();
+    public List<Base64> getX509Chain() {
+        return get(X5C).asList(Base64.class);
     }
 }

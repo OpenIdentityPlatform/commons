@@ -16,9 +16,11 @@
 
 package org.forgerock.json.jose.jwt;
 
-import java.util.Map;
+import static org.forgerock.json.jose.jwt.JwtHeaderKey.ALG;
+import static org.forgerock.json.jose.jwt.JwtHeaderKey.TYP;
+import static org.forgerock.json.jose.jwt.JwtHeaderKey.getHeaderKey;
 
-import static org.forgerock.json.jose.jwt.JwtHeaderKey.*;
+import java.util.Map;
 
 /**
  * A base implementation class for JWT Headers.
@@ -188,7 +190,6 @@ public abstract class JwtHeader extends JWObject {
      * @return The value stored against the header parameter key.
      * @see #getParameter(String)
      */
-    @SuppressWarnings("unchecked")
     public <T> T getParameter(String key, Class<T> clazz) {
         return clazz.cast(getParameter(key));
     }

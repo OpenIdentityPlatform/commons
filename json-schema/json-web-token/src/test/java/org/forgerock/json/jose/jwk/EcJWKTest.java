@@ -23,24 +23,13 @@
  */
 package org.forgerock.json.jose.jwk;
 
-import org.forgerock.json.fluent.JsonException;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.util.encode.Base64url;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-//import sun.security.ec.ECKeyFactory;
-//import sun.security.ec.NamedCurve;
-
-import java.math.BigInteger;
-import java.security.KeyPair;
-import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.ECPublicKey;
-import java.security.spec.ECParameterSpec;
-import java.security.spec.ECPoint;
-import java.security.spec.ECPrivateKeySpec;
-import java.security.spec.ECPublicKeySpec;
 import java.util.HashMap;
 
+import org.forgerock.json.fluent.JsonValue;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
+@SuppressWarnings("javadoc")
 public class EcJWKTest {
 
     //ECJWK parameters
