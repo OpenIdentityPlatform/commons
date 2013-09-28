@@ -131,6 +131,12 @@ public final class ResourceNameTest {
         assertThat(child.toString()).isEqualTo(expected);
     }
 
+    @Test(dataProvider = "child")
+    public void testLeaf(final String base, final Object element, final String path) {
+        final ResourceName name = ResourceName.valueOf(path);
+        assertThat(name.leaf()).isEqualTo(element.toString());
+    }
+
     @DataProvider
     public Object[][] compare() {
         // @formatter:off
