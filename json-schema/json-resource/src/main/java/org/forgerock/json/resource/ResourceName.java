@@ -43,12 +43,12 @@ import java.util.List;
  * {@link #parent()} or {@link #child(Object)}.
  * <p>
  * Example:
- * 
+ *
  * <pre>
  * ResourceName base = ResourceName.valueOf(&quot;commons/rest&quot;);
  * ResourceName child = base.child(&quot;hello world&quot;);
  * child.toString(); // commons/rest/hello+world
- * 
+ *
  * ResourceName user = base.child(&quot;users&quot;).child(123);
  * user.toString(); // commons/rest/users/123
  * </pre>
@@ -83,7 +83,7 @@ public final class ResourceName extends AbstractList<String> implements Comparab
     /**
      * Returns the empty resource name whose string representation is the empty
      * string and which has zero path elements.
-     * 
+     *
      * @return The empty resource name.
      */
     public static ResourceName empty() {
@@ -93,7 +93,7 @@ public final class ResourceName extends AbstractList<String> implements Comparab
     /**
      * Returns the URL encoding of the string representation of the provided
      * path element.
-     * 
+     *
      * @param pathElement
      *            The path element to be encoded.
      * @return The URL encoded path element.
@@ -133,12 +133,12 @@ public final class ResourceName extends AbstractList<String> implements Comparab
      * This method may be useful in cases where the structure of a resource name
      * is not known at compile time, for example, it may be obtained from a
      * configuration file. Example usage:
-     * 
+     *
      * <pre>
      * String template = "rest/users/%s"
      * ResourceName name = ResourceName.format(template, &quot;bjensen&quot;);
      * </pre>
-     * 
+     *
      * @param template
      *            The resource name template.
      * @param pathElements
@@ -159,7 +159,7 @@ public final class ResourceName extends AbstractList<String> implements Comparab
 
     /**
      * Parses the provided string representation of a resource name.
-     * 
+     *
      * @param path
      *            The resource name to be parsed.
      * @return The provided string representation of a resource name.
@@ -190,7 +190,7 @@ public final class ResourceName extends AbstractList<String> implements Comparab
                                 + "' contains empty path elements");
                     }
                     lastCharWasSlash = true;
-                    if (startOfLastElement != 0) {
+                    if (i != 0) {
                         if (elements == null) {
                             elements = new LinkedList<String>();
                         }
@@ -212,10 +212,16 @@ public final class ResourceName extends AbstractList<String> implements Comparab
             }
             // Normalize the path string by removing leading and trailing slashes.
             final String trimmedPath;
-            if (trimLeadingSlash || lastCharWasSlash) {
-                trimmedPath =
-                        path.substring((trimLeadingSlash ? 1 : 0), (lastCharWasSlash ? size - 1
-                                : size));
+            if (trimLeadingSlash) {
+                if (size == 1) {
+                    return EMPTY;
+                } else if (lastCharWasSlash) {
+                    trimmedPath = path.substring(1, size - 1);
+                } else {
+                    trimmedPath = path.substring(1, size);
+                }
+            } else if (lastCharWasSlash) {
+                trimmedPath = path.substring(0, size - 1);
             } else {
                 trimmedPath = path;
             }
@@ -265,7 +271,7 @@ public final class ResourceName extends AbstractList<String> implements Comparab
 
     /**
      * Creates a new resource name having the provided path elements.
-     * 
+     *
      * @param pathElements
      *            The unencoded path elements.
      */
@@ -286,7 +292,7 @@ public final class ResourceName extends AbstractList<String> implements Comparab
 
     /**
      * Creates a new resource name having the provided path elements.
-     * 
+     *
      * @param pathElements
      *            The unencoded path elements.
      */
@@ -303,7 +309,7 @@ public final class ResourceName extends AbstractList<String> implements Comparab
      * Creates a new resource name which is a child of this resource name. The
      * returned resource name will have the same path elements as this resource
      * name and, in addition, the provided path element.
-     * 
+     *
      * @param pathElement
      *            The unencoded child path element.
      * @return A new resource name which is a child of this resource name.
@@ -324,6 +330,10 @@ public final class ResourceName extends AbstractList<String> implements Comparab
      * Compares this resource name with the provided resource name. Resource
      * names are compared case sensitively and ancestors sort before
      * descendants.
+     *
+     * @param o
+     *            {@inheritDoc}
+     * @return {@inheritDoc}
      */
     @Override
     public int compareTo(final ResourceName o) {
@@ -341,7 +351,7 @@ public final class ResourceName extends AbstractList<String> implements Comparab
      * Creates a new resource name which is a descendant of this resource name.
      * The returned resource name will have be formed of the concatenation of
      * this resource name and the provided resource name.
-     * 
+     *
      * @param childPath
      *            The resource name to be appended to this resource name.
      * @return A new resource name which is a descendant of this resource name.
@@ -365,7 +375,7 @@ public final class ResourceName extends AbstractList<String> implements Comparab
      * Creates a new resource name which is a descendant of this resource name.
      * The returned resource name will have be formed of the concatenation of
      * this resource name and the provided resource name.
-     * 
+     *
      * @param childPath
      *            The resource name to be appended to this resource name.
      * @return A new resource name which is a descendant of this resource name.
@@ -380,6 +390,10 @@ public final class ResourceName extends AbstractList<String> implements Comparab
      * Returns the path element at the specified position in this resource name.
      * The path element at position 0 is the top level element (closest to
      * root).
+     *
+     * @param index
+     *            {@inheritDoc}
+     * @return {@inheritDoc}
      */
     @Override
     public String get(final int index) {
@@ -387,9 +401,23 @@ public final class ResourceName extends AbstractList<String> implements Comparab
     }
 
     /**
+     * Returns the last path element in this resource name. Calling this method
+     * is equivalent to:
+     *
+     * <pre>
+     * resourceName.get(resourceName.size() - 1);
+     * </pre>
+     *
+     * @return The last path element in this resource name.
+     */
+    public String leaf() {
+        return elements[elements.length - 1];
+    }
+
+    /**
      * Returns the resource name which is the immediate parent of this resource
      * name, or {@code null} if this resource name is empty.
-     * 
+     *
      * @return The resource name which is the immediate parent of this resource
      *         name, or {@code null} if this resource name is empty.
      */
@@ -410,6 +438,8 @@ public final class ResourceName extends AbstractList<String> implements Comparab
     /**
      * Returns the number of elements in this resource name, or 0 if it is
      * empty.
+     *
+     * @return {@inheritDoc}
      */
     @Override
     public int size() {
@@ -418,7 +448,7 @@ public final class ResourceName extends AbstractList<String> implements Comparab
 
     /**
      * Returns the URL encoded string representation of this resource name.
-     * 
+     *
      * @return The URL encoded string representation of this resource name.
      * @see #valueOf(String)
      */
