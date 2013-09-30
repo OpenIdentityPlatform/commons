@@ -59,7 +59,7 @@ define("org/forgerock/commons/ui/common/main/ErrorsHandler", [
         
         if(handler) {
             // conditional check needed here until calls to authentication?_action=reauthenticate and OpenAM authentication no longer produce 403 status
-            if (!error.hasOwnProperty("responseObj") || 
+            if (!error.responseObj || 
                 !(
                     (
                         error.responseObj.code === 403 && 
