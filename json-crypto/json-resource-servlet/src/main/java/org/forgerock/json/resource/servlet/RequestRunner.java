@@ -48,6 +48,7 @@ import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestVisitor;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceName;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.UpdateRequest;
 
@@ -313,9 +314,11 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
         buffer.append(forceEmptyIfNull(httpRequest.getServletPath()));
 
         // Add new resource name and resource ID.
-        final String resourceName = request.getResourceName();
-        buffer.append('/');
-        buffer.append(resourceName);
+        final ResourceName resourceName = request.getResourceNameObject();
+        if (!resourceName.isEmpty()) {
+            buffer.append('/');
+            buffer.append(resourceName);
+        }
         buffer.append('/');
         buffer.append(resource.getId());
 
