@@ -129,6 +129,20 @@ public interface Request {
     String getResourceName();
 
     /**
+     * Returns the non-{@code null} name of the JSON resource to which this
+     * request should be targeted. The resource name is relative and never
+     * begins or ends with a forward slash, but may be empty.
+     * <p>
+     * <b>NOTE</b>: for resource provider implementations the resource name is
+     * relative to the current resource being accessed. See the description of
+     * {@link RouterContext} for more information.
+     *
+     * @return The non-{@code null} name of the JSON resource to which this
+     *         request should be targeted, which may be the empty string.
+     */
+    ResourceName getResourceNameObject();
+
+    /**
      * Sets the non-{@code null} name of the JSON resource to which this request
      * should be targeted. The resource name is relative and never begins or
      * ends with a forward slash, but may be empty.
@@ -146,4 +160,23 @@ public interface Request {
      *             name.
      */
     Request setResourceName(String name);
+
+    /**
+     * Sets the non-{@code null} name of the JSON resource to which this request
+     * should be targeted. The resource name is relative and never begins or
+     * ends with a forward slash, but may be empty.
+     * <p>
+     * <b>NOTE</b>: for resource provider implementations the resource name is
+     * relative to the current resource being accessed. See the description of
+     * {@link RouterContext} for more information.
+     *
+     * @param name
+     *            The non-{@code null} name of the JSON resource to which this
+     *            request should be targeted, which may be the empty string.
+     * @return This request.
+     * @throws UnsupportedOperationException
+     *             If this request does not permit changes to the JSON resource
+     *             name.
+     */
+    Request setResourceName(ResourceName name);
 }
