@@ -16,8 +16,6 @@
 
 package org.forgerock.json.resource;
 
-import static org.forgerock.json.resource.Resources.normalizeResourceName;
-
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -34,20 +32,17 @@ import org.forgerock.json.fluent.JsonValue;
 public final class Requests {
     private static abstract class AbstractRequestImpl<T extends Request> implements Request {
         private final List<JsonPointer> fields = new LinkedList<JsonPointer>();
-        private String resourceName;
+        private ResourceName resourceName;
 
         protected AbstractRequestImpl() {
             // Default constructor.
         }
 
         protected AbstractRequestImpl(final Request request) {
-            this.resourceName = request.getResourceName();
+            this.resourceName = request.getResourceNameObject();
             this.fields.addAll(request.getFields());
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public final T addField(final JsonPointer... fields) {
             for (final JsonPointer field : fields) {
@@ -56,9 +51,6 @@ public final class Requests {
             return getThis();
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public final T addField(final String... fields) {
             try {
@@ -71,28 +63,30 @@ public final class Requests {
             return getThis();
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public final List<JsonPointer> getFields() {
             return fields;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public final String getResourceName() {
+            return resourceName.toString();
+        }
+
+        @Override
+        public final ResourceName getResourceNameObject() {
             return resourceName;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public final T setResourceName(final String name) {
-            resourceName = normalizeResourceName(name);
+            resourceName = ResourceName.valueOf(name);
+            return getThis();
+        }
+
+        @Override
+        public final T setResourceName(final ResourceName name) {
+            resourceName = name;
             return getThis();
         }
 
