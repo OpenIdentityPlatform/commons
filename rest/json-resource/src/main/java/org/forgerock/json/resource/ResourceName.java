@@ -41,11 +41,9 @@ import java.util.List;
  * {@link #empty()}. Resource names are case sensitive and empty path elements
  * are not allowed.
  * <p>
- * Resource names are immutable and, as such, all mutating {@link List} methods
- * will throw an {@link UnsupportedOperationException}. New resource names can
- * be created from their string representation using {@link #valueOf(String)},
- * or by deriving new resource names from existing values, e.g. using
- * {@link #parent()} or {@link #child(Object)}.
+ * New resource names can be created from their string representation using
+ * {@link #valueOf(String)}, or by deriving new resource names from existing
+ * values, e.g. using {@link #parent()} or {@link #child(Object)}.
  * <p>
  * Example:
  *
