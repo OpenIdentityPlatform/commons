@@ -15,13 +15,18 @@
  */
 package org.forgerock.json.resource;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static java.util.Collections.unmodifiableList;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.util.AbstractList;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -53,8 +58,7 @@ import java.util.List;
  * user.toString(); // commons/rest/users/123
  * </pre>
  */
-public final class ResourceName extends AbstractList<String> implements Comparable<ResourceName>,
-        List<String> {
+public final class ResourceName implements Comparable<ResourceName>, Iterable<String> {
     private static final ResourceName EMPTY = new ResourceName();
 
     /**
@@ -232,12 +236,12 @@ public final class ResourceName extends AbstractList<String> implements Comparab
                         lastElementNeedsDecoding ? decodePathElement(element) : element;
                 if (elements == null) {
                     // Avoid unnecessary allocation for common case of single path element.
-                    return new ResourceName(trimmedPath, decodedElement);
+                    return new ResourceName(trimmedPath, singletonList(decodedElement));
                 } else {
                     elements.add(decodedElement);
                 }
             }
-            return new ResourceName(trimmedPath, elements.toArray(new String[elements.size()]));
+            return new ResourceName(trimmedPath, unmodifiableList(elements));
         }
     }
 
@@ -254,7 +258,7 @@ public final class ResourceName extends AbstractList<String> implements Comparab
         return c == '+' || c == '%';
     }
 
-    private final String[] elements; // uri decoded
+    private final List<String> elements; // uri decoded, unmodifiable.
     private final String path; // uri encoded
 
     /**
@@ -265,7 +269,7 @@ public final class ResourceName extends AbstractList<String> implements Comparab
      * order to avoid unnecessary memory allocation.
      */
     public ResourceName() {
-        this.elements = new String[0];
+        this.elements = emptyList();
         this.path = "";
     }
 
@@ -276,7 +280,7 @@ public final class ResourceName extends AbstractList<String> implements Comparab
      *            The unencoded path elements.
      */
     public ResourceName(final Collection<? extends Object> pathElements) {
-        this.elements = new String[pathElements.size()];
+        final String[] tmp = new String[pathElements.size()];
         int i = 0;
         final StringBuilder builder = new StringBuilder();
         for (final Object element : pathElements) {
@@ -285,8 +289,9 @@ public final class ResourceName extends AbstractList<String> implements Comparab
                 builder.append('/');
             }
             builder.append(encodePathElement(s));
-            this.elements[i++] = s;
+            tmp[i++] = s;
         }
+        this.elements = asList(tmp);
         this.path = builder.toString();
     }
 
@@ -297,10 +302,10 @@ public final class ResourceName extends AbstractList<String> implements Comparab
      *            The unencoded path elements.
      */
     public ResourceName(final Object... pathElements) {
-        this(Arrays.asList(pathElements));
+        this(asList(pathElements));
     }
 
-    private ResourceName(final String path, final String... elements) {
+    private ResourceName(final String path, final List<String> elements) {
         this.elements = elements;
         this.path = path;
     }
@@ -315,15 +320,16 @@ public final class ResourceName extends AbstractList<String> implements Comparab
      * @return A new resource name which is a child of this resource name.
      */
     public ResourceName child(final Object pathElement) {
-        final String[] newElements = new String[elements.length + 1];
-        System.arraycopy(elements, 0, newElements, 0, elements.length);
+        final int size = size();
+        final String[] newElements = new String[size + 1];
         final String s = pathElement.toString();
-        newElements[elements.length] = s;
+        elements.toArray(newElements);
+        newElements[size] = s;
         final String encodedPathElement = encodePathElement(s);
         final String newPath =
                 isEmpty() ? encodedPathElement : new StringBuilder(path).append('/').append(
                         encodedPathElement).toString();
-        return new ResourceName(newPath, newElements);
+        return new ResourceName(newPath, asList(newElements));
     }
 
     /**
@@ -337,14 +343,16 @@ public final class ResourceName extends AbstractList<String> implements Comparab
      */
     @Override
     public int compareTo(final ResourceName o) {
-        final int minSize = Math.min(size(), o.size());
+        final int thisSize = size();
+        final int thatSize = o.size();
+        final int minSize = Math.min(thisSize, thatSize);
         for (int i = 0; i < minSize; i++) {
-            final int result = elements[i].compareTo(o.elements[i]);
+            final int result = elements.get(i).compareTo(o.elements.get(i));
             if (result != 0) {
                 return result;
             }
         }
-        return size() - o.size();
+        return thisSize - thatSize;
     }
 
     /**
@@ -362,13 +370,21 @@ public final class ResourceName extends AbstractList<String> implements Comparab
         } else if (childPath.isEmpty()) {
             return this;
         } else {
-            final String[] newElements = new String[elements.length + childPath.elements.length];
-            System.arraycopy(elements, 0, newElements, 0, elements.length);
-            System.arraycopy(childPath.elements, 0, newElements, elements.length,
-                    childPath.elements.length);
+            final List<String> newElements = new ArrayList<String>(size() + childPath.size());
+            newElements.addAll(elements);
+            newElements.addAll(childPath.elements);
             final String newPath = path + "/" + childPath.path;
-            return new ResourceName(newPath, newElements);
+            return new ResourceName(newPath, unmodifiableList(newElements));
         }
+    }
+
+    /**
+     * Returns {@code true} if this resource name contains no path elements.
+     *
+     * @return {@code true} if this resource name contains no path elements.
+     */
+    public boolean isEmpty() {
+        return elements.isEmpty();
     }
 
     /**
@@ -392,12 +408,14 @@ public final class ResourceName extends AbstractList<String> implements Comparab
      * root).
      *
      * @param index
-     *            {@inheritDoc}
-     * @return {@inheritDoc}
+     *            The index of the path element to be returned, where 0 is the
+     *            top level element.
+     * @return The path element at the specified position in this resource name.
+     * @throws IndexOutOfBoundsException
+     *             If the index is out of range (index < 0 || index >= size()).
      */
-    @Override
     public String get(final int index) {
-        return elements[index];
+        return elements.get(index);
     }
 
     /**
@@ -411,7 +429,7 @@ public final class ResourceName extends AbstractList<String> implements Comparab
      * @return The last path element in this resource name.
      */
     public String leaf() {
-        return elements[elements.length - 1];
+        return get(size() - 1);
     }
 
     /**
@@ -428,8 +446,7 @@ public final class ResourceName extends AbstractList<String> implements Comparab
         case 1:
             return EMPTY;
         default:
-            final String[] newElements = new String[elements.length - 1];
-            System.arraycopy(elements, 0, newElements, 0, elements.length - 1);
+            final List<String> newElements = elements.subList(0, size() - 1);
             final String newPath = path.substring(0, path.lastIndexOf('/') /* safe */);
             return new ResourceName(newPath, newElements);
         }
@@ -439,11 +456,11 @@ public final class ResourceName extends AbstractList<String> implements Comparab
      * Returns the number of elements in this resource name, or 0 if it is
      * empty.
      *
-     * @return {@inheritDoc}
+     * @return The number of elements in this resource name, or 0 if it is
+     *         empty.
      */
-    @Override
     public int size() {
-        return elements.length;
+        return elements.size();
     }
 
     /**
@@ -455,5 +472,47 @@ public final class ResourceName extends AbstractList<String> implements Comparab
     @Override
     public String toString() {
         return path;
+    }
+
+    /**
+     * Returns an iterator over the path elements in this resource name. The
+     * returned iterator will not support the {@link Iterator#remove()} method
+     * and will return path elements starting with index 0, then 1, then 2, etc.
+     *
+     * @return An iterator over the path elements in this resource name.
+     */
+    @Override
+    public Iterator<String> iterator() {
+        return elements.iterator();
+    }
+
+    /**
+     * Returns {@code true} if {@code obj} is a resource name having the exact
+     * same elements as this resource name.
+     *
+     * @param obj
+     *            The object to be compared.
+     * @return {@code true} if {@code obj} is a resource name having the exact
+     *         same elements as this resource name.
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        } else if (obj instanceof ResourceName) {
+            return elements.equals(((ResourceName) obj).elements);
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Returns a hash code for this resource name.
+     *
+     * @return A hash code for this resource name.
+     */
+    @Override
+    public int hashCode() {
+        return elements.hashCode();
     }
 }
