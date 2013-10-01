@@ -28,10 +28,11 @@ define("org/forgerock/commons/ui/user/login/InternalLoginHelper", [
 	"UserDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/util/CookieHelper",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "org/forgerock/commons/ui/common/main/ServiceInvoker",
     "org/forgerock/commons/ui/common/main/Configuration"
-], function (userDelegate, eventManager, constants, AbstractConfigurationAware, serviceInvoker, conf) {
+], function (userDelegate, eventManager, constants, cookieHelper, AbstractConfigurationAware, serviceInvoker, conf) {
     var obj = new AbstractConfigurationAware();
 
     obj.login = function(params, successCallback, errorCallback) {
@@ -45,7 +46,8 @@ define("org/forgerock/commons/ui/user/login/InternalLoginHelper", [
     };
 
     obj.logout = function() {
-        userDelegate.logout();
+        delete conf.loggedUser;
+        cookieHelper.deleteCookie("session-jwt", "/", ""); // resets the cookie session to discard old session that may still exist
     };
     
     obj.getLoggedUser = function(successCallback, errorCallback) {
