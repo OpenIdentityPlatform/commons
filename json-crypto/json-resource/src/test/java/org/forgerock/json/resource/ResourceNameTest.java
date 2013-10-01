@@ -18,7 +18,7 @@ package org.forgerock.json.resource;
 import static org.fest.assertions.Assertions.assertThat;
 
 import java.util.Arrays;
-import java.util.List;
+import java.util.Iterator;
 
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -51,38 +51,37 @@ public final class ResourceNameTest {
         // @formatter:on
     }
 
-    private List<String> e(final String... elements) {
-        return Arrays.asList(elements);
+    private Object[] e(final String... elements) {
+        return elements;
     }
 
     @Test(dataProvider = "valueOfStrings")
-    public void testValueOf(final String path, final String normalizedPath,
-            final List<String> elements) {
+    public void testValueOf(final String path, final String normalizedPath, final Object[] elements) {
         final ResourceName name = ResourceName.valueOf(path);
-        if (elements.isEmpty()) {
-            assertThat(name).isSameAs(ResourceName.empty());
+        assertThat(name).hasSize(elements.length);
+        if (elements.length == 0) {
+            assertThat((Object) name).isSameAs(ResourceName.empty());
         } else {
-            assertThat(name).isEqualTo(elements);
+            assertThat(name).containsOnly(elements);
         }
-        assertThat(name).hasSize(elements.size());
         assertThat(name.toString()).isEqualTo(normalizedPath);
     }
 
     @Test(dataProvider = "valueOfStrings")
     public void testConstructorCollection(final String path, final String normalizedPath,
-            final List<String> elements) {
-        final ResourceName name = new ResourceName(elements);
-        assertThat(name).isEqualTo(elements);
-        assertThat(name).hasSize(elements.size());
+            final Object[] elements) {
+        final ResourceName name = new ResourceName(Arrays.asList(elements));
+        assertThat(name).hasSize(elements.length);
+        assertThat(name).containsOnly(elements);
         assertThat(name.toString()).isEqualTo(normalizedPath);
     }
 
     @Test(dataProvider = "valueOfStrings")
     public void testConstructorVarargs(final String path, final String normalizedPath,
-            final List<String> elements) {
-        final ResourceName name = new ResourceName(elements.toArray());
-        assertThat(name).isEqualTo(elements);
-        assertThat(name).hasSize(elements.size());
+            final Object[] elements) {
+        final ResourceName name = new ResourceName(elements);
+        assertThat(name).hasSize(elements.length);
+        assertThat(name).containsOnly(elements);
         assertThat(name.toString()).isEqualTo(normalizedPath);
     }
 
@@ -101,7 +100,8 @@ public final class ResourceNameTest {
     @Test(dataProvider = "parent")
     public void testParent(final String child, final String parent) {
         final ResourceName actualParent = ResourceName.valueOf(child).parent();
-        assertThat(actualParent).isEqualTo(parent != null ? ResourceName.valueOf(parent) : null);
+        assertThat((Object) actualParent).isEqualTo(
+                parent != null ? ResourceName.valueOf(parent) : null);
         assertThat(actualParent != null ? actualParent.toString() : null).isEqualTo(parent);
     }
 
@@ -120,14 +120,14 @@ public final class ResourceNameTest {
     public void testChild(final String base, final Object element, final String expected) {
         final ResourceName parent = ResourceName.valueOf(base);
         final ResourceName child = parent.child(element);
-        assertThat(child).isEqualTo(ResourceName.valueOf(expected));
+        assertThat((Object) child).isEqualTo(ResourceName.valueOf(expected));
         assertThat(child.toString()).isEqualTo(expected);
     }
 
     @Test(dataProvider = "child")
     public void testFormat(final String base, final Object element, final String expected) {
         final ResourceName child = ResourceName.format(base + "/%s", element);
-        assertThat(child).isEqualTo(ResourceName.valueOf(expected));
+        assertThat((Object) child).isEqualTo(ResourceName.valueOf(expected));
         assertThat(child.toString()).isEqualTo(expected);
     }
 
@@ -183,14 +183,38 @@ public final class ResourceNameTest {
             final String expected) {
         final ResourceName firstName = ResourceName.valueOf(first);
         final ResourceName secondName = ResourceName.valueOf(second);
-        assertThat(firstName.concat(secondName)).isEqualTo(ResourceName.valueOf(expected));
+        assertThat((Object) firstName.concat(secondName)).isEqualTo(ResourceName.valueOf(expected));
         assertThat(firstName.concat(secondName).toString()).isEqualTo(expected);
     }
 
     @Test(dataProvider = "concat")
     public void testConcatString(final String first, final String second, final String expected) {
         final ResourceName firstName = ResourceName.valueOf(first);
-        assertThat(firstName.concat(second)).isEqualTo(ResourceName.valueOf(expected));
+        assertThat((Object) firstName.concat(second)).isEqualTo(ResourceName.valueOf(expected));
         assertThat(firstName.concat(second).toString()).isEqualTo(expected);
+    }
+
+    @Test
+    public void testNotEquals() {
+        final ResourceName value = ResourceName.valueOf("hello/world");
+        assertThat((Object) value).isNotEqualTo("hello/world");
+    }
+
+    @Test
+    public void testHashCode() {
+        final ResourceName value = ResourceName.valueOf("hello/world");
+        assertThat(value.hashCode()).isNotEqualTo(0);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testValueOfInvalidString() {
+        ResourceName.valueOf("must/not/contain//empty/elements");
+    }
+
+    @Test(expectedExceptions = UnsupportedOperationException.class)
+    public void testImmutableIterator() {
+        final Iterator<String> i = ResourceName.valueOf("hello/world").iterator();
+        assertThat(i.next()).isEqualTo("hello");
+        i.remove();
     }
 }
