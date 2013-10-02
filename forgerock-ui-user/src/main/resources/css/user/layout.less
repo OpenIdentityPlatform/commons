@@ -15,7 +15,7 @@
 
             a {
                 display: block;
-                color: #f9f9f9;
+                color: @inactive-menu-font-color;
                 font-size: 16px;
                 padding: 10px 20px 10px 20px;
                 text-decoration: none;
@@ -24,6 +24,9 @@
 
         .active {
             background-color: @active-menu-color;
+            a{
+                color: @active-menu-font-color;
+            }
         }
 
         .active:first-child {
