@@ -33,7 +33,7 @@ import org.forgerock.json.resource.api.Schema;
 import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")
-public final class ApiDescriptorDemo {
+public final class ApiDescriptorTest {
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
 
     private static final JsonGenerator WRITER;
