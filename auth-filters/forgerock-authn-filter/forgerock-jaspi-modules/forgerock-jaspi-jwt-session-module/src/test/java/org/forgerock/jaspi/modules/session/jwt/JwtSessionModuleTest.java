@@ -59,6 +59,7 @@ import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertNotNull;
 
 public class JwtSessionModuleTest {
 
@@ -756,6 +757,46 @@ public class JwtSessionModuleTest {
         assertEquals(jwtSessionCookie.getPath(), "/");
         assertEquals(jwtSessionCookie.getValue(), "ENCRYPTED_JWT");
         assertEquals(jwtSessionCookie.getMaxAge(), new Long(exp.getTime() - iat.getTime()).intValue() / 1000);
+    }
+
+    @Test
+    public void shouldReturnEmptyContextMap() {
+        //Given
+        MessageInfo messageInfo = mock(MessageInfo.class);
+
+        Map<String, Object> messageInfoMap = new HashMap<String, Object>();
+
+        given(messageInfo.getMap()).willReturn(messageInfoMap);
+
+        //When
+        Map<String, Object> result = jwtSessionModule.getContextMap(messageInfo); //create this time
+        Map<String, Object> sameResult = jwtSessionModule.getContextMap(messageInfo); //retrieve
+
+        //Then
+        assertNotNull(result);
+        assertEquals(result.size(), 0);
+        assertEquals(result, sameResult);
+    }
+
+    @Test
+    public void shouldReturnContextMap() {
+        //Given
+        MessageInfo messageInfo = mock(MessageInfo.class);
+
+        Map<String, Object> internalMap = new HashMap<String, Object>();
+        internalMap.put("TEST", "TEST");
+
+        Map<String, Object> messageInfoMap = new HashMap<String, Object>();
+        messageInfoMap.put("org.forgerock.authentication.context", internalMap);
+
+        given(messageInfo.getMap()).willReturn(messageInfoMap);
+
+        //When
+        Map<String, Object> result = jwtSessionModule.getContextMap(messageInfo);
+
+        //Then
+        assertEquals(result.size(), 1);
+        assertEquals(result.get("TEST"), "TEST");
     }
 
     @Test

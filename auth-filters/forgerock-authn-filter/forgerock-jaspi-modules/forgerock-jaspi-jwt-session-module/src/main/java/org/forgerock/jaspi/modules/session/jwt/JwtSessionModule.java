@@ -174,7 +174,7 @@ public class JwtSessionModule implements ServerAuthModule {
                     new CallerPrincipalCallback(clientSubject, jwt.getClaimsSet().getClaim("prn", String.class))
                 });
                 //TODO also include ATTRIBUTE_AUTHCID!
-                Map<String, Object> context = (Map<String, Object>) messageInfo.getMap().get(AuthNFilter.ATTRIBUTE_AUTH_CONTEXT);
+                Map<String, Object> context = getContextMap(messageInfo);
                 Map<String, Object> claimsSetContext = jwt.getClaimsSet().getClaim(AuthNFilter.ATTRIBUTE_AUTH_CONTEXT, Map.class);
                 if (claimsSetContext != null) {
                     context.putAll(claimsSetContext);
@@ -228,8 +228,12 @@ public class JwtSessionModule implements ServerAuthModule {
             if (jwt != null) {
                 //if all goes well!
                 Map<String, Object> claimsSetContext = jwt.getClaimsSet().getClaim(AuthNFilter.ATTRIBUTE_AUTH_CONTEXT, Map.class);
-                for (String key : claimsSetContext.keySet()) {
-                    request.setAttribute(key, claimsSetContext.get(key));
+
+                if (claimsSetContext != null)
+                {
+                    for (String key : claimsSetContext.keySet()) {
+                        request.setAttribute(key, claimsSetContext.get(key));
+                    }
                 }
 
                 // If request is made within one minute of the Jwt being issued the idle timeout is not reset.
@@ -249,6 +253,23 @@ public class JwtSessionModule implements ServerAuthModule {
         }
 
         return null;
+    }
+
+    /**
+     * Ensures the context map exists within the messageInfo object, and then returns the context map to be used
+     *
+     * @param messageInfo The MessageInfo instance.
+     * @return The context map internal to the messageInfo's map.
+     */
+    public Map<String, Object> getContextMap(MessageInfo messageInfo) {
+        Map<String, Object> internalMap = (Map<String, Object>) messageInfo.getMap().get(AuthNFilter.ATTRIBUTE_AUTH_CONTEXT);
+
+        if (internalMap == null) {
+            internalMap = new HashMap<String, Object>();
+            messageInfo.getMap().put(AuthNFilter.ATTRIBUTE_AUTH_CONTEXT, internalMap);
+        }
+
+        return internalMap;
     }
 
     /**
@@ -365,11 +386,13 @@ public class JwtSessionModule implements ServerAuthModule {
         Map<String, Object> map = messageInfo.getMap();
         HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
         Object principal = request.getHeader(AuthNFilter.ATTRIBUTE_AUTH_PRINCIPAL);
+
         if (principal != null) {
             jwtParameters.put("prn", principal);
         }
+
         if (map.containsKey(AuthNFilter.ATTRIBUTE_AUTH_CONTEXT)) {
-            jwtParameters.put(AuthNFilter.ATTRIBUTE_AUTH_CONTEXT, map.get(AuthNFilter.ATTRIBUTE_AUTH_CONTEXT));
+            jwtParameters.put(AuthNFilter.ATTRIBUTE_AUTH_CONTEXT, getContextMap(messageInfo));
         }
 
         if (map.containsKey(SKIP_SESSION_PARAMETER_NAME) && ((Boolean) map.get(SKIP_SESSION_PARAMETER_NAME))) {
