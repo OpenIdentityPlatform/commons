@@ -93,6 +93,11 @@ public interface QueryRequest extends Request {
     /**
      * {@inheritDoc}
      */
+    <R, P> R accept(RequestVisitor<R, P> v, P p);
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     QueryRequest addField(JsonPointer... fields);
 
@@ -133,10 +138,14 @@ public interface QueryRequest extends Request {
     QueryRequest addSortKey(String... keys);
 
     /**
-     * {@inheritDoc}
+     * Returns the additional parameters which should be used to control the
+     * behavior of this query request. The returned map may be modified if
+     * permitted by this query request.
+     *
+     * @return The additional parameters which should be used to control the
+     *         behavior of this query request (never {@code null}).
      */
-    @Override
-    String getResourceName();
+    Map<String, String> getAdditionalQueryParameters();
 
     /**
      * {@inheritDoc}
@@ -194,16 +203,6 @@ public interface QueryRequest extends Request {
     int getPageSize();
 
     /**
-     * Returns the additional parameters which should be used to control the
-     * behavior of this query request. The returned map may be modified if
-     * permitted by this query request.
-     *
-     * @return The additional parameters which should be used to control the
-     *         behavior of this query request (never {@code null}).
-     */
-    Map<String, String> getAdditionalQueryParameters();
-
-    /**
      * Returns the native query expression which will be used for processing the
      * query request. An example of a native query expression is a SQL
      * statement.
@@ -249,6 +248,24 @@ public interface QueryRequest extends Request {
     String getQueryId();
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    RequestType getRequestType();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    String getResourceName();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    ResourceName getResourceNameObject();
+
+    /**
      * Returns the sort keys which should be used for ordering the JSON
      * resources returned by this query request. The returned list may be
      * modified if permitted by this query request.
@@ -272,12 +289,6 @@ public interface QueryRequest extends Request {
      *             additional parameters.
      */
     QueryRequest setAdditionalQueryParameter(String name, String value);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    QueryRequest setResourceName(String name);
 
     /**
      * Sets the opaque cookie which is used by the resource provider to track
@@ -401,4 +412,16 @@ public interface QueryRequest extends Request {
      * @see QueryRequest#setQueryFilter(QueryFilter)
      */
     QueryRequest setQueryId(String id);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    Request setResourceName(ResourceName name);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    QueryRequest setResourceName(String name);
 }

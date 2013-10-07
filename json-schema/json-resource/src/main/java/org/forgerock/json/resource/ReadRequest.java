@@ -28,6 +28,11 @@ public interface ReadRequest extends Request {
     /**
      * {@inheritDoc}
      */
+    <R, P> R accept(RequestVisitor<R, P> v, P p);
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     ReadRequest addField(JsonPointer... fields);
 
@@ -41,13 +46,31 @@ public interface ReadRequest extends Request {
      * {@inheritDoc}
      */
     @Override
+    List<JsonPointer> getFields();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    RequestType getRequestType();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     String getResourceName();
 
     /**
      * {@inheritDoc}
      */
     @Override
-    List<JsonPointer> getFields();
+    ResourceName getResourceNameObject();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    Request setResourceName(ResourceName name);
 
     /**
      * {@inheritDoc}
