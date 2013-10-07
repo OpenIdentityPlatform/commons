@@ -45,9 +45,15 @@ public interface ActionRequest extends Request {
     public static final String FIELD_CONTENT = "content";
 
     /**
-     * The name of the action which is reserved for performing "create" operations.
+     * The name of the action which is reserved for performing "create"
+     * operations.
      */
     public static final String ACTION_ID_CREATE = "create";
+
+    /**
+     * {@inheritDoc}
+     */
+    <R, P> R accept(RequestVisitor<R, P> v, P p);
 
     /**
      * {@inheritDoc}
@@ -79,6 +85,26 @@ public interface ActionRequest extends Request {
     Map<String, String> getAdditionalActionParameters();
 
     /**
+     * Returns the content of this action request. The structure of the content
+     * is defined by the action.
+     *
+     * @return The content of this action request.
+     */
+    JsonValue getContent();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    List<JsonPointer> getFields();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    RequestType getRequestType();
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -88,15 +114,7 @@ public interface ActionRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    List<JsonPointer> getFields();
-
-    /**
-     * Returns the content of this action request. The structure of the content
-     * is defined by the action.
-     *
-     * @return The content of this action request.
-     */
-    JsonValue getContent();
+    ResourceName getResourceNameObject();
 
     /**
      * Sets the ID of the action to be performed by this action request.
@@ -126,12 +144,6 @@ public interface ActionRequest extends Request {
     ActionRequest setAdditionalActionParameter(String name, String value);
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    ActionRequest setResourceName(String name);
-
-    /**
      * Sets the content of this action request. The structure of the content is
      * defined by the action.
      *
@@ -143,4 +155,16 @@ public interface ActionRequest extends Request {
      *             content.
      */
     ActionRequest setContent(JsonValue content);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    Request setResourceName(ResourceName name);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    ActionRequest setResourceName(String name);
 }
