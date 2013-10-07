@@ -28,6 +28,7 @@ import java.util.Set;
 
 import org.forgerock.i18n.LocalizableMessage;
 import org.forgerock.i18n.LocalizedIllegalArgumentException;
+import org.forgerock.json.resource.ResourceName;
 
 @SuppressWarnings("javadoc")
 public final class ApiDescriptor {
@@ -57,10 +58,10 @@ public final class ApiDescriptor {
 
         public RelationDescriptor.RelationBuilder<ApiBuilder> addRelation(final String name,
                 final String resourceUrn) {
-            return addRelation(name, Urn.valueOf(resourceUrn));
+            return addRelation(ResourceName.valueOf(name), Urn.valueOf(resourceUrn));
         }
 
-        public RelationDescriptor.RelationBuilder<ApiBuilder> addRelation(final String name,
+        public RelationDescriptor.RelationBuilder<ApiBuilder> addRelation(final ResourceName name,
                 final Urn resourceUrn) {
             return RelationDescriptor.builder(name, resourceUrn,
                     new RelationCapableBuilder<ApiBuilder>() {
@@ -156,7 +157,7 @@ public final class ApiDescriptor {
                                 warnings.add(LocalizableMessage
                                         .raw("The relation '%s' for resource '%s' in API '%s' "
                                                 + "is invalid because it refers to a non-existant resource '%s'",
-                                                relation.getName(), resource.getUrn(), urn,
+                                                relation.getResourceName(), resource.getUrn(), urn,
                                                 relation.getResourceUrn()));
                             }
                             resourceIsValid = false;
@@ -195,7 +196,7 @@ public final class ApiDescriptor {
                     // TODO: i18n.
                     warnings.add(LocalizableMessage.raw(
                             "The relation '%s' in API '%s' is invalid because it refers "
-                                    + "to a non-existant resource '%s'", relation.getName(), urn,
+                                    + "to a non-existant resource '%s'", relation.getResourceName(), urn,
                             relation.getResourceUrn()));
                 }
             }
