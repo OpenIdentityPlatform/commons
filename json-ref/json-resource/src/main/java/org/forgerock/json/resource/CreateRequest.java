@@ -39,9 +39,15 @@ public interface CreateRequest extends Request {
     public static final String FIELD_NEW_RESOURCE_ID = "newResourceId";
 
     /**
-     * The name of the action which is reserved for performing "create" operations.
+     * The name of the action which is reserved for performing "create"
+     * operations.
      */
     public static final String ACTION_ID_CREATE = ActionRequest.ACTION_ID_CREATE;
+
+    /**
+     * {@inheritDoc}
+     */
+    <R, P> R accept(RequestVisitor<R, P> v, P p);
 
     /**
      * {@inheritDoc}
@@ -86,6 +92,12 @@ public interface CreateRequest extends Request {
     String getNewResourceId();
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    RequestType getRequestType();
+
+    /**
      * Returns the name of the JSON resource container beneath which the new
      * resource should be created.
      * <p>
@@ -99,6 +111,12 @@ public interface CreateRequest extends Request {
      */
     @Override
     String getResourceName();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    ResourceName getResourceNameObject();
 
     /**
      * Sets the content of the JSON resource to be created.
@@ -133,6 +151,12 @@ public interface CreateRequest extends Request {
      * @see #setResourceName(String)
      */
     CreateRequest setNewResourceId(String id);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    Request setResourceName(ResourceName name);
 
     /**
      * Sets the name of the JSON resource container beneath which the new
