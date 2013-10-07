@@ -17,9 +17,8 @@ package org.forgerock.json.resource.api;
 
 import static org.forgerock.json.resource.api.RelationDescriptor.Multiplicity.ONE_TO_MANY;
 
-import java.util.Locale;
-
 import org.forgerock.i18n.LocalizableMessage;
+import org.forgerock.json.resource.ResourceName;
 
 @SuppressWarnings("javadoc")
 public final class RelationDescriptor {
@@ -28,17 +27,15 @@ public final class RelationDescriptor {
     }
 
     public static final class RelationBuilder<T> {
-        private final String name;
+        private final ResourceName name;
         private final Urn resourceUrn;
         private LocalizableMessage description;
         private Multiplicity multiplicity = ONE_TO_MANY;
-        private final String normalizedName;
         private final RelationCapableBuilder<T> parentBuilder;
 
-        private RelationBuilder(final String name, final Urn resourceUrn,
+        private RelationBuilder(final ResourceName name, final Urn resourceUrn,
                 final RelationCapableBuilder<T> parentBuilder) {
             this.name = name;
-            this.normalizedName = name.toLowerCase(Locale.ENGLISH);
             this.resourceUrn = resourceUrn;
             this.parentBuilder = parentBuilder;
         }
@@ -59,8 +56,7 @@ public final class RelationDescriptor {
 
         public T build() {
             final RelationDescriptor relation =
-                    new RelationDescriptor(name, normalizedName, description, multiplicity,
-                            resourceUrn);
+                    new RelationDescriptor(name, description, multiplicity, resourceUrn);
             return parentBuilder.addRelationFromBuilder(relation);
         }
 
@@ -69,7 +65,7 @@ public final class RelationDescriptor {
             if (this == obj) {
                 return true;
             } else if (obj instanceof RelationBuilder) {
-                return normalizedName.equals(((RelationBuilder<?>) obj).normalizedName);
+                return name.equals(((RelationBuilder<?>) obj).name);
             } else {
                 return false;
             }
@@ -77,32 +73,29 @@ public final class RelationDescriptor {
 
         @Override
         public int hashCode() {
-            return normalizedName.hashCode();
+            return name.hashCode();
         }
 
         @Override
         public String toString() {
-            return name;
+            return name.toString();
         }
     }
 
-    static <T> RelationBuilder<T> builder(final String name, final Urn resourceUrn,
+    static <T> RelationBuilder<T> builder(final ResourceName name, final Urn resourceUrn,
             final RelationCapableBuilder<T> parentBuilder) {
         return new RelationBuilder<T>(name, resourceUrn, parentBuilder);
     }
 
-    private final String name;
+    private final ResourceName name;
     private final Urn resourceUrn;
     private ResourceDescriptor resource;
     private final LocalizableMessage description;
     private final Multiplicity multiplicity;
-    private final String normalizedName;
 
-    private RelationDescriptor(final String name, final String normalizedName,
-            final LocalizableMessage description, final Multiplicity multiplicity,
-            final Urn resourceUrn) {
+    private RelationDescriptor(final ResourceName name, final LocalizableMessage description,
+            final Multiplicity multiplicity, final Urn resourceUrn) {
         this.name = name;
-        this.normalizedName = normalizedName;
         this.description = description; // Delegate to resource if null.
         this.multiplicity = multiplicity;
         this.resourceUrn = resourceUrn;
@@ -110,7 +103,6 @@ public final class RelationDescriptor {
 
     RelationDescriptor(final RelationDescriptor relation) {
         this.name = relation.name;
-        this.normalizedName = relation.normalizedName;
         this.description = relation.description;
         this.multiplicity = relation.multiplicity;
         this.resourceUrn = relation.resourceUrn;
@@ -124,7 +116,11 @@ public final class RelationDescriptor {
         return resourceUrn;
     }
 
-    public String getName() {
+    public String getResourceName() {
+        return name.toString();
+    }
+
+    public ResourceName getResourceNameObject() {
         return name;
     }
 
@@ -137,7 +133,7 @@ public final class RelationDescriptor {
         if (this == obj) {
             return true;
         } else if (obj instanceof RelationDescriptor) {
-            return normalizedName.equals(((RelationDescriptor) obj).normalizedName);
+            return name.equals(((RelationDescriptor) obj).name);
         } else {
             return false;
         }
@@ -145,12 +141,12 @@ public final class RelationDescriptor {
 
     @Override
     public int hashCode() {
-        return normalizedName.hashCode();
+        return name.hashCode();
     }
 
     @Override
     public String toString() {
-        return name;
+        return name.toString();
     }
 
     public Multiplicity getMultiplicity() {

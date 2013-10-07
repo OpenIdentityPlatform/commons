@@ -22,6 +22,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.forgerock.i18n.LocalizableMessage;
+import org.forgerock.json.resource.ResourceName;
 
 @SuppressWarnings("javadoc")
 public final class ResourceDescriptor {
@@ -41,11 +42,11 @@ public final class ResourceDescriptor {
 
         public RelationDescriptor.RelationBuilder<ResourceBuilder> addRelation(final String name,
                 final String resourceUrn) {
-            return addRelation(name, Urn.valueOf(resourceUrn));
+            return addRelation(ResourceName.valueOf(name), Urn.valueOf(resourceUrn));
         }
 
-        public RelationDescriptor.RelationBuilder<ResourceBuilder> addRelation(final String name,
-                final Urn resourceUrn) {
+        public RelationDescriptor.RelationBuilder<ResourceBuilder> addRelation(
+                final ResourceName name, final Urn resourceUrn) {
             return RelationDescriptor.builder(name, resourceUrn,
                     new RelationCapableBuilder<ResourceBuilder>() {
                         @Override
