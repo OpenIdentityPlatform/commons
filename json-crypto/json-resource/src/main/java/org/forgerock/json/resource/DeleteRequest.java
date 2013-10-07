@@ -34,6 +34,11 @@ public interface DeleteRequest extends Request {
     /**
      * {@inheritDoc}
      */
+    <R, P> R accept(RequestVisitor<R, P> v, P p);
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     DeleteRequest addField(JsonPointer... fields);
 
@@ -47,13 +52,25 @@ public interface DeleteRequest extends Request {
      * {@inheritDoc}
      */
     @Override
+    List<JsonPointer> getFields();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    RequestType getRequestType();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     String getResourceName();
 
     /**
      * {@inheritDoc}
      */
     @Override
-    List<JsonPointer> getFields();
+    ResourceName getResourceNameObject();
 
     /**
      * Returns the expected version information associated with the JSON
@@ -70,6 +87,12 @@ public interface DeleteRequest extends Request {
      *         resource to be deleted.
      */
     String getRevision();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    Request setResourceName(ResourceName name);
 
     /**
      * {@inheritDoc}

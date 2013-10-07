@@ -42,6 +42,11 @@ public interface UpdateRequest extends Request {
     /**
      * {@inheritDoc}
      */
+    <R, P> R accept(RequestVisitor<R, P> v, P p);
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     UpdateRequest addField(JsonPointer... fields);
 
@@ -55,12 +60,6 @@ public interface UpdateRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    String getResourceName();
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     List<JsonPointer> getFields();
 
     /**
@@ -69,6 +68,24 @@ public interface UpdateRequest extends Request {
      * @return The new content of the JSON resource to be replaced.
      */
     JsonValue getNewContent();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    RequestType getRequestType();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    String getResourceName();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    ResourceName getResourceNameObject();
 
     /**
      * Returns the expected version information associated with the JSON
@@ -87,12 +104,6 @@ public interface UpdateRequest extends Request {
     String getRevision();
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    UpdateRequest setResourceName(String name);
-
-    /**
      * Sets the new content of the JSON resource to be replaced.
      *
      * @param content
@@ -103,6 +114,18 @@ public interface UpdateRequest extends Request {
      *             content.
      */
     UpdateRequest setNewContent(JsonValue content);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    Request setResourceName(ResourceName name);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    UpdateRequest setResourceName(String name);
 
     /**
      * Sets the expected version information associated with the JSON resource

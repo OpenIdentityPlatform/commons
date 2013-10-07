@@ -49,6 +49,11 @@ public interface PatchRequest extends Request {
     /**
      * {@inheritDoc}
      */
+    <R, P> R accept(RequestVisitor<R, P> v, P p);
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     PatchRequest addField(JsonPointer... fields);
 
@@ -108,7 +113,19 @@ public interface PatchRequest extends Request {
      * {@inheritDoc}
      */
     @Override
+    RequestType getRequestType();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     String getResourceName();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    ResourceName getResourceNameObject();
 
     /**
      * Returns the expected version information associated with the JSON
@@ -125,6 +142,12 @@ public interface PatchRequest extends Request {
      *         resource to be patched.
      */
     String getRevision();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    Request setResourceName(ResourceName name);
 
     /**
      * {@inheritDoc}
