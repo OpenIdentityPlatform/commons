@@ -164,14 +164,13 @@ public class AuthNFilter implements Filter {
             AuthStatus requestAuthStatus = serverAuthContext.validateRequest(messageInfo, clientSubject,
                     serviceSubject);
 
-            boolean proceedWithCall = false;
             if (SUCCESS.equals(requestAuthStatus)) {
                 // nothing to do here just carry on
-                proceedWithCall = true;
                 DEBUG.debug("Successfully validated request.");
             } else if (SEND_SUCCESS.equals(requestAuthStatus)) {
                 // Send HttpServletResponse to client and exit.
                 DEBUG.debug("Successfully validated request, with response message");
+                return;
             } else if (SEND_FAILURE.equals(requestAuthStatus)) {
                 // Send HttpServletResponse to client and exit.
                 DEBUG.debug("Failed to validate request, included response message.");
@@ -186,22 +185,14 @@ public class AuthNFilter implements Filter {
                 throw new AuthException("Invalid AuthStatus from validateRequest: " + requestAuthStatus.toString());
             }
 
-            AuthException secureResponseException = null;
-            AuthStatus responseAuthStatus = null;
-            try {
-                // Secure the response (includes adding any session cookies to the response)
-                responseAuthStatus = serverAuthContext.secureResponse(messageInfo, serviceSubject);
+            filterChain.doFilter((ServletRequest) messageInfo.getRequestMessage(),
+                    (ServletResponse) messageInfo.getResponseMessage());
+
+            AuthStatus responseAuthStatus = serverAuthContext.secureResponse(messageInfo, serviceSubject);
+            //TODO does this fix the redirection/forwarding issue that could occur here too???
                 // If any filter/resource closes the response or redirects the response the secureResponse call cannot
                 // add anything else to the response. Because of this the call to secureResponse has been moved before
                 // the doFilter call to get around this issue.
-            } catch (AuthException e) {
-                secureResponseException = e;
-            }
-
-            if (proceedWithCall) {
-                filterChain.doFilter((ServletRequest) messageInfo.getRequestMessage(),
-                        (ServletResponse) messageInfo.getResponseMessage());
-            }
 
             if (SEND_SUCCESS.equals(responseAuthStatus)) {
                 // nothing to do here just carry on
@@ -216,8 +207,6 @@ public class AuthNFilter implements Filter {
                 DEBUG.debug("Has not finished securing response. Requires more information from client.");
                 response.setStatus(100);
                 return;
-            } else if (secureResponseException != null) {
-                throw new ServletException(secureResponseException.getMessage(), secureResponseException);
             } else {
                 DEBUG.error("Invalid AuthStatus, {}", requestAuthStatus.toString());
                 throw new AuthException("Invalid AuthStatus from secureResponse: " + responseAuthStatus.toString());

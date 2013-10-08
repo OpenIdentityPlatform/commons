@@ -16,6 +16,8 @@
 
 package org.forgerock.jaspi.container;
 
+import org.forgerock.jaspi.filter.JaspiHttpServletResponseWrapper;
+
 import javax.security.auth.message.MessageInfo;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
@@ -87,7 +89,7 @@ public class MessageInfoImpl implements MessageInfo {
      * @param response An HttpServletResponse representing the response message.
      */
     public void setResponseMessage(Object response) {
-        HttpServletResponseWrapper wrapper = new HttpServletResponseWrapper((HttpServletResponse) response);
+        HttpServletResponseWrapper wrapper = new JaspiHttpServletResponseWrapper((HttpServletResponse) response);
         this.responseWrapper = wrapper;
     }
 
