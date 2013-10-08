@@ -50,8 +50,6 @@ define("org/forgerock/commons/ui/user/SiteConfigurator", [
        if(obj.configuration && obj.initialized === false) {
            obj.initialized = true;
            
-           i18nManager.setLanguage(constants.DEFAULT_LANGUAGE);
-           
            if(obj.configuration.remoteConfig === true) {
                configurationDelegate.getConfiguration(function(config) {
                    obj.processConfiguration(config); 
