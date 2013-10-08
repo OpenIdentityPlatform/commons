@@ -123,14 +123,18 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
      *
      * @param fields
      *            The list of {@link #field(String, Object) fields} to include
-     *            in the JSON object.
+     *            in the JSON object. {@code null} elements are allowed, but are
+     *            not included in the returned map (this makes it easier to
+     *            include optional elements).
      * @return The JSON object.
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static Object object(final Map.Entry... fields) {
         final Map<String, Object> object = new LinkedHashMap<String, Object>(fields.length);
         for (final Map.Entry<String, Object> field : fields) {
-            object.put(field.getKey(), field.getValue());
+            if (field != null) {
+                object.put(field.getKey(), field.getValue());
+            }
         }
         return object;
     }
@@ -677,7 +681,7 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
      * Returns a subclass of JsonValue that records which keys are accessed in this {@link JsonValue} and its children.
      * Call #verifyAllKeysAccessed() to verify that all keys were accessed. The returned JsonValue provides an
      * immutable view on the monitored underlying JsonValue.
-     * 
+     *
      * @return a JsonValue monitoring which properties are accessed
      * @see #verifyAllKeysAccessed()
      */
