@@ -19,6 +19,7 @@ import static org.forgerock.json.resource.RoutingMode.EQUALS;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -32,6 +33,92 @@ import org.forgerock.json.fluent.JsonValue;
  * factories and connections.
  */
 public final class Resources {
+
+    private static final class SynchronousRequestHandlerAdapter implements RequestHandler {
+        private final SynchronousRequestHandler syncHandler;
+
+        /**
+         * @param syncHandler
+         */
+        private SynchronousRequestHandlerAdapter(final SynchronousRequestHandler syncHandler) {
+            this.syncHandler = syncHandler;
+        }
+
+        @Override
+        public void handleUpdate(final ServerContext context, final UpdateRequest request,
+                final ResultHandler<Resource> handler) {
+            try {
+                handler.handleResult(syncHandler.handleUpdate(context, request));
+            } catch (final ResourceException e) {
+                handler.handleError(e);
+            }
+        }
+
+        @Override
+        public void handleRead(final ServerContext context, final ReadRequest request,
+                final ResultHandler<Resource> handler) {
+            try {
+                handler.handleResult(syncHandler.handleRead(context, request));
+            } catch (final ResourceException e) {
+                handler.handleError(e);
+            }
+        }
+
+        @Override
+        public void handleQuery(final ServerContext context, final QueryRequest request,
+                final QueryResultHandler handler) {
+            try {
+                final Collection<Resource> resources = new LinkedList<Resource>();
+                final QueryResult result = syncHandler.handleQuery(context, request, resources);
+                for (final Resource resource : resources) {
+                    handler.handleResource(resource);
+                }
+                handler.handleResult(result);
+            } catch (final ResourceException e) {
+                handler.handleError(e);
+            }
+        }
+
+        @Override
+        public void handlePatch(final ServerContext context, final PatchRequest request,
+                final ResultHandler<Resource> handler) {
+            try {
+                handler.handleResult(syncHandler.handlePatch(context, request));
+            } catch (final ResourceException e) {
+                handler.handleError(e);
+            }
+        }
+
+        @Override
+        public void handleDelete(final ServerContext context, final DeleteRequest request,
+                final ResultHandler<Resource> handler) {
+            try {
+                handler.handleResult(syncHandler.handleDelete(context, request));
+            } catch (final ResourceException e) {
+                handler.handleError(e);
+            }
+        }
+
+        @Override
+        public void handleCreate(final ServerContext context, final CreateRequest request,
+                final ResultHandler<Resource> handler) {
+            try {
+                handler.handleResult(syncHandler.handleCreate(context, request));
+            } catch (final ResourceException e) {
+                handler.handleError(e);
+            }
+        }
+
+        @Override
+        public void handleAction(final ServerContext context, final ActionRequest request,
+                final ResultHandler<JsonValue> handler) {
+            try {
+                handler.handleResult(syncHandler.handleAction(context, request));
+            } catch (final ResourceException e) {
+                handler.handleError(e);
+            }
+        }
+    }
 
     /**
      * An abstract future result which acts as a result handler.
@@ -477,6 +564,18 @@ public final class Resources {
     }
 
     /**
+     * Adapts the provided {@link SynchronousRequestHandler} as a
+     * {@link RequestHandler}.
+     *
+     * @param syncHandler
+     *            The synchronous request handler to be adapted.
+     * @return The adapted synchronous request handler.
+     */
+    public static RequestHandler asRequestHandler(final SynchronousRequestHandler syncHandler) {
+        return new SynchronousRequestHandlerAdapter(syncHandler);
+    }
+
+    /**
      * Returns a JSON object containing only the specified fields from the
      * provided JSON value. If the list of fields is empty then the value is
      * returned unchanged.
@@ -618,7 +717,7 @@ public final class Resources {
      *            The connection whose {@code close} method is to be disabled.
      * @return An uncloseable view of the provided connection.
      */
-    public static Connection uncloseable(Connection connection) {
+    public static Connection uncloseable(final Connection connection) {
         return new AbstractConnectionWrapper<Connection>(connection) {
             @Override
             public void close() {
@@ -641,7 +740,7 @@ public final class Resources {
 
             @Override
             public FutureResult<Connection> getConnectionAsync(
-                    ResultHandler<? super Connection> handler) {
+                    final ResultHandler<? super Connection> handler) {
                 return factory.getConnectionAsync(handler);
             }
 
