@@ -578,6 +578,7 @@ public class WDSSO /*extends AMLoginModule*/ {
 //        }
         System.setProperty("java.security.krb5.realm", kdcRealm);
         System.setProperty("java.security.krb5.kdc", kdcServer);
+        System.setProperty("java.security.auth.login.config", "/dev/null");
 
         try {
             Configuration config = Configuration.getConfiguration();
