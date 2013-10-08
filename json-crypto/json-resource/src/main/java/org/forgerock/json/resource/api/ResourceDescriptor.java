@@ -16,97 +16,116 @@
 package org.forgerock.json.resource.api;
 
 import static java.util.Collections.unmodifiableSet;
-import static org.forgerock.json.resource.api.ApiDescriptor.defaultToEmptyMessageIfNull;
+import static org.forgerock.json.resource.api.Api.unmodifiableCopyOf;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.forgerock.i18n.LocalizableMessage;
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ResourceName;
 
 @SuppressWarnings("javadoc")
 public final class ResourceDescriptor {
-    public static final class ResourceBuilder {
-        private final Urn urn;
+    public static final class Builder {
         private LocalizableMessage description;
         private final Set<RelationDescriptor> relations = new LinkedHashSet<RelationDescriptor>();
         private Urn parentResourceUrn;
         private Schema schema;
         private final Set<ActionDescriptor> actions = new LinkedHashSet<ActionDescriptor>();
-        private final ApiDescriptor.ApiBuilder parentBuilder;
+        private final ApiDescriptor.Builder parentBuilder;
+        private final Set<Profile> profiles = new LinkedHashSet<Profile>();
+        private final Urn urn;
 
-        private ResourceBuilder(final Urn urn, final ApiDescriptor.ApiBuilder parentBuilder) {
+        private Builder(final Urn urn, final ApiDescriptor.Builder parentBuilder) {
             this.urn = urn;
             this.parentBuilder = parentBuilder;
         }
 
-        public RelationDescriptor.RelationBuilder<ResourceBuilder> addRelation(final String name,
+        public RelationDescriptor.Builder<Builder> addRelation(final String name,
                 final String resourceUrn) {
             return addRelation(ResourceName.valueOf(name), Urn.valueOf(resourceUrn));
         }
 
-        public RelationDescriptor.RelationBuilder<ResourceBuilder> addRelation(
-                final ResourceName name, final Urn resourceUrn) {
+        public Builder addProfile(final String urn, final JsonValue content) {
+            return addProfile(Urn.valueOf(urn), content);
+        }
+
+        public Builder addProfile(final Urn urn, final JsonValue content) {
+            profiles.add(new Profile(urn, content));
+            return this;
+        }
+
+        public RelationDescriptor.Builder<Builder> addRelation(final ResourceName name,
+                final Urn resourceUrn) {
             return RelationDescriptor.builder(name, resourceUrn,
-                    new RelationCapableBuilder<ResourceBuilder>() {
+                    new RelationCapableBuilder<Builder>() {
                         @Override
-                        public ResourceBuilder addRelationFromBuilder(
-                                final RelationDescriptor relation) {
+                        public Builder addRelationFromBuilder(final RelationDescriptor relation) {
                             relations.add(relation);
-                            return ResourceDescriptor.ResourceBuilder.this;
+                            return ResourceDescriptor.Builder.this;
                         }
                     });
         }
 
-        public ResourceBuilder addRelation(final RelationDescriptor relation) {
+        public Builder addRelation(final RelationDescriptor relation) {
             relations.add(new RelationDescriptor(relation));
             return this;
         }
 
-        public ActionDescriptor.ActionBuilder<ResourceBuilder> addAction(final String name) {
-            return ActionDescriptor.builder(name, new ActionCapableBuilder<ResourceBuilder>() {
+        public ActionDescriptor.Builder<Builder> addAction(final String name) {
+            return ActionDescriptor.builder(name, new ActionCapableBuilder<Builder>() {
                 @Override
-                public ResourceBuilder addActionFromBuilder(final ActionDescriptor action) {
+                public Builder addActionFromBuilder(final ActionDescriptor action) {
                     actions.add(action);
-                    return ResourceDescriptor.ResourceBuilder.this;
+                    return Builder.this;
                 }
             });
         }
 
-        public ResourceBuilder addRelation(final ActionDescriptor action) {
+        public Builder addRelation(final ActionDescriptor action) {
             actions.add(action);
             return this;
         }
 
-        public ResourceBuilder setDescription(final String description) {
+        public Builder setDescription(final String description) {
             return setDescription(LocalizableMessage.raw(description));
         }
 
-        public ResourceBuilder setDescription(final LocalizableMessage description) {
+        public Builder setDescription(final LocalizableMessage description) {
             this.description = description;
             return this;
         }
 
-        public ResourceBuilder setParent(final Urn parentResourceUrn) {
+        public Builder setParent(final Urn parentResourceUrn) {
             this.parentResourceUrn = parentResourceUrn;
             return this;
         }
 
-        public ResourceBuilder setParent(final String parentResourceUrn) {
+        public Builder setParent(final String parentResourceUrn) {
             return setParent(Urn.valueOf(parentResourceUrn));
         }
 
-        public ResourceBuilder setSchema(final Schema schema) {
+        public Builder setSchema(final Schema schema) {
             this.schema = schema;
             return this;
+        }
+
+        public ApiDescriptor.Builder build() {
+            final ResourceDescriptor resource =
+                    new ResourceDescriptor(urn, description, parentResourceUrn, schema,
+                            unmodifiableCopyOf(actions), unmodifiableCopyOf(relations),
+                            unmodifiableCopyOf(profiles));
+            parentBuilder.addResourceFromBuilder(resource);
+            return parentBuilder;
         }
 
         @Override
         public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
-            } else if (obj instanceof ResourceBuilder) {
-                return urn.equals(((ResourceBuilder) obj).urn);
+            } else if (obj instanceof Builder) {
+                return urn.equals(((Builder) obj).urn);
             } else {
                 return false;
             }
@@ -121,22 +140,12 @@ public final class ResourceDescriptor {
         public String toString() {
             return urn.toString();
         }
-
-        public ApiDescriptor.ApiBuilder build() {
-            final ResourceDescriptor resource =
-                    new ResourceDescriptor(urn, description, parentResourceUrn, schema,
-                            unmodifiableSet(new LinkedHashSet<ActionDescriptor>(actions)),
-                            unmodifiableSet(new LinkedHashSet<RelationDescriptor>(relations)));
-            parentBuilder.addResourceFromBuilder(resource);
-            return parentBuilder;
-        }
     }
 
-    static ResourceBuilder builder(final Urn urn, final ApiDescriptor.ApiBuilder parentBuilder) {
-        return new ResourceBuilder(urn, parentBuilder);
+    static Builder builder(final Urn urn, final ApiDescriptor.Builder parentBuilder) {
+        return new Builder(urn, parentBuilder);
     }
 
-    private final Urn urn;
     private final LocalizableMessage description;
     private final Schema schema;
     private ResourceDescriptor parent;
@@ -145,16 +154,19 @@ public final class ResourceDescriptor {
     private final Set<ResourceDescriptor> children = unmodifiableSet(mutableChildren);
     private final Set<ActionDescriptor> actions;
     private final Set<RelationDescriptor> relations;
+    private final Set<Profile> profiles;
+    private final Urn urn;
 
     private ResourceDescriptor(final Urn urn, final LocalizableMessage description,
             final Urn parentUrn, final Schema schema, final Set<ActionDescriptor> actions,
-            final Set<RelationDescriptor> relations) {
+            final Set<RelationDescriptor> relations, final Set<Profile> profiles) {
         this.urn = urn;
-        this.description = defaultToEmptyMessageIfNull(description);
+        this.description = Api.defaultToEmptyMessageIfNull(description);
         this.parentUrn = parentUrn;
         this.schema = schema;
         this.actions = actions;
         this.relations = relations;
+        this.profiles = profiles;
     }
 
     ResourceDescriptor(final ResourceDescriptor resource) {
@@ -162,7 +174,8 @@ public final class ResourceDescriptor {
         this.description = resource.description;
         this.parentUrn = resource.parentUrn;
         this.schema = resource.schema;
-        this.actions = unmodifiableSet(new LinkedHashSet<ActionDescriptor>(resource.actions));
+        this.actions = resource.actions;
+        this.profiles = resource.profiles;
 
         // Need to copy the relations in order to make them unresolved.
         final Set<RelationDescriptor> unresolvedRelations =
@@ -171,10 +184,6 @@ public final class ResourceDescriptor {
             unresolvedRelations.add(new RelationDescriptor(relation));
         }
         this.relations = unmodifiableSet(unresolvedRelations);
-    }
-
-    public Urn getUrn() {
-        return urn;
     }
 
     public String getName() {
@@ -209,6 +218,23 @@ public final class ResourceDescriptor {
         return schema;
     }
 
+    public Urn getParentUrn() {
+        return parentUrn;
+    }
+
+    void setParent(final ResourceDescriptor parent) {
+        this.parent = parent;
+        parent.mutableChildren.add(this);
+    }
+
+    public Set<Profile> getProfiles() {
+        return profiles;
+    }
+
+    public Urn getUrn() {
+        return urn;
+    }
+
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) {
@@ -228,14 +254,5 @@ public final class ResourceDescriptor {
     @Override
     public String toString() {
         return urn.toString();
-    }
-
-    public Urn getParentUrn() {
-        return parentUrn;
-    }
-
-    void setParent(final ResourceDescriptor parent) {
-        this.parent = parent;
-        parent.mutableChildren.add(this);
     }
 }

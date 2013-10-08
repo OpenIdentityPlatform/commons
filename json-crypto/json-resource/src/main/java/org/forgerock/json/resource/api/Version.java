@@ -17,7 +17,7 @@ package org.forgerock.json.resource.api;
 
 @SuppressWarnings("javadoc")
 public final class Version implements Comparable<Version> {
-    private static final Version DOT_ZERO_CACHE[] = new Version[10];
+    private static final Version[] DOT_ZERO_CACHE = new Version[10];
     static {
         for (int i = 0; i < DOT_ZERO_CACHE.length; i++) {
             DOT_ZERO_CACHE[i] = new Version(i, 0, 0, null);
@@ -31,7 +31,7 @@ public final class Version implements Comparable<Version> {
 
     /**
      * Creates a new version using the provided version information.
-     * 
+     *
      * @param major
      *            Major version number.
      * @param minor
@@ -47,7 +47,7 @@ public final class Version implements Comparable<Version> {
     /**
      * Creates a new version using the provided version information and a micro
      * version of 0.
-     * 
+     *
      * @param major
      *            Major version number.
      * @param minor
@@ -61,7 +61,7 @@ public final class Version implements Comparable<Version> {
     /**
      * Creates a new version using the provided version information and a minor
      * and micro version of 0.
-     * 
+     *
      * @param major
      *            Major version number.
      * @return The version.
@@ -87,20 +87,20 @@ public final class Version implements Comparable<Version> {
     /**
      * Parses the string argument as a version. The string must be one of the
      * following forms:
-     * 
+     *
      * <pre>
      * major
      * major.minor
      * major.minor.micro
      * </pre>
-     * 
+     *
      * @param s
      *            The string to be parsed as a version.
      * @return The parsed version.
      * @throws IllegalArgumentException
      *             If the string does not contain a parsable version.
      */
-    public static Version valueOf(final String s) throws IllegalArgumentException {
+    public static Version valueOf(final String s) {
         final String[] fields = s.split("\\.");
         if (fields.length == 0 || fields.length > 3) {
             throw new IllegalArgumentException("Invalid version string " + s);
@@ -113,7 +113,7 @@ public final class Version implements Comparable<Version> {
 
     /**
      * Returns the major version number.
-     * 
+     *
      * @return The major version number.
      */
     public int getMajor() {
@@ -122,7 +122,7 @@ public final class Version implements Comparable<Version> {
 
     /**
      * Returns the minor version number.
-     * 
+     *
      * @return The minor version number.
      */
     public int getMinor() {
@@ -131,7 +131,7 @@ public final class Version implements Comparable<Version> {
 
     /**
      * Returns the micro version number.
-     * 
+     *
      * @return The micro version number.
      */
     public int getMicro() {

@@ -16,6 +16,7 @@
 package org.forgerock.json.resource.api;
 
 import static java.util.Collections.unmodifiableSet;
+import static org.forgerock.json.resource.api.Api.unmodifiableCopyOf;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -28,52 +29,63 @@ import java.util.Set;
 
 import org.forgerock.i18n.LocalizableMessage;
 import org.forgerock.i18n.LocalizedIllegalArgumentException;
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ResourceName;
 
 @SuppressWarnings("javadoc")
 public final class ApiDescriptor {
-    public static final class ApiBuilder {
-        private final Urn urn;
+    public static final class Builder {
         private LocalizableMessage description;
         private final Map<Urn, ResourceDescriptor> resources =
                 new LinkedHashMap<Urn, ResourceDescriptor>();
         private final Set<RelationDescriptor> relations = new LinkedHashSet<RelationDescriptor>();
+        private final Set<Profile> profiles = new LinkedHashSet<Profile>();
+        private final Urn urn;
 
-        private ApiBuilder(final Urn urn) {
+        private Builder(final Urn urn) {
             this.urn = urn;
         }
 
-        public ApiBuilder addResource(final ResourceDescriptor resource) {
+        public Builder addResource(final ResourceDescriptor resource) {
             resources.put(resource.getUrn(), new ResourceDescriptor(resource));
             return this;
         }
 
-        public ResourceDescriptor.ResourceBuilder addResource(final Urn urn) {
+        public Builder addProfile(final String urn, final JsonValue content) {
+            return addProfile(Urn.valueOf(urn), content);
+        }
+
+        public Builder addProfile(final Urn urn, final JsonValue content) {
+            profiles.add(new Profile(urn, content));
+            return this;
+        }
+
+        public ResourceDescriptor.Builder addResource(final Urn urn) {
             return ResourceDescriptor.builder(urn, this);
         }
 
-        public ResourceDescriptor.ResourceBuilder addResource(final String urn) {
+        public ResourceDescriptor.Builder addResource(final String urn) {
             return addResource(Urn.valueOf(urn));
         }
 
-        public RelationDescriptor.RelationBuilder<ApiBuilder> addRelation(final String name,
+        public RelationDescriptor.Builder<Builder> addRelation(final String name,
                 final String resourceUrn) {
             return addRelation(ResourceName.valueOf(name), Urn.valueOf(resourceUrn));
         }
 
-        public RelationDescriptor.RelationBuilder<ApiBuilder> addRelation(final ResourceName name,
+        public RelationDescriptor.Builder<Builder> addRelation(final ResourceName name,
                 final Urn resourceUrn) {
             return RelationDescriptor.builder(name, resourceUrn,
-                    new RelationCapableBuilder<ApiBuilder>() {
+                    new RelationCapableBuilder<Builder>() {
                         @Override
-                        public ApiBuilder addRelationFromBuilder(final RelationDescriptor relation) {
+                        public Builder addRelationFromBuilder(final RelationDescriptor relation) {
                             relations.add(relation);
-                            return ApiDescriptor.ApiBuilder.this;
+                            return ApiDescriptor.Builder.this;
                         }
                     });
         }
 
-        public ApiBuilder addRelation(final RelationDescriptor relation) {
+        public Builder addRelation(final RelationDescriptor relation) {
             relations.add(new RelationDescriptor(relation));
             return this;
         }
@@ -82,11 +94,11 @@ public final class ApiDescriptor {
             resources.put(resource.getUrn(), resource);
         }
 
-        public ApiBuilder setDescription(final String description) {
+        public Builder setDescription(final String description) {
             return setDescription(LocalizableMessage.raw(description));
         }
 
-        public ApiBuilder setDescription(final LocalizableMessage description) {
+        public Builder setDescription(final LocalizableMessage description) {
             this.description = description;
             return this;
         }
@@ -196,43 +208,58 @@ public final class ApiDescriptor {
                     // TODO: i18n.
                     warnings.add(LocalizableMessage.raw(
                             "The relation '%s' in API '%s' is invalid because it refers "
-                                    + "to a non-existant resource '%s'", relation.getResourceName(), urn,
-                            relation.getResourceUrn()));
+                                    + "to a non-existant resource '%s'",
+                            relation.getResourceName(), urn, relation.getResourceUrn()));
                 }
             }
             return new ApiDescriptor(urn, description, unmodifiableSet(resolvedRelations),
-                    unmodifiableSet(new LinkedHashSet<ResourceDescriptor>(resolvedResources
-                            .values())));
+                    unmodifiableCopyOf(resolvedResources.values()), unmodifiableCopyOf(profiles));
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            } else if (obj instanceof Builder) {
+                return urn.equals(((Builder) obj).urn);
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public int hashCode() {
+            return urn.hashCode();
+        }
+
+        @Override
+        public String toString() {
+            return urn.toString();
         }
     }
 
-    static LocalizableMessage defaultToEmptyMessageIfNull(final LocalizableMessage description) {
-        return description != null ? description : LocalizableMessage.EMPTY;
-    }
-
-    private final Urn urn;
     private final LocalizableMessage description;
     private final Set<ResourceDescriptor> resources;
     private final Set<RelationDescriptor> relations;
+    private final Set<Profile> profiles;
+    private final Urn urn;
 
     private ApiDescriptor(final Urn urn, final LocalizableMessage description,
-            final Set<RelationDescriptor> relations, final Set<ResourceDescriptor> resources) {
+            final Set<RelationDescriptor> relations, final Set<ResourceDescriptor> resources,
+            final Set<Profile> profiles) {
         this.urn = urn;
-        this.description = defaultToEmptyMessageIfNull(description);
+        this.description = Api.defaultToEmptyMessageIfNull(description);
         this.relations = relations;
         this.resources = resources;
+        this.profiles = profiles;
     }
 
-    public static ApiBuilder builder(final String urn) {
-        return new ApiBuilder(Urn.valueOf(urn));
+    public static Builder builder(final String urn) {
+        return new Builder(Urn.valueOf(urn));
     }
 
-    public static ApiBuilder builder(final Urn urn) {
-        return new ApiBuilder(urn);
-    }
-
-    public Urn getUrn() {
-        return urn;
+    public static Builder builder(final Urn urn) {
+        return new Builder(urn);
     }
 
     public String getName() {
@@ -253,6 +280,14 @@ public final class ApiDescriptor {
 
     public Set<ResourceDescriptor> getResources() {
         return resources;
+    }
+
+    public Set<Profile> getProfiles() {
+        return profiles;
+    }
+
+    public Urn getUrn() {
+        return urn;
     }
 
     @Override
