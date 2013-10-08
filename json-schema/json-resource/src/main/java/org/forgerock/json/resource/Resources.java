@@ -34,12 +34,12 @@ import org.forgerock.json.fluent.JsonValue;
  */
 public final class Resources {
 
+    /**
+     * Implementation class for {@link #asRequestHandler}.
+     */
     private static final class SynchronousRequestHandlerAdapter implements RequestHandler {
         private final SynchronousRequestHandler syncHandler;
 
-        /**
-         * @param syncHandler
-         */
         private SynchronousRequestHandlerAdapter(final SynchronousRequestHandler syncHandler) {
             this.syncHandler = syncHandler;
         }
