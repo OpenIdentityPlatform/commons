@@ -15,9 +15,14 @@
  */
 package org.forgerock.json.resource.api;
 
+import static org.forgerock.json.resource.api.Api.unmodifiableCopyOf;
 import static org.forgerock.json.resource.api.RelationDescriptor.Multiplicity.ONE_TO_MANY;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import org.forgerock.i18n.LocalizableMessage;
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ResourceName;
 
 @SuppressWarnings("javadoc")
@@ -26,37 +31,59 @@ public final class RelationDescriptor {
         ONE_TO_ONE, ONE_TO_MANY;
     }
 
-    public static final class RelationBuilder<T> {
+    public static final class Builder<T> {
         private final ResourceName name;
         private final Urn resourceUrn;
         private LocalizableMessage description;
         private Multiplicity multiplicity = ONE_TO_MANY;
         private final RelationCapableBuilder<T> parentBuilder;
+        private final Set<Profile> profiles = new LinkedHashSet<Profile>();
+        private final Set<ActionDescriptor> actions = new LinkedHashSet<ActionDescriptor>();
 
-        private RelationBuilder(final ResourceName name, final Urn resourceUrn,
+        private Builder(final ResourceName name, final Urn resourceUrn,
                 final RelationCapableBuilder<T> parentBuilder) {
             this.name = name;
             this.resourceUrn = resourceUrn;
             this.parentBuilder = parentBuilder;
         }
 
-        public RelationBuilder<T> setDescription(final String description) {
+        public ActionDescriptor.Builder<Builder<T>> addAction(final String name) {
+            return ActionDescriptor.builder(name, new ActionCapableBuilder<Builder<T>>() {
+                @Override
+                public Builder<T> addActionFromBuilder(final ActionDescriptor action) {
+                    actions.add(action);
+                    return Builder.this;
+                }
+            });
+        }
+
+        public Builder<T> setDescription(final String description) {
             return setDescription(LocalizableMessage.raw(description));
         }
 
-        public RelationBuilder<T> setDescription(final LocalizableMessage description) {
+        public Builder<T> addProfile(final String urn, final JsonValue content) {
+            return addProfile(Urn.valueOf(urn), content);
+        }
+
+        public Builder<T> addProfile(final Urn urn, final JsonValue content) {
+            profiles.add(new Profile(urn, content));
+            return this;
+        }
+
+        public Builder<T> setDescription(final LocalizableMessage description) {
             this.description = description;
             return this;
         }
 
-        public RelationBuilder<T> setMultiplicity(final Multiplicity multiplicity) {
+        public Builder<T> setMultiplicity(final Multiplicity multiplicity) {
             this.multiplicity = multiplicity;
             return this;
         }
 
         public T build() {
             final RelationDescriptor relation =
-                    new RelationDescriptor(name, description, multiplicity, resourceUrn);
+                    new RelationDescriptor(name, description, multiplicity,
+                            unmodifiableCopyOf(actions), resourceUrn, unmodifiableCopyOf(profiles));
             return parentBuilder.addRelationFromBuilder(relation);
         }
 
@@ -64,8 +91,8 @@ public final class RelationDescriptor {
         public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
-            } else if (obj instanceof RelationBuilder) {
-                return name.equals(((RelationBuilder<?>) obj).name);
+            } else if (obj instanceof Builder) {
+                return name.equals(((Builder<?>) obj).name);
             } else {
                 return false;
             }
@@ -82,9 +109,9 @@ public final class RelationDescriptor {
         }
     }
 
-    static <T> RelationBuilder<T> builder(final ResourceName name, final Urn resourceUrn,
+    static <T> Builder<T> builder(final ResourceName name, final Urn resourceUrn,
             final RelationCapableBuilder<T> parentBuilder) {
-        return new RelationBuilder<T>(name, resourceUrn, parentBuilder);
+        return new Builder<T>(name, resourceUrn, parentBuilder);
     }
 
     private final ResourceName name;
@@ -92,24 +119,35 @@ public final class RelationDescriptor {
     private ResourceDescriptor resource;
     private final LocalizableMessage description;
     private final Multiplicity multiplicity;
+    private final Set<Profile> profiles;
+    private final Set<ActionDescriptor> actions;
 
     private RelationDescriptor(final ResourceName name, final LocalizableMessage description,
-            final Multiplicity multiplicity, final Urn resourceUrn) {
+            final Multiplicity multiplicity, final Set<ActionDescriptor> actions,
+            final Urn resourceUrn, final Set<Profile> profiles) {
         this.name = name;
         this.description = description; // Delegate to resource if null.
         this.multiplicity = multiplicity;
+        this.actions = actions;
         this.resourceUrn = resourceUrn;
+        this.profiles = profiles;
     }
 
     RelationDescriptor(final RelationDescriptor relation) {
         this.name = relation.name;
         this.description = relation.description;
         this.multiplicity = relation.multiplicity;
+        this.actions = relation.actions;
         this.resourceUrn = relation.resourceUrn;
+        this.profiles = relation.profiles;
     }
 
     void setResource(final ResourceDescriptor resource) {
         this.resource = resource;
+    }
+
+    public Set<ActionDescriptor> getActions() {
+        return actions;
     }
 
     public Urn getResourceUrn() {
@@ -155,5 +193,9 @@ public final class RelationDescriptor {
 
     public ResourceDescriptor getResource() {
         return resource;
+    }
+
+    public Set<Profile> getProfiles() {
+        return profiles;
     }
 }
