@@ -15,21 +15,18 @@
  */
 package org.forgerock.json.resource.api;
 
-import static org.forgerock.json.resource.Requests.newActionRequest;
+import static org.forgerock.json.resource.Requests.newReadRequest;
 
 import java.io.IOException;
 
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonGenerator.Feature;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.RequestHandler;
+import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.RootContext;
-import org.forgerock.json.resource.api.Api;
-import org.forgerock.json.resource.api.ApiDescriptor;
-import org.forgerock.json.resource.api.Schema;
 import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")
@@ -89,13 +86,13 @@ public final class ApiDescriptorTest {
                                 .build();
         // @formatter:on
 
-        RequestHandler handler = Api.newApiDescriptorRequestHandler(api);
+        RequestHandler handler = Api.newSingleApiDescriptorRequestHandler(api);
         Connection connection = Resources.newInternalConnection(handler);
 
         System.out.println("#### Reading API Descriptor");
         System.out.println();
-        JsonValue apiValue = connection.action(new RootContext(), newActionRequest("", "api"));
-        WRITER.writeObject(apiValue.getObject());
+        Resource apiValue = connection.read(new RootContext(), newReadRequest(""));
+        WRITER.writeObject(apiValue.getContent().getObject());
 
         //        System.out.println();
         //        System.out.println("#### Reading user com/subrealms/example/users/bjensen");
