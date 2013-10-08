@@ -15,48 +15,66 @@
  */
 package org.forgerock.json.resource.api;
 
-import static java.util.Collections.unmodifiableSet;
-import static org.forgerock.json.resource.api.ApiDescriptor.defaultToEmptyMessageIfNull;
+import static org.forgerock.json.resource.api.Api.unmodifiableCopyOf;
 
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Set;
 
 import org.forgerock.i18n.LocalizableMessage;
+import org.forgerock.json.fluent.JsonValue;
 
 @SuppressWarnings("javadoc")
 public final class ActionDescriptor {
-    public static final class ActionBuilder<T> {
+    public static final class Builder<T> {
         private final String name;
         private final String normalizedName;
         private LocalizableMessage description;
-        private final Set<String> parameters = new LinkedHashSet<String>();
+        private final Set<ActionParameter> parameters = new LinkedHashSet<ActionParameter>();
         private final ActionCapableBuilder<T> parentBuilder;
+        private final Set<Profile> profiles = new LinkedHashSet<Profile>();
 
-        ActionBuilder(final String name, final ActionCapableBuilder<T> parentBuilder) {
+        Builder(final String name, final ActionCapableBuilder<T> parentBuilder) {
             this.name = name;
             this.normalizedName = name.toLowerCase(Locale.ENGLISH);
             this.parentBuilder = parentBuilder;
         }
 
-        public ActionBuilder<T> setDescription(final String description) {
+        public Builder<T> addProfile(final String urn, final JsonValue content) {
+            return addProfile(Urn.valueOf(urn), content);
+        }
+
+        public Builder<T> addProfile(final Urn urn, final JsonValue content) {
+            profiles.add(new Profile(urn, content));
+            return this;
+        }
+
+        public Builder<T> setDescription(final String description) {
             return setDescription(LocalizableMessage.raw(description));
         }
 
-        public ActionBuilder<T> setDescription(final LocalizableMessage description) {
+        public Builder<T> setDescription(final LocalizableMessage description) {
             this.description = description;
             return this;
         }
 
-        public ActionBuilder<T> addParameter(final String parameter) {
-            parameters.add(parameter);
+        public Builder<T> addParameter(final String name) {
+            return addParameter(name, (LocalizableMessage) null);
+        }
+
+        public Builder<T> addParameter(final String name, final String description) {
+            return addParameter(name, LocalizableMessage.raw(description));
+        }
+
+        public Builder<T> addParameter(final String name, final LocalizableMessage description) {
+            parameters.add(new ActionParameter(name, description));
             return this;
         }
 
         public T build() {
             final ActionDescriptor action =
                     new ActionDescriptor(name, normalizedName, description,
-                            unmodifiableSet(new LinkedHashSet<String>(parameters)));
+                            unmodifiableCopyOf(parameters), unmodifiableCopyOf(profiles));
             return parentBuilder.addActionFromBuilder(action);
         }
 
@@ -64,8 +82,8 @@ public final class ActionDescriptor {
         public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
-            } else if (obj instanceof ActionBuilder) {
-                return normalizedName.equals(((ActionBuilder<?>) obj).normalizedName);
+            } else if (obj instanceof Builder) {
+                return normalizedName.equals(((Builder<?>) obj).normalizedName);
             } else {
                 return false;
             }
@@ -84,20 +102,22 @@ public final class ActionDescriptor {
 
     private final String name;
     private final LocalizableMessage description;
-    private final Set<String> parameters;
+    private final Set<ActionParameter> parameters;
     private final String normalizedName;
+    private final Set<Profile> profiles;
 
-    static <T> ActionBuilder<T> builder(final String name,
-            final ActionCapableBuilder<T> parentBuilder) {
-        return new ActionBuilder<T>(name, parentBuilder);
+    static <T> Builder<T> builder(final String name, final ActionCapableBuilder<T> parentBuilder) {
+        return new Builder<T>(name, parentBuilder);
     }
 
     private ActionDescriptor(final String name, final String normalizedName,
-            final LocalizableMessage description, final Set<String> parameters) {
+            final LocalizableMessage description, final Set<ActionParameter> parameters,
+            final Set<Profile> profiles) {
         this.name = name;
         this.normalizedName = normalizedName;
-        this.description = defaultToEmptyMessageIfNull(description);
+        this.description = Api.defaultToEmptyMessageIfNull(description);
         this.parameters = parameters;
+        this.profiles = profiles;
     }
 
     public String getName() {
@@ -108,7 +128,7 @@ public final class ActionDescriptor {
         return description;
     }
 
-    public Set<String> getParameters() {
+    public Set<ActionParameter> getParameters() {
         return parameters;
     }
 
@@ -131,5 +151,9 @@ public final class ActionDescriptor {
     @Override
     public String toString() {
         return name;
+    }
+
+    public Set<Profile> getProfiles() {
+        return profiles;
     }
 }

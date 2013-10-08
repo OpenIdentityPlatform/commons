@@ -22,7 +22,7 @@ public final class Urn implements Comparable<Urn> {
     // FIXME: not sure if we want to restrict the URN format this much.
 
     public enum Type {
-        API("api"), RESOURCE("resource");
+        API("api"), RESOURCE("resource"), PROFILE("profile");
         private final String lowerName;
 
         private Type(final String lowerName) {
@@ -63,27 +63,27 @@ public final class Urn implements Comparable<Urn> {
     /**
      * Parses the string argument as a descriptor URN. The URN must be of the
      * following form:
-     * 
+     *
      * <pre>
      * urn:&lt;organization>:&lt;namespace>:&lt;type>:&lt;name>:&lt;version>
      * </pre>
-     * 
+     *
      * Where {@code type} is one of "api" or "resource". Here are some examples
      * of valid descriptor URNs:
-     * 
+     *
      * <pre>
      * urn:forgerock:rest:resource:user:1.0
      * urn:forgerock:openam:resource:realm:1.0
      * urn:forgerock:rest:api:repo:1.0
      * </pre>
-     * 
+     *
      * @param s
      *            The string to be parsed as a descriptor URN.
      * @return The parsed descriptor URN.
      * @throws IllegalArgumentException
      *             If the string does not contain a parsable descriptor URN.
      */
-    public static Urn valueOf(final String s) throws IllegalArgumentException {
+    public static Urn valueOf(final String s) {
         final String[] fields = s.split(":");
         try {
             if (fields.length == 6 && fields[0].equalsIgnoreCase("urn")) {
@@ -103,7 +103,7 @@ public final class Urn implements Comparable<Urn> {
 
     /**
      * Returns the organization name.
-     * 
+     *
      * @return The organization name.
      */
     public String getOrganization() {
@@ -112,7 +112,7 @@ public final class Urn implements Comparable<Urn> {
 
     /**
      * Returns the namespace name.
-     * 
+     *
      * @return The namespace name.
      */
     public String getNamespace() {
@@ -121,7 +121,7 @@ public final class Urn implements Comparable<Urn> {
 
     /**
      * Returns the type.
-     * 
+     *
      * @return The type.
      */
     public Type getType() {
@@ -130,7 +130,7 @@ public final class Urn implements Comparable<Urn> {
 
     /**
      * Returns the name.
-     * 
+     *
      * @return The name.
      */
     public String getName() {
@@ -139,7 +139,7 @@ public final class Urn implements Comparable<Urn> {
 
     /**
      * Returns the version.
-     * 
+     *
      * @return The version.
      */
     public Version getVersion() {
