@@ -205,8 +205,9 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     
     Handlebars.registerHelper('url', function(routeKey) {
         var result = "#" + router.getLink(router.configuration.routes[routeKey], _.toArray([arguments[1]]));
-       
-        return new Handlebars.SafeString(result);
+        
+        //Don't return a safe string to prevent XSS.
+        return result;
     });
     
     //format ISO8601; example: 2012-10-29T10:49:49.419+01:00
