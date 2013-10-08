@@ -15,6 +15,9 @@
  */
 package org.forgerock.json.resource.api;
 
+import static org.forgerock.json.fluent.JsonValue.field;
+import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.fluent.JsonValue.object;
 import static org.forgerock.json.resource.Requests.newReadRequest;
 
 import java.io.IOException;
@@ -37,7 +40,7 @@ public final class ApiDescriptorTest {
     static {
         try {
             WRITER = JSON_MAPPER.getJsonFactory().createJsonGenerator(System.out);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new RuntimeException(e);
         }
         WRITER.configure(Feature.AUTO_CLOSE_TARGET, false);
@@ -47,7 +50,7 @@ public final class ApiDescriptorTest {
     @Test
     public void smokeTest() throws Exception {
         // @formatter:off
-        ApiDescriptor api = ApiDescriptor.builder("urn:forgerock:openam:api:repo:1.0")
+        final ApiDescriptor api = ApiDescriptor.builder("urn:forgerock:openam:api:repo:1.0")
                                 .setDescription("Example OpenAM REST API")
                                 .addRelation("users", "urn:forgerock:openam:resource:user:1.0")
                                     .build()
@@ -60,9 +63,11 @@ public final class ApiDescriptorTest {
                                     .setDescription("An OpenAM user")
                                     .addAction("login")
                                         .setDescription("Authenticates a user")
-                                        .addParameter("password")
+                                        .addParameter("password", "The user's password")
                                         .build()
                                     .setSchema(Schema.builder().build())
+                                    .addProfile("urn:forgerock:ldap:profile:schema:1.0",
+                                            json(object(field("objectClass", "inetOrgPerson"))))
                                     .build()
                                 .addResource("urn:forgerock:openam:resource:admin:1.0")
                                     .setDescription("An OpenAM administrator")
@@ -76,6 +81,9 @@ public final class ApiDescriptorTest {
                                 .addResource("urn:forgerock:openam:resource:realm:1.0")
                                     .setDescription("An OpenAM realm")
                                     .addRelation("users", "urn:forgerock:openam:resource:user:1.0")
+                                        .addAction("bulk-add")
+                                            .setDescription("Bulk add a load of users")
+                                            .build()
                                         .build()
                                     .addRelation("groups", "urn:forgerock:openam:resource:group:1.0")
                                         .build()
@@ -86,12 +94,12 @@ public final class ApiDescriptorTest {
                                 .build();
         // @formatter:on
 
-        RequestHandler handler = Api.newSingleApiDescriptorRequestHandler(api);
-        Connection connection = Resources.newInternalConnection(handler);
+        final RequestHandler handler = Api.newSingleApiDescriptorRequestHandler(api);
+        final Connection connection = Resources.newInternalConnection(handler);
 
         System.out.println("#### Reading API Descriptor");
         System.out.println();
-        Resource apiValue = connection.read(new RootContext(), newReadRequest(""));
+        final Resource apiValue = connection.read(new RootContext(), newReadRequest(""));
         WRITER.writeObject(apiValue.getContent().getObject());
 
         //        System.out.println();
