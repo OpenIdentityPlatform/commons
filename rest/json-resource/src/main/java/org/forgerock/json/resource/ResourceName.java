@@ -16,19 +16,15 @@
 package org.forgerock.json.resource;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
-import static java.util.Collections.unmodifiableList;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Locale;
+import java.util.NoSuchElementException;
 
 /**
  * A relative path, or URL, to a resource. A resource name is an ordered list of
@@ -80,6 +76,20 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
         SAFE_URL_CHARS.set('0', '9' + 1);
         SAFE_URL_CHARS.set('a', 'z' + 1);
         SAFE_URL_CHARS.set('A', 'Z' + 1);
+    }
+
+    /**
+     * Look up table for characters which do not need normalizing - same as
+     * SAFE_URL_CHARS except for upper-case ASCII letters.
+     */
+    private static final BitSet NORMALIZED_URL_CHARS = new BitSet(128);
+    static {
+        NORMALIZED_URL_CHARS.set('-');
+        NORMALIZED_URL_CHARS.set('_');
+        NORMALIZED_URL_CHARS.set('.');
+        NORMALIZED_URL_CHARS.set('*');
+        NORMALIZED_URL_CHARS.set('0', '9' + 1);
+        NORMALIZED_URL_CHARS.set('a', 'z' + 1);
     }
 
     /**
@@ -174,16 +184,18 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
             // Fast-path.
             return EMPTY;
         } else {
-            // For performance attempt to determine:
-            // - if this is a single element path
-            // - if the path contains empty elements (error)
-            // - how many elements it contains.
+            /*
+             * This method is optimized for the case where resource names do not
+             * contained encoded characters and are already normalized.
+             */
             final int size = path.length();
-            List<String> elements = null;
+            StringBuilder normalizedPathBuilder = null;
             boolean lastCharWasSlash = false;
             int startOfLastElement = 0;
+            boolean lastElementNeedsNormalizing = false;
             boolean lastElementNeedsDecoding = false;
             boolean trimLeadingSlash = false;
+            int elementCount = 0;
             for (int i = 0; i < size; i++) {
                 final char c = path.charAt(i);
                 if (c == '/') {
@@ -193,13 +205,27 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
                     }
                     lastCharWasSlash = true;
                     if (i != 0) {
-                        if (elements == null) {
-                            elements = new LinkedList<String>();
+                        if (lastElementNeedsDecoding || lastElementNeedsNormalizing) {
+                            if (normalizedPathBuilder == null) {
+                                normalizedPathBuilder = new StringBuilder(size);
+                                if (startOfLastElement > 0) {
+                                    // Include slash.
+                                    final String pathStart =
+                                            path.substring(trimLeadingSlash ? 1 : 0,
+                                                    startOfLastElement);
+                                    normalizedPathBuilder.append(pathStart);
+                                }
+                            } else {
+                                normalizedPathBuilder.append('/');
+                            }
+                            final String element = path.substring(startOfLastElement, i);
+                            final String normalizedElement =
+                                    normalizePathElement(element, lastElementNeedsDecoding);
+                            normalizedPathBuilder.append(normalizedElement);
+                        } else if (normalizedPathBuilder != null) {
+                            normalizedPathBuilder.append('/');
+                            normalizedPathBuilder.append(path.substring(startOfLastElement, i));
                         }
-                        final String element = path.substring(startOfLastElement, i);
-                        final String decodedElement =
-                                lastElementNeedsDecoding ? decodePathElement(element) : element;
-                        elements.add(decodedElement);
                     } else {
                         trimLeadingSlash = true;
                     }
@@ -208,8 +234,12 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
                     lastCharWasSlash = false;
                     startOfLastElement = i;
                     lastElementNeedsDecoding = isUrlEscapeChar(c);
+                    lastElementNeedsNormalizing = needsNormalizing(c);
+                    elementCount++;
                 } else if (isUrlEscapeChar(c)) {
                     lastElementNeedsDecoding = true;
+                } else if (needsNormalizing(c)) {
+                    lastElementNeedsNormalizing = true;
                 }
             }
             // Normalize the path string by removing leading and trailing slashes.
@@ -227,37 +257,81 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
             } else {
                 trimmedPath = path;
             }
-            // Decode remaining trailing path element.
+            final String normalizedPath;
             if (!lastCharWasSlash) {
-                final String element = path.substring(startOfLastElement, size);
-                final String decodedElement =
-                        lastElementNeedsDecoding ? decodePathElement(element) : element;
-                if (elements == null) {
-                    // Avoid unnecessary allocation for common case of single path element.
-                    return new ResourceName(trimmedPath, singletonList(decodedElement));
+                // Decode remaining trailing path element.
+                if (lastElementNeedsDecoding || lastElementNeedsNormalizing) {
+                    final String element = path.substring(startOfLastElement, size);
+                    final String normalizedElement =
+                            normalizePathElement(element, lastElementNeedsDecoding);
+                    if (normalizedPathBuilder == null) {
+                        if (startOfLastElement > 0) {
+                            // Include slash.
+                            final String pathStart =
+                                    path.substring(trimLeadingSlash ? 1 : 0, startOfLastElement);
+                            normalizedPathBuilder = new StringBuilder(size);
+                            normalizedPathBuilder.append(pathStart);
+                            normalizedPathBuilder.append(normalizedElement);
+                            normalizedPath = normalizedPathBuilder.toString();
+                        } else {
+                            normalizedPath = normalizedElement;
+                        }
+                    } else {
+                        normalizedPathBuilder.append('/');
+                        normalizedPathBuilder.append(normalizedElement);
+                        normalizedPath = normalizedPathBuilder.toString();
+                    }
+                } else if (normalizedPathBuilder != null) {
+                    normalizedPathBuilder.append('/');
+                    normalizedPathBuilder.append(path.substring(startOfLastElement, size));
+                    normalizedPath = normalizedPathBuilder.toString();
                 } else {
-                    elements.add(decodedElement);
+                    normalizedPath = trimmedPath;
                 }
+                elementCount++;
+            } else if (normalizedPathBuilder != null) {
+                normalizedPath = normalizedPathBuilder.toString();
+            } else {
+                normalizedPath = trimmedPath;
             }
-            return new ResourceName(trimmedPath, unmodifiableList(elements));
+            return new ResourceName(trimmedPath, normalizedPath, elementCount);
+        }
+    }
+
+    private static String normalizePathElement(final String element, final boolean needsDecoding) {
+        if (needsDecoding) {
+            return encodePathElement(decodePathElement(element).toLowerCase(Locale.ENGLISH));
+        } else {
+            return element.toLowerCase(Locale.ENGLISH);
         }
     }
 
     private static String decodePathElement(final String element) {
-        try {
-            return URLDecoder.decode(element, "UTF-8");
-        } catch (final UnsupportedEncodingException e) {
-            // UTF-8 should always be supported.
-            throw new RuntimeException(e);
+        final int size = element.length();
+        for (int i = 0; i < size; i++) {
+            if (isUrlEscapeChar(element.charAt(i))) {
+                try {
+                    return URLDecoder.decode(element, "UTF-8");
+                } catch (final UnsupportedEncodingException e) {
+                    // UTF-8 should always be supported.
+                    throw new RuntimeException(e);
+                }
+            }
         }
+        return element;
     }
 
     private static boolean isUrlEscapeChar(final char c) {
         return c == '+' || c == '%';
     }
 
-    private final List<String> elements; // uri decoded, unmodifiable.
+    private static boolean needsNormalizing(final char c) {
+        return !NORMALIZED_URL_CHARS.get(c);
+    }
+
     private final String path; // uri encoded
+    private final String normalizedPath; // uri encoded
+    private final int size;
 
     /**
      * Creates a new empty resource name whose string representation is the
@@ -267,8 +341,8 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
      * order to avoid unnecessary memory allocation.
      */
     public ResourceName() {
-        this.elements = emptyList();
-        this.path = "";
+        this.path = this.normalizedPath = "";
+        this.size = 0;
     }
 
     /**
@@ -278,19 +352,28 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
      *            The unencoded path elements.
      */
     public ResourceName(final Collection<? extends Object> pathElements) {
-        final String[] tmp = new String[pathElements.size()];
         int i = 0;
-        final StringBuilder builder = new StringBuilder();
+        final StringBuilder pathBuilder = new StringBuilder();
+        final StringBuilder normalizedPathBuilder = new StringBuilder();
         for (final Object element : pathElements) {
             final String s = element.toString();
             if (i > 0) {
-                builder.append('/');
+                pathBuilder.append('/');
+                normalizedPathBuilder.append('/');
             }
-            builder.append(encodePathElement(s));
-            tmp[i++] = s;
+            final String encodedPathElement = encodePathElement(s);
+            pathBuilder.append(encodedPathElement);
+            final String normalizedPathElement = s.toLowerCase(Locale.ENGLISH);
+            if (normalizedPathElement == s) {
+                normalizedPathBuilder.append(encodedPathElement);
+            } else {
+                normalizedPathBuilder.append(encodePathElement(normalizedPathElement));
+            }
+            i++;
         }
-        this.elements = asList(tmp);
-        this.path = builder.toString();
+        this.path = pathBuilder.toString();
+        this.normalizedPath = normalizedPathBuilder.toString();
+        this.size = pathElements.size();
     }
 
     /**
@@ -303,9 +386,10 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
         this(asList(pathElements));
     }
 
-    private ResourceName(final String path, final List<String> elements) {
-        this.elements = elements;
+    private ResourceName(final String path, final String normalizedPath, final int size) {
         this.path = path;
+        this.normalizedPath = normalizedPath;
+        this.size = size;
     }
 
     /**
@@ -318,16 +402,19 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
      * @return A new resource name which is a child of this resource name.
      */
     public ResourceName child(final Object pathElement) {
-        final int size = size();
-        final String[] newElements = new String[size + 1];
         final String s = pathElement.toString();
-        elements.toArray(newElements);
-        newElements[size] = s;
         final String encodedPathElement = encodePathElement(s);
-        final String newPath =
-                isEmpty() ? encodedPathElement : new StringBuilder(path).append('/').append(
-                        encodedPathElement).toString();
-        return new ResourceName(newPath, asList(newElements));
+        final String normalizedPathElement = s.toLowerCase(Locale.ENGLISH);
+        final String normalizedEncodedPathElement =
+                (s == normalizedPathElement) ? encodedPathElement
+                        : encodePathElement(normalizedPathElement);
+        if (isEmpty()) {
+            return new ResourceName(encodedPathElement, normalizedEncodedPathElement, 1);
+        } else {
+            final String newPath = path + "/" + encodedPathElement;
+            final String newNormalizedPath = normalizedPath + "/" + normalizedEncodedPathElement;
+            return new ResourceName(newPath, newNormalizedPath, size + 1);
+        }
     }
 
     /**
@@ -341,16 +428,7 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
      */
     @Override
     public int compareTo(final ResourceName o) {
-        final int thisSize = size();
-        final int thatSize = o.size();
-        final int minSize = Math.min(thisSize, thatSize);
-        for (int i = 0; i < minSize; i++) {
-            final int result = elements.get(i).compareTo(o.elements.get(i));
-            if (result != 0) {
-                return result;
-            }
-        }
-        return thisSize - thatSize;
+        return normalizedPath.compareTo(o.normalizedPath);
     }
 
     /**
@@ -368,11 +446,9 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
         } else if (childPath.isEmpty()) {
             return this;
         } else {
-            final List<String> newElements = new ArrayList<String>(size() + childPath.size());
-            newElements.addAll(elements);
-            newElements.addAll(childPath.elements);
             final String newPath = path + "/" + childPath.path;
-            return new ResourceName(newPath, unmodifiableList(newElements));
+            final String newNormalizedPath = normalizedPath + "/" + childPath.normalizedPath;
+            return new ResourceName(newPath, newNormalizedPath, size + childPath.size);
         }
     }
 
@@ -382,7 +458,7 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
      * @return {@code true} if this resource name contains no path elements.
      */
     public boolean isEmpty() {
-        return elements.isEmpty();
+        return size == 0;
     }
 
     /**
@@ -413,7 +489,16 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
      *             If the index is out of range (index < 0 || index >= size()).
      */
     public String get(final int index) {
-        return elements.get(index);
+        if (index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException();
+        }
+        int startIndex = 0;
+        int endIndex = nextElementEndIndex(path, 0);
+        for (int i = 0; i < index; i++) {
+            startIndex = endIndex + 1;
+            endIndex = nextElementEndIndex(path, startIndex);
+        }
+        return decodePathElement(path.substring(startIndex, endIndex));
     }
 
     /**
@@ -444,9 +529,10 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
         case 1:
             return EMPTY;
         default:
-            final List<String> newElements = elements.subList(0, size() - 1);
             final String newPath = path.substring(0, path.lastIndexOf('/') /* safe */);
-            return new ResourceName(newPath, newElements);
+            final String newNormalizedPath =
+                    normalizedPath.substring(0, normalizedPath.lastIndexOf('/') /* safe */);
+            return new ResourceName(newPath, newNormalizedPath, size - 1);
         }
     }
 
@@ -458,7 +544,7 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
      *         empty.
      */
     public int size() {
-        return elements.size();
+        return size;
     }
 
     /**
@@ -481,7 +567,37 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
      */
     @Override
     public Iterator<String> iterator() {
-        return elements.iterator();
+        return new Iterator<String>() {
+            private int startIndex = 0;
+            private int endIndex = nextElementEndIndex(path, 0);
+
+            @Override
+            public boolean hasNext() {
+                return startIndex < path.length();
+            }
+
+            @Override
+            public String next() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+                final String element = path.substring(startIndex, endIndex);
+                startIndex = endIndex + 1;
+                endIndex = nextElementEndIndex(path, startIndex);
+                return decodePathElement(element);
+            }
+
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+
+        };
+    }
+
+    private int nextElementEndIndex(final String s, final int startIndex) {
+        final int index = s.indexOf('/', startIndex);
+        return index < 0 ? s.length() : index;
     }
 
     /**
@@ -498,7 +614,7 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
         if (this == obj) {
             return true;
         } else if (obj instanceof ResourceName) {
-            return elements.equals(((ResourceName) obj).elements);
+            return normalizedPath.equals(((ResourceName) obj).normalizedPath);
         } else {
             return false;
         }
@@ -511,6 +627,99 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
      */
     @Override
     public int hashCode() {
-        return elements.hashCode();
+        return normalizedPath.hashCode();
+    }
+
+    /**
+     * Returns a resource name which is a subsequence of the path elements
+     * contained in this resource name beginning with the first element (0) and
+     * ending with the element at position {@code endIndex-1}. The returned
+     * resource name will therefore have the size {@code endIndex}. Calling this
+     * method is equivalent to:
+     *
+     * <pre>
+     * subSequence(0, endIndex);
+     * </pre>
+     *
+     * @param endIndex
+     *            The end index, exclusive.
+     * @return A resource name which is a subsequence of the path elements
+     *         contained in this resource name.
+     * @throws IndexOutOfBoundsException
+     *             If {@code endIndex} is bigger than {@code size()}.
+     */
+    public ResourceName head(final int endIndex) {
+        return subSequence(0, endIndex);
+    }
+
+    /**
+     * Returns a resource name which is a subsequence of the path elements
+     * contained in this resource name beginning with the element at position
+     * {@code beginIndex} and ending with the last element in this resource
+     * name. The returned resource name will therefore have the size
+     * {@code size() - beginIndex}. Calling this method is equivalent to:
+     *
+     * <pre>
+     * subSequence(beginIndex, size());
+     * </pre>
+     *
+     * @param beginIndex
+     *            The beginning index, inclusive.
+     * @return A resource name which is a subsequence of the path elements
+     *         contained in this resource name.
+     * @throws IndexOutOfBoundsException
+     *             If {@code beginIndex} is negative, or if {@code beginIndex}
+     *             is bigger than {@code size()}.
+     */
+    public ResourceName tail(final int beginIndex) {
+        return subSequence(beginIndex, size);
+    }
+
+    /**
+     * Returns a resource name which is a subsequence of the path elements
+     * contained in this resource name beginning with the element at position
+     * {@code beginIndex} and ending with the element at position
+     * {@code endIndex-1}. The returned resource name will therefore have the
+     * size {@code endIndex - beginIndex}.
+     *
+     * @param beginIndex
+     *            The beginning index, inclusive.
+     * @param endIndex
+     *            The end index, exclusive.
+     * @return A resource name which is a subsequence of the path elements
+     *         contained in this resource name.
+     * @throws IndexOutOfBoundsException
+     *             If {@code beginIndex} is negative, or {@code endIndex} is
+     *             bigger than {@code size()}, or if {@code beginIndex} is
+     *             bigger than {@code endIndex}.
+     */
+    public ResourceName subSequence(final int beginIndex, final int endIndex) {
+        if (beginIndex < 0 || endIndex > size || beginIndex > endIndex) {
+            throw new IndexOutOfBoundsException();
+        }
+        if (beginIndex == 0 && endIndex == size) {
+            return this;
+        }
+        if (endIndex - beginIndex == 0) {
+            return EMPTY;
+        }
+        final String subPath = subPath(path, beginIndex, endIndex);
+        final String subNormalizedPath = subPath(normalizedPath, beginIndex, endIndex);
+        return new ResourceName(subPath, subNormalizedPath, endIndex - beginIndex);
+    }
+
+    private String subPath(final String s, final int beginIndex, final int endIndex) {
+        int startCharIndex = 0;
+        int endCharIndex = nextElementEndIndex(s, 0);
+        for (int i = 0; i < beginIndex; i++) {
+            startCharIndex = endCharIndex + 1;
+            endCharIndex = nextElementEndIndex(s, startCharIndex);
+        }
+        int tmpStartCharIndex;
+        for (int i = beginIndex + 1; i < endIndex; i++) {
+            tmpStartCharIndex = endCharIndex + 1;
+            endCharIndex = nextElementEndIndex(s, tmpStartCharIndex);
+        }
+        return s.substring(startCharIndex, endCharIndex);
     }
 }
