@@ -42,6 +42,11 @@ define("org/forgerock/commons/ui/common/main/i18nManager", [
             urlParams = uiUtils.convertCurrentUrlToJSON().params,
             i18nCookie = cookieHelper.getCookie('i18next');
         
+        $.i18n.init({
+            fallbackLng: false,
+            load: 'current' 
+        });
+        
         //if there is already a cookie then use that value as the language
         if(i18nCookie){
             language = i18nCookie;
