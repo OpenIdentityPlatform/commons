@@ -272,4 +272,28 @@ public final class ResourceNameTest {
         assertThat((Object) name.tail(2)).isEqualTo((Object) expected);
     }
 
+    @DataProvider
+    public Object[][] startsWith() {
+        // @formatter:off
+        return new Object[][] {
+            { "", "", true },
+            { "one", "", true },
+            { "one", "on", false },
+            { "one", "one", true },
+            { "one/two", "one", true },
+            { "one/two", "on", false },
+            { "one/two", "one/two", true },
+            { "one/two", "one/tw", false },
+            { "one/two/three", "one", true },
+            { "one/two/three", "one/two", true },
+            { "one/two/three", "one/two/three", true },
+            { "one/two/three", "one/two/t", false },
+        };
+        // @formatter:on
+    }
+
+    @Test(dataProvider = "startsWith")
+    public void testStartsWith(final String name, final String prefix, final boolean expected) {
+        assertThat(ResourceName.valueOf(name).startsWith(prefix)).isEqualTo(expected);
+    }
 }
