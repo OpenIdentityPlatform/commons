@@ -722,4 +722,41 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
         }
         return s.substring(startCharIndex, endCharIndex);
     }
+
+    /**
+     * Returns {@code true} if this resource name is equal to or begins with the
+     * provided resource resource name.
+     *
+     * @param prefix
+     *            The resource name prefix.
+     * @return {@code true} if this resource name is equal to or begins with the
+     *         provided resource resource name.
+     * @throws IllegalArgumentException
+     *             If the the prefix contains empty path elements.
+     */
+    public boolean startsWith(final String prefix) {
+        return startsWith(valueOf(prefix));
+    }
+
+    /**
+     * Returns {@code true} if this resource name is equal to or begins with the
+     * provided resource resource name.
+     *
+     * @param prefix
+     *            The resource name prefix.
+     * @return {@code true} if this resource name is equal to or begins with the
+     *         provided resource resource name.
+     */
+    public boolean startsWith(final ResourceName prefix) {
+        if (size == prefix.size) {
+            return equals(prefix);
+        } else if (size == 0) {
+            return false;
+        } else if (prefix.size == 0) {
+            return true;
+        } else {
+            return normalizedPath.startsWith(prefix.normalizedPath)
+                    && normalizedPath.charAt(prefix.normalizedPath.length()) == '/';
+        }
+    }
 }
