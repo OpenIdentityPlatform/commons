@@ -150,6 +150,8 @@ public final class ResourceNameTest {
             { "users", "users/1", -1 },
             { "users/1", "users/2", -1 },
             { "users/2", "users/1", 1 },
+            { "Users/%30", "users/0", 0 },
+            { "Users/this+that", "users/this%20That", 0 }
         };
         // @formatter:on
     }
@@ -201,9 +203,18 @@ public final class ResourceNameTest {
     }
 
     @Test
+    public void testEquals() {
+        final ResourceName value1 = ResourceName.valueOf("hello/world");
+        final ResourceName value2 = ResourceName.valueOf("HELLO/WORLD");
+        assertThat((Object) value1).isEqualTo(value2);
+    }
+
+    @Test
     public void testHashCode() {
-        final ResourceName value = ResourceName.valueOf("hello/world");
-        assertThat(value.hashCode()).isNotEqualTo(0);
+        final ResourceName value1 = ResourceName.valueOf("hello/world");
+        final ResourceName value2 = ResourceName.valueOf("HELLO/WORLD");
+        assertThat(value1.hashCode()).isNotEqualTo(0);
+        assertThat(value1.hashCode()).isEqualTo(value2.hashCode());
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
@@ -217,4 +228,48 @@ public final class ResourceNameTest {
         assertThat(i.next()).isEqualTo("hello");
         i.remove();
     }
+
+    @DataProvider
+    public Object[][] subSequence() {
+        // @formatter:off
+        return new Object[][] {
+            { "", 0, 0, "" },
+            { "one", 0, 0, "" },
+            { "one", 0, 1, "one" },
+            { "one/TWO/three", 0, 0, "" },
+            { "one/TWO/three", 0, 1, "one" },
+            { "one/TWO/three", 0, 2, "one/two" },
+            { "one/TWO/three", 0, 3, "one/two/three" },
+            { "one/TWO/three", 1, 3, "two/three" },
+            { "one/TWO/three", 2, 3, "three" },
+            { "one/TWO/three", 3, 3, "" },
+        };
+        // @formatter:on
+    }
+
+    @Test(dataProvider = "subSequence")
+    public void testSubSequnce(final String path, final int beginIndex, final int endIndex,
+            final String expected) {
+        final ResourceName name = ResourceName.valueOf(path);
+        final ResourceName expectedName = ResourceName.valueOf(expected);
+        final ResourceName actualName = name.subSequence(beginIndex, endIndex);
+        assertThat((Object) actualName).isEqualTo(expectedName);
+        assertThat(actualName.size()).isEqualTo(endIndex - beginIndex);
+    }
+
+    @Test
+    public void testHead() {
+        ResourceName name = ResourceName.valueOf("ONE/TWO/THREE/FOUR");
+        ResourceName expected = ResourceName.valueOf("ONE/two");
+        assertThat((Object) name.head(2)).isEqualTo((Object) expected);
+
+    }
+
+    @Test
+    public void testTail() {
+        ResourceName name = ResourceName.valueOf("ONE/TWO/THREE/FOUR");
+        ResourceName expected = ResourceName.valueOf("THREE/four");
+        assertThat((Object) name.tail(2)).isEqualTo((Object) expected);
+    }
+
 }
