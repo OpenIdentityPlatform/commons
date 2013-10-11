@@ -58,7 +58,6 @@ import org.forgerock.json.resource.descriptor.RelationDescriptor.Multiplicity;
 
 @SuppressWarnings("javadoc")
 public final class Api {
-
     private static abstract class AbstractResolverHandler implements ResultHandler<RequestHandler> {
         private final ResultHandler<?> handler;
 
@@ -72,8 +71,33 @@ public final class Api {
         }
     }
 
-    public static RequestHandler newApiDescriptorRequestHandler(
-            final Collection<ApiDescriptor> apis) {
+    private static final RelationResolver FIXED_RESOLVER = new RelationResolver() {
+        @Override
+        public void getRelationsForResource(final RelationDescriptor relation,
+                final String resourceId, final ResultHandler<Collection<RelationDescriptor>> handler) {
+            handler.handleResult(relation.getResource().getRelations());
+        }
+    };
+
+    public static RelationResolver fixedResolver() {
+        return FIXED_RESOLVER;
+    }
+
+    public static RequestHandler newApiDescriptorRequestHandler(final ApiDescriptor api) {
+        return new AbstractRequestHandler() {
+            @Override
+            public void handleRead(final ServerContext context, final ReadRequest request,
+                    final ResultHandler<Resource> handler) {
+                if (request.getResourceNameObject().isEmpty()) {
+                    handler.handleResult(new Resource(null, null, json(apiToJson(api))));
+                } else {
+                    handler.handleError(new NotSupportedException());
+                }
+            }
+        };
+    }
+
+    public static RequestHandler newApiDescriptorRequestHandler(final Collection<ApiDescriptor> apis) {
         return new AbstractRequestHandler() {
             @Override
             public void handleRead(final ServerContext context, final ReadRequest request,
@@ -91,113 +115,104 @@ public final class Api {
         };
     }
 
-    public static RequestHandler newApiDescriptorRequestHandler(final ApiDescriptor api) {
-        return new AbstractRequestHandler() {
-            @Override
-            public void handleRead(final ServerContext context, final ReadRequest request,
-                    final ResultHandler<Resource> handler) {
-                if (request.getResourceNameObject().isEmpty()) {
-                    handler.handleResult(new Resource(null, null, json(apiToJson(api))));
-                } else {
-                    handler.handleError(new NotSupportedException());
-                }
-            }
-        };
+    public static RequestHandler newApiRequestHandler(final ApiDescriptor api,
+            final RequestHandlerFactory factory) {
+        return newApiRequestHandler(api, factory, fixedResolver());
     }
 
     public static RequestHandler newApiRequestHandler(final ApiDescriptor api,
-            final RelationResolverFactory factory) {
+            final RequestHandlerFactory factory, final RelationResolver resolver) {
         return new RequestHandler() {
 
             @Override
             public void handleAction(final ServerContext context, final ActionRequest request,
                     final ResultHandler<JsonValue> handler) {
                 final ActionRequest mutableCopy = copyOfActionRequest(request);
-                resolveAndInvoke(api.getRelations(), mutableCopy, factory
-                        .createRelationResolver(api), new AbstractResolverHandler(handler) {
-                    @Override
-                    public void handleResult(final RequestHandler resolvedRequestHandler) {
-                        resolvedRequestHandler.handleAction(context, mutableCopy, handler);
-                    }
-                });
+                resolveAndInvoke(api.getRelations(), mutableCopy, factory, resolver,
+                        new AbstractResolverHandler(handler) {
+                            @Override
+                            public void handleResult(final RequestHandler resolvedRequestHandler) {
+                                resolvedRequestHandler.handleAction(context, mutableCopy, handler);
+                            }
+                        });
             }
 
             @Override
             public void handleCreate(final ServerContext context, final CreateRequest request,
                     final ResultHandler<Resource> handler) {
                 final CreateRequest mutableCopy = copyOfCreateRequest(request);
-                resolveAndInvoke(api.getRelations(), mutableCopy, factory
-                        .createRelationResolver(api), new AbstractResolverHandler(handler) {
-                    @Override
-                    public void handleResult(final RequestHandler resolvedRequestHandler) {
-                        resolvedRequestHandler.handleCreate(context, mutableCopy, handler);
-                    }
-                });
+                resolveAndInvoke(api.getRelations(), mutableCopy, factory, resolver,
+                        new AbstractResolverHandler(handler) {
+                            @Override
+                            public void handleResult(final RequestHandler resolvedRequestHandler) {
+                                resolvedRequestHandler.handleCreate(context, mutableCopy, handler);
+                            }
+                        });
             }
 
             @Override
             public void handleDelete(final ServerContext context, final DeleteRequest request,
                     final ResultHandler<Resource> handler) {
                 final DeleteRequest mutableCopy = copyOfDeleteRequest(request);
-                resolveAndInvoke(api.getRelations(), mutableCopy, factory
-                        .createRelationResolver(api), new AbstractResolverHandler(handler) {
-                    @Override
-                    public void handleResult(final RequestHandler resolvedRequestHandler) {
-                        resolvedRequestHandler.handleDelete(context, mutableCopy, handler);
-                    }
-                });
+                resolveAndInvoke(api.getRelations(), mutableCopy, factory, resolver,
+                        new AbstractResolverHandler(handler) {
+                            @Override
+                            public void handleResult(final RequestHandler resolvedRequestHandler) {
+                                resolvedRequestHandler.handleDelete(context, mutableCopy, handler);
+                            }
+                        });
             }
 
             @Override
             public void handlePatch(final ServerContext context, final PatchRequest request,
                     final ResultHandler<Resource> handler) {
                 final PatchRequest mutableCopy = copyOfPatchRequest(request);
-                resolveAndInvoke(api.getRelations(), mutableCopy, factory
-                        .createRelationResolver(api), new AbstractResolverHandler(handler) {
-                    @Override
-                    public void handleResult(final RequestHandler resolvedRequestHandler) {
-                        resolvedRequestHandler.handlePatch(context, mutableCopy, handler);
-                    }
-                });
+                resolveAndInvoke(api.getRelations(), mutableCopy, factory, resolver,
+                        new AbstractResolverHandler(handler) {
+                            @Override
+                            public void handleResult(final RequestHandler resolvedRequestHandler) {
+                                resolvedRequestHandler.handlePatch(context, mutableCopy, handler);
+                            }
+                        });
             }
 
             @Override
             public void handleQuery(final ServerContext context, final QueryRequest request,
                     final QueryResultHandler handler) {
                 final QueryRequest mutableCopy = copyOfQueryRequest(request);
-                resolveAndInvoke(api.getRelations(), mutableCopy, factory
-                        .createRelationResolver(api), new AbstractResolverHandler(handler) {
-                    @Override
-                    public void handleResult(final RequestHandler resolvedRequestHandler) {
-                        resolvedRequestHandler.handleQuery(context, mutableCopy, handler);
-                    }
-                });
+                resolveAndInvoke(api.getRelations(), mutableCopy, factory, resolver,
+                        new AbstractResolverHandler(handler) {
+                            @Override
+                            public void handleResult(final RequestHandler resolvedRequestHandler) {
+                                resolvedRequestHandler.handleQuery(context, mutableCopy, handler);
+                            }
+                        });
             }
 
             @Override
             public void handleRead(final ServerContext context, final ReadRequest request,
                     final ResultHandler<Resource> handler) {
                 final ReadRequest mutableCopy = copyOfReadRequest(request);
-                resolveAndInvoke(api.getRelations(), mutableCopy, factory
-                        .createRelationResolver(api), new AbstractResolverHandler(handler) {
-                    @Override
-                    public void handleResult(final RequestHandler resolvedRequestHandler) {
-                        resolvedRequestHandler.handleRead(context, mutableCopy, handler);
-                    }
-                });
+                resolveAndInvoke(api.getRelations(), mutableCopy, factory, resolver,
+                        new AbstractResolverHandler(handler) {
+                            @Override
+                            public void handleResult(final RequestHandler resolvedRequestHandler) {
+                                resolvedRequestHandler.handleRead(context, mutableCopy, handler);
+                            }
+                        });
             }
 
             @Override
             public void handleUpdate(final ServerContext context, final UpdateRequest request,
                     final ResultHandler<Resource> handler) {
                 final UpdateRequest mutableCopy = copyOfUpdateRequest(request);
-                resolveAndInvoke(api.getRelations(), mutableCopy, factory
-                        .createRelationResolver(api), new AbstractResolverHandler(handler) {
-                    @Override
-                    public void handleResult(final RequestHandler resolvedRequestHandler) {
-                        resolvedRequestHandler.handleUpdate(context, mutableCopy, handler);
-                    }
-                });
+                resolveAndInvoke(api.getRelations(), mutableCopy, factory, resolver,
+                        new AbstractResolverHandler(handler) {
+                            @Override
+                            public void handleResult(final RequestHandler resolvedRequestHandler) {
+                                resolvedRequestHandler.handleUpdate(context, mutableCopy, handler);
+                            }
+                        });
             }
 
             private boolean isBetterMatch(final RelationDescriptor oldMatch,
@@ -217,8 +232,8 @@ public final class Api {
             }
 
             private void resolveAndInvoke(final Collection<RelationDescriptor> relations,
-                    final Request mutableRequest, final RelationResolver resolver,
-                    final ResultHandler<RequestHandler> handler) {
+                    final Request mutableRequest, final RequestHandlerFactory factory,
+                    final RelationResolver resolver, final ResultHandler<RequestHandler> handler) {
                 // @formatter:off
                 /*
                  * We need to find the best match so first try all
@@ -264,16 +279,14 @@ public final class Api {
                     try {
                         RequestHandler resolvedRequestHandler;
                         if (exactMatch != null) {
-                            resolvedRequestHandler = resolver.getRequestHandler(exactMatch);
+                            resolvedRequestHandler = factory.getRequestHandler(exactMatch);
                             mutableRequest.setResourceName(ResourceName.empty());
                         } else {
-                            resolvedRequestHandler = resolver.getRequestHandler(childMatch);
+                            resolvedRequestHandler = factory.getRequestHandler(childMatch);
                             mutableRequest.setResourceName(name.tail(name.size() - 1));
                         }
-                        resolver.close();
                         handler.handleResult(resolvedRequestHandler);
                     } catch (final ResourceException e) {
-                        resolver.close();
                         handler.handleError(e);
                     }
                 } else if (subMatch != null) {
@@ -292,17 +305,16 @@ public final class Api {
                             new ResultHandler<Collection<RelationDescriptor>>() {
                                 @Override
                                 public void handleError(final ResourceException error) {
-                                    resolver.close();
                                     handler.handleError(error);
                                 }
 
                                 @Override
                                 public void handleResult(final Collection<RelationDescriptor> result) {
-                                    resolveAndInvoke(result, mutableRequest, resolver, handler);
+                                    resolveAndInvoke(result, mutableRequest, factory, resolver,
+                                            handler);
                                 }
                             });
                 } else {
-                    resolver.close();
                     handler.handleError(new NotFoundException(String.format(
                             "Resource '%s' not found", name)));
                 }

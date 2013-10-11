@@ -15,19 +15,11 @@
  */
 package org.forgerock.json.resource.descriptor;
 
-import java.io.Closeable;
 import java.util.Collection;
 
-import org.forgerock.json.resource.RequestHandler;
-import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResultHandler;
 
-public interface RelationResolver extends Closeable {
-
-    @Override
-    void close();
-
-    RequestHandler getRequestHandler(RelationDescriptor relation) throws ResourceException;
+public interface RelationResolver {
 
     void getRelationsForResource(RelationDescriptor relation, String resourceId,
             ResultHandler<Collection<RelationDescriptor>> handler);

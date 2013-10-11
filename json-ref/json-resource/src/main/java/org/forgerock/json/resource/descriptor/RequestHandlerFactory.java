@@ -15,9 +15,11 @@
  */
 package org.forgerock.json.resource.descriptor;
 
+import org.forgerock.json.resource.RequestHandler;
+import org.forgerock.json.resource.ResourceException;
 
-public interface RelationResolverFactory {
+public interface RequestHandlerFactory {
 
-    RelationResolver createRelationResolver(final ApiDescriptor api);
+    RequestHandler getRequestHandler(RelationDescriptor relation) throws ResourceException;
 
 }
