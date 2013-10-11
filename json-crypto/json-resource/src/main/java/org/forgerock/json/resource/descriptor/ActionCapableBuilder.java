@@ -13,28 +13,8 @@
  *
  * Copyright 2013 ForgeRock AS.
  */
-package org.forgerock.json.resource.api;
+package org.forgerock.json.resource.descriptor;
 
-@SuppressWarnings("javadoc")
-public final class Schema {
-
-    public static final class SchemaBuilder {
-        private SchemaBuilder() {
-            // Nothing to do.
-        }
-
-        public Schema build() {
-            return new Schema();
-        }
-
-    }
-
-    public static SchemaBuilder builder() {
-        return new SchemaBuilder();
-    }
-
-    private Schema() {
-        // TODO
-    }
-
+interface ActionCapableBuilder<T> {
+    T addActionFromBuilder(ActionDescriptor action);
 }

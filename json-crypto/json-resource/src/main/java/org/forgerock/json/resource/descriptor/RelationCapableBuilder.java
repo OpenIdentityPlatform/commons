@@ -9,13 +9,12 @@
  * When distributing Covered Software, include this CDDL Header Notice in each file and include
  * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
- * information: "Portions Copyrighted [year] [name of copyright owner]".
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright © 2012 ForgeRock AS. All rights reserved.
+ * Copyright 2013 ForgeRock AS.
  */
+package org.forgerock.json.resource.descriptor;
 
-/**
- * Classes and interfaces for describing CREST APIs.
- */
-package org.forgerock.json.resource.api;
-
+interface RelationCapableBuilder<T> {
+    T addRelationFromBuilder(RelationDescriptor relation);
+}

@@ -13,7 +13,7 @@
  *
  * Copyright 2013 ForgeRock AS.
  */
-package org.forgerock.json.resource.api;
+package org.forgerock.json.resource.descriptor;
 
 import static org.forgerock.json.fluent.JsonValue.field;
 import static org.forgerock.json.fluent.JsonValue.json;
@@ -40,7 +40,14 @@ import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.ServerContext;
-import org.forgerock.json.resource.api.RelationDescriptor.Multiplicity;
+import org.forgerock.json.resource.descriptor.Api;
+import org.forgerock.json.resource.descriptor.ApiDescriptor;
+import org.forgerock.json.resource.descriptor.RelationDescriptor;
+import org.forgerock.json.resource.descriptor.RelationResolver;
+import org.forgerock.json.resource.descriptor.RelationResolverFactory;
+import org.forgerock.json.resource.descriptor.Schema;
+import org.forgerock.json.resource.descriptor.Urn;
+import org.forgerock.json.resource.descriptor.RelationDescriptor.Multiplicity;
 import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")
