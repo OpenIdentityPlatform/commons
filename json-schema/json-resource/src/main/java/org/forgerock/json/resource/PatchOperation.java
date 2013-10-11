@@ -18,6 +18,8 @@ package org.forgerock.json.resource;
 
 import static org.forgerock.json.resource.Resources.checkNotNull;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.LinkedHashMap;
 
 import org.forgerock.json.fluent.JsonPointer;
@@ -367,6 +369,61 @@ public final class PatchOperation {
         return replace(new JsonPointer(field), value);
     }
 
+    /**
+     * Creates a new patch operation using the provided json information. 
+     *
+     * @param json
+     *            The patch operation to be parsed.
+     * @return The parsed PatchOperation.
+     * @throws BadRequestException
+     *            If the json value does not represent a valid JSON patch.
+     */
+    public static PatchOperation valueOf(final JsonValue json) throws BadRequestException {
+
+        if (!json.isMap()) {
+            throw new BadRequestException(
+                        "The request could not be processed because the provided "
+                                + "content is not a valid JSON patch");
+        }
+
+        try {
+            final String       type = json.get(FIELD_OPERATION).required().asString();
+            final JsonPointer field = json.get(FIELD_FIELD).required().asPointer();
+            final JsonValue   value = json.get(FIELD_VALUE);
+            return operation(type, field, value);
+        } catch (final Exception e) {
+            throw new BadRequestException(
+                    "The request could not be processed because the provided "
+                            + "content is not a valid JSON patch: " + e.getMessage(), e);
+        }
+    }
+    
+    /**
+     * Creates a list of new patch operations using the provided json information. 
+     *
+     * @param json
+     *            A list of patch operations to be parsed.
+     * @return The parsed PatchOperation list.
+     * @throws BadRequestException
+     *            If the json value does not represent a valid list of JSON patches.
+     */
+    public static List<PatchOperation> valueOfList(final JsonValue json) throws BadRequestException {
+
+        if (!json.isList()) {
+            throw new BadRequestException(
+                    "The request could not be processed because the provided "
+                            + "content is not a JSON array of patch operations");
+        }
+
+        final List<PatchOperation> patch = new ArrayList<PatchOperation>(json.size());
+
+        for (final JsonValue operation : json) {
+            patch.add(valueOf(operation));
+        }
+
+        return patch;
+    }
+
     private static JsonValue json(final Object value) {
         /*
          * It doesn't matter if value is null because it will be wrapped anyway
@@ -450,15 +507,24 @@ public final class PatchOperation {
         return is(OPERATION_REPLACE);
     }
 
-    @Override
-    public String toString() {
+    /**
+     * Return a JsonValue expression of this patch operation.
+     * 
+     * @return this patch operation as a JsonValue
+     */
+    public JsonValue toJsonValue() {
         final JsonValue json = new JsonValue(new LinkedHashMap<String, Object>(3));
         json.put(FIELD_OPERATION, operation);
         json.put(FIELD_FIELD, field);
         if (!value.isNull()) {
             json.put(FIELD_VALUE, value.getObject());
         }
-        return json.toString();
+        return json;
+    }
+
+    @Override
+    public String toString() {
+        return toJsonValue().toString();
     }
 
     private void checkOperationValue() {
