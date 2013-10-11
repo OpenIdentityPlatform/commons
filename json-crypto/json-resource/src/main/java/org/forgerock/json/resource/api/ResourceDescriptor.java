@@ -47,6 +47,11 @@ public final class ResourceDescriptor {
             return addRelation(ResourceName.valueOf(name), Urn.valueOf(resourceUrn));
         }
 
+        public RelationDescriptor.Builder<Builder> addRelation(final String name,
+                final Urn resourceUrn) {
+            return addRelation(ResourceName.valueOf(name), resourceUrn);
+        }
+
         public Builder addProfile(final String urn, final JsonValue content) {
             return addProfile(Urn.valueOf(urn), content);
         }

@@ -21,15 +21,26 @@ import static org.forgerock.json.fluent.JsonValue.object;
 import static org.forgerock.json.resource.Requests.newReadRequest;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonGenerator.Feature;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.AbstractRequestHandler;
 import org.forgerock.json.resource.Connection;
+import org.forgerock.json.resource.NotSupportedException;
+import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
+import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.RootContext;
+import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.api.RelationDescriptor.Multiplicity;
 import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")
@@ -49,15 +60,25 @@ public final class ApiDescriptorTest {
 
     @Test
     public void smokeTest() throws Exception {
+        final Urn apiUrn = Urn.valueOf("urn:forgerock:common:resource:api:1.0");
+        final Urn usersUrn = Urn.valueOf("urn:forgerock:openam:resource:user:1.0");
+
         // @formatter:off
         final ApiDescriptor api = ApiDescriptor.builder("urn:forgerock:openam:api:repo:1.0")
                                 .setDescription("Example OpenAM REST API")
-                                .addRelation("users", "urn:forgerock:openam:resource:user:1.0")
+                                .addRelation("", apiUrn)
+                                    .setMultiplicity(Multiplicity.ONE_TO_ONE)
+                                    .build()
+                                .addRelation("users", usersUrn)
                                     .build()
                                 .addRelation("groups", "urn:forgerock:openam:resource:group:1.0")
                                     .build()
                                 .addRelation("realms", "urn:forgerock:openam:resource:realm:1.0")
                                     .setDescription("An OpenAM realm")
+                                    .build()
+                                .addResource(apiUrn)
+                                    .setDescription("Commons Rest API Descriptor")
+                                    .setSchema(Schema.builder().build())
                                     .build()
                                 .addResource("urn:forgerock:openam:resource:user:1.0")
                                     .setDescription("An OpenAM user")
@@ -80,7 +101,7 @@ public final class ApiDescriptorTest {
                                     .build()
                                 .addResource("urn:forgerock:openam:resource:realm:1.0")
                                     .setDescription("An OpenAM realm")
-                                    .addRelation("users", "urn:forgerock:openam:resource:user:1.0")
+                                    .addRelation("users", usersUrn)
                                         .addAction("bulk-add")
                                             .setDescription("Bulk add a load of users")
                                             .build()
@@ -93,8 +114,53 @@ public final class ApiDescriptorTest {
                                     .build()
                                 .build();
         // @formatter:on
+        final RelationResolverFactory factory = new RelationResolverFactory() {
 
-        final RequestHandler handler = Api.newSingleApiDescriptorRequestHandler(api);
+            @Override
+            public RelationResolver createRelationResolver(final ApiDescriptor api) {
+                return new RelationResolver() {
+                    private final List<String> realmList = new LinkedList<String>();
+
+                    @Override
+                    public void getRelationsForResource(RelationDescriptor relation,
+                            String resourceId, ResultHandler<Collection<RelationDescriptor>> handler) {
+                        System.out.println("Queried " + relation + " : " + resourceId);
+                        realmList.add(resourceId);
+                        handler.handleResult(relation.getResource().getRelations());
+                    }
+
+                    @Override
+                    public RequestHandler getRequestHandler(final RelationDescriptor relation)
+                            throws ResourceException {
+                        if (relation.getResourceUrn().equals(apiUrn)) {
+                            return Api.newApiDescriptorRequestHandler(api);
+                        } else if (relation.getResourceUrn().equals(usersUrn)) {
+                            return new AbstractRequestHandler() {
+                                @Override
+                                public void handleRead(final ServerContext context,
+                                        final ReadRequest request,
+                                        final ResultHandler<Resource> handler) {
+                                    System.out.println("Reading user from realm " + realmList);
+                                    final JsonValue content =
+                                            json(object(field("id", request.getResourceName())));
+                                    handler.handleResult(new Resource(request.getResourceName(),
+                                            "1", content));
+                                }
+                            };
+                        } else {
+                            throw new NotSupportedException("Relation " + relation
+                                    + " not supported");
+                        }
+                    }
+
+                    @Override
+                    public void close() {
+                        // Do nothing.
+                    }
+                };
+            }
+        };
+        final RequestHandler handler = Api.newApiRequestHandler(api, factory);
         final Connection connection = Resources.newInternalConnection(handler);
 
         System.out.println("#### Reading API Descriptor");
@@ -102,12 +168,12 @@ public final class ApiDescriptorTest {
         final Resource apiValue = connection.read(new RootContext(), newReadRequest(""));
         WRITER.writeObject(apiValue.getContent().getObject());
 
-        //        System.out.println();
-        //        System.out.println("#### Reading user com/subrealms/example/users/bjensen");
-        //        System.out.println();
-        //        Resource bjensen =
-        //                connection.read(new RootContext(),
-        //                        newReadRequest("com/subrealms/example/users/bjensen"));
-        //        WRITER.writeObject(bjensen.getContent().getObject());
+        System.out.println();
+        System.out.println("#### Reading user realms/com/subrealms/example/users/bjensen");
+        System.out.println();
+        final Resource bjensen =
+                connection.read(new RootContext(),
+                        newReadRequest("realms/com/subrealms/example/users/bjensen"));
+        WRITER.writeObject(bjensen.getContent().getObject());
     }
 }
