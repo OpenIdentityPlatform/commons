@@ -73,6 +73,11 @@ public final class ApiDescriptor {
             return addRelation(ResourceName.valueOf(name), Urn.valueOf(resourceUrn));
         }
 
+        public RelationDescriptor.Builder<Builder> addRelation(final String name,
+                final Urn resourceUrn) {
+            return addRelation(ResourceName.valueOf(name), resourceUrn);
+        }
+
         public RelationDescriptor.Builder<Builder> addRelation(final ResourceName name,
                 final Urn resourceUrn) {
             return RelationDescriptor.builder(name, resourceUrn,
