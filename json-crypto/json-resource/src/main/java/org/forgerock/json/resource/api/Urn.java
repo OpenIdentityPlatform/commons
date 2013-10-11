@@ -68,8 +68,8 @@ public final class Urn implements Comparable<Urn> {
      * urn:&lt;organization>:&lt;namespace>:&lt;type>:&lt;name>:&lt;version>
      * </pre>
      *
-     * Where {@code type} is one of "api" or "resource". Here are some examples
-     * of valid descriptor URNs:
+     * Where {@code type} is one of "api", "resource", or "profile". Here are
+     * some examples of valid descriptor URNs:
      *
      * <pre>
      * urn:forgerock:rest:resource:user:1.0
