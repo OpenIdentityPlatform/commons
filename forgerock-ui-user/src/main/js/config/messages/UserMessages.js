@@ -35,6 +35,10 @@ define("config/messages/UserMessages", [
                 msg: "config.messages.UserMessages.invalidCredentials",
                 type: "error"
             },
+            "invalidOldPassword": {
+                msg: "config.messages.UserMessages.invalidOldPassword",
+                type: "error"
+            },
             "serviceUnavailable": {
                 msg: "config.messages.UserMessages.serviceUnavailable",
                 type: "error"
