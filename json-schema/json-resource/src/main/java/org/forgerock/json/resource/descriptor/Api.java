@@ -28,7 +28,6 @@ import static org.forgerock.json.resource.Requests.copyOfReadRequest;
 import static org.forgerock.json.resource.Requests.copyOfUpdateRequest;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -73,12 +72,7 @@ public final class Api {
         }
     }
 
-    public static RequestHandler newApiDescriptorCollectionRequestHandler(
-            final ApiDescriptor... apis) {
-        return newApiDescriptorCollectionRequestHandler(Arrays.asList(apis));
-    }
-
-    public static RequestHandler newApiDescriptorCollectionRequestHandler(
+    public static RequestHandler newApiDescriptorRequestHandler(
             final Collection<ApiDescriptor> apis) {
         return new AbstractRequestHandler() {
             @Override
