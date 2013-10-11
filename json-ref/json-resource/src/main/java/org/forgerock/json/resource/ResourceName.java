@@ -301,14 +301,6 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
         }
     }
 
-    private static String normalizePathElement(final String element, final boolean needsDecoding) {
-        if (needsDecoding) {
-            return encodePathElement(decodePathElement(element).toLowerCase(Locale.ENGLISH));
-        } else {
-            return element.toLowerCase(Locale.ENGLISH);
-        }
-    }
-
     private static String decodePathElement(final String element) {
         final int size = element.length();
         for (int i = 0; i < size; i++) {
@@ -330,6 +322,14 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
 
     private static boolean needsNormalizing(final char c) {
         return !NORMALIZED_URL_CHARS.get(c);
+    }
+
+    private static String normalizePathElement(final String element, final boolean needsDecoding) {
+        if (needsDecoding) {
+            return encodePathElement(decodePathElement(element).toLowerCase(Locale.ENGLISH));
+        } else {
+            return element.toLowerCase(Locale.ENGLISH);
+        }
     }
 
     private final String path; // uri encoded
@@ -456,15 +456,6 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
     }
 
     /**
-     * Returns {@code true} if this resource name contains no path elements.
-     *
-     * @return {@code true} if this resource name contains no path elements.
-     */
-    public boolean isEmpty() {
-        return size == 0;
-    }
-
-    /**
      * Creates a new resource name which is a descendant of this resource name.
      * The returned resource name will have be formed of the concatenation of
      * this resource name and the provided resource name.
@@ -477,6 +468,26 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
      */
     public ResourceName concat(final String suffix) {
         return concat(valueOf(suffix));
+    }
+
+    /**
+     * Returns {@code true} if {@code obj} is a resource name having the exact
+     * same elements as this resource name.
+     *
+     * @param obj
+     *            The object to be compared.
+     * @return {@code true} if {@code obj} is a resource name having the exact
+     *         same elements as this resource name.
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        } else if (obj instanceof ResourceName) {
+            return normalizedPath.equals(((ResourceName) obj).normalizedPath);
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -502,6 +513,84 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
             endIndex = nextElementEndIndex(path, startIndex);
         }
         return decodePathElement(path.substring(startIndex, endIndex));
+    }
+
+    /**
+     * Returns a hash code for this resource name.
+     *
+     * @return A hash code for this resource name.
+     */
+    @Override
+    public int hashCode() {
+        return normalizedPath.hashCode();
+    }
+
+    /**
+     * Returns a resource name which is a subsequence of the path elements
+     * contained in this resource name beginning with the first element (0) and
+     * ending with the element at position {@code endIndex-1}. The returned
+     * resource name will therefore have the size {@code endIndex}. Calling this
+     * method is equivalent to:
+     *
+     * <pre>
+     * subSequence(0, endIndex);
+     * </pre>
+     *
+     * @param endIndex
+     *            The end index, exclusive.
+     * @return A resource name which is a subsequence of the path elements
+     *         contained in this resource name.
+     * @throws IndexOutOfBoundsException
+     *             If {@code endIndex} is bigger than {@code size()}.
+     */
+    public ResourceName head(final int endIndex) {
+        return subSequence(0, endIndex);
+    }
+
+    /**
+     * Returns {@code true} if this resource name contains no path elements.
+     *
+     * @return {@code true} if this resource name contains no path elements.
+     */
+    public boolean isEmpty() {
+        return size == 0;
+    }
+
+    /**
+     * Returns an iterator over the path elements in this resource name. The
+     * returned iterator will not support the {@link Iterator#remove()} method
+     * and will return path elements starting with index 0, then 1, then 2, etc.
+     *
+     * @return An iterator over the path elements in this resource name.
+     */
+    @Override
+    public Iterator<String> iterator() {
+        return new Iterator<String>() {
+            private int startIndex = 0;
+            private int endIndex = nextElementEndIndex(path, 0);
+
+            @Override
+            public boolean hasNext() {
+                return startIndex < path.length();
+            }
+
+            @Override
+            public String next() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+                final String element = path.substring(startIndex, endIndex);
+                startIndex = endIndex + 1;
+                endIndex = nextElementEndIndex(path, startIndex);
+                return decodePathElement(element);
+            }
+
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+
+        };
     }
 
     /**
@@ -551,131 +640,40 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
     }
 
     /**
-     * Returns the URL encoded string representation of this resource name.
+     * Returns {@code true} if this resource name is equal to or begins with the
+     * provided resource resource name.
      *
-     * @return The URL encoded string representation of this resource name.
-     * @see #valueOf(String)
+     * @param prefix
+     *            The resource name prefix.
+     * @return {@code true} if this resource name is equal to or begins with the
+     *         provided resource resource name.
      */
-    @Override
-    public String toString() {
-        return path;
-    }
-
-    /**
-     * Returns an iterator over the path elements in this resource name. The
-     * returned iterator will not support the {@link Iterator#remove()} method
-     * and will return path elements starting with index 0, then 1, then 2, etc.
-     *
-     * @return An iterator over the path elements in this resource name.
-     */
-    @Override
-    public Iterator<String> iterator() {
-        return new Iterator<String>() {
-            private int startIndex = 0;
-            private int endIndex = nextElementEndIndex(path, 0);
-
-            @Override
-            public boolean hasNext() {
-                return startIndex < path.length();
-            }
-
-            @Override
-            public String next() {
-                if (!hasNext()) {
-                    throw new NoSuchElementException();
-                }
-                final String element = path.substring(startIndex, endIndex);
-                startIndex = endIndex + 1;
-                endIndex = nextElementEndIndex(path, startIndex);
-                return decodePathElement(element);
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
-
-        };
-    }
-
-    private int nextElementEndIndex(final String s, final int startIndex) {
-        final int index = s.indexOf('/', startIndex);
-        return index < 0 ? s.length() : index;
-    }
-
-    /**
-     * Returns {@code true} if {@code obj} is a resource name having the exact
-     * same elements as this resource name.
-     *
-     * @param obj
-     *            The object to be compared.
-     * @return {@code true} if {@code obj} is a resource name having the exact
-     *         same elements as this resource name.
-     */
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        } else if (obj instanceof ResourceName) {
-            return normalizedPath.equals(((ResourceName) obj).normalizedPath);
-        } else {
+    public boolean startsWith(final ResourceName prefix) {
+        if (size == prefix.size) {
+            return equals(prefix);
+        } else if (size == 0) {
             return false;
+        } else if (prefix.size == 0) {
+            return true;
+        } else {
+            return normalizedPath.startsWith(prefix.normalizedPath)
+                    && normalizedPath.charAt(prefix.normalizedPath.length()) == '/';
         }
     }
 
     /**
-     * Returns a hash code for this resource name.
+     * Returns {@code true} if this resource name is equal to or begins with the
+     * provided resource resource name.
      *
-     * @return A hash code for this resource name.
+     * @param prefix
+     *            The resource name prefix.
+     * @return {@code true} if this resource name is equal to or begins with the
+     *         provided resource resource name.
+     * @throws IllegalArgumentException
+     *             If the the prefix contains empty path elements.
      */
-    @Override
-    public int hashCode() {
-        return normalizedPath.hashCode();
-    }
-
-    /**
-     * Returns a resource name which is a subsequence of the path elements
-     * contained in this resource name beginning with the first element (0) and
-     * ending with the element at position {@code endIndex-1}. The returned
-     * resource name will therefore have the size {@code endIndex}. Calling this
-     * method is equivalent to:
-     *
-     * <pre>
-     * subSequence(0, endIndex);
-     * </pre>
-     *
-     * @param endIndex
-     *            The end index, exclusive.
-     * @return A resource name which is a subsequence of the path elements
-     *         contained in this resource name.
-     * @throws IndexOutOfBoundsException
-     *             If {@code endIndex} is bigger than {@code size()}.
-     */
-    public ResourceName head(final int endIndex) {
-        return subSequence(0, endIndex);
-    }
-
-    /**
-     * Returns a resource name which is a subsequence of the path elements
-     * contained in this resource name beginning with the element at position
-     * {@code beginIndex} and ending with the last element in this resource
-     * name. The returned resource name will therefore have the size
-     * {@code size() - beginIndex}. Calling this method is equivalent to:
-     *
-     * <pre>
-     * subSequence(beginIndex, size());
-     * </pre>
-     *
-     * @param beginIndex
-     *            The beginning index, inclusive.
-     * @return A resource name which is a subsequence of the path elements
-     *         contained in this resource name.
-     * @throws IndexOutOfBoundsException
-     *             If {@code beginIndex} is negative, or if {@code beginIndex}
-     *             is bigger than {@code size()}.
-     */
-    public ResourceName tail(final int beginIndex) {
-        return subSequence(beginIndex, size);
+    public boolean startsWith(final String prefix) {
+        return startsWith(valueOf(prefix));
     }
 
     /**
@@ -711,6 +709,45 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
         return new ResourceName(subPath, subNormalizedPath, endIndex - beginIndex);
     }
 
+    /**
+     * Returns a resource name which is a subsequence of the path elements
+     * contained in this resource name beginning with the element at position
+     * {@code beginIndex} and ending with the last element in this resource
+     * name. The returned resource name will therefore have the size
+     * {@code size() - beginIndex}. Calling this method is equivalent to:
+     *
+     * <pre>
+     * subSequence(beginIndex, size());
+     * </pre>
+     *
+     * @param beginIndex
+     *            The beginning index, inclusive.
+     * @return A resource name which is a subsequence of the path elements
+     *         contained in this resource name.
+     * @throws IndexOutOfBoundsException
+     *             If {@code beginIndex} is negative, or if {@code beginIndex}
+     *             is bigger than {@code size()}.
+     */
+    public ResourceName tail(final int beginIndex) {
+        return subSequence(beginIndex, size);
+    }
+
+    /**
+     * Returns the URL encoded string representation of this resource name.
+     *
+     * @return The URL encoded string representation of this resource name.
+     * @see #valueOf(String)
+     */
+    @Override
+    public String toString() {
+        return path;
+    }
+
+    private int nextElementEndIndex(final String s, final int startIndex) {
+        final int index = s.indexOf('/', startIndex);
+        return index < 0 ? s.length() : index;
+    }
+
     private String subPath(final String s, final int beginIndex, final int endIndex) {
         int startCharIndex = 0;
         int endCharIndex = nextElementEndIndex(s, 0);
@@ -724,42 +761,5 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
             endCharIndex = nextElementEndIndex(s, tmpStartCharIndex);
         }
         return s.substring(startCharIndex, endCharIndex);
-    }
-
-    /**
-     * Returns {@code true} if this resource name is equal to or begins with the
-     * provided resource resource name.
-     *
-     * @param prefix
-     *            The resource name prefix.
-     * @return {@code true} if this resource name is equal to or begins with the
-     *         provided resource resource name.
-     * @throws IllegalArgumentException
-     *             If the the prefix contains empty path elements.
-     */
-    public boolean startsWith(final String prefix) {
-        return startsWith(valueOf(prefix));
-    }
-
-    /**
-     * Returns {@code true} if this resource name is equal to or begins with the
-     * provided resource resource name.
-     *
-     * @param prefix
-     *            The resource name prefix.
-     * @return {@code true} if this resource name is equal to or begins with the
-     *         provided resource resource name.
-     */
-    public boolean startsWith(final ResourceName prefix) {
-        if (size == prefix.size) {
-            return equals(prefix);
-        } else if (size == 0) {
-            return false;
-        } else if (prefix.size == 0) {
-            return true;
-        } else {
-            return normalizedPath.startsWith(prefix.normalizedPath)
-                    && normalizedPath.charAt(prefix.normalizedPath.length()) == '/';
-        }
     }
 }
