@@ -13,7 +13,7 @@
  *
  * Copyright 2013 ForgeRock AS.
  */
-package org.forgerock.json.resource.api;
+package org.forgerock.json.resource.descriptor;
 
 import static java.util.Collections.unmodifiableSet;
 import static org.forgerock.json.fluent.JsonValue.field;
@@ -55,7 +55,7 @@ import org.forgerock.json.resource.ResourceName;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.json.resource.api.RelationDescriptor.Multiplicity;
+import org.forgerock.json.resource.descriptor.RelationDescriptor.Multiplicity;
 
 @SuppressWarnings("javadoc")
 public final class Api {

@@ -13,8 +13,28 @@
  *
  * Copyright 2013 ForgeRock AS.
  */
-package org.forgerock.json.resource.api;
+package org.forgerock.json.resource.descriptor;
 
-interface RelationCapableBuilder<T> {
-    T addRelationFromBuilder(RelationDescriptor relation);
+@SuppressWarnings("javadoc")
+public final class Schema {
+
+    public static final class SchemaBuilder {
+        private SchemaBuilder() {
+            // Nothing to do.
+        }
+
+        public Schema build() {
+            return new Schema();
+        }
+
+    }
+
+    public static SchemaBuilder builder() {
+        return new SchemaBuilder();
+    }
+
+    private Schema() {
+        // TODO
+    }
+
 }
