@@ -13,7 +13,7 @@
  *
  * Copyright 2013 ForgeRock AS.
  */
-package org.forgerock.json.resource.api;
+package org.forgerock.json.resource.descriptor;
 
 import org.forgerock.json.fluent.JsonValue;
 

@@ -13,10 +13,10 @@
  *
  * Copyright 2013 ForgeRock AS.
  */
-package org.forgerock.json.resource.api;
+package org.forgerock.json.resource.descriptor;
 
 import static java.util.Collections.unmodifiableSet;
-import static org.forgerock.json.resource.api.Api.unmodifiableCopyOf;
+import static org.forgerock.json.resource.descriptor.Api.unmodifiableCopyOf;
 
 import java.util.Collection;
 import java.util.Iterator;
