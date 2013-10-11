@@ -18,8 +18,8 @@ package org.forgerock.json.resource.descriptor;
 @SuppressWarnings("javadoc")
 public final class Schema {
 
-    public static final class SchemaBuilder {
-        private SchemaBuilder() {
+    public static final class Builder {
+        private Builder() {
             // Nothing to do.
         }
 
@@ -29,8 +29,8 @@ public final class Schema {
 
     }
 
-    public static SchemaBuilder builder() {
-        return new SchemaBuilder();
+    public static Builder builder() {
+        return new Builder();
     }
 
     private Schema() {
