@@ -34,8 +34,11 @@ import java.util.NoSuchElementException;
  * described in the {@link URLEncoder} documentation.
  * <p>
  * The empty resource name having zero path elements may be obtained by calling
- * {@link #empty()}. Resource names are case sensitive and empty path elements
- * are not allowed.
+ * {@link #empty()}. Resource names are case insensitive and empty path elements
+ * are not allowed. In addition, resource names will be automatically normalized
+ * such that any leading or trailing slashes are removed. In other words, all
+ * resource names will be considered to be "relative". At the moment the
+ * relative path elements "." and ".." are not supported.
  * <p>
  * New resource names can be created from their string representation using
  * {@link #valueOf(String)}, or by deriving new resource names from existing
