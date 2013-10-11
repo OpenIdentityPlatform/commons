@@ -13,10 +13,10 @@
  *
  * Copyright 2013 ForgeRock AS.
  */
-package org.forgerock.json.resource.api;
+package org.forgerock.json.resource.descriptor;
 
-import static org.forgerock.json.resource.api.Api.unmodifiableCopyOf;
-import static org.forgerock.json.resource.api.RelationDescriptor.Multiplicity.ONE_TO_MANY;
+import static org.forgerock.json.resource.descriptor.Api.unmodifiableCopyOf;
+import static org.forgerock.json.resource.descriptor.RelationDescriptor.Multiplicity.ONE_TO_MANY;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
