@@ -439,19 +439,19 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
      * The returned resource name will have be formed of the concatenation of
      * this resource name and the provided resource name.
      *
-     * @param childPath
+     * @param suffix
      *            The resource name to be appended to this resource name.
      * @return A new resource name which is a descendant of this resource name.
      */
-    public ResourceName concat(final ResourceName childPath) {
+    public ResourceName concat(final ResourceName suffix) {
         if (isEmpty()) {
-            return childPath;
-        } else if (childPath.isEmpty()) {
+            return suffix;
+        } else if (suffix.isEmpty()) {
             return this;
         } else {
-            final String newPath = path + "/" + childPath.path;
-            final String newNormalizedPath = normalizedPath + "/" + childPath.normalizedPath;
-            return new ResourceName(newPath, newNormalizedPath, size + childPath.size);
+            final String newPath = path + "/" + suffix.path;
+            final String newNormalizedPath = normalizedPath + "/" + suffix.normalizedPath;
+            return new ResourceName(newPath, newNormalizedPath, size + suffix.size);
         }
     }
 
@@ -469,14 +469,14 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
      * The returned resource name will have be formed of the concatenation of
      * this resource name and the provided resource name.
      *
-     * @param childPath
+     * @param suffix
      *            The resource name to be appended to this resource name.
      * @return A new resource name which is a descendant of this resource name.
      * @throws IllegalArgumentException
-     *             If the the child path contains empty path elements.
+     *             If the the suffix contains empty path elements.
      */
-    public ResourceName concat(final String childPath) {
-        return concat(valueOf(childPath));
+    public ResourceName concat(final String suffix) {
+        return concat(valueOf(suffix));
     }
 
     /**
