@@ -341,34 +341,7 @@ final class HttpUtils {
      */
     static List<PatchOperation> getJsonPatchContent(final HttpServletRequest req)
             throws ResourceException {
-        final JsonValue json = new JsonValue(parseJsonBody(req, false));
-        if (!json.isList()) {
-            throw new BadRequestException(
-                    "The request could not be processed because the provided "
-                            + "content is not a JSON array");
-        }
-        final List<PatchOperation> patch = new ArrayList<PatchOperation>(json.size());
-        for (final JsonValue operation : json) {
-            if (operation.isMap()) {
-                try {
-                    final String type =
-                            operation.get(PatchOperation.FIELD_OPERATION).required().asString();
-                    final JsonPointer field =
-                            operation.get(PatchOperation.FIELD_FIELD).required().asPointer();
-                    final JsonValue value = operation.get(PatchOperation.FIELD_VALUE);
-                    patch.add(PatchOperation.operation(type, field, value));
-                } catch (final Exception e) {
-                    throw new BadRequestException(
-                            "The request could not be processed because the provided "
-                                    + "content is not a valid JSON patch: " + e.getMessage());
-                }
-            } else {
-                throw new BadRequestException(
-                        "The request could not be processed because the provided "
-                                + "content is not a JSON array of patch operations");
-            }
-        }
-        return patch;
+        return PatchOperation.valueOfList(new JsonValue(parseJsonBody(req, false)));
     }
 
     /**
