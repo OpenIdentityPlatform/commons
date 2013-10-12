@@ -370,22 +370,20 @@ public final class PatchOperation {
     }
 
     /**
-     * Creates a new patch operation using the provided json information. 
+     * Parses the provided JSON content as a patch operation.
      *
      * @param json
      *            The patch operation to be parsed.
-     * @return The parsed PatchOperation.
+     * @return The parsed patch operation.
      * @throws BadRequestException
-     *            If the json value does not represent a valid JSON patch.
+     *             If the JSON value is not a JSON patch operation.
      */
     public static PatchOperation valueOf(final JsonValue json) throws BadRequestException {
-
         if (!json.isMap()) {
             throw new BadRequestException(
                         "The request could not be processed because the provided "
                                 + "content is not a valid JSON patch");
         }
-
         try {
             final String       type = json.get(FIELD_OPERATION).required().asString();
             final JsonPointer field = json.get(FIELD_FIELD).required().asPointer();
@@ -397,30 +395,26 @@ public final class PatchOperation {
                             + "content is not a valid JSON patch: " + e.getMessage(), e);
         }
     }
-    
+
     /**
-     * Creates a list of new patch operations using the provided json information. 
+     * Parses the provided JSON content as a list of patch operations.
      *
      * @param json
-     *            A list of patch operations to be parsed.
-     * @return The parsed PatchOperation list.
+     *            The list of patch operations to be parsed.
+     * @return The list of parsed patch operations.
      * @throws BadRequestException
-     *            If the json value does not represent a valid list of JSON patches.
+     *             If the JSON value is not a list of JSON patch operations.
      */
     public static List<PatchOperation> valueOfList(final JsonValue json) throws BadRequestException {
-
         if (!json.isList()) {
             throw new BadRequestException(
                     "The request could not be processed because the provided "
                             + "content is not a JSON array of patch operations");
         }
-
         final List<PatchOperation> patch = new ArrayList<PatchOperation>(json.size());
-
         for (final JsonValue operation : json) {
             patch.add(valueOf(operation));
         }
-
         return patch;
     }
 
@@ -508,9 +502,9 @@ public final class PatchOperation {
     }
 
     /**
-     * Return a JsonValue expression of this patch operation.
-     * 
-     * @return this patch operation as a JsonValue
+     * Returns a JSON value representation of this patch operation.
+     *
+     * @return A JSON value representation of this patch operation.
      */
     public JsonValue toJsonValue() {
         final JsonValue json = new JsonValue(new LinkedHashMap<String, Object>(3));
