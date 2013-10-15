@@ -63,7 +63,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.target>1.6</maven.compiler.target>
         <maven.compiler.source>1.6</maven.compiler.source>
-        <i18nFrameworkVersion>1.4.0</i18nFrameworkVersion>
+        <i18nFrameworkVersion>1.4.1-SNAPSHOT</i18nFrameworkVersion>
     </properties>
     <modules>
         <module>json-fluent</module>
