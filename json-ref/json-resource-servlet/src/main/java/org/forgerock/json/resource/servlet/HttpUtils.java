@@ -343,6 +343,23 @@ final class HttpUtils {
     }
 
     /**
+     * Returns the content of the provided HTTP request decoded as a JSON action
+     * content.
+     *
+     * @param req
+     *            The HTTP request.
+     * @return The content of the provided HTTP request decoded as a JSON action
+     *         content.
+     * @throws ResourceException
+     *             If the content could not be read or if the content was not
+     *             valid JSON.
+     */
+    static JsonValue getJsonActionContent(final HttpServletRequest req)
+            throws ResourceException {
+        return new JsonValue(parseJsonBody(req, true));
+    }
+
+    /**
      * Returns the effective method name for an HTTP request taking into account
      * the "X-HTTP-Method-Override" header.
      *
