@@ -106,39 +106,6 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
     }
 
     /**
-     * Returns the URL encoding of the string representation of the provided
-     * path element.
-     *
-     * @param pathElement
-     *            The path element to be encoded.
-     * @return The URL encoded path element.
-     */
-    public static String encodePathElement(final Object pathElement) {
-        if (pathElement == null) {
-            throw new NullPointerException();
-        }
-        /*
-         * Before delegating to the costly URLEncoder class, first try fast-path
-         * encode of simple ASCII.
-         */
-        final String s = pathElement.toString();
-        final int size = s.length();
-        for (int i = 0; i < size; i++) {
-            final int c = s.charAt(i);
-            if (!SAFE_URL_CHARS.get(c)) {
-                // Contains a character that needs encoding so delegate to URLEncoder.
-                try {
-                    return URLEncoder.encode(s, "UTF-8");
-                } catch (final UnsupportedEncodingException e) {
-                    // UTF-8 should always be supported.
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-        return s;
-    }
-
-    /**
      * Creates a new resource name using the provided name template and
      * unencoded path elements. This method first URL encodes each of the path
      * elements and then substitutes them into the template using
@@ -162,14 +129,70 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
      * @return The formatted template parsed as a resource name.
      * @throws IllegalArgumentException
      *             If the formatted template contains empty path elements.
-     * @see #encodePathElement(Object)
+     * @see #urlEncode(Object)
      */
     public static ResourceName format(final String template, final Object... pathElements) {
         final String[] encodedPathElements = new String[pathElements.length];
         for (int i = 0; i < pathElements.length; i++) {
-            encodedPathElements[i] = encodePathElement(pathElements[i]);
+            encodedPathElements[i] = urlEncode(pathElements[i]);
         }
         return valueOf(String.format(template, (Object[]) encodedPathElements));
+    }
+
+    /**
+     * Returns the URL decoding of the provided object's string representation.
+     *
+     * @param value
+     *            The value to be URL decoded.
+     * @return The URL decoding of the provided object's string representation.
+     */
+    public static String urlDecode(final Object value) {
+        /*
+         * Before delegating to the costly URLDecoder class, first try fast-path
+         * decode of simple ASCII.
+         */
+        final String s = value.toString();
+        final int size = s.length();
+        for (int i = 0; i < size; i++) {
+            if (isUrlEscapeChar(s.charAt(i))) {
+                try {
+                    return URLDecoder.decode(s, "UTF-8");
+                } catch (final UnsupportedEncodingException e) {
+                    // UTF-8 should always be supported.
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        return s;
+    }
+
+    /**
+     * Returns the URL encoding of the provided object's string representation.
+     *
+     * @param value
+     *            The value to be URL encoded.
+     * @return The URL encoding of the provided object's string representation.
+     */
+    public static String urlEncode(final Object value) {
+        /*
+         * Before delegating to the costly URLEncoder class, first try fast-path
+         * encode of simple ASCII.
+         */
+        final String s = value.toString();
+        final int size = s.length();
+        for (int i = 0; i < size; i++) {
+            final int c = s.charAt(i);
+            if (!SAFE_URL_CHARS.get(c)) {
+                // Contains a character that needs encoding so delegate to URLEncoder.
+                try {
+                    return URLEncoder.encode(s, "UTF-8");
+                } catch (final UnsupportedEncodingException e) {
+                    // UTF-8 should always be supported.
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        return s;
     }
 
     /**
@@ -301,21 +324,6 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
         }
     }
 
-    private static String decodePathElement(final String element) {
-        final int size = element.length();
-        for (int i = 0; i < size; i++) {
-            if (isUrlEscapeChar(element.charAt(i))) {
-                try {
-                    return URLDecoder.decode(element, "UTF-8");
-                } catch (final UnsupportedEncodingException e) {
-                    // UTF-8 should always be supported.
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-        return element;
-    }
-
     private static boolean isUrlEscapeChar(final char c) {
         return c == '+' || c == '%';
     }
@@ -326,7 +334,7 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
 
     private static String normalizePathElement(final String element, final boolean needsDecoding) {
         if (needsDecoding) {
-            return encodePathElement(decodePathElement(element).toLowerCase(Locale.ENGLISH));
+            return urlEncode(urlDecode(element).toLowerCase(Locale.ENGLISH));
         } else {
             return element.toLowerCase(Locale.ENGLISH);
         }
@@ -364,13 +372,13 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
                 pathBuilder.append('/');
                 normalizedPathBuilder.append('/');
             }
-            final String encodedPathElement = encodePathElement(s);
+            final String encodedPathElement = urlEncode(s);
             pathBuilder.append(encodedPathElement);
             final String normalizedPathElement = s.toLowerCase(Locale.ENGLISH);
             if (normalizedPathElement == s) {
                 normalizedPathBuilder.append(encodedPathElement);
             } else {
-                normalizedPathBuilder.append(encodePathElement(normalizedPathElement));
+                normalizedPathBuilder.append(urlEncode(normalizedPathElement));
             }
             i++;
         }
@@ -406,11 +414,11 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
      */
     public ResourceName child(final Object pathElement) {
         final String s = pathElement.toString();
-        final String encodedPathElement = encodePathElement(s);
+        final String encodedPathElement = urlEncode(s);
         final String normalizedPathElement = s.toLowerCase(Locale.ENGLISH);
         final String normalizedEncodedPathElement =
                 (s == normalizedPathElement) ? encodedPathElement
-                        : encodePathElement(normalizedPathElement);
+                        : urlEncode(normalizedPathElement);
         if (isEmpty()) {
             return new ResourceName(encodedPathElement, normalizedEncodedPathElement, 1);
         } else {
@@ -512,7 +520,7 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
             startIndex = endIndex + 1;
             endIndex = nextElementEndIndex(path, startIndex);
         }
-        return decodePathElement(path.substring(startIndex, endIndex));
+        return urlDecode(path.substring(startIndex, endIndex));
     }
 
     /**
@@ -582,7 +590,7 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
                 final String element = path.substring(startIndex, endIndex);
                 startIndex = endIndex + 1;
                 endIndex = nextElementEndIndex(path, startIndex);
-                return decodePathElement(element);
+                return urlDecode(element);
             }
 
             @Override
