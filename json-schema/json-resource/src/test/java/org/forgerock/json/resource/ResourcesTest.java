@@ -21,11 +21,16 @@ import static org.forgerock.json.fluent.JsonValue.object;
 import static org.forgerock.json.resource.TestUtils.content;
 import static org.forgerock.json.resource.TestUtils.expected;
 import static org.forgerock.json.resource.TestUtils.filter;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.util.List;
 
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
+import org.mockito.ArgumentCaptor;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -153,5 +158,32 @@ public final class ResourcesTest {
     public void testFilter(List<JsonPointer> filter, JsonValue content, JsonValue expected) {
         assertThat(Resources.filterResource(content, filter).getObject()).isEqualTo(
                 expected.getObject());
+    }
+
+    @DataProvider
+    public Object[][] testCollectionResourceProviderData() {
+        // @formatter:off
+        return new Object[][] {
+            { "test", "test" },
+            { "test%2fuser", "test/user" },
+            { "test+user", "test user" },
+            { "test%20user", "test user" }
+        };
+        // @formatter:on
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test(dataProvider = "testCollectionResourceProviderData")
+    public void testCollectionResourceProvider(String resourceName, String expectedId)
+            throws Exception {
+        CollectionResourceProvider collection = mock(CollectionResourceProvider.class);
+        RequestHandler handler = Resources.newCollection(collection);
+        Connection connection = Resources.newInternalConnection(handler);
+        ReadRequest read = Requests.newReadRequest(resourceName);
+        connection.readAsync(new RootContext(), read, null);
+        ArgumentCaptor<ReadRequest> captor = ArgumentCaptor.forClass(ReadRequest.class);
+        verify(collection).readInstance(any(ServerContext.class), eq(expectedId), captor.capture(),
+                any(ResultHandler.class));
+        assertThat(captor.getValue().getResourceName()).isEqualTo("");
     }
 }
