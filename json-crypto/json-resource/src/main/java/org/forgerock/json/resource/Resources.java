@@ -15,6 +15,7 @@
  */
 package org.forgerock.json.resource;
 
+import static org.forgerock.json.resource.ResourceName.urlDecode;
 import static org.forgerock.json.resource.RoutingMode.EQUALS;
 
 import java.util.Collection;
@@ -776,7 +777,7 @@ public final class Resources {
     }
 
     private static String idOf(final ServerContext context) {
-        return context.asContext(RouterContext.class).getUriTemplateVariables().get("id");
+        return urlDecode(context.asContext(RouterContext.class).getUriTemplateVariables().get("id"));
     }
 
     private static ResourceException newBadRequestException(final String fs, final Object... args) {
