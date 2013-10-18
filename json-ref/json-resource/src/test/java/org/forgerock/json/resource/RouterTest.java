@@ -237,6 +237,8 @@ public final class RouterTest {
             { "{userId}/devices", "test/devices", new String[] {"userId", "test" }},
             { "{a}/{b}", "aaa/bbb", new String[] {"a", "aaa", "b", "bbb" }},
             { "{a}/b/{c}", "aaa/b/ccc", new String[] {"a", "aaa", "c", "ccc" }},
+            { "users/{id}/devices", "users/test+user/devices", new String[] {"id", "test user" }},
+            { "users/{id}/devices", "users/test%2fdevices/devices", new String[] {"id", "test/devices" }},
         };
         // @formatter:on
     }

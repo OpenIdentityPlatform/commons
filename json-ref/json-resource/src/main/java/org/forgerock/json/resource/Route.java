@@ -16,6 +16,7 @@
 
 package org.forgerock.json.resource;
 
+import static org.forgerock.json.resource.ResourceName.urlDecode;
 import static org.forgerock.json.resource.Resources.normalizeResourceName;
 import static org.forgerock.json.resource.RoutingMode.EQUALS;
 import static org.forgerock.json.resource.RoutingMode.STARTS_WITH;
@@ -186,13 +187,13 @@ public final class Route {
                 break;
             case 1:
                 // Group 0 matches entire URL, group 1 matches entire template.
-                variableMap = Collections.singletonMap(variables.get(0), matcher.group(2));
+                variableMap = Collections.singletonMap(variables.get(0), urlDecode(matcher.group(2)));
                 break;
             default:
                 variableMap = new LinkedHashMap<String, String>(variables.size());
                 for (int i = 0; i < variables.size(); i++) {
                     // Group 0 matches entire URL, group 1 matches entire template.
-                    variableMap.put(variables.get(i), matcher.group(i + 2));
+                    variableMap.put(variables.get(i), urlDecode(matcher.group(i + 2)));
                 }
                 break;
             }
