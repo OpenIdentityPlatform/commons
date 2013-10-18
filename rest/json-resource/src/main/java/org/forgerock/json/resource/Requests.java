@@ -630,6 +630,8 @@ public final class Requests {
      * newActionRequest(&quot;users&quot;, &quot;1&quot;, actionId);
      * </pre>
      *
+     * Except that the resource ID is already URL encoded in the first form.
+     *
      * @param resourceName
      *            The resource name.
      * @param actionId
@@ -654,10 +656,12 @@ public final class Requests {
      * newActionRequest(&quot;users/1&quot;, &quot;someAction&quot;);
      * </pre>
      *
+     * Except that the resource ID is already URL encoded in the second form.
+     *
      * @param resourceContainer
      *            The name of the resource container.
      * @param resourceId
-     *            The ID of the resource.
+     *            The URL decoded ID of the resource.
      * @param actionId
      *            The action ID.
      * @return The new action request.
@@ -674,14 +678,16 @@ public final class Requests {
      * the new resource. Invoking this method as follows:
      *
      * <pre>
-     * newCreateRequest(&quot;users&quot;, content);
+     * newCreateRequest(&quot;users/1&quot;, content);
      * </pre>
      *
      * Is equivalent to:
      *
      * <pre>
-     * newCreateRequest(&quot;users&quot;, null, content);
+     * newCreateRequest(&quot;users&quot;, "1", content);
      * </pre>
+     *
+     * Except that the resource ID is already URL encoded in the first form.
      *
      * @param resourceContainer
      *            The name of the resource container beneath which the new
@@ -709,13 +715,15 @@ public final class Requests {
      * newCreateRequest(&quot;users&quot;, content).setNewResourceId(&quot;1&quot;);
      * </pre>
      *
+     * Except that the resource ID is already URL encoded in the second form.
+     *
      * @param resourceContainer
      *            The name of the resource container beneath which the new
      *            resource should be created.
      * @param newResourceId
-     *            The client provided ID of the resource to be created, or
-     *            {@code null} if the server should be responsible for
-     *            generating the resource ID.
+     *            The URL decoded client provided ID of the resource to be
+     *            created, or {@code null} if the server should be responsible
+     *            for generating the resource ID.
      * @param content
      *            The JSON content.
      * @return The new create request.
@@ -739,6 +747,8 @@ public final class Requests {
      * newDeleteRequest(&quot;users&quot;, &quot;1&quot;);
      * </pre>
      *
+     * Except that the resource ID is already URL encoded in the first form.
+     *
      * @param resourceName
      *            The resource name.
      * @return The new delete request.
@@ -761,10 +771,12 @@ public final class Requests {
      * newDeleteRequest(&quot;users/1&quot;);
      * </pre>
      *
+     * Except that the resource ID is already URL encoded in the second form.
+     *
      * @param resourceContainer
      *            The name of the resource container.
      * @param resourceId
-     *            The ID of the resource.
+     *            The URL decoded ID of the resource.
      * @return The new delete request.
      */
     public static DeleteRequest newDeleteRequest(final String resourceContainer,
@@ -785,6 +797,8 @@ public final class Requests {
      * <pre>
      * newPatchRequest(&quot;users&quot;, &quot;1&quot;, operations);
      * </pre>
+     *
+     * Except that the resource ID is already URL encoded in the first form.
      *
      * @param resourceName
      *            The resource name.
@@ -811,10 +825,12 @@ public final class Requests {
      * newPatchRequest(&quot;users/1&quot;, operations);
      * </pre>
      *
+     * Except that the resource ID is already URL encoded in the second form.
+     *
      * @param resourceContainer
      *            The name of the resource container.
      * @param resourceId
-     *            The ID of the resource.
+     *            The URL decoded ID of the resource.
      * @param operations
      *            The JSON patch operations.
      * @return The new patch request.
@@ -854,6 +870,8 @@ public final class Requests {
      * newReadRequest(&quot;users&quot;, &quot;1&quot;);
      * </pre>
      *
+     * Except that the resource ID is already URL encoded in the first form.
+     *
      * @param resourceName
      *            The resource name.
      * @return The new read request.
@@ -876,10 +894,12 @@ public final class Requests {
      * newReadRequest(&quot;users/1&quot;);
      * </pre>
      *
+     * Except that the resource ID is already URL encoded in the second form.
+     *
      * @param resourceContainer
      *            The name of the resource container.
      * @param resourceId
-     *            The ID of the resource.
+     *            The URL decoded ID of the resource.
      * @return The new read request.
      */
     public static ReadRequest newReadRequest(final String resourceContainer, final String resourceId) {
@@ -899,6 +919,8 @@ public final class Requests {
      * <pre>
      * newUpdateRequest(&quot;users&quot;, &quot;1&quot;, newContent);
      * </pre>
+     *
+     * Except that the resource ID is already URL encoded in the first form.
      *
      * @param resourceName
      *            The resource name.
@@ -925,10 +947,12 @@ public final class Requests {
      * newUpdateRequest(&quot;users/1&quot;, newContent);
      * </pre>
      *
+     * Except that the resource ID is already URL encoded in the second form.
+     *
      * @param resourceContainer
      *            The name of the resource container.
      * @param resourceId
-     *            The ID of the resource.
+     *            The URL decoded ID of the resource.
      * @param newContent
      *            The new JSON content.
      * @return The new update request.
@@ -939,13 +963,14 @@ public final class Requests {
     }
 
     private static String concat(final String resourceContainer, final String resourceId) {
+        final String urlEncodedResourceId = ResourceName.urlEncode(resourceId);
         final StringBuilder builder =
-                new StringBuilder(resourceContainer.length() + 1 + resourceId.length());
+                new StringBuilder(resourceContainer.length() + 1 + urlEncodedResourceId.length());
         builder.append(resourceContainer);
         if (!resourceContainer.endsWith("/") && resourceContainer.length() > 1) {
             builder.append('/');
         }
-        builder.append(resourceId);
+        builder.append(urlEncodedResourceId);
         return builder.toString();
     }
 

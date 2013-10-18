@@ -31,20 +31,22 @@ public final class RequestsTest {
     public Object[][] containerNames() {
         return new Object[][] {
             // @formatter:off
-            { "", "test" },
-            { "/", "test" },
-            { "users", "users/test" },
-            { "users/", "users/test" },
-            { "/users", "users/test" },
-            { "/users/", "users/test" },
+            { "", "test", "test" },
+            { "/", "test", "test" },
+            { "users", "test", "users/test" },
+            { "users/", "test", "users/test" },
+            { "/users", "test", "users/test" },
+            { "/users/", "test", "users/test" },
+            { "users", "test user", "users/test+user" },
+            { "users", "test/user", "users/test%2Fuser" },
             // @formatter:on
         };
     }
 
     @Test(dataProvider = "containerNames")
     public void testResourceNameConcatenation(final String container,
-            final String expectedResourceName) {
-        final Request request = newReadRequest(container, "test");
+            final String id, final String expectedResourceName) {
+        final Request request = newReadRequest(container, id);
         assertThat(request.getResourceName()).isEqualTo(expectedResourceName);
     }
 
