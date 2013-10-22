@@ -212,7 +212,10 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
         } else {
             /*
              * This method is optimized for the case where resource names do not
-             * contained encoded characters and are already normalized.
+             * contained encoded characters and are already normalized. In
+             * particular, it avoids performing multiple passes through the
+             * string, unnecessary normalization, and unnecessary URL
+             * decode/encodes.
              */
             final int size = path.length();
             StringBuilder normalizedPathBuilder = null;
@@ -252,6 +255,7 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
                             normalizedPathBuilder.append('/');
                             normalizedPathBuilder.append(path.substring(startOfLastElement, i));
                         }
+                        elementCount++;
                     } else {
                         trimLeadingSlash = true;
                     }
@@ -261,7 +265,6 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
                     startOfLastElement = i;
                     lastElementNeedsDecoding = isUrlEscapeChar(c);
                     lastElementNeedsNormalizing = needsNormalizing(c);
-                    elementCount++;
                 } else if (isUrlEscapeChar(c)) {
                     lastElementNeedsDecoding = true;
                 } else if (needsNormalizing(c)) {
@@ -659,7 +662,7 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
     public boolean startsWith(final ResourceName prefix) {
         if (size == prefix.size) {
             return equals(prefix);
-        } else if (size == 0) {
+        } else if (size < prefix.size) {
             return false;
         } else if (prefix.size == 0) {
             return true;
