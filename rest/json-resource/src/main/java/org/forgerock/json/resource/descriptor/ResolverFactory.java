@@ -15,13 +15,11 @@
  */
 package org.forgerock.json.resource.descriptor;
 
-import java.util.Collection;
+import org.forgerock.json.resource.Request;
+import org.forgerock.json.resource.ServerContext;
 
-import org.forgerock.json.resource.ResultHandler;
+public interface ResolverFactory {
 
-public interface RelationResolver {
-
-    void getRelationsForResource(RelationDescriptor relation, String resourceId,
-            ResultHandler<Collection<RelationDescriptor>> handler);
+    Resolver createResolver(ServerContext context, Request request);
 
 }
