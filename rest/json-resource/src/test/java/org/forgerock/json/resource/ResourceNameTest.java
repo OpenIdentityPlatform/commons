@@ -30,6 +30,26 @@ import org.testng.annotations.Test;
 public final class ResourceNameTest {
 
     @DataProvider
+    public Object[][] invalidStrings() {
+        // @formatter:off
+        return new Object[][] {
+            { "//" },
+            { "one//two" },
+            { "//one/two" },
+            { "one/two//" },
+            { "one/two//three" },
+            { "//one/two/three" },
+            { "one/two/three//" },
+        };
+        // @formatter:on
+    }
+
+    @Test(dataProvider = "invalidStrings", expectedExceptions = IllegalArgumentException.class)
+    public void testValueOfInvalidString(final String value) {
+        ResourceName.valueOf(value);
+    }
+
+    @DataProvider
     public Object[][] valueOfStrings() {
         // @formatter:off
         return new Object[][] {
@@ -46,6 +66,8 @@ public final class ResourceNameTest {
             { "users/1/", "users/1", e("users", "1") },
             { "/users/1/", "users/1", e("users", "1") },
             // Test decoding.
+            { "foo%30%41%42%43/test/", "foo0abc/test", e("foo0ABC", "test") },
+            { "hello+world/test/user", "hello+world/test/user", e("hello world", "test", "user") },
             { "hello+world/test%2Fuser", "hello+world/test%2Fuser", e("hello world", "test/user") },
         };
         // @formatter:on
@@ -59,12 +81,14 @@ public final class ResourceNameTest {
     public void testValueOf(final String path, final String normalizedPath, final Object[] elements) {
         final ResourceName name = ResourceName.valueOf(path);
         assertThat(name).hasSize(elements.length);
+        assertThat(name.size()).isEqualTo(elements.length);
         if (elements.length == 0) {
             assertThat((Object) name).isSameAs(ResourceName.empty());
         } else {
             assertThat(name).containsOnly(elements);
         }
-        assertThat(name.toString()).isEqualTo(normalizedPath);
+        assertThat((Object) name).isEqualTo(ResourceName.valueOf(normalizedPath));
+        assertThat((Object) ResourceName.valueOf(normalizedPath)).isEqualTo(name);
     }
 
     @Test(dataProvider = "valueOfStrings")
@@ -72,8 +96,10 @@ public final class ResourceNameTest {
             final Object[] elements) {
         final ResourceName name = new ResourceName(Arrays.asList(elements));
         assertThat(name).hasSize(elements.length);
+        assertThat(name.size()).isEqualTo(elements.length);
         assertThat(name).containsOnly(elements);
-        assertThat(name.toString()).isEqualTo(normalizedPath);
+        assertThat((Object) name).isEqualTo(ResourceName.valueOf(normalizedPath));
+        assertThat((Object) ResourceName.valueOf(normalizedPath)).isEqualTo(name);
     }
 
     @Test(dataProvider = "valueOfStrings")
@@ -81,8 +107,10 @@ public final class ResourceNameTest {
             final Object[] elements) {
         final ResourceName name = new ResourceName(elements);
         assertThat(name).hasSize(elements.length);
+        assertThat(name.size()).isEqualTo(elements.length);
         assertThat(name).containsOnly(elements);
-        assertThat(name.toString()).isEqualTo(normalizedPath);
+        assertThat((Object) name).isEqualTo(ResourceName.valueOf(normalizedPath));
+        assertThat((Object) ResourceName.valueOf(normalizedPath)).isEqualTo(name);
     }
 
     @DataProvider
@@ -109,7 +137,9 @@ public final class ResourceNameTest {
     public Object[][] child() {
         // @formatter:off
         return new Object[][] {
+            { "", 123, "123" },
             { "users", 123, "users/123" },
+            { "users", "BJENSEN", "users/BJENSEN" },
             { "users", "bjensen", "users/bjensen" },
             { "users", "hello /world",  "users/hello+%2Fworld"},
         };
@@ -288,6 +318,8 @@ public final class ResourceNameTest {
             { "one/two/three", "one/two", true },
             { "one/two/three", "one/two/three", true },
             { "one/two/three", "one/two/t", false },
+            { "one/two/three", "one/two/threee", false },
+            { "one/two/three", "one/two/three/four", false },
         };
         // @formatter:on
     }
