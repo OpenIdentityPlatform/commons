@@ -33,6 +33,7 @@ import org.forgerock.json.resource.AbstractRequestHandler;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
@@ -45,41 +46,49 @@ import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")
 public final class ApiDescriptorTest {
-    private static final class Resolver implements RequestHandlerFactory, RelationResolver {
+    private static final class ResolverFactoryImpl implements ResolverFactory {
         private final ApiDescriptor api;
-        private final List<String> realmList = new LinkedList<String>();
 
-        private Resolver(final ApiDescriptor api) {
+        private ResolverFactoryImpl(final ApiDescriptor api) {
             this.api = api;
         }
 
         @Override
-        public void getRelationsForResource(final RelationDescriptor relation,
-                final String resourceId, final ResultHandler<Collection<RelationDescriptor>> handler) {
-            System.out.println("Queried " + relation + " : " + resourceId);
-            realmList.add(resourceId);
-            handler.handleResult(relation.getResource().getRelations());
-        }
+        public Resolver createResolver(ServerContext context, Request request) {
+            return new AbstractResolver() {
+                private final List<String> realmList = new LinkedList<String>();
 
-        @Override
-        public RequestHandler getRequestHandler(final RelationDescriptor relation)
-                throws ResourceException {
-            if (relation.getResourceUrn().equals(API_URN)) {
-                return Api.newApiDescriptorRequestHandler(api);
-            } else if (relation.getResourceUrn().equals(USERS_URN)) {
-                return new AbstractRequestHandler() {
-                    @Override
-                    public void handleRead(final ServerContext context, final ReadRequest request,
-                            final ResultHandler<Resource> handler) {
-                        System.out.println("Reading user from realm " + realmList);
-                        final JsonValue content =
-                                json(object(field("id", request.getResourceName())));
-                        handler.handleResult(new Resource(request.getResourceName(), "1", content));
+                @Override
+                public void getRelationsForResource(final RelationDescriptor relation,
+                        final String resourceId,
+                        final ResultHandler<Collection<RelationDescriptor>> handler) {
+                    System.out.println("Queried " + relation + " : " + resourceId);
+                    realmList.add(resourceId);
+                    handler.handleResult(relation.getResource().getRelations());
+                }
+
+                @Override
+                public RequestHandler getRequestHandler(final RelationDescriptor relation)
+                        throws ResourceException {
+                    if (relation.getResourceUrn().equals(API_URN)) {
+                        return Api.newApiDescriptorRequestHandler(api);
+                    } else if (relation.getResourceUrn().equals(USERS_URN)) {
+                        return new AbstractRequestHandler() {
+                            @Override
+                            public void handleRead(final ServerContext context,
+                                    final ReadRequest request, final ResultHandler<Resource> handler) {
+                                System.out.println("Reading user from realm " + realmList);
+                                final JsonValue content =
+                                        json(object(field("id", request.getResourceName())));
+                                handler.handleResult(new Resource(request.getResourceName(), "1",
+                                        content));
+                            }
+                        };
+                    } else {
+                        throw new NotSupportedException("Relation " + relation + " not supported");
                     }
-                };
-            } else {
-                throw new NotSupportedException("Relation " + relation + " not supported");
-            }
+                }
+            };
         }
     }
 
@@ -153,8 +162,7 @@ public final class ApiDescriptorTest {
                                     .build()
                                 .build();
         // @formatter:on
-        final Resolver resolver = new Resolver(api);
-        final RequestHandler handler = Api.newApiRequestHandler(api, resolver, resolver);
+        final RequestHandler handler = Api.newApiDispatcher(api, new ResolverFactoryImpl(api));
         final Connection connection = Resources.newInternalConnection(handler);
 
         System.out.println("#### Reading API Descriptor");
