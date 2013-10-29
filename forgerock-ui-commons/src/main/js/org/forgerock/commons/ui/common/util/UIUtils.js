@@ -78,8 +78,18 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     
     obj.convertQueryParametersToJSON = function(queryParameters) {
         if(queryParameters) {
-            queryParameters = decodeURIComponent(queryParameters);
-            return _.object(_.map(queryParameters.match(/([^&]+)/g), function (pair) { return pair.match(/([^=]+)=?(.*)/).slice(1); }));
+            //create a json object from a query string
+            //by taking a query string and splitting it up into individual key=value strings
+            return _.object(
+                        //queryParameters.match(/([^&]+)/g) returns an array of key value pair strings
+                        _.map(queryParameters.match(/([^&]+)/g), function (pair) { 
+                           //convert each string into a an array 0 index being the key and 1 index being the value
+                           var keyAndValue = pair.match(/([^=]+)=?(.*)/).slice(1);
+                               //decode the value
+                               keyAndValue[1] = decodeURIComponent(keyAndValue[1]);
+                               return keyAndValue;
+                        })
+                    );
         }
         return null;
     };

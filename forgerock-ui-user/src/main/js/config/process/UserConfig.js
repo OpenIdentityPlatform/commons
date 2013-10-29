@@ -147,7 +147,7 @@ define("config/process/UserConfig", [
                     if (! conf.backgroundLogin)
                     {
                         if(conf.globalData.auth.urlParams && conf.globalData.auth.urlParams.goto){
-                            window.location.href = decodeURIComponent(conf.globalData.auth.urlParams.goto);
+                            window.location.href = conf.globalData.auth.urlParams.goto;
                             return false;
                         }
                         if(conf.gotoURL && _.indexOf(["#","","#/","/#"], conf.gotoURL) === -1) {
@@ -164,7 +164,7 @@ define("config/process/UserConfig", [
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "loggedIn");
                 }, function() {
                     if(conf.globalData.auth.urlParams && conf.globalData.auth.urlParams.gotoOnFail){
-                        window.location.href = decodeURIComponent(conf.globalData.auth.urlParams.gotoOnFail);
+                        window.location.href = conf.globalData.auth.urlParams.gotoOnFail;
                         return false;
                     }
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "invalidCredentials"); 
