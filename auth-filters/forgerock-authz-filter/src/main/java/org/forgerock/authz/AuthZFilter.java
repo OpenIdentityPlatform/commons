@@ -112,7 +112,7 @@ public class AuthZFilter implements Filter {
      * @throws ServletException {@inheritDoc}
      */
     @Override
-    public final void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
             throws IOException, ServletException {
         init();
 
