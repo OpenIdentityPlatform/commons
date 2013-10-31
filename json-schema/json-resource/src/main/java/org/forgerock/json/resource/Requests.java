@@ -86,7 +86,7 @@ public final class Requests {
 
         @Override
         public final T setResourceName(final ResourceName name) {
-            resourceName = name;
+            resourceName = notNull(name);
             return getThis();
         }
 
