@@ -50,4 +50,19 @@ public final class RequestsTest {
         assertThat(request.getResourceName()).isEqualTo(expectedResourceName);
     }
 
+    // test the contract that resource name must not be null
+    @Test(expectedExceptions = NullPointerException.class)
+    public void testNullResourceName() {
+        newReadRequest(null);
+    }
+
+    // test the contract that request.getResourceName/getResourceNameObject 
+    // always returns non-null by creating a "legit" request and then 
+    // updating the ResourceName to null using the setter
+    @Test(expectedExceptions = NullPointerException.class)
+    public void testSetNullResourceName() {
+        final Request request = newReadRequest("/hello");
+        request.setResourceName((ResourceName) null);
+    }
+
 }
