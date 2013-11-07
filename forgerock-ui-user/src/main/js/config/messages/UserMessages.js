@@ -35,6 +35,14 @@ define("config/messages/UserMessages", [
                 msg: "config.messages.UserMessages.invalidCredentials",
                 type: "error"
             },
+            "usernameNotFound": {
+                msg: "config.messages.UserMessages.usernameNotFound",
+                type: "error"
+            },
+            "noEmailProvided": {
+                msg: "config.messages.UserMessages.noEmailProvided",
+                type: "error"
+            },
             "invalidOldPassword": {
                 msg: "config.messages.UserMessages.invalidOldPassword",
                 type: "error"
