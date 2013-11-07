@@ -84,6 +84,13 @@ public class ArtifactItem
     private String downloadUrl;
 
     /**
+     * Timeout in millis allowed for artifact download
+     *
+     * @parameter
+     */
+    private Integer timeout;
+
+    /**
      * Packaging type of the artifact to be installed.
      * 
      * @parameter default-value="jar"
@@ -363,6 +370,23 @@ public class ArtifactItem
     public final void setDownloadUrl(final String downloadUrl)
     {
         this.downloadUrl = filterEmptyString(downloadUrl);
+    }
+
+    /**
+     * @return Returns the timeout in millis allowed for artifact download.
+     */
+    public final Integer getTimeout()
+    {
+        return (timeout==null||timeout<=0)?5000:timeout;
+    }
+
+    /**
+     * @param timeout
+     *            Set the timeout in millis allowed for artifact download.
+     */
+    public final void setTimeout(final Integer timeout)
+    {
+        this.timeout = timeout;
     }
 
     /**

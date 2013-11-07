@@ -192,7 +192,7 @@ public class ResolveExternalDependencyMojo extends
                                 wagon.addSessionListener(debug);
                                 wagon.addTransferListener(debug);
                             }
-                            wagon.setTimeout(5000);
+                            wagon.setTimeout(artifactItem.getTimeout());
                             Settings settings = mavenSettingsBuilder.buildSettings();
                             ProxyInfo proxyInfo = null;
                             if (settings != null&& settings.getActiveProxy() != null)
