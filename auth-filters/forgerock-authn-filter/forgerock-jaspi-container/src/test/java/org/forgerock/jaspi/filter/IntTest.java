@@ -84,20 +84,12 @@ public class IntTest {
 
         //When
         FilterRunner filterRunner = new FilterRunner();
-        boolean exceptionCaught = false;
-        Exception exception = null;
-        try {
-            filterRunner.run("default");
-        } catch (ServletException e) {
-            exceptionCaught = true;
-            exception = e;
-        }
+        filterRunner.run("default");
 
         //Then
-        assertTrue(exceptionCaught);
-        assertTrue(ServletException.class.isAssignableFrom(exception.getClass()));
         verify(filterRunner.getFilterChain(), never()).doFilter((HttpServletRequest) anyObject(),
                 (HttpServletResponse) anyObject());
+        verify(filterRunner.getResponse()).setStatus(500);
     }
 
     @Test
@@ -109,20 +101,12 @@ public class IntTest {
 
         //When
         FilterRunner filterRunner = new FilterRunner();
-        boolean exceptionCaught = false;
-        Exception exception = null;
-        try {
-            filterRunner.run("none");
-        } catch (ServletException e) {
-            exceptionCaught = true;
-            exception = e;
-        }
+        filterRunner.run("none");
 
         //Then
-        assertTrue(exceptionCaught);
-        assertTrue(AuthException.class.isAssignableFrom(exception.getCause().getClass()));
         verify(filterRunner.getFilterChain(), never()).doFilter((HttpServletRequest) anyObject(),
                 (HttpServletResponse) anyObject());
+        verify(filterRunner.getResponse()).setStatus(500);
     }
 
     @Test

@@ -18,6 +18,7 @@ package org.forgerock.jaspi.filter;
 
 import org.forgerock.jaspi.container.AuthConfigFactoryImpl;
 import org.forgerock.jaspi.container.MessageInfoImpl;
+import org.forgerock.json.resource.ResourceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -213,7 +214,15 @@ public class AuthNFilter implements Filter {
             }
 
         } catch (AuthException e) {
-            throw new ServletException(e.getMessage(), e);
+            HttpServletResponse httpResponse = (HttpServletResponse) messageInfo.getResponseMessage();
+            ResourceException jre = ResourceException.getException(ResourceException.INTERNAL_ERROR, e.getMessage());
+            httpResponse.setStatus(ResourceException.INTERNAL_ERROR);
+            try {
+                httpResponse.getWriter().write(jre.toJsonValue().toString());
+                httpResponse.setContentType("application/json");
+            } catch (IOException ioe) {
+                throw new ServletException(ioe.getMessage(), ioe);
+            }
         }
     }
 
