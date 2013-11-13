@@ -15,7 +15,7 @@
  */
 package org.forgerock.json.resource;
 
-import static org.forgerock.json.resource.Resources.checkNotNull;
+import static org.forgerock.util.Reject.checkNotNull;
 
 import java.lang.reflect.Constructor;
 import java.util.LinkedHashMap;
@@ -138,7 +138,7 @@ public class ServerContext extends Context {
      *             context.
      */
     public ServerContext(final Context parent, final Connection connection) {
-        super(checkNotNull(parent));
+        super(checkNotNull(parent, "Cannot instantiate ServerContext with null parent Context"));
         this.connection = connection;
         getConnection(); // Fail-fast if there is no connection available.
     }
@@ -177,7 +177,7 @@ public class ServerContext extends Context {
      *             context.
      */
     public ServerContext(final String id, final Context parent, final Connection connection) {
-        super(id, checkNotNull(parent));
+        super(id, checkNotNull(parent, "Cannot instantiate ServerContext ith with null parent Context"));
         this.connection = connection;
         getConnection(); // Fail-fast if there is no connection available.
     }
