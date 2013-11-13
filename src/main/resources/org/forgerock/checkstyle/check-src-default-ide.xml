@@ -139,6 +139,16 @@
       <property name="scope" value="private" />
       <property name="checkEmptyJavadoc" value="true" />
     </module>
+
+    <!--  Javadoc should not contain author annotations -->
+    <module name="WriteTag">
+      <property name="tag" value="@author"/>
+      <property name="tagFormat" value="\S"/>
+      <!-- Ignore when not present -->
+      <property name="severity" value="ignore"/>
+      <!-- Warn when present -->
+      <property name="tagSeverity" value="warning"/>
+    </module>
     
     <!--
     
