@@ -158,7 +158,7 @@
       <!-- Ignore when not present -->
       <property name="severity" value="ignore"/>
       <!-- Warn when present -->
-      <property name="tagSeverity" value="warning"/>
+      <property name="tagSeverity" value="error"/>
     </module>
 
     <!--
