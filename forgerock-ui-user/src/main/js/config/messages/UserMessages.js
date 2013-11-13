@@ -43,6 +43,10 @@ define("config/messages/UserMessages", [
                 msg: "config.messages.UserMessages.noEmailProvided",
                 type: "error"
             },
+            "emailNotSent": {
+                msg: "config.messages.UserMessages.emailNotSent",
+                type: "error"
+            },
             "invalidOldPassword": {
                 msg: "config.messages.UserMessages.invalidOldPassword",
                 type: "error"
