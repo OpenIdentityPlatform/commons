@@ -15,7 +15,7 @@
  */
 package org.forgerock.json.resource;
 
-import static org.forgerock.json.resource.Resources.checkNotNull;
+import static org.forgerock.util.Reject.checkNotNull;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -143,7 +143,7 @@ public final class FilterChain implements RequestHandler {
      *            processing has reached the end of the filter chain.
      */
     public FilterChain(final RequestHandler target) {
-        this.target = checkNotNull(target);
+        this.target = checkNotNull(target, "Cannot create FilterChain with null target RequestHandler");
     }
 
     /**
@@ -157,7 +157,7 @@ public final class FilterChain implements RequestHandler {
      *            target.
      */
     public FilterChain(final RequestHandler target, final Collection<Filter> filters) {
-        this.target = checkNotNull(target);
+        this.target = checkNotNull(target, "Cannot create FilterChain with null target RequestHandler");
         this.filters.addAll(filters);
     }
 
@@ -172,7 +172,7 @@ public final class FilterChain implements RequestHandler {
      *            target.
      */
     public FilterChain(final RequestHandler target, final Filter... filters) {
-        this.target = checkNotNull(target);
+        this.target = checkNotNull(target, "Cannot create FilterChain with null target RequestHandler");
         this.filters.addAll(Arrays.asList(filters));
     }
 
@@ -252,7 +252,7 @@ public final class FilterChain implements RequestHandler {
      * @return This a reference to this filter chain.
      */
     public FilterChain setTarget(final RequestHandler target) {
-        this.target = checkNotNull(target);
+        this.target = checkNotNull(target, "Cannot set target RequestHandler to null value");
         return this;
     }
 

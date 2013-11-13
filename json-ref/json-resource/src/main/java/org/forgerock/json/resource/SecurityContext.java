@@ -15,7 +15,7 @@
  */
 package org.forgerock.json.resource;
 
-import static org.forgerock.json.resource.Resources.checkNotNull;
+import static org.forgerock.util.Reject.checkNotNull;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -126,7 +126,7 @@ public final class SecurityContext extends Context {
      */
     public SecurityContext(final Context parent, final String authenticationId,
             final Map<String, Object> authorizationId) {
-        super(checkNotNull(parent));
+        super(checkNotNull(parent, "Cannot instantiate SecurityContext with null parent Context"));
         this.authenticationId = authenticationId != null ? authenticationId : "";
         this.authorizationId =
                 authorizationId != null ? Collections
@@ -156,7 +156,7 @@ public final class SecurityContext extends Context {
      */
     public SecurityContext(final String id, final Context parent, final String authenticationId,
             final Map<String, Object> authorizationId) {
-        super(id, checkNotNull(parent));
+        super(id, checkNotNull(parent, "Cannot instantiate SecurityContext with null parent Context"));
         this.authenticationId = authenticationId != null ? authenticationId : "";
         this.authorizationId =
                 authorizationId != null ? Collections

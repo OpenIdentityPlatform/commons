@@ -16,7 +16,7 @@
 
 package org.forgerock.json.resource;
 
-import static org.forgerock.json.resource.Resources.checkNotNull;
+import static org.forgerock.util.Reject.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -431,8 +431,8 @@ public final class PatchOperation {
     private final JsonValue value;
 
     private PatchOperation(final String operation, final JsonPointer field, final JsonValue value) {
-        this.operation = checkNotNull(operation);
-        this.field = checkNotNull(field);
+        this.operation = checkNotNull(operation, "Cannot instantiate PatchOperation with null operation value");
+        this.field = checkNotNull(field, "Cannot instantiate PatchOperation with null field value");
         this.value = value != null ? value : new JsonValue(null);
         checkOperationValue();
     }

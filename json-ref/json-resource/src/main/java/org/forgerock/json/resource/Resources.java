@@ -756,13 +756,6 @@ public final class Resources {
         };
     }
 
-    static <T> T checkNotNull(final T object) {
-        if (object == null) {
-            throw new NullPointerException();
-        }
-        return object;
-    }
-
     // Ensures that the resource name does not begin or end with forward slashes.
     static String normalizeResourceName(final String name) {
         String tmp = name;
