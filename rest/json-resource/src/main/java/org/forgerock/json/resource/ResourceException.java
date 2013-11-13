@@ -409,6 +409,15 @@ public class ResourceException extends ExecutionException {
     }
 
     /**
+     * Returns true if the HTTP error code is in the 500 range.
+     *
+     * @return <code>true</code> if HTTP error code is in the 500 range.
+     */
+    public boolean isServerError() {
+        return code >= 500 && code <= 599;
+    }
+
+    /**
      * Returns the additional detail which can be evaluated by applications. By
      * default there is no additional detail (
      * {@code getDetail().isNull() == true}), and it is the responsibility of
