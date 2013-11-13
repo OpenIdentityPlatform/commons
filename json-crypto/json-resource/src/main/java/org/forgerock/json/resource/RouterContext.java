@@ -15,7 +15,7 @@
  */
 package org.forgerock.json.resource;
 
-import static org.forgerock.json.resource.Resources.checkNotNull;
+import static org.forgerock.util.Reject.checkNotNull;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -126,7 +126,7 @@ public final class RouterContext extends ServerContext {
      */
     RouterContext(final ServerContext parent, final String matchedUri,
             final Map<String, String> uriTemplateVariables) {
-        super(checkNotNull(parent));
+        super(checkNotNull(parent, "Cannot instantiate RouterContext with null parent Context"));
         this.matchedUri = matchedUri;
         this.uriTemplateVariables = Collections.unmodifiableMap(uriTemplateVariables);
     }

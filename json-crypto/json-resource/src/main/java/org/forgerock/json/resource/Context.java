@@ -16,7 +16,7 @@
 
 package org.forgerock.json.resource;
 
-import static org.forgerock.json.resource.Resources.checkNotNull;
+import static org.forgerock.util.Reject.checkNotNull;
 
 import java.lang.reflect.Constructor;
 import java.util.LinkedHashMap;
@@ -149,7 +149,7 @@ public abstract class Context {
      *            The parent context.
      */
     protected Context(final String id, final Context parent) {
-        this.id = checkNotNull(id);
+        this.id = checkNotNull(id, "Cannot create Context with null id");
         this.parent = parent;
     }
 

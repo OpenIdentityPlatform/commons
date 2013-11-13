@@ -15,7 +15,7 @@
  */
 package org.forgerock.json.resource;
 
-import static org.forgerock.json.resource.Resources.checkNotNull;
+import static org.forgerock.util.Reject.checkNotNull;
 
 import org.forgerock.json.fluent.JsonValue;
 
@@ -65,9 +65,9 @@ public final class ApiInfoContext extends Context {
      *            The version of the REST API exposed by the network end-point.
      */
     public ApiInfoContext(final Context parent, final String apiName, final String apiVersion) {
-        super(checkNotNull(parent));
-        this.apiName = checkNotNull(apiName);
-        this.apiVersion = checkNotNull(apiVersion);
+        super(checkNotNull(parent, "Cannot instantiate ApiInfoContext with null parent Context"));
+        this.apiName = checkNotNull(apiName, "Cannot instantiate ApiInfoContext with null apiName");
+        this.apiVersion = checkNotNull(apiVersion, "Cannot instantiate ApiInfoContext with null apiVersion");
     }
 
     /**
@@ -85,9 +85,9 @@ public final class ApiInfoContext extends Context {
      */
     public ApiInfoContext(final String id, final Context parent, final String apiName,
             final String apiVersion) {
-        super(id, checkNotNull(parent));
-        this.apiName = checkNotNull(apiName);
-        this.apiVersion = checkNotNull(apiVersion);
+        super(id, checkNotNull(parent, "Cannot instantiate ApiInfoContext with null parent Context"));
+        this.apiName = checkNotNull(apiName, "Cannot instantiate ApiInfoContext with null apiName");
+        this.apiVersion = checkNotNull(apiVersion, "Cannot instantiate ApiInfoContext with null apiVersion");
     }
 
     /**
