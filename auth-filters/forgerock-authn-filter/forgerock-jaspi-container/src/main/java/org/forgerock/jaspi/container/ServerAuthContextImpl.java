@@ -172,27 +172,36 @@ public class ServerAuthContextImpl implements ServerAuthContext {
                 }
             }
 
-            for (ServerAuthModule serverAuthModule : serverAuthModules) {
-                authStatus = serverAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject);
-                // Record the AuthModules AuthStatus to decided later whether to call secureResponse on the AuthModule.
-                if (AuthStatus.SUCCESS.equals(authStatus)) {
-                    // The module has successfully authenticated the client.
-                    authenticatingAuthModule = serverAuthModule;
-                    authenticatingAuthStatus = authStatus;
-                    break;
-                } else if (AuthStatus.SEND_SUCCESS.equals(authStatus)) {
-                    // The module may have completely/partially/not authenticated the client.
-                    authenticatingAuthModule = serverAuthModule;
-                    authenticatingAuthStatus = authStatus;
-                    break;
-                } else if (AuthStatus.SEND_FAILURE.equals(authStatus)) {
-                    // The module has failed to authenticate the client.
-                    // -- In our implementation we will let subsequent modules try before sending the failure.
-                    continue;
-                } else if (AuthStatus.SEND_CONTINUE.equals(authStatus)) {
-                    // The module has not completed authenticating the client.
-                    authenticatingAuthStatus = authStatus;
-                    break;
+            try {
+                for (ServerAuthModule serverAuthModule : serverAuthModules) {
+                    authStatus = serverAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject);
+                    // Record the AuthModules AuthStatus to decided later whether to call secureResponse on the AuthModule.
+                    if (AuthStatus.SUCCESS.equals(authStatus)) {
+                        // The module has successfully authenticated the client.
+                        authenticatingAuthModule = serverAuthModule;
+                        authenticatingAuthStatus = authStatus;
+                        break;
+                    } else if (AuthStatus.SEND_SUCCESS.equals(authStatus)) {
+                        // The module may have completely/partially/not authenticated the client.
+                        authenticatingAuthModule = serverAuthModule;
+                        authenticatingAuthStatus = authStatus;
+                        break;
+                    } else if (AuthStatus.SEND_FAILURE.equals(authStatus)) {
+                        // The module has failed to authenticate the client.
+                        // -- In our implementation we will let subsequent modules try before sending the failure.
+                        continue;
+                    } else if (AuthStatus.SEND_CONTINUE.equals(authStatus)) {
+                        // The module has not completed authenticating the client.
+                        authenticatingAuthStatus = authStatus;
+                        break;
+                    }
+                }
+            } finally {
+                // Once all Auth modules have had the chance to authenticate, audit the attempt.
+                if (AuditLoggerHolder.INSTANCE.getInstance() != null) {
+                    AuditLoggerHolder.INSTANCE.getInstance().audit(messageInfo);
+                } else {
+                    DEBUG.warn("Failed to log entry for authentication attempt as router is null.");
                 }
             }
 
@@ -215,12 +224,6 @@ public class ServerAuthContextImpl implements ServerAuthContext {
         } finally {
             authContextMap.put(AUTHENTICATING_AUTH_STATUS_KEY, authenticatingAuthStatus);
             authContextMap.put(AUTHENTICATING_AUTH_MODULE_KEY, authenticatingAuthModule);
-            // Once all Auth modules have had the chance to authenticate, audit the attempt.
-            if (AuditLoggerHolder.INSTANCE.getInstance() != null) {
-                AuditLoggerHolder.INSTANCE.getInstance().audit(messageInfo);
-            } else {
-                DEBUG.warn("Failed to log entry for authentication attempt as router is null.");
-            }
         }
     }
 
