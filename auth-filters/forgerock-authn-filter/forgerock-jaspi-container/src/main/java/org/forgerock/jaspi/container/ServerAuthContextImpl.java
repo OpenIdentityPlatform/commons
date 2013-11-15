@@ -64,10 +64,6 @@ public class ServerAuthContextImpl implements ServerAuthContext {
 
     private static final Logger DEBUG = LoggerFactory.getLogger(ServerAuthContextImpl.class);
 
-    //TODO change to CREST constant when AM and IDM have been updated to use 2.0.0 version
-    private static final String AUTHC_ID_REQUEST_KEY = "org.forgerock.security.authcid";
-    private static final String CONTEXT_REQUEST_KEY = "org.forgerock.security.context";
-
     private static final String PRIVATE_CONTEXT_MAP_KEY = "_serverAuthContextImplContextMap";
     private static final String AUTHENTICATING_AUTH_STATUS_KEY = "authenticatingAuthStatus";
     private static final String AUTHENTICATING_AUTH_MODULE_KEY = "authenticatingAuthModule";
@@ -148,7 +144,7 @@ public class ServerAuthContextImpl implements ServerAuthContext {
         AuthStatus authenticatingAuthStatus = null;
         ServerAuthModule authenticatingAuthModule = null;
         try {
-            messageInfo.getMap().put(CONTEXT_REQUEST_KEY, new HashMap<String, Object>());
+            messageInfo.getMap().put(AuthNFilter.ATTRIBUTE_AUTH_CONTEXT, new HashMap<String, Object>());
 
             AuthStatus authStatus = null;
             if (sessionAuthModule != null) {
