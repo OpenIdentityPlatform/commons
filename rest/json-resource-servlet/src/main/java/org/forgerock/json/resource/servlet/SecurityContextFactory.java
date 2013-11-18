@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012 ForgeRock AS.
+ * Copyright 2012-2013 ForgeRock AS.
  */
 package org.forgerock.json.resource.servlet;
 
@@ -77,24 +77,68 @@ import org.forgerock.json.resource.SecurityContext;
 public final class SecurityContextFactory implements HttpServletContextFactory {
 
     /**
+     * The value of {@link #ATTRIBUTE_AUTHCID} used in CREST versions 2.0.0 -
+     * 2.0.2. See the description of {@link #ATTRIBUTE_AUTHCID} for more
+     * information.
+     *
+     * @deprecated This version of the attribute was used in CREST versions
+     *             2.0.0 - 2.0.2 and deprecated in order to align with the
+     *             attribute names used by the common JASPI authentication
+     *             project. Applications should use
+     *             {@link #ATTRIBUTE_AUTHCID_V2} instead.
+     */
+    @Deprecated
+    public static final String ATTRIBUTE_AUTHCID_V1 = "org.forgerock.security.authcid";
+
+    /**
+     * The most recent value of {@link #ATTRIBUTE_AUTHCID}. See the description
+     * of {@link #ATTRIBUTE_AUTHCID} for more information.
+     */
+    public static final String ATTRIBUTE_AUTHCID_V2 = "org.forgerock.authentication.principal";
+
+    /**
      * The name of the HTTP Servlet Request attribute where this factory expects
      * to find the authenticated user's authentication ID. The name of this
      * attribute is {@code org.forgerock.security.authcid} and it MUST contain a
      * {@code String} if it is present.
+     * <p>
+     * This constant has the same value as {@link #ATTRIBUTE_AUTHCID_V2}.
      *
      * @see SecurityContext#getAuthenticationId()
      */
-    public static final String ATTRIBUTE_AUTHCID = "org.forgerock.security.authcid";
+    public static final String ATTRIBUTE_AUTHCID = ATTRIBUTE_AUTHCID_V2;
+
+    /**
+     * The value of {@link #ATTRIBUTE_AUTHZID} used in CREST versions 2.0.0 -
+     * 2.0.2. See the description of {@link #ATTRIBUTE_AUTHZID} for more
+     * information.
+     *
+     * @deprecated This version of the attribute was used in CREST versions
+     *             2.0.0 - 2.0.2 and deprecated in order to align with the
+     *             attribute names used by the common JASPI authentication
+     *             project. Applications should use
+     *             {@link #ATTRIBUTE_AUTHZID_V2} instead.
+     */
+    @Deprecated
+    public static final String ATTRIBUTE_AUTHZID_V1 = "org.forgerock.security.authzid";
+
+    /**
+     * The most recent value of {@link #ATTRIBUTE_AUTHZID}. See the description
+     * of {@link #ATTRIBUTE_AUTHZID} for more information.
+     */
+    public static final String ATTRIBUTE_AUTHZID_V2 = "org.forgerock.authentication.context";
 
     /**
      * The name of the HTTP Servlet Request attribute where this factory expects
      * to find the authenticated user's authorization ID. The name of this
      * attribute is {@code org.forgerock.security.authzid} and it MUST contain a
      * {@code Map<String, Object>} if it is present.
+     * <p>
+     * This constant has the same value as {@link #ATTRIBUTE_AUTHZID_V2}.
      *
      * @see SecurityContext#getAuthorizationId()
      */
-    public static final String ATTRIBUTE_AUTHZID = "org.forgerock.security.authzid";
+    public static final String ATTRIBUTE_AUTHZID = ATTRIBUTE_AUTHZID_V2;
 
     // Singleton instance.
     private static final SecurityContextFactory INSTANCE = new SecurityContextFactory();
@@ -137,34 +181,46 @@ public final class SecurityContextFactory implements HttpServletContextFactory {
      * @throws ResourceException
      *             If one of the attributes was present but had the wrong type.
      */
-    @SuppressWarnings("unchecked")
     public SecurityContext createContext(final Context parent, final HttpServletRequest request)
             throws ResourceException {
-        // Get the authentication ID.
-        String authcid;
-        try {
-            authcid = (String) request.getAttribute(ATTRIBUTE_AUTHCID);
-        } catch (final ClassCastException e) {
-            throw new InternalServerErrorException(
-                    "The security context could not be created because the "
-                            + "authentication ID attribute, " + ATTRIBUTE_AUTHCID
-                            + ", contained in the HTTP servlet request did "
-                            + "not have the correct type", e);
+        String authcid = getAuthenticationIdAttribute(ATTRIBUTE_AUTHCID, request);
+        if (authcid == null) {
+            // Check legacy attribute name.
+            authcid = getAuthenticationIdAttribute(ATTRIBUTE_AUTHCID_V1, request);
         }
-
-        // Get the authorization ID.
-        Map<String, Object> authzid;
-        try {
-            authzid = (Map<String, Object>) request.getAttribute(ATTRIBUTE_AUTHZID);
-        } catch (final ClassCastException e) {
-            throw new InternalServerErrorException(
-                    "The security context could not be created because the "
-                            + "authorization ID attribute, " + ATTRIBUTE_AUTHZID
-                            + ", contained in the HTTP servlet request did "
-                            + "not have the correct type", e);
+        Map<String, Object> authzid = getAuthorizationIdAttribute(ATTRIBUTE_AUTHZID, request);
+        if (authzid == null) {
+            // Check legacy attribute name.
+            authzid = getAuthorizationIdAttribute(ATTRIBUTE_AUTHZID_V1, request);
         }
-
         return new SecurityContext(parent, authcid, authzid);
+    }
+
+    private String getAuthenticationIdAttribute(final String attributeName,
+            final HttpServletRequest request) throws InternalServerErrorException {
+        try {
+            return (String) request.getAttribute(attributeName);
+        } catch (final ClassCastException e) {
+            throw new InternalServerErrorException(
+                    "The security context could not be created because the "
+                            + "authentication ID attribute, " + attributeName
+                            + ", contained in the HTTP servlet request did "
+                            + "not have the correct type", e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> getAuthorizationIdAttribute(final String attributeName,
+            final HttpServletRequest request) throws InternalServerErrorException {
+        try {
+            return (Map<String, Object>) request.getAttribute(attributeName);
+        } catch (final ClassCastException e) {
+            throw new InternalServerErrorException(
+                    "The security context could not be created because the "
+                            + "authorization ID attribute, " + attributeName
+                            + ", contained in the HTTP servlet request did "
+                            + "not have the correct type", e);
+        }
     }
 
     /**
