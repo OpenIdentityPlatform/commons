@@ -79,8 +79,10 @@ public class JwtSessionModule implements ServerAuthModule {
     public static final String TOKEN_IDLE_TIME_CLAIM_KEY = "tokenIdleTimeMinutes";
     /** The Jwt Token Maximum life configuration property key. */
     public static final String MAX_TOKEN_LIFE_KEY = "maxTokenLifeMinutes";
-    /** The Jwt Validated configuration proprety key. */
+    /** The Jwt Validated configuration property key. */
     public static final String JWT_VALIDATED_KEY = "jwtValidated";
+    /** Whether the JWT should persist between browser restarts property key. */
+    public static final String BROWSER_SESSION_ONLY_KEY = "sessionOnly";
 
     private final JwtBuilderFactory jwtBuilderFactory;
 
@@ -93,6 +95,7 @@ public class JwtSessionModule implements ServerAuthModule {
     private String keystorePassword;
     private int tokenIdleTime;
     private int maxTokenLife;
+    private boolean browserSessionOnly;
 
     /**
      * Constructs an instance of the JwtSessionModule.
@@ -138,6 +141,8 @@ public class JwtSessionModule implements ServerAuthModule {
             maxTokenLife = "0";
         }
         this.maxTokenLife = Integer.parseInt(maxTokenLife);
+        Boolean sessionOnly = (Boolean) options.get(BROWSER_SESSION_ONLY_KEY);
+        this.browserSessionOnly = sessionOnly == null ? false : sessionOnly;
     }
 
     /**
@@ -353,7 +358,7 @@ public class JwtSessionModule implements ServerAuthModule {
 
         Cookie cookie = new Cookie(JWT_SESSION_COOKIE_NAME, jwtString);
         cookie.setPath("/");
-        cookie.setMaxAge(new Long(exp.getTime() - now.getTime()).intValue() / 1000);
+        setCookieMaxAge(cookie, now, exp);
 
         return cookie;
     }
@@ -461,9 +466,24 @@ public class JwtSessionModule implements ServerAuthModule {
 
         Cookie cookie = new Cookie(JWT_SESSION_COOKIE_NAME, jwtString);
         cookie.setPath("/");
-        cookie.setMaxAge(new Long(exp.getTime() - now.getTime()).intValue() / 1000);
-
+        setCookieMaxAge(cookie, now, exp);
         return cookie;
+    }
+
+    /**
+     * Sets the max age for the cookie, based on whether the cookie should be browser session only.
+     * <p>
+     * If the cookie is only meant to last the same length the users browser is open, then the max age is set to -1.
+     * Otherwise the max age is set to expiry time.
+     *
+     * @param cookie The Cookie.
+     * @param now The Date at which the cookie was created.
+     * @param exp The expiry Date of the cookie.
+     */
+    private void setCookieMaxAge(Cookie cookie, Date now, Date exp) {
+        if (!browserSessionOnly) {
+            cookie.setMaxAge(new Long(exp.getTime() - now.getTime()).intValue() / 1000);
+        }
     }
 
     /**

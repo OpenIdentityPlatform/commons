@@ -55,11 +55,16 @@ import java.util.Map;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyMap;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
-import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 
 public class JwtSessionModuleTest {
 
@@ -882,5 +887,93 @@ public class JwtSessionModuleTest {
         assertEquals(jwtSessionCookie.getPath(), "/");
         assertEquals(jwtSessionCookie.getValue(), "ENCRYPTED_JWT");
         assertEquals(jwtSessionCookie.getMaxAge(), new Long(exp.getTime() - iat.getTime()).intValue() / 1000);
+    }
+
+    @Test
+    public void shouldSecureResponseWithMinusOneMaxLife() throws AuthException, UnsupportedEncodingException {
+
+        //Given
+        MessagePolicy requestPolicy = null;
+        MessagePolicy responsePolicy = null;
+        CallbackHandler callbackHandler = null;
+        Map<String, Object> options = getOptionsMap(1, 10);
+        options.put(JwtSessionModule.BROWSER_SESSION_ONLY_KEY, true);
+
+        jwtSessionModule.initialize(requestPolicy, responsePolicy, callbackHandler, options);
+
+        MessageInfo messageInfo = mock(MessageInfo.class);
+        Subject serviceSubject = null;
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        Map<String, Object> map = new HashMap<String, Object>();
+
+        given(messageInfo.getRequestMessage()).willReturn(request);
+        given(messageInfo.getResponseMessage()).willReturn(response);
+        given(messageInfo.getMap()).willReturn(map);
+
+        EncryptedJwtBuilder encryptedJwtBuilder = mock(EncryptedJwtBuilder.class);
+        JweHeaderBuilder jweHeaderBuilder = mock(JweHeaderBuilder.class);
+        JwtClaimsSetBuilder jwtClaimsSetBuilder = mock(JwtClaimsSetBuilder.class);
+        JwtClaimsSet claimsSet = mock(JwtClaimsSet.class);
+
+        given(jwtBuilderFactory.jwe(Matchers.<Key>anyObject())).willReturn(encryptedJwtBuilder);
+        given(encryptedJwtBuilder.headers()).willReturn(jweHeaderBuilder);
+        given(jweHeaderBuilder.alg(Matchers.<Algorithm>anyObject())).willReturn(jweHeaderBuilder);
+        given(jweHeaderBuilder.enc(Matchers.<EncryptionMethod>anyObject())).willReturn(jweHeaderBuilder);
+        given(jweHeaderBuilder.done()).willReturn(encryptedJwtBuilder);
+
+        given(jwtBuilderFactory.claims()).willReturn(jwtClaimsSetBuilder);
+        given(jwtClaimsSetBuilder.jti(anyString())).willReturn(jwtClaimsSetBuilder);
+        given(jwtClaimsSetBuilder.exp(Matchers.<Date>anyObject())).willReturn(jwtClaimsSetBuilder);
+        given(jwtClaimsSetBuilder.nbf(Matchers.<Date>anyObject())).willReturn(jwtClaimsSetBuilder);
+        given(jwtClaimsSetBuilder.iat(Matchers.<Date>anyObject())).willReturn(jwtClaimsSetBuilder);
+        given(jwtClaimsSetBuilder.claim(anyString(), anyObject())).willReturn(jwtClaimsSetBuilder);
+        given(jwtClaimsSetBuilder.claims(anyMap())).willReturn(jwtClaimsSetBuilder);
+        given(jwtClaimsSetBuilder.build()).willReturn(claimsSet);
+        given(encryptedJwtBuilder.claims(claimsSet)).willReturn(encryptedJwtBuilder);
+        given(encryptedJwtBuilder.build()).willReturn("ENCRYPTED_JWT");
+
+        //When
+        AuthStatus authStatus = jwtSessionModule.secureResponse(messageInfo, serviceSubject);
+
+        //Then
+        assertEquals(authStatus, AuthStatus.SEND_SUCCESS);
+        verify(jweHeaderBuilder).alg(JweAlgorithm.RSAES_PKCS1_V1_5);
+        verify(jweHeaderBuilder).enc(EncryptionMethod.A128CBC_HS256);
+
+        ArgumentCaptor<Date> expCaptor = ArgumentCaptor.forClass(Date.class);
+        ArgumentCaptor<Date> nbfCaptor = ArgumentCaptor.forClass(Date.class);
+        ArgumentCaptor<Date> iatCaptor = ArgumentCaptor.forClass(Date.class);
+        ArgumentCaptor<Long> idleTimeoutCaptor = ArgumentCaptor.forClass(Long.class);
+        ArgumentCaptor<Cookie> cookieCaptor = ArgumentCaptor.forClass(Cookie.class);
+
+        verify(jwtClaimsSetBuilder).exp(expCaptor.capture());
+        verify(jwtClaimsSetBuilder).nbf(nbfCaptor.capture());
+        verify(jwtClaimsSetBuilder).iat(iatCaptor.capture());
+        verify(jwtClaimsSetBuilder).claim(eq(JwtSessionModule.TOKEN_IDLE_TIME_CLAIM_KEY), idleTimeoutCaptor.capture());
+        verify(jwtClaimsSetBuilder).claims(anyMap());
+        verify(response).addCookie(cookieCaptor.capture());
+
+
+        Date iat = iatCaptor.getValue();
+        Date nbf = nbfCaptor.getValue();
+        Date exp = expCaptor.getValue();
+        Long idle = idleTimeoutCaptor.getValue();
+
+        assertEquals(iat, nbf);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(iat);
+        calendar.set(Calendar.MILLISECOND, 0);
+        calendar.add(Calendar.MINUTE, 10);
+        assertEquals(exp, calendar.getTime());
+        calendar.add(Calendar.MINUTE, 1);
+        calendar.add(Calendar.MINUTE, -10);
+        assertEquals(idle, (Long) (calendar.getTime().getTime() / 1000L));
+
+
+        Cookie jwtSessionCookie = cookieCaptor.getValue();
+        assertEquals(jwtSessionCookie.getPath(), "/");
+        assertEquals(jwtSessionCookie.getValue(), "ENCRYPTED_JWT");
+        assertEquals(jwtSessionCookie.getMaxAge(), -1);
     }
 }
