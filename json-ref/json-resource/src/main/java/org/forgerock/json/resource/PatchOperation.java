@@ -434,6 +434,7 @@ public final class PatchOperation {
         this.operation = checkNotNull(operation, "Cannot instantiate PatchOperation with null operation value");
         this.field = checkNotNull(field, "Cannot instantiate PatchOperation with null field value");
         this.value = value != null ? value : new JsonValue(null);
+        checkOperationType();
         checkOperationValue();
     }
 
@@ -509,7 +510,7 @@ public final class PatchOperation {
     public JsonValue toJsonValue() {
         final JsonValue json = new JsonValue(new LinkedHashMap<String, Object>(3));
         json.put(FIELD_OPERATION, operation);
-        json.put(FIELD_FIELD, field);
+        json.put(FIELD_FIELD, field.toString());
         if (!value.isNull()) {
             json.put(FIELD_VALUE, value.getObject());
         }
@@ -531,6 +532,12 @@ public final class PatchOperation {
                 throw new IllegalArgumentException(
                         "Non-numeric value provided for increment patch operation");
             }
+        }
+    }
+    
+    private void checkOperationType() {
+        if (!isAdd() && !isRemove() && !isIncrement() && !isReplace()) {
+            throw new IllegalArgumentException("Invalid patch operation type " + operation);
         }
     }
 
