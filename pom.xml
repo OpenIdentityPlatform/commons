@@ -154,7 +154,7 @@
         <netbeans.checkstyle.format>true</netbeans.checkstyle.format>
         
         <!--  ForgeRock build tools version -->
-        <forgerockBuildToolsVersion>1.0.1</forgerockBuildToolsVersion>
+        <forgerockBuildToolsVersion>1.0.2</forgerockBuildToolsVersion>
     </properties>
 
     <prerequisites>
