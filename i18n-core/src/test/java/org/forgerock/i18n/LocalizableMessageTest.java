@@ -31,6 +31,14 @@ public final class LocalizableMessageTest {
     private static final String RESOURCE_NAME = "org.forgerock.i18n.my_test";
 
     /**
+     * Tests that the message file's static resource name can be obtained.
+     */
+    @Test
+    public void testStaticResourceName() {
+        assertThat(MyTestMessages.resourceName()).isEqualTo(RESOURCE_NAME);
+    }
+
+    /**
      * Tests retrieval of a message having an ordinal but no arguments.
      */
     @Test

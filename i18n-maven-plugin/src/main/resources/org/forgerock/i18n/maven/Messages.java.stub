@@ -25,7 +25,7 @@ public final class ${CLASS_NAME} {
      * @return The name of the resource associated with the messages contained
      *         in this class.
      */
-    public String resourceName() {
+    public static String resourceName() {
         return RESOURCE;
     }
 
