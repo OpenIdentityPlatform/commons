@@ -43,6 +43,7 @@ define("config/process/UserConfig", [
                 "UserDelegate",
                 "org/forgerock/commons/ui/common/main/Configuration",
                 "org/forgerock/commons/ui/common/util/UIUtils",
+                "org/forgerock/commons/ui/common/util/CookieHelper",
                 "org/forgerock/commons/ui/common/main/SessionManager"
             ],
             processDescription: function(event, 
@@ -53,6 +54,7 @@ define("config/process/UserConfig", [
                     userDelegate,
                     conf,
                     uiUtils,
+                    cookieHelper,
                     sessionManager) {
                               
                 breadcrumbs.init();
@@ -63,6 +65,9 @@ define("config/process/UserConfig", [
                     eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: false});
                     router.init();
                 }, function() {
+                    if(!cookieHelper.cookiesEnabled()){
+                        location.href = "#enableCookies/";
+                    }
                     eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: true});
                     router.init();
                 });

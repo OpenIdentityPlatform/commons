@@ -64,5 +64,14 @@ define("org/forgerock/commons/ui/common/util/CookieHelper", [
         obj.setCookie(name, "", date, path, domain);
     };
     
+    obj.cookiesEnabled = function(){
+        this.setCookie("cookieTest","test");
+        if(!this.getCookie("cookieTest")){
+            return false;
+        }
+        this.deleteCookie("cookieTest");
+        return true;
+    };
+    
     return obj;
 });

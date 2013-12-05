@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -22,24 +22,29 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define*/
+/*global define, $ */
 
-define("org/forgerock/commons/ui/user/main", [
-    "./delegates/InternalUserDelegate",
-    "./login/InternalLoginHelper",  
-    "./UserRegistrationView",
-    "./profile/UserProfileView",
-    "./TermsOfUseDialog",
-    "./profile/EnterOldPasswordDialog",
-    "./ForgottenPasswordDialog",
-    "./profile/ChangeSecurityDataDialog",
-    "./profile/ChangeSiteIdentificationDialog",
-    "./LoginView",
-    "./LoginDialog",
-    "./NotFoundView",
-    "./login/LoggedUserBarView",
-    "./SiteConfigurator",
-    "./delegates/SiteConfigurationDelegate",
-    "./delegates/SiteIdentificationDelegate",
-    "./EnableCookiesView"
-]);
+/**
+ * @author Huck Elliott
+ */
+define("org/forgerock/commons/ui/user/EnableCookiesView", [
+    "org/forgerock/commons/ui/common/main/AbstractView",
+    "org/forgerock/commons/ui/common/util/CookieHelper"
+], function(AbstractView, cookieHelper) {
+    var EnableCookiesView = AbstractView.extend({
+        template: "templates/user/EnableCookiesTemplate.html",
+        baseTemplate: "templates/user/LoginBaseTemplate.html",
+        render: function() {
+            if(!cookieHelper.cookiesEnabled()){
+                this.parentRender();
+            }
+            else{
+                location.href = "#login/";
+            }
+        }
+    }); 
+    
+    return new EnableCookiesView();
+});
+
+

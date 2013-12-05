@@ -31,11 +31,15 @@ define("config/routes/CommonRoutesConfig", [
 ], function() {
     
     var obj = {
-        "404":  { //this route must be the first route
-            view: "org/forgerock/commons/ui/user/NotFoundView",
-            url: /^([\w\W]*)$/,
-            pattern: "?"
-        }
+            "404":  { //this route must be the first route
+                view: "org/forgerock/commons/ui/user/NotFoundView",
+                url: /^([\w\W]*)$/,
+                pattern: "?"
+            },
+            "enableCookies":  { //this route must be the first route
+                view: "org/forgerock/commons/ui/user/EnableCookiesView",
+                url: "enableCookies/"
+            }
     };
     
     return obj;
