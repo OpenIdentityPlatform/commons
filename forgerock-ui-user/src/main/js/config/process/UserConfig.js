@@ -172,7 +172,7 @@ define("config/process/UserConfig", [
                         window.location.href = conf.globalData.auth.urlParams.gotoOnFail;
                         return false;
                     }
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "invalidCredentials"); 
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "authenticationFailed"); 
                 });
             }
         },

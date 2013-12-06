@@ -106,7 +106,7 @@ define("org/forgerock/commons/ui/user/LoginDialog", [
                     }
                     
                 }, function() {
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "invalidCredentials"); 
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "authenticationFailed"); 
                 });
             }
         },

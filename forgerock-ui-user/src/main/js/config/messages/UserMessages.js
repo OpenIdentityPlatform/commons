@@ -31,8 +31,8 @@ define("config/messages/UserMessages", [
 ], function() {
     
     var obj = {
-            "invalidCredentials": {
-                msg: "config.messages.UserMessages.invalidCredentials",
+            "authenticationFailed": {
+                msg: "config.messages.UserMessages.authenticationFailed",
                 type: "error"
             },
             "usernameNotFound": {
