@@ -341,10 +341,14 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     });
     
     Handlebars.registerHelper('checkbox', function(map, name, options) {
-        var ret = "<div class='checkboxList'><ol>", key;
+        var ret = "<div class='checkboxList' id='"+name+"'><ol>", idx,
+            sortedMap = _.chain(map)
+                            .pairs()
+                            .sortBy(function (arr) { return arr[1]; })
+                            .value();
         
-        for(key in map) {
-            ret += '<li><input type="checkbox" name="'+ name +'" value="'+ key +'" id="'+ name +'_'+ key +'"><label for="'+ name +'_'+ key +'">' + map[key] + '</label></li>';
+        for(idx=0;idx<sortedMap.length;idx++) {
+            ret += '<li><input type="checkbox" name="'+ name +'" value="'+ sortedMap[idx][0] +'" id="'+ name +'_'+ encodeURIComponent(sortedMap[idx][0]) +'"><label for="'+ name +'_'+ encodeURIComponent(sortedMap[idx][0]) +'">' + sortedMap[idx][1] + '</label></li>';
         }
         
         ret += "</ol></div>";
@@ -362,6 +366,36 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         return new Handlebars.SafeString(ret);
     });
     
+    Handlebars.registerHelper("each_with_index", function(array, fn) {
+        var buffer = "",
+            item,
+            k=0,
+            i=0,
+            j=0;
+
+        for (i = 0, j = array.length; i < j; i++) {
+            if (array[i]) {
+                item = {};
+                item.value = array[i];
+        
+                // stick an index property onto the item, starting with 0
+                item.index = k;
+                
+                item.first = (k === 0);
+                item.last = (k === array.length);
+    
+                // show the inside of the block
+                buffer += fn.fn(item);
+
+                k++;
+            }
+        }
+
+        // return the finished buffer
+        return buffer;
+    
+    });
+
     obj.loadSelectOptions = function(data, el, empty, callback) {
         if( empty === undefined || empty === true ) {
             data = [ {
@@ -375,6 +409,31 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         if(callback) {
             callback(data);
         }
+    };
+    
+    
+    obj.jqConfirm = function(message,confirmCallback){
+        var btns = {};
+        btns[$.t('common.form.cancel')] = function(){
+            $('#jqConfirm').dialog('close');
+        };
+        btns[$.t('common.form.ok')] = function(){
+            $('#jqConfirm').dialog('close');
+            confirmCallback();
+        };
+        $('<div id="jqConfirm">' + message + '</div>')
+            .dialog({
+                title: $.t('common.form.confirm'),
+                modal: true,
+                resizable: false,
+                bgiframe: true,
+                width: '550px',
+                buttons: btns,
+                close: function(){
+                    $('#jqConfirm').dialog('destroy').remove();
+                }
+            })
+        ;
     };
     
     return obj;

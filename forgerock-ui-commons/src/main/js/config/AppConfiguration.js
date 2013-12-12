@@ -57,7 +57,6 @@ define("config/AppConfiguration", [
                 links: {                    
                     "default" : {
                         "urls": {
-                            //"role": "openidm-authorized"
                             "openidm": {
                                 "url": "http://forgerock.com/openidm.html",
                                 "name": "OpenIDM"

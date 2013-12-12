@@ -110,8 +110,7 @@ define("config/process/UserConfig", [
                     delete serviceInvokerConfig.defaultHeaders[constants.OPENIDM_HEADER_PARAM_USERNAME];
                     delete serviceInvokerConfig.defaultHeaders[constants.OPENIDM_HEADER_PARAM_NO_SESION];
                     
-                    loggedUserBarView.render();
-                    navigation.reload();
+                    eventManager.sendEvent(constants.EVENT_AUTHENTICATED);
                 } else {
                     serviceInvokerConfig.defaultHeaders[constants.OPENIDM_HEADER_PARAM_PASSWORD] = constants.OPENIDM_ANONYMOUS_PASSWORD;
                     serviceInvokerConfig.defaultHeaders[constants.OPENIDM_HEADER_PARAM_USERNAME] = constants.OPENIDM_ANONYMOUS_USERNAME;
@@ -207,61 +206,59 @@ define("config/process/UserConfig", [
                 eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
                 delete conf.gotoURL;
             }
-         },
-         {
-             startEvent: constants.EVENT_UNAUTHORIZED,
-             description: "",
-             dependencies: [
-                 "org/forgerock/commons/ui/common/main/ViewManager",
-                 "org/forgerock/commons/ui/common/main/Router",
-                 "org/forgerock/commons/ui/common/main/Configuration",
-                 "org/forgerock/commons/ui/common/main/SessionManager",
-                 "org/forgerock/commons/ui/user/LoginDialog"
-             ],
-             processDescription: function(error, viewManager, router, conf, sessionManager, loginDialog) {
-                 if(!conf.loggedUser) {
-                     if(!conf.gotoURL) {
-                         conf.setProperty("gotoURL", window.location.hash);
-                     }
-                     
-                     eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
-                     return;
-                 }
-                 
-                 sessionManager.getLoggedUser(function(user) {
-                     sessionManager.logout();
-                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unauthorized");
-                     eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
-                 }, function() {
-                     if (error.error.type === "GET") {
-                         conf.setProperty("gotoURL", window.location.hash); 
-                         sessionManager.logout();
-                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unauthorized");
-                         eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
-                     } else {
-                         viewManager.showDialog(router.configuration.routes.loginDialog.dialog);
-                     }
-                 });    
-             }
-         },
-         {
-             startEvent: constants.EVENT_NOTIFICATION_DELETE_FAILED,
-             description: "Error in deleting notification",
-             dependencies: [
-             ],
-             processDescription: function(event) {
-                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "errorDeletingNotification");
-             }
-         },
-         {
-             startEvent: constants.EVENT_GET_NOTIFICATION_FOR_USER_ERROR,
-             description: "Error in getting notifications",
-             dependencies: [
-             ],
-             processDescription: function(event) {
-                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "errorFetchingNotifications");
-             }
-         }
-         ];
+        },
+        {
+            startEvent: constants.EVENT_UNAUTHORIZED,
+            description: "",
+            dependencies: [
+                "org/forgerock/commons/ui/common/main/ViewManager",
+                "org/forgerock/commons/ui/common/main/Router",
+                "org/forgerock/commons/ui/common/main/Configuration",
+                "org/forgerock/commons/ui/common/main/SessionManager",
+                "org/forgerock/commons/ui/user/LoginDialog"
+            ],
+            processDescription: function(error, viewManager, router, conf, sessionManager, loginDialog) {
+                if(!conf.loggedUser) {
+                    if(!conf.gotoURL) {
+                        conf.setProperty("gotoURL", window.location.hash);
+                    }
+                    
+                    eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
+                    return;
+                }
+                
+                sessionManager.getLoggedUser(function(user) {
+                    sessionManager.logout();
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unauthorized");
+                    eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
+                }, function() {
+                    if (error.error.type === "GET") {
+                        conf.setProperty("gotoURL", window.location.hash); 
+                        sessionManager.logout();
+                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unauthorized");
+                        eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
+                    } else {
+                        viewManager.showDialog(router.configuration.routes.loginDialog.dialog);
+                    }
+                });    
+            }
+        },
+        {
+            startEvent: constants.EVENT_NOTIFICATION_DELETE_FAILED,
+            description: "Error in deleting notification",
+            dependencies: [ ],
+            processDescription: function(event) {
+                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "errorDeletingNotification");
+            }
+        },
+        {
+            startEvent: constants.EVENT_GET_NOTIFICATION_FOR_USER_ERROR,
+            description: "Error in getting notifications",
+            dependencies: [ ],
+            processDescription: function(event) {
+                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "errorFetchingNotifications");
+            }
+        }
+    ];
     return obj;
 });

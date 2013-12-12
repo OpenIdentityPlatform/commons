@@ -68,11 +68,11 @@ define("org/forgerock/commons/ui/user/LoginView", [
         
         formSubmit: function(event) {
             event.preventDefault();
-            
+            this.$el.find(":input").trigger("keyup");
             if(validatorsManager.formValidated(this.$el)) {
                 if(this.$el.find("[name=loginRemember]:checked").length !== 0) {
                     var expire = new Date();
-                    expire.setDate(expire.getDate + 365*20);
+                    expire.setDate(expire.getDate() + 365*20);
                     cookieHelper.setCookie("login", this.$el.find("input[name=login]").val(), expire);
                 } else {
                     cookieHelper.deleteCookie("login");

@@ -74,9 +74,9 @@ define("org/forgerock/commons/ui/common/main/ViewManager", [
         obj.currentView = viewPath;
     };
     
-    obj.showDialog = function(dialogPath, args) {
+    obj.showDialog = function(dialogPath, args, callback) {
         if(obj.currentDialog !== dialogPath || !_.isEqual(obj.currentDialogArgs, args)) {
-            require(dialogPath).render(args);
+            require(dialogPath).render(args, callback);
             msg.messages.hideMessages();
         }
         

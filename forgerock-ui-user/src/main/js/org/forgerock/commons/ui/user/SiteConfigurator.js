@@ -46,6 +46,10 @@ define("org/forgerock/commons/ui/user/SiteConfigurator", [
            conf.globalData.auth = {};
        }
 
+       if(!conf.delegateCache) {
+           conf.setProperty('delegateCache', {});
+       }
+
        console.log("READING CONFIGURATION");
        if(obj.configuration && obj.initialized === false) {
            obj.initialized = true;
@@ -55,6 +59,7 @@ define("org/forgerock/commons/ui/user/SiteConfigurator", [
                    obj.processConfiguration(config); 
                    eventManager.sendEvent(constants.EVENT_APP_INTIALIZED);
                }, function() {
+                   obj.processConfiguration({}); 
                    eventManager.sendEvent(constants.EVENT_APP_INTIALIZED);                   
                });
            } else {
@@ -77,14 +82,6 @@ define("org/forgerock/commons/ui/user/SiteConfigurator", [
                delete router.configuration.routes.register;
            }
        }
-       
-       if(config.securityQuestions === true) {
-           conf.globalData.securityQuestions = true;             
-       } else {
-           changeSecurityDataDialog = require("org/forgerock/commons/ui/user/profile/ChangeSecurityDataDialog");
-           changeSecurityDataDialog.data.height = 260;
-       }
-       
        
        if(config.securityQuestions === true) {
            conf.globalData.securityQuestions = true;             

@@ -28,7 +28,8 @@
  * @author yaromin
  */
 define("org/forgerock/commons/ui/common/main/EventManager", [
-	"org/forgerock/commons/ui/common/util/Constants"
+    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/util/CustomPolyfill"
 ], function(constants) {
     
     /**
@@ -44,7 +45,7 @@ define("org/forgerock/commons/ui/common/main/EventManager", [
 
     obj.registerListener = function (eventId, callback) {
         var proxyFunction = function(element, event) {
-            console.debug("Handiling event " + element.namespace);
+            console.debug("Handling event " + element.namespace);
             callback(event);
         };
         console.debug("registering event listener eventId=" + eventId);

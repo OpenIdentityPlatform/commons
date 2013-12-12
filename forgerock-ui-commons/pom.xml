@@ -118,7 +118,7 @@
        <dependency>
             <groupId>org.forgerock.commons.ui.libs</groupId>
             <artifactId>less</artifactId>
-            <version>1.3.3</version>
+            <version>1.5.1</version>
             <type>js</type>
             <classifier>min</classifier>
         </dependency>
@@ -183,11 +183,6 @@
         <dependency>
             <groupId>org.forgerock.commons.ui.libs</groupId>
             <artifactId>form2js</artifactId>
-            <type>js</type>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
-            <artifactId>mustache</artifactId>
             <type>js</type>
         </dependency>
         <dependency>

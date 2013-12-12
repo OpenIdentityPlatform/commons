@@ -36,6 +36,7 @@ define("org/forgerock/commons/ui/common/main/Router", [
     var obj = new AbstractConfigurationAware();
     
     obj.bindedRoutes = {};
+    obj.currentRoute = {};
     
     obj.init = function() {
         console.debug("Router init");
@@ -88,21 +89,17 @@ define("org/forgerock/commons/ui/common/main/Router", [
         Backbone.history.start();
     };
     
-    obj.routeTo = function(routeName, params) {
+    obj.routeTo = function(route, params) {
         var link;
         
         if(params && params.args) {
-            link = obj.getLink(obj.configuration.routes[routeName], params.args);
+            link = obj.getLink(route, params.args);
         } else {
-            link = obj.configuration.routes[routeName].url;
+            link = route.url;
         }
-        
-        if(window.location.hash === link) {
-            console.log("Hard route");
-            obj.bindedRoutes[routeName]();
-        }
-        
+
         params.replace = false;
+        obj.currentRoute = route;
         obj.router.navigate(link, params);
     };
     

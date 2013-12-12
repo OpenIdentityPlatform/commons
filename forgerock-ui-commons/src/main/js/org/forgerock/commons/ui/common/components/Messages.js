@@ -91,8 +91,10 @@ define("org/forgerock/commons/ui/common/components/Messages", [
                 }
                 this.$el.append("<div class='errorMessage' style='display: none;'><span><img src='images/span_error.png' width='14' height='14' alt='error' align='top' /></span>" + msg.message + "</div>");
             
-                this.$el.find("div:last").fadeIn(500);
-                this.messages.shift();
+                this.$el.find("div:last").fadeIn(500, _.bind(function () {
+                    this.messages.shift();
+                }, this));
+                
             } else {
                 this.$el.find("div").fadeOut(500, function () {
                     $(this).remove();

@@ -29,5 +29,6 @@ define("org/forgerock/commons/ui/common/util/main", [
 	"./UIUtils",
 	"./ObjectUtil",
 	"./ValidatorsUtils",
-	"./typeextentions/String"
+	"./typeextentions/String",
+	"./CustomPolyfill"
 ]);

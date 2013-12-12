@@ -86,7 +86,7 @@ define("org/forgerock/commons/ui/user/profile/ChangeSecurityDataDialog", [
                 delete conf.passwords;
                 this.close();
                 
-                if ($.inArray("openidm-admin", conf.loggedUser.roles.split(",")) === -1) {
+                if ($.inArray("ui-admin", conf.loggedUser.roles) === -1) {
                     userDelegate.getForUserID(conf.loggedUser._id, function(user) {
                         conf.loggedUser = user;
                     });

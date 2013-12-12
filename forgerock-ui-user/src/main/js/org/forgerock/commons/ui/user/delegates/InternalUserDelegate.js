@@ -48,7 +48,7 @@ define("org/forgerock/commons/ui/user/delegates/InternalUserDelegate", [
                 user[v.replace] = v.value;
             }
             
-            obj.updateEntity(user, successCallback, errorCallback);
+            obj.updateEntity(id, user, successCallback, errorCallback);
         });
         
         //obj.patchEntity({id: id, rev: rev}, patchDefinitionObject, successCallback, errorCallback, noChangesCallback);

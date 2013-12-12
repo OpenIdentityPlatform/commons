@@ -68,7 +68,7 @@ define("org/forgerock/commons/ui/user/profile/ChangeSiteIdentificationDialog", [
                     conf.loggedUser.siteImage = self.$el.find("input[name='siteImage']").val();
                     conf.loggedUser.passPhrase = self.$el.find("input[name=passPhrase]").val();
                     
-                    if ($.inArray("openidm-admin", conf.loggedUser.roles.split(",")) === -1) {
+                    if ($.inArray("ui-admin", conf.loggedUser.roles) === -1) {
                         userDelegate.getForUserID(conf.loggedUser._id, function(user) {
                             conf.loggedUser = user;
                         });

@@ -34,8 +34,11 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/commons/ui/common/util/Constants"
-], function(_, Backbone, AbstractConfigurationAware, AbstractView, conf, constants) {
+    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/main/EventManager",
+    "org/forgerock/commons/ui/common/main/ViewManager",
+    "org/forgerock/commons/ui/common/main/Router"
+], function(_, Backbone, AbstractConfigurationAware, AbstractView, conf, constants, eventManager, viewManager, router) {
     var obj = new AbstractConfigurationAware();
     
     obj.init = function() {
@@ -44,50 +47,72 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
             element: "#menu",
             template: "templates/common/NavigationTemplate.html",
             noBaseTemplate: true,
-            
+            data: {},
+
+            events: {
+                "click a.inactive": "disableLink"
+            },
+            disableLink: function(e){
+                e.preventDefault();
+            },
             render: function() {
-                this.parentRender(_.bind(function() {
-                    this.reload();
-                }, this));
+                this.reload();
+                this.parentRender();
             },
             
             addLinks: function(linkName) {
-                var url, urlName, subUrl, subUrlName;
+                var url, urlName, subUrl, subUrlName,icon;
                 
                 for(urlName in obj.configuration.links[linkName].urls) {
                     url = obj.configuration.links[linkName].urls[urlName];
                     
-                    if (this.isCurrent(url.url) || this.isCurrent(url.baseUrl)) {
-                        this.addLink(url.name, url.url, true);
-                        
+                    if (this.isCurrent(url.url) || this.isCurrent(url.baseUrl) || this.childIsCurrent(url.urls)) {
+                        this.addLink(url.name, url.url, true, url.icon, url.inactive);
+
                         if (url.urls) {
-                            this.$el.append('<div id="submenu" class="submenubar"><ul>');
                             for(subUrlName in url.urls) {
                                 subUrl = url.urls[subUrlName];
-                                this.addSubLink(subUrl.name, subUrl.url, this.isCurrent(subUrl.url));
+                                this.addSubLink(subUrl.name, subUrl.url, this.isCurrent(subUrl.url), subUrl.icon, subUrl.inactive);
                             }
-                            this.$el.append('</ul></div>');
-                        }
-                        
+                        }         
+
                     } else {
-                        this.addLink(url.name, url.url, false);
+                        this.addLink(url.name, url.url, false,url.icon, url.inactive);
+                    }                    
+                }
+       
+            },
+            
+            addLink: function(name, url, isActive, icon, isInactive) {
+                this.data.topNav.push({
+                    key: name,
+                    hashurl: url,
+                    title: $.t(name),
+                    isActive: isActive,
+                    isInactive: isInactive,
+                    icon: icon
+                });            
+            },
+            
+            addSubLink: function(name, url, isActive, icon, isInactive) {
+                this.data.subNav.push({
+                    key: name,
+                    hashurl: url,
+                    title: $.t(name),
+                    isActive: isActive,
+                    isInactive: isInactive,
+                    icon: icon
+                });     
+            },
+            
+            childIsCurrent: function(urls) {
+                var urlName;
+                for (urlName in urls) {
+                    if (this.isCurrent(urls[urlName].url)) {
+                        return true;
                     }
-                    
                 }
-            },
-            
-            addLink: function(name, url, isActive) {
-                var newLink = this.$el.find("ul:first").append('<li><a href="'+url+'">'+ $.t(name) +'</a></li>');
-                if (isActive) {
-                    $(newLink).find("li:last").addClass('active');
-                }
-            },
-            
-            addSubLink: function(name, url, isActive) {
-                var newSubLink = this.$el.find("ul:last").append('<li><a href="'+url+'">'+ $.t(name) +'</a></li>');
-                if (isActive) {
-                    $(newSubLink).find("li:last").addClass('active');
-                }
+                return false;
             },
             
             isCurrent: function(urlName) {
@@ -101,8 +126,8 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
             },
             
             clear: function() {
-                $("#menu li").remove();
-                $("#submenu").remove();
+                this.data.topNav = [];
+                this.data.subNav = [];
             },
             
             reload: function() {
@@ -113,7 +138,7 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                 for(linkName in obj.configuration.links) {
                     link = obj.configuration.links[linkName];
                     
-                    if(link.role && conf.loggedUser && _.contains(conf.loggedUser.roles.split(","), link.role)) {
+                    if(link.role && conf.loggedUser && _.contains(conf.loggedUser.roles, link.role)) {
                         this.addLinks(linkName);
                         return;
                     } else if(!link.role) {
@@ -130,7 +155,7 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
     
     obj.reload = function() {
         if(obj.navigation) {
-            obj.navigation.reload();
+            obj.navigation.render();
         }
     };
 

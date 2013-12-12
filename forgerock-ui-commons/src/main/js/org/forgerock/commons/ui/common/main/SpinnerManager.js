@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define, Spinner*/
+/*global $, define, Spinner, window */
 
 /**
  * @author mbilski
@@ -33,17 +33,27 @@ define("org/forgerock/commons/ui/common/main/SpinnerManager", [
 
     var obj = {};
     
-    obj.showSpinner = function() {
+    obj.showSpinner = function(priority) {
         if(obj.spinner) {
             obj.hideSpinner();
         }
         
-        obj.spinner = new Spinner().spin(document.getElementById('content'));
+        obj.spinner = new Spinner().spin(document.getElementById('wrapper'));
+        $(".spinner").position({
+                                of: $(window),
+                                my: "center center",
+                                at: "center center"
+                            });
+
+        if (priority && (!obj.priority || priority > obj.priority)) {
+            obj.priority = priority;
+        }
     };
     
-    obj.hideSpinner = function() {
-        if(obj.spinner) {
+    obj.hideSpinner = function(priority) {
+        if(obj.spinner && (!obj.priority || (priority && priority >= obj.priority))) {
             obj.spinner.stop();
+            delete obj.priority;
         }
     };
 

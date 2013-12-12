@@ -114,17 +114,20 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
          * change color of submit button.
          */
         onValidate: function(event, input, msg, validatorType) {           
+            var button = this.$el.find("input[type=submit]");
             if(msg === "inProgress") {
                 //TODO spinner
                 //console.log("in progress..");
                 return;
             }
-            
+            if (!button.length) {
+                button = this.$el.find("#submit");
+            }
             if(validatorsManager.formValidated(this.$el)) {
-                this.$el.find("input[type=submit]").removeClass('inactive').addClass('active');
+                button.removeClass('inactive').addClass('active');
                 this.$el.find(".input-validation-message").hide();
             } else {
-                this.$el.find("input[type=submit]").removeClass('active').addClass('inactive');
+                button.removeClass('active').addClass('inactive');
                 this.$el.find(".input-validation-message").show();
             }
             
@@ -140,7 +143,7 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
             }
             
             $(input).nextAll("div.validation-message:first").html(msg ? msg : '');
-            $("div.validation-message[for="+$(input).attr('name')+"]").html(msg ? msg : '');
+            $("div.validation-message[for='"+$(input).attr('name')+"']").html(msg ? msg : '');
             
             if(validatorType) {
                 validatorsUtils.setErrors(this.$el, validatorType, msg);

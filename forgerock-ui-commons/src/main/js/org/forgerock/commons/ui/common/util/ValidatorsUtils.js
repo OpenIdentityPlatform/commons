@@ -47,32 +47,34 @@ define("org/forgerock/commons/ui/common/util/ValidatorsUtils", [
     };
     
     obj.setErrors = function(el, validatorType, msg) {
-        _.each(el.find("span[data-for-validator="+validatorType+"]"), function(input) {
-            var type = $(input).attr("data-for-req"), span = $(input).prev("span");
-            if (!type) { type = $(input).text(); }
-            
-            if( $.inArray(type, msg) !== -1 ) {
-                span.removeClass('ok');
-                span.addClass('error');
-                span.html('x');
-            } else {
-                span.removeClass('error');
-                span.addClass('ok');
-                span.html('&#10004;');
-            }
+        _.each(validatorType.split(' '), function (vt) {
+            _.each(el.find("span[data-for-validator="+vt+"]"), function(input) {
+                var type = $(input).attr("data-for-req"), span = $(input).prev("span");
+                if (!type) { type = $(input).text(); }
+                
+                if( $.inArray(type, msg) !== -1 ) {
+                    span.removeClass('ok');
+                    span.addClass('error');
+                    span.html('x');
+                } else {
+                    span.removeClass('error');
+                    span.addClass('ok');
+                    span.html('&#10004;');
+                }
+            });
         });
     };
     
     obj.hideValidation = function(input, el) {
         $(input).nextAll("span").hide();
         $(input).nextAll("div.validation-message:first").hide();
-        $("div.validation-message[for="+$(input).attr('name')+"]").hide();
+        $("div.validation-message[for='"+$(input).attr('name')+"']").hide();
     };
     
     obj.showValidation = function(input, el) {
         $(input).nextAll("span").show();
         $(input).nextAll("div.validation-message:first").show();
-        $("div.validation-message[for="+$(input).attr('name')+"]").show();
+        $("div.validation-message[for='"+$(input).attr('name')+"']").show();
     };
     
     obj.hideBox = function(el) {

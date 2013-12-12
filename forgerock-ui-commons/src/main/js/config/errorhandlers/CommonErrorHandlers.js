@@ -41,6 +41,10 @@ define("config/errorhandlers/CommonErrorHandlers", [
                 status: "401",
                 event: constants.EVENT_UNAUTHORIZED
             },
+            "notImplemented": {
+                status: "501",
+                event: constants.EVENT_UNAUTHORIZED
+            },
             "forbidden": {
                 status: "403",
                 event: constants.EVENT_UNAUTHORIZED,

@@ -65,7 +65,7 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
                         eventManager.sendEvent(constants.EVENT_LOGOUT);
                         return;
                     }
-                    if ($.inArray("openidm-admin", conf.loggedUser.roles.split(",")) === -1) {
+                    if ($.inArray("ui-admin", conf.loggedUser.roles) === -1) {
                         this.delegate.getForUserID(data._id, function(user) {
                             conf.loggedUser = user;
                             eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateSuccessful");

@@ -77,7 +77,7 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
             if(input.attr('data-validator-event')) {
                 event = input.attr('data-validator-event');
             } else {
-                event = "change";
+                event = "change paste";
             }
             
             input.on(event, _.bind(obj.validate, {input: input, el: el, validatorType: input.attr('data-validator')}));
@@ -86,9 +86,16 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
         if (baseEntity) {
             policyDelegate.readEntity(baseEntity, _.bind(function (policy) {
                 _.each(policy.properties, _.bind(function (property, i) {
-                    var input,event;
+                    var input,event,idx;
                     
-                    input = el.find("[name=" + property.name + "]");
+                    if (property.name.match(/\[\]$/)) { // property is an array
+                        // if the name is property[], then this selector will match all inputs named beginning like "property[", including
+                        // property[1],property[2], etc...
+                        input = el.find("[name^='" + property.name.replace(/\]$/, '') + "']");
+                    }
+                    else {
+                        input = el.find("[name='" + property.name + "']");
+                    }
                     
                     input.attr("data-validation-status", "error");
                     
@@ -106,7 +113,7 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
                     });
                     
                     // This adds requirement descriptions for DOM containers specifically designated to hold them
-                    _.each($(".validationRules[data-for-validator~='"+input.attr("name")+"']"), function (ruleContainer) {
+                    _.each($(".validationRules[data-for-validator~='"+property.name+"']"), function (ruleContainer) {
 
                         // we don't want to add the rules to this container more than once,
                         // so checking for this attribute prevents this from happening.
@@ -148,67 +155,75 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
                     
                     
                     // This binds the events to all of our fields which have validation policies defined by the server
-                    input.on(event, _.bind(function (e) {
-                        var validationContext = (e.type === "change" || e.type === "blur") ? "server":"client";
-                        
-                        $.doTimeout(this.input.attr('name')+'validation' + validationContext, 100, _.bind(function() {
-    
-                            var j,params,policyFailures = [],
-                                hasServerPolicies = false,
-                                EVAL_IS_EVIL = eval; // JSLint doesn't like eval usage; this is a bit of a hack around that, while acknowledging it.
+                    _.each(input, function (item, idx) {
+                        $(input[idx]).on(event, _.bind(function (e) {
+                            var validationContext = (e.type === "change" || e.type === "blur") ? "server":"client";
                             
-                            this.input.siblings(".validation-message").empty();
-                            
-                            _.each(this.property.policies, _.bind(function(policy,j) {
-                                // The policy may return the JavaScript validation function as a string property;
-                                // If so, we can use that validation function directly here
-                                if (policy.policyFunction) {
-                                    
-                                    if (!policy.params) {
-                                        policy.params = {};
+                            $.doTimeout(this.input.attr('name')+'validation' + validationContext, 100, _.bind(function() {
+        
+                                var j,params,policyFailures = [],
+                                    hasServerPolicies = false,
+                                    EVAL_IS_EVIL = eval; // JSLint doesn't like eval usage; this is a bit of a hack around that, while acknowledging it.
+        
+                                if (!this.input.closest("form")[0]) { 
+                                    // possible if the form has been removed between the time the event is triggered and the 
+                                    // doTimeout is executed (particularly in unit tests)
+                                    return;
+                                }
+
+                                this.input.siblings(".validation-message").empty();
+                                
+                                _.each(this.property.policies, _.bind(function(policy,j) {
+                                    // The policy may return the JavaScript validation function as a string property;
+                                    // If so, we can use that validation function directly here
+                                    if (policy.policyFunction) {
+                                        
+                                        if (!policy.params) {
+                                            policy.params = {};
+                                        }
+                                        
+                                        params = policy.params;
+                                        // This instantiates the string representation of the function into an actual, executable local function
+                                        // and then calls that function, appending the resulting array into our collection of policy failures.
+                                        policyFailures = policyFailures.concat(EVAL_IS_EVIL("policyFunction = " + policy.policyFunction)(form2js(this.input.closest('form')[0]), this.input.val(), params, this.property.name));
                                     }
+                                    // we have a special case for reauth required, since that is kind of a strange case.
+                                    else if (!($.inArray("REAUTH_REQUIRED", policy.policyRequirements) !== -1 && policy.policyRequirements.length === 1)) {
+                                        hasServerPolicies = true;
+                                    }
+                                }, this));
+                                
+                                // For those validation policies which cannot be performed within the browser, 
+                                // we call to the server to do the validation for us.
+                                if (validationContext === "server" && (hasServerPolicies || this.input.attr("data-validation-force-server"))) {
+                                    policyFailures = [];
+                                    policyDelegate.validateProperty(
+                                        baseEntity,
+                                        {
+                                            "fullObject": form2js(this.input.closest("form")[0], '.', false), 
+                                            "value": this.input.val(), 
+                                            "property": this.property.name
+                                        }, 
+                                        _.bind(function (result) {
+                                            var l;
+                                            if (!result.result) {
+                                                for (l = 0; l < result.failedPolicyRequirements.length; l++) {
+                                                    policyFailures = policyFailures.concat(result.failedPolicyRequirements[l].policyRequirements);
+                                                }
+                                            }
+                                            postValidation.call(this, policyFailures);
+                                        }, this)
+                                    );
+                                }
+                                else {
+                                    postValidation.call(this, policyFailures);
+                                }
                                     
-                                    params = policy.params;
-                                    // This instantiates the string representation of the function into an actual, executable local function
-                                    // and then calls that function, appending the resulting array into our collection of policy failures.
-                                    policyFailures = policyFailures.concat(EVAL_IS_EVIL("policyFunction = " + policy.policyFunction)(form2js(this.input.closest('form')[0]), this.input.val(), params, this.property.name));
-                                }
-                                // we have a special case for reauth required, since that is kind of a strange case.
-                                else if (!($.inArray("REAUTH_REQUIRED", policy.policyRequirements) !== -1 && policy.policyRequirements.length === 1)) {
-                                    hasServerPolicies = true;
-                                }
+                            
                             }, this));
                             
-                            // For those validation policies which cannot be performed within the browser, 
-                            // we call to the server to do the validation for us.
-                            if (validationContext === "server" && (hasServerPolicies || this.input.attr("data-validation-force-server"))) {
-                                policyFailures = [];
-                                policyDelegate.validateProperty(
-                                    baseEntity,
-                                    {
-                                        "fullObject": form2js(this.input.closest("form")[0], '.', false), 
-                                        "value": this.input.val(), 
-                                        "property": this.property.name
-                                    }, 
-                                    _.bind(function (result) {
-                                        var l;
-                                        if (!result.result) {
-                                            for (l = 0; l < result.failedPolicyRequirements.length; l++) {
-                                                policyFailures = policyFailures.concat(result.failedPolicyRequirements[l].policyRequirements);
-                                            }
-                                        }
-                                        postValidation.call(this, policyFailures);
-                                    }, this)
-                                );
-                            }
-                            else {
-                                postValidation.call(this, policyFailures);
-                            }
-                                
-                        
-                        }, this));
-                        
-                    }, {property : property, input: input}));
+                        }, {property : property, input: $(input[idx])}));
+                    }, this);
                 }, this));
                 
                 if (callback) {
@@ -225,7 +240,9 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
             var event = $(input).attr('data-validator-event');
             
             if(event) {
-                $(input).trigger(event);
+                _.each(event.split(/\s+/), function (e) {
+                    $(input).trigger(e);
+                });
             } else {
                 $(input).trigger("change");
             }
@@ -242,19 +259,23 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
 
     obj.validate = function(event) {       
         var parameters = [this.el, this.input, _.bind(obj.afterValidation, this)], validatorConfig, i;
-        validatorConfig = obj.configuration.validators[this.validatorType];
-        
-        if(validatorConfig) {
-            this.el.trigger("onValidate", [this.input, "inProgress"]);
+        _.each(this.validatorType.split(' '), _.bind(function (vt) {
+
+            validatorConfig = obj.configuration.validators[vt];
             
-            for(i = 0; i < validatorConfig.dependencies.length; i++) {
-                parameters.push(require(validatorConfig.dependencies[i]));
+            if(validatorConfig) {
+                this.el.trigger("onValidate", [this.input, "inProgress"]);
+                
+                for(i = 0; i < validatorConfig.dependencies.length; i++) {
+                    parameters.push(require(validatorConfig.dependencies[i]));
+                }
+                
+                validatorConfig.validator.apply(this, parameters);
+            } else {
+                console.error("Could not find such validator: " + validatorConfig);
             }
-            
-            validatorConfig.validator.apply(this, parameters);
-        } else {
-            console.error("Could not find such validator: " + validatorConfig);
-        }
+
+        }, this));
     };
     
     obj.afterValidation = function(msg) {

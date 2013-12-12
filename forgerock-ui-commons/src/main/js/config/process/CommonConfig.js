@@ -67,7 +67,9 @@ define("config/process/CommonConfig", [
                 "org/forgerock/commons/ui/common/main/SpinnerManager"
             ],
             processDescription: function(event, spinner) {
-                spinner.showSpinner();
+                if (!event.suppressSpinner) {
+                    spinner.showSpinner();
+                }
             }
         },
         {
@@ -87,16 +89,18 @@ define("config/process/CommonConfig", [
                 "org/forgerock/commons/ui/common/main/ViewManager",
                 "org/forgerock/commons/ui/common/main/Router",
                 "org/forgerock/commons/ui/common/main/Configuration",
-                "org/forgerock/commons/ui/common/components/Navigation"
+                "org/forgerock/commons/ui/common/components/Navigation",
+                "org/forgerock/commons/ui/common/main/SpinnerManager"
             ],
-            processDescription: function(args, viewManager, router, conf, navigation) {
-                var route = args.route, params = args.args;
-                
+            processDescription: function(args, viewManager, router, conf, navigation, spinner) {
+                var route = args.route, params = args.args, callback = args.callback;
+                params = params || route.defaults;
                 conf.setProperty("baseView", ""); 
                 conf.setProperty("baseViewArgs", ""); 
                                         
-                router.navigate(router.getLink(route, params));
-                viewManager.changeView(route.view, params, undefined, route.forceUpdate);
+                spinner.hideSpinner(10);
+                router.routeTo(route, {trigger: true, args: params});
+                viewManager.changeView(route.view, params, callback, route.forceUpdate);
                 navigation.reload();
             }
         },
@@ -110,15 +114,15 @@ define("config/process/CommonConfig", [
                 "org/forgerock/commons/ui/common/components/Navigation"
             ],
             processDescription: function(args, viewManager, router, conf, navigation) {
-                var route = args.route, params = args.args;
+                var route = args.route, params = args.args, callback = args.callback;
                 
                 conf.setProperty("baseView", args.base); 
                 conf.setProperty("baseViewArgs", params); 
                 
                 navigation.init();
                 
-                viewManager.changeView(route.baseView.view, params, function() {  
-                    viewManager.showDialog(route.dialog, params);
+                viewManager.changeView(route.baseView.view, viewManager.currentViewArgs, function() {  
+                    viewManager.showDialog(route.dialog, params, callback);
                     router.navigate(router.getLink(route, params));
                 });
             }
@@ -142,9 +146,9 @@ define("config/process/CommonConfig", [
             ],
             processDescription: function(event, router, navigation) {
                 if(event.trigger === false) {
-                    router.routeTo(event.routeName, {trigger: false, args: event.args});
+                    router.routeTo(router.configuration.routes[event.routeName], {trigger: false, args: event.args});
                 } else {
-                    router.routeTo(event.routeName, {trigger: true, args: event.args});
+                    router.routeTo(router.configuration.routes[event.routeName], {trigger: true, args: event.args});
                 }
                 navigation.reload();
             }
@@ -159,6 +163,7 @@ define("config/process/CommonConfig", [
                 messagesManager.messages.displayMessageFromConfig(event);
             }
         }
+        
         ];
     return obj;
 });

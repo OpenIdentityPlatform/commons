@@ -31,7 +31,7 @@
 
 require.config({
     paths: {
-        mustache: "libs/mustache-0.7.0",
+        less: "libs/less-1.5.1-min",
         i18next: "libs/i18next-1.5.8-min",
         backbone: "libs/backbone-0.9.2-min",
         underscore: "libs/underscore-1.4.4-min",
@@ -100,7 +100,6 @@ require.config({
  * required synchronously
  */
 require([
-    "mustache",
     "underscore",
     "backbone",
     "form2js",
@@ -121,7 +120,7 @@ require([
     "org/forgerock/commons/ui/user/main",
     "org/forgerock/commons/ui/user/delegates/UserDelegate",
     "org/forgerock/commons/ui/common/main"
-], function(a, b, c, d, e, f, g, h, i, j, k, l, m, n, i18n, constants, eventManager) { 
+], function(b, c, d, e, f, g, h, i, j, k, l, m, n, i18n, constants, eventManager) { 
     eventManager.sendEvent(constants.EVENT_DEPENDECIES_LOADED);
 });
 

@@ -59,9 +59,37 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
         return serviceInvoker.restCall(callParams);
     };
 
-    obj.prototype.createEntity = function(object, successCallback, errorCallback) {
-        console.debug("create entity");
-        return this.serviceCall({url: "/?_action=create" , type: "POST", success: successCallback, error: errorCallback, data: JSON.stringify(object)});
+    obj.prototype.createEntity = function(id, objectParam, successCallback, errorCallback) {
+        console.debug("create entity");      
+        var headers = {}; 
+
+        if (typeof id === "object" && id !== null) {
+            throw "Invalid id value passed to createEntity";
+        }
+
+
+        if (id !== null && id !== undefined) {
+            if(objectParam._rev) {
+                headers["If-None-Match"] = '"' + objectParam._rev + '"';
+            } else {
+                headers["If-None-Match"] = '"' + "*" + '"';
+            }
+            return this.serviceCall({url: "/" + id,
+                type: "PUT",
+                success: successCallback, 
+                error: errorCallback, 
+                data: JSON.stringify(objectParam),
+                headers: headers
+            });
+        } else {
+            return this.serviceCall({url: "/?_action=create",
+                type: "POST",
+                success: successCallback, 
+                error: errorCallback, 
+                data: JSON.stringify(objectParam),
+                headers: headers
+            });            
+        }
     };
 
     obj.prototype.deleteEntity = function(id, successCallback, errorCallback) {
@@ -83,7 +111,7 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
         return this.serviceCall({url: "/" + id, type: "GET", success: successCallback, error: errorCallback});
     };
 
-    obj.prototype.updateEntity = function(objectParam, successCallback, errorCallback) {
+    obj.prototype.updateEntity = function(id, objectParam, successCallback, errorCallback) {
         console.debug("update entity");
         var headers = {};
         
@@ -93,7 +121,7 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
             headers["If-Match"] = '"' + "*" + '"';
         }
         
-        return this.serviceCall({url: "/" + objectParam._id,
+        return this.serviceCall({url: "/" + id,
             type: "PUT",
             success: successCallback, 
             error: errorCallback, 

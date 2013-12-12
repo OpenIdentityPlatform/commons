@@ -52,7 +52,7 @@ define("org/forgerock/commons/ui/common/main/ServiceInvoker", [
             delete callParams.headers[constants.OPENIDM_HEADER_PARAM_NO_SESION];
         }
 
-        em.sendEvent(constants.EVENT_START_REST_CALL);
+        em.sendEvent(constants.EVENT_START_REST_CALL, {suppressSpinner: callParamsParam.suppressSpinner});
         realSuccess = callParams.success;
         realError = callParams.error;
         callParams.success = function (data,textStatus, jqXHR) {
@@ -79,6 +79,16 @@ define("org/forgerock/commons/ui/common/main/ServiceInvoker", [
             callParams.dataType = "json";
             callParams.contentType = "application/json";
         }
+
+        callParams.xhrFields = {
+            // Useful for CORS requests, should we be accessing a remote endpoint
+            // http://www.html5rocks.com/en/tutorials/cors/#toc-withcredentials
+            withCredentials: true
+        };
+        
+        // this is the jQuery default value for this header, but unless manually specified (like so) it won't be included in CORS requests
+        callParams.headers["X-Requested-With"] = "XMLHttpRequest";
+        
         return $.ajax(callParams); 
     };
 

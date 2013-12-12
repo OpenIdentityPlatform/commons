@@ -55,6 +55,10 @@ define("org/forgerock/commons/ui/common/main/i18nManager", [
                 language = urlParams.locale;
             }
         }
+        $.i18n.init({
+            fallbackLng: false,
+            load: 'current' 
+        });            
         $.i18n.setLng(language);
         obj.language = language;
         

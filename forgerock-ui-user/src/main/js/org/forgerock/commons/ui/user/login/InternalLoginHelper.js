@@ -22,32 +22,54 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define*/
+/*global define, window */
 
 define("org/forgerock/commons/ui/user/login/InternalLoginHelper", [
-	"UserDelegate",
+    "UserDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/util/CookieHelper",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "org/forgerock/commons/ui/common/main/ServiceInvoker",
-    "org/forgerock/commons/ui/common/main/Configuration"
-], function (userDelegate, eventManager, constants, cookieHelper, AbstractConfigurationAware, serviceInvoker, conf) {
+    "org/forgerock/commons/ui/common/main/Configuration",
+    "org/forgerock/commons/ui/common/util/CookieHelper",
+    "org/forgerock/commons/ui/common/main/Router"
+            
+], function (userDelegate, eventManager, constants, AbstractConfigurationAware, serviceInvoker, conf, cookieHelper, router) {
     var obj = new AbstractConfigurationAware();
 
     obj.login = function(params, successCallback, errorCallback) {
-        userDelegate.login(params.userName, params.password, function(user) {
-            conf.globalData.userComponent = user.userid.component;
-            
-            userDelegate.getUserById(user.userid.id, user.userid.component, successCallback, errorCallback);
-        }, function() {
-            errorCallback();
-        }, {"unauthorized": { status: "401"}});
+        cookieHelper.deleteCookie("session-jwt", "/", ""); // resets the session cookie to discard old session that may still exist
+        userDelegate.login(params.userName, params.password, 
+            function(user) {
+                conf.globalData.userComponent = user.userid.component;
+                
+                userDelegate.getUserById(user.userid.id, user.userid.component, 
+                    function(userData) {
+                        userData.roles = user.roles; // the "roles" attribute comes from the security context, rather than the read of the user
+                        successCallback(userData);
+                    }, 
+                    errorCallback, 
+                    // supress 403 errors at this stage
+                    {"forbidden": { status: "403"}}
+                ); 
+            }, 
+            function() {
+                if (errorCallback) {
+                    errorCallback();
+                }
+            }, 
+            {
+                "unauthorized": { 
+                    status: "401", 
+                    message: "authenticationFailed"
+                }
+            }
+        );
     };
 
     obj.logout = function() {
         delete conf.loggedUser;
-        cookieHelper.deleteCookie("session-jwt", "/", ""); // resets the cookie session to discard old session that may still exist
+        cookieHelper.deleteCookie("session-jwt", "/", ""); // resets the session cookie to discard old session that may still exist
     };
     
     obj.getLoggedUser = function(successCallback, errorCallback) {
@@ -55,10 +77,31 @@ define("org/forgerock/commons/ui/user/login/InternalLoginHelper", [
             userDelegate.getProfile(function(user) {
                 conf.globalData.userComponent = user.userid.component;
                 
-                userDelegate.getUserById(user.userid.id, user.userid.component, successCallback, errorCallback);
+                userDelegate.getUserById(user.userid.id, user.userid.component, 
+                    function(userData) {
+                        userData.roles = user.roles; // the "roles" attribute comes from the security context, rather than the read of the user
+                        if (!userData.userName) {
+                            userData.userName = user.username;
+                        }
+                        successCallback(userData);
+                    }, 
+                    function () {
+                        if (!window.location.hash.replace(/^#/, '').match(router.configuration.routes.logout.url)) {
+                            errorCallback();
+                        } else {
+                            errorCallback();
+                        }
+                    }, 
+                    {"forbidden": { status: "403"}}
+                );
             }, function() {
                 errorCallback();
-            }, {"serverError": {status: "503"}, "unauthorized": {status: "401"}});
+            }, 
+            {
+                "unauthorized": { 
+                    status: "401"
+                }
+            });
         } catch(e) {
             console.log(e);
             errorCallback();
