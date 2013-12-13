@@ -22,7 +22,7 @@ package org.forgerock.auth.common;
  * @author Phill Cunnington
  * @since 1.0.0
  */
-public interface AuditLogger {
+public interface AuditLogger<T> {
 
     /**
      * Audits the AuthN or AuthZ requests outcome.
@@ -32,5 +32,5 @@ public interface AuditLogger {
      *
      * @param auditRecord The AuditRecord.
      */
-    void audit(AuditRecord auditRecord);
+    void audit(AuditRecord<T> auditRecord);
 }

@@ -1,0 +1,267 @@
+This file is imported in every test case
+It will trigger all the other needed imports
+
+*** Settings ***
+# ForgeRock Libraries: will load Robot and Python libraries
+#Resource    file_utils.txt
+#Resource    json_utils.txt
+Resource    rest_utils.txt
+Resource    startup_shutdown.txt
+
+# Robot Framework Libraries needed by keywords defined bellow and by some tc
+Library     Collections
+Library     OperatingSystem
+Library     String
+
+*** Variables ***
+#####################################################################################
+# those variables are variables that can be customized by users                     #
+# custom values should be set in variables.py. Leaving following values as default  #
+#####################################################################################
+
+# timeouts in seconds
+${STARTUP_TIMEOUT}          60
+${TIMEOUT}                  90
+${LONGTIMEOUT}              210
+
+# drives the behavior accordingly to the os chosen: unix or windows
+# windows not supported for the moment
+#${OPERATING_SYSTEM}  unix
+
+# To run openidm in debug mode (adding jpda on command line), set to 'true'
+${DEBUG}  false
+
+#####################################################################################
+# those variables are hard-coded variable that should not be modified by user       #
+# hence they are not in the variable file (example of variable file in /samples)    #
+#####################################################################################
+
+# openidm is installed on localhost on port 8080. 
+# This is URL prefix to use for REST access
+${SERVER}              http://localhost:8080/
+${URL_PREFIX}  ${SERVER}jaspi/
+
+# URL
+#${URL_RECON_XML}        recon?_action=recon&mapping=systemXmlfileAccounts_managedUser&waitForCompletion=true
+#${URL_RECON_LDAP}       recon?_action=recon&mapping=systemLdapAccounts_managedUser&waitForCompletion=true
+#${URL_RECON_LDAP_NOWAITING}       recon?_action=recon&mapping=systemLdapAccounts_managedUser
+#${URL_TASKSCANNER}      taskscanner?_action=execute&name=schedule/taskscan_sunset
+
+# Default user properties 
+#${DEFAULT_USER_ID}        joesmith
+#${DEFAULT_USER_NAME}      jsmith
+#${DEFAULT_GIVEN_NAME}     joe
+#${DEFAULT_FAMILY_NAME}    smith
+#${DEFAULT_EMAIL}          joe@example.com
+#${DEFAULT_PHONE_NUMBER}   5551231234
+#${DEFAULT_PASSWORD}       Th3Password
+#${DEFAULT_DESCRIPTION}    My First user
+# If we need another user
+#${ANOTHER_DEFAULT_USER_ID}    anotherjoesmith
+#${ANOTHER_DEFAULT_USER_NAME}  anotherjsmith
+
+# Configuration files
+${ONE_SESSION_TWO_AUTH_JASPI_CONFIG}    /Users/Phill/ForgeRockDev/commons/forgerock-auth-filters-robot/forgerock-auth-filters-robot/testcases/jaspi_configuration.json
+
+#${AUDIT_CONFIG_FILE}            ${OPENIDMDIR}/conf/audit.json
+#${AUTHENTICATION_CONFIG_FILE}   ${OPENIDMDIR}/conf/authentication.json
+#${BOOT_PROPERTIES_FILE}         ${OPENIDMDIR}/conf/boot/boot.properties
+#${LOGGING_PROPERTIES_FILE}      ${OPENIDMDIR}/conf/logging.properties
+#${MANAGED_CONFIG_FILE}          ${OPENIDMDIR}/conf/managed.json
+#${REPO_ORIENTDB_CONFIG_FILE}    ${OPENIDMDIR}/conf/repo.orientdb.json
+#${ROUTER_CONFIG_FILE}           ${OPENIDMDIR}/conf/router.json
+#${SCHEDULE_TASKSCAN_SUNSET}     ${OPENIDMDIR}/conf/schedule-taskscan_sunset.json
+#${SCHEDULER_CONFIG_FILE}        ${OPENIDMDIR}/conf/scheduler.json
+#${SYSTEM_PROPERTIES_FILE}       ${OPENIDMDIR}/conf/system.properties
+#${WORKFLOW_CONFIG_FILE}         ${OPENIDMDIR}/conf/workflow.json
+#${CONTEXT_ENDUSER_CONFIG_FILE}  ${OPENIDMDIR}/conf/ui.context-enduser.json
+
+#${AUDIT_CONFIG_FILE_SAMPLE1}    ${OPENIDMDIR}/samples/sample1/conf/audit.json
+#${MANAGED_CONFIG_FILE_SAMPLE1}  ${OPENIDMDIR}/samples/sample1/conf/managed.json
+#${POLICY_CONFIG_FILE_SAMPLE1}   ${OPENIDMDIR}/samples/sample1/conf/policy.json
+#${ROUTER_CONFIG_FILE_SAMPLE1}   ${OPENIDMDIR}/samples/sample1/conf/router.json
+#${SYNC_CONFIG_FILE_SAMPLE1}     ${OPENIDMDIR}/samples/sample1/conf/sync.json
+
+#${LOGGING_PROPERTIES_FILE_SAMPLE2}    ${OPENIDMDIR}/samples/sample2/conf/logging.properties
+#${SYNC_CONFIG_FILE_SAMPLE2}           ${OPENIDMDIR}/samples/sample2/conf/sync.json
+#${POLICY_CONFIG_FILE_SAMPLE2}         ${OPENIDMDIR}/samples/sample2/conf/policy.json
+#${REPO_ORIENTDB_CONFIG_FILE_SAMPLE2}  ${OPENIDMDIR}/samples/sample2/conf/repo.orientdb.json
+#${REPO_JDBC_CONFIG_FILE_SAMPLE2}      ${OPENIDMDIR}/samples/sample2/conf/repo.jdbc.json
+
+
+#${BACKUP_CONF_DIR}          ${OPENIDMDIR}/backupconf
+#${BACKUP_CONF_DIR_SAMPLE1}  ${OPENIDMDIR}/samples/sample1/backupconf
+#${BACKUP_DATA_DIR_SAMPLE1}  ${OPENIDMDIR}/samples/sample1/backupdata
+#${BACKUP_CONF_DIR_SAMPLE2}  ${OPENIDMDIR}/samples/sample2/backupconf
+
+# Audit and Log files
+#${ACCESS_AUDIT_FILE}    ${OPENIDMDIR}/audit/access.csv
+#${ACTIVITY_AUDIT_FILE}  ${OPENIDMDIR}/audit/activity.csv
+#${RECON_AUDIT_FILE}     ${OPENIDMDIR}/audit/recon.csv 
+#${FIRST_LOG_FILE}       ${OPENIDMDIR}/logs/openidm0.log.0
+
+# Scripts
+#${ACCESS_SCRIPT}     ${OPENIDMDIR}/script/access.js
+
+# Command Line Interface 
+#${CLI_COMMAND_LINUX}  cd ${OPENIDMDIR};java -classpath "${OPENIDMDIR}/bin/*:${OPENIDMDIR}/bundle/*" org.forgerock.openidm.shell.impl.Main
+#${CLI_COMMAND_WINDOWS}  cd ${OPENIDMDIR} & java -classpath "${OPENIDMDIR}\\bin\\*;${OPENIDMDIR}\\bundle\\*" org.forgerock.openidm.shell.impl.Main
+
+
+*** Keywords ***
+#########################################################################
+# to call from initialization file to set TAG to the TC in FOLDERS
+#########################################################################
+Set_Folder_Name_Tags  [Arguments]    ${test_suite_path}
+    [Documentation]  to call from initialization file to set TAG to the TC in FOLDERS
+    ${path}     ${folder name} =    Split Path    ${test_suite_path}
+    Set Tags    ${folder name}
+    
+#########################################################################
+# CLI.SH
+#########################################################################
+run_cli_command  [arguments]  ${arguments}
+    ${output} =     Run Keyword If	 '${OPERATING_SYSTEM}' == 'unix'	  Run	${CLI_COMMAND_LINUX} ${arguments}
+    ...             ELSE IF	         '${OPERATING_SYSTEM}' == 'windows'	  Run	${CLI_COMMAND_WINDOWS} ${arguments}
+    [return]  ${output}
+    
+#########################################################################
+# TaskScanner keywords
+#########################################################################
+#CheckTaskscannerTaskState  [Arguments]  ${task_id}  ${expected_state}
+#    [Documentation]        check the status of a given task of the taskscanner
+#    ${json} =              get_url      taskscanner/${task_id}     
+#    ${progress} =          Get From Dictionary     ${json}       progress 
+#    ${actual_state} =      Get From Dictionary     ${progress}   state
+#    ${error_message} =     catenate  Taskscanner task state expected value was   ${expected_state}  but found  ${actual_state}
+#    Should Be Equal        ${actual_state}  ${expected_state}  ${error_message}  values=false
+    
+#clean_taskscanner_tasks
+#    @{id_of_tasks} =    get_id_of_taskscanner_tasks
+#    :FOR	${id_of_task}	 IN  @{id_of_tasks}
+#    \       post_url  taskscanner/${id_of_task}?_action=cancel   {}
+    
+#get_id_of_taskscanner_tasks
+#    ${id_list} =        Create List
+#    ${json} =           get_url    taskscanner
+#    ${tasks} =          Get From Dictionary     ${json}  tasks
+#    ${nb_of_tasks} =    Get Length	    ${tasks}
+#    log     ${nb_of_tasks}
+#    :FOR	${index}  IN RANGE	0	${nb_of_tasks}
+#    \       ${task} =  Get From List  ${tasks}  ${index}
+#    \       ${id} =   Get From Dictionary  ${task}      _id
+#    \       Append to list  ${id_list}  ${id}
+#    [return]  ${id_list}   
+        
+#clean_managed_users_and_taskscanner_tasks
+#    clean_managed_users
+#    clean_taskscanner_tasks    
+    
+#########################################################################
+# Policy Enforcement keywords
+#########################################################################
+#validate_user_object_against_server  [Arguments]  ${user_name}  ${data}
+#    [Documentation]  Uses POST to validate a user object against the server policy for users via rest
+#    ${result} =     post_as_admin   ${OPENIDM_URL_PREFIX}policy/managed/user/${user_name}?_action=validateObject  ${data}
+#    [Return]        ${result.json()} 
+    
+#validate_property_against_server  [Arguments]  ${user_name}  ${data}
+#    [Documentation]  Validate an object property against the server
+#    log  ${user_name}
+#    log  ${data}
+#    log  ${OPENIDM_URL_PREFIX}policy/managed/user/${user_name}?_action=validateProperty
+#    ${result} =     post_as_admin   ${OPENIDM_URL_PREFIX}policy/managed/user/${user_name}?_action=validateProperty  ${data}
+#    [Return]        ${result.json()} 
+    
+#########################################################################
+# CLEAN AUDIT
+#########################################################################
+#clean_audit_files
+#	Remove Files  ${ACCESS_AUDIT_FILE}  ${ACTIVITY_AUDIT_FILE}  ${RECON_AUDIT_FILE}      
+    
+#clean_audit_and_openidm_users
+#    # clean audit files after user drop because user delete creates some audit
+#    clean_managed_users    
+#    clean_audit_files
+    
+#clean_audit_config_for_sample1_and_audit_files_and_openidm_users
+#    # we refresh sample1 audit config file by default audit config file that was untouched 
+#    Copy File         ${AUDIT_CONFIG_FILE}    ${AUDIT_CONFIG_FILE_SAMPLE1}
+#    load_configuration  audit  ${AUDIT_CONFIG_FILE_SAMPLE1}
+#    clean_audit_and_openidm_users    
+
+#########################################################################
+# BACKUP AND CLEAN
+#########################################################################    
+#backup_openidm_output_directories
+#    ${SUITE_NAME_UNDERSCORE} =  replace string  ${SUITE_NAME}  ${SPACE}  _
+#    ${TEST_NAME_UNDERSCORE} =  replace string  ${TEST_NAME}  ${SPACE}  _
+#    ${TC_BACKUP_PATH} =  Join Path  ${BACKUP_PATH}  ${SUITE_NAME_UNDERSCORE}.${TEST_NAME_UNDERSCORE}
+#    Create Directory  ${TC_BACKUP_PATH}
+#    Copy Directory  ${OPENIDMDIR}/logs    ${TC_BACKUP_PATH}
+#    Copy Directory  ${OPENIDMDIR}/conf    ${TC_BACKUP_PATH}
+#    Copy Directory  ${OPENIDMDIR}/audit   ${TC_BACKUP_PATH}     
+#    Copy Directory  ${OPENIDMDIR}/samples/sample1/conf   ${TC_BACKUP_PATH}/sample1_conf 
+#    Copy Directory  ${OPENIDMDIR}/samples/sample2/conf   ${TC_BACKUP_PATH}/sample2_conf
+    
+#backup_output
+#    Run Keyword If Test Failed  backup_openidm_output_directories
+
+#backup_and_clean_audit_and_users
+#    backup_output    
+#    clean_audit_config_for_sample1_and_audit_files_and_openidm_users
+
+#backup_and_clean_opendj
+#    backup_output    
+#    clean_opendj_users_and_groups
+
+#backup_and_clean_managed_users  
+#    backup_output    
+#    clean_managed_users
+    
+#backup_restore_sync_sample2_and_clean_openidm_links_opendj
+#     backup_output    
+#     restore_sync_sample2_from_backup_sample2_directory
+#     clean_managed_users
+#     delete_link_between_managed_users_and_ldap
+#     clean_opendj_users_and_groups
+
+#backup_restore_sync_sample2_and_clean_openidm_links_audit_opendj
+#     backup_output    
+#     restore_sync_sample2_from_backup_sample2_directory
+#     clean_managed_users
+#     delete_link_between_managed_users_and_ldap
+#     clean_audit_files
+#     clean_opendj_users_and_groups
+ 
+#restore_policy_sync_sample2_and_clean_openidm_links_audit_opendj
+#     restore_sync_policy_sample2_from_backup_sample2_directory     
+#     clean_managed_users
+#     delete_link_between_managed_users_and_ldap
+#     clean_audit_files
+#     clean_opendj_users_and_groups
+      
+#backup_and_shutdown_openidm
+#    backup_output
+#    shutdown_openidm
+
+#backup_and_shutdown_openidm_and_clean_opendj
+#    backup_output
+#    shutdown_openidm_and_clean_opendj
+
+#backup_and_shutdown_openidm_and_uninstall_opendj
+#    backup_output
+#    shutdown_openidm_and_uninstall_opendj    
+    
+#backup_output_cluster
+#    Run Keyword If Test Failed  backup_openidm_output_directories_for_cluster 
+        
+#backup_openidm_output_directories_for_cluster
+#    ${SUITE_NAME_UNDERSCORE} =  replace string  ${SUITE_NAME}  ${SPACE}  _
+#    ${TEST_NAME_UNDERSCORE} =  replace string  ${TEST_NAME}  ${SPACE}  _
+#    ${TC_BACKUP_PATH} =  Join Path  ${BACKUP_PATH}  ${SUITE_NAME_UNDERSCORE}.${TEST_NAME_UNDERSCORE}
+#    Create Directory  ${TC_BACKUP_PATH}
+#    Copy Directory  ${OPENIDMDIR}/cluster/openidm0/openidm/logs    ${TC_BACKUP_PATH}/node0_logs
+#    Copy Directory  ${OPENIDMDIR}/cluster/openidm1/openidm/logs    ${TC_BACKUP_PATH}/node1_logs    
+    
+

@@ -16,9 +16,9 @@
 
 package org.forgerock.jaspi.modules.iwa;
 
+import org.forgerock.auth.common.DebugLogger;
+import org.forgerock.jaspi.logging.LogFactory;
 import org.forgerock.jaspi.modules.iwa.wdsso.WDSSO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
@@ -41,7 +41,7 @@ import java.util.Map;
  */
 public class IWAModule implements ServerAuthModule {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(IWAModule.class);
+    private static final DebugLogger LOGGER = LogFactory.getDebug();
 
     private static final String IWA_FAILED = "iwa-failed";
 
@@ -96,7 +96,7 @@ public class IWAModule implements ServerAuthModule {
                 try {
                     response.getWriter().write("{\"failure\":true,\"reason\":\"" + IWA_FAILED + "\"}");
                 } catch (IOException e) {
-                    LOGGER.debug("IWAModule: Error writing Negotiate header to Response. {}", e.getMessage());
+                    LOGGER.debug("IWAModule: Error writing Negotiate header to Response. " + e.getMessage());
                     throw new AuthException("Error writing to Response");
                 }
 
@@ -105,7 +105,7 @@ public class IWAModule implements ServerAuthModule {
                 LOGGER.debug("IWAModule: Authorization Header set in request.");
                 try {
                     final String username = new WDSSO().process(options, request);
-                    LOGGER.debug("IWAModule: IWA successful with username, {}", username);
+                    LOGGER.debug("IWAModule: IWA successful with username, " + username);
 
                     clientSubject.getPrincipals().add(new Principal() {
                         public String getName() {
@@ -113,7 +113,7 @@ public class IWAModule implements ServerAuthModule {
                         }
                     });
                 } catch (Exception e) {
-                    LOGGER.debug("IWAModule: IWA has failed. {}", e.getMessage());
+                    LOGGER.debug("IWAModule: IWA has failed. " + e.getMessage());
                     throw new AuthException("IWA has failed");
                 }
 

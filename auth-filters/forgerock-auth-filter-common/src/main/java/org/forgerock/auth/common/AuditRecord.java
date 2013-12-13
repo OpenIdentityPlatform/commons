@@ -16,28 +16,26 @@
 
 package org.forgerock.auth.common;
 
-import javax.servlet.http.HttpServletRequest;
-
 /**
  * Contains all required information for the AuthN or AuthZ request to be audited.
  *
  * @author Phill Cunnington
  * @since 1.0.0
  */
-public class AuditRecord {
+public class AuditRecord<T> {
 
     private final AuthResult authResult;
-    private final HttpServletRequest request;
+    private final T auditObject;
 
     /**
-     * Constructs a new AuditRecord with the given AuthResult and HttpServletRequest.
+     * Constructs a new AuditRecord with the given AuthResult and audit Object.
      *
      * @param authResult The AuthResult of the auth operation.
-     * @param request The HttpServletRequest of the auth operation.
+     * @param auditObject The audit Object of the auth operation.
      */
-    public AuditRecord(AuthResult authResult, HttpServletRequest request) {
+    public AuditRecord(AuthResult authResult, T auditObject) {
         this.authResult = authResult;
-        this.request = request;
+        this.auditObject = auditObject;
     }
 
     /**
@@ -50,11 +48,11 @@ public class AuditRecord {
     }
 
     /**
-     * Gets the HttpServletRequest of the auth operation.
+     * Gets the audit Object of the auth operation.
      *
-     * @return The HttpServletRequest.
+     * @return The audit Object.
      */
-    public HttpServletRequest getHttpServletRequest() {
-        return request;
+    public T getAuditObject() {
+        return auditObject;
     }
 }

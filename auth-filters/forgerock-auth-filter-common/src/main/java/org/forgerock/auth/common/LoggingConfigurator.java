@@ -17,14 +17,16 @@
 package org.forgerock.auth.common;
 
 /**
- * Base interface for all Configurators responsible for providing configuration to the AuthN and AuthZ Filters.
+ * Base interface for all Configurators responsible for providing config to the AuthN and AuthZ Filters.
  * <p>
  * Provides methods for getting instances of the two Logging interfaces.
+ *
+ * @param <T> The type of AuditLogger.
  *
  * @author Phill Cunnington
  * @since 1.0.0
  */
-public interface LoggingConfigurator {
+public interface LoggingConfigurator<T> {
 
     /**
      * Gets the instance of the Debug Logger.
@@ -38,5 +40,5 @@ public interface LoggingConfigurator {
      *
      * @return The Audit Logger instance.
      */
-    AuditLogger getAuditLogger();
+    AuditLogger<T> getAuditLogger();
 }

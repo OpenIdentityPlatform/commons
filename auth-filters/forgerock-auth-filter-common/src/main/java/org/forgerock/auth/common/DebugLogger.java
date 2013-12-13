@@ -19,17 +19,31 @@ package org.forgerock.auth.common;
 /**
  * Base interface for all debug logging implementations.
  *
- * @author Phill Cunnington
  * @since 1.0.0
  */
 public interface DebugLogger {
 
     /**
+     * Logs the given message at the trace level.
+     *
+     * @param message The log message.
+     */
+    void trace(final String message);
+
+    /**
+     * Logs the given message at the trace level.
+     *
+     * @param message The log message.
+     * @param t The throwable to log.
+     */
+    void trace(final String message, final Throwable t);
+
+    /**
      * Logs the given message at the debug level.
      *
      * @param message The log message.
      */
-    void debug(String message);
+    void debug(final String message);
 
     /**
      * Logs the given message at the debug level.
@@ -37,14 +51,14 @@ public interface DebugLogger {
      * @param message The log message.
      * @param t The throwable to log.
      */
-    void debug(String message, Throwable t);
+    void debug(final String message, final Throwable t);
 
     /**
      * Logs the given message at the error level.
      *
      * @param message The log message.
      */
-    void error(String message);
+    void error(final String message);
 
     /**
      * Logs the given message at the error level.
@@ -52,14 +66,14 @@ public interface DebugLogger {
      * @param message The log message.
      * @param t The throwable to log.
      */
-    void error(String message, Throwable t);
+    void error(final String message, final Throwable t);
 
     /**
      * Logs the given message at the warning level.
      *
      * @param message The log message.
      */
-    void warn(String message);
+    void warn(final String message);
 
     /**
      * Logs the given message at the warning level.
@@ -67,5 +81,5 @@ public interface DebugLogger {
      * @param message The log message.
      * @param t The throwable to log.
      */
-    void warn(String message, Throwable t);
+    void warn(final String message, final Throwable t);
 }

@@ -45,17 +45,18 @@ import javax.security.auth.Subject;
 import javax.security.auth.login.Configuration;
 import javax.security.auth.login.LoginContext;
 import javax.servlet.http.HttpServletRequest;
+
+import org.forgerock.auth.common.DebugLogger;
+import org.forgerock.jaspi.logging.LogFactory;
 import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSManager;
 import org.ietf.jgss.GSSName;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class WDSSO /*extends AMLoginModule*/ {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(WDSSO.class);
+    private static final DebugLogger LOGGER = LogFactory.getDebug();
 
     private static final String amAuthWindowsDesktopSSO =
             "amAuthWindowsDesktopSSO";
@@ -177,7 +178,7 @@ public class WDSSO /*extends AMLoginModule*/ {
             if( e instanceof GSSException) {
                 int major = ((GSSException)e).getMajor();
                 if (major == GSSException.CREDENTIALS_EXPIRED) {
-                    LOGGER.debug("IWA WDSSO: Credential expired. Re-establish credential... {}", e.getMessage());
+                    LOGGER.debug("IWA WDSSO: Credential expired. Re-establish credential... " + e.getMessage());
                     serviceLogin();
                     try {
                         authenticateToken(kerberosToken);
@@ -186,12 +187,12 @@ public class WDSSO /*extends AMLoginModule*/ {
 //                            result = ISAuthConstants.LOGIN_SUCCEED;
 //                        }
                     } catch (Exception ee) {
-                        LOGGER.error("IWA WDSSO: Authentication failed with new cred. {}", e.getMessage());
+                        LOGGER.error("IWA WDSSO: Authentication failed with new cred. " + e.getMessage());
                         throw ee;
 //                        return AuthStatus.SEND_FAILURE;
                     }
                 } else {
-                    LOGGER.error("IWA WDSSO: Authentication failed with GSSException. {}", e.getMessage());
+                    LOGGER.error("IWA WDSSO: Authentication failed with GSSException. " + e.getMessage());
                     throw new RuntimeException();
 //                    return AuthStatus.SEND_FAILURE;
                 }
@@ -199,7 +200,7 @@ public class WDSSO /*extends AMLoginModule*/ {
         } catch (GSSException e ){
             int major = e.getMajor();
             if (major == GSSException.CREDENTIALS_EXPIRED) {
-                LOGGER.debug("IWA WDSSO: Credential expired. Re-establish credential... {}", e.getMessage());
+                LOGGER.debug("IWA WDSSO: Credential expired. Re-establish credential... " + e.getMessage());
                 serviceLogin();
                 try {
                     authenticateToken(kerberosToken);
@@ -208,20 +209,20 @@ public class WDSSO /*extends AMLoginModule*/ {
 //                        result = ISAuthConstants.LOGIN_SUCCEED;
 //                    }
                 } catch (Exception ee) {
-                    LOGGER.debug("IWA WDSSO: Authentication failed with new cred. {}", e.getMessage());
+                    LOGGER.debug("IWA WDSSO: Authentication failed with new cred. " + e.getMessage());
                     throw ee;
 //                    return AuthStatus.SEND_FAILURE;
                 }
             } else {
-                LOGGER.debug("IWA WDSSO: Authentication failed with GSSException. {}", e.getMessage());
+                LOGGER.debug("IWA WDSSO: Authentication failed with GSSException. " + e.getMessage());
                 throw new RuntimeException();
 //                return AuthStatus.SEND_FAILURE;
             }
         } catch (RuntimeException e) {
-            LOGGER.debug("IWA WDSSO: Authentication failed with generic exception. {}", e.getMessage());
+            LOGGER.debug("IWA WDSSO: Authentication failed with generic exception. " + e.getMessage());
             throw e;
         } catch (Exception e) {
-            LOGGER.debug("IWA WDSSO: Authentication failed with generic exception. {}", e.getMessage());
+            LOGGER.debug("IWA WDSSO: Authentication failed with generic exception. " + e.getMessage());
             throw e;
 //            return AuthStatus.SEND_FAILURE;
         }
@@ -270,7 +271,7 @@ public class WDSSO /*extends AMLoginModule*/ {
 //                    }
                     GSSName user = context.getSrcName();
                     WDSSO.user = getUserName(user.toString());
-                    LOGGER.debug("IWA WDSSO: Found user! {}", WDSSO.user);
+                    LOGGER.debug("IWA WDSSO: Found user! " + WDSSO.user);
 
                     // Check if the user account from the Kerberos ticket exists 
                     // in the realm. The "Alias Search Attribute Names" will be used to
@@ -380,7 +381,7 @@ public class WDSSO /*extends AMLoginModule*/ {
         String header = req.getHeader("Authorization");
         if ((header != null) && header.startsWith("Negotiate")) {
             header = header.substring("Negotiate".length()).trim();
-            LOGGER.debug("IWA WDSSO: \"Authorization\" header set, {}", header);
+            LOGGER.debug("IWA WDSSO: \"Authorization\" header set, " + header);
             try {
                 spnegoToken = Base64.decode(header);
             } catch (Exception e) {
@@ -603,7 +604,7 @@ public class WDSSO /*extends AMLoginModule*/ {
 //                debug.message("Service login succeeded.");
 //            }
         } catch (Exception e) {
-            LOGGER.error("IWA WDSSO: Service Login Error: {}", e.getMessage());
+            LOGGER.error("IWA WDSSO: Service Login Error: " + e.getMessage());
 //            if (debug.messageEnabled()) {
                 LOGGER.error("IWA WDSSO: Stack trace: ", e);
 //            }

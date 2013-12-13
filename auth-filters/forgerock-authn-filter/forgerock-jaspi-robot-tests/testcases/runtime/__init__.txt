@@ -1,0 +1,3 @@
+*** Settings ***
+Resource 	    jaspi_keywords.txt
+Force Tags      runtime

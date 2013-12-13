@@ -48,7 +48,7 @@ public class AuthZFilterTest {
     private FilterChain filterChain;
     private PrintWriter writer;
     private AuthorizationFilter authorizationFilter;
-    private AuditLogger auditLogger;
+    private AuditLogger<HttpServletRequest> auditLogger;
     private DebugLogger debugLogger;
     private AuthorizationConfigurator authorizationConfigurator;
 
@@ -129,7 +129,7 @@ public class AuthZFilterTest {
         ArgumentCaptor<AuditRecord> auditRecordCaptor = ArgumentCaptor.forClass(AuditRecord.class);
         verify(auditLogger).audit(auditRecordCaptor.capture());
         assertEquals(auditRecordCaptor.getValue().getAuthResult(), AuthResult.SUCCESS);
-        assertEquals(auditRecordCaptor.getValue().getHttpServletRequest(), request);
+        assertEquals(auditRecordCaptor.getValue().getAuditObject(), request);
         verify(filterChain).doFilter(request, response);
     }
 
@@ -146,7 +146,7 @@ public class AuthZFilterTest {
         ArgumentCaptor<AuditRecord> auditRecordCaptor = ArgumentCaptor.forClass(AuditRecord.class);
         verify(auditLogger).audit(auditRecordCaptor.capture());
         assertEquals(auditRecordCaptor.getValue().getAuthResult(), AuthResult.FAILURE);
-        assertEquals(auditRecordCaptor.getValue().getHttpServletRequest(), request);
+        assertEquals(auditRecordCaptor.getValue().getAuditObject(), request);
         verify(filterChain, never()).doFilter(request, response);
     }
 

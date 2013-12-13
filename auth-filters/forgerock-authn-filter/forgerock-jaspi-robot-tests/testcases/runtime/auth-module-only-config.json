@@ -1,0 +1,10 @@
+{
+  "serverAuthContext": {
+    "authModules": [{
+        "className": "org.forgerock.jaspi.test.server.modules.AuthModuleOne",
+        "properties": {
+            "keyAlias": "openidm-localhost"
+        }
+    }]
+  }
+}
