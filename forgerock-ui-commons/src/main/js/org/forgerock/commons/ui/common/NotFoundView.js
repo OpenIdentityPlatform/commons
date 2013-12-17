@@ -25,26 +25,20 @@
 /*global define, $ */
 
 /**
- * @author Huck Elliott
+ * @author mbilski
  */
-define("org/forgerock/commons/ui/user/EnableCookiesView", [
+define("org/forgerock/commons/ui/common/NotFoundView", [
     "org/forgerock/commons/ui/common/main/AbstractView",
-    "org/forgerock/commons/ui/common/util/CookieHelper"
-], function(AbstractView, cookieHelper) {
-    var EnableCookiesView = AbstractView.extend({
-        template: "templates/user/EnableCookiesTemplate.html",
-        baseTemplate: "templates/user/LoginBaseTemplate.html",
-        render: function() {
-            if(!cookieHelper.cookiesEnabled()){
-                this.parentRender();
-            }
-            else{
-                location.href = "#login/";
-            }
-        }
+    "org/forgerock/commons/ui/common/main/ValidatorsManager",
+    "org/forgerock/commons/ui/common/main/EventManager",
+    "org/forgerock/commons/ui/common/util/Constants"
+], function(AbstractView, validatorsManager, eventManager, constants) {
+    var NotFoundView = AbstractView.extend({
+        template: "templates/common/404.html",
+        baseTemplate: "templates/common/LoginBaseTemplate.html"
     }); 
     
-    return new EnableCookiesView();
+    return new NotFoundView();
 });
 
 

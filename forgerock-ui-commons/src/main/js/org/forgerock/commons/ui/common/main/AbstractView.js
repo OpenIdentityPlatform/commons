@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -44,7 +44,7 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
          */
         element: "#content",
         
-        baseTemplate: "templates/user/DefaultBaseTemplate.html",
+        baseTemplate: "templates/common/DefaultBaseTemplate.html",
         
         /**
          * View mode: replace or append

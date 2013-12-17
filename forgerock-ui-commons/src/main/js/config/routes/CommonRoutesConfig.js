@@ -1,7 +1,7 @@
 /** 
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -32,12 +32,12 @@ define("config/routes/CommonRoutesConfig", [
     
     var obj = {
             "404":  { //this route must be the first route
-                view: "org/forgerock/commons/ui/user/NotFoundView",
+                view: "org/forgerock/commons/ui/common/NotFoundView",
                 url: /^([\w\W]*)$/,
                 pattern: "?"
             },
-            "enableCookies":  { //this route must be the first route
-                view: "org/forgerock/commons/ui/user/EnableCookiesView",
+            "enableCookies":  { 
+                view: "org/forgerock/commons/ui/common/EnableCookiesView",
                 url: "enableCookies/"
             }
     };

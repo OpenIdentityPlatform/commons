@@ -1,7 +1,7 @@
 /** 
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -30,62 +30,42 @@
 define("config/routes/UserRoutesConfig", [
     "org/forgerock/commons/ui/common/util/Constants"
 ], function(constants) {
-    
+    //definitions for views here are generic
+    //the actual path to each view is defined in config/AppConfiguration.js
+    //view files are loaded when the GenericRouteInterfaceMap module is initialized
     var obj = {
         "": {
-            view: "org/forgerock/commons/ui/user/profile/UserProfileView",
-            role: "ui-user,ui-admin",
-            url: ""                                  
+            view: "UserProfileView",
+            role: "ui-user",
+            url: "",
+            forceUpdate: true
         },
-        
-        //commons
         "profile": {
-            view: "org/forgerock/commons/ui/user/profile/UserProfileView",
-            role: "ui-user,ui-admin",
-            url: "profile/" 
-        },
-        "siteIdentification": {
-            base: "profile",
-            dialog: "org/forgerock/commons/ui/user/profile/ChangeSiteIdentificationDialog",
-            url: "profile/site_identification/",
-            role: "ui-user,ui-admin",
-            excludedRole: "ui-admin"
-        },
-        "register": {
-            view: "org/forgerock/commons/ui/user/UserRegistrationView",
-            url: "register/"
-        },
-        "termsOfUse": {
-            base: "register",
-            dialog: "org/forgerock/commons/ui/user/TermsOfUseDialog",
-            url: "register/terms_of_use/"
+            view: "UserProfileView",
+            role: "ui-user",
+            url: "profile/" ,
+            forceUpdate: true
         },
         "login" : {
-            view: "org/forgerock/commons/ui/user/LoginView",
+            view: "LoginView",
             url: "login/"
-        },                           
+        },
+        "loginDialog" : {
+            dialog: "LoginDialog",
+            url: "loginDialog/"
+        },
         "logout" : {
             event: constants.EVENT_LOGOUT,
             url: "logout/"
-        },                           
-        "loginDialog" : {
-            dialog: "org/forgerock/commons/ui/user/LoginDialog",
-            url: "loginDialog/"
-        },                           
-        "forgottenPassword" : {
-            base: "login",
-            dialog: "org/forgerock/commons/ui/user/ForgottenPasswordDialog",
-            url: "profile/forgotten_password/"
         },
-        "enterOldPassword": {
-            base: "profile",
-            dialog: "org/forgerock/commons/ui/user/profile/EnterOldPasswordDialog",
-            role: "ui-user,ui-admin",
-            url: "profile/old_password/"
+        "selfRegistration": {
+            view: "RegisterView",
+            url: "register/",
+            forceUpdate: true
         },
         "changeSecurityData": {
             base: "profile",
-            dialog: "org/forgerock/commons/ui/user/profile/ChangeSecurityDataDialog",
+            dialog: "ChangeSecurityDataDialog",
             role: "ui-user,ui-admin",
             url: "profile/change_security_data/"
         }

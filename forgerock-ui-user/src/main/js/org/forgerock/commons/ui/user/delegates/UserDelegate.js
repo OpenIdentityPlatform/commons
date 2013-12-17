@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -31,7 +31,7 @@
  * root main.js file to load the proper copy.
  */
 define("UserDelegate", [
-	"org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/EventManager"
@@ -136,7 +136,7 @@ define("UserDelegate", [
     
     obj.getUserById = function(id, component, successCallback, errorCallback) {
         if(component === "stub") {
-                successCallback({"_id":"stubUserid","_rev":"0","familyName":"User","givenName":"Stub","userName":"stubUsername","email":"stub@example.com", "roles": "openidm-authorized"});
+                successCallback({"_id":"stubUserid","_rev":"0","familyName":"User","givenName":"Stub","userName":"stubUsername","email":"stub@example.com", "roles": "ui-user"});
         }
     };
 

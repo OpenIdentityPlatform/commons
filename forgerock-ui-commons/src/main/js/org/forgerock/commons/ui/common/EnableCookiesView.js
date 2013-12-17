@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -25,20 +25,26 @@
 /*global define, $ */
 
 /**
- * @author mbilski
+ * @author Huck Elliott
  */
-define("org/forgerock/commons/ui/user/NotFoundView", [
+define("org/forgerock/commons/ui/common/EnableCookiesView", [
     "org/forgerock/commons/ui/common/main/AbstractView",
-    "org/forgerock/commons/ui/common/main/ValidatorsManager",
-    "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/commons/ui/common/util/Constants"
-], function(AbstractView, validatorsManager, eventManager, constants) {
-    var NotFoundView = AbstractView.extend({
-        template: "templates/user/404.html",
-        baseTemplate: "templates/user/LoginBaseTemplate.html"
+    "org/forgerock/commons/ui/common/util/CookieHelper"
+], function(AbstractView, cookieHelper) {
+    var EnableCookiesView = AbstractView.extend({
+        template: "templates/common/EnableCookiesTemplate.html",
+        baseTemplate: "templates/common/LoginBaseTemplate.html",
+        render: function() {
+            if(!cookieHelper.cookiesEnabled()){
+                this.parentRender();
+            }
+            else{
+                location.href = "#login/";
+            }
+        }
     }); 
     
-    return new NotFoundView();
+    return new EnableCookiesView();
 });
 
 
