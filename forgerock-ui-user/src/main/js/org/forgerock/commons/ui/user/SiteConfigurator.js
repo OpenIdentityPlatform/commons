@@ -108,13 +108,9 @@ define("org/forgerock/commons/ui/user/SiteConfigurator", [
        if (config.passwordResetLink) {
            conf.globalData.passwordResetLink = config.passwordResetLink;
        }
-       
-       if (config.language) {
-           i18nManager.setLanguage(config.language);
-       } else {
-           i18nManager.setLanguage(constants.DEFAULT_LANGUAGE);
-       }
-       
+     
+       i18nManager.init();
+      
        if(config.roles) {
            conf.globalData.userRoles = config.roles;
        }

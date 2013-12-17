@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -27,68 +27,68 @@
 /**
  * @author jdabrowski
  */
-define("org/forgerock/commons/ui/common/main/i18nManager", [
-    "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/util/UIUtils",
-    "org/forgerock/commons/ui/common/util/CookieHelper"
-], function(consts,uiUtils,cookieHelper) {
+define( "org/forgerock/commons/ui/common/main/i18nManager", [
+        "org/forgerock/commons/ui/common/util/Constants",
+        "org/forgerock/commons/ui/common/util/UIUtils"
+], function(consts,uiUtils) {
+
+    /*
+     * i18nManger with i18next try to detect the user language and load the corresponding translation in the following order:
+     * 1) querystring parameter (&locale=en-US)
+     * 2) cookie (i18next) 
+     * 3) navigator.language
+     * 4) consts.DEFAULT_LANGUAGE
+     * After which the cookie is set for next time. 
+     */
     
     var obj = {};
-    
-    obj.language = consts.DEFAULT_LANGUAGE;
-    
-    obj.setLanguage = function(language) {
-        var mNames, mNamesShort, dNames, dNamesShort,
-            urlParams = uiUtils.convertCurrentUrlToJSON().params,
-            i18nCookie = cookieHelper.getCookie('i18next');
-        
-        $.i18n.init({
-            fallbackLng: false,
-            load: 'current' 
-        });
-        
-        //if there is already a cookie then use that value as the language
-        if(i18nCookie){
-            language = i18nCookie;
-            //if locale is set in the url and is different from the cookie value use the locale param
-            if(urlParams && urlParams.locale !== i18nCookie){
-                language = urlParams.locale;
-            }
+
+    obj.init = function() {
+
+        var urlParams = uiUtils.convertCurrentUrlToJSON().params,
+            opts = { fallbackLng: consts.DEFAULT_LANGUAGE,  detectLngQS: 'locale' };
+
+        if(urlParams && urlParams.locale){
+            opts.lng  = urlParams.locale;
         }
-        $.i18n.init({
-            fallbackLng: false,
-            load: 'current' 
-        });            
-        $.i18n.setLng(language);
-        obj.language = language;
-        
-        mNames = $.t("config.dates.monthNames").replace(/ ,/g,',').replace(/, /g,',').split(',');
-        mNamesShort = $.t("config.dates.monthNamesShort").replace(/ ,/g,',').replace(/, /g,',').split(',');
-        dNames = $.t("config.dates.dayNames").replace(/ ,/g,',').replace(/, /g,',').split(',');
-        dNamesShort = $.t("config.dates.dayNamesShort").replace(/ ,/g,',').replace(/, /g,',').split(',');
-        
+
+
+        $.i18n.init(opts).done(obj.ready);
+        obj.locale = $.i18n.lng();
+ 
+    };
+
+    obj.ready = function() {
+
+        var locale = $.i18n.lng(),
+            mNames = $.t("config.dates.monthNames").replace(/ ,/g,',').replace(/, /g,',').split(','),
+            mNamesShort = $.t("config.dates.monthNamesShort").replace(/ ,/g,',').replace(/, /g,',').split(','),
+            dNames = $.t("config.dates.dayNames").replace(/ ,/g,',').replace(/, /g,',').split(','),
+            dNamesShort = $.t("config.dates.dayNamesShort").replace(/ ,/g,',').replace(/, /g,',').split(',');
+
         if (
-                ! mNames.length || mNames.length < 12
-                || 
-                ! mNamesShort.length || mNamesShort.length < 12
-                || 
-                ! dNames.length || dNames.length < 7
-                || 
-                ! dNamesShort.length || dNamesShort.length < 7        
-            ) 
+            ! mNames.length || mNames.length < 12
+            || 
+            ! mNamesShort.length || mNamesShort.length < 12
+            || 
+            ! dNames.length || dNames.length < 7
+            || 
+            ! dNamesShort.length || dNamesShort.length < 7        
+        ) 
         {
             console.log("DATE NAMES ARE NOT DEFINED CORRECTLY!");
         } else {
             
-            XDate.locales[language] = {
+            XDate.locales[ locale ] = {
                 monthNames: mNames,
                 monthNamesShort: mNamesShort,
                 dayNames: dNames,
                 dayNamesShort: dNamesShort
             };
             
-            XDate.defaultLocale = language;
-        }
+            XDate.defaultLocale = locale;
+        }  
+
     };
     
     return obj;
