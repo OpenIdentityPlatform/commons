@@ -82,6 +82,9 @@ import org.forgerock.json.fluent.JsonValue;
  * @see Router
  */
 public final class RouterContext extends ServerContext {
+
+    private static final ContextName CONTEXT_NAME = ContextName.valueOf("router");
+
     // Persisted attribute names.
     private static final String ATTR_MATCHED_URI = "matched-uri";
     private static final String ATTR_URI_TEMPLATE_VARIABLES = "uri-template-variables";
@@ -102,7 +105,7 @@ public final class RouterContext extends ServerContext {
      */
     RouterContext(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
-        super(savedContext, config);
+        super(CONTEXT_NAME, savedContext, config);
         this.matchedUri = savedContext.get(ATTR_MATCHED_URI).required().asString();
         final Map<String, Object> savedMap =
                 savedContext.get(ATTR_URI_TEMPLATE_VARIABLES).required().asMap();
@@ -126,7 +129,7 @@ public final class RouterContext extends ServerContext {
      */
     RouterContext(final ServerContext parent, final String matchedUri,
             final Map<String, String> uriTemplateVariables) {
-        super(checkNotNull(parent, "Cannot instantiate RouterContext with null parent Context"));
+        super(CONTEXT_NAME, checkNotNull(parent, "Cannot instantiate RouterContext with null parent Context"));
         this.matchedUri = matchedUri;
         this.uriTemplateVariables = Collections.unmodifiableMap(uriTemplateVariables);
     }

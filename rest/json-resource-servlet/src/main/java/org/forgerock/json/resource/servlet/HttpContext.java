@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.Context;
+import org.forgerock.json.resource.ContextName;
 import org.forgerock.json.resource.PersistenceConfig;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.util.Factory;
@@ -58,6 +59,8 @@ import org.forgerock.util.LazyMap;
  * </pre>
  */
 public final class HttpContext extends Context {
+
+    private static final ContextName CONTEXT_NAME = ContextName.valueOf("http");
     // TODO: security parameters such as user name, etc?
 
     // Persisted attribute names.
@@ -86,7 +89,7 @@ public final class HttpContext extends Context {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public HttpContext(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
-        super(savedContext, config);
+        super(CONTEXT_NAME, savedContext, config);
         this.method = savedContext.get(ATTR_METHOD).required().asString();
         this.path = savedContext.get(ATTR_PATH).required().asString();
         this.headers = (Map) savedContext.get(ATTR_HEADERS).required().asMap();
@@ -94,7 +97,7 @@ public final class HttpContext extends Context {
     }
 
     HttpContext(final Context parent, final HttpServletRequest req) {
-        super(parent);
+        super(CONTEXT_NAME, parent);
         this.method = HttpUtils.getMethod(req);
         this.path = req.getRequestURL().toString();
         this.headers = Collections.unmodifiableMap(new LazyMap<String, List<String>>(

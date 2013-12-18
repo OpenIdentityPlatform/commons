@@ -46,7 +46,8 @@ import org.forgerock.json.fluent.JsonValue;
  * </pre>
  */
 public class ServerContext extends Context {
-    private static final String ATTR_CLASS = "class";
+
+    private static final ContextName CONTEXT_NAME = ContextName.valueOf("server");
 
     // Persisted attribute names.
     private static final String ATTR_CONNECTION_ID = "connection-id";
@@ -107,6 +108,24 @@ public class ServerContext extends Context {
     private final Connection connection;
 
     /**
+     * Creates a new server context having the provided context name and parent.
+     * Used by subclasses.
+     *
+     * @param name
+     *            The context name.
+     * @param parent
+     *            The parent context.
+     * @throws IllegalStateException
+     *             If it was not possible to inherit a connection from a parent
+     *             server context.
+     */
+    protected ServerContext(final ContextName name, final Context parent) {
+        super(name, parent);
+        this.connection = null;
+        getConnection(); // Fail-fast if there is no connection available.
+    }
+
+    /**
      * Creates a new server context having the provided parent, an ID
      * automatically generated using {@code UUID.randomUUID()}, and an internal
      * connection inherited from a parent server context.
@@ -138,7 +157,7 @@ public class ServerContext extends Context {
      *             context.
      */
     public ServerContext(final Context parent, final Connection connection) {
-        super(checkNotNull(parent, "Cannot instantiate ServerContext with null parent Context"));
+        super(CONTEXT_NAME, checkNotNull(parent, "Cannot instantiate ServerContext with null parent Context"));
         this.connection = connection;
         getConnection(); // Fail-fast if there is no connection available.
     }
@@ -177,7 +196,7 @@ public class ServerContext extends Context {
      *             context.
      */
     public ServerContext(final String id, final Context parent, final Connection connection) {
-        super(id, checkNotNull(parent, "Cannot instantiate ServerContext ith with null parent Context"));
+        super(CONTEXT_NAME, id, checkNotNull(parent, "Cannot instantiate ServerContext ith with null parent Context"));
         this.connection = connection;
         getConnection(); // Fail-fast if there is no connection available.
     }
@@ -195,7 +214,25 @@ public class ServerContext extends Context {
      */
     protected ServerContext(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
-        super(savedContext, config);
+        this(CONTEXT_NAME, savedContext, config);
+    }
+
+    /**
+     * Restore from JSON representation.
+     *
+     * @param name
+     *            The context name.
+     * @param savedContext
+     *            The JSON representation from which this context's attributes
+     *            should be parsed.
+     * @param config
+     *            The persistence configuration.
+     * @throws ResourceException
+     *             If the JSON representation could not be parsed.
+     */
+    protected ServerContext(final ContextName name, final JsonValue savedContext, final PersistenceConfig config)
+            throws ResourceException {
+        super(name, savedContext, config);
         final JsonValue connectionId = savedContext.get(ATTR_CONNECTION_ID);
         if (connectionId.isNull()) {
             this.connection = null;

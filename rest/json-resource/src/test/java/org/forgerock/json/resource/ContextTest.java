@@ -39,6 +39,7 @@ public final class ContextTest {
         assertThat(root.getParent()).isNull();
         assertThat(root.getId()).isNotEmpty();
         assertThat(root.isRootContext()).isTrue();
+        assertThat(root.getContextName().toString()).isEqualTo("root");
     }
 
     @Test
@@ -47,6 +48,7 @@ public final class ContextTest {
         assertThat(root.getParent()).isNull();
         assertThat(root.getId()).isEqualTo("root-id");
         assertThat(root.isRootContext()).isTrue();
+        assertThat(root.getContextName().toString()).isEqualTo("root");
     }
 
     @Test
@@ -64,6 +66,7 @@ public final class ContextTest {
         assertThat(context.getParent()).isSameAs(root);
         assertThat(context.getId()).isNotEmpty();
         assertThat(context.isRootContext()).isFalse();
+        assertThat(context.getContextName().toString()).isEqualTo("server");
 
         final JsonValue json = ServerContext.saveToJson(context, config);
         assertThat(json.isMap()).isTrue();
@@ -109,4 +112,65 @@ public final class ContextTest {
         assertThat(context.getConnection()).isSameAs(connection);
     }
 
+    @Test
+    public void testContainsContext() throws Exception {
+        final Connection connection = mock(Connection.class);
+        final ConnectionProvider provider = mock(ConnectionProvider.class);
+        when(provider.getConnectionId(any(Connection.class))).thenReturn("my-connection-id");
+        when(provider.getConnection(anyString())).thenReturn(connection);
+        final PersistenceConfig config = PersistenceConfig.builder().connectionProvider(provider)
+                .build();
+
+        final Context root = new RootContext("root-id");
+        final ServerContext context = new ServerContext(root, connection);
+
+        assertThat(context.containsContext(RootContext.class)).isTrue();
+        assertThat(context.containsContext(SecurityContext.class)).isFalse();
+        assertThat(context.containsContext("root")).isTrue();
+        assertThat(context.containsContext("security")).isFalse();
+    }
+
+    @Test
+    public void testAsContext() throws Exception {
+        final Connection connection = mock(Connection.class);
+        final ConnectionProvider provider = mock(ConnectionProvider.class);
+        when(provider.getConnectionId(any(Connection.class))).thenReturn("my-connection-id");
+        when(provider.getConnection(anyString())).thenReturn(connection);
+        final PersistenceConfig config = PersistenceConfig.builder().connectionProvider(provider)
+                .build();
+
+        final Context root = new RootContext("root-id");
+        final ServerContext context = new ServerContext(root, connection);
+
+        assertThat(context.asContext(RootContext.class)).isSameAs(root);
+        try {
+            context.asContext(SecurityContext.class);
+        } catch (Exception e) {
+            assertThat(e).isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("No context of type " + SecurityContext.class.getName() + " found.")
+                    .hasNoCause();
+        }
+    }
+
+    @Test
+    public void testGetContext() throws Exception {
+        final Connection connection = mock(Connection.class);
+        final ConnectionProvider provider = mock(ConnectionProvider.class);
+        when(provider.getConnectionId(any(Connection.class))).thenReturn("my-connection-id");
+        when(provider.getConnection(anyString())).thenReturn(connection);
+        final PersistenceConfig config = PersistenceConfig.builder().connectionProvider(provider)
+                .build();
+
+        final Context root = new RootContext("root-id");
+        final ServerContext context = new ServerContext(root, connection);
+
+        assertThat(context.getContext("root")).isSameAs(root);
+        try {
+            context.getContext("test");
+        } catch (Exception e) {
+            assertThat(e).isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("No context of named test found.")
+                    .hasNoCause();
+        }
+    }
 }
