@@ -33,12 +33,14 @@ import org.forgerock.json.fluent.JsonValue;
  */
 public final class RootContext extends Context {
 
+    private static final ContextName CONTEXT_NAME = ContextName.valueOf("root");
+
     /**
      * Creates a new root context having an ID automatically generated using
      * {@code UUID.randomUUID()}.
      */
     public RootContext() {
-        super(null); // No parent.
+        super(CONTEXT_NAME, null); // No parent.
     }
 
     /**
@@ -48,7 +50,7 @@ public final class RootContext extends Context {
      *            The context ID.
      */
     public RootContext(final String id) {
-        super(id, null); // No parent.
+        super(CONTEXT_NAME, id, null); // No parent.
     }
 
     /**
@@ -64,6 +66,6 @@ public final class RootContext extends Context {
      */
     RootContext(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
-        super(savedContext, config);
+        super(CONTEXT_NAME, savedContext, config);
     }
 }

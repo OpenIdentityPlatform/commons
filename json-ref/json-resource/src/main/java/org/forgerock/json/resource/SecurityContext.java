@@ -69,6 +69,8 @@ import org.forgerock.json.fluent.JsonValue;
  */
 public final class SecurityContext extends Context {
 
+    private static final ContextName CONTEXT_NAME = ContextName.valueOf("security");
+
     /**
      * The authorization ID name reserved for the name of the component in which
      * a user's resource is located, e.g. "users".
@@ -126,7 +128,7 @@ public final class SecurityContext extends Context {
      */
     public SecurityContext(final Context parent, final String authenticationId,
             final Map<String, Object> authorizationId) {
-        super(checkNotNull(parent, "Cannot instantiate SecurityContext with null parent Context"));
+        super(CONTEXT_NAME, checkNotNull(parent, "Cannot instantiate SecurityContext with null parent Context"));
         this.authenticationId = authenticationId != null ? authenticationId : "";
         this.authorizationId =
                 authorizationId != null ? Collections
@@ -156,7 +158,7 @@ public final class SecurityContext extends Context {
      */
     public SecurityContext(final String id, final Context parent, final String authenticationId,
             final Map<String, Object> authorizationId) {
-        super(id, checkNotNull(parent, "Cannot instantiate SecurityContext with null parent Context"));
+        super(CONTEXT_NAME, id, checkNotNull(parent, "Cannot instantiate SecurityContext with null parent Context"));
         this.authenticationId = authenticationId != null ? authenticationId : "";
         this.authorizationId =
                 authorizationId != null ? Collections
@@ -177,7 +179,7 @@ public final class SecurityContext extends Context {
      */
     SecurityContext(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
-        super(savedContext, config);
+        super(CONTEXT_NAME, savedContext, config);
         this.authenticationId = savedContext.get(ATTR_AUTHENTICATION_ID).required().asString();
         this.authorizationId = savedContext.get(ATTR_AUTHORIZATION_ID).required().asMap();
     }

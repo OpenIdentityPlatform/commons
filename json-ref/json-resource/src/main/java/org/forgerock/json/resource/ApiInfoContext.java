@@ -44,6 +44,9 @@ import org.forgerock.json.fluent.JsonValue;
  * </pre>
  */
 public final class ApiInfoContext extends Context {
+
+    private static final ContextName CONTEXT_NAME = ContextName.valueOf("apiinfo");
+
     // Persisted attribute names.
     private static final String ATTR_API_NAME = "api-name";
     private static final String ATTR_API_VERSION = "api-version";
@@ -65,7 +68,7 @@ public final class ApiInfoContext extends Context {
      *            The version of the REST API exposed by the network end-point.
      */
     public ApiInfoContext(final Context parent, final String apiName, final String apiVersion) {
-        super(checkNotNull(parent, "Cannot instantiate ApiInfoContext with null parent Context"));
+        super(CONTEXT_NAME, checkNotNull(parent, "Cannot instantiate ApiInfoContext with null parent Context"));
         this.apiName = checkNotNull(apiName, "Cannot instantiate ApiInfoContext with null apiName");
         this.apiVersion = checkNotNull(apiVersion, "Cannot instantiate ApiInfoContext with null apiVersion");
     }
@@ -85,7 +88,7 @@ public final class ApiInfoContext extends Context {
      */
     public ApiInfoContext(final String id, final Context parent, final String apiName,
             final String apiVersion) {
-        super(id, checkNotNull(parent, "Cannot instantiate ApiInfoContext with null parent Context"));
+        super(CONTEXT_NAME, id, checkNotNull(parent, "Cannot instantiate ApiInfoContext with null parent Context"));
         this.apiName = checkNotNull(apiName, "Cannot instantiate ApiInfoContext with null apiName");
         this.apiVersion = checkNotNull(apiVersion, "Cannot instantiate ApiInfoContext with null apiVersion");
     }
@@ -103,7 +106,7 @@ public final class ApiInfoContext extends Context {
      */
     ApiInfoContext(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
-        super(savedContext, config);
+        super(CONTEXT_NAME, savedContext, config);
         this.apiName = savedContext.get(ATTR_API_NAME).required().asString();
         this.apiVersion = savedContext.get(ATTR_API_VERSION).required().asString();
     }

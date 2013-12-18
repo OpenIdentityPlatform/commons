@@ -52,8 +52,8 @@ import org.forgerock.json.fluent.JsonValue;
  */
 public abstract class Context {
     // Persisted attribute names.
-    private static final String ATTR_CLASS = "class";
-    private static final String ATTR_ID = "id";
+    protected static final String ATTR_CLASS = "class";
+    protected static final String ATTR_ID = "id";
     private static final String ATTR_PARENT = "parent";
 
     private static Context load0(final JsonValue savedContext, final PersistenceConfig config)
@@ -73,6 +73,11 @@ public abstract class Context {
     }
 
     /**
+     * A friendly name for the Context.
+     */
+    private final ContextName contextName;
+
+    /**
      * This should only be accessed via getId() in order to ensure that it is
      * lazily initialized.
      * <p>
@@ -82,17 +87,23 @@ public abstract class Context {
      */
     private volatile String id;
 
+    /**
+     * The parent Context.
+     */
     private final Context parent;
 
     /**
      * Creates a new context having the provided parent and an ID automatically
      * generated using {@code UUID.randomUUID()}.
      *
+     * @param name
+     *            The context name.
      * @param parent
      *            The parent context.
      */
-    protected Context(final Context parent) {
+    protected Context(final ContextName name, final Context parent) {
         /* ID will be generated lazily in getId() */
+        this.contextName = name;
         this.parent = parent;
     }
 
@@ -123,6 +134,8 @@ public abstract class Context {
      * implementations must override
      * {@link #saveToJson(JsonValue, PersistenceConfig)}.
      *
+     * @param name
+     *            The context name.
      * @param savedContext
      *            The JSON representation from which this context's attributes
      *            should be parsed.
@@ -133,8 +146,9 @@ public abstract class Context {
      * @see #saveToJson(JsonValue, PersistenceConfig)
      * @see ServerContext#loadFromJson(JsonValue, PersistenceConfig)
      */
-    protected Context(final JsonValue savedContext, final PersistenceConfig config)
+    protected Context(final ContextName name, final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
+        this.contextName = name;
         this.id = savedContext.get(ATTR_ID).required().asString();
         final JsonValue savedParentContext = savedContext.get(ATTR_PARENT);
         this.parent = savedParentContext.isNull() ? null : load0(savedParentContext, config);
@@ -143,12 +157,15 @@ public abstract class Context {
     /**
      * Creates a new context having the provided ID, and parent.
      *
+     * @param name
+     *            The context name.
      * @param id
      *            The context ID.
      * @param parent
      *            The parent context.
      */
-    protected Context(final String id, final Context parent) {
+    protected Context(final ContextName name, final String id, final Context parent) {
+        this.contextName = name;
         this.id = checkNotNull(id, "Cannot create Context with null id");
         this.parent = parent;
     }
@@ -180,6 +197,27 @@ public abstract class Context {
     }
 
     /**
+     * Returns the first context in the chain whose context name matches the
+     * provided name.
+     *
+     * @param contextName
+     *            The name of the context to be returned.
+     * @return The first context in the chain whose name matches the
+     *         provided context name.
+     * @throws IllegalArgumentException
+     *             If no matching context was found in this context's parent
+     *             chain.
+     */
+    public final Context getContext(final String contextName) {
+        final Context context = getContext0(contextName);
+        if (context != null) {
+            return context;
+        } else {
+            throw new IllegalArgumentException("No context of named " + contextName + " found.");
+        }
+    }
+
+    /**
      * Returns {@code true} if there is a context in the chain whose type is a
      * sub-type of the provided {@code Context} class. The method first checks
      * this context to see if it has the required type, before proceeding to the
@@ -193,6 +231,28 @@ public abstract class Context {
      */
     public final boolean containsContext(final Class<? extends Context> clazz) {
         return asContext0(clazz) != null;
+    }
+
+    /**
+     * Returns {@code true} if there is a context in the chain whose ContextName is
+     * matches the provided context name.
+     *
+     * @param contextName
+     *            The name of the context to locate.
+     * @return {@code true} if there is a context in the chain whose context name
+     *            matches {@code contextName}.
+     */
+    public final boolean containsContext(final String contextName) {
+        return getContext0(contextName) != null;
+    }
+
+    /**
+     * Get this Context's {@link ContextName}.
+     *
+     * @return this object's ContextName
+     */
+    public final ContextName getContextName() {
+        return contextName;
     }
 
     /**
@@ -292,4 +352,12 @@ public abstract class Context {
         return null;
     }
 
+    private final Context getContext0(final String contextName) {
+        for (Context context = this; context != null; context = context.getParent()) {
+            if (context.getContextName().toString().equals(contextName)) {
+                return context;
+            }
+        }
+        return null;
+    }
 }
