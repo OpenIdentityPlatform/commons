@@ -37,13 +37,23 @@ public final class RouteTest {
             // @formatter:off
             /* mode, template, resourceName, remaining */
             { EQUALS, "test", "test", "" },
-            { STARTS_WITH, "test", "test", "" },
+            { EQUALS, "test/", "test", "" },
             { EQUALS, "test", "testremaining", null },
-            { STARTS_WITH, "test", "testremaining", "remaining" },
             { EQUALS, "users/{id}", "users/1", "" },
-            { STARTS_WITH, "users/{id}", "users/{id}", "" },
             { EQUALS, "users/{id}", "users/1/devices/0", null },
+            { STARTS_WITH, "users/{id}", "users/1", "" },
             { STARTS_WITH, "users/{id}", "users/1/devices/0", "devices/0" },
+            { STARTS_WITH, "test/", "test/remaining", "remaining" },
+            { STARTS_WITH, "test/", "testremaining", null },
+            { STARTS_WITH, "test/", "test", "" },
+            { STARTS_WITH, "test/", "test/", "" },
+            { STARTS_WITH, "test", "test/remaining", "remaining" },
+            { STARTS_WITH, "test", "testremaining", null },
+            { STARTS_WITH, "test{suffix}", "testabc", "" },
+            { STARTS_WITH, "test{suffix}", "testabc/", "" },
+            { STARTS_WITH, "test{suffix}", "testabc/123", "123" },
+            { STARTS_WITH, "test", "test", "" },
+            { STARTS_WITH, "test", "test/", "" }
             // @formatter:on
         };
     }
