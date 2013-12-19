@@ -17,7 +17,6 @@
 package org.forgerock.json.resource;
 
 import static org.forgerock.json.resource.ResourceName.urlDecode;
-import static org.forgerock.json.resource.Resources.normalizeResourceName;
 import static org.forgerock.json.resource.RoutingMode.EQUALS;
 import static org.forgerock.json.resource.RoutingMode.STARTS_WITH;
 
@@ -104,7 +103,7 @@ public final class Route {
         private final List<String> variables = new LinkedList<String>();
 
         private UriTemplate(final RoutingMode mode, final String uriTemplate) {
-            final String t = normalizeResourceName(uriTemplate);
+            final String t = removeTrailingSlash(removeLeadingSlash(uriTemplate));
             final StringBuilder builder = new StringBuilder(t.length() + 8);
 
             // Parse the template.
@@ -145,10 +144,10 @@ public final class Route {
             // Escape and add remaining literal substring.
             builder.append(Pattern.quote(t.substring(elementStart)));
             builder.append(')');
-
+            
             if (mode == STARTS_WITH) {
-                // Add wild-card match for remaining unmatched path (not included in group 1).
-                builder.append(".*");
+                // Add wild-card match for remaining unmatched path.
+                builder.append("(/(.*))?");
             }
 
             this.uriTemplate = uriTemplate;
@@ -206,6 +205,13 @@ public final class Route {
         private String removeLeadingSlash(final String resourceName) {
             if (resourceName.startsWith("/")) {
                 return resourceName.substring(1);
+            }
+            return resourceName;
+        }
+
+        private String removeTrailingSlash(final String resourceName) {
+            if (resourceName.endsWith("/")) {
+                return resourceName.substring(0, resourceName.length()-1);
             }
             return resourceName;
         }
