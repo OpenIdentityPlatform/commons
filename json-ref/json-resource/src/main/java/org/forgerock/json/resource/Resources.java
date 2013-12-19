@@ -756,18 +756,6 @@ public final class Resources {
         };
     }
 
-    // Ensures that the resource name does not begin or end with forward slashes.
-    static String normalizeResourceName(final String name) {
-        String tmp = name;
-        if (tmp.startsWith("/")) {
-            tmp = tmp.substring(1);
-        }
-        if (tmp.endsWith("/")) {
-            tmp = tmp.substring(0, tmp.length() - 1);
-        }
-        return tmp;
-    }
-
     private static String idOf(final ServerContext context) {
         return context.asContext(RouterContext.class).getUriTemplateVariables().get("id");
     }
