@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.forgerock</groupId>
         <artifactId>forgerock-parent</artifactId>
-        <version>1.0.0</version>
+        <version>1.2.0</version>
     </parent>
     <groupId>org.forgerock.commons</groupId>
     <artifactId>forgerock-util</artifactId>
@@ -29,7 +29,6 @@
     <description>Miscellaneous utility classes used within ForgeRock projects.</description>
     <packaging>bundle</packaging>
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.target>1.6</maven.compiler.target>
         <maven.compiler.source>1.6</maven.compiler.source>
     </properties>
@@ -65,10 +64,10 @@
                     <instructions>
                         <Import-Package>*</Import-Package>
                         <Export-Package>
-				            org.forgerock.util;version=${project.version},
+                            org.forgerock.util;version=${project.version},
                             org.forgerock.util.xml;version=${project.version},
                             org.forgerock.util.encode;version=${project.version}
-			            </Export-Package>
+			</Export-Package>
                     </instructions>
                 </configuration>
             </plugin>

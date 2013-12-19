@@ -24,13 +24,14 @@
  *
  * $Id: XMLHandler.java,v 1.2 2008/06/25 05:53:08 qcheng Exp $
  *
- * Portions Copyrighted 2012-2013 ForgeRock Inc
+ * Portions Copyright 2012-2013 ForgeRock Inc
  */
 
 package org.forgerock.util.xml;
 
 import java.io.InputStream;
 import java.io.StringReader;
+
 import org.xml.sax.InputSource;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -44,20 +45,32 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class XMLHandler extends DefaultHandler {
 
-    public InputSource resolveEntity(String aPublicID, String aSystemID) {
-        String sysid = aSystemID.trim();
+    /* FIXME: does this class need to be non-final and public? */
+
+    /**
+     * Creates a new XML handler.
+     */
+    public XMLHandler() {
+        // No impl.
+    }
+
+    @Override
+    public InputSource resolveEntity(final String aPublicID, final String aSystemID) {
+        final String sysid = aSystemID.trim();
 
         if (sysid.toLowerCase().startsWith("jar://")) {
-            String dtdname = sysid.substring(5);
-            InputStream is = getClass().getResourceAsStream(dtdname);
+            final String dtdname = sysid.substring(5);
+            final InputStream is = getClass().getResourceAsStream(dtdname);
             if (is != null) {
                 return new InputSource(is);
             }
         }
 
-        //make sure that we do NOT return null here, as xerces would
-        //fall back to the default entity resolver and try to resolve the
-        //entity with that
+        /*
+         * make sure that we do NOT return null here, as xerces would fall back
+         * to the default entity resolver and try to resolve the entity with
+         * that
+         */
         return new InputSource(new StringReader(""));
     }
 }

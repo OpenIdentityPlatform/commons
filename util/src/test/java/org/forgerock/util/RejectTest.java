@@ -15,17 +15,13 @@
  */
 package org.forgerock.util;
 
-
 // TestNG
 import org.testng.annotations.Test;
 
 // FEST-Assert
 import static org.fest.assertions.Assertions.assertThat;
 
-
-/**
- * Test Reject utilities for proper parameter assumption/validation.
- */
+@SuppressWarnings("javadoc")
 public class RejectTest {
 
     @Test(expectedExceptions = NullPointerException.class)
@@ -55,16 +51,16 @@ public class RejectTest {
     @Test
     public void checkNotNullNotNull() {
         Long value = Long.MAX_VALUE;
-        Reject.checkNotNull(value);
+        assertThat(Reject.checkNotNull(value)).isSameAs(value);
     }
 
-    @Test(expectedExceptions=NullPointerException.class)
+    @Test(expectedExceptions = NullPointerException.class)
     public void checkNotNullNull() {
         Long value = null;
         Reject.checkNotNull(value);
     }
 
-    @Test(expectedExceptions=IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void ifTrueTrue() {
         Reject.ifTrue(true);
     }
@@ -74,17 +70,7 @@ public class RejectTest {
         Reject.ifTrue(false);
     }
 
-    @Test(expectedExceptions=IllegalArgumentException.class)
-    public void checkFalseTrue() {
-        Reject.checkFalse(true);
-    }
-
-    @Test
-    public void checkFalseFalse() {
-        assertThat(Reject.checkFalse(false)).isFalse();
-    }
-
-    @Test(expectedExceptions=IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void ifFalseFalse() {
         Reject.ifFalse(false);
     }
@@ -94,13 +80,15 @@ public class RejectTest {
         Reject.ifFalse(true);
     }
 
-    @Test(expectedExceptions=IllegalArgumentException.class)
-    public void checkTrueFalse() {
-        Reject.checkTrue(false);
+    @Test(expectedExceptions = NullPointerException.class)
+    public void ifNullVarArgsStrings() {
+        String[] args = { "hello", null };
+        Reject.ifNull(args);
     }
 
-    @Test
-    public void checkTrueTrue() {
-        assertThat(Reject.checkTrue(true)).isTrue();
+    @Test(expectedExceptions = NullPointerException.class)
+    public void ifNullVarArgsObjects() {
+        Object[] args = { "hello", null };
+        Reject.ifNull(args);
     }
 }

@@ -37,7 +37,13 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-public class XMLUtils {
+/**
+ * Utility classes for handling XML.
+ */
+public final class XMLUtils {
+    private XMLUtils() {
+        // No impl.
+    }
 
     /**
      * Provides a secure DocumentBuilder implementation, which is protected against

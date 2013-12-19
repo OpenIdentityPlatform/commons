@@ -16,24 +16,29 @@
 package org.forgerock.util;
 
 /**
- * <p>
  * A input parameter-validating utility class using fluent invocation:
+ *
  * <pre>
- *     public int divide(int dividend, int divisor) {
- *         Reject.ifTrue(divisor == 0, "Division by zero not supported");
- *         return dividend / divisor;
- *     }
+ * public int divide(int dividend, int divisor) {
+ *     Reject.ifTrue(divisor == 0, &quot;Division by zero not supported&quot;);
+ *     return dividend / divisor;
+ * }
  * </pre>
- * will cause an {@code IllegalArgumentException} to be thrown with the message given.
+ *
+ * The example above will cause an {@code IllegalArgumentException} to be thrown
+ * with the message given.
  * <p>
  * Another use case is validating constructor parameters:
+ *
  * <pre>
- *     public TokenManager(final TokenFactory factory) {
- *         Reject.ifNull(factory, "Cannot instantiate TokenManager with null TokenFactory");
- *     }
+ * public TokenManager(final TokenFactory factory) {
+ *     Reject.ifNull(factory, &quot;Cannot instantiate TokenManager with null TokenFactory&quot;);
+ * }
  * </pre>
- * Sometimes, constructor parameters are passed to ancestor constructors which must be
- * called first--thus, the {@code checkNotNull} syntax is available:
+ *
+ * Sometimes, constructor parameters are passed to ancestor constructors which
+ * must be called first--thus, the {@code checkNotNull} syntax is available:
+ *
  * <pre>
  *     import static org.forgerock.util.Reject.checkNotNull;
  *
@@ -41,87 +46,44 @@ package org.forgerock.util;
  *         super(checkNotNull(factory));
  *     }
  * </pre>
- * </p>
- * <p>
- * Note that the methods herein throw generic RuntimeExceptions as opposed to custom,
- * application-specific error Exceptions.  This class is intended for wide use among
- * multiple projects whose Exception frameworks may differ.  The implementer is encouraged
- * to catch the generic exceptions thrown by this class and rethrow exceptions appropriate
- * to the target application.
- * </p>
+ *
+ * Note that the methods herein throw generic RuntimeExceptions as opposed to
+ * custom, application-specific error Exceptions. This class is intended for
+ * wide use among multiple projects whose Exception frameworks may differ. The
+ * implementer is encouraged to catch the generic exceptions thrown by this
+ * class and rethrow exceptions appropriate to the target application.
  */
-public class Reject {
-
-    // Prevent instantiation
-    private Reject() {
-        // nothing to do
-    }
+public final class Reject {
 
     /**
-     * Alias for {@code checkNotNull} to be used in fluent {@code Reject.ifNull} syntax.
-     * Throws a {@code NullPointerException} if the <tt>object</tt> parameter is null.
+     * Throws a {@code NullPointerException} if the <tt>object</tt> parameter is
+     * null, returns the object otherwise.
      *
-     * @param object the object to test
-     * @throws NullPointerException if {@code object} is null
-     */
-    public static void ifNull(final Object object) {
-        ifNull(object, null);
-    }
-
-    /**
-     * Alias for {@code checkNotNull} to be used in fluent {@code Reject.ifNull} syntax.
-     * Throws a {@code NullPointerException} if the <tt>object</tt> parameter is null.
-     *
-     * @param object the object to test
-     * @param message a custom exception message to use
-     * @throws NullPointerException if {@code object} is null
-     */
-    public static void ifNull(final Object object, final String message) {
-        checkNotNull(object, message);
-    }
-
-    /**
-     * Alias for {@code checkTrue} to be used in fluent {@code Reject.ifFalse} syntax.
-     * Throws an {@code IllegalArgumentException} if the <tt>value</tt> parameter is false.
-     *
-     * @param value the value to test
-     * @throws IllegalArgumentException if {@code value} is false
-     */
-    public static void ifFalse(final boolean value) {
-        checkTrue(value);
-    }
-
-    /**
-     * Alias for {@code checkFalse} to be used in fluent {@code Reject.ifTrue} syntax.
-     * Throws an {@code IllegalArgumentException} if the <tt>value</tt> parameter is true.
-     *
-     * @param value the value to test
-     * @throws IllegalArgumentException if {@code value} is true
-     */
-    public static void ifTrue(final boolean value) {
-        checkFalse(value);
-    }
-
-    /**
-     * Throws a {@code NullPointerException} if the <tt>object</tt> parameter is null,
-     * returns the object otherwise.
-     *
-     * @param object the object to test
+     * @param <T>
+     *            The type of object to test.
+     * @param object
+     *            the object to test
      * @return the object
-     * @throws NullPointerException if {@code object} is null
+     * @throws NullPointerException
+     *             if {@code object} is null
      */
     public static <T> T checkNotNull(final T object) {
         return checkNotNull(object, null);
     }
 
     /**
-     * Throws a {@code NullPointerException} if the <tt>object</tt> parameter is null,
-     * returns the object otherwise.
+     * Throws a {@code NullPointerException} if the <tt>object</tt> parameter is
+     * null, returns the object otherwise.
      *
-     * @param object the object to test
-     * @param message a custom exception message to use
+     * @param <T>
+     *            The type of object to test.
+     * @param object
+     *            the object to test
+     * @param message
+     *            a custom exception message to use
      * @return the object
-     * @throws NullPointerException if {@code object} is null
+     * @throws NullPointerException
+     *             if {@code object} is null
      */
     public static <T> T checkNotNull(final T object, final String message) {
         if (object == null) {
@@ -131,55 +93,123 @@ public class Reject {
     }
 
     /**
-     * Tests that the {@code value} parameter is false.
-     * Throws an @{code IllegalArgumentException} with a custom {@code message} if not.
+     * Throws an {@code IllegalArgumentException} if the <tt>condition</tt>
+     * parameter is false.
      *
-     * @param value the value to test
-     * @param message a custom exception message to use
-     * @throws IllegalArgumentException if {@code value} is true
+     * @param condition
+     *            the condition to test
+     * @throws IllegalArgumentException
+     *             if {@code condition} is false
      */
-    public static boolean checkFalse(final boolean value, String message) {
-        if (value) {
+    public static void ifFalse(final boolean condition) {
+        ifFalse(condition, "Expected condition was true, found false");
+    }
+
+    /**
+     * Throws an {@code IllegalArgumentException} with a custom {@code message}
+     * if the <tt>condition</tt> parameter is false.
+     *
+     * @param condition
+     *            the condition to test
+     * @param message
+     *            a custom exception message to use
+     * @throws IllegalArgumentException
+     *             if {@code condition} is false
+     */
+    public static void ifFalse(final boolean condition, final String message) {
+        if (!condition) {
             throw new IllegalArgumentException(message);
         }
-        return value;
     }
 
     /**
-     * Tests that the {@code value} parameter is true.
-     * Throws an @{code IllegalArgumentException} with a custom {@code message} if not.
+     * Alias for {@code checkNotNull} to be used in fluent {@code Reject.ifNull}
+     * syntax. Throws a {@code NullPointerException} if the <tt>object</tt>
+     * parameter is null.
      *
-     * @param value the value to test
-     * @param message a custom exception message to use
-     * @throws IllegalArgumentException if {@code value} is false
+     * @param object
+     *            the object to test
+     * @throws NullPointerException
+     *             if {@code object} is null
      */
-    public static boolean checkTrue(final boolean value, String message) {
-        if (!value) {
+    public static void ifNull(final Object object) {
+        ifNull(object, null);
+    }
+
+    /**
+     * Throws a {@code NullPointerException} if any of the provided arguments
+     * are {@code null}.
+     *
+     * @param <T>
+     *            The type of object to test.
+     * @param objects
+     *            The objects to test.
+     * @throws NullPointerException
+     *             If any of the provided arguments are {@code null}.
+     */
+    public static <T> void ifNull(final T... objects) {
+        /*
+         * This method is generic in order to play better with varargs.
+         * Otherwise invoking this method with an array of Strings will be
+         * flagged with a warning because of the potential ambiguity. See
+         * org.forgerock.util.RejectTest.ifNullVarArgsStrings().
+         */
+        for (final Object o : objects) {
+            if (o == null) {
+                throw new NullPointerException();
+            }
+        }
+    }
+
+    /**
+     * Alias for {@code checkNotNull} to be used in fluent {@code Reject.ifNull}
+     * syntax. Throws a {@code NullPointerException} if the <tt>object</tt>
+     * parameter is null.
+     *
+     * @param object
+     *            the object to test
+     * @param message
+     *            a custom exception message to use
+     * @throws NullPointerException
+     *             if {@code object} is null
+     */
+    public static void ifNull(final Object object, final String message) {
+        checkNotNull(object, message);
+    }
+
+    /**
+     * Throws an {@code IllegalArgumentException} if the <tt>condition</tt>
+     * parameter is true.
+     *
+     * @param condition
+     *            the condition to test
+     * @throws IllegalArgumentException
+     *             if {@code condition} is true
+     */
+    public static void ifTrue(final boolean condition) {
+        ifTrue(condition, "Expected condition was false, found true");
+    }
+
+    /**
+     * Throws an {@code IllegalArgumentException} with a custom {@code message}
+     * if the <tt>condition</tt> parameter is true.
+     *
+     * @param condition
+     *            the condition to test
+     * @param message
+     *            a custom exception message to use
+     * @throws IllegalArgumentException
+     *             if {@code condition} is true
+     */
+    public static void ifTrue(final boolean condition, final String message) {
+        if (condition) {
             throw new IllegalArgumentException(message);
         }
-        return value;
     }
 
-    /**
-     * Tests that the {@code value} parameter is false.
-     * Throws an @{code IllegalArgumentException} with a default message if not.
-     *
-     * @param value the value to test
-     * @throws IllegalArgumentException if {@code value} is false
-     */
-    public static boolean checkFalse(final boolean value) {
-        return checkFalse(value, "Expected value was false, found true");
-    }
-
-    /**
-     * Tests that the {@code value} parameter is true.
-     * Throws an @{code IllegalArgumentException} with a default message if not.
-     *
-     * @param value the value to test
-     * @throws IllegalArgumentException if {@code value} is false
-     */
-    public static boolean checkTrue(final boolean value) {
-        return checkTrue(value, "Expected value was true, found false");
+    // Prevent instantiation
+    private Reject() {
+        // nothing to do
     }
 
 }

@@ -23,6 +23,7 @@ import java.nio.charset.Charset;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotSame;
 
+@SuppressWarnings("javadoc")
 public class Base64urlTest {
 
     @Test

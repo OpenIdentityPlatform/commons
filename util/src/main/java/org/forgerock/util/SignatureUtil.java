@@ -54,27 +54,27 @@ public class SignatureUtil {
     }
 
     /**
-     * Signs a String using the given private key. Uses the algorithm from the private key to perform the signature.
+     * Signs a String using the given private key. Uses the algorithm from the
+     * private key to perform the signature.
      *
-     * @param privateKey The private key to use to sign the String.
-     * @param algorithm The algorithm to use in the signing.
-     * @param message The String to sign.
+     * @param privateKey
+     *            The private key to use to sign the String.
+     * @param algorithm
+     *            The algorithm to use in the signing.
+     * @param message
+     *            The String to sign.
      * @return The byte array of the signature.
-     * @throws java.security.SignatureException If there is a problem when performing the signature.
+     * @throws java.security.SignatureException
+     *             If there is a problem when performing the signature.
      */
-    public byte[] sign(PrivateKey privateKey, String algorithm, String message) throws SignatureException {
-
+    public byte[] sign(PrivateKey privateKey, String algorithm, String message)
+            throws SignatureException {
         try {
             Signature signature = Signature.getInstance(algorithm);
-
             signature.initSign(privateKey);
-
             signature.update(message.getBytes());
-
             byte[] signatureBytes = signature.sign();
-
             return signatureBytes;
-
         } catch (NoSuchAlgorithmException e) {
             throw new SignatureException(MessageFormat.format(
                     "Could not get Signature instance with the algorithm: {0}", algorithm), e);
@@ -84,45 +84,53 @@ public class SignatureUtil {
     }
 
     /**
-     * Verifies a signature of a String using the certificate. Uses the algorithm from the certificate to perform the
-     * verification of the signature.
+     * Verifies a signature of a String using the certificate. Uses the
+     * algorithm from the certificate to perform the verification of the
+     * signature.
      *
-     * @param certificate The X509Certificate to use to verify the signature.
-     * @param algorithm The algorithm to use in the signing.
-     * @param message The String that was signed.
-     * @param signatureData The byte array of the signature.
-     * @return Whether or not the signature is valid for the String that was signed.
-     * @throws java.security.SignatureException If there is a problem when verifying the signature.
+     * @param certificate
+     *            The X509Certificate to use to verify the signature.
+     * @param algorithm
+     *            The algorithm to use in the signing.
+     * @param message
+     *            The String that was signed.
+     * @param signatureData
+     *            The byte array of the signature.
+     * @return Whether or not the signature is valid for the String that was
+     *         signed.
+     * @throws java.security.SignatureException
+     *             If there is a problem when verifying the signature.
      */
-    public boolean verify(X509Certificate certificate, String algorithm, String message, byte[] signatureData) throws
-            SignatureException {
+    public boolean verify(X509Certificate certificate, String algorithm, String message,
+            byte[] signatureData) throws SignatureException {
         return verify(certificate.getPublicKey(), algorithm, message, signatureData);
     }
 
     /**
-     * Verifies a signature of a String using the public key. Uses the algorithm from the public key to perform the
-     * verification of the signature.
+     * Verifies a signature of a String using the public key. Uses the algorithm
+     * from the public key to perform the verification of the signature.
      *
-     * @param publicKey The public key to use to verify the signature.
-     * @param algorithm The algorithm to use in the signing.
-     * @param message The String that was signed.
-     * @param signatureData The byte array of the signature.
-     * @return Whether or not the signature is valid for the String that was signed.
-     * @throws java.security.SignatureException If there is a problem when verifying the signature.
+     * @param publicKey
+     *            The public key to use to verify the signature.
+     * @param algorithm
+     *            The algorithm to use in the signing.
+     * @param message
+     *            The String that was signed.
+     * @param signatureData
+     *            The byte array of the signature.
+     * @return Whether or not the signature is valid for the String that was
+     *         signed.
+     * @throws java.security.SignatureException
+     *             If there is a problem when verifying the signature.
      */
-    public boolean verify(PublicKey publicKey,  String algorithm, String message, byte[] signatureData) throws SignatureException {
-
+    public boolean verify(PublicKey publicKey, String algorithm, String message,
+            byte[] signatureData) throws SignatureException {
         try {
             Signature signature = Signature.getInstance(algorithm);
-
             signature.initVerify(publicKey);
-
             signature.update(message.getBytes());
-
             boolean verified = signature.verify(signatureData);
-
             return verified;
-
         } catch (NoSuchAlgorithmException e) {
             throw new SignatureException(MessageFormat.format(
                     "Could not get Signature instance with the algorithm: {0}", algorithm), e);

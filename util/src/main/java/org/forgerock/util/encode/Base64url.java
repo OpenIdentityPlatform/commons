@@ -17,45 +17,45 @@
 package org.forgerock.util.encode;
 
 /**
- * Makes use of the very fast and memory efficient Base64 class to encode and decode to and from BASE64 in full
- * accordance with RFC 2045. And then replaces + and / for - and _ respectively and removes the padding character =
- * to be in accordance with RFC 4648.
+ * Makes use of the very fast and memory efficient Base64 class to encode and
+ * decode to and from BASE64 in full accordance with RFC 2045. And then replaces
+ * + and / for - and _ respectively and removes the padding character = to be in
+ * accordance with RFC 4648.
  */
-public class Base64url {
+public final class Base64url {
+    /**
+     * Decodes the given Base64url encoded String into a byte array.
+     *
+     * @param content
+     *            The Base64url encoded String to decode.
+     * @return The decoded byte[] array.
+     */
+    public static byte[] decode(final String content) {
+        final StringBuilder builder =
+                new StringBuilder(content.replaceAll("-", "+").replaceAll("_", "/"));
+        final int modulus = builder.length() % 4;
+        final int numberOfPaddingChars = 4 - modulus;
+        if (modulus != 0) {
+            for (int i = 0; i < numberOfPaddingChars; i++) {
+                builder.append('=');
+            }
+        }
+        return Base64.decode(builder.toString());
+    }
 
     /**
      * Encodes the given byte array into a Base64url encoded String.
      *
-     * @param content The byte array to encode.
+     * @param content
+     *            The byte array to encode.
      * @return The Base64url encoded byte array.
      */
-    public static String encode(byte[] content) {
-        String base64EncodedString = Base64.encode(content);
-
-        return base64EncodedString.replaceAll("\\+", "-")
-                .replaceAll("/", "_")
-                .replaceAll("=", "");
+    public static String encode(final byte[] content) {
+        return Base64.encode(content).replaceAll("\\+", "-").replaceAll("/", "_").replaceAll("=",
+                "");
     }
 
-    /**
-     * Decodes the given Base64url encoded String into a byte array.
-     *
-     * @param content The Base64url encoded String to decode.
-     * @return The decoded byte[] array.
-     */
-    public static byte[] decode(String content) {
-
-        content = content.replaceAll("-", "+")
-                .replaceAll("_", "/");
-
-        int modulus = content.length() % 4;
-        int numberOfPaddingChars = 4 - modulus;
-        if (modulus != 0) {
-            for (int i = 0; i < numberOfPaddingChars; i++) {
-                content += "=";
-            }
-        }
-
-        return Base64.decode(content);
+    private Base64url() {
+        // No impl.
     }
 }
