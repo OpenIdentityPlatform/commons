@@ -390,7 +390,7 @@ public class JwtSessionModule implements ServerAuthModule {
 
         Map<String, Object> map = messageInfo.getMap();
         HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
-        Object principal = request.getHeader(AuthNFilter.ATTRIBUTE_AUTH_PRINCIPAL);
+        Object principal = request.getAttribute(AuthNFilter.ATTRIBUTE_AUTH_PRINCIPAL);
 
         if (principal != null) {
             jwtParameters.put("prn", principal);
