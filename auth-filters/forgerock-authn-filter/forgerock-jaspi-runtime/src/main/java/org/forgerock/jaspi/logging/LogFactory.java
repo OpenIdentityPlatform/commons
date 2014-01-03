@@ -18,8 +18,8 @@ package org.forgerock.jaspi.logging;
 
 import org.forgerock.auth.common.AuditLogger;
 import org.forgerock.auth.common.DebugLogger;
-import org.forgerock.auth.common.NopAuditLogger;
-import org.forgerock.auth.common.NopDebugLogger;
+import org.forgerock.auth.common.NoOpAuditLogger;
+import org.forgerock.auth.common.NoOpDebugLogger;
 
 import javax.security.auth.message.MessageInfo;
 
@@ -51,13 +51,13 @@ public final class LogFactory {
     /**
      * Gets the Debug Logger for the JASPI runtime.
      * <p>
-     * If no Debug Logger has been set then a Nop Debug Logger will be returned.
+     * If no Debug Logger has been set then a NoOp Debug Logger will be returned.
      *
      * @return The DebugLogger instance.
      */
     public static DebugLogger getDebug() {
         if (debugLogger == null) {
-            return new NopDebugLogger();
+            return new NoOpDebugLogger();
         }
         return debugLogger;
     }
@@ -74,13 +74,13 @@ public final class LogFactory {
     /**
      * Gets the Audit Logger for the JASPI runtime.
      * <p>
-     * If no Audit Logger has been set then a Nop Audit Logger will be returned.
+     * If no Audit Logger has been set then a NoOp Audit Logger will be returned.
      *
      * @return The AuditLogger instance.
      */
     public static AuditLogger<MessageInfo> getAuditLogger() {
         if (auditLogger == null) {
-            return new NopAuditLogger<MessageInfo>();
+            return new NoOpAuditLogger<MessageInfo>();
         }
         return auditLogger;
     }

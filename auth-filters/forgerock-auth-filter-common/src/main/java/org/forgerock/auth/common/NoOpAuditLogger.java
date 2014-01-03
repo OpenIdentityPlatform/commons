@@ -17,12 +17,12 @@
 package org.forgerock.auth.common;
 
 /**
- *
+ * No Operation implementation of the Audit Logger interface.
  *
  * @author Phill Cunnington
  * @since 1.3.0
  */
-public class NopAuditLogger<T> implements AuditLogger<T> {
+public class NoOpAuditLogger<T> implements AuditLogger<T> {
 
     @Override
     public void audit(AuditRecord<T> auditRecord) {

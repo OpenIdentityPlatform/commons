@@ -172,7 +172,7 @@ public class DefaultRuntimeInjector implements RuntimeInjector {
     /**
      * Gets the instance of the configured {@link LoggingConfigurator}, configured in the Filter Config init params.
      * <p>
-     * If no LoggingConfigurator is configured in the Filter Config, then a NOP LoggingConfigurator will be returned.
+     * If no LoggingConfigurator is configured in the Filter Config, then a NoOp LoggingConfigurator will be returned.
      *
      * @param config The Filter Config.
      * @return An instance of the LoggingConfigurator.
@@ -185,7 +185,7 @@ public class DefaultRuntimeInjector implements RuntimeInjector {
 
         if (loggingConfigurator == null) {
             LOGGER.debug("Filter init param, " + INIT_PARAM_LOGGING_CONFIGURATOR_CLASS + ", not set. Falling back "
-                    + "to the NOPLoggingConfigurator.");
+                    + "to the NoOp Logging Configurator.");
             loggingConfigurator = new LoggingConfigurator<MessageInfo>() {
                 @Override
                 public DebugLogger getDebugLogger() {

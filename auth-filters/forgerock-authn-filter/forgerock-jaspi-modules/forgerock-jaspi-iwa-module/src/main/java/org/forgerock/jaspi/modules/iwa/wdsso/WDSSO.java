@@ -187,12 +187,12 @@ public class WDSSO /*extends AMLoginModule*/ {
 //                            result = ISAuthConstants.LOGIN_SUCCEED;
 //                        }
                     } catch (Exception ee) {
-                        LOGGER.error("IWA WDSSO: Authentication failed with new cred. " + e.getMessage());
+                        LOGGER.error("IWA WDSSO: Authentication failed with new cred. " + e.getMessage(), e);
                         throw ee;
 //                        return AuthStatus.SEND_FAILURE;
                     }
                 } else {
-                    LOGGER.error("IWA WDSSO: Authentication failed with GSSException. " + e.getMessage());
+                    LOGGER.error("IWA WDSSO: Authentication failed with GSSException. " + e.getMessage(), e);
                     throw new RuntimeException();
 //                    return AuthStatus.SEND_FAILURE;
                 }
@@ -219,10 +219,10 @@ public class WDSSO /*extends AMLoginModule*/ {
 //                return AuthStatus.SEND_FAILURE;
             }
         } catch (RuntimeException e) {
-            LOGGER.debug("IWA WDSSO: Authentication failed with generic exception. " + e.getMessage());
+            LOGGER.error("IWA WDSSO: Authentication failed with generic exception. " + e.getMessage(), e);
             throw e;
         } catch (Exception e) {
-            LOGGER.debug("IWA WDSSO: Authentication failed with generic exception. " + e.getMessage());
+            LOGGER.error("IWA WDSSO: Authentication failed with generic exception. " + e.getMessage(), e);
             throw e;
 //            return AuthStatus.SEND_FAILURE;
         }

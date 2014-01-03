@@ -17,11 +17,11 @@
 package org.forgerock.auth.common;
 
 /**
- * NOP implementation of the DebugLogger.
+ * No Operation implementation of the Debug Logger interface.
  *
  * @since 1.3.0
  */
-public class NopDebugLogger implements DebugLogger {
+public class NoOpDebugLogger implements DebugLogger {
 
     @Override
     public void trace(String message) {
