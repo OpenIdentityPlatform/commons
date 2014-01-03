@@ -82,7 +82,7 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
                 headers: headers
             });
         } else {
-            return this.serviceCall({url: "/?_action=create",
+            return this.serviceCall({url: "?_action=create",
                 type: "POST",
                 success: successCallback, 
                 error: errorCallback, 
@@ -159,16 +159,12 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
         //simple transformation
         var i;
         for(i = 0; i < patchDefinition.length; i++) {
-            if (typeof(patchDefinition[i].replace) !== "undefined") {
-                patchDefinition[i].replace = "/" + patchDefinition[i].replace;
-            }
-            if (typeof(patchDefinition[i].add) !== "undefined") {
-                patchDefinition[i].add = "/" + patchDefinition[i].add;
-            }
-            
+            if (typeof(patchDefinition[i].field) !== "undefined") {
+                patchDefinition[i].field = "/" + patchDefinition[i].field;
+            }            
         }
-        return this.serviceCall({url: "/" + queryParameters.id + "?_action=patch", 
-            type: "POST", 
+        return this.serviceCall({url: "/" + queryParameters.id, 
+            type: "PATCH", 
             success: successCallback, 
             error: errorCallback, 
             data: JSON.stringify(patchDefinition),
@@ -182,7 +178,7 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
      *  Patches single attribute
      */
     obj.prototype.patchEntityAttribute = function(queryParameters, attributeName, newValue, successCallback, errorCallback, noChangesCallback, fields) {
-        return this.patchEntity(queryParameters, [{replace: attributeName, value: newValue}], successCallback, errorCallback, noChangesCallback);
+        return this.patchEntity(queryParameters, [{operation: "replace", field: attributeName, value: newValue}], successCallback, errorCallback, noChangesCallback);
     };
 
     /**
@@ -199,9 +195,11 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
                 newValue = newObject[field];
                 oldValue = oldObject[field];
                 if((newValue!=="" || oldValue) && newValue !== oldValue){
-                    patchCmd = {};
-                    patchCmd[method] = field;
-                    patchCmd.value = newValue;
+                    patchCmd = {
+                        operation: method,
+                        field: field,
+                        value: newValue
+                    };
                     result.push( patchCmd );
                 }
             }
