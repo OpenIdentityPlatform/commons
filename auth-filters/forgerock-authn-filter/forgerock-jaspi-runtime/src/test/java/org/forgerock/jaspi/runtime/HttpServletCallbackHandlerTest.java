@@ -36,6 +36,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertNull;
 
 public class HttpServletCallbackHandlerTest {
 
@@ -53,7 +54,7 @@ public class HttpServletCallbackHandlerTest {
         CallerPrincipalCallback callbackOne = mock(CallerPrincipalCallback.class);
         Callback[] callbacks = new Callback[]{callbackOne};
         Subject subject = new Subject();
-        Principal principal = mock(Principal.class);
+        Principal principal = null;
 
         given(callbackOne.getSubject()).willReturn(subject);
         given(callbackOne.getName()).willReturn("PRN_NAME");
@@ -66,6 +67,29 @@ public class HttpServletCallbackHandlerTest {
         assertEquals(subject.getPrincipals().size(), 1);
         assertEquals(subject.getPrincipals().toArray(new Principal[0])[0].getName(), "PRN_NAME");
         assertNotEquals(subject.getPrincipals().toArray(new Principal[0])[0], principal);
+    }
+
+    @Test
+    public void shouldHandleCallerPrincipalCallbackWithCallbackNameButNonNullPrincipal()
+            throws UnsupportedCallbackException {
+
+        //Given
+        CallerPrincipalCallback callbackOne = mock(CallerPrincipalCallback.class);
+        Callback[] callbacks = new Callback[]{callbackOne};
+        Subject subject = new Subject();
+        Principal principal = mock(Principal.class);
+
+        given(callbackOne.getSubject()).willReturn(subject);
+        given(callbackOne.getName()).willReturn("PRN_NAME");
+        given(callbackOne.getPrincipal()).willReturn(principal);
+
+        //When
+        callbackHandler.handle(callbacks);
+
+        //Then
+        assertEquals(subject.getPrincipals().size(), 1);
+        assertNull(subject.getPrincipals().toArray(new Principal[0])[0].getName());
+        assertEquals(subject.getPrincipals().toArray(new Principal[0])[0], principal);
     }
 
     @Test

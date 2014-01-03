@@ -74,7 +74,10 @@ public class HttpServletCallbackHandler implements CallbackHandler {
                 final String name = callerPrincipalCallback.getName();
                 Principal principal = callerPrincipalCallback.getPrincipal();
 
-                if (name != null) {
+                if (principal != null) {
+                    LOGGER.trace("Adding principal, " + principal.getName() + ", to Subject");
+                    subject.getPrincipals().add(principal);
+                } else if (name != null) {
                     LOGGER.trace("Adding principal, " + name + ", to Subject");
                     subject.getPrincipals().add(new Principal() {
                         @Override
@@ -82,9 +85,6 @@ public class HttpServletCallbackHandler implements CallbackHandler {
                             return name;
                         }
                     });
-                } else if (principal != null) {
-                    LOGGER.trace("Adding principal, " + principal.getName() + ", to Subject");
-                    subject.getPrincipals().add(principal);
                 } else {
                     //Both name and principal are null so not adding either.
                     LOGGER.trace("Not adding principal as no name or principal set on callback");

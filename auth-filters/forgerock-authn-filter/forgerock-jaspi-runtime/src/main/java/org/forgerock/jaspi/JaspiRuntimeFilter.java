@@ -16,11 +16,11 @@
 
 package org.forgerock.jaspi;
 
-import org.forgerock.auth.common.DebugLogger;
 import org.forgerock.jaspi.logging.LogFactory;
 import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.jaspi.runtime.config.inject.DefaultRuntimeInjector;
 import org.forgerock.jaspi.runtime.config.inject.RuntimeInjector;
+import org.forgerock.jaspi.utils.DebugLoggerBuffer;
 import org.forgerock.jaspi.utils.FilterConfiguration;
 import org.forgerock.jaspi.utils.FilterConfigurationImpl;
 
@@ -46,7 +46,7 @@ import java.io.IOException;
  */
 public class JaspiRuntimeFilter implements Filter {
 
-    private static final DebugLogger LOGGER = LogFactory.getDebug();
+    private static final DebugLoggerBuffer LOGGER = new DebugLoggerBuffer();
 
     private static final String INIT_PARAM_INJECTOR_CLASS = "runtime-injector-class";
     private static final String INIT_PARAM_INJECTOR_METHOD = "runtime-injector-method";
@@ -91,10 +91,10 @@ public class JaspiRuntimeFilter implements Filter {
      * @return The instance of the Jaspi Runtime.
      * @throws ServletException If there is an error configuring the Jaspi Runtime.
      */
-    private JaspiRuntime getJaspiRuntime() throws ServletException {
+    private synchronized JaspiRuntime getJaspiRuntime() throws ServletException {
         if (jaspiRuntime == null) {
-            LOGGER.debug("Initialising the JaspiRuntime");
             RuntimeInjector runtimeInjector = getRuntimeInjector(filterConfig);
+            LOGGER.debug("Initialising the JaspiRuntime");
             jaspiRuntime = runtimeInjector.getInstance(JaspiRuntime.class);
         }
         return jaspiRuntime;
@@ -141,9 +141,10 @@ public class JaspiRuntimeFilter implements Filter {
                 INIT_PARAM_INJECTOR_METHOD, INIT_PARAM_INJECTOR_METHOD_DEFAULT);
 
         if (runtimeInjector == null) {
+            runtimeInjector = DefaultRuntimeInjector.getRuntimeInjector(config);
+            LOGGER.setDebugLogger(LogFactory.getDebug());
             LOGGER.debug("Filter init param, " + INIT_PARAM_INJECTOR_CLASS + ", not set. Falling back to the "
                     + DefaultRuntimeInjector.class.getSimpleName() + ".");
-            runtimeInjector = DefaultRuntimeInjector.getRuntimeInjector(config);
         }
 
         return runtimeInjector;

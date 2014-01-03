@@ -27,8 +27,6 @@ public class JaspiAuthException extends AuthException {
 
     private static final long serialVersionUID = -1L;
 
-    private final Throwable cause;
-
     /**
      * Constructs a new JaspiAuthException with the specified detail message.
      *
@@ -36,7 +34,6 @@ public class JaspiAuthException extends AuthException {
      */
     public JaspiAuthException(final String message) {
         super(message);
-        this.cause = null;
     }
 
     /**
@@ -47,7 +44,7 @@ public class JaspiAuthException extends AuthException {
      */
     public JaspiAuthException(final Throwable cause) {
         super(cause.getMessage());
-        this.cause = cause;
+        initCause(cause);
     }
 
     /**
@@ -58,14 +55,6 @@ public class JaspiAuthException extends AuthException {
      */
     public JaspiAuthException(final String message, final Throwable cause) {
         super(message);
-        this.cause = cause;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Throwable getCause() {
-        return cause;
+        initCause(cause);
     }
 }

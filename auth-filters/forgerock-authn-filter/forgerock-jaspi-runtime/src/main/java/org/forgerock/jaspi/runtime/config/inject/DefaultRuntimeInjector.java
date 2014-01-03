@@ -26,6 +26,7 @@ import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.jaspi.runtime.RuntimeResultHandler;
 import org.forgerock.jaspi.runtime.config.ServerContextFactory;
 import org.forgerock.jaspi.runtime.context.ContextHandler;
+import org.forgerock.jaspi.utils.DebugLoggerBuffer;
 import org.forgerock.jaspi.utils.FilterConfiguration;
 import org.forgerock.jaspi.utils.FilterConfigurationImpl;
 import org.forgerock.jaspi.utils.MessageInfoUtils;
@@ -44,7 +45,7 @@ import javax.servlet.ServletException;
  */
 public class DefaultRuntimeInjector implements RuntimeInjector {
 
-    private static final DebugLogger LOGGER = LogFactory.getDebug();
+    private static final DebugLoggerBuffer LOGGER = new DebugLoggerBuffer();
 
     private static final String INIT_PARAM_CONTEXT_CLASS = "context-factory-class";
     private static final String INIT_PARAM_CONTEXT_METHOD = "context-factory-method";
@@ -88,6 +89,7 @@ public class DefaultRuntimeInjector implements RuntimeInjector {
         LoggingConfigurator<MessageInfo> loggingConfigurator = getLoggingConfigurator(config);
         LogFactory.setAuditLogger(loggingConfigurator.getAuditLogger());
         LogFactory.setDebugLogger(loggingConfigurator.getDebugLogger());
+        LOGGER.setDebugLogger(LogFactory.getDebug());
 
         ServerContextFactory serverContextFactory = getServerContextFactory(config);
 

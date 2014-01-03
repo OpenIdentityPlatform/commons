@@ -209,7 +209,7 @@ public class ContextHandlerTest {
         try {
             contextHandler.handleCompletion(messageInfo, clientSubject, authStatus);
         } catch (JaspiAuthException e) {
-            verify(response, never()).setContentType("application/json");
+            verify(response).setContentType("application/json");
             throw e;
         }
 

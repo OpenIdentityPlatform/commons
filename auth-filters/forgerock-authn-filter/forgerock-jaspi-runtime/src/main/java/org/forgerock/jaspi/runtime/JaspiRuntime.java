@@ -150,6 +150,7 @@ public class JaspiRuntime {
             serverAuthContext.cleanSubject(messageInfo, clientSubject);
 
         } catch (AuthException e) {
+            DEBUG.error(e.getMessage(), e);
             HttpServletResponse httpResponse = (HttpServletResponse) messageInfo.getResponseMessage();
             ResourceException jre = ResourceException.getException(ResourceException.INTERNAL_ERROR, e.getMessage());
             httpResponse.setStatus(ResourceException.INTERNAL_ERROR);

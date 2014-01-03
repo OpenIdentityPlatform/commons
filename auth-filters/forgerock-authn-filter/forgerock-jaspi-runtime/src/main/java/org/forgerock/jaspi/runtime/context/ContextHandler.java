@@ -130,8 +130,8 @@ public class ContextHandler {
             ResourceException jre = ResourceException.getException(UNAUTHORIZED_HTTP_ERROR_CODE,
                     UNAUTHORIZED_ERROR_MESSAGE);
             try {
-                response.getWriter().write(jre.toJsonValue().toString());
                 response.setContentType(JSON_HTTP_MEDIA_TYPE);
+                response.getWriter().write(jre.toJsonValue().toString());
             } catch (IOException e) {
                 LOGGER.error("Failed to write to response", e);
                 throw new JaspiAuthException(e);
@@ -156,8 +156,10 @@ public class ContextHandler {
         HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
         String principalName = null;
         for (Principal principal : clientSubject.getPrincipals()) {
-            principalName = principal.getName();
-            break;
+            if (principal.getName() != null) {
+                principalName = principal.getName();
+                break;
+            }
         }
 
         Map<String, Object> context = messageInfoUtils.getMap(messageInfo, JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT);

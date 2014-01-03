@@ -41,9 +41,9 @@ import java.util.List;
  * any other ServerAuthModules.
  * <br/>
  * This class or concrete implementations of it MUST not store any request specific state in it. This is because
- * many different requests will use this class, possibly concurrently. If request specific state does need to be
- * maintained, then use the MessageInfo map that is provided as this is created and used only be the specific request
- * being handled. The MessageInfo will be available for the entire time the request is being processed.
+ * many different requests will use this class, possibly concurrently. If the request-specific state needs to be
+ * maintained then use the MessageInfo map provided. This is created and used only by this specific request - it will
+ * be available for the entire time the request is being processed..
  *
  * @param <T> The type of the ServerAuthModule configured in the runtime.
  * @since 1.3.0
@@ -118,8 +118,6 @@ public abstract class JaspiServerAuthContext<T extends ServerAuthModule> impleme
      * #validateRequest(List, MessageInfo, Subject, Subject) will be called for the ServerAuthModules
      * #validateRequest(MessageInfo, Subject, Subject) to be called.
      * <br/>
-     * Possible AuthStatus return values: SUCCESS, SEND_SUCCESS, SEND_FAILURE, SEND_CONTINUE.
-     * <br/>
      * The configured AuditLogger will be called to audit the request <strong>if</strong> the Session AuthModule
      * is not configured or returns AuthStatus.SEND_FAILURE as if the Session AuthModule passes the Jaspi Runtime
      * takes this as an existing session continuing.
@@ -169,8 +167,8 @@ public abstract class JaspiServerAuthContext<T extends ServerAuthModule> impleme
                 return authStatus;
             } else if (AuthStatus.SEND_SUCCESS.equals(authStatus)) {
                 // The module may have completely/partially/not authenticated the client.
-                LOGGER.debug(sessionAuthModule.getClass().getSimpleName() + " has successfully authenticated the "
-                        + "client and has a response to return to the client");
+                LOGGER.debug(sessionAuthModule.getClass().getSimpleName() + " may have completely/partially/not "
+                        + "authenticated the client and has a response to return to the client");
                 return authStatus;
             } else if (AuthStatus.SEND_FAILURE.equals(authStatus)) {
                 // The module has failed to authenticate the client.
@@ -193,6 +191,7 @@ public abstract class JaspiServerAuthContext<T extends ServerAuthModule> impleme
             authStatus = validateRequest(authModules, messageInfo, clientSubject, serviceSubject);
             if (authStatus == null || AuthStatus.FAILURE.equals(authStatus)) {
                 final AuthStatus exceptionAuthStatus = authStatus;
+                // Setting authStatus to null so auditing does not happen. As this exception is a configuration issue.
                 authStatus = null;
                 LOGGER.error("Invalid AuthStatus returned from validateRequest, " + exceptionAuthStatus);
                 throw new JaspiAuthException("Invalid AuthStatus returned from validateRequest, "
