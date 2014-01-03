@@ -105,7 +105,7 @@ public class DefaultRuntimeInjector implements RuntimeInjector {
 
     /**
      * Returns a new instance of the DefaultRuntimeInjector.
-     * <p>
+     * <br/>
      * This does and should return a new instance of a RuntimeInjector, as it is only ever called once per configured
      * filter. This means that a web application can create multiple instances of the JaspiRuntimeFilter and each
      * instance will have its own self contained injector which uses that instances filter configuration.
@@ -125,7 +125,7 @@ public class DefaultRuntimeInjector implements RuntimeInjector {
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br/>
      * Will only ever return the singleton instance (for this instance of the JaspiRuntimeFilter) and if asked
      * for an instance of a different type will throw a {@link RuntimeException}.
      *
@@ -147,7 +147,7 @@ public class DefaultRuntimeInjector implements RuntimeInjector {
 
     /**
      * Gets the instance of the configured {@link ServerContextFactory}, configured in the Filter Config init params.
-     * <p>
+     * <br/>
      * If no ServerContextFactory is configured in the Filter Config, then the {@link DefaultServerContextFactory} will
      * be returned.
      *
@@ -171,7 +171,7 @@ public class DefaultRuntimeInjector implements RuntimeInjector {
 
     /**
      * Gets the instance of the configured {@link LoggingConfigurator}, configured in the Filter Config init params.
-     * <p>
+     * <br/>
      * If no LoggingConfigurator is configured in the Filter Config, then a NoOp LoggingConfigurator will be returned.
      *
      * @param config The Filter Config.

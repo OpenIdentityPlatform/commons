@@ -26,7 +26,7 @@ public interface AuditLogger<T> {
 
     /**
      * Audits the AuthN or AuthZ requests outcome.
-     * <p>
+     * <br/>
      * The AuditRecord parameter will contain the originating HttpServletRequest, the AuthResult, with the
      * auth operations outcome and any other relevant information for the audit purposes.
      *

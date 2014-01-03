@@ -38,7 +38,7 @@ import java.io.IOException;
  * This Servlet Filter class provides a method of integrating the Jaspi runtime into a Servlet Container, such that
  * requests made to the url this filter is registered at will cause the Jaspi runtime to validate and secure the
  * request and response using it configured ServerAuthModules.
- * <p>
+ * <br/>
  * To configure the Jaspi runtime the Servlet Filter registration must contain the configuration for the
  * LoggingConfigurator.
  *
@@ -66,7 +66,7 @@ public class JaspiRuntimeFilter implements Filter {
 
     /**
      * Constructs a new instance of the JaspiRuntimeFilter for use in tests.
-     * <p>
+     * <br/>
      * Allows tests to pass in a mock of the FilterConfiguration.
      *
      * @param filterConfiguration A mock of the FilterConfiguration.
@@ -128,7 +128,7 @@ public class JaspiRuntimeFilter implements Filter {
 
     /**
      * Gets the instance of the configured {@link RuntimeInjector}, configured in the Filter Config init params.
-     * <p>
+     * <br/>
      * If no RuntimeInjector is configured in the Filter Config, then the {@link DefaultRuntimeInjector} will be
      * returned.
      *

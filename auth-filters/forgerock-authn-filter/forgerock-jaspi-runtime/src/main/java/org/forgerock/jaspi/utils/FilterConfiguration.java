@@ -30,12 +30,12 @@ public interface FilterConfiguration {
     /**
      * Gets an instance of a class by calling a static factory method on a class, as defined in the given FilterConfig
      * instance.
-     * <p>
+     * <br/>
      * The class to call the factory method on is retrieved from the Filter Config using the given classNameParam,
      * similarly the method to call is retrieved from the Filter Config using the given methodNameParam. If the
      * methodNameParam is not present on the Filter Config then the method specified in the defaultMethodName will be
      * used instead.
-     * <p>
+     * <br/>
      * The method to be called will be called firstly with the Filter Config instance as a parameter, and if no method
      * exists then it will be called with no args.
      *

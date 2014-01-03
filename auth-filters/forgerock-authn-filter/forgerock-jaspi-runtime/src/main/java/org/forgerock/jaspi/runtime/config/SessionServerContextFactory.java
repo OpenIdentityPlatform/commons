@@ -39,10 +39,10 @@ import java.util.Map;
 
 /**
  * Factory class for getting the ServerAuthContext instance that the JaspiRuntime will be configured to use.
- * <p>
+ * <br/>
  * Configures the Session AuthModule for the ServerAuthContext and then delegates the configuration of the list
  * of ServerAuthModules and creation of the ServerAuthContext instance to its concrete sub-type.
- * <p>
+ * <br/>
  * Uses Json to model the configuration for the ServerAuthContext.
  *
  * @since 1.3.0
@@ -84,7 +84,7 @@ public abstract class SessionServerContextFactory implements ServerContextFactor
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br/>
      * Gets the Json configuration from the Filter Config and configures the Session AuthModule, if defined in
      * configuration. Then passes onto concrete sub-class to configure the list of ServerAuthModules and creating
      * the instance of the ServerAuthContext that the Jaspi Runtime will be configured with.
@@ -132,7 +132,7 @@ public abstract class SessionServerContextFactory implements ServerContextFactor
 
     /**
      * Returns the ServerAuthContext instance that the JaspiRuntime will be configured to use.
-     * <p>
+     * <br/>
      * Responsible for configuring the list of ServerAuthModules and creating the instance of the ServerAuthContext
      * that the Jaspi Runtime will be configured with.
      *

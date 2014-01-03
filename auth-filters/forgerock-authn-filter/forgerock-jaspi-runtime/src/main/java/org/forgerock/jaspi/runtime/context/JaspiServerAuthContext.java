@@ -34,12 +34,12 @@ import java.util.List;
 /**
  * Encapsulates ServerAuthModules that are used to validate service requests received from clients, and to secure any
  * response returned for those requests.
- * <p>
+ * <br/>
  * This abstract implementation of the ServerAuthContext interface allows a single Session ServerAuthModule, to
  * provide session capabilities (i.e. on secureResponse, adds a cookie which is validate on each subsequent request to
  * skip re-authenticating each request), and then defers to the concrete implementation to co-ordinate calling
  * any other ServerAuthModules.
- * <p>
+ * <br/>
  * This class or concrete implementations of it MUST not store any request specific state in it. This is because
  * many different requests will use this class, possibly concurrently. If request specific state does need to be
  * maintained, then use the MessageInfo map that is provided as this is created and used only be the specific request
@@ -64,7 +64,7 @@ public abstract class JaspiServerAuthContext<T extends ServerAuthModule> impleme
 
     /**
      * Constructs an instance of the JaspiServerAuthContext.
-     * <p>
+     * <br/>
      * Each configured ServerAuthModule has its #getSupportedMessageTypes() method called to ensure that each module
      * does support and conform to the Jaspi HttpServlet Profile.
      *
@@ -104,7 +104,7 @@ public abstract class JaspiServerAuthContext<T extends ServerAuthModule> impleme
 
     /**
      * Authenticate a received service request by delegating calls to the configured ServerAuthModules.
-     * <p>
+     * <br/>
      * The logic used to determine whether the Session AuthModule is called is as follows:
      * <ol>
      *     <li>If a Session AuthModule is configured, it is called first.</li>
@@ -117,9 +117,9 @@ public abstract class JaspiServerAuthContext<T extends ServerAuthModule> impleme
      * If the Session AuthModule is not configured or returns AuthStatus.SEND_FAILURE, then the concrete sub-types
      * #validateRequest(List, MessageInfo, Subject, Subject) will be called for the ServerAuthModules
      * #validateRequest(MessageInfo, Subject, Subject) to be called.
-     * <p>
+     * <br/>
      * Possible AuthStatus return values: SUCCESS, SEND_SUCCESS, SEND_FAILURE, SEND_CONTINUE.
-     * <p>
+     * <br/>
      * The configured AuditLogger will be called to audit the request <strong>if</strong> the Session AuthModule
      * is not configured or returns AuthStatus.SEND_FAILURE as if the Session AuthModule passes the Jaspi Runtime
      * takes this as an existing session continuing.
@@ -215,7 +215,7 @@ public abstract class JaspiServerAuthContext<T extends ServerAuthModule> impleme
     /**
      * Co-ordinates calling the configured ServerAuthModules #validateRequest method, when either the Session
      * AuthModule is not configured or has returned AuthStatus.SEND_FAILURE.
-     * <p>
+     * <br/>
      * Possible AuthStatus return values: SUCCESS, SEND_SUCCESS, SEND_FAILURE, SEND_CONTINUE.
      *
      * @param authModules The list of configured ServerAuthModules.
@@ -251,10 +251,10 @@ public abstract class JaspiServerAuthContext<T extends ServerAuthModule> impleme
     /**
      * Secures a service response before sending it to the client by delegating calls to the configured
      * ServerAuthModules.
-     * <p>
+     * <br/>
      * Firstly the concrete sub-types #secureResponse(List, MessageInfo, Subject) will be called for the
      * ServerAuthModules #secureResponse(MessageInfo, Subject) to be called.
-     * <p>
+     * <br/>
      * The Session AuthModule is only called if:
      * <ul>
      *     <li>it is configured</li>
@@ -263,10 +263,10 @@ public abstract class JaspiServerAuthContext<T extends ServerAuthModule> impleme
      *
      * Any other AuthStatus returned from the concrete sub-types secureResponse method will result in the end of
      * processing and the AuthStatus to be returned.
-     * <p>
+     * <br/>
      * Note: secureResponse should only be called if the call to validateRequest returned AuthStatus.SUCCESS. Any other
      * AuthStatus should cause the runtime to finish processing the request and return a response to the client.
-     * <p>
+     * <br/>
      * Possible AuthStatus return values: SEND_SUCCESS, SEND_FAILURE, SEND_CONTINUE.
      *
      * @param messageInfo A contextual object that encapsulates the client request and server response objects.
@@ -322,10 +322,10 @@ public abstract class JaspiServerAuthContext<T extends ServerAuthModule> impleme
     /**
      * Co-ordinates calling the configured ServerAuthModules #secureResponse method, before the Session AuthModule is
      * called (if it is configured).
-     * <p>
+     * <br/>
      * Any other AuthStatus that AuthStatus.SEND_SUCCESS returned from the configured ServerAuthModules secureResponse
      * method will result in the end of processing and the AuthStatus to be returned.
-     * <p>
+     * <br/>
      * Possible AuthStatus return values: SEND_SUCCESS, SEND_FAILURE, SEND_CONTINUE.
      *
      * @param authModules The list of configured ServerAuthModules.

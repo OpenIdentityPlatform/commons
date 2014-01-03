@@ -110,7 +110,7 @@ public class ContextHandler {
 
     /**
      * Handles the completion of an authentication request.
-     * <p>
+     * <br/>
      * Checks if the authentication resulted in a valid AuthStatus and if not will write a 401 Unauthorized response
      * to the HttpServletResponse stored in the MessageInfo object.
      * Otherwise will set the authentication attributes, principal name and authentication context map, in the
@@ -144,7 +144,7 @@ public class ContextHandler {
     /**
      * Sets the authentication id and context map into the HttpServletRequest, as attributes, for use by other
      * filters and resources.
-     * <p>
+     * <br/>
      * Will take the first Principal it finds in the client Subject and add the Principal's name to the authentication
      * context.
      *

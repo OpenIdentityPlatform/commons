@@ -18,7 +18,7 @@ package org.forgerock.auth.common;
 
 /**
  * Base interface for all Configurators responsible for providing config to the AuthN and AuthZ Filters.
- * <p>
+ * <br/>
  * Provides methods for getting instances of the two Logging interfaces.
  *
  * @param <T> The type of AuditLogger.

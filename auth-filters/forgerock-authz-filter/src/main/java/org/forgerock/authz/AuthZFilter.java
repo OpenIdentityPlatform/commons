@@ -34,7 +34,7 @@ import java.io.IOException;
 
 /**
  * Authorization Filter which protects resources based on the user's privileges who made the request.
- * <p>
+ * <br/>
  * Uses the Configurator implementation given as a init-param, to delegate the authorization processing to
  * the configured implementation of a AuthorizationFilter interface.
  *
@@ -102,7 +102,7 @@ public class AuthZFilter implements Filter {
     /**
      * Makes a call to the AuthorizationFilter instance to perform the authorization logic and based on the result of
      * that call will either, send the request through or return a 403 Http response.
-     * <p>
+     * <br/>
      * The method will also make a call to the AuditLoggers audit method to audit the authorization request.
      *
      * @param servletRequest {@inheritDoc}

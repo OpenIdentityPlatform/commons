@@ -39,7 +39,7 @@ public class RuntimeResultHandler {
 
     /**
      * Handles the result of the call to the ServerAuthContext validateRequest method.
-     * <p>
+     * <br/>
      * Only an AuthStatus of SUCCESS will return true and an AuthStatus of SEND_FAILURE will set the response status to
      * 401.
      * Also an AuthStatus of SEND_CONTINUE will set the response status to 100.
@@ -78,7 +78,7 @@ public class RuntimeResultHandler {
 
     /**
      * Handles the result of the call to the ServerAuthContext secureResponse method.
-     * <p>
+     * <br/>
      * An AuthStatus of SEND_CONTINUE will set the response status to 100.
      *
      * @param authStatus The returned AuthStatus from the secureResponse method call.

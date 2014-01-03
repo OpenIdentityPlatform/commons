@@ -41,7 +41,7 @@ public enum ServerAuthModuleInstanceCreatorImpl implements ServerAuthModuleInsta
 
     /**
      * Constructs a new ServerAuthModule instance, using the given class name.
-     * <p>
+     * <br/>
      * After constructing the ServerAuthModule, its ServerAuthModule#initialize method is called with the given
      * properties map, message policy and callback handler.
      *
@@ -58,7 +58,7 @@ public enum ServerAuthModuleInstanceCreatorImpl implements ServerAuthModuleInsta
 
         if (className != null && !className.isEmpty()) {
             try {
-                ServerAuthModule module = (ServerAuthModule) Class.forName(className).newInstance();
+                ServerAuthModule module = Class.forName(className).asSubclass(ServerAuthModule.class).newInstance();
                 module.initialize(messagePolicy, null, handler, moduleProperties);
                 LOGGER.debug("Created module, className: " + className);
                 return module;
@@ -74,7 +74,7 @@ public enum ServerAuthModuleInstanceCreatorImpl implements ServerAuthModuleInsta
             }
         }
 
-        LOGGER.error("FClass name cannot be null.");
+        LOGGER.error("Class name cannot be null.");
         throw new AuthException("Class name cannot be null.");
     }
 }

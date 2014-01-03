@@ -35,11 +35,11 @@ import java.io.IOException;
 
 /**
  * This class is the entry point for the JASPI runtime.
- * <p>
+ * <br/>
  * Provides a single method #processMessage that takes a HttpServletRequest, HttpServletResponse and the FilterChain
  * and will run the configured ServerAuthModules to determine whether the request is allowed to be passed down
  * the filter chain.
- * <p>
+ * <br/>
  * <strong>Note:</strong> if the Jaspi runtime is not configured properly with a non-null ServerAuthContext
  * each request will be passed straight to the filter chain with no further processing. So it is VERY important
  * to ensure the runtime is configured correctly.
@@ -94,13 +94,13 @@ public class JaspiRuntime {
 
     /**
      * Processes the given request and response.
-     * <p>
+     * <br/>
      * Guaranteed to call the configured ServerAuthModules validateRequest method to determine whether the request is
      * allowed through and if validation was successful, to call secureResponse after the service call has completed.
-     * <p>
+     * <br/>
      * Any authentication exceptions that occur during this process will be caught and converted into a Json response
      * that matches a HTTP 500 status code.
-     * <p>
+     * <br/>
      * If no ServerAuthContext is configured for the HttpServlet layer and the requests application context, then
      * the request will be allowed through.
      *

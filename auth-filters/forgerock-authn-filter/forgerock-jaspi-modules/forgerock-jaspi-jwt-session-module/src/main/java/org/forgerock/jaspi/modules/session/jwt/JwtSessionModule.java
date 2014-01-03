@@ -471,7 +471,7 @@ public class JwtSessionModule implements ServerAuthModule {
 
     /**
      * Sets the max age for the cookie, based on whether the cookie should be browser session only.
-     * <p>
+     * <br/>
      * If the cookie is only meant to last the same length the users browser is open, then the max age is set to -1.
      * Otherwise the max age is set to expiry time.
      *

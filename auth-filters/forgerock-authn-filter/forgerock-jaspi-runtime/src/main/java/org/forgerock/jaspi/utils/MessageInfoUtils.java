@@ -29,7 +29,7 @@ public class MessageInfoUtils {
 
     /**
      * Gets the map with the given key from the root map in the MessageInfo.
-     * <p>
+     * <br/>
      * If the map does not exist in the root map of the MessageInfo, the a new {@code <String, Object>} map will
      * be created an inserted into it, with the given key.
      *
@@ -44,7 +44,7 @@ public class MessageInfoUtils {
 
     /**
      * Gets the map with the given key from the given containing map.
-     * <p>
+     * <br/>
      * If the map does not exist, a new {@code <String, Object>} map will be created and inserted into the given
      * containing map with the given key.
      *

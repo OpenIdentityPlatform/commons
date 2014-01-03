@@ -69,7 +69,7 @@ public class DefaultServerContextFactory extends SessionServerContextFactory {
 
     /**
      * Returns a new instance of the DefaultServerContextFactory
-     * <p>
+     * <br/>
      * This does and should return a new instance of a ServerContextFactory, as it is only ever called once per
      * configured filter.
      *

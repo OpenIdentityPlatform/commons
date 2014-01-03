@@ -33,9 +33,9 @@ import java.util.Map;
 /**
  * Encapsulates ServerAuthModules that are used to validate service requests received from clients, and to secure any
  * response returned for those requests.
- * <p>
+ * <br/>
  * This FallbackServerAuthContext can be configured to use a single Session ServerAuthModule, to provide session
- * capabilities (ie. on secureResponse adds a cookie which is validated on subsequent request to skip re-authenticating
+ * capabilities (i.e. on secureResponse adds a cookie which is validated on subsequent request to skip re-authenticating
  * for each request), and a list of ServerAuthModule that will be called in order until one returns a non-failure
  * AuthStatus, or the list is exhausted.
  *
@@ -106,8 +106,8 @@ public class FallbackServerAuthContext extends JaspiServerAuthContext<ServerAuth
                     break;
                 } else if (AuthStatus.SEND_SUCCESS.equals(authStatus)) {
                     // The module may have completely/partially/not authenticated the client.
-                    LOGGER.debug(authModule.getClass().getSimpleName() + " has successfully authenticated the "
-                            + "client and has a response to return to the client");
+                    LOGGER.debug(authModule.getClass().getSimpleName() + " may have completely/partially/not "
+                            + "authenticated the client and has a response to return to the client");
                     break;
                 } else if (AuthStatus.SEND_FAILURE.equals(authStatus)) {
                     // The module has failed to authenticate the client.
@@ -121,6 +121,16 @@ public class FallbackServerAuthContext extends JaspiServerAuthContext<ServerAuth
                             + "client");
                     break;
                 }
+                /**
+                 * In this implementation of the ServerAuthContext we are allowing a single "session" auth module to
+                 * run and possible succeed and if so will stop processing, otherwise we allow a list of "normal"
+                 * auth modules to try and authenticate the request. Hence why here a SEND_FAILURE will carry on
+                 * processing, where as SEND_CONTINUE and SEND_SUCCESS will cause processing to end.
+                 *
+                 * SEND_CONTINUE implies that there is to be more communication between server and client before
+                 * authentication can be deemed successful or failed. So processing needs to stop and a response sent
+                 * back to the client.
+                 */
             }
 
             return authStatus;
@@ -140,7 +150,7 @@ public class FallbackServerAuthContext extends JaspiServerAuthContext<ServerAuth
 
     /**
      * {@inheritDoc}
-     * <p>
+     * <br/>
      * Only the ServerAuthModule which returned AuthStatus.SUCCESS for its #validateRequest method will have its
      * secureResponse method call and if no ServerAuthModule successfully validated the request then this method
      * will return <code>null</code>.

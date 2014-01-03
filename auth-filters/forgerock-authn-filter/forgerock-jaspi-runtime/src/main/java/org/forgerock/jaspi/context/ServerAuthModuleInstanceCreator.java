@@ -31,7 +31,7 @@ public interface ServerAuthModuleInstanceCreator {
 
     /**
      * Constructs a new ServerAuthModule instance, using the given class name.
-     * <p>
+     * <br/>
      * After constructing the ServerAuthModule, its ServerAuthModule#initialize method is called with the given
      * properties map, message policy and callback handler.
      *
@@ -40,7 +40,7 @@ public interface ServerAuthModuleInstanceCreator {
      * @param messagePolicy The message policy used to initialise the ServerAuthModule.
      * @param handler The callback handler used to initialise the ServerAuthModule.
      * @return An instance of the ServerAuthModule.
-     * @throws javax.security.auth.message.AuthException If the AuthConfigProvider class name is null or empty.
+     * @throws AuthException If the AuthConfigProvider class name is null or empty.
      */
     public ServerAuthModule construct(final String className, final Map<String, Object> moduleProperties,
             final MessagePolicy messagePolicy, final CallbackHandler handler) throws AuthException;

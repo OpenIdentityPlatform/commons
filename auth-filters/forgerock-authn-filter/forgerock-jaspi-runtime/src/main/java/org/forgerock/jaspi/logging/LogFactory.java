@@ -50,7 +50,7 @@ public final class LogFactory {
 
     /**
      * Gets the Debug Logger for the JASPI runtime.
-     * <p>
+     * <br/>
      * If no Debug Logger has been set then a NoOp Debug Logger will be returned.
      *
      * @return The DebugLogger instance.
@@ -73,7 +73,7 @@ public final class LogFactory {
 
     /**
      * Gets the Audit Logger for the JASPI runtime.
-     * <p>
+     * <br/>
      * If no Audit Logger has been set then a NoOp Audit Logger will be returned.
      *
      * @return The AuditLogger instance.

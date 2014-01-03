@@ -44,17 +44,17 @@ public class HttpServletCallbackHandler implements CallbackHandler {
 
     /**
      * Called by Authentication modules to request more information about the request and response message.
-     * <p>
+     * <br/>
      * Callbacks currently supported are as follows:
      * <ul>
      *     <li>CallerPrincipalCallback</li>
      *     <li>GroupPrincipalCallback</li>
      * </ul>
-     * <p>
+     * <br/>
      * This method will handle a CallerPrincipalCallback by creating a Principal from the name stored in the Callback
      * and adding it to the Subject from the Callback. If the name is not populated then the Principal stored in the
      * Callback will be added to the Subject instead.
-     * <p>
+     * <br/>
      * This method will handle a GroupPrincipalCallback by create a Principal for each group stored in the Callback
      * and adding them to the Subject from the Callback.
      *

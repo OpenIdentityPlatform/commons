@@ -20,7 +20,7 @@ import org.forgerock.auth.common.LoggingConfigurator;
 
 /**
  * Base interface for all Authorization Configurators, responsible for providing configuration to the AuthZFilter.
- * <p>
+ * <br/>
  * Provides a method for getting the instance of the AuthorizationFilter which contains the logic to determine
  * whether the request is authorized or not.
  *
