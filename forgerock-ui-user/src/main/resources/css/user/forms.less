@@ -1,5 +1,5 @@
 /* FORMS */
-input[type="text"], input[type="password"], textarea, select {
+input[type="text"], input[type="password"], input[type="tel"], input[type="email"], textarea, select {
     border: 1px solid @input-border-basic;
     .rounded-corners(5px);
     font-size: 15px;
@@ -16,15 +16,21 @@ input[type="text"], input[type="password"], textarea, select {
 	width: 130px;
 }
 
-input.read-only {
-    border: none;
-    background: transparent;
+input:not([type=submit]):invalid:required {
+    background-color: #fee; 
 }
 
-input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:focus {
+
+input[type="text"]:focus, input[type="password"]:focus, input[type="tel"]:focus, input[type="email"]:focus, textarea:focus, select:focus {
     border: 1px solid @color-active;
     outline: none;
     .box-shadow(0, 0, 1px, 1px, @color-active);
+}
+
+input.read-only, input:read-only, input[type="text"]:focus:read-only{
+    background: transparent;
+    box-shadow:none;
+    border:1px solid @input-border-basic;
 }
 
 form.form {
