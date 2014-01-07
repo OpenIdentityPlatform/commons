@@ -67,7 +67,7 @@ define("UserDelegate", [
         /*
         headers[constants.HEADER_PARAM_USERNAME] = uid;
         headers[constants.HEADER_PARAM_PASSWORD] = password;
-        headers[constants.HEADER_PARAM_NO_SESION] = false;
+        headers[constants.HEADER_PARAM_NO_SESSION] = false;
         obj.serviceCall({
             serviceUrl: constants.host + "GET_SESSION_DETAILS_ENDPOINT",
             url: "",

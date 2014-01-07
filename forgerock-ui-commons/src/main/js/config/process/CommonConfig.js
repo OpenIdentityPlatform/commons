@@ -108,13 +108,13 @@ define("config/process/CommonConfig", [
                 if(!event.anonymousMode) {
                     delete serviceInvokerConfig.defaultHeaders[constants.HEADER_PARAM_PASSWORD];
                     delete serviceInvokerConfig.defaultHeaders[constants.HEADER_PARAM_USERNAME];
-                    delete serviceInvokerConfig.defaultHeaders[constants.HEADER_PARAM_NO_SESION];
+                    delete serviceInvokerConfig.defaultHeaders[constants.HEADER_PARAM_NO_SESSION];
                     
                     eventManager.sendEvent(constants.EVENT_AUTHENTICATED);
                 } else {
                     serviceInvokerConfig.defaultHeaders[constants.HEADER_PARAM_PASSWORD] = constants.ANONYMOUS_PASSWORD;
                     serviceInvokerConfig.defaultHeaders[constants.HEADER_PARAM_USERNAME] = constants.ANONYMOUS_USERNAME;
-                    serviceInvokerConfig.defaultHeaders[constants.HEADER_PARAM_NO_SESION]= true; 
+                    serviceInvokerConfig.defaultHeaders[constants.HEADER_PARAM_NO_SESSION]= true; 
                     
                     configuration.setProperty('loggedUser', null);
                     loggedUserBarView.render();

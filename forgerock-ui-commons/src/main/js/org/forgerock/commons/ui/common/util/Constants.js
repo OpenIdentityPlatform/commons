@@ -116,7 +116,7 @@ define("org/forgerock/commons/ui/common/util/Constants", [
     
     obj.HEADER_PARAM_PASSWORD = "X-Password";
     obj.HEADER_PARAM_USERNAME = "X-Username";
-    obj.HEADER_PARAM_NO_SESION = "X-NoSession";
+    obj.HEADER_PARAM_NO_SESSION = "X-NoSession";
     
     return obj;
 });
