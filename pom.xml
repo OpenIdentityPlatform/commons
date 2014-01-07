@@ -12,7 +12,7 @@
   Header, with the fields enclosed by brackets [] replaced by your own identifying
   information: "Portions Copyrighted [year] [name of copyright owner]".
 
-  Copyright 2012 ForgeRock AS. All rights reserved.
+  Copyright 2012-2014 ForgeRock AS. All rights reserved.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
@@ -29,7 +29,31 @@
     This module includes common infrastructure required for building ForgeRock
     projects, comprising of TestNG listeners, Checkstyle configuration, etc.
   </description>
-  <url>http://commons.forgerock.org/i18n-framework</url>
+  <url>http://commons.forgerock.org/forgerock-build-tools</url>
+  <licenses>
+    <license>
+      <name>CDDL 1.0</name>
+      <url>http://www.opensource.org/licenses/cddl1.php</url>
+      <comments>Common Development and Distribution License (CDDL) 1.0.
+      This license applies as indicated in the source files.</comments>
+      <distribution>repo</distribution>
+    </license>
+    <license>
+      <name>GNU LGPL 2.1</name>
+      <url>http://opensource.org/licenses/LGPL-2.1</url>
+      <comments>The GNU Lesser General Public License, version 2.1. This license
+      applies to the patch for the Checkstyle indentation checker
+      as indicated in the source files.</comments>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <distributionManagement>
+    <site>
+      <id>forgerock.org</id>
+      <name>ForgeRock Community</name>
+      <url>scp://forgerock.org/var/www/vhosts/commons.forgerock.org/httpdocs/forgerock-build-tools</url>
+    </site>
+  </distributionManagement>
   <scm>
     <url>https://svn.forgerock.org/commons/forgerock-build-tools/trunk/</url>
     <connection>scm:svn:https://svn.forgerock.org/commons/forgerock-build-tools/trunk/</connection>
@@ -81,6 +105,23 @@
           <goals>deploy</goals>
           <arguments>-Penforce</arguments>
         </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.forgerock.maven.plugins</groupId>
+        <artifactId>javadoc-updater-maven-plugin</artifactId>
+        <version>1.0.0</version>
+        <executions>
+          <execution>
+            <phase>site</phase>
+            <goals>
+              <goal>fixjavadoc</goal>
+            </goals>
+            <configuration>
+              <directory>${project.reporting.outputDirectory}</directory>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
