@@ -65,9 +65,9 @@ define("UserDelegate", [
     obj.login = function(uid, password, successCallback, errorCallback, errorsHandlers) {
         var headers = {};
         /*
-        headers[constants.OPENIDM_HEADER_PARAM_USERNAME] = uid;
-        headers[constants.OPENIDM_HEADER_PARAM_PASSWORD] = password;
-        headers[constants.OPENIDM_HEADER_PARAM_NO_SESION] = false;
+        headers[constants.HEADER_PARAM_USERNAME] = uid;
+        headers[constants.HEADER_PARAM_PASSWORD] = password;
+        headers[constants.HEADER_PARAM_NO_SESION] = false;
         obj.serviceCall({
             serviceUrl: constants.host + "GET_SESSION_DETAILS_ENDPOINT",
             url: "",
@@ -84,7 +84,7 @@ define("UserDelegate", [
             error: errorCallback,
             errorsHandlers: errorsHandlers
         });
-        delete headers[constants.OPENIDM_HEADER_PARAM_PASSWORD];
+        delete headers[constants.HEADER_PARAM_PASSWORD];
         */
         successCallback({username: 'stubUsername', userid: {id : 'stubUserid', component: '' }}); // stub return
     };
@@ -96,7 +96,7 @@ define("UserDelegate", [
 
         var headers = {};
         /*
-        headers[constants.OPENIDM_HEADER_PARAM_REAUTH] = password;
+        headers[constants.HEADER_PARAM_REAUTH] = password;
         obj.serviceCall({
             serviceUrl: constants.host + "REAUTH_PASSWORD_ENDPOINT",
             url: "",
@@ -198,7 +198,7 @@ define("UserDelegate", [
                     console.debug("Error during logging out");
                 }
         };
-        callParams.headers[constants.OPENIDM_HEADER_PARAM_LOGOUT] = true;
+        callParams.headers[constants.HEADER_PARAM_LOGOUT] = true;
 
         obj.serviceCall(callParams);
         */

@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, require*/
+/*global define, require, _*/
 
 /**
  * @author yaromin
@@ -62,14 +62,30 @@ define("org/forgerock/commons/ui/common/main/ProcessConfiguration", [
     };
 
     obj.registerAllListenersFromConfig = function() {
-        var j, oneProcessDefinitionObject, i;
-        for(j=0; j < obj.configuration.processConfigurationFiles.length;j++) {
-            oneProcessDefinitionObject = require(obj.configuration.processConfigurationFiles[j]);
-
-            for(i = 0; i < oneProcessDefinitionObject.length; i++) {
-                obj.callRegisterListenerFromConfig(oneProcessDefinitionObject[i]);
-            }	
-        }
+        var oneProcessDefinitionObject,
+            processArray = [],
+            overrideArray = [];
+        
+        _.each(obj.configuration.processConfigurationFiles,function(filePath){
+            oneProcessDefinitionObject = require(filePath);
+            _.each(oneProcessDefinitionObject,function(process){
+                if(process.override){
+                    overrideArray.push(process.startEvent);
+                }
+                processArray.push(process);
+            });
+        });
+        
+        //handle overrides
+        _.each(overrideArray,function(override){
+            processArray = _.reject(processArray,function(process){
+                return process.startEvent === override && !process.override;
+            });
+        });
+        
+        _.each(processArray,function(process){
+            obj.callRegisterListenerFromConfig(process);
+        });
     };
 
     obj.callService = function(serviceId, methodName,params) {

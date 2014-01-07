@@ -49,8 +49,7 @@ define("org/forgerock/commons/ui/common/main/GenericRouteInterfaceMap", [
             define(key, require(val));
             //once defined we need to load the module so that 
             //it is available to routes.js
-            //the $.noop() function forces the module to be loaded synchronously
-            require([key], $.noop());
+            require([key]);
         });
     };
     

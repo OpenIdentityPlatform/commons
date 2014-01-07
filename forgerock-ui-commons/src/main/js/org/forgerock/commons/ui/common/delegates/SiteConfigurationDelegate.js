@@ -22,38 +22,37 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, Backbone */
+/*global $, define, _ */
 
 /**
  * @author mbilski
  */
-define("org/forgerock/commons/ui/user/login/LoggedUserBarView", [
-    "org/forgerock/commons/ui/common/main/EventManager",
+define("org/forgerock/commons/ui/common/delegates/SiteConfigurationDelegate", [
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/main/Configuration"
-], function(eventManager, constants, conf) {
-    var LoggedUserBarView = Backbone.View.extend({
-        element: "#loginContent",
+    "org/forgerock/commons/ui/common/main/AbstractDelegate",
+    "org/forgerock/commons/ui/common/main/Configuration",
+    "org/forgerock/commons/ui/common/main/EventManager"
+], function(constants, AbstractDelegate, configuration, eventManager) {
+
+    var obj = new AbstractDelegate(constants.host + "/openidm/config/ui/configuration");
+
+    obj.getConfiguration = function(successCallback, errorCallback) {
+        var i;
+        console.info("Getting configuration");
         
-        render: function() {
-            this.setElement(this.element);
-            
-            if(conf.loggedUser) {
-                this.$el.find("#profile_link").show();
-                if (conf.loggedUser.userName) {
-                    this.$el.find("#user_name").text(conf.loggedUser.userName); //idm
-                } else if (conf.loggedUser.cn) {
-                    this.$el.find("#user_name").text(conf.loggedUser.cn); //am
-                }
-                
-                this.$el.show();
-            } else {
-                this.$el.hide();
+        obj.serviceCall({url: "", success: function(data) {
+            if(successCallback) {                           
+                successCallback(data.configuration);
             }
-        }
-    }); 
+        }, error: errorCallback, headers: {
+            "X-OpenIDM-Password": "anonymous",
+            "X-OpenIDM-Username": "anonymous",
+            "X-OpenIDM-NoSession": "true"
+        }});
+    };
     
-    return new LoggedUserBarView();
+    return obj;
 });
+
 
 

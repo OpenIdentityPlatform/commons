@@ -28,7 +28,8 @@
  * @author jdabrowski
  */
 define("config/routes/CommonRoutesConfig", [
-], function() {
+    "org/forgerock/commons/ui/common/util/Constants"
+], function(constants) {
     
     var obj = {
             "404":  { //this route must be the first route
@@ -39,6 +40,21 @@ define("config/routes/CommonRoutesConfig", [
             "enableCookies":  { 
                 view: "org/forgerock/commons/ui/common/EnableCookiesView",
                 url: "enableCookies/"
+            },
+            //definitions for the following views here are generic
+            //the actual path to each view is defined in config/AppConfiguration.js
+            //view files are loaded when the GenericRouteInterfaceMap module is initialized
+            "login" : {
+                view: "LoginView",
+                url: "login/"
+            },
+            "logout" : {
+                event: constants.EVENT_LOGOUT,
+                url: "logout/"
+            },
+            "loginDialog" : {
+                dialog: "LoginDialog",
+                url: "loginDialog/"
             }
     };
     

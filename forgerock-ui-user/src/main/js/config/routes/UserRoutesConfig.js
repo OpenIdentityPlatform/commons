@@ -28,8 +28,7 @@
  * @author jdabrowski
  */
 define("config/routes/UserRoutesConfig", [
-    "org/forgerock/commons/ui/common/util/Constants"
-], function(constants) {
+], function() {
     //definitions for views here are generic
     //the actual path to each view is defined in config/AppConfiguration.js
     //view files are loaded when the GenericRouteInterfaceMap module is initialized
@@ -45,18 +44,6 @@ define("config/routes/UserRoutesConfig", [
             role: "ui-user",
             url: "profile/" ,
             forceUpdate: true
-        },
-        "login" : {
-            view: "LoginView",
-            url: "login/"
-        },
-        "loginDialog" : {
-            dialog: "LoginDialog",
-            url: "loginDialog/"
-        },
-        "logout" : {
-            event: constants.EVENT_LOGOUT,
-            url: "logout/"
         },
         "selfRegistration": {
             view: "RegisterView",

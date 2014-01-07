@@ -48,8 +48,8 @@ define("org/forgerock/commons/ui/common/main/ServiceInvoker", [
         obj.applyDefaultHeadersIfNecessary(callParams, obj.configuration.defaultHeaders);
 
         //TODO This line can be deleted when the bug https://bugster.forgerock.org/jira/browse/OPENIDM-568 is fixed
-        if(callParams.headers[constants.OPENIDM_HEADER_PARAM_NO_SESION] === false) {
-            delete callParams.headers[constants.OPENIDM_HEADER_PARAM_NO_SESION];
+        if(callParams.headers[constants.HEADER_PARAM_NO_SESION] === false) {
+            delete callParams.headers[constants.HEADER_PARAM_NO_SESION];
         }
 
         em.sendEvent(constants.EVENT_START_REST_CALL, {suppressSpinner: callParamsParam.suppressSpinner});

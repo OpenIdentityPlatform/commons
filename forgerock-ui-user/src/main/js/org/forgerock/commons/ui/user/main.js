@@ -24,8 +24,4 @@
 
 /*global define*/
 
-define("org/forgerock/commons/ui/user/main", [
-    "./login/LoggedUserBarView",
-    "./SiteConfigurator",
-    "./delegates/SiteConfigurationDelegate"
-]);
+define("org/forgerock/commons/ui/user/main", []);

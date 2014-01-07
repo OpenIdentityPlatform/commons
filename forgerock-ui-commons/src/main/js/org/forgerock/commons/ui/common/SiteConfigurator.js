@@ -27,12 +27,12 @@
 /**
 * @author mbilski
 */
-define("org/forgerock/commons/ui/user/SiteConfigurator", [
+define("org/forgerock/commons/ui/common/SiteConfigurator", [
    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
    "org/forgerock/commons/ui/common/util/Constants", 
    "org/forgerock/commons/ui/common/main/EventManager",
    "org/forgerock/commons/ui/common/main/Configuration",
-   "org/forgerock/commons/ui/user/delegates/SiteConfigurationDelegate",
+   "org/forgerock/commons/ui/common/delegates/SiteConfigurationDelegate",
    "org/forgerock/commons/ui/common/main/i18nManager"
 ], function(AbstractConfigurationAware, constants, eventManager, conf, configurationDelegate, i18nManager) {
    var obj = new AbstractConfigurationAware();

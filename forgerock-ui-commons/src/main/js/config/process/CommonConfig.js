@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, require */
+/*global define, require, window, _*/
 
 /**
  * @author yaromin
@@ -31,7 +31,134 @@ define("config/process/CommonConfig", [
     "org/forgerock/commons/ui/common/util/Constants", 
     "org/forgerock/commons/ui/common/main/EventManager"
 ], function(constants, eventManager) {
-    var obj = [        
+    var obj = [
+        {
+            startEvent: constants.EVENT_APP_INTIALIZED,
+            description: "Starting basic components",
+            dependencies: [
+                "org/forgerock/commons/ui/common/components/Navigation",
+                "org/forgerock/commons/ui/common/components/popup/PopupCtrl",
+                "org/forgerock/commons/ui/common/components/Breadcrumbs",
+                "org/forgerock/commons/ui/common/main/Router",
+                "UserDelegate",
+                "org/forgerock/commons/ui/common/main/Configuration",
+                "org/forgerock/commons/ui/common/util/UIUtils",
+                "org/forgerock/commons/ui/common/util/CookieHelper",
+                "org/forgerock/commons/ui/common/main/SessionManager"
+            ],
+            processDescription: function(event, 
+                    navigation, 
+                    popupCtrl, 
+                    breadcrumbs, 
+                    router,
+                    userDelegate,
+                    conf,
+                    uiUtils,
+                    cookieHelper,
+                    sessionManager) {
+                              
+                breadcrumbs.init();
+                uiUtils.preloadTemplates();
+                
+                sessionManager.getLoggedUser(function(user) {
+                    conf.setProperty('loggedUser', user);
+                    eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: false});
+                    router.init();
+                }, function() {
+                    if(!cookieHelper.cookiesEnabled()){
+                        location.href = "#enableCookies/";
+                    }
+                    eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: true});
+                    router.init();
+                });
+            }    
+        },
+        {
+            startEvent: constants.EVENT_CHANGE_BASE_VIEW,
+            description: "",
+            dependencies: [
+                "org/forgerock/commons/ui/common/components/Navigation",
+                "org/forgerock/commons/ui/common/components/popup/PopupCtrl",
+                "org/forgerock/commons/ui/common/components/Breadcrumbs",
+                "org/forgerock/commons/ui/common/main/Configuration",
+                "org/forgerock/commons/ui/common/LoggedUserBarView",
+                "org/forgerock/commons/ui/common/components/Footer"
+            ],
+            processDescription: function(event, navigation, popupCtrl, breadcrumbs, conf, loggedUserBarView,footer) {
+                navigation.init();
+                popupCtrl.init();                
+                
+                breadcrumbs.buildByUrl();
+                loggedUserBarView.render();
+                footer.render();
+            }
+        },
+        {
+            startEvent: constants.EVENT_AUTHENTICATION_DATA_CHANGED,
+            description: "",
+            dependencies: [
+                "org/forgerock/commons/ui/common/main/Configuration",
+                "org/forgerock/commons/ui/common/components/Navigation",
+                "org/forgerock/commons/ui/common/LoggedUserBarView"
+            ],
+            processDescription: function(event, configuration, navigation, loggedUserBarView) {
+                var serviceInvokerModuleName, serviceInvokerConfig; 
+                serviceInvokerModuleName = "org/forgerock/commons/ui/common/main/ServiceInvoker";
+                serviceInvokerConfig = configuration.getModuleConfiguration(serviceInvokerModuleName);
+                if(!event.anonymousMode) {
+                    delete serviceInvokerConfig.defaultHeaders[constants.HEADER_PARAM_PASSWORD];
+                    delete serviceInvokerConfig.defaultHeaders[constants.HEADER_PARAM_USERNAME];
+                    delete serviceInvokerConfig.defaultHeaders[constants.HEADER_PARAM_NO_SESION];
+                    
+                    eventManager.sendEvent(constants.EVENT_AUTHENTICATED);
+                } else {
+                    serviceInvokerConfig.defaultHeaders[constants.HEADER_PARAM_PASSWORD] = constants.ANONYMOUS_PASSWORD;
+                    serviceInvokerConfig.defaultHeaders[constants.HEADER_PARAM_USERNAME] = constants.ANONYMOUS_USERNAME;
+                    serviceInvokerConfig.defaultHeaders[constants.HEADER_PARAM_NO_SESION]= true; 
+                    
+                    configuration.setProperty('loggedUser', null);
+                    loggedUserBarView.render();
+                    navigation.reload();
+                }
+                configuration.sendSingleModuleConfigurationChangeInfo(serviceInvokerModuleName);
+            }
+        },
+        {
+            startEvent: constants.EVENT_UNAUTHORIZED,
+            description: "",
+            dependencies: [
+                "org/forgerock/commons/ui/common/main/ViewManager",
+                "org/forgerock/commons/ui/common/main/Router",
+                "org/forgerock/commons/ui/common/main/Configuration",
+                "org/forgerock/commons/ui/common/main/SessionManager",
+                "LoginDialog"
+            ],
+            processDescription: function(error, viewManager, router, conf, sessionManager, loginDialog) {
+                if(!conf.loggedUser) {
+                    if(!conf.gotoURL) {
+                        conf.setProperty("gotoURL", window.location.hash);
+                    }
+                    
+                    eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
+                    return;
+                }
+                
+                sessionManager.getLoggedUser(function(user) {
+                    sessionManager.logout();
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unauthorized");
+                    eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
+                }, function() {
+                    if (error.error.type === "GET") {
+                        conf.setProperty("gotoURL", window.location.hash); 
+                        sessionManager.logout();
+                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unauthorized");
+                        eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
+                    } else {
+                        viewManager.showDialog(router.configuration.routes.loginDialog.dialog);
+                    }
+                });    
+            }
+        },
         {
             startEvent: constants.EVENT_DIALOG_CLOSE,
             description: "",
@@ -161,6 +288,65 @@ define("config/process/CommonConfig", [
             ],
             processDescription: function(event, messagesManager) {
                 messagesManager.messages.displayMessageFromConfig(event);
+            }
+        },
+        {
+            startEvent: constants.EVENT_LOGIN_REQUEST,
+            description: "",
+            dependencies: [
+                "org/forgerock/commons/ui/common/main/SessionManager",
+                "org/forgerock/commons/ui/common/main/Configuration",
+                "org/forgerock/commons/ui/common/main/Router",
+                "org/forgerock/commons/ui/common/main/ViewManager"
+            ],
+            processDescription: function(event, sessionManager, conf, router, viewManager) {
+                sessionManager.login(event, function(user) {
+                    conf.setProperty('loggedUser', user);
+                    
+                    eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: false});
+                    
+                    if (! conf.backgroundLogin)
+                    {
+                        if(conf.globalData.auth.urlParams && conf.globalData.auth.urlParams.goto){
+                            window.location.href = conf.globalData.auth.urlParams.goto;
+                            return false;
+                        }
+                        if(conf.gotoURL && _.indexOf(["#","","#/","/#"], conf.gotoURL) === -1) {
+                            console.log("Auto redirect to " + conf.gotoURL);
+                            router.navigate(conf.gotoURL, {trigger: true});
+                            delete conf.gotoURL;
+                        } else {
+                            router.navigate("", {trigger: true});
+                        }
+                    } else if (viewManager.currentDialog !== "null") {
+                        require(viewManager.currentDialog).close();
+                    }
+                    
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "loggedIn");
+                }, function() {
+                    if(conf.globalData.auth.urlParams && conf.globalData.auth.urlParams.gotoOnFail){
+                        window.location.href = conf.globalData.auth.urlParams.gotoOnFail;
+                        return false;
+                    }
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "authenticationFailed"); 
+                });
+            }
+        },
+        {
+            startEvent: constants.EVENT_LOGOUT,
+            description: "",
+            dependencies: [
+                "org/forgerock/commons/ui/common/main/Router",
+                "org/forgerock/commons/ui/common/main/Configuration",
+                "org/forgerock/commons/ui/common/main/SessionManager"
+            ],
+            processDescription: function(event, router, conf, sessionManager) {
+                sessionManager.logout();
+                conf.setProperty('loggedUser', null);
+                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "loggedOut");
+                eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
+                eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: true});
+                delete conf.gotoURL;
             }
         }
         

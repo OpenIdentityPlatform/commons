@@ -49,7 +49,7 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
             callParams.headers = {};
         }
         if (configuration.hasOwnProperty('passwords') && configuration.passwords.hasOwnProperty('password')) {
-            callParams.headers[constants.OPENIDM_HEADER_PARAM_REAUTH]=configuration.passwords.password;
+            callParams.headers[constants.HEADER_PARAM_REAUTH]=configuration.passwords.password;
         }
         if(callParams.serviceUrl) {
             callParams.url = callParams.serviceUrl + callParams.url;

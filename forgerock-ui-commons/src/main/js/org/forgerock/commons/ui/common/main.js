@@ -29,5 +29,9 @@ define("org/forgerock/commons/ui/common/main", [
 	"./util/main",
 	"./components/main",
     "./NotFoundView",
-    "./EnableCookiesView"
+    "./EnableCookiesView",
+    "./LoginView",
+    "./LoginDialog",
+    "./LoggedUserBarView",
+    "./SiteConfigurator"
 ]);

@@ -53,7 +53,7 @@ define("org/forgerock/commons/ui/common/util/Constants", [
     obj.EVENT_SELF_REGISTRATION_REQUEST = "user.login.EVENT_SELF_REGISTRATION_REQUEST";
     obj.EVENT_LOGIN_REQUEST = "user.login.EVENT_LOGIN_REQUEST";
     obj.EVENT_AUTHENTICATED = "user.login.EVENT_AUTHENTICATED";
-    obj.EVENT_OPENIDM_ADMIN_LOGGED_IN = "user.login.EVENT_OPENIDM_ADMIN_LOGGED_IN";
+    obj.EVENT_ADMIN_LOGGED_IN = "user.login.EVENT_ADMIN_LOGGED_IN";
 
     //profile
     obj.EVENT_SHOW_PROFILE_REQUEST = "user.profile.EVENT_SHOW_PROFILE_REQUEST";
@@ -110,6 +110,13 @@ define("org/forgerock/commons/ui/common/util/Constants", [
     obj.USER_APPLICATION_STATE_PENDING = "B65FA6A2-D43D-49CD-BEA0-CE98E275A8CD";
     
     obj.DEFAULT_LANGUAGE = "en-US";
+
+    obj.ANONYMOUS_USERNAME = "anonymous";
+    obj.ANONYMOUS_PASSWORD = "anonymous";
+    
+    obj.HEADER_PARAM_PASSWORD = "X-Password";
+    obj.HEADER_PARAM_USERNAME = "X-Username";
+    obj.HEADER_PARAM_NO_SESION = "X-NoSession";
     
     return obj;
 });
