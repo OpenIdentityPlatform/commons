@@ -55,7 +55,7 @@ public class AuthZFilter implements Filter {
     private static final String CONFIGURATOR_IMPL_INIT_PARAM = "configurator";
 
     private AuthorizationConfigurator configurator;
-    private AuditLogger auditLogger;
+    private AuditLogger<HttpServletRequest> auditLogger;
     private AuthorizationFilter authorizationFilter;
 
     /**
@@ -138,7 +138,7 @@ public class AuthZFilter implements Filter {
      * @param request The HttpServletRequest of the authorization request.
      */
     private void audit(AuthResult authResult, HttpServletRequest request) {
-        auditLogger.audit(new AuditRecord(authResult, request));
+        auditLogger.audit(new AuditRecord<HttpServletRequest>(authResult, request));
     }
 
     /**

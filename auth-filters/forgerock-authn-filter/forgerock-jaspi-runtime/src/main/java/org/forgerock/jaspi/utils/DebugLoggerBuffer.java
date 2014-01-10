@@ -18,8 +18,11 @@ package org.forgerock.jaspi.utils;
 
 import org.forgerock.auth.common.DebugLogger;
 
-import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * This Debug Logger implementation provides buffering ability. This enables log calls to be made without actually
@@ -30,10 +33,11 @@ import java.util.List;
  */
 public class DebugLoggerBuffer implements DebugLogger {
 
-    private final List<LogEntry> traceLogBuffer = new ArrayList<LogEntry>();
-    private final List<LogEntry> debugLogBuffer = new ArrayList<LogEntry>();
-    private final List<LogEntry> errorLogBuffer = new ArrayList<LogEntry>();
-    private final List<LogEntry> warnLogBuffer = new ArrayList<LogEntry>();
+    private final ConcurrentLinkedQueue<LogEntry> logBuffer = new ConcurrentLinkedQueue<LogEntry>();
+
+    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    private final ReentrantReadWriteLock.WriteLock writeLock = lock.writeLock();
+    private final ReentrantReadWriteLock.ReadLock readLock = lock.readLock();
 
     private DebugLogger logger;
 
@@ -43,144 +47,166 @@ public class DebugLoggerBuffer implements DebugLogger {
      *
      * @param logger The Debug Logger instance.
      */
-    public final synchronized void setDebugLogger(final DebugLogger logger) {
-        this.logger = logger;
-        for (LogEntry entry : traceLogBuffer) {
-            if (entry.t == null) {
-                trace(entry.message);
-            } else {
-                trace(entry.message, entry.t);
+    public final void setDebugLogger(final DebugLogger logger) {
+        try {
+            writeLock.lock();
+            this.logger = logger;
+            processLogBuffer(logger);
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
+    /**
+     * Processes the Log Buffer queue and reads from the queue and logs the entry to the "real" debug logger.
+     *
+     * @param debugLogger The "real" debug logger.
+     */
+    private void processLogBuffer(final DebugLogger debugLogger) {
+        while (!logBuffer.isEmpty()) {
+            LogEntry entry = logBuffer.poll();
+            log(debugLogger, entry.level, entry.message, entry.t);
+        }
+    }
+
+    /**
+     * Determines which log call to make on the "real" debug logger.
+     *
+     * @param debugLogger The "real" debug logger.
+     * @param level The Log Level.
+     * @param message The message of the entry.
+     * @param t The throwable of the entry.
+     */
+    private void log(final DebugLogger debugLogger, final LogLevel level, final String message, final Throwable t) {
+        switch (level) {
+            case TRACE: {
+                if (t == null) {
+                    debugLogger.trace(message);
+                } else {
+                    debugLogger.trace(message, t);
+                }
+                break;
+            }
+            case DEBUG: {
+                if (t == null) {
+                    debugLogger.debug(message);
+                } else {
+                    debugLogger.debug(message, t);
+                }
+                break;
+            }
+            case ERROR: {
+                if (t == null) {
+                    debugLogger.error(message);
+                } else {
+                    debugLogger.error(message, t);
+                }
+                break;
+            }
+            case WARN: {
+                if (t == null) {
+                    debugLogger.warn(message);
+                } else {
+                    debugLogger.warn(message, t);
+                }
+                break;
             }
         }
-        traceLogBuffer.clear();
-        for (LogEntry entry : debugLogBuffer) {
-            if (entry.t == null) {
-                debug(entry.message);
-            } else {
-                debug(entry.message, entry.t);
+    }
+
+    /**
+     * Logs the message by either adding it to the log buffer, if no "real" logger is set, or by making the log
+     * call to the "real" logger.
+     *
+     * @param level The Log Level.
+     * @param message The message of the entry.
+     * @param t The throwable of the entry.
+     */
+    private void log(final LogLevel level, final String message, final Throwable t) {
+        try {
+            readLock.lock();
+            if (logger == null) {
+                logBuffer.add(new LogEntry(level, message, t));
+                return;
             }
+        } finally {
+            readLock.unlock();
         }
-        debugLogBuffer.clear();
-        for (LogEntry entry : errorLogBuffer) {
-            if (entry.t == null) {
-                error(entry.message);
-            } else {
-                error(entry.message, entry.t);
-            }
-        }
-        errorLogBuffer.clear();
-        for (LogEntry entry : warnLogBuffer) {
-            if (entry.t == null) {
-                warn(entry.message);
-            } else {
-                warn(entry.message, entry.t);
-            }
-        }
-        warnLogBuffer.clear();
+        log(logger, level, message, t);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public final synchronized void trace(final String message) {
-        if (logger == null) {
-            traceLogBuffer.add(new LogEntry(message));
-            return;
-        }
-
-        logger.trace(message);
+    public final void trace(final String message) {
+        log(LogLevel.TRACE, message, null);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public final synchronized void trace(final String message, final Throwable t) {
-        if (logger == null) {
-            traceLogBuffer.add(new LogEntry(message, t));
-            return;
-        }
-
-        logger.trace(message, t);
+    public final void trace(final String message, final Throwable t) {
+        log(LogLevel.TRACE, message, t);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public final synchronized void debug(final String message) {
-        if (logger == null) {
-            debugLogBuffer.add(new LogEntry(message));
-            return;
-        }
-
-        logger.debug(message);
+    public final void debug(final String message) {
+        log(LogLevel.DEBUG, message, null);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public final synchronized void debug(final String message, final Throwable t) {
-        if (logger == null) {
-            debugLogBuffer.add(new LogEntry(message, t));
-            return;
-        }
-
-        logger.debug(message, t);
+    public final void debug(final String message, final Throwable t) {
+        log(LogLevel.DEBUG, message, t);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public final synchronized void error(final String message) {
-        if (logger == null) {
-            errorLogBuffer.add(new LogEntry(message));
-            return;
-        }
-
-        logger.error(message);
+    public final void error(final String message) {
+        log(LogLevel.ERROR, message, null);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public final synchronized void error(final String message, final Throwable t) {
-        if (logger == null) {
-            errorLogBuffer.add(new LogEntry(message, t));
-            return;
-        }
-
-        logger.error(message, t);
+    public final void error(final String message, final Throwable t) {
+        log(LogLevel.ERROR, message, t);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public final synchronized void warn(final String message) {
-        if (logger == null) {
-            warnLogBuffer.add(new LogEntry(message));
-            return;
-        }
-
-        logger.warn(message);
+    public final void warn(final String message) {
+        log(LogLevel.WARN, message, null);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public final synchronized void warn(final String message, final Throwable t) {
-        if (logger == null) {
-            warnLogBuffer.add(new LogEntry(message, t));
-            return;
-        }
+    public final void warn(final String message, final Throwable t) {
+        log(LogLevel.WARN, message, t);
+    }
 
-        logger.warn(message, t);
+    /**
+     * Log Levels.
+     */
+    private static enum LogLevel {
+        TRACE,
+        DEBUG,
+        ERROR,
+        WARN
     }
 
     /**
@@ -188,26 +214,19 @@ public class DebugLoggerBuffer implements DebugLogger {
      */
     private final static class LogEntry {
 
+        private final LogLevel level;
         private final String message;
         private final Throwable t;
 
         /**
          * Constructs a new Log Entry.
          *
-         * @param message The message of the entry.
-         */
-        private LogEntry(final String message) {
-            this.message = message;
-            this.t = null;
-        }
-
-        /**
-         * Constructs a new Log Entry.
-         *
+         * @param level The Log Level.
          * @param message The message of the entry.
          * @param t The throwable of the entry.
          */
-        private LogEntry(final String message, final Throwable t) {
+        private LogEntry(final LogLevel level, final String message, final Throwable t) {
+            this.level = level;
             this.message = message;
             this.t = t;
         }

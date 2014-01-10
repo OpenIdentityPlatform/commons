@@ -18,6 +18,8 @@ package org.forgerock.authz;
 
 import org.forgerock.auth.common.LoggingConfigurator;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * Base interface for all Authorization Configurators, responsible for providing configuration to the AuthZFilter.
  * <br/>
@@ -27,7 +29,7 @@ import org.forgerock.auth.common.LoggingConfigurator;
  * @author Phill Cunnington
  * @since 1.0.0
  */
-public interface AuthorizationConfigurator extends LoggingConfigurator {
+public interface AuthorizationConfigurator extends LoggingConfigurator<HttpServletRequest> {
 
     /**
      * Gets the instance of the Authorization Filter, which contains the logic to determine

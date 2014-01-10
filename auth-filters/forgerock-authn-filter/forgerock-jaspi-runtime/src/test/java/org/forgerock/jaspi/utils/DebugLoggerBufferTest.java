@@ -20,7 +20,8 @@ import org.forgerock.auth.common.DebugLogger;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public class DebugLoggerBufferTest {
 

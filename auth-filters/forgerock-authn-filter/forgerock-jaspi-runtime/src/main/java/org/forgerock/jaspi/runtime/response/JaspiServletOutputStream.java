@@ -42,7 +42,7 @@ public class JaspiServletOutputStream extends ServletOutputStream {
      * Calls write(int) on the underlying output stream.
      *
      * @param i {@inheritDoc}
-     * @throws java.io.IOException {@inheritDoc}
+     * @throws IOException {@inheritDoc}
      */
     @Override
     public void write(final int i) throws IOException {
@@ -50,9 +50,35 @@ public class JaspiServletOutputStream extends ServletOutputStream {
     }
 
     /**
+     * Calls write(byte[]) on the underlying output stream.
+     *
+     * @param b {@inheritDoc}
+     * @throws IOException {@inheritDoc}
+     * @since 1.3.0
+     */
+    @Override
+    public void write(byte[] b) throws IOException {
+        servletOutputStream.write(b);
+    }
+
+    /**
+     * Calls write(byte[], int, int) on the underlying output stream.
+     *
+     * @param b {@inheritDoc}
+     * @param off {@inheritDoc}
+     * @param len {@inheritDoc}
+     * @throws IOException {@inheritDoc}
+     * @since 1.3.0
+     */
+    @Override
+    public void write(byte[] b, int off, int len) throws IOException {
+        servletOutputStream.write(b, off, len);
+    }
+
+    /**
      * Calls close() on the underlying output stream.
      *
-     * @throws java.io.IOException {@inheritDoc}
+     * @throws IOException {@inheritDoc}
      */
     @Override
     public void close() throws IOException {
