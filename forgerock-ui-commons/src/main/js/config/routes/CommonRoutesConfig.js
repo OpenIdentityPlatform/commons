@@ -50,7 +50,7 @@ define("config/routes/CommonRoutesConfig", [
                 url: /^(login\/)?(.+)?$/,
                 pattern: "??",
                 forceUpdate: true,
-                defaults: [""]
+                defaults: ["login/", ""]
             },            
             "logout" : {
                 event: constants.EVENT_LOGOUT,
