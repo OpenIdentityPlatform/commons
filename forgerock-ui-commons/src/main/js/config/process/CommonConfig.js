@@ -135,7 +135,7 @@ define("config/process/CommonConfig", [
             ],
             processDescription: function(error, viewManager, router, conf, sessionManager, loginDialog) {
                 if(!conf.loggedUser) {
-                    if(!conf.gotoURL) {
+                    if(!conf.gotoURL && !window.location.hash.replace(/^#/, '').match(router.configuration.routes.login.url)) {
                         conf.setProperty("gotoURL", window.location.hash);
                     }
                     
@@ -220,7 +220,10 @@ define("config/process/CommonConfig", [
                 "org/forgerock/commons/ui/common/main/SpinnerManager"
             ],
             processDescription: function(args, viewManager, router, conf, navigation, spinner) {
-                var route = args.route, params = args.args, callback = args.callback;
+                var route = args.route, params = args.args, callback = args.callback,
+                    view = require(route.view);
+
+                view.route = route;
                 params = params || route.defaults;
                 conf.setProperty("baseView", ""); 
                 conf.setProperty("baseViewArgs", ""); 

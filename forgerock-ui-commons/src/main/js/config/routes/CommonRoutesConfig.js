@@ -23,6 +23,7 @@
  */
 
 /*global define*/
+/*jslint regexp:false */
 
 /**
  * @author jdabrowski
@@ -46,8 +47,11 @@ define("config/routes/CommonRoutesConfig", [
             //view files are loaded when the GenericRouteInterfaceMap module is initialized
             "login" : {
                 view: "LoginView",
-                url: "login/"
-            },
+                url: /^(login\/)?(.+)?$/,
+                pattern: "??",
+                forceUpdate: true,
+                defaults: [""]
+            },            
             "logout" : {
                 event: constants.EVENT_LOGOUT,
                 url: "logout/"

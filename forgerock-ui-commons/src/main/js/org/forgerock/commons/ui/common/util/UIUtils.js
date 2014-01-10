@@ -96,8 +96,13 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     
     obj.templates = {};
 
-    obj.renderTemplate = function(templateUrl, el, data, clb, mode) {
+    obj.renderTemplate = function(templateUrl, el, data, clb, mode, validation) {
         obj.fillTemplateWithData(templateUrl, data, function(tpl) {
+            // if we were passed a validation function and it returns false, abort
+            if (validation && !validation()) {
+                return false;
+            }
+            
             if(mode === "append") {
                 el.append(tpl);
             } else {

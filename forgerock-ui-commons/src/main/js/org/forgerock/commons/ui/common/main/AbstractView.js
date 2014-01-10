@@ -33,9 +33,10 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
     "org/forgerock/commons/ui/common/util/ValidatorsUtils",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/EventManager", 
+    "org/forgerock/commons/ui/common/main/Router", 
     "org/forgerock/commons/ui/common/util/Constants",
     "ThemeManager"
-], function(uiUtils, validatorsManager, validatorsUtils, conf, eventManager, constants, themeManager) {
+], function(uiUtils, validatorsManager, validatorsUtils, conf, eventManager, router, constants, themeManager) {
     var View = Backbone.View.extend({
 
         /**
@@ -80,6 +81,17 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
         },
         
         loadTemplate: function() {
+            var _this = this,
+                validateCurrent = function () {
+                    if (!_.has(_this, "route")) {
+                        return true;
+                    } else if (!_this.route.url.length && window.location.hash.replace(/^#/, '') === "") {
+                        return true;
+                    } else {
+                        return window.location.hash.replace(/^#/, '').match(_this.route.url);
+                    }
+                };
+
             this.setElement($(this.element));
             this.$el.unbind();
             this.delegateEvents();
@@ -90,9 +102,9 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
             }
             
             if(this.callback) {
-                uiUtils.renderTemplate(this.data.theme.path + this.template, this.$el, _.extend(conf.globalData, this.data), _.bind(this.callback, this), this.mode);
+                uiUtils.renderTemplate(this.data.theme.path + this.template, this.$el, _.extend(conf.globalData, this.data), _.bind(this.callback, this), this.mode, validateCurrent);
             } else {
-                uiUtils.renderTemplate(this.data.theme.path + this.template, this.$el, _.extend(conf.globalData, this.data), null, this.mode);
+                uiUtils.renderTemplate(this.data.theme.path + this.template, this.$el, _.extend(conf.globalData, this.data), null, this.mode, validateCurrent);
             }
            
         },
