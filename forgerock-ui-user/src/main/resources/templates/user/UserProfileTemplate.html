@@ -1,0 +1,119 @@
+<div class="content-bg">
+
+    <h3>{{t "common.user.userProfile"}}</h3>
+
+    <form class="form two-columns" id="UserProfileForm">
+        <input type="hidden" name="dn">
+        <div class="column-layout">
+            <div class="column2">
+                <div class="field">
+                    <label for="userprofile-username"class="light">{{t "common.user.username"}}</label>
+                    <input  id="userprofile-username" type="text" name="username"  data-validator="required" readonly />
+                    <span></span>
+                    <div class="validation-message"></div>
+                </div>
+                
+                {{#unless adminUser}}
+                    <div class="field">
+                        <label for="userprofile-givenname" class="light">{{t "common.user.givenName"}}</label>
+                        <input  id="userprofile-givenname" type="text" name="givenname" data-validator="required" autofocus required />
+                        <span></span>
+                        <div class="validation-message"></div>
+                    </div>
+                    
+                    <div class="field">
+                        <label for="userprofile-email" class="light">{{t "common.user.emailAddress"}}</label> 
+                        <input  id="userprofile-email" type="email" name="mail" /> 
+                        <span></span>
+                        <div class="validation-message"></div>
+                    </div>
+                
+                    <div class="field">
+                        <label for="userprofile-postaladdress" class="light">{{t "common.user.address1"}}</label>
+                        <input  id="userprofile-postaladdress" type="text" name="postaladdress" /> 
+                        <span></span>
+                        <div class="validation-message"></div>
+                    </div>
+                
+                        {{#if hasAddressDetails}}
+                            <div class="field">
+                                <label for="userprofile-country" class="light">{{t "common.user.country"}}</label>
+                                <select id="userprofile-country" name="country"></select>
+                                <span></span>
+                                <div class="validation-message"></div>
+                            </div>
+                            
+                            <div class="field">
+                                <label for="userprofile-stateprovince" class="light">{{t "common.user.stateProvince"}}</label>
+                                <select id="userprofile-stateprovince" name="stateprovince"></select>
+                                <span></span>
+                                <div class="validation-message"></div>
+                            </div>
+                        {{/if}}
+                        
+                {{/unless}}
+            </div>
+            <div class="column2">
+                <div class="field">
+                    <label class="light"></label> 
+                    <a href="{{url 'changeSecurityData'}}" id="securityDialogLink" class="ice hrefInput">
+                        {{t "templates.user.UserProfileTemplate.changeSecurityData"}}
+                    </a>
+                </div>
+                
+                {{#unless adminUser}}
+                    <div class="field">
+                        <label for="userprofile-sn" class="light">{{t "common.user.familyName"}}</label>
+                        <input  id="userprofile-sn" type="text" name="sn" data-validator="required" required /> 
+                        <span></span>
+                        <div class="validation-message"></div>
+                    </div>
+                    
+                    <div class="field">
+                        <label for="userprofile-telephonenumber" class="light">{{t "common.user.phoneNumber"}}</label>
+                        <input  id="userprofile-telephonenumber" type="tel" name="telephonenumber" /> 
+                        <span></span>
+                        <div class="validation-message"></div>
+                    </div>
+                
+                    {{#if hasAddressDetails}}
+                        <div class="field">
+                            <label for="userprofile-address2" class="light">{{t "common.user.address2"}}</label>
+                            <input id="userprofile-address2" type="text" name="address2" />
+                            <span></span>
+                            <div class="validation-message"></div>
+                        </div>
+                        
+                        <div class="field">
+                            <label for="userprofile-city" class="light">{{t "common.user.city"}}</label>
+                            <input id="userprofile-city" type="text" name="city" />
+                            <span></span>
+                            <div class="validation-message"></div>
+                        </div>
+                        
+                        <div class="field">
+                            <label for="userprofile-postalcode" class="light">{{t "common.user.postalCode"}}</label>
+                            <input id="userprofile-postalcode" type="text" name="postalcode" />
+                            <span></span>
+                            <div class="validation-message"></div>
+                        </div>
+                    {{/if}}
+                    
+                    {{#siteIdentification}}
+                        <div class="field">
+                            <label class="light"></label> 
+                            <a href="{{url 'siteIdentification'}}" id="passPhraseLink" class="ice hrefInput">
+                                {{t "templates.user.UserProfileTemplate.changeSiteIdentification"}}
+                            </a>
+                        </div>
+                    {{/siteIdentification}}
+                {{/unless}}
+                <div class="field" style="margin-left: 240px; margin-top: 30px; height: auto">
+                    <input type="submit" name="saveButton" value="{{t "common.form.update"}}" class="button active" />
+                    <input type="button" name="resetButton" value="{{t "common.form.reset"}}" class="button gray"/>
+                </div>
+            </div>
+        </div>
+    </form>
+
+</div>
