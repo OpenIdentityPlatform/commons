@@ -57,6 +57,16 @@ define("config/process/UserConfig", [
                     router.navigate(router.configuration.routes.adminUsers.url, {trigger: true});
                 }
             }
+        },
+        {
+            startEvent: constants.EVENT_HANDLE_DEFAULT_ROUTE,
+            description: "",
+            dependencies: [
+                "org/forgerock/commons/ui/common/main/Router"
+            ],
+            processDescription: function(event, router) {
+                router.routeTo(router.configuration.routes.profile, {trigger: true});
+            }
         }
     ];
     return obj;

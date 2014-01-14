@@ -80,6 +80,7 @@ define("org/forgerock/commons/ui/common/util/Constants", [
     
     obj.EVENT_NAVIGATION_HOME_REQUEST = "common.navigation.EVENT_NAVIGATION_HOME_REQUEST";
     obj.EVENT_SWITCH_VIEW_REQUEST = "common.navigation.EVENT_SWITCH_VIEW_REQUEST";
+    obj.EVENT_HANDLE_DEFAULT_ROUTE = "common.navigation.EVENT_HANDLE_DEFAULT_ROUTE";
 
     obj.FORGOTTEN_PASSWORD_CHANGED_SUCCESSFULLY = "user.forgottenpassword.FORGOTTEN_PASSWORD_CHANGED_SUCCESSFULLY";
 

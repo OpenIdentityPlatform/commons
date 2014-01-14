@@ -33,12 +33,6 @@ define("config/routes/UserRoutesConfig", [
     //the actual path to each view is defined in config/AppConfiguration.js
     //view files are loaded when the GenericRouteInterfaceMap module is initialized
     var obj = {
-        "": {
-            view: "UserProfileView",
-            role: "ui-user",
-            url: "",
-            forceUpdate: true
-        },
         "profile": {
             view: "UserProfileView",
             role: "ui-user",
