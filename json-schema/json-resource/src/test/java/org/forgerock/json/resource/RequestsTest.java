@@ -56,8 +56,8 @@ public final class RequestsTest {
         newReadRequest(null);
     }
 
-    // test the contract that request.getResourceName/getResourceNameObject 
-    // always returns non-null by creating a "legit" request and then 
+    // test the contract that request.getResourceName/getResourceNameObject
+    // always returns non-null by creating a "legit" request and then
     // updating the ResourceName to null using the setter
     @Test(expectedExceptions = NullPointerException.class)
     public void testSetNullResourceName() {
