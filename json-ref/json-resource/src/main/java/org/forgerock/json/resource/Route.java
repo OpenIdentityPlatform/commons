@@ -144,7 +144,7 @@ public final class Route {
             // Escape and add remaining literal substring.
             builder.append(Pattern.quote(t.substring(elementStart)));
             builder.append(')');
-            
+
             if (mode == STARTS_WITH) {
                 // Add wild-card match for remaining unmatched path.
                 builder.append("(/(.*))?");
@@ -211,7 +211,7 @@ public final class Route {
 
         private String removeTrailingSlash(final String resourceName) {
             if (resourceName.endsWith("/")) {
-                return resourceName.substring(0, resourceName.length()-1);
+                return resourceName.substring(0, resourceName.length() - 1);
             }
             return resourceName;
         }

@@ -534,7 +534,7 @@ public final class PatchOperation {
             }
         }
     }
-    
+
     private void checkOperationType() {
         if (!isAdd() && !isRemove() && !isIncrement() && !isReplace()) {
             throw new IllegalArgumentException("Invalid patch operation type " + operation);
