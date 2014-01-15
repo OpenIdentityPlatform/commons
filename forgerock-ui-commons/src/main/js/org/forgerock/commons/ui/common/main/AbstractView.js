@@ -62,7 +62,10 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
          */
         parentRender: function(callback) {   
             this.callback = callback;
-            var _this = this;
+            var _this = this,
+                needsNewBaseTemplate = function () {
+                    return (conf.baseTemplate !== _this.baseTemplate && !_this.noBaseTemplate);
+                };
             eventManager.registerListener(constants.EVENT_REQUEST_RESEND_REQUIRED, function () {
                 _this.unlock();
             });
@@ -70,8 +73,8 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
             themeManager.getTheme().then(function(theme){
                 _this.data.theme = theme;
                 
-                if(conf.baseTemplate !== _this.baseTemplate && !_this.noBaseTemplate) {
-                    uiUtils.renderTemplate(_this.data.theme.path + _this.baseTemplate, $("#wrapper"), _.extend(conf.globalData, _this.data), _.bind(_this.loadTemplate, _this), "replace");
+                if(needsNewBaseTemplate()) {
+                    uiUtils.renderTemplate(_this.data.theme.path + _this.baseTemplate, $("#wrapper"), _.extend(conf.globalData, _this.data), _.bind(_this.loadTemplate, _this), "replace", needsNewBaseTemplate);
                 } else {
                     _this.loadTemplate();
                 }
