@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2014 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -181,10 +181,11 @@ public interface UntypedCrossCutFilter<C> {
      * <ul>
      * <li>forward zero or more resources to the client by invoking
      * {@link QueryResultHandler#handleResource(Resource)
-     * handler.handleResource}. Implementations will typically invoke this once
-     * per resource, but may choose not to invoke it at all if the resource is
-     * to be excluded from the query results, or multiple times if, for example,
-     * the resource is to be decomposed into multiple related resources,
+     * handler.handleResource} for each matching resource. Implementations will
+     * typically invoke this once per resource, but may choose not to invoke it
+     * at all if the resource is to be excluded from the query results, or
+     * multiple times if, for example, the resource is to be decomposed into
+     * multiple related resources,
      * <li>signal that no more resources will be returned to the client and that
      * an error should be sent instead by invoking
      * {@link QueryResultHandler#handleError(ResourceException)
