@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2014 ForgeRock AS.
  */
 
 package org.forgerock.authz;
@@ -34,7 +34,7 @@ import java.io.IOException;
 
 /**
  * Authorization Filter which protects resources based on the user's privileges who made the request.
- * <p>
+ * <br/>
  * Uses the Configurator implementation given as a init-param, to delegate the authorization processing to
  * the configured implementation of a AuthorizationFilter interface.
  *
@@ -55,7 +55,7 @@ public class AuthZFilter implements Filter {
     private static final String CONFIGURATOR_IMPL_INIT_PARAM = "configurator";
 
     private AuthorizationConfigurator configurator;
-    private AuditLogger auditLogger;
+    private AuditLogger<HttpServletRequest> auditLogger;
     private AuthorizationFilter authorizationFilter;
 
     /**
@@ -102,7 +102,7 @@ public class AuthZFilter implements Filter {
     /**
      * Makes a call to the AuthorizationFilter instance to perform the authorization logic and based on the result of
      * that call will either, send the request through or return a 403 Http response.
-     * <p>
+     * <br/>
      * The method will also make a call to the AuditLoggers audit method to audit the authorization request.
      *
      * @param servletRequest {@inheritDoc}
@@ -138,7 +138,7 @@ public class AuthZFilter implements Filter {
      * @param request The HttpServletRequest of the authorization request.
      */
     private void audit(AuthResult authResult, HttpServletRequest request) {
-        auditLogger.audit(new AuditRecord(authResult, request));
+        auditLogger.audit(new AuditRecord<HttpServletRequest>(authResult, request));
     }
 
     /**

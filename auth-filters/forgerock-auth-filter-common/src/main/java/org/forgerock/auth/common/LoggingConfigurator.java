@@ -11,20 +11,22 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2014 ForgeRock AS.
  */
 
 package org.forgerock.auth.common;
 
 /**
- * Base interface for all Configurators responsible for providing configuration to the AuthN and AuthZ Filters.
- * <p>
+ * Base interface for all Configurators responsible for providing config to the AuthN and AuthZ Filters.
+ * <br/>
  * Provides methods for getting instances of the two Logging interfaces.
+ *
+ * @param <T> The type of AuditLogger.
  *
  * @author Phill Cunnington
  * @since 1.0.0
  */
-public interface LoggingConfigurator {
+public interface LoggingConfigurator<T> {
 
     /**
      * Gets the instance of the Debug Logger.
@@ -38,5 +40,5 @@ public interface LoggingConfigurator {
      *
      * @return The Audit Logger instance.
      */
-    AuditLogger getAuditLogger();
+    AuditLogger<T> getAuditLogger();
 }

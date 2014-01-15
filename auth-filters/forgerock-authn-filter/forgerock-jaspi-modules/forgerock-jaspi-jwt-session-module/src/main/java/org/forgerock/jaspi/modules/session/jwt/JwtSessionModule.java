@@ -11,13 +11,15 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013-2014 ForgeRock AS.
  */
 
 package org.forgerock.jaspi.modules.session.jwt;
 
+import org.forgerock.auth.common.DebugLogger;
 import org.forgerock.common.util.KeystoreManager;
-import org.forgerock.jaspi.filter.AuthNFilter;
+import org.forgerock.jaspi.logging.LogFactory;
+import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.json.jose.builders.JwtBuilderFactory;
 import org.forgerock.json.jose.jwe.EncryptedJwt;
 import org.forgerock.json.jose.jwe.EncryptionMethod;
@@ -25,8 +27,6 @@ import org.forgerock.json.jose.jwe.JweAlgorithm;
 import org.forgerock.json.jose.jwe.JweHeader;
 import org.forgerock.json.jose.jwt.Jwt;
 import org.forgerock.json.jose.jwt.JwtClaimsSet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
@@ -60,7 +60,7 @@ import java.util.UUID;
  */
 public class JwtSessionModule implements ServerAuthModule {
 
-    private static final Logger DEBUG = LoggerFactory.getLogger(JwtSessionModule.class);
+    private static final DebugLogger DEBUG = LogFactory.getDebug();
 
     private static final String JWT_SESSION_COOKIE_NAME = "session-jwt";
     private static final String SKIP_SESSION_PARAMETER_NAME = "skipSession";
@@ -180,7 +180,7 @@ public class JwtSessionModule implements ServerAuthModule {
                 });
                 //TODO also include ATTRIBUTE_AUTHCID!
                 Map<String, Object> context = getContextMap(messageInfo);
-                Map<String, Object> claimsSetContext = jwt.getClaimsSet().getClaim(AuthNFilter.ATTRIBUTE_AUTH_CONTEXT, Map.class);
+                Map<String, Object> claimsSetContext = jwt.getClaimsSet().getClaim(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT, Map.class);
                 if (claimsSetContext != null) {
                     context.putAll(claimsSetContext);
                 }
@@ -232,10 +232,9 @@ public class JwtSessionModule implements ServerAuthModule {
             Jwt jwt = verifySessionJwt(jwtSessionCookie.getValue());
             if (jwt != null) {
                 //if all goes well!
-                Map<String, Object> claimsSetContext = jwt.getClaimsSet().getClaim(AuthNFilter.ATTRIBUTE_AUTH_CONTEXT, Map.class);
+                Map<String, Object> claimsSetContext = jwt.getClaimsSet().getClaim(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT, Map.class);
 
-                if (claimsSetContext != null)
-                {
+                if (claimsSetContext != null) {
                     for (String key : claimsSetContext.keySet()) {
                         request.setAttribute(key, claimsSetContext.get(key));
                     }
@@ -267,11 +266,11 @@ public class JwtSessionModule implements ServerAuthModule {
      * @return The context map internal to the messageInfo's map.
      */
     public Map<String, Object> getContextMap(MessageInfo messageInfo) {
-        Map<String, Object> internalMap = (Map<String, Object>) messageInfo.getMap().get(AuthNFilter.ATTRIBUTE_AUTH_CONTEXT);
+        Map<String, Object> internalMap = (Map<String, Object>) messageInfo.getMap().get(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT);
 
         if (internalMap == null) {
             internalMap = new HashMap<String, Object>();
-            messageInfo.getMap().put(AuthNFilter.ATTRIBUTE_AUTH_CONTEXT, internalMap);
+            messageInfo.getMap().put(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT, internalMap);
         }
 
         return internalMap;
@@ -390,14 +389,14 @@ public class JwtSessionModule implements ServerAuthModule {
 
         Map<String, Object> map = messageInfo.getMap();
         HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
-        Object principal = request.getAttribute(AuthNFilter.ATTRIBUTE_AUTH_PRINCIPAL);
+        Object principal = request.getAttribute(JaspiRuntime.ATTRIBUTE_AUTH_PRINCIPAL);
 
         if (principal != null) {
             jwtParameters.put("prn", principal);
         }
 
-        if (map.containsKey(AuthNFilter.ATTRIBUTE_AUTH_CONTEXT)) {
-            jwtParameters.put(AuthNFilter.ATTRIBUTE_AUTH_CONTEXT, getContextMap(messageInfo));
+        if (map.containsKey(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT)) {
+            jwtParameters.put(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT, getContextMap(messageInfo));
         }
 
         if (map.containsKey(SKIP_SESSION_PARAMETER_NAME) && ((Boolean) map.get(SKIP_SESSION_PARAMETER_NAME))) {
@@ -472,7 +471,7 @@ public class JwtSessionModule implements ServerAuthModule {
 
     /**
      * Sets the max age for the cookie, based on whether the cookie should be browser session only.
-     * <p>
+     * <br/>
      * If the cookie is only meant to last the same length the users browser is open, then the max age is set to -1.
      * Otherwise the max age is set to expiry time.
      *

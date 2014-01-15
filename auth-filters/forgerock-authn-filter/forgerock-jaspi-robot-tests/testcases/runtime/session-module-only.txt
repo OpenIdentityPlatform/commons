@@ -1,0 +1,86 @@
+Description:
+JASPI Runtime
+
+*** Settings ***
+Resource	    jaspi_keywords.txt
+Test Timeout	${TIMEOUT}
+Suite Setup	        deploy_startup_jaspi
+Suite Teardown      shutdown_tomcat
+
+*** Variables ***
+${JASPI_RUNTIME_CONFIGURATION_FILE}  /Users/Phill/ForgeRockDev/tmp-old-repos/forgerock-commons-auth-filters-1.3.0/forgerock-commons-auth-filters-1.3.0/forgerock-authn-filter/forgerock-jaspi-robot-tests/testcases/runtime/session-module-only-config.json
+
+*** Test Cases ***
+BasicTest
+    [Documentation]	Perform Basic Test
+    ${headers} =   Create Dictionary  X-Jaspi-Session-Validate-Request=SUCCESS  X-Jaspi-Session-Secure-Response=SEND_SUCCESS
+
+    configure_jaspi  ${JASPI_RUNTIME_CONFIGURATION_FILE}
+
+    ${result} =  get  http://localhost:8080/jaspi/endpoint  ${headers}
+    Should Be Equal  ${result.status_code}  ${200}
+
+BasicTest2
+    [Documentation]	Perform Basic Test2
+    ${headers} =   Create Dictionary  X-Jaspi-Session-Validate-Request=SEND_SUCCESS
+
+    configure_jaspi  ${JASPI_RUNTIME_CONFIGURATION_FILE}
+
+    ${result} =  get  http://localhost:8080/jaspi/endpoint  ${headers}
+    Should Be Equal  ${result.status_code}  ${200}
+
+BasicTest4
+    [Documentation]	Perform Basic Test4
+    ${headers} =   Create Dictionary  X-Jaspi-Session-Validate-Request=SEND_FAILURE
+
+    configure_jaspi  ${JASPI_RUNTIME_CONFIGURATION_FILE}
+
+    ${result} =  get  http://localhost:8080/jaspi/endpoint  ${headers}
+    Should Be Equal  ${result.status_code}  ${401}
+
+BasicTest5
+    [Documentation]	Perform Basic Test5
+    ${headers} =   Create Dictionary  X-Jaspi-Session-Secure-Response=SEND_SUCCESS
+
+    configure_jaspi  ${JASPI_RUNTIME_CONFIGURATION_FILE}
+
+    ${result} =  get  http://localhost:8080/jaspi/endpoint  ${headers}
+    Should Be Equal  ${result.status_code}  ${500}
+
+BasicTest6
+    [Documentation]	Perform Basic Test6
+    ${headers} =   Create Dictionary  X-Jaspi-Session-Validate-Request=SUCCESS  X-Jaspi-Session-Secure-Response=SEND_FAILURE
+
+    configure_jaspi  ${JASPI_RUNTIME_CONFIGURATION_FILE}
+
+    ${result} =  get  http://localhost:8080/jaspi/endpoint  ${headers}
+    Should Be Equal  ${result.status_code}  ${500}
+
+BasicTest8
+    [Documentation]	Perform Basic Test8
+    ${headers} =   Create Dictionary  X-Jaspi-Session-Validate-Request=SUCCESS
+
+    configure_jaspi  ${JASPI_RUNTIME_CONFIGURATION_FILE}
+
+    ${result} =  get  http://localhost:8080/jaspi/endpoint  ${headers}
+    Should Be Equal  ${result.status_code}  ${500}
+
+***
+
+BasicTest3
+    [Documentation]	Perform Basic Test3
+    ${headers} =   Create Dictionary  X-Jaspi-Session-Validate-Request=SEND_CONTINUE
+
+    configure_jaspi  ${JASPI_RUNTIME_CONFIGURATION_FILE}
+
+    ${result} =  get  http://localhost:8080/jaspi/endpoint  ${headers}
+    Should Be Equal  ${result.status_code}  ${100}
+
+BasicTest7
+    [Documentation]	Perform Basic Test7
+    ${headers} =   Create Dictionary  X-Jaspi-Session-Validate-Request=SUCCESS  X-Jaspi-Session-Secure-Response=SEND_CONTINUE
+
+    configure_jaspi  ${JASPI_RUNTIME_CONFIGURATION_FILE}
+
+    ${result} =  get  http://localhost:8080/jaspi/endpoint  ${headers}
+    Should Be Equal  ${result.status_code}  ${100}

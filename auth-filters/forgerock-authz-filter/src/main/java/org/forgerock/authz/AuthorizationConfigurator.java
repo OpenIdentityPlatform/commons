@@ -11,23 +11,25 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2014 ForgeRock AS.
  */
 
 package org.forgerock.authz;
 
 import org.forgerock.auth.common.LoggingConfigurator;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * Base interface for all Authorization Configurators, responsible for providing configuration to the AuthZFilter.
- * <p>
+ * <br/>
  * Provides a method for getting the instance of the AuthorizationFilter which contains the logic to determine
  * whether the request is authorized or not.
  *
  * @author Phill Cunnington
  * @since 1.0.0
  */
-public interface AuthorizationConfigurator extends LoggingConfigurator {
+public interface AuthorizationConfigurator extends LoggingConfigurator<HttpServletRequest> {
 
     /**
      * Gets the instance of the Authorization Filter, which contains the logic to determine

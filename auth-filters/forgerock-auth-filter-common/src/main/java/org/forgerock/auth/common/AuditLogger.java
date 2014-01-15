@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2014 ForgeRock AS.
  */
 
 package org.forgerock.auth.common;
@@ -22,15 +22,15 @@ package org.forgerock.auth.common;
  * @author Phill Cunnington
  * @since 1.0.0
  */
-public interface AuditLogger {
+public interface AuditLogger<T> {
 
     /**
      * Audits the AuthN or AuthZ requests outcome.
-     * <p>
+     * <br/>
      * The AuditRecord parameter will contain the originating HttpServletRequest, the AuthResult, with the
      * auth operations outcome and any other relevant information for the audit purposes.
      *
      * @param auditRecord The AuditRecord.
      */
-    void audit(AuditRecord auditRecord);
+    void audit(AuditRecord<T> auditRecord);
 }
