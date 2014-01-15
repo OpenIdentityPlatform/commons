@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2012 ForgeRock AS. All rights reserved.
+ * Copyright 2012-2014 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -146,6 +146,16 @@ public interface CollectionResourceProvider {
      * {@link RequestHandler#handleQuery(ServerContext, QueryRequest, QueryResultHandler)
      * Searches} the collection for all resources which match the query request
      * criteria.
+     * <p>
+     * Implementations must invoke
+     * {@link QueryResultHandler#handleResource(Resource)} for each resource
+     * which matches the query criteria. Once all matching resources have been
+     * returned implementations are required to invoke either
+     * {@link QueryResultHandler#handleResult(QueryResult)} if the query has
+     * completed successfully, or
+     * {@link QueryResultHandler#handleError(ResourceException)} if the query
+     * did not complete successfully (even if some matching resources were
+     * returned).
      *
      * @param context
      *            The request server context.
