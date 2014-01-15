@@ -52,6 +52,32 @@ public class JaspiServletOutputStreamTest {
     }
 
     @Test
+    public void shouldWriteByte() throws IOException {
+
+        //Given
+        byte[] b = new byte[0];
+
+        //When
+        servletOutputStream.write(b);
+
+        //Then
+        verify(outputStream).write(b);
+    }
+
+    @Test
+    public void shouldWriteByteWithLength() throws IOException {
+
+        //Given
+        byte[] b = new byte[0];
+
+        //When
+        servletOutputStream.write(b, 0, 1);
+
+        //Then
+        verify(outputStream).write(b, 0, 1);
+    }
+
+    @Test
     public void shouldClose() throws IOException {
 
         //Given

@@ -18,10 +18,7 @@ package org.forgerock.jaspi.utils;
 
 import org.forgerock.auth.common.DebugLogger;
 
-import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -79,38 +76,38 @@ public class DebugLoggerBuffer implements DebugLogger {
      */
     private void log(final DebugLogger debugLogger, final LogLevel level, final String message, final Throwable t) {
         switch (level) {
-            case TRACE: {
-                if (t == null) {
-                    debugLogger.trace(message);
-                } else {
-                    debugLogger.trace(message, t);
-                }
-                break;
+        case TRACE: {
+            if (t == null) {
+                debugLogger.trace(message);
+            } else {
+                debugLogger.trace(message, t);
             }
-            case DEBUG: {
-                if (t == null) {
-                    debugLogger.debug(message);
-                } else {
-                    debugLogger.debug(message, t);
-                }
-                break;
+            break;
+        }
+        case DEBUG: {
+            if (t == null) {
+                debugLogger.debug(message);
+            } else {
+                debugLogger.debug(message, t);
             }
-            case ERROR: {
-                if (t == null) {
-                    debugLogger.error(message);
-                } else {
-                    debugLogger.error(message, t);
-                }
-                break;
+            break;
+        }
+        case ERROR: {
+            if (t == null) {
+                debugLogger.error(message);
+            } else {
+                debugLogger.error(message, t);
             }
-            case WARN: {
-                if (t == null) {
-                    debugLogger.warn(message);
-                } else {
-                    debugLogger.warn(message, t);
-                }
-                break;
+            break;
+        }
+        case WARN: {
+            if (t == null) {
+                debugLogger.warn(message);
+            } else {
+                debugLogger.warn(message, t);
             }
+            break;
+        }
         }
     }
 

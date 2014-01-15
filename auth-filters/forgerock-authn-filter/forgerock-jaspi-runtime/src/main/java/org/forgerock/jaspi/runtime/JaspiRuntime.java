@@ -21,7 +21,6 @@ import org.forgerock.jaspi.logging.LogFactory;
 import org.forgerock.json.resource.ResourceException;
 
 import javax.security.auth.Subject;
-import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.config.ServerAuthContext;
@@ -149,7 +148,7 @@ public class JaspiRuntime {
             // Give the AuthModule a chance to clear out any authentication data from the subject.
             serverAuthContext.cleanSubject(messageInfo, clientSubject);
 
-        } catch (AuthException e) {
+        } catch (Exception e) {
             DEBUG.error(e.getMessage(), e);
             HttpServletResponse httpResponse = (HttpServletResponse) messageInfo.getResponseMessage();
             ResourceException jre = ResourceException.getException(ResourceException.INTERNAL_ERROR, e.getMessage());

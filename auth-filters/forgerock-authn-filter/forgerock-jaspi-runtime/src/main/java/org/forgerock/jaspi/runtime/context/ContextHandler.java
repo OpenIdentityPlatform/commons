@@ -124,7 +124,7 @@ public class ContextHandler {
     public void handleCompletion(final MessageInfo messageInfo, final Subject clientSubject,
             final AuthStatus authStatus) throws AuthException {
 
-        if (authStatus == null) {
+        if (authStatus == null || AuthStatus.SEND_FAILURE.equals(authStatus)) {
             LOGGER.debug("Authentication has failed.");
             HttpServletResponse response = (HttpServletResponse) messageInfo.getResponseMessage();
             ResourceException jre = ResourceException.getException(UNAUTHORIZED_HTTP_ERROR_CODE,
