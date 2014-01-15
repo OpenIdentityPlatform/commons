@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2014 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -164,6 +164,16 @@ public interface Filter {
 
     /**
      * Filters a query request.
+     * <p>
+     * Implementations which return results directly rather than forwarding the
+     * request should invoke {@link QueryResultHandler#handleResource(Resource)}
+     * for each resource which matches the query criteria. Once all matching
+     * resources have been returned implementations are required to invoke
+     * either {@link QueryResultHandler#handleResult(QueryResult)} if the query
+     * has completed successfully, or
+     * {@link QueryResultHandler#handleError(ResourceException)} if the query
+     * did not complete successfully (even if some matching resources were
+     * returned).
      *
      * @param context
      *            The filter chain context.

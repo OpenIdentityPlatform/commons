@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright 2012 ForgeRock AS. All rights reserved.
+ * Copyright 2012-2014 ForgeRock AS. All rights reserved.
  */
 
 package org.forgerock.json.resource;
@@ -21,9 +21,9 @@ package org.forgerock.json.resource;
  * <p>
  * A query result completion handler may be specified when performing query
  * requests using a {@link Connection} object. The {@link #handleResource}
- * method is invoked each time a matching JSON resource is returned, followed by
- * {@link #handleResult} or {@link #handleError} indicating that no more JSON
- * resources will be returned.
+ * method is invoked for each resource which matches the query criteria,
+ * followed by {@link #handleResult} or {@link #handleError} indicating that no
+ * more JSON resources will be returned.
  * <p>
  * Implementations of these methods should complete in a timely manner so as to
  * avoid keeping the invoking thread from dispatching to other completion
@@ -42,14 +42,25 @@ package org.forgerock.json.resource;
 public interface QueryResultHandler extends ResultHandler<QueryResult> {
 
     /**
-     * {@inheritDoc}
+     * Invoked when the query request has failed and no more matching resources
+     * can been {@link #handleResource(Resource) returned}.
+     *
+     * @param error
+     *            {@inheritDoc}
      */
     @Override
     void handleError(ResourceException error);
 
     /**
      * Invoked each time a matching JSON resource is returned from a query
-     * request.
+     * request. More specifically, if a query request matches 10 resources, then
+     * this method will be invoked 10 times, once for each matching resource.
+     * Once all matching resources have been returned, either
+     * {@link QueryResultHandler#handleResult(QueryResult)} will be invoked if
+     * the query has completed successfully, or
+     * {@link QueryResultHandler#handleError(ResourceException)} will be invoked
+     * if the query did not complete successfully (even if some matching
+     * resources were returned).
      *
      * @param resource
      *            The matching JSON resource.
@@ -61,7 +72,8 @@ public interface QueryResultHandler extends ResultHandler<QueryResult> {
     boolean handleResource(Resource resource);
 
     /**
-     * {@inheritDoc}
+     * Invoked when the query request has completed successfully and all
+     * matching resources have been {@link #handleResource(Resource) returned}.
      *
      * @param result
      *            The query result indicating that no more resources are to be

@@ -9,9 +9,9 @@
  * When distributing Covered Software, include this CDDL Header Notice in each file and include
  * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
- * information: "Portions Copyrighted [year] [name of copyright owner]".
+ * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright © 2012 ForgeRock AS. All rights reserved.
+ * Copyright 2012-2014 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -172,6 +172,15 @@ public interface RequestHandler {
     /**
      * Searches for all JSON resources matching a user specified set of
      * criteria, invoking the provided query result handler upon completion.
+     * <p>
+     * Implementations must invoke
+     * {@link QueryResultHandler#handleResource(Resource)} for each resource
+     * which matches the query criteria. Once all matching resources have been
+     * returned implementations are required to invoke either
+     * {@link QueryResultHandler#handleResult(QueryResult)} if the query has
+     * completed successfully, or
+     * {@link QueryResultHandler#handleError(ResourceException)} if the query
+     * did not complete successfully (even if some matching resources were returned).
      * <p>
      * Query expects failure exceptions as follows:
      * <ul>
