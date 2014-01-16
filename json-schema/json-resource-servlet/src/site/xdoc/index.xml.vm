@@ -333,7 +333,7 @@ Accept: application/json</source>
                     </tr>
                     <tr>
                         <td>
-                            <tt>_filter=<i>FILTER</i></tt>
+                            <tt>_queryFilter=<i>FILTER</i></tt>
                         </td>
                         <td>
                             <p>A filter expression which will be used to determine
