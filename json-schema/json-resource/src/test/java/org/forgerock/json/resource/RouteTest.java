@@ -53,7 +53,10 @@ public final class RouteTest {
             { STARTS_WITH, "test{suffix}", "testabc/", "" },
             { STARTS_WITH, "test{suffix}", "testabc/123", "123" },
             { STARTS_WITH, "test", "test", "" },
-            { STARTS_WITH, "test", "test/", "" }
+            { STARTS_WITH, "test", "test/", "" },
+            { STARTS_WITH, "", "", "" },
+            { STARTS_WITH, "", "123", "123" },
+            { STARTS_WITH, "", "123/456", "123/456" }
             // @formatter:on
         };
     }
