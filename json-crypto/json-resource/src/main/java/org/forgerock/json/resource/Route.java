@@ -147,7 +147,17 @@ public final class Route {
 
             if (mode == STARTS_WITH) {
                 // Add wild-card match for remaining unmatched path.
-                builder.append("(/(.*))?");
+                if (uriTemplate.isEmpty()) {
+                    /*
+                     * Special case for empty template: the next path element is
+                     * not preceded by a slash. The redundant parentheses are
+                     * required in order to have consistent group numbering with
+                     * the non-empty case.
+                     */
+                    builder.append("((.*))?");
+                } else {
+                    builder.append("(/(.*))?");
+                }
             }
 
             this.uriTemplate = uriTemplate;

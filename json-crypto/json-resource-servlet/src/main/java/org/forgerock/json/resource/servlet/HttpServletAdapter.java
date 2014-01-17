@@ -485,13 +485,18 @@ public final class HttpServletAdapter {
                 final String resourceName = getResourceName(req);
                 final int i = resourceName.lastIndexOf('/');
                 final CreateRequest request;
-                if (i < 0) {
+                if (resourceName.isEmpty()) {
                     // FIXME: i18n.
                     throw new BadRequestException("No new resource ID in HTTP PUT request");
+                } else if (i < 0) {
+                    // We have a pathInfo of the form "{id}"
+                    request = Requests.newCreateRequest("", content);
+                    request.setNewResourceId(resourceName);
                 } else {
+                    // We have a pathInfo of the form "{container}/{id}"
                     request = Requests.newCreateRequest(resourceName.substring(0, i), content);
+                    request.setNewResourceId(resourceName.substring(i + 1));
                 }
-                request.setNewResourceId(resourceName.substring(i + 1));
                 for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
                     final String name = p.getKey();
                     final String[] values = p.getValue();
