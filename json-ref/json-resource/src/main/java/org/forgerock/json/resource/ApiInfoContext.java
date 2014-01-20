@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012 ForgeRock AS.
+ * Copyright 2012-2014 ForgeRock AS.
  */
 package org.forgerock.json.resource;
 
@@ -20,8 +20,8 @@ import static org.forgerock.util.Reject.checkNotNull;
 import org.forgerock.json.fluent.JsonValue;
 
 /**
- * A {@link Context} containing information about the REST API exposed by the
- * network end-point (Servlet, listener). A REST API information {@link Context}
+ * A {@link AbstractContext} containing information about the REST API exposed by the
+ * network end-point (Servlet, listener). A REST API information {@link AbstractContext}
  * will be created for each REST request.
  * <p>
  * The name which identifies the REST API exposed by the
@@ -38,22 +38,19 @@ import org.forgerock.json.fluent.JsonValue;
  *   "parent" : {
  *       ...
  *   },
- *   "api-name"     : "org.forgerock.commons.json-resource-servlet",
- *   "api-version" : "2.0"
+ *   "apiName"     : "org.forgerock.commons.json-resource-servlet",
+ *   "apiVersion" : "2.0"
  * }
  * </pre>
  */
-public final class ApiInfoContext extends Context {
+public final class ApiInfoContext extends AbstractContext {
 
+    /** a client-friendly name for this context */
     private static final ContextName CONTEXT_NAME = ContextName.valueOf("apiinfo");
 
     // Persisted attribute names.
-    private static final String ATTR_API_NAME = "api-name";
-    private static final String ATTR_API_VERSION = "api-version";
-
-    // TODO: as this grows it may be better to provide a Builder.
-    private final String apiName;
-    private final String apiVersion;
+    private static final String ATTR_API_NAME = "apiName";
+    private static final String ATTR_API_VERSION = "apiVersion";
 
     /**
      * Creates a new API information context having the provided parent and an
@@ -69,8 +66,8 @@ public final class ApiInfoContext extends Context {
      */
     public ApiInfoContext(final Context parent, final String apiName, final String apiVersion) {
         super(CONTEXT_NAME, checkNotNull(parent, "Cannot instantiate ApiInfoContext with null parent Context"));
-        this.apiName = checkNotNull(apiName, "Cannot instantiate ApiInfoContext with null apiName");
-        this.apiVersion = checkNotNull(apiVersion, "Cannot instantiate ApiInfoContext with null apiVersion");
+        data.put(ATTR_API_NAME, checkNotNull(apiName, "Cannot instantiate ApiInfoContext with null apiName"));
+        data.put(ATTR_API_VERSION, checkNotNull(apiVersion, "Cannot instantiate ApiInfoContext with null apiVersion"));
     }
 
     /**
@@ -86,11 +83,10 @@ public final class ApiInfoContext extends Context {
      * @param apiVersion
      *            The version of the REST API exposed by the network end-point.
      */
-    public ApiInfoContext(final String id, final Context parent, final String apiName,
-            final String apiVersion) {
+    public ApiInfoContext(final String id, final Context parent, final String apiName, final String apiVersion) {
         super(CONTEXT_NAME, id, checkNotNull(parent, "Cannot instantiate ApiInfoContext with null parent Context"));
-        this.apiName = checkNotNull(apiName, "Cannot instantiate ApiInfoContext with null apiName");
-        this.apiVersion = checkNotNull(apiVersion, "Cannot instantiate ApiInfoContext with null apiVersion");
+        data.put(ATTR_API_NAME, checkNotNull(apiName, "Cannot instantiate ApiInfoContext with null apiName"));
+        data.put(ATTR_API_VERSION, checkNotNull(apiVersion, "Cannot instantiate ApiInfoContext with null apiVersion"));
     }
 
     /**
@@ -99,16 +95,12 @@ public final class ApiInfoContext extends Context {
      * @param savedContext
      *            The JSON representation from which this context's attributes
      *            should be parsed.
-     * @param config
-     *            The persistence configuration.
      * @throws ResourceException
      *             If the JSON representation could not be parsed.
      */
     ApiInfoContext(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
         super(CONTEXT_NAME, savedContext, config);
-        this.apiName = savedContext.get(ATTR_API_NAME).required().asString();
-        this.apiVersion = savedContext.get(ATTR_API_VERSION).required().asString();
     }
 
     /**
@@ -119,7 +111,7 @@ public final class ApiInfoContext extends Context {
      *         end-point.
      */
     public String getApiName() {
-        return apiName;
+        return data.get(ATTR_API_NAME).asString();
     }
 
     /**
@@ -128,17 +120,6 @@ public final class ApiInfoContext extends Context {
      * @return The version of the REST API exposed by the network end-point.
      */
     public String getApiVersion() {
-        return apiVersion;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveToJson(final JsonValue savedContext, final PersistenceConfig config)
-            throws ResourceException {
-        super.saveToJson(savedContext, config);
-        savedContext.put(ATTR_API_NAME, apiName);
-        savedContext.put(ATTR_API_VERSION, apiVersion);
+        return data.get(ATTR_API_VERSION).asString();
     }
 }

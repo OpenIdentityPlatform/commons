@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012 ForgeRock AS.
+ * Copyright 2012-2014 ForgeRock AS.
  */
 package org.forgerock.json.resource;
 
@@ -24,7 +24,7 @@ import java.util.Map;
 import org.forgerock.json.fluent.JsonValue;
 
 /**
- * A {@link Context} containing information about the client performing the
+ * A {@link AbstractContext} containing information about the client performing the
  * request which may be used when performing authorization decisions. A security
  * context will typically be created for each REST request and comprises of two
  * fields:
@@ -67,8 +67,9 @@ import org.forgerock.json.fluent.JsonValue;
  * }
  * </pre>
  */
-public final class SecurityContext extends Context {
+public final class SecurityContext extends AbstractContext {
 
+    /** the client-friendly name of this context */
     private static final ContextName CONTEXT_NAME = ContextName.valueOf("security");
 
     /**
@@ -101,11 +102,8 @@ public final class SecurityContext extends Context {
     public static final String AUTHZID_ROLES = "roles";
 
     // Persisted attribute names.
-    private static final String ATTR_AUTHENTICATION_ID = "authentication-id";
-    private static final String ATTR_AUTHORIZATION_ID = "authorization-id";
-
-    private final String authenticationId;
-    private final Map<String, Object> authorizationId;
+    private static final String ATTR_AUTHENTICATION_ID = "authenticationId";
+    private static final String ATTR_AUTHORIZATION_ID = "authorizationId";
 
     /**
      * Creates a new security context having the provided parent and an ID
@@ -126,14 +124,13 @@ public final class SecurityContext extends Context {
      *            must only contain values which can be serialized as JSON
      *            values.
      */
-    public SecurityContext(final Context parent, final String authenticationId,
-            final Map<String, Object> authorizationId) {
+    public SecurityContext(final Context parent,
+            final String authenticationId, final Map<String, Object> authorizationId) {
         super(CONTEXT_NAME, checkNotNull(parent, "Cannot instantiate SecurityContext with null parent Context"));
-        this.authenticationId = authenticationId != null ? authenticationId : "";
-        this.authorizationId =
-                authorizationId != null ? Collections
-                        .unmodifiableMap(new LinkedHashMap<String, Object>(authorizationId))
-                        : Collections.<String, Object> emptyMap();
+        data.put(ATTR_AUTHENTICATION_ID, authenticationId != null ? authenticationId : "");
+        data.put(ATTR_AUTHORIZATION_ID,  authorizationId != null
+                ? Collections.unmodifiableMap(new LinkedHashMap<String, Object>(authorizationId))
+                : Collections.<String, Object> emptyMap());
     }
 
     /**
@@ -156,14 +153,13 @@ public final class SecurityContext extends Context {
      *            must only contain values which can be serialized as JSON
      *            values.
      */
-    public SecurityContext(final String id, final Context parent, final String authenticationId,
-            final Map<String, Object> authorizationId) {
+    public SecurityContext(final String id, final Context parent,
+            final String authenticationId, final Map<String, Object> authorizationId) {
         super(CONTEXT_NAME, id, checkNotNull(parent, "Cannot instantiate SecurityContext with null parent Context"));
-        this.authenticationId = authenticationId != null ? authenticationId : "";
-        this.authorizationId =
-                authorizationId != null ? Collections
-                        .unmodifiableMap(new LinkedHashMap<String, Object>(authorizationId))
-                        : Collections.<String, Object> emptyMap();
+        data.put(ATTR_AUTHENTICATION_ID, authenticationId != null ? authenticationId : "");
+        data.put(ATTR_AUTHORIZATION_ID,  authorizationId != null
+                ? Collections.unmodifiableMap(new LinkedHashMap<String, Object>(authorizationId))
+                : Collections.<String, Object> emptyMap());
     }
 
     /**
@@ -172,16 +168,12 @@ public final class SecurityContext extends Context {
      * @param savedContext
      *            The JSON representation from which this context's attributes
      *            should be parsed.
-     * @param config
-     *            The persistence configuration.
      * @throws ResourceException
      *             If the JSON representation could not be parsed.
      */
     SecurityContext(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
         super(CONTEXT_NAME, savedContext, config);
-        this.authenticationId = savedContext.get(ATTR_AUTHENTICATION_ID).required().asString();
-        this.authorizationId = savedContext.get(ATTR_AUTHORIZATION_ID).required().asMap();
     }
 
     /**
@@ -195,7 +187,7 @@ public final class SecurityContext extends Context {
      *         is unauthenticated.
      */
     public String getAuthenticationId() {
-        return authenticationId;
+        return data.get(ATTR_AUTHENTICATION_ID).asString();
     }
 
     /**
@@ -218,17 +210,6 @@ public final class SecurityContext extends Context {
      *         user.
      */
     public Map<String, Object> getAuthorizationId() {
-        return authorizationId;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveToJson(final JsonValue savedContext, final PersistenceConfig config)
-            throws ResourceException {
-        super.saveToJson(savedContext, config);
-        savedContext.put(ATTR_AUTHENTICATION_ID, authenticationId);
-        savedContext.put(ATTR_AUTHORIZATION_ID, authorizationId);
+        return data.get(ATTR_AUTHORIZATION_ID).asMap();
     }
 }
