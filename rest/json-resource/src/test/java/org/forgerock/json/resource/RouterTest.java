@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012 ForgeRock AS.
+ * Copyright 2012-2014 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -84,7 +84,7 @@ public final class RouterTest {
 
     private void checkRouterContext(ArgumentCaptor<RouterContext> rc, final ServerContext c,
             final String expectedMatchedUri, final Map<String, String> expectedUriTemplateVariables) {
-        assertThat(rc.getValue().getParent()).isSameAs(c);
+        assertThat(rc.getValue().getParent()).isEqualTo(c);
         assertThat(rc.getValue().getMatchedUri()).isEqualTo(expectedMatchedUri);
         assertThat(rc.getValue().getBaseUri()).isEqualTo(expectedMatchedUri);
         assertThat(rc.getValue().getUriTemplateVariables()).isEqualTo(expectedUriTemplateVariables);
@@ -271,7 +271,7 @@ public final class RouterTest {
     }
 
     private ServerContext newServerContext(final RequestHandler handler) {
-        return new ServerContext(new RootContext(), newInternalConnection(handler));
+        return new ServerContext(new RootContext());
     }
 
 }

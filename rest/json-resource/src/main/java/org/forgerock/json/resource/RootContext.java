@@ -11,14 +11,14 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012 ForgeRock AS.
+ * Copyright 2012-2014 ForgeRock AS.
  */
 package org.forgerock.json.resource;
 
 import org.forgerock.json.fluent.JsonValue;
 
 /**
- * A {@link Context} which has an an ID but no parent. All request context
+ * A {@link AbstractContext} which has an an ID but no parent. All request context
  * chains are terminated by a root context as the top-most context.
  * <p>
  * Here is an example of the JSON representation of a root context:
@@ -31,8 +31,9 @@ import org.forgerock.json.fluent.JsonValue;
  * }
  * </pre>
  */
-public final class RootContext extends Context {
+public final class RootContext extends AbstractContext {
 
+    // a client-friendly name for this context */
     private static final ContextName CONTEXT_NAME = ContextName.valueOf("root");
 
     /**
