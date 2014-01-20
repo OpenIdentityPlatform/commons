@@ -16,10 +16,8 @@
 
 package org.forgerock.json.resource;
 
-import static org.forgerock.util.Reject.checkNotNull;
-
 import java.lang.reflect.Constructor;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.UUID;
 
 import org.forgerock.json.fluent.JsonValue;
@@ -50,8 +48,9 @@ import org.forgerock.json.fluent.JsonValue;
  * }
  * </pre>
  */
-public abstract class Context {
+public abstract class AbstractContext implements Context {
     // Persisted attribute names.
+    protected static final String ATTR_CONTEXT_NAME = "contextName";
     protected static final String ATTR_CLASS = "class";
     protected static final String ATTR_ID = "id";
     private static final String ATTR_PARENT = "parent";
@@ -62,7 +61,7 @@ public abstract class Context {
         final String className = savedContext.get(ATTR_CLASS).required().asString();
         try {
             final Class<? extends Context> clazz = Class.forName(className, true,
-                    config.getClassLoader()).asSubclass(Context.class);
+                    config.getClassLoader()).asSubclass(AbstractContext.class);
             final Constructor<? extends Context> constructor = clazz.getDeclaredConstructor(
                     JsonValue.class, PersistenceConfig.class);
             return constructor.newInstance(savedContext, config);
@@ -73,11 +72,6 @@ public abstract class Context {
     }
 
     /**
-     * A friendly name for the Context.
-     */
-    private final ContextName contextName;
-
-    /**
      * This should only be accessed via getId() in order to ensure that it is
      * lazily initialized.
      * <p>
@@ -85,12 +79,17 @@ public abstract class Context {
      * of contention because the underlying SecureRandom implementation performs
      * single threaded blocking reads to get entropy from /dev/urandom.
      */
-    private volatile String id;
+//    private volatile String id;
 
     /**
      * The parent Context.
      */
     private final Context parent;
+
+    /**
+     * The Context data.
+     */
+    protected final JsonValue data;
 
     /**
      * Creates a new context having the provided parent and an ID automatically
@@ -101,9 +100,29 @@ public abstract class Context {
      * @param parent
      *            The parent context.
      */
-    protected Context(final ContextName name, final Context parent) {
+    protected AbstractContext(final ContextName name, final Context parent) {
         /* ID will be generated lazily in getId() */
-        this.contextName = name;
+        this(name, null, parent);
+    }
+
+    /**
+     * Creates a new context having the provided ID, and parent.
+     *
+     * @param name
+     *            The context name.
+     * @param id
+     *            The context ID.
+     * @param parent
+     *            The parent context.
+     */
+    protected AbstractContext(final ContextName name, final String id, final Context parent) {
+        final int size = 2 + (id != null ? 1 : 0) + (parent != null ? 1 : 0);
+        this.data = new JsonValue(new HashMap<String, Object>(size));
+        this.data.put(ATTR_CLASS, this.getClass().getName());
+        if (id != null) {
+            this.data.put(ATTR_ID, id);
+        }
+        this.data.put(ATTR_CONTEXT_NAME, name.toString());
         this.parent = parent;
     }
 
@@ -146,28 +165,21 @@ public abstract class Context {
      * @see #saveToJson(JsonValue, PersistenceConfig)
      * @see ServerContext#loadFromJson(JsonValue, PersistenceConfig)
      */
-    protected Context(final ContextName name, final JsonValue savedContext, final PersistenceConfig config)
+    protected AbstractContext(final ContextName name, final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
-        this.contextName = name;
-        this.id = savedContext.get(ATTR_ID).required().asString();
         final JsonValue savedParentContext = savedContext.get(ATTR_PARENT);
+        savedContext.remove(ATTR_PARENT);
         this.parent = savedParentContext.isNull() ? null : load0(savedParentContext, config);
+        this.data = savedContext;
     }
 
     /**
-     * Creates a new context having the provided ID, and parent.
+     * Get this Context's {@link ContextName}.
      *
-     * @param name
-     *            The context name.
-     * @param id
-     *            The context ID.
-     * @param parent
-     *            The parent context.
+     * @return this object's ContextName
      */
-    protected Context(final ContextName name, final String id, final Context parent) {
-        this.contextName = name;
-        this.id = checkNotNull(id, "Cannot create Context with null id");
-        this.parent = parent;
+    public final ContextName getContextName() {
+        return ContextName.valueOf(data.get(ATTR_CONTEXT_NAME).asString());
     }
 
     /**
@@ -247,15 +259,6 @@ public abstract class Context {
     }
 
     /**
-     * Get this Context's {@link ContextName}.
-     *
-     * @return this object's ContextName
-     */
-    public final ContextName getContextName() {
-        return contextName;
-    }
-
-    /**
      * Returns the unique ID identifying this context, usually a UUID.
      *
      * @return The unique ID identifying this context.
@@ -264,14 +267,14 @@ public abstract class Context {
         /*
          * Lazily initialize the ID. See field documentation for details.
          */
-        if (id == null) {
-            synchronized (this) {
-                if (id == null) {
-                    id = UUID.randomUUID().toString();
+        if (data.get(ATTR_ID).isNull()) {
+            synchronized (this.data) {
+                if (data.get(ATTR_ID).isNull()) {
+                    data.put(ATTR_ID, UUID.randomUUID().toString());
                 }
             }
         }
-        return id;
+        return data.get(ATTR_ID).required().asString();
     }
 
     /**
@@ -294,70 +297,57 @@ public abstract class Context {
     }
 
     /**
-     * Creates a JSON representation of this context which is suitable for
-     * persistence to long term storage.
-     * <p>
-     * Sub-classes <b>MUST</b> override this method in order to support
-     * persistence. Implementations <b>MUST</b> take care to invoke the super
-     * class implementation before creating their own context attributes. Below
-     * is an example implementation for a security context which stores the user
-     * name and password of the authenticated user:
+     * Return this Context as a JsonValue (for persistence).
      *
-     * <pre>
-     * protected void saveToJson(JsonValue savedContext, PersistenceConfig config)
-     *         throws ResourceException {
-     *     // Invoke the super-class implementation first.
-     *     super.saveToJson(savedContext, config);
-     *
-     *     // Now create attributes for this context.
-     *     savedContext.put(&quot;username&quot;, username);
-     *     savedContext.put(&quot;password&quot;, password);
-     * }
-     * </pre>
-     *
-     * In order to support reloading of a context's persisted JSON
-     * representation, implementations must provide a constructor having the
-     * same declaration as {@link #Context(JsonValue, PersistenceConfig)}.
-     *
-     * @param savedContext
-     *            The JSON representation into which this context's attributes
-     *            should be placed.
-     * @param config
-     *            The persistence configuration.
-     * @throws ResourceException
-     *             If the JSON representation could not be created.
-     * @see #Context(JsonValue, PersistenceConfig)
-     * @see ServerContext#saveToJson(ServerContext, PersistenceConfig)
+     * @return the Context data as a JsonValue.
      */
-    protected void saveToJson(final JsonValue savedContext, final PersistenceConfig config)
-            throws ResourceException {
-        savedContext.put(ATTR_ID, getId());
-        savedContext.put(ATTR_CLASS, getClass().getName());
-
-        // Persist the parent if there is one.
-        if (parent != null) {
-            final JsonValue savedParentContext = new JsonValue(new LinkedHashMap<String, Object>(4));
-            parent.saveToJson(savedParentContext, config);
-            savedContext.put(ATTR_PARENT, savedParentContext.asMap());
-        }
+    public JsonValue toJsonValue() {
+        final JsonValue value = data.copy();
+        value.put(ATTR_PARENT, parent != null ? parent.toJsonValue().getObject() : null);
+        return value;
     }
 
     private final <T extends Context> T asContext0(final Class<T> clazz) {
-        for (Context context = this; context != null; context = context.getParent()) {
-            final Class<?> contextClass = context.getClass();
-            if (clazz.isAssignableFrom(contextClass)) {
-                return contextClass.asSubclass(clazz).cast(context);
+        try {
+            for (Context context = this; context != null; context = context.getParent()) {
+                final Class<?> contextClass = context.getClass();
+                if (clazz.isAssignableFrom(contextClass)) {
+                    return contextClass.asSubclass(clazz).cast(context);
+                }
             }
+        } catch (final Exception e) {
+            throw new IllegalArgumentException(
+                    "Unable to instantiate Context implementation class '" + clazz.getName().toString() + "'", e);
         }
         return null;
     }
 
     private final Context getContext0(final String contextName) {
         for (Context context = this; context != null; context = context.getParent()) {
-            if (context.getContextName().toString().equals(contextName)) {
+            if (context.getContextName().equals(ContextName.valueOf(contextName))) {
                 return context;
             }
         }
         return null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null) {
+            return false;
+        }
+        if (!(o instanceof Context)) {
+            return false;
+        }
+        Context context = (Context) o;
+        if (context.toJsonValue().isNull() && this.toJsonValue().isNull()) { // this shouldn't be the case
+            return true;
+        }
+        return context.toJsonValue().getObject().equals(this.toJsonValue().getObject());
+    }
+
+    @Override
+    public int hashCode() {
+        return toJsonValue().getObject().hashCode();
     }
 }
