@@ -21,6 +21,7 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
+@SuppressWarnings("javadoc")
 public class ResourceExceptionTest {
 
     @Test
