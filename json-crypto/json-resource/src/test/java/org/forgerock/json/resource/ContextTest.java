@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012 ForgeRock AS.
+ * Copyright 2012-2014 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -22,6 +22,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 import org.forgerock.json.fluent.JsonValue;
@@ -32,6 +33,19 @@ import org.testng.annotations.Test;
  */
 @SuppressWarnings("javadoc")
 public final class ContextTest {
+
+    public static class InternalServerContext extends ServerContext implements ClientContext {
+        public InternalServerContext(Context parent) {
+            super("internal-server", parent);
+        }
+
+        @Override
+        public boolean hasProtocol(Protocol protocol) {
+            // context has two protocols
+            return Protocol.valueOf("internal").equals(protocol)
+                    || Protocol.valueOf("server").equals(protocol);
+        }
+    }
 
     @Test
     public void testNewRootContext() {
@@ -53,34 +67,26 @@ public final class ContextTest {
 
     @Test
     public void testNewServerContext() throws Exception {
-        final Connection connection = mock(Connection.class);
-        final ConnectionProvider provider = mock(ConnectionProvider.class);
-        when(provider.getConnectionId(any(Connection.class))).thenReturn("my-connection-id");
-        when(provider.getConnection(anyString())).thenReturn(connection);
-        final PersistenceConfig config = PersistenceConfig.builder().connectionProvider(provider)
-                .build();
-
         final Context root = new RootContext("root-id");
-        final ServerContext context = new ServerContext(root, connection);
+        final ServerContext context = new ServerContext(root);
 
-        assertThat(context.getParent()).isSameAs(root);
+        assertThat(context.getParent()).isEqualTo(root);
         assertThat(context.getId()).isNotEmpty();
         assertThat(context.isRootContext()).isFalse();
         assertThat(context.getContextName().toString()).isEqualTo("server");
 
-        final JsonValue json = ServerContext.saveToJson(context, config);
+        final JsonValue json = context.toJsonValue();
         assertThat(json.isMap()).isTrue();
         assertThat(json.size()).isEqualTo(4);
         assertThat(json.get("class").asString()).isEqualTo(
                 "org.forgerock.json.resource.ServerContext");
         assertThat(json.get("id").asUUID()).isNotNull();
         assertThat(json.get("parent").isMap()).isTrue();
-        assertThat(json.get("parent").size()).isEqualTo(2);
+        assertThat(json.get("parent").size()).isEqualTo(4);
         assertThat(json.get("parent").get("class").asString()).isEqualTo(
                 "org.forgerock.json.resource.RootContext");
         assertThat(json.get("parent").get("id").asString()).isEqualTo("root-id");
         assertThat(json.get("parent").get("parent").asMap()).isNull();
-        assertThat(json.get("connection-id").asString()).isEqualTo("my-connection-id");
     }
 
     @Test
@@ -101,28 +107,19 @@ public final class ContextTest {
         in.add("class", "org.forgerock.json.resource.ServerContext");
         in.add("id", "child-id");
         in.add("parent", inRoot.asMap());
-        in.add("connection-id", "my-connection-id");
 
-        final ServerContext context = ServerContext.loadFromJson(in, config);
+        final ServerContext context = new ServerContext(in, config);
         assertThat(context.getId()).isEqualTo("child-id");
         assertThat(context.isRootContext()).isFalse();
         assertThat(context.getParent().getId()).isEqualTo("root-id");
         assertThat(context.getParent().getParent()).isNull();
         assertThat(context.getParent().isRootContext()).isTrue();
-        assertThat(context.getConnection()).isSameAs(connection);
     }
 
     @Test
     public void testContainsContext() throws Exception {
-        final Connection connection = mock(Connection.class);
-        final ConnectionProvider provider = mock(ConnectionProvider.class);
-        when(provider.getConnectionId(any(Connection.class))).thenReturn("my-connection-id");
-        when(provider.getConnection(anyString())).thenReturn(connection);
-        final PersistenceConfig config = PersistenceConfig.builder().connectionProvider(provider)
-                .build();
-
         final Context root = new RootContext("root-id");
-        final ServerContext context = new ServerContext(root, connection);
+        final ServerContext context = new ServerContext(root);
 
         assertThat(context.containsContext(RootContext.class)).isTrue();
         assertThat(context.containsContext(SecurityContext.class)).isFalse();
@@ -132,19 +129,21 @@ public final class ContextTest {
 
     @Test
     public void testAsContext() throws Exception {
-        final Connection connection = mock(Connection.class);
-        final ConnectionProvider provider = mock(ConnectionProvider.class);
-        when(provider.getConnectionId(any(Connection.class))).thenReturn("my-connection-id");
-        when(provider.getConnection(anyString())).thenReturn(connection);
-        final PersistenceConfig config = PersistenceConfig.builder().connectionProvider(provider)
-                .build();
-
         final Context root = new RootContext("root-id");
-        final ServerContext context = new ServerContext(root, connection);
+        final InternalServerContext internal = new InternalServerContext(root);
+        final ServerContext server = new ServerContext(internal);
+        final RouterContext router = new RouterContext(server, "test", new HashMap<String, String>(0));
+        final InternalServerContext internal2 = new InternalServerContext(router);
 
-        assertThat(context.asContext(RootContext.class)).isSameAs(root);
+        assertThat(server.asContext(RootContext.class)).isEqualTo(root);
+        assertThat(router.asContext(RouterContext.class)).isEqualTo(router);
+        assertThat(router.asContext(ServerContext.class)).isEqualTo(router);
+        assertThat(router.getParent().asContext(ServerContext.class)).isEqualTo(server);
+        assertThat(router.asContext(ClientContext.class)).isEqualTo(internal);
+        assertThat(internal2.asContext(ClientContext.class)).isEqualTo(internal2);
+
         try {
-            context.asContext(SecurityContext.class);
+            router.asContext(SecurityContext.class);
         } catch (Exception e) {
             assertThat(e).isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("No context of type " + SecurityContext.class.getName() + " found.")
@@ -154,17 +153,10 @@ public final class ContextTest {
 
     @Test
     public void testGetContext() throws Exception {
-        final Connection connection = mock(Connection.class);
-        final ConnectionProvider provider = mock(ConnectionProvider.class);
-        when(provider.getConnectionId(any(Connection.class))).thenReturn("my-connection-id");
-        when(provider.getConnection(anyString())).thenReturn(connection);
-        final PersistenceConfig config = PersistenceConfig.builder().connectionProvider(provider)
-                .build();
-
         final Context root = new RootContext("root-id");
-        final ServerContext context = new ServerContext(root, connection);
+        final ServerContext context = new ServerContext(root);
 
-        assertThat(context.getContext("root")).isSameAs(root);
+        assertThat(context.getContext("root")).isEqualTo(root);
         try {
             context.getContext("test");
         } catch (Exception e) {
@@ -172,5 +164,15 @@ public final class ContextTest {
                     .hasMessage("No context of named test found.")
                     .hasNoCause();
         }
+    }
+
+    @Test
+    public void testHasProtocol() throws Exception {
+        final Context root = new RootContext("root-id");
+        final InternalServerContext internal = new InternalServerContext(root);
+
+        assertThat(internal.hasProtocol(ClientContext.Protocol.valueOf("internal"))).isTrue();
+        assertThat(internal.hasProtocol(ClientContext.Protocol.valueOf("server"))).isTrue();
+        assertThat(internal.hasProtocol(ClientContext.Protocol.valueOf("http"))).isFalse();
     }
 }

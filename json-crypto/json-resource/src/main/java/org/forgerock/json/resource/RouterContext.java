@@ -11,13 +11,14 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2013 ForgeRock AS.
+ * Copyright 2012-2014 ForgeRock AS.
  */
 package org.forgerock.json.resource;
 
 import static org.forgerock.util.Reject.checkNotNull;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -71,8 +72,8 @@ import org.forgerock.json.fluent.JsonValue;
  *   "parent" : {
  *       ...
  *   },
- *   "matched-uri" : "users/bjensen",
- *   "uri-template-variables" : {
+ *   "matchedUri" : "users/bjensen",
+ *   "uriTemplateVariables" : {
  *       "userId" : "bjensen",
  *       "deviceId" : "0"
  *   }
@@ -83,14 +84,12 @@ import org.forgerock.json.fluent.JsonValue;
  */
 public final class RouterContext extends ServerContext {
 
+    /** the client-friendly name of this context */
     private static final ContextName CONTEXT_NAME = ContextName.valueOf("router");
 
     // Persisted attribute names.
-    private static final String ATTR_MATCHED_URI = "matched-uri";
-    private static final String ATTR_URI_TEMPLATE_VARIABLES = "uri-template-variables";
-
-    private final String matchedUri;
-    private final Map<String, String> uriTemplateVariables;
+    private static final String ATTR_MATCHED_URI = "matchedUri";
+    private static final String ATTR_URI_TEMPLATE_VARIABLES = "uriTemplateVariables";
 
     /**
      * Restore from JSON representation.
@@ -98,22 +97,12 @@ public final class RouterContext extends ServerContext {
      * @param savedContext
      *            The JSON representation from which this context's attributes
      *            should be parsed.
-     * @param config
-     *            The persistence configuration.
      * @throws ResourceException
      *             If the JSON representation could not be parsed.
      */
     RouterContext(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
         super(CONTEXT_NAME, savedContext, config);
-        this.matchedUri = savedContext.get(ATTR_MATCHED_URI).required().asString();
-        final Map<String, Object> savedMap =
-                savedContext.get(ATTR_URI_TEMPLATE_VARIABLES).required().asMap();
-        final Map<String, String> newMap = new LinkedHashMap<String, String>(savedMap.size());
-        for (final Map.Entry<String, Object> e : savedMap.entrySet()) {
-            newMap.put(e.getKey(), String.valueOf(e.getValue()));
-        }
-        this.uriTemplateVariables = Collections.unmodifiableMap(newMap);
     }
 
     /**
@@ -130,8 +119,8 @@ public final class RouterContext extends ServerContext {
     RouterContext(final ServerContext parent, final String matchedUri,
             final Map<String, String> uriTemplateVariables) {
         super(CONTEXT_NAME, checkNotNull(parent, "Cannot instantiate RouterContext with null parent Context"));
-        this.matchedUri = matchedUri;
-        this.uriTemplateVariables = Collections.unmodifiableMap(uriTemplateVariables);
+        data.put(ATTR_MATCHED_URI, matchedUri);
+        data.put(ATTR_URI_TEMPLATE_VARIABLES, uriTemplateVariables);
     }
 
     /**
@@ -152,11 +141,11 @@ public final class RouterContext extends ServerContext {
                 builder.append(baseUri);
             }
         }
-        if (matchedUri.length() > 0) {
+        if (getMatchedUri().length() > 0) {
             if (builder.length() > 0) {
                 builder.append('/');
             }
-            builder.append(matchedUri);
+            builder.append(getMatchedUri());
         }
         return builder.toString();
     }
@@ -169,7 +158,7 @@ public final class RouterContext extends ServerContext {
      *         URI template.
      */
     public String getMatchedUri() {
-        return matchedUri;
+        return data.get(ATTR_MATCHED_URI).asString();
     }
 
     /**
@@ -180,17 +169,11 @@ public final class RouterContext extends ServerContext {
      *         variables, keyed on the URI template variable name.
      */
     public Map<String, String> getUriTemplateVariables() {
-        return uriTemplateVariables;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveToJson(final JsonValue savedContext, final PersistenceConfig config)
-            throws ResourceException {
-        super.saveToJson(savedContext, config);
-        savedContext.put(ATTR_MATCHED_URI, matchedUri);
-        savedContext.put(ATTR_URI_TEMPLATE_VARIABLES, uriTemplateVariables);
+        final Map<String, String> uriTemplateVariables =
+            new HashMap<String, String>(data.get(ATTR_URI_TEMPLATE_VARIABLES).size());
+        for (final String key : data.get(ATTR_URI_TEMPLATE_VARIABLES).keys()) {
+            uriTemplateVariables.put(key, data.get(ATTR_URI_TEMPLATE_VARIABLES).get(key).asString());
+        }
+        return Collections.unmodifiableMap(uriTemplateVariables);
     }
 }
