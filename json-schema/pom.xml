@@ -33,9 +33,9 @@
         <url>https://bugster.forgerock.org/jira/browse/CREST</url>
     </issueManagement>
     <scm>
-        <url>https://svn.forgerock.org/commons/forgerock-rest/trunk/</url>
-        <connection>scm:svn:https://svn.forgerock.org/commons/forgerock-rest/trunk/</connection>
-        <developerConnection>scm:svn:https://svn.forgerock.org/commons/forgerock-rest/trunk/</developerConnection>
+        <url>https://svn.forgerock.org/commons/forgerock-rest/branches/2.1</url>
+        <connection>scm:svn:https://svn.forgerock.org/commons/forgerock-rest/branches/2.1</connection>
+        <developerConnection>scm:svn:https://svn.forgerock.org/commons/forgerock-rest/branches/2.1</developerConnection>
     </scm>
     <ciManagement>
         <system>jenkins</system>
