@@ -28,7 +28,7 @@
   <parent>
     <artifactId>i18n-framework</artifactId>
     <groupId>org.forgerock.commons</groupId>
-    <version>1.4.1-SNAPSHOT</version>
+    <version>1.4.1</version>
   </parent>
   <artifactId>i18n-slf4j</artifactId>
   <name>ForgeRock I18N SLF4J Support</name>
