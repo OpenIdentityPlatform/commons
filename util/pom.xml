@@ -28,6 +28,36 @@
     <name>ForgeRock Utility Classes</name>
     <description>Miscellaneous utility classes used within ForgeRock projects.</description>
     <packaging>bundle</packaging>
+        <url>http://commons.forgerock.org/forgerock-util</url>
+    <issueManagement>
+        <system>Jira</system>
+        <url>https://bugster.forgerock.org/jira/browse/CREST</url>
+    </issueManagement>
+    <scm>
+        <url>https://svn.forgerock.org/commons/forgerock-util/trunk/</url>
+        <connection>scm:svn:https://svn.forgerock.org/commons/forgerock-util/trunk/</connection>
+        <developerConnection>scm:svn:https://svn.forgerock.org/commons/forgerock-util/trunk/</developerConnection>
+    </scm>
+    <ciManagement>
+        <system>jenkins</system>
+        <url>https://builds.forgerock.org/job/Commons%20-%20ForgeRock%20Utils/</url>
+        <notifiers>
+            <notifier>
+                <type>mail</type>
+                <sendOnError>true</sendOnError>
+                <sendOnFailure>true</sendOnFailure>
+                <sendOnSuccess>false</sendOnSuccess>
+                <sendOnWarning>false</sendOnWarning>
+            </notifier>
+        </notifiers>
+    </ciManagement>
+    <distributionManagement>
+        <site>
+            <id>forgerock.org</id>
+            <name>ForgeRock Community</name>
+            <url>scp://forgerock.org/var/www/vhosts/commons.forgerock.org/httpdocs/forgerock-util</url>
+        </site>
+    </distributionManagement>
     <properties>
         <maven.compiler.target>1.6</maven.compiler.target>
         <maven.compiler.source>1.6</maven.compiler.source>
@@ -90,7 +120,6 @@
             </plugin>
         </plugins>
     </build>
-<!-- may-be-temporary, based-on our decisions around the content and release of forgerock-parent -->
     <repositories>
         <repository>
             <id>forgerock-staging-repository</id>
@@ -101,5 +130,25 @@
             </snapshots>
         </repository>
     </repositories>
-<!-- /may-be-temporary -->
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>2.4</version>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>mailing-list</report>
+                            <report>issue-tracking</report>
+                            <report>license</report>
+                            <report>scm</report>
+                            <report>cim</report>
+                            <report>distribution-management</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+        </plugins>
+    </reporting>
 </project>
