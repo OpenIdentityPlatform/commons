@@ -74,6 +74,7 @@
         <module>json-crypto</module>
         <module>json-crypto-cli</module>
         <module>json-resource</module>
+        <module>json-resource-examples</module>
         <module>json-resource-servlet</module>
         <module>json-web-token</module>
     </modules>
@@ -127,7 +128,7 @@
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>forgerock-util</artifactId>
-                <version>1.2.0</version>
+                <version>1.3.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
