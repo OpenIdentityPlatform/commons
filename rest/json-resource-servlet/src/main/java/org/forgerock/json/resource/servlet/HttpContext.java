@@ -11,13 +11,14 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012 ForgeRock AS.
+ * Copyright 2012-2014 ForgeRock AS.
  */
 package org.forgerock.json.resource.servlet;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,14 +28,17 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.AbstractContext;
+import org.forgerock.json.resource.ClientContext;
 import org.forgerock.json.resource.Context;
+import org.forgerock.json.resource.ContextName;
 import org.forgerock.json.resource.PersistenceConfig;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.util.Factory;
 import org.forgerock.util.LazyMap;
 
 /**
- * A {@link Context} containing information relating to the originating HTTP
+ * A {@link org.forgerock.json.resource.AbstractContext} containing information relating to the originating HTTP
  * Servlet request.
  * <p>
  * Here is an example of the JSON representation of an HTTP context:
@@ -57,19 +61,18 @@ import org.forgerock.util.LazyMap;
  * }
  * </pre>
  */
-public final class HttpContext extends Context {
+public final class HttpContext extends AbstractContext implements ClientContext {
+
+    /** a client-friendly name for this context */
+    private static final ContextName CONTEXT_NAME = ContextName.valueOf("http");
+
     // TODO: security parameters such as user name, etc?
 
     // Persisted attribute names.
-    private static final String ATTR_HEADERS = "headers";
+    public static final String ATTR_HEADERS = "headers";
     private static final String ATTR_METHOD = "method";
-    private static final String ATTR_PARAMETERS = "parameters";
+    public static final String ATTR_PARAMETERS = "parameters";
     private static final String ATTR_PATH = "path";
-
-    private final Map<String, List<String>> headers;
-    private final String method;
-    private final Map<String, List<String>> parameters;
-    private final String path;
 
     /**
      * Restore from JSON representation. This method is for internal use only
@@ -78,30 +81,35 @@ public final class HttpContext extends Context {
      * @param savedContext
      *            The JSON representation from which this context's attributes
      *            should be parsed.
-     * @param config
-     *            The persistence configuration.
      * @throws ResourceException
      *             If the JSON representation could not be parsed.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public HttpContext(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
-        super(savedContext, config);
-        this.method = savedContext.get(ATTR_METHOD).required().asString();
-        this.path = savedContext.get(ATTR_PATH).required().asString();
-        this.headers = (Map) savedContext.get(ATTR_HEADERS).required().asMap();
-        this.parameters = (Map) savedContext.get(ATTR_PARAMETERS).required().asMap();
+        super(CONTEXT_NAME, savedContext, config);
+    }
+
+    /** the protocol represented by this context */
+    private static final Protocol HTTP_PROTOCOL = Protocol.valueOf("http");
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean hasProtocol(Protocol protocol) {
+        return HTTP_PROTOCOL.equals(protocol);
     }
 
     HttpContext(final Context parent, final HttpServletRequest req) {
-        super(parent);
-        this.method = HttpUtils.getMethod(req);
-        this.path = req.getRequestURL().toString();
-        this.headers = Collections.unmodifiableMap(new LazyMap<String, List<String>>(
+        super(CONTEXT_NAME, parent);
+        data.put(ATTR_METHOD, HttpUtils.getMethod(req));
+        data.put(ATTR_PATH, req.getRequestURL().toString());
+        data.put(ATTR_HEADERS, /*Collections.unmodifiableMap(new LazyMap<String, List<String>>(
                 new Factory<Map<String, List<String>>>() {
                     @Override
                     public Map<String, List<String>> newInstance() {
-                        final Map<String, List<String>> result = new LinkedHashMap<String, List<String>>();
+                        final Map<String, List<String>> result = */new LinkedHashMap<String, List<String>>() {{
                         final Enumeration<String> i = req.getHeaderNames();
                         while (i.hasMoreElements()) {
                             final String name = i.nextElement();
@@ -110,26 +118,30 @@ public final class HttpContext extends Context {
                             while (j.hasMoreElements()) {
                                 values.add(j.nextElement());
                             }
-                            result.put(name, values);
+                            /*result.*/put(name, values);
                         }
+        /*
                         return result;
+                        */
                     }
-                }));
-        this.parameters = Collections.unmodifiableMap(new LazyMap<String, List<String>>(
+                }/*))*/);
+        data.put(ATTR_PARAMETERS, /*Collections.unmodifiableMap(new LazyMap<String, List<String>>(
                 new Factory<Map<String, List<String>>>() {
                     @Override
                     public Map<String, List<String>> newInstance() {
-                        final Map<String, List<String>> result = new LinkedHashMap<String, List<String>>();
+                        final Map<String, List<String>> result = */ new LinkedHashMap<String, List<String>>() {{
                         final Set<Map.Entry<String, String[]>> parameters = req.getParameterMap()
                                 .entrySet();
                         for (final Map.Entry<String, String[]> parameter : parameters) {
                             final String name = parameter.getKey();
                             final String[] values = parameter.getValue();
-                            result.put(name, Arrays.asList(values));
+                            /*result.*/put(name, Arrays.asList(values));
                         }
+            /*
                         return result;
+                        */
                     }
-                }));
+                }/*))*/);
     }
 
     /**
@@ -143,7 +155,7 @@ public final class HttpContext extends Context {
      *         in the request.
      */
     public List<String> getHeader(final String name) {
-        final List<String> header = headers.get(name);
+        final List<String> header = data.get(ATTR_HEADERS).get(name).asList(String.class);
         return header != null ? header : Collections.<String> emptyList();
     }
 
@@ -166,6 +178,10 @@ public final class HttpContext extends Context {
      * @return An unmodifiable map of the HTTP request headers.
      */
     public Map<String, List<String>> getHeaders() {
+        final Map<String, List<String>> headers = new HashMap<String, List<String>>(data.get(ATTR_HEADERS).size());
+        for (final String key : data.get(ATTR_HEADERS).keys()) {
+            headers.put(key, data.get(ATTR_HEADERS).get(key).asList(String.class));
+        }
         return headers;
     }
 
@@ -177,7 +193,7 @@ public final class HttpContext extends Context {
      *         {@code X-HTTP-Method-Override} header.
      */
     public String getMethod() {
-        return method;
+        return data.get(ATTR_METHOD).asString();
     }
 
     /**
@@ -191,7 +207,7 @@ public final class HttpContext extends Context {
      *         present in the request.
      */
     public List<String> getParameter(final String name) {
-        final List<String> parameter = parameters.get(name);
+        final List<String> parameter = data.get(ATTR_PARAMETERS).get(name).copy().asList(String.class);
         return parameter != null ? parameter : Collections.<String> emptyList();
     }
 
@@ -214,6 +230,10 @@ public final class HttpContext extends Context {
      * @return An unmodifiable map of the HTTP request parameters.
      */
     public Map<String, List<String>> getParameters() {
+        final Map<String, List<String>> parameters = new HashMap<String, List<String>>(data.get(ATTR_PARAMETERS).size());
+        for (final String key : data.get(ATTR_PARAMETERS).keys()) {
+            parameters.put(key, data.get(ATTR_PARAMETERS).get(key).asList(String.class));
+        }
         return parameters;
     }
 
@@ -223,20 +243,7 @@ public final class HttpContext extends Context {
      * @return The HTTP request path.
      */
     public String getPath() {
-        return path;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveToJson(final JsonValue savedContext, final PersistenceConfig config)
-            throws ResourceException {
-        super.saveToJson(savedContext, config);
-        savedContext.put(ATTR_METHOD, method);
-        savedContext.put(ATTR_PATH, path);
-        savedContext.put(ATTR_HEADERS, headers);
-        savedContext.put(ATTR_PARAMETERS, parameters);
+        return data.get(ATTR_PATH).asString();
     }
 
 }
