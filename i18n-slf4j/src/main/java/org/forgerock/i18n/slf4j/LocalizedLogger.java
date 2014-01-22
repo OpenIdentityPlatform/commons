@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- *      Copyright 2011 ForgeRock AS
+ *      Copyright 2011-2014 ForgeRock AS
  */
 
 package org.forgerock.i18n.slf4j;
@@ -39,6 +39,11 @@ import org.slf4j.Marker;
  * forwarding them to an underlying SLF4J {@link Logger}. For performance
  * reasons this implementation will only localize and format messages if logging
  * has been enabled for the associated log level and marker (if present).
+ * <p>
+ * If no marker is provided, a {@code LocalizedMarker} is automatically constructed
+ * with the corresponding {@code LocalizedMessage} to be logged and passed to the
+ * underlying SLF4J {@link Logger}. This allow a custom implementation of SLF4J
+ * logger adapter to retrieve the complete localizable message when logging.
  */
 public final class LocalizedLogger {
     /**
@@ -114,7 +119,8 @@ public final class LocalizedLogger {
      */
     public void debug(final Arg0 d) {
         if (logger.isDebugEnabled()) {
-            logger.debug(d.get().toString(locale));
+            LocalizableMessage message = d.get();
+            logger.debug(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -129,7 +135,8 @@ public final class LocalizedLogger {
      */
     public void debug(final Arg0 d, final Throwable t) {
         if (logger.isDebugEnabled()) {
-            logger.debug(d.get().toString(locale), t);
+            LocalizableMessage message = d.get();
+            logger.debug(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -146,7 +153,8 @@ public final class LocalizedLogger {
      */
     public <T1> void debug(final Arg1<T1> d, final T1 a1) {
         if (logger.isDebugEnabled()) {
-            logger.debug(d.get(a1).toString(locale));
+            LocalizableMessage message = d.get(a1);
+            logger.debug(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -165,7 +173,8 @@ public final class LocalizedLogger {
      */
     public <T1> void debug(final Arg1<T1> d, final T1 a1, final Throwable t) {
         if (logger.isDebugEnabled()) {
-            logger.debug(d.get(a1).toString(locale), t);
+            LocalizableMessage message = d.get(a1);
+            logger.debug(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -186,7 +195,8 @@ public final class LocalizedLogger {
      */
     public <T1, T2> void debug(final Arg2<T1, T2> d, final T1 a1, final T2 a2) {
         if (logger.isDebugEnabled()) {
-            logger.debug(d.get(a1, a2).toString(locale));
+            LocalizableMessage message = d.get(a1, a2);
+            logger.debug(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -209,7 +219,8 @@ public final class LocalizedLogger {
      */
     public <T1, T2> void debug(final Arg2<T1, T2> d, final T1 a1, final T2 a2, final Throwable t) {
         if (logger.isDebugEnabled()) {
-            logger.debug(d.get(a1, a2).toString(locale), t);
+            LocalizableMessage message = d.get(a1, a2);
+            logger.debug(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -234,7 +245,8 @@ public final class LocalizedLogger {
      */
     public <T1, T2, T3> void debug(final Arg3<T1, T2, T3> d, final T1 a1, final T2 a2, final T3 a3) {
         if (logger.isDebugEnabled()) {
-            logger.debug(d.get(a1, a2, a3).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3);
+            logger.debug(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -262,7 +274,8 @@ public final class LocalizedLogger {
     public <T1, T2, T3> void debug(final Arg3<T1, T2, T3> d, final T1 a1, final T2 a2, final T3 a3,
             final Throwable t) {
         if (logger.isDebugEnabled()) {
-            logger.debug(d.get(a1, a2, a3).toString(locale), t);
+            LocalizableMessage message = d.get(a1, a2, a3);
+            logger.debug(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -292,7 +305,8 @@ public final class LocalizedLogger {
     public <T1, T2, T3, T4> void debug(final Arg4<T1, T2, T3, T4> d, final T1 a1, final T2 a2,
             final T3 a3, final T4 a4) {
         if (logger.isDebugEnabled()) {
-            logger.debug(d.get(a1, a2, a3, a4).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3, a4);
+            logger.debug(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -324,7 +338,8 @@ public final class LocalizedLogger {
     public <T1, T2, T3, T4> void debug(final Arg4<T1, T2, T3, T4> d, final T1 a1, final T2 a2,
             final T3 a3, final T4 a4, final Throwable t) {
         if (logger.isDebugEnabled()) {
-            logger.debug(d.get(a1, a2, a3, a4).toString(locale), t);
+            LocalizableMessage message = d.get(a1, a2, a3, a4);
+            logger.debug(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -358,7 +373,8 @@ public final class LocalizedLogger {
     public <T1, T2, T3, T4, T5> void debug(final Arg5<T1, T2, T3, T4, T5> d, final T1 a1,
             final T2 a2, final T3 a3, final T4 a4, final T5 a5) {
         if (logger.isDebugEnabled()) {
-            logger.debug(d.get(a1, a2, a3, a4, a5).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5);
+            logger.debug(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -394,7 +410,8 @@ public final class LocalizedLogger {
     public <T1, T2, T3, T4, T5> void debug(final Arg5<T1, T2, T3, T4, T5> d, final T1 a1,
             final T2 a2, final T3 a3, final T4 a4, final T5 a5, final Throwable t) {
         if (logger.isDebugEnabled()) {
-            logger.debug(d.get(a1, a2, a3, a4, a5).toString(locale), t);
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5);
+            logger.debug(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -432,7 +449,8 @@ public final class LocalizedLogger {
     public <T1, T2, T3, T4, T5, T6> void debug(final Arg6<T1, T2, T3, T4, T5, T6> d, final T1 a1,
             final T2 a2, final T3 a3, final T4 a4, final T5 a5, final T6 a6) {
         if (logger.isDebugEnabled()) {
-            logger.debug(d.get(a1, a2, a3, a4, a5, a6).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6);
+            logger.debug(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -472,7 +490,8 @@ public final class LocalizedLogger {
     public <T1, T2, T3, T4, T5, T6> void debug(final Arg6<T1, T2, T3, T4, T5, T6> d, final T1 a1,
             final T2 a2, final T3 a3, final T4 a4, final T5 a5, final T6 a6, final Throwable t) {
         if (logger.isDebugEnabled()) {
-            logger.debug(d.get(a1, a2, a3, a4, a5, a6).toString(locale), t);
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6);
+            logger.debug(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -515,7 +534,8 @@ public final class LocalizedLogger {
             final T1 a1, final T2 a2, final T3 a3, final T4 a4, final T5 a5, final T6 a6,
             final T7 a7) {
         if (logger.isDebugEnabled()) {
-            logger.debug(d.get(a1, a2, a3, a4, a5, a6, a7).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6, a7);
+            logger.debug(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -560,7 +580,8 @@ public final class LocalizedLogger {
             final T1 a1, final T2 a2, final T3 a3, final T4 a4, final T5 a5, final T6 a6,
             final T7 a7, final Throwable t) {
         if (logger.isDebugEnabled()) {
-            logger.debug(d.get(a1, a2, a3, a4, a5, a6, a7).toString(locale), t);
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6, a7);
+            logger.debug(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -607,7 +628,8 @@ public final class LocalizedLogger {
             final Arg8<T1, T2, T3, T4, T5, T6, T7, T8> d, final T1 a1, final T2 a2, final T3 a3,
             final T4 a4, final T5 a5, final T6 a6, final T7 a7, final T8 a8) {
         if (logger.isDebugEnabled()) {
-            logger.debug(d.get(a1, a2, a3, a4, a5, a6, a7, a8).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6, a7, a8);
+            logger.debug(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -656,7 +678,8 @@ public final class LocalizedLogger {
             final Arg8<T1, T2, T3, T4, T5, T6, T7, T8> d, final T1 a1, final T2 a2, final T3 a3,
             final T4 a4, final T5 a5, final T6 a6, final T7 a7, final T8 a8, final Throwable t) {
         if (logger.isDebugEnabled()) {
-            logger.debug(d.get(a1, a2, a3, a4, a5, a6, a7, a8).toString(locale), t);
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6, a7, a8);
+            logger.debug(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -708,7 +731,8 @@ public final class LocalizedLogger {
             final T3 a3, final T4 a4, final T5 a5, final T6 a6, final T7 a7, final T8 a8,
             final T9 a9) {
         if (logger.isDebugEnabled()) {
-            logger.debug(d.get(a1, a2, a3, a4, a5, a6, a7, a8, a9).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+            logger.debug(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -762,7 +786,8 @@ public final class LocalizedLogger {
             final T3 a3, final T4 a4, final T5 a5, final T6 a6, final T7 a7, final T8 a8,
             final T9 a9, final Throwable t) {
         if (logger.isDebugEnabled()) {
-            logger.debug(d.get(a1, a2, a3, a4, a5, a6, a7, a8, a9).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+            logger.debug(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -777,7 +802,8 @@ public final class LocalizedLogger {
      */
     public void debug(final ArgN d, final Object... args) {
         if (logger.isDebugEnabled()) {
-            logger.debug(d.get(args).toString(locale));
+            LocalizableMessage message = d.get(args);
+            logger.debug(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -794,7 +820,8 @@ public final class LocalizedLogger {
      */
     public void debug(final ArgN d, final Throwable t, final Object... args) {
         if (logger.isDebugEnabled()) {
-            logger.debug(d.get(args).toString(locale), t);
+            LocalizableMessage message = d.get(args);
+            logger.debug(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -807,7 +834,7 @@ public final class LocalizedLogger {
      */
     public void debug(final LocalizableMessage m) {
         if (logger.isDebugEnabled()) {
-            logger.debug(m.toString(locale));
+            logger.debug(new LocalizedMarker(m), m.toString(locale));
         }
     }
 
@@ -822,7 +849,7 @@ public final class LocalizedLogger {
      */
     public void debug(final LocalizableMessage m, final Throwable t) {
         if (logger.isDebugEnabled()) {
-            logger.debug(m.toString(locale), t);
+            logger.debug(new LocalizedMarker(m), m.toString(locale), t);
         }
     }
 
@@ -1576,7 +1603,8 @@ public final class LocalizedLogger {
      */
     public void error(final Arg0 d) {
         if (logger.isErrorEnabled()) {
-            logger.error(d.get().toString(locale));
+            LocalizableMessage message = d.get();
+            logger.error(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -1591,7 +1619,8 @@ public final class LocalizedLogger {
      */
     public void error(final Arg0 d, final Throwable t) {
         if (logger.isErrorEnabled()) {
-            logger.error(d.get().toString(locale), t);
+            LocalizableMessage message = d.get();
+            logger.error(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -1608,7 +1637,8 @@ public final class LocalizedLogger {
      */
     public <T1> void error(final Arg1<T1> d, final T1 a1) {
         if (logger.isErrorEnabled()) {
-            logger.error(d.get(a1).toString(locale));
+            LocalizableMessage message = d.get(a1);
+            logger.error(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -1627,7 +1657,8 @@ public final class LocalizedLogger {
      */
     public <T1> void error(final Arg1<T1> d, final T1 a1, final Throwable t) {
         if (logger.isErrorEnabled()) {
-            logger.error(d.get(a1).toString(locale), t);
+            LocalizableMessage message = d.get(a1);
+            logger.error(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -1648,7 +1679,8 @@ public final class LocalizedLogger {
      */
     public <T1, T2> void error(final Arg2<T1, T2> d, final T1 a1, final T2 a2) {
         if (logger.isErrorEnabled()) {
-            logger.error(d.get(a1, a2).toString(locale));
+            LocalizableMessage message = d.get(a1, a2);
+            logger.error(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -1671,7 +1703,8 @@ public final class LocalizedLogger {
      */
     public <T1, T2> void error(final Arg2<T1, T2> d, final T1 a1, final T2 a2, final Throwable t) {
         if (logger.isErrorEnabled()) {
-            logger.error(d.get(a1, a2).toString(locale), t);
+            LocalizableMessage message = d.get(a1, a2);
+            logger.error(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -1696,7 +1729,8 @@ public final class LocalizedLogger {
      */
     public <T1, T2, T3> void error(final Arg3<T1, T2, T3> d, final T1 a1, final T2 a2, final T3 a3) {
         if (logger.isErrorEnabled()) {
-            logger.error(d.get(a1, a2, a3).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3);
+            logger.error(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -1724,7 +1758,8 @@ public final class LocalizedLogger {
     public <T1, T2, T3> void error(final Arg3<T1, T2, T3> d, final T1 a1, final T2 a2, final T3 a3,
             final Throwable t) {
         if (logger.isErrorEnabled()) {
-            logger.error(d.get(a1, a2, a3).toString(locale), t);
+            LocalizableMessage message = d.get(a1, a2, a3);
+            logger.error(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -1754,7 +1789,8 @@ public final class LocalizedLogger {
     public <T1, T2, T3, T4> void error(final Arg4<T1, T2, T3, T4> d, final T1 a1, final T2 a2,
             final T3 a3, final T4 a4) {
         if (logger.isErrorEnabled()) {
-            logger.error(d.get(a1, a2, a3, a4).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3, a4);
+            logger.error(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -1786,7 +1822,8 @@ public final class LocalizedLogger {
     public <T1, T2, T3, T4> void error(final Arg4<T1, T2, T3, T4> d, final T1 a1, final T2 a2,
             final T3 a3, final T4 a4, final Throwable t) {
         if (logger.isErrorEnabled()) {
-            logger.error(d.get(a1, a2, a3, a4).toString(locale), t);
+            LocalizableMessage message = d.get(a1, a2, a3, a4);
+            logger.error(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -1820,7 +1857,8 @@ public final class LocalizedLogger {
     public <T1, T2, T3, T4, T5> void error(final Arg5<T1, T2, T3, T4, T5> d, final T1 a1,
             final T2 a2, final T3 a3, final T4 a4, final T5 a5) {
         if (logger.isErrorEnabled()) {
-            logger.error(d.get(a1, a2, a3, a4, a5).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5);
+            logger.error(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -1856,7 +1894,8 @@ public final class LocalizedLogger {
     public <T1, T2, T3, T4, T5> void error(final Arg5<T1, T2, T3, T4, T5> d, final T1 a1,
             final T2 a2, final T3 a3, final T4 a4, final T5 a5, final Throwable t) {
         if (logger.isErrorEnabled()) {
-            logger.error(d.get(a1, a2, a3, a4, a5).toString(locale), t);
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5);
+            logger.error(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -1894,7 +1933,8 @@ public final class LocalizedLogger {
     public <T1, T2, T3, T4, T5, T6> void error(final Arg6<T1, T2, T3, T4, T5, T6> d, final T1 a1,
             final T2 a2, final T3 a3, final T4 a4, final T5 a5, final T6 a6) {
         if (logger.isErrorEnabled()) {
-            logger.error(d.get(a1, a2, a3, a4, a5, a6).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6);
+            logger.error(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -1934,7 +1974,8 @@ public final class LocalizedLogger {
     public <T1, T2, T3, T4, T5, T6> void error(final Arg6<T1, T2, T3, T4, T5, T6> d, final T1 a1,
             final T2 a2, final T3 a3, final T4 a4, final T5 a5, final T6 a6, final Throwable t) {
         if (logger.isErrorEnabled()) {
-            logger.error(d.get(a1, a2, a3, a4, a5, a6).toString(locale), t);
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6);
+            logger.error(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -1977,7 +2018,8 @@ public final class LocalizedLogger {
             final T1 a1, final T2 a2, final T3 a3, final T4 a4, final T5 a5, final T6 a6,
             final T7 a7) {
         if (logger.isErrorEnabled()) {
-            logger.error(d.get(a1, a2, a3, a4, a5, a6, a7).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6, a7);
+            logger.error(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -2022,7 +2064,8 @@ public final class LocalizedLogger {
             final T1 a1, final T2 a2, final T3 a3, final T4 a4, final T5 a5, final T6 a6,
             final T7 a7, final Throwable t) {
         if (logger.isErrorEnabled()) {
-            logger.error(d.get(a1, a2, a3, a4, a5, a6, a7).toString(locale), t);
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6, a7);
+            logger.error(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -2069,7 +2112,8 @@ public final class LocalizedLogger {
             final Arg8<T1, T2, T3, T4, T5, T6, T7, T8> d, final T1 a1, final T2 a2, final T3 a3,
             final T4 a4, final T5 a5, final T6 a6, final T7 a7, final T8 a8) {
         if (logger.isErrorEnabled()) {
-            logger.error(d.get(a1, a2, a3, a4, a5, a6, a7, a8).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6, a7, a8);
+            logger.error(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -2118,7 +2162,8 @@ public final class LocalizedLogger {
             final Arg8<T1, T2, T3, T4, T5, T6, T7, T8> d, final T1 a1, final T2 a2, final T3 a3,
             final T4 a4, final T5 a5, final T6 a6, final T7 a7, final T8 a8, final Throwable t) {
         if (logger.isErrorEnabled()) {
-            logger.error(d.get(a1, a2, a3, a4, a5, a6, a7, a8).toString(locale), t);
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6, a7, a8);
+            logger.error(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -2170,7 +2215,8 @@ public final class LocalizedLogger {
             final T3 a3, final T4 a4, final T5 a5, final T6 a6, final T7 a7, final T8 a8,
             final T9 a9) {
         if (logger.isErrorEnabled()) {
-            logger.error(d.get(a1, a2, a3, a4, a5, a6, a7, a8, a9).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+            logger.error(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -2224,7 +2270,8 @@ public final class LocalizedLogger {
             final T3 a3, final T4 a4, final T5 a5, final T6 a6, final T7 a7, final T8 a8,
             final T9 a9, final Throwable t) {
         if (logger.isErrorEnabled()) {
-            logger.error(d.get(a1, a2, a3, a4, a5, a6, a7, a8, a9).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+            logger.error(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -2239,7 +2286,8 @@ public final class LocalizedLogger {
      */
     public void error(final ArgN d, final Object... args) {
         if (logger.isErrorEnabled()) {
-            logger.error(d.get(args).toString(locale));
+            LocalizableMessage message = d.get(args);
+            logger.error(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -2256,7 +2304,8 @@ public final class LocalizedLogger {
      */
     public void error(final ArgN d, final Throwable t, final Object... args) {
         if (logger.isErrorEnabled()) {
-            logger.error(d.get(args).toString(locale), t);
+            LocalizableMessage message = d.get(args);
+            logger.error(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -2269,7 +2318,7 @@ public final class LocalizedLogger {
      */
     public void error(final LocalizableMessage m) {
         if (logger.isErrorEnabled()) {
-            logger.error(m.toString(locale));
+            logger.error(new LocalizedMarker(m), m.toString(locale));
         }
     }
 
@@ -2284,7 +2333,7 @@ public final class LocalizedLogger {
      */
     public void error(final LocalizableMessage m, final Throwable t) {
         if (logger.isErrorEnabled()) {
-            logger.error(m.toString(locale), t);
+            logger.error(new LocalizedMarker(m), m.toString(locale), t);
         }
     }
 
@@ -3066,7 +3115,8 @@ public final class LocalizedLogger {
      */
     public void info(final Arg0 d) {
         if (logger.isInfoEnabled()) {
-            logger.info(d.get().toString(locale));
+            LocalizableMessage message = d.get();
+            logger.info(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -3081,7 +3131,8 @@ public final class LocalizedLogger {
      */
     public void info(final Arg0 d, final Throwable t) {
         if (logger.isInfoEnabled()) {
-            logger.info(d.get().toString(locale), t);
+            LocalizableMessage message = d.get();
+            logger.info(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -3098,7 +3149,8 @@ public final class LocalizedLogger {
      */
     public <T1> void info(final Arg1<T1> d, final T1 a1) {
         if (logger.isInfoEnabled()) {
-            logger.info(d.get(a1).toString(locale));
+            LocalizableMessage message = d.get(a1);
+            logger.info(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -3117,7 +3169,8 @@ public final class LocalizedLogger {
      */
     public <T1> void info(final Arg1<T1> d, final T1 a1, final Throwable t) {
         if (logger.isInfoEnabled()) {
-            logger.info(d.get(a1).toString(locale), t);
+            LocalizableMessage message = d.get(a1);
+            logger.info(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -3138,7 +3191,8 @@ public final class LocalizedLogger {
      */
     public <T1, T2> void info(final Arg2<T1, T2> d, final T1 a1, final T2 a2) {
         if (logger.isInfoEnabled()) {
-            logger.info(d.get(a1, a2).toString(locale));
+            LocalizableMessage message = d.get(a1, a2);
+            logger.info(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -3161,7 +3215,8 @@ public final class LocalizedLogger {
      */
     public <T1, T2> void info(final Arg2<T1, T2> d, final T1 a1, final T2 a2, final Throwable t) {
         if (logger.isInfoEnabled()) {
-            logger.info(d.get(a1, a2).toString(locale), t);
+            LocalizableMessage message = d.get(a1, a2);
+            logger.info(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -3186,7 +3241,8 @@ public final class LocalizedLogger {
      */
     public <T1, T2, T3> void info(final Arg3<T1, T2, T3> d, final T1 a1, final T2 a2, final T3 a3) {
         if (logger.isInfoEnabled()) {
-            logger.info(d.get(a1, a2, a3).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3);
+            logger.info(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -3214,7 +3270,8 @@ public final class LocalizedLogger {
     public <T1, T2, T3> void info(final Arg3<T1, T2, T3> d, final T1 a1, final T2 a2, final T3 a3,
             final Throwable t) {
         if (logger.isInfoEnabled()) {
-            logger.info(d.get(a1, a2, a3).toString(locale), t);
+            LocalizableMessage message = d.get(a1, a2, a3);
+            logger.info(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -3244,7 +3301,8 @@ public final class LocalizedLogger {
     public <T1, T2, T3, T4> void info(final Arg4<T1, T2, T3, T4> d, final T1 a1, final T2 a2,
             final T3 a3, final T4 a4) {
         if (logger.isInfoEnabled()) {
-            logger.info(d.get(a1, a2, a3, a4).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3, a4);
+            logger.info(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -3276,7 +3334,8 @@ public final class LocalizedLogger {
     public <T1, T2, T3, T4> void info(final Arg4<T1, T2, T3, T4> d, final T1 a1, final T2 a2,
             final T3 a3, final T4 a4, final Throwable t) {
         if (logger.isInfoEnabled()) {
-            logger.info(d.get(a1, a2, a3, a4).toString(locale), t);
+            LocalizableMessage message = d.get(a1, a2, a3, a4);
+            logger.info(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -3310,7 +3369,8 @@ public final class LocalizedLogger {
     public <T1, T2, T3, T4, T5> void info(final Arg5<T1, T2, T3, T4, T5> d, final T1 a1,
             final T2 a2, final T3 a3, final T4 a4, final T5 a5) {
         if (logger.isInfoEnabled()) {
-            logger.info(d.get(a1, a2, a3, a4, a5).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5);
+            logger.info(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -3346,7 +3406,8 @@ public final class LocalizedLogger {
     public <T1, T2, T3, T4, T5> void info(final Arg5<T1, T2, T3, T4, T5> d, final T1 a1,
             final T2 a2, final T3 a3, final T4 a4, final T5 a5, final Throwable t) {
         if (logger.isInfoEnabled()) {
-            logger.info(d.get(a1, a2, a3, a4, a5).toString(locale), t);
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5);
+            logger.info(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -3384,7 +3445,8 @@ public final class LocalizedLogger {
     public <T1, T2, T3, T4, T5, T6> void info(final Arg6<T1, T2, T3, T4, T5, T6> d, final T1 a1,
             final T2 a2, final T3 a3, final T4 a4, final T5 a5, final T6 a6) {
         if (logger.isInfoEnabled()) {
-            logger.info(d.get(a1, a2, a3, a4, a5, a6).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6);
+            logger.info(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -3424,7 +3486,8 @@ public final class LocalizedLogger {
     public <T1, T2, T3, T4, T5, T6> void info(final Arg6<T1, T2, T3, T4, T5, T6> d, final T1 a1,
             final T2 a2, final T3 a3, final T4 a4, final T5 a5, final T6 a6, final Throwable t) {
         if (logger.isInfoEnabled()) {
-            logger.info(d.get(a1, a2, a3, a4, a5, a6).toString(locale), t);
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6);
+            logger.info(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -3467,7 +3530,8 @@ public final class LocalizedLogger {
             final T1 a1, final T2 a2, final T3 a3, final T4 a4, final T5 a5, final T6 a6,
             final T7 a7) {
         if (logger.isInfoEnabled()) {
-            logger.info(d.get(a1, a2, a3, a4, a5, a6, a7).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6, a7);
+            logger.info(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -3512,7 +3576,8 @@ public final class LocalizedLogger {
             final T1 a1, final T2 a2, final T3 a3, final T4 a4, final T5 a5, final T6 a6,
             final T7 a7, final Throwable t) {
         if (logger.isInfoEnabled()) {
-            logger.info(d.get(a1, a2, a3, a4, a5, a6, a7).toString(locale), t);
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6, a7);
+            logger.info(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -3559,7 +3624,8 @@ public final class LocalizedLogger {
             final T1 a1, final T2 a2, final T3 a3, final T4 a4, final T5 a5, final T6 a6,
             final T7 a7, final T8 a8) {
         if (logger.isInfoEnabled()) {
-            logger.info(d.get(a1, a2, a3, a4, a5, a6, a7, a8).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6, a7, a8);
+            logger.info(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -3608,7 +3674,8 @@ public final class LocalizedLogger {
             final T1 a1, final T2 a2, final T3 a3, final T4 a4, final T5 a5, final T6 a6,
             final T7 a7, final T8 a8, final Throwable t) {
         if (logger.isInfoEnabled()) {
-            logger.info(d.get(a1, a2, a3, a4, a5, a6, a7, a8).toString(locale), t);
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6, a7, a8);
+            logger.info(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -3660,7 +3727,8 @@ public final class LocalizedLogger {
             final T3 a3, final T4 a4, final T5 a5, final T6 a6, final T7 a7, final T8 a8,
             final T9 a9) {
         if (logger.isInfoEnabled()) {
-            logger.info(d.get(a1, a2, a3, a4, a5, a6, a7, a8, a9).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+            logger.info(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -3714,7 +3782,8 @@ public final class LocalizedLogger {
             final T3 a3, final T4 a4, final T5 a5, final T6 a6, final T7 a7, final T8 a8,
             final T9 a9, final Throwable t) {
         if (logger.isInfoEnabled()) {
-            logger.info(d.get(a1, a2, a3, a4, a5, a6, a7, a8, a9).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+            logger.info(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -3729,7 +3798,8 @@ public final class LocalizedLogger {
      */
     public void info(final ArgN d, final Object... args) {
         if (logger.isInfoEnabled()) {
-            logger.info(d.get(args).toString(locale));
+            LocalizableMessage message = d.get(args);
+            logger.info(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -3746,7 +3816,8 @@ public final class LocalizedLogger {
      */
     public void info(final ArgN d, final Throwable t, final Object... args) {
         if (logger.isInfoEnabled()) {
-            logger.info(d.get(args).toString(locale), t);
+            LocalizableMessage message = d.get(args);
+            logger.info(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -3759,7 +3830,7 @@ public final class LocalizedLogger {
      */
     public void info(final LocalizableMessage m) {
         if (logger.isInfoEnabled()) {
-            logger.info(m.toString(locale));
+            logger.info(new LocalizedMarker(m), m.toString(locale));
         }
     }
 
@@ -3774,7 +3845,7 @@ public final class LocalizedLogger {
      */
     public void info(final LocalizableMessage m, final Throwable t) {
         if (logger.isInfoEnabled()) {
-            logger.info(m.toString(locale), t);
+            logger.info(new LocalizedMarker(m), m.toString(locale), t);
         }
     }
 
@@ -4652,8 +4723,33 @@ public final class LocalizedLogger {
      */
     public void trace(final Arg0 d) {
         if (logger.isTraceEnabled()) {
-            logger.trace(d.get().toString(locale));
+            LocalizableMessage message = d.get();
+            logger.trace(new LocalizedMarker(message), message.toString(locale));
         }
+    }
+
+    /**
+     * Logs a trace message.
+     *
+     * @param msg
+     *            The message.
+     * @see org.slf4j.Logger#trace(String)
+     */
+    public void trace(final String msg) {
+        if (logger.isTraceEnabled()) {
+            logger.trace(new LocalizedMarker(LocalizableMessage.raw(msg)), msg);
+        }
+    }
+
+    /**
+     * Logs a trace message with provided exception.
+     *
+     * @param t
+     *            The exception.
+     * @see org.slf4j.Logger#trace(String)
+     */
+    public void traceException(final Throwable t) {
+        traceException(t, t.getMessage());
     }
 
     /**
@@ -4667,7 +4763,23 @@ public final class LocalizedLogger {
      */
     public void trace(final Arg0 d, final Throwable t) {
         if (logger.isTraceEnabled()) {
-            logger.trace(d.get().toString(locale), t);
+            LocalizableMessage message = d.get();
+            logger.trace(new LocalizedMarker(message), message.toString(locale), t);
+        }
+    }
+
+    /**
+     * Logs a trace message with an accompanying exception.
+     *
+     * @param t
+     *            The throwable to log.
+     * @param msg
+     *            The message.
+     * @see org.slf4j.Logger#trace(String, Throwable)
+     */
+    public void traceException(final Throwable t, final String msg) {
+        if (logger.isTraceEnabled()) {
+            logger.trace(new LocalizedMarker(LocalizableMessage.raw(msg)), msg, t);
         }
     }
 
@@ -4684,7 +4796,25 @@ public final class LocalizedLogger {
      */
     public <T1> void trace(final Arg1<T1> d, final T1 a1) {
         if (logger.isTraceEnabled()) {
-            logger.trace(d.get(a1).toString(locale));
+            LocalizableMessage message = d.get(a1);
+            logger.trace(new LocalizedMarker(message), message.toString(locale));
+        }
+    }
+
+    /**
+     * Logs a trace message.
+     *
+     * @param format
+     *            The message format, compatible with
+     *            {@code java.util.Formatter} rules
+     * @param a1
+     *            The first message argument.
+     * @see org.slf4j.Logger#trace(String)
+     */
+    public void trace(final String format, final Object a1) {
+        if (logger.isTraceEnabled()) {
+            LocalizableMessage message = LocalizableMessage.raw(format, a1);
+            logger.trace(new LocalizedMarker(message), message.toString());
         }
     }
 
@@ -4703,7 +4833,27 @@ public final class LocalizedLogger {
      */
     public <T1> void trace(final Arg1<T1> d, final T1 a1, final Throwable t) {
         if (logger.isTraceEnabled()) {
-            logger.trace(d.get(a1).toString(locale), t);
+            LocalizableMessage message = d.get(a1);
+            logger.trace(new LocalizedMarker(message), message.toString(locale), t);
+        }
+    }
+
+    /**
+     * Logs a trace message with an accompanying exception.
+     *
+     * @param t
+     *            The throwable to log.
+     * @param format
+     *            The message format, compatible with
+     *            {@code java.util.Formatter} rules
+     * @param a1
+     *            The first message argument.
+     * @see org.slf4j.Logger#trace(String, Throwable)
+     */
+    public void traceException(final Throwable t, final String format, final Object a1) {
+        if (logger.isTraceEnabled()) {
+            LocalizableMessage message = LocalizableMessage.raw(format, a1);
+            logger.trace(new LocalizedMarker(message), message.toString(), t);
         }
     }
 
@@ -4724,7 +4874,27 @@ public final class LocalizedLogger {
      */
     public <T1, T2> void trace(final Arg2<T1, T2> d, final T1 a1, final T2 a2) {
         if (logger.isTraceEnabled()) {
-            logger.trace(d.get(a1, a2).toString(locale));
+            LocalizableMessage message = d.get(a1, a2);
+            logger.trace(new LocalizedMarker(message), message.toString(locale));
+        }
+    }
+
+    /**
+     * Logs a trace message.
+     *
+     * @param format
+     *            The message format, compatible with
+     *            {@code java.util.Formatter} rules
+     * @param a1
+     *            The first message argument.
+     * @param a2
+     *            The second message argument.
+     * @see org.slf4j.Logger#trace(String)
+     */
+    public void trace(final String format, final Object a1, final Object a2) {
+        if (logger.isTraceEnabled()) {
+            LocalizableMessage message = LocalizableMessage.raw(format, a1, a2);
+            logger.trace(new LocalizedMarker(message), message.toString());
         }
     }
 
@@ -4747,7 +4917,29 @@ public final class LocalizedLogger {
      */
     public <T1, T2> void trace(final Arg2<T1, T2> d, final T1 a1, final T2 a2, final Throwable t) {
         if (logger.isTraceEnabled()) {
-            logger.trace(d.get(a1, a2).toString(locale), t);
+            LocalizableMessage message = d.get(a1, a2);
+            logger.trace(new LocalizedMarker(message), message.toString(locale), t);
+        }
+    }
+
+    /**
+     * Logs a trace message with an accompanying exception.
+     *
+     * @param t
+     *            The throwable to log.
+     * @param format
+     *            The message format, compatible with
+     *            {@code java.util.Formatter} rules
+     * @param a1
+     *            The first message argument.
+     * @param a2
+     *            The second message argument.
+     * @see org.slf4j.Logger#trace(String, Throwable)
+     */
+    public void traceException(final Throwable t, final String format, final Object a1, final Object a2) {
+        if (logger.isTraceEnabled()) {
+            LocalizableMessage message = LocalizableMessage.raw(format, a1, a2);
+            logger.trace(new LocalizedMarker(message), message.toString(), t);
         }
     }
 
@@ -4772,9 +4964,32 @@ public final class LocalizedLogger {
      */
     public <T1, T2, T3> void trace(final Arg3<T1, T2, T3> d, final T1 a1, final T2 a2, final T3 a3) {
         if (logger.isTraceEnabled()) {
-            logger.trace(d.get(a1, a2, a3).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3);
+            logger.trace(new LocalizedMarker(message), message.toString(locale));
         }
     }
+
+    /**
+     * Logs a trace message.
+     *
+     * @param format
+     *            The message format, compatible with
+     *            {@code java.util.Formatter} rules
+     * @param a1
+     *            The first message argument.
+     * @param a2
+     *            The second message argument.
+     * @param a3
+     *            The third message argument.
+     * @see org.slf4j.Logger#trace(String)
+     */
+    public void trace(final String format, final Object a1, final Object a2, final Object a3) {
+        if (logger.isTraceEnabled()) {
+            LocalizableMessage message = LocalizableMessage.raw(format, a1, a2, a3);
+            logger.trace(new LocalizedMarker(message), message.toString());
+        }
+    }
+
 
     /**
      * Logs a trace message with an accompanying exception.
@@ -4800,7 +5015,32 @@ public final class LocalizedLogger {
     public <T1, T2, T3> void trace(final Arg3<T1, T2, T3> d, final T1 a1, final T2 a2, final T3 a3,
             final Throwable t) {
         if (logger.isTraceEnabled()) {
-            logger.trace(d.get(a1, a2, a3).toString(locale), t);
+            LocalizableMessage message = d.get(a1, a2, a3);
+            logger.trace(new LocalizedMarker(message), message.toString(locale), t);
+        }
+    }
+
+    /**
+     * Logs a trace message with an accompanying exception.
+     *
+     * @param t
+     *            The throwable to log.
+     * @param format
+     *            The message format, compatible with
+     *            {@code java.util.Formatter} rules
+     * @param a1
+     *            The first message argument.
+     * @param a2
+     *            The second message argument.
+     * @param a3
+     *            The third message argument.
+     * @see org.slf4j.Logger#trace(String, Throwable)
+     */
+    public void traceException(final Throwable t, final String format, final Object a1, final Object a2,
+        final Object a3) {
+        if (logger.isTraceEnabled()) {
+            LocalizableMessage message = LocalizableMessage.raw(format, a1, a2, a3);
+            logger.trace(new LocalizedMarker(message), message.toString(), t);
         }
     }
 
@@ -4830,7 +5070,8 @@ public final class LocalizedLogger {
     public <T1, T2, T3, T4> void trace(final Arg4<T1, T2, T3, T4> d, final T1 a1, final T2 a2,
             final T3 a3, final T4 a4) {
         if (logger.isTraceEnabled()) {
-            logger.trace(d.get(a1, a2, a3, a4).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3, a4);
+            logger.trace(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -4862,7 +5103,8 @@ public final class LocalizedLogger {
     public <T1, T2, T3, T4> void trace(final Arg4<T1, T2, T3, T4> d, final T1 a1, final T2 a2,
             final T3 a3, final T4 a4, final Throwable t) {
         if (logger.isTraceEnabled()) {
-            logger.trace(d.get(a1, a2, a3, a4).toString(locale), t);
+            LocalizableMessage message = d.get(a1, a2, a3, a4);
+            logger.trace(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -4896,7 +5138,8 @@ public final class LocalizedLogger {
     public <T1, T2, T3, T4, T5> void trace(final Arg5<T1, T2, T3, T4, T5> d, final T1 a1,
             final T2 a2, final T3 a3, final T4 a4, final T5 a5) {
         if (logger.isTraceEnabled()) {
-            logger.trace(d.get(a1, a2, a3, a4, a5).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5);
+            logger.trace(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -4932,7 +5175,8 @@ public final class LocalizedLogger {
     public <T1, T2, T3, T4, T5> void trace(final Arg5<T1, T2, T3, T4, T5> d, final T1 a1,
             final T2 a2, final T3 a3, final T4 a4, final T5 a5, final Throwable t) {
         if (logger.isTraceEnabled()) {
-            logger.trace(d.get(a1, a2, a3, a4, a5).toString(locale), t);
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5);
+            logger.trace(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -4970,7 +5214,8 @@ public final class LocalizedLogger {
     public <T1, T2, T3, T4, T5, T6> void trace(final Arg6<T1, T2, T3, T4, T5, T6> d, final T1 a1,
             final T2 a2, final T3 a3, final T4 a4, final T5 a5, final T6 a6) {
         if (logger.isTraceEnabled()) {
-            logger.trace(d.get(a1, a2, a3, a4, a5, a6).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6);
+            logger.trace(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -5010,7 +5255,8 @@ public final class LocalizedLogger {
     public <T1, T2, T3, T4, T5, T6> void trace(final Arg6<T1, T2, T3, T4, T5, T6> d, final T1 a1,
             final T2 a2, final T3 a3, final T4 a4, final T5 a5, final T6 a6, final Throwable t) {
         if (logger.isTraceEnabled()) {
-            logger.trace(d.get(a1, a2, a3, a4, a5, a6).toString(locale), t);
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6);
+            logger.trace(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -5053,7 +5299,8 @@ public final class LocalizedLogger {
             final T1 a1, final T2 a2, final T3 a3, final T4 a4, final T5 a5, final T6 a6,
             final T7 a7) {
         if (logger.isTraceEnabled()) {
-            logger.trace(d.get(a1, a2, a3, a4, a5, a6, a7).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6, a7);
+            logger.trace(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -5098,7 +5345,8 @@ public final class LocalizedLogger {
             final T1 a1, final T2 a2, final T3 a3, final T4 a4, final T5 a5, final T6 a6,
             final T7 a7, final Throwable t) {
         if (logger.isTraceEnabled()) {
-            logger.trace(d.get(a1, a2, a3, a4, a5, a6, a7).toString(locale), t);
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6, a7);
+            logger.trace(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -5145,7 +5393,8 @@ public final class LocalizedLogger {
             final Arg8<T1, T2, T3, T4, T5, T6, T7, T8> d, final T1 a1, final T2 a2, final T3 a3,
             final T4 a4, final T5 a5, final T6 a6, final T7 a7, final T8 a8) {
         if (logger.isTraceEnabled()) {
-            logger.trace(d.get(a1, a2, a3, a4, a5, a6, a7, a8).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6, a7, a8);
+            logger.trace(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -5194,7 +5443,8 @@ public final class LocalizedLogger {
             final Arg8<T1, T2, T3, T4, T5, T6, T7, T8> d, final T1 a1, final T2 a2, final T3 a3,
             final T4 a4, final T5 a5, final T6 a6, final T7 a7, final T8 a8, final Throwable t) {
         if (logger.isTraceEnabled()) {
-            logger.trace(d.get(a1, a2, a3, a4, a5, a6, a7, a8).toString(locale), t);
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6, a7, a8);
+            logger.trace(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -5246,7 +5496,8 @@ public final class LocalizedLogger {
             final T3 a3, final T4 a4, final T5 a5, final T6 a6, final T7 a7, final T8 a8,
             final T9 a9) {
         if (logger.isTraceEnabled()) {
-            logger.trace(d.get(a1, a2, a3, a4, a5, a6, a7, a8, a9).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+            logger.trace(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -5300,7 +5551,8 @@ public final class LocalizedLogger {
             final T3 a3, final T4 a4, final T5 a5, final T6 a6, final T7 a7, final T8 a8,
             final T9 a9, final Throwable t) {
         if (logger.isTraceEnabled()) {
-            logger.trace(d.get(a1, a2, a3, a4, a5, a6, a7, a8, a9).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+            logger.trace(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -5315,7 +5567,8 @@ public final class LocalizedLogger {
      */
     public void trace(final ArgN d, final Object... args) {
         if (logger.isTraceEnabled()) {
-            logger.trace(d.get(args).toString(locale));
+            LocalizableMessage message = d.get(args);
+            logger.trace(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -5332,7 +5585,27 @@ public final class LocalizedLogger {
      */
     public void trace(final ArgN d, final Throwable t, final Object... args) {
         if (logger.isTraceEnabled()) {
-            logger.trace(d.get(args).toString(locale), t);
+            LocalizableMessage message = d.get(args);
+            logger.trace(new LocalizedMarker(message), message.toString(locale), t);
+        }
+    }
+
+    /**
+     * Logs a trace message with an accompanying exception.
+     *
+     * @param t
+     *            The throwable to log.
+     * @param format
+     *            The message format, compatible with
+     *            {@code java.util.Formatter} rules
+     * @param args
+     *            The message arguments.
+     * @see org.slf4j.Logger#trace(String, Throwable)
+     */
+    public void traceException(final Throwable t, final String format, final Object... args) {
+        if (logger.isTraceEnabled()) {
+            LocalizableMessage message = LocalizableMessage.raw(format, args);
+            logger.trace(new LocalizedMarker(message), message.toString(), t);
         }
     }
 
@@ -5345,7 +5618,7 @@ public final class LocalizedLogger {
      */
     public void trace(final LocalizableMessage m) {
         if (logger.isTraceEnabled()) {
-            logger.trace(m.toString(locale));
+            logger.trace(new LocalizedMarker(m), m.toString(locale));
         }
     }
 
@@ -5360,7 +5633,7 @@ public final class LocalizedLogger {
      */
     public void trace(final LocalizableMessage m, final Throwable t) {
         if (logger.isTraceEnabled()) {
-            logger.trace(m.toString(locale), t);
+            logger.trace(new LocalizedMarker(m), m.toString(locale), t);
         }
     }
 
@@ -6114,7 +6387,8 @@ public final class LocalizedLogger {
      */
     public void warn(final Arg0 d) {
         if (logger.isWarnEnabled()) {
-            logger.warn(d.get().toString(locale));
+            LocalizableMessage message = d.get();
+            logger.warn(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -6129,7 +6403,8 @@ public final class LocalizedLogger {
      */
     public void warn(final Arg0 d, final Throwable t) {
         if (logger.isWarnEnabled()) {
-            logger.warn(d.get().toString(locale), t);
+            LocalizableMessage message = d.get();
+            logger.warn(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -6146,7 +6421,8 @@ public final class LocalizedLogger {
      */
     public <T1> void warn(final Arg1<T1> d, final T1 a1) {
         if (logger.isWarnEnabled()) {
-            logger.warn(d.get(a1).toString(locale));
+            LocalizableMessage message = d.get(a1);
+            logger.warn(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -6165,7 +6441,8 @@ public final class LocalizedLogger {
      */
     public <T1> void warn(final Arg1<T1> d, final T1 a1, final Throwable t) {
         if (logger.isWarnEnabled()) {
-            logger.warn(d.get(a1).toString(locale), t);
+            LocalizableMessage message = d.get(a1);
+            logger.warn(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -6186,7 +6463,8 @@ public final class LocalizedLogger {
      */
     public <T1, T2> void warn(final Arg2<T1, T2> d, final T1 a1, final T2 a2) {
         if (logger.isWarnEnabled()) {
-            logger.warn(d.get(a1, a2).toString(locale));
+            LocalizableMessage message = d.get(a1, a2);
+            logger.warn(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -6209,7 +6487,8 @@ public final class LocalizedLogger {
      */
     public <T1, T2> void warn(final Arg2<T1, T2> d, final T1 a1, final T2 a2, final Throwable t) {
         if (logger.isWarnEnabled()) {
-            logger.warn(d.get(a1, a2).toString(locale), t);
+            LocalizableMessage message = d.get(a1, a2);
+            logger.warn(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -6234,7 +6513,8 @@ public final class LocalizedLogger {
      */
     public <T1, T2, T3> void warn(final Arg3<T1, T2, T3> d, final T1 a1, final T2 a2, final T3 a3) {
         if (logger.isWarnEnabled()) {
-            logger.warn(d.get(a1, a2, a3).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3);
+            logger.warn(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -6262,7 +6542,8 @@ public final class LocalizedLogger {
     public <T1, T2, T3> void warn(final Arg3<T1, T2, T3> d, final T1 a1, final T2 a2, final T3 a3,
             final Throwable t) {
         if (logger.isWarnEnabled()) {
-            logger.warn(d.get(a1, a2, a3).toString(locale), t);
+            LocalizableMessage message = d.get(a1, a2, a3);
+            logger.warn(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -6292,7 +6573,8 @@ public final class LocalizedLogger {
     public <T1, T2, T3, T4> void warn(final Arg4<T1, T2, T3, T4> d, final T1 a1, final T2 a2,
             final T3 a3, final T4 a4) {
         if (logger.isWarnEnabled()) {
-            logger.warn(d.get(a1, a2, a3, a4).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3, a4);
+            logger.warn(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -6324,7 +6606,8 @@ public final class LocalizedLogger {
     public <T1, T2, T3, T4> void warn(final Arg4<T1, T2, T3, T4> d, final T1 a1, final T2 a2,
             final T3 a3, final T4 a4, final Throwable t) {
         if (logger.isWarnEnabled()) {
-            logger.warn(d.get(a1, a2, a3, a4).toString(locale), t);
+            LocalizableMessage message = d.get(a1, a2, a3, a4);
+            logger.warn(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -6358,7 +6641,8 @@ public final class LocalizedLogger {
     public <T1, T2, T3, T4, T5> void warn(final Arg5<T1, T2, T3, T4, T5> d, final T1 a1,
             final T2 a2, final T3 a3, final T4 a4, final T5 a5) {
         if (logger.isWarnEnabled()) {
-            logger.warn(d.get(a1, a2, a3, a4, a5).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5);
+            logger.warn(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -6394,7 +6678,8 @@ public final class LocalizedLogger {
     public <T1, T2, T3, T4, T5> void warn(final Arg5<T1, T2, T3, T4, T5> d, final T1 a1,
             final T2 a2, final T3 a3, final T4 a4, final T5 a5, final Throwable t) {
         if (logger.isWarnEnabled()) {
-            logger.warn(d.get(a1, a2, a3, a4, a5).toString(locale), t);
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5);
+            logger.warn(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -6432,7 +6717,8 @@ public final class LocalizedLogger {
     public <T1, T2, T3, T4, T5, T6> void warn(final Arg6<T1, T2, T3, T4, T5, T6> d, final T1 a1,
             final T2 a2, final T3 a3, final T4 a4, final T5 a5, final T6 a6) {
         if (logger.isWarnEnabled()) {
-            logger.warn(d.get(a1, a2, a3, a4, a5, a6).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6);
+            logger.warn(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -6472,7 +6758,8 @@ public final class LocalizedLogger {
     public <T1, T2, T3, T4, T5, T6> void warn(final Arg6<T1, T2, T3, T4, T5, T6> d, final T1 a1,
             final T2 a2, final T3 a3, final T4 a4, final T5 a5, final T6 a6, final Throwable t) {
         if (logger.isWarnEnabled()) {
-            logger.warn(d.get(a1, a2, a3, a4, a5, a6).toString(locale), t);
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6);
+            logger.warn(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -6515,7 +6802,8 @@ public final class LocalizedLogger {
             final T1 a1, final T2 a2, final T3 a3, final T4 a4, final T5 a5, final T6 a6,
             final T7 a7) {
         if (logger.isWarnEnabled()) {
-            logger.warn(d.get(a1, a2, a3, a4, a5, a6, a7).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6, a7);
+            logger.warn(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -6560,7 +6848,8 @@ public final class LocalizedLogger {
             final T1 a1, final T2 a2, final T3 a3, final T4 a4, final T5 a5, final T6 a6,
             final T7 a7, final Throwable t) {
         if (logger.isWarnEnabled()) {
-            logger.warn(d.get(a1, a2, a3, a4, a5, a6, a7).toString(locale), t);
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6, a7);
+            logger.warn(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -6607,7 +6896,8 @@ public final class LocalizedLogger {
             final T1 a1, final T2 a2, final T3 a3, final T4 a4, final T5 a5, final T6 a6,
             final T7 a7, final T8 a8) {
         if (logger.isWarnEnabled()) {
-            logger.warn(d.get(a1, a2, a3, a4, a5, a6, a7, a8).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6, a7, a8);
+            logger.warn(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -6656,7 +6946,8 @@ public final class LocalizedLogger {
             final T1 a1, final T2 a2, final T3 a3, final T4 a4, final T5 a5, final T6 a6,
             final T7 a7, final T8 a8, final Throwable t) {
         if (logger.isWarnEnabled()) {
-            logger.warn(d.get(a1, a2, a3, a4, a5, a6, a7, a8).toString(locale), t);
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6, a7, a8);
+            logger.warn(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -6708,7 +6999,8 @@ public final class LocalizedLogger {
             final T3 a3, final T4 a4, final T5 a5, final T6 a6, final T7 a7, final T8 a8,
             final T9 a9) {
         if (logger.isWarnEnabled()) {
-            logger.warn(d.get(a1, a2, a3, a4, a5, a6, a7, a8, a9).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+            logger.warn(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -6762,7 +7054,8 @@ public final class LocalizedLogger {
             final T3 a3, final T4 a4, final T5 a5, final T6 a6, final T7 a7, final T8 a8,
             final T9 a9, final Throwable t) {
         if (logger.isWarnEnabled()) {
-            logger.warn(d.get(a1, a2, a3, a4, a5, a6, a7, a8, a9).toString(locale));
+            LocalizableMessage message = d.get(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+            logger.warn(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -6777,7 +7070,8 @@ public final class LocalizedLogger {
      */
     public void warn(final ArgN d, final Object... args) {
         if (logger.isWarnEnabled()) {
-            logger.warn(d.get(args).toString(locale));
+            LocalizableMessage message = d.get(args);
+            logger.warn(new LocalizedMarker(message), message.toString(locale));
         }
     }
 
@@ -6794,7 +7088,8 @@ public final class LocalizedLogger {
      */
     public void warn(final ArgN d, final Throwable t, final Object... args) {
         if (logger.isWarnEnabled()) {
-            logger.warn(d.get(args).toString(locale), t);
+            LocalizableMessage message = d.get(args);
+            logger.warn(new LocalizedMarker(message), message.toString(locale), t);
         }
     }
 
@@ -6807,7 +7102,7 @@ public final class LocalizedLogger {
      */
     public void warn(final LocalizableMessage m) {
         if (logger.isWarnEnabled()) {
-            logger.warn(m.toString(locale));
+            logger.warn(new LocalizedMarker(m), m.toString(locale));
         }
     }
 
@@ -6822,7 +7117,7 @@ public final class LocalizedLogger {
      */
     public void warn(final LocalizableMessage m, final Throwable t) {
         if (logger.isWarnEnabled()) {
-            logger.warn(m.toString(locale), t);
+            logger.warn(new LocalizedMarker(m), m.toString(locale), t);
         }
     }
 
