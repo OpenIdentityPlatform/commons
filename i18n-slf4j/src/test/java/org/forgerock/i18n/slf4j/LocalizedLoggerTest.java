@@ -162,4 +162,10 @@ public final class LocalizedLoggerTest {
 
     }
 
+    @Test
+    public void testGetCallerClassName() throws Exception {
+        String caller = LocalizedLogger.getClassNameOfCaller();
+        assertThat(caller).isEqualTo(LocalizedLoggerTest.class.getName());
+    }
+
 }
