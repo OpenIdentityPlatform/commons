@@ -21,6 +21,7 @@ package org.forgerock.util.promise;
  * @param <V>
  *            The type of result consumed by the handler.
  */
+// @FunctionalInterface
 public interface SuccessHandler<V> {
     /**
      * Invoked when the asynchronous task has completed successfully.

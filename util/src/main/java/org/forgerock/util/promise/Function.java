@@ -50,6 +50,7 @@ package org.forgerock.util.promise;
  * @see AsyncFunction
  * @see NeverThrowsException
  */
+// @FunctionalInterface
 public interface Function<VIN, VOUT, E extends Exception> {
     /**
      * Applies this function to the input parameter {@code value} and returns

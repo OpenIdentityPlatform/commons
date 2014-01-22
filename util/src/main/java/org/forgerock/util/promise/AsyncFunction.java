@@ -70,6 +70,7 @@ package org.forgerock.util.promise;
  * @see Function
  * @see NeverThrowsException
  */
+// @FunctionalInterface
 public interface AsyncFunction<VIN, VOUT, E extends Exception> extends
         Function<VIN, Promise<VOUT, E>, E> {
 

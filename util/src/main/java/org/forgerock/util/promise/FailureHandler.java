@@ -22,6 +22,7 @@ package org.forgerock.util.promise;
  * @param <E>
  *            The type of error consumed by the handler.
  */
+// @FunctionalInterface
 public interface FailureHandler<E> {
     /**
      * Invoked when the asynchronous task has failed.

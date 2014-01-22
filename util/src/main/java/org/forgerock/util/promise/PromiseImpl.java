@@ -115,27 +115,27 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Succe
 
     @Override
     public final V get() throws InterruptedException, ExecutionException {
-        waitForResult(); // Publishes.
+        await(); // Publishes.
         return get0();
     }
 
     @Override
     public final V get(final long timeout, final TimeUnit unit) throws InterruptedException,
             ExecutionException, TimeoutException {
-        waitForResult(timeout, unit); // Publishes.
+        await(timeout, unit, false); // Publishes.
         return get0();
     }
 
     @Override
     public final V getOrThrow() throws InterruptedException, E {
-        waitForResult(); // Publishes.
+        await(); // Publishes.
         return getOrThrow0();
     }
 
     @Override
     public final V getOrThrow(final long timeout, final TimeUnit unit) throws InterruptedException,
             E, TimeoutException {
-        waitForResult(timeout, unit); // Publishes.
+        await(timeout, unit, false); // Publishes.
         return getOrThrow0();
     }
 
@@ -160,24 +160,12 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Succe
     @Override
     public final V getOrThrowUninterruptibly(final long timeout, final TimeUnit unit) throws E,
             TimeoutException {
-        final long startTime = System.currentTimeMillis();
-        long timeoutMS = unit.toMillis(timeout);
-        boolean wasInterrupted = false;
         try {
-            while (true) {
-                try {
-                    return getOrThrow(timeoutMS, TimeUnit.MILLISECONDS);
-                } catch (final InterruptedException e) {
-                    wasInterrupted = true;
-                }
-                final long now = System.currentTimeMillis();
-                timeoutMS -= now - startTime; // getOrThrow handles timeouts <= 0.
-            }
-        } finally {
-            if (wasInterrupted) {
-                Thread.currentThread().interrupt();
-            }
+            await(timeout, unit, true); // Publishes.
+        } catch (InterruptedException ignored) {
+            // Will never occur since interrupts are ignored.
         }
+        return getOrThrow0();
     }
 
     /**
@@ -396,14 +384,14 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Succe
             state = newState; // Publishes.
             notifyAll(); // Wake up any blocked threads.
         }
-        for (StateListener<V, E> listener = listeners.poll(); listener != null; listener =
-                listeners.poll()) {
+        StateListener<V, E> listener;
+        while ((listener = listeners.poll()) != null) {
             listener.handleStateChange(newState, result, error);
         }
         return true;
     }
 
-    private void waitForResult() throws InterruptedException {
+    private void await() throws InterruptedException {
         // Use double-check for fast-path.
         if (state == PENDING) {
             synchronized (this) {
@@ -414,19 +402,34 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Succe
         }
     }
 
-    private void waitForResult(final long timeout, final TimeUnit unit)
+    private void await(final long timeout, final TimeUnit unit, final boolean isUninterruptibly)
             throws InterruptedException, TimeoutException {
         // Use double-check for fast-path.
         if (state == PENDING) {
             final long timeoutMS = unit.toMillis(timeout);
             final long endTimeMS = System.currentTimeMillis() + timeoutMS;
-            synchronized (this) {
-                while (state == PENDING) {
-                    final long remainingTimeMS = endTimeMS - System.currentTimeMillis();
-                    if (remainingTimeMS <= 0) {
-                        throw new TimeoutException();
+            boolean wasInterrupted = false;
+            try {
+                synchronized (this) {
+                    while (state == PENDING) {
+                        final long remainingTimeMS = endTimeMS - System.currentTimeMillis();
+                        if (remainingTimeMS <= 0) {
+                            throw new TimeoutException();
+                        }
+                        try {
+                            wait(remainingTimeMS);
+                        } catch (final InterruptedException e) {
+                            if (isUninterruptibly) {
+                                wasInterrupted = true;
+                            } else {
+                                throw e;
+                            }
+                        }
                     }
-                    wait(remainingTimeMS);
+                }
+            } finally {
+                if (wasInterrupted) {
+                    Thread.currentThread().interrupt();
                 }
             }
         }
