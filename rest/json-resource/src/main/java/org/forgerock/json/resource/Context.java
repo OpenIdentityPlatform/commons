@@ -33,18 +33,6 @@ import org.forgerock.json.fluent.JsonValue;
  * {@link org.forgerock.json.resource.Context#toJsonValue()}.</li>
  * </ul>
  * <p>
- * Here is an example of the JSON representation of the core attributes of all
- * contexts:
- *
- * <pre>
- * {
- *   "id"     : "56f0fb7e-3837-464d-b9ec-9d3b6af665c3",
- *   "class"  : ...Java class name..,
- *   "parent" : {
- *       ...
- *   }
- * }
- * </pre>
  */
 public interface Context {
     /**
