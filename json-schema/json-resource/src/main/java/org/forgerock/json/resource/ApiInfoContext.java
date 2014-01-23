@@ -65,7 +65,7 @@ public final class ApiInfoContext extends AbstractContext {
      *            The version of the REST API exposed by the network end-point.
      */
     public ApiInfoContext(final Context parent, final String apiName, final String apiVersion) {
-        super(CONTEXT_NAME, checkNotNull(parent, "Cannot instantiate ApiInfoContext with null parent Context"));
+        super(checkNotNull(parent, "Cannot instantiate ApiInfoContext with null parent Context"));
         data.put(ATTR_API_NAME, checkNotNull(apiName, "Cannot instantiate ApiInfoContext with null apiName"));
         data.put(ATTR_API_VERSION, checkNotNull(apiVersion, "Cannot instantiate ApiInfoContext with null apiVersion"));
     }
@@ -84,7 +84,7 @@ public final class ApiInfoContext extends AbstractContext {
      *            The version of the REST API exposed by the network end-point.
      */
     public ApiInfoContext(final String id, final Context parent, final String apiName, final String apiVersion) {
-        super(CONTEXT_NAME, id, checkNotNull(parent, "Cannot instantiate ApiInfoContext with null parent Context"));
+        super(id, checkNotNull(parent, "Cannot instantiate ApiInfoContext with null parent Context"));
         data.put(ATTR_API_NAME, checkNotNull(apiName, "Cannot instantiate ApiInfoContext with null apiName"));
         data.put(ATTR_API_VERSION, checkNotNull(apiVersion, "Cannot instantiate ApiInfoContext with null apiVersion"));
     }
@@ -100,7 +100,16 @@ public final class ApiInfoContext extends AbstractContext {
      */
     ApiInfoContext(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
-        super(CONTEXT_NAME, savedContext, config);
+        super(savedContext, config);
+    }
+
+    /**
+     * Get this Context's {@link org.forgerock.json.resource.ContextName}.
+     *
+     * @return this object's ContextName
+     */
+    public ContextName getContextName() {
+        return CONTEXT_NAME;
     }
 
     /**

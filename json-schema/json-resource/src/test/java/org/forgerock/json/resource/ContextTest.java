@@ -77,12 +77,12 @@ public final class ContextTest {
 
         final JsonValue json = context.toJsonValue();
         assertThat(json.isMap()).isTrue();
-        assertThat(json.size()).isEqualTo(4);
+        assertThat(json.size()).isEqualTo(3);
         assertThat(json.get("class").asString()).isEqualTo(
                 "org.forgerock.json.resource.ServerContext");
         assertThat(json.get("id").asUUID()).isNotNull();
         assertThat(json.get("parent").isMap()).isTrue();
-        assertThat(json.get("parent").size()).isEqualTo(4);
+        assertThat(json.get("parent").size()).isEqualTo(3);
         assertThat(json.get("parent").get("class").asString()).isEqualTo(
                 "org.forgerock.json.resource.RootContext");
         assertThat(json.get("parent").get("id").asString()).isEqualTo("root-id");
@@ -123,8 +123,8 @@ public final class ContextTest {
 
         assertThat(context.containsContext(RootContext.class)).isTrue();
         assertThat(context.containsContext(SecurityContext.class)).isFalse();
-        assertThat(context.containsContext("root")).isTrue();
-        assertThat(context.containsContext("security")).isFalse();
+        assertThat(context.containsContext(ContextName.valueOf("root"))).isTrue();
+        assertThat(context.containsContext(ContextName.valueOf("security"))).isFalse();
     }
 
     @Test
@@ -156,9 +156,9 @@ public final class ContextTest {
         final Context root = new RootContext("root-id");
         final ServerContext context = new ServerContext(root);
 
-        assertThat(context.getContext("root")).isSameAs(root);
+        assertThat(context.getContext(ContextName.valueOf("root"))).isSameAs(root);
         try {
-            context.getContext("test");
+            context.getContext(ContextName.valueOf("test"));
         } catch (Exception e) {
             assertThat(e).isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("No context of named test found.")

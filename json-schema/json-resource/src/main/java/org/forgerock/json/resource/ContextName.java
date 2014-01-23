@@ -63,9 +63,6 @@ public class ContextName {
      * @return true if the object is equal to this one, false otherwise.
      */
     public boolean equals(Object o) {
-        if (o == null) {
-            return false;
-        }
         if (!(o instanceof ContextName)) {
             return false;
         }

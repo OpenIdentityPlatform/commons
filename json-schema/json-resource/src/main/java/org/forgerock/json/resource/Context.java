@@ -82,7 +82,7 @@ public interface Context {
      *             If no matching context was found in this context's parent
      *             chain.
      */
-    Context getContext(String contextName);
+    Context getContext(ContextName contextName);
 
     /**
      * Returns {@code true} if there is a context in the chain whose type is a
@@ -107,7 +107,7 @@ public interface Context {
      * @return {@code true} if there is a context in the chain whose context name
      *            matches {@code contextName}.
      */
-    boolean containsContext(String contextName);
+    boolean containsContext(ContextName contextName);
 
     /**
      * Returns the unique ID identifying this context, usually a UUID.
