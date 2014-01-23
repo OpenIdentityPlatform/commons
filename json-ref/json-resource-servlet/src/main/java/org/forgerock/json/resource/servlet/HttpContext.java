@@ -34,8 +34,6 @@ import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.ContextName;
 import org.forgerock.json.resource.PersistenceConfig;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.util.Factory;
-import org.forgerock.util.LazyMap;
 
 /**
  * A {@link org.forgerock.json.resource.AbstractContext} containing information relating to the originating HTTP
@@ -87,7 +85,7 @@ public final class HttpContext extends AbstractContext implements ClientContext 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public HttpContext(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
-        super(CONTEXT_NAME, savedContext, config);
+        super(savedContext, config);
     }
 
     /** the protocol represented by this context */
@@ -102,7 +100,7 @@ public final class HttpContext extends AbstractContext implements ClientContext 
     }
 
     HttpContext(final Context parent, final HttpServletRequest req) {
-        super(CONTEXT_NAME, parent);
+        super(parent);
         data.put(ATTR_METHOD, HttpUtils.getMethod(req));
         data.put(ATTR_PATH, req.getRequestURL().toString());
         data.put(ATTR_HEADERS, /*Collections.unmodifiableMap(new LazyMap<String, List<String>>(
@@ -142,6 +140,15 @@ public final class HttpContext extends AbstractContext implements ClientContext 
                         */
                     }
                 }/*))*/);
+    }
+
+    /**
+     * Get this Context's {@link org.forgerock.json.resource.ContextName}.
+     *
+     * @return this object's ContextName
+     */
+    public ContextName getContextName() {
+        return CONTEXT_NAME;
     }
 
     /**
@@ -245,5 +252,4 @@ public final class HttpContext extends AbstractContext implements ClientContext 
     public String getPath() {
         return data.get(ATTR_PATH).asString();
     }
-
 }

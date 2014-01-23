@@ -126,7 +126,7 @@ public final class SecurityContext extends AbstractContext {
      */
     public SecurityContext(final Context parent,
             final String authenticationId, final Map<String, Object> authorizationId) {
-        super(CONTEXT_NAME, checkNotNull(parent, "Cannot instantiate SecurityContext with null parent Context"));
+        super(checkNotNull(parent, "Cannot instantiate SecurityContext with null parent Context"));
         data.put(ATTR_AUTHENTICATION_ID, authenticationId != null ? authenticationId : "");
         data.put(ATTR_AUTHORIZATION_ID,  authorizationId != null
                 ? Collections.unmodifiableMap(new LinkedHashMap<String, Object>(authorizationId))
@@ -155,11 +155,11 @@ public final class SecurityContext extends AbstractContext {
      */
     public SecurityContext(final String id, final Context parent,
             final String authenticationId, final Map<String, Object> authorizationId) {
-        super(CONTEXT_NAME, id, checkNotNull(parent, "Cannot instantiate SecurityContext with null parent Context"));
+        super(id, checkNotNull(parent, "Cannot instantiate SecurityContext with null parent Context"));
         data.put(ATTR_AUTHENTICATION_ID, authenticationId != null ? authenticationId : "");
-        data.put(ATTR_AUTHORIZATION_ID,  authorizationId != null
+        data.put(ATTR_AUTHORIZATION_ID, authorizationId != null
                 ? Collections.unmodifiableMap(new LinkedHashMap<String, Object>(authorizationId))
-                : Collections.<String, Object> emptyMap());
+                : Collections.<String, Object>emptyMap());
     }
 
     /**
@@ -173,7 +173,16 @@ public final class SecurityContext extends AbstractContext {
      */
     SecurityContext(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
-        super(CONTEXT_NAME, savedContext, config);
+        super(savedContext, config);
+    }
+
+    /**
+     * Get this Context's {@link org.forgerock.json.resource.ContextName}.
+     *
+     * @return this object's ContextName
+     */
+    public ContextName getContextName() {
+        return CONTEXT_NAME;
     }
 
     /**

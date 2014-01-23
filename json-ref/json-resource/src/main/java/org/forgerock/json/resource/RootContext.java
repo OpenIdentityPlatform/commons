@@ -41,7 +41,7 @@ public final class RootContext extends AbstractContext {
      * {@code UUID.randomUUID()}.
      */
     public RootContext() {
-        super(CONTEXT_NAME, null); // No parent.
+        super(null); // No parent.
     }
 
     /**
@@ -51,7 +51,7 @@ public final class RootContext extends AbstractContext {
      *            The context ID.
      */
     public RootContext(final String id) {
-        super(CONTEXT_NAME, id, null); // No parent.
+        super(id, null); // No parent.
     }
 
     /**
@@ -67,6 +67,15 @@ public final class RootContext extends AbstractContext {
      */
     RootContext(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
-        super(CONTEXT_NAME, savedContext, config);
+        super(savedContext, config);
+    }
+
+    /**
+     * Get this Context's {@link org.forgerock.json.resource.ContextName}.
+     *
+     * @return this object's ContextName
+     */
+    public ContextName getContextName() {
+        return CONTEXT_NAME;
     }
 }
