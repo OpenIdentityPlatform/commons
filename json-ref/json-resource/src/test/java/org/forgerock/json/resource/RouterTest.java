@@ -84,7 +84,7 @@ public final class RouterTest {
 
     private void checkRouterContext(ArgumentCaptor<RouterContext> rc, final ServerContext c,
             final String expectedMatchedUri, final Map<String, String> expectedUriTemplateVariables) {
-        assertThat(rc.getValue().getParent()).isEqualTo(c);
+        assertThat(rc.getValue().getParent()).isSameAs(c);
         assertThat(rc.getValue().getMatchedUri()).isEqualTo(expectedMatchedUri);
         assertThat(rc.getValue().getBaseUri()).isEqualTo(expectedMatchedUri);
         assertThat(rc.getValue().getUriTemplateVariables()).isEqualTo(expectedUriTemplateVariables);
