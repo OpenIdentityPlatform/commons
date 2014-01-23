@@ -25,10 +25,13 @@ import org.forgerock.json.fluent.JsonValue;
  * time-stamp information, HTTP headers, etc. Contexts are linked together to
  * form a parent-child chain of context, whose root is a {@link RootContext}.
  * <p>
- * Contexts <b>MUST</b> support persistence by providing a <b>public</b>
- * constructor having the same declaration as
- * {@link #Context(JsonValue, PersistenceConfig)}.  See the method's
- * documentation for more details.
+ * Contexts <b>MUST</b> support persistence by providing
+ * <ul>
+ *     <li>a <b>public</b> constructor having the same declaration as
+ * {@link AbstractContext(JsonValue, PersistenceConfig)}.</li>
+ *     <li>a <b>public</b> method having the same declaration as
+ * {@link org.forgerock.json.resource.Context#toJsonValue()}.</li>
+ * </ul>
  * <p>
  * Here is an example of the JSON representation of the core attributes of all
  * contexts:
