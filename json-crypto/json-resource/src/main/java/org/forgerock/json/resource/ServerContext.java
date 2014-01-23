@@ -46,22 +46,6 @@ public class ServerContext extends AbstractContext {
     private static final ContextName CONTEXT_NAME = ContextName.valueOf("server");
 
     /**
-     * Creates a new server context having the provided context name and parent.
-     * Used by subclasses.
-     *
-     * @param name
-     *            The context name.
-     * @param parent
-     *            The parent context.
-     * @throws IllegalStateException
-     *             If it was not possible to inherit a connection from a parent
-     *             server context.
-     */
-    protected ServerContext(final ContextName name, final Context parent) {
-        super(name, parent);
-    }
-
-    /**
      * Creates a new server context having the provided parent, an ID
      * automatically generated using {@code UUID.randomUUID()}, and an internal
      * connection inherited from a parent server context.
@@ -73,7 +57,7 @@ public class ServerContext extends AbstractContext {
      *             server context.
      */
     public ServerContext(final Context parent) {
-        this(CONTEXT_NAME, parent);
+        super(parent);
     }
 
     /**
@@ -89,7 +73,7 @@ public class ServerContext extends AbstractContext {
      *             server context.
      */
     public ServerContext(final String id, final Context parent) {
-        super(CONTEXT_NAME, id, checkNotNull(parent, "Cannot instantiate ServerContext ith with null parent Context"));
+        super(id, checkNotNull(parent, "Cannot instantiate ServerContext ith with null parent Context"));
     }
 
     /**
@@ -105,22 +89,15 @@ public class ServerContext extends AbstractContext {
      */
     public ServerContext(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
-        this(CONTEXT_NAME, savedContext, config);
+        super(savedContext, config);
     }
 
     /**
-     * Restore from JSON representation.
+     * Get this Context's {@link org.forgerock.json.resource.ContextName}.
      *
-     * @param savedContext
-     *            The JSON representation from which this context's attributes
-     *            should be parsed.
-     * @param config
-     *            The persistence configuration.
-     * @throws ResourceException
-     *             If the JSON representation could not be parsed.
+     * @return this object's ContextName
      */
-    protected ServerContext(final ContextName name, final JsonValue savedContext, final PersistenceConfig config)
-            throws ResourceException {
-        super(name, savedContext, config);
+    public ContextName getContextName() {
+        return CONTEXT_NAME;
     }
 }

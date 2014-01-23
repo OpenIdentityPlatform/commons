@@ -102,7 +102,7 @@ public final class RouterContext extends ServerContext {
      */
     RouterContext(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
-        super(CONTEXT_NAME, savedContext, config);
+        super(savedContext, config);
     }
 
     /**
@@ -118,9 +118,18 @@ public final class RouterContext extends ServerContext {
      */
     RouterContext(final ServerContext parent, final String matchedUri,
             final Map<String, String> uriTemplateVariables) {
-        super(CONTEXT_NAME, checkNotNull(parent, "Cannot instantiate RouterContext with null parent Context"));
+        super(checkNotNull(parent, "Cannot instantiate RouterContext with null parent Context"));
         data.put(ATTR_MATCHED_URI, matchedUri);
         data.put(ATTR_URI_TEMPLATE_VARIABLES, uriTemplateVariables);
+    }
+
+    /**
+     * Get this Context's {@link org.forgerock.json.resource.ContextName}.
+     *
+     * @return this object's ContextName
+     */
+    public ContextName getContextName() {
+        return CONTEXT_NAME;
     }
 
     /**
