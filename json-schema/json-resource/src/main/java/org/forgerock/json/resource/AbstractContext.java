@@ -330,24 +330,4 @@ public abstract class AbstractContext implements Context {
         }
         return null;
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null) {
-            return false;
-        }
-        if (!(o instanceof Context)) {
-            return false;
-        }
-        Context context = (Context) o;
-        if (context.toJsonValue().isNull() && this.toJsonValue().isNull()) { // this shouldn't be the case
-            return true;
-        }
-        return context.toJsonValue().getObject().equals(this.toJsonValue().getObject());
-    }
-
-    @Override
-    public int hashCode() {
-        return toJsonValue().getObject().hashCode();
-    }
 }
