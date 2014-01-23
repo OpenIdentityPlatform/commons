@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2012 ForgeRock AS. All rights reserved.
+ * Copyright © 2012-2014 ForgeRock AS. All rights reserved.
  */
 
 package org.forgerock.json.resource;
@@ -50,7 +50,6 @@ import org.forgerock.json.fluent.JsonValue;
  */
 public abstract class AbstractContext implements Context {
     // Persisted attribute names.
-    protected static final String ATTR_CONTEXT_NAME = "contextName";
     protected static final String ATTR_CLASS = "class";
     protected static final String ATTR_ID = "id";
     private static final String ATTR_PARENT = "parent";
@@ -100,9 +99,9 @@ public abstract class AbstractContext implements Context {
      * @param parent
      *            The parent context.
      */
-    protected AbstractContext(final ContextName name, final Context parent) {
+    protected AbstractContext(final Context parent) {
         /* ID will be generated lazily in getId() */
-        this(name, null, parent);
+        this(null, parent);
     }
 
     /**
@@ -115,14 +114,13 @@ public abstract class AbstractContext implements Context {
      * @param parent
      *            The parent context.
      */
-    protected AbstractContext(final ContextName name, final String id, final Context parent) {
-        final int size = 2 + (id != null ? 1 : 0) + (parent != null ? 1 : 0);
+    protected AbstractContext(final String id, final Context parent) {
+        final int size = 1 + (id != null ? 1 : 0);
         this.data = new JsonValue(new HashMap<String, Object>(size));
         this.data.put(ATTR_CLASS, this.getClass().getName());
         if (id != null) {
             this.data.put(ATTR_ID, id);
         }
-        this.data.put(ATTR_CONTEXT_NAME, name.toString());
         this.parent = parent;
     }
 
@@ -151,10 +149,7 @@ public abstract class AbstractContext implements Context {
      *
      * In order to creation of a context's persisted JSON representation,
      * implementations must override
-     * {@link #saveToJson(JsonValue, PersistenceConfig)}.
      *
-     * @param name
-     *            The context name.
      * @param savedContext
      *            The JSON representation from which this context's attributes
      *            should be parsed.
@@ -162,10 +157,8 @@ public abstract class AbstractContext implements Context {
      *            The persistence configuration.
      * @throws ResourceException
      *             If the JSON representation could not be parsed.
-     * @see #saveToJson(JsonValue, PersistenceConfig)
-     * @see ServerContext#loadFromJson(JsonValue, PersistenceConfig)
      */
-    protected AbstractContext(final ContextName name, final JsonValue savedContext, final PersistenceConfig config)
+    protected AbstractContext(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
         final JsonValue savedParentContext = savedContext.get(ATTR_PARENT);
         savedContext.remove(ATTR_PARENT);
@@ -178,9 +171,7 @@ public abstract class AbstractContext implements Context {
      *
      * @return this object's ContextName
      */
-    public final ContextName getContextName() {
-        return ContextName.valueOf(data.get(ATTR_CONTEXT_NAME).asString());
-    }
+    public abstract ContextName getContextName();
 
     /**
      * Returns the first context in the chain whose type is a sub-type of the
@@ -220,7 +211,7 @@ public abstract class AbstractContext implements Context {
      *             If no matching context was found in this context's parent
      *             chain.
      */
-    public final Context getContext(final String contextName) {
+    public final Context getContext(final ContextName contextName) {
         final Context context = getContext0(contextName);
         if (context != null) {
             return context;
@@ -254,7 +245,7 @@ public abstract class AbstractContext implements Context {
      * @return {@code true} if there is a context in the chain whose context name
      *            matches {@code contextName}.
      */
-    public final boolean containsContext(final String contextName) {
+    public final boolean containsContext(final ContextName contextName) {
         return getContext0(contextName) != null;
     }
 
@@ -322,9 +313,9 @@ public abstract class AbstractContext implements Context {
         return null;
     }
 
-    private final Context getContext0(final String contextName) {
+    private final Context getContext0(final ContextName contextName) {
         for (Context context = this; context != null; context = context.getParent()) {
-            if (context.getContextName().equals(ContextName.valueOf(contextName))) {
+            if (context.getContextName().equals(contextName)) {
                 return context;
             }
         }
