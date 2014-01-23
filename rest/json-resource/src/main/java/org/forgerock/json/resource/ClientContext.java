@@ -38,7 +38,7 @@ public interface ClientContext extends Context {
      */
     public static class Protocol {
         /** the protocol value */
-        private String protocol;
+        private final String protocol;
 
         /**
          * Construct a new Protocol.  Private access; callers must use {@link valueOf} to
@@ -67,7 +67,7 @@ public interface ClientContext extends Context {
          * @return true if this object is equal to <em>o</em>, false otherwise
          */
         public boolean equals(Object o) {
-            if (!(o instanceof Protocol) || o == null) {
+            if (!(o instanceof Protocol)) {
                 return false;
             }
             Protocol p = (Protocol) o;
@@ -84,23 +84,13 @@ public interface ClientContext extends Context {
         }
 
         /**
-         * Cache of created protocols.
-         */
-        private static Map<String,Protocol> protocols = new HashMap<String,Protocol>(0);
-
-        /**
-         * Return a Protocol object based on the parameter <em>protocol</em>.  Caches
-         * existing Protocol objects to reduce unnecessary object creation.
+         * Return a Protocol object based on the parameter <em>protocol</em>.
          *
          * @param protocol the protocol value
          * @return the Protocol object
          */
         public static Protocol valueOf(final String protocol) {
-            Reject.ifNull(protocol, "Protocol cannot wrap null value");
-            if (!protocols.containsKey(protocol)) {
-                protocols.put(protocol, new Protocol(protocol));
-            }
-            return protocols.get(protocol);
+            return new Protocol(protocol);
         }
     }
 
