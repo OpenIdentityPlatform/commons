@@ -70,7 +70,7 @@ public final class ContextTest {
         final Context root = new RootContext("root-id");
         final ServerContext context = new ServerContext(root);
 
-        assertThat(context.getParent()).isEqualTo(root);
+        assertThat(context.getParent()).isSameAs(root);
         assertThat(context.getId()).isNotEmpty();
         assertThat(context.isRootContext()).isFalse();
         assertThat(context.getContextName().toString()).isEqualTo("server");
@@ -135,12 +135,12 @@ public final class ContextTest {
         final RouterContext router = new RouterContext(server, "test", new HashMap<String, String>(0));
         final InternalServerContext internal2 = new InternalServerContext(router);
 
-        assertThat(server.asContext(RootContext.class)).isEqualTo(root);
-        assertThat(router.asContext(RouterContext.class)).isEqualTo(router);
-        assertThat(router.asContext(ServerContext.class)).isEqualTo(router);
-        assertThat(router.getParent().asContext(ServerContext.class)).isEqualTo(server);
-        assertThat(router.asContext(ClientContext.class)).isEqualTo(internal);
-        assertThat(internal2.asContext(ClientContext.class)).isEqualTo(internal2);
+        assertThat(server.asContext(RootContext.class)).isSameAs(root);
+        assertThat(router.asContext(RouterContext.class)).isSameAs(router);
+        assertThat(router.asContext(ServerContext.class)).isSameAs(router);
+        assertThat(router.getParent().asContext(ServerContext.class)).isSameAs(server);
+        assertThat(router.asContext(ClientContext.class)).isSameAs(internal);
+        assertThat(internal2.asContext(ClientContext.class)).isSameAs(internal2);
 
         try {
             router.asContext(SecurityContext.class);
@@ -156,7 +156,7 @@ public final class ContextTest {
         final Context root = new RootContext("root-id");
         final ServerContext context = new ServerContext(root);
 
-        assertThat(context.getContext("root")).isEqualTo(root);
+        assertThat(context.getContext("root")).isSameAs(root);
         try {
             context.getContext("test");
         } catch (Exception e) {
