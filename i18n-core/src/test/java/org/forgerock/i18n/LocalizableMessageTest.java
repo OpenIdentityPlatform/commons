@@ -189,11 +189,4 @@ public final class LocalizableMessageTest {
         assertThat(message.toString()).isEqualTo("hello %%");
     }
 
-    /** Tests the check for associated descriptor */
-    @Test
-    public void testHasDescriptor() throws Exception {
-        final LocalizableMessage message = MyTestMessages.FIRST_MESSAGE_WITH_ORDINAL.get();
-        assertThat(message.hasDescriptor(MyTestMessages.FIRST_MESSAGE_WITH_ORDINAL)).isTrue();
-    }
-
 }

@@ -183,18 +183,6 @@ public final class LocalizableMessage implements CharSequence, Formattable,
     }
 
     /**
-     * Check if this message is based on the provided descriptor.
-     *
-     * @param descriptor
-     *            The message descriptor.
-     * @return {@code true} if and only if this message is based on the provided
-     *         descriptor.
-     */
-    public boolean hasDescriptor(AbstractLocalizableMessageDescriptor descriptor) {
-        return this.descriptor.equals(descriptor);
-    }
-
-    /**
      * Returns the {@code char} value at the specified index of the
      * {@code String} representation of this message in the default locale.
      *
