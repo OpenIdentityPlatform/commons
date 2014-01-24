@@ -38,7 +38,7 @@ import org.forgerock.util.Factory;
 import org.forgerock.util.LazyMap;
 
 /**
- * A {@link org.forgerock.json.resource.AbstractContext} containing information relating to the originating HTTP
+ * A {@link org.forgerock.json.resource.Context} containing information relating to the originating HTTP
  * Servlet request.
  * <p>
  * Here is an example of the JSON representation of an HTTP context:
