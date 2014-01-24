@@ -17,6 +17,8 @@ package org.forgerock.json.resource;
 
 import org.forgerock.json.fluent.JsonValue;
 
+import java.util.UUID;
+
 /**
  * A {@link AbstractContext} which has an an ID but no parent. All request context
  * chains are terminated by a root context as the top-most context.
@@ -41,7 +43,7 @@ public final class RootContext extends AbstractContext {
      * {@code UUID.randomUUID()}.
      */
     public RootContext() {
-        super(null); // No parent.
+        this(UUID.randomUUID().toString());
     }
 
     /**
