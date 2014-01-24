@@ -251,18 +251,12 @@ button.button, a.button, input.button {
     padding: 0 10px 1px;
     cursor: pointer;
     .rounded-corners(5px);
-    background-color: @color-active;
+    background-color: @color-inactive;
     padding: 7px 10px 7px 10px;
     margin-left: 5px;
-
-    -webkit-transition: background 0.3s;
-       -moz-transition: background 0.3s;
-        -ms-transition: background 0.3s;
-         -o-transition: background 0.3s;
-            transition: background 0.3s;
     
     &:hover {
-        background-color: lighten(@color-active, @button-hover-lightness);    
+        background-color: lighten(@color-inactive, @button-hover-lightness);    
     }
     
     &.active {
@@ -280,15 +274,9 @@ button.button, a.button, input.button {
             }
         }
     }
-
-    &:disabled {
-        background-color: @color-inactive;
-        cursor:auto;
-    }
     
     &.inactive {
         background-color: @color-inactive;
-        cursor:auto;
         &:hover {
             background-color: lighten(@color-inactive, @button-hover-lightness);    
         }
