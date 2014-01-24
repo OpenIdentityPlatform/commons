@@ -34,6 +34,8 @@ import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.ContextName;
 import org.forgerock.json.resource.PersistenceConfig;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.util.Factory;
+import org.forgerock.util.LazyMap;
 
 /**
  * A {@link org.forgerock.json.resource.AbstractContext} containing information relating to the originating HTTP
@@ -72,6 +74,9 @@ public final class HttpContext extends AbstractContext implements ClientContext 
     public static final String ATTR_PARAMETERS = "parameters";
     private static final String ATTR_PATH = "path";
 
+    private final Map<String, List<String>> headers;
+    private final Map<String, List<String>> parameters;
+
     /**
      * Restore from JSON representation. This method is for internal use only
      * and should not be called directly.
@@ -86,6 +91,8 @@ public final class HttpContext extends AbstractContext implements ClientContext 
     public HttpContext(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
         super(savedContext, config);
+        this.headers = (Map) data.get(ATTR_HEADERS).required().asMap();
+        this.parameters = (Map) data.get(ATTR_PARAMETERS).required().asMap();
     }
 
     /** the protocol represented by this context */
@@ -103,11 +110,11 @@ public final class HttpContext extends AbstractContext implements ClientContext 
         super(parent);
         data.put(ATTR_METHOD, HttpUtils.getMethod(req));
         data.put(ATTR_PATH, req.getRequestURL().toString());
-        data.put(ATTR_HEADERS, /*Collections.unmodifiableMap(new LazyMap<String, List<String>>(
+        this.headers = Collections.unmodifiableMap(new LazyMap<String, List<String>>(
                 new Factory<Map<String, List<String>>>() {
                     @Override
                     public Map<String, List<String>> newInstance() {
-                        final Map<String, List<String>> result = */new LinkedHashMap<String, List<String>>() {{
+                        final Map<String, List<String>> result = new LinkedHashMap<String, List<String>>();
                         final Enumeration<String> i = req.getHeaderNames();
                         while (i.hasMoreElements()) {
                             final String name = i.nextElement();
@@ -116,30 +123,28 @@ public final class HttpContext extends AbstractContext implements ClientContext 
                             while (j.hasMoreElements()) {
                                 values.add(j.nextElement());
                             }
-                            /*result.*/put(name, values);
+                            result.put(name, values);
                         }
-        /*
                         return result;
-                        */
                     }
-                }/*))*/);
-        data.put(ATTR_PARAMETERS, /*Collections.unmodifiableMap(new LazyMap<String, List<String>>(
+                }));
+        data.put(ATTR_HEADERS, headers);
+        this.parameters = Collections.unmodifiableMap(new LazyMap<String, List<String>>(
                 new Factory<Map<String, List<String>>>() {
                     @Override
                     public Map<String, List<String>> newInstance() {
-                        final Map<String, List<String>> result = */ new LinkedHashMap<String, List<String>>() {{
+                        final Map<String, List<String>> result = new LinkedHashMap<String, List<String>>();
                         final Set<Map.Entry<String, String[]>> parameters = req.getParameterMap()
                                 .entrySet();
                         for (final Map.Entry<String, String[]> parameter : parameters) {
                             final String name = parameter.getKey();
                             final String[] values = parameter.getValue();
-                            /*result.*/put(name, Arrays.asList(values));
+                            result.put(name, Arrays.asList(values));
                         }
-            /*
                         return result;
-                        */
                     }
-                }/*))*/);
+                }));
+        data.put(ATTR_PARAMETERS, parameters);
     }
 
     /**
@@ -185,10 +190,6 @@ public final class HttpContext extends AbstractContext implements ClientContext 
      * @return An unmodifiable map of the HTTP request headers.
      */
     public Map<String, List<String>> getHeaders() {
-        final Map<String, List<String>> headers = new HashMap<String, List<String>>(data.get(ATTR_HEADERS).size());
-        for (final String key : data.get(ATTR_HEADERS).keys()) {
-            headers.put(key, data.get(ATTR_HEADERS).get(key).asList(String.class));
-        }
         return headers;
     }
 
@@ -237,10 +238,6 @@ public final class HttpContext extends AbstractContext implements ClientContext 
      * @return An unmodifiable map of the HTTP request parameters.
      */
     public Map<String, List<String>> getParameters() {
-        final Map<String, List<String>> parameters = new HashMap<String, List<String>>(data.get(ATTR_PARAMETERS).size());
-        for (final String key : data.get(ATTR_PARAMETERS).keys()) {
-            parameters.put(key, data.get(ATTR_PARAMETERS).get(key).asList(String.class));
-        }
         return parameters;
     }
 

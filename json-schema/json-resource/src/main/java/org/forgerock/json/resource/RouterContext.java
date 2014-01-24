@@ -18,8 +18,6 @@ package org.forgerock.json.resource;
 import static org.forgerock.util.Reject.checkNotNull;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.forgerock.json.fluent.JsonValue;
@@ -91,6 +89,8 @@ public final class RouterContext extends ServerContext {
     private static final String ATTR_MATCHED_URI = "matchedUri";
     private static final String ATTR_URI_TEMPLATE_VARIABLES = "uriTemplateVariables";
 
+    private final Map<String, String> uriTemplateVariables;
+
     /**
      * Restore from JSON representation.
      *
@@ -103,6 +103,8 @@ public final class RouterContext extends ServerContext {
     RouterContext(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
         super(savedContext, config);
+        this.uriTemplateVariables =
+                Collections.unmodifiableMap((Map) data.get(ATTR_URI_TEMPLATE_VARIABLES).required().asMap());
     }
 
     /**
@@ -120,7 +122,8 @@ public final class RouterContext extends ServerContext {
             final Map<String, String> uriTemplateVariables) {
         super(checkNotNull(parent, "Cannot instantiate RouterContext with null parent Context"));
         data.put(ATTR_MATCHED_URI, matchedUri);
-        data.put(ATTR_URI_TEMPLATE_VARIABLES, uriTemplateVariables);
+        this.uriTemplateVariables = Collections.unmodifiableMap(uriTemplateVariables);
+        data.put(ATTR_URI_TEMPLATE_VARIABLES, this.uriTemplateVariables);
     }
 
     /**
@@ -142,19 +145,20 @@ public final class RouterContext extends ServerContext {
      *         routed so far.
      */
     public String getBaseUri() {
-        final Context parent = getParent();
         final StringBuilder builder = new StringBuilder();
+        final Context parent = getParent();
         if (parent.containsContext(RouterContext.class)) {
             final String baseUri = parent.asContext(RouterContext.class).getBaseUri();
             if (baseUri.length() > 1) {
                 builder.append(baseUri);
             }
         }
-        if (getMatchedUri().length() > 0) {
+        final String matchedUri = getMatchedUri();
+        if (matchedUri.length() > 0) {
             if (builder.length() > 0) {
                 builder.append('/');
             }
-            builder.append(getMatchedUri());
+            builder.append(matchedUri);
         }
         return builder.toString();
     }
@@ -178,11 +182,6 @@ public final class RouterContext extends ServerContext {
      *         variables, keyed on the URI template variable name.
      */
     public Map<String, String> getUriTemplateVariables() {
-        final Map<String, String> uriTemplateVariables =
-            new HashMap<String, String>(data.get(ATTR_URI_TEMPLATE_VARIABLES).size());
-        for (final String key : data.get(ATTR_URI_TEMPLATE_VARIABLES).keys()) {
-            uriTemplateVariables.put(key, data.get(ATTR_URI_TEMPLATE_VARIABLES).get(key).asString());
-        }
-        return Collections.unmodifiableMap(uriTemplateVariables);
+        return uriTemplateVariables;
     }
 }
