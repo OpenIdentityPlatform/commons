@@ -77,10 +77,9 @@ public final class ContextTest {
 
         final JsonValue json = context.toJsonValue();
         assertThat(json.isMap()).isTrue();
-        assertThat(json.size()).isEqualTo(3);
+        assertThat(json.size()).isEqualTo(2);
         assertThat(json.get("class").asString()).isEqualTo(
                 "org.forgerock.json.resource.ServerContext");
-        assertThat(json.get("id").asUUID()).isNotNull();
         assertThat(json.get("parent").isMap()).isTrue();
         assertThat(json.get("parent").size()).isEqualTo(3);
         assertThat(json.get("parent").get("class").asString()).isEqualTo(
