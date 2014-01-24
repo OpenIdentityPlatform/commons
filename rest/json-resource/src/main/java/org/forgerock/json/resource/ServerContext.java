@@ -73,7 +73,7 @@ public class ServerContext extends AbstractContext {
      *             server context.
      */
     public ServerContext(final String id, final Context parent) {
-        super(id, checkNotNull(parent, "Cannot instantiate ServerContext ith with null parent Context"));
+        super(id, checkNotNull(parent, "Cannot instantiate ServerContext with null parent Context"));
     }
 
     /**
