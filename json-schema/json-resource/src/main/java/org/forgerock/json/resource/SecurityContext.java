@@ -126,11 +126,7 @@ public final class SecurityContext extends AbstractContext {
      */
     public SecurityContext(final Context parent,
             final String authenticationId, final Map<String, Object> authorizationId) {
-        super(checkNotNull(parent, "Cannot instantiate SecurityContext with null parent Context"));
-        data.put(ATTR_AUTHENTICATION_ID, authenticationId != null ? authenticationId : "");
-        data.put(ATTR_AUTHORIZATION_ID,  authorizationId != null
-                ? Collections.unmodifiableMap(new LinkedHashMap<String, Object>(authorizationId))
-                : Collections.<String, Object> emptyMap());
+        this(null, parent, authenticationId, authorizationId); // no id
     }
 
     /**
