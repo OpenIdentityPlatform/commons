@@ -71,25 +71,6 @@ public final class ApiInfoContext extends AbstractContext {
     }
 
     /**
-     * Creates a new API information context having the provided ID, and parent.
-     *
-     * @param id
-     *            The context ID.
-     * @param parent
-     *            The parent context.
-     * @param apiName
-     *            The URI identifying the REST API exposed by the network
-     *            end-point.
-     * @param apiVersion
-     *            The version of the REST API exposed by the network end-point.
-     */
-    public ApiInfoContext(final String id, final Context parent, final String apiName, final String apiVersion) {
-        super(id, checkNotNull(parent, "Cannot instantiate ApiInfoContext with null parent Context"));
-        data.put(ATTR_API_NAME, checkNotNull(apiName, "Cannot instantiate ApiInfoContext with null apiName"));
-        data.put(ATTR_API_VERSION, checkNotNull(apiVersion, "Cannot instantiate ApiInfoContext with null apiVersion"));
-    }
-
-    /**
      * Restore from JSON representation.
      *
      * @param savedContext
