@@ -18,7 +18,6 @@ package org.forgerock.json.resource;
 
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
-import java.util.UUID;
 
 import org.forgerock.json.fluent.JsonValue;
 
@@ -74,16 +73,6 @@ public abstract class AbstractContext implements Context {
     }
 
     /**
-     * This should only be accessed via getId() in order to ensure that it is
-     * lazily initialized.
-     * <p>
-     * Benchmarking has shown that generating random UUID is a significant point
-     * of contention because the underlying SecureRandom implementation performs
-     * single threaded blocking reads to get entropy from /dev/urandom.
-     */
-//    private volatile String id;
-
-    /**
      * The parent Context.
      */
     private final Context parent;
@@ -94,14 +83,12 @@ public abstract class AbstractContext implements Context {
     protected final JsonValue data;
 
     /**
-     * Creates a new context having the provided parent and an ID automatically
-     * generated using {@code UUID.randomUUID()}.
+     * Creates a new context having the provided parent and no ID.
      *
      * @param parent
      *            The parent context.
      */
     protected AbstractContext(final Context parent) {
-        /* ID will be generated lazily in getId() */
         this(null, parent);
     }
 
@@ -114,7 +101,7 @@ public abstract class AbstractContext implements Context {
      *            The parent context.
      */
     protected AbstractContext(final String id, final Context parent) {
-        final int size = 1 + (id != null ? 1 : 0);
+        final int size = (id == null) ? 1 : 2;
         this.data = new JsonValue(new HashMap<String, Object>(size));
         this.data.put(ATTR_CLASS, this.getClass().getName());
         if (id != null) {
@@ -249,22 +236,17 @@ public abstract class AbstractContext implements Context {
     }
 
     /**
-     * Returns the unique ID identifying this context, usually a UUID.
+     * Returns the unique ID identifying this context.  Ids are not required for
+     * all contexts in a context chain.  If this context's id is null, we will
+     * return the parent's id until we reach the RootContext, which always has
+     * an id, usually a UUID.
      *
      * @return The unique ID identifying this context.
      */
     public final String getId() {
-        /*
-         * Lazily initialize the ID. See field documentation for details.
-         */
-        if (data.get(ATTR_ID).isNull()) {
-            synchronized (this.data) {
-                if (data.get(ATTR_ID).isNull()) {
-                    data.put(ATTR_ID, UUID.randomUUID().toString());
-                }
-            }
-        }
-        return data.get(ATTR_ID).required().asString();
+        return data.get(ATTR_ID).isNull() && !isRootContext()
+                ? getParent().getId()
+                : data.get(ATTR_ID).required().asString();
     }
 
     /**
