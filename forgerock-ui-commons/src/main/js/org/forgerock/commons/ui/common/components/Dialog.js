@@ -39,10 +39,7 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
         template: "templates/common/DialogTemplate.html",
         element: "#dialogs",
 
-        data: {         
-            width: 360,
-            height: 128
-        },
+        data: { },
 
         mode: "append",
 
@@ -68,16 +65,16 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
          * Then creates actions buttons and bind events. If actions map is empty, default
          * close action is added.
          */
-        show: function(callback) {         
+        show: function(callback) {   
+            
             this.setElement($("#dialogs"));
             this.parentRender(_.bind(function() {
                 this.setElement(this.$el.find(".dialogContainer:last"));
+                $("#dialogs").addClass('show');
                 
-                $(".dialog-background").show();
+                $(".dialog-background").fadeIn(300);
                 $(".dialog-background").off('click').on('click', _.bind(this.close, this));
-                
-                this.resize();
-                
+         
                 _.each(this.actions, _.bind(function(type, name) {
                     this.$el.find(".dialogActions").append("<input type='"+ type +"' name='"+ name +"' value='"+ name +"' class='button float-right' />");                    
                 }, this));
@@ -86,17 +83,7 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
             }, this));
         },
         
-        resize: function() {
-            this.$el.css({width: this.data.width, height: this.data.height});
-            
-            if (this.data.height) {
-                this.$el.css('margin-top', (window.innerHeight - this.data.height) / 2 * 0.5);
-            } else {
-                this.$el.css('margin-top', "50px");
-            }
-            this.$el.css('margin-left', (window.innerWidth - this.data.width) / 2);
-            this.$el.find(".dialogContent").css('height', this.data.height - 43);
-        },
+ 
         
         /**
          * Loads template from 'contentTemplate'
@@ -119,7 +106,9 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
             }
             
             if($(".dialogContainer").length < 2) {
-                $(".dialog-background").hide();
+                $(".dialog-background").fadeOut(300, function(){
+                    $("#dialogs").removeClass('show');
+                });
             }
             
             eventManager.sendEvent(constants.EVENT_DIALOG_CLOSE);

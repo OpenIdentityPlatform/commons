@@ -5,19 +5,21 @@ input[type="text"], input[type="password"], input[type="tel"], input[type="email
     font-size: 15px;
     color: @font-color;
     padding: 5px 10px;
-    background-color: @content-background;
-    width: 200px;
+    background-color: @input-background-color;
+    width: 230px;
     transition: all 0.25s ease-in-out;
     -webkit-transition: all 0.25s ease-in-out;
     -moz-transition: all 0.25s ease-in-out;
 }
+
+
 
 .select-static-medium {
 	width: 130px;
 }
 
 input:not([type=submit]):invalid:required {
-    background-color: #fee; 
+    background-color: @input-background-invalid-color; 
 }
 
 
@@ -27,15 +29,14 @@ input[type="text"]:focus, input[type="password"]:focus, input[type="tel"]:focus,
     .box-shadow(0, 0, 1px, 1px, @color-active);
 }
 
-input.read-only, input:read-only, input[type="text"]:focus:read-only{
+input.read-only, input:read-only, input[type="text"]:focus:read-only, input[type="email"]:focus:read-only{
     background: transparent;
     box-shadow:none;
     border:1px solid @input-border-basic;
 }
 
 form.form {
-    padding: 20px;
-    
+
     &.large {
         width: 700px;
         label {
@@ -92,7 +93,7 @@ form.form {
         font-weight: bold;
     }
     label.short {
-        width: 150px;
+        width: 140px;
     }
     label.light {
         font-weight: normal;
@@ -164,25 +165,31 @@ form.form {
        padding-top: 20px;
     }
     select {
-        width: 222px;
+        width: 252px;
+        height: 30px;
+        padding:0;
+    }
+    span.error, span.ok {
+        font-weight: bold;
+        font-size: 14px;
+        text-align: center;
+        vertical-align: middle;
+        width: 20px;
+        display: inline-block;
     }
     span.error {
         color: @color-error;
-        font-weight: bold;
-        font-size: 14px;
-        padding: 0 6px;
     }
     span.ok {
         color: @color-success;
-        font-weight: bold;
-        font-size: 14px;
-        padding: 0 3px 0 5px;
     }
+
     div.validation-message, div.input-validation-message {
         color: @color-error;
         display: inline-block;
         float: right;
-        width: 220px;
+        height: 13px;
+        font-size: 12px;
     }
     div.group-field-inputs {
         float: left;
@@ -198,14 +205,105 @@ form.form {
             font-weight: bold;
             font-size: 12px;
             &.ok {
-                padding: 0 5px 0 4px;
+                width:12px;
+            }
+            &.error {
+               width:12px;
             }
         }
     }
+
     div.group-field-message {
         margin-left: 15px;
         float: left;
         width: 210px;
     }
-    
+
+
+    .group-field-row{
+        clear:both;
+    }
+
+    .group-actions-block{
+        clear:both;
+        margin: 30px 0 0;
+    }
+
+    .group-field-row, .group-field-block{
+
+        display: table;
+        padding: 5px 0 0;
+
+        label, input{
+            float:left;
+        }
+
+        label{ 
+            width:160px;
+            text-align:left;
+        }
+
+        .group-input-span{
+            float:left; 
+
+        }
+
+        .group-input-span label{
+            float:none;
+        }
+
+        .group-input-span{
+            display:table;
+            float: left;
+        }
+        .group-input-span span.error,.group-input-span span.ok{
+            display:table-cell;
+            vertical-align: middle;
+            
+        }
+
+        div.validation-message{
+            margin: 0 20px 0 0;
+            width:auto;
+            clear: both;
+        }
+
+        span{
+            display: table-cell;
+            vertical-align: middle;
+        }
+
+    }
+
+    .align-label{
+        padding-left:170px;
+    }
+
+    .group-field-row  span.ok, .group-field-row span.error{ 
+        display:table-cell;
+        vertical-align: middle;
+    }
+
+    .field-rule{
+        padding:2px 0 0;
+    }
+
+    .group-field-row.group-field-short label{
+        width:auto;
+    }
+
+    div.group-field-errors{
+        margin: 7px 0 0 7px;
+    }
+
+    .group-field-row label.right, 
+    .group-field-block label.align-right, 
+    align.right{
+        text-align:right;
+    }
+
+    .group-field-block{
+       height:50px;
+    }
+
 }

@@ -116,34 +116,6 @@ a.img-close {
     display-inline: block;
 }
 
-/* HELPERS */
-.align-center {
-    text-align: center;
-}
-.block {
-    display: block;
-}
-.inline {
-    display: inline-block;
-}
-.float-left {
-    float: left;
-}
-.float-right {
-    float: right;
-}
-.clear {
-    clear: both;
-}
-.noMargin {
-    margin: 0;
-}
-.bold {
-    font-weight: bold;
-}
-.active {
-    color: @color-active;
-}
 
 /* FUNCTIONS */
 .rounded-corners (@radius: 5px) {
@@ -202,12 +174,6 @@ a.img-close {
     background-image: url("@{background-url}"), -ms-linear-gradient(@position, @color-start, @color-end);
     background-repeat: @background-repeat;
     background-position: @background-position;
-}
-
-/* */
-.container {
-    width: @site-width;
-    margin: 0 auto;
 }
 
 .column-layout {
@@ -324,13 +290,18 @@ a.img-close {
     margin-bottom: 20px;
 }
 
+.col2{
+    float:left;
+    width:50%;
+}
+
 
 .container-shadow {
-    .container;
     .rounded-corners(5px);
     border: 1px solid #e6e6e6;
     background-color: @content-background;
     .box-shadow(0, 2px, 8px, 0, #888);
+    padding:30px;
 }
 .content {
     padding: 5px 10px;
@@ -339,7 +310,7 @@ a.img-close {
 .content-bg {
     background-color: @content-background;
     .rounded-corners(5px);
-    padding: 5px 15px 10px 15px;
+    padding: 20px;
     border: 1px solid darken(@background-color, 7.5%);
 }
 
@@ -389,8 +360,47 @@ a.img-close {
 }
 
 #login-container {
-    width: @login-container-width;
+    
     label {
         text-align:@login-container-label-align;
     }
+    label.align-left {
+        text-align:left;
+    }
+}
+
+
+/* HELPERS */
+.align-center {
+    text-align: center;
+}
+.align-left {
+    text-align: left;
+}
+.align-right {
+    text-align: right;
+}
+.block {
+    display: block;
+}
+.inline {
+    display: inline-block;
+}
+.float-left {
+    float: left;
+}
+.float-right {
+    float: right;
+}
+.clear {
+    clear: both;
+}
+.noMargin {
+    margin: 0;
+}
+.bold {
+    font-weight: bold;
+}
+.active {
+    color: @color-active;
 }

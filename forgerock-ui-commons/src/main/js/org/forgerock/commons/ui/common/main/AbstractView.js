@@ -139,10 +139,10 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
                 button = this.$el.find("#submit");
             }
             if(validatorsManager.formValidated(this.$el)) {
-                button.removeClass('inactive').addClass('active');
+                button.attr('disabled', false);
                 this.$el.find(".input-validation-message").hide();
             } else {
-                button.removeClass('active').addClass('inactive');
+                button.attr('disabled', true);
                 this.$el.find(".input-validation-message").show();
             }
             
@@ -158,6 +158,8 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
             }
             
             $(input).nextAll("div.validation-message:first").html(msg ? msg : '');
+            $(input).parents('.separate-message').children("div.validation-message:first").html(msg ? msg : '');
+          
             $("div.validation-message[for='"+$(input).attr('name')+"']").html(msg ? msg : '');
             
             if(validatorType) {

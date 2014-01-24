@@ -1,5 +1,5 @@
 <div class="container-shadow" id="login-container">
-    <div class="column-layout" style="padding-top: 30px;">
+    <div class="column-layout">
         <div{{#hasOptionalUIFeatures}} class="column2"{{/hasOptionalUIFeatures}}>
             <form action="" method="post" class="form">
                 <fieldset{{#hasOptionalUIFeatures}} style="border-right: 1px solid #C0C0C0;"{{/hasOptionalUIFeatures}}>
@@ -12,7 +12,7 @@
                             data-validator="required" data-validator-event="keyup" />
                     </div>
                     <div class="field field-checkbox">
-                        <label style="text-align:left;"><input type="checkbox" name="loginRemember" />{{t "templates.user.LoginTemplate.loginRemember"}}</label>
+                        <label class="align-left"><input type="checkbox" name="loginRemember" />{{t "templates.user.LoginTemplate.loginRemember"}}</label>
                     </div>
                     <div class="field field-submit">
                         <input type="submit" name="loginButton" class="button active" value="{{t "common.user.login"}}" />
