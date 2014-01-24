@@ -20,7 +20,7 @@ import org.forgerock.json.fluent.JsonValue;
 import java.util.UUID;
 
 /**
- * A {@link AbstractContext} which has an an ID but no parent. All request context
+ * A {@link Context} which has an an ID but no parent. All request context
  * chains are terminated by a root context as the top-most context.
  * <p>
  * Here is an example of the JSON representation of a root context:

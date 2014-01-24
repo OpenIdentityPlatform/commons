@@ -20,8 +20,8 @@ import static org.forgerock.util.Reject.checkNotNull;
 import org.forgerock.json.fluent.JsonValue;
 
 /**
- * A {@link AbstractContext} containing information about the REST API exposed by the
- * network end-point (Servlet, listener). A REST API information {@link AbstractContext}
+ * A {@link Context} containing information about the REST API exposed by the
+ * network end-point (Servlet, listener). A REST API information {@link Context}
  * will be created for each REST request.
  * <p>
  * The name which identifies the REST API exposed by the
