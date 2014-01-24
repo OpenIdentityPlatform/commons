@@ -24,7 +24,7 @@ import java.util.Map;
 import org.forgerock.json.fluent.JsonValue;
 
 /**
- * A {@link AbstractContext} containing information about the client performing the
+ * A {@link Context} containing information about the client performing the
  * request which may be used when performing authorization decisions. A security
  * context will typically be created for each REST request and comprises of two
  * fields:
