@@ -43,7 +43,7 @@ import org.forgerock.json.fluent.JsonValue;
 public class ServerContext extends AbstractContext {
 
     /** the client-friendly name of this context */
-    private static final ContextName CONTEXT_NAME = ContextName.valueOf("server");
+    private static final String CONTEXT_NAME = "server";
 
     /**
      * Creates a new server context having the provided parent, an ID
@@ -93,11 +93,11 @@ public class ServerContext extends AbstractContext {
     }
 
     /**
-     * Get this Context's {@link org.forgerock.json.resource.ContextName}.
+     * Get this Context's name.
      *
-     * @return this object's ContextName
+     * @return this object's name
      */
-    public ContextName getContextName() {
+    public String getContextName() {
         return CONTEXT_NAME;
     }
 }

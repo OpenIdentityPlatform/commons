@@ -153,11 +153,11 @@ public abstract class AbstractContext implements Context {
     }
 
     /**
-     * Get this Context's {@link ContextName}.
+     * Get this Context's name.
      *
-     * @return this object's ContextName
+     * @return this object's name
      */
-    public abstract ContextName getContextName();
+    public abstract String getContextName();
 
     /**
      * Returns the first context in the chain whose type is a sub-type of the
@@ -197,7 +197,7 @@ public abstract class AbstractContext implements Context {
      *             If no matching context was found in this context's parent
      *             chain.
      */
-    public final Context getContext(final ContextName contextName) {
+    public final Context getContext(final String contextName) {
         final Context context = getContext0(contextName);
         if (context != null) {
             return context;
@@ -223,7 +223,7 @@ public abstract class AbstractContext implements Context {
     }
 
     /**
-     * Returns {@code true} if there is a context in the chain whose ContextName is
+     * Returns {@code true} if there is a context in the chain whose context name is
      * matches the provided context name.
      *
      * @param contextName
@@ -231,7 +231,7 @@ public abstract class AbstractContext implements Context {
      * @return {@code true} if there is a context in the chain whose context name
      *            matches {@code contextName}.
      */
-    public final boolean containsContext(final ContextName contextName) {
+    public final boolean containsContext(final String contextName) {
         return getContext0(contextName) != null;
     }
 
@@ -294,7 +294,7 @@ public abstract class AbstractContext implements Context {
         return null;
     }
 
-    private final Context getContext0(final ContextName contextName) {
+    private final Context getContext0(final String contextName) {
         for (Context context = this; context != null; context = context.getParent()) {
             if (context.getContextName().equals(contextName)) {
                 return context;

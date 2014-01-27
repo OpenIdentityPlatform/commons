@@ -36,7 +36,7 @@ import java.util.UUID;
 public final class RootContext extends AbstractContext {
 
     // a client-friendly name for this context */
-    private static final ContextName CONTEXT_NAME = ContextName.valueOf("root");
+    private static final String CONTEXT_NAME = "root";
 
     /**
      * Creates a new root context having an ID automatically generated using
@@ -73,11 +73,11 @@ public final class RootContext extends AbstractContext {
     }
 
     /**
-     * Get this Context's {@link org.forgerock.json.resource.ContextName}.
+     * Get this Context's name.
      *
-     * @return this object's ContextName
+     * @return this object's name
      */
-    public ContextName getContextName() {
+    public String getContextName() {
         return CONTEXT_NAME;
     }
 }
