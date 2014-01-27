@@ -36,11 +36,11 @@ import org.forgerock.json.fluent.JsonValue;
  */
 public interface Context {
     /**
-     * Get this Context's {@link ContextName}.
+     * Get this Context's name.
      *
-     * @return this object's ContextName
+     * @return this object's name
      */
-    ContextName getContextName();
+    String getContextName();
 
     /**
      * Returns the first context in the chain whose type is a sub-type of the
@@ -73,7 +73,7 @@ public interface Context {
      *             If no matching context was found in this context's parent
      *             chain.
      */
-    Context getContext(ContextName contextName);
+    Context getContext(String contextName);
 
     /**
      * Returns {@code true} if there is a context in the chain whose type is a
@@ -90,7 +90,7 @@ public interface Context {
     boolean containsContext(Class<? extends Context> clazz);
 
     /**
-     * Returns {@code true} if there is a context in the chain whose ContextName is
+     * Returns {@code true} if there is a context in the chain whose name
      * matches the provided context name.
      *
      * @param contextName
@@ -98,7 +98,7 @@ public interface Context {
      * @return {@code true} if there is a context in the chain whose context name
      *            matches {@code contextName}.
      */
-    boolean containsContext(ContextName contextName);
+    boolean containsContext(String contextName);
 
     /**
      * Returns the unique ID identifying this context, usually a UUID.
