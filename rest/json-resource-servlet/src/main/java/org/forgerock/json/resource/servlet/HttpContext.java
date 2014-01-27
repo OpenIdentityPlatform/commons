@@ -18,7 +18,6 @@ package org.forgerock.json.resource.servlet;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,7 +30,6 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.AbstractContext;
 import org.forgerock.json.resource.ClientContext;
 import org.forgerock.json.resource.Context;
-import org.forgerock.json.resource.ContextName;
 import org.forgerock.json.resource.PersistenceConfig;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.util.Factory;
@@ -64,7 +62,7 @@ import org.forgerock.util.LazyMap;
 public final class HttpContext extends AbstractContext implements ClientContext {
 
     /** a client-friendly name for this context */
-    private static final ContextName CONTEXT_NAME = ContextName.valueOf("http");
+    public static final String CONTEXT_NAME = "http";
 
     // TODO: security parameters such as user name, etc?
 
@@ -148,11 +146,11 @@ public final class HttpContext extends AbstractContext implements ClientContext 
     }
 
     /**
-     * Get this Context's {@link org.forgerock.json.resource.ContextName}.
+     * Get this Context's name.
      *
-     * @return this object's ContextName
+     * @return this object's name
      */
-    public ContextName getContextName() {
+    public String getContextName() {
         return CONTEXT_NAME;
     }
 

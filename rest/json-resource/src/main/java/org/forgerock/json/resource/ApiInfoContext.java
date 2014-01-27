@@ -46,7 +46,7 @@ import org.forgerock.json.fluent.JsonValue;
 public final class ApiInfoContext extends AbstractContext {
 
     /** a client-friendly name for this context */
-    private static final ContextName CONTEXT_NAME = ContextName.valueOf("apiInfo");
+    private static final String CONTEXT_NAME = "apiInfo";
 
     // Persisted attribute names.
     private static final String ATTR_API_NAME = "apiName";
@@ -85,11 +85,11 @@ public final class ApiInfoContext extends AbstractContext {
     }
 
     /**
-     * Get this Context's {@link org.forgerock.json.resource.ContextName}.
+     * Get this Context's name.
      *
-     * @return this object's ContextName
+     * @return this object's name
      */
-    public ContextName getContextName() {
+    public String getContextName() {
         return CONTEXT_NAME;
     }
 
