@@ -53,7 +53,7 @@ public final class ContextTest {
         assertThat(root.getParent()).isNull();
         assertThat(root.getId()).isNotEmpty();
         assertThat(root.isRootContext()).isTrue();
-        assertThat(root.getContextName().toString()).isEqualTo("root");
+        assertThat(root.getContextName()).isEqualTo("root");
     }
 
     @Test
@@ -62,7 +62,7 @@ public final class ContextTest {
         assertThat(root.getParent()).isNull();
         assertThat(root.getId()).isEqualTo("root-id");
         assertThat(root.isRootContext()).isTrue();
-        assertThat(root.getContextName().toString()).isEqualTo("root");
+        assertThat(root.getContextName()).isEqualTo("root");
     }
 
     @Test
@@ -73,7 +73,7 @@ public final class ContextTest {
         assertThat(context.getParent()).isSameAs(root);
         assertThat(context.getId()).isNotEmpty();
         assertThat(context.isRootContext()).isFalse();
-        assertThat(context.getContextName().toString()).isEqualTo("server");
+        assertThat(context.getContextName()).isEqualTo("server");
 
         final JsonValue json = context.toJsonValue();
         assertThat(json.isMap()).isTrue();
@@ -122,8 +122,8 @@ public final class ContextTest {
 
         assertThat(context.containsContext(RootContext.class)).isTrue();
         assertThat(context.containsContext(SecurityContext.class)).isFalse();
-        assertThat(context.containsContext(ContextName.valueOf("root"))).isTrue();
-        assertThat(context.containsContext(ContextName.valueOf("security"))).isFalse();
+        assertThat(context.containsContext("root")).isTrue();
+        assertThat(context.containsContext("security")).isFalse();
     }
 
     @Test
@@ -155,9 +155,9 @@ public final class ContextTest {
         final Context root = new RootContext("root-id");
         final ServerContext context = new ServerContext(root);
 
-        assertThat(context.getContext(ContextName.valueOf("root"))).isSameAs(root);
+        assertThat(context.getContext("root")).isSameAs(root);
         try {
-            context.getContext(ContextName.valueOf("test"));
+            context.getContext("test");
         } catch (Exception e) {
             assertThat(e).isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("No context of named test found.")
