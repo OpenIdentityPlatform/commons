@@ -45,6 +45,10 @@ public final class ContextTest {
             return Protocol.valueOf("internal").equals(protocol)
                     || Protocol.valueOf("server").equals(protocol);
         }
+
+        public Protocol getProtocol() {
+            return Protocol.valueOf("internal");
+        }
     }
 
     @Test
