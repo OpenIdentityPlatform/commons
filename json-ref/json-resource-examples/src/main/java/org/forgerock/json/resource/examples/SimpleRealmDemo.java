@@ -15,6 +15,9 @@
  */
 package org.forgerock.json.resource.examples;
 
+import static org.forgerock.json.resource.examples.DemoUtils.ctx;
+import static org.forgerock.json.resource.examples.DemoUtils.log;
+
 import java.util.Collections;
 
 import org.forgerock.json.fluent.JsonValue;
@@ -28,7 +31,6 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceName;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.ServerContext;
 
 /**
@@ -51,16 +53,16 @@ public final class SimpleRealmDemo {
         final Connection c = Resources.newInternalConnection(rootRealm);
 
         // Realm = [], Collection = users, Resource = alice
-        c.read(new RootContext(), Requests.newReadRequest("users/alice"));
+        c.read(ctx(), Requests.newReadRequest("users/alice"));
 
         // Realm = [], Collection = groups, Resource = administrators
-        c.read(new RootContext(), Requests.newReadRequest("groups/administrators"));
+        c.read(ctx(), Requests.newReadRequest("groups/administrators"));
 
         // Realm = [a], Collection = users, Resource = alice
-        c.read(new RootContext(), Requests.newReadRequest("a/users/alice"));
+        c.read(ctx(), Requests.newReadRequest("a/users/alice"));
 
         // Realm = [a, b], Collection = users, Resource = alice
-        c.read(new RootContext(), Requests.newReadRequest("a/b/users/alice"));
+        c.read(ctx(), Requests.newReadRequest("a/b/users/alice"));
     }
 
     /**
@@ -76,23 +78,21 @@ public final class SimpleRealmDemo {
                 final ResourceName name = request.getResourceNameObject();
                 final int size = name.size();
                 if (size == 0) {
-                    System.out.println("Reading root");
+                    log("Reading root");
                 } else if (name.leaf().equals("users")) {
-                    System.out.println("Reading users container in "
-                            + name.subSequence(0, size - 1));
+                    log("Reading users container in " + name.subSequence(0, size - 1));
                 } else if (name.leaf().equals("groups")) {
-                    System.out.println("Reading groups container in "
-                            + name.subSequence(0, size - 1));
+                    log("Reading groups container in " + name.subSequence(0, size - 1));
                 } else if (size > 1) {
                     if (name.get(size - 2).equals("users")) {
                         read("user", name);
                     } else if (name.get(size - 2).equals("groups")) {
                         read("group", name);
                     } else {
-                        System.out.println("Reading realm " + name);
+                        log("Reading realm " + name);
                     }
                 } else {
-                    System.out.println("Reading realm " + name);
+                    log("Reading realm " + name);
                 }
 
                 final JsonValue content =
@@ -103,9 +103,9 @@ public final class SimpleRealmDemo {
     }
 
     private static void read(final String type, final ResourceName path) {
-        System.out.println("Reading " + type);
-        System.out.println("    resource ID : " + path.leaf());
-        System.out.println("    realm path  : " + path.subSequence(0, path.size() - 2));
+        log("Reading " + type);
+        log("    resource ID : " + path.leaf());
+        log("    realm path  : " + path.subSequence(0, path.size() - 2));
     }
 
     private SimpleRealmDemo() {
