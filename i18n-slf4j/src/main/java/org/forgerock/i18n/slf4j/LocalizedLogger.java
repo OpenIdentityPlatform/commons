@@ -5033,7 +5033,6 @@ public final class LocalizedLogger {
         }
     }
 
-
     /**
      * Logs a trace message with an accompanying exception.
      *
@@ -5630,6 +5629,24 @@ public final class LocalizedLogger {
         if (logger.isTraceEnabled()) {
             final LocalizableMessage message = d.get(args);
             logger.trace(new LocalizedMarker(message), message.toString(locale), t);
+        }
+    }
+
+    /**
+     * Logs a trace message.
+     *
+     * @param format
+     *            The message format, compatible with
+     *            {@code java.util.Formatter} rules
+     * @param args
+     *            The message arguments.
+     *
+     * @see org.slf4j.Logger#trace(Marker, String)
+     */
+    public void trace(final String format, final Object...args) {
+        if (logger.isTraceEnabled()) {
+            final LocalizableMessage message = LocalizableMessage.raw(format, args);
+            logger.trace(new LocalizedMarker(message), message.toString());
         }
     }
 
