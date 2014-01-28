@@ -119,7 +119,7 @@
     &lt;plugin>
       &lt;groupId>org.forgerock.commons&lt;/groupId>
       &lt;artifactId>i18n-maven-plugin&lt;/artifactId>
-      &lt;version>${currentStableVersion}&lt;/version>
+      &lt;version>${project.version}&lt;/version>
       &lt;executions>
         &lt;execution>
           &lt;phase>generate-sources&lt;/phase>
@@ -206,7 +206,7 @@ public final class MyToolMessages
   &lt;dependency>
     &lt;groupId>org.forgerock.commons&lt;/groupId>
     &lt;artifactId>i18n-core&lt;/artifactId>
-    &lt;version>${currentStableVersion}&lt;/version>
+    &lt;version>${project.version}&lt;/version>
   &lt;/dependency>
 &lt;/dependencies></source>
       <p>
@@ -254,7 +254,7 @@ System.out.println(message.toString()); // Default locale.</source>
           <a href="i18n-maven-plugin/clean-messages-mojo.html">clean-messages</a>
           goal which can be invoked as follows: 
         </p>
-        <source>mvn org.forgerock.commons:i18n-maven-plugin:${currentStableVersion}:clean-messages -DmessageFile=src/main/resources/com/example/my_tool.properties</source>
+        <source>mvn org.forgerock.commons:i18n-maven-plugin:${project.version}:clean-messages -DmessageFile=src/main/resources/com/example/my_tool.properties</source>
       </subsection>
       <subsection name="Java logging integration">
         <p>
@@ -267,7 +267,7 @@ System.out.println(message.toString()); // Default locale.</source>
   &lt;dependency>
     &lt;groupId>org.forgerock.commons&lt;/groupId>
     &lt;artifactId>i18n-jul&lt;/artifactId>
-    &lt;version>${currentStableVersion}&lt;/version>
+    &lt;version>${project.version}&lt;/version>
   &lt;/dependency>
 &lt;/dependencies></source>
       <p>
@@ -303,7 +303,7 @@ logger.warning(MY_MESSAGE, "a message parameter");</source>
   &lt;dependency>
     &lt;groupId>org.forgerock.commons&lt;/groupId>
     &lt;artifactId>i18n-slf4j&lt;/artifactId>
-    &lt;version>${currentStableVersion}&lt;/version>
+    &lt;version>${project.version}&lt;/version>
   &lt;/dependency>
 &lt;/dependencies></source>
       <p>
