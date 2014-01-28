@@ -104,6 +104,13 @@ public final class HttpContext extends AbstractContext implements ClientContext 
         return HTTP_PROTOCOL.equals(protocol);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public Protocol getProtocol() {
+        return HTTP_PROTOCOL;
+    }
+
     HttpContext(final Context parent, final HttpServletRequest req) {
         super(parent);
         data.put(ATTR_METHOD, HttpUtils.getMethod(req));
