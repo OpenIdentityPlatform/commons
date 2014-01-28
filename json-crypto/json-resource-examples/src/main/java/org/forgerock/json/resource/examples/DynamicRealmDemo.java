@@ -15,6 +15,9 @@
  */
 package org.forgerock.json.resource.examples;
 
+import static org.forgerock.json.resource.examples.DemoUtils.ctx;
+import static org.forgerock.json.resource.examples.DemoUtils.log;
+
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,7 +40,6 @@ import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.RouterContext;
 import org.forgerock.json.resource.RoutingMode;
@@ -67,16 +69,16 @@ public final class DynamicRealmDemo {
         final Connection c = Resources.newInternalConnection(rootRealm);
 
         // Realm = [], Collection = users, Resource = alice
-        c.read(new RootContext(), Requests.newReadRequest("users/alice"));
+        c.read(ctx(), Requests.newReadRequest("users/alice"));
 
         // Realm = [], Collection = groups, Resource = administrators
-        c.read(new RootContext(), Requests.newReadRequest("groups/administrators"));
+        c.read(ctx(), Requests.newReadRequest("groups/administrators"));
 
         // Realm = [a], Collection = users, Resource = alice
-        c.read(new RootContext(), Requests.newReadRequest("a/users/alice"));
+        c.read(ctx(), Requests.newReadRequest("a/users/alice"));
 
         // Realm = [a, b], Collection = users, Resource = alice
-        c.read(new RootContext(), Requests.newReadRequest("a/b/users/alice"));
+        c.read(ctx(), Requests.newReadRequest("a/b/users/alice"));
     }
 
     /**
@@ -130,9 +132,9 @@ public final class DynamicRealmDemo {
             @Override
             public void readInstance(final ServerContext context, final String resourceId,
                     final ReadRequest request, final ResultHandler<Resource> handler) {
-                System.out.println("Reading " + name);
-                System.out.println("    resource ID : " + resourceId);
-                System.out.println("    realm path  : " + path);
+                log("Reading " + name);
+                log("    resource ID : " + resourceId);
+                log("    realm path  : " + path);
                 final JsonValue content =
                         new JsonValue(Collections.singletonMap("id", (Object) resourceId));
                 handler.handleResult(new Resource(resourceId, "1", content));
