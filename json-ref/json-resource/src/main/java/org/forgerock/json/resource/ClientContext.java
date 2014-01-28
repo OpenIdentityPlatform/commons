@@ -28,7 +28,7 @@ public interface ClientContext extends Context {
 
     /**
      * A source, or "protocol" class that indicates what type of client is 
-     * submitting a request.  For example, {@link HttpContext} may implement
+     * submitting a request.  For example, {@link org.forgerock.json.resource.servlet.HttpContext} may implement
      * <pre>
      *     public boolean hasProtocol(Protocol protocol) {
      *         Protocol.valueOf("http").equals(protocol);
@@ -41,7 +41,7 @@ public interface ClientContext extends Context {
         private final String protocol;
 
         /**
-         * Construct a new Protocol.  Private access; callers must use {@link valueOf} to
+         * Construct a new Protocol.  Private access; callers must use {@link #valueOf} to
          * instantiate a Protocol from a String.
          *
          * @param protocol the protocol value
@@ -102,4 +102,10 @@ public interface ClientContext extends Context {
      */
     public boolean hasProtocol(Protocol protocol);
 
+    /**
+     * Return this context's {@link Protocol}.
+     *
+     * @return the Protocol of this context
+     */
+    public Protocol getProtocol();
 }
