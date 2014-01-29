@@ -492,8 +492,7 @@ public final class Resources {
         public FutureResult<Connection> getConnectionAsync(
                 final ResultHandler<? super Connection> handler) {
             final Connection connection = getConnection();
-            final FutureResult<Connection> future =
-                    new CompletedFutureResult<Connection>(connection);
+            final FutureResult<Connection> future = newCompletedFutureResult(connection);
             if (handler != null) {
                 handler.handleResult(connection);
             }
@@ -748,6 +747,19 @@ public final class Resources {
                 // Do nothing.
             }
         };
+    }
+
+    /**
+     * Creates a new future whose result is known at the time of creation.
+     *
+     * @param object
+     *            The result object of the Future.
+     * @return The new {@link FutureResult} which holds the object passed in.
+     * @deprecated
+     */
+    @Deprecated
+    public static <T> FutureResult<T> newCompletedFutureResult(T object) {
+        return new CompletedFutureResult<T>(object);
     }
 
     private static String idOf(final ServerContext context) {
