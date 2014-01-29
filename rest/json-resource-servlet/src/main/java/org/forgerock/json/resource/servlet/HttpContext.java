@@ -173,7 +173,7 @@ public final class HttpContext extends AbstractContext implements ClientContext 
      */
     public List<String> getHeader(final String name) {
         final List<String> header = data.get(ATTR_HEADERS).get(name).asList(String.class);
-        return header != null ? header : Collections.<String> emptyList();
+        return Collections.unmodifiableList(header != null ? header : Collections.<String> emptyList());
     }
 
     /**
@@ -220,8 +220,8 @@ public final class HttpContext extends AbstractContext implements ClientContext 
      *         present in the request.
      */
     public List<String> getParameter(final String name) {
-        final List<String> parameter = data.get(ATTR_PARAMETERS).get(name).copy().asList(String.class);
-        return parameter != null ? parameter : Collections.<String> emptyList();
+        final List<String> parameter = data.get(ATTR_PARAMETERS).get(name).asList(String.class);
+        return Collections.unmodifiableList(parameter != null ? parameter : Collections.<String> emptyList());
     }
 
     /**
