@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2013 ForgeRock AS.
+ * Copyright 2012-2014 ForgeRock AS.
  */
 package org.forgerock.json.resource;
 
@@ -464,13 +464,7 @@ public final class Resources {
             if (context instanceof ServerContext) {
                 return (ServerContext) context;
             } else {
-                final Connection connection;
-                if (context.containsContext(ServerContext.class)) {
-                    connection = context.asContext(ServerContext.class).getConnection();
-                } else {
-                    connection = this;
-                }
-                return new ServerContext(context, connection);
+                return new ServerContext(context);
             }
         }
 
@@ -498,8 +492,7 @@ public final class Resources {
         public FutureResult<Connection> getConnectionAsync(
                 final ResultHandler<? super Connection> handler) {
             final Connection connection = getConnection();
-            final FutureResult<Connection> future =
-                    new CompletedFutureResult<Connection>(connection);
+            final FutureResult<Connection> future = newCompletedFutureResult(connection);
             if (handler != null) {
                 handler.handleResult(connection);
             }
@@ -754,6 +747,19 @@ public final class Resources {
                 // Do nothing.
             }
         };
+    }
+
+    /**
+     * Creates a new future whose result is known at the time of creation.
+     *
+     * @param object
+     *            The result object of the Future.
+     * @return The new {@link FutureResult} which holds the object passed in.
+     * @deprecated
+     */
+    @Deprecated
+    public static <T> FutureResult<T> newCompletedFutureResult(T object) {
+        return new CompletedFutureResult<T>(object);
     }
 
     private static String idOf(final ServerContext context) {

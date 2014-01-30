@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012 ForgeRock AS.
+ * Copyright 2012-2014 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -271,7 +271,7 @@ public final class RouterTest {
     }
 
     private ServerContext newServerContext(final RequestHandler handler) {
-        return new ServerContext(new RootContext(), newInternalConnection(handler));
+        return new ServerContext(new RootContext());
     }
 
 }
