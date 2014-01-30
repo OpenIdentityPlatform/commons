@@ -27,9 +27,9 @@ import org.forgerock.json.fluent.JsonValue;
  * <p>
  * Contexts <b>MUST</b> support persistence by providing
  * <ul>
- *     <li>a <b>public</b> constructor having the same declaration as
- * {@link AbstractContext(JsonValue, PersistenceConfig)}.</li>
- *     <li>a <b>public</b> method having the same declaration as
+ * <li>a <b>public</b> constructor having the same declaration as
+ * {@link AbstractContext#AbstractContext(JsonValue, PersistenceConfig)}.</li>
+ * <li>a <b>public</b> method having the same declaration as
  * {@link org.forgerock.json.resource.Context#toJsonValue()}.</li>
  * </ul>
  * <p>
