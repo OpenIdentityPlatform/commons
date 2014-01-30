@@ -24,6 +24,12 @@ import java.util.LinkedHashMap;
 import org.forgerock.json.fluent.JsonValue;
 import org.testng.annotations.Test;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;                                                      
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+
 /**
  * Tests {@code Context}.
  */
@@ -90,7 +96,12 @@ public final class ContextTest {
 
     @Test
     public void testServerContextSaveLoad() throws Exception {
-        final PersistenceConfig config = PersistenceConfig.builder().build();
+        final Connection connection = mock(Connection.class);
+        final ConnectionProvider provider = mock(ConnectionProvider.class);
+        when(provider.getConnectionId(any(Connection.class))).thenReturn("my-connection-id");
+        when(provider.getConnection(anyString())).thenReturn(connection);
+        final PersistenceConfig config = PersistenceConfig.builder().connectionProvider(provider)
+                .build();
 
         final JsonValue inRoot = new JsonValue(new LinkedHashMap<String, Object>());
         inRoot.add("class", "org.forgerock.json.resource.RootContext");
