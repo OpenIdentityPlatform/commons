@@ -545,7 +545,7 @@ public class WDSSO /*extends AMLoginModule*/ {
 //            debug.message("Retrieved config params from cache.");
 //        }
         return true;*/
-        return false;
+        return serviceSubject != null;
     }
 
     private void initWindowsDesktopSSOAuth(Map options)
