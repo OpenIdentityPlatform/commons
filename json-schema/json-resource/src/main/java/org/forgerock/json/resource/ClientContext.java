@@ -17,9 +17,6 @@ package org.forgerock.json.resource;
 
 import org.forgerock.util.Reject;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * A Context to establish the source of a client request through the use of one
  * or more {@link Protocol} objects.
@@ -27,17 +24,17 @@ import java.util.Map;
 public interface ClientContext extends Context {
 
     /**
-     * A source, or "protocol" class that indicates what type of client is 
-     * submitting a request.  For example, {@link org.forgerock.json.resource.servlet.HttpContext} may implement
+     * A source, or "protocol" class that indicates what type of client is
+     * submitting a request.  For example, {@code HttpContext} implements
      * <pre>
      *     public boolean hasProtocol(Protocol protocol) {
      *         Protocol.valueOf("http").equals(protocol);
      *     }
      * </pre>
-     * to indicate it is the http protocol.  
+     * to indicate it is the http protocol.
      */
-    public static class Protocol {
-        /** the protocol value */
+    public static final class Protocol {
+        /** the protocol value. */
         private final String protocol;
 
         /**

@@ -42,7 +42,7 @@ import org.forgerock.json.fluent.JsonValue;
  */
 public class ServerContext extends AbstractContext {
 
-    /** the client-friendly name of this context */
+    /** the client-friendly name of this context. */
     private static final String CONTEXT_NAME = "server";
 
     /**

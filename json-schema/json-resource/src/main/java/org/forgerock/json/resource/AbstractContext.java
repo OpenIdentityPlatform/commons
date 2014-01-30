@@ -23,19 +23,20 @@ import org.forgerock.json.fluent.JsonValue;
 
 /**
  * A base implementation of the context associated with a request currently
- * being processed by a JSON resource provider. A request context can be
- * used to query state information about the request. Implementations may
- * provide additional information, time-stamp information, HTTP headers, etc.
- * Contexts are linked together to form a parent-child chain of context,
- * whose root is a {@link RootContext}.
+ * being processed by a JSON resource provider. A request context can be used to
+ * query state information about the request. Implementations may provide
+ * additional information, time-stamp information, HTTP headers, etc. Contexts
+ * are linked together to form a parent-child chain of context, whose root is a
+ * {@link RootContext}.
  * <p>
  * Derived Contexts <b>MUST</b> support persistence by providing
  * <ul>
- *     <li>a <b>public</b> constructor having the same declaration as
- * {@link AbstractContext(JsonValue, PersistenceConfig)}</li>
- *     <li>a <b>public</b> method having the same declaration as
- * {@link org.forgerock.json.resource.Context#toJsonValue()}</li>
- * See the documentation for more details.
+ * <li>a <b>public</b> constructor having the same declaration as
+ * {@link #AbstractContext(JsonValue, PersistenceConfig)}</li>
+ * <li>a <b>public</b> method having the same declaration as
+ * {@link org.forgerock.json.resource.Context#toJsonValue()}</li> See the
+ * documentation for more details.
+ * </ul>
  * <p>
  * Here is an example of the JSON representation of the core attributes of all
  * contexts:
@@ -52,8 +53,8 @@ import org.forgerock.json.fluent.JsonValue;
  */
 public abstract class AbstractContext implements Context {
     // Persisted attribute names.
-    protected static final String ATTR_CLASS = "class";
-    protected static final String ATTR_ID = "id";
+    private static final String ATTR_CLASS = "class";
+    private static final String ATTR_ID = "id";
     private static final String ATTR_PARENT = "parent";
 
     private static Context load0(final JsonValue savedContext, final PersistenceConfig config)

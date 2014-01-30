@@ -752,10 +752,13 @@ public final class Resources {
     /**
      * Creates a new future whose result is known at the time of creation.
      *
+     * @param <T>
+     *            The type of the result object.
      * @param object
      *            The result object of the Future.
      * @return The new {@link FutureResult} which holds the object passed in.
-     * @deprecated
+     * @deprecated This method will be removed once
+     *             {@link org.forgerock.util.promise.Promise} support is added.
      */
     @Deprecated
     public static <T> FutureResult<T> newCompletedFutureResult(T object) {

@@ -61,15 +61,15 @@ import org.forgerock.util.LazyMap;
  */
 public final class HttpContext extends AbstractContext implements ClientContext {
 
-    /** a client-friendly name for this context */
+    /** a client-friendly name for this context. */
     public static final String CONTEXT_NAME = "http";
 
     // TODO: security parameters such as user name, etc?
 
     // Persisted attribute names.
-    public static final String ATTR_HEADERS = "headers";
+    private static final String ATTR_HEADERS = "headers";
     private static final String ATTR_METHOD = "method";
-    public static final String ATTR_PARAMETERS = "parameters";
+    private static final String ATTR_PARAMETERS = "parameters";
     private static final String ATTR_PATH = "path";
 
     private final Map<String, List<String>> headers;
@@ -95,7 +95,7 @@ public final class HttpContext extends AbstractContext implements ClientContext 
         this.parameters = (Map) data.get(ATTR_PARAMETERS).required().asMap();
     }
 
-    /** the protocol represented by this context */
+    /** the protocol represented by this context. */
     private static final Protocol HTTP_PROTOCOL = Protocol.valueOf("http");
 
     /**
