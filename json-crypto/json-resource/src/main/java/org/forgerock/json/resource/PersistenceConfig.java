@@ -27,6 +27,7 @@ public final class PersistenceConfig {
      */
     public static final class Builder {
         private ClassLoader classLoader;
+        private ConnectionProvider connectionProvider;
 
         private Builder() {
             // No implementation required.
@@ -42,7 +43,10 @@ public final class PersistenceConfig {
          *             If the connection provider has not been specified.
          */
         public PersistenceConfig build() {
-            return new PersistenceConfig(classLoader);
+            if (connectionProvider == null) {
+                throw new IllegalStateException("No ConnectionProvider specified");
+            }
+            return new PersistenceConfig(connectionProvider, classLoader);
         }
 
         /**
@@ -61,6 +65,22 @@ public final class PersistenceConfig {
             return this;
         }
 
+        /**
+         * Sets the connection provider which should be used when serializing
+         * and deserializing internal connections. The connection provider
+         * mandatory and failure to specify one will result in an error when the
+         * connection provider is {@link #build() built}.
+         *
+         * @param provider
+         *            The connection provider which should be used when
+         *            serializing and deserializing internal connections.
+         * @return This builder.
+         */
+        public Builder connectionProvider(final ConnectionProvider provider) {
+            this.connectionProvider = provider;
+            return this;
+        }
+
     }
 
     /**
@@ -75,8 +95,10 @@ public final class PersistenceConfig {
     }
 
     private final ClassLoader classLoader;
+    private final ConnectionProvider connectionProvider;
 
-    private PersistenceConfig(final ClassLoader classLoader) {
+    private PersistenceConfig(final ConnectionProvider provider, final ClassLoader classLoader) {
+        this.connectionProvider = provider;
         this.classLoader = classLoader != null ? classLoader : PersistenceConfig.class
                 .getClassLoader();
     }
@@ -90,6 +112,17 @@ public final class PersistenceConfig {
      */
     public ClassLoader getClassLoader() {
         return classLoader;
+    }
+
+    /**
+     * Returns the connection provider which should be used when serializing and
+     * deserializing internal connections.
+     *
+     * @return The connection provider which should be used when serializing and
+     *         deserializing internal connections.
+     */
+    public ConnectionProvider getConnectionProvider() {
+        return connectionProvider;
     }
 
 }
