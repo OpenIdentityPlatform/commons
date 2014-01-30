@@ -82,7 +82,7 @@ import org.forgerock.json.fluent.JsonValue;
  */
 public final class RouterContext extends ServerContext {
 
-    /** the client-friendly name of this context */
+    /** the client-friendly name of this context. */
     private static final String CONTEXT_NAME = "router";
 
     // Persisted attribute names.
@@ -102,11 +102,13 @@ public final class RouterContext extends ServerContext {
      * @throws ResourceException
      *             If the JSON representation could not be parsed.
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     RouterContext(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
         super(savedContext, config);
         this.uriTemplateVariables =
-                Collections.unmodifiableMap((Map) data.get(ATTR_URI_TEMPLATE_VARIABLES).required().asMap());
+                Collections.unmodifiableMap((Map) data.get(ATTR_URI_TEMPLATE_VARIABLES).required()
+                        .asMap());
     }
 
     /**

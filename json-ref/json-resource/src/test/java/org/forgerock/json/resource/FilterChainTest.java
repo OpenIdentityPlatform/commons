@@ -15,7 +15,6 @@
  */
 package org.forgerock.json.resource;
 
-import static org.forgerock.json.resource.Resources.newInternalConnection;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.doAnswer;

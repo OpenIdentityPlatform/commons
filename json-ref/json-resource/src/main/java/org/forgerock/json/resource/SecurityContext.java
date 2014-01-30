@@ -69,7 +69,7 @@ import org.forgerock.json.fluent.JsonValue;
  */
 public final class SecurityContext extends AbstractContext {
 
-    /** the client-friendly name of this context */
+    /** the client-friendly name of this context. */
     private static final String CONTEXT_NAME = "security";
 
     /**
@@ -173,9 +173,9 @@ public final class SecurityContext extends AbstractContext {
     }
 
     /**
-     * Get this Context's name
+     * Returns the name of this context.
      *
-     * @return this object's name
+     * @return The name of this context.
      */
     public String getContextName() {
         return CONTEXT_NAME;

@@ -17,10 +17,6 @@
 package org.forgerock.json.resource;
 
 import static org.fest.assertions.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -94,12 +90,7 @@ public final class ContextTest {
 
     @Test
     public void testServerContextSaveLoad() throws Exception {
-        final Connection connection = mock(Connection.class);
-        final ConnectionProvider provider = mock(ConnectionProvider.class);
-        when(provider.getConnectionId(any(Connection.class))).thenReturn("my-connection-id");
-        when(provider.getConnection(anyString())).thenReturn(connection);
-        final PersistenceConfig config = PersistenceConfig.builder().connectionProvider(provider)
-                .build();
+        final PersistenceConfig config = PersistenceConfig.builder().build();
 
         final JsonValue inRoot = new JsonValue(new LinkedHashMap<String, Object>());
         inRoot.add("class", "org.forgerock.json.resource.RootContext");
