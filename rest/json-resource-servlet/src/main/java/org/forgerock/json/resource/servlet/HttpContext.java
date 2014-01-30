@@ -67,9 +67,11 @@ public final class HttpContext extends AbstractContext implements ClientContext 
     // TODO: security parameters such as user name, etc?
 
     // Persisted attribute names.
-    private static final String ATTR_HEADERS = "headers";
+    /** the persisted attribute name for the HTTP headers. */
+    public static final String ATTR_HEADERS = "headers";
     private static final String ATTR_METHOD = "method";
-    private static final String ATTR_PARAMETERS = "parameters";
+    /** the persisted attribute name for the HTTP parameters. */
+    public static final String ATTR_PARAMETERS = "parameters";
     private static final String ATTR_PATH = "path";
 
     private final Map<String, List<String>> headers;
