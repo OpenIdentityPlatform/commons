@@ -79,8 +79,11 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
             } else {
                 event = "change paste";
             }
+  
+            _.each(input.attr('data-validator').split(' '), function(type){
+                input.on(event, _.bind(obj.validate, {input: input, el: el, validatorType: type}));
+            });
             
-            input.on(event, _.bind(obj.validate, {input: input, el: el, validatorType: input.attr('data-validator')}));
         });
         
         if (baseEntity) {

@@ -37,19 +37,8 @@ define("config/validators/UserValidators", [
                 ],
                 "validator": function(el, input, callback, utils) {
                     var v = $(input).val();
-                    
-/*                    if(el.find("input[name=oldPassword]").length !== 0) {
-                        if(v === "" && $(el).find("input[name=password]").val() === "") {
-                            utils.hideValidation($(el).find("input[name=password]"), el);
-                            callback("disabled");
-                            utils.hideBox(el);
-                            return;
-                        } else {
-                            utils.showBox(el);
-                        }
-                    }
-*/
-                    if( v === "" || v !== $(el).find("input[name=password]").val() ) {
+            
+                    if( v === "" ||  $(el).find("input[name=password]").val() !== $(el).find("input[name=passwordConfirm]").val() ) {
                         callback([$.t("common.form.validation.confirmationMatchesPassword")]);
                         return;
                     }
