@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012 ForgeRock AS.
+ * Copyright 2012-2014 ForgeRock AS.
  */
 package org.forgerock.json.resource.servlet;
 
@@ -27,6 +27,8 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.AbstractContext;
+import org.forgerock.json.resource.ClientContext;
 import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.PersistenceConfig;
 import org.forgerock.json.resource.ResourceException;
@@ -57,19 +59,21 @@ import org.forgerock.util.LazyMap;
  * }
  * </pre>
  */
-public final class HttpContext extends Context {
+public final class HttpContext extends AbstractContext implements ClientContext {
+
+    /** a client-friendly name for this context */
+    public static final String CONTEXT_NAME = "http";
+
     // TODO: security parameters such as user name, etc?
 
     // Persisted attribute names.
-    private static final String ATTR_HEADERS = "headers";
+    public static final String ATTR_HEADERS = "headers";
     private static final String ATTR_METHOD = "method";
-    private static final String ATTR_PARAMETERS = "parameters";
+    public static final String ATTR_PARAMETERS = "parameters";
     private static final String ATTR_PATH = "path";
 
     private final Map<String, List<String>> headers;
-    private final String method;
     private final Map<String, List<String>> parameters;
-    private final String path;
 
     /**
      * Restore from JSON representation. This method is for internal use only
@@ -87,16 +91,32 @@ public final class HttpContext extends Context {
     public HttpContext(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
         super(savedContext, config);
-        this.method = savedContext.get(ATTR_METHOD).required().asString();
-        this.path = savedContext.get(ATTR_PATH).required().asString();
-        this.headers = (Map) savedContext.get(ATTR_HEADERS).required().asMap();
-        this.parameters = (Map) savedContext.get(ATTR_PARAMETERS).required().asMap();
+        this.headers = (Map) data.get(ATTR_HEADERS).required().asMap();
+        this.parameters = (Map) data.get(ATTR_PARAMETERS).required().asMap();
+    }
+
+    /** the protocol represented by this context */
+    private static final Protocol HTTP_PROTOCOL = Protocol.valueOf("http");
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean hasProtocol(Protocol protocol) {
+        return HTTP_PROTOCOL.equals(protocol);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Protocol getProtocol() {
+        return HTTP_PROTOCOL;
     }
 
     HttpContext(final Context parent, final HttpServletRequest req) {
         super(parent);
-        this.method = HttpUtils.getMethod(req);
-        this.path = req.getRequestURL().toString();
+        data.put(ATTR_METHOD, HttpUtils.getMethod(req));
+        data.put(ATTR_PATH, req.getRequestURL().toString());
         this.headers = Collections.unmodifiableMap(new LazyMap<String, List<String>>(
                 new Factory<Map<String, List<String>>>() {
                     @Override
@@ -115,6 +135,7 @@ public final class HttpContext extends Context {
                         return result;
                     }
                 }));
+        data.put(ATTR_HEADERS, headers);
         this.parameters = Collections.unmodifiableMap(new LazyMap<String, List<String>>(
                 new Factory<Map<String, List<String>>>() {
                     @Override
@@ -130,6 +151,16 @@ public final class HttpContext extends Context {
                         return result;
                     }
                 }));
+        data.put(ATTR_PARAMETERS, parameters);
+    }
+
+    /**
+     * Get this Context's name.
+     *
+     * @return this object's name
+     */
+    public String getContextName() {
+        return CONTEXT_NAME;
     }
 
     /**
@@ -143,8 +174,8 @@ public final class HttpContext extends Context {
      *         in the request.
      */
     public List<String> getHeader(final String name) {
-        final List<String> header = headers.get(name);
-        return header != null ? header : Collections.<String> emptyList();
+        final List<String> header = data.get(ATTR_HEADERS).get(name).asList(String.class);
+        return Collections.unmodifiableList(header != null ? header : Collections.<String> emptyList());
     }
 
     /**
@@ -177,7 +208,7 @@ public final class HttpContext extends Context {
      *         {@code X-HTTP-Method-Override} header.
      */
     public String getMethod() {
-        return method;
+        return data.get(ATTR_METHOD).asString();
     }
 
     /**
@@ -191,8 +222,8 @@ public final class HttpContext extends Context {
      *         present in the request.
      */
     public List<String> getParameter(final String name) {
-        final List<String> parameter = parameters.get(name);
-        return parameter != null ? parameter : Collections.<String> emptyList();
+        final List<String> parameter = data.get(ATTR_PARAMETERS).get(name).asList(String.class);
+        return Collections.unmodifiableList(parameter != null ? parameter : Collections.<String> emptyList());
     }
 
     /**
@@ -223,20 +254,6 @@ public final class HttpContext extends Context {
      * @return The HTTP request path.
      */
     public String getPath() {
-        return path;
+        return data.get(ATTR_PATH).asString();
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveToJson(final JsonValue savedContext, final PersistenceConfig config)
-            throws ResourceException {
-        super.saveToJson(savedContext, config);
-        savedContext.put(ATTR_METHOD, method);
-        savedContext.put(ATTR_PATH, path);
-        savedContext.put(ATTR_HEADERS, headers);
-        savedContext.put(ATTR_PARAMETERS, parameters);
-    }
-
 }
