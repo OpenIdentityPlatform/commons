@@ -46,7 +46,7 @@ public interface QueryRequest extends Request {
      * The name of the field which contains the additional query parameters in
      * the JSON representation.
      */
-    public static final String FIELD_ADDITIONAL_QUERY_PARAMETERS = "additionalQueryParameters";
+    public static final String FIELD_ADDITIONAL_PARAMETERS = "additionalParameters";
 
     /**
      * The name of the field which contains the paged results cookie in the JSON
@@ -144,8 +144,20 @@ public interface QueryRequest extends Request {
      *
      * @return The additional parameters which should be used to control the
      *         behavior of this query request (never {@code null}).
+     * @deprecated Use {@link QueryRequest#getAdditionalParameters} instead.
      */
+    @Deprecated
     Map<String, String> getAdditionalQueryParameters();
+
+    /**
+     * Returns the additional parameters which should be used to control the
+     * behavior of this query request. The returned map may be modified if
+     * permitted by this query request.
+     *
+     * @return The additional parameters which should be used to control the
+     *         behavior of this query request (never {@code null}).
+     */
+    Map<String, String> getAdditionalParameters();
 
     /**
      * {@inheritDoc}
@@ -287,8 +299,25 @@ public interface QueryRequest extends Request {
      * @throws UnsupportedOperationException
      *             If this query request does not permit changes to the
      *             additional parameters.
+     * @deprecated Use {@link QueryRequest#setAdditionalParameter} instead.
      */
+    @Deprecated
     QueryRequest setAdditionalQueryParameter(String name, String value);
+
+    /**
+     * Sets an additional parameter which should be used to control the behavior
+     * of this query request.
+     *
+     * @param name
+     *            The name of the additional parameter.
+     * @param value
+     *            The additional parameter's value.
+     * @return This query request.
+     * @throws UnsupportedOperationException
+     *             If this query request does not permit changes to the
+     *             additional parameters.
+     */
+    QueryRequest setAdditionalParameter(String name, String value);
 
     /**
      * Sets the opaque cookie which is used by the resource provider to track

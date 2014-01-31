@@ -36,7 +36,7 @@ public interface ActionRequest extends Request {
      * The name of the field which contains the additional action parameters in
      * the JSON representation.
      */
-    public static final String FIELD_ADDITIONAL_ACTION_PARAMETERS = "additionalActionParameters";
+    public static final String FIELD_ADDITIONAL_PARAMETERS = "additionalParameters";
 
     /**
      * The name of the field which contains the action content in the JSON
@@ -81,8 +81,20 @@ public interface ActionRequest extends Request {
      *
      * @return The additional parameters which should be used to control the
      *         behavior of this action request (never {@code null}).
+     * @deprecated Use {@link ActionRequest#getAdditionalParameters} instead.
      */
+    @Deprecated
     Map<String, String> getAdditionalActionParameters();
+
+    /**
+     * Returns the additional parameters which should be used to control the
+     * behavior of this action request. The returned map may be modified if
+     * permitted by this action request.
+     *
+     * @return The additional parameters which should be used to control the
+     *         behavior of this action request (never {@code null}).
+     */
+    Map<String, String> getAdditionalParameters();
 
     /**
      * Returns the content of this action request. The structure of the content
@@ -140,9 +152,25 @@ public interface ActionRequest extends Request {
      * @throws UnsupportedOperationException
      *             If this action request does not permit changes to the
      *             additional parameters.
+     * @deprecated Use {ActionRequest#setAdditionalParameter} instead.
      */
+    @Deprecated
     ActionRequest setAdditionalActionParameter(String name, String value);
 
+    /**
+     * Sets an additional parameter which should be used to control the behavior
+     * of this action request.
+     *
+     * @param name
+     *            The name of the additional parameter.
+     * @param value
+     *            The additional parameter's value.
+     * @return This action request.
+     * @throws UnsupportedOperationException
+     *             If this action request does not permit changes to the
+     *             additional parameters.
+     */
+    ActionRequest setAdditionalParameter(String name, String value);
     /**
      * Sets the content of this action request. The structure of the content is
      * defined by the action.
