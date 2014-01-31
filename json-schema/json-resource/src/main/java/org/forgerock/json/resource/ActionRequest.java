@@ -36,7 +36,7 @@ public interface ActionRequest extends Request {
      * The name of the field which contains the additional action parameters in
      * the JSON representation.
      */
-    public static final String FIELD_ADDITIONAL_ACTION_PARAMETERS = "additionalActionParameters";
+    public static final String FIELD_ADDITIONAL_PARAMETERS = "additionalParameters";
 
     /**
      * The name of the field which contains the action content in the JSON
@@ -82,7 +82,7 @@ public interface ActionRequest extends Request {
      * @return The additional parameters which should be used to control the
      *         behavior of this action request (never {@code null}).
      */
-    Map<String, String> getAdditionalActionParameters();
+    Map<String, String> getAdditionalParameters();
 
     /**
      * Returns the content of this action request. The structure of the content
@@ -141,8 +141,7 @@ public interface ActionRequest extends Request {
      *             If this action request does not permit changes to the
      *             additional parameters.
      */
-    ActionRequest setAdditionalActionParameter(String name, String value);
-
+    ActionRequest setAdditionalParameter(String name, String value);
     /**
      * Sets the content of this action request. The structure of the content is
      * defined by the action.
