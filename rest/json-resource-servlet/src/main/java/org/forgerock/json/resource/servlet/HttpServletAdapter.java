@@ -319,7 +319,7 @@ public final class HttpServletAdapter {
                                     + name + "' could not be parsed as a valid query filter");
                         }
                     } else {
-                        request.setAdditionalQueryParameter(name, asSingleValue(name, values));
+                        request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
                 }
 
@@ -343,7 +343,7 @@ public final class HttpServletAdapter {
                 }
 
                 if (request.getQueryId() == null
-                        && !request.getAdditionalQueryParameters().isEmpty()) {
+                        && !request.getAdditionalParameters().isEmpty()) {
                     // FIXME: i18n.
                     throw new BadRequestException("Additional query parameters can only be used "
                             + "with the parameter " + PARAM_QUERY_ID);
@@ -450,7 +450,7 @@ public final class HttpServletAdapter {
                     } else if (name.equalsIgnoreCase(PARAM_ACTION)) {
                         // Ignore - already handled.
                     } else {
-                        request.setAdditionalActionParameter(name, asSingleValue(name, values));
+                        request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
                 }
                 doRequest(req, resp, request);
