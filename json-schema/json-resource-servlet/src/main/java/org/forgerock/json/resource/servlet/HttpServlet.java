@@ -15,7 +15,7 @@
  */
 package org.forgerock.json.resource.servlet;
 
-import static org.forgerock.json.resource.servlet.HttpUtils.checkNotNull;
+import static org.forgerock.util.Reject.checkNotNull;
 
 import java.io.IOException;
 import java.lang.reflect.Method;

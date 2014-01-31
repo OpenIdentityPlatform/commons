@@ -180,7 +180,7 @@ public final class ResourcesTest {
         RequestHandler handler = Resources.newCollection(collection);
         Connection connection = Resources.newInternalConnection(handler);
         ReadRequest read = Requests.newReadRequest(resourceName);
-        connection.readAsync(new RootContext(), read, null);
+        connection.readAsync(new RootContext(), read);
         ArgumentCaptor<ReadRequest> captor = ArgumentCaptor.forClass(ReadRequest.class);
         verify(collection).readInstance(any(ServerContext.class), eq(expectedId), captor.capture(),
                 any(ResultHandler.class));
