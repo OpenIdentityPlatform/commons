@@ -27,6 +27,11 @@ public final class ExamplesTest {
     }
 
     @Test
+    public void testAsyncReadModifyWrite() throws ResourceException {
+        AsyncReadModifyWriteDemo.main(new String[0]);
+    }
+
+    @Test
     public void testReadModifyWrite() throws ResourceException {
         ReadModifyWriteDemo.main(new String[0]);
     }

@@ -20,6 +20,7 @@ import java.io.Closeable;
 import java.util.Collection;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.util.promise.Promise;
 
 /**
  * A client connection to a JSON resource provider over which read and update
@@ -55,9 +56,6 @@ public interface Connection extends Closeable {
      *            The request context, such as associated principal.
      * @param request
      *            The action request.
-     * @param handler
-     *            A result handler which can be used to asynchronously process
-     *            the operation result when it is received, may be {@code null}.
      * @return A future representing the result of the request.
      * @throws UnsupportedOperationException
      *             If this connection does not support action requests.
@@ -65,8 +63,7 @@ public interface Connection extends Closeable {
      *             If this connection has already been closed, i.e. if
      *             {@code isClosed() == true}.
      */
-    FutureResult<JsonValue> actionAsync(Context context, ActionRequest request,
-            ResultHandler<? super JsonValue> handler);
+    Promise<JsonValue, ResourceException> actionAsync(Context context, ActionRequest request);
 
     /**
      * Releases any resources associated with this connection. For physical
@@ -106,9 +103,6 @@ public interface Connection extends Closeable {
      *            The request context, such as associated principal.
      * @param request
      *            The create request.
-     * @param handler
-     *            A result handler which can be used to asynchronously process
-     *            the operation result when it is received, may be {@code null}.
      * @return A future representing the result of the request.
      * @throws UnsupportedOperationException
      *             If this connection does not support create requests.
@@ -116,8 +110,7 @@ public interface Connection extends Closeable {
      *             If this connection has already been closed, i.e. if
      *             {@code isClosed() == true}.
      */
-    FutureResult<Resource> createAsync(Context context, CreateRequest request,
-            ResultHandler<? super Resource> handler);
+    Promise<Resource, ResourceException> createAsync(Context context, CreateRequest request);
 
     /**
      * Deletes a JSON resource.
@@ -144,9 +137,6 @@ public interface Connection extends Closeable {
      *            The request context, such as associated principal.
      * @param request
      *            The delete request.
-     * @param handler
-     *            A result handler which can be used to asynchronously process
-     *            the operation result when it is received, may be {@code null}.
      * @return A future representing the result of the request.
      * @throws UnsupportedOperationException
      *             If this connection does not support delete requests.
@@ -154,8 +144,7 @@ public interface Connection extends Closeable {
      *             If this connection has already been closed, i.e. if
      *             {@code isClosed() == true}.
      */
-    FutureResult<Resource> deleteAsync(Context context, DeleteRequest request,
-            ResultHandler<? super Resource> handler);
+    Promise<Resource, ResourceException> deleteAsync(Context context, DeleteRequest request);
 
     /**
      * Indicates whether or not this connection has been explicitly closed by
@@ -206,9 +195,6 @@ public interface Connection extends Closeable {
      *            The request context, such as associated principal.
      * @param request
      *            The patch request.
-     * @param handler
-     *            A result handler which can be used to asynchronously process
-     *            the operation result when it is received, may be {@code null}.
      * @return A future representing the result of the request.
      * @throws UnsupportedOperationException
      *             If this connection does not support patch requests.
@@ -216,8 +202,7 @@ public interface Connection extends Closeable {
      *             If this connection has already been closed, i.e. if
      *             {@code isClosed() == true}.
      */
-    FutureResult<Resource> patchAsync(Context context, PatchRequest request,
-            ResultHandler<? super Resource> handler);
+    Promise<Resource, ResourceException> patchAsync(Context context, PatchRequest request);
 
     /**
      * Searches for all JSON resources matching a user specified set of
@@ -289,7 +274,7 @@ public interface Connection extends Closeable {
      *             If this connection has already been closed, i.e. if
      *             {@code isClosed() == true}.
      */
-    FutureResult<QueryResult> queryAsync(Context context, QueryRequest request,
+    Promise<QueryResult, ResourceException> queryAsync(Context context, QueryRequest request,
             QueryResultHandler handler);
 
     /**
@@ -317,9 +302,6 @@ public interface Connection extends Closeable {
      *            The request context, such as associated principal.
      * @param request
      *            The read request.
-     * @param handler
-     *            A result handler which can be used to asynchronously process
-     *            the operation result when it is received, may be {@code null}.
      * @return A future representing the result of the request.
      * @throws UnsupportedOperationException
      *             If this connection does not support read requests.
@@ -327,8 +309,7 @@ public interface Connection extends Closeable {
      *             If this connection has already been closed, i.e. if
      *             {@code isClosed() == true}.
      */
-    FutureResult<Resource> readAsync(Context context, ReadRequest request,
-            ResultHandler<? super Resource> handler);
+    Promise<Resource, ResourceException> readAsync(Context context, ReadRequest request);
 
     /**
      * Updates a JSON resource by replacing its existing content with new
@@ -357,9 +338,6 @@ public interface Connection extends Closeable {
      *            The request context, such as associated principal.
      * @param request
      *            The update request.
-     * @param handler
-     *            A result handler which can be used to asynchronously process
-     *            the operation result when it is received, may be {@code null}.
      * @return A future representing the result of the request.
      * @throws UnsupportedOperationException
      *             If this connection does not support update requests.
@@ -367,6 +345,5 @@ public interface Connection extends Closeable {
      *             If this connection has already been closed, i.e. if
      *             {@code isClosed() == true}.
      */
-    FutureResult<Resource> updateAsync(Context context, UpdateRequest request,
-            ResultHandler<? super Resource> handler);
+    Promise<Resource, ResourceException> updateAsync(Context context, UpdateRequest request);
 }

@@ -17,9 +17,9 @@
 package org.forgerock.json.resource;
 
 // Java SE
+import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 import org.forgerock.json.fluent.JsonValue;
 
@@ -33,7 +33,7 @@ import org.forgerock.json.fluent.JsonValue;
  * interoperability with HTTP, if an exception corresponds with an HTTP error
  * status, use the matching HTTP status code.
  */
-public class ResourceException extends ExecutionException {
+public class ResourceException extends IOException {
 
     /**
      * The name of the JSON field used for the detail.
