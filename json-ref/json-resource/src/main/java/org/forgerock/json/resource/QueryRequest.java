@@ -46,7 +46,7 @@ public interface QueryRequest extends Request {
      * The name of the field which contains the additional query parameters in
      * the JSON representation.
      */
-    public static final String FIELD_ADDITIONAL_QUERY_PARAMETERS = "additionalQueryParameters";
+    public static final String FIELD_ADDITIONAL_PARAMETERS = "additionalParameters";
 
     /**
      * The name of the field which contains the paged results cookie in the JSON
@@ -145,7 +145,7 @@ public interface QueryRequest extends Request {
      * @return The additional parameters which should be used to control the
      *         behavior of this query request (never {@code null}).
      */
-    Map<String, String> getAdditionalQueryParameters();
+    Map<String, String> getAdditionalParameters();
 
     /**
      * {@inheritDoc}
@@ -288,7 +288,7 @@ public interface QueryRequest extends Request {
      *             If this query request does not permit changes to the
      *             additional parameters.
      */
-    QueryRequest setAdditionalQueryParameter(String name, String value);
+    QueryRequest setAdditionalParameter(String name, String value);
 
     /**
      * Sets the opaque cookie which is used by the resource provider to track
