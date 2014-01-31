@@ -108,7 +108,7 @@ public final class Requests {
             super(request);
             this.actionId = request.getAction();
             this.content = copyJsonValue(request.getContent());
-            this.parameters.putAll(request.getAdditionalActionParameters());
+            this.parameters.putAll(request.getAdditionalParameters());
         }
 
         @Override
@@ -122,7 +122,7 @@ public final class Requests {
         }
 
         @Override
-        public Map<String, String> getAdditionalActionParameters() {
+        public Map<String, String> getAdditionalParameters() {
             return parameters;
         }
 
@@ -138,7 +138,7 @@ public final class Requests {
         }
 
         @Override
-        public ActionRequest setAdditionalActionParameter(final String name, final String value) {
+        public ActionRequest setAdditionalParameter(final String name, final String value) {
             parameters.put(notNull(name), notNull(value));
             return this;
         }
@@ -337,7 +337,7 @@ public final class Requests {
             this.queryId = request.getQueryId();
             this.queryExpression = request.getQueryExpression();
             this.keys.addAll(request.getSortKeys());
-            this.parameters.putAll(request.getAdditionalQueryParameters());
+            this.parameters.putAll(request.getAdditionalParameters());
             this.pageSize = request.getPageSize();
             this.pagedResultsCookie = request.getPagedResultsCookie();
             this.pagedResultsOffset = request.getPagedResultsOffset();
@@ -365,7 +365,7 @@ public final class Requests {
         }
 
         @Override
-        public Map<String, String> getAdditionalQueryParameters() {
+        public Map<String, String> getAdditionalParameters() {
             return parameters;
         }
 
@@ -405,7 +405,7 @@ public final class Requests {
         }
 
         @Override
-        public QueryRequest setAdditionalQueryParameter(final String name, final String value) {
+        public QueryRequest setAdditionalParameter(final String name, final String value) {
             parameters.put(notNull(name), notNull(value));
             return this;
         }
