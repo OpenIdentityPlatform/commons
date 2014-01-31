@@ -4792,7 +4792,7 @@ public final class LocalizedLogger {
      * @see org.slf4j.Logger#trace(String)
      */
     public void traceException(final Throwable t) {
-        traceException(t, t.getMessage());
+        traceException(t, (t.getMessage() == null ? "" : t.getMessage()));
     }
 
     /**
