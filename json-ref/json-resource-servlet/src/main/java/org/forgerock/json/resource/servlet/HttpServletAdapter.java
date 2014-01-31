@@ -16,44 +16,8 @@
 package org.forgerock.json.resource.servlet;
 
 import static org.forgerock.json.resource.ActionRequest.ACTION_ID_CREATE;
-import static org.forgerock.json.resource.servlet.HttpUtils.CONTENT_TYPE;
-import static org.forgerock.json.resource.servlet.HttpUtils.CONTENT_TYPE_REGEX;
-import static org.forgerock.json.resource.servlet.HttpUtils.ETAG_ANY;
-import static org.forgerock.json.resource.servlet.HttpUtils.HEADER_IF_MATCH;
-import static org.forgerock.json.resource.servlet.HttpUtils.HEADER_IF_NONE_MATCH;
-import static org.forgerock.json.resource.servlet.HttpUtils.METHOD_DELETE;
-import static org.forgerock.json.resource.servlet.HttpUtils.METHOD_GET;
-import static org.forgerock.json.resource.servlet.HttpUtils.METHOD_PATCH;
-import static org.forgerock.json.resource.servlet.HttpUtils.METHOD_POST;
-import static org.forgerock.json.resource.servlet.HttpUtils.METHOD_PUT;
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_ACTION;
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_DEBUG;
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_FIELDS;
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_PAGED_RESULTS_COOKIE;
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_PAGED_RESULTS_OFFSET;
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_PAGE_SIZE;
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_PRETTY_PRINT;
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_EXPRESSION;
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_FILTER;
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_ID;
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_SORT_KEYS;
-import static org.forgerock.json.resource.servlet.HttpUtils.asBooleanValue;
-import static org.forgerock.json.resource.servlet.HttpUtils.asIntValue;
-import static org.forgerock.json.resource.servlet.HttpUtils.asSingleValue;
-import static org.forgerock.json.resource.servlet.HttpUtils.checkNotNull;
-import static org.forgerock.json.resource.servlet.HttpUtils.fail;
-import static org.forgerock.json.resource.servlet.HttpUtils.getIfMatch;
-import static org.forgerock.json.resource.servlet.HttpUtils.getIfNoneMatch;
-import static org.forgerock.json.resource.servlet.HttpUtils.getJsonActionContent;
-import static org.forgerock.json.resource.servlet.HttpUtils.getJsonContent;
-import static org.forgerock.json.resource.servlet.HttpUtils.getJsonPatchContent;
-import static org.forgerock.json.resource.servlet.HttpUtils.getMethod;
-import static org.forgerock.json.resource.servlet.HttpUtils.getParameter;
-import static org.forgerock.json.resource.servlet.HttpUtils.hasParameter;
-import static org.forgerock.json.resource.servlet.HttpUtils.isDebugRequested;
-import static org.forgerock.json.resource.servlet.HttpUtils.prepareResponse;
-import static org.forgerock.json.resource.servlet.HttpUtils.rejectIfMatch;
-import static org.forgerock.json.resource.servlet.HttpUtils.rejectIfNoneMatch;
+import static org.forgerock.json.resource.servlet.HttpUtils.*;
+import static org.forgerock.util.Reject.checkNotNull;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -532,7 +496,7 @@ public final class HttpServletAdapter {
         final Context context = newRequestContext(req);
         final ServletSynchronizer sync = syncFactory.createServletSynchronizer(req, resp);
         final RequestRunner runner = new RequestRunner(context, request, req, resp, sync);
-        connectionFactory.getConnectionAsync(runner);
+        connectionFactory.getConnectionAsync().then(runner, runner);
         sync.awaitIfNeeded(); // Only blocks when async is not supported.
     }
 

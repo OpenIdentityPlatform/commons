@@ -15,7 +15,8 @@
  */
 package org.forgerock.json.resource.servlet;
 
-import java.io.Closeable;
+import static org.forgerock.util.Utils.closeSilently;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.util.LinkedHashMap;
@@ -27,8 +28,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -163,44 +164,6 @@ final class HttpUtils {
     }
 
     /**
-     * Throws a {@code NullPointerException} if the provided object is
-     * {@code null}.
-     *
-     * @param <T>
-     *            The parameter type.
-     * @param object
-     *            The object to test.
-     * @return The object if not {@code null}.
-     * @throws NullPointerException
-     *             If {@code object} is {@code null}.
-     */
-    static <T> T checkNotNull(final T object) {
-        if (object == null) {
-            throw new NullPointerException();
-        }
-        return object;
-    }
-
-    /**
-     * Closes the provided {@code Closeable}s ignoring null values and any
-     * exceptions.
-     *
-     * @param closeables
-     *            The {@code Closeable}s to be closed.
-     */
-    static void closeQuietly(final Closeable... closeables) {
-        for (final Closeable closeable : closeables) {
-            if (closeable != null) {
-                try {
-                    closeable.close();
-                } catch (final Exception ignored) {
-                    // Ignore.
-                }
-            }
-        }
-    }
-
-    /**
      * Safely fail an HTTP request using the provided {@code Exception}.
      *
      * @param req
@@ -219,7 +182,7 @@ final class HttpUtils {
                 resp.setStatus(re.getCode());
                 final JsonGenerator writer = getJsonGenerator(req, resp);
                 writer.writeObject(re.toJsonValue().getObject());
-                closeQuietly(writer, resp.getOutputStream());
+                closeSilently(writer, resp.getOutputStream());
             } catch (final IOException ignored) {
                 // Ignore the error since this was probably the cause.
             }
@@ -498,7 +461,7 @@ final class HttpUtils {
         } catch (final IOException e) {
             throw adapt(e);
         } finally {
-            closeQuietly(parser);
+            closeSilently(parser);
         }
     }
 

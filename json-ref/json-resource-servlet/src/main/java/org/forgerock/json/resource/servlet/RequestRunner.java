@@ -15,17 +15,9 @@
  */
 package org.forgerock.json.resource.servlet;
 
-import static org.forgerock.json.resource.QueryResult.FIELD_ERROR;
-import static org.forgerock.json.resource.QueryResult.FIELD_PAGED_RESULTS_COOKIE;
-import static org.forgerock.json.resource.QueryResult.FIELD_REMAINING_PAGED_RESULTS;
-import static org.forgerock.json.resource.QueryResult.FIELD_RESULT;
-import static org.forgerock.json.resource.QueryResult.FIELD_RESULT_COUNT;
-import static org.forgerock.json.resource.servlet.HttpUtils.HEADER_ETAG;
-import static org.forgerock.json.resource.servlet.HttpUtils.HEADER_LOCATION;
-import static org.forgerock.json.resource.servlet.HttpUtils.adapt;
-import static org.forgerock.json.resource.servlet.HttpUtils.closeQuietly;
-import static org.forgerock.json.resource.servlet.HttpUtils.getIfNoneMatch;
-import static org.forgerock.json.resource.servlet.HttpUtils.getJsonGenerator;
+import static org.forgerock.json.resource.QueryResult.*;
+import static org.forgerock.json.resource.servlet.HttpUtils.*;
+import static org.forgerock.util.Utils.closeSilently;
 
 import java.io.IOException;
 
@@ -51,6 +43,7 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceName;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.util.promise.SuccessHandler;
 
 /**
  * Common request processing.
@@ -101,33 +94,23 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
      */
     @Override
     public final Void visitActionRequest(final Void p, final ActionRequest request) {
-        connection.actionAsync(context, request, new ResultHandler<JsonValue>() {
-            /**
-             * {@inheritDoc}
-             */
-            @Override
-            public void handleError(final ResourceException error) {
-                onError(error);
-            }
-
-            /**
-             * {@inheritDoc}
-             */
-            @Override
-            public void handleResult(final JsonValue result) {
-                try {
-                    if (result != null) {
-                        writeJsonValue(result);
-                    } else {
-                        // No content.
-                        httpResponse.setStatus(HttpServletResponse.SC_NO_CONTENT);
+        connection.actionAsync(context, request).onFailure(this).onSuccess(
+                new SuccessHandler<JsonValue>() {
+                    @Override
+                    public void handleResult(final JsonValue result) {
+                        try {
+                            if (result != null) {
+                                writeJsonValue(result);
+                            } else {
+                                // No content.
+                                httpResponse.setStatus(HttpServletResponse.SC_NO_CONTENT);
+                            }
+                            onSuccess();
+                        } catch (final Exception e) {
+                            onError(e);
+                        }
                     }
-                    onSuccess();
-                } catch (final Exception e) {
-                    onError(e);
-                }
-            }
-        });
+                });
         return null; // return Void.
     }
 
@@ -136,32 +119,23 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
      */
     @Override
     public final Void visitCreateRequest(final Void p, final CreateRequest request) {
-        connection.createAsync(context, request, new ResultHandler<Resource>() {
-            /**
-             * {@inheritDoc}
-             */
-            @Override
-            public void handleError(final ResourceException error) {
-                onError(error);
-            }
-
-            /**
-             * {@inheritDoc}
-             */
-            @Override
-            public void handleResult(final Resource result) {
-                try {
-                    if (result.getId() != null) {
-                        httpResponse.setHeader(HEADER_LOCATION, getResourceURL(request, result));
+        connection.createAsync(context, request).onFailure(this).onSuccess(
+                new SuccessHandler<Resource>() {
+                    @Override
+                    public void handleResult(final Resource result) {
+                        try {
+                            if (result.getId() != null) {
+                                httpResponse.setHeader(HEADER_LOCATION, getResourceURL(request,
+                                        result));
+                            }
+                            httpResponse.setStatus(HttpServletResponse.SC_CREATED);
+                            writeResource(result);
+                            onSuccess();
+                        } catch (final Exception e) {
+                            onError(e);
+                        }
                     }
-                    httpResponse.setStatus(HttpServletResponse.SC_CREATED);
-                    writeResource(result);
-                    onSuccess();
-                } catch (final Exception e) {
-                    onError(e);
-                }
-            }
-        });
+                });
         return null; // return Void.
     }
 
@@ -170,7 +144,8 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
      */
     @Override
     public final Void visitDeleteRequest(final Void p, final DeleteRequest request) {
-        connection.deleteAsync(context, request, newResourceResultHandler());
+        connection.deleteAsync(context, request).onFailure(this).onSuccess(
+                newResourceSuccessHandler());
         return null; // return Void.
     }
 
@@ -179,7 +154,8 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
      */
     @Override
     public final Void visitPatchRequest(final Void p, final PatchRequest request) {
-        connection.patchAsync(context, request, newResourceResultHandler());
+        connection.patchAsync(context, request).onFailure(this).onSuccess(
+                newResourceSuccessHandler());
         return null; // return Void.
     }
 
@@ -192,9 +168,6 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
             private boolean isFirstResult = true;
             private int resultCount = 0;
 
-            /**
-             * {@inheritDoc}
-             */
             @Override
             public void handleError(final ResourceException error) {
                 if (isFirstResult) {
@@ -213,9 +186,6 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
                 }
             }
 
-            /**
-             * {@inheritDoc}
-             */
             @Override
             public boolean handleResource(final Resource resource) {
                 try {
@@ -229,9 +199,6 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
                 }
             }
 
-            /**
-             * {@inheritDoc}
-             */
             @Override
             public void handleResult(final QueryResult result) {
                 try {
@@ -265,7 +232,8 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
      */
     @Override
     public final Void visitReadRequest(final Void p, final ReadRequest request) {
-        connection.readAsync(context, request, newResourceResultHandler());
+        connection.readAsync(context, request).onFailure(this).onSuccess(
+                newResourceSuccessHandler());
         return null; // return Void.
     }
 
@@ -274,13 +242,14 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
      */
     @Override
     public final Void visitUpdateRequest(final Void p, final UpdateRequest request) {
-        connection.updateAsync(context, request, newResourceResultHandler());
+        connection.updateAsync(context, request).onFailure(this).onSuccess(
+                newResourceSuccessHandler());
         return null; // return Void.
     }
 
     private void onSuccess() {
         try {
-            closeQuietly(connection, writer);
+            closeSilently(connection, writer);
         } finally {
             sync.signalAndComplete();
         }
@@ -290,7 +259,7 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
         try {
             // Don't close the JSON writer because the request will become
             // "completed" which then prevents us from sending an error.
-            closeQuietly(connection);
+            closeSilently(connection);
         } finally {
             sync.signalAndComplete(e);
         }
@@ -325,19 +294,8 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
         return buffer.toString();
     }
 
-    private ResultHandler<Resource> newResourceResultHandler() {
-        return new ResultHandler<Resource>() {
-            /**
-             * {@inheritDoc}
-             */
-            @Override
-            public void handleError(final ResourceException error) {
-                onError(error);
-            }
-
-            /**
-             * {@inheritDoc}
-             */
+    private SuccessHandler<Resource> newResourceSuccessHandler() {
+        return new SuccessHandler<Resource>() {
             @Override
             public void handleResult(final Resource result) {
                 try {
