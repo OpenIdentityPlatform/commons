@@ -623,7 +623,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
             synchronized (writeLock) {
                 final Resource existingResource = getResourceForUpdate(id, rev);
                 final String newRev = getNextRevision(existingResource.getRevision());
-                resource = new Resource(id, newRev, request.getNewContent());
+                resource = new Resource(id, newRev, request.getContent());
                 addIdAndRevision(resource);
                 resources.put(id, resource);
             }

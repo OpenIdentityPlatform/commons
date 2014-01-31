@@ -31,7 +31,7 @@ public interface UpdateRequest extends Request {
      * The name of the field which contains the resource content in the JSON
      * representation.
      */
-    public static final String FIELD_NEW_CONTENT = "newContent";
+    public static final String FIELD_CONTENT = "content";
 
     /**
      * The name of the field which contains the resource version in the JSON
@@ -66,8 +66,17 @@ public interface UpdateRequest extends Request {
      * Returns the new content of the JSON resource to be replaced.
      *
      * @return The new content of the JSON resource to be replaced.
+     * @deprecated Use {@link UpdateRequest#getContent} instead.
      */
+    @Deprecated
     JsonValue getNewContent();
+
+    /**
+     * Returns the content of the JSON resource to be replaced.
+     *
+     * @return The content of the JSON resource to be replaced.
+     */
+    JsonValue getContent();
 
     /**
      * {@inheritDoc}
@@ -112,8 +121,22 @@ public interface UpdateRequest extends Request {
      * @throws UnsupportedOperationException
      *             If this update request does not permit changes to the
      *             content.
+     * @deprecated Use {@link UpdateRequest#setContent} instead.
      */
+    @Deprecated
     UpdateRequest setNewContent(JsonValue content);
+
+    /**
+     * Sets the content of the JSON resource to be replaced.
+     *
+     * @param content
+     *            The content of the JSON resource to be replaced.
+     * @return This update request.
+     * @throws UnsupportedOperationException
+     *             If this update request does not permit changes to the
+     *             content.
+     */
+    UpdateRequest setContent(JsonValue content);
 
     /**
      * {@inheritDoc}
