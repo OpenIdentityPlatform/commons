@@ -16,6 +16,9 @@
 
 package org.forgerock.json.resource;
 
+import org.forgerock.util.promise.FailureHandler;
+import org.forgerock.util.promise.SuccessHandler;
+
 
 /**
  * A completion handler for consuming the result of an asynchronous operation or
@@ -35,7 +38,7 @@ package org.forgerock.json.resource;
  * @param <V>
  *            The type of result handled by this result handler.
  */
-public interface ResultHandler<V> {
+public interface ResultHandler<V> extends SuccessHandler<V>, FailureHandler<ResourceException> {
 
     /**
      * Invoked when the asynchronous request has failed.

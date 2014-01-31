@@ -18,6 +18,7 @@ package org.forgerock.json.resource;
 import java.util.Collection;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.util.promise.Promise;
 
 /**
  * An abstract base class from which connection wrappers may be easily
@@ -44,12 +45,14 @@ public abstract class AbstractConnectionWrapper<C extends Connection> implements
     }
 
     /**
-     * Optional Context-transformation function if the implementer has requirements to override
-     * the {@link Context} provided in the {@link Connection}'s method invocations.
+     * Optional Context-transformation function if the implementer has
+     * requirements to override the {@link Context} provided in the
+     * {@link Connection}'s method invocations.
      * <p>
      * The default implementation is a pass-through no-op.
      *
-     * @param context the request context
+     * @param context
+     *            the request context
      * @return the transformed context
      */
     protected Context transform(Context context) {
@@ -70,9 +73,8 @@ public abstract class AbstractConnectionWrapper<C extends Connection> implements
      * <p>
      * The default implementation is to delegate.
      */
-    public FutureResult<JsonValue> actionAsync(Context context, ActionRequest request,
-            ResultHandler<? super JsonValue> handler) {
-        return connection.actionAsync(transform(context), request, handler);
+    public Promise<JsonValue, ResourceException> actionAsync(Context context, ActionRequest request) {
+        return connection.actionAsync(transform(context), request);
     }
 
     /**
@@ -98,9 +100,8 @@ public abstract class AbstractConnectionWrapper<C extends Connection> implements
      * <p>
      * The default implementation is to delegate.
      */
-    public FutureResult<Resource> createAsync(Context context, CreateRequest request,
-            ResultHandler<? super Resource> handler) {
-        return connection.createAsync(transform(context), request, handler);
+    public Promise<Resource, ResourceException> createAsync(Context context, CreateRequest request) {
+        return connection.createAsync(transform(context), request);
     }
 
     /**
@@ -117,9 +118,8 @@ public abstract class AbstractConnectionWrapper<C extends Connection> implements
      * <p>
      * The default implementation is to delegate.
      */
-    public FutureResult<Resource> deleteAsync(Context context, DeleteRequest request,
-            ResultHandler<? super Resource> handler) {
-        return connection.deleteAsync(transform(context), request, handler);
+    public Promise<Resource, ResourceException> deleteAsync(Context context, DeleteRequest request) {
+        return connection.deleteAsync(transform(context), request);
     }
 
     /**
@@ -154,9 +154,8 @@ public abstract class AbstractConnectionWrapper<C extends Connection> implements
      * <p>
      * The default implementation is to delegate.
      */
-    public FutureResult<Resource> patchAsync(Context context, PatchRequest request,
-            ResultHandler<? super Resource> handler) {
-        return connection.patchAsync(transform(context), request, handler);
+    public Promise<Resource, ResourceException> patchAsync(Context context, PatchRequest request) {
+        return connection.patchAsync(transform(context), request);
     }
 
     /**
@@ -184,8 +183,8 @@ public abstract class AbstractConnectionWrapper<C extends Connection> implements
      * <p>
      * The default implementation is to delegate.
      */
-    public FutureResult<QueryResult> queryAsync(Context context, QueryRequest request,
-            QueryResultHandler handler) {
+    public Promise<QueryResult, ResourceException> queryAsync(Context context,
+            QueryRequest request, QueryResultHandler handler) {
         return connection.queryAsync(transform(context), request, handler);
     }
 
@@ -203,9 +202,8 @@ public abstract class AbstractConnectionWrapper<C extends Connection> implements
      * <p>
      * The default implementation is to delegate.
      */
-    public FutureResult<Resource> readAsync(Context context, ReadRequest request,
-            ResultHandler<? super Resource> handler) {
-        return connection.readAsync(transform(context), request, handler);
+    public Promise<Resource, ResourceException> readAsync(Context context, ReadRequest request) {
+        return connection.readAsync(transform(context), request);
     }
 
     /**
@@ -222,9 +220,8 @@ public abstract class AbstractConnectionWrapper<C extends Connection> implements
      * <p>
      * The default implementation is to delegate.
      */
-    public FutureResult<Resource> updateAsync(Context context, UpdateRequest request,
-            ResultHandler<? super Resource> handler) {
-        return connection.updateAsync(transform(context), request, handler);
+    public Promise<Resource, ResourceException> updateAsync(Context context, UpdateRequest request) {
+        return connection.updateAsync(transform(context), request);
     }
 
 }
