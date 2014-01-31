@@ -497,7 +497,7 @@ public final class Requests {
         private UpdateRequestImpl(final UpdateRequest request) {
             super(request);
             this.version = request.getRevision();
-            this.content = copyJsonValue(request.getNewContent());
+            this.content = copyJsonValue(request.getContent());
         }
 
         @Override
@@ -506,7 +506,7 @@ public final class Requests {
         };
 
         @Override
-        public JsonValue getNewContent() {
+        public JsonValue getContent() {
             return content;
         }
 
@@ -516,7 +516,7 @@ public final class Requests {
         }
 
         @Override
-        public UpdateRequest setNewContent(final JsonValue content) {
+        public UpdateRequest setContent(final JsonValue content) {
             this.content = notNull(content);
             return this;
         }
@@ -930,7 +930,7 @@ public final class Requests {
      */
     public static UpdateRequest newUpdateRequest(final String resourceName,
             final JsonValue newContent) {
-        return new UpdateRequestImpl().setResourceName(resourceName).setNewContent(newContent);
+        return new UpdateRequestImpl().setResourceName(resourceName).setContent(newContent);
     }
 
     /**
