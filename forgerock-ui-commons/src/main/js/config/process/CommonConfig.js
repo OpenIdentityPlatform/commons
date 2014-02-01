@@ -134,6 +134,9 @@ define("config/process/CommonConfig", [
                 "LoginDialog"
             ],
             processDescription: function(error, viewManager, router, conf, sessionManager, loginDialog) {
+                
+                eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: true});
+
                 if(!conf.loggedUser) {
                     if(!conf.gotoURL && !window.location.hash.replace(/^#/, '').match(router.configuration.routes.login.url)) {
                         conf.setProperty("gotoURL", window.location.hash);
