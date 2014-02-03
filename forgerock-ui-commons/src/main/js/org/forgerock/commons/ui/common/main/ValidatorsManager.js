@@ -36,6 +36,17 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
     
     obj.bindValidators = function(el,baseEntity,callback) {
         var inputs, event, input,
+            validateDependents = function (input) {
+                // re-validate dependent form fields
+                if (input.attr("data-validation-dependents")) {
+                    input
+                        .closest("form")
+                        .find(':input')
+                        .filter(function () { return $.inArray($(this).attr("name"), input.attr("data-validation-dependents").split(",")) !== -1; })
+                        .trigger("change");
+                }
+
+            },
             postValidation = function  (policyFailures) {
                 var simpleFailures = [], msg = [],
                     thisInput = this.input,
@@ -58,14 +69,7 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
                 
                 el.trigger("onValidate", [this.input, msg.length ? msg.join("<br>") : false]); 
                 
-                // re-validate dependent form fields
-                if (thisInput.attr("data-validation-dependents")) {
-                    thisInput
-                        .closest("form")
-                        .find(':input')
-                        .filter(function () { return $.inArray($(this).attr("name"), thisInput.attr("data-validation-dependents").split(",")) !== -1; })
-                        .trigger("change");
-                }
+                validateDependents(thisInput);
             };
 
         
@@ -81,7 +85,10 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
             }
   
             _.each(input.attr('data-validator').split(' '), function(type){
-                input.on(event, _.bind(obj.validate, {input: input, el: el, validatorType: type}));
+                input.on(event, function (e) {
+                    obj.validate.call({input: input, el: el, validatorType: type}, e);
+                    validateDependents(input);
+                });
             });
             
         });
