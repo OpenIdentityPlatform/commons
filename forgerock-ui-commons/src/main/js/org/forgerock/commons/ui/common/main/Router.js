@@ -117,7 +117,7 @@ define("org/forgerock/commons/ui/common/main/Router", [
         if (typeof route.defaults === "object") {
             if (args) {
                 for (i=0;i<args.length;i++) {
-                    if (args[i] === undefined && route.defaults[i] !== undefined) {
+                    if (typeof args[i] !== "string" && route.defaults[i] !== undefined) {
                         args[i] = route.defaults[i];
                     } 
                 }

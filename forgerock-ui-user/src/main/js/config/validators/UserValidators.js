@@ -110,14 +110,10 @@ define("config/validators/UserValidators", [
                         return;
                     }
                     
-                    userDelegate.checkCredentials(v, function(result) {
-                        if(result.reauthenticated) {
-                            callback();
-                            $(input).attr('data-validation-status', 'ok');
-                            $("input[name='Continue']").click();
-                        } else {
-                            callback($.t("common.form.validation.incorrectPassword"));
-                        }
+                    userDelegate.checkCredentials(v, function() {
+                        callback();
+                        $(input).attr('data-validation-status', 'ok');
+                        $("input[name='Continue']").click();
                     },
                     function (result) {
                         callback($.t("common.form.validation.incorrectPassword"));
