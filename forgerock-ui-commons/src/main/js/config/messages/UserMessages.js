@@ -47,6 +47,10 @@ define("config/messages/UserMessages", [
                 msg: "config.messages.UserMessages.emailNotSent",
                 type: "error"
             },
+            "unableToRegister": {
+                msg: "config.messages.UserMessages.unableToRegister",
+                type: "error"
+            },
             "invalidOldPassword": {
                 msg: "config.messages.UserMessages.invalidOldPassword",
                 type: "error"
