@@ -33,15 +33,15 @@ define("config/routes/CommonRoutesConfig", [
 ], function(constants) {
     
     var obj = {
-            "default": {
-                event: constants.EVENT_HANDLE_DEFAULT_ROUTE,
-                role: "ui-user",
-                url: ""
-            },
             "404":  { //this route must be the first route
                 view: "org/forgerock/commons/ui/common/NotFoundView",
                 url: /^([\w\W]*)$/,
                 pattern: "?"
+            },
+            "default": {
+                event: constants.EVENT_HANDLE_DEFAULT_ROUTE,
+                role: "ui-user",
+                url: /^$/
             },
             "enableCookies":  { 
                 view: "org/forgerock/commons/ui/common/EnableCookiesView",

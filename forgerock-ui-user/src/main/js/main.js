@@ -48,9 +48,6 @@ require.config({
     },
 
     shim: {
-        mustache: {
-            exports: "Mustache"
-        },
         underscore: {
             exports: "_"
         },

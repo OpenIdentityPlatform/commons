@@ -27,32 +27,28 @@
 define("org/forgerock/commons/ui/common/util/CustomPolyfill", [
 ], function () {
 
-    var fakeConsole = {
-            log : function() {
-            },
-            info : function() {
-            },
-            debug : function() {
-            }
-        },
-        key,
-        proto = "__proto__";
+    // From html5-boilerplate: https://raw2.github.com/h5bp/html5-boilerplate/master/js/plugins.js
+    (function() {
+        var method;
+        var noop = function () {};
+        var methods = [
+            'assert', 'clear', 'count', 'debug', 'dir', 'dirxml', 'error',
+            'exception', 'group', 'groupCollapsed', 'groupEnd', 'info', 'log',
+            'markTimeline', 'profile', 'profileEnd', 'table', 'time', 'timeEnd',
+            'timeStamp', 'trace', 'warn'
+        ];
+        var length = methods.length;
+        var console = (window.console = window.console || {});
 
-    if (typeof console === "undefined") {
-        window.console = fakeConsole;
-    }
-    else
-    {
-        if (window.console.log) {
-            fakeConsole.log = window.console.log;
-        }
+        while (length--) {
+            method = methods[length];
 
-        for (key in fakeConsole) {
-            if (!window.console[key]) {
-                window.console[key] = fakeConsole.log;
+            // Only stub undefined methods.
+            if (!console[method]) {
+                console[method] = noop;
             }
         }
-    }
+    }());
 
 
     //this is here to catch the issue IE 8 has with getPrototypeOf method
