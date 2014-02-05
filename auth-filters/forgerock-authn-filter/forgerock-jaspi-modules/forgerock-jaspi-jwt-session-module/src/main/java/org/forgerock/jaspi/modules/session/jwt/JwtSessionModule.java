@@ -17,7 +17,7 @@
 package org.forgerock.jaspi.modules.session.jwt;
 
 import org.forgerock.auth.common.DebugLogger;
-import org.forgerock.common.util.KeystoreManager;
+import org.forgerock.json.jose.utils.KeystoreManager;
 import org.forgerock.jaspi.logging.LogFactory;
 import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.json.jose.builders.JwtBuilderFactory;
