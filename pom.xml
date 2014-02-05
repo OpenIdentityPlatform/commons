@@ -19,13 +19,13 @@
     </parent>
 
     <properties>
-        <forgerock-ui.version>1.0.7-SNAPSHOT</forgerock-ui.version>
+        <forgerock-ui.version>1.0.6-SNAPSHOT</forgerock-ui.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <groupId>org.forgerock.commons.ui</groupId>
     <artifactId>forgerock-ui</artifactId>
-    <version>1.0.7-SNAPSHOT</version>
+    <version>1.0.6-SNAPSHOT</version>
     <name>Forgerock Web UI</name>
     <description>Common modern ForgeRock Web UI</description>
     <packaging>pom</packaging>
