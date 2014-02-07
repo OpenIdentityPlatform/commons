@@ -17,16 +17,17 @@
 package org.forgerock.jaspi.modules.session.jwt;
 
 import org.forgerock.auth.common.DebugLogger;
-import org.forgerock.json.jose.utils.KeystoreManager;
 import org.forgerock.jaspi.logging.LogFactory;
 import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.json.jose.builders.JwtBuilderFactory;
+import org.forgerock.json.jose.exceptions.JweDecryptionException;
 import org.forgerock.json.jose.jwe.EncryptedJwt;
 import org.forgerock.json.jose.jwe.EncryptionMethod;
 import org.forgerock.json.jose.jwe.JweAlgorithm;
 import org.forgerock.json.jose.jwe.JweHeader;
 import org.forgerock.json.jose.jwt.Jwt;
 import org.forgerock.json.jose.jwt.JwtClaimsSet;
+import org.forgerock.json.jose.utils.KeystoreManager;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
@@ -229,7 +230,13 @@ public class JwtSessionModule implements ServerAuthModule {
 
         if (jwtSessionCookie != null && !isEmpty(jwtSessionCookie.getValue())) {
 
-            Jwt jwt = verifySessionJwt(jwtSessionCookie.getValue());
+            final Jwt jwt;
+            try {
+                jwt = verifySessionJwt(jwtSessionCookie.getValue());
+            } catch (JweDecryptionException e) {
+                DEBUG.error("Failed to decrypt Jwt", e);
+                return null;
+            }
             if (jwt != null) {
                 //if all goes well!
                 Map<String, Object> claimsSetContext = jwt.getClaimsSet().getClaim(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT, Map.class);

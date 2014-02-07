@@ -21,10 +21,12 @@ import org.forgerock.json.jose.builders.EncryptedJwtBuilder;
 import org.forgerock.json.jose.builders.JweHeaderBuilder;
 import org.forgerock.json.jose.builders.JwtBuilderFactory;
 import org.forgerock.json.jose.builders.JwtClaimsSetBuilder;
+import org.forgerock.json.jose.exceptions.JweDecryptionException;
 import org.forgerock.json.jose.jwe.EncryptedJwt;
 import org.forgerock.json.jose.jwe.EncryptionMethod;
 import org.forgerock.json.jose.jwe.JweAlgorithm;
 import org.forgerock.json.jose.jwt.Algorithm;
+import org.forgerock.json.jose.jwt.Jwt;
 import org.forgerock.json.jose.jwt.JwtClaimsSet;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
@@ -311,6 +313,35 @@ public class JwtSessionModuleTest {
         //Then
         assertEquals(authStatus, AuthStatus.SEND_FAILURE);
         verifyZeroInteractions(response);
+    }
+
+    @Test
+    public void validateJwtSessionCookieShouldReturnNullWhenJwtCannotBeDecrypted() throws AuthException,
+            UnsupportedEncodingException {
+
+        //Given
+        jwtSessionModule.initialize(null, null, null, getOptionsMap(1, 2));
+
+        MessageInfo messageInfo = mock(MessageInfo.class);
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        Cookie jwtSessionCookie = mock(Cookie.class);
+        Cookie[] cookies = new Cookie[]{jwtSessionCookie};
+
+        given(messageInfo.getRequestMessage()).willReturn(request);
+        given(messageInfo.getResponseMessage()).willReturn(response);
+        given(request.getCookies()).willReturn(cookies);
+        given(jwtSessionCookie.getName()).willReturn("session-jwt");
+        given(jwtSessionCookie.getValue()).willReturn("SESSION_JWT");
+
+        given(jwtBuilderFactory.reconstruct("SESSION_JWT", EncryptedJwt.class))
+                .willThrow(JweDecryptionException.class);
+
+        //When
+        Jwt jwt = jwtSessionModule.validateJwtSessionCookie(messageInfo);
+
+        //Then
+        assertNull(jwt);
     }
 
     @Test
