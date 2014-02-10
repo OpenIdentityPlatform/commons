@@ -11,19 +11,16 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2014 ForgeRock AS.
  */
 
 package org.forgerock.authz;
 
-import org.forgerock.auth.common.AuditLogger;
-import org.forgerock.auth.common.LoggingConfigurator;
-import org.forgerock.auth.common.DebugLogger;
-
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.forgerock.auth.common.AuditLogger;
+import org.forgerock.auth.common.DebugLogger;
+import org.forgerock.auth.common.LoggingConfigurator;
 
 /**
  * Base interface for all Authorization Filter implementations, which will contain the logic required
@@ -52,4 +49,9 @@ public interface AuthorizationFilter {
      * @return <code>true</code> if the request is authorized to proceed, otherwise <code>false</code>.
      */
     boolean authorize(HttpServletRequest servletRequest, HttpServletResponse servletResponse);
+
+    /**
+     * Gives us an opportunity to clean up any resources that are being held by this filter
+     */
+    void destroy();
 }

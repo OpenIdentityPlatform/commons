@@ -16,12 +16,7 @@
 
 package org.forgerock.authz;
 
-import org.forgerock.auth.common.AuditLogger;
-import org.forgerock.auth.common.AuditRecord;
-import org.forgerock.auth.common.AuthResult;
-import org.forgerock.auth.common.DebugLogger;
-import org.forgerock.json.resource.ResourceException;
-
+import java.io.IOException;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -30,7 +25,11 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import org.forgerock.auth.common.AuditLogger;
+import org.forgerock.auth.common.AuditRecord;
+import org.forgerock.auth.common.AuthResult;
+import org.forgerock.auth.common.DebugLogger;
+import org.forgerock.json.resource.ResourceException;
 
 /**
  * Authorization Filter which protects resources based on the user's privileges who made the request.
@@ -54,9 +53,9 @@ public class AuthZFilter implements Filter {
 
     private static final String CONFIGURATOR_IMPL_INIT_PARAM = "configurator";
 
-    private AuthorizationConfigurator configurator;
-    private AuditLogger<HttpServletRequest> auditLogger;
-    private AuthorizationFilter authorizationFilter;
+    private volatile AuthorizationConfigurator configurator;
+    private volatile AuditLogger<HttpServletRequest> auditLogger;
+    private volatile AuthorizationFilter authorizationFilter;
 
     /**
      * Initialises the instance of the Configurator that will be used to set up this AuthZFilter.
@@ -85,11 +84,12 @@ public class AuthZFilter implements Filter {
     }
 
     /**
-     * Lazily initialises the AuditLogger, DebugLogger and AuthorizationFilter member variables from the AuthZFilter
-     * Configurator instance.
+     * Lazy initialises the AuditLogger, DebugLogger and AuthorizationFilter member variables from the
+     * AuthZFilter Configurator instance.
      */
     private synchronized void init() {
-        if (authorizationFilter == null) {
+
+        if(authorizationFilter == null) {
 
             auditLogger = configurator.getAuditLogger();
             DebugLogger debugLogger = configurator.getDebugLogger();
@@ -114,6 +114,7 @@ public class AuthZFilter implements Filter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
             throws IOException, ServletException {
+
         init();
 
         if (!(servletRequest instanceof HttpServletRequest && servletResponse instanceof HttpServletResponse)) {
@@ -183,12 +184,10 @@ public class AuthZFilter implements Filter {
     }
 
     /**
-     * Nullifies the AuthZFilter's member variables.
+     * Chain through to the authorizationFilter's destroy
      */
     @Override
     public void destroy() {
-        configurator = null;
-        auditLogger = null;
-        authorizationFilter = null;
+        authorizationFilter.destroy();
     }
 }

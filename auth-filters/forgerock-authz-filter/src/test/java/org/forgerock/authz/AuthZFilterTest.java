@@ -61,7 +61,6 @@ public class AuthZFilterTest {
 
         authZFilter.init(filterConfig);
 
-
         request = mock(HttpServletRequest.class);
         response = mock(HttpServletResponse.class);
         filterChain = mock(FilterChain.class);
@@ -80,6 +79,7 @@ public class AuthZFilterTest {
         given(authorizationConfigurator.getDebugLogger()).willReturn(debugLogger);
 
         AuthorizationConfiguratorFactory.setAuthorizationConfigurator(authorizationConfigurator);
+
     }
 
     @Test
