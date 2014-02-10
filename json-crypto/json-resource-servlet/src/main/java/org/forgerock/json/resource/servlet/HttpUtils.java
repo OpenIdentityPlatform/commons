@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2013 ForgeRock AS.
+ * Copyright 2012-2014 ForgeRock AS.
  */
 package org.forgerock.json.resource.servlet;
 
@@ -44,7 +44,7 @@ import org.forgerock.json.resource.ResourceException;
 /**
  * HTTP utility methods and constants.
  */
-final class HttpUtils {
+public final class HttpUtils {
 
     static final String CACHE_CONTROL = "no-cache";
     static final String CHARACTER_ENCODING = "UTF-8";
@@ -70,17 +70,28 @@ final class HttpUtils {
     static final String METHOD_PUT = "PUT";
     static final String METHOD_TRACE = "TRACE";
 
-    static final String PARAM_ACTION = param(ActionRequest.FIELD_ACTION);
-    static final String PARAM_DEBUG = "_debug";
-    static final String PARAM_FIELDS = param(Request.FIELD_FIELDS);
-    static final String PARAM_PAGE_SIZE = param(QueryRequest.FIELD_PAGE_SIZE);
-    static final String PARAM_PAGED_RESULTS_COOKIE = param(QueryRequest.FIELD_PAGED_RESULTS_COOKIE);
-    static final String PARAM_PAGED_RESULTS_OFFSET = param(QueryRequest.FIELD_PAGED_RESULTS_OFFSET);
-    static final String PARAM_PRETTY_PRINT = "_prettyPrint";
-    static final String PARAM_QUERY_EXPRESSION = param(QueryRequest.FIELD_QUERY_EXPRESSION);
-    static final String PARAM_QUERY_FILTER = param(QueryRequest.FIELD_QUERY_FILTER);
-    static final String PARAM_QUERY_ID = param(QueryRequest.FIELD_QUERY_ID);
-    static final String PARAM_SORT_KEYS = param(QueryRequest.FIELD_SORT_KEYS);
+    /** the HTTP request parameter for an action */
+    public static final String PARAM_ACTION = param(ActionRequest.FIELD_ACTION);
+    /** the HTTP request parameter to request debugging */
+    public static final String PARAM_DEBUG = "_debug";
+    /** the HTTP request parameter to specify which fields to return */
+    public static final String PARAM_FIELDS = param(Request.FIELD_FIELDS);
+    /** the HTTP request parameter to request a certain page size */
+    public static final String PARAM_PAGE_SIZE = param(QueryRequest.FIELD_PAGE_SIZE);
+    /** the HTTP request parameter to specify a paged results cookie */
+    public static final String PARAM_PAGED_RESULTS_COOKIE = param(QueryRequest.FIELD_PAGED_RESULTS_COOKIE);
+    /** the HTTP request parameter to specify a paged results offset */
+    public static final String PARAM_PAGED_RESULTS_OFFSET = param(QueryRequest.FIELD_PAGED_RESULTS_OFFSET);
+    /** the HTTP request parameter to request pretty printing */
+    public static final String PARAM_PRETTY_PRINT = "_prettyPrint";
+    /** the HTTP request parameter to specify a query expression */
+    public static final String PARAM_QUERY_EXPRESSION = param(QueryRequest.FIELD_QUERY_EXPRESSION);
+    /** the HTTP request parameter to specify a query filter */
+    public static final String PARAM_QUERY_FILTER = param(QueryRequest.FIELD_QUERY_FILTER);
+    /** the HTTP request parameter to specify a query id */
+    public static final String PARAM_QUERY_ID = param(QueryRequest.FIELD_QUERY_ID);
+    /** the HTTP request parameter to specify the sort keys */
+    public static final String PARAM_SORT_KEYS = param(QueryRequest.FIELD_SORT_KEYS);
 
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
 
