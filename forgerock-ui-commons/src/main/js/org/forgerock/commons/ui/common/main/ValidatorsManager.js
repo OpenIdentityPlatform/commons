@@ -98,10 +98,10 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
                 _.each(policy.properties, _.bind(function (property, i) {
                     var input,event,idx;
                     
-                    if (property.name.match(/\[\]$/)) { // property is an array
-                        // if the name is property[], then this selector will match all inputs named beginning like "property[", including
+                    if (property.name.match(/\[\*\]$/)) { // property is an array
+                        // if the name is property[*], then this selector will match all inputs named beginning like "property[", including
                         // property[1],property[2], etc...
-                        input = el.find("[name^='" + property.name.replace(/\]$/, '') + "']");
+                        input = el.find("[name^='" + property.name.replace(/\*\]$/, '') + "']");
                     }
                     else {
                         input = el.find("[name='" + property.name + "']");

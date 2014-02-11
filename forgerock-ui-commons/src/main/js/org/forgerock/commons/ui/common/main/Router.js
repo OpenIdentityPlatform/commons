@@ -112,11 +112,12 @@ define("org/forgerock/commons/ui/common/main/Router", [
     };
     
     obj.getLink = function(route, args) {
-        var i, pattern;
+        var i,maxArgLength, pattern;
         
         if (typeof route.defaults === "object") {
             if (args) {
-                for (i=0;i<args.length;i++) {
+                maxArgLength = (args.length >= route.defaults.length) ? args.length : route.defaults.length;
+                for (i=0;i<maxArgLength;i++) {
                     if (typeof args[i] !== "string" && route.defaults[i] !== undefined) {
                         args[i] = route.defaults[i];
                     } 

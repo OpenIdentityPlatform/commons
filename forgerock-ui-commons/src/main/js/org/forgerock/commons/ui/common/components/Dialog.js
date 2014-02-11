@@ -106,14 +106,13 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
             }
             
             if($(".dialogContainer").length < 2) {
-                $(".dialog-background").fadeOut(300, function(){
-                    $("#dialogs").removeClass('show');
-                });
+                $(".dialog-background").hide();
+                $("#dialogs").removeClass('show');
             }
             
             eventManager.sendEvent(constants.EVENT_DIALOG_CLOSE);
             
-            $(".dialogContainer:last").remove();
+            this.$el.remove();
         },
 
         addAction: function(name, type) {

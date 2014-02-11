@@ -45,13 +45,14 @@ define("org/forgerock/commons/ui/common/main/ViewManager", [
     obj.changeView = function(viewPath, args, callback, forceUpdate) {        
         var view;
         
-        if(obj.currentDialog !== "null") {
-            require(obj.currentDialog).close();
-        }
-        
-        obj.currentDialog = "null";
         
         if(obj.currentView !== viewPath || forceUpdate || !_.isEqual(obj.currentViewArgs, args)) {
+            if(obj.currentDialog !== "null") {
+                require(obj.currentDialog).close();
+            }
+            
+            obj.currentDialog = "null";
+
             view = require(viewPath);
             
             if(view.init) {
@@ -80,6 +81,10 @@ define("org/forgerock/commons/ui/common/main/ViewManager", [
             msg.messages.hideMessages();
         }
         
+        if(obj.currentDialog !== "null") {
+            require(obj.currentDialog).close();
+        }
+                
         obj.currentDialog = dialogPath;
         obj.currentDialogArgs = args;
     };
