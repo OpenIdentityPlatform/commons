@@ -97,22 +97,11 @@ public final class HttpContext extends AbstractContext implements ClientContext 
         this.parameters = (Map) data.get(ATTR_PARAMETERS).required().asMap();
     }
 
-    /** the protocol represented by this context. */
-    private static final Protocol HTTP_PROTOCOL = Protocol.valueOf("http");
-
     /**
      * {@inheritDoc}
      */
-    @Override
-    public boolean hasProtocol(Protocol protocol) {
-        return HTTP_PROTOCOL.equals(protocol);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Protocol getProtocol() {
-        return HTTP_PROTOCOL;
+    public boolean isExternal() {
+        return true;
     }
 
     HttpContext(final Context parent, final HttpServletRequest req) {

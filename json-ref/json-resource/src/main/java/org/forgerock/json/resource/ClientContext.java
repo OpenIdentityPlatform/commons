@@ -15,8 +15,6 @@
  */
 package org.forgerock.json.resource;
 
-import org.forgerock.util.Reject;
-
 /**
  * A Context to establish the source of a client request through the use of one
  * or more {@link Protocol} objects.
@@ -24,85 +22,9 @@ import org.forgerock.util.Reject;
 public interface ClientContext extends Context {
 
     /**
-     * A source, or "protocol" class that indicates what type of client is
-     * submitting a request.  For example, {@code HttpContext} implements
-     * <pre>
-     *     public boolean hasProtocol(Protocol protocol) {
-     *         Protocol.valueOf("http").equals(protocol);
-     *     }
-     * </pre>
-     * to indicate it is the http protocol.
-     */
-    public static final class Protocol {
-        /** the protocol value. */
-        private final String protocol;
-
-        /**
-         * Construct a new Protocol.  Private access; callers must use {@link #valueOf} to
-         * instantiate a Protocol from a String.
-         *
-         * @param protocol the protocol value
-         */
-        private Protocol(final String protocol) {
-            Reject.ifNull(protocol, "Protocol cannot wrap null value");
-            this.protocol = protocol;
-        }
-
-        /**
-         * Return this object as a String.
-         *
-         * @return the String representation of this object
-         */
-        public String toString() {
-            return protocol;
-        }
-
-        /**
-         * Return whether this object is the same object as the parameter.
-         *
-         * @param o Object for comparison
-         * @return true if this object is equal to <em>o</em>, false otherwise
-         */
-        public boolean equals(Object o) {
-            if (!(o instanceof Protocol)) {
-                return false;
-            }
-            Protocol p = (Protocol) o;
-            return p.protocol.equals(this.protocol);
-        }
-
-        /**
-         * Compute the hashcode of this object.
-         *
-         * @return the hashcode of this object
-         */
-        public int hashCode() {
-            return protocol.hashCode();
-        }
-
-        /**
-         * Return a Protocol object based on the parameter <em>protocol</em>.
-         *
-         * @param protocol the protocol value
-         * @return the Protocol object
-         */
-        public static Protocol valueOf(final String protocol) {
-            return new Protocol(protocol);
-        }
-    }
-
-    /**
-     * Return whether this Context has a particular Protocol.
+     * Return whether this client is external
      *
-     * @param protocol the Protocol to check
-     * @return true if the Context has the <em>protocol</em>, false otherwise
+     * @return true if this context represents a request from an external client, false otherwise
      */
-    public boolean hasProtocol(Protocol protocol);
-
-    /**
-     * Return this context's {@link Protocol}.
-     *
-     * @return the Protocol of this context
-     */
-    public Protocol getProtocol();
+    public boolean isExternal();
 }
