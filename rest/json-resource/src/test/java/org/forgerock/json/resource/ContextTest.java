@@ -36,23 +36,6 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings("javadoc")
 public final class ContextTest {
 
-    public static class InternalServerContext extends ServerContext implements ClientContext {
-        public InternalServerContext(Context parent) {
-            super("internal-server", parent);
-        }
-
-        @Override
-        public boolean hasProtocol(Protocol protocol) {
-            // context has two protocols
-            return Protocol.valueOf("internal").equals(protocol)
-                    || Protocol.valueOf("server").equals(protocol);
-        }
-
-        public Protocol getProtocol() {
-            return Protocol.valueOf("internal");
-        }
-    }
-
     @Test
     public void testNewRootContext() {
         final RootContext root = new RootContext();
@@ -171,13 +154,4 @@ public final class ContextTest {
         }
     }
 
-    @Test
-    public void testHasProtocol() throws Exception {
-        final Context root = new RootContext("root-id");
-        final InternalServerContext internal = new InternalServerContext(root);
-
-        assertThat(internal.hasProtocol(ClientContext.Protocol.valueOf("internal"))).isTrue();
-        assertThat(internal.hasProtocol(ClientContext.Protocol.valueOf("server"))).isTrue();
-        assertThat(internal.hasProtocol(ClientContext.Protocol.valueOf("http"))).isFalse();
-    }
 }
