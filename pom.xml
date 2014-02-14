@@ -14,9 +14,7 @@ information: "Portions Copyrighted [year] [name of copyright owner]".
 
 Copyright 2014 ForgeRock AS.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -58,9 +56,9 @@ Copyright 2014 ForgeRock AS.
     </issueManagement>
 
     <scm>
-        <url>https://svn.forgerock.org/commons/forgerock-guice/trunk</url>
-        <connection>scm:svn:https://svn.forgerock.org/commons/forgerock-guice/trunk</connection>
-        <developerConnection>scm:svn:https://svn.forgerock.org/commons/forgerock-guice/trunk</developerConnection>
+        <url>https://svn.forgerock.org/commons/forgerock-guice/branches/1.0</url>
+        <connection>scm:svn:https://svn.forgerock.org/commons/forgerock-guice/branches/1.0</connection>
+        <developerConnection>scm:svn:https://svn.forgerock.org/commons/forgerock-guice/branches/1.0</developerConnection>
     </scm>
 
     <ciManagement>
