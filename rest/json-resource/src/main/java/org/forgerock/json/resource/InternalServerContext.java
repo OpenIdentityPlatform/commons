@@ -23,7 +23,7 @@ import org.forgerock.json.fluent.JsonValue;
  */
 public class InternalServerContext extends ServerContext implements ClientContext {
     /** the client-friendly name of this context */
-    private static final String CONTEXT_NAME = "internal-server";
+    private static final String CONTEXT_NAME = "internalServer";
 
     /**
      * {@inheritDoc}
