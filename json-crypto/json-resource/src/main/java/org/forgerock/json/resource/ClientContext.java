@@ -16,8 +16,8 @@
 package org.forgerock.json.resource;
 
 /**
- * A Context to establish the source of a client request through the use of one
- * or more {@link Protocol} objects.
+ * A Context to differentiate the source of a client request as being
+ * either "external" or "internal".
  */
 public interface ClientContext extends Context {
 
