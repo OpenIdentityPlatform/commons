@@ -211,7 +211,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     };
     
     Handlebars.registerHelper('t', function(i18nKey) {        
-        var params = { postProcess: 'sprintf', sprintf: _.toArray(arguments).slice(1, -1)}, result;
+        var params = { postProcess: 'sprintf', sprintf: _.map(_.toArray(arguments).slice(1, -1), Handlebars.Utils.escapeExpression)}, result;
         
         result = i18n.t(i18nKey, params);
         
