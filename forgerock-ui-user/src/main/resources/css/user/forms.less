@@ -39,7 +39,7 @@ input.read-only, input:read-only, input[type="text"]:focus:read-only, input[type
 form.form {
 
     &.large {
-        width: 700px;
+        width: 750px;
         label {
             width: 210px;        
         }
@@ -175,7 +175,7 @@ form.form {
         font-size: 14px;
         text-align: center;
         vertical-align: middle;
-        width: 20px;
+        width: 18px;
         display: inline-block;
     }
     span.error {
@@ -189,8 +189,13 @@ form.form {
         color: @color-error;
         display: inline-block;
         float: right;
-        height: 13px;
+        min-height: 13px;
         font-size: 12px;
+        text-align: right;
+        &.noFloat {
+            float:none;
+            text-align: left;
+        }
     }
     div.group-field-inputs {
         float: left;
