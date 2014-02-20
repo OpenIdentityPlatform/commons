@@ -11,13 +11,14 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2014 ForgeRock AS.
  */
 package org.forgerock.json.resource;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.forgerock.json.resource.Requests.newReadRequest;
 
+import org.forgerock.json.fluent.JsonValue;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -63,6 +64,32 @@ public final class RequestsTest {
     public void testSetNullResourceName() {
         final Request request = newReadRequest("/hello");
         request.setResourceName((ResourceName) null);
+    }
+
+    @Test
+    public void testResourceIdEscaping1() {
+        Request r = Requests.newReadRequest("test/users/forward%2fslash");
+        assertThat(r.getResourceName()).isEqualTo("test/users/forward%2fslash");
+        assertThat(r.getResourceNameObject().leaf()).isEqualTo("forward/slash");
+        assertThat(r.getResourceNameObject()).hasSize(3);
+    }
+
+    @Test
+    public void testResourceIdEscaping2() {
+        Request r = Requests.newReadRequest("test/users", "forward/slash");
+        assertThat(r.getResourceName()).isEqualTo("test/users/forward%2Fslash");
+        assertThat(r.getResourceNameObject().leaf()).isEqualTo("forward/slash");
+        assertThat(r.getResourceNameObject()).hasSize(3);
+    }
+
+    @Test
+    public void testNewResourceIdEscaping() {
+        CreateRequest r =
+                Requests.newCreateRequest("test/users", "forward/slash", new JsonValue(null));
+        assertThat(r.getResourceName()).isEqualTo("test/users");
+        assertThat(r.getResourceNameObject().leaf()).isEqualTo("users");
+        assertThat(r.getResourceNameObject()).hasSize(2);
+        assertThat(r.getNewResourceId()).isEqualTo("forward/slash");
     }
 
 }
