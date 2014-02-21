@@ -19,10 +19,8 @@ package org.forgerock.authz;
 import org.forgerock.auth.common.AuditLogger;
 import org.forgerock.auth.common.AuditRecord;
 import org.forgerock.auth.common.AuthResult;
-import org.forgerock.auth.common.LoggingConfigurator;
 import org.forgerock.auth.common.DebugLogger;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Matchers;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -33,10 +31,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collections;
 
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertEquals;
 
 public class AuthZFilterTest {
@@ -76,7 +77,6 @@ public class AuthZFilterTest {
 
         given(authorizationConfigurator.getAuthorizationFilter()).willReturn(authorizationFilter);
         given(authorizationConfigurator.getAuditLogger()).willReturn(auditLogger);
-        given(authorizationConfigurator.getDebugLogger()).willReturn(debugLogger);
 
         AuthorizationConfiguratorFactory.setAuthorizationConfigurator(authorizationConfigurator);
 
@@ -93,9 +93,8 @@ public class AuthZFilterTest {
 
         //Then
         verify(authorizationConfigurator).getAuditLogger();
-        verify(authorizationConfigurator).getDebugLogger();
         verify(authorizationConfigurator).getAuthorizationFilter();
-        verify(authorizationFilter).initialise(Matchers.<LoggingConfigurator>anyObject(), eq(auditLogger), eq(debugLogger));
+        verify(authorizationFilter).initialise(Collections.<String, String>emptyMap());
     }
 
     @Test
@@ -111,9 +110,8 @@ public class AuthZFilterTest {
 
         //Then
         verify(authorizationConfigurator).getAuditLogger();
-        verify(authorizationConfigurator).getDebugLogger();
         verify(authorizationConfigurator).getAuthorizationFilter();
-        verify(authorizationFilter).initialise(Matchers.<LoggingConfigurator>anyObject(), eq(auditLogger), eq(debugLogger));
+        verify(authorizationFilter).initialise(Collections.<String, String>emptyMap());
     }
 
     @Test

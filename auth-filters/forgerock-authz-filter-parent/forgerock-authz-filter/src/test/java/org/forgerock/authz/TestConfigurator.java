@@ -11,13 +11,14 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2014 ForgeRock AS.
  */
 
 package org.forgerock.authz;
 
 import org.forgerock.auth.common.AuditLogger;
-import org.forgerock.auth.common.DebugLogger;
+
+import javax.servlet.http.HttpServletRequest;
 
 public class TestConfigurator implements AuthorizationConfigurator {
 
@@ -27,12 +28,7 @@ public class TestConfigurator implements AuthorizationConfigurator {
     }
 
     @Override
-    public DebugLogger getDebugLogger() {
-        return AuthorizationConfiguratorFactory.getInstance().getDebugLogger();
-    }
-
-    @Override
-    public AuditLogger getAuditLogger() {
+    public AuditLogger<HttpServletRequest> getAuditLogger() {
         return AuthorizationConfiguratorFactory.getInstance().getAuditLogger();
     }
 

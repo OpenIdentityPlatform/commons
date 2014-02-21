@@ -16,7 +16,7 @@
             <param-value>org.forgerock.jaspi.test.server.TestLoggingConfigurator</param-value>
         </init-param>
         <init-param>
-            <param-name>module-configuration-factory-class</param-name>       <!-- Test all posible incorrect configurations, etc -->
+            <param-name>module-configuration-factory-class</param-name>       <!-- Test all possible incorrect configurations, etc -->
             <param-value>org.forgerock.jaspi.test.server.endpoint.ModuleConfigurationResource</param-value>
         </init-param>
     </filter>

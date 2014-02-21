@@ -11,22 +11,22 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2014 ForgeRock AS.
  */
 
 package org.forgerock.auth.common;
 
 /**
- * Base interface for all Configurators responsible for providing config to the AuthN and AuthZ Filters.
- * <br/>
- * Provides methods for getting instances of the two Logging interfaces.
+ * Base interface for Debug Configurators responsible for providing a Debug logger to the AuthN Filter.
  *
- * @param <T> The type of AuditLogger.
- *
- * @since 1.0.0
- * @deprecated Use AuditLoggingConfigurator for getting an Audit Logger but use slf4j over the DebugLogger and
- * DebugLoggingConfigurator.
+ * @since 1.4.0
  */
-@Deprecated
-public interface LoggingConfigurator<T> extends DebugLoggingConfigurator, AuditLoggingConfigurator<T> {
+public interface DebugLoggingConfigurator {
+
+    /**
+     * Gets the instance of the Debug Logger.
+     *
+     * @return The Debug Logger instance.
+     */
+    DebugLogger getDebugLogger();
 }

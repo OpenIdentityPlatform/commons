@@ -16,6 +16,7 @@
 
 package org.forgerock.authz;
 
+import org.forgerock.auth.common.AuditLoggingConfigurator;
 import org.forgerock.auth.common.LoggingConfigurator;
 
 import javax.servlet.http.HttpServletRequest;
@@ -26,10 +27,9 @@ import javax.servlet.http.HttpServletRequest;
  * Provides a method for getting the instance of the AuthorizationFilter which contains the logic to determine
  * whether the request is authorized or not.
  *
- * @author Phill Cunnington
  * @since 1.0.0
  */
-public interface AuthorizationConfigurator extends LoggingConfigurator<HttpServletRequest> {
+public interface AuthorizationConfigurator extends AuditLoggingConfigurator<HttpServletRequest> {
 
     /**
      * Gets the instance of the Authorization Filter, which contains the logic to determine

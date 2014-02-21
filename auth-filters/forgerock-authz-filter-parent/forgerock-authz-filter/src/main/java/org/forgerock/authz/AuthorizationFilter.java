@@ -22,11 +22,12 @@ import org.forgerock.auth.common.AuditLogger;
 import org.forgerock.auth.common.DebugLogger;
 import org.forgerock.auth.common.LoggingConfigurator;
 
+import java.util.Map;
+
 /**
  * Base interface for all Authorization Filter implementations, which will contain the logic required
  * to determine if the request is authorized to proceed or not.
  *
- * @author Phill Cunnington
  * @since 1.0.0
  */
 public interface AuthorizationFilter {
@@ -35,11 +36,9 @@ public interface AuthorizationFilter {
      * Initialises the Authorization Filter by providing it with the Configurator that was used to set up the
      * AuthZFilter and the two Logging instances.
      *
-     * @param configuration The Configurator used to set up the AuthZFilter.
-     * @param auditLogger The AuditLogger instance.
-     * @param debugLogger The DebugLogger instance.
+     * @param config A read-only Map of module configuration options.
      */
-    void initialise(LoggingConfigurator configuration, AuditLogger auditLogger, DebugLogger debugLogger);
+    void initialise(Map<String, String> config);
 
     /**
      * Determines whether the request is authorized to proceed or not.

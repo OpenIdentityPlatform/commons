@@ -17,6 +17,7 @@
 package org.forgerock.authz;
 
 import java.io.IOException;
+import java.util.Collections;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -46,7 +47,6 @@ import org.forgerock.json.resource.ResourceException;
  *     &lt;/init-param&gt;
  * &lt;/filter&gt;
  *
- * @author Phill Cunnington
  * @since 1.0.0
  */
 public class AuthZFilter implements Filter {
@@ -89,13 +89,12 @@ public class AuthZFilter implements Filter {
      */
     private synchronized void init() {
 
-        if(authorizationFilter == null) {
+        if (authorizationFilter == null) {
 
             auditLogger = configurator.getAuditLogger();
-            DebugLogger debugLogger = configurator.getDebugLogger();
 
             authorizationFilter = configurator.getAuthorizationFilter();
-            authorizationFilter.initialise(configurator, auditLogger, debugLogger);
+            authorizationFilter.initialise(Collections.<String, String>emptyMap());
         }
     }
 
