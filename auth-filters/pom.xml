@@ -59,7 +59,7 @@
     <modules>
         <module>forgerock-auth-filter-common</module>
         <module>forgerock-authn-filter</module>
-        <module>forgerock-authz-filter</module>
+        <module>forgerock-authz-filter-parent</module>
     </modules>
 
     <properties>
