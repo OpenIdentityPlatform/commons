@@ -14,8 +14,9 @@
  * Copyright 2013-2014 ForgeRock AS.
  */
 
-package org.forgerock.jaspi.utils;
+package org.forgerock.auth.common;
 
+import org.forgerock.auth.common.FilterConfigurationImpl;
 import org.testng.annotations.Test;
 
 import javax.servlet.FilterConfig;

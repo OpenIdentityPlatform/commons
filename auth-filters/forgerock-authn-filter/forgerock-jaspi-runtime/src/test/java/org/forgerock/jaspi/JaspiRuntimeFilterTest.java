@@ -18,7 +18,7 @@ package org.forgerock.jaspi;
 
 import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.jaspi.runtime.config.inject.RuntimeInjector;
-import org.forgerock.jaspi.utils.FilterConfiguration;
+import org.forgerock.auth.common.FilterConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

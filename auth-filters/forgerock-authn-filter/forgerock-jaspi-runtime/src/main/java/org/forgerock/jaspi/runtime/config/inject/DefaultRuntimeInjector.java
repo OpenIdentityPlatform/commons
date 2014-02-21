@@ -27,8 +27,8 @@ import org.forgerock.jaspi.runtime.RuntimeResultHandler;
 import org.forgerock.jaspi.runtime.config.ServerContextFactory;
 import org.forgerock.jaspi.runtime.context.ContextHandler;
 import org.forgerock.jaspi.utils.DebugLoggerBuffer;
-import org.forgerock.jaspi.utils.FilterConfiguration;
-import org.forgerock.jaspi.utils.FilterConfigurationImpl;
+import org.forgerock.auth.common.FilterConfiguration;
+import org.forgerock.auth.common.FilterConfigurationImpl;
 import org.forgerock.jaspi.utils.MessageInfoUtils;
 
 import javax.security.auth.message.AuthException;

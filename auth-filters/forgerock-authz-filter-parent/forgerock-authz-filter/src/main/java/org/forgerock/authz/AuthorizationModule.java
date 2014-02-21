@@ -21,36 +21,35 @@ import javax.servlet.http.HttpServletResponse;
 import org.forgerock.auth.common.AuditLogger;
 import org.forgerock.auth.common.DebugLogger;
 import org.forgerock.auth.common.LoggingConfigurator;
+import org.forgerock.json.fluent.JsonValue;
 
 import java.util.Map;
 
 /**
- * Base interface for all Authorization Filter implementations, which will contain the logic required
+ * Base interface for all Authorization Module implementations, which will contain the logic required
  * to determine if the request is authorized to proceed or not.
  *
  * @since 1.0.0
  */
-public interface AuthorizationFilter {
+public interface AuthorizationModule {
 
     /**
-     * Initialises the Authorization Filter by providing it with the Configurator that was used to set up the
-     * AuthZFilter and the two Logging instances.
+     * Initialises the Authorization Module by providing it with the configuration that the module was configured with.
      *
-     * @param config A read-only Map of module configuration options.
+     * @param config A JsonValue of module configuration options.
      */
-    void initialise(Map<String, String> config);
+    void initialise(JsonValue config);
 
     /**
      * Determines whether the request is authorized to proceed or not.
      *
      * @param servletRequest The HttpServletRequest.
-     * @param servletResponse The HttpServletResponse.
      * @return <code>true</code> if the request is authorized to proceed, otherwise <code>false</code>.
      */
-    boolean authorize(HttpServletRequest servletRequest, HttpServletResponse servletResponse);
+    boolean authorize(HttpServletRequest servletRequest);
 
     /**
-     * Gives us an opportunity to clean up any resources that are being held by this filter
+     * Gives us an opportunity to clean up any resources that are being held by this module
      */
     void destroy();
 }

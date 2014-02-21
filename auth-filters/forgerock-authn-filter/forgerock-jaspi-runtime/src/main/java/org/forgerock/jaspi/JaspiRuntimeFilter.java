@@ -21,8 +21,8 @@ import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.jaspi.runtime.config.inject.DefaultRuntimeInjector;
 import org.forgerock.jaspi.runtime.config.inject.RuntimeInjector;
 import org.forgerock.jaspi.utils.DebugLoggerBuffer;
-import org.forgerock.jaspi.utils.FilterConfiguration;
-import org.forgerock.jaspi.utils.FilterConfigurationImpl;
+import org.forgerock.auth.common.FilterConfiguration;
+import org.forgerock.auth.common.FilterConfigurationImpl;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;

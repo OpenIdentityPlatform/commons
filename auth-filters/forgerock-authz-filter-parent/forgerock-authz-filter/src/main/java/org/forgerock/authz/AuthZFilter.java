@@ -16,8 +16,14 @@
 
 package org.forgerock.authz;
 
-import java.io.IOException;
-import java.util.Collections;
+import org.forgerock.auth.common.AuditLogger;
+import org.forgerock.auth.common.AuditRecord;
+import org.forgerock.auth.common.AuthResult;
+import org.forgerock.auth.common.FilterConfiguration;
+import org.forgerock.auth.common.FilterConfigurationImpl;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ResourceException;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -26,11 +32,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.forgerock.auth.common.AuditLogger;
-import org.forgerock.auth.common.AuditRecord;
-import org.forgerock.auth.common.AuthResult;
-import org.forgerock.auth.common.DebugLogger;
-import org.forgerock.json.resource.ResourceException;
+import java.io.IOException;
 
 /**
  * Authorization Filter which protects resources based on the user's privileges who made the request.
@@ -51,29 +53,123 @@ import org.forgerock.json.resource.ResourceException;
  */
 public class AuthZFilter implements Filter {
 
-    private static final String CONFIGURATOR_IMPL_INIT_PARAM = "configurator";
+    private static final String INIT_PARAM_LOGGING_CONFIGURATOR_FACTORY_CLASS = "logging-configurator-factory-class";
+    private static final String INIT_PARAM_LOGGING_CONFIGURATOR_FACTORY_METHOD = "logging-configuration-factory-method";
+    private static final String INIT_PARAM_LOGGING_CONFIGURATOR_FACTORY_METHOD_DEFAULT = "getLoggingConfigurator";
 
-    private volatile AuthorizationConfigurator configurator;
-    private volatile AuditLogger<HttpServletRequest> auditLogger;
-    private volatile AuthorizationFilter authorizationFilter;
+    private static final String INIT_PARAM_MODULE_CONFIGURATOR_FACTORY_CLASS = "module-configurator-factory-class";
+    private static final String INIT_PARAM_MODULE_CONFIGURATOR_FACTORY_METHOD = "module-configuration-factory-method";
+    private static final String INIT_PARAM_MODULE_CONFIGURATOR_FACTORY_METHOD_DEFAULT = "getModuleConfigurator";
+
+    private static final String INIT_PARAM_MODULE_CLASS = "module-class";
+
+    private final InstanceCreator instanceCreator;
+    private final FilterConfiguration filterConfiguration;
+
+    private AuditLogger<HttpServletRequest> auditLogger;
+    private AuthorizationModule authorizationModule;
 
     /**
-     * Initialises the instance of the Configurator that will be used to set up this AuthZFilter.
+     * Constructs a new instance of the AuthZFilter.
+     */
+    public AuthZFilter() {
+        this(new InstanceCreator(), FilterConfigurationImpl.INSTANCE);
+    }
+
+    /**
+     * Constructs a new instance of the AuthZFilter for use in tests.
+     * <br/>
+     * Allows tests to pass in a mock of the FilterConfiguration.
+     *
+     * @param instanceCreator An instance of the InstanceCreator.
+     * @param filterConfiguration A mock of the FilterConfiguration.
+     */
+    protected AuthZFilter(final InstanceCreator instanceCreator, final FilterConfiguration filterConfiguration) {
+        this.instanceCreator = instanceCreator;
+        this.filterConfiguration = filterConfiguration;
+    }
+
+    /**
+     * Initialises the instance of the Authorization Module that will be used to authorize requests passed through the
+     * AuthZFilter.
      *
      * @param filterConfig {@inheritDoc}
-     * @throws ServletException If the Configurator can not be created.
+     * @throws ServletException If the Authorization Module can not be created.
      */
     @Override
-    @SuppressWarnings("unchecked")
-    public void init(FilterConfig filterConfig) throws ServletException {
-        String configuratorClassName = filterConfig.getInitParameter(CONFIGURATOR_IMPL_INIT_PARAM);
+    public void init(final FilterConfig filterConfig) throws ServletException {
 
+        auditLogger = getAuditLogger(filterConfig);
+        if (auditLogger == null) {
+            throw new ServletException("AuditLogger cannot be null.");
+        }
+
+        authorizationModule = initAuthorizationModule(filterConfig);
+
+        if (authorizationModule == null) {
+            throw new ServletException("AuthorizationModule must be configured in web.xml by either "
+                    + "'module-configuration-factory-class' param or 'module-class' param. See documentation for more "
+                    + "details.");
+        }
+    }
+
+    /**
+     * Gets the AuditLogger from the AuthorizationLoggingConfigurator instance specified in the web.xml for the filter
+     * instance.
+     *
+     * @param filterConfig The filter config.
+     * @return The AuditLogger instance.
+     * @throws ServletException If there is an error getting the AuditLogger.
+     */
+    private AuditLogger<HttpServletRequest> getAuditLogger(final FilterConfig filterConfig) throws ServletException {
+
+        final AuthorizationLoggingConfigurator loggingConfigurator = filterConfiguration.get(filterConfig,
+                INIT_PARAM_LOGGING_CONFIGURATOR_FACTORY_CLASS, INIT_PARAM_LOGGING_CONFIGURATOR_FACTORY_METHOD,
+                INIT_PARAM_LOGGING_CONFIGURATOR_FACTORY_METHOD_DEFAULT);
+
+        if (loggingConfigurator == null) {
+            throw new ServletException("AuditLogger must be configured.");
+        }
+        return loggingConfigurator.getAuditLogger();
+    }
+
+    /**
+     * Gets an instance of the Authorization Module and configures it.
+     * <br/>
+     * First it tries to get an instance of the AuthorizationModule from the AuthorizationModuleConfigurator, if
+     * configured in the web.xml for the filter instance. If it has been configured will also get the JsonValue
+     * configuration from the AuthorizationModuleConfigurator and use that in the call to the modules initialise method.
+     * <br/>
+     * If the AuthorizationModuleConfigurator has not been configured then an instance of the class specified in the
+     * web.xml init-param, 'module-class', will be created and the initialise method will be called with an empty
+     * JsonValue.
+     * <br/>
+     * If the Authorization Module has not been configured in either or these ways then <code>null</code> is returned.
+     *
+     * @param filterConfig The filter config.
+     * @return An initialised instance of an Authorization Module or <code>null</code>.
+     * @throws ServletException If there is an error  the AuditLogger.
+     */
+    private AuthorizationModule initAuthorizationModule(final FilterConfig filterConfig) throws ServletException {
+
+        final AuthorizationModuleConfigurator moduleConfigurator = filterConfiguration.get(filterConfig,
+                INIT_PARAM_MODULE_CONFIGURATOR_FACTORY_CLASS,INIT_PARAM_MODULE_CONFIGURATOR_FACTORY_METHOD,
+                INIT_PARAM_MODULE_CONFIGURATOR_FACTORY_METHOD_DEFAULT);
+
+        final AuthorizationModule authorizationModule;
+        if (moduleConfigurator != null) {
+            authorizationModule = moduleConfigurator.getModule();
+            authorizationModule.initialise(moduleConfigurator.getConfiguration());
+            return authorizationModule;
+        }
+
+        final String authorizationModuleClassName = filterConfig.getInitParameter(INIT_PARAM_MODULE_CLASS);
+        if (authorizationModuleClassName == null) {
+            return null;
+        }
         try {
-            Class<? extends AuthorizationConfigurator> configuratorClass =
-                    Class.forName(configuratorClassName).asSubclass(AuthorizationConfigurator.class);
-
-            configurator = configuratorClass.newInstance();
-
+            authorizationModule = instanceCreator.createInstance(authorizationModuleClassName,                    AuthorizationModule.class);
+            authorizationModule.initialise(JsonValue.json(JsonValue.object()));
         } catch (ClassNotFoundException e) {
             throw new ServletException(e);
         } catch (InstantiationException e) {
@@ -81,21 +177,8 @@ public class AuthZFilter implements Filter {
         } catch (IllegalAccessException e) {
             throw new ServletException(e);
         }
-    }
 
-    /**
-     * Lazy initialises the AuditLogger, DebugLogger and AuthorizationFilter member variables from the
-     * AuthZFilter Configurator instance.
-     */
-    private synchronized void init() {
-
-        if (authorizationFilter == null) {
-
-            auditLogger = configurator.getAuditLogger();
-
-            authorizationFilter = configurator.getAuthorizationFilter();
-            authorizationFilter.initialise(Collections.<String, String>emptyMap());
-        }
+        return authorizationModule;
     }
 
     /**
@@ -114,15 +197,14 @@ public class AuthZFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
             throws IOException, ServletException {
 
-        init();
-
-        if (!(servletRequest instanceof HttpServletRequest && servletResponse instanceof HttpServletResponse)) {
+        if (!(HttpServletRequest.class.isAssignableFrom(servletRequest.getClass())
+                && HttpServletResponse.class.isAssignableFrom(servletResponse.getClass()))) {
             throw new ServletException("Request/response must be of types HttpServletRequest and HttpServletResponse");
         }
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
 
-        if (authorizationFilter.authorize(request, response)) {
+        if (authorizationModule.authorize(request)) {
             audit(AuthResult.SUCCESS, request);
             filterChain.doFilter(request, response);
         } else {
@@ -187,6 +269,6 @@ public class AuthZFilter implements Filter {
      */
     @Override
     public void destroy() {
-        authorizationFilter.destroy();
+        authorizationModule.destroy();
     }
 }

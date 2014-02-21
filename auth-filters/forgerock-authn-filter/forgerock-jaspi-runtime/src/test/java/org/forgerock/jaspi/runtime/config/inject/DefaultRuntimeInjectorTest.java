@@ -23,7 +23,7 @@ import org.forgerock.jaspi.logging.LogFactory;
 import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.jaspi.runtime.config.ServerContextFactory;
 import org.forgerock.jaspi.runtime.context.ContextHandler;
-import org.forgerock.jaspi.utils.FilterConfiguration;
+import org.forgerock.auth.common.FilterConfiguration;
 import org.forgerock.jaspi.utils.MessageInfoUtils;
 import org.mockito.Matchers;
 import org.testng.annotations.BeforeMethod;

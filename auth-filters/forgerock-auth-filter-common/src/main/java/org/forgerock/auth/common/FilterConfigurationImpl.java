@@ -14,10 +14,7 @@
  * Copyright 2013-2014 ForgeRock AS.
  */
 
-package org.forgerock.jaspi.utils;
-
-import org.forgerock.auth.common.DebugLogger;
-import org.forgerock.jaspi.logging.LogFactory;
+package org.forgerock.auth.common;
 
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
@@ -34,8 +31,6 @@ public enum FilterConfigurationImpl implements FilterConfiguration {
      * The Singleton instance of the FilterConfigurationImpl.
      */
     INSTANCE;
-
-    private static final DebugLogger LOGGER = LogFactory.getDebug();
 
     /**
      * {@inheritDoc}
@@ -62,7 +57,6 @@ public enum FilterConfigurationImpl implements FilterConfiguration {
                         return (T) factoryMethod.invoke(null);
                     }
                 } catch (final Exception e) {
-                    LOGGER.error("Could not construct instance of, " + className, e);
                     throw new ServletException(e);
                 }
             }

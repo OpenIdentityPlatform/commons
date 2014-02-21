@@ -14,7 +14,7 @@
  * Copyright 2013-2014 ForgeRock AS.
  */
 
-package org.forgerock.jaspi.utils;
+package org.forgerock.auth.common;
 
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;

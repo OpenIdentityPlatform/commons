@@ -19,106 +19,216 @@ package org.forgerock.authz;
 import org.forgerock.auth.common.AuditLogger;
 import org.forgerock.auth.common.AuditRecord;
 import org.forgerock.auth.common.AuthResult;
-import org.forgerock.auth.common.DebugLogger;
+import org.forgerock.auth.common.FilterConfiguration;
+import org.forgerock.json.fluent.JsonValue;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Matchers;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Collections;
 
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
 
 public class AuthZFilterTest {
 
     private AuthZFilter authZFilter;
 
-    private HttpServletRequest request;
-    private HttpServletResponse response;
-    private FilterChain filterChain;
-    private PrintWriter writer;
-    private AuthorizationFilter authorizationFilter;
-    private AuditLogger<HttpServletRequest> auditLogger;
-    private DebugLogger debugLogger;
-    private AuthorizationConfigurator authorizationConfigurator;
+    private static AuthorizationModule authorizationModule;
+    private static AuditLogger<HttpServletRequest> auditLogger;
 
+    private InstanceCreator instanceCreator;
+    private FilterConfiguration filterConfiguration;
+
+    @SuppressWarnings("unchecked")
     @BeforeMethod
     public void setUp() throws ServletException, IOException {
-        authZFilter = new AuthZFilter();
 
+        instanceCreator = mock(InstanceCreator.class);
+        filterConfiguration = mock(FilterConfiguration.class);
+
+        authZFilter = new AuthZFilter(instanceCreator, filterConfiguration);
+
+        authorizationModule = mock(AuthorizationModule.class);
+        auditLogger = mock(AuditLogger.class);
+    }
+
+    @Test (expectedExceptions = ServletException.class)
+    public void initShouldThrowServletExceptionWhenLoggingConfiguratorNotSet() throws ServletException {
+
+        //Given
         FilterConfig filterConfig = mock(FilterConfig.class);
-        given(filterConfig.getInitParameter("configurator")).willReturn(TestConfigurator.class.getCanonicalName());
 
+        //When
         authZFilter.init(filterConfig);
 
-        request = mock(HttpServletRequest.class);
-        response = mock(HttpServletResponse.class);
-        filterChain = mock(FilterChain.class);
-        writer = mock(PrintWriter.class);
+        //Then
+        fail();
+    }
 
-        authorizationFilter = mock(AuthorizationFilter.class);
-        auditLogger = mock(AuditLogger.class);
-        debugLogger = mock(DebugLogger.class);
+    @Test (expectedExceptions = ServletException.class)
+    public void initShouldThrowServletExceptionWhenAuditLoggerNull() throws ServletException {
 
-        authorizationConfigurator = mock(AuthorizationConfigurator.class);
+        //Given
+        FilterConfig filterConfig = mock(FilterConfig.class);
 
-        given(response.getWriter()).willReturn(writer);
+        given(filterConfiguration.get(eq(filterConfig), eq("logging-configurator-factory-class"), anyString(),
+                anyString())) .willReturn(new NullAuditLoggingConfigurator());
 
-        given(authorizationConfigurator.getAuthorizationFilter()).willReturn(authorizationFilter);
-        given(authorizationConfigurator.getAuditLogger()).willReturn(auditLogger);
+        //When
+        authZFilter.init(filterConfig);
 
-        AuthorizationConfiguratorFactory.setAuthorizationConfigurator(authorizationConfigurator);
+        //Then
+        fail();
+    }
 
+    @Test (expectedExceptions = ServletException.class)
+    public void initShouldThrowServletExceptionWhenAuthzModuleNotSet() throws ServletException {
+
+        //Given
+        FilterConfig filterConfig = mock(FilterConfig.class);
+
+        given(filterConfiguration.get(eq(filterConfig), eq("logging-configurator-factory-class"), anyString(),
+                anyString())).willReturn(new AuditLoggingConfigurator());
+
+        //When
+        authZFilter.init(filterConfig);
+
+        //Then
+        fail();
     }
 
     @Test
-    public void shouldCallInitOnFirstDoFilter() throws IOException, ServletException {
+    public void initShouldGetAuthzModuleFromConfigurator() throws ServletException {
 
         //Given
-        given(authorizationFilter.authorize(request, response)).willReturn(true);
+        FilterConfig filterConfig = mock(FilterConfig.class);
+
+        given(filterConfiguration.get(eq(filterConfig), eq("logging-configurator-factory-class"), anyString(),
+                anyString())).willReturn(new AuditLoggingConfigurator());
+        given(filterConfiguration.get(eq(filterConfig), eq("module-configurator-factory-class"), anyString(),
+                anyString())).willReturn(new TestAuthorizationModuleConfigurator());
+
+        //When
+        authZFilter.init(filterConfig);
+
+        //Then
+        verify(authorizationModule).initialise(null);
+    }
+
+    @Test
+    public void initShouldCreateAuthzModuleFromClassName() throws ServletException, IllegalAccessException,
+            InstantiationException, ClassNotFoundException {
+
+        //Given
+        FilterConfig filterConfig = mock(FilterConfig.class);
+
+        given(filterConfiguration.get(eq(filterConfig), eq("logging-configurator-factory-class"), anyString(),
+                anyString())).willReturn(new AuditLoggingConfigurator());
+        given(filterConfig.getInitParameter("module-class")).willReturn("MODULE_CLASS_NAME");
+
+        given(instanceCreator.createInstance("MODULE_CLASS_NAME", AuthorizationModule.class))
+                .willReturn(authorizationModule);
+
+        //When
+        authZFilter.init(filterConfig);
+
+        //Then
+        verify(authorizationModule).initialise(Matchers.<JsonValue>anyObject());
+    }
+
+    @Test
+    public void initShouldGetAuthzModuleFromConfiguratorOverClassName() throws ServletException, IllegalAccessException,
+            InstantiationException, ClassNotFoundException {
+
+        //Given
+        FilterConfig filterConfig = mock(FilterConfig.class);
+
+        given(filterConfiguration.get(eq(filterConfig), eq("logging-configurator-factory-class"), anyString(),
+                anyString())).willReturn(new AuditLoggingConfigurator());
+        given(filterConfiguration.get(eq(filterConfig), eq("module-configurator-factory-class"), anyString(),
+                anyString())).willReturn(new TestAuthorizationModuleConfigurator());
+
+        //When
+        authZFilter.init(filterConfig);
+
+        //Then
+        verifyZeroInteractions(instanceCreator);
+        verify(authorizationModule).initialise(null);
+    }
+
+    @Test (expectedExceptions = ServletException.class)
+    public void doFilterShouldNotAllowNonHttpServletRequest() throws IOException, ServletException {
+
+        //Given
+        ServletRequest req = mock(ServletRequest.class);
+        HttpServletResponse resp = mock(HttpServletResponse.class);
+        FilterChain chain = mock(FilterChain.class);
+
+        //When
+        authZFilter.doFilter(req, resp, chain);
+
+        //Then
+        fail();
+    }
+
+    @Test (expectedExceptions = ServletException.class)
+    public void doFilterShouldNotAllowNonHttpServletResponse() throws IOException, ServletException {
+
+        //Given
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        ServletResponse response = mock(ServletResponse.class);
+        FilterChain filterChain = mock(FilterChain.class);
 
         //When
         authZFilter.doFilter(request, response, filterChain);
 
         //Then
-        verify(authorizationConfigurator).getAuditLogger();
-        verify(authorizationConfigurator).getAuthorizationFilter();
-        verify(authorizationFilter).initialise(Collections.<String, String>emptyMap());
+        fail();
     }
 
-    @Test
-    public void shouldNotCallInitOnSecondDoFilter() throws IOException, ServletException {
+    private void initAuthzFilter() throws ServletException, IllegalAccessException, InstantiationException,
+            ClassNotFoundException {
 
-        //Given
-        given(authorizationFilter.authorize(request, response)).willReturn(true);
+        FilterConfig filterConfig = mock(FilterConfig.class);
 
-        authZFilter.doFilter(request, response, filterChain);
+        given(filterConfiguration.get(eq(filterConfig), eq("logging-configurator-factory-class"), anyString(),
+                anyString())).willReturn(new AuditLoggingConfigurator());
+        given(filterConfiguration.get(eq(filterConfig), eq("module-configurator-factory-class"), anyString(),
+                anyString())).willReturn(new TestAuthorizationModuleConfigurator());
 
-        //When
-        authZFilter.doFilter(request, response, filterChain);
-
-        //Then
-        verify(authorizationConfigurator).getAuditLogger();
-        verify(authorizationConfigurator).getAuthorizationFilter();
-        verify(authorizationFilter).initialise(Collections.<String, String>emptyMap());
+        authZFilter.init(filterConfig);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
-    public void shouldAuditSuccessWhenAuthorizationPassed() throws IOException, ServletException {
+    public void shouldAuditSuccessWhenAuthorizationPassed() throws IOException, ServletException,
+            IllegalAccessException, ClassNotFoundException, InstantiationException {
 
         //Given
-        given(authorizationFilter.authorize(request, response)).willReturn(true);
+        initAuthzFilter();
+
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        FilterChain filterChain = mock(FilterChain.class);
+
+        given(authorizationModule.authorize(request)).willReturn(true);
 
         //When
         authZFilter.doFilter(request, response, filterChain);
@@ -131,11 +241,22 @@ public class AuthZFilterTest {
         verify(filterChain).doFilter(request, response);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
-    public void shouldAuditFailureWhenAuthorizationFailed() throws IOException, ServletException {
+    public void shouldAuditFailureWhenAuthorizationFailed() throws IOException, ServletException,
+            IllegalAccessException, ClassNotFoundException, InstantiationException {
 
         //Given
-        given(authorizationFilter.authorize(request, response)).willReturn(false);
+        initAuthzFilter();
+
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        FilterChain filterChain = mock(FilterChain.class);
+        PrintWriter writer = mock(PrintWriter.class);
+
+        given(response.getWriter()).willReturn(writer);
+
+        given(authorizationModule.authorize(request)).willReturn(false);
 
         //When
         authZFilter.doFilter(request, response, filterChain);
@@ -149,10 +270,20 @@ public class AuthZFilterTest {
     }
 
     @Test
-    public void shouldReturn403WhenAuthorizationFailed() throws IOException, ServletException {
+    public void shouldReturn403WhenAuthorizationFailed() throws IOException, ServletException, IllegalAccessException,
+            ClassNotFoundException, InstantiationException {
 
         //Given
-        given(authorizationFilter.authorize(request, response)).willReturn(false);
+        initAuthzFilter();
+
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        FilterChain filterChain = mock(FilterChain.class);
+        PrintWriter writer = mock(PrintWriter.class);
+
+        given(response.getWriter()).willReturn(writer);
+
+        given(authorizationModule.authorize(request)).willReturn(false);
 
         //When
         authZFilter.doFilter(request, response, filterChain);
@@ -161,5 +292,42 @@ public class AuthZFilterTest {
         verify(response).setStatus(403);
         verify(writer).write(anyString());
         verify(filterChain, never()).doFilter(request, response);
+    }
+
+    static class NullAuditLoggingConfigurator implements AuthorizationLoggingConfigurator {
+
+        @Override
+        public AuditLogger<HttpServletRequest> getAuditLogger() {
+            return null;
+        }
+    }
+
+    private static AuditLogger<HttpServletRequest> getMockAuditLogger() {
+        return auditLogger;
+    }
+
+    static class AuditLoggingConfigurator implements AuthorizationLoggingConfigurator {
+
+        @Override
+        public AuditLogger<HttpServletRequest> getAuditLogger() {
+            return getMockAuditLogger();
+        }
+    }
+
+    private static AuthorizationModule getAuthorizationModule() {
+        return authorizationModule;
+    }
+
+    static class TestAuthorizationModuleConfigurator implements AuthorizationModuleConfigurator {
+
+        @Override
+        public AuthorizationModule getModule() {
+            return getAuthorizationModule();
+        }
+
+        @Override
+        public JsonValue getConfiguration() {
+            return null;
+        }
     }
 }

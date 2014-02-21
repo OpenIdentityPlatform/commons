@@ -20,7 +20,7 @@ import org.forgerock.jaspi.context.ServerAuthModuleInstanceCreator;
 import org.forgerock.jaspi.exceptions.JaspiAuthException;
 import org.forgerock.jaspi.runtime.context.ContextHandler;
 import org.forgerock.jaspi.runtime.context.config.ModuleConfigurationFactory;
-import org.forgerock.jaspi.utils.FilterConfiguration;
+import org.forgerock.auth.common.FilterConfiguration;
 import org.forgerock.jaspi.utils.MessageInfoUtils;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
