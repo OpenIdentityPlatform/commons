@@ -192,7 +192,7 @@ define("org/forgerock/commons/ui/common/util/FormGenerationUtils", [
     };
     
     obj.generateLabel = function(labelValue) {
-        return '<label class="light">{{t "' + labelValue +'"}}</label>';
+        return '<label class="light">' + labelValue +'</label>';
     };
     
     obj.buildPropertyTypeMap = function(formProperties) {
