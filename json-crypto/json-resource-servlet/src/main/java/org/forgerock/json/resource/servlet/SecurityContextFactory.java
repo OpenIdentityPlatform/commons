@@ -99,8 +99,8 @@ public final class SecurityContextFactory implements HttpServletContextFactory {
     /**
      * The name of the HTTP Servlet Request attribute where this factory expects
      * to find the authenticated user's authentication ID. The name of this
-     * attribute is {@code org.forgerock.security.authcid} and it MUST contain a
-     * {@code String} if it is present.
+     * attribute is {@code org.forgerock.authentication.principal} and it MUST
+     * contain a {@code String} if it is present.
      * <p>
      * This constant has the same value as {@link #ATTRIBUTE_AUTHCID_V2}.
      *
@@ -131,11 +131,11 @@ public final class SecurityContextFactory implements HttpServletContextFactory {
     /**
      * The name of the HTTP Servlet Request attribute where this factory expects
      * to find the authenticated user's authorization ID. The name of this
-     * attribute is {@code org.forgerock.security.authzid} and it MUST contain a
-     * {@code Map<String, Object>} if it is present.
+     * attribute is {@code org.forgerock.authentication.context} and it MUST
+     * contain a {@code Map<String, Object>} if it is present.
      * <p>
      * This constant has the same value as {@link #ATTRIBUTE_AUTHZID_V2}.
-     *
+     * 
      * @see SecurityContext#getAuthorizationId()
      */
     public static final String ATTRIBUTE_AUTHZID = ATTRIBUTE_AUTHZID_V2;
