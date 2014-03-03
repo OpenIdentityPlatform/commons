@@ -170,26 +170,82 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Succe
 
     /**
      * Signals that the asynchronous task represented by this promise has
-     * failed.
+     * failed. If the task has already completed (i.e. {@code isDone() == true})
+     * then calling this method has no effect and the provided result will be
+     * discarded.
      *
      * @param error
      *            The exception indicating why the task failed.
+     * @see #tryHandleError(Exception)
      */
     @Override
     public final void handleError(final E error) {
-        setState(FAILED, null, error);
+        tryHandleError(error);
     }
 
     /**
      * Signals that the asynchronous task represented by this promise has
-     * succeeded.
+     * succeeded. If the task has already completed (i.e.
+     * {@code isDone() == true}) then calling this method has no effect and the
+     * provided result will be discarded.
      *
      * @param result
      *            The result of the asynchronous task (may be {@code null}).
+     * @see #tryHandleResult(Object)
      */
     @Override
     public final void handleResult(final V result) {
-        setState(SUCCEEDED, result, null);
+        tryHandleResult(result);
+    }
+
+    /**
+     * Attempts to signal that the asynchronous task represented by this promise
+     * has failed. If the task has already completed (i.e.
+     * {@code isDone() == true}) then calling this method has no effect and
+     * {@code false} is returned.
+     * <p>
+     * This method should be used in cases where multiple threads may
+     * concurrently attempt to complete a promise and need to release resources
+     * if the completion attempt fails. For example, an asynchronous TCP connect
+     * attempt may complete after a timeout has expired. In this case the
+     * connection should be immediately closed because it is never going to be
+     * used.
+     *
+     * @param error
+     *            The exception indicating why the task failed.
+     * @return {@code false} if this promise has already been completed, either
+     *         due to normal termination, an exception, or cancellation (i.e.
+     *         {@code isDone() == true}).
+     * @see #handleError(Exception)
+     * @see #isDone()
+     */
+    public final boolean tryHandleError(final E error) {
+        return setState(FAILED, null, error);
+    }
+
+    /**
+     * Attempts to signal that the asynchronous task represented by this promise
+     * has succeeded. If the task has already completed (i.e.
+     * {@code isDone() == true}) then calling this method has no effect and
+     * {@code false} is returned.
+     * <p>
+     * This method should be used in cases where multiple threads may
+     * concurrently attempt to complete a promise and need to release resources
+     * if the completion attempt fails. For example, an asynchronous TCP connect
+     * attempt may complete after a timeout has expired. In this case the
+     * connection should be immediately closed because it is never going to be
+     * used.
+     *
+     * @param result
+     *            The result of the asynchronous task (may be {@code null}).
+     * @return {@code false} if this promise has already been completed, either
+     *         due to normal termination, an exception, or cancellation (i.e.
+     *         {@code isDone() == true}).
+     * @see #handleResult(Object)
+     * @see #isDone()
+     */
+    public final boolean tryHandleResult(final V result) {
+        return setState(SUCCEEDED, result, null);
     }
 
     @Override
