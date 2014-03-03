@@ -201,9 +201,16 @@
             <dependency>
                 <groupId>org.forgerock.commons.ui.libs</groupId>
                 <artifactId>jquery-ui</artifactId>
-                <version>1.8.23.custom</version>
-                <type>js</type>
+                <version>1.10.4.custom</version>
                 <classifier>min</classifier>
+                <type>js</type>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons.ui.libs</groupId>
+                <artifactId>jquery.jqGrid</artifactId>
+                <version>4.5.4</version>
+                <classifier>min</classifier>
+                <type>js</type>
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons.ui.libs</groupId>

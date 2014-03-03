@@ -48,6 +48,12 @@
             <type>js</type>
             <classifier>min</classifier>
         </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons.ui.libs</groupId>
+                <artifactId>jquery.jqGrid</artifactId>
+                <classifier>min</classifier>
+                <type>js</type>
+            </dependency>
         <dependency>
             <groupId>org.forgerock.commons.ui.libs</groupId>
             <artifactId>contentflow</artifactId>
@@ -81,6 +87,7 @@
                 <configuration>
                     <excludes>
                         <exclude>**/libs/*.js</exclude>
+                        <exclude>**/libs/i18n/*.js</exclude>
                         <exclude>**/*Test.js</exclude>
                     </excludes>
                 </configuration>

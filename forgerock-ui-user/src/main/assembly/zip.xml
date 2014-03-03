@@ -44,11 +44,17 @@
 	</fileSets>
 	<dependencySets>
 		<dependencySet>
-		    <includes>
-		        <include>org.forgerock.commons.ui.libs:jquery-ui</include>
-		    </includes>
-		    <outputDirectory>/libs</outputDirectory>
-		</dependencySet>
+            <includes>
+                <include>org.forgerock.commons.ui.libs:jquery-ui</include>
+            </includes>
+            <outputDirectory>/libs</outputDirectory>
+        </dependencySet>
+        <dependencySet>
+            <includes>
+                <include>org.forgerock.commons.ui.libs:jquery.jqGrid</include>
+            </includes>
+            <outputDirectory>/libs</outputDirectory>
+        </dependencySet>
 		<dependencySet>
             <includes>
                 <include>org.forgerock.commons.ui.libs:contentflow</include>
