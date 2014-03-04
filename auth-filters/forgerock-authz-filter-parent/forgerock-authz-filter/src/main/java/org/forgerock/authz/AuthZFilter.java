@@ -23,6 +23,8 @@ import org.forgerock.auth.common.FilterConfiguration;
 import org.forgerock.auth.common.FilterConfigurationImpl;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ResourceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -53,6 +55,11 @@ import java.io.IOException;
  */
 public class AuthZFilter implements Filter {
 
+    /**
+     * The application/json HTTP Media Type.
+     */
+    private static final String JSON_HTTP_MEDIA_TYPE = "application/json";
+
     private static final String INIT_PARAM_LOGGING_CONFIGURATOR_FACTORY_CLASS = "logging-configurator-factory-class";
     private static final String INIT_PARAM_LOGGING_CONFIGURATOR_FACTORY_METHOD = "logging-configuration-factory-method";
     private static final String INIT_PARAM_LOGGING_CONFIGURATOR_FACTORY_METHOD_DEFAULT = "getLoggingConfigurator";
@@ -62,6 +69,8 @@ public class AuthZFilter implements Filter {
     private static final String INIT_PARAM_MODULE_CONFIGURATOR_FACTORY_METHOD_DEFAULT = "getModuleConfigurator";
 
     private static final String INIT_PARAM_MODULE_CLASS = "module-class";
+
+    private final Logger logger = LoggerFactory.getLogger(AuthZFilter.class);
 
     private final InstanceCreator instanceCreator;
     private final FilterConfiguration filterConfiguration;
@@ -104,9 +113,17 @@ public class AuthZFilter implements Filter {
             throw new ServletException("AuditLogger cannot be null.");
         }
 
-        authorizationModule = initAuthorizationModule(filterConfig);
+        try {
+            authorizationModule = initAuthorizationModule(filterConfig);
+        } catch (AuthorizationException e) {
+            logger.error("Failed to initialise AuthorizationModule", e);
+            throw new ServletException("Failed to initialise AuthorizationModule", e);
+        }
 
         if (authorizationModule == null) {
+            logger.error("AuthorizationModule must be configured in web.xml by either "
+                    + "'module-configuration-factory-class' param or 'module-class' param. See documentation for more "
+                    + "details.");
             throw new ServletException("AuthorizationModule must be configured in web.xml by either "
                     + "'module-configuration-factory-class' param or 'module-class' param. See documentation for more "
                     + "details.");
@@ -128,6 +145,7 @@ public class AuthZFilter implements Filter {
                 INIT_PARAM_LOGGING_CONFIGURATOR_FACTORY_METHOD_DEFAULT);
 
         if (loggingConfigurator == null) {
+            logger.error("AuditLogger must be configured");
             throw new ServletException("AuditLogger must be configured.");
         }
         return loggingConfigurator.getAuditLogger();
@@ -153,7 +171,7 @@ public class AuthZFilter implements Filter {
     private AuthorizationModule initAuthorizationModule(final FilterConfig filterConfig) throws ServletException {
 
         final AuthorizationModuleConfigurator moduleConfigurator = filterConfiguration.get(filterConfig,
-                INIT_PARAM_MODULE_CONFIGURATOR_FACTORY_CLASS,INIT_PARAM_MODULE_CONFIGURATOR_FACTORY_METHOD,
+                INIT_PARAM_MODULE_CONFIGURATOR_FACTORY_CLASS, INIT_PARAM_MODULE_CONFIGURATOR_FACTORY_METHOD,
                 INIT_PARAM_MODULE_CONFIGURATOR_FACTORY_METHOD_DEFAULT);
 
         final AuthorizationModule authorizationModule;
@@ -168,7 +186,8 @@ public class AuthZFilter implements Filter {
             return null;
         }
         try {
-            authorizationModule = instanceCreator.createInstance(authorizationModuleClassName,                    AuthorizationModule.class);
+            authorizationModule = instanceCreator.createInstance(authorizationModuleClassName,
+                    AuthorizationModule.class);
             authorizationModule.initialise(JsonValue.json(JsonValue.object()));
         } catch (ClassNotFoundException e) {
             throw new ServletException(e);
@@ -204,12 +223,24 @@ public class AuthZFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         AuthorizationContext context = AuthorizationContext.forRequest(request);
 
-        if (authorizationModule.authorize(request, context)) {
-            audit(AuthResult.SUCCESS, request);
-            filterChain.doFilter(request, response);
-        } else {
-            audit(AuthResult.FAILURE, request);
-            handleUnauthorisedException(response);
+        try {
+            if (authorizationModule.authorize(request, context)) {
+                audit(AuthResult.SUCCESS, request);
+                filterChain.doFilter(request, response);
+            } else {
+                audit(AuthResult.FAILURE, request);
+                handleUnauthorisedException(response);
+            }
+        } catch (AuthorizationException e) {
+            logger.error(e.getMessage(), e);
+            ResourceException jre = ResourceException.getException(ResourceException.INTERNAL_ERROR, e.getMessage());
+            response.setStatus(ResourceException.INTERNAL_ERROR);
+            try {
+                response.getWriter().write(jre.toJsonValue().toString());
+                response.setContentType(JSON_HTTP_MEDIA_TYPE);
+            } catch (IOException ioe) {
+                throw new ServletException(ioe.getMessage(), ioe);
+            }
         }
     }
 
@@ -265,7 +296,7 @@ public class AuthZFilter implements Filter {
     }
 
     /**
-     * Chain through to the authorizationFilter's destroy
+     * Chain through to the authorizationFilter's destroy.
      */
     @Override
     public void destroy() {

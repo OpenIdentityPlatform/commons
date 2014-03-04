@@ -116,7 +116,7 @@ public class AuthZFilterTest {
     }
 
     @Test
-    public void initShouldGetAuthzModuleFromConfigurator() throws ServletException {
+    public void initShouldGetAuthzModuleFromConfigurator() throws ServletException, AuthorizationException {
 
         //Given
         FilterConfig filterConfig = mock(FilterConfig.class);
@@ -135,7 +135,7 @@ public class AuthZFilterTest {
 
     @Test
     public void initShouldCreateAuthzModuleFromClassName() throws ServletException, IllegalAccessException,
-            InstantiationException, ClassNotFoundException {
+            InstantiationException, ClassNotFoundException, AuthorizationException {
 
         //Given
         FilterConfig filterConfig = mock(FilterConfig.class);
@@ -156,7 +156,7 @@ public class AuthZFilterTest {
 
     @Test
     public void initShouldGetAuthzModuleFromConfiguratorOverClassName() throws ServletException, IllegalAccessException,
-            InstantiationException, ClassNotFoundException {
+            InstantiationException, ClassNotFoundException, AuthorizationException {
 
         //Given
         FilterConfig filterConfig = mock(FilterConfig.class);
@@ -217,10 +217,10 @@ public class AuthZFilterTest {
         authZFilter.init(filterConfig);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
     public void shouldAuditSuccessWhenAuthorizationPassed() throws IOException, ServletException,
-            IllegalAccessException, ClassNotFoundException, InstantiationException {
+            IllegalAccessException, ClassNotFoundException, InstantiationException, AuthorizationException {
 
         //Given
         initAuthzFilter();
@@ -242,10 +242,10 @@ public class AuthZFilterTest {
         verify(filterChain).doFilter(request, response);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
     public void shouldAuditFailureWhenAuthorizationFailed() throws IOException, ServletException,
-            IllegalAccessException, ClassNotFoundException, InstantiationException {
+            IllegalAccessException, ClassNotFoundException, InstantiationException, AuthorizationException {
 
         //Given
         initAuthzFilter();
@@ -272,7 +272,7 @@ public class AuthZFilterTest {
 
     @Test
     public void shouldReturn403WhenAuthorizationFailed() throws IOException, ServletException, IllegalAccessException,
-            ClassNotFoundException, InstantiationException {
+            ClassNotFoundException, InstantiationException, AuthorizationException {
 
         //Given
         initAuthzFilter();
@@ -306,7 +306,8 @@ public class AuthZFilterTest {
         authZFilter.doFilter(request, mock(HttpServletResponse.class), mock(FilterChain.class));
 
         // Then
-        verify(request).setAttribute(eq(AuthorizationContext.ATTRIBUTE_AUTHORIZATION_CONTEXT), any(AuthorizationContext.class));
+        verify(request).setAttribute(eq(AuthorizationContext.ATTRIBUTE_AUTHORIZATION_CONTEXT),
+                any(AuthorizationContext.class));
     }
 
     @Test
@@ -317,7 +318,8 @@ public class AuthZFilterTest {
         AuthorizationContext context = new AuthorizationContext();
         context.setAttribute("test", "some value");
         given(authorizationModule.authorize(eq(request), any(AuthorizationContext.class))).willReturn(true);
-        given(request.getAttribute(AuthorizationContext.ATTRIBUTE_AUTHORIZATION_CONTEXT)).willReturn(context.getAttributes());
+        given(request.getAttribute(AuthorizationContext.ATTRIBUTE_AUTHORIZATION_CONTEXT))
+                .willReturn(context.getAttributes());
 
         // When
         authZFilter.doFilter(request, mock(HttpServletResponse.class), mock(FilterChain.class));

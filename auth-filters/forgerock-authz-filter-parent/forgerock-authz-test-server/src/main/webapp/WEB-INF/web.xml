@@ -35,7 +35,7 @@
 
     <filter-mapping>
         <filter-name>TestAuthzFilter</filter-name>
-        <url-pattern>/*</url-pattern>
+        <url-pattern>/authz-test/*</url-pattern>
     </filter-mapping>
 
     <servlet>
@@ -46,5 +46,37 @@
     <servlet-mapping>
         <servlet-name>authz-test-servlet</servlet-name>
         <url-pattern>/authz-test</url-pattern>
+    </servlet-mapping>
+
+
+
+    <filter>
+        <filter-name>TestOAuth2AuthzFilter</filter-name>
+        <filter-class>org.forgerock.authz.AuthZFilter</filter-class>
+        <init-param>
+            <description>The authorization module configurator to use to protect our resource.</description>
+            <param-name>module-configurator-factory-class</param-name>
+            <param-value>org.forgerock.authz.test.OAuth2AuthorizationModuleConfigurator</param-value>
+        </init-param>
+        <init-param>
+            <description>Configurator for audit logging. Should have a static getLoggingConfigurator() factory method.</description>
+            <param-name>logging-configurator-factory-class</param-name>
+            <param-value>org.forgerock.authz.test.TestLoggingConfigurator</param-value>
+        </init-param>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>TestOAuth2AuthzFilter</filter-name>
+        <url-pattern>/oauth2-authz-test/*</url-pattern>
+    </filter-mapping>
+
+    <servlet>
+        <servlet-name>oauth2-authz-test-servlet</servlet-name>
+        <servlet-class>org.forgerock.authz.test.AuthorizationTestServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>oauth2-authz-test-servlet</servlet-name>
+        <url-pattern>/oauth2-authz-test</url-pattern>
     </servlet-mapping>
 </web-app>

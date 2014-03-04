@@ -1,6 +1,4 @@
 /*
- * Copyright 2014 ForgeRock, AS.
- *
  * The contents of this file are subject to the terms of the Common Development and
  * Distribution License (the License). You may not use this file except in compliance with the
  * License.
@@ -12,6 +10,8 @@
  * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Copyright 2014 ForgeRock AS.
  */
 
 package org.forgerock.authz;
@@ -28,10 +28,12 @@ import javax.servlet.ServletRequest;
  *     ...
  *     Set<String> roles = rolesAttr.get(context);
  * }</pre>
- * Note that due to the dynamic nature of servlet request attributes, it is not possible to make this completely type-safe.
+ * Note that due to the dynamic nature of servlet request attributes, it is not possible to make this completely
+ * type-safe.
  * Clients should be prepared for runtime {@link ClassCastException}s if an unexpected value is found in an
  * authorization context.
  *
+ * @param <T> The type of the attribute.
  * @since 1.4.0
  */
 public final class AuthorizationAttribute<T> {
@@ -100,6 +102,7 @@ public final class AuthorizationAttribute<T> {
         set(AuthorizationContext.forRequest(request), value);
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -121,6 +124,6 @@ public final class AuthorizationAttribute<T> {
 
     @Override
     public String toString() {
-        return "AuthorizationAttribute{key='" + key +"'}";
+        return "AuthorizationAttribute{key='" + key + "'}";
     }
 }

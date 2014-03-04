@@ -20,28 +20,31 @@
 
     <parent>
         <groupId>org.forgerock.commons</groupId>
-        <artifactId>forgerock-authz-filter-parent</artifactId>
+        <artifactId>forgerock-authz-modules</artifactId>
         <version>1.4.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>forgerock-authz-modules</artifactId>
-    <packaging>pom</packaging>
+    <artifactId>forgerock-authz-oauth2-module</artifactId>
 
-    <name>ForgeRock Authorization Filter Modules</name>
-
-    <modules>
-        <module>forgerock-authz-oauth2-module</module>
-    </modules>
+    <name>ForgeRock Authorization Filter OAuth2 Module</name>
 
     <dependencies>
         <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>forgerock-authz-filter</artifactId>
+            <groupId>org.restlet.jse</groupId>
+            <artifactId>org.restlet</artifactId>
         </dependency>
-
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
+            <groupId>org.restlet.jse</groupId>
+            <artifactId>org.restlet.ext.httpclient</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.restlet.jse</groupId>
+            <artifactId>org.restlet.ext.json</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-mapper-asl</artifactId>
         </dependency>
     </dependencies>
+
 </project>

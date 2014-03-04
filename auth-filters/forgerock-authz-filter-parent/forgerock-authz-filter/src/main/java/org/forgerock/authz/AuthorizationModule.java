@@ -32,6 +32,7 @@ public interface AuthorizationModule {
      * Initialises the Authorization Module by providing it with the configuration that the module was configured with.
      *
      * @param config A JsonValue of module configuration options.
+     * @throws AuthorizationException If there is a problem initialising the module.
      */
     void initialise(JsonValue config);
 
@@ -43,11 +44,12 @@ public interface AuthorizationModule {
      *                and to the protected resource via the {@link AuthorizationContext#ATTRIBUTE_AUTHORIZATION_CONTEXT}
      *                attribute in the request.
      * @return <code>true</code> if the request is authorized to proceed, otherwise <code>false</code>.
+     * @throws AuthorizationException If there is a problem determining whether the request is authorized.
      */
     boolean authorize(HttpServletRequest servletRequest, AuthorizationContext context);
 
     /**
-     * Gives us an opportunity to clean up any resources that are being held by this module
+     * Gives us an opportunity to clean up any resources that are being held by this module.
      */
     void destroy();
 }
