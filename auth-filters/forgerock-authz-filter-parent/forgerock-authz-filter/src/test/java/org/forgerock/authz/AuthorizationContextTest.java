@@ -62,11 +62,11 @@ public class AuthorizationContextTest {
         // Given
         AuthorizationContext context = new AuthorizationContext();
         String key = "test";
-        int value = 1234;
+        Integer value = 1234;
         context.setAttribute(key, value);
 
         // When
-        int result = context.getAttribute(key);
+        Integer result = context.getAttribute(key);
 
         // Then
         assertEquals(result, value);
