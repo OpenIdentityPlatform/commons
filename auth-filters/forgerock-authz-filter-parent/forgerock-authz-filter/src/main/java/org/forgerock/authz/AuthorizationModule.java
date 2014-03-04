@@ -16,14 +16,9 @@
 
 package org.forgerock.authz;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.forgerock.auth.common.AuditLogger;
-import org.forgerock.auth.common.DebugLogger;
-import org.forgerock.auth.common.LoggingConfigurator;
 import org.forgerock.json.fluent.JsonValue;
 
-import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Base interface for all Authorization Module implementations, which will contain the logic required
@@ -44,9 +39,12 @@ public interface AuthorizationModule {
      * Determines whether the request is authorized to proceed or not.
      *
      * @param servletRequest The HttpServletRequest.
+     * @param context The authorization context. Attributes in this context will be propagated to other authz modules
+     *                and to the protected resource via the {@link AuthorizationContext#ATTRIBUTE_AUTHORIZATION_CONTEXT}
+     *                attribute in the request.
      * @return <code>true</code> if the request is authorized to proceed, otherwise <code>false</code>.
      */
-    boolean authorize(HttpServletRequest servletRequest);
+    boolean authorize(HttpServletRequest servletRequest, AuthorizationContext context);
 
     /**
      * Gives us an opportunity to clean up any resources that are being held by this module

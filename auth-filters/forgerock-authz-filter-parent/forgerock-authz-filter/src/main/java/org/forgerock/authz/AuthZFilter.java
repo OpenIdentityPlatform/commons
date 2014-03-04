@@ -197,14 +197,14 @@ public class AuthZFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
             throws IOException, ServletException {
 
-        if (!(HttpServletRequest.class.isAssignableFrom(servletRequest.getClass())
-                && HttpServletResponse.class.isAssignableFrom(servletResponse.getClass()))) {
+        if (!(servletRequest instanceof HttpServletRequest && servletResponse instanceof HttpServletResponse)) {
             throw new ServletException("Request/response must be of types HttpServletRequest and HttpServletResponse");
         }
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
+        AuthorizationContext context = AuthorizationContext.forRequest(request);
 
-        if (authorizationModule.authorize(request)) {
+        if (authorizationModule.authorize(request, context)) {
             audit(AuthResult.SUCCESS, request);
             filterChain.doFilter(request, response);
         } else {

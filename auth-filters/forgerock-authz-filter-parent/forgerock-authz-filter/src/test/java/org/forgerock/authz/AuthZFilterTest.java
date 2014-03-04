@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
@@ -228,7 +229,7 @@ public class AuthZFilterTest {
         HttpServletResponse response = mock(HttpServletResponse.class);
         FilterChain filterChain = mock(FilterChain.class);
 
-        given(authorizationModule.authorize(request)).willReturn(true);
+        given(authorizationModule.authorize(eq(request), any(AuthorizationContext.class))).willReturn(true);
 
         //When
         authZFilter.doFilter(request, response, filterChain);
@@ -256,7 +257,7 @@ public class AuthZFilterTest {
 
         given(response.getWriter()).willReturn(writer);
 
-        given(authorizationModule.authorize(request)).willReturn(false);
+        given(authorizationModule.authorize(eq(request), any(AuthorizationContext.class))).willReturn(false);
 
         //When
         authZFilter.doFilter(request, response, filterChain);
@@ -283,7 +284,7 @@ public class AuthZFilterTest {
 
         given(response.getWriter()).willReturn(writer);
 
-        given(authorizationModule.authorize(request)).willReturn(false);
+        given(authorizationModule.authorize(eq(request), any(AuthorizationContext.class))).willReturn(false);
 
         //When
         authZFilter.doFilter(request, response, filterChain);
@@ -292,6 +293,39 @@ public class AuthZFilterTest {
         verify(response).setStatus(403);
         verify(writer).write(anyString());
         verify(filterChain, never()).doFilter(request, response);
+    }
+
+    @Test
+    public void shouldCreateNewAuthorizationContextIfNotAlreadyPresent() throws Exception {
+        // Given
+        initAuthzFilter();
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        given(authorizationModule.authorize(eq(request), any(AuthorizationContext.class))).willReturn(true);
+
+        // When
+        authZFilter.doFilter(request, mock(HttpServletResponse.class), mock(FilterChain.class));
+
+        // Then
+        verify(request).setAttribute(eq(AuthorizationContext.ATTRIBUTE_AUTHORIZATION_CONTEXT), any(AuthorizationContext.class));
+    }
+
+    @Test
+    public void shouldReuseExistingAuthorizationContextIfAlreadyPresent() throws Exception {
+        // Given
+        initAuthzFilter();
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        AuthorizationContext context = new AuthorizationContext();
+        context.setAttribute("test", "some value");
+        given(authorizationModule.authorize(eq(request), any(AuthorizationContext.class))).willReturn(true);
+        given(request.getAttribute(AuthorizationContext.ATTRIBUTE_AUTHORIZATION_CONTEXT)).willReturn(context.getAttributes());
+
+        // When
+        authZFilter.doFilter(request, mock(HttpServletResponse.class), mock(FilterChain.class));
+
+        // Then - ensure same context was passed to authz module
+        verify(authorizationModule).authorize(request, context);
+        // ensure context is not changed on the request
+        verify(request, never()).setAttribute(eq(AuthorizationContext.ATTRIBUTE_AUTHORIZATION_CONTEXT), any());
     }
 
     static class NullAuditLoggingConfigurator implements AuthorizationLoggingConfigurator {
