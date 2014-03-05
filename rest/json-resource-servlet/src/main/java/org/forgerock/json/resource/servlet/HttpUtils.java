@@ -18,11 +18,24 @@ package org.forgerock.json.resource.servlet;
 import java.io.Closeable;
 import java.io.EOFException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayDeque;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.activation.DataSource;
+import javax.mail.BodyPart;
+import javax.mail.MessagingException;
+import javax.mail.internet.ContentDisposition;
+import javax.mail.internet.ContentType;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.ParseException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -39,6 +52,7 @@ import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.util.encode.Base64url;
 
 /**
  * HTTP utility methods and constants.
@@ -47,7 +61,8 @@ public final class HttpUtils {
 
     static final String CACHE_CONTROL = "no-cache";
     static final String CHARACTER_ENCODING = "UTF-8";
-    static final String CONTENT_TYPE = "application/json";
+    static final String APPLICATION_JSON_CONTENT_TYPE = "application/json";
+    static final String MULTIPART_FORM_CONTENT_TYPE = "multipart/form-data";
     static final Pattern CONTENT_TYPE_REGEX = Pattern.compile(
             "^application/json([ ]*;[ ]*charset=utf-8)?$", Pattern.CASE_INSENSITIVE);
     static final String CRLF = "\r\n";
@@ -93,6 +108,17 @@ public final class HttpUtils {
     public static final String PARAM_SORT_KEYS = param(QueryRequest.FIELD_SORT_KEYS);
 
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
+
+    private static final String FILENAME = "filename";
+    private static final String MIME_TYPE = "mimetype";
+    private static final String CONTENT = "content";
+    private static final String CONTENT_DISPOSITION = "Content-Disposition";
+    private static final String NAME = "name";
+    private static final Pattern MULTIPART_FIELD_REGEX = Pattern.compile(
+            "^cid:(.*)#(" + FILENAME + "|" + MIME_TYPE + "|" + CONTENT + ")$", Pattern.CASE_INSENSITIVE);
+    private static final int PART_NAME = 1;
+    private static final int PART_DATA_TYPE = 2;
+    private static final String REFERENCE_TAG = "$ref";
 
     /**
      * Adapts an {@code Exception} to a {@code ResourceException}.
@@ -436,7 +462,7 @@ public final class HttpUtils {
     }
 
     static void prepareResponse(final HttpServletResponse resp) {
-        resp.setContentType(CONTENT_TYPE);
+        resp.setContentType(APPLICATION_JSON_CONTENT_TYPE);
         resp.setCharacterEncoding(CHARACTER_ENCODING);
         resp.setHeader(HEADER_CACHE_CONTROL, CACHE_CONTROL);
     }
@@ -473,12 +499,134 @@ public final class HttpUtils {
         }
     }
 
+    private static BodyPart getJsonRequestPart(final MimeMultipart mimeMultiparts)
+            throws BadRequestException, ResourceException {
+        try {
+            for (int i = 0; i < mimeMultiparts.getCount(); i++) {
+                BodyPart part = mimeMultiparts.getBodyPart(i);
+                ContentType contentType = new ContentType(part.getContentType());
+                if (contentType.match(APPLICATION_JSON_CONTENT_TYPE)) {
+                    return part;
+                }
+            }
+            throw new BadRequestException(
+                    "The request could not be processed because the multipart request "
+                            + "does not include Content-Type: " + APPLICATION_JSON_CONTENT_TYPE);
+        } catch (final MessagingException e) {
+            throw new BadRequestException(
+                    "The request could not be processed because the request cant be parsed", e);
+        }
+
+    }
+
+    private static String getRequestPartData(final MimeMultipart mimeMultiparts,
+                                             final String partName,
+                                             final String partDataType)
+            throws BadRequestException, ResourceException, IOException, MessagingException {
+        if (mimeMultiparts == null) {
+            throw new BadRequestException("The request parameter is null when retrieving part data for part name: "
+                    + partName);
+        }
+
+        if (partDataType == null || partDataType.isEmpty()) {
+            throw new BadRequestException("The request is requesting an unknown part field");
+        }
+        MimeBodyPart part = null;
+        for (int i = 0; i < mimeMultiparts.getCount() ; i++) {
+            part = (MimeBodyPart) mimeMultiparts.getBodyPart(i);
+            ContentDisposition disposition =
+                    new ContentDisposition(part.getHeader(CONTENT_DISPOSITION, null));
+            if (disposition.getParameter(NAME).equalsIgnoreCase(partName)) {
+                break;
+            }
+        }
+
+        if (part == null) {
+            throw new BadRequestException("The request is missing a referenced part for part name: " + partName);
+        }
+
+        if (MIME_TYPE.equalsIgnoreCase(partDataType)) {
+            return new ContentType(part.getContentType()).toString();
+        } else if (FILENAME.equalsIgnoreCase(partDataType)) {
+            return part.getFileName();
+        } else if (CONTENT.equalsIgnoreCase(partDataType)) {
+            return Base64url.encode(IOUtils.toByteArray(part.getInputStream()));
+        } else {
+            throw new BadRequestException(
+                    "The request could not be processed because the multipart request "
+                            + "requests data from the part that isn't supported. Data requested: " + partDataType);
+        }
+    }
+
+    private static boolean isAReferenceJsonObject(JsonValue node) {
+        return node.keys() != null &&
+               node.keys().size() == 1 &&
+               REFERENCE_TAG.equalsIgnoreCase(node.keys().iterator().next());
+    }
+
+    private static Object swapRequestPartsIntoContent(final MimeMultipart mimeMultiparts, Object content)
+            throws BadRequestException, ResourceException {
+        try {
+            JsonValue root = new JsonValue(content);
+
+            ArrayDeque<JsonValue> stack = new ArrayDeque<JsonValue>();
+            stack.push(root);
+
+            while (!stack.isEmpty()) {
+                JsonValue node = stack.pop();
+                if (isAReferenceJsonObject(node)) {
+                    Matcher matcher = MULTIPART_FIELD_REGEX.matcher(node.get(REFERENCE_TAG).asString());
+                    if (matcher.matches()) {
+                        String partName = matcher.group(PART_NAME);
+                        String requestPartData = getRequestPartData(mimeMultiparts, partName, matcher.group(PART_DATA_TYPE));
+                        root.put(node.getPointer(), requestPartData);
+                    } else {
+                        throw new BadRequestException("Invalid reference tag '"
+                                + node.toString() + "'");
+                    }
+                } else {
+                    Iterator<JsonValue> iter = node.iterator();
+                    while (iter.hasNext()) {
+                        stack.push(iter.next());
+                    }
+                }
+            }
+            return root;
+        } catch (final IOException e) {
+            throw adapt(e);
+        } catch (final MessagingException e) {
+            throw new BadRequestException(
+                    "The request could not be processed because the request is not a valid multipart request");
+        }
+    }
+
+    public static boolean isMultiPartRequest(final String unknownContentType) throws BadRequestException {
+        try {
+            ContentType contentType = new ContentType(unknownContentType);
+            if (contentType.match(MULTIPART_FORM_CONTENT_TYPE)) {
+                return true;
+            }
+        } catch (final ParseException e) {
+            throw new BadRequestException(
+                    "The request content type can't be parsed.", e);
+        }
+        return false;
+    }
+
     private static Object parseJsonBody(final HttpServletRequest req, final boolean allowEmpty)
             throws BadRequestException, ResourceException {
         JsonParser parser = null;
         try {
-            parser = JSON_MAPPER.getJsonFactory().createJsonParser(req.getInputStream());
-            final Object content = parser.readValueAs(Object.class);
+            boolean isMultiPartRequest = isMultiPartRequest(req.getContentType());
+            MimeMultipart mimeMultiparts = null;
+            if (isMultiPartRequest) {
+                mimeMultiparts = new MimeMultipart(new HttpServletRequestDataSource(req));
+                BodyPart jsonPart = getJsonRequestPart(mimeMultiparts);
+                parser = JSON_MAPPER.getJsonFactory().createJsonParser(jsonPart.getInputStream());
+            } else {
+                parser = JSON_MAPPER.getJsonFactory().createJsonParser(req.getInputStream());
+            }
+            Object content = parser.readValueAs(Object.class);
 
             // Ensure that there is no trailing data following the JSON resource.
             boolean hasTrailingGarbage;
@@ -493,6 +641,10 @@ public final class HttpUtils {
                                 + "trailing data after the JSON content");
             }
 
+            if (isMultiPartRequest) {
+                swapRequestPartsIntoContent(mimeMultiparts, content);
+            }
+
             return content;
         } catch (final JsonParseException e) {
             throw new BadRequestException(
@@ -504,10 +656,13 @@ public final class HttpUtils {
                 return null;
             } else {
                 throw new BadRequestException("The request could not be processed "
-                        + "because it did not contain any JSON content");
+                        + "because it did not contain any JSON content", e);
             }
         } catch (final IOException e) {
             throw adapt(e);
+        } catch (final MessagingException e) {
+            throw new BadRequestException(
+                    "The request could not be processed because it can't be parsed", e);
         } finally {
             closeQuietly(parser);
         }
@@ -519,6 +674,31 @@ public final class HttpUtils {
 
     private HttpUtils() {
         // Prevent instantiation.
+    }
+
+    private static class HttpServletRequestDataSource implements DataSource {
+
+        private HttpServletRequest request;
+
+        HttpServletRequestDataSource(HttpServletRequest request) throws IOException {
+            this.request = request;
+        }
+
+        public InputStream getInputStream() throws IOException {
+            return request.getInputStream();
+        }
+
+        public OutputStream getOutputStream() throws IOException {
+            return null;
+        }
+
+        public String getContentType() {
+            return request.getContentType();
+        }
+
+        public String getName() {
+            return "HttpServletRequestDataSource";
+        }
     }
 
 }
