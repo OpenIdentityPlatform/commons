@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2013 ForgeRock AS.
+ * Copyright 2012-2014 ForgeRock AS.
  */
 package org.forgerock.json.resource.servlet;
 
@@ -359,7 +359,9 @@ public final class HttpServletAdapter {
             for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
                 final String name = p.getKey();
                 final String[] values = p.getValue();
-                if (!parseCommonParameter(name, values, request)) {
+                if (HttpUtils.isMultiPartRequest(req.getContentType())) {
+                    // Ignore - multipart content adds form parts to the parameter set
+                } else if (!parseCommonParameter(name, values, request)) {
                     // FIXME: i18n.
                     throw new BadRequestException("Unrecognized update request parameter '" + name
                             + "'");
@@ -394,7 +396,9 @@ public final class HttpServletAdapter {
                         continue;
                     } else if (name.equalsIgnoreCase(PARAM_ACTION)) {
                         // Ignore - already handled.
-                    } else {
+                    } else if (HttpUtils.isMultiPartRequest(req.getContentType())) {
+                        // Ignore - multipart content adds form parts to the parameter set
+                    }  else {
                         // FIXME: i18n.
                         throw new BadRequestException("Unrecognized create request parameter '"
                                 + name + "'");
@@ -413,6 +417,8 @@ public final class HttpServletAdapter {
                         continue;
                     } else if (name.equalsIgnoreCase(PARAM_ACTION)) {
                         // Ignore - already handled.
+                    } else if (HttpUtils.isMultiPartRequest(req.getContentType())) {
+                        // Ignore - multipart content adds form parts to the parameter set
                     } else {
                         request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
@@ -464,7 +470,9 @@ public final class HttpServletAdapter {
                 for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
                     final String name = p.getKey();
                     final String[] values = p.getValue();
-                    if (!parseCommonParameter(name, values, request)) {
+                    if (HttpUtils.isMultiPartRequest(req.getContentType())) {
+                        // Ignore - multipart content adds form parts to the parameter set
+                    } else if (!parseCommonParameter(name, values, request)) {
                         // FIXME: i18n.
                         throw new BadRequestException("Unrecognized create request parameter '"
                                 + name + "'");
@@ -478,7 +486,9 @@ public final class HttpServletAdapter {
                 for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
                     final String name = p.getKey();
                     final String[] values = p.getValue();
-                    if (!parseCommonParameter(name, values, request)) {
+                    if (HttpUtils.isMultiPartRequest(req.getContentType())) {
+                        // Ignore - multipart content adds form parts to the parameter set
+                    } else if (!parseCommonParameter(name, values, request)) {
                         // FIXME: i18n.
                         throw new BadRequestException("Unrecognized update request parameter '"
                                 + name + "'");
@@ -583,12 +593,16 @@ public final class HttpServletAdapter {
 
         // Check content-type.
         final String contentType = req.getContentType();
-        if (contentType != null && !CONTENT_TYPE_REGEX.matcher(contentType).matches()) {
+        if (!req.getMethod().equalsIgnoreCase(HttpUtils.METHOD_GET) &&
+                contentType != null &&
+                !CONTENT_TYPE_REGEX.matcher(contentType).matches() &&
+                !HttpUtils.isMultiPartRequest(contentType)) {
             // TODO: i18n
             throw new BadRequestException(
                     "The request could not be processed because it specified the content-type '"
                             + req.getContentType() + "' when only the content-type '"
-                            + CONTENT_TYPE + "' is supported");
+                            + APPLICATION_JSON_CONTENT_TYPE + "' and '"
+                            + MULTIPART_FORM_CONTENT_TYPE + "' are supported");
         }
 
         if (req.getHeader("If-Modified-Since") != null) {
