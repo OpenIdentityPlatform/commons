@@ -135,7 +135,7 @@ public final class SecurityContextFactory implements HttpServletContextFactory {
      * contain a {@code Map<String, Object>} if it is present.
      * <p>
      * This constant has the same value as {@link #ATTRIBUTE_AUTHZID_V2}.
-     * 
+     *
      * @see SecurityContext#getAuthorizationId()
      */
     public static final String ATTRIBUTE_AUTHZID = ATTRIBUTE_AUTHZID_V2;

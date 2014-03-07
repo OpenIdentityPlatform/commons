@@ -17,6 +17,7 @@ package org.forgerock.json.resource.servlet;
 
 import static org.forgerock.util.Utils.closeSilently;
 
+import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -59,7 +60,6 @@ import org.forgerock.util.encode.Base64url;
  * HTTP utility methods and constants.
  */
 public final class HttpUtils {
-
     static final String CACHE_CONTROL = "no-cache";
     static final String CHARACTER_ENCODING = "UTF-8";
     static final String APPLICATION_JSON_CONTENT_TYPE = "application/json";
@@ -85,27 +85,29 @@ public final class HttpUtils {
     static final String METHOD_PUT = "PUT";
     static final String METHOD_TRACE = "TRACE";
 
-    /** the HTTP request parameter for an action */
+    /** the HTTP request parameter for an action. */
     public static final String PARAM_ACTION = param(ActionRequest.FIELD_ACTION);
-    /** the HTTP request parameter to request debugging */
+    /** the HTTP request parameter to request debugging. */
     public static final String PARAM_DEBUG = "_debug";
-    /** the HTTP request parameter to specify which fields to return */
+    /** the HTTP request parameter to specify which fields to return. */
     public static final String PARAM_FIELDS = param(Request.FIELD_FIELDS);
-    /** the HTTP request parameter to request a certain page size */
+    /** the HTTP request parameter to request a certain page size. */
     public static final String PARAM_PAGE_SIZE = param(QueryRequest.FIELD_PAGE_SIZE);
-    /** the HTTP request parameter to specify a paged results cookie */
-    public static final String PARAM_PAGED_RESULTS_COOKIE = param(QueryRequest.FIELD_PAGED_RESULTS_COOKIE);
-    /** the HTTP request parameter to specify a paged results offset */
-    public static final String PARAM_PAGED_RESULTS_OFFSET = param(QueryRequest.FIELD_PAGED_RESULTS_OFFSET);
-    /** the HTTP request parameter to request pretty printing */
+    /** the HTTP request parameter to specify a paged results cookie. */
+    public static final String PARAM_PAGED_RESULTS_COOKIE =
+            param(QueryRequest.FIELD_PAGED_RESULTS_COOKIE);
+    /** the HTTP request parameter to specify a paged results offset. */
+    public static final String PARAM_PAGED_RESULTS_OFFSET =
+            param(QueryRequest.FIELD_PAGED_RESULTS_OFFSET);
+    /** the HTTP request parameter to request pretty printing. */
     public static final String PARAM_PRETTY_PRINT = "_prettyPrint";
-    /** the HTTP request parameter to specify a query expression */
+    /** the HTTP request parameter to specify a query expression. */
     public static final String PARAM_QUERY_EXPRESSION = param(QueryRequest.FIELD_QUERY_EXPRESSION);
-    /** the HTTP request parameter to specify a query filter */
+    /** the HTTP request parameter to specify a query filter. */
     public static final String PARAM_QUERY_FILTER = param(QueryRequest.FIELD_QUERY_FILTER);
-    /** the HTTP request parameter to specify a query id */
+    /** the HTTP request parameter to specify a query id. */
     public static final String PARAM_QUERY_ID = param(QueryRequest.FIELD_QUERY_ID);
-    /** the HTTP request parameter to specify the sort keys */
+    /** the HTTP request parameter to specify the sort keys. */
     public static final String PARAM_SORT_KEYS = param(QueryRequest.FIELD_SORT_KEYS);
 
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
@@ -115,11 +117,14 @@ public final class HttpUtils {
     private static final String CONTENT = "content";
     private static final String CONTENT_DISPOSITION = "Content-Disposition";
     private static final String NAME = "name";
-    private static final Pattern MULTIPART_FIELD_REGEX = Pattern.compile(
-            "^cid:(.*)#(" + FILENAME + "|" + MIME_TYPE + "|" + CONTENT + ")$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern MULTIPART_FIELD_REGEX = Pattern.compile("^cid:(.*)#(" + FILENAME
+            + "|" + MIME_TYPE + "|" + CONTENT + ")$", Pattern.CASE_INSENSITIVE);
     private static final int PART_NAME = 1;
     private static final int PART_DATA_TYPE = 2;
     private static final String REFERENCE_TAG = "$ref";
+
+    private static final int BUFFER_SIZE = 1024;
+    private static final int EOF = -1;
 
     /**
      * Adapts an {@code Exception} to a {@code ResourceException}.
@@ -354,8 +359,7 @@ public final class HttpUtils {
      *             If the content could not be read or if the content was not
      *             valid JSON.
      */
-    static JsonValue getJsonActionContent(final HttpServletRequest req)
-            throws ResourceException {
+    static JsonValue getJsonActionContent(final HttpServletRequest req) throws ResourceException {
         return new JsonValue(parseJsonBody(req, true));
     }
 
@@ -485,19 +489,19 @@ public final class HttpUtils {
     }
 
     private static String getRequestPartData(final MimeMultipart mimeMultiparts,
-                                             final String partName,
-                                             final String partDataType)
-            throws BadRequestException, ResourceException, IOException, MessagingException {
+            final String partName, final String partDataType) throws BadRequestException,
+            ResourceException, IOException, MessagingException {
         if (mimeMultiparts == null) {
-            throw new BadRequestException("The request parameter is null when retrieving part data for part name: "
-                    + partName);
+            throw new BadRequestException(
+                    "The request parameter is null when retrieving part data for part name: "
+                            + partName);
         }
 
         if (partDataType == null || partDataType.isEmpty()) {
             throw new BadRequestException("The request is requesting an unknown part field");
         }
         MimeBodyPart part = null;
-        for (int i = 0; i < mimeMultiparts.getCount() ; i++) {
+        for (int i = 0; i < mimeMultiparts.getCount(); i++) {
             part = (MimeBodyPart) mimeMultiparts.getBodyPart(i);
             ContentDisposition disposition =
                     new ContentDisposition(part.getHeader(CONTENT_DISPOSITION, null));
@@ -507,7 +511,8 @@ public final class HttpUtils {
         }
 
         if (part == null) {
-            throw new BadRequestException("The request is missing a referenced part for part name: " + partName);
+            throw new BadRequestException(
+                    "The request is missing a referenced part for part name: " + partName);
         }
 
         if (MIME_TYPE.equalsIgnoreCase(partDataType)) {
@@ -515,22 +520,22 @@ public final class HttpUtils {
         } else if (FILENAME.equalsIgnoreCase(partDataType)) {
             return part.getFileName();
         } else if (CONTENT.equalsIgnoreCase(partDataType)) {
-            return Base64url.encode(IOUtils.toByteArray(part.getInputStream()));
+            return Base64url.encode(toByteArray(part.getInputStream()));
         } else {
             throw new BadRequestException(
                     "The request could not be processed because the multipart request "
-                            + "requests data from the part that isn't supported. Data requested: " + partDataType);
+                            + "requests data from the part that isn't supported. Data requested: "
+                            + partDataType);
         }
     }
 
     private static boolean isAReferenceJsonObject(JsonValue node) {
-        return node.keys() != null &&
-               node.keys().size() == 1 &&
-               REFERENCE_TAG.equalsIgnoreCase(node.keys().iterator().next());
+        return node.keys() != null && node.keys().size() == 1
+                && REFERENCE_TAG.equalsIgnoreCase(node.keys().iterator().next());
     }
 
-    private static Object swapRequestPartsIntoContent(final MimeMultipart mimeMultiparts, Object content)
-            throws BadRequestException, ResourceException {
+    private static Object swapRequestPartsIntoContent(final MimeMultipart mimeMultiparts,
+            Object content) throws BadRequestException, ResourceException {
         try {
             JsonValue root = new JsonValue(content);
 
@@ -540,14 +545,17 @@ public final class HttpUtils {
             while (!stack.isEmpty()) {
                 JsonValue node = stack.pop();
                 if (isAReferenceJsonObject(node)) {
-                    Matcher matcher = MULTIPART_FIELD_REGEX.matcher(node.get(REFERENCE_TAG).asString());
+                    Matcher matcher =
+                            MULTIPART_FIELD_REGEX.matcher(node.get(REFERENCE_TAG).asString());
                     if (matcher.matches()) {
                         String partName = matcher.group(PART_NAME);
-                        String requestPartData = getRequestPartData(mimeMultiparts, partName, matcher.group(PART_DATA_TYPE));
+                        String requestPartData =
+                                getRequestPartData(mimeMultiparts, partName, matcher
+                                        .group(PART_DATA_TYPE));
                         root.put(node.getPointer(), requestPartData);
                     } else {
-                        throw new BadRequestException("Invalid reference tag '"
-                                + node.toString() + "'");
+                        throw new BadRequestException("Invalid reference tag '" + node.toString()
+                                + "'");
                     }
                 } else {
                     Iterator<JsonValue> iter = node.iterator();
@@ -565,17 +573,13 @@ public final class HttpUtils {
         }
     }
 
-    public static boolean isMultiPartRequest(final String unknownContentType) throws BadRequestException {
+    static boolean isMultiPartRequest(final String unknownContentType) throws BadRequestException {
         try {
             ContentType contentType = new ContentType(unknownContentType);
-            if (contentType.match(MULTIPART_FORM_CONTENT_TYPE)) {
-                return true;
-            }
+            return contentType.match(MULTIPART_FORM_CONTENT_TYPE);
         } catch (final ParseException e) {
-            throw new BadRequestException(
-                    "The request content type can't be parsed.", e);
+            throw new BadRequestException("The request content type can't be parsed.", e);
         }
-        return false;
     }
 
     private static Object parseJsonBody(final HttpServletRequest req, final boolean allowEmpty)
@@ -614,8 +618,8 @@ public final class HttpUtils {
         } catch (final JsonParseException e) {
             throw new BadRequestException(
                     "The request could not be processed because the provided "
-                            + "content is not valid JSON", e).setDetail(new JsonValue(e
-                            .getMessage()));
+                            + "content is not valid JSON", e)
+                .setDetail(new JsonValue(e.getMessage()));
         } catch (final EOFException e) {
             if (allowEmpty) {
                 return null;
@@ -642,7 +646,6 @@ public final class HttpUtils {
     }
 
     private static class HttpServletRequestDataSource implements DataSource {
-
         private HttpServletRequest request;
 
         HttpServletRequestDataSource(HttpServletRequest request) throws IOException {
@@ -666,4 +669,14 @@ public final class HttpUtils {
         }
     }
 
+    private static byte[] toByteArray(final InputStream inputStream) throws IOException {
+        final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        final byte[] data = new byte[BUFFER_SIZE];
+        int size;
+        while ((size = inputStream.read(data)) != EOF) {
+            byteArrayOutputStream.write(data, 0, size);
+        }
+        byteArrayOutputStream.flush();
+        return byteArrayOutputStream.toByteArray();
+    }
 }
