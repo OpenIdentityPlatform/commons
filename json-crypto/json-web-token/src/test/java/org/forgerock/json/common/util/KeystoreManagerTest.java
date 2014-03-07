@@ -29,9 +29,9 @@ public class KeystoreManagerTest {
     @Test
     public void should() throws URISyntaxException, UnsupportedEncodingException {
 
-        KeystoreManager keystoreManager = new KeystoreManager("password", "JKS",
+        KeystoreManager keystoreManager = new KeystoreManager("JKS",
                 URLDecoder.decode(ClassLoader.getSystemResource("keystore.jks").getFile(), "UTF-8"), "password");
 
-        keystoreManager.getPrivateKey("jwt-test-ks");
+        keystoreManager.getPrivateKey("jwt-test-ks", "password");
     }
 }
