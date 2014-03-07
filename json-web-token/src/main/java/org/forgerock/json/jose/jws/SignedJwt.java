@@ -11,13 +11,13 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2014 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jws;
 
 import java.security.Key;
-
+import java.security.PrivateKey;
 import org.forgerock.json.jose.jws.handlers.SigningHandler;
 import org.forgerock.json.jose.jwt.Jwt;
 import org.forgerock.json.jose.jwt.JwtClaimsSet;
@@ -33,7 +33,6 @@ import org.forgerock.util.encode.Base64url;
  * <p>
  * @see <a href="http://tools.ietf.org/html/draft-ietf-jose-json-web-signature-11">JSON Web Signature Specification</a>
  *
- * @author Phill Cunnington
  * @since 2.0.0
  */
 public class SignedJwt implements Jwt {
@@ -43,7 +42,7 @@ public class SignedJwt implements Jwt {
     private final JwsHeader header;
     private final Payload payload;
 
-    private final Key privateKey;
+    private final PrivateKey privateKey;
 
     private final byte[] signingInput;
     private final byte[] signature;
@@ -57,7 +56,7 @@ public class SignedJwt implements Jwt {
      * @param claimsSet The JwtClaimsSet containing the claims of the JWS.
      * @param privateKey The private key to use to sign the JWS.
      */
-    public SignedJwt(JwsHeader header, JwtClaimsSet claimsSet, Key privateKey) {
+    public SignedJwt(JwsHeader header, JwtClaimsSet claimsSet, PrivateKey privateKey) {
         this.header = header;
         this.payload = claimsSet;
         this.privateKey = privateKey;
@@ -97,7 +96,7 @@ public class SignedJwt implements Jwt {
      * @param nestedPayload The nested payload that will be the payload of this JWS.
      * @param privateKey The private key to use to sign the JWS.
      */
-    protected SignedJwt(JwsHeader header, Payload nestedPayload, Key privateKey) {
+    protected SignedJwt(JwsHeader header, Payload nestedPayload, PrivateKey privateKey) {
         this.header = header;
         this.payload = nestedPayload;
         this.privateKey = privateKey;

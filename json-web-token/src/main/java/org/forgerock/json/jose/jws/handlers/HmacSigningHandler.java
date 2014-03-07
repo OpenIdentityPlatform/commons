@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2014 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jws.handlers;
@@ -20,11 +20,9 @@ import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-
 import org.forgerock.json.jose.exceptions.JwsSigningException;
 import org.forgerock.json.jose.jws.JwsAlgorithm;
 import org.forgerock.json.jose.utils.Utils;
@@ -32,7 +30,6 @@ import org.forgerock.json.jose.utils.Utils;
 /**
  * An implementation of the SigningHandler which can sign and verify using algorithms from the HMAC family.
  *
- * @author Phill Cunnington
  * @since 2.0.0
  */
 public class HmacSigningHandler implements SigningHandler {

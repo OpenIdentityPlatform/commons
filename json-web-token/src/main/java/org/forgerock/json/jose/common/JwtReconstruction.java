@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2014 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.common;
@@ -34,10 +34,9 @@ import org.forgerock.util.encode.Base64url;
  * A service that provides a method for reconstruct a JWT string back into its relevant JWT object,
  * (SignedJwt, EncryptedJwt, SignedEncryptedJwt).
  *
- * @author Phill Cunnington
  * @since 2.0.0
  */
-public final class JwtReconstruction {
+public class JwtReconstruction {
 
     private static final int JWS_NUM_PARTS = 3;
     private static final int JWE_NUM_PARTS = 5;

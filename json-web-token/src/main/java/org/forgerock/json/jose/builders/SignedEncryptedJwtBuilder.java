@@ -11,13 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2014 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.builders;
 
-import java.security.Key;
-
+import java.security.PrivateKey;
 import org.forgerock.json.jose.jwe.EncryptedJwt;
 import org.forgerock.json.jose.jws.JwsAlgorithm;
 import org.forgerock.json.jose.jws.JwsHeader;
@@ -29,13 +28,12 @@ import org.forgerock.json.jose.jwt.JwtType;
  * An implementation of a JwtBuilder that can build a JWT and encrypt it and nest it within another signed JWT,
  * resulting in an SignedEncryptedJwt object.
  *
- * @author Phill Cunnington
  * @since 2.0.0
  */
 public class SignedEncryptedJwtBuilder implements SignedJwtBuilder {
 
     private final EncryptedJwtBuilder encryptedJwtBuilder;
-    private final Key privateKey;
+    private final PrivateKey privateKey;
     private final JwsAlgorithm jwsAlgorithm;
 
     /**
@@ -46,7 +44,7 @@ public class SignedEncryptedJwtBuilder implements SignedJwtBuilder {
      * @param privateKey The private key to sign the JWT with.
      * @param jwsAlgorithm The JwsAlgorithm to use when signing the JWT.
      */
-    public SignedEncryptedJwtBuilder(EncryptedJwtBuilder encryptedJwtBuilder, Key privateKey,
+    public SignedEncryptedJwtBuilder(EncryptedJwtBuilder encryptedJwtBuilder, PrivateKey privateKey,
             JwsAlgorithm jwsAlgorithm) {
         this.encryptedJwtBuilder = encryptedJwtBuilder;
         this.privateKey = privateKey;
