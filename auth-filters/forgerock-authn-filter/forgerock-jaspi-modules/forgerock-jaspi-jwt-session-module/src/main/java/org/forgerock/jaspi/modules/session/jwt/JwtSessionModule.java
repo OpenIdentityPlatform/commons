@@ -56,7 +56,6 @@ import java.util.UUID;
  * as a Cookie on the response. Then on subsequent requests checks for the presents of the JWT as a Cookie on the
  * request and validates the signature and decrypts it and checks the expiration time of the JWT.
  *
- * @author Phill Cunningon
  * @since 1.0.0
  */
 public class JwtSessionModule implements ServerAuthModule {
@@ -294,10 +293,10 @@ public class JwtSessionModule implements ServerAuthModule {
      */
     private Jwt verifySessionJwt(String sessionJwt) {
 
-        KeystoreManager keystoreManager = new KeystoreManager(privateKeyPassword, keystoreType,
+        KeystoreManager keystoreManager = new KeystoreManager(keystoreType,
                 keystoreFile, keystorePassword);
 
-        RSAPrivateKey privateKey = (RSAPrivateKey) keystoreManager.getPrivateKey(keyAlias);
+        RSAPrivateKey privateKey = (RSAPrivateKey) keystoreManager.getPrivateKey(keyAlias, privateKeyPassword);
 
         EncryptedJwt jwt = jwtBuilderFactory.reconstruct(sessionJwt, EncryptedJwt.class);
         jwt.decrypt(privateKey);
@@ -355,7 +354,7 @@ public class JwtSessionModule implements ServerAuthModule {
         jwt.getClaimsSet().setNotBeforeTime(nbf);
         jwt.getClaimsSet().setClaim(TOKEN_IDLE_TIME_CLAIM_KEY, tokenIdleTime.getTime() / 1000L);
 
-        KeystoreManager keystoreManager = new KeystoreManager(privateKeyPassword, keystoreType,
+        KeystoreManager keystoreManager = new KeystoreManager(keystoreType,
                 keystoreFile, keystorePassword);
 
         RSAPublicKey publicKey = (RSAPublicKey) keystoreManager.getPublicKey(keyAlias);
@@ -433,7 +432,7 @@ public class JwtSessionModule implements ServerAuthModule {
      */
     private Cookie createSessionJwtCookie(Map<String, Object> jwtParameters) throws AuthException {
 
-        KeystoreManager keystoreManager = new KeystoreManager(privateKeyPassword, keystoreType,
+        KeystoreManager keystoreManager = new KeystoreManager(keystoreType,
                 keystoreFile, keystorePassword);
 
         RSAPublicKey publicKey = (RSAPublicKey) keystoreManager.getPublicKey(keyAlias);

@@ -69,7 +69,7 @@
         <maven.compiler.source>1.6</maven.compiler.source>
 
         <slf4j.version>1.7.5</slf4j.version>
-        <forgerock-rest.version>2.2.1</forgerock-rest.version>
+        <forgerock-rest.version>2.2.3-SNAPSHOT</forgerock-rest.version>
         <restlet.version>2.1.6</restlet.version>
         <jackson.version>1.9.7</jackson.version>
     </properties>
