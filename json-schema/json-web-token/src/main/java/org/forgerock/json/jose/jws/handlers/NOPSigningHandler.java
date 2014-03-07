@@ -11,20 +11,18 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2014 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jws.handlers;
 
 import java.security.Key;
-
 import org.forgerock.json.jose.jws.JwsAlgorithm;
 import org.forgerock.json.jose.utils.Utils;
 
 /**
  * An implementation of the SigningHandler which does not perform any signing or verifying.
  *
- * @author Phill Cunnington
  * @since 2.0.0
  */
 public class NOPSigningHandler implements SigningHandler {
@@ -46,13 +44,13 @@ public class NOPSigningHandler implements SigningHandler {
      * Verifies that the signature length is zero.
      *
      * @param algorithm {@inheritDoc}
-     * @param privateKey {@inheritDoc}
+     * @param key {@inheritDoc}
      * @param data {@inheritDoc}
      * @param signature {@inheritDoc}
      * @return {@inheritDoc}
      */
     @Override
-    public boolean verify(JwsAlgorithm algorithm, Key privateKey, byte[] data, byte[] signature) {
+    public boolean verify(JwsAlgorithm algorithm, Key key, byte[] data, byte[] signature) {
         return signature.length == 0;
     }
 }

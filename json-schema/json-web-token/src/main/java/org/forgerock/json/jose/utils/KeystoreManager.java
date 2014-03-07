@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013-2014 ForgeRock Inc.
  */
 
 package org.forgerock.json.jose.utils;
@@ -32,25 +32,21 @@ import java.security.cert.X509Certificate;
 /**
  * A class that manages a Java Key Store and has methods for extracting out public/private keys and certificates.
  *
- * @author Phill Cunnington
  * @since 2.0.0
  */
 public class KeystoreManager {
 
     private KeyStore keyStore = null;
-    private final String privateKeyPassword;
 
     /**
      * Constructs an instance of the KeystoreManager.
      *
-     * @param privateKeyPassword The private password for the keys.
      * @param keyStoreType The type of Java KeyStore.
      * @param keyStoreFile The file path to the KeyStore.
      * @param keyStorePassword The password for the KeyStore.
      */
-    public KeystoreManager(String privateKeyPassword, String keyStoreType, String keyStoreFile,
-            String keyStorePassword) {
-        this.privateKeyPassword = privateKeyPassword;
+    public KeystoreManager(final String keyStoreType, final String keyStoreFile,
+            final String keyStorePassword) {
         loadKeyStore(keyStoreType, keyStoreFile, keyStorePassword);
     }
 
@@ -137,14 +133,14 @@ public class KeystoreManager {
      * @param keyAlias The Private Key Alias.
      * @return The Private Key.
      */
-    public PrivateKey getPrivateKey(String keyAlias) {
+    public PrivateKey getPrivateKey(final String keyAlias, final String keyPassword) {
 
         if (keyAlias == null || keyAlias.length() == 0) {
             return null;
         }
 
         try {
-            return (PrivateKey) keyStore.getKey(keyAlias, privateKeyPassword.toCharArray());
+            return (PrivateKey) keyStore.getKey(keyAlias, keyPassword.toCharArray());
         } catch (KeyStoreException e) {
             throw new KeystoreManagerException(e);
         } catch (NoSuchAlgorithmException e) {
