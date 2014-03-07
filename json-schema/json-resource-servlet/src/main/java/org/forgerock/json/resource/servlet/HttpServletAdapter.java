@@ -630,10 +630,9 @@ public final class HttpServletAdapter {
 
         // Check content-type.
         final String contentType = req.getContentType();
-        if (!req.getMethod().equalsIgnoreCase(HttpUtils.METHOD_GET) &&
-                contentType != null &&
-                !CONTENT_TYPE_REGEX.matcher(contentType).matches() &&
-                !HttpUtils.isMultiPartRequest(contentType)) {
+        if (!req.getMethod().equalsIgnoreCase(HttpUtils.METHOD_GET) && contentType != null
+                && !CONTENT_TYPE_REGEX.matcher(contentType).matches()
+                && !HttpUtils.isMultiPartRequest(contentType)) {
             // TODO: i18n
             throw new BadRequestException(
                     "The request could not be processed because it specified the content-type '"
