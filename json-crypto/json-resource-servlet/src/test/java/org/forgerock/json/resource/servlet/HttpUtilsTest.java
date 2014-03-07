@@ -30,14 +30,15 @@ import static org.mockito.Mockito.*;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.List;
 
+@SuppressWarnings("javadoc")
 public class HttpUtilsTest {
-
     private static final String JPEG_PART_NAME = "profile";
     private static final String JPEG_PART_FILENAME = "file.jpg";
     private static final String JPEG_CONTENT = "This is Jpeg Content";
@@ -54,7 +55,7 @@ public class HttpUtilsTest {
             "multipart/form-data; boundary=kwkIqb-fsdbtcNpB4dJ_Xqf1-3b0Hp_VF9D0vsgL";
 
     private HttpServletRequest request;
-    
+
     private byte[] requestInputStreamData;
 
     private String jsonBody;
@@ -66,20 +67,26 @@ public class HttpUtilsTest {
         jsonBody.append("{").append("\n");
         jsonBody.append("\"uid\" : \"alice\",").append("\n");
         jsonBody.append("\"email\" : \"alice@example.com\",").append("\n");
-        jsonBody.append("\"" + PROFILE_CONTENT_KEY + "\" : { \"$ref\" : \"cid:" + JPEG_PART_NAME + "#content\" },").append("\n");
-        jsonBody.append("\"" + PROFILE_MIMETYPE_KEY + "\" : { \"$ref\" : \"cid:" + JPEG_PART_NAME + "#mimetype\" },").append("\n");
-        jsonBody.append("\"" + PROFILE_FILENAME_KEY + "\" : { \"$ref\" : \"cid:" + JPEG_PART_NAME + "#filename\" }").append("\n");
+        jsonBody.append(
+                "\"" + PROFILE_CONTENT_KEY + "\" : { \"$ref\" : \"cid:" + JPEG_PART_NAME
+                        + "#content\" },").append("\n");
+        jsonBody.append(
+                "\"" + PROFILE_MIMETYPE_KEY + "\" : { \"$ref\" : \"cid:" + JPEG_PART_NAME
+                        + "#mimetype\" },").append("\n");
+        jsonBody.append(
+                "\"" + PROFILE_FILENAME_KEY + "\" : { \"$ref\" : \"cid:" + JPEG_PART_NAME
+                        + "#filename\" }").append("\n");
         jsonBody.append("}");
         this.jsonBody = jsonBody.toString();
 
         jsonBody = new StringBuilder();
         jsonBody.append("[");
-        jsonBody.append("{ \"operation\": \"replace\", \"field\": \"" + PROFILE_MIMETYPE_KEY +
-                "\", \"value\": { \"$ref\" : \"cid:" + JPEG_PART_NAME + "#mimetype\" } },");
-        jsonBody.append("{ \"operation\": \"replace\", \"field\": \"" + PROFILE_CONTENT_KEY +
-                "\", \"value\": { \"$ref\" : \"cid:" + JPEG_PART_NAME + "#content\" } },");
-        jsonBody.append("{ \"operation\": \"replace\", \"field\": \"" + PROFILE_FILENAME_KEY +
-                "\", \"value\": { \"$ref\" : \"cid:" + JPEG_PART_NAME + "#filename\" } }");
+        jsonBody.append("{ \"operation\": \"replace\", \"field\": \"" + PROFILE_MIMETYPE_KEY
+                + "\", \"value\": { \"$ref\" : \"cid:" + JPEG_PART_NAME + "#mimetype\" } },");
+        jsonBody.append("{ \"operation\": \"replace\", \"field\": \"" + PROFILE_CONTENT_KEY
+                + "\", \"value\": { \"$ref\" : \"cid:" + JPEG_PART_NAME + "#content\" } },");
+        jsonBody.append("{ \"operation\": \"replace\", \"field\": \"" + PROFILE_FILENAME_KEY
+                + "\", \"value\": { \"$ref\" : \"cid:" + JPEG_PART_NAME + "#filename\" } }");
         jsonBody.append("]");
         this.jsonPatchBody = jsonBody.toString();
     }
@@ -97,7 +104,8 @@ public class HttpUtilsTest {
         reguestInputStreamData.println();
         reguestInputStreamData.println(jsonBody);
         reguestInputStreamData.println("--kwkIqb-fsdbtcNpB4dJ_Xqf1-3b0Hp_VF9D0vsgL");
-        reguestInputStreamData.println("Content-Disposition: form-data; name=\"" + JPEG_PART_NAME + "\"; filename=\"" + JPEG_PART_FILENAME + "\"");
+        reguestInputStreamData.println("Content-Disposition: form-data; name=\"" + JPEG_PART_NAME
+                + "\"; filename=\"" + JPEG_PART_FILENAME + "\"");
         reguestInputStreamData.println("Content-Type: " + JPEG_CONTENT_TYPE);
         reguestInputStreamData.println();
         reguestInputStreamData.println(JPEG_CONTENT);
@@ -117,9 +125,11 @@ public class HttpUtilsTest {
         this.requestInputStreamData = requestInputStreamData.toByteArray();
     }
 
-    private void setUpRequestMock(HttpServletRequest request, String contentType) throws IOException {
+    private void setUpRequestMock(HttpServletRequest request, String contentType)
+            throws IOException {
         when(request.getContentType()).thenReturn(contentType);
-        final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(requestInputStreamData);
+        final ByteArrayInputStream byteArrayInputStream =
+                new ByteArrayInputStream(requestInputStreamData);
         when(request.getInputStream()).thenReturn(new ServletInputStream() {
             @Override
             public int read() throws IOException {
@@ -138,8 +148,8 @@ public class HttpUtilsTest {
         assertThat(result.get(PROFILE_FILENAME_KEY).asString().equalsIgnoreCase(JPEG_PART_FILENAME));
 
         assertThat(result.get(PROFILE_CONTENT_KEY).asString() != null);
-        assertThat(result.get(PROFILE_CONTENT_KEY).asString().
-                equalsIgnoreCase(Base64url.encode(JPEG_CONTENT.getBytes())));
+        assertThat(result.get(PROFILE_CONTENT_KEY).asString().equalsIgnoreCase(
+                Base64url.encode(JPEG_CONTENT.getBytes())));
 
         assertThat(result.get(PROFILE_MIMETYPE_KEY).asString() != null);
         assertThat(result.get(PROFILE_MIMETYPE_KEY).asString().equalsIgnoreCase(JPEG_CONTENT_TYPE));
@@ -152,16 +162,16 @@ public class HttpUtilsTest {
         assertThat(result.get(UID).asString().equalsIgnoreCase(ALICE));
 
         assertThat(result.get(PROFILE_FILENAME_KEY) != null);
-        assertThat(result.get(PROFILE_FILENAME_KEY).get("$ref").asString().
-                equalsIgnoreCase("cid:" + JPEG_PART_NAME + "#filename"));
+        assertThat(result.get(PROFILE_FILENAME_KEY).get("$ref").asString().equalsIgnoreCase(
+                "cid:" + JPEG_PART_NAME + "#filename"));
 
         assertThat(result.get(PROFILE_CONTENT_KEY) != null);
-        assertThat(result.get(PROFILE_CONTENT_KEY).get("$ref").asString().
-                equalsIgnoreCase("cid:" + JPEG_PART_NAME + "#content"));
+        assertThat(result.get(PROFILE_CONTENT_KEY).get("$ref").asString().equalsIgnoreCase(
+                "cid:" + JPEG_PART_NAME + "#content"));
 
         assertThat(result.get(PROFILE_MIMETYPE_KEY) != null);
-        assertThat(result.get(PROFILE_MIMETYPE_KEY).get("$ref").asString().
-                equalsIgnoreCase("cid:" + JPEG_PART_NAME + "#mimetype"));
+        assertThat(result.get(PROFILE_MIMETYPE_KEY).get("$ref").asString().equalsIgnoreCase(
+                "cid:" + JPEG_PART_NAME + "#mimetype"));
     }
 
     @Test
@@ -196,7 +206,8 @@ public class HttpUtilsTest {
             if (field.equalsIgnoreCase(PROFILE_MIMETYPE_KEY)) {
                 assertThat(operation.getValue().asString().equalsIgnoreCase(JPEG_CONTENT_TYPE));
             } else if (field.equalsIgnoreCase(PROFILE_CONTENT_KEY)) {
-                assertThat(operation.getValue().asString().equals(Base64url.encode(JPEG_CONTENT.getBytes())));
+                assertThat(operation.getValue().asString().equals(
+                        Base64url.encode(JPEG_CONTENT.getBytes())));
             } else if (field.equalsIgnoreCase(PROFILE_FILENAME_KEY)) {
                 assertThat(operation.getValue().asString().equalsIgnoreCase(JPEG_PART_FILENAME));
             } else {
@@ -206,8 +217,8 @@ public class HttpUtilsTest {
     }
 
     @Test
-    public void testShouldPopulateReferencesWhenGetJsonContentIsCalled()
-            throws ResourceException, IOException, ServletException {
+    public void testShouldPopulateReferencesWhenGetJsonContentIsCalled() throws ResourceException,
+            IOException, ServletException {
         //given
         request = mock(HttpServletRequest.class);
         createMultiPartRequest(jsonBody);
@@ -250,11 +261,14 @@ public class HttpUtilsTest {
         for (PatchOperation operation : result) {
             String field = operation.getField().leaf();
             if (field.equalsIgnoreCase(PROFILE_MIMETYPE_KEY)) {
-                assertThat(operation.getValue().get("$ref").asString().equalsIgnoreCase("cid:" + JPEG_PART_NAME + "#mimetype"));
+                assertThat(operation.getValue().get("$ref").asString().equalsIgnoreCase(
+                        "cid:" + JPEG_PART_NAME + "#mimetype"));
             } else if (field.equalsIgnoreCase(PROFILE_CONTENT_KEY)) {
-                assertThat(operation.getValue().get("$ref").asString().equalsIgnoreCase("cid:" + JPEG_PART_NAME + "#content"));
+                assertThat(operation.getValue().get("$ref").asString().equalsIgnoreCase(
+                        "cid:" + JPEG_PART_NAME + "#content"));
             } else if (field.equalsIgnoreCase(PROFILE_FILENAME_KEY)) {
-                assertThat(operation.getValue().get("$ref").asString().equalsIgnoreCase("cid:" + JPEG_PART_NAME + "#filename"));
+                assertThat(operation.getValue().get("$ref").asString().equalsIgnoreCase(
+                        "cid:" + JPEG_PART_NAME + "#filename"));
             } else {
                 throw new BadRequestException();
             }
