@@ -43,6 +43,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import org.forgerock.util.RangeSet;
+import org.forgerock.util.promise.Function;
 
 /**
  * Represents a value in a JSON object model structure. JSON values are
@@ -562,6 +563,43 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
             }
         }
         return (List<E>) object;
+    }
+
+    /**
+     * Returns the JSON value as a {@link List} containing objects whose type
+     * (and value) is specified by a transformation function. If the value is
+     * {@code null}, this method returns {@code null}. It is up to to the
+     * transformation function to transform/enforce source types of the elements
+     * in the Json source list.  If any of the elements of the list are not of
+     * the appropriate type, or the type-transformation cannot occur,
+     * the exception specified by the transformation function is thrown.
+     *
+     * @param <V>
+     *            the type of elements in this list
+     * @param <E>
+     *            the type of exception thrown by the transformation function
+     * @param transformFunction
+     *            a {@link Function} to transform an element of the JsonValue list
+     *            to the desired type
+     * @return the list value, or {@code null} if no value.
+     * @throws E
+     *             if the JSON value is not a {@code List}, contains an
+     *             unexpected type, or contains an element that cannot be
+     *             transformed
+     * @throws NullPointerException
+     *             if {@code transformFunction} is {@code null}.
+     */
+    public <V,E extends Exception> List<V> asList(final Function<JsonValue,V,E> transformFunction) throws E {
+        if (object != null) {
+            expect(List.class);
+            final int size = size();
+            final List<V> list = new ArrayList<V>(size);
+            for (int i = 0; i < size; i++) {
+                list.add(transformFunction.apply(get(i)));
+            }
+            return list;
+        }
+        return (List<V>) object;
     }
 
     /**
