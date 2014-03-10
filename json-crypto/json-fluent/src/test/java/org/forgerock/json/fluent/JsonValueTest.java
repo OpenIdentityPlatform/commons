@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.forgerock.util.promise.Function;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -350,6 +351,33 @@ public class JsonValueTest {
     @Test(expectedExceptions = JsonValueException.class)
     public void testAsURLBad() throws Exception {
         json("asdf://nowhere").asURL();
+    }
+
+    private static final Function AS_INTEGER = new Function<JsonValue, Integer, Exception>() {
+        @Override
+        public Integer apply(JsonValue jsonValue) throws Exception {
+            if (jsonValue.isString()) {
+                return Integer.valueOf(jsonValue.asString());
+            }
+            throw new Exception("jsonValue value "+jsonValue.getObject()+" is not an integer");
+        }
+    };
+
+    @Test
+    public void testAsListTransformFunction() throws Exception {
+        final JsonValue value = json(array("2", "3", "5", "8"));
+        final List<Integer> list = value.asList(AS_INTEGER);
+        assertThat(list.size()).isEqualTo(4);
+        assertThat(list.get(0)).isEqualTo(2);
+        assertThat(list.get(1)).isEqualTo(3);
+        assertThat(list.get(2)).isEqualTo(5);
+        assertThat(list.get(3)).isEqualTo(8);
+    }
+
+    @Test(expectedExceptions = Exception.class)
+    public void testAsListTransformFunctionBadType() throws Exception {
+        final JsonValue badValue = json(array("a", "b", "c"));
+        badValue.asList(AS_INTEGER);
     }
 
     private JsonPointer ptr(final String pointer) {
