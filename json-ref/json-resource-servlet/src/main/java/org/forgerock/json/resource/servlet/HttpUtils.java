@@ -87,8 +87,6 @@ public final class HttpUtils {
 
     /** the HTTP request parameter for an action. */
     public static final String PARAM_ACTION = param(ActionRequest.FIELD_ACTION);
-    /** the HTTP request parameter to request debugging. */
-    public static final String PARAM_DEBUG = "_debug";
     /** the HTTP request parameter to specify which fields to return. */
     public static final String PARAM_FIELDS = param(Request.FIELD_FIELDS);
     /** the HTTP request parameter to request a certain page size. */
@@ -412,20 +410,6 @@ public final class HttpUtils {
      */
     static boolean hasParameter(final HttpServletRequest req, final String parameter) {
         return getParameter(req, parameter) != null;
-    }
-
-    /**
-     * Determines whether debugging was requested in an HTTP request.
-     *
-     * @param req
-     *            The HTTP request.
-     * @return {@code true} if debugging was requested.
-     * @throws ResourceException
-     *             If the debug parameter could not be parsed.
-     */
-    static boolean isDebugRequested(final HttpServletRequest req) throws ResourceException {
-        final String[] values = req.getParameterValues(PARAM_DEBUG);
-        return (values != null && asBooleanValue(PARAM_DEBUG, values));
     }
 
     static void prepareResponse(final HttpServletResponse resp) {
