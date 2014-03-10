@@ -26,6 +26,7 @@ import static org.forgerock.json.fluent.JsonValue.field;
 import static org.forgerock.json.fluent.JsonValue.json;
 import static org.forgerock.json.fluent.JsonValue.object;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -337,6 +338,18 @@ public class JsonValueTest {
         assertThat(value.isDefined("/roles")).isFalse();
         value.remove(ptr("/uid"));
         assertThat(value.isDefined("/uid")).isFalse();
+    }
+
+    @Test
+    public void testAsURL() throws Exception {
+        URL url = new URL("http://java.sun.com/index.html");
+        JsonValue value = json("http://java.sun.com/index.html");
+        assertThat(value.asURL()).isEqualTo(url);
+    }
+
+    @Test(expectedExceptions = JsonValueException.class)
+    public void testAsURLBad() throws Exception {
+        json("asdf://nowhere").asURL();
     }
 
     private JsonPointer ptr(final String pointer) {
