@@ -28,7 +28,6 @@ import static org.forgerock.json.resource.servlet.HttpUtils.METHOD_PATCH;
 import static org.forgerock.json.resource.servlet.HttpUtils.METHOD_POST;
 import static org.forgerock.json.resource.servlet.HttpUtils.METHOD_PUT;
 import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_ACTION;
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_DEBUG;
 import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_FIELDS;
 import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_PAGED_RESULTS_COOKIE;
 import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_PAGED_RESULTS_OFFSET;
@@ -51,14 +50,11 @@ import static org.forgerock.json.resource.servlet.HttpUtils.getJsonPatchContent;
 import static org.forgerock.json.resource.servlet.HttpUtils.getMethod;
 import static org.forgerock.json.resource.servlet.HttpUtils.getParameter;
 import static org.forgerock.json.resource.servlet.HttpUtils.hasParameter;
-import static org.forgerock.json.resource.servlet.HttpUtils.isDebugRequested;
 import static org.forgerock.json.resource.servlet.HttpUtils.prepareResponse;
 import static org.forgerock.json.resource.servlet.HttpUtils.rejectIfMatch;
 import static org.forgerock.json.resource.servlet.HttpUtils.rejectIfNoneMatch;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -132,7 +128,6 @@ public final class HttpServletAdapter {
     private final ServletApiVersionAdapter syncFactory;
     private final ConnectionFactory connectionFactory;
     private final HttpServletContextFactory contextFactory;
-    private final ServletContext servletContext;
 
     /**
      * Creates a new servlet adapter with the provided connection factory and a
@@ -197,7 +192,10 @@ public final class HttpServletAdapter {
     public HttpServletAdapter(final ServletContext servletContext,
             final ConnectionFactory connectionFactory,
             final HttpServletContextFactory contextFactory) throws ServletException {
-        this.servletContext = checkNotNull(servletContext);
+        /*
+         * The servletContext field was removed as part of fix for CREST-146.
+         * The constructor parameter remains for API compatibility.
+         */
         this.contextFactory =
                 contextFactory != null ? contextFactory : SecurityContextFactory
                         .getHttpServletContextFactory();
@@ -547,30 +545,6 @@ public final class HttpServletAdapter {
         sync.awaitIfNeeded(); // Only blocks when async is not supported.
     }
 
-    private void dumpRequest(final HttpServletRequest req) {
-        final String newline = System.getProperty("line.separator");
-        final StringBuilder builder = new StringBuilder();
-        builder.append("Method=" + req.getMethod() + newline);
-        final Enumeration<?> headerNames = req.getHeaderNames();
-        while (headerNames.hasMoreElements()) {
-            final String headerName = (String) headerNames.nextElement();
-            builder.append("Header " + headerName + "=" + req.getHeader(headerName) + newline);
-        }
-        builder.append("RequestURI=" + req.getRequestURI() + newline);
-        builder.append("ContextPath=" + req.getContextPath() + newline);
-        builder.append("ServletPath=" + req.getServletPath() + newline);
-        builder.append("PathInfo=" + req.getPathInfo() + newline);
-        builder.append("QueryString=" + req.getQueryString() + newline);
-        final Enumeration<?> parameterNames = req.getParameterNames();
-        while (parameterNames.hasMoreElements()) {
-            final String parameterName = (String) parameterNames.nextElement();
-            builder.append("Parameter " + parameterName + "="
-                    + Arrays.asList(req.getParameterValues(parameterName)) + newline);
-        }
-        builder.append(newline);
-        servletContext.log(builder.toString());
-    }
-
     /*
      * Removes leading and trailing forward slashes.
      */
@@ -611,10 +585,6 @@ public final class HttpServletAdapter {
             // This will be handled by the completionHandlerFactory, so just validate.
             asBooleanValue(name, values);
             return true;
-        } else if (name.equalsIgnoreCase(PARAM_DEBUG)) {
-            // This will be handled by the completionHandlerFactory, so just validate.
-            asBooleanValue(name, values);
-            return true;
         } else {
             // Unrecognized - must be request specific.
             return false;
@@ -622,10 +592,6 @@ public final class HttpServletAdapter {
     }
 
     private void preprocessRequest(final HttpServletRequest req) throws ResourceException {
-        if (isDebugRequested(req)) {
-            dumpRequest(req);
-        }
-
         // TODO: check Accept (including charset parameter) and Accept-Charset headers
 
         // Check content-type.
