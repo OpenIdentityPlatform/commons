@@ -25,9 +25,9 @@
 /*global define*/
 
 define("org/forgerock/commons/ui/common/main", [
-	"./main/main",
-	"./util/main",
-	"./components/main",
+    "./main/main",
+    "./util/main",
+    "./components/main",
     "./NotFoundView",
     "./EnableCookiesView",
     "./LoginView",

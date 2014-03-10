@@ -44,8 +44,21 @@ define("org/forgerock/commons/ui/common/components/Messages", [
             "click div": "hideMessages"
         },
         
-        displayMessageFromConfig: function(msgKey) {
-            this.addMessage({message: $.t(obj.configuration.messages[msgKey].msg), type: obj.configuration.messages[msgKey].type});
+        displayMessageFromConfig: function(event) {
+            if (typeof event === "object") {
+                if (typeof event.key === "string") {
+                    this.addMessage({
+                        message: $.t(obj.configuration.messages[event.key].msg, event), 
+                        type: obj.configuration.messages[event.key].type
+                    });
+                }
+            } else if (typeof event === "string") {
+                this.addMessage({
+                    message: $.t(obj.configuration.messages[event].msg), 
+                    type: obj.configuration.messages[event].type
+                });
+            }
+
         },
         
         /**

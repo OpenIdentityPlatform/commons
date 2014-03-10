@@ -7,30 +7,32 @@
             "dayNamesShort" : "Sun. , Mon., Tue., Wed., Thu., Fri., Sat."
         },
         "messages" : {
-            "UserMessages" : {
+            "CommonMessages" : {
                 "authenticationFailed" : "Login/password combination is invalid.",
                 "serviceUnavailable" : "Service unavailable",
-                "changedPassword" : "Password has been changed",
                 "unknown" : "Unknown error. Please contact with administrator",
-                "profileUpdateFailed" : "Problem during profile update",
-                "profileUpdateSuccessful" : "Profile has been updated",
-                "userNameUpdated" : "Username has been modified succesfully.",
-                "afterRegistration" : "User has been registered successfully",
                 "loggedIn" : "You have been successfully logged in.",
                 "errorFetchingData" : "Error fetching user data",
                 "loggedOut" : "You have been logged out.",
-                "siteIdentificationChanged" : "Site identification image has been changed",
-                "securityDataChanged" : "Security data has been changed",
                 "unauthorized" : "Unauthorized access or session timeout",
-                "userAlreadyExists" : "User already exists",
                 "internalError" : "Internal server error",
                 "forbiddenError" : "Forbidden request error.",
                 "notFoundError" : "Not found error.",
                 "badRequestError" : "Bad request error.",
                 "conflictError" : "Detected conflict in request.",
-                "errorDeletingNotification" : "Error deleting notification.",
-                "errorFetchingNotifications" : "Error Fetching notifications.",
                 "incorrectRevisionError" : "Cannot update the record because the version is not the latest."
+            },
+            "UserMessages" : {
+                "changedPassword" : "Password has been changed",
+                "profileUpdateFailed" : "Problem during profile update",
+                "profileUpdateSuccessful" : "Profile has been updated",
+                "userNameUpdated" : "Username has been modified succesfully.",
+                "afterRegistration" : "User has been registered successfully",
+                "siteIdentificationChanged" : "Site identification image has been changed",
+                "securityDataChanged" : "Security data has been changed",
+                "userAlreadyExists" : "User already exists",
+                "errorDeletingNotification" : "Error deleting notification.",
+                "errorFetchingNotifications" : "Error Fetching notifications."
             },
             "AdminMessages" : {
                 "cannotDeleteYourself" : "You can't delete yourself",

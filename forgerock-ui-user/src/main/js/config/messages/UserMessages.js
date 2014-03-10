@@ -31,10 +31,6 @@ define("config/messages/UserMessages", [
 ], function() {
     
     var obj = {
-            "authenticationFailed": {
-                msg: "config.messages.UserMessages.authenticationFailed",
-                type: "error"
-            },
             "usernameNotFound": {
                 msg: "config.messages.UserMessages.usernameNotFound",
                 type: "error"
@@ -55,17 +51,9 @@ define("config/messages/UserMessages", [
                 msg: "config.messages.UserMessages.invalidOldPassword",
                 type: "error"
             },
-            "serviceUnavailable": {
-                msg: "config.messages.UserMessages.serviceUnavailable",
-                type: "error"
-            },
             "changedPassword": {
                 msg: "config.messages.UserMessages.changedPassword",
                 type: "info"
-            },
-            "unknown": {
-                msg: "config.messages.UserMessages.unknown",
-                type: "error"
             },
             "profileUpdateFailed": {
                 msg: "config.messages.UserMessages.profileUpdateFailed",
@@ -83,22 +71,6 @@ define("config/messages/UserMessages", [
                 msg: "config.messages.UserMessages.afterRegistration",
                 type: "info"
             },
-            "loggedIn": {
-                msg: "config.messages.UserMessages.loggedIn",
-                type: "info"
-            },
-            "errorFetchingData": {
-                msg: "config.messages.UserMessages.errorFetchingData",
-                type: "error"
-            },
-            "loggedOut": {
-                msg: "config.messages.UserMessages.loggedOut",
-                type: "info"
-            },
-            "loginTimeout": {
-                msg: "config.messages.UserMessages.loginTimeout",
-                type: "info"
-            },
             "siteIdentificationChanged": {
                 msg: "config.messages.UserMessages.siteIdentificationChanged",
                 type: "info"
@@ -107,32 +79,8 @@ define("config/messages/UserMessages", [
                 msg: "config.messages.UserMessages.securityDataChanged",
                 type: "info"
             },
-            "unauthorized": {
-                msg: "config.messages.UserMessages.unauthorized",
-                type: "error"
-            },
             "userAlreadyExists": {
                 msg: "config.messages.UserMessages.userAlreadyExists",
-                type: "error"
-            },
-            "internalError": {
-                msg: "config.messages.UserMessages.internalError",
-                type: "error"
-            },
-            "forbiddenError": {
-                msg: "config.messages.UserMessages.forbiddenError",
-                type: "error"
-            },
-            "notFoundError": {
-                msg: "config.messages.UserMessages.notFoundError",
-                type: "error"
-            },
-            "badRequestError": {
-                msg: "config.messages.UserMessages.badRequestError",
-                type: "error"
-            },
-            "conflictError": {
-                msg: "config.messages.UserMessages.conflictError",
                 type: "error"
             },
             "errorDeletingNotification": {
@@ -141,10 +89,6 @@ define("config/messages/UserMessages", [
             },
             "errorFetchingNotifications": {
                 msg: "config.messages.UserMessages.errorFetchingNotifications",
-                type: "error"
-            },
-            "incorrectRevisionError": {
-                msg: "config.messages.UserMessages.incorrectRevisionError",
                 type: "error"
             }
     };

@@ -26,6 +26,7 @@
 
 define("config/main", [
     "./AppConfiguration",
+    "./messages/CommonMessages",
     "./validators/CommonValidators",
     "./process/CommonConfig",
     "./errorhandlers/CommonErrorHandlers"

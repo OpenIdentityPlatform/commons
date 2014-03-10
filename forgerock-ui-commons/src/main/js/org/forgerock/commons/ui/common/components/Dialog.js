@@ -75,8 +75,8 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
                 $(".dialog-background").fadeIn(300);
                 $(".dialog-background").off('click').on('click', _.bind(this.close, this));
          
-                _.each(this.actions, _.bind(function(type, name) {
-                    this.$el.find(".dialogActions").append("<input type='"+ type +"' name='"+ name +"' value='"+ name +"' class='button float-right' />");                    
+                _.each(this.actions, _.bind(function(a) {
+                    this.$el.find(".dialogActions").append("<input type='"+ a.type +"' name='"+ a.name +"' value='"+ a.name +"' class='button float-right' />");                    
                 }, this));
                 
                 this.loadContent(callback);
@@ -116,7 +116,10 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
         },
 
         addAction: function(name, type) {
-            this.actions[name] = type;
+            this.actions.push({
+                "name" : name,
+                "type" : type
+            });
         }
     });
 

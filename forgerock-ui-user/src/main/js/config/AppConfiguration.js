@@ -119,6 +119,7 @@ define("config/AppConfiguration", [
                        messages: {
                        },
                        loader: [
+                                {"messages":"config/messages/CommonMessages"},
                                 {"messages":"config/messages/UserMessages"}
                        ]
                    } 

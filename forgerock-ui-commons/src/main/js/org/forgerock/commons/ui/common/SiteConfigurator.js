@@ -32,15 +32,15 @@ define("org/forgerock/commons/ui/common/SiteConfigurator", [
    "org/forgerock/commons/ui/common/util/Constants", 
    "org/forgerock/commons/ui/common/main/EventManager",
    "org/forgerock/commons/ui/common/main/Configuration",
-   "org/forgerock/commons/ui/common/delegates/SiteConfigurationDelegate",
    "org/forgerock/commons/ui/common/main/i18nManager"
-], function(AbstractConfigurationAware, constants, eventManager, conf, configurationDelegate, i18nManager) {
+], function(AbstractConfigurationAware, constants, eventManager, conf, i18nManager) {
    var obj = new AbstractConfigurationAware();
    
    obj.initialized = false;
    
    $(document).on(constants.EVENT_READ_CONFIGURATION_REQUEST, function() {
-       
+       var configurationDelegate;
+
        if(!conf.globalData) {
            conf.setProperty('globalData', {});
            conf.globalData.auth = {};
@@ -55,6 +55,7 @@ define("org/forgerock/commons/ui/common/SiteConfigurator", [
            obj.initialized = true;
            
            if(obj.configuration.remoteConfig === true) {
+               configurationDelegate = require(obj.configuration.delegate);
                configurationDelegate.getConfiguration(function(config) {
                    obj.processConfiguration(config); 
                    eventManager.sendEvent(constants.EVENT_APP_INTIALIZED);
