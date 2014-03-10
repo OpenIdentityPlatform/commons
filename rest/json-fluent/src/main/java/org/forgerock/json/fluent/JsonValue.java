@@ -18,8 +18,10 @@
 package org.forgerock.json.fluent;
 
 import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
@@ -658,6 +660,22 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
             return (object == null ? null : new URI(asString()));
         } catch (final URISyntaxException use) {
             throw new JsonValueException(this, use);
+        }
+    }
+
+    /**
+     * Returns the JSON string value as a uniform resource locator. If the
+     * JSON value is {@code null}, this method returns {@code null}.
+     *
+     * @return the URL represented by the string value.
+     * @throws JsonValueException
+     *             if the given string violates URL syntax.
+     */
+    public URL asURL() {
+        try {
+            return (object == null ? null : new URL(asString()));
+        } catch (final MalformedURLException mue) {
+            throw new JsonValueException(this, mue);
         }
     }
 
