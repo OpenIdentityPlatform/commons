@@ -139,10 +139,10 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
                 button = this.$el.find("#submit");
             }
             if(validatorsManager.formValidated(this.$el)) {
-                button.attr('disabled', false);
+                button.prop('disabled', false);
                 this.$el.find(".input-validation-message").hide();
             } else {
-                button.attr('disabled', true);
+                button.prop('disabled', true);
                 this.$el.find(".input-validation-message").show();
             }
             

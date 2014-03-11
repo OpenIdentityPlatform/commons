@@ -61,7 +61,7 @@ define("org/forgerock/commons/ui/common/components/ConfirmationDialog", [
             this.okCallback = okCallback;
             
             this.show(_.bind(function() {
-                this.$el.find("input[type=submit]").attr('disabled', false);
+                this.$el.find("input[type=submit]").prop('disabled', false);
             }, this));            
         }
     });

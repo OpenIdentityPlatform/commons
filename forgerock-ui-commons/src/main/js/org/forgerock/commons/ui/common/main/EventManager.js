@@ -39,25 +39,18 @@ define("org/forgerock/commons/ui/common/main/EventManager", [
     
 
     obj.sendEvent = function (eventId, event) {
-        console.debug("sending event eventId=" + eventId);
         $(document).trigger(eventId, event);
     };
 
     obj.registerListener = function (eventId, callback) {
         var proxyFunction = function(element, event) {
-            console.debug("Handling event " + element.namespace);
             callback(event);
         };
-        console.debug("registering event listener eventId=" + eventId);
         listenerProxyMap[callback] = proxyFunction;
         $(document).on(eventId, proxyFunction);
     };
 
     obj.unregisterListener = function (eventId, callback) {
-        var proxyFunction;
-        console.debug("unregistering event listener eventId=" + eventId);
-        //proxyFunction = listenerProxyMap[callback];
-        //$(document).off(proxyFunction);
         $(document).off(eventId);
     };
 

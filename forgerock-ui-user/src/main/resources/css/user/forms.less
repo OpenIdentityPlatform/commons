@@ -1,6 +1,8 @@
 /* FORMS */
 input[type="text"], input[type="password"], input[type="tel"], input[type="email"], textarea, select {
     border: 1px solid @input-border-basic;
+    border-top-color: darken(@input-border-basic, 14%);
+    border-left-color: darken(@input-border-basic, 14%);
     .rounded-corners(5px);
     font-size: 15px;
     color: @font-color;
@@ -12,15 +14,19 @@ input[type="text"], input[type="password"], input[type="tel"], input[type="email
     -moz-transition: all 0.25s ease-in-out;
 }
 
-
-
-.select-static-medium {
-	width: 130px;
+input{
+    margin:0;
 }
 
-input:not([type=submit]):invalid:required {
+.select-static-medium {
+    width: 130px;
+}
+
+input:not([type=submit]):invalid:required{
     background-color: @input-background-invalid-color; 
     border-color: @input-border-invalid-color;
+    border-top-color: mix(@input-border-invalid-color, #000000, 80%);
+    border-left-color: mix(@input-border-invalid-color, #000000, 80%);
 }
 
 
@@ -35,6 +41,12 @@ input.read-only, input:read-only, input[type="text"]:focus:read-only, input[type
     box-shadow:none;
     border:1px solid @input-border-basic;
 }
+
+.content-bg h1, .container-shadow h1{
+    padding: 0 0 30px;
+    line-height: 22px;
+}
+
 
 form.form {
 
@@ -77,9 +89,13 @@ form.form {
             margin-left: 117px;
         }
     }
-    &.center {
+    div.field-checkbox.float-left {
+            margin-left: 0;  
+    }
+    &.center , .center{
         margin: 0 auto;
     }
+    
     &.no-margin {
         fieldset {
             margin-top: 0;
@@ -90,7 +106,7 @@ form.form {
         text-align: right;
         padding-right: 10px;
         font-size: 17px;
-        padding-top: 8px;
+        padding-top: 7px;
         font-weight: bold;
     }
     label.short {
@@ -98,6 +114,10 @@ form.form {
     }
     label.light {
         font-weight: normal;
+    }
+    .input{
+        float: left;
+        padding-top: 7px;
     }
     ul {
         clear: left;
@@ -137,29 +157,29 @@ form.form {
     }
     
     div.input-icon {
-    	span.icon {
-    	   height: 28px;
-    	   width: 36px;
-    	   display: inline-block;
-    	   vertical-align: top;
-    	   margin-right: -1px;
-    	   border: 1px solid @input-border-basic;
-    	   .rounded-left-corners;
-    	   .linear-gradient;
-    	}
-    	span.icon-user {
-		   .linear-gradient-with-image("../../images/icon-user.png");
-    	}
-    	span.icon-key {
-    	   .linear-gradient-with-image("../../images/icon-key.png");
-    	}
-    	input {
-	    	position: relative;
-			margin-bottom: 0;
-			vertical-align: top;
-			height: 18px;
-    		.rounded-left-corners(0);
-    	}
+        span.icon {
+           height: 28px;
+           width: 36px;
+           display: inline-block;
+           vertical-align: top;
+           margin-right: -1px;
+           border: 1px solid @input-border-basic;
+           .rounded-left-corners;
+           .linear-gradient;
+        }
+        span.icon-user {
+           .linear-gradient-with-image("../../images/icon-user.png");
+        }
+        span.icon-key {
+           .linear-gradient-with-image("../../images/icon-key.png");
+        }
+        input {
+            position: relative;
+            margin-bottom: 0;
+            vertical-align: top;
+            height: 18px;
+            .rounded-left-corners(0);
+        }
     }
     
     div.field-text {
@@ -170,12 +190,18 @@ form.form {
         height: 30px;
         padding:0;
     }
+
+    .field-rule span{
+         padding-left:5px;
+    }
+
     span.error, span.ok {
+        padding-left:0;
         font-weight: bold;
         font-size: 14px;
         text-align: center;
         vertical-align: middle;
-        width: 18px;
+        width: 20px;
         display: inline-block;
     }
     span.error {
@@ -190,9 +216,9 @@ form.form {
         display: inline-block;
         float: right;
         font-size: 12px;
-        line-height:12px;
+        text-align:right;
+        line-height: 12px;
         padding-top: 5px;
-        text-align: right;
         &.noFloat {
             float:none;
             text-align: left;
@@ -203,7 +229,7 @@ form.form {
     }
     div.group-field-errors {
         padding: 1px 7px 5px 5px;
-        max-width: 230px;
+        width: 240px; 
         margin-left: 5px;
         border: 1px solid @input-border-basic;
         float: left;
@@ -217,6 +243,15 @@ form.form {
             &.error {
                width:12px;
             }
+        }
+    }
+
+    div.field-checkbox div.validation-message{
+        padding:5px 0 0 21px;
+        text-align:left;
+            float:left;  
+        .label{
+            float:left;
         }
     }
 
@@ -286,6 +321,41 @@ form.form {
 
     }
 
+    .center label, .center .group-field-block label{
+        width:auto;
+    }
+
+
+
+    .checkboxList {
+        .rounded-corners;
+        .border-gray;
+        .content;
+        float: left;
+        max-height: 80px;
+        width: 230px;
+        overflow: auto;
+        margin-bottom: 15px;
+
+        ol {
+            list-style-type:none;
+            li{
+                input{
+                    float: none;
+                }
+                label {
+                    width: auto;
+                    float: none;
+                    text-align: left;
+                    display: inline;
+                    font-weight: normal;
+                    font-size:12px;
+                    padding:1px 0 0 5px;
+                }
+            }
+        }
+    }
+
     .align-label{
         padding-left:170px;
     }
@@ -304,9 +374,19 @@ form.form {
     }
 
     div.group-field-errors{
-        margin: 7px 0 0 7px;
+        margin: 5px 0 0 7px;
     }
 
+    div.col2b{
+        margin-left:170px;
+    }
+
+    .col0, .fieldset.col0{
+        width: 442px;
+        margin-left:auto;
+        margin-right:auto;
+    }
+  
     .group-field-row label.right, 
     .group-field-block label.align-right, 
     align.right{
@@ -314,7 +394,16 @@ form.form {
     }
 
     .group-field-block{
-       height:50px;
+       min-height: 35px;
+    }
+
+    .fieldset{
+        padding: 10px 10px;
+        clear: both;
+        border-radius: 5px;
+        border: 1px solid rgba(0,0,0,0.05);
+        margin: 0 0 10px;
     }
 
 }
+
