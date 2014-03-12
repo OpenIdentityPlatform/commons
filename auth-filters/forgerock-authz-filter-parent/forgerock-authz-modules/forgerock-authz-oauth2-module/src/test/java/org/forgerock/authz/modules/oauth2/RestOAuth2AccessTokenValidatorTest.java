@@ -23,6 +23,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,6 +32,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -147,5 +149,37 @@ public class RestOAuth2AccessTokenValidatorTest {
         assertTrue(validate.isTokenValid());
         assertEquals(validate.getProfileInformation().size(), 2);
         assertEquals(validate.getTokenScopes().size(), 3);
+    }
+
+    /**
+     * The userInfo endpoint configuration is optional. If it is not specified, then no attempt should be made to fetch
+     * any user profile information.
+     */
+    @Test
+    public void shouldNotFetchUserProfileIfEndPointNotConfigured() throws Exception {
+        // Given
+        JsonValue config = JsonValue.json(JsonValue.object(
+                JsonValue.field("token-info-endpoint", "TOKEN_INFO")
+                // No user info endpoint
+        ));
+        accessTokenValidator = new RestOAuth2AccessTokenValidator(config, restResourceFactory, jsonParser);
+        String accessToken = "ACCESS_TOKEN";
+        Representation accessTokenResponse = mock(Representation.class);
+        Map<String, Object> tokenInfoMap = new HashMap<String, Object>();
+        tokenInfoMap.put("expires_in", 1);
+        tokenInfoMap.put("scope", "A B C");
+        JsonValue tokenInfoResponse = new JsonValue(tokenInfoMap);
+
+        given(tokenInfoRequest.get()).willReturn(accessTokenResponse);
+        given(accessTokenResponse.getText()).willReturn("TOKEN_INFO");
+        given(jsonParser.parse("TOKEN_INFO")).willReturn(tokenInfoResponse);
+
+
+        // When
+        AccessTokenValidationResponse response = accessTokenValidator.validate(accessToken);
+
+        // Then
+        verifyZeroInteractions(userProfileRequest);
+        assertEquals(response.getProfileInformation(), Collections.emptyMap());
     }
 }

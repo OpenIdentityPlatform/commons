@@ -69,7 +69,8 @@ public class RestOAuth2AccessTokenValidator implements OAuth2AccessTokenValidato
     RestOAuth2AccessTokenValidator(final JsonValue config, final RestResourceFactory restResourceFactory,
             final JsonParser jsonParser) {
         tokenInfoEndpoint = config.get("token-info-endpoint").required().asString();
-        userProfileEndpoint = config.get("user-info-endpoint").required().asString();
+        // userInfo endpoint is optional
+        userProfileEndpoint = config.get("user-info-endpoint").asString();
         this.restResourceFactory = restResourceFactory;
         this.jsonParser = jsonParser;
     }
@@ -97,7 +98,8 @@ public class RestOAuth2AccessTokenValidator implements OAuth2AccessTokenValidato
             final Set<String> scopes = getScope(tokenInfo);
 
             final Map<String, Object> profileInfo = new HashMap<String, Object>();
-            if (expiresIn > 0) {
+            if (userProfileEndpoint != null && expiresIn > 0) {
+                logger.debug("Fetching user profile information from endpoint");
                 final RestResource userProfileRequest = restResourceFactory.resource(userProfileEndpoint);
                 userProfileRequest.addHeader("Authorization", "Bearer " + accessToken);
                 final Representation userProfileResponse = userProfileRequest.get();
