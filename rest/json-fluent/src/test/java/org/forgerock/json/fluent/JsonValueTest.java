@@ -359,7 +359,7 @@ public class JsonValueTest {
             if (jsonValue.isString()) {
                 return Integer.valueOf(jsonValue.asString());
             }
-            throw new Exception("jsonValue value "+jsonValue.getObject()+" is not an integer");
+            throw new Exception("jsonValue value " + jsonValue.getObject() + " is not an integer");
         }
     };
 
