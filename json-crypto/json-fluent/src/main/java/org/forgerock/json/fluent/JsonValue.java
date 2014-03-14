@@ -589,7 +589,7 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
      * @throws NullPointerException
      *             if {@code transformFunction} is {@code null}.
      */
-    public <V,E extends Exception> List<V> asList(final Function<JsonValue,V,E> transformFunction) throws E {
+    public <V, E extends Exception> List<V> asList(final Function<JsonValue, V, E> transformFunction) throws E {
         if (object != null) {
             expect(List.class);
             final int size = size();
