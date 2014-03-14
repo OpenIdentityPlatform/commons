@@ -71,9 +71,8 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
             this.parentRender(_.bind(function() {
                 this.setElement(this.$el.find(".dialogContainer:last"));
                 $("#dialogs").addClass('show');
-                
-                $(".dialog-background").fadeIn(300);
-                $(".dialog-background").off('click').on('click', _.bind(this.close, this));
+                $("#dialog-background").addClass('show');
+                $("#dialog-background").off('click').on('click', _.bind(this.close, this));
          
                 _.each(this.actions, _.bind(function(a) {
                     this.$el.find(".dialogActions").append("<input type='"+ a.type +"' name='"+ a.name +"' value='"+ a.name +"' class='button float-right' />");                    
@@ -106,7 +105,7 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
             }
             
             if($(".dialogContainer").length < 2) {
-                $(".dialog-background").hide();
+                $("#dialog-background").removeClass('show');
                 $("#dialogs").removeClass('show');
             }
             

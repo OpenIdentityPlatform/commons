@@ -8,6 +8,8 @@
         .rounded-corners(5px);     
         background-color: @inactive-menu-color;
         height: 38px;
+        overflow:hidden;
+        box-shadow: 0px 1px 2px rgba(0,0,0,0.2);
        
         li {
             float: left;
@@ -20,17 +22,23 @@
                 padding: 10px 20px 10px 15px;
                 text-decoration: none;
             }
+
+            -webkit-transition: background 0.3s ease-out;
+               -moz-transition: background 0.3s ease-out;
+                -ms-transition: background 0.3s ease-out;
+                 -o-transition: background 0.3s ease-out;
+                    transition: background 0.3s ease-out;
         }
 
-        .active {
+        li:hover {
+            background-color: mix(@active-menu-color, @inactive-menu-color, 50%);
+        }
+
+        li.active, li.active:hover  {
             background-color: @active-menu-color;
             a{
                 color: @active-menu-font-color;
             }
-        }
-
-        .active:first-child {
-            .rounded-left-corners(5px);
         }
     }
 }
@@ -109,22 +117,36 @@
 
 /* DIALOGS */
 
-.dialog-background {
+#dialog-background {
     position: fixed;
+    z-index: 60000; /* needs to be higher than contentflows z-indexes*/
     top: 0;
     bottom: 0;
     width: 100%;
     background-color: #000;
-    opacity: 0.8;
-    display: none;
 
+    display: block;
+    opacity: 0; 
+    height: 0;
+    overflow: hidden;
+
+    -webkit-transition: opacity .4s ease-out;
+       -moz-transition: opacity .4s ease-out;
+        -ms-transition: opacity .4s ease-out;
+         -o-transition: opacity .4s ease-out;
+            transition: opacity .4s ease-out;
+}
+
+#dialog-background.show {
+    opacity: 0.8;
+    height: auto;
 }
 
 #dialogs{
     top: 0; 
-    width:100%;
     display: none;
-    position: absolute;
+    position: fixed; 
+    z-index: 60001; 
     height: 100%;
     width: 100%;
 }
@@ -132,8 +154,6 @@
 #dialogs.show{
     display: table;
 }
-
-
 
 .dialogContainer {
 
@@ -146,7 +166,7 @@
         min-width: 300px; 
         max-width: 900px;
         margin: 0 auto;
-        background: @background-color;
+        background: @content-background;
         border: 1px solid @font-color;
         padding: 15px;
         .rounded-corners(5px);
@@ -174,6 +194,7 @@
             padding: 8px 0 8px 0;
             font-size: 14px;
         }
+        
     }
 
     .dialogActions {
@@ -182,10 +203,6 @@
     }
 
 }
-
-
-
-
 
 
 /* MESSAGES*/
@@ -255,9 +272,12 @@ button.button, a.button, input.button {
         -ms-transition: background 0.3s;
          -o-transition: background 0.3s;
             transition: background 0.3s;
+
+    box-shadow: 1px 1px 2px rgba(0,0,0,0.1);
     
     &:hover {
-        background-color: lighten(@color-active, @button-hover-lightness);    
+        background-color: lighten(@color-active, @button-hover-lightness);  
+        box-shadow: 0 0 0;  
     }
     
     &.active {
@@ -279,11 +299,13 @@ button.button, a.button, input.button {
     &:disabled {
         background-color: @color-inactive;
         cursor:auto;
+        box-shadow: 0 0 0;  
     }
     
     &.inactive {
         background-color: @color-inactive;
         cursor:auto;
+        box-shadow: 0 0 0;  
         &:hover {
             background-color: lighten(@color-inactive, @button-hover-lightness);    
         }

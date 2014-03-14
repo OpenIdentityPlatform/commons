@@ -1,6 +1,6 @@
 <ul class="menu">
     {{#each topNav}}
-    <li id="nav_{{name}}" {{#if isActive}} class="active"{{/if}}>
+    <li {{#if isActive}} class="active"{{/if}}>
         <a href="{{hashurl}}" title="{{title}}" {{#if isInactive}} class="inactive" {{/if}}><span class="glyph-icon glyph-icon-active {{icon}}"></span><span class="glyph-title">{{title}}</span></a>
     </li>
     {{/each}}
@@ -9,7 +9,7 @@
     <div id="submenu" class="submenubar">
         <ul>
             {{#each subNav}}
-            <li id="nav_{{name}}" {{#if isActive}} class="active"{{/if}}>
+            <li {{#if isActive}} class="active"{{/if}}>
                 <a href="{{hashurl}}" title="{{title}}" {{#if isInactive}} class="inactive" {{/if}}><span class="glyph-icon glyph-icon-active {{icon}}"></span><span class="glyph-title">{{title}}</span></a>
             </li>
             {{/each}}

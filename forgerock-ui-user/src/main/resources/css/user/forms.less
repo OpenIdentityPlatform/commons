@@ -9,6 +9,7 @@ input[type="text"], input[type="password"], input[type="tel"], input[type="email
     padding: 5px 10px;
     background-color: @input-background-color;
     width: 230px;
+    box-shadow: 1px 1px 1px rgba(0,0,0,0.1) inset;
     transition: all 0.25s ease-in-out;
     -webkit-transition: all 0.25s ease-in-out;
     -moz-transition: all 0.25s ease-in-out;
@@ -104,14 +105,16 @@ form.form {
     label {
         float: left;
         text-align: right;
-        padding-right: 10px;
         font-size: 17px;
-        padding-top: 7px;
         font-weight: bold;
+        padding: 7px 10px 7px 0;
     }
-    label.short {
-        width: 140px;
+    label.short, .group-field-row label.short, .group-field-block label.short {
+        width: 100px;
     }
+
+    
+
     label.light {
         font-weight: normal;
     }
@@ -139,7 +142,7 @@ form.form {
         }
         input {
             float: left;
-            margin: 3px 6px 3px 4px;
+            margin: 3px 6px 3px 0;
         }
     }
     
@@ -188,7 +191,7 @@ form.form {
     select {
         width: 252px;
         height: 30px;
-        padding:0;
+        font-size:13px;
     }
 
     .field-rule span{
@@ -232,6 +235,7 @@ form.form {
         width: 240px; 
         margin-left: 5px;
         border: 1px solid @input-border-basic;
+        background-color:darken(@content-background, 1%);
         float: left;
         .rounded-corners(5px);
         span {
@@ -244,9 +248,13 @@ form.form {
                width:12px;
             }
         }
+        p {
+            font-size:12px;
+            padding:4px;
+        }
     }
 
-    div.field-checkbox div.validation-message{
+    div.field-checkbox div.validation-message {
         padding:5px 0 0 21px;
         text-align:left;
             float:left;  
@@ -255,7 +263,7 @@ form.form {
         }
     }
 
-    div.group-field-errors.float-right{
+    div.group-field-errors.float-right {
         float:right;
     }
 
@@ -406,4 +414,17 @@ form.form {
     }
 
 }
+
+.fieldset{
+    padding: 10px 10px;
+    clear: both;
+    border-radius: 5px;
+    border: 1px solid rgba(0,0,0,0.05);
+    margin: 0 0 10px;
+}
+
+.fieldset p.last {
+    padding-bottom:0;
+}
+
 
