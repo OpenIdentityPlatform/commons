@@ -9,10 +9,8 @@ input[type="text"], input[type="password"], input[type="tel"], input[type="email
     padding: 5px 10px;
     background-color: @input-background-color;
     width: 230px;
-    box-shadow: 1px 1px 1px rgba(0,0,0,0.1) inset;
-    transition: all 0.25s ease-in-out;
-    -webkit-transition: all 0.25s ease-in-out;
-    -moz-transition: all 0.25s ease-in-out;
+    .box-shadow(1px, 1px, 1px, rgba(0,0,0,0.1), inset);
+    .transition(all, 0.3s, 0.25s,  ease-in-out);
 }
 
 input{
@@ -35,6 +33,11 @@ input[type="text"]:focus, input[type="password"]:focus, input[type="tel"]:focus,
     border: 1px solid @color-active;
     outline: none;
     .box-shadow(0, 0, 1px, 1px, @color-active);
+}
+
+input[type="text"]:focus:invalid:required, input[type="password"]:focus:invalid:required, input[type="tel"]:focus:invalid:required, input[type="email"]:focus:invalid:required:required, textarea:focus:invalid:required, select:focus:invalid:required {
+    border: 1px solid @input-border-invalid-color;
+    .box-shadow(0, 0, 1px, 1px, @input-border-invalid-color);
 }
 
 input.read-only, input:read-only, input[type="text"]:focus:read-only, input[type="email"]:focus:read-only{
@@ -427,4 +430,16 @@ form.form {
     padding-bottom:0;
 }
 
+ul.link-box{
+    display:block;
+    clear:none;
+    padding:10px 10px 0;
+    
+    &.float-right{
+        padding-right:38px;
+    }
+    li{
+        display:inline;
+    }
+}
 

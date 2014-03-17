@@ -156,6 +156,14 @@ a.img-close {
   -webkit-box-shadow: @arguments;
 }
 
+.transition(@property: all, @duration:.5s, @easing:ease, @delay:0){
+    -webkit-transition: @arguments;
+       -moz-transition: @arguments;
+        -ms-transition: @arguments;
+         -o-transition: @arguments;
+            transition: @arguments;
+}
+
 .linear-gradient (@position: left top, @color-start: #fcfcfc 0%, @color-end: #ededed 53%) {
     background-image: linear-gradient(@position, @color-start, @color-end);
     background-image: -o-linear-gradient(@position, @color-start, @color-end);

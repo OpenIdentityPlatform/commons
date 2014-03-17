@@ -8,11 +8,13 @@
 
         <div class="clearfix">
 
-            <div class="float-right col2">
-                <a href="{{url 'changeSecurityData'}}" id="securityDialogLink" class="ice hrefInput align-label">
-                    {{t "templates.user.UserProfileTemplate.changeSecurityData"}}
-                </a>
-            </div>
+            <ul class="float-right link-box">
+                <li><a href="{{url 'changeSecurityData'}}" id="securityDialogLink" class="ice hrefInput">{{t "templates.user.UserProfileTemplate.changeSecurityData"}}</a></li>
+               
+                {{#unless adminUser}}{{#siteIdentification}} 
+                 | <li><a href="{{url 'siteIdentification'}}" id="passPhraseLink" class="ice hrefInput">{{t "templates.user.UserProfileTemplate.changeSiteIdentification"}}</a></li> 
+                {{/siteIdentification}}{{/unless}}
+            </ul>
      
             <div class="group-field-block col2">
                 <label for="username"  class="light align-right">{{t "common.user.username"}}</label>
@@ -23,10 +25,16 @@
 
         {{#unless adminUser}}
             <div class="clearfix">
-            
+    
                 <div class="group-field-block col2">
                     <label for="givenname" class="light align-right">{{t "common.user.givenName"}}</label>
-                    <input  id="givenname" type="text" name="givenname" value="" autofocus />
+                    <div class="float-left separate-message">
+                        <div class="group-input-span">
+                            <input type="text" id="givenname" name="givenname" value="" autofocus />
+                            <span class="error"></span>
+                        </div>
+                        <div class="validation-message"></div>
+                    </div>
                 </div>
 
                 <div class="group-field-block col2">
@@ -46,12 +54,24 @@
 
                 <div class="group-field-block col2">
                     <label for="mail" class="light align-right">{{t "common.user.emailAddress"}}</label>
-                    <input type="email" id="mail" name="mail" value="" />
+                    <div class="float-left separate-message">
+                        <div class="group-input-span">
+                            <input type="email" id="mail" name="mail" value="" />
+                            <span class="error"></span>
+                        </div>
+                        <div class="validation-message"></div>
+                    </div>
                 </div>
 
                 <div class="group-field-block col2">
                     <label for="telephonenumber" class="light align-right">{{t "common.user.phoneNumber"}}</label>
-                    <input type="tel" id="telephonenumber" name="telephonenumber" value="" />
+                    <div class="float-left separate-message">
+                        <div class="group-input-span">
+                            <input type="tel" id="telephonenumber" name="telephonenumber" value=""  />
+                            <span class="error"></span>
+                        </div>
+                        <div class="validation-message"></div>
+                    </div>
                 </div>
 
             </div>
@@ -61,12 +81,24 @@
 
                     <div class="group-field-block col2">
                         <label for="postaladdress" class="light align-right">{{t "common.user.address1"}}</label>
-                        <input type="text" id="postaladdress" name="postaladdress" value="" />
+                        <div class="float-left separate-message">
+                            <div class="group-input-span">
+                                <input type="text" id="postaladdress" name="postaladdress" value=""  />
+                                <span class="error"></span>
+                            </div>
+                            <div class="validation-message"></div>
+                        </div>
                     </div>
 
-                     <div class="group-field-block col2">
+                    <div class="group-field-block col2">
                         <label for="address2" class="light align-right">{{t "common.user.address2"}}</label>
-                        <input type="text" id="address2" name="address2" value="" />
+                        <div class="float-left separate-message">
+                            <div class="group-input-span">
+                                <input type="text" id="address2" name="address2" value=""  />
+                                <span class="error"></span>
+                            </div>
+                            <div class="validation-message"></div>
+                        </div>
                     </div>
 
                 </div>
@@ -75,12 +107,24 @@
 
                     <div class="group-field-block col2">
                         <label for="city" class="light align-right">{{t "common.user.city"}}</label>
-                        <input type="text" id="city" name="city" value="" />
+                        <div class="float-left separate-message">
+                            <div class="group-input-span">
+                                <input type="text" id="city" name="city" value=""  />
+                                <span class="error"></span>
+                            </div>
+                            <div class="validation-message"></div>
+                        </div>
                     </div>
 
-                     <div class="group-field-block col2">
+                    <div class="group-field-block col2">
                         <label for="postalcode" class="light align-right">{{t "common.user.postalCode"}}</label>
-                        <input type="text" id="postalcode" name="postalcode" value="" />
+                        <div class="float-left separate-message">
+                            <div class="group-input-span">
+                                <input type="text" id="postalcode" name="postalcode" value=""  />
+                                <span class="error"></span>
+                            </div>
+                            <div class="validation-message"></div>
+                        </div>
                     </div>
 
                 </div>
@@ -89,28 +133,24 @@
 
                     <div class="group-field-block col2">
                         <label for="country" class="light align-right">{{t "common.user.country"}}</label>
-                        <select id="country" name="country"></select>  
+                        <div class="group-input-span">
+                            <select id="country" name="country"></select>  
+                            <span class="error"></span>
+                        </div>
                     </div>
 
-                     <div class="group-field-block col2">
+                    <div class="group-field-block col2">
                         <label for="stateprovince" class="light align-right">{{t "common.user.stateProvince"}}</label>
-                        <select id="stateprovince" name="stateprovince"></select>                   
+                        <div class="group-input-span">
+                            <select id="stateprovince" name="stateprovince"></select>  
+                            <span class="error"></span>
+                        </div>
                     </div>
 
                 </div>
             {{/if}}
 
-            {{#siteIdentification}}
-                <div class="clearfix">
 
-                    <div class="float-right col2">
-                        <a href="{{url 'siteIdentification'}}" id="passPhraseLink" class="ice hrefInput align-label">
-                            {{t "templates.user.UserProfileTemplate.changeSiteIdentification"}}
-                        </a>
-                    </div>
-
-                </div>
-            {{/siteIdentification}}
 
         {{/unless}}
 
