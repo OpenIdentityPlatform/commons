@@ -25,18 +25,17 @@
 /*global define*/
 
 define("org/forgerock/commons/ui/common/main/main", [
-	"./AbstractConfigurationAware",
-	"./AbstractDelegate",
-	"./Configuration",
-	"./EventManager",
-	"./ProcessConfiguration", 
-	"./PolicyDelegate",
-	"./ServiceInvoker",
-	"./Router",
-	"./ViewManager",
-	"./SpinnerManager",
-	"./ErrorsHandler",
-	"./SessionManager",
-	"./i18nManager",
-	"./GenericRouteInterfaceMap"
+    "./AbstractConfigurationAware",
+    "./AbstractDelegate",
+    "./Configuration",
+    "./EventManager",
+    "./ProcessConfiguration", 
+    "./ServiceInvoker",
+    "./Router",
+    "./ViewManager",
+    "./SpinnerManager",
+    "./ErrorsHandler",
+    "./SessionManager",
+    "./i18nManager",
+    "./GenericRouteInterfaceMap"
 ]);

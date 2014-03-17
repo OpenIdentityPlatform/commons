@@ -29,13 +29,12 @@
  */
 define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
-    "org/forgerock/commons/ui/common/util/ValidatorsUtils",
-    "org/forgerock/commons/ui/common/main/PolicyDelegate"
-], function(AbstractConfigurationAware, validatorUtils, policyDelegate) {
+    "org/forgerock/commons/ui/common/util/ValidatorsUtils"
+], function(AbstractConfigurationAware, validatorUtils) {
     var obj = new AbstractConfigurationAware();
     
     obj.bindValidators = function(el,baseEntity,callback) {
-        var inputs, event, input,
+        var inputs, event, input, policyDelegate,
             validateDependents = function (input) {
                 // re-validate dependent form fields
                 if (input.attr("data-validation-dependents")) {
@@ -93,7 +92,8 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
             
         });
         
-        if (baseEntity) {
+        if (baseEntity && obj.configuration.policyDelegate) {
+            policyDelegate = require(obj.configuration.policyDelegate);
             policyDelegate.readEntity(baseEntity, _.bind(function (policy) {
                 _.each(policy.properties, _.bind(function (property, i) {
                     var input,event,idx;
