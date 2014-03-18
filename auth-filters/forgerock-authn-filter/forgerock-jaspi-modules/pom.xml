@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+]<?xml version="1.0" encoding="UTF-8"?>
 <!--
 * The contents of this file are subject to the terms of the Common Development and
 * Distribution License (the License). You may not use this file except in compliance with the
@@ -33,7 +33,6 @@
         <module>forgerock-jaspi-jwt-session-module</module>
         <module>forgerock-jaspi-openid-connect-module</module>
         <module>forgerock-jaspi-iwa-module</module>
-        <module>forgerock-jaspi-cors-module</module>
     </modules>
 
     <dependencies>
