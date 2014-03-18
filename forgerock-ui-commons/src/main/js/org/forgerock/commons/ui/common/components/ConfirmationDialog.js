@@ -53,7 +53,7 @@ define("org/forgerock/commons/ui/common/components/ConfirmationDialog", [
         },
         
         render: function(title, msg, actionName, okCallback) {
-            this.actions = {};
+            this.actions = [];
             this.addAction(actionName, "submit");
             
             this.data.msg = msg;
