@@ -15,24 +15,22 @@
 */
 package org.forgerock.jaspi.modules.openid.resolvers.service;
 
+import java.net.URL;
 import java.security.PublicKey;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.forgerock.auth.common.DebugLogger;
 import org.forgerock.jaspi.logging.LogFactory;
+import org.forgerock.jaspi.modules.openid.exceptions.FailedToLoadJWKException;
 import org.forgerock.jaspi.modules.openid.resolvers.OpenIdResolver;
-import org.forgerock.jaspi.modules.openid.resolvers.PublicKeyOpenIdResolverImpl;
-import org.forgerock.jaspi.modules.openid.resolvers.SharedSecretOpenIdResolverImpl;
+import org.forgerock.jaspi.modules.openid.resolvers.OpenIdResolverFactory;
 import org.forgerock.json.jose.utils.KeystoreManager;
 import org.forgerock.json.jose.utils.KeystoreManagerException;
 
 /**
  * Holds a copy of the current OpenID Resolvers.
  *
- * Held in a ConcurrentHashMap for multi-threaded access, this class holds a KeystoreManager
- * instance which is instantiated on construction from the passed in settings.
- *
- * As new resolvers are configured, this class loads up the appropriate public key and
+ * As new resolvers are configured, this class loads up the appropriate verification key and
  * stores it along with the other information necessary for it to perform its task.
  *
  * This service stores {@link org.forgerock.jaspi.modules.openid.resolvers.OpenIdResolver}s against their issuer key,
@@ -42,25 +40,44 @@ public class OpenIdResolverServiceImpl implements OpenIdResolverService {
 
     private static final DebugLogger DEBUG = LogFactory.getDebug();
 
-    private final Map<String, OpenIdResolver> openIdResolvers = new ConcurrentHashMap<String, OpenIdResolver>();
+    private final ConcurrentMap<String, OpenIdResolver> openIdResolvers =
+            new ConcurrentHashMap<String, OpenIdResolver>();
 
-    private final KeystoreManager keystoreManager;
+    private final int readTimeout;
+    private final int connTimeout;
+
+    private final OpenIdResolverFactory openIdResolverFactory;
 
     /**
-     * Constructor for the OpenIdResolverServiceImpl
+     * Constructor for the OpenIdResolverServiceImpl which will use the supplied
+     * read and connection timeouts when communicating over HTTP.
      *
-     * @param keystoreType The type of Java KeyStore.
-     * @param keystoreLocation The file path to the KeyStore.
-     * @param keystorePassword The password for the KeyStore.
+     * @param readTimeout HTTP read timeout for resolvers
+     * @param connTimeout HTTP connection timeout for resolvers
      */
-    public OpenIdResolverServiceImpl(final String keystoreType, final String keystoreLocation,
-                                     final String keystorePassword) {
+    public OpenIdResolverServiceImpl(final int readTimeout, final int connTimeout) {
+        this.readTimeout = readTimeout;
+        this.connTimeout = connTimeout;
+        this.openIdResolverFactory = new OpenIdResolverFactory(readTimeout, connTimeout);
+    }
 
-        keystoreManager = new KeystoreManager(keystoreType, keystoreLocation, keystorePassword);
+    /**
+     * For tests.
+     *
+     * @param openIdResolverFactory Factory to provide resolvers
+     * @param readTimeout HTTP read timeout for resolvers
+     * @param connTimeout HTTP connection timeout for resolvers
+     */
+    OpenIdResolverServiceImpl(OpenIdResolverFactory openIdResolverFactory, final int readTimeout,
+                              final int connTimeout) {
+        this.readTimeout = readTimeout;
+        this.connTimeout = connTimeout;
+        this.openIdResolverFactory = openIdResolverFactory;
     }
 
     /**
      * Returns the appropriate resolver for the given issuer - if it exists. Otherwise null.
+     *
      * @param issuer The name of the issuer of the Open Id Connect token to check
      * @return A resolver which can handle verification of the Open Id Connect token
      */
@@ -72,17 +89,24 @@ public class OpenIdResolverServiceImpl implements OpenIdResolverService {
      * Configures a new Resolver by finding the appropriate public key in the supplied keystore,
      * and adds it to the Map of current resolvers.
      *
-     * @param clientId The clientId for which this resolver is valid
      * @param issuer The issuer which provides the Open ID Connect auth token
      * @param keyAlias The alias under which the public key is stored
+     * @param keystoreLocation location of the keystore file
+     * @param keystoreType type of the keystore file
+     * @param keystorePassword password to enter the keystore
      * @return true if the resolver was configured successfully, false otherwise
      */
-    public boolean configureResolverWithKey(final String clientId, final String issuer, final String keyAlias) {
+    public boolean configureResolverWithKey(final String issuer,
+                                            final String keyAlias, final String keystoreLocation,
+                                            final String keystoreType, final String keystorePassword) {
 
         try {
-            final PublicKey key = lookupKey(keyAlias);
 
-            final OpenIdResolver impl = new PublicKeyOpenIdResolverImpl(issuer, clientId, key);
+            final KeystoreManager keystoreManager = new KeystoreManager(keystoreType, keystoreLocation,
+                    keystorePassword);
+            final PublicKey key = keystoreManager.getPublicKey(keyAlias);
+
+            final OpenIdResolver impl = openIdResolverFactory.createPublicKeyResolver(issuer, key);
             openIdResolvers.put(issuer, impl);
         } catch (KeystoreManagerException kme) {
             DEBUG.debug("Error accessing the KeystoreManager", kme);
@@ -99,15 +123,14 @@ public class OpenIdResolverServiceImpl implements OpenIdResolverService {
      * Configures a new Resolver by finding the appropriate public key in the supplied keystore,
      * and adds it to the Map of current resolvers.
      *
-     * @param clientId The clientId for which this resolver is valid
      * @param issuer The issuer which provides the Open ID Connect auth token
-     * @param sharedSecret The known-to-bogth-parties secret String
+     * @param sharedSecret The known-to-both-parties secret String
      * @return true if the resolver was configured successfully, false otherwise
      */
-    public boolean configureResolverWithSecret(final String clientId, final String issuer, final String sharedSecret) {
+    public boolean configureResolverWithSecret(final String issuer, final String sharedSecret) {
 
         try {
-            final OpenIdResolver impl = new SharedSecretOpenIdResolverImpl(issuer, clientId, sharedSecret);
+            final OpenIdResolver impl = openIdResolverFactory.createSharedSecretResolver(issuer, sharedSecret);
             openIdResolvers.put(issuer, impl);
         } catch (IllegalArgumentException iae) {
             DEBUG.debug("Shared secret must not be null", iae);
@@ -118,13 +141,45 @@ public class OpenIdResolverServiceImpl implements OpenIdResolverService {
     }
 
     /**
-     * Retrieves a public key from the keystoreManager, based on the supplied alias
+     * Configures a new Resolver by setting it up to download public keys from the supplied url.
      *
-     * @param keyAlias The name of the key to look up from the keystore
-     * @return The public key associated with the supplied keyAlias from the keystore
+     * @param issuer The issuer which provides the Open ID Connect auth token
+     * @param jwkUrl location from which to determine which public key to use
+     * @return true if the resolver was configured successfully, false otherwise
      */
-    private PublicKey lookupKey(final String keyAlias) {
-        return keystoreManager.getPublicKey(keyAlias);
+    public boolean configureResolverWithJWK(final String issuer,
+                                            final URL jwkUrl) {
+
+        try {
+            final OpenIdResolver impl = openIdResolverFactory.createJWKResolver(issuer, jwkUrl,
+                    readTimeout, connTimeout);
+            openIdResolvers.put(issuer, impl);
+        } catch (FailedToLoadJWKException e) {
+            DEBUG.debug("Unable to load JSON Web Keys", e);
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Configures a new Resolver by setting it up to download public keys from the supplied
+     * well-known Open Id Connect URL.
+     *
+     * @param configUrl location from which to determine which public key to use
+     * @return true if the resolver was configured successfully, false otherwise
+     */
+    public boolean configureResolverWithWellKnownOpenIdConfiguration(final URL configUrl) {
+
+        try {
+            final OpenIdResolver impl = openIdResolverFactory.createFromOpenIDConfigUrl(configUrl);
+            openIdResolvers.put(impl.getIssuer(), impl);
+        } catch (FailedToLoadJWKException e) {
+            DEBUG.debug("Unable to load JSON Web Keys", e);
+            return false;
+        }
+
+        return true;
     }
 
 }

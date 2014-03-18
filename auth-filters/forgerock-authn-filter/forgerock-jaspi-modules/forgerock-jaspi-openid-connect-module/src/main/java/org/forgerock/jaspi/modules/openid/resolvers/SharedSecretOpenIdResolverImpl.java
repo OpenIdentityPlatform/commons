@@ -17,6 +17,8 @@ package org.forgerock.jaspi.modules.openid.resolvers;
 
 import java.security.Key;
 import javax.crypto.spec.SecretKeySpec;
+import org.forgerock.auth.common.DebugLogger;
+import org.forgerock.jaspi.logging.LogFactory;
 import org.forgerock.jaspi.modules.openid.exceptions.InvalidSignatureException;
 import org.forgerock.jaspi.modules.openid.exceptions.OpenIdConnectVerificationException;
 import org.forgerock.json.jose.jws.SignedJwt;
@@ -30,18 +32,19 @@ import org.forgerock.json.jose.jws.SignedJwt;
  */
 public class SharedSecretOpenIdResolverImpl extends BaseOpenIdResolver {
 
+    private static final DebugLogger DEBUG = LogFactory.getDebug();
+
     private final String sharedSecret;
 
     /**
-     * Constructor for SharedSecretOpenIdResolverImpl
+     * Constructor for SharedSecretOpenIdResolverImpl.
      *
      * @param issuer The issuer (provider) of the Open Id Connect id token
-     * @param clientId The client ID (consumer) of the Open Id Connect id token
      * @param sharedSecret The secret String, known to both provider and consumer
      * @throws IllegalArgumentException if the sharedSecret is null
      */
-    public SharedSecretOpenIdResolverImpl(String issuer, String clientId, String sharedSecret) {
-        super(issuer, clientId);
+    public SharedSecretOpenIdResolverImpl(String issuer, String sharedSecret) {
+        super(issuer);
 
         if (sharedSecret == null) {
             throw new IllegalArgumentException("sharedSecret must not be null.");
@@ -63,12 +66,13 @@ public class SharedSecretOpenIdResolverImpl extends BaseOpenIdResolver {
      * Verifies that the JWS was signed by the supplied key. Throws an exception otherwise.
      *
      * @param idClaim The JWS to verify
-     * @throws org.forgerock.jaspi.modules.openid.exceptions.InvalidSignatureException If the JWS supplied does not match the key for this resolver
+     * @throws InvalidSignatureException If the JWS supplied does not match the key for this resolver
      */
     public void verifySignature(final SignedJwt idClaim) throws InvalidSignatureException {
         Key key = new SecretKeySpec(sharedSecret.getBytes(), idClaim.getHeader().getAlgorithm().getKnownName());
 
         if (!idClaim.verify(key)) {
+            DEBUG.debug("JWS signature not signed with supplied key");
             throw new InvalidSignatureException("JWS signature not signed with supplied key");
         }
     }

@@ -19,18 +19,61 @@ import org.forgerock.jaspi.modules.openid.exceptions.OpenIdConnectVerificationEx
 import org.forgerock.json.jose.jws.SignedJwt;
 
 /**
- * Interface for different OpenId Connect resolvers.
+ * Validation of Open ID Connect JWTs via verification of their internals
+ * (issuer, audience, signature, etc.). Each Resolver relates to one
+ * specific issuer (which can be retrieved via
+ * {@link org.forgerock.jaspi.modules.openid.resolvers.OpenIdResolver#getIssuer()}) and
+ * performs validation against a supplied {@link SignedJwt}, throwing an
+ * {@link OpenIdConnectVerificationException} if there are any issues which do not
+ * conform to the verification spec as per:
+ *
+ * More details on how the verification should be completed can be found at
+ * <a href="http://openid.net/specs/openid-authentication-2_0.html">
+ *     http://openid.net/specs/openid-authentication-2_0.html</a>
  *
  * {@link OpenIdResolver#validateIdentity(org.forgerock.json.jose.jws.SignedJwt)} performs all individual checks.
  */
 public interface OpenIdResolver {
 
+    /**
+     * Lookup key for a key stored in a keystore.
+     */
     public static final String KEY_ALIAS_KEY = "keyAlias";
-    public static final String CLIENT_ID_KEY = "clientId";
+
+    /**
+     * Lookup key for the issuer's name.
+     */
     public static final String ISSUER_KEY = "issuer";
+
+    /**
+     * Lookup key for the client secret.
+     */
     public static final String CLIENT_SECRET_KEY = "clientSecret";
 
-    static final String AUTHORIZED_PARTY = "azp";
+    /**
+     * Lookup key for JWK configuration.
+     */
+    public static final String JWK = "jwk";
+
+    /**
+     * Lookup key for a .well-known Open ID Connect config.
+     */
+    public static final String WELL_KNOWN_CONFIGURATION = "well-known";
+
+    /**
+     * Lookup key for the location of a keystore.
+     */
+    public static final String KEYSTORE_LOCATION_KEY = "keystoreLocation";
+
+    /**
+     * Lookup key for the type of a keystore.
+     */
+    public static final String KEYSTORE_TYPE_KEY = "keystoreType";
+
+    /**
+     * Lookup key for the password to a keystore.
+     */
+    public static final String KEYSTORE_PASS_KEY = "keystorePassword";
 
     /**
      * Validates the supplied Jwt against this OpenId Connect Idp.
@@ -40,4 +83,10 @@ public interface OpenIdResolver {
      */
     public void validateIdentity(final SignedJwt idClaim) throws OpenIdConnectVerificationException;
 
+    /**
+     * Returns the issuer (IdP) for which this resolver will resolve identities.
+     *
+     * @return the name of the issuer
+     */
+    public String getIssuer();
 }

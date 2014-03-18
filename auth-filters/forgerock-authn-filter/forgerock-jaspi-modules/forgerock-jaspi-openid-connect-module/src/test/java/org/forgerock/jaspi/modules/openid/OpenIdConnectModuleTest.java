@@ -17,8 +17,8 @@ package org.forgerock.jaspi.modules.openid;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
@@ -48,6 +48,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -56,36 +57,34 @@ public class OpenIdConnectModuleTest {
 
     OpenIdConnectModule testModule;
     OpenIdResolverServiceConfigurator mockConfigurator;
-    OpenIdResolverService mockService;
     JwtReconstruction mockReconstruction;
+    OpenIdResolverService mockService;
+    CallbackHandler mockCallback;
 
     @BeforeMethod
     public void setUp() {
         mockConfigurator = mock(OpenIdResolverServiceConfigurator.class);
-        mockService = mock(OpenIdResolverService.class);
         mockReconstruction = mock(JwtReconstruction.class);
-        testModule = new OpenIdConnectModule(mockConfigurator, mockReconstruction);
+        mockService = mock(OpenIdResolverService.class);
+        mockCallback = mock(CallbackHandler.class);
+        testModule = new OpenIdConnectModule(mockConfigurator, mockReconstruction, mockService, mockCallback);
     }
 
     private Map<String, Object> getConfig() throws UnsupportedEncodingException {
 
         Map<String, Object> options = new HashMap<String, Object>();
-        options.put(OpenIdConnectModule.KEYSTORE_PASSWORD_KEY, "storepass");
-        options.put(OpenIdConnectModule.KEYSTORE_TYPE_KEY, "JKS");
-        options.put(OpenIdConnectModule.KEYSTORE_LOCATION_KEY,
-                URLDecoder.decode(ClassLoader.getSystemResource("cacert.jks").getFile(), "UTF-8"));
         options.put(OpenIdConnectModule.HEADER_KEY, "openam-openid-connect-header");
 
         return options;
     }
 
     @Test(expectedExceptions = AuthException.class)
-    public void shouldThrowAuthExceptionWithInvalidConfig() throws AuthException, UnsupportedEncodingException {
+    public void shouldThrowAuthExceptionWithNoHeaderInConfig() throws AuthException, UnsupportedEncodingException {
         //given
         MessagePolicy requestPolicy = mock(MessagePolicy.class);
         MessagePolicy responsePolicy =  mock(MessagePolicy.class);
         CallbackHandler callback =  mock(CallbackHandler.class);
-        Map<String, Object> config = getConfig();
+        Map<String, Object> config = new HashMap<String, Object>();
 
         //when
         testModule.initialize(requestPolicy, responsePolicy, callback, config);
@@ -94,7 +93,7 @@ public class OpenIdConnectModuleTest {
     }
 
     @Test(expectedExceptions = AuthException.class)
-    public void shouldThrowAuthExceptionWithInvalidResolverConfig() throws AuthException,
+    public void shouldThrowAuthExceptionWhenConfigureServiceFails() throws AuthException,
             UnsupportedEncodingException {
         //given
         MessagePolicy requestPolicy = mock(MessagePolicy.class);
@@ -102,7 +101,7 @@ public class OpenIdConnectModuleTest {
         CallbackHandler callback =  mock(CallbackHandler.class);
         Map<String, Object> config = getConfig();
 
-        given(mockConfigurator.setupService(anyString(), anyString(), anyString())).willReturn(mockService);
+        given(mockConfigurator.configureService(any(OpenIdResolverService.class), any(List.class))).willReturn(false);
 
         //when
         testModule.initialize(requestPolicy, responsePolicy, callback, config);
@@ -177,6 +176,8 @@ public class OpenIdConnectModuleTest {
         verifyZeroInteractions(mockResponse);
     }
 
+
+
     @Test
     public void shouldReturnFailureWhenInvalidJwtPartsInRequest() throws AuthException {
         //given
@@ -205,16 +206,6 @@ public class OpenIdConnectModuleTest {
     public void shouldReturnFailureWhenUnableToFindResolverForIssuer() throws AuthException,
             UnsupportedEncodingException {
         //given
-        MessagePolicy requestPolicy = mock(MessagePolicy.class);
-        MessagePolicy responsePolicy =  mock(MessagePolicy.class);
-        CallbackHandler callback =  mock(CallbackHandler.class);
-        Map<String, Object> config = getConfig();
-
-        given(mockConfigurator.configureService(mockService, null)).willReturn(true);
-        given(mockConfigurator.setupService(anyString(), anyString(), anyString())).willReturn(mockService);
-
-        testModule.initialize(requestPolicy, responsePolicy, callback, config);
-
         HttpServletRequest mockRequest = mock(HttpServletRequest.class);
         HttpServletResponse mockResponse = mock(HttpServletResponse.class);
 
@@ -231,7 +222,6 @@ public class OpenIdConnectModuleTest {
         given(mockRequest.getHeader(anyString())).willReturn(jwtInRequest);
         given(mockReconstruction.reconstructJwt(anyString(), any(Class.class))).willReturn(jws);
         given(claimSet.getIssuer()).willReturn("");
-        given(mockService.getResolverForIssuer(anyString())).willReturn(null);
 
         //when
         AuthStatus res = testModule.validateRequest(mockMessage, null, null);
@@ -245,16 +235,6 @@ public class OpenIdConnectModuleTest {
     public void shouldReturnFailureWhenUnableToValidateJwtWithCorrectResolver() throws UnsupportedEncodingException,
             AuthException, OpenIdConnectVerificationException {
         //given
-        MessagePolicy requestPolicy = mock(MessagePolicy.class);
-        MessagePolicy responsePolicy =  mock(MessagePolicy.class);
-        CallbackHandler callback =  mock(CallbackHandler.class);
-        Map<String, Object> config = getConfig();
-
-        given(mockConfigurator.configureService(mockService, null)).willReturn(true);
-        given(mockConfigurator.setupService(anyString(), anyString(), anyString())).willReturn(mockService);
-
-        testModule.initialize(requestPolicy, responsePolicy, callback, config);
-
         OpenIdResolver mockResolver = mock(OpenIdResolver.class);
         HttpServletRequest mockRequest = mock(HttpServletRequest.class);
         HttpServletResponse mockResponse = mock(HttpServletResponse.class);
@@ -272,7 +252,6 @@ public class OpenIdConnectModuleTest {
         given(mockRequest.getHeader(anyString())).willReturn(jwtInRequest);
         given(mockReconstruction.reconstructJwt(anyString(), any(Class.class))).willReturn(jws);
         given(claimSet.getIssuer()).willReturn("");
-        given(mockService.getResolverForIssuer(anyString())).willReturn(mockResolver);
 
         doThrow(new OpenIdConnectVerificationException()).when(mockResolver).validateIdentity(jws);
 
@@ -288,16 +267,6 @@ public class OpenIdConnectModuleTest {
     public void shouldReturnFailureWhenUnableToSetPrincipal() throws IOException, AuthException,
             UnsupportedCallbackException, OpenIdConnectVerificationException {
         //given
-        MessagePolicy requestPolicy = mock(MessagePolicy.class);
-        MessagePolicy responsePolicy =  mock(MessagePolicy.class);
-        CallbackHandler callback =  mock(CallbackHandler.class);
-        Map<String, Object> config = getConfig();
-
-        given(mockConfigurator.configureService(mockService, null)).willReturn(true);
-        given(mockConfigurator.setupService(anyString(), anyString(), anyString())).willReturn(mockService);
-
-        testModule.initialize(requestPolicy, responsePolicy, callback, config);
-
         OpenIdResolver mockResolver = mock(OpenIdResolver.class);
         HttpServletRequest mockRequest = mock(HttpServletRequest.class);
         HttpServletResponse mockResponse = mock(HttpServletResponse.class);
@@ -317,7 +286,7 @@ public class OpenIdConnectModuleTest {
         given(claimSet.getIssuer()).willReturn("");
         given(mockService.getResolverForIssuer(anyString())).willReturn(mockResolver);
 
-        doThrow(new IOException()).when(callback).handle(any(Callback[].class));
+        doThrow(new IOException()).when(mockCallback).handle(any(Callback[].class));
 
         boolean errored = false;
 
@@ -333,6 +302,7 @@ public class OpenIdConnectModuleTest {
         assertTrue(errored);
         verify(mockResolver, times(1)).validateIdentity(jws);
         verifyZeroInteractions(mockResponse);
+        assertNull(res);
     }
 
     @Test

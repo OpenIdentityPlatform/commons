@@ -16,28 +16,25 @@
 package org.forgerock.jaspi.modules.openid.resolvers;
 
 import java.security.Key;
-import java.util.ArrayList;
 import java.util.Date;
-import org.forgerock.jaspi.modules.openid.exceptions.InvalidAudException;
 import org.forgerock.jaspi.modules.openid.exceptions.InvalidIssException;
 import org.forgerock.jaspi.modules.openid.exceptions.InvalidSignatureException;
 import org.forgerock.jaspi.modules.openid.exceptions.JwtExpiredException;
-import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.jose.jws.JwsAlgorithm;
 import org.forgerock.json.jose.jws.JwsHeader;
 import org.forgerock.json.jose.jws.SignedJwt;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import org.testng.annotations.BeforeTest;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class SharedSecretOpenIdResolverImplTest {
 
     SharedSecretOpenIdResolverImpl testResolver;
 
-    @BeforeTest
+    @BeforeMethod
     public void setUp() {
-        testResolver = new SharedSecretOpenIdResolverImpl("Test", "Test", "Test");
+        testResolver = new SharedSecretOpenIdResolverImpl("Test", "Test");
     }
 
     @Test (expectedExceptions = InvalidSignatureException.class)
@@ -57,46 +54,6 @@ public class SharedSecretOpenIdResolverImplTest {
 
         //then checked by exception
 
-    }
-
-    @Test(expectedExceptions = InvalidAudException.class)
-    public void testInvalidAudienceThrowsException() throws InvalidAudException {
-        //given
-        JsonValue authorizedParty = new JsonValue("Test");
-        ArrayList<String> audiences = new ArrayList<String>();
-        audiences.add("One");
-        audiences.add("Two");
-
-        //when
-        testResolver.verifyAudience(audiences, authorizedParty);
-
-        //then checked by exception
-    }
-
-    @Test(expectedExceptions = InvalidAudException.class)
-    public void testNullAudienceThrowsException() throws InvalidAudException {
-        //given
-        JsonValue authorizedParty = new JsonValue("Test");
-        ArrayList<String> audiences = null;
-
-        //when
-        testResolver.verifyAudience(audiences, authorizedParty);
-
-        //then checked by exception
-    }
-
-    @Test(expectedExceptions = InvalidAudException.class)
-    public void testInvalidSpecifiedAudienceThrowsException() throws InvalidAudException {
-        //given
-        JsonValue authorizedParty = new JsonValue("Bob");
-        ArrayList<String> audiences = new ArrayList<String>();
-        audiences.add("Test");
-        audiences.add("TestTwo");
-
-        //when
-        testResolver.verifyAudience(audiences, authorizedParty);
-
-        //then checked by exception
     }
 
     @Test(expectedExceptions = JwtExpiredException.class)

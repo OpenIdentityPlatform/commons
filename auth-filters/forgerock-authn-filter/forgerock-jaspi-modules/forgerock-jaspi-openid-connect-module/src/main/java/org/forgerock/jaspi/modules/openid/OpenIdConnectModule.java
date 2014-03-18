@@ -37,12 +37,12 @@ import org.forgerock.jaspi.modules.openid.resolvers.OpenIdResolver;
 import org.forgerock.jaspi.modules.openid.resolvers.service.OpenIdResolverService;
 import org.forgerock.jaspi.modules.openid.resolvers.service.OpenIdResolverServiceConfigurator;
 import org.forgerock.jaspi.modules.openid.resolvers.service.OpenIdResolverServiceConfiguratorImpl;
+import org.forgerock.jaspi.modules.openid.resolvers.service.OpenIdResolverServiceImpl;
 import org.forgerock.json.jose.common.JwtReconstruction;
 import org.forgerock.json.jose.exceptions.InvalidJwtException;
 import org.forgerock.json.jose.exceptions.JwtReconstructionException;
 import org.forgerock.json.jose.jws.SignedJwt;
 import org.forgerock.json.jose.jwt.JwtClaimsSet;
-import org.forgerock.json.jose.utils.KeystoreManagerException;
 
 /**
  * OpenID Connect module that allows access when a valid OpenID Connect JWT which
@@ -50,16 +50,40 @@ import org.forgerock.json.jose.utils.KeystoreManagerException;
  */
 public class OpenIdConnectModule implements ServerAuthModule {
 
-    public static final String KEYSTORE_LOCATION_KEY = "keystoreLocation";
-    public static final String KEYSTORE_PASSWORD_KEY = "keystorePassword";
-    public static final String KEYSTORE_TYPE_KEY = "keystoreType";
+    /**
+     * Default read timeout for HTTP connections.
+     */
+    private static final int DEFAULT_READ_TIMEOUT = 5000;
+
+    /**
+     * Default connection timeout for HTTP connections.
+     */
+    private static final int DEFAULT_CONN_TIMEOUT = 5000;
+
+    /**
+     * Lookup key for the configured HTTP connection's read timeout for this module.
+     */
+    public static final String READ_TIMEOUT_KEY = "readTimeout";
+
+    /**
+     * Lookup key for the configured HTTP connection's connection timeout for this module.
+     */
+    public static final String CONNECTION_TIMEOUT_KEY = "connectionTimeout";
+
+    /**
+     * Lookup key for the configured HTTP header used by this module to locate JWSs.
+     */
     public static final String HEADER_KEY = "openIdConnectHeader";
+
+    /**
+     * Lookup key for the configured resolvers which will be used by this module.
+     */
     public static final String RESOLVERS_KEY = "resolvers";
 
     private static final DebugLogger DEBUG = LogFactory.getDebug();
 
     private final JwtReconstruction constructor;
-    private final OpenIdResolverServiceConfigurator resolverConfigurator;
+    private final OpenIdResolverServiceConfigurator serviceConfigurator;
 
     private String openIdConnectHeader;
 
@@ -68,23 +92,27 @@ public class OpenIdConnectModule implements ServerAuthModule {
     private CallbackHandler callbackHandler;
 
     /**
-     * Default constructor
+     * Default constructor.
      */
     public OpenIdConnectModule() {
         constructor = new JwtReconstruction();
-        resolverConfigurator = new OpenIdResolverServiceConfiguratorImpl();
+        serviceConfigurator = new OpenIdResolverServiceConfiguratorImpl();
     }
 
     /**
-     * Used for tests
+     * Used for tests.
      *
-     * @param resolverConfigurator Configurator device for setting up our resolver service
+     * @param serviceConfigurator Configurator device for setting up our resolver service
      * @param constructor Builder for creating our JWTs out of their representation
      */
-    OpenIdConnectModule(final OpenIdResolverServiceConfigurator resolverConfigurator,
-                        final JwtReconstruction constructor) {
-        this.resolverConfigurator = resolverConfigurator;
+    OpenIdConnectModule(final OpenIdResolverServiceConfigurator serviceConfigurator,
+                        final JwtReconstruction constructor,
+                        final OpenIdResolverService service,
+                        final CallbackHandler callback) {
+        this.serviceConfigurator = serviceConfigurator;
         this.constructor = constructor;
+        this.resolverService = service;
+        this.callbackHandler = callback;
     }
 
     /**
@@ -97,23 +125,32 @@ public class OpenIdConnectModule implements ServerAuthModule {
         this.openIdConnectHeader = (String) config.get(OpenIdConnectModule.HEADER_KEY);
         this.callbackHandler = callbackHandler;
 
-        final String keystoreLocation = (String) config.get(OpenIdConnectModule.KEYSTORE_LOCATION_KEY);
-        final String keystorePassword = (String) config.get(OpenIdConnectModule.KEYSTORE_PASSWORD_KEY);
-        final String keystoreType = (String) config.get(OpenIdConnectModule.KEYSTORE_TYPE_KEY);
+        Integer readTimeout = (Integer) config.get(OpenIdConnectModule.READ_TIMEOUT_KEY);
+        Integer connTimeout = (Integer) config.get(OpenIdConnectModule.CONNECTION_TIMEOUT_KEY);
+
+        if (openIdConnectHeader == null || openIdConnectHeader.isEmpty()) {
+            DEBUG.debug("OpenIdConnectModule config is invalid. You must include the header key parameter");
+            throw new AuthException("OpenIdConnectModule configuration is invalid.");
+        }
+
+        if (readTimeout == null || readTimeout < 0) {
+            DEBUG.debug("Read Timeout setting invalid, set to default: " + DEFAULT_READ_TIMEOUT);
+            readTimeout = DEFAULT_READ_TIMEOUT;
+        }
+
+        if (connTimeout == null || connTimeout < 0) {
+            DEBUG.debug("Connection Timeout setting invalid, set to default: " + DEFAULT_CONN_TIMEOUT);
+            connTimeout = DEFAULT_CONN_TIMEOUT;
+        }
 
         final List<Map<String, String>> resolvers =
                 (List<Map<String, String>>) config.get(OpenIdConnectModule.RESOLVERS_KEY);
 
-        try {
-            resolverService = resolverConfigurator.setupService(keystoreType, keystoreLocation, keystorePassword);
-        } catch (KeystoreManagerException kme) {
-            DEBUG.debug("KeystoreManagerException thrown while generating OpenIDResolverService", kme);
-            throw new AuthException("OpenIdConnectModule configuration is invalid.");
-        }
+        resolverService = new OpenIdResolverServiceImpl(readTimeout, connTimeout);
 
         //if we weren't able to set up the service, or any one of the supplied resolver configs was invalid,
-        // error out here
-        if (resolverService == null || !resolverConfigurator.configureService(resolverService, resolvers)) {
+        //error out here
+        if (!serviceConfigurator.configureService(resolverService, resolvers)) {
             DEBUG.debug("OpenIdConnectModule config is invalid. You must configure at least one valid resolver.");
             throw new AuthException("OpenIdConnectModule configuration is invalid.");
         }
@@ -123,8 +160,8 @@ public class OpenIdConnectModule implements ServerAuthModule {
     /**
      * Attempts to retrieve the value of the specified OpenID Connect header from the messageInfo, then
      * converts this to a Jwt and attempts to decrypt. If both these steps succeed, we verify the Jwt
-     * through the {@link org.forgerock.jaspi.modules.openid.resolvers.OpenIdResolver} interface to ensure that we are the intended audience,
-     * the token has not expired and the issuer was an expected source.
+     * through the {@link org.forgerock.jaspi.modules.openid.resolvers.OpenIdResolver} interface
+     * to ensure that we are the intended audience, the token has not expired and the issuer was an expected source.
      *
      * If all of these validate, we return SUCCESS, otherwise SEND_FAILURE.
      *
@@ -203,7 +240,7 @@ public class OpenIdConnectModule implements ServerAuthModule {
     }
 
     /**
-     * Nothing to clean
+     * Nothing to clean.
      *
      * @param messageInfo {@inheritDoc}
      * @param subject {@inheritDoc}

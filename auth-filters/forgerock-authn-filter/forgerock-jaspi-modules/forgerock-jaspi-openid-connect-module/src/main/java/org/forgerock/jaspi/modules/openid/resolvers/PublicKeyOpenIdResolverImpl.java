@@ -16,6 +16,8 @@
 package org.forgerock.jaspi.modules.openid.resolvers;
 
 import java.security.PublicKey;
+import org.forgerock.auth.common.DebugLogger;
+import org.forgerock.jaspi.logging.LogFactory;
 import org.forgerock.jaspi.modules.openid.exceptions.InvalidSignatureException;
 import org.forgerock.jaspi.modules.openid.exceptions.OpenIdConnectVerificationException;
 import org.forgerock.json.jose.jws.SignedJwt;
@@ -29,17 +31,18 @@ import org.forgerock.json.jose.jws.SignedJwt;
  */
 public class PublicKeyOpenIdResolverImpl extends BaseOpenIdResolver {
 
+    private static final DebugLogger DEBUG = LogFactory.getDebug();
+
     private final PublicKey key;
 
     /**
-     * Constructor for SharedSecretOpenIdResolverImpl
+     * Constructor for PublicKeyOpenIdResolverImpl.
      *
      * @param issuer The issuer (provider) of the Open Id Connect id token
-     * @param clientId The client ID (consumer) of the Open Id Connect id token
      * @param key The public key, used to verify a private-key signed signature
      */
-    public PublicKeyOpenIdResolverImpl(String issuer, String clientId, PublicKey key) {
-        super(issuer, clientId);
+    public PublicKeyOpenIdResolverImpl(String issuer, PublicKey key) {
+        super(issuer);
 
         this.key = key;
     }
@@ -62,6 +65,7 @@ public class PublicKeyOpenIdResolverImpl extends BaseOpenIdResolver {
      */
     public void verifySignature(final SignedJwt idClaim) throws InvalidSignatureException {
         if (!idClaim.verify(key)) {
+            DEBUG.debug("JWS signature not signed with supplied key");
             throw new InvalidSignatureException("JWS signature not signed with supplied key");
         }
     }

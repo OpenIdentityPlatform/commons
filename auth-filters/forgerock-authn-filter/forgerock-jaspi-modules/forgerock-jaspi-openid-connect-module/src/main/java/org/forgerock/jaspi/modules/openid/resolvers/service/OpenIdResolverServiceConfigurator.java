@@ -19,32 +19,24 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Interface directing how to generate (
- * {@link OpenIdResolverServiceConfigurator#setupService(String, String, String)}) and
- * then configure ({@link OpenIdResolverServiceConfigurator#configureService(OpenIdResolverService, java.util.List)})
+ * Interface directing how to configure
+ * ({@link OpenIdResolverServiceConfigurator#configureService(OpenIdResolverService, java.util.List)})
  * an {@link OpenIdResolverService}.
+ *
+ * Implementing classes must be aware that the configurations are "flat" and enter
+ * this method call unverified and unchecked - thus can contain
+ * invalid combinations of values.
  */
 public interface OpenIdResolverServiceConfigurator {
 
     /**
      * Configures a provided {@link OpenIdResolverService} using the resolver information held
-     * in a {@link List} of {@link Map}
+     * in a {@link List} of {@link Map}.
      *
      * @param service to configure
      * @param resolvers the configuration
      * @return false if any resolver configuration fails true otherwise
      */
     public boolean configureService(final OpenIdResolverService service, final List<Map<String, String>> resolvers);
-
-    /**
-     * Provides an OpenIdResolverService, using the provided keystore details.
-     *
-     * @param keystoreType type of keystore
-     * @param keystoreLocation location of the keystore
-     * @param keystorePassword password to access the keystore
-     * @return a usable OpenIdResolverService, null otherwise
-     */
-    public OpenIdResolverService setupService(final String keystoreType, final String keystoreLocation,
-                                              final String keystorePassword);
 
 }
