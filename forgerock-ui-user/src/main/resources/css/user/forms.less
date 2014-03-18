@@ -9,8 +9,10 @@ input[type="text"], input[type="password"], input[type="tel"], input[type="email
     padding: 5px 10px;
     background-color: @input-background-color;
     width: 230px;
-    .box-shadow(1px, 1px, 1px, rgba(0,0,0,0.1), inset);
-    .transition(all, 0.3s, 0.25s,  ease-in-out);
+            box-shadow:1px 1px 1px 0 rgba(0,0,0,0.1) inset;
+       -moz-box-shadow:1px 1px 1px 0 rgba(0,0,0,0.1) inset;
+    -webkit-box-shadow:1px 1px 1px 0 rgba(0,0,0,0.1) inset;
+    .transition(background, 0.3s, 0.25s,  ease-in-out);
 }
 
 input{
