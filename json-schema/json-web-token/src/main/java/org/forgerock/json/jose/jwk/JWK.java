@@ -108,7 +108,7 @@ public abstract class JWK extends JWObject {
             put(USE, use.toString());
         }
         if (alg != null && !alg.isEmpty()) {
-            put(ALG, use);
+            put(ALG, alg);
         }
         if (x5c != null && !x5c.isEmpty()) {
             put(X5C, x5c);
