@@ -70,6 +70,7 @@ form.form {
         fieldset {
             margin-top: 20px;
         }
+
     }
     &.two-columns {
         label {
@@ -89,12 +90,14 @@ form.form {
             width: 110px;
         }
         div.field-checkbox {
-            margin-left: 117px;
+            margin-left: 111px;
         }
         div.field-submit {
-            margin-left: 117px;
+            margin-left: 111px;
         }
     }
+
+
     div.field-checkbox.float-left {
             margin-left: 0;  
     }
@@ -435,13 +438,32 @@ form.form {
 ul.link-box{
     display:block;
     clear:none;
-    padding:10px 10px 0;
-    
-    &.float-right{
-        padding-right:38px;
-    }
+    padding:10px 10px 0 0;
+    font-size:0; /*removes spaces between */
     li{
-        display:inline;
+        display:inline-block;
+        border-left:1px solid @font-color;
+        margin:0 0 0 10px;
+        padding:0 0 0 10px;
+        font-size:14px;
+        line-height:14px;
     }
+
 }
+
+nav ul.link-box li{
+    border-left:2px solid @font-color;
+}
+
+nav ul.link-box li:first-of-type, ul.link-box li:first-of-type{
+    border:none;
+    margin:0;
+    padding:0;
+}
+
+.form ul.link-box.float-right{
+    padding-right:38px;
+}
+
+
 

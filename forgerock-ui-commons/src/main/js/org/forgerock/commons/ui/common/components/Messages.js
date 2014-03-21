@@ -95,26 +95,28 @@ define("org/forgerock/commons/ui/common/components/Messages", [
          * Shows message on screen.
          */
         showMessage: function(msg, callback) {
-            var obj = this;
+            var obj = this, delay = 0;
             
             if(msg.type === "error") {
                 if (this.$el.find(".errorMessage").length) {
                     this.$el.find(".errorMessage").fadeOut(500);
                     this.$el.find(".errorMessage").remove();
                 }
-                this.$el.append("<div class='errorMessage' style='display: none;'><span><img src='images/span_error.png' width='14' height='14' alt='error' align='top' /></span>" + msg.message + "</div>");
+                this.$el.append("<div class='errorMessage'><span class='error-outter'><span class='error-inner'><span>" + msg.message + "</span></span></span></div>");
             
                 this.$el.find("div:last").fadeIn(500, _.bind(function () {
                     this.messages.shift();
                 }, this));
                 
             } else {
+                if (this.$el.find("div").length > 0) {
+                    delay = 500;
+                }
                 this.$el.find("div").fadeOut(500, function () {
                     $(this).remove();
                 });
-                this.$el.append("<div class='confirmMessage' style='display: none;'><span><img src='images/span_ok.png' width='14' height='14' alt='error' align='top' /></span>" + msg.message + "</div>");
-                                
-                this.$el.find("div:last").fadeIn(500).delay(1000).fadeOut(500, function() {
+                this.$el.append("<div class='confirmMessage'><span class='error-outter'><span class='error-inner'><span>" + msg.message + "</span></span></span></div>");           
+                this.$el.find("div:last").delay(delay).fadeIn(500).delay(1500).fadeOut(500, function() {
                     $(this).remove();
                     if (callback) {
                         callback.call(obj);
@@ -122,7 +124,7 @@ define("org/forgerock/commons/ui/common/components/Messages", [
                 });
             }            
         },
-        
+
         hideMessages : function() {
             var obj = this;
             this.$el.find("div").delay(1000).fadeOut(500, function() {
@@ -130,6 +132,8 @@ define("org/forgerock/commons/ui/common/components/Messages", [
                 $(this).remove();
             });
         }
+
+
     });
     
     obj.messages = new Messages();

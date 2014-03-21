@@ -9,11 +9,10 @@
         <div class="clearfix">
 
             <ul class="float-right link-box">
-                <li><a href="{{url 'changeSecurityData'}}" id="securityDialogLink" class="ice hrefInput">{{t "templates.user.UserProfileTemplate.changeSecurityData"}}</a></li>
-               
-                {{#unless adminUser}}{{#siteIdentification}} 
-                 | <li><a href="{{url 'siteIdentification'}}" id="passPhraseLink" class="ice hrefInput">{{t "templates.user.UserProfileTemplate.changeSiteIdentification"}}</a></li> 
-                {{/siteIdentification}}{{/unless}}
+                <li><a href="{{url 'changeSecurityData'}}">{{t "templates.user.UserProfileTemplate.changeSecurityData"}}</a></li>
+                {{#unless adminUser}}
+                {{#siteIdentification}}<li><a href="{{url 'siteIdentification'}}">{{t "templates.user.UserProfileTemplate.changeSiteIdentification"}}</a></li>{{/siteIdentification}}
+                {{/unless}}
             </ul>
      
             <div class="group-field-block col2">

@@ -207,33 +207,53 @@
 /* MESSAGES*/
 
 #messages {
-    div {
-        .rounded-corners(5px);
 
-        width: 360px;
-        position: fixed;
-        margin-left: -180px;
-        top: 10px;
-        left: 50%;
-        text-align: center;
+    position: absolute;
+    top: 50px;
+    left: 10px;
+    right: 10px;
+
+    div {
+        
         font-size: 14px;
-        line-height: 14px;
-        padding: 5px;
-        border: 1px solid darken(@input-border-basic, 20%);
-        background: @message-background-color;
-        z-index: 10;
+        line-height: 14px;  
     }
 
-    span {
-        padding: 0 20px 0 10px;
+    span.error-outter{
+        position: absolute;
+        text-align: center;
+        width: 100%;
+    }
+
+    span.error-inner {
+        margin: 0 auto;
+        display: inline-block;
+        max-width: @login-container-width;
+    }
+
+    span.error-inner span {
+        padding: 10px 8px 10px 30px;
+        border: 1px solid darken(@input-border-basic, 20%);
+        background: @message-background-color no-repeat 10px center;
+        display:inline-block;
+        .rounded-corners(5px);
+        margin: 0 auto;
     }
 
     .confirmMessage { 
+        display:none;
         color: @color-success;
+        span.error-inner span{
+            background-image: url('../images/span_ok.png');
+        }
     }
 
     .errorMessage {
+        display:none;
         color: @color-error;
+        span.error-inner span{
+            background-image: url('../images/span_error.png');
+        }
     }
 
 }
