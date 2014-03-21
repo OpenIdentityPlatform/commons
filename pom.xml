@@ -130,6 +130,14 @@ Copyright 2014 ForgeRock AS.
                 <groupId>com.google.inject</groupId>
                 <artifactId>guice</artifactId>
                 <version>${guice.version}</version>
+                <!-- Exclude aopalliance dependency due to ambiguous licensing. -->
+                <classifier>no_aop</classifier>
+                <exclusions>
+                    <exclusion>
+                        <groupId>aopalliance</groupId>
+                        <artifactId>aopalliance</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>javax.servlet</groupId>

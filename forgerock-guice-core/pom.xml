@@ -32,6 +32,7 @@
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
+            <classifier>no_aop</classifier>
         </dependency>
     </dependencies>
     
