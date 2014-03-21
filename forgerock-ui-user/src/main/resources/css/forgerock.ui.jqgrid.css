@@ -167,3 +167,6 @@ a.g-menu-item, a.soptclass, a.clearsearchclass { cursor: pointer; }
 .ui-jqgrid .ui-search-table .ui-search-input>input{
     margin-bottom: -5px;
 }
+.ui-jqgrid select{
+    padding: 0px;
+}
