@@ -380,6 +380,51 @@ public class JsonValueTest {
         badValue.asList(AS_INTEGER);
     }
 
+    @Test
+    public void testAsMapOf() {
+        Map<String, Object> m = mapValue.asMap();
+        m.put("a", "aString");
+        m.put("b", "bString");
+        m.put("c", "cString");
+        Map<String, String> stringMap = mapValue.asMap(String.class);
+        assertThat(stringMap.get("a") instanceof String).isTrue();
+    }
+
+    @Test(expectedExceptions = JsonValueException.class)
+    public void testAsMapOfBad() {
+        Map<String, Object> m = mapValue.asMap();
+        m.put("a", "aString");
+        m.put("b", true);
+        m.put("c", 4);
+        Map<String, String> stringMap = mapValue.asMap(String.class);
+    }
+
+    @Test
+    public void testAsMapOfList() {
+        listValue.add("String");
+        Map<String, Object> m = mapValue.asMap();
+        m.put("a", listValue.getObject());
+        Map<String, List<String>> stringListMap = mapValue.asMapOfList(String.class);
+        assertThat(stringListMap.get("a") instanceof List).isTrue();
+        assertThat(stringListMap.get("a").get(0)).isEqualTo("String");
+    }
+
+    @Test(expectedExceptions = JsonValueException.class)
+    public void testAsMapOfListNonList() {
+        Map<String, Object> m = mapValue.asMap();
+        m.put("a", true);
+        Map<String, List<String>> stringListMap = mapValue.asMapOfList(String.class);
+    }
+
+    @Test(expectedExceptions = JsonValueException.class)
+    public void testAsMapOfListBadElement() {
+        listValue.add(true);
+        listValue.add(false);
+        Map<String, Object> m = mapValue.asMap();
+        m.put("a", listValue.getObject());
+        Map<String, List<String>> stringListMap = mapValue.asMapOfList(String.class);
+    }
+
     private JsonPointer ptr(final String pointer) {
         return new JsonPointer(pointer);
     }
