@@ -629,6 +629,80 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
     }
 
     /**
+     * Returns the JSON value as a {@link Map} containing objects of the
+     * specified type. If the value is {@code null}, this method returns
+     * {@code null}. If any of the values of the map are not {@code null} and
+     * not of the specified type, {@code JsonValueException} is thrown.
+     *
+     * @param <V>
+     *            the type of values in this map
+     * @param type
+     *            the type of object that all values are expected to be.
+     * @return the map value, or {@code null} if no value.
+     * @throws JsonValueException
+     *             if the JSON value is not a {@code Map} or contains an
+     *             unexpected type.
+     * @throws NullPointerException
+     *             if {@code type} is {@code null}.
+     */
+    @SuppressWarnings("unchecked")
+    public <V> Map<String, V> asMap(final Class<V> type) {
+        if (object != null) {
+            expect(Map.class);
+            if (type != Object.class) {
+                final Map<String, Object> map = (Map<String, Object>) this.object;
+                for (final Object element : map.values()) {
+                    if (element != null && !type.isInstance(element)) {
+                        throw new JsonValueException(this, "Expecting a Map of " + type.getName()
+                                + " elements");
+                    }
+                }
+            }
+        }
+        return (Map<String, V>) object;
+    }
+    /**
+     * Returns the JSON value as a {@link Map} containing a collection of
+     * objects of the specified type. If the value is {@code null}, this method
+     * returns {@code null}. If any of the values of the map are not {@code null} and
+     * not of the specified type, {@code JsonValueException} is thrown.
+     *
+     * @param <E>
+     *            the type of elements in the collection
+     * @param elementType
+     *            the type of object that all collection elements are
+     *            expected to be.
+     * @return the map value, or {@code null} if no value.
+     * @throws JsonValueException
+     *             if the JSON value is not a {@code Map} or contains an
+     *             unexpected type.
+     * @throws NullPointerException
+     *             if {@code type} is {@code null}.
+     */
+    @SuppressWarnings("unchecked")
+    public <E> Map<String, List<E>> asMapOfList(final Class<E> elementType) {
+        if (object != null) {
+            expect(Map.class);
+            if (elementType != Object.class) {
+                final Map<String, Object> map = (Map<String, Object>) this.object;
+                for (final Object value : map.values()) {
+                    if (value != null && !(value instanceof List)) {
+                        throw new JsonValueException(this, "Expecting a Map of List values");
+                    }
+                    final List list = (List) value;
+                    for (final Object element : list) {
+                        if (element != null && !elementType.isInstance(element)) {
+                            throw new JsonValueException(this, "Expecting a Map of Lists with "
+                                    + elementType.getName() + " elements");
+                        }
+                    }
+                }
+            }
+        }
+        return (Map<String, List<E>>) object;
+    }
+
+    /**
      * Returns the JSON value as a {@code Number} object. If the JSON value is
      * {@code null}, this method returns {@code null}.
      *
