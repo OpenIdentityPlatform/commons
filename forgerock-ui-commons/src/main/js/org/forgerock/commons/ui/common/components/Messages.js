@@ -75,8 +75,7 @@ define("org/forgerock/commons/ui/common/components/Messages", [
                 }
             }
             
-            this.messages.push(msg);
-            
+            this.messages.push(msg);   
             this.showMessage(msg, this.messagesLoop);
         },
 
@@ -99,11 +98,12 @@ define("org/forgerock/commons/ui/common/components/Messages", [
             
             if(msg.type === "error") {
                 if (this.$el.find(".errorMessage").length) {
-                    this.$el.find(".errorMessage").fadeOut(500);
-                    this.$el.find(".errorMessage").remove();
+                    this.$el.find(".errorMessage").fadeOut(500, function(){
+                        $(this).remove()
+                    });        
                 }
                 this.$el.append("<div class='errorMessage'><span class='error-outter'><span class='error-inner'><span>" + msg.message + "</span></span></span></div>");
-            
+
                 this.$el.find("div:last").fadeIn(500, _.bind(function () {
                     this.messages.shift();
                 }, this));
@@ -127,7 +127,7 @@ define("org/forgerock/commons/ui/common/components/Messages", [
 
         hideMessages : function() {
             var obj = this;
-            this.$el.find("div").delay(1000).fadeOut(500, function() {
+            this.$el.find("div").fadeOut(500, function() {
                 obj.messagesLoop();
                 $(this).remove();
             });

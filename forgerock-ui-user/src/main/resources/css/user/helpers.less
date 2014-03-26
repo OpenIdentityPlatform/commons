@@ -310,23 +310,42 @@ a.img-close {
 }
 
 
-
 .container-shadow {
     .rounded-corners(5px);
-    border: 1px solid #e6e6e6;
+    border: 1px solid darken(@background-color, 15%);
     background-color: @content-background;
-    .box-shadow(0, 2px, 8px, 0, #888);
     padding:30px;
+    position:relative;
 }
+
+.container-shadow:before,
+.content-bg:before {
+    top: 50%;
+    bottom: 0;
+    left: 10px;
+    right: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+    content: "";
+    position: absolute;
+    z-index: -2; 
+}
+
+#default-base .content-bg:before{
+    border-bottom-right-radius:  100%  20%;
+    border-bottom-left-radius: 100%  20%;
+}
+
+
 .content {
     padding: 5px 10px;
 }
 
 .content-bg {
+    position:relative;
     background-color: @content-background;
     .rounded-corners(5px);
     padding: 20px;
-    border: 1px solid darken(@background-color, 7.5%);
+    border: 1px solid darken(@background-color, 15%);
 }
 
 .bg {
