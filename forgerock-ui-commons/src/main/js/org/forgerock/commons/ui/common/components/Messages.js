@@ -99,7 +99,7 @@ define("org/forgerock/commons/ui/common/components/Messages", [
             if(msg.type === "error") {
                 if (this.$el.find(".errorMessage").length) {
                     this.$el.find(".errorMessage").fadeOut(500, function(){
-                        $(this).remove()
+                        $(this).remove();
                     });        
                 }
                 this.$el.append("<div class='errorMessage'><span class='error-outter'><span class='error-inner'><span>" + msg.message + "</span></span></span></div>");
