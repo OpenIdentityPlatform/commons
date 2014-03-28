@@ -12,6 +12,7 @@
                 <li><a href="{{url 'changeSecurityData'}}">{{t "templates.user.UserProfileTemplate.changeSecurityData"}}</a></li>
                 {{#unless adminUser}}
                 {{#siteIdentification}}<li><a href="{{url 'siteIdentification'}}">{{t "templates.user.UserProfileTemplate.changeSiteIdentification"}}</a></li>{{/siteIdentification}}
+                {{#emailSecure}}<li><a href="{{url 'changeEmailAddress'}}">{{t "templates.user.UserProfileTemplate.changeEmailAddress"}}</a></li>{{/emailSecure}}
                 {{/unless}}
             </ul>
      
@@ -66,7 +67,7 @@
                     <label for="telephonenumber" class="light align-right">{{t "common.user.phoneNumber"}}</label>
                     <div class="float-left separate-message">
                         <div class="group-input-span">
-                            <input type="tel" id="telephonenumber" name="telephonenumber" value=""  />
+                            <input type="tel" id="telephonenumber" name="telephonenumber" value="" />
                             <span class="error"></span>
                         </div>
                         <div class="validation-message"></div>
