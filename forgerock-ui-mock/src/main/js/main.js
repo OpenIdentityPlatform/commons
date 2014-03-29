@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -22,29 +22,35 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global require, define*/
 
+/*global require, _ */
 
 /**
  * @author yaromin
+ * @author Eugenia Sergueeva
  */
 
 require.config({
     paths: {
-        less: "libs/less-1.5.1-min",
         i18next: "libs/i18next-1.7.1-min",
+        i18nGrid: "libs/i18n/grid.locale-en",
         backbone: "libs/backbone-0.9.2-min",
         underscore: "libs/underscore-1.4.4-min",
         js2form: "libs/js2form-1.0",
         form2js: "libs/form2js-1.0",
-        contentflow: "libs/contentflow",
         spin: "libs/spin-1.2.5-min",
-        dataTable: "libs/datatables-1.9.3-min",
-        jqueryui: "libs/jquery-ui-1.8.23.custom-min",
+        jqueryui: "libs/jquery-ui-1.10.4.custom-min",
+        jqgrid: "libs/jquery.jqGrid-4.5.4-min",
         xdate: "libs/xdate-0.7-min",
         doTimeout: "libs/jquery.ba-dotimeout-1.0-min",
         handlebars: "libs/handlebars-1.0.rc.1",
-        moment: "libs/moment-1.7.2-min"
+        moment: "libs/moment-1.7.2-min",
+        sinon: "qunit/libs/sinon-1.7.3",
+        UserDelegate: "org/forgerock/mock/ui/user/delegates/UserDelegate",
+        ThemeManager: "org/forgerock/mock/ui/common/util/ThemeManager",
+        SiteIdentificationDelegate: "org/forgerock/mock/ui/user/delegates/SiteIdentificationDelegate",
+        LoginDialog: "org/forgerock/commons/ui/common/LoginDialog",
+        LoginView: "org/forgerock/mock/ui/user/LoginView"
     },
 
     shim: {
@@ -61,18 +67,15 @@ require.config({
         form2js: {
             exports: "form2js"
         },
-        contentflow: {
-            exports: "contentflow"
-        },
         spin: {
             exports: "spin"
         },
-        dataTable: {
-            exports: "dataTable"
-        },
         jqueryui: {
             exports: "jqueryui"
-        }, 
+        },
+        jqgrid: {
+            deps: ["jqueryui", "i18nGrid"]
+        },
         xdate: {
             exports: "xdate"
         },
@@ -88,6 +91,9 @@ require.config({
         },
         moment: {
             exports: "moment"
+        },
+        sinon: {
+            exports: "sinon"
         }
     }
 });
@@ -101,25 +107,48 @@ require([
     "backbone",
     "form2js",
     "js2form",
-    "contentflow",
     "spin",
-    "dataTable",
+    "jqgrid",
     "jqueryui",
     "xdate",
     "moment",
     "doTimeout",
     "handlebars",
     "i18next",
+    "sinon",
     "org/forgerock/commons/ui/common/main/i18nManager",
-    "org/forgerock/commons/ui/common/util/Constants", 
+    "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
-    "config/main",
+    "org/forgerock/mock/ui/common/main/LocalStorage",
+    "org/forgerock/mock/ui/common/main/MockServer",
+    "org/forgerock/mock/ui/common/main",
+    "org/forgerock/mock/ui/user/main",
     "org/forgerock/commons/ui/user/main",
-    "org/forgerock/commons/ui/user/delegates/UserDelegate",
-    "org/forgerock/commons/ui/common/main"
-], function(b, c, d, e, f, g, h, i, j, k, l, m, n, i18n, constants, eventManager) { 
+    "org/forgerock/commons/ui/common/main",
+    "config/main"
+], function (a, b, c, d, e, f, g, h, i, j, k, l, m, i18n, constants, eventManager, localStorage) {
+
+    // Mock project is run without server. Framework requires cookies to be enabled in order to be able to login.
+    // Default CookieHelper.cookiesEnabled() implementation will always return false as cookies cannot be set from local
+    // file. Hence redefining function to return true
+    require('org/forgerock/commons/ui/common/util/CookieHelper').cookiesEnabled = function () {
+        return true;
+    };
+
+    // Adding stub user
+    localStorage.add('test', {
+        _id: 'test',
+        _rev: '1',
+        component: 'internal/user',
+        roles: ['ui-user'],
+        userName: 'test',
+        password: 'test',
+        telephoneNumber: '12345',
+        givenName: 'Jack',
+        sn: 'White',
+        mail: 'white@test.com'
+
+    });
+
     eventManager.sendEvent(constants.EVENT_DEPENDECIES_LOADED);
 });
-
-
-
