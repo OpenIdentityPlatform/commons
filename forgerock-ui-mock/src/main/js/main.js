@@ -108,7 +108,6 @@ require([
     "form2js",
     "js2form",
     "spin",
-    "jqgrid",
     "jqueryui",
     "xdate",
     "moment",
@@ -116,17 +115,18 @@ require([
     "handlebars",
     "i18next",
     "sinon",
+    "org/forgerock/mock/ui/common/main/MockServer",
     "org/forgerock/commons/ui/common/main/i18nManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/mock/ui/common/main/LocalStorage",
-    "org/forgerock/mock/ui/common/main/MockServer",
     "org/forgerock/mock/ui/common/main",
     "org/forgerock/mock/ui/user/main",
     "org/forgerock/commons/ui/user/main",
     "org/forgerock/commons/ui/common/main",
     "config/main"
-], function (a, b, c, d, e, f, g, h, i, j, k, l, m, i18n, constants, eventManager, localStorage) {
+], function (_, Backbone, form2js, js2form, spin, $ui, xdate, moment, doTimeout, Handlebars, i18n, sinon, 
+             mockServer, i18nManager, constants, eventManager, localStorage) {
 
     // Mock project is run without server. Framework requires cookies to be enabled in order to be able to login.
     // Default CookieHelper.cookiesEnabled() implementation will always return false as cookies cannot be set from local

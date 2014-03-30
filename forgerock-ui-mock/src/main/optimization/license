@@ -1,0 +1,157 @@
+/**
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ *
+ * Portions copyright (c) 2013 ForgeRock AS. All rights reserved.
+ */
+ 
+ // Backbone.js 0.9.2
+
+// (c) 2010-2012 Jeremy Ashkenas, DocumentCloud Inc.
+// Backbone may be freely distributed under the MIT license.
+// For all details and documentation:
+// http://backbonejs.org
+
+// form2js 1.0, js2form 1.0
+/**
+ * Copyright (c) 2010 Maxim Vasiliev
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * @author Maxim Vasiliev
+ * Date: 09.09.2010
+ * Time: 19:02:33
+ */
+
+// i18next, v1.5.8
+// Copyright (c)2012 Jan Mühlemann (jamuhl).
+// Distributed under MIT license
+// http://i18next.com
+
+/*! jQuery v@1.8.1 jquery.com | jquery.org/license */
+
+/*
+ * jQuery gentleSelect plugin
+ * http://shawnchin.github.com/jquery-cron
+ *
+ * Copyright (c) 2010 Shawn Chin. 
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ */
+
+ /*! jQuery UI - v1.10.2 - 2013-03-27
+* http://jqueryui.com
+* Includes: jquery.ui.core.js, jquery.ui.widget.js, jquery.ui.mouse.js, jquery.ui.position.js, jquery.ui.draggable.js, jquery.ui.droppable.js, jquery.ui.resizable.js, jquery.ui.selectable.js, jquery.ui.sortable.js, jquery.ui.accordion.js, jquery.ui.autocomplete.js, jquery.ui.button.js, jquery.ui.datepicker.js, jquery.ui.dialog.js, jquery.ui.menu.js, jquery.ui.progressbar.js, jquery.ui.slider.js, jquery.ui.spinner.js, jquery.ui.tabs.js, jquery.ui.tooltip.js, jquery.ui.effect.js, jquery.ui.effect-blind.js, jquery.ui.effect-bounce.js, jquery.ui.effect-clip.js, jquery.ui.effect-drop.js, jquery.ui.effect-explode.js, jquery.ui.effect-fade.js, jquery.ui.effect-fold.js, jquery.ui.effect-highlight.js, jquery.ui.effect-pulsate.js, jquery.ui.effect-scale.js, jquery.ui.effect-shake.js, jquery.ui.effect-slide.js, jquery.ui.effect-transfer.js
+* Copyright 2013 jQuery Foundation and other contributors Licensed MIT */
+
+/*
+ * jQuery doTimeout: Like setTimeout, but better! - v1.0 - 3/3/2010
+ * http://benalman.com/projects/jquery-dotimeout-plugin/
+ * 
+ * Copyright (c) 2010 "Cowboy" Ben Alman
+ * Dual licensed under the MIT and GPL licenses.
+ * http://benalman.com/about/license/
+ */
+ /* 
+* jqGrid  4.4.4 - jQuery Grid 
+* Copyright (c) 2008, Tony Tomov, tony@trirand.com 
+* Dual licensed under the MIT and GPL licenses 
+* http://www.opensource.org/licenses/mit-license.php 
+* http://www.gnu.org/licenses/gpl-2.0.html 
+* Date:2013-01-30 
+* Modules: grid.base.js; jquery.fmatter.js; grid.custom.js; grid.common.js; grid.formedit.js; grid.filter.js; grid.inlinedit.js; grid.celledit.js; jqModal.js; jqDnR.js; grid.import.js; JsonXml.js; grid.jqueryui.js; 
+*/
+
+//
+// LESS - Leaner CSS v1.3.3
+// http://lesscss.org
+// 
+// Copyright (c) 2009-2013, Alexis Sellier
+// Licensed under the Apache 2.0 License.
+//
+
+// moment.js
+// version : 1.7.2
+// author : Tim Wood
+// license : MIT
+// momentjs.com
+
+/*
+ RequireJS 2.0.6 Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.
+ Available via the MIT or new BSD license.
+ see: http://github.com/jrburke/requirejs for details
+*/
+
+// Spectrum Colorpicker v1.0.9
+// https://github.com/bgrins/spectrum
+// Author: Brian Grinstead
+// License: MIT
+
+//fgnass.github.com/spin.js#v1.2.6
+
+/*
+ XDate v0.7
+ Docs & Licensing: http://arshaw.com/xdate/
+*/
+
+// underscore 1.4.4
+// Copyright (c) 2009-2013 Jeremy Ashkenas, DocumentCloud
+
+// Permission is hereby granted, free of charge, to any person
+// obtaining a copy of this software and associated documentation
+// files (the "Software"), to deal in the Software without
+// restriction, including without limitation the rights to use,
+// copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the
+// Software is furnished to do so, subject to the following
+// conditions:
+
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+// OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+// WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+// FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+// OTHER DEALINGS IN THE SOFTWARE.
+
+/*
+https://github.com/mcavage/node-ldapjs
+Copyright (c) 2011 Mark Cavage, All rights reserved.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE
+
+*/

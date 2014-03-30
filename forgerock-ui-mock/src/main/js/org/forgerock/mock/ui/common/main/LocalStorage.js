@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $*/
+/*global define, localStorage */
 
 /**
  * Local storage helper.
@@ -63,13 +63,14 @@ define("org/forgerock/mock/ui/common/main/LocalStorage", function () {
          * @returns {Object} patched data
          */
         patch: function (key, data) {
-            var item = this.get(key);
+            var item = this.get(key),
+                dataLength = data.length,
+                i;
+
             if (item) {
-                var dataLength = data.length;
-                for (var i = 0; i < dataLength; i++) {
+                for (i = 0; i < dataLength; i++) {
                     item[data[i].field] = data[i].value;
                 }
-                console.log('Patching item in localStorage under key: ' + key);
                 localStorage.setItem(mockPrefix + key, JSON.stringify(item));
             }
             return item;
@@ -82,7 +83,6 @@ define("org/forgerock/mock/ui/common/main/LocalStorage", function () {
          * @returns {Object}
          */
         get: function (key) {
-            console.log('Getting from localStorage by key: ' + key);
             return JSON.parse(localStorage.getItem(mockPrefix + key));
         },
 
@@ -93,7 +93,6 @@ define("org/forgerock/mock/ui/common/main/LocalStorage", function () {
          * @returns {boolean} whether data was removed
          */
         remove: function (key) {
-            console.log('Removing data from localStorage by key: ' + key);
             return delete localStorage[mockPrefix + key];
         }
     } : {

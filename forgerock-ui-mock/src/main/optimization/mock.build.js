@@ -1,7 +1,7 @@
-/**
+/** 
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2012 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -21,34 +21,17 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-
-/*global define, sinon */
-
-/**
- * Fake server to handle AJAX requests.
- *
- * @author Eugenia Sergueeva
- */
-
-define("org/forgerock/mock/ui/common/main/MockServer", ["mock/Data"], function (mockData) {
-    var instance = null,
-        server;
-
-    function init() {
-        server = sinon.fakeServer.create();
-        server.autoRespond = true;
-
-        mockData(server);
-        return server;
-    }
-
-    return {
-        instance: (function () {
-            if (!instance) {
-                instance = init();
-            }
-
-            return instance;
-        }())
-    };
-});
+({
+    appDir : "../../../target/www",
+    baseUrl : ".",
+    dir: "../../../target/www_minified",
+    mainConfigFile : '../js/main.js',
+    preserveLicenseComments: false,
+    generateSourceMaps: true,
+    optimize: "uglify2",
+    modules: [
+        {
+            name: "main"
+        }
+    ]
+})

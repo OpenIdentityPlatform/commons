@@ -34,6 +34,8 @@ define("org/forgerock/commons/ui/common/util/Constants", [
 
     obj.EVENT_PROFILE_INITIALIZATION = "user.profile.EVENT_PROFILE_INITIALIZATION";
 
+    obj.LESS_VERSION = 'libs/less-1.5.1-min.js';
+
     //service invoker
     obj.EVENT_END_REST_CALL = "common.delegate.EVENT_END_REST_CALL";
     obj.EVENT_START_REST_CALL = "common.delegate.EVENT_START_REST_CALL";

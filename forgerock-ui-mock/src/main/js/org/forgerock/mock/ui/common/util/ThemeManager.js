@@ -28,51 +28,106 @@
  * @author Eugenia Sergueeva
  */
 
-define("ThemeManager", [ ], function () {
+define("ThemeManager", [
+    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/main/Configuration"
+], function (constants, conf) {
     var obj = {},
-        themePromise = $.Deferred().resolve({
-            "path": "",
-            "icon": "favicon.ico",
-            "settings": {
-                "logo": {
-                    "src": "images/logo.png",
-                    "title": "ForgeRock",
-                    "alt": "ForgeRock",
-                    "height": "80",
-                    "width": "120"
-                },
-                "lessVars": {
-                    "background-image": "url('../images/box-bg.png')",
-                    "background-position": "950px -100px",
-                    "column-padding": "0px",
-                    "login-container-label-align": "left",
-                    "highlight-color": "#eeea07",
-                    "login-container-width": "430px",
-                    "medium-container-width": "850px",
-                    "content-background": "#f9f9f9",
-                    "href-color-hover": "#5e887f",
-                    "color-error": "#d97986",
-                    "color-warning": "yellow",
-                    "color-success": "#71bd71",
-                    "color-info": "blue",
-                    "color-inactive": "gray"
-                },
-                "footer": {
-                    "mailto": "info@forgerock.com",
-                    "phone": "+47-2108-1746"
-                }
-            }
-        }).done(function (theme) {
-            var newLessVars = {};
-            _.each(theme.settings.lessVars, function (value, key) {
-                newLessVars['@' + key] = value;
-            });
-            less.modifyVars(newLessVars);
-        });
+        themePromise;
 
-    obj.getTheme = function () {
-        return themePromise;
+    obj.loadThemeCSS = function(theme){
+        $('head').find('link[href*=less]').remove();
+        $('head').find('link[href*=favicon]').remove();
+        
+        $("<link/>", {
+            rel: "stylesheet/less",
+            type: "text/css",
+            href: theme.path + "css/styles.less"
+         }).appendTo("head");
+
+        $("<link/>", {
+            rel: "icon",
+            type: "image/x-icon",
+            href: theme.path + theme.icon
+         }).appendTo("head");
+        
+        $("<link/>", {
+            rel: "shortcut icon",
+            type: "image/x-icon",
+            href: theme.path + theme.icon
+         }).appendTo("head");
+
+        return $.ajax({
+            url: constants.LESS_VERSION,
+            dataType: "script",
+            cache: true
+        });
     };
 
+
+    obj.loadThemeConfig = function(){
+        var prom = $.Deferred();
+        //check to see if the config file has been loaded already
+        //if so use what is already there if not load it
+        if(conf.globalData.themeConfig){
+            prom.resolve(conf.globalData.themeConfig);
+            return prom;
+        }
+        else{
+            return $.Deferred().resolve({
+                "path": "",
+                "icon": "favicon.ico",
+                "settings": {
+                    "logo": {
+                        "src": "images/logo.png",
+                        "title": "ForgeRock",
+                        "alt": "ForgeRock",
+                        "height": "80",
+                        "width": "120"
+                    },
+                    "lessVars": {
+                        "background-image": "url('../images/box-bg.png')",
+                        "background-position": "950px -100px",
+                        "column-padding": "0px",
+                        "login-container-label-align": "left",
+                        "highlight-color": "#eeea07",
+                        "login-container-width": "430px",
+                        "medium-container-width": "850px",
+                        "content-background": "#f9f9f9",
+                        "href-color-hover": "#5e887f",
+                        "color-error": "#d97986",
+                        "color-warning": "yellow",
+                        "color-success": "#71bd71",
+                        "color-info": "blue",
+                        "color-inactive": "gray"
+                    },
+                    "footer": {
+                        "mailto": "info@forgerock.com",
+                        "phone": "+47-2108-1746"
+                    }
+                }
+            });
+        }
+    };
+    
+    obj.getTheme = function(){
+        if (themePromise === undefined) {
+            themePromise = obj.loadThemeConfig().then(function(themeConfig){
+                var newLessVars = {};
+
+                conf.globalData.theme = themeConfig;
+                return obj.loadThemeCSS(themeConfig).then(function(){
+                    _.each(themeConfig.settings.lessVars, function (value, key) {
+                        newLessVars['@' + key] = value;
+                    });
+                    less.modifyVars(newLessVars);
+                    
+                    return themeConfig;
+                });
+            });
+        }
+        return themePromise;
+    };
+    
     return obj;
 });

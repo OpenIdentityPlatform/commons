@@ -59,7 +59,8 @@ define("org/forgerock/mock/ui/user/UserRegistrationView", [
             if (validatorsManager.formValidated(this.$el) && !this.isFormLocked()) {
                 this.lock();
 
-                var data = form2js(this.$el.attr("id"));
+                var data = form2js(this.$el.attr("id")),
+                    self = this;
 
                 delete data.terms;
                 delete data.passwordConfirm;
@@ -73,7 +74,6 @@ define("org/forgerock/mock/ui/user/UserRegistrationView", [
                     roles: ['ui-user']
                 });
 
-                var self = this;
                 this.delegate.create(data.userName, data, function () {
                     eventManager.sendEvent(constants.EVENT_USER_SUCCESSFULLY_REGISTERED, { user: data, selfRegistration: true });
                 }, function () {
