@@ -124,42 +124,51 @@
                     </execution>
                 </executions>
             </plugin>            
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>js/css optimization</id>
-                        <phase>package</phase>
-
-                        <configuration>
-                            <target name="optimize">
-                                
-                                <property name="requirejs.dir" value="${basedir}/src/main/optimization" />
-
-                                <java classname="org.mozilla.javascript.tools.shell.Main">
-                                    <classpath refid="maven.compile.classpath" />
-                                    <arg value="${requirejs.dir}/r.js" />
-                                    <arg value="-o" />
-                                    <arg value="${requirejs.dir}/mock.build.js" />
-                                </java>
-                                
-                                <delete dir="${project.build.directory}/www" />
-
-                                <move   file="${project.build.directory}/www_minified" 
-                                        tofile="${project.build.directory}/www" />
-
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>production</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>js/css optimization</id>
+                                <phase>package</phase>
+
+                                <configuration>
+                                    <target name="optimize">
+                                        
+                                        <property name="requirejs.dir" value="${basedir}/src/main/optimization" />
+        
+                                        <java classname="org.mozilla.javascript.tools.shell.Main">
+                                            <classpath refid="maven.compile.classpath" />
+                                            <arg value="${requirejs.dir}/r.js" />
+                                            <arg value="-o" />
+                                            <arg value="${requirejs.dir}/mock.build.js" />
+                                        </java>
+                                        
+                                        <delete dir="${project.build.directory}/www" />
+
+                                        <move   file="${project.build.directory}/www_minified" 
+                                                tofile="${project.build.directory}/www" />
+
+                                    </target>
+                                </configuration>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
     <repositories>
         <repository>
