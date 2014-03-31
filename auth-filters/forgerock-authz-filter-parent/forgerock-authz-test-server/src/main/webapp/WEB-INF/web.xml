@@ -18,13 +18,15 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
     <display-name>OpenAM Authz Filter Test Server</display-name>
 
+    <!-- CREST Testing -->
+
     <filter>
-        <filter-name>TestAuthzFilter</filter-name>
+        <filter-name>TestCrestAuthZFilter</filter-name>
         <filter-class>org.forgerock.authz.AuthZFilter</filter-class>
         <init-param>
             <description>The authorization module configurator to use to protect our resource.</description>
             <param-name>module-configurator-factory-class</param-name>
-            <param-value>org.forgerock.authz.test.TestAuthorizationModuleConfigurator</param-value>
+            <param-value>org.forgerock.authz.test.crest.TestCrestAuthorizationModuleConfigurator</param-value>
         </init-param>
         <init-param>
             <description>Configurator for audit logging. Should have a static getLoggingConfigurator() factory method.</description>
@@ -34,21 +36,25 @@
     </filter>
 
     <filter-mapping>
-        <filter-name>TestAuthzFilter</filter-name>
-        <url-pattern>/authz-test/*</url-pattern>
+        <filter-name>TestCrestAuthZFilter</filter-name>
+        <url-pattern>/crest-authz-test/*</url-pattern>
     </filter-mapping>
 
     <servlet>
-        <servlet-name>authz-test-servlet</servlet-name>
-        <servlet-class>org.forgerock.authz.test.AuthorizationTestServlet</servlet-class>
+        <servlet-name>TestCrestServlet</servlet-name>
+        <servlet-class>org.forgerock.json.resource.servlet.HttpServlet</servlet-class>
+        <init-param>
+            <param-name>connection-factory-class</param-name>
+            <param-value>org.forgerock.authz.test.crest.TestCrestConnectionFactory</param-value>
+        </init-param>
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>authz-test-servlet</servlet-name>
-        <url-pattern>/authz-test</url-pattern>
+        <servlet-name>TestCrestServlet</servlet-name>
+        <url-pattern>/crest-authz-test/*</url-pattern>
     </servlet-mapping>
 
-
+    <!-- OAuth2 Testing -->
 
     <filter>
         <filter-name>TestOAuth2AuthzFilter</filter-name>
