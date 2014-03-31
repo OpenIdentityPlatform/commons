@@ -33,7 +33,7 @@ define("org/forgerock/mock/ui/common/delegates/PolicyDelegate", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate"
 ], function (constants, AbstractDelegate) {
-    var obj = new AbstractDelegate("");
+    var obj = new AbstractDelegate("/policy");
 
     obj.validateProperty = function (baseEntity, args, callback) {
         /* 

@@ -31,24 +31,26 @@
 define("org/forgerock/mock/ui/user/profile/UserProfileView", [
     "org/forgerock/commons/ui/user/profile/UserProfileView",
     "org/forgerock/commons/ui/common/main/Configuration",
+    "UserDelegate",
     "org/forgerock/commons/ui/common/main/ValidatorsManager"
-], function (commonProfileView, conf, validatorsManager) {
+], function (commonProfileView, conf, userDelegate, validatorsManager) {
     var obj = Object.getPrototypeOf(commonProfileView);
 
     obj.render = function (args, callback) {
 
         this.parentRender(function () {
-            validatorsManager.bindValidators(this.$el);
-
             _.each(conf.loggedUser, function (val, key) {
                 this.$el.find('[name=' + key.toLowerCase() + ']').prop("name", key);
             }, this);
 
-            this.reloadData();
+            validatorsManager.bindValidators(this.$el, userDelegate.serviceUrl + "/*", _.bind(function () {
+                this.reloadData();
 
-            if (callback) {
-                callback();
-            }
+                if (callback) {
+                    callback();
+                }
+
+            }, this));
         });
     };
 

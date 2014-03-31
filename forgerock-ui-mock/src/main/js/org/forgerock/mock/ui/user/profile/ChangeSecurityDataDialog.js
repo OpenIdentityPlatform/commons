@@ -98,7 +98,8 @@ define("org/forgerock/mock/ui/user/profile/ChangeSecurityDataDialog", [
             $("#dialogs").hide();
 
             this.show(_.bind(function () {
-                validatorsManager.bindValidators(this.$el, userDelegate.serviceUrl + "/test", _.bind(function () {
+
+                validatorsManager.bindValidators(this.$el, userDelegate.serviceUrl + "/*", _.bind(function () {
                     $("#dialogs").show();
                     if (!this.reauth_required) {
                         this.reloadData();

@@ -195,7 +195,7 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
                                         params = policy.params;
                                         // This instantiates the string representation of the function into an actual, executable local function
                                         // and then calls that function, appending the resulting array into our collection of policy failures.
-                                        policyFailures = policyFailures.concat(EVAL_IS_EVIL("policyFunction = " + policy.policyFunction)(form2js(this.input.closest('form')[0]), this.input.val(), params, this.property.name));
+                                        policyFailures = policyFailures.concat(EVAL_IS_EVIL("policyFunction = " + policy.policyFunction).call({failedPolicyRequirements: policyFailures}, form2js(this.input.closest('form')[0]), this.input.val(), params, this.property.name));
                                     }
                                     // we have a special case for reauth required, since that is kind of a strange case.
                                     else if (!($.inArray("REAUTH_REQUIRED", policy.policyRequirements) !== -1 && policy.policyRequirements.length === 1)) {
