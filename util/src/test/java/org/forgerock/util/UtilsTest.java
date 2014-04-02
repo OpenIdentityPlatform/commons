@@ -17,10 +17,12 @@ package org.forgerock.util;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.forgerock.util.Utils.joinAsString;
+import static org.forgerock.util.Utils.asEnum;
 
 import java.util.Arrays;
 import java.util.Collections;
 
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")
@@ -64,5 +66,36 @@ public class UtilsTest {
     @Test
     public void joinAsStringStringIterable3() {
         assertThat(joinAsString(", ", Arrays.asList(1, 2, 3))).isEqualTo("1, 2, 3");
+    }
+
+    enum MyAction {
+        action1, action2, mIxEdCase
+    }
+
+    @DataProvider
+    public Object[][] actionNames() {
+        return new Object[][] {
+                // @formatter:off
+                { "action1", MyAction.action1 },
+                { "action2", MyAction.action2 },
+                { "mixedcase", MyAction.mIxEdCase },
+
+                // @formatter:on
+        };
+    }
+
+    @Test(dataProvider = "actionNames")
+    public void testAsEnum(final String value, final MyAction action) {
+        assertThat(asEnum(value, MyAction.class)).isEqualTo(action);
+    }
+
+    @Test
+    public void testActionRequestAsEnumNullValue() {
+        assertThat(asEnum(null, MyAction.class)).isNull();
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testActionRequestAsEnumBadEnumType() {
+        asEnum("badAction", MyAction.class);
     }
 }

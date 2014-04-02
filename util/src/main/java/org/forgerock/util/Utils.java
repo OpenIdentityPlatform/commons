@@ -142,6 +142,43 @@ public final class Utils {
         };
     }
 
+    /**
+     * Returns the string value as an enum constant of the specified enum
+     * type. The string value and enum constants are compared, ignoring case
+     * considerations. If the string value is {@code null}, this method returns
+     * {@code null}.
+     *
+     * @param <T>
+     *            the enum type sub-class.
+     * @param value
+     *            the string value
+     * @param type
+     *            the enum type to match constants with the value.
+     * @return the enum constant represented by the string value.
+     * @throws IllegalArgumentException
+     *             if {@code type} does not represent an enum type,
+     *             of if {@code value} does not match one of the enum constants
+     * @throws NullPointerException
+     *             if {@code type} is {@code null}.
+     */
+    public static <T extends Enum<T>> T asEnum(final String value, final Class<T> type) {
+        if (value == null) {
+            return null;
+        }
+        final T[] constants = type.getEnumConstants();
+        if (constants == null) {
+            throw new IllegalArgumentException("Type is not an enum class");
+        }
+        for (final T constant : constants) {
+            if (value.equalsIgnoreCase(constant.toString())) {
+                return constant;
+            }
+        }
+        final StringBuilder sb = new StringBuilder("Expecting String containing one of: ");
+        sb.append(joinAsString(" ", constants));
+        throw new IllegalArgumentException(sb.toString());
+    }
+
     private Utils() {
         // Prevent instantiation.
     }
