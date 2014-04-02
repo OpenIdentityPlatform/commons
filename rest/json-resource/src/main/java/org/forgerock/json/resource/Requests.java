@@ -24,6 +24,7 @@ import java.util.Map;
 import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.util.Utils;
 
 /**
  * A utility class containing various factory methods for creating and
@@ -119,6 +120,11 @@ public final class Requests {
         @Override
         public String getAction() {
             return actionId;
+        }
+
+        @Override
+        public <T extends Enum<T>> T getActionAsEnum(final Class<T> type) {
+            return Utils.asEnum(getAction(), type);
         }
 
         @Override

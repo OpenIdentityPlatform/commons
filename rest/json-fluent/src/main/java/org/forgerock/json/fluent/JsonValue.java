@@ -43,6 +43,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import org.forgerock.util.RangeSet;
+import org.forgerock.util.Utils;
 import org.forgerock.util.promise.Function;
 
 /**
@@ -462,35 +463,13 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
      *            the enum type to match constants with the value.
      * @return the enum constant represented by the string value.
      * @throws IllegalArgumentException
-     *             if {@code type} does not represent an enum type.
-     * @throws JsonValueException
+     *             if {@code type} does not represent an enum type. or
      *             if the JSON value does not match any of the enum's constants.
      * @throws NullPointerException
      *             if {@code type} is {@code null}.
      */
     public <T extends Enum<T>> T asEnum(final Class<T> type) {
-        T result = null;
-        final String string = asString();
-        if (string != null) {
-            final T[] constants = type.getEnumConstants();
-            if (constants == null) {
-                throw new IllegalArgumentException("Type is not an enum class");
-            }
-            for (final T constant : constants) {
-                if (string.equalsIgnoreCase(constant.toString())) {
-                    result = constant;
-                    break;
-                }
-            }
-            if (result == null) {
-                final StringBuilder sb = new StringBuilder("Expecting String containing one of:");
-                for (final T constant : constants) {
-                    sb.append(' ').append(constant.toString());
-                }
-                throw new JsonValueException(this, sb.toString());
-            }
-        }
-        return result;
+        return Utils.asEnum(asString(), type);
     }
 
     /**
