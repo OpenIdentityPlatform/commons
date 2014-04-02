@@ -75,6 +75,25 @@ public interface ActionRequest extends Request {
     String getAction();
 
     /**
+     * Returns the ID of the action to be performed by this action request
+     * as a enum constant of the specified enum type.  The action ID string
+     * and enum constants are compared, ignoring case considerations.
+     *
+     * @param <T>
+     *            the enum type sub-class.
+     * @param type
+     *            the enum type to match constants with the value.
+     * @return the enum constant represented by the Id of the action to be
+     *         performed by this action request.
+     * @throws IllegalArgumentException
+     *             if {@code type} does not represent an enum type, or
+     *             if the ID does not match any of the enum's constants.
+     * @throws NullPointerException
+     *             if {@code type} is {@code null}.
+     */
+    <T extends Enum<T>> T getActionAsEnum(Class<T> type);
+
+    /**
      * Returns the additional parameters which should be used to control the
      * behavior of this action request. The returned map may be modified if
      * permitted by this action request.
