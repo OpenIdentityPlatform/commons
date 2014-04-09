@@ -69,9 +69,12 @@
         <maven.compiler.source>1.6</maven.compiler.source>
 
         <slf4j.version>1.7.5</slf4j.version>
-        <forgerock-rest.version>2.2.3-SNAPSHOT</forgerock-rest.version>
-        <restlet.version>2.1.6</restlet.version>
-        <jackson.version>1.9.7</jackson.version>
+        <forgerock-rest.version>2.2.4</forgerock-rest.version>
+        <restlet.version>2.1.2</restlet.version>
+        <jackson.version>2.1.5</jackson.version>
+
+        <testng.version>6.8</testng.version>
+        <mockito.version>1.9.0</mockito.version>
     </properties>
 
     <scm>
@@ -181,6 +184,11 @@
 
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
+                <artifactId>json-fluent</artifactId>
+                <version>${forgerock-rest.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons</groupId>
                 <artifactId>json-resource</artifactId>
                 <version>${forgerock-rest.version}</version>
             </dependency>
@@ -196,23 +204,28 @@
                 <version>${slf4j.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.restlet.jse</groupId>
+                <groupId>org.restlet.osgi</groupId>
                 <artifactId>org.restlet</artifactId>
                 <version>${restlet.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.restlet.jse</groupId>
+                <groupId>org.restlet.osgi</groupId>
                 <artifactId>org.restlet.ext.httpclient</artifactId>
                 <version>${restlet.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.restlet.jse</groupId>
+                <groupId>org.restlet.osgi</groupId>
+                <artifactId>org.restlet.ext.net</artifactId>
+                <version>${restlet.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.restlet.osgi</groupId>
                 <artifactId>org.restlet.ext.json</artifactId>
                 <version>${restlet.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.codehaus.jackson</groupId>
-                <artifactId>jackson-mapper-asl</artifactId>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
                 <version>${jackson.version}</version>
             </dependency>
 
@@ -238,13 +251,13 @@
             <dependency>
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>
-                <version>6.5.2</version>
+                <version>${testng.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-all</artifactId>
-                <version>1.9.0</version>
+                <version>${mockito.version}</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>

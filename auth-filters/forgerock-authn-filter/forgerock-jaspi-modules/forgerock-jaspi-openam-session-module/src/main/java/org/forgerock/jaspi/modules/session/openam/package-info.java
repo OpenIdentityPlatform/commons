@@ -14,31 +14,7 @@
  * Copyright 2014 ForgeRock AS.
  */
 
-package org.forgerock.authz.modules.oauth2;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.forgerock.json.fluent.JsonValue;
-
-import java.io.IOException;
-import java.util.Map;
-
 /**
- * Simple wrapper around the {@link ObjectMapper} class to facilitate testing.
- *
- * @since 1.4.0
+ * This package contains classes for the OpenAM Session JASPI Authentication Module.
  */
-public class JsonParser {
-
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-
-    /**
-     * Parses the Json String into a {@link JsonValue}.
-     *
-     * @param s The Json String to parse.
-     * @return A JsonValue
-     * @throws IOException If the String could not be parsed.
-     */
-    public JsonValue parse(final String s) throws IOException {
-        return new JsonValue(MAPPER.readValue(s, Map.class));
-    }
-}
+package org.forgerock.jaspi.modules.session.openam;
