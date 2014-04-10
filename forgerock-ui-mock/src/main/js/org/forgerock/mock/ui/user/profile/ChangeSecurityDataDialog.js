@@ -70,7 +70,7 @@ define("org/forgerock/mock/ui/user/profile/ChangeSecurityDataDialog", [
                 patchDefinitionObject.push({operation: "replace", field: "password", value: this.$el.find("input[name=password]").val()});
             }
 
-            userDelegate.patchSelectedUserAttributes(conf.loggedUser._id, conf.loggedUser._rev, patchDefinitionObject, _.bind(function (r) {
+            userDelegate.patchSelectedUserAttributes(userDelegate.getUserResourceName(conf.loggedUser), conf.loggedUser._rev, patchDefinitionObject, _.bind(function (r) {
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "securityDataChanged");
                 delete conf.passwords;
                 this.close();

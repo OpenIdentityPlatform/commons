@@ -49,7 +49,7 @@ define("org/forgerock/mock/ui/common/main/LocalStorage", function () {
             if (!this.get(key)) {
                 console.log('Adding item to localStorage: ' + data);
                 localStorage.setItem(mockPrefix + key, JSON.stringify(data));
-                return data;
+                return key;
             }
 
             return null;

@@ -56,7 +56,7 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
             
             if(validatorsManager.formValidated(this.$el)) {
                 data = form2js(this.el, '.', false);
-                this.delegate.updateUser(conf.loggedUser, conf.globalData.auth.realm, data, _.bind(function(newUserData) {
+                this.delegate.updateUser(conf.loggedUser, data, _.bind(function(newUserData) {
                     if (_.has(newUserData, "_rev")) {
                         data._rev = newUserData._rev;
                     }
@@ -71,13 +71,15 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
         render: function(args, callback) {
             
             this.parentRender(function() {
-                validatorsManager.bindValidators(this.$el);
+                validatorsManager.bindValidators(this.$el, this.delegate.getUserResourceName(conf.loggedUser), _.bind(function () {
                     
-                this.reloadData();
+                    this.reloadData();
 
-                if(callback) {
-                    callback();
-                }
+                    if(callback) {
+                        callback();
+                    }
+
+                }, this));
                 
             });
         },

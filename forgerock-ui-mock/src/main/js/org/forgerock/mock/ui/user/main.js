@@ -33,7 +33,6 @@ define("org/forgerock/mock/ui/user/main", [
     "./LoginView",
     "./login/InternalLoginHelper",
     "./TermsOfUseDialog",
-    "./profile/UserProfileView",
     "./profile/EnterOldPasswordDialog",
     "./profile/ChangeSecurityDataDialog"
 ]);

@@ -117,6 +117,7 @@ require([
     "sinon",
     "org/forgerock/mock/ui/common/main/MockServer",
     "org/forgerock/commons/ui/common/main/i18nManager",
+    "org/forgerock/mock/ui/common/util/ThemeManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/mock/ui/common/main/LocalStorage",
@@ -126,7 +127,7 @@ require([
     "org/forgerock/commons/ui/common/main",
     "config/main"
 ], function (_, Backbone, form2js, js2form, spin, $ui, xdate, moment, doTimeout, Handlebars, i18n, sinon, 
-             mockServer, i18nManager, constants, eventManager, localStorage) {
+             mockServer, i18nManager, themeManager, constants, eventManager, localStorage) {
 
     // Mock project is run without server. Framework requires cookies to be enabled in order to be able to login.
     // Default CookieHelper.cookiesEnabled() implementation will always return false as cookies cannot be set from local
@@ -136,18 +137,18 @@ require([
     };
 
     // Adding stub user
-    localStorage.add('test', {
+    localStorage.add('mock/repo/internal/user/test', {
         _id: 'test',
         _rev: '1',
-        component: 'internal/user',
+        component: 'mock/repo/internal/user',
         roles: ['ui-user'],
+        uid: 'test',
         userName: 'test',
         password: 'test',
         telephoneNumber: '12345',
         givenName: 'Jack',
         sn: 'White',
         mail: 'white@test.com'
-
     });
 
     eventManager.sendEvent(constants.EVENT_DEPENDECIES_LOADED);

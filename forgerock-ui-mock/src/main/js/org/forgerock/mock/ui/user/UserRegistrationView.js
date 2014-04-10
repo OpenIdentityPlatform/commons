@@ -40,7 +40,6 @@ define("org/forgerock/mock/ui/user/UserRegistrationView", [
     var UserRegistrationView = AbstractView.extend({
         template: "templates/mock/UserRegistrationTemplate.html",
         baseTemplate: "templates/common/MediumBaseTemplate.html",
-        delegate: userDelegate,
         events: {
             "click input[type=submit]": "formSubmit",
             "onValidate": "onValidate",
@@ -70,11 +69,12 @@ define("org/forgerock/mock/ui/user/UserRegistrationView", [
                 $.extend(data, {
                     _id: data.userName,
                     _rev: '1',
+                    uid: data.userName,
                     component: 'internal/user',
                     roles: ['ui-user']
                 });
 
-                this.delegate.create(data.userName, data, function () {
+                userDelegate.create(userDelegate.getUserResourceName(data), data, function () {
                     eventManager.sendEvent(constants.EVENT_USER_SUCCESSFULLY_REGISTERED, { user: data, selfRegistration: true });
                 }, function () {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "userAlreadyExists");

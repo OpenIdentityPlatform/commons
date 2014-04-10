@@ -43,6 +43,11 @@ define("UserDelegate", [
     obj.users = null;
     obj.numberOfUsers = 0;
 
+    obj.getUserResourceName = function (user) {
+        var userId = user._id || "*";
+        return this.serviceUrl + "/" + userId;
+    };
+
     /**
      * Starting session. Sending username and password to authenticate and returns user's id.
      */
@@ -75,7 +80,7 @@ define("UserDelegate", [
      */
     obj.getProfile = function (successCallback, errorCallback, errorsHandlers, headers) {
         if (headers) {
-            var storedUser = localStorage.get(headers[constants.HEADER_PARAM_USERNAME]);
+            var storedUser = localStorage.get(this.serviceUrl + "/" + headers[constants.HEADER_PARAM_USERNAME]);
             if (storedUser && storedUser.password === headers[constants.HEADER_PARAM_PASSWORD]) {
                 successCallback(storedUser);
             } else {
@@ -94,19 +99,25 @@ define("UserDelegate", [
      * Creates new user.
      */
     obj.create = function (id, data, successCallback, errorCallback) {
-        if (localStorage.add(data.userName, data)) {
-            successCallback();
+        var promise = $.Deferred(),
+            result = localStorage.add(id, data);
+
+        if (result) {
+            promise.resolve(result);
+            if (successCallback) {
+                successCallback(result);
+            }
         } else {
-            errorCallback();
+            promise.reject();
+            if (errorCallback) {
+                errorCallback();
+            }
         }
-        return localStorage.add(data.userName, data);
+
+        return promise;
     };
 
     obj.getForUserName = function (uid, successCallback, errorCallback) {
-        // not used
-    };
-
-    obj.getForUserID = function (uid, successCallback, errorCallback) {
         // not used
     };
 
@@ -114,12 +125,12 @@ define("UserDelegate", [
         console.info("updating user");
 
         var updatedData = obj.getDifferences(oldUserData, newUserData);
-        if (localStorage.patch(configuration.loggedUser._id, updatedData)) {
+        if (localStorage.patch(obj.getUserResourceName(oldUserData), updatedData)) {
             successCallback(updatedData);
         }
     };
 
-    obj.updateUser = function (oldUserData, stub, newUserData, successCallback, errorCallback, noChangesCallback) {
+    obj.updateUser = function (oldUserData, newUserData, successCallback, errorCallback, noChangesCallback) {
         obj.patchUserDifferences(oldUserData, newUserData, successCallback, errorCallback, noChangesCallback, {
             "forbidden": {
                 status: "403",

@@ -130,7 +130,7 @@ var deps = arguments,
 
         server.respondWith(
             "GET",
-            "/policy/mock/repo/internal/user/*",
+            new RegExp("\/policy\/mock\/repo\/internal\/user\/.*"),
             [
                 200,
                 {
