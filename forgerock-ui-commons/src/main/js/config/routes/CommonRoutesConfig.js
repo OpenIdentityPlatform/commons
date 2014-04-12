@@ -55,7 +55,8 @@ define("config/routes/CommonRoutesConfig", [
                 url: /login([^\&]+)?(&.+)?/,
                 pattern: "login??",
                 defaults: ["/",""],
-                forceUpdate: true
+                forceUpdate: true,
+                argumentNames: ["realm","details"]
             },            
             "logout" : {
                 event: constants.EVENT_LOGOUT,

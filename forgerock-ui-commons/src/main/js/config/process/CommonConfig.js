@@ -219,9 +219,10 @@ define("config/process/CommonConfig", [
                 "org/forgerock/commons/ui/common/main/Router",
                 "org/forgerock/commons/ui/common/main/Configuration",
                 "org/forgerock/commons/ui/common/components/Navigation",
-                "org/forgerock/commons/ui/common/main/SpinnerManager"
+                "org/forgerock/commons/ui/common/main/SpinnerManager",
+                "org/forgerock/commons/ui/common/SiteConfigurator"
             ],
-            processDescription: function(args, viewManager, router, conf, navigation, spinner) {
+            processDescription: function(args, viewManager, router, conf, navigation, spinner, siteConfigurator) {
                 var route = args.route, params = args.args, callback = args.callback,
                     view = require(route.view);
 
@@ -229,11 +230,14 @@ define("config/process/CommonConfig", [
                 params = params || route.defaults;
                 conf.setProperty("baseView", ""); 
                 conf.setProperty("baseViewArgs", ""); 
-                                        
-                spinner.hideSpinner(10);
-                router.routeTo(route, {trigger: true, args: params});
-                viewManager.changeView(route.view, params, callback, route.forceUpdate);
-                navigation.reload();
+
+                siteConfigurator.configurePage(route, params).then(function () {
+                    spinner.hideSpinner(10);
+                    router.routeTo(route, {trigger: true, args: params});
+                    viewManager.changeView(route.view, params, callback, route.forceUpdate);
+                    navigation.reload();
+                });
+
             }
         },
         {
