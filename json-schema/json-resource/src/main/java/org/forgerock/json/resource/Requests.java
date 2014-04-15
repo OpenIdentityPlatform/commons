@@ -132,6 +132,11 @@ public final class Requests {
         }
 
         @Override
+        public String getAdditionalParameter(final String name) {
+            return parameters.get(name);
+        }
+
+        @Override
         public JsonValue getContent() {
             return content;
         }
@@ -372,6 +377,11 @@ public final class Requests {
         @Override
         public Map<String, String> getAdditionalParameters() {
             return parameters;
+        }
+
+        @Override
+        public String getAdditionalParameter(final String name) {
+            return parameters.get(name);
         }
 
         @Override
