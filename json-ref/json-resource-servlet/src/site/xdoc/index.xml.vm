@@ -310,7 +310,7 @@ Accept: application/json</source>
                     To search or list the resources contained within a resource
                     container send a GET request targeting the resource
                     container and including either a <tt>_queryId</tt> or
-                    <tt>_filter</tt> parameter.
+                    <tt>_queryFilter</tt> parameter.
                 </p>
                 <table>
                     <tr>
@@ -327,7 +327,7 @@ Accept: application/json</source>
                         </td>
                         <td>
                             <p>A string identifying a server side "stored" query.
-                            This parameter is mandatory if <tt>_filter</tt>
+                            This parameter is mandatory if <tt>_queryFilter</tt>
                             is not specified.</p>
                         </td>
                     </tr>
@@ -338,10 +338,10 @@ Accept: application/json</source>
                         <td>
                             <p>A filter expression which will be used to determine
                             whether or not a resource should be included in the
-                            returned results. The filter format is TBD (this
-                            feature is not yet fully implemented), but
-                            expected to be similar to the filter representation
-                            used in SCIM. This parameter is mandatory if
+                            returned results. The filter format is described in the
+                            Javadoc for the <a
+                            href="http://commons.forgerock.org/forgerock-rest/json-resource/apidocs/org/forgerock/json/resource/QueryFilter.html"><tt>QueryFilter</tt></a>
+                            class. This parameter is mandatory if
                             <tt>_queryId</tt> is not specified.</p>
                         </td>
                     </tr>
