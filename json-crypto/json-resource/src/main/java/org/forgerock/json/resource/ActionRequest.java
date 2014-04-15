@@ -116,6 +116,17 @@ public interface ActionRequest extends Request {
     Map<String, String> getAdditionalParameters();
 
     /**
+     * Returns the additional parameter which should be used to control the behavior
+     * of this action request.
+     *
+     * @param name
+     *            The name of the additional parameter.
+     * @return The additional parameter which should be used to control the
+     *         behavior of this action request
+     */
+    String getAdditionalParameter(String name);
+
+    /**
      * Returns the content of this action request. The structure of the content
      * is defined by the action.
      *

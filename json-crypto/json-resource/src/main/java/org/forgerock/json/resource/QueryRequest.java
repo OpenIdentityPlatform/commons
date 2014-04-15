@@ -160,6 +160,17 @@ public interface QueryRequest extends Request {
     Map<String, String> getAdditionalParameters();
 
     /**
+     * Returns the additional parameter which should be used to control the behavior
+     * of this query request.
+     *
+     * @param name
+     *            The name of the additional parameter.
+     * @return The additional parameter which should be used to control the
+     *         behavior of this query request
+     */
+    String getAdditionalParameter(String name);
+
+    /**
      * {@inheritDoc}
      */
     @Override
