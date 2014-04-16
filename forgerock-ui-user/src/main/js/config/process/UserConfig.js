@@ -51,11 +51,9 @@ define("config/process/UserConfig", [
             processDescription: function(event, router) {
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "afterRegistration");
 
-                if(event.selfRegistration) {
+                if(event.autoLogin) {
                     eventManager.sendEvent(constants.EVENT_LOGIN_REQUEST, { userName: event.user.userName, password: event.user.password});
-                } else {
-                    router.navigate(router.configuration.routes.adminUsers.url, {trigger: true});
-                }
+                } 
             }
         },
         {

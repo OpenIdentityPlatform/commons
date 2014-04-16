@@ -75,7 +75,7 @@ define("org/forgerock/mock/ui/user/UserRegistrationView", [
                 });
 
                 userDelegate.create(userDelegate.getUserResourceName(data), data, function () {
-                    eventManager.sendEvent(constants.EVENT_USER_SUCCESSFULLY_REGISTERED, { user: data, selfRegistration: true });
+                    eventManager.sendEvent(constants.EVENT_USER_SUCCESSFULLY_REGISTERED, { user: data, autoLogin: true });
                 }, function () {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "userAlreadyExists");
                     self.unlock();

@@ -112,7 +112,7 @@ define("org/forgerock/commons/ui/common/util/Constants", [
     obj.USER_APPLICATION_STATE_APPROVED = "B65FA6A2-D43D-49CB-BEA0-CE98E275A8CD";
     obj.USER_APPLICATION_STATE_PENDING = "B65FA6A2-D43D-49CD-BEA0-CE98E275A8CD";
     
-    obj.DEFAULT_LANGUAGE = "en-US";
+    obj.DEFAULT_LANGUAGE = "en";
 
     obj.ANONYMOUS_USERNAME = "anonymous";
     obj.ANONYMOUS_PASSWORD = "anonymous";

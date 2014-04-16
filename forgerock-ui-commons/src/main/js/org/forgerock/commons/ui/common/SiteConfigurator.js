@@ -28,54 +28,54 @@
 * @author mbilski
 */
 define("org/forgerock/commons/ui/common/SiteConfigurator", [
-    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
-    "org/forgerock/commons/ui/common/util/Constants", 
-    "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/commons/ui/common/main/i18nManager"
+   "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
+   "org/forgerock/commons/ui/common/util/Constants", 
+   "org/forgerock/commons/ui/common/main/EventManager",
+   "org/forgerock/commons/ui/common/main/Configuration",
+   "org/forgerock/commons/ui/common/main/i18nManager"
 ], function(AbstractConfigurationAware, constants, eventManager, conf, i18nManager) {
-    var obj = new AbstractConfigurationAware();
-    
-    obj.initialized = false;
-    
-    $(document).on(constants.EVENT_READ_CONFIGURATION_REQUEST, function() {
-        var configurationDelegate;
+   var obj = new AbstractConfigurationAware();
+   
+   obj.initialized = false;
+   
+   $(document).on(constants.EVENT_READ_CONFIGURATION_REQUEST, function() {
+       var configurationDelegate;
 
-        if (!conf.globalData) {
-            conf.setProperty('globalData', {});
-            conf.globalData.auth = {};
-        }
+       if (!conf.globalData) {
+           conf.setProperty('globalData', {});
+           conf.globalData.auth = {};
+       }
 
-        if (!conf.delegateCache) {
-            conf.setProperty('delegateCache', {});
-        }
+       if (!conf.delegateCache) {
+           conf.setProperty('delegateCache', {});
+       }
 
-        console.info("READING CONFIGURATION");
+       console.info("READING CONFIGURATION");
 
-        if (obj.configuration && obj.initialized === false) {
-            obj.initialized = true;
-            
-            if(obj.configuration.remoteConfig === true) {
-                configurationDelegate = require(obj.configuration.delegate);
-                configurationDelegate.getConfiguration(function(config) {
-                    obj.processConfiguration(config); 
-                    eventManager.sendEvent(constants.EVENT_APP_INTIALIZED);
-                }, function() {
-                    obj.processConfiguration({}); 
-                    eventManager.sendEvent(constants.EVENT_APP_INTIALIZED);
-                });
-            } else {
-                obj.processConfiguration(obj.configuration); 
-                eventManager.sendEvent(constants.EVENT_APP_INTIALIZED);
-            }          
-        }
-    });
+       if (obj.configuration && obj.initialized === false) {
+           obj.initialized = true;
+           
+           if (obj.configuration.remoteConfig === true) {
+               configurationDelegate = require(obj.configuration.delegate);
+               configurationDelegate.getConfiguration(function(config) {
+                   obj.processConfiguration(config); 
+                   eventManager.sendEvent(constants.EVENT_APP_INTIALIZED);
+               }, function() {
+                   obj.processConfiguration({}); 
+                   eventManager.sendEvent(constants.EVENT_APP_INTIALIZED);                   
+               });
+           } else {
+               obj.processConfiguration(obj.configuration); 
+               eventManager.sendEvent(constants.EVENT_APP_INTIALIZED);
+           }          
+       }
+   });
 
-    obj.configurePage = function (route, params) {
-        var promise = $.Deferred(),
-            configurationDelegate;
+  obj.configurePage = function (route, params) {
+      var promise = $.Deferred(),
+          configurationDelegate;
 
-            if (obj.configuration.remoteConfig === true) {
+          if (obj.configuration.remoteConfig === true) {
                 configurationDelegate = require(obj.configuration.delegate);
                 if (typeof configurationDelegate.checkForDifferences === "function") {
                     configurationDelegate.checkForDifferences(route, params).then(function (config) {
@@ -84,59 +84,53 @@ define("org/forgerock/commons/ui/common/SiteConfigurator", [
                         }
                         promise.resolve();
                     });
-            } else {
-               promise.resolve();
-            }
-        } else {
+          } else {
+              promise.resolve();
+          }
+      } else {
             promise.resolve();
-        }
+      }
 
-        return promise;
-    };
-    
-    obj.processConfiguration = function(config) {
-        var router, changeSecurityDataDialog;
-        console.log("SiteConfigurator processConfiguration");
-        router = require("org/forgerock/commons/ui/common/main/Router");
-       
-        if (config.selfRegistration === "true" || config.selfRegistration === true) {
-            conf.globalData.selfRegistration = config.selfRegistration;
-        } 
-        
-        if (config.securityQuestions === true) {
-            conf.globalData.securityQuestions = true;
-        } 
+      return promise;
+  };
+   
+   obj.processConfiguration = function(config) {
+
+       if (config.securityQuestions === true) {
+           conf.globalData.securityQuestions = true;             
+       } 
  
-        if (config.siteImages) {
-            conf.globalData.siteImages = config.siteImages;
-        }
-        
-        if (config.passwordResetLink) {
-            conf.globalData.passwordResetLink = config.passwordResetLink;
-        }
+       if (config.siteImages) {
+           conf.globalData.siteImages = config.siteImages;
+       }
+       
+       if (config.passwordResetLink) {
+           conf.globalData.passwordResetLink = config.passwordResetLink;
+       }
 
-        i18nManager.init(config.lang);
+       if (config.roles) {
+           conf.globalData.userRoles = config.roles;
+       }
+       
+       if (config.notificationTypes) {
+           conf.notificationTypes = config.notificationTypes;
+       }
+       
+       if (config.defaultNotificationType) {
+           conf.defaultType = config.defaultNotificationType;
+       }
 
-        conf.globalData.requirePasswordForEmailChange = config.requirePasswordForEmailChange;
-        conf.globalData.forgotPassword = config.forgotPassword;
-        conf.globalData.successfulUserRegistrationDestination = config.successfulUserRegistrationDestination ;
-        conf.globalData.auth.cookieName =  config.cookieName;
-        conf.globalData.auth.cookieDomains = config.domains;
+       conf.globalData.selfRegistration =                       config.selfRegistration;
+       conf.globalData.protectedUserAttributes =                config.protectedUserAttributes;
+       conf.globalData.requirePasswordForEmailChange =          config.requirePasswordForEmailChange;
+       conf.globalData.forgotPassword =                         config.forgotPassword;            
+       conf.globalData.successfulUserRegistrationDestination =  config.successfulUserRegistrationDestination ;
+       conf.globalData.auth.cookieName =                        config.cookieName;
+       conf.globalData.auth.cookieDomains =                     config.domains;
 
-        if (config.roles) {
-            conf.globalData.userRoles = config.roles;
-        }
-        
-        if (config.notificationTypes) {
-            conf.notificationTypes = config.notificationTypes;
-        }
-        
-        if (config.defaultNotificationType) {
-            conf.defaultType = config.defaultNotificationType;
-        }
-        
-        
-    };
-    
-    return obj;
+       i18nManager.init(config.lang);    
+       
+   };
+   
+   return obj;
 });

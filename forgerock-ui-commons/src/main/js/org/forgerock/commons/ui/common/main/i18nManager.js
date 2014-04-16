@@ -35,21 +35,25 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
     /*
      * i18nManger with i18next try to detect the user language and load the corresponding translation in the following order:
      * 1) querystring parameter (&locale=en-US)
-     * 2) navigator.language
+     * 2) server info
      * 3) consts.DEFAULT_LANGUAGE
      */
     
     var obj = {};
 
-    obj.init = function() {
+    obj.init = function(lang) {
+
+        if( obj.locale !== undefined && obj.locale === lang){
+           return;
+        }
 
         var urlParams = uiUtils.convertCurrentUrlToJSON().params,
-            opts = { fallbackLng: consts.DEFAULT_LANGUAGE,  detectLngQS: 'locale', useCookie:false };
+            opts = { fallbackLng: consts.DEFAULT_LANGUAGE,  detectLngQS: 'locale', useCookie:false,  getAsync: false, lng:lang, load: 'unspecific' };
 
+        // if urlParams then override lang
         if(urlParams && urlParams.locale){
             opts.lng  = urlParams.locale;
         }
-
 
         $.i18n.init(opts).done(obj.ready);
         obj.locale = $.i18n.lng();
@@ -86,7 +90,7 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
             
             XDate.defaultLocale = locale;
         }  
-
+       
     };
     
     return obj;

@@ -47,52 +47,72 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
             "click input[name=resetButton]": "reloadData",
             "onValidate": "onValidate"
         },
-        
+
+        data:{},
+
+        submit: function(){
+            var _this = this;
+            this.delegate.updateUser(conf.loggedUser, this.data, _.bind(function(newUserData) {
+                if (_.has(newUserData, "_rev")) {
+                    _this.data._rev = newUserData._rev;
+                }
+                $.extend(conf.loggedUser, _this.data);
+                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateSuccessful");
+            }, this ),
+            function(e){
+                console.log('errorCallback', e.responseText);
+                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateFailed");
+                _this.reloadData();
+            });
+        },
+
         formSubmit: function(event) {
-            var data = {};
-            
+
             event.preventDefault();
             event.stopPropagation();
-            
-            if(validatorsManager.formValidated(this.$el)) {
-                data = form2js(this.el, '.', false);
-                this.delegate.updateUser(conf.loggedUser, data, _.bind(function(newUserData) {
-                    if (_.has(newUserData, "_rev")) {
-                        data._rev = newUserData._rev;
+
+            var _this = this;
+
+            if (validatorsManager.formValidated(this.$el)) {
+
+                this.data = form2js(this.el, '.', false);
+                this.data.changedProtected = [];
+                _.each(conf.globalData.protectedUserAttributes, function(attr){
+                    if(conf.loggedUser[attr] !== _this.data[attr]){
+                        _this.data.changedProtected.push(" "+_this.$el.find("label[for="+attr+"]").text()); 
                     }
-                    $.extend(conf.loggedUser, data);
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateSuccessful");
-                }, this));
+                });
+
+                if (this.data.changedProtected.length === 0) {
+                    this.submit();
+                } else {
+                    location.hash = router.configuration.routes.confirmPassword.url;
+                }
+
             } else {
                 console.log('invalid form');
             }
         },
-        
-        render: function(args, callback) {
-            
-            this.parentRender(function() {
-                validatorsManager.bindValidators(this.$el, this.delegate.getUserResourceName(conf.loggedUser), _.bind(function () {
-                    
-                    this.reloadData();
 
+        render: function(args, callback) {
+
+            this.parentRender(function() {
+                validatorsManager.bindValidators( this.$el, this.delegate.getUserResourceName(conf.loggedUser), _.bind(function () {
+                    this.reloadData();
                     if(callback) {
                         callback();
                     }
-
-                }, this));
-                
+                }, this ));
             });
         },
-        
+
         reloadData: function() {
             js2form(document.getElementById(this.$el.find("#UserProfileForm").attr("id")), conf.loggedUser);
             this.$el.find("input[name=saveButton]").val($.t("common.form.update"));
             this.$el.find("input[name=resetButton]").val($.t("common.form.reset"));
             validatorsManager.validateAllFields(this.$el);
         }
-    }); 
-    
+    });
+
     return new UserProfileView();
 });
-
-

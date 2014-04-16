@@ -53,6 +53,8 @@ define("org/forgerock/commons/ui/common/main/ViewManager", [
             
             obj.currentDialog = "null";
 
+            msg.messages.hideMessages();
+
             view = require(viewPath);
             
             if(view.init) {
@@ -61,7 +63,7 @@ define("org/forgerock/commons/ui/common/main/ViewManager", [
                 view.render(args, callback);
             }
             
-            msg.messages.hideMessages();
+
         } else {
             view = require(obj.currentView);
             view.rebind();

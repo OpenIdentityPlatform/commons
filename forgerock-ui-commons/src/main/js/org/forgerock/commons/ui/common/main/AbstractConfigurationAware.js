@@ -35,7 +35,7 @@ define("org/forgerock/commons/ui/common/main/AbstractConfigurationAware", [
 
     obj.prototype.updateConfigurationCallback = function(configuration) {
         var configurationSetsToLoad = [], i, key, itemKey, singleConfigurationData, confKey, confToAdd;
-        console.debug('configuration updated');
+        console.debug('Configuration updated');
         this.configuration = configuration;
         
         if (configuration.loader) {

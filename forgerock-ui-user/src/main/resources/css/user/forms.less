@@ -23,6 +23,11 @@ input{
     width: 130px;
 }
 
+:focus{
+    outline: none;
+    .box-shadow(0, 0, 1px, 1px, @color-active);
+}
+
 input:not([type=submit]):invalid:required{
     background-color: @input-background-invalid-color; 
     border-color: @input-border-invalid-color;
@@ -31,16 +36,21 @@ input:not([type=submit]):invalid:required{
 }
 
 
-input[type="text"]:focus, input[type="password"]:focus, input[type="tel"]:focus, input[type="email"]:focus, textarea:focus, select:focus {
+input[type="text"]:focus, input[type="password"]:focus, input[type="tel"]:focus, input[type="email"]:focus, textarea:focus, select:focus, button.button:focus, a.button:focus, input.button:focus{
     border: 1px solid @color-active;
     outline: none;
     .box-shadow(0, 0, 1px, 1px, @color-active);
+}
+
+button.button:focus, a.button:focus, input.button:focus{
+    .box-shadow(0, 0, 1px, 2px, saturate(@color-active, 30%));
 }
 
 input[type="text"]:focus:invalid:required, input[type="password"]:focus:invalid:required, input[type="tel"]:focus:invalid:required, input[type="email"]:focus:invalid:required:required, textarea:focus:invalid:required, select:focus:invalid:required {
     border: 1px solid @input-border-invalid-color;
     .box-shadow(0, 0, 1px, 1px, @input-border-invalid-color);
 }
+
 
 input.read-only, input:read-only, input[type="text"]:focus:read-only, input[type="email"]:focus:read-only{
     background: transparent;

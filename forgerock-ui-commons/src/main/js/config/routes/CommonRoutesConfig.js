@@ -1,7 +1,7 @@
 /** 
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -52,11 +52,11 @@ define("config/routes/CommonRoutesConfig", [
             //view files are loaded when the GenericRouteInterfaceMap module is initialized
             "login" : {
                 view: "LoginView",
-                url: /login([^\&]+)?(&.+)?/,
+                url: /login([^\&]+)?(&.+)?/, 
                 pattern: "login??",
                 defaults: ["/",""],
                 forceUpdate: true,
-                argumentNames: ["realm","details"]
+                argumentNames: ["realm","additionalParameters"]
             },            
             "logout" : {
                 event: constants.EVENT_LOGOUT,

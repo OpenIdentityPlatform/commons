@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -22,10 +22,10 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Backbone */
+/*global define, $, _, Backbone, window */
 
 /**
- * @author mbilski
+ * @author jkigwana
  */
 
 define("org/forgerock/commons/ui/common/components/Messages", [
@@ -37,102 +37,78 @@ define("org/forgerock/commons/ui/common/components/Messages", [
 
     Messages = Backbone.View.extend({
 
-        messages: [],
-        numberOfMessages: 0,
+        list: [],
         el: "#messages",
         events: {
-            "click div": "hideMessages"
+            "click div": "removeAndNext"
         },
+        delay:2500,
+        timer:null,
         
         displayMessageFromConfig: function(event) {
+            var _this = obj.messages;
             if (typeof event === "object") {
                 if (typeof event.key === "string") {
-                    this.addMessage({
+                    _this.addMessage({
                         message: $.t(obj.configuration.messages[event.key].msg, event), 
                         type: obj.configuration.messages[event.key].type
                     });
                 }
             } else if (typeof event === "string") {
-                this.addMessage({
+                _this.addMessage({
                     message: $.t(obj.configuration.messages[event].msg), 
                     type: obj.configuration.messages[event].type
                 });
             }
 
         },
-        
-        /**
-         * Add message to array and runs messagesLoop if it is not currently running
-         * Usage: addMessage({message: "Some Message", type: "error"})
-         */
+
         addMessage: function(msg) {
-            var i;
-            
-            for(i = 0; i < this.messages.length; i++) {
-                if(this.messages[i].message === msg.message) {
+            var i, _this = obj.messages;
+            for(i = 0; i < _this.list.length; i++) {
+                if(_this.list[i].message === msg.message) {
                     console.log("duplicated message");
                     return;
                 }
             }
-            
-            this.messages.push(msg);   
-            this.showMessage(msg, this.messagesLoop);
+            console.info(msg.type + ":", msg.message);
+            _this.list.push(msg); 
+            if (_this.list.length <= 1) {               
+                _this.showMessage(msg);    
+            }    
         },
-
-        /**
-         * Displays messages singly.
-         */
-        messagesLoop: function() {       
-            var msg = this.messages.shift();
-            
-            if (this.messages.length > 0) {                
-                this.showMessage(this.messages[0], this.messagesLoop);      
+    
+        nextMessage: function() {   
+            var _this = obj.messages;
+            _this.list.shift();
+            if (_this.list.length > 0) {                
+                _this.showMessage();      
             }
         },
 
-        /**
-         * Shows message on screen.
-         */
-        showMessage: function(msg, callback) {
-            var obj = this, delay = 0;
-            
-            if(msg.type === "error") {
-                if (this.$el.find(".errorMessage").length) {
-                    this.$el.find(".errorMessage").fadeOut(500, function(){
-                        $(this).remove();
-                    });        
-                }
-                this.$el.append("<div class='errorMessage'><span class='error-outter'><span class='error-inner'><span>" + msg.message + "</span></span></span></div>");
-
-                this.$el.find("div:last").fadeIn(500, _.bind(function () {
-                    this.messages.shift();
-                }, this));
-                
-            } else {
-                if (this.$el.find("div").length > 0) {
-                    delay = 500;
-                }
-                this.$el.find("div").fadeOut(500, function () {
-                    $(this).remove();
-                });
-                this.$el.append("<div class='confirmMessage'><span class='error-outter'><span class='error-inner'><span>" + msg.message + "</span></span></span></div>");           
-                this.$el.find("div:last").delay(delay).fadeIn(500).delay(1500).fadeOut(500, function() {
-                    $(this).remove();
-                    if (callback) {
-                        callback.call(obj);
-                    }
-                });
-            }            
+        removeAndNext: function() {  
+            var _this = obj.messages;
+            window.clearTimeout(obj.messages.timer);
+            _this.$el.find("div").fadeOut(300, function(){
+                $(this).remove();
+                _this.nextMessage();
+            }); 
         },
 
-        hideMessages : function() {
-            var obj = this;
-            this.$el.find("div").fadeOut(500, function() {
-                obj.messagesLoop();
-                $(this).remove();
+        showMessage: function() {
+            var _this = this, errorType = this.list[0].type === "error" ? "errorMessage" : "confirmMessage";
+            this.$el.append("<div class='"+errorType+"'><span class='error-outter'><span class='error-inner'><span>" + this.list[0].message + "</span></span></span></div>");
+            this.$el.find("div:last").fadeIn(300, function () {
+                _this.timer = window.setTimeout(_this.removeAndNext, _this.delay);
             });
-        }
+        },
 
+        hideMessages: function() {  
+            var _this = obj.messages;
+            if (_this.list.length > 1) {    
+                _this.list = [_this.list[1]];    
+            }   
+        }
 
     });
     

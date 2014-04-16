@@ -230,14 +230,13 @@ define("config/process/CommonConfig", [
                 params = params || route.defaults;
                 conf.setProperty("baseView", ""); 
                 conf.setProperty("baseViewArgs", ""); 
-
+                                        
                 siteConfigurator.configurePage(route, params).then(function () {
                     spinner.hideSpinner(10);
                     router.routeTo(route, {trigger: true, args: params});
                     viewManager.changeView(route.view, params, callback, route.forceUpdate);
                     navigation.reload();
                 });
-
             }
         },
         {

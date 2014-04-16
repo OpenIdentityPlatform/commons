@@ -25,5 +25,6 @@
 /*global define*/
 
 define("org/forgerock/commons/ui/user/main", [
-    "./profile/UserProfileView"
+    "./profile/UserProfileView",
+    "./profile/ConfirmPasswordDialog"
 ]);

@@ -1,7 +1,7 @@
 /** 
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -23,6 +23,7 @@
  */
 
 /*global define*/
+/*jslint regexp:false */
 
 /**
  * @author jdabrowski
@@ -41,14 +42,22 @@ define("config/routes/UserRoutesConfig", [
         },
         "selfRegistration": {
             view: "RegisterView",
-            url: "register/",
-            forceUpdate: true
+            url: /register(\/[^\&]*)(\&.+)?/, 
+            pattern: "register??",
+            forceUpdate: true,
+            argumentNames: ["realm", "additionalParameters"]
         },
         "changeSecurityData": {
             base: "profile",
             dialog: "ChangeSecurityDataDialog",
             role: "ui-user,ui-admin",
             url: "profile/change_security_data/"
+        },
+        "confirmPassword": {
+            base: "profile",
+            dialog: "ConfirmPasswordDialog",
+            role: "ui-user",
+            url: "profile/confirm_password_dialog/"
         }
     };
     
