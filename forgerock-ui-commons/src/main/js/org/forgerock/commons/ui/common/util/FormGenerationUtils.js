@@ -97,7 +97,7 @@ define("org/forgerock/commons/ui/common/util/FormGenerationUtils", [
             handlebarsValueExpression = handlebarsValueExpression.replace(/\}/g,'}}');
         }
         
-        if (!formFieldType.name || formFieldType.name === 'string') {
+        if (!formFieldType || !formFieldType.name || formFieldType.name === 'string') {
             return this.generateStringTypeField(formFieldVariableName, formFieldDisplayName, handlebarsValueExpression, formFieldIsReadable, formFieldIsWritable, formFieldIsRequired);
         } else if (formFieldType.name === 'enum') {
             return this.generateEnumTypeField(formFieldVariableName, formFieldDisplayName, formFieldType.values, handlebarsValueExpression, formFieldIsReadable, formFieldIsWritable, formFieldIsRequired);
@@ -201,7 +201,7 @@ define("org/forgerock/commons/ui/common/util/FormGenerationUtils", [
             formFieldDescription = formProperties[i];
             if (formFieldDescription._id !== '_formGenerationTemplate') {
                 formFieldType = formFieldDescription.type;
-                if (!formFieldType.name || formFieldType.name === '') {
+                if (!formFieldType || !formFieldType.name || formFieldType.name === '') {
                     typeName = 'string';
                 } else {
                     typeName = formFieldType.name;
