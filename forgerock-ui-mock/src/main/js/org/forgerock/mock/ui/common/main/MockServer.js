@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, sinon */
+/*global define */
 
 /**
  * Fake server to handle AJAX requests.
@@ -30,7 +30,10 @@
  * @author Eugenia Sergueeva
  */
 
-define("org/forgerock/mock/ui/common/main/MockServer", ["mock/Data"], function (mockData) {
+define("org/forgerock/mock/ui/common/main/MockServer", [
+    "mock/Data",
+    "sinon"
+], function (mockData, sinon) {
     var instance = null,
         server;
 

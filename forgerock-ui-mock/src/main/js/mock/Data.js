@@ -29,14 +29,14 @@
  * @author Jake Feasel
  */
 
-define([
+define("mock/Data", [
     "text!libs/less-1.5.1-min.js",
     "text!css/styles.less",
     "text!css/user/config.less",
     "text!css/user/forms.less",
     "text!css/user/helpers.less",
     "text!css/user/layout.less",
-    "text!locales/en-US/translation.json",
+    "text!locales/en/translation.json",
     "text!templates/common/NavigationTemplate.html",
     "text!templates/common/FooterTemplate.html",
     "text!templates/common/404.html",
@@ -61,7 +61,7 @@ var deps = arguments,
     "css/user/forms.less",
     "css/user/helpers.less",
     "css/user/layout.less",
-    "locales/en-US/translation.json",
+    "locales/en/translation.json",
     "templates/common/NavigationTemplate.html",
     "templates/common/FooterTemplate.html",
     "templates/common/404.html",
@@ -121,7 +121,7 @@ var deps = arguments,
                                     "name": "common.notification.types.info"
                                 }
                             },
-                            "language": "en-US"
+                            "lang": "en"
                         }
                     }
                 )

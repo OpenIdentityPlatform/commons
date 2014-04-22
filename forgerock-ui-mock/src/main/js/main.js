@@ -32,6 +32,9 @@
 
 require.config({
     paths: {
+        // sinon only needed (or available) for Mock project
+        sinon: "libs/sinon-1.9.1",
+
         i18next: "libs/i18next-1.7.1-min",
         i18nGrid: "libs/i18n/grid.locale-en",
         backbone: "libs/backbone-0.9.2-min",
@@ -45,7 +48,6 @@ require.config({
         doTimeout: "libs/jquery.ba-dotimeout-1.0-min",
         handlebars: "libs/handlebars-1.0.rc.1",
         moment: "libs/moment-1.7.2-min",
-        sinon: "qunit/libs/sinon-1.7.3",
         UserDelegate: "org/forgerock/mock/ui/user/delegates/UserDelegate",
         ThemeManager: "org/forgerock/mock/ui/common/util/ThemeManager",
         SiteIdentificationDelegate: "org/forgerock/mock/ui/user/delegates/SiteIdentificationDelegate",
@@ -54,6 +56,9 @@ require.config({
     },
 
     shim: {
+        sinon: {
+            exports: "sinon"
+        },
         underscore: {
             exports: "_"
         },
@@ -91,9 +96,6 @@ require.config({
         },
         moment: {
             exports: "moment"
-        },
-        sinon: {
-            exports: "sinon"
         }
     }
 });
@@ -103,6 +105,8 @@ require.config({
  * required synchronously
  */
 require([
+    // sinon only needed (or available) for Mock project
+    "sinon",
     "underscore",
     "backbone",
     "form2js",
@@ -114,7 +118,6 @@ require([
     "doTimeout",
     "handlebars",
     "i18next",
-    "sinon",
     "org/forgerock/mock/ui/common/main/MockServer",
     "org/forgerock/commons/ui/common/main/i18nManager",
     "org/forgerock/mock/ui/common/util/ThemeManager",
@@ -126,7 +129,7 @@ require([
     "org/forgerock/commons/ui/user/main",
     "org/forgerock/commons/ui/common/main",
     "config/main"
-], function (_, Backbone, form2js, js2form, spin, $ui, xdate, moment, doTimeout, Handlebars, i18n, sinon, 
+], function ( sinon, _, Backbone, form2js, js2form, spin, $ui, xdate, moment, doTimeout, Handlebars, i18n,
              mockServer, i18nManager, themeManager, constants, eventManager, localStorage) {
 
     // Mock project is run without server. Framework requires cookies to be enabled in order to be able to login.

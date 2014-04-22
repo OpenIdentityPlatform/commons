@@ -45,7 +45,8 @@ define("config/routes/UserRoutesConfig", [
             url: /register(\/[^\&]*)(\&.+)?/, 
             pattern: "register??",
             forceUpdate: true,
-            argumentNames: ["realm", "additionalParameters"]
+            argumentNames: ["realm", "additionalParameters"],
+            defaults: ["/",""]
         },
         "changeSecurityData": {
             base: "profile",
