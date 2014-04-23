@@ -121,6 +121,7 @@ define("org/forgerock/commons/ui/common/SiteConfigurator", [
        }
 
        conf.globalData.selfRegistration =                       config.selfRegistration;
+       conf.globalData.siteIdentification =                     config.siteIdentification;
        conf.globalData.protectedUserAttributes =                config.protectedUserAttributes;
        conf.globalData.requirePasswordForEmailChange =          config.requirePasswordForEmailChange;
        conf.globalData.forgotPassword =                         config.forgotPassword;            

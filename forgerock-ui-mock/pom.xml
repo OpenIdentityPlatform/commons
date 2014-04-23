@@ -81,7 +81,7 @@
                                 <artifactItem>
                                     <groupId>org.forgerock.commons.ui</groupId>
                                     <artifactId>forgerock-ui-user</artifactId>
-                                    <version>1.0.12-SNAPSHOT</version>
+                                    <version>${forgerock-ui.version}</version>
                                     <type>zip</type>
                                     <classifier>www</classifier>
                                 </artifactItem>
