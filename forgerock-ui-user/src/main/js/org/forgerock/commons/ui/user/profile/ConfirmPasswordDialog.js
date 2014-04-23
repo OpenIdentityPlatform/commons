@@ -48,7 +48,7 @@ define("org/forgerock/commons/ui/user/profile/ConfirmPasswordDialog", [
         },
         data: {},
         formSubmit: function(event) {
-            userProfileView.data.currentPassword = this.$el.find("#currentPassword").val();
+            userProfileView.data.currentpassword = this.$el.find("#currentPassword").val();
             userProfileView.submit();
             this.close();
                    
