@@ -128,8 +128,10 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
          * Perform only view changes: displays tick, message and
          * change color of submit button.
          */
-        onValidate: function(event, input, msg, validatorType) {           
-            var button = this.$el.find("input[type=submit]");
+        onValidate: function(event, input, msg, validatorType) {
+            var button = this.$el.find("input[type=submit]"),
+                $input = $(input);
+
             if(msg === "inProgress") {
                 //TODO spinner
                 //console.log("in progress..");
@@ -153,14 +155,14 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
                 validatorsUtils.showValidation(input);
             }
             
-            if($(input).nextAll("span")) {
+            if($input.nextAll("span")) {
                 validatorsUtils.setTick(input, msg ? true : false);
             }
             
-            $(input).nextAll("div.validation-message:first").html(msg ? msg : '');
-            $(input).parents('.separate-message').children("div.validation-message:first").html(msg ? msg : '');
+            $input.nextAll("div.validation-message:first").attr("for", $input.attr('id')).html(msg ? msg : '');
+            $input.parents('.separate-message').children("div.validation-message:first").attr("for", $input.attr('id')).html(msg ? msg : '');
           
-            $("div.validation-message[for='"+$(input).attr('name')+"']").html(msg ? msg : '');
+            $("div.validation-message[for='"+$input.attr('name')+"']").html(msg ? msg : '');
             
             if(validatorType) {
                 validatorsUtils.setErrors(this.$el, validatorType, msg);
