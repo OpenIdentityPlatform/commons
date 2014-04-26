@@ -86,6 +86,10 @@ define("config/messages/CommonMessages", [
             "incorrectRevisionError": {
                 msg: "config.messages.CommonMessages.incorrectRevisionError",
                 type: "error"
+            },
+            "tokenNotFound": {
+                msg: "config.messages.CommonMessages.tokenNotFound",
+                type: "error"
             }
     };
     
