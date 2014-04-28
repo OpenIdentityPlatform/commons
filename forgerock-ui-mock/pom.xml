@@ -27,7 +27,7 @@
     <parent>
         <groupId>org.forgerock.commons.ui</groupId>
         <artifactId>forgerock-ui</artifactId>
-        <version>1.0.13-SNAPSHOT</version>
+        <version>1.0.14-SNAPSHOT</version>
     </parent>
 
     <artifactId>forgerock-ui-mock</artifactId>
@@ -191,7 +191,7 @@
         <dependency>
             <groupId>org.forgerock.commons.ui</groupId>
             <artifactId>forgerock-ui-user</artifactId>
-            <version>1.0.13-SNAPSHOT</version>
+            <version>1.0.14-SNAPSHOT</version>
             <type>zip</type>
             <classifier>www</classifier>
         </dependency>
