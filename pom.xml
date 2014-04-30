@@ -139,7 +139,7 @@
             <dependency>
                 <groupId>org.forgerock.commons.ui.libs</groupId>
                 <artifactId>i18next</artifactId>
-                <version>1.7.1</version>
+                <version>1.7.3</version>
                 <type>js</type>
                 <classifier>min</classifier>
             </dependency>

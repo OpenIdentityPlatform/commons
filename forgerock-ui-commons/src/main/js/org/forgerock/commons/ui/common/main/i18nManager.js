@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -22,11 +22,12 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global require, define, _, $, XDate */
+/*global require, define, _, $*/
 
 /**
- * @author jdabrowski
+ * @author jkigwana
  */
+
 define( "org/forgerock/commons/ui/common/main/i18nManager", [
         "org/forgerock/commons/ui/common/util/Constants",
         "org/forgerock/commons/ui/common/util/UIUtils"
@@ -34,8 +35,8 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
 
     /*
      * i18nManger with i18next try to detect the user language and load the corresponding translation in the following order:
-     * 1) querystring parameter (&locale=en-US)
-     * 2) server info
+     * 1) querystring parameter (&locale=fr)
+     * 2) serverinfo which is a mirror to the values in the browser request headers. This could be a single value in a string or a string of csv.
      * 3) consts.DEFAULT_LANGUAGE
      */
     
@@ -43,54 +44,32 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
 
     obj.init = function(lang) {
 
-        if( obj.locale !== undefined && obj.locale === lang){
+        var fallbacks = [], opts = { },
+            urlParams = uiUtils.convertCurrentUrlToJSON().params;         
+
+        if (lang) {
+            fallbacks = lang.split(',');    
+        }
+
+        if (fallbacks.indexOf(consts.DEFAULT_LANGUAGE) === -1){
+            fallbacks.push(consts.DEFAULT_LANGUAGE);
+        }
+
+        if (obj.fallbacks !== undefined && obj.fallbacks === fallbacks) {
            return;
         }
 
-        var urlParams = uiUtils.convertCurrentUrlToJSON().params,
-            opts = { fallbackLng: consts.DEFAULT_LANGUAGE,  detectLngQS: 'locale', useCookie:false,  getAsync: false, lng:lang, load: 'unspecific' };
+        obj.fallbacks = fallbacks;
+
+        opts = { fallbackLng: fallbacks, detectLngQS: 'locale', useCookie:false, getAsync: false, load: 'unspecific' };
 
         // if urlParams then override lang
         if(urlParams && urlParams.locale){
             opts.lng  = urlParams.locale;
         }
 
-        $.i18n.init(opts).done(obj.ready);
-        obj.locale = $.i18n.lng();
- 
-    };
+        $.i18n.init(opts);
 
-    obj.ready = function() {
-
-        var locale = $.i18n.lng(),
-            mNames = $.t("config.dates.monthNames").replace(/ ,/g,',').replace(/, /g,',').split(','),
-            mNamesShort = $.t("config.dates.monthNamesShort").replace(/ ,/g,',').replace(/, /g,',').split(','),
-            dNames = $.t("config.dates.dayNames").replace(/ ,/g,',').replace(/, /g,',').split(','),
-            dNamesShort = $.t("config.dates.dayNamesShort").replace(/ ,/g,',').replace(/, /g,',').split(',');
-
-        if (
-            ! mNames.length || mNames.length < 12
-            || 
-            ! mNamesShort.length || mNamesShort.length < 12
-            || 
-            ! dNames.length || dNames.length < 7
-            || 
-            ! dNamesShort.length || dNamesShort.length < 7        
-        ) 
-        {
-            console.log("DATE NAMES ARE NOT DEFINED CORRECTLY!");
-        } else {
-            
-            XDate.locales[ locale ] = {
-                monthNames: mNames,
-                monthNamesShort: mNamesShort,
-                dayNames: dNames,
-                dayNamesShort: dNamesShort
-            };
-            
-            XDate.defaultLocale = locale;
-        }  
-       
     };
     
     return obj;

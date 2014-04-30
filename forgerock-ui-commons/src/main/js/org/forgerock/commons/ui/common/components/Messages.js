@@ -71,7 +71,7 @@ define("org/forgerock/commons/ui/common/components/Messages", [
                     return;
                 }
             }
-            console.info(msg.type + ":", msg.message);
+            console.info(msg.type + ":", msg.message, msg);
             _this.list.push(msg); 
             if (_this.list.length <= 1) {               
                 _this.showMessage(msg);    
