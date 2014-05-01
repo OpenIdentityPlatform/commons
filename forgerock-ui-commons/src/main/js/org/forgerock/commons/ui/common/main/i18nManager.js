@@ -35,38 +35,29 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
 
     /*
      * i18nManger with i18next try to detect the user language and load the corresponding translation in the following order:
-     * 1) querystring parameter (&locale=fr)
-     * 2) serverinfo which is a mirror to the values in the browser request headers. This could be a single value in a string or a string of csv.
-     * 3) consts.DEFAULT_LANGUAGE
+     * 1) The querystring parameter (&locale=fr)
+     * 2) lang, a 2 digit language code passed in from server.
+     * 3) The default language set inside consts.DEFAULT_LANGUAGE
      */
-    
+
     var obj = {};
 
     obj.init = function(lang) {
+        
+        var locales = [], opts = { }, params = uiUtils.convertCurrentUrlToJSON().params;    
 
-        var fallbacks = [], opts = { },
-            urlParams = uiUtils.convertCurrentUrlToJSON().params;         
+        if (params && params.locale) {
+            lang = params.locale;
+        }    
 
-        if (lang) {
-            fallbacks = lang.split(',');    
-        }
-
-        if (fallbacks.indexOf(consts.DEFAULT_LANGUAGE) === -1){
-            fallbacks.push(consts.DEFAULT_LANGUAGE);
-        }
-
-        if (obj.fallbacks !== undefined && obj.fallbacks === fallbacks) {
+        // return if the stored lang matches the new one.
+        if (obj.lang !== undefined && obj.lang === lang) {
            return;
         }
+        obj.lang = lang;
 
-        obj.fallbacks = fallbacks;
-
-        opts = { fallbackLng: fallbacks, detectLngQS: 'locale', useCookie:false, getAsync: false, load: 'unspecific' };
-
-        // if urlParams then override lang
-        if(urlParams && urlParams.locale){
-            opts.lng  = urlParams.locale;
-        }
+   
+        opts = { fallbackLng: consts.DEFAULT_LANGUAGE, detectLngQS: 'locale', useCookie:false, getAsync: false, lng:lang, load: 'unspecific' };
 
         $.i18n.init(opts);
 
