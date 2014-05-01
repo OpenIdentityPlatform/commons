@@ -60,7 +60,6 @@ define("org/forgerock/commons/ui/common/LoginDialog", [
                 this.addAction("Login", "submit");
                 this.show(_.bind(function(){ 
                     validatorsManager.bindValidators(this.$el);
-                    this.resize();
                     
                     $(".dialog-background").off('click').on('click', _.bind(this.loginClose, this));
                                         
