@@ -37,7 +37,7 @@ define("org/forgerock/commons/ui/user/profile/ConfirmPasswordDialog", [
     "org/forgerock/commons/ui/user/profile/UserProfileView"
 ], function(Dialog, validatorsManager, conf, userDelegate, eventManager, constants, userProfileView) {
     var ConfirmPasswordDialog = Dialog.extend({    
-        contentTemplate: "templates/common/ConfirmPasswordDialogTemplate.html",
+        contentTemplate: "templates/user/ConfirmPasswordDialogTemplate.html",
         events: {
             "click .dialogActions input[type=submit]": "formSubmit",
             "onValidate": "onValidate",
