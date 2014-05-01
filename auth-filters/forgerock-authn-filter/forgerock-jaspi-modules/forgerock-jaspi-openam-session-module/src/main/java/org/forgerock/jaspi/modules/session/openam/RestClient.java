@@ -36,12 +36,26 @@ interface RestClient {
     void setSslConfiguration(final SslConfiguration sslConfiguration);
 
     /**
-     * Makes a REST POST call to the specified URI, with the specified query parameters.
+     * Makes a REST GET call to the specified URI, with the specified query parameters and headers.
      *
      * @param uri The URI of the resource to make the REST call to.
      * @param queryParameters The query parameters to set on the REST request.
+     * @param headers The headers to set on the REST request.
      * @return The JsonValue response of the REST call.
      * @throws ResourceException If there is any problem making the REST call.
      */
-    JsonValue post(final String uri, final Map<String, String> queryParameters) throws ResourceException;
+    JsonValue get(String uri, Map<String, String> queryParameters, Map<String, String> headers)
+            throws ResourceException;
+
+    /**
+     * Makes a REST POST call to the specified URI, with the specified query parameters and headers.
+     *
+     * @param uri The URI of the resource to make the REST call to.
+     * @param queryParameters The query parameters to set on the REST request.
+     * @param headers The headers to set on the REST request.
+     * @return The JsonValue response of the REST call.
+     * @throws ResourceException If there is any problem making the REST call.
+     */
+    JsonValue post(String uri, Map<String, String> queryParameters, Map<String, String> headers)
+            throws ResourceException;
 }
