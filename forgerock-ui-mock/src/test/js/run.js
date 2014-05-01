@@ -1,7 +1,3 @@
-$.doTimeout = function (name, time, func) {
-    func(); // run the function immediately rather than delayed.
-}
-
 require([
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
@@ -12,17 +8,19 @@ require([
 ], function (constants, eventManager, mockServer, commonsTests, userTests, mockTests) {
 
     eventManager.registerListener(constants.EVENT_APP_INTIALIZED, function () {
-        var server = mockServer.instance;
+    
+        $.doTimeout = function (name, time, func) {
+            func(); // run the function immediately rather than delayed.
+        }
 
-        QUnit.start();
+        require("ThemeManager").getTheme().then(function () {
+            var server = mockServer.instance;
 
-        QUnit.done(function () {
-           window.location.hash = "";
+            QUnit.start();
+
+            commonsTests.executeAll(server);
+            userTests.executeAll(server);
+            mockTests.executeAll(server);
         });
-
-        commonsTests.executeAll(server);
-        userTests.executeAll(server);
-        mockTests.executeAll(server);
-
     });
 });
