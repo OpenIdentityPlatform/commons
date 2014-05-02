@@ -23,21 +23,23 @@ import org.forgerock.json.jose.jwt.Algorithm;
  * <p>
  * @see <a href="http://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-11#section-3.1">JWS Algorithms</a>
  *
- * @author Phill Cunnington
  * @since 2.0.0
  */
 public enum JwsAlgorithm implements Algorithm {
 
     /** No digital signature or MAC value included. */
-    NONE(null, JwsAlgorithmType.NONE),
+    NONE(null, null, JwsAlgorithmType.NONE),
     /** HMAC using SHA-256 hash algorithm. */
-    HS256("HmacSHA256", JwsAlgorithmType.HMAC),
+    HS256("HmacSHA256", "HmacSHA256", JwsAlgorithmType.HMAC),
     /** HMAC using SHA-384 hash algorithm. */
-    HS384("HmacSHA384", JwsAlgorithmType.HMAC),
+    HS384("HmacSHA384", "HmacSHA384", JwsAlgorithmType.HMAC),
     /** HMAC using SHA-512 hash algorithm. */
-    HS512("HmacSHA512", JwsAlgorithmType.HMAC);
+    HS512("HmacSHA512", "HmacSHA512", JwsAlgorithmType.HMAC),
+    /** RSA using SHA-256 hash algorithm **/
+    RS256("RS256", "SHA256withRSA", JwsAlgorithmType.RSA);
 
     private final String algorithm;
+    private final String knownName;
     private final JwsAlgorithmType algorithmType;
 
     /**
@@ -47,8 +49,9 @@ public enum JwsAlgorithm implements Algorithm {
      * @param algorithm The Java Cryptographic algorithm name.
      * @param algorithmType The JwsAlgorithmType of the JwsAlgorithm.
      */
-    private JwsAlgorithm(String algorithm, JwsAlgorithmType algorithmType) {
+    private JwsAlgorithm(String algorithm, String knownName, JwsAlgorithmType algorithmType) {
         this.algorithm = algorithm;
+        this.knownName = knownName;
         this.algorithmType = algorithmType;
     }
 

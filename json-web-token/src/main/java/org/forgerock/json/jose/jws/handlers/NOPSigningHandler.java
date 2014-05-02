@@ -16,8 +16,6 @@
 
 package org.forgerock.json.jose.jws.handlers;
 
-import java.security.Key;
-
 import org.forgerock.json.jose.jws.JwsAlgorithm;
 import org.forgerock.json.jose.utils.Utils;
 
@@ -33,12 +31,11 @@ public class NOPSigningHandler implements SigningHandler {
      * Simply returns a byte array of a UTF-8 empty string.
      *
      * @param algorithm {@inheritDoc}
-     * @param privateKey {@inheritDoc}
      * @param data {@inheritDoc}
      * @return {@inheritDoc}
      */
     @Override
-    public byte[] sign(JwsAlgorithm algorithm, Key privateKey, String data) {
+    public byte[] sign(JwsAlgorithm algorithm, String data) {
         return "".getBytes(Utils.CHARSET);
     }
 
@@ -46,13 +43,12 @@ public class NOPSigningHandler implements SigningHandler {
      * Verifies that the signature length is zero.
      *
      * @param algorithm {@inheritDoc}
-     * @param privateKey {@inheritDoc}
      * @param data {@inheritDoc}
      * @param signature {@inheritDoc}
      * @return {@inheritDoc}
      */
     @Override
-    public boolean verify(JwsAlgorithm algorithm, Key privateKey, byte[] data, byte[] signature) {
+    public boolean verify(JwsAlgorithm algorithm, byte[] data, byte[] signature) {
         return signature.length == 0;
     }
 }
