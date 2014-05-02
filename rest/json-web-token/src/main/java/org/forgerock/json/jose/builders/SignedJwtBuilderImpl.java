@@ -16,9 +16,9 @@
 
 package org.forgerock.json.jose.builders;
 
-import java.security.PrivateKey;
 import org.forgerock.json.jose.jws.JwsHeader;
 import org.forgerock.json.jose.jws.SignedJwt;
+import org.forgerock.json.jose.jws.handlers.SigningHandler;
 import org.forgerock.json.jose.jwt.JwtClaimsSet;
 
 /**
@@ -28,15 +28,15 @@ import org.forgerock.json.jose.jwt.JwtClaimsSet;
  */
 public class SignedJwtBuilderImpl extends AbstractJwtBuilder implements SignedJwtBuilder {
 
-    private final PrivateKey privateKey;
+    private final SigningHandler signingHandler;
 
     /**
      * Constructs a new SignedJwtBuilderImpl that will use the given private key to sign the JWT.
      *
-     * @param privateKey The private key to sign the JWT with.
+     * @param signingHandler The SigningHandler instance used to sign the JWS.
      */
-    public SignedJwtBuilderImpl(PrivateKey privateKey) {
-        this.privateKey = privateKey;
+    public SignedJwtBuilderImpl(SigningHandler signingHandler) {
+        this.signingHandler = signingHandler;
     }
 
     /**
@@ -77,7 +77,7 @@ public class SignedJwtBuilderImpl extends AbstractJwtBuilder implements SignedJw
         if (claimsSet == null) {
             claimsSet = new JwtClaimsSet();
         }
-        return new SignedJwt(header, claimsSet, privateKey);
+        return new SignedJwt(header, claimsSet, signingHandler);
     }
 
     /**
