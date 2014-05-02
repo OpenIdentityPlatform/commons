@@ -16,17 +16,19 @@
 
 package org.forgerock.json.jose.jws.handlers;
 
-import java.security.Key;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.SignatureException;
-import java.security.cert.X509Certificate;
-
 import org.forgerock.json.jose.exceptions.JwsSigningException;
 import org.forgerock.json.jose.exceptions.JwsVerifyingException;
 import org.forgerock.json.jose.jws.JwsAlgorithm;
 import org.forgerock.json.jose.utils.Utils;
+import org.forgerock.util.Reject;
 import org.forgerock.util.SignatureUtil;
+
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SignatureException;
+import java.security.cert.X509Certificate;
 
 /**
  * An implementation of the SigningHandler which can sign and verify using algorithms from the RSA family.
@@ -37,13 +39,16 @@ import org.forgerock.util.SignatureUtil;
 public class RSASigningHandler implements SigningHandler {
 
     private final SignatureUtil signatureUtil;
+    private final Key key;
 
     /**
      * Constructs a new RSASigningHandler, with a SignatureUtil instance to delegate the signing and verifying calls to.
      *
+     * @param key The key used to sign and verify the signature.
      * @param signatureUtil An instance of the SignatureUtil.
      */
-    public RSASigningHandler(SignatureUtil signatureUtil) {
+    public RSASigningHandler(Key key, SignatureUtil signatureUtil) {
+        this.key = key;
         this.signatureUtil = signatureUtil;
     }
 
@@ -51,9 +56,10 @@ public class RSASigningHandler implements SigningHandler {
      * {@inheritDoc}
      */
     @Override
-    public byte[] sign(JwsAlgorithm algorithm, Key privateKey, String data) {
+    public byte[] sign(JwsAlgorithm algorithm, String data) {
         try {
-            return signatureUtil.sign((PrivateKey) privateKey, algorithm.getAlgorithm(), data);
+            Reject.ifFalse(key instanceof PrivateKey, "RSA requires private key for signing.");
+            return signatureUtil.sign((PrivateKey) key, algorithm.getAlgorithm(), data);
         } catch (SignatureException e) {
             if (e.getCause().getClass().isAssignableFrom(NoSuchAlgorithmException.class)) {
                 throw new JwsSigningException("Unsupported Signing Algorithm, " + algorithm.getAlgorithm(), e);
@@ -66,8 +72,9 @@ public class RSASigningHandler implements SigningHandler {
      * {@inheritDoc}
      */
     @Override
-    public boolean verify(JwsAlgorithm algorithm, Key privateKey, byte[] data, byte[] signature) {
+    public boolean verify(JwsAlgorithm algorithm, byte[] data, byte[] signature) {
         try {
+            Reject.ifFalse(key instanceof PublicKey, "RSA requires public key for signature verification.");
             return signatureUtil.verify((X509Certificate) null, algorithm.getAlgorithm(),
                     new String(data, Utils.CHARSET), signature);
         } catch (SignatureException e) {
