@@ -222,6 +222,17 @@
                 <groupId>org.restlet.osgi</groupId>
                 <artifactId>org.restlet.ext.json</artifactId>
                 <version>${restlet.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.restlet.osgi</groupId>
+                        <artifactId>org.restlet.lib.org.json</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.json</groupId>
+                <artifactId>json</artifactId>
+                <version>20140107</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
