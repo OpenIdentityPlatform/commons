@@ -21,6 +21,7 @@ import java.security.Key;
 import org.forgerock.json.jose.jwe.EncryptedJwt;
 import org.forgerock.json.jose.jwe.JweHeader;
 import org.forgerock.json.jose.jws.JwsAlgorithm;
+import org.forgerock.json.jose.jws.handlers.SigningHandler;
 import org.forgerock.json.jose.jwt.JwtClaimsSet;
 
 /**
@@ -68,12 +69,12 @@ public class EncryptedJwtBuilder extends AbstractJwtBuilder {
      * Returns a SignedEncryptedJwtBuilder that will build a signed JWT with this builder's encrypted JWT as its
      * payload.
      *
-     * @param privateKey The private key to sign the JWT with.
+     * @param signingHandler The SigningHandler instance used to sign the JWS.
      * @param jwsAlgorithm The JwsAlgorithm to use when signing the JWT.
      * @return The SignedEncryptedJwtBuilder instance.
      */
-    public SignedEncryptedJwtBuilder sign(Key privateKey, JwsAlgorithm jwsAlgorithm) {
-        return new SignedEncryptedJwtBuilder(this, privateKey, jwsAlgorithm);
+    public SignedEncryptedJwtBuilder sign(SigningHandler signingHandler, JwsAlgorithm jwsAlgorithm) {
+        return new SignedEncryptedJwtBuilder(this, signingHandler, jwsAlgorithm);
     }
 
     /**

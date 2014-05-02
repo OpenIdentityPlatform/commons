@@ -39,6 +39,8 @@ import org.forgerock.json.jose.helper.KeysHelper;
 import org.forgerock.json.jose.jwe.EncryptionMethod;
 import org.forgerock.json.jose.jwe.JweAlgorithm;
 import org.forgerock.json.jose.jws.JwsAlgorithm;
+import org.forgerock.json.jose.jws.SigningManager;
+import org.forgerock.json.jose.jws.handlers.SigningHandler;
 import org.forgerock.json.jose.jwt.Jwt;
 import org.forgerock.json.jose.jwt.JwtClaimsSet;
 import org.forgerock.json.jose.jwt.JwtType;
@@ -461,9 +463,11 @@ public class JwtImplementationSpecTest {
 
         //Given
         JwtBuilderFactory jwtBuilderFactory = new JwtBuilderFactory();
+        SigningManager signingManager = new SigningManager();
 
         //When
-        String jwtString = jwtBuilderFactory.jws(KeysHelper.getRSAPrivateKey())
+        String jwtString = jwtBuilderFactory.jws(signingManager.newHmacSigningHandler(
+                KeysHelper.getRSAPrivateKey().getEncoded()))
                 .headers().alg(JwsAlgorithm.HS256).done()
                 .build();
 
@@ -499,11 +503,13 @@ public class JwtImplementationSpecTest {
 
         //Given
         JwtBuilderFactory jwtBuilderFactory = new JwtBuilderFactory();
+        SigningManager signingManager = new SigningManager();
 
         //When
         String jwtString = jwtBuilderFactory.jwe(KeysHelper.getRSAPublicKey())
                 .headers().alg(JweAlgorithm.RSAES_PKCS1_V1_5).enc(EncryptionMethod.A128CBC_HS256).done()
-                .sign(KeysHelper.getRSAPrivateKey(), JwsAlgorithm.HS256)
+                .sign(signingManager.newHmacSigningHandler(KeysHelper.getRSAPrivateKey().getEncoded()),
+                        JwsAlgorithm.HS256)
                 .build();
 
         //Then
