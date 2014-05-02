@@ -15,10 +15,6 @@
 */
 package org.forgerock.jaspi.modules.openid.resolvers;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.security.PublicKey;
-import java.util.Date;
 import org.forgerock.jaspi.modules.openid.exceptions.FailedToLoadJWKException;
 import org.forgerock.jaspi.modules.openid.exceptions.InvalidIssException;
 import org.forgerock.jaspi.modules.openid.exceptions.InvalidSignatureException;
@@ -26,25 +22,31 @@ import org.forgerock.jaspi.modules.openid.exceptions.JwtExpiredException;
 import org.forgerock.jaspi.modules.openid.helpers.JWKSetParser;
 import org.forgerock.json.jose.jws.JwsHeader;
 import org.forgerock.json.jose.jws.SignedJwt;
+import org.forgerock.json.jose.jws.handlers.SigningHandler;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Date;
+
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertTrue;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 public class JWKOpenIdResolverImplTest {
 
     JWKOpenIdResolverImpl testResolver;
     JWKSetParser mockParser;
-    PublicKey mockKey;
+    SigningHandler signingHandler;
     URL mockURL;
 
     @BeforeMethod
     public void setUp() throws FailedToLoadJWKException, MalformedURLException {
-        mockKey = mock(PublicKey.class);
+        signingHandler = mock(SigningHandler.class);
         mockParser = mock(JWKSetParser.class);
         mockURL = new URL("http://www.google.com");
         testResolver = new JWKOpenIdResolverImpl("Test", mockURL, mockParser);
@@ -87,7 +89,7 @@ public class JWKOpenIdResolverImplTest {
         given(mockJwt.getHeader()).willReturn(mockHeader);
         given(mockHeader.getKeyId()).willReturn("keyId");
 
-        given(mockJwt.verify(mockKey)).willReturn(false);
+        given(mockJwt.verify(signingHandler)).willReturn(false);
 
         //when
         testResolver.verifySignature(mockJwt);

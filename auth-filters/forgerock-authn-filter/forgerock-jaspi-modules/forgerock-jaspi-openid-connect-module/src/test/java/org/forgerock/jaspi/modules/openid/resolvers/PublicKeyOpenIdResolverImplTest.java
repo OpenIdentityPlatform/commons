@@ -15,25 +15,29 @@
 */
 package org.forgerock.jaspi.modules.openid.resolvers;
 
-import java.security.PublicKey;
-import java.util.Date;
 import org.forgerock.jaspi.modules.openid.exceptions.InvalidIssException;
 import org.forgerock.jaspi.modules.openid.exceptions.InvalidSignatureException;
 import org.forgerock.jaspi.modules.openid.exceptions.JwtExpiredException;
 import org.forgerock.json.jose.jws.SignedJwt;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
+import org.forgerock.json.jose.jws.handlers.SigningHandler;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.security.PublicKey;
+import java.util.Date;
+
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 public class PublicKeyOpenIdResolverImplTest {
 
     PublicKeyOpenIdResolverImpl testResolver;
-    PublicKey mockKey;
+    SigningHandler signingHandler;
 
     @BeforeMethod
     public void setUp() {
-        mockKey = mock(PublicKey.class);
+        signingHandler = mock(SigningHandler.class);
+        PublicKey mockKey = mock(PublicKey.class);
         testResolver = new PublicKeyOpenIdResolverImpl("Test", mockKey);
     }
 
@@ -42,7 +46,7 @@ public class PublicKeyOpenIdResolverImplTest {
 
         //given
         SignedJwt mockJwt = mock(SignedJwt.class);
-        given(mockJwt.verify(mockKey)).willReturn(false);
+        given(mockJwt.verify(signingHandler)).willReturn(false);
 
         //when
         testResolver.verifySignature(mockJwt);

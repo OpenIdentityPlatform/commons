@@ -23,14 +23,11 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ResourceException;
 import org.json.JSONObject;
 import org.restlet.Context;
-import org.restlet.engine.header.Header;
 import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.ext.ssl.DefaultSslContextFactory;
 import org.restlet.ext.ssl.SslContextFactory;
 import org.restlet.resource.ClientResource;
-import org.restlet.util.Series;
 
-import java.io.IOException;
 import java.util.Map;
 
 import static org.forgerock.json.fluent.JsonValue.json;
@@ -74,68 +71,11 @@ class RestletRestClient implements RestClient {
      * {@inheritDoc}
      */
     @Override
-    public JsonValue get(String uri, Map<String, String> queryParameters, Map<String, String> headers)
-            throws ResourceException {
-
-        final ClientResource resource = createClientResource(uri, queryParameters, headers);
-
-        try {
-            final JSONObject response = resource.get(JSONObject.class);
-            return convertResponse(response);
-        } catch (org.restlet.resource.ResourceException e) {
-            logger.error("REST GET request failed.", e);
-            throw ResourceException.getException(e.getStatus().getCode(), e.getMessage());
-        } catch (Exception e) {
-            logger.error("REST GET request failed.", e);
-            throw ResourceException.getException(ResourceException.INTERNAL_ERROR, e.getMessage());
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public JsonValue post(String uri, Map<String, String> queryParameters, Map<String, String> headers)
-            throws ResourceException {
-
-        final ClientResource resource = createClientResource(uri, queryParameters, headers);
-
-        try {
-            final JSONObject response = resource.post(new JsonRepresentation(json(object()).toString()),
-                    JSONObject.class);
-
-            return convertResponse(response);
-        } catch (org.restlet.resource.ResourceException e) {
-            logger.error("REST POST request failed.", e);
-            throw ResourceException.getException(e.getStatus().getCode(), e.getMessage());
-        } catch (Exception e) {
-            logger.error("REST POST request failed.", e);
-            throw ResourceException.getException(ResourceException.INTERNAL_ERROR, e.getMessage());
-        }
-    }
-
-    /**
-     * Create the Restlet ClientResource and sets the query parameters and headers.
-     *
-     * @param uri The resource URI.
-     * @param queryParameters The query parameters to set on the REST request.
-     * @param headers The headers to set on the REST request.
-     * @return The ClientResource.
-     */
-    @SuppressWarnings("unchecked")
-    private ClientResource createClientResource(String uri, Map<String, String> queryParameters,
-            Map<String, String> headers) {
+    public JsonValue post(final String uri, final Map<String, String> queryParameters) throws ResourceException {
 
         final ClientResource resource = createResource(uri);
         for (final Map.Entry<String, String> entry : queryParameters.entrySet()) {
             resource.addQueryParameter(entry.getKey(), entry.getValue());
-        }
-
-        resource.getRequest().getAttributes().putIfAbsent("org.restlet.http.headers", new Series<Header>(Header.class));
-        final Series<Header> resourceHeaders = (Series<Header>) resource.getRequestAttributes()
-                .get("org.restlet.http.headers");
-        for (final Map.Entry<String, String> entry : headers.entrySet()) {
-            resourceHeaders.set(entry.getKey(), entry.getValue());
         }
 
         if (sslContextFactory != null) {
@@ -143,18 +83,16 @@ class RestletRestClient implements RestClient {
             resource.getContext().getAttributes().put("sslContextFactory", sslContextFactory);
         }
 
-        return resource;
-    }
+        try {
+            final JSONObject response = resource.post(new JsonRepresentation(json(object()).toString()),
+                    JSONObject.class);
 
-    /**
-     * Converts the JSONObject response from Restlet to a JsonValue.
-     *
-     * @param response The REST response.
-     * @return The JsonValue representation of the response.
-     * @throws IOException If there is a problem parsing the response.
-     */
-    private JsonValue convertResponse(JSONObject response) throws IOException {
-        return new JsonValue(OBJECT_MAPPER.readValue(response.toString(), Map.class));
+            return new JsonValue(OBJECT_MAPPER.readValue(response.toString(), Map.class));
+        } catch (org.restlet.resource.ResourceException e) {
+            throw ResourceException.getException(e.getStatus().getCode(), e.getMessage());
+        } catch (Exception e) {
+            throw ResourceException.getException(ResourceException.INTERNAL_ERROR, e.getMessage());
+        }
     }
 
     /**

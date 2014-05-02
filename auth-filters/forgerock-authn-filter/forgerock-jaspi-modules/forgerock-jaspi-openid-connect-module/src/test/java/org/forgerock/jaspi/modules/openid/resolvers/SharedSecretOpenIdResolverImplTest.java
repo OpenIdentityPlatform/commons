@@ -15,18 +15,20 @@
 */
 package org.forgerock.jaspi.modules.openid.resolvers;
 
-import java.security.Key;
-import java.util.Date;
 import org.forgerock.jaspi.modules.openid.exceptions.InvalidIssException;
 import org.forgerock.jaspi.modules.openid.exceptions.InvalidSignatureException;
 import org.forgerock.jaspi.modules.openid.exceptions.JwtExpiredException;
 import org.forgerock.json.jose.jws.JwsAlgorithm;
 import org.forgerock.json.jose.jws.JwsHeader;
 import org.forgerock.json.jose.jws.SignedJwt;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
+import org.forgerock.json.jose.jws.handlers.SigningHandler;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.util.Date;
+
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 public class SharedSecretOpenIdResolverImplTest {
 
@@ -41,13 +43,13 @@ public class SharedSecretOpenIdResolverImplTest {
     public void testInvalidSignatureThrowsException() throws InvalidSignatureException {
 
         //given
-        Key mockKey = mock(Key.class);
+        SigningHandler signingHandler = mock(SigningHandler.class);
         JwsHeader mockHeader = mock(JwsHeader.class);
         SignedJwt mockJwt = mock(SignedJwt.class);
 
         given(mockJwt.getHeader()).willReturn(mockHeader);
         given(mockHeader.getAlgorithm()).willReturn(JwsAlgorithm.HS256);
-        given(mockJwt.verify(mockKey)).willReturn(false);
+        given(mockJwt.verify(signingHandler)).willReturn(false);
 
         //when
         testResolver.verifySignature(mockJwt);

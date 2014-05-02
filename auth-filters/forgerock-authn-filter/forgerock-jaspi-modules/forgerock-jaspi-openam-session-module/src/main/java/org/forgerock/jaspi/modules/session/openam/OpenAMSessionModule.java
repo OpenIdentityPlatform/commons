@@ -50,9 +50,7 @@ import java.util.Map;
  */
 public class OpenAMSessionModule implements ServerAuthModule {
 
-    private static final String JSON_REST_ROOT_ENDPOINT = "json";
-    private static final String JSON_SESSIONS_RELATIVE_URI = JSON_REST_ROOT_ENDPOINT + "/sessions/";
-    private static final String JSON_USERS_ENDPOINT = "users/";
+    private static final String JSON_SESSIONS_RELATIVE_URI = "json/sessions/";
 
     private final DebugLogger logger = LogFactory.getDebug();
     private final RestClient restClient;
@@ -60,7 +58,6 @@ public class OpenAMSessionModule implements ServerAuthModule {
     private CallbackHandler handler;
     private String openamDeploymentUrl;
     private String openamSSOTokenCookieName;
-    private String openamUserAttribute;
 
     /**
      * Constructs a new OpenAMSessionModule instance.
@@ -118,10 +115,8 @@ public class OpenAMSessionModule implements ServerAuthModule {
 
         openamDeploymentUrl = (String) options.get("openamDeploymentUrl");
         openamSSOTokenCookieName = (String) options.get("openamSSOTokenCookieName");
-        openamUserAttribute = (String) options.get("openamUserAttribute");
         Reject.ifTrue(isEmpty(openamDeploymentUrl), "openamDeploymentUrl property must be set.");
         Reject.ifTrue(isEmpty(openamSSOTokenCookieName), "openamSSOTokenCookieName property must be set.");
-        Reject.ifTrue(isEmpty(openamUserAttribute), "openamUserAttribute property must be set.");
 
         if (!openamDeploymentUrl.endsWith("/")) {
             openamDeploymentUrl += "/";
@@ -228,23 +223,14 @@ public class OpenAMSessionModule implements ServerAuthModule {
         }
 
         try {
-            final JsonValue validationResponse = restClient.post(openamDeploymentUrl + JSON_SESSIONS_RELATIVE_URI
-                            + tokenId, Collections.singletonMap("_action", "validate"),
-                    Collections.<String, String>emptyMap());
+            final JsonValue response = restClient.post(openamDeploymentUrl + JSON_SESSIONS_RELATIVE_URI + tokenId,
+                    Collections.singletonMap("_action", "validate"));
 
-            if (validationResponse.isDefined("valid") && validationResponse.get("valid").asBoolean()) {
+            if (response.isDefined("valid") && response.get("valid").asBoolean()) {
                 logger.debug("REST validation call returned true.");
 
-                final String uid = validationResponse.get("uid").asString();
-                final String realm = validationResponse.get("realm").asString();
-
-                JsonValue response = restClient.get(openamDeploymentUrl + JSON_REST_ROOT_ENDPOINT + realm + "/"
-                                + JSON_USERS_ENDPOINT + uid,
-                        Collections.singletonMap("_fields", openamUserAttribute),
-                        Collections.singletonMap(openamSSOTokenCookieName, tokenId));
-
                 handler.handle(new Callback[]{
-                        new CallerPrincipalCallback(clientSubject, response.get(openamUserAttribute).get(0).asString())
+                        new CallerPrincipalCallback(clientSubject, response.get("prn").asString())
                 });
 
                 return AuthStatus.SUCCESS;

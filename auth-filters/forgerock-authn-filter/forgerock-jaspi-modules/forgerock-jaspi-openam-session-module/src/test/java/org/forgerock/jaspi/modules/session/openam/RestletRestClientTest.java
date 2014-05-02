@@ -20,10 +20,7 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ResourceException;
 import org.json.JSONObject;
 import org.restlet.Context;
-import org.restlet.Request;
-import org.restlet.engine.header.Header;
 import org.restlet.resource.ClientResource;
-import org.restlet.util.Series;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -48,7 +45,6 @@ public class RestletRestClientTest {
     private RestletRestClient restClient;
 
     private ClientResource resource;
-    private Series<Header> requestHeaders;
 
     @BeforeMethod
     public void setUp() {
@@ -61,14 +57,6 @@ public class RestletRestClientTest {
                 return resource;
             }
         };
-
-        Request request = mock(Request.class);
-        ConcurrentHashMap<String, Object> requestAttributes = new ConcurrentHashMap<String, Object>();
-        requestHeaders = mock(Series.class);
-        given(resource.getRequest()).willReturn(request);
-        given(request.getAttributes()).willReturn(requestAttributes);
-        given(resource.getRequestAttributes()).willReturn(requestAttributes);
-        requestAttributes.put("org.restlet.http.headers", requestHeaders);
     }
 
     @Test
@@ -116,18 +104,16 @@ public class RestletRestClientTest {
         //Given
         final String uri = "URI";
         final Map<String, String> queryParameters = new HashMap<String, String>();
-        final Map<String, String> headers = new HashMap<String, String>();
         final JSONObject restResponse = mock(JSONObject.class);
 
         given(resource.post(anyObject(), eq(JSONObject.class))).willReturn(restResponse);
         given(restResponse.toString()).willReturn("{}");
 
         //When
-        final JsonValue response = restClient.post(uri, queryParameters, headers);
+        final JsonValue response = restClient.post(uri, queryParameters);
 
         //Then
         verify(resource, never()).addQueryParameter(anyString(), anyString());
-        verify(requestHeaders, never()).set(anyString(), anyString());
         verify(resource, never()).getContext();
         assertEquals(response.size(), 0);
     }
@@ -138,7 +124,6 @@ public class RestletRestClientTest {
         //Given
         final String uri = "URI";
         final Map<String, String> queryParameters = new HashMap<String, String>();
-        final Map<String, String> headers = new HashMap<String, String>();
         final JSONObject restResponse = mock(JSONObject.class);
 
         queryParameters.put("PARAM1", "VALUE1");
@@ -147,11 +132,10 @@ public class RestletRestClientTest {
         given(restResponse.toString()).willReturn("{}");
 
         //When
-        final JsonValue response = restClient.post(uri, queryParameters, headers);
+        final JsonValue response = restClient.post(uri, queryParameters);
 
         //Then
         verify(resource, times(2)).addQueryParameter(anyString(), anyString());
-        verify(requestHeaders, never()).set(anyString(), anyString());
         verify(resource, never()).getContext();
         assertEquals(response.size(), 0);
     }
@@ -163,7 +147,6 @@ public class RestletRestClientTest {
         setSslConfiguration();
         final String uri = "URI";
         final Map<String, String> queryParameters = new HashMap<String, String>();
-        final Map<String, String> headers = new HashMap<String, String>();
         final Context context = mock(Context.class);
         final ConcurrentHashMap<String, Object> requestAttributes = new ConcurrentHashMap<String, Object>();
         final JSONObject restResponse = mock(JSONObject.class);
@@ -174,11 +157,10 @@ public class RestletRestClientTest {
         given(restResponse.toString()).willReturn("{}");
 
         //When
-        final JsonValue response = restClient.post(uri, queryParameters, headers);
+        final JsonValue response = restClient.post(uri, queryParameters);
 
         //Then
         verify(resource, never()).addQueryParameter(anyString(), anyString());
-        verify(requestHeaders, never()).set(anyString(), anyString());
         verify(resource).getContext();
         assertTrue(requestAttributes.containsKey("sslContextFactory"));
         assertEquals(response.size(), 0);
@@ -190,7 +172,6 @@ public class RestletRestClientTest {
         //Given
         final String uri = "URI";
         final Map<String, String> queryParameters = new HashMap<String, String>();
-        final Map<String, String> headers = new HashMap<String, String>();
         final org.restlet.resource.ResourceException exception =
                 new org.restlet.resource.ResourceException(500, "EXCEPTION_MESSAGE", "DESCRIPTION", "URI");
 
@@ -198,112 +179,12 @@ public class RestletRestClientTest {
 
         //When
         try {
-            restClient.post(uri, queryParameters, headers);
+            restClient.post(uri, queryParameters);
         } catch (ResourceException e) {
             //Then
             assertEquals(e.getCode(), 500);
             assertEquals(e.getMessage(), "EXCEPTION_MESSAGE");
             verify(resource, never()).addQueryParameter(anyString(), anyString());
-            verify(requestHeaders, never()).set(anyString(), anyString());
-            verify(resource, never()).getContext();
-        }
-    }
-
-    @Test
-    public void shouldGetWithEmptyQueryParameters() throws ResourceException {
-
-        //Given
-        final String uri = "URI";
-        final Map<String, String> queryParameters = new HashMap<String, String>();
-        final Map<String, String> headers = new HashMap<String, String>();
-        final JSONObject restResponse = mock(JSONObject.class);
-
-        given(resource.get(JSONObject.class)).willReturn(restResponse);
-        given(restResponse.toString()).willReturn("{}");
-
-        //When
-        final JsonValue response = restClient.get(uri, queryParameters, headers);
-
-        //Then
-        verify(resource, never()).addQueryParameter(anyString(), anyString());
-        verify(requestHeaders, never()).set(anyString(), anyString());
-        verify(resource, never()).getContext();
-        assertEquals(response.size(), 0);
-    }
-
-    @Test
-    public void shouldGetWithQueryParameters() throws ResourceException {
-
-        //Given
-        final String uri = "URI";
-        final Map<String, String> queryParameters = new HashMap<String, String>();
-        final Map<String, String> headers = new HashMap<String, String>();
-        final JSONObject restResponse = mock(JSONObject.class);
-
-        queryParameters.put("PARAM1", "VALUE1");
-        queryParameters.put("PARAM2", "VALUE2");
-        given(resource.get(JSONObject.class)).willReturn(restResponse);
-        given(restResponse.toString()).willReturn("{}");
-
-        //When
-        final JsonValue response = restClient.get(uri, queryParameters, headers);
-
-        //Then
-        verify(resource, times(2)).addQueryParameter(anyString(), anyString());
-        verify(requestHeaders, never()).set(anyString(), anyString());
-        verify(resource, never()).getContext();
-        assertEquals(response.size(), 0);
-    }
-
-    @Test
-    public void shouldGetWithSSL() throws ResourceException {
-
-        //Given
-        setSslConfiguration();
-        final String uri = "URI";
-        final Map<String, String> queryParameters = new HashMap<String, String>();
-        final Map<String, String> headers = new HashMap<String, String>();
-        final Context context = mock(Context.class);
-        final ConcurrentHashMap<String, Object> requestAttributes = new ConcurrentHashMap<String, Object>();
-        final JSONObject restResponse = mock(JSONObject.class);
-
-        given(resource.getContext()).willReturn(context);
-        given(context.getAttributes()).willReturn(requestAttributes);
-        given(resource.get(JSONObject.class)).willReturn(restResponse);
-        given(restResponse.toString()).willReturn("{}");
-
-        //When
-        final JsonValue response = restClient.get(uri, queryParameters, headers);
-
-        //Then
-        verify(resource, never()).addQueryParameter(anyString(), anyString());
-        verify(requestHeaders, never()).set(anyString(), anyString());
-        verify(resource).getContext();
-        assertTrue(requestAttributes.containsKey("sslContextFactory"));
-        assertEquals(response.size(), 0);
-    }
-
-    @Test
-    public void getShouldFailWhenResourceExceptionThrown() throws ResourceException {
-
-        //Given
-        final String uri = "URI";
-        final Map<String, String> queryParameters = new HashMap<String, String>();
-        final Map<String, String> headers = new HashMap<String, String>();
-        final org.restlet.resource.ResourceException exception =
-                new org.restlet.resource.ResourceException(500, "EXCEPTION_MESSAGE", "DESCRIPTION", "URI");
-
-        doThrow(exception).when(resource).get(JSONObject.class);
-
-        //When
-        try {
-            restClient.get(uri, queryParameters, headers);
-        } catch (ResourceException e) {
-            //Then
-            assertEquals(e.getCode(), 500);
-            assertEquals(e.getMessage(), "EXCEPTION_MESSAGE");
-            verify(resource, never()).addQueryParameter(anyString(), anyString());
-            verify(requestHeaders, never()).set(anyString(), anyString());
             verify(resource, never()).getContext();
         }
     }

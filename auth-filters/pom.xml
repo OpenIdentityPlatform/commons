@@ -69,7 +69,7 @@
         <maven.compiler.source>1.6</maven.compiler.source>
 
         <slf4j.version>1.7.5</slf4j.version>
-        <forgerock-rest.version>2.2.4</forgerock-rest.version>
+        <forgerock-rest.version>2.2.5-SNAPSHOT</forgerock-rest.version>
         <restlet.version>2.1.2</restlet.version>
         <jackson.version>2.1.5</jackson.version>
 
@@ -222,17 +222,6 @@
                 <groupId>org.restlet.osgi</groupId>
                 <artifactId>org.restlet.ext.json</artifactId>
                 <version>${restlet.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.restlet.osgi</groupId>
-                        <artifactId>org.restlet.lib.org.json</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.json</groupId>
-                <artifactId>json</artifactId>
-                <version>20140107</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>

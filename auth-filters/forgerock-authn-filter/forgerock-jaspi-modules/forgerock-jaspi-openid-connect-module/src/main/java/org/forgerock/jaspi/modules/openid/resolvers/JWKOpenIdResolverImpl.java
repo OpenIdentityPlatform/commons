@@ -15,10 +15,6 @@
 */
 package org.forgerock.jaspi.modules.openid.resolvers;
 
-import java.net.URL;
-import java.security.Key;
-import java.util.HashMap;
-import java.util.Map;
 import org.forgerock.auth.common.DebugLogger;
 import org.forgerock.jaspi.logging.LogFactory;
 import org.forgerock.jaspi.modules.openid.exceptions.FailedToLoadJWKException;
@@ -27,6 +23,12 @@ import org.forgerock.jaspi.modules.openid.exceptions.OpenIdConnectVerificationEx
 import org.forgerock.jaspi.modules.openid.helpers.JWKSetParser;
 import org.forgerock.jaspi.modules.openid.helpers.SimpleHTTPClient;
 import org.forgerock.json.jose.jws.SignedJwt;
+import org.forgerock.json.jose.jws.SigningManager;
+
+import java.net.URL;
+import java.security.Key;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class exists to allow Open Id Providers to supply or promote a JWK exposure point for
@@ -41,6 +43,8 @@ import org.forgerock.json.jose.jws.SignedJwt;
  * re-fill our map.
  */
 public class JWKOpenIdResolverImpl extends BaseOpenIdResolver {
+
+    private final SigningManager signingManager;
 
     private final URL jwkUrl;
 
@@ -64,6 +68,7 @@ public class JWKOpenIdResolverImpl extends BaseOpenIdResolver {
                                  final int connTimeout) throws FailedToLoadJWKException {
         super(issuer);
 
+        this.signingManager = new SigningManager();
         jwkParser = new JWKSetParser(readTimeout, connTimeout);
         this.jwkUrl = jwkUrl;
 
@@ -87,6 +92,7 @@ public class JWKOpenIdResolverImpl extends BaseOpenIdResolver {
             throws FailedToLoadJWKException {
         super(issuer);
 
+        this.signingManager = new SigningManager();
         jwkParser = new JWKSetParser(httpClient);
         this.jwkUrl = jwkUrl;
 
@@ -109,6 +115,7 @@ public class JWKOpenIdResolverImpl extends BaseOpenIdResolver {
             throws FailedToLoadJWKException {
         super(issuer);
 
+        this.signingManager = new SigningManager();
         this.jwkParser = jwkParser;
         this.jwkUrl = jwkUrl;
 
@@ -148,8 +155,7 @@ public class JWKOpenIdResolverImpl extends BaseOpenIdResolver {
         }
 
         key = keyMap.get(idClaim.getHeader().getKeyId());
-
-        if (key == null || !idClaim.verify(key)) {
+        if (key == null || !idClaim.verify(signingManager.newRsaSigningHandler(key))) {
             DEBUG.debug("JWS unable to be verified");
             throw new InvalidSignatureException("JWS unable to be verified");
         }
