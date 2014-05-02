@@ -16,7 +16,6 @@
 
 package org.forgerock.json.jose.jws.handlers;
 
-import java.security.Key;
 import org.forgerock.json.jose.jws.JwsAlgorithm;
 
 /**
@@ -33,11 +32,10 @@ public interface SigningHandler {
      * The signature is created using the given private key.
      *
      * @param algorithm The JwsAlgorithm defining the Java Cryptographic algorithm.
-     * @param key The key used to sign the data.
      * @param data The data to be signed.
      * @return A byte array of the signature.
      */
-    byte[] sign(JwsAlgorithm algorithm, Key key, String data);
+    byte[] sign(JwsAlgorithm algorithm, String data);
 
     /**
      * Verifies that the given signature is valid for the given data using supplied private key.
@@ -46,11 +44,9 @@ public interface SigningHandler {
      * of the data to compare against the given signature to see if they are identical.
      *
      * @param algorithm The JwsAlgorithm defining the JavaCryptographic algorithm.
-     * @param key Key with which to verify data.
-     * @param data The data that was signed.ø
+     * @param data The data that was signed.
      * @param signature The signature of the data.
      * @return <code>true</code> if the signature is a valid signature of the data.
      */
-    boolean verify(JwsAlgorithm algorithm, Key key, byte[] data, byte[] signature);
-
+    boolean verify(JwsAlgorithm algorithm, byte[] data, byte[] signature);
 }
