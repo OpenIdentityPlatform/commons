@@ -18,7 +18,9 @@ package com.persistit.unit;
 
 import com.persistit.Exchange;
 import com.persistit.Key;
+import com.persistit.KeyFilter;
 import com.persistit.PersistitUnitTestCase;
+import com.persistit.Value;
 import com.persistit.exception.PersistitException;
 import org.junit.Test;
 
@@ -62,6 +64,64 @@ public class BigDataTest extends PersistitUnitTestCase {
     ex.store();
 
     ex.fetch();
+    final Pojo loadedPojo = (Pojo) ex.getValue().get();
+    assertThat(loadedPojo.getData()).isEqualTo(pojo.getData());
+  }
+
+  @Test
+  public void testSaveLoadVeryBigPojoNeedIncreaseMaxSize() throws PersistitException {
+    final Exchange ex = _persistit.getExchange("persistit", "BigDataTest", true);
+    ex.removeAll();
+    ex.getValue().setMaximumSize(Value.MAXIMUM_SIZE);
+
+    StringBuilder data = new StringBuilder();
+    for (int i = 0; i < 500000; i++) {
+      data.append("some data");
+    }
+
+    Pojo pojo = new Pojo();
+    pojo.setId(1);
+    pojo.setData(data.toString());
+    pojo.setDate(new Date());
+
+    final Key key = ex.getKey();
+    key.clear().append(1);
+    ex.getValue().put(pojo);
+    ex.store();
+
+    ex.fetch();
+    final Pojo loadedPojo = (Pojo) ex.getValue().get();
+    assertThat(loadedPojo.getData()).isEqualTo(pojo.getData());
+  }
+
+  @Test
+  public void testTraverseVeryBigPojoNeedIncreaseMaxSize() throws PersistitException {
+    final Exchange ex = _persistit.getExchange("persistit", "BigDataTest", true);
+    ex.removeAll();
+    ex.setMaximumValueSize(Value.MAXIMUM_SIZE);
+
+    StringBuilder data = new StringBuilder();
+    for (int i = 0; i < 500000; i++) {
+      data.append("some data");
+    }
+
+    Pojo pojo = new Pojo();
+    pojo.setId(1);
+    pojo.setData(data.toString());
+    pojo.setDate(new Date());
+
+    final Key key = ex.getKey();
+    key.clear().append(1);
+    ex.getValue().put(pojo);
+    ex.store();
+
+    ex.clear().to(Key.BEFORE);
+    KeyFilter filter = new KeyFilter().append(KeyFilter.ALL);
+    Exchange itExchange = new Exchange(ex);
+    assertThat(itExchange.hasNext(filter)).isTrue();
+
+    itExchange.next(filter);
+
     final Pojo loadedPojo = (Pojo) ex.getValue().get();
     assertThat(loadedPojo.getData()).isEqualTo(pojo.getData());
   }

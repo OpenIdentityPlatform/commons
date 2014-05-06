@@ -687,10 +687,10 @@ public final class Value {
     Debug.$assert0.t(!isLongRecordMode());
     Debug.$assert0.t(!target.isLongRecordMode());
 
+    target.setMaximumSize(_maximumSize);
     target.ensureFit(_size);
     System.arraycopy(_bytes, 0, target._bytes, 0, _size);
     target._size = _size;
-    target._maximumSize = _maximumSize;
     target._pointer = _pointer;
     target._longMode = _longMode;
     target.reset();
@@ -891,8 +891,9 @@ public final class Value {
    * @throws IllegalArgumentException
    *             If the backing buffer is already larger than
    *             <code>size</code>, this method
-   * 
+   * @deprecated use {@link Exchange#setMaximumValueSize(int)}. This method should not be public.
    */
+  @Deprecated
   public void setMaximumSize(final int size) {
     if (size < _size) {
       throw new IllegalArgumentException("Value is larger than new maximum size");
