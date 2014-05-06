@@ -35,7 +35,7 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
 
     /*
      * i18nManger with i18next try to detect the user language and load the corresponding translation in the following order:
-     * 1) The querystring parameter (&locale=fr)
+     * 1) The query string parameter (&locale=fr)
      * 2) lang, a 2 digit language code passed in from server.
      * 3) The default language set inside consts.DEFAULT_LANGUAGE
      */
@@ -43,7 +43,7 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
     var obj = {};
 
     obj.init = function(lang) {
-        
+
         var locales = [], opts = { }, params = uiUtils.convertCurrentUrlToJSON().params;    
 
         if (params && params.locale) {

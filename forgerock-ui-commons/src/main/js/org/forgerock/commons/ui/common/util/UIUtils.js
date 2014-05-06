@@ -42,13 +42,19 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         return window.location.protocol + "//" + window.location.host;  
     };
 
-    obj.getCurrentUrlQueryParameters = function() {
-        if(window.location.hash.length > 1 && window.location.hash.indexOf('&') > -1){
-            return window.location.hash.substring(window.location.hash.indexOf('&') + 1);
+    obj.getCurrentHash = function() {
+        // cannot use window.location.hash due to FF which de-encodes this parameter.
+        return window.location.href.substring(window.location.href.indexOf('#') + 1);  
+    };
+
+    obj.getCurrentUrlQueryParameters = function() { 
+        var hash = obj.getCurrentHash(),
+            queries = window.location.search.substr(1,window.location.search.length);  
+            // location.search will only return a value if there are queries before the hash.
+        if (hash && hash.indexOf('&') > -1) {
+            queries = hash.substring(hash.indexOf('&') + 1);
         }
-        else{
-            return window.location.search.substr(1,window.location.search.length);
-        }  
+        return queries;   
     };
 
     obj.getCurrentPathName = function() {
@@ -65,7 +71,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         }
         return subPath;
     };
-    
+ 
     obj.convertCurrentUrlToJSON = function() {
         var result = {}, parsedQueryParams;
 
