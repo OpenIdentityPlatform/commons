@@ -16,6 +16,8 @@
 
 package org.forgerock.json.resource;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,7 +26,7 @@ import java.util.Map;
 import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.util.Utils;
+import static org.forgerock.util.Utils.asEnum;
 
 /**
  * A utility class containing various factory methods for creating and
@@ -93,6 +95,18 @@ public final class Requests {
 
         protected abstract T getThis();
 
+        @Override
+        public JsonValue toJsonValue() {
+            return new JsonValue(new HashMap<String,Object>())
+                    .put("method", getRequestType().name().toLowerCase())
+                    .put(FIELD_RESOURCE_NAME, getResourceName())
+                    .put(FIELD_FIELDS, getFields());
+        }
+
+        @Override
+        public String toString() {
+            return toJsonValue().toString();
+        }
     }
 
     private static final class ActionRequestImpl extends AbstractRequestImpl<ActionRequest>
@@ -124,7 +138,7 @@ public final class Requests {
 
         @Override
         public <T extends Enum<T>> T getActionAsEnum(final Class<T> type) {
-            return Utils.asEnum(getAction(), type);
+            return asEnum(getAction(), type);
         }
 
         public Map<String, String> getAdditionalParameters() {
@@ -167,6 +181,14 @@ public final class Requests {
         @Override
         public RequestType getRequestType() {
             return RequestType.ACTION;
+        }
+
+        @Override
+        public JsonValue toJsonValue() {
+            return super.toJsonValue()
+                    .put(FIELD_ACTION, String.valueOf(getAction()))
+                    .put(FIELD_CONTENT, getContent().getObject())
+                    .put(FIELD_ADDITIONAL_PARAMETERS, getAdditionalParameters());
         }
     }
 
@@ -222,6 +244,13 @@ public final class Requests {
             return RequestType.CREATE;
         }
 
+        @Override
+        public JsonValue toJsonValue() {
+            return super.toJsonValue()
+                    .put(FIELD_NEW_RESOURCE_ID, String.valueOf(getNewResourceId()))
+                    .put(FIELD_CONTENT, getContent().getObject());
+        }
+
     }
 
     private static final class DeleteRequestImpl extends AbstractRequestImpl<DeleteRequest>
@@ -261,6 +290,12 @@ public final class Requests {
         @Override
         public RequestType getRequestType() {
             return RequestType.DELETE;
+        }
+
+        @Override
+        public JsonValue toJsonValue() {
+            return super.toJsonValue()
+                    .put(FIELD_REVISION, String.valueOf(getRevision()));
         }
 
     }
@@ -323,6 +358,17 @@ public final class Requests {
         @Override
         public RequestType getRequestType() {
             return RequestType.PATCH;
+        }
+
+        @Override
+        public JsonValue toJsonValue() {
+            final List<Object> operations = new ArrayList<Object>();
+            for (PatchOperation operation : getPatchOperations()) {
+                operations.add(operation.toJsonValue().getObject());
+            }
+            return super.toJsonValue()
+                    .put(FIELD_REVISION, String.valueOf(getRevision()))
+                    .put(FIELD_PATCH_OPERATIONS, operations);
         }
     }
 
@@ -471,6 +517,22 @@ public final class Requests {
             return RequestType.QUERY;
         }
 
+        @Override
+        public JsonValue toJsonValue() {
+            final List<String> sortKeys =  new ArrayList<String>();
+            for (SortKey key : getSortKeys()) {
+                sortKeys.add(String.valueOf(key));
+            }
+            return super.toJsonValue()
+                    .put(FIELD_QUERY_ID, String.valueOf(getQueryId()))
+                    .put(FIELD_QUERY_EXPRESSION, String.valueOf(getQueryExpression()))
+                    .put(FIELD_QUERY_FILTER, String.valueOf(getQueryFilter()))
+                    .put(FIELD_SORT_KEYS, sortKeys)
+                    .put(FIELD_PAGE_SIZE, String.valueOf(getPageSize()))
+                    .put(FIELD_PAGED_RESULTS_OFFSET, String.valueOf(getPagedResultsOffset()))
+                    .put(FIELD_PAGED_RESULTS_COOKIE, String.valueOf(getPagedResultsCookie()))
+                    .put(FIELD_ADDITIONAL_PARAMETERS, getAdditionalParameters());
+        }
     }
 
     private static final class ReadRequestImpl extends AbstractRequestImpl<ReadRequest> implements
@@ -552,6 +614,12 @@ public final class Requests {
             return RequestType.UPDATE;
         }
 
+        @Override
+        public JsonValue toJsonValue() {
+            return super.toJsonValue()
+                    .put(FIELD_REVISION, String.valueOf(getRevision()))
+                    .put(FIELD_CONTENT, getContent().getObject());
+        }
     }
 
     /**
