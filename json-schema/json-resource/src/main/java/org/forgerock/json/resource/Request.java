@@ -19,6 +19,7 @@ package org.forgerock.json.resource;
 import java.util.List;
 
 import org.forgerock.json.fluent.JsonPointer;
+import org.forgerock.json.fluent.JsonValue;
 
 /**
  * Common attributes of all JSON resource requests.
@@ -179,4 +180,11 @@ public interface Request {
      *             name.
      */
     Request setResourceName(ResourceName name);
+
+    /**
+     * Return a JsonValue representation of this request.
+     *
+     * @return this request as a JsonValue
+     */
+    JsonValue toJsonValue();
 }
