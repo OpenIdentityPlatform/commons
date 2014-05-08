@@ -107,7 +107,7 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
         },
 
         reloadData: function() {
-            js2form(document.getElementById(this.$el.find("#UserProfileForm").attr("id")), conf.loggedUser);
+            js2form(this.$el.find("#UserProfileForm")[0], conf.loggedUser);
             this.$el.find("input[name=saveButton]").val($.t("common.form.update"));
             this.$el.find("input[name=resetButton]").val($.t("common.form.reset"));
             validatorsManager.validateAllFields(this.$el);

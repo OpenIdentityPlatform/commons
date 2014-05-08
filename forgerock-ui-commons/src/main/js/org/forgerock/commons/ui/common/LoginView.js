@@ -46,18 +46,15 @@ define("org/forgerock/commons/ui/common/LoginView", [
         
         formSubmit: function(event) {
             event.preventDefault();
-            this.$el.find(":input").trigger("keyup");
-            if(validatorsManager.formValidated(this.$el)) {
-                if(this.$el.find("[name=loginRemember]:checked").length !== 0) {
-                    var expire = new Date();
-                    expire.setDate(expire.getDate() + 365*20);
-                    cookieHelper.setCookie("login", this.$el.find("input[name=login]").val(), expire);
-                } else {
-                    cookieHelper.deleteCookie("login");
-                }
-                
-                eventManager.sendEvent(constants.EVENT_LOGIN_REQUEST, {userName: this.$el.find("input[name=login]").val(), password: this.$el.find("input[name=password]").val()});
+            if(this.$el.find("[name=loginRemember]:checked").length !== 0) {
+                var expire = new Date();
+                expire.setDate(expire.getDate() + 365*20);
+                cookieHelper.setCookie("login", this.$el.find("input[name=login]").val(), expire);
+            } else {
+                cookieHelper.deleteCookie("login");
             }
+            
+            eventManager.sendEvent(constants.EVENT_LOGIN_REQUEST, {userName: this.$el.find("input[name=login]").val(), password: this.$el.find("input[name=password]").val()});
         },
         
         render: function(args, callback) {
@@ -77,10 +74,10 @@ define("org/forgerock/commons/ui/common/LoginView", [
                     this.$el.find("input[name=login]").focus();
                 }
                 
-                
                 if(callback) {
                     callback();
                 }
+                
             });
         }
     }); 

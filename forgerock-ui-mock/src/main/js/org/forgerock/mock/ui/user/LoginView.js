@@ -34,10 +34,7 @@ define("org/forgerock/mock/ui/user/LoginView", [
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/mock/ui/common/main/LocalStorage"
 ], function (commonLoginView, validatorsManager, conf, localStorage) {
-    var handleLoginChange = function () {
-            var login = this.$el.find("input[name=login]").val();
-        },
-        LoginView = function () {
+    var LoginView = function () {
         },
         obj;
 
@@ -45,19 +42,27 @@ define("org/forgerock/mock/ui/user/LoginView", [
 
     obj = new LoginView();
 
-    obj.render = function (args) {
+    obj.render = function (args, callback) {
+
         if (conf.globalData.selfRegistration) {
             obj.baseTemplate = "templates/common/MediumBaseTemplate.html";
         }
-        commonLoginView.render.call(this, args, _.bind(handleLoginChange, this));
 
-        var login = localStorage.get('remember-login');
-        if (login) {
-            this.$el.find("input[name=login]").val(login);
-            this.$el.find("[name=loginRemember]").attr("checked", "true");
-            validatorsManager.validateAllFields(this.$el);
-            this.$el.find("[name=password]").focus();
-        }
+        commonLoginView.render.call(this, args, _.bind(function () {
+
+            var login = localStorage.get('remember-login');
+            if (login) {
+                this.$el.find("input[name=login]").val(login);
+                this.$el.find("[name=loginRemember]").attr("checked", "true");
+                validatorsManager.validateAllFields(this.$el);
+                this.$el.find("[name=password]").focus();
+            }
+
+            if (callback) {
+                callback();
+            }
+
+        }, this));        
     };
 
     obj.formSubmit = function (event) {
@@ -70,8 +75,6 @@ define("org/forgerock/mock/ui/user/LoginView", [
             localStorage.remove('remember-login');
         }
     };
-
-    obj.events["change input[name=login]"] = handleLoginChange;
 
     return obj;
 });
