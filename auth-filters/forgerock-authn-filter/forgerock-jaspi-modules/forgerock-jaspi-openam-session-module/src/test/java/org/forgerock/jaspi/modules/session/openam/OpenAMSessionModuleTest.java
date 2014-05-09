@@ -224,7 +224,7 @@ public class OpenAMSessionModuleTest {
             openAMSessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
         } catch (IllegalArgumentException e) {
             //Then
-            assertTrue(e.getMessage().contains("trustStorePath property must be set"));
+            assertTrue(e.getMessage().contains("truststorePath property must be set"));
             verifyZeroInteractions(restClient);
         }
     }
@@ -241,14 +241,14 @@ public class OpenAMSessionModuleTest {
         options.put("openamDeploymentUrl", "https://OPENAM_DEPLOYMENT_URI/");
         options.put("openamSSOTokenCookieName", "OPENAM_SSO_TOKEN_COOKIE_NAME");
         options.put("openamUserAttribute", "OPENAM_USER_ATTRIBUTE");
-        options.put("trustStorePath", "");
+        options.put("truststorePath", "");
 
         //When
         try {
             openAMSessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
         } catch (IllegalArgumentException e) {
             //Then
-            assertTrue(e.getMessage().contains("trustStorePath property must be set"));
+            assertTrue(e.getMessage().contains("truststorePath property must be set"));
             verifyZeroInteractions(restClient);
         }
     }
@@ -265,14 +265,14 @@ public class OpenAMSessionModuleTest {
         options.put("openamDeploymentUrl", "https://OPENAM_DEPLOYMENT_URI/");
         options.put("openamSSOTokenCookieName", "OPENAM_SSO_TOKEN_COOKIE_NAME");
         options.put("openamUserAttribute", "OPENAM_USER_ATTRIBUTE");
-        options.put("trustStorePath", "TRUST_STORE_PATH");
+        options.put("truststorePath", "TRUST_STORE_PATH");
 
         //When
         try {
             openAMSessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
         } catch (IllegalArgumentException e) {
             //Then
-            assertTrue(e.getMessage().contains("trustStoreType property must be set"));
+            assertTrue(e.getMessage().contains("truststoreType property must be set"));
             verifyZeroInteractions(restClient);
         }
     }
@@ -289,15 +289,15 @@ public class OpenAMSessionModuleTest {
         options.put("openamDeploymentUrl", "https://OPENAM_DEPLOYMENT_URI/");
         options.put("openamSSOTokenCookieName", "OPENAM_SSO_TOKEN_COOKIE_NAME");
         options.put("openamUserAttribute", "OPENAM_USER_ATTRIBUTE");
-        options.put("trustStorePath", "TRUST_STORE_PATH");
-        options.put("trustStoreType", "");
+        options.put("truststorePath", "TRUST_STORE_PATH");
+        options.put("truststoreType", "");
 
         //When
         try {
             openAMSessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
         } catch (IllegalArgumentException e) {
             //Then
-            assertTrue(e.getMessage().contains("trustStoreType property must be set"));
+            assertTrue(e.getMessage().contains("truststoreType property must be set"));
             verifyZeroInteractions(restClient);
         }
     }
@@ -314,15 +314,15 @@ public class OpenAMSessionModuleTest {
         options.put("openamDeploymentUrl", "https://OPENAM_DEPLOYMENT_URI/");
         options.put("openamSSOTokenCookieName", "OPENAM_SSO_TOKEN_COOKIE_NAME");
         options.put("openamUserAttribute", "OPENAM_USER_ATTRIBUTE");
-        options.put("trustStorePath", "TRUST_STORE_PATH");
-        options.put("trustStoreType", "TRUST_STORE_TYPE");
+        options.put("truststorePath", "TRUST_STORE_PATH");
+        options.put("truststoreType", "TRUST_STORE_TYPE");
 
         //When
         try {
             openAMSessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
         } catch (IllegalArgumentException e) {
             //Then
-            assertTrue(e.getMessage().contains("trustStorePassword property must be set"));
+            assertTrue(e.getMessage().contains("truststorePassword property must be set"));
             verifyZeroInteractions(restClient);
         }
     }
@@ -339,16 +339,16 @@ public class OpenAMSessionModuleTest {
         options.put("openamDeploymentUrl", "https://OPENAM_DEPLOYMENT_URI/");
         options.put("openamSSOTokenCookieName", "OPENAM_SSO_TOKEN_COOKIE_NAME");
         options.put("openamUserAttribute", "OPENAM_USER_ATTRIBUTE");
-        options.put("trustStorePath", "TRUST_STORE_PATH");
-        options.put("trustStoreType", "TRUST_STORE_TYPE");
-        options.put("trustStorePassword", "");
+        options.put("truststorePath", "TRUST_STORE_PATH");
+        options.put("truststoreType", "TRUST_STORE_TYPE");
+        options.put("truststorePassword", "");
 
         //When
         try {
             openAMSessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
         } catch (IllegalArgumentException e) {
             //Then
-            assertTrue(e.getMessage().contains("trustStorePassword property must be set"));
+            assertTrue(e.getMessage().contains("truststorePassword property must be set"));
             verifyZeroInteractions(restClient);
         }
     }
@@ -365,9 +365,9 @@ public class OpenAMSessionModuleTest {
         options.put("openamDeploymentUrl", "https://OPENAM_DEPLOYMENT_URI/");
         options.put("openamSSOTokenCookieName", "OPENAM_SSO_TOKEN_COOKIE_NAME");
         options.put("openamUserAttribute", "OPENAM_USER_ATTRIBUTE");
-        options.put("trustStorePath", "TRUST_STORE_PATH");
-        options.put("trustStoreType", "TRUST_STORE_TYPE");
-        options.put("trustStorePassword", "TRUST_STORE_PASSWORD");
+        options.put("truststorePath", "TRUST_STORE_PATH");
+        options.put("truststoreType", "TRUST_STORE_TYPE");
+        options.put("truststorePassword", "TRUST_STORE_PASSWORD");
 
         //When
         openAMSessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
@@ -395,9 +395,9 @@ public class OpenAMSessionModuleTest {
         options.put("openamDeploymentUrl", "https://OPENAM_DEPLOYMENT_URI/");
         options.put("openamSSOTokenCookieName", "OPENAM_SSO_TOKEN_COOKIE_NAME");
         options.put("openamUserAttribute", "OPENAM_USER_ATTRIBUTE");
-        options.put("trustStorePath", "TRUST_STORE_PATH");
-        options.put("trustStoreType", "TRUST_STORE_TYPE");
-        options.put("trustStorePassword", "TRUST_STORE_PASSWORD");
+        options.put("truststorePath", "TRUST_STORE_PATH");
+        options.put("truststoreType", "TRUST_STORE_TYPE");
+        options.put("truststorePassword", "TRUST_STORE_PASSWORD");
 
         options.put("trustManagerAlgorithm", "TRUST_MANAGER_ALGORITHM");
 
@@ -442,9 +442,9 @@ public class OpenAMSessionModuleTest {
         options.put("openamDeploymentUrl", openamDeploymentUrl);
         options.put("openamSSOTokenCookieName", "OPENAM_SSO_TOKEN_COOKIE_NAME");
         options.put("openamUserAttribute", "OPENAM_USER_ATTRIBUTE");
-        options.put("trustStorePath", "TRUST_STORE_PATH");
-        options.put("trustStoreType", "TRUST_STORE_TYPE");
-        options.put("trustStorePassword", "TRUST_STORE_PASSWORD");
+        options.put("truststorePath", "TRUST_STORE_PATH");
+        options.put("truststoreType", "TRUST_STORE_TYPE");
+        options.put("truststorePassword", "TRUST_STORE_PASSWORD");
 
         options.put("trustManagerAlgorithm", "TRUST_MANAGER_ALGORITHM");
 

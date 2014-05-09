@@ -95,11 +95,11 @@ public class OpenAMSessionModule implements ServerAuthModule {
      * OpenAM to set the SSO Token Id</td><td>iPlanetDirectoryPro</td></tr>
      * <tr><td>trustManagerAlgorithm</td><td>String</td><td>When useSSL is true</td><td>SunX509</td><td>Certificate
      * algorithm for the trust manager</td><td>SunX509</td></tr>
-     * <tr><td>trustStorePath</td><td>String</td><td>When useSSL is true</td><td>N/A</td><td>The absolute path to the
+     * <tr><td>truststorePath</td><td>String</td><td>When useSSL is true</td><td>N/A</td><td>The absolute path to the
      * location of the SSL Trust Store</td><td>/opt/truststore.jks</td></tr>
-     * <tr><td>trustStoreType</td><td>String</td><td>When useSSL is true</td><td>N/A</td><td>The type of the SSL Trust
+     * <tr><td>truststoreType</td><td>String</td><td>When useSSL is true</td><td>N/A</td><td>The type of the SSL Trust
      * Store</td><td>JKS</td></tr>
-     * <tr><td>trustStorePassword</td><td>String</td><td>When useSSL is true</td><td>N/A</td><td>The password for the
+     * <tr><td>truststorePassword</td><td>String</td><td>When useSSL is true</td><td>N/A</td><td>The password for the
      * SSL Trust Store</td><td>cangetin</td></tr>
      * </tbody>
      * </table>
@@ -152,13 +152,13 @@ public class OpenAMSessionModule implements ServerAuthModule {
     @SuppressWarnings("rawtypes")
     private SslConfiguration configureSsl(final Map options) {
 
-        final String trustStorePath = (String) options.get("trustStorePath");
-        final String trustStoreType = (String) options.get("trustStoreType");
-        final String trustStorePassword = (String) options.get("trustStorePassword");
+        final String trustStorePath = (String) options.get("truststorePath");
+        final String trustStoreType = (String) options.get("truststoreType");
+        final String trustStorePassword = (String) options.get("truststorePassword");
 
-        Reject.ifTrue(isEmpty(trustStorePath), "trustStorePath property must be set.");
-        Reject.ifTrue(isEmpty(trustStoreType), "trustStoreType property must be set.");
-        Reject.ifTrue(isEmpty(trustStorePassword), "trustStorePassword property must be set.");
+        Reject.ifTrue(isEmpty(trustStorePath), "truststorePath property must be set.");
+        Reject.ifTrue(isEmpty(trustStoreType), "truststoreType property must be set.");
+        Reject.ifTrue(isEmpty(trustStorePassword), "truststorePassword property must be set.");
 
         String trustManagerAlgorithm = (String) options.get("trustManagerAlgorithm");
         if (isEmpty(trustManagerAlgorithm)) {
