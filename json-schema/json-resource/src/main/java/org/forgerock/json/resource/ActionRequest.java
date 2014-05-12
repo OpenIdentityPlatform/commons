@@ -33,12 +33,6 @@ public interface ActionRequest extends Request {
     public static final String FIELD_ACTION = "action";
 
     /**
-     * The name of the field which contains the additional action parameters in
-     * the JSON representation.
-     */
-    public static final String FIELD_ADDITIONAL_PARAMETERS = "additionalParameters";
-
-    /**
      * The name of the field which contains the action content in the JSON
      * representation.
      */
@@ -94,39 +88,6 @@ public interface ActionRequest extends Request {
     <T extends Enum<T>> T getActionAsEnum(Class<T> type);
 
     /**
-     * Returns the additional parameters which should be used to control the
-     * behavior of this action request. The returned map may be modified if
-     * permitted by this action request.
-     *
-     * @return The additional parameters which should be used to control the
-     *         behavior of this action request (never {@code null}).
-     * @deprecated Use {@link ActionRequest#getAdditionalParameters} instead.
-     */
-    @Deprecated
-    Map<String, String> getAdditionalActionParameters();
-
-    /**
-     * Returns the additional parameters which should be used to control the
-     * behavior of this action request. The returned map may be modified if
-     * permitted by this action request.
-     *
-     * @return The additional parameters which should be used to control the
-     *         behavior of this action request (never {@code null}).
-     */
-    Map<String, String> getAdditionalParameters();
-
-    /**
-     * Returns the additional parameter which should be used to control the behavior
-     * of this action request.
-     *
-     * @param name
-     *            The name of the additional parameter.
-     * @return The additional parameter which should be used to control the
-     *         behavior of this action request
-     */
-    String getAdditionalParameter(String name);
-
-    /**
      * Returns the content of this action request. The structure of the content
      * is defined by the action.
      *
@@ -171,37 +132,6 @@ public interface ActionRequest extends Request {
     ActionRequest setAction(String id);
 
     /**
-     * Sets an additional parameter which should be used to control the behavior
-     * of this action request.
-     *
-     * @param name
-     *            The name of the additional parameter.
-     * @param value
-     *            The additional parameter's value.
-     * @return This action request.
-     * @throws UnsupportedOperationException
-     *             If this action request does not permit changes to the
-     *             additional parameters.
-     * @deprecated Use {ActionRequest#setAdditionalParameter} instead.
-     */
-    @Deprecated
-    ActionRequest setAdditionalActionParameter(String name, String value);
-
-    /**
-     * Sets an additional parameter which should be used to control the behavior
-     * of this action request.
-     *
-     * @param name
-     *            The name of the additional parameter.
-     * @param value
-     *            The additional parameter's value.
-     * @return This action request.
-     * @throws UnsupportedOperationException
-     *             If this action request does not permit changes to the
-     *             additional parameters.
-     */
-    ActionRequest setAdditionalParameter(String name, String value);
-    /**
      * Sets the content of this action request. The structure of the content is
      * defined by the action.
      *
@@ -225,4 +155,10 @@ public interface ActionRequest extends Request {
      */
     @Override
     ActionRequest setResourceName(String name);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    ActionRequest setAdditionalParameter(String name, String value) throws BadRequestException;
 }

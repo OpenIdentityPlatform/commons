@@ -63,15 +63,6 @@ public interface UpdateRequest extends Request {
     List<JsonPointer> getFields();
 
     /**
-     * Returns the new content of the JSON resource to be replaced.
-     *
-     * @return The new content of the JSON resource to be replaced.
-     * @deprecated Use {@link UpdateRequest#getContent} instead.
-     */
-    @Deprecated
-    JsonValue getNewContent();
-
-    /**
      * Returns the content of the JSON resource to be replaced.
      *
      * @return The content of the JSON resource to be replaced.
@@ -111,20 +102,6 @@ public interface UpdateRequest extends Request {
      *         resource to be updated.
      */
     String getRevision();
-
-    /**
-     * Sets the new content of the JSON resource to be replaced.
-     *
-     * @param content
-     *            The new content of the JSON resource to be replaced.
-     * @return This update request.
-     * @throws UnsupportedOperationException
-     *             If this update request does not permit changes to the
-     *             content.
-     * @deprecated Use {@link UpdateRequest#setContent} instead.
-     */
-    @Deprecated
-    UpdateRequest setNewContent(JsonValue content);
 
     /**
      * Sets the content of the JSON resource to be replaced.
@@ -170,4 +147,10 @@ public interface UpdateRequest extends Request {
      *             information.
      */
     UpdateRequest setRevision(String version);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    UpdateRequest setAdditionalParameter(String name, String value) throws BadRequestException;
 }
