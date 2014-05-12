@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS. 
+ * Copyright 2014 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -22,7 +22,7 @@ import org.forgerock.json.fluent.JsonValue;
  * A {@link ServerContext} from an internal source.
  */
 public class InternalServerContext extends ServerContext implements ClientContext {
-    /** the client-friendly name of this context */
+    /** The client-friendly name of this context. */
     private static final String CONTEXT_NAME = "internalServer";
 
     /**
@@ -40,7 +40,7 @@ public class InternalServerContext extends ServerContext implements ClientContex
     }
 
     /**
-     * Get this Context's name
+     * Get this Context's name.
      *
      * @return this object's name
      */
