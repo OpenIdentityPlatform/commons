@@ -223,7 +223,7 @@ public class OpenAMSessionModule implements ServerAuthModule {
         logger.trace("SSO Token value, " + tokenId);
 
         if (tokenId == null) {
-            logger.error("SSO Token not found on request.");
+            logger.trace("SSO Token not found on request.");
             return AuthStatus.SEND_FAILURE;
         }
 
