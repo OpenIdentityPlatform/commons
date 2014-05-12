@@ -121,4 +121,10 @@ public interface DeleteRequest extends Request {
      */
     DeleteRequest setRevision(String version);
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    DeleteRequest setAdditionalParameter(String name, String value) throws BadRequestException;
+
 }

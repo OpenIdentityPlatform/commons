@@ -36,6 +36,7 @@ public final class Requests {
     private static abstract class AbstractRequestImpl<T extends Request> implements Request {
         private final List<JsonPointer> fields = new LinkedList<JsonPointer>();
         private ResourceName resourceName;
+        private final Map<String, String> parameters = new LinkedHashMap<String, String>(2);
 
         protected AbstractRequestImpl() {
             // Default constructor.
@@ -44,6 +45,7 @@ public final class Requests {
         protected AbstractRequestImpl(final Request request) {
             this.resourceName = request.getResourceNameObject();
             this.fields.addAll(request.getFields());
+            this.parameters.putAll(request.getAdditionalParameters());
         }
 
         @Override
@@ -82,6 +84,16 @@ public final class Requests {
         }
 
         @Override
+        public Map<String, String> getAdditionalParameters() {
+            return parameters;
+        }
+
+        @Override
+        public String getAdditionalParameter(final String name) {
+            return parameters.get(name);
+        }
+
+        @Override
         public final T setResourceName(final String name) {
             resourceName = ResourceName.valueOf(name);
             return getThis();
@@ -91,6 +103,19 @@ public final class Requests {
         public final T setResourceName(final ResourceName name) {
             resourceName = notNull(name);
             return getThis();
+        }
+
+        @Override
+        public T setAdditionalParameter(final String name, final String value) throws BadRequestException {
+            if (isReservedParameter(name)) {
+                throw new BadRequestException("Unrecognized update request parameter '" + name + "'");
+            }
+            parameters.put(notNull(name), notNull(value));
+            return getThis();
+        }
+
+        boolean isReservedParameter(String name) {
+            return name.startsWith("_");
         }
 
         protected abstract T getThis();
@@ -113,7 +138,6 @@ public final class Requests {
             implements ActionRequest {
         private String actionId;
         private JsonValue content;
-        private final Map<String, String> parameters = new LinkedHashMap<String, String>(2);
 
         private ActionRequestImpl() {
             // Default constructor.
@@ -123,7 +147,6 @@ public final class Requests {
             super(request);
             this.actionId = request.getAction();
             this.content = copyJsonValue(request.getContent());
-            this.parameters.putAll(request.getAdditionalParameters());
         }
 
         @Override
@@ -142,22 +165,6 @@ public final class Requests {
         }
 
         @Override
-        @Deprecated
-        public Map<String, String> getAdditionalActionParameters() {
-            return getAdditionalParameters();
-        }
-
-        @Override
-        public Map<String, String> getAdditionalParameters() {
-            return parameters;
-        }
-
-        @Override
-        public String getAdditionalParameter(final String name) {
-            return parameters.get(name);
-        }
-
-        @Override
         public JsonValue getContent() {
             return content;
         }
@@ -165,18 +172,6 @@ public final class Requests {
         @Override
         public ActionRequest setAction(final String id) {
             this.actionId = notNull(id);
-            return this;
-        }
-
-        @Override
-        @Deprecated
-        public ActionRequest setAdditionalActionParameter(final String name, final String value) {
-            return setAdditionalParameter(name, value);
-        }
-
-        @Override
-        public ActionRequest setAdditionalParameter(final String name, final String value) {
-            parameters.put(notNull(name), notNull(value));
             return this;
         }
 
@@ -202,6 +197,12 @@ public final class Requests {
                     .put(FIELD_ACTION, String.valueOf(getAction()))
                     .put(FIELD_CONTENT, getContent().getObject())
                     .put(FIELD_ADDITIONAL_PARAMETERS, getAdditionalParameters());
+        }
+
+        @Override
+        boolean isReservedParameter(String name) {
+            // no reserved parameters for ActionRequests in order to support current patch-by-query usage
+            return false;
         }
     }
 
@@ -392,7 +393,6 @@ public final class Requests {
         private String pagedResultsCookie;
         private int pagedResultsOffset = 0;
         private int pageSize = 0;
-        private final Map<String, String> parameters = new LinkedHashMap<String, String>(2);
         private String queryId;
         private String queryExpression;
 
@@ -406,7 +406,6 @@ public final class Requests {
             this.queryId = request.getQueryId();
             this.queryExpression = request.getQueryExpression();
             this.keys.addAll(request.getSortKeys());
-            this.parameters.putAll(request.getAdditionalParameters());
             this.pageSize = request.getPageSize();
             this.pagedResultsCookie = request.getPagedResultsCookie();
             this.pagedResultsOffset = request.getPagedResultsOffset();
@@ -431,22 +430,6 @@ public final class Requests {
                 this.keys.add(SortKey.valueOf(key));
             }
             return this;
-        }
-
-        @Override
-        @Deprecated
-        public Map<String, String> getAdditionalQueryParameters() {
-            return getAdditionalParameters();
-        }
-
-        @Override
-        public Map<String, String> getAdditionalParameters() {
-            return parameters;
-        }
-
-        @Override
-        public String getAdditionalParameter(final String name) {
-            return parameters.get(name);
         }
 
         @Override
@@ -482,18 +465,6 @@ public final class Requests {
         @Override
         public List<SortKey> getSortKeys() {
             return keys;
-        }
-
-        @Override
-        @Deprecated
-        public QueryRequest setAdditionalQueryParameter(final String name, final String value) {
-            return setAdditionalParameter(name, value);
-        }
-
-        @Override
-        public QueryRequest setAdditionalParameter(final String name, final String value) {
-            parameters.put(notNull(name), notNull(value));
-            return this;
         }
 
         @Override
@@ -608,12 +579,6 @@ public final class Requests {
         };
 
         @Override
-        @Deprecated
-        public JsonValue getNewContent() {
-            return getContent();
-        }
-
-        @Override
         public JsonValue getContent() {
             return content;
         }
@@ -621,12 +586,6 @@ public final class Requests {
         @Override
         public String getRevision() {
             return version;
-        }
-
-        @Override
-        @Deprecated
-        public UpdateRequest setNewContent(final JsonValue content) {
-            return setContent(content);
         }
 
         @Override
