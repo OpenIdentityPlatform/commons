@@ -42,7 +42,7 @@ define("org/forgerock/commons/ui/common/util/ValidatorsUtils", [
         } else {
             span.removeClass('error');
             span.addClass('ok');
-            span.html('&#10004;');
+            span.html('');
         }
     };
     

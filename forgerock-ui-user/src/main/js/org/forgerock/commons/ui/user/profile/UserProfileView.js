@@ -78,7 +78,7 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
                 this.data = form2js(this.el, '.', false);
                 this.data.changedProtected = [];
                 _.each(conf.globalData.protectedUserAttributes, function(attr){
-                    if(conf.loggedUser[attr] !== _this.data[attr]){
+                    if(_this.data[attr] && conf.loggedUser[attr] !== _this.data[attr]){
                         _this.data.changedProtected.push(" "+_this.$el.find("label[for="+attr+"]").text()); 
                     }
                 });

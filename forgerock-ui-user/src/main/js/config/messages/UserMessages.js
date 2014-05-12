@@ -90,6 +90,10 @@ define("config/messages/UserMessages", [
             "errorFetchingNotifications": {
                 msg: "config.messages.UserMessages.errorFetchingNotifications",
                 type: "error"
+            },
+            "identityNoSpace": {
+                msg: "config.messages.UserMessages.identityNoSpace",
+                type: "error"
             }
     };
     
