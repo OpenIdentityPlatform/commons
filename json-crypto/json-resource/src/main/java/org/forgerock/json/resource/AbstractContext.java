@@ -280,6 +280,11 @@ public abstract class AbstractContext implements Context {
         return value;
     }
 
+    @Override
+    public String toString() {
+        return toJsonValue().toString();
+    }
+
     private final <T extends Context> T asContext0(final Class<T> clazz) {
         try {
             for (Context context = this; context != null; context = context.getParent()) {
