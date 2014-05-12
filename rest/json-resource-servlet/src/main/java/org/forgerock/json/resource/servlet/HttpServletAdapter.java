@@ -250,10 +250,10 @@ public final class HttpServletAdapter {
             for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
                 final String name = p.getKey();
                 final String[] values = p.getValue();
-                if (!parseCommonParameter(name, values, request)) {
-                    // FIXME: i18n.
-                    throw new BadRequestException("Unrecognized delete request parameter '" + name
-                            + "'");
+                if (parseCommonParameter(name, values, request)) {
+                    continue;
+                } else {
+                    request.setAdditionalParameter(name, asSingleValue(name, values));
                 }
             }
             doRequest(req, resp, request);
@@ -341,12 +341,6 @@ public final class HttpServletAdapter {
                             + PARAM_QUERY_EXPRESSION + " are mutually exclusive");
                 }
 
-                if (request.getQueryId() == null
-                        && !request.getAdditionalParameters().isEmpty()) {
-                    // FIXME: i18n.
-                    throw new BadRequestException("Additional query parameters can only be used "
-                            + "with the parameter " + PARAM_QUERY_ID);
-                }
                 doRequest(req, resp, request);
             } else {
                 // Read of instance within collection or singleton.
@@ -361,10 +355,10 @@ public final class HttpServletAdapter {
                 for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
                     final String name = p.getKey();
                     final String[] values = p.getValue();
-                    if (!parseCommonParameter(name, values, request)) {
-                        // FIXME: i18n.
-                        throw new BadRequestException("Unrecognized read request parameter '"
-                                + name + "'");
+                    if (parseCommonParameter(name, values, request)) {
+                        continue;
+                    } else {
+                        request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
                 }
                 doRequest(req, resp, request);
@@ -396,10 +390,10 @@ public final class HttpServletAdapter {
                 final String[] values = p.getValue();
                 if (HttpUtils.isMultiPartRequest(req.getContentType())) {
                     // Ignore - multipart content adds form parts to the parameter set
-                } else if (!parseCommonParameter(name, values, request)) {
-                    // FIXME: i18n.
-                    throw new BadRequestException("Unrecognized update request parameter '" + name
-                            + "'");
+                } else if (parseCommonParameter(name, values, request)) {
+                    continue;
+                } else {
+                    request.setAdditionalParameter(name, asSingleValue(name, values));
                 }
             }
             doRequest(req, resp, request);
@@ -433,10 +427,8 @@ public final class HttpServletAdapter {
                         // Ignore - already handled.
                     } else if (HttpUtils.isMultiPartRequest(req.getContentType())) {
                         // Ignore - multipart content adds form parts to the parameter set
-                    }  else {
-                        // FIXME: i18n.
-                        throw new BadRequestException("Unrecognized create request parameter '"
-                                + name + "'");
+                    } else {
+                        request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
                 }
                 doRequest(req, resp, request);
@@ -507,10 +499,10 @@ public final class HttpServletAdapter {
                     final String[] values = p.getValue();
                     if (HttpUtils.isMultiPartRequest(req.getContentType())) {
                         // Ignore - multipart content adds form parts to the parameter set
-                    } else if (!parseCommonParameter(name, values, request)) {
-                        // FIXME: i18n.
-                        throw new BadRequestException("Unrecognized create request parameter '"
-                                + name + "'");
+                    } else if (parseCommonParameter(name, values, request)) {
+                        continue;
+                    } else {
+                        request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
                 }
                 doRequest(req, resp, request);
@@ -523,10 +515,10 @@ public final class HttpServletAdapter {
                     final String[] values = p.getValue();
                     if (HttpUtils.isMultiPartRequest(req.getContentType())) {
                         // Ignore - multipart content adds form parts to the parameter set
-                    } else if (!parseCommonParameter(name, values, request)) {
-                        // FIXME: i18n.
-                        throw new BadRequestException("Unrecognized update request parameter '"
-                                + name + "'");
+                    } else if (parseCommonParameter(name, values, request)) {
+                        continue;
+                    } else {
+                        request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
                 }
                 doRequest(req, resp, request);

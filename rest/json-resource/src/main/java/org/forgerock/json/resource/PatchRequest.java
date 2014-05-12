@@ -175,4 +175,10 @@ public interface PatchRequest extends Request {
      *             information.
      */
     PatchRequest setRevision(String version);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    PatchRequest setAdditionalParameter(String name, String value) throws BadRequestException;
 }
