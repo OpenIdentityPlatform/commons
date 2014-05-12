@@ -76,6 +76,52 @@ define([
                     QUnit.equal($('input[name="mail"]', userProfileView.$el).attr('data-validation-status'),               'ok', 'Email address input passes validation');
                     QUnit.equal($('input[name="sn"]', userProfileView.$el).attr('data-validation-status'),                 'ok', 'Last Name input passes validation');
                     QUnit.equal($('input[name="telephoneNumber"]', userProfileView.$el).attr('data-validation-status'),    'ok', 'Mobile Phone input passes validation');
+
+                    //Testing Buttons
+
+                    //submit button
+
+                    var testVals = {
+                        uid                 : 'Username',
+                        givenName           : 'John',
+                        mail                : 'test@test.com',
+                        sn                  : 'Doe',
+                        telephoneNumber     : '123456789'
+                    };
+
+                    $('input[name="uid"]', userProfileView.$el).val(testVals.uid).trigger('change');
+                    $('input[name="givenName"]', userProfileView.$el).val(testVals.givenName).trigger('change');
+                    $('input[name="mail"]', userProfileView.$el).val(testVals.mail).trigger('change');
+                    $('input[name="sn"]', userProfileView.$el).val(testVals.sn).trigger('change');
+                    $('input[name="telephoneNumber"]', userProfileView.$el).val(testVals.telephoneNumber).trigger('change');
+
+                    //clicking submit button
+                    
+                    $('input[name="saveButton"]', userProfileView.$el).trigger('click');
+
+                    QUnit.equal(conf.loggedUser.uid, testVals.uid                             , "Username changed");
+                    QUnit.equal(conf.loggedUser.givenName, testVals.givenName                 , "First name changed");
+                    QUnit.equal(conf.loggedUser.mail, testVals.mail                           , "Email changed");
+                    QUnit.equal(conf.loggedUser.sn, testVals.sn                               , "Last Name changed");
+                    QUnit.equal(conf.loggedUser.telephoneNumber, testVals.telephoneNumber     , "Mobile Phone changed");
+
+                    //reset button
+
+                    $('input[name="uid"]', userProfileView.$el).val('AnotherUsername').trigger('change');
+                    $('input[name="givenName"]', userProfileView.$el).val('Jane').trigger('change');
+                    $('input[name="mail"]', userProfileView.$el).val('test2@test.com').trigger('change');
+                    $('input[name="sn"]', userProfileView.$el).val('Doe').trigger('change');
+                    $('input[name="telephoneNumber"]', userProfileView.$el).val('987654321').trigger('change');
+
+                    //clicking reset button
+                    $('input[name="resetButton"]', userProfileView.$el).trigger('click'); 
+
+                    QUnit.equal($('input[name="uid"]', userProfileView.$el).val(), testVals.uid                             , "Username was reset");
+                    QUnit.equal($('input[name="givenName"]', userProfileView.$el).val(), testVals.givenName                 , "First name was reset");
+                    QUnit.equal($('input[name="mail"]', userProfileView.$el).val(), testVals.mail                           , "Email was reset");
+                    QUnit.equal($('input[name="sn"]', userProfileView.$el).val(), testVals.sn                               , "Last Name was reset");
+                    QUnit.equal($('input[name="telephoneNumber"]', userProfileView.$el).val(), testVals.telephoneNumber     , "Mobile Phone was reset");
+
                    
                     testPromise.resolve(); // make sure this is only called after the last async test is finished
                 });
