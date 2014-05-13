@@ -17,6 +17,7 @@
 package org.forgerock.json.resource;
 
 import java.util.List;
+import java.util.Map;
 
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
@@ -43,6 +44,12 @@ public interface Request {
      * representation.
      */
     public static final String FIELD_RESOURCE_NAME = "resourceName";
+
+    /**
+     * The name of the field which contains the additional query parameters in
+     * the JSON representation.
+     */
+    public static final String FIELD_ADDITIONAL_PARAMETERS = "additionalParameters";
 
     /**
      * Applies a {@code RequestVisitor} to this {@code Request}.
@@ -144,6 +151,27 @@ public interface Request {
     ResourceName getResourceNameObject();
 
     /**
+     * Returns the additional parameters which should be used to control the
+     * behavior of this action request. The returned map may be modified if
+     * permitted by this action request.
+     *
+     * @return The additional parameters which should be used to control the
+     *         behavior of this action request (never {@code null}).
+     */
+    Map<String, String> getAdditionalParameters();
+
+    /**
+     * Returns the additional parameter which should be used to control the behavior
+     * of this action request.
+     *
+     * @param name
+     *            The name of the additional parameter.
+     * @return The additional parameter which should be used to control the
+     *         behavior of this action request
+     */
+    String getAdditionalParameter(String name);
+
+    /**
      * Sets the non-{@code null} name of the JSON resource to which this request
      * should be targeted. The resource name is relative and never begins or
      * ends with a forward slash, but may be empty.
@@ -180,6 +208,23 @@ public interface Request {
      *             name.
      */
     Request setResourceName(ResourceName name);
+
+    /**
+     * Sets an additional parameter which should be used to control the behavior
+     * of this action request.
+     *
+     * @param name
+     *            The name of the additional parameter.
+     * @param value
+     *            The additional parameter's value.
+     * @return This action request.
+     * @throws BadRequestException
+     *             If this request does not permit the additional parameter to be set.
+     * @throws UnsupportedOperationException
+     *             If this request does not permit changes to the
+     *             additional parameters.
+     */
+    Request setAdditionalParameter(String name, String value) throws BadRequestException;
 
     /**
      * Return a JsonValue representation of this request.
