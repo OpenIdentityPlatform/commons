@@ -177,4 +177,10 @@ public interface CreateRequest extends Request {
      */
     @Override
     CreateRequest setResourceName(String name);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    CreateRequest setAdditionalParameter(String name, String value) throws BadRequestException;
 }
