@@ -50,6 +50,16 @@ define([
 
                 userProfileView.render(null,function() {
 
+                    var testVals = {
+                            uid                 : 'Username',
+                            givenName           : 'John',
+                            mail                : 'test@test.com',
+                            sn                  : 'Doe',
+                            telephoneNumber     : '123456789'
+                        },
+                        modifiedUser = _.extend(_.clone(conf.loggedUser), testVals);
+
+
                     QUnit.start();
 
                     // Testing inputs
@@ -79,16 +89,6 @@ define([
 
                     //Testing Buttons
 
-                    //submit button
-
-                    var testVals = {
-                        uid                 : 'Username',
-                        givenName           : 'John',
-                        mail                : 'test@test.com',
-                        sn                  : 'Doe',
-                        telephoneNumber     : '123456789'
-                    };
-
                     $('input[name="uid"]', userProfileView.$el).val(testVals.uid).trigger('change');
                     $('input[name="givenName"]', userProfileView.$el).val(testVals.givenName).trigger('change');
                     $('input[name="mail"]', userProfileView.$el).val(testVals.mail).trigger('change');
@@ -104,6 +104,8 @@ define([
                     QUnit.equal(conf.loggedUser.mail, testVals.mail                           , "Email changed");
                     QUnit.equal(conf.loggedUser.sn, testVals.sn                               , "Last Name changed");
                     QUnit.equal(conf.loggedUser.telephoneNumber, testVals.telephoneNumber     , "Mobile Phone changed");
+
+                    QUnit.ok(_.isEqual(conf.loggedUser, modifiedUser)                         , "User object doesn't have any unexpected changes");
 
                     //reset button
 

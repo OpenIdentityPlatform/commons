@@ -71,19 +71,27 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
             event.preventDefault();
             event.stopPropagation();
 
-            var _this = this;
+            var _this = this,
+                changedProtected = [];
 
             if (validatorsManager.formValidated(this.$el)) {
 
                 this.data = form2js(this.el, '.', false);
-                this.data.changedProtected = [];
+
+                // buttons will be included in this structure, so remove those.
+                _.each(this.data, function (value, key, list) {
+                    if (this.$el.find("input[name=" + key + "]").hasClass('button')) {
+                        delete this.data[key];
+                    }
+                }, this);
+
                 _.each(conf.globalData.protectedUserAttributes, function(attr){
                     if(_this.data[attr] && conf.loggedUser[attr] !== _this.data[attr]){
-                        _this.data.changedProtected.push(" "+_this.$el.find("label[for="+attr+"]").text()); 
+                        changedProtected.push(" "+_this.$el.find("label[for="+attr+"]").text()); 
                     }
                 });
 
-                if (this.data.changedProtected.length === 0) {
+                if (changedProtected.length === 0) {
                     this.submit();
                 } else {
                     location.hash = router.configuration.routes.confirmPassword.url;
@@ -107,7 +115,7 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
         },
 
         reloadData: function() {
-            js2form(this.$el.find("#UserProfileForm")[0], conf.loggedUser);
+            js2form(this.$el.find("#userProfileForm")[0], conf.loggedUser);
             this.$el.find("input[name=saveButton]").val($.t("common.form.update"));
             this.$el.find("input[name=resetButton]").val($.t("common.form.reset"));
             validatorsManager.validateAllFields(this.$el);
