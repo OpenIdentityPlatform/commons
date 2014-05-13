@@ -97,7 +97,7 @@ public final class Requests {
 
         @Override
         public JsonValue toJsonValue() {
-            return new JsonValue(new HashMap<String,Object>())
+            return new JsonValue(new HashMap<String, Object>())
                     .put("method", getRequestType().name().toLowerCase())
                     .put(FIELD_RESOURCE_NAME, getResourceName())
                     .put(FIELD_FIELDS, getFields());
