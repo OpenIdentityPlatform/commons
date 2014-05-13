@@ -77,4 +77,10 @@ public interface ReadRequest extends Request {
      */
     @Override
     ReadRequest setResourceName(String name);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    ReadRequest setAdditionalParameter(String name, String value) throws BadRequestException;
 }

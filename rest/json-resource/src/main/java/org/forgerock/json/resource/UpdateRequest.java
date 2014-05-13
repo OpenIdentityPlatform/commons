@@ -147,4 +147,10 @@ public interface UpdateRequest extends Request {
      *             information.
      */
     UpdateRequest setRevision(String version);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    UpdateRequest setAdditionalParameter(String name, String value) throws BadRequestException;
 }
