@@ -22,7 +22,7 @@ package org.forgerock.json.resource;
 public interface ClientContext extends Context {
 
     /**
-     * Return whether this client is external
+     * Return whether this client is external.
      *
      * @return true if this context represents a request from an external client, false otherwise
      */
