@@ -154,13 +154,22 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
             } else {
                 validatorsUtils.showValidation(input);
             }
-            
+      
             if($input.nextAll("span")) {
                 validatorsUtils.setTick(input, msg ? true : false);
             }
             
             $input.nextAll("div.validation-message:first").attr("for", $input.attr('id')).html(msg ? msg : '');
             $input.parents('.separate-message').children("div.validation-message:first").attr("for", $input.attr('id')).html(msg ? msg : '');
+
+            if(msg){
+                $input.parents('.separate-message').addClass('invalid');
+                $input.addClass('invalid');
+            }else{
+                $input.parents('.separate-message').removeClass('invalid'); 
+                $input.removeClass('invalid');
+            }
+                
           
             $("div.validation-message[for='"+$input.attr('name')+"']").html(msg ? msg : '');
             

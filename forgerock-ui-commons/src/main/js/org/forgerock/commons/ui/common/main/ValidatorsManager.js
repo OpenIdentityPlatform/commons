@@ -117,8 +117,15 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
                     
 
                     _.each(property.policyRequirements, function (req) {
-                        if (req === "REAUTH_REQUIRED") {
-                            el.trigger("check_reauth", property.name);
+
+                        switch (req) {
+                            case "REAUTH_REQUIRED":
+                                el.trigger("check_reauth", property.name);
+                            break;
+
+                            case "REQUIRED":
+                                input.prop('required', true);
+                            break;
                         }
                     });
                     
