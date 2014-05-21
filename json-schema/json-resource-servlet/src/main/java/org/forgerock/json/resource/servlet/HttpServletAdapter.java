@@ -84,6 +84,11 @@ public final class HttpServletAdapter {
     private static final String THIS_API_URI;
     private static final String THIS_API_VERSION;
 
+    private static final String FIELDS_DELIMITER = ",";
+    private static final String SORT_KEYS_DELIMITER = ",";
+    private static final String EMPTY_STRING = "";
+    private static final String JOIN_STRINGS_DELIMITER = " , ";
+
     static {
         final ResourceBundle bundle = ResourceBundle.getBundle(HttpServletAdapter.class.getName());
         THIS_API_URI = bundle.getString("rest-api-uri");
@@ -203,7 +208,7 @@ public final class HttpServletAdapter {
     void doDelete(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
             // Prepare response.
-            prepareResponse(resp);
+            prepareResponse(req, resp);
 
             // Validate request.
             preprocessRequest(req);
@@ -230,7 +235,7 @@ public final class HttpServletAdapter {
     void doGet(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
             // Prepare response.
-            prepareResponse(resp);
+            prepareResponse(req, resp);
 
             // Validate request.
             preprocessRequest(req);
@@ -254,7 +259,7 @@ public final class HttpServletAdapter {
                     } else if (name.equalsIgnoreCase(PARAM_SORT_KEYS)) {
                         for (final String s : values) {
                             try {
-                                request.addSortKey(s.split(","));
+                                request.addSortKey(s.split(SORT_KEYS_DELIMITER));
                             } catch (final IllegalArgumentException e) {
                                 // FIXME: i18n.
                                 throw new BadRequestException("The value '" + s
@@ -322,6 +327,15 @@ public final class HttpServletAdapter {
                     final String[] values = p.getValue();
                     if (parseCommonParameter(name, values, request)) {
                         continue;
+                    } else if (PARAM_MIME_TYPE.equalsIgnoreCase(name)) {
+                        if (values.length != 1 || values[0].split(FIELDS_DELIMITER).length > 1) {
+                            // FIXME: i18n.
+                            throw new BadRequestException("Only one mime type value allowed");
+                        }
+                        if (parameters.get(PARAM_FIELDS).length != 1) {
+                            // FIXME: i18n.
+                            throw new BadRequestException("The mime type parameter requires only 1 field to be specified");
+                        }
                     } else {
                         request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
@@ -336,7 +350,7 @@ public final class HttpServletAdapter {
     void doPatch(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
             // Prepare response.
-            prepareResponse(resp);
+            prepareResponse(req, resp);
 
             // Validate request.
             preprocessRequest(req);
@@ -370,7 +384,7 @@ public final class HttpServletAdapter {
     void doPost(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
             // Prepare response.
-            prepareResponse(resp);
+            prepareResponse(req, resp);
 
             // Validate request.
             preprocessRequest(req);
@@ -425,7 +439,7 @@ public final class HttpServletAdapter {
     void doPut(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
             // Prepare response.
-            prepareResponse(resp);
+            prepareResponse(req, resp);
 
             // Validate request.
             preprocessRequest(req);
@@ -452,7 +466,7 @@ public final class HttpServletAdapter {
                     throw new BadRequestException("No new resource ID in HTTP PUT request");
                 } else if (i < 0) {
                     // We have a pathInfo of the form "{id}"
-                    request = Requests.newCreateRequest("", content);
+                    request = Requests.newCreateRequest(EMPTY_STRING, content);
                     request.setNewResourceId(resourceName);
                 } else {
                     // We have a pathInfo of the form "{container}/{id}"
@@ -509,7 +523,7 @@ public final class HttpServletAdapter {
         // Treat null path info as root resource.
         String resourceName = req.getPathInfo();
         if (resourceName == null) {
-            return "";
+            return EMPTY_STRING;
         }
         if (resourceName.startsWith("/")) {
             resourceName = resourceName.substring(1);
@@ -560,8 +574,8 @@ public final class HttpServletAdapter {
             throw new BadRequestException(
                     "The request could not be processed because it specified the content-type '"
                             + req.getContentType() + "' when only the content-type '"
-                            + APPLICATION_JSON_CONTENT_TYPE + "' and '"
-                            + MULTIPART_FORM_CONTENT_TYPE + "' are supported");
+                            + MIME_TYPE_APPLICATION_JSON + "' and '"
+                            + MIME_TYPE_MULTIPART_FORM_DATA + "' are supported");
         }
 
         if (req.getHeader("If-Modified-Since") != null) {
