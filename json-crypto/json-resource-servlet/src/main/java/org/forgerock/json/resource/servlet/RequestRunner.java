@@ -21,6 +21,8 @@ import static org.forgerock.util.Utils.closeSilently;
 
 import java.io.IOException;
 
+import javax.mail.internet.ContentType;
+import javax.mail.internet.ParseException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -43,6 +45,7 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceName;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.util.encode.Base64url;
 import org.forgerock.util.promise.SuccessHandler;
 
 /**
@@ -322,7 +325,43 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
         writer.writeObject(json.getObject());
     }
 
-    private void writeResource(final Resource resource) throws IOException {
+    private void writeTextValue(final JsonValue json) throws IOException {
+        if (json.isMap() && !json.asMap().isEmpty()) {
+            writeToResponse(json.asMap().entrySet().iterator().next().getValue().toString().getBytes());
+        } else if (json.isList() && !json.asList().isEmpty()) {
+            writeToResponse(json.asList(String.class).iterator().next().getBytes());
+        } else if (json.isString()) {
+            writeToResponse(json.asString().getBytes());
+        } else if (json.isBoolean()) {
+            writeToResponse(json.asBoolean().toString().getBytes());
+        } else if (json.isNumber()) {
+            writeToResponse(json.asNumber().toString().getBytes());
+        } else {
+            throw new IOException("Content is unknown type or is empty");
+        }
+    }
+
+    private void writeBinaryValue(final JsonValue json) throws IOException {
+        if (json.isMap() && !json.asMap().isEmpty()) {
+            writeToResponse(Base64url.decode(json.asMap().entrySet().iterator().next().getValue().toString()));
+        } else if (json.isList() && !json.asList().isEmpty()) {
+            writeToResponse(Base64url.decode(json.asList(String.class).iterator().next()));
+        } else if (json.isString()) {
+            writeToResponse(Base64url.decode(json.asString()));
+        } else {
+            throw new IOException("Content is not an accepted type or is empty");
+        }
+    }
+
+    private void writeToResponse(byte[] data) throws IOException {
+        if (data == null || data.length == 0) {
+            throw new IOException("Content is empty or corrupt");
+        }
+        httpResponse.setContentLength(data.length);
+        httpResponse.getOutputStream().write(data);
+    }
+
+    private void writeResource(final Resource resource) throws IOException, ParseException {
         if (resource.getRevision() != null) {
             final StringBuilder builder = new StringBuilder();
             builder.append('"');
@@ -330,6 +369,16 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
             builder.append('"');
             httpResponse.setHeader(HEADER_ETAG, builder.toString());
         }
-        writeJsonValue(resource.getContent());
+
+        ContentType contentType = new ContentType(httpResponse.getContentType());
+
+        if (contentType.match(MIME_TYPE_APPLICATION_JSON)) {
+            writeJsonValue(resource.getContent());
+        } else if (contentType.match(MIME_TYPE_TEXT_PLAIN)) {
+            writeTextValue(resource.getContent());
+        } else {
+            writeBinaryValue(resource.getContent());
+        }
+
     }
 }

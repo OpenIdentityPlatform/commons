@@ -201,8 +201,9 @@ public final class Requests {
 
         @Override
         boolean isReservedParameter(String name) {
-            // no reserved parameters for ActionRequests in order to support current patch-by-query usage
-            return false;
+            // no reserved parameters for ActionRequests in order to support current patch-by-query usage *except*
+            // mimeType which only applies to true read requests.
+            return name.equals("_mimeType");
         }
     }
 
