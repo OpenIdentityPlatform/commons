@@ -16,43 +16,7 @@
 package org.forgerock.json.resource.servlet;
 
 import static org.forgerock.json.resource.ActionRequest.ACTION_ID_CREATE;
-import static org.forgerock.json.resource.servlet.HttpUtils.APPLICATION_JSON_CONTENT_TYPE;
-import static org.forgerock.json.resource.servlet.HttpUtils.MULTIPART_FORM_CONTENT_TYPE;
-import static org.forgerock.json.resource.servlet.HttpUtils.CONTENT_TYPE_REGEX;
-import static org.forgerock.json.resource.servlet.HttpUtils.ETAG_ANY;
-import static org.forgerock.json.resource.servlet.HttpUtils.HEADER_IF_MATCH;
-import static org.forgerock.json.resource.servlet.HttpUtils.HEADER_IF_NONE_MATCH;
-import static org.forgerock.json.resource.servlet.HttpUtils.METHOD_DELETE;
-import static org.forgerock.json.resource.servlet.HttpUtils.METHOD_GET;
-import static org.forgerock.json.resource.servlet.HttpUtils.METHOD_PATCH;
-import static org.forgerock.json.resource.servlet.HttpUtils.METHOD_POST;
-import static org.forgerock.json.resource.servlet.HttpUtils.METHOD_PUT;
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_ACTION;
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_FIELDS;
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_PAGED_RESULTS_COOKIE;
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_PAGED_RESULTS_OFFSET;
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_PAGE_SIZE;
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_PRETTY_PRINT;
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_EXPRESSION;
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_FILTER;
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_ID;
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_SORT_KEYS;
-import static org.forgerock.json.resource.servlet.HttpUtils.asBooleanValue;
-import static org.forgerock.json.resource.servlet.HttpUtils.asIntValue;
-import static org.forgerock.json.resource.servlet.HttpUtils.asSingleValue;
-import static org.forgerock.json.resource.servlet.HttpUtils.checkNotNull;
-import static org.forgerock.json.resource.servlet.HttpUtils.fail;
-import static org.forgerock.json.resource.servlet.HttpUtils.getIfMatch;
-import static org.forgerock.json.resource.servlet.HttpUtils.getIfNoneMatch;
-import static org.forgerock.json.resource.servlet.HttpUtils.getJsonActionContent;
-import static org.forgerock.json.resource.servlet.HttpUtils.getJsonContent;
-import static org.forgerock.json.resource.servlet.HttpUtils.getJsonPatchContent;
-import static org.forgerock.json.resource.servlet.HttpUtils.getMethod;
-import static org.forgerock.json.resource.servlet.HttpUtils.getParameter;
-import static org.forgerock.json.resource.servlet.HttpUtils.hasParameter;
-import static org.forgerock.json.resource.servlet.HttpUtils.prepareResponse;
-import static org.forgerock.json.resource.servlet.HttpUtils.rejectIfMatch;
-import static org.forgerock.json.resource.servlet.HttpUtils.rejectIfNoneMatch;
+import static org.forgerock.json.resource.servlet.HttpUtils.*;
 
 import java.io.IOException;
 import java.util.Map;
@@ -118,6 +82,11 @@ import org.forgerock.json.resource.UpdateRequest;
 public final class HttpServletAdapter {
     private static final String THIS_API_URI;
     private static final String THIS_API_VERSION;
+
+    private static final String FIELDS_DELIMITER = ",";
+    private static final String SORT_KEYS_DELIMITER = ",";
+    private static final String EMPTY_STRING = "";
+    private static final String JOIN_STRINGS_DELIMITER = " , ";
 
     static {
         final ResourceBundle bundle = ResourceBundle.getBundle(HttpServletAdapter.class.getName());
@@ -238,7 +207,7 @@ public final class HttpServletAdapter {
     void doDelete(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
             // Prepare response.
-            prepareResponse(resp);
+            prepareResponse(req, resp);
 
             // Validate request.
             preprocessRequest(req);
@@ -265,7 +234,7 @@ public final class HttpServletAdapter {
     void doGet(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
             // Prepare response.
-            prepareResponse(resp);
+            prepareResponse(req, resp);
 
             // Validate request.
             preprocessRequest(req);
@@ -289,7 +258,7 @@ public final class HttpServletAdapter {
                     } else if (name.equalsIgnoreCase(PARAM_SORT_KEYS)) {
                         for (final String s : values) {
                             try {
-                                request.addSortKey(s.split(","));
+                                request.addSortKey(s.split(SORT_KEYS_DELIMITER));
                             } catch (final IllegalArgumentException e) {
                                 // FIXME: i18n.
                                 throw new BadRequestException("The value '" + s
@@ -357,6 +326,15 @@ public final class HttpServletAdapter {
                     final String[] values = p.getValue();
                     if (parseCommonParameter(name, values, request)) {
                         continue;
+                    } else if (PARAM_MIME_TYPE.equalsIgnoreCase(name)) {
+                        if (values.length != 1 || values[0].split(FIELDS_DELIMITER).length > 1) {
+                            // FIXME: i18n.
+                            throw new BadRequestException("Only one mime type value allowed");
+                        }
+                        if (parameters.get(PARAM_FIELDS).length != 1) {
+                            // FIXME: i18n.
+                            throw new BadRequestException("The mime type parameter requires only 1 field to be specified");
+                        }
                     } else {
                         request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
@@ -371,7 +349,7 @@ public final class HttpServletAdapter {
     void doPatch(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
             // Prepare response.
-            prepareResponse(resp);
+            prepareResponse(req, resp);
 
             // Validate request.
             preprocessRequest(req);
@@ -405,7 +383,7 @@ public final class HttpServletAdapter {
     void doPost(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
             // Prepare response.
-            prepareResponse(resp);
+            prepareResponse(req, resp);
 
             // Validate request.
             preprocessRequest(req);
@@ -460,7 +438,7 @@ public final class HttpServletAdapter {
     void doPut(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
             // Prepare response.
-            prepareResponse(resp);
+            prepareResponse(req, resp);
 
             // Validate request.
             preprocessRequest(req);
@@ -487,7 +465,7 @@ public final class HttpServletAdapter {
                     throw new BadRequestException("No new resource ID in HTTP PUT request");
                 } else if (i < 0) {
                     // We have a pathInfo of the form "{id}"
-                    request = Requests.newCreateRequest("", content);
+                    request = Requests.newCreateRequest(EMPTY_STRING, content);
                     request.setNewResourceId(resourceName);
                 } else {
                     // We have a pathInfo of the form "{container}/{id}"
@@ -544,7 +522,7 @@ public final class HttpServletAdapter {
         // Treat null path info as root resource.
         String resourceName = req.getPathInfo();
         if (resourceName == null) {
-            return "";
+            return EMPTY_STRING;
         }
         if (resourceName.startsWith("/")) {
             resourceName = resourceName.substring(1);
@@ -595,8 +573,8 @@ public final class HttpServletAdapter {
             throw new BadRequestException(
                     "The request could not be processed because it specified the content-type '"
                             + req.getContentType() + "' when only the content-type '"
-                            + APPLICATION_JSON_CONTENT_TYPE + "' and '"
-                            + MULTIPART_FORM_CONTENT_TYPE + "' are supported");
+                            + MIME_TYPE_APPLICATION_JSON + "' and '"
+                            + MIME_TYPE_MULTIPART_FORM_DATA + "' are supported");
         }
 
         if (req.getHeader("If-Modified-Since") != null) {
