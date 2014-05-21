@@ -71,12 +71,6 @@
         </dependencySet>
         <dependencySet>
             <includes>
-                <include>org.forgerock.commons.ui.libs:datatables</include>
-            </includes>
-            <outputDirectory>/libs</outputDirectory>
-        </dependencySet>
-        <dependencySet>
-            <includes>
                 <include>org.forgerock.commons.ui.libs:xdate</include>
             </includes>
             <outputDirectory>/libs</outputDirectory>

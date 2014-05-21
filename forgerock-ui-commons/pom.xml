@@ -165,12 +165,6 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons.ui.libs</groupId>
-            <artifactId>datatables</artifactId>
-            <type>js</type>
-            <classifier>min</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
             <artifactId>xdate</artifactId>
             <type>js</type>
             <classifier>min</classifier>

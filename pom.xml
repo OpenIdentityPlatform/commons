@@ -180,13 +180,6 @@
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons.ui.libs</groupId>
-                <artifactId>datatables</artifactId>
-                <version>1.9.3</version>
-                <type>js</type>
-                <classifier>min</classifier>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons.ui.libs</groupId>
                 <artifactId>xdate</artifactId>
                 <version>0.7</version>
                 <type>js</type>
