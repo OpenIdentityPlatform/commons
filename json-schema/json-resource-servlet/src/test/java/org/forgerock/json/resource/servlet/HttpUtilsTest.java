@@ -18,10 +18,13 @@ package org.forgerock.json.resource.servlet;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.util.encode.Base64url;
+import org.mockito.ArgumentCaptor;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import static org.fest.assertions.Assertions.assertThat;
@@ -30,6 +33,8 @@ import static org.mockito.Mockito.*;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -237,7 +242,7 @@ public class HttpUtilsTest {
         //given
         request = mock(HttpServletRequest.class);
         createRequest(jsonBody);
-        setUpRequestMock(request, HttpUtils.APPLICATION_JSON_CONTENT_TYPE);
+        setUpRequestMock(request, HttpUtils.MIME_TYPE_APPLICATION_JSON);
 
         //when
         JsonValue result = HttpUtils.getJsonActionContent(request);
@@ -252,7 +257,7 @@ public class HttpUtilsTest {
         //given
         request = mock(HttpServletRequest.class);
         createRequest(jsonPatchBody);
-        setUpRequestMock(request, HttpUtils.APPLICATION_JSON_CONTENT_TYPE);
+        setUpRequestMock(request, HttpUtils.MIME_TYPE_APPLICATION_JSON);
 
         //when
         List<PatchOperation> result = HttpUtils.getJsonPatchContent(request);
@@ -281,7 +286,7 @@ public class HttpUtilsTest {
         //given
         request = mock(HttpServletRequest.class);
         createRequest(jsonBody);
-        setUpRequestMock(request, HttpUtils.APPLICATION_JSON_CONTENT_TYPE);
+        setUpRequestMock(request, HttpUtils.MIME_TYPE_APPLICATION_JSON);
 
         //when
         JsonValue result = HttpUtils.getJsonContent(request);
@@ -290,4 +295,87 @@ public class HttpUtilsTest {
         testNonMultiPartResult(result);
     }
 
+    @DataProvider
+    public Object[][] ValidGetMethodContentTypeCombination() {
+        return new Object[][]{
+                { HttpUtils.METHOD_GET, HttpUtils.MIME_TYPE_APPLICATION_JSON, HttpUtils.MIME_TYPE_APPLICATION_JSON },
+                { HttpUtils.METHOD_GET, HttpUtils.MIME_TYPE_TEXT_PLAIN, HttpUtils.MIME_TYPE_TEXT_PLAIN }
+        };
+    }
+
+    private void setupPrepareResponseMocks(final HttpServletRequest httpServletRequest,
+                                           final HttpServletResponse httpServletResponse,
+                                           final ArgumentCaptor<String> captor,
+                                           final String method,
+                                           final String contentType) {
+        when(httpServletRequest.getMethod()).thenReturn(method);
+        when(httpServletRequest.getHeader(HttpUtils.HEADER_X_HTTP_METHOD_OVERRIDE)).thenReturn(method);
+        when(httpServletRequest.getParameter(HttpUtils.PARAM_MIME_TYPE)).thenReturn(contentType);
+        doNothing().when(httpServletResponse).setContentType(captor.capture());
+        doNothing().when(httpServletResponse).setCharacterEncoding(captor.capture());
+        doNothing().when(httpServletResponse).setHeader(captor.capture(), captor.capture());
+    }
+
+    @Test(dataProvider = "ValidGetMethodContentTypeCombination")
+    public void testShouldSetResponseContentType(final String method, final String contentType, final String result)
+            throws ResourceException {
+        //given
+        HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
+        HttpServletResponse httpServletResponse = mock(HttpServletResponse.class);
+        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+
+        setupPrepareResponseMocks(httpServletRequest, httpServletResponse, captor, method, contentType);
+
+        //when
+        HttpUtils.prepareResponse(httpServletRequest, httpServletResponse);
+
+        //then
+        assertThat(captor.getValue().equalsIgnoreCase(result));
+        assertThat(captor.getValue().equalsIgnoreCase(HttpUtils.CHARACTER_ENCODING));
+        assertThat(captor.getValue().equalsIgnoreCase(HttpUtils.HEADER_CACHE_CONTROL));
+        assertThat(captor.getValue().equalsIgnoreCase(HttpUtils.CACHE_CONTROL));
+    }
+
+    @Test(expectedExceptions = BadRequestException.class)
+    public void testShouldThrowBadRequestExceptionOnInvalidContentTypeForGet()
+            throws ResourceException {
+        //given
+        HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
+        HttpServletResponse httpServletResponse = mock(HttpServletResponse.class);
+        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+
+        setupPrepareResponseMocks(httpServletRequest, httpServletResponse, captor, HttpUtils.METHOD_GET, "unknown content type");
+
+        //when
+        HttpUtils.prepareResponse(httpServletRequest, httpServletResponse);
+    }
+
+    @DataProvider
+    public Object[][] ValidPostMethodContentTypeCombination() {
+        return new Object[][]{
+                { HttpUtils.METHOD_POST, HttpUtils.MIME_TYPE_APPLICATION_JSON, HttpUtils.MIME_TYPE_APPLICATION_JSON },
+                { HttpUtils.METHOD_POST, HttpUtils.MIME_TYPE_TEXT_PLAIN, HttpUtils.MIME_TYPE_APPLICATION_JSON },
+                { HttpUtils.METHOD_POST, "Unknown content Type", HttpUtils.MIME_TYPE_APPLICATION_JSON }
+        };
+    }
+
+    @Test(dataProvider = "ValidPostMethodContentTypeCombination")
+    public void testShouldSetResponseContentTypeForPostMethod(final String method, final String contentType, final String result)
+            throws ResourceException {
+        //given
+        HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
+        HttpServletResponse httpServletResponse = mock(HttpServletResponse.class);
+        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+
+        setupPrepareResponseMocks(httpServletRequest, httpServletResponse, captor, method, contentType);
+
+        //when
+        HttpUtils.prepareResponse(httpServletRequest, httpServletResponse);
+
+        //then
+        assertThat(captor.getValue().equalsIgnoreCase(result));
+        assertThat(captor.getValue().equalsIgnoreCase(HttpUtils.CHARACTER_ENCODING));
+        assertThat(captor.getValue().equalsIgnoreCase(HttpUtils.HEADER_CACHE_CONTROL));
+        assertThat(captor.getValue().equalsIgnoreCase(HttpUtils.CACHE_CONTROL));
+    }
 }

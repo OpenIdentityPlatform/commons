@@ -61,12 +61,14 @@ import org.forgerock.util.encode.Base64url;
 public final class HttpUtils {
     static final String CACHE_CONTROL = "no-cache";
     static final String CHARACTER_ENCODING = "UTF-8";
-    static final String APPLICATION_JSON_CONTENT_TYPE = "application/json";
-    static final String MULTIPART_FORM_CONTENT_TYPE = "multipart/form-data";
     static final Pattern CONTENT_TYPE_REGEX = Pattern.compile(
             "^application/json([ ]*;[ ]*charset=utf-8)?$", Pattern.CASE_INSENSITIVE);
     static final String CRLF = "\r\n";
     static final String ETAG_ANY = "*";
+
+    static final String MIME_TYPE_APPLICATION_JSON = "application/json";
+    static final String MIME_TYPE_MULTIPART_FORM_DATA = "multipart/form-data";
+    static final String MIME_TYPE_TEXT_PLAIN = "text/plain";
 
     static final String HEADER_CACHE_CONTROL = "Cache-Control";
     static final String HEADER_ETAG = "ETag";
@@ -88,6 +90,8 @@ public final class HttpUtils {
     public static final String PARAM_ACTION = param(ActionRequest.FIELD_ACTION);
     /** the HTTP request parameter to specify which fields to return. */
     public static final String PARAM_FIELDS = param(Request.FIELD_FIELDS);
+    /** the HTTP request parameter to request a certain mimetype for a filed. */
+    public static final String PARAM_MIME_TYPE = param("mimeType");
     /** the HTTP request parameter to request a certain page size. */
     public static final String PARAM_PAGE_SIZE = param(QueryRequest.FIELD_PAGE_SIZE);
     /** the HTTP request parameter to specify a paged results cookie. */
@@ -255,12 +259,14 @@ public final class HttpUtils {
             final ResourceException re = adapt(t);
             try {
                 resp.reset();
-                prepareResponse(resp);
+                prepareResponse(req, resp);
                 resp.setStatus(re.getCode());
                 final JsonGenerator writer = getJsonGenerator(req, resp);
                 writer.writeObject(re.toJsonValue().getObject());
                 closeQuietly(writer, resp.getOutputStream());
             } catch (final IOException ignored) {
+                // Ignore the error since this was probably the cause.
+            } catch (final ResourceException ignored) {
                 // Ignore the error since this was probably the cause.
             }
         }
@@ -449,10 +455,24 @@ public final class HttpUtils {
         return getParameter(req, parameter) != null;
     }
 
-    static void prepareResponse(final HttpServletResponse resp) {
-        resp.setContentType(APPLICATION_JSON_CONTENT_TYPE);
-        resp.setCharacterEncoding(CHARACTER_ENCODING);
-        resp.setHeader(HEADER_CACHE_CONTROL, CACHE_CONTROL);
+    static void prepareResponse(final HttpServletRequest req, final HttpServletResponse resp)
+            throws ResourceException {
+        //get content type from req path
+        try {
+            String mimeType = req.getParameter(PARAM_MIME_TYPE);
+            if (METHOD_GET.equalsIgnoreCase(getMethod(req)) && mimeType != null && !mimeType.isEmpty()) {
+                ContentType contentType = new ContentType(mimeType);
+                resp.setContentType(contentType.toString());
+            } else {
+                resp.setContentType(MIME_TYPE_APPLICATION_JSON);
+            }
+
+            resp.setCharacterEncoding(CHARACTER_ENCODING);
+            resp.setHeader(HEADER_CACHE_CONTROL, CACHE_CONTROL);
+        } catch (ParseException e) {
+            throw new BadRequestException("The mime type parameter '"+ req.getParameter(PARAM_MIME_TYPE)
+                    +"' can't be parsed", e);
+        }
     }
 
     static void rejectIfMatch(final HttpServletRequest req) throws ResourceException,
@@ -493,13 +513,13 @@ public final class HttpUtils {
             for (int i = 0; i < mimeMultiparts.getCount(); i++) {
                 BodyPart part = mimeMultiparts.getBodyPart(i);
                 ContentType contentType = new ContentType(part.getContentType());
-                if (contentType.match(APPLICATION_JSON_CONTENT_TYPE)) {
+                if (contentType.match(MIME_TYPE_APPLICATION_JSON)) {
                     return part;
                 }
             }
             throw new BadRequestException(
                     "The request could not be processed because the multipart request "
-                            + "does not include Content-Type: " + APPLICATION_JSON_CONTENT_TYPE);
+                    + "does not include Content-Type: " + MIME_TYPE_APPLICATION_JSON);
         } catch (final MessagingException e) {
             throw new BadRequestException(
                     "The request could not be processed because the request cant be parsed", e);
@@ -595,7 +615,7 @@ public final class HttpUtils {
     static boolean isMultiPartRequest(final String unknownContentType) throws BadRequestException {
         try {
             ContentType contentType = new ContentType(unknownContentType);
-            return contentType.match(MULTIPART_FORM_CONTENT_TYPE);
+            return contentType.match(MIME_TYPE_MULTIPART_FORM_DATA);
         } catch (final ParseException e) {
             throw new BadRequestException("The request content type can't be parsed.", e);
         }
