@@ -150,9 +150,14 @@ public class JaspiRuntime {
 
         } catch (Exception e) {
             DEBUG.error(e.getMessage(), e);
+            ResourceException jre;
+            if (e.getCause() instanceof ResourceException) {
+                jre = (ResourceException) e.getCause();
+            } else {
+                jre = ResourceException.getException(ResourceException.INTERNAL_ERROR, e.getMessage());
+            }
             HttpServletResponse httpResponse = (HttpServletResponse) messageInfo.getResponseMessage();
-            ResourceException jre = ResourceException.getException(ResourceException.INTERNAL_ERROR, e.getMessage());
-            httpResponse.setStatus(ResourceException.INTERNAL_ERROR);
+            httpResponse.setStatus(jre.getCode());
             try {
                 httpResponse.getWriter().write(jre.toJsonValue().toString());
                 httpResponse.setContentType(JSON_HTTP_MEDIA_TYPE);

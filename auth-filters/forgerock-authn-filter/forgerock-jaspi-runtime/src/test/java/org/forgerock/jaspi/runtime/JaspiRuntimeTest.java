@@ -16,6 +16,8 @@
 
 package org.forgerock.jaspi.runtime;
 
+import org.forgerock.jaspi.exceptions.JaspiAuthException;
+import org.forgerock.json.resource.ResourceException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.testng.annotations.BeforeMethod;
@@ -35,8 +37,12 @@ import javax.servlet.http.HttpServletResponseWrapper;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import static org.forgerock.json.fluent.JsonValue.field;
+import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.fluent.JsonValue.object;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -159,5 +165,39 @@ public class JaspiRuntimeTest {
         verify(writer).write(writerArgumentCaptor.capture(), anyInt(), anyInt());
         assertTrue(writerArgumentCaptor.getValue().contains("500"));
         verify(response).setContentType("application/json");
+    }
+
+    @Test
+    public void shouldUnwrapResourceExceptionCause() throws IOException, ServletException, AuthException {
+
+        //Given
+        HttpServletRequest req = mock(HttpServletRequest.class);
+        HttpServletResponse resp = mock(HttpServletResponse.class);
+        FilterChain chain = mock(FilterChain.class);
+        PrintWriter writer = mock(PrintWriter.class);
+        ServerAuthContext serverAuthContext = mock(ServerAuthContext.class);
+        ResourceException resourceException = ResourceException.getException(ResourceException.BAD_REQUEST,
+                "BAD_REQUEST");
+        resourceException.setDetail(json(object(field("DETAIL_KEY", "DETAIL_VALUE"))));
+        JaspiAuthException authException = new JaspiAuthException("AUTH_EXCEPTION", resourceException);
+
+        JaspiRuntime jaspiRuntime = new JaspiRuntime(serverAuthContext, runtimeResultHandler);
+
+        doThrow(authException).when(serverAuthContext).validateRequest(Matchers.<MessageInfo>anyObject(),
+                Matchers.<Subject>anyObject(), Matchers.<Subject>anyObject());
+        given(resp.getWriter()).willReturn(writer);
+
+        //When
+        jaspiRuntime.processMessage(req, resp, chain);
+
+        //Then
+        verify(resp).setStatus(resourceException.getCode());
+        ArgumentCaptor<String> writerArgumentCaptor = ArgumentCaptor.forClass(String.class);
+        verify(writer).write(writerArgumentCaptor.capture(), anyInt(), anyInt());
+        assertTrue(writerArgumentCaptor.getValue().contains("400"));
+        assertTrue(writerArgumentCaptor.getValue().contains("BAD_REQUEST"));
+        assertTrue(writerArgumentCaptor.getValue().contains("DETAIL_KEY"));
+        assertTrue(writerArgumentCaptor.getValue().contains("DETAIL_VALUE"));
+        verify(resp).setContentType("application/json");
     }
 }
