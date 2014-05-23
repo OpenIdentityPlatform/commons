@@ -78,9 +78,9 @@
     </properties>
 
     <scm>
-        <url>https://svn.forgerock.org/commons/forgerock-auth-filters/trunk</url>
-        <connection>scm:svn:https://svn.forgerock.org/commons/forgerock-auth-filters/trunk</connection>
-        <developerConnection>scm:svn:https://svn.forgerock.org/commons/forgerock-auth-filters/trunk</developerConnection>
+        <url>https://svn.forgerock.org/commons/forgerock-auth-filters/branches/1.4</url>
+        <connection>scm:svn:https://svn.forgerock.org/commons/forgerock-auth-filters/branches/1.4</connection>
+        <developerConnection>scm:svn:https://svn.forgerock.org/commons/forgerock-auth-filters/branches/1.4</developerConnection>
     </scm>
 
     <ciManagement>
