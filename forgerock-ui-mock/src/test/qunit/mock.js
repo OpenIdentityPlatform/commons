@@ -24,24 +24,60 @@
 
 /*global require, define, QUnit */
 
-define(function () {
+define([
+    "org/forgerock/commons/ui/common/main/EventManager",
+    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/mock/ui/common/main/LocalStorage"
+], function (eventManager, constants, localStorage) {
     return {
-        executeAll: function (server) {
+        executeAll: function (server, parameters) {
 
-            var testPromise = $.Deferred();
+            var userRegPromise = $.Deferred(),
+                rememberPromise = $.Deferred();
 
             module('Mock Tests');
+
+            QUnit.asyncTest("Remember Login", function () {
+                var loginView = require("LoginView");
+                loginView.element = $("<div>")[0];
+                delete loginView.route;
+
+                localStorage.remove('remember-login');
+
+                loginView.render([], function () {
+                    QUnit.start();
+
+                    // login with loginRemember checked
+                    $("#login", loginView.$el).val(parameters.username).trigger('keyup');
+                    $("#password", loginView.$el).val(parameters.password).trigger('keyup');
+                    $("[name=loginRemember]", loginView.$el).trigger("click");
+                    $("[name=loginButton]", loginView.$el).trigger("click");
+
+                    QUnit.equal(localStorage.get('remember-login'), parameters.username, "Remember-login matches provided username");
+
+                    eventManager.sendEvent(constants.EVENT_LOGOUT);
+
+                    loginView.render();
+
+                    QUnit.equal($("#login", loginView.$el).val(), parameters.username, "Username is remembered after logout.");                    
+
+                    localStorage.remove('remember-login');
+                    rememberPromise.resolve();
+                });
+            });            
 
             QUnit.asyncTest('User Registration', function () {
 
                 var registerView = require('RegisterView');
                 registerView.element = $("<div>")[0];
+                delete registerView.route;
+
                 registerView.render(null, function () {
 
                     var pwd = $('input[name="password"]', registerView.$el),
                         pwdConfirm = $('input[name="passwordConfirm"]', registerView.$el);
 
-                    start();
+                    QUnit.start();
                     QUnit.equal($('input[name="register"]', registerView.$el).attr('disabled'), 'disabled'              , 'Initial state of submit button is not disabled');
 
                     QUnit.equal($('input[name="userName"]', registerView.$el).data('validation-status'), 'error'        , "Empty username field passes validation");
@@ -68,12 +104,12 @@ define(function () {
                     QUnit.equal($('input[name="password"]', registerView.$el).attr('data-validation-status'), 'ok'      , 'Password passes validation');
                     QUnit.equal($('input[name="passwordConfirm"]', registerView.$el).attr('data-validation-status'), 'ok', 'Password confirm field passes validation');
 
-                    testPromise.resolve(); // make sure this is only called after the last async test is finished
+                    userRegPromise.resolve();
 
                 });
             });
 
-            return testPromise;
+            return $.when(userRegPromise, rememberPromise);
         }
     }
 });

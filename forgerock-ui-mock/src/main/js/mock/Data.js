@@ -87,7 +87,7 @@ var deps = arguments,
                     { },
                     deps[i]
                 ]
-            );            
+            );
         });
 
         server.respondWith(

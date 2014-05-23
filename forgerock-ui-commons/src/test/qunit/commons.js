@@ -24,9 +24,10 @@
 
 /*global require, define, QUnit */
 
+
 define([
-        "org/forgerock/commons/ui/common/main/Configuration"
-    ], function (conf) {
+    "org/forgerock/commons/ui/common/main/Configuration"
+], function (conf) {
     return {
         executeAll: function (server, parameters) {
 
@@ -41,14 +42,22 @@ define([
 
             });
 
-            QUnit.asyncTest("Login Page", function () {
-                var loginView = require("LoginView");
+            QUnit.asyncTest("Login / Logout", function () {
+
+                var loginView = require("LoginView"),
+                    cachedUser;
+
                 loginView.element = $("<div>")[0];
                 loginView.render([], function () {
+
+                    var loggedUserBarView = require("org/forgerock/commons/ui/common/LoggedUserBarView"),
+                        loggedUserEl = $('<div>').append('<ul id="loginContent"><li id="user_name"></li><li id="logout_link"></a></li></ul>');
+
                     QUnit.start();
 
                     QUnit.ok($("#login", loginView.$el).length                                  , "Username field available");
                     QUnit.ok($("#password", loginView.$el).length                               , "Password field available");
+                    QUnit.ok($("[name=loginButton]", loginView.$el).length                      , "Login button available");
 
                     $("#login", loginView.$el).val(parameters.username).trigger('keyup');
                     $("#password", loginView.$el).val(parameters.password).trigger('keyup');
@@ -57,12 +66,29 @@ define([
 
                     QUnit.ok(conf.loggedUser !== undefined                                      , "User should be logged in");
 
+                    cachedUser = _.clone(conf.loggedUser);
+
+                    loggedUserBarView.element = loggedUserEl[0];
+
+                    // loggedUserBarView.render is synchronous
+                    loggedUserBarView.render([], function () {
+
+                        QUnit.equal($("#user_name", loggedUserBarView.$el).text(), conf.loggedUser.userName     , "Login Bar 'user_name' reflects logged user");
+                        QUnit.ok($("#logout_link", loggedUserBarView.$el).length                                , "Log out link available");
+
+                        $("#logout_link", loggedUserBarView.$el).trigger("click");
+                        QUnit.ok(conf.loggedUser === null                                                       , "User should be logged out");
+
+                        conf.loggedUser = cachedUser;
+
+                    });
+
                     testPromise.resolve(); // make sure this is only called after the last async test is finished
+
                 });
             });
 
             return testPromise;
-
         }
     };
 });

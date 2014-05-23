@@ -40,17 +40,19 @@ require([
         }
 
         require("ThemeManager").getTheme().then(function () {
-            var server = mockServer.instance;
+            var server = mockServer.instance,
+                userParams = {
+                    "username": "test",
+                    "password": "test"
+                };
 
             QUnit.start();
 
-            commonsTests.executeAll(server, {
-                    "username": "test",
-                    "password": "test"
-                }).then(function () {
+            commonsTests.executeAll(server, userParams)
+                .then(function () {
                     return userTests.executeAll(server);
                 }).then(function () {
-                    return mockTests.executeAll(server);
+                    return mockTests.executeAll(server, userParams);
                 });
 
         });

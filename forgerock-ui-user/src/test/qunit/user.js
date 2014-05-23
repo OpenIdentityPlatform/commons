@@ -37,7 +37,7 @@ define([
 
             QUnit.test("Logged in user", function () {
 
-                QUnit.ok(conf.loggedUser !== undefined, "There must be a user logged in before running this test suite");
+                QUnit.ok(conf.loggedUser !== null && conf.loggedUser !== undefined, "There must be a user logged in before running this test suite");
 
             });
 
@@ -47,6 +47,8 @@ define([
 
                 var userProfileView = require("UserProfileView");
                 userProfileView.element = $("<div>")[0];
+
+                delete userProfileView.route; // necessary to prevent some error-checking code from causing problems in this context
 
                 userProfileView.render(null,function() {
 
