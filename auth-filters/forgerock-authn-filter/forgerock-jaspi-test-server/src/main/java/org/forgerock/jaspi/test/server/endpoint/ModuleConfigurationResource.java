@@ -59,7 +59,7 @@ public enum ModuleConfigurationResource implements SingletonResourceProvider, Mo
 
     @Override
     public void updateInstance(ServerContext context, UpdateRequest request, ResultHandler<Resource> handler) {
-        moduleConfiguration = request.getNewContent();
+        moduleConfiguration = request.getContent();
         handler.handleResult(new Resource("ModuleConfiguration", "0", moduleConfiguration));
     }
 
