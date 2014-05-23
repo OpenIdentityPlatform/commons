@@ -38,8 +38,7 @@ public class AccessTokenValidationResponse {
      * @param profileInfo The user profile information for the user who authorized the access token.
      * @param scope The scope of the access token.
      */
-    public AccessTokenValidationResponse(final long expiryTime, final Map<String, Object> profileInfo,
-            final Set<String> scope) {
+    public AccessTokenValidationResponse(long expiryTime, Map<String, Object> profileInfo, Set<String> scope) {
         this.expiryTime = expiryTime;
         this.profileInfo = Collections.unmodifiableMap(profileInfo);
         this.scope = Collections.unmodifiableSet(scope);
@@ -51,7 +50,7 @@ public class AccessTokenValidationResponse {
      * @param expiryTime The time at which the access token becomes invalid.
      * @param scope The scope of the access token.
      */
-    public AccessTokenValidationResponse(final long expiryTime, final Set<String> scope) {
+    public AccessTokenValidationResponse(long expiryTime, Set<String> scope) {
         this(expiryTime, Collections.<String, Object>emptyMap(), scope);
     }
 
@@ -60,7 +59,7 @@ public class AccessTokenValidationResponse {
      *
      * @param expiryTime The time at which the access token becomes invalid.
      */
-    public AccessTokenValidationResponse(final long expiryTime) {
+    public AccessTokenValidationResponse(long expiryTime) {
         this(expiryTime, Collections.<String, Object>emptyMap(), Collections.<String>emptySet());
     }
 

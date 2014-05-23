@@ -30,9 +30,10 @@
     <name>ForgeRock Authorization Filter Parent</name>
 
     <modules>
-        <module>forgerock-authz-filter</module>
+        <module>authz-framework-api</module>
+        <module>authz-framework</module>
         <module>forgerock-authz-modules</module>
-        <module>forgerock-authz-test-server</module>
+        <module>authz-framework-functional-tests</module>
     </modules>
 
     <dependencyManagement>

@@ -38,7 +38,7 @@ public class JsonParser {
      * @return A JsonValue
      * @throws IOException If the String could not be parsed.
      */
-    public JsonValue parse(final String s) throws IOException {
+    public JsonValue parse(String s) throws IOException {
         return new JsonValue(MAPPER.readValue(s, Map.class));
     }
 }

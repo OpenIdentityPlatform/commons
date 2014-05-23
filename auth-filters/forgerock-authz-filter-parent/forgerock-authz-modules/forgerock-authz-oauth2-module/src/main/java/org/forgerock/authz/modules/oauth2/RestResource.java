@@ -36,7 +36,7 @@ public class RestResource {
      *
      * @param uri The uri of the resource.
      */
-    public RestResource(final String uri) {
+    public RestResource(String uri) {
         resource = new ClientResource(uri);
     }
 
@@ -59,7 +59,7 @@ public class RestResource {
      * @param value The header value.
      */
     @SuppressWarnings("unchecked")
-    public void addHeader(final String name, final String value) {
+    public void addHeader(String name, String value) {
         Series<Header> headers = (Series<Header>) resource.getRequestAttributes().get("org.restlet.http.headers");
         if (headers == null) {
             headers = new Series<Header>(Header.class);

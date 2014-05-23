@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+* The contents of this file are subject to the terms of the Common Development and
+* Distribution License (the License). You may not use this file except in compliance with the
+* License.
+*
+* You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+* specific language governing permission and limitations under the License.
+*
+* When distributing Covered Software, include this CDDL Header Notice in each file and include
+* the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+* Header, with the fields enclosed by brackets [] replaced by your own identifying
+* information: "Portions copyright [year] [name of copyright owner]".
+*
+* Copyright 2014 ForgeRock AS.
+-->
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+         version="2.5">
+
+    <display-name>Commons Authorization Filter</display-name>
+
+    <!-- vvvvvv - Basic Test Cases - vvvvvv-->
+
+    <filter>
+        <filter-name>BasicHttpServletAuthorizationFilter</filter-name>
+        <filter-class>org.forgerock.authz.filter.servlet.HttpServletAuthorizationFilter</filter-class>
+        <init-param>
+            <param-name>authorization-module-factory-class</param-name>
+            <param-value>org.forgerock.authz.basic.servlet.BasicAuthorizationFactory</param-value>
+        </init-param>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>BasicHttpServletAuthorizationFilter</filter-name>
+        <url-pattern>/basic/servlet/*</url-pattern>
+    </filter-mapping>
+
+    <servlet>
+        <servlet-name>BasicCrestAuthorizationFilter</servlet-name>
+        <servlet-class>org.forgerock.json.resource.servlet.HttpServlet</servlet-class>
+        <init-param>
+            <param-name>connection-factory-class</param-name>
+            <param-value>org.forgerock.authz.basic.crest.BasicAuthorizationConnectionFactory</param-value>
+        </init-param>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>BasicCrestAuthorizationFilter</servlet-name>
+        <url-pattern>/basic/crest/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>AuthorizationContextServlet</servlet-name>
+        <servlet-class>org.forgerock.authz.basic.AuthorizationContextServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>AuthorizationContextServlet</servlet-name>
+        <url-pattern>/basic/servlet/*</url-pattern>
+    </servlet-mapping>
+
+    <!-- ^^^^^^ - Basic Test Cases - ^^^^^^-->
+
+    <!-- vvvvvv - OAuth2 Test Cases - vvvvvv -->
+
+    <filter>
+        <filter-name>OAuth2HttpServletAuthorizationFilter</filter-name>
+        <filter-class>org.forgerock.authz.filter.servlet.HttpServletAuthorizationFilter</filter-class>
+        <init-param>
+            <param-name>authorization-module-factory-class</param-name>
+            <param-value>org.forgerock.authz.modules.oauth2.servlet.OAuth2AuthorizationFactory</param-value>
+        </init-param>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>OAuth2HttpServletAuthorizationFilter</filter-name>
+        <url-pattern>/modules/oauth2/servlet/*</url-pattern>
+    </filter-mapping>
+
+    <servlet-mapping>
+        <servlet-name>AuthorizationContextServlet</servlet-name>
+        <url-pattern>/modules/oauth2/servlet/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>OAuth2CrestAuthorizationFilter</servlet-name>
+        <servlet-class>org.forgerock.json.resource.servlet.HttpServlet</servlet-class>
+        <init-param>
+            <param-name>connection-factory-class</param-name>
+            <param-value>org.forgerock.authz.modules.oauth2.crest.OAuth2AuthorizationConnectionFactory</param-value>
+        </init-param>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>OAuth2CrestAuthorizationFilter</servlet-name>
+        <url-pattern>/modules/oauth2/crest/*</url-pattern>
+    </servlet-mapping>
+
+    <!-- ^^^^^^ - OAuth2 Test Cases - ^^^^^^-->
+
+</web-app>

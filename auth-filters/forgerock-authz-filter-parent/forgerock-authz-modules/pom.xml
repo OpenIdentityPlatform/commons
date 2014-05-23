@@ -33,15 +33,4 @@
         <module>forgerock-authz-oauth2-module</module>
     </modules>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>forgerock-authz-filter</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-        </dependency>
-    </dependencies>
 </project>

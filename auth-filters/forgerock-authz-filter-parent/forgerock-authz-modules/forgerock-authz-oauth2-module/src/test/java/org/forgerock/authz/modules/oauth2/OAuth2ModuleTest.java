@@ -13,27 +13,25 @@
  *
  * Copyright 2014 ForgeRock AS.
  */
-
 package org.forgerock.authz.modules.oauth2;
 
-import org.forgerock.authz.AuthorizationContext;
-import org.forgerock.authz.AuthorizationException;
-import org.forgerock.json.fluent.JsonValue;
-import org.mockito.Matchers;
+import org.forgerock.authz.filter.api.AuthorizationContext;
+import org.forgerock.authz.filter.api.AuthorizationException;
+import org.forgerock.authz.filter.api.AuthorizationResult;
+import org.forgerock.util.promise.Promise;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import static org.forgerock.authz.modules.oauth2.OAuth2Module.AccessTokenValidationCacheFactory;
 import static org.forgerock.authz.modules.oauth2.OAuth2Module.OAUTH2_PROFILE_INFO_CONTEXT_KEY;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -47,177 +45,119 @@ public class OAuth2ModuleTest {
 
     private OAuth2Module oAuth2Module;
 
+    private AccessTokenValidationCacheFactory cacheFactory;
     private OAuth2AccessTokenValidator tokenValidator;
     private AccessTokenValidationCache cache;
 
     @BeforeMethod
     public void setUp() throws AuthorizationException {
 
-        AccessTokenValidatorFactory validatorFactory = mock(AccessTokenValidatorFactory.class);
-        AccessTokenValidationCacheFactory cacheFactory = mock(AccessTokenValidationCacheFactory.class);
-
-        oAuth2Module = new OAuth2Module(validatorFactory, cacheFactory);
-
+        cacheFactory = mock(AccessTokenValidationCacheFactory.class);
         tokenValidator = mock(OAuth2AccessTokenValidator.class);
-        cache = mock(AccessTokenValidationCache.class);
 
-        given(validatorFactory.getInstance(anyString(), Matchers.<JsonValue>anyObject())).willReturn(tokenValidator);
+        cache = mock(AccessTokenValidationCache.class);
         given(cacheFactory.getCache(anyInt())).willReturn(cache);
     }
 
-    private void initOAuth2Module(final boolean cacheEnabled,
-            final String... requiredScopes)
-            throws AuthorizationException {
-        JsonValue config = JsonValue.json(JsonValue.object(
-                JsonValue.field("access-token-validator-class", "VALIDATOR_CLASS_NAME"),
-                JsonValue.field("required-scopes", new JsonValue(Arrays.asList(requiredScopes))),
-                JsonValue.field("cache-enabled", cacheEnabled),
-                JsonValue.field("cache-size", 10)
-        ));
-        oAuth2Module.initialise(config);
-    }
-
-    @Test
-    public void shouldReturnFalseWhenAuthorizationHeaderNotSet() {
-
-        //Given
-        HttpServletRequest req = mock(HttpServletRequest.class);
-        AuthorizationContext context = mock(AuthorizationContext.class);
-
-        //When
-        final boolean authorized = oAuth2Module.authorize(req, context);
-
-        //Then
-        assertFalse(authorized);
-    }
-
-    @Test
-    public void shouldReturnFalseWhenAuthorizationInvalid() {
-
-        //Given
-        HttpServletRequest req = mock(HttpServletRequest.class);
-        AuthorizationContext context = mock(AuthorizationContext.class);
-
-        given(req.getHeader("Authorization")).willReturn("INVALID");
-
-        //When
-        final boolean authorized = oAuth2Module.authorize(req, context);
-
-        //Then
-        assertFalse(authorized);
-    }
-
-    @Test
-    public void shouldReturnFalseWhenAuthorizationIsNotBearer() {
-
-        //Given
-        HttpServletRequest req = mock(HttpServletRequest.class);
-        AuthorizationContext context = mock(AuthorizationContext.class);
-
-        given(req.getHeader("Authorization")).willReturn("MAC ACCESS_TOKEN");
-
-        //When
-        final boolean authorized = oAuth2Module.authorize(req, context);
-
-        //Then
-        assertFalse(authorized);
+    private void createOAuth2Module(boolean cacheEnabled, String... requiredScopes) {
+        oAuth2Module = new OAuth2Module(cacheFactory, tokenValidator,
+                new HashSet<String>(Arrays.asList(requiredScopes)), cacheEnabled, 10);
     }
 
     @Test
     public void shouldReturnTrueWhenUsingCacheWithEntryPresentAndTokenValid() {
 
         //Given
-        HttpServletRequest req = mock(HttpServletRequest.class);
+        String accessToken = "ACCESS_TOKEN";
         AuthorizationContext context = mock(AuthorizationContext.class);
         AccessTokenValidationResponse validationResponse = mock(AccessTokenValidationResponse.class);
 
-        initOAuth2Module(true);
-        given(req.getHeader("Authorization")).willReturn("Bearer ACCESS_TOKEN");
+        createOAuth2Module(true);
         given(cache.get("ACCESS_TOKEN")).willReturn(validationResponse);
         given(validationResponse.isTokenValid()).willReturn(true);
         given(validationResponse.getTokenScopes()).willReturn(Collections.singleton("SCOPE_A"));
 
         //When
-        final boolean authorized = oAuth2Module.authorize(req, context);
+        Promise<AuthorizationResult, AuthorizationException> promise = oAuth2Module.authorize(accessToken, context);
 
         //Then
-        assertTrue(authorized);
+        assertTrue(promise.isDone());
+        assertTrue(promise.getOrThrowUninterruptibly().isAuthorized());
     }
 
     @Test
     public void shouldReturnFalseWhenTokenHasExpired() {
 
         //Given
-        HttpServletRequest req = mock(HttpServletRequest.class);
+        String accessToken = "ACCESS_TOKEN";
         AuthorizationContext context = mock(AuthorizationContext.class);
         AccessTokenValidationResponse validationResponse = mock(AccessTokenValidationResponse.class);
 
-        initOAuth2Module(true);
-        given(req.getHeader("Authorization")).willReturn("Bearer ACCESS_TOKEN");
+        createOAuth2Module(true);
         given(cache.get("ACCESS_TOKEN")).willReturn(validationResponse);
         given(validationResponse.isTokenValid()).willReturn(false);
         given(validationResponse.getTokenScopes()).willReturn(Collections.singleton("SCOPE_A"));
 
         //When
-        final boolean authorized = oAuth2Module.authorize(req, context);
+        Promise<AuthorizationResult, AuthorizationException> promise = oAuth2Module.authorize(accessToken, context);
 
         //Then
-        assertFalse(authorized);
+        assertTrue(promise.isDone());
+        assertFalse(promise.getOrThrowUninterruptibly().isAuthorized());
     }
 
     @Test
     public void shouldReturnFalseWhenMissingRequiredScope() {
 
         //Given
-        HttpServletRequest req = mock(HttpServletRequest.class);
+        String accessToken = "ACCESS_TOKEN";
         AuthorizationContext context = mock(AuthorizationContext.class);
         AccessTokenValidationResponse validationResponse = mock(AccessTokenValidationResponse.class);
 
-        initOAuth2Module(true, "SCOPE_A", "SCOPE_B");
-        given(req.getHeader("Authorization")).willReturn("Bearer ACCESS_TOKEN");
+        createOAuth2Module(true, "SCOPE_A", "SCOPE_B");
         given(cache.get("ACCESS_TOKEN")).willReturn(validationResponse);
         given(validationResponse.isTokenValid()).willReturn(true);
         given(validationResponse.getTokenScopes()).willReturn(Collections.singleton("SCOPE_A"));
 
         //When
-        final boolean authorized = oAuth2Module.authorize(req, context);
+        Promise<AuthorizationResult, AuthorizationException> promise = oAuth2Module.authorize(accessToken, context);
 
         //Then
-        assertFalse(authorized);
+        assertTrue(promise.isDone());
+        assertFalse(promise.getOrThrowUninterruptibly().isAuthorized());
     }
 
     @Test
     public void shouldReturnTrueWhenUsingCacheWithoutEntryPresentAndTokenValid() {
 
         //Given
-        HttpServletRequest req = mock(HttpServletRequest.class);
+        String accessToken = "ACCESS_TOKEN";
         AuthorizationContext context = mock(AuthorizationContext.class);
         AccessTokenValidationResponse validationResponse = mock(AccessTokenValidationResponse.class);
 
-        initOAuth2Module(true);
-        given(req.getHeader("Authorization")).willReturn("Bearer ACCESS_TOKEN");
+        createOAuth2Module(true);
         given(cache.get("ACCESS_TOKEN")).willReturn(null);
         given(tokenValidator.validate("ACCESS_TOKEN")).willReturn(validationResponse);
         given(validationResponse.isTokenValid()).willReturn(true);
         given(validationResponse.getTokenScopes()).willReturn(Collections.singleton("SCOPE_A"));
 
         //When
-        final boolean authorized = oAuth2Module.authorize(req, context);
+        Promise<AuthorizationResult, AuthorizationException> promise = oAuth2Module.authorize(accessToken, context);
 
         //Then
-        assertTrue(authorized);
+        assertTrue(promise.isDone());
+        assertTrue(promise.getOrThrowUninterruptibly().isAuthorized());
     }
 
     @Test
     public void shouldUseCacheOnSubsequentRequestsWhenCacheEnabled() {
 
         //Given
-        HttpServletRequest req = mock(HttpServletRequest.class);
+        String accessToken = "ACCESS_TOKEN";
         AuthorizationContext context = mock(AuthorizationContext.class);
         AccessTokenValidationResponse validationResponse = mock(AccessTokenValidationResponse.class);
 
-        initOAuth2Module(true);
-        given(req.getHeader("Authorization")).willReturn("Bearer ACCESS_TOKEN");
+        createOAuth2Module(true);
         given(cache.get("ACCESS_TOKEN"))
                 .willReturn(null)
                 .willReturn(validationResponse);
@@ -225,10 +165,10 @@ public class OAuth2ModuleTest {
         given(validationResponse.isTokenValid()).willReturn(true);
         given(validationResponse.getTokenScopes()).willReturn(Collections.singleton("SCOPE_A"));
 
-        oAuth2Module.authorize(req, context);
+        oAuth2Module.authorize(accessToken, context);
 
         //When
-        oAuth2Module.authorize(req, context);
+        oAuth2Module.authorize(accessToken, context);
 
         //Then
         verify(tokenValidator, times(1)).validate("ACCESS_TOKEN");
@@ -239,21 +179,21 @@ public class OAuth2ModuleTest {
     public void shouldReturnTrueWhenNotUsingCacheTokenValid() {
 
         //Given
-        HttpServletRequest req = mock(HttpServletRequest.class);
+        String accessToken = "ACCESS_TOKEN";
         AuthorizationContext context = mock(AuthorizationContext.class);
         AccessTokenValidationResponse validationResponse = mock(AccessTokenValidationResponse.class);
 
-        initOAuth2Module(false);
-        given(req.getHeader("Authorization")).willReturn("Bearer ACCESS_TOKEN");
+        createOAuth2Module(false);
         given(tokenValidator.validate("ACCESS_TOKEN")).willReturn(validationResponse);
         given(validationResponse.isTokenValid()).willReturn(true);
         given(validationResponse.getTokenScopes()).willReturn(Collections.singleton("SCOPE_A"));
 
         //When
-        final boolean authorized = oAuth2Module.authorize(req, context);
+        Promise<AuthorizationResult, AuthorizationException> promise = oAuth2Module.authorize(accessToken, context);
 
         //Then
-        assertTrue(authorized);
+        assertTrue(promise.isDone());
+        assertTrue(promise.getOrThrowUninterruptibly().isAuthorized());
         verifyZeroInteractions(cache);
     }
 
@@ -261,19 +201,18 @@ public class OAuth2ModuleTest {
     public void shouldAddProfileInfoToContext() {
 
         //Given
-        HttpServletRequest req = mock(HttpServletRequest.class);
+        String accessToken = "ACCESS_TOKEN";
         AuthorizationContext context = mock(AuthorizationContext.class);
         AccessTokenValidationResponse validationResponse = mock(AccessTokenValidationResponse.class);
         Map<String, Object> profileInfo = new HashMap<String, Object>();
 
-        initOAuth2Module(false);
-        given(req.getHeader("Authorization")).willReturn("Bearer ACCESS_TOKEN");
+        createOAuth2Module(false);
         given(tokenValidator.validate("ACCESS_TOKEN")).willReturn(validationResponse);
         given(validationResponse.isTokenValid()).willReturn(true);
         given(validationResponse.getProfileInformation()).willReturn(profileInfo);
 
         //When
-        oAuth2Module.authorize(req, context);
+        oAuth2Module.authorize(accessToken, context);
 
         //Then
         verify(context).setAttribute(OAUTH2_PROFILE_INFO_CONTEXT_KEY, profileInfo);
@@ -283,20 +222,19 @@ public class OAuth2ModuleTest {
     public void shouldNotUseCacheOnSubsequentRequestsWhenCacheNotEnabled() {
 
         //Given
-        HttpServletRequest req = mock(HttpServletRequest.class);
+        String accessToken = "ACCESS_TOKEN";
         AuthorizationContext context = mock(AuthorizationContext.class);
         AccessTokenValidationResponse validationResponse = mock(AccessTokenValidationResponse.class);
 
-        initOAuth2Module(false);
-        given(req.getHeader("Authorization")).willReturn("Bearer ACCESS_TOKEN");
+        createOAuth2Module(false);
         given(tokenValidator.validate("ACCESS_TOKEN")).willReturn(validationResponse);
         given(validationResponse.isTokenValid()).willReturn(true);
         given(validationResponse.getTokenScopes()).willReturn(Collections.singleton("SCOPE_A"));
 
-        oAuth2Module.authorize(req, context);
+        oAuth2Module.authorize(accessToken, context);
 
         //When
-        oAuth2Module.authorize(req, context);
+        oAuth2Module.authorize(accessToken, context);
 
         //Then
         verify(tokenValidator, times(2)).validate("ACCESS_TOKEN");
@@ -307,17 +245,17 @@ public class OAuth2ModuleTest {
     public void shouldThrowAuthorizationExceptionWhenOAuth2ExceptionThrown() {
 
         //Given
-        HttpServletRequest req = mock(HttpServletRequest.class);
+        String accessToken = "ACCESS_TOKEN";
         AuthorizationContext context = mock(AuthorizationContext.class);
 
-        initOAuth2Module(false);
-        given(req.getHeader("Authorization")).willReturn("Bearer ACCESS_TOKEN");
+        createOAuth2Module(false);
         doThrow(OAuth2Exception.class).when(tokenValidator).validate("ACCESS_TOKEN");
 
         //When
-        oAuth2Module.authorize(req, context);
+        Promise<AuthorizationResult, AuthorizationException> promise = oAuth2Module.authorize(accessToken, context);
 
         //Then
-        fail();
+        assertTrue(promise.isDone());
+        promise.getOrThrowUninterruptibly();
     }
 }

@@ -29,14 +29,17 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static org.forgerock.authz.modules.oauth2.OAuth2Authorization.TOKEN_INFO_ENDPOINT_KEY;
+import static org.forgerock.authz.modules.oauth2.OAuth2Authorization.USER_INFO_ENDPOINT_KEY;
+
 /**
  * Access Token Validator for validating OAuth2 tokens issued by an OAuth2 Provider using REST requests.
  * <br/>
  * This validator requires the configuration given at construction to contain the following entries:
  * <ul>
- *     <li>token-info-endpoint - the URI of OAuth2 Providers's tokeninfo endpoint (not including the access_token query
+ *     <li>token-info-endpoint - the URI of OAuth2 Provider's tokeninfo endpoint (not including the access_token query
  *     parameter</li>
- *     <li>user-info-endpoint - the URI of OAuth2 Providers's userinfo endpoint</li>
+ *     <li>user-info-endpoint - the URI of OAuth2 Provider's userinfo endpoint</li>
  * </ul>
  *
  * @since 1.4.0
@@ -55,7 +58,7 @@ public class RestOAuth2AccessTokenValidator implements OAuth2AccessTokenValidato
      *
      * @param config The configuration for the validator.
      */
-    public RestOAuth2AccessTokenValidator(final JsonValue config) {
+    public RestOAuth2AccessTokenValidator(JsonValue config) {
         this(config, new RestResourceFactory(), new JsonParser());
     }
 
@@ -66,11 +69,10 @@ public class RestOAuth2AccessTokenValidator implements OAuth2AccessTokenValidato
      * @param restResourceFactory An instance of the RestResourceFactory.
      * @param jsonParser An instance of the JsonParser.
      */
-    RestOAuth2AccessTokenValidator(final JsonValue config, final RestResourceFactory restResourceFactory,
-            final JsonParser jsonParser) {
-        tokenInfoEndpoint = config.get("token-info-endpoint").required().asString();
+    RestOAuth2AccessTokenValidator(JsonValue config, RestResourceFactory restResourceFactory, JsonParser jsonParser) {
+        tokenInfoEndpoint = config.get(TOKEN_INFO_ENDPOINT_KEY).required().asString();
         // userInfo endpoint is optional
-        userProfileEndpoint = config.get("user-info-endpoint").asString();
+        userProfileEndpoint = config.get(USER_INFO_ENDPOINT_KEY).asString();
         this.restResourceFactory = restResourceFactory;
         this.jsonParser = jsonParser;
     }
@@ -112,6 +114,9 @@ public class RestOAuth2AccessTokenValidator implements OAuth2AccessTokenValidato
             logger.error(e.getMessage(), e);
             throw new OAuth2Exception(e.getMessage(), e);
         } catch (ResourceException e) {
+            if (e.getStatus().getCode() >= 400 && e.getStatus().getCode() < 500) {
+                return new AccessTokenValidationResponse(0);
+            }
             logger.error(e.getMessage(), e);
             throw new OAuth2Exception(e.getMessage(), e);
         }
@@ -123,7 +128,7 @@ public class RestOAuth2AccessTokenValidator implements OAuth2AccessTokenValidato
      * @param tokenInfo The response from the token info endpoint.
      * @return The Set of scopes.
      */
-    protected Set<String> getScope(final JsonValue tokenInfo) {
+    protected Set<String> getScope(JsonValue tokenInfo) {
         final String scopeList = tokenInfo.get("scope").required().asString();
         return new HashSet<String>(Arrays.asList(scopeList.split(" ")));
     }

@@ -22,15 +22,14 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- * Cache for caching AccessToken validation results.
- * <br/>
- * The cache is created with a maximum size, which when reached the cache will remove the oldest entry.
+ * <p>Cache for caching AccessToken validation results.</p>
+ *
+ * <p>The cache is created with a maximum size, which when reached the cache will remove the oldest entry.</p>
  *
  * @since 1.4.0
  */
 class AccessTokenValidationCache {
 
-    private final int maxSize;
     private final Map<String, AccessTokenValidationResponse> cache;
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
@@ -40,7 +39,6 @@ class AccessTokenValidationCache {
      * @param maxSize The maximum size of the cache.
      */
     AccessTokenValidationCache(final int maxSize) {
-        this.maxSize = maxSize;
         cache = new LinkedHashMap<String, AccessTokenValidationResponse>(maxSize) {
             /**
              * Serial Version UID.
@@ -60,7 +58,7 @@ class AccessTokenValidationCache {
      * @param accessToken The access token.
      * @param validationResponse The validation response.
      */
-    void add(final String accessToken, final AccessTokenValidationResponse validationResponse) {
+    void add(String accessToken, AccessTokenValidationResponse validationResponse) {
         try {
             lock.writeLock().lock();
             cache.put(accessToken, validationResponse);
@@ -75,7 +73,7 @@ class AccessTokenValidationCache {
      * @param accessToken The access token.
      * @return The access tokens validation response.
      */
-    AccessTokenValidationResponse get(final String accessToken) {
+    AccessTokenValidationResponse get(String accessToken) {
         try {
             lock.readLock().lock();
             return cache.get(accessToken);

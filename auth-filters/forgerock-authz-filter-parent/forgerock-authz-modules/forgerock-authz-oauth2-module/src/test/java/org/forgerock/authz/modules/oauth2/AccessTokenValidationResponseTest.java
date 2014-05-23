@@ -47,13 +47,14 @@ public class AccessTokenValidationResponseTest {
     public void shouldCreateValidResponse() {
 
         //Given
+        long expiryTime = System.currentTimeMillis() + 100;
 
         //When
-        final AccessTokenValidationResponse validationResponse =
-                new AccessTokenValidationResponse(System.currentTimeMillis() + 100);
+        final AccessTokenValidationResponse validationResponse = new AccessTokenValidationResponse(expiryTime);
 
         //Then
         assertTrue(validationResponse.isTokenValid());
+        assertEquals(validationResponse.getExpiryTime(), expiryTime);
         assertTrue(validationResponse.getProfileInformation().isEmpty());
         assertTrue(validationResponse.getTokenScopes().isEmpty());
     }

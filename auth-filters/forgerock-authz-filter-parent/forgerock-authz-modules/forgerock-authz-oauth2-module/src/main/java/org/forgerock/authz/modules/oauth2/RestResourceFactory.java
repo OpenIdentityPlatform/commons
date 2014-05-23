@@ -29,7 +29,7 @@ public class RestResourceFactory {
      * @param uri The uri of the resource.
      * @return A new RestResource.
      */
-    public RestResource resource(final String uri) {
+    public RestResource resource(String uri) {
         return new RestResource(uri);
     }
 }
