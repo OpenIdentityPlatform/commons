@@ -29,12 +29,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import org.forgerock.util.promise.Function;
+import org.forgerock.util.promise.NeverThrowsException;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import static org.fest.assertions.Assertions.assertThat;
 
 import static org.forgerock.util.Iterables.filter;
+import static org.forgerock.util.Iterables.map;
 
 
 /**
@@ -135,4 +138,33 @@ public class IterablesTest {
     {
         filter(new ArrayList<String>(), ALWAYS_TRUE).iterator().remove();
     }
+
+    private static final Function<String, Character, NeverThrowsException> FIRST_LETTERS =
+            new Function<String, Character, NeverThrowsException>() {
+                @Override
+                public Character apply(String value) throws NeverThrowsException {
+                    return value.charAt(0);
+                }
+            };
+
+    @DataProvider
+    public Object[][] mapCollections() {
+        return new Object[][] {
+                // @formatter:off
+                { new String[] { "goo", "gah", "boo", "bah", "zoo" }, "ggbbz" },
+                { new String[] { "boo", "baz", "goo", "gah", "zoo" }, "bbggz" },
+                { new String[] { "boo", "goo", "bah", "zoo", "gah" }, "bgbzg" }
+                // @formatter:on
+        };
+    }
+
+    @Test(dataProvider = "mapCollections")
+    public void testMap(final String[] value, final String firstLetters) {
+        StringBuilder sb = new StringBuilder();
+        for (Character element : map(Arrays.asList(value), FIRST_LETTERS)) {
+            sb.append(element);
+        }
+        assertThat(sb.toString()).isEqualTo(firstLetters);
+    }
+
 }

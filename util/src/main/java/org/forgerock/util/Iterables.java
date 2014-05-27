@@ -24,6 +24,8 @@
 
 package org.forgerock.util;
 
+import org.forgerock.util.promise.Function;
+
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -103,6 +105,57 @@ public class Iterables {
         }
     }
 
+    /**
+     * An {@link Iterable} that will apply a {@link Function} on the elements of
+     * the provided {@link Iterable}.
+     */
+    private static class MappedIterable<T, R, E extends RuntimeException> implements Iterable<R> {
+
+        /** the Iterable to map */
+        private final Iterable<T> iterable;
+
+        /** the function to map across the elements */
+        private final Function<T, R, E> mapper;
+
+        /**
+         * Construct the MappedIterable.
+         *
+         * @param iterable the Iterable to map
+         * @param mapper the mapper function to apply
+         */
+        private MappedIterable(Iterable<T> iterable, Function<T, R, E> mapper) {
+            this.iterable = iterable;
+            this.mapper = mapper;
+        }
+
+        /**
+         * Return an {@link Iterator} that maps objects according to the mapper function.
+         *
+         * @return the mapped iterator.
+         */
+        @Override
+        public Iterator<R> iterator() {
+            return new Iterator<R>() {
+                final Iterator<T> oIterator = iterable.iterator();
+
+                @Override
+                public boolean hasNext() {
+                    return oIterator.hasNext();
+                }
+
+                @Override
+                public R next() {
+                    return mapper.apply(oIterator.next());
+                }
+
+                @Override
+                public void remove() {
+                    oIterator.remove();
+                }
+            };
+        }
+    }
+
     private Iterables() {
         // prevent construction
     }
@@ -138,6 +191,41 @@ public class Iterables {
      */
     public static <T> Iterable<T> filter(Iterable<T> iterable, Predicate<T> predicate) {
         return new FilteredIterable<T>(iterable, predicate);
+    }
+
+    /**
+     * Create an {@link Iterable} according to a source {@link Iterable} and a mapper {@link Function}.
+     * The {@link Function} transforms the source elements in the source Iterable.
+     * <pre>
+     * {@code
+     *     List<String> fruit = new ArrayList<String>();
+     *     fruit.add("apple");
+     *     fruit.add("pineapple");
+     *     fruit.add("banana");
+     *     fruit.add("orange");
+     *     fruit.add("pear");
+     *     return map(fruit,
+     *              new Function<String, Integer, NeverThrowsException>() {
+     *                  public Integer apply(String fruit) {
+     *                      return fruit.length();
+     *                  }
+     *              });
+     * }
+     * </pre>
+     * would return an iterable whose elements are
+     * <pre>
+     *     [ 5, 9, 6, 6, 4 ]
+     * </pre>
+     *
+     * @param <T> the source element type
+     * @param <R> the returned iterable element type
+     * @param <E> a RuntimeException thrown by the map function
+     * @param iterable the source {@linkplain Iterable} to map
+     * @param mapper the {@linkplan Function} used to map elements from source type to return type
+     * @return the mapped {@linkplain Iterable}
+     */
+    public static <T, R, E extends RuntimeException> Iterable<R> map(Iterable<T> iterable, Function<T, R, E> mapper) {
+        return new MappedIterable(iterable, mapper);
     }
 
 }
