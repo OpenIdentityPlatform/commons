@@ -325,6 +325,7 @@ public class IOFailureTest extends PersistitUnitTestCase {
     }
     _persistit.close(false);
 
+    channel1.close();
     assertTrue(file1.delete());
 
     _persistit = new Persistit();
@@ -336,7 +337,6 @@ public class IOFailureTest extends PersistitUnitTestCase {
       // expected
     }
     channel0.close();
-    channel1.close();
   }
 
   @Test
