@@ -302,18 +302,22 @@ public class IOFailureTest extends PersistitUnitTestCase {
     _persistit.close();
 
     final File file0 = jman.addressToFile(currentAddress - jman.getBlockSize());
-    final FileChannel channel0 = new RandomAccessFile(file0, "rw").getChannel();
+    RandomAccessFile randomAccessFile0 = new RandomAccessFile(file0, "rw");
+    final FileChannel channel0 = randomAccessFile0.getChannel();
     final long size0 = channel0.size();
     channel0.truncate(100);
 
     channel0.close();
+    randomAccessFile0.close();
 
     final File file1 = jman.addressToFile(currentAddress);
-    final FileChannel channel1 = new RandomAccessFile(file1, "rw").getChannel();
+    RandomAccessFile randomAccessFile1 = new RandomAccessFile(file1, "rw");
+    final FileChannel channel1 = randomAccessFile1.getChannel();
     final long size1 = channel1.size();
     channel1.truncate(100);
 
     channel1.close();
+    randomAccessFile1.close();
 
     _persistit = new Persistit();
     _persistit.setConfiguration(_config);
@@ -325,7 +329,6 @@ public class IOFailureTest extends PersistitUnitTestCase {
     }
     _persistit.close(false);
 
-    channel1.close();
     assertTrue(file1.delete());
 
     _persistit = new Persistit();
@@ -336,7 +339,6 @@ public class IOFailureTest extends PersistitUnitTestCase {
     } catch (final CorruptVolumeException cve) {
       // expected
     }
-    channel0.close();
   }
 
   @Test
