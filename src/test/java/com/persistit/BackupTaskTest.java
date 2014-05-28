@@ -87,11 +87,10 @@ public class BackupTaskTest extends PersistitUnitTestCase {
       Thread.sleep(1000);
     }
 
-    final File file = File.createTempFile("backup", ".zip");
-    file.deleteOnExit();
+    final File file = temp.newFile("backup.zip");
 
     final BackupTask backup1 = (BackupTask) CLI
-      .parseTask(_persistit, "backup -y -c file=" + file.getAbsolutePath());
+      .parseTask(_persistit, "backup -y -c file=" + file.getAbsolutePath().replaceAll("\\\\", "/"));
 
     backup1.setMessageWriter(writer);
     backup1.setPersistit(_persistit);

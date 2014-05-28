@@ -323,7 +323,9 @@ public class IOFailureTest extends PersistitUnitTestCase {
     } catch (final CorruptJournalException cje) {
       // expected
     }
-    file1.delete();
+    _persistit.close(false);
+
+    assertTrue(file1.delete());
 
     _persistit = new Persistit();
     _persistit.setConfiguration(_config);
