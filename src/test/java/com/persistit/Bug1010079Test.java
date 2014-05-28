@@ -16,9 +16,9 @@
 
 package com.persistit;
 
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * https://bugs.launchpad.net/akiban-persistit/+bug/1010079

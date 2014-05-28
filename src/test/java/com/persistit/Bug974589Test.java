@@ -16,13 +16,11 @@
 
 package com.persistit;
 
-import static org.junit.Assert.assertEquals;
-
-import org.junit.Test;
-
 import com.persistit.Accumulator.SumAccumulator;
 import com.persistit.exception.PersistitException;
-import com.persistit.unit.UnitTestProperties;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class Bug974589Test extends PersistitUnitTestCase {
     /*
@@ -36,7 +34,7 @@ public class Bug974589Test extends PersistitUnitTestCase {
     private static final String TREE_NAME = "Bug974589Test";
 
     private static Exchange getExchange(final Persistit persistit) throws PersistitException {
-        return persistit.getExchange(UnitTestProperties.VOLUME_NAME, TREE_NAME, true);
+        return persistit.getExchange(VOLUME_NAME, TREE_NAME, true);
     }
 
     @Test

@@ -16,16 +16,16 @@
 
 package com.persistit.stress.unit;
 
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.concurrent.atomic.AtomicLong;
-
 import com.persistit.Exchange;
 import com.persistit.Key;
 import com.persistit.Transaction;
 import com.persistit.Value;
 import com.persistit.exception.RollbackException;
 import com.persistit.util.ArgParser;
+
+import java.util.Arrays;
+import java.util.BitSet;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class Stress3txn extends StressBase {
 

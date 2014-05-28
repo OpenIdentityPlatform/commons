@@ -16,11 +16,11 @@
 
 package com.persistit.stress.unit;
 
-import java.util.ArrayList;
-
 import com.persistit.Exchange;
 import com.persistit.Key;
 import com.persistit.util.ArgParser;
+
+import java.util.ArrayList;
 
 public class Stress11 extends StressBase {
 

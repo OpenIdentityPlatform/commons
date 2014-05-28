@@ -16,6 +16,11 @@
 
 package com.persistit;
 
+import com.persistit.Configuration.BufferPoolConfiguration;
+import org.junit.Test;
+
+import java.util.Properties;
+
 import static com.persistit.Configuration.GIGA;
 import static com.persistit.Configuration.MEGA;
 import static com.persistit.Configuration.bufferSizeFromPropertyName;
@@ -28,12 +33,6 @@ import static com.persistit.Configuration.validBufferSizes;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
-import java.util.Properties;
-
-import org.junit.Test;
-
-import com.persistit.Configuration.BufferPoolConfiguration;
 
 public class ConfigurationTest extends PersistitUnitTestCase {
 

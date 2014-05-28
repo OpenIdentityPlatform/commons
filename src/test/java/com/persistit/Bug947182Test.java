@@ -16,6 +16,13 @@
 
 package com.persistit;
 
+import com.persistit.exception.PersistitException;
+import org.junit.Test;
+
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+
 import static com.persistit.util.SequencerConstants.WRITE_WRITE_STORE_A;
 import static com.persistit.util.SequencerConstants.WRITE_WRITE_STORE_B;
 import static com.persistit.util.SequencerConstants.WRITE_WRITE_STORE_C;
@@ -31,15 +38,6 @@ import static com.persistit.util.ThreadSequencer.out;
 import static com.persistit.util.ThreadSequencer.rawSequenceHistoryCopy;
 import static com.persistit.util.ThreadSequencer.sequence;
 import static org.junit.Assert.assertEquals;
-
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
-
-import org.junit.Test;
-
-import com.persistit.exception.PersistitException;
-import com.persistit.unit.UnitTestProperties;
 
 public class Bug947182Test extends PersistitUnitTestCase {
     private static final String TREE_NAME = "Bug947182Test";
@@ -183,7 +181,7 @@ public class Bug947182Test extends PersistitUnitTestCase {
     }
 
     private static Exchange getExchange(final Persistit persistit) throws PersistitException {
-        return persistit.getExchange(UnitTestProperties.VOLUME_NAME, TREE_NAME, true);
+        return persistit.getExchange(VOLUME_NAME, TREE_NAME, true);
     }
 
     private static void storeLongMVV(final Exchange ex) throws PersistitException {

@@ -16,14 +16,6 @@
 
 package com.persistit;
 
-import java.io.FileWriter;
-import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.regex.Pattern;
-
 import com.persistit.stress.AbstractSuite;
 import com.persistit.stress.AccumulatorRestartSuite;
 import com.persistit.stress.InsertBigLoad;
@@ -41,6 +33,14 @@ import com.persistit.stress.Stress12txnSuite;
 import com.persistit.stress.Stress4Suite;
 import com.persistit.stress.Stress8txnSuite;
 import com.persistit.util.ArgParser;
+
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Runs the stress test suites defined in the _classes list below. Arguments:

@@ -16,15 +16,12 @@
 
 package com.persistit;
 
-import static com.persistit.unit.UnitTestProperties.VOLUME_NAME;
+import com.persistit.exception.PersistitException;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-
-import org.junit.Test;
-
-import com.persistit.exception.PersistitException;
 
 /**
  * https://bugs.launchpad.net/akiban-persistit/+bug/1065677

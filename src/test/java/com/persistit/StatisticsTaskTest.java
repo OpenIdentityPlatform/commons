@@ -16,12 +16,9 @@
 
 package com.persistit;
 
-import static com.persistit.StatisticsTask.COUNT_FORMAT;
-import static com.persistit.StatisticsTask.PCOUNT_FORMAT;
-import static com.persistit.StatisticsTask.PHEADER_FORMAT;
-import static com.persistit.StatisticsTask.PRATE_FORMAT;
-import static com.persistit.StatisticsTask.RATE_FORMAT;
-import static org.junit.Assert.assertEquals;
+import com.persistit.StatisticsTask.Display;
+import com.persistit.StatisticsTask.Stat;
+import org.junit.Test;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -29,10 +26,12 @@ import java.io.FileReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import org.junit.Test;
-
-import com.persistit.StatisticsTask.Display;
-import com.persistit.StatisticsTask.Stat;
+import static com.persistit.StatisticsTask.COUNT_FORMAT;
+import static com.persistit.StatisticsTask.PCOUNT_FORMAT;
+import static com.persistit.StatisticsTask.PHEADER_FORMAT;
+import static com.persistit.StatisticsTask.PRATE_FORMAT;
+import static com.persistit.StatisticsTask.RATE_FORMAT;
+import static org.junit.Assert.assertEquals;
 
 public class StatisticsTaskTest extends PersistitUnitTestCase {
 

@@ -16,11 +16,11 @@
 
 package com.persistit;
 
+import org.junit.Test;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-
-import org.junit.Test;
 
 /**
  * Suppose a persistit tree has keys (1, 10), (1, 20), (2, 30). If an exchange's

@@ -16,13 +16,13 @@
 
 package com.persistit;
 
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
-
 import com.persistit.exception.BufferSizeUnavailableException;
 import com.persistit.exception.InvalidKeyException;
 import com.persistit.exception.PersistitException;
 import com.persistit.exception.PersistitInterruptedException;
+
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 
 /**
  * Accessors for package-private methods in com.persistit so that unit tests can

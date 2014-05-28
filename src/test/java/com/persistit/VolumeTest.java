@@ -16,23 +16,21 @@
 
 package com.persistit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import com.persistit.exception.CorruptVolumeException;
+import com.persistit.exception.InUseException;
+import com.persistit.exception.InvalidVolumeSpecificationException;
+import com.persistit.exception.VolumeFullException;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.RandomAccessFile;
 import java.util.List;
 
-import org.junit.Test;
-
-import com.persistit.exception.CorruptVolumeException;
-import com.persistit.exception.InUseException;
-import com.persistit.exception.InvalidVolumeSpecificationException;
-import com.persistit.exception.VolumeFullException;
-import com.persistit.unit.UnitTestProperties;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class VolumeTest extends PersistitUnitTestCase {
 
@@ -218,7 +216,7 @@ public class VolumeTest extends PersistitUnitTestCase {
         _persistit.getTimestampAllocator().bumpTimestamp(1000000);
 
         // Write records to check on later
-        final Exchange ex = _persistit.getExchange(UnitTestProperties.VOLUME_NAME, "VolumeTest", true);
+        final Exchange ex = _persistit.getExchange(VOLUME_NAME, "VolumeTest", true);
         final Transaction txn = _persistit.getTransaction();
         txn.begin();
         for (int i = 0; i < RECORDS; ++i) {
@@ -248,7 +246,7 @@ public class VolumeTest extends PersistitUnitTestCase {
 
     @Test
     public void timeoutWhenPageIsInUse() throws Exception {
-        final Exchange exchange = _persistit.getExchange(UnitTestProperties.VOLUME_NAME, "VolumeTest", true);
+        final Exchange exchange = _persistit.getExchange(VOLUME_NAME, "VolumeTest", true);
         final Buffer buffer = exchange.getBufferPool().get(exchange.getVolume(), 1, false, true);
         try {
             final long start = System.currentTimeMillis();

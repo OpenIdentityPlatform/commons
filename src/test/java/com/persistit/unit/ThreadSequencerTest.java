@@ -16,6 +16,9 @@
 
 package com.persistit.unit;
 
+import com.persistit.util.Debug;
+import org.junit.Test;
+
 import static com.persistit.util.ThreadSequencer.addSchedule;
 import static com.persistit.util.ThreadSequencer.allocate;
 import static com.persistit.util.ThreadSequencer.array;
@@ -25,10 +28,6 @@ import static com.persistit.util.ThreadSequencer.sequence;
 import static com.persistit.util.ThreadSequencer.sequencerHistory;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
-import org.junit.Test;
-
-import com.persistit.util.Debug;
 
 public class ThreadSequencerTest {
 

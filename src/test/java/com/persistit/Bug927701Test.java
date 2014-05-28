@@ -16,9 +16,9 @@
 
 package com.persistit;
 
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * Failure detected during TPCC testing. Upon restarting server, the following

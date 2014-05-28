@@ -16,15 +16,14 @@
 
 package com.persistit.unit;
 
-import java.io.IOException;
-
-import org.junit.Test;
-
 import com.persistit.Exchange;
 import com.persistit.Key;
 import com.persistit.PersistitUnitTestCase;
 import com.persistit.Value;
 import com.persistit.exception.PersistitException;
+import org.junit.Test;
+
+import java.io.IOException;
 
 public class JoinTest1 extends PersistitUnitTestCase {
 

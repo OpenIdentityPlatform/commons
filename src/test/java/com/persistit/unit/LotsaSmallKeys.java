@@ -16,49 +16,48 @@
 
 package com.persistit.unit;
 
-import java.util.Properties;
-
-import org.junit.Test;
-
 import com.persistit.Exchange;
 import com.persistit.PersistitUnitTestCase;
 import com.persistit.exception.PersistitException;
 import com.persistit.policy.SplitPolicy;
+import org.junit.Test;
+
+import java.util.Properties;
 
 public class LotsaSmallKeys extends PersistitUnitTestCase {
 
-    private final String _volumeName = "persistit";
+  private final String _volumeName = "persistit";
 
-    /**
-     * Tests bug 775752. Logic to limit the key count was missing in the delete
-     * case. This caused an AIOOBE in Buffer#recomputeFindex.
-     * 
-     * @throws PersistitException
-     */
-    @Test
-    public void testInsertAndDeleteSmallRecords() throws PersistitException {
-        final Exchange exchange = _persistit.getExchange(_volumeName, "LotsOfSmallKeys", true);
-        exchange.removeAll();
-        exchange.setSplitPolicy(SplitPolicy.LEFT_BIAS);
-        exchange.getValue().clear();
-        for (int i = 0; i < 20000; i++) {
-            exchange.clear().append(i).store();
-        }
-        for (int j = 0; j < 100; j++) {
-            for (int i = j; i < 20000; i += 100) {
-                exchange.clear().append(i).remove();
-            }
-        }
+  /**
+   * Tests bug 775752. Logic to limit the key count was missing in the delete
+   * case. This caused an AIOOBE in Buffer#recomputeFindex.
+   * 
+   * @throws PersistitException
+   */
+  @Test
+  public void testInsertAndDeleteSmallRecords() throws PersistitException {
+    final Exchange exchange = _persistit.getExchange(_volumeName, "LotsOfSmallKeys", true);
+    exchange.removeAll();
+    exchange.setSplitPolicy(SplitPolicy.LEFT_BIAS);
+    exchange.getValue().clear();
+    for (int i = 0; i < 20000; i++) {
+      exchange.clear().append(i).store();
     }
+    for (int j = 0; j < 100; j++) {
+      for (int i = j; i < 20000; i += 100) {
+        exchange.clear().append(i).remove();
+      }
+    }
+  }
 
-    @Override
-    public Properties getProperties(final boolean cleanup) {
-        return UnitTestProperties.getBiggerProperties(cleanup);
-    }
+  @Override
+  public Properties doGetProperties(final boolean cleanup) {
+    return getBiggerProperties(cleanup);
+  }
 
-    @Override
-    public void runAllTests() throws Exception {
-        testInsertAndDeleteSmallRecords();
-    }
+  @Override
+  public void runAllTests() throws Exception {
+    testInsertAndDeleteSmallRecords();
+  }
 
 }

@@ -16,13 +16,12 @@
 
 package com.persistit;
 
-import static org.junit.Assert.assertEquals;
+import com.persistit.ValueHelper.RawValueWriter;
+import org.junit.Test;
 
 import java.util.Random;
 
-import org.junit.Test;
-
-import com.persistit.ValueHelper.RawValueWriter;
+import static org.junit.Assert.assertEquals;
 
 public class FastIndexTest extends PersistitUnitTestCase {
 

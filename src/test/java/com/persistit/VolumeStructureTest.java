@@ -16,21 +16,19 @@
 
 package com.persistit;
 
-import static org.junit.Assert.assertEquals;
-
+import com.persistit.exception.PersistitException;
 import org.junit.Test;
 
-import com.persistit.exception.PersistitException;
-import com.persistit.unit.UnitTestProperties;
+import static org.junit.Assert.assertEquals;
 
 public class VolumeStructureTest extends PersistitUnitTestCase {
 
     private Exchange exchange() throws PersistitException {
-        return _persistit.getExchange(UnitTestProperties.VOLUME_NAME, "VolumeStructureTest", true);
+        return _persistit.getExchange(VOLUME_NAME, "VolumeStructureTest", true);
     }
 
     private long nextAvailable() {
-        return _persistit.getVolume(UnitTestProperties.VOLUME_NAME).getNextAvailablePage();
+        return _persistit.getVolume(VOLUME_NAME).getNextAvailablePage();
     }
 
     @Test

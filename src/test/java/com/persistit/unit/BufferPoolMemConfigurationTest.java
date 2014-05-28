@@ -16,16 +16,15 @@
 
 package com.persistit.unit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import com.persistit.Management.BufferPoolInfo;
+import com.persistit.PersistitUnitTestCase;
+import org.junit.Test;
 
 import java.util.Properties;
 
-import org.junit.Test;
-
-import com.persistit.Management.BufferPoolInfo;
-import com.persistit.PersistitUnitTestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class BufferPoolMemConfigurationTest extends PersistitUnitTestCase {
 
@@ -36,7 +35,7 @@ public class BufferPoolMemConfigurationTest extends PersistitUnitTestCase {
 
     @Test
     public void testBufferMemConfiguration() throws Exception {
-        final Properties properties = UnitTestProperties.getPropertiesByMemory(true, "1M");
+        final Properties properties = getPropertiesByMemory(true, "1M");
         _persistit.setProperties(properties);
         _persistit.initialize();
         final BufferPoolInfo[] infoArray = _persistit.getManagement().getBufferPoolInfoArray();
@@ -50,7 +49,7 @@ public class BufferPoolMemConfigurationTest extends PersistitUnitTestCase {
 
     @Test
     public void testBufferMemConfigurationErrors() throws Exception {
-        Properties properties = UnitTestProperties.getPropertiesByMemory(true, "1000,999");
+        Properties properties = getPropertiesByMemory(true, "1000,999");
         try {
             _persistit.setProperties(properties);
             _persistit.initialize();
@@ -59,7 +58,7 @@ public class BufferPoolMemConfigurationTest extends PersistitUnitTestCase {
             // okay
         }
 
-        properties = UnitTestProperties.getPropertiesByMemory(true, "10000G");
+        properties = getPropertiesByMemory(true, "10000G");
         try {
             _persistit.setProperties(properties);
             _persistit.initialize();
@@ -68,7 +67,7 @@ public class BufferPoolMemConfigurationTest extends PersistitUnitTestCase {
             // okay
         }
 
-        properties = UnitTestProperties.getPropertiesByMemory(true, "10M");
+        properties = getPropertiesByMemory(true, "10M");
         properties.put("buffer.count.16384", "1234");
         try {
             _persistit.setProperties(properties);

@@ -16,16 +16,6 @@
 
 package com.persistit.unit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.concurrent.atomic.AtomicReference;
-
-import org.junit.Test;
-
 import com.persistit.Exchange;
 import com.persistit.Key;
 import com.persistit.KeyFilter;
@@ -34,6 +24,15 @@ import com.persistit.Transaction;
 import com.persistit.Volume;
 import com.persistit.exception.KeyTooLongException;
 import com.persistit.exception.PersistitException;
+import org.junit.Test;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class ExchangeTest extends PersistitUnitTestCase {
 

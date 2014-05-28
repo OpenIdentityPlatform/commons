@@ -16,15 +16,14 @@
 
 package com.persistit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import com.persistit.exception.PersistitException;
+import org.junit.Test;
 
 import java.io.PrintWriter;
 
-import org.junit.Test;
-
-import com.persistit.exception.PersistitException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class IntegrityCheckTest extends PersistitUnitTestCase {
 

@@ -16,19 +16,18 @@
 
 package com.persistit.unit;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import org.junit.Test;
-
 import com.persistit.Exchange;
 import com.persistit.Exchange.TraverseVisitor;
 import com.persistit.Key;
 import com.persistit.PersistitUnitTestCase;
 import com.persistit.ReadOnlyExchange;
 import com.persistit.exception.PersistitException;
+import org.junit.Test;
+
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.junit.Assert.assertEquals;
 
 public class TraverseVisitorTest extends PersistitUnitTestCase {
 

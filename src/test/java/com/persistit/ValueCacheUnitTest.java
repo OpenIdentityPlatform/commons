@@ -16,11 +16,9 @@
 
 package com.persistit;
 
-import junit.framework.Assert;
-
-import org.junit.Test;
-
 import com.persistit.Value.ValueCache;
+import junit.framework.Assert;
+import org.junit.Test;
 
 /**
  * 

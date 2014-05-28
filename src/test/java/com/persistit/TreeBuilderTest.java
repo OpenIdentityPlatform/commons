@@ -16,9 +16,7 @@
 
 package com.persistit;
 
-import static com.persistit.unit.UnitTestProperties.VOLUME_NAME;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -28,9 +26,8 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Test;
-
-import com.persistit.unit.UnitTestProperties;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class TreeBuilderTest extends PersistitUnitTestCase {
     private final static int COUNT = 100000;
@@ -277,7 +274,7 @@ public class TreeBuilderTest extends PersistitUnitTestCase {
 
         } finally {
             for (final File file : directories) {
-                UnitTestProperties.cleanUpDirectory(file);
+                cleanUpDirectory(file);
             }
         }
     }

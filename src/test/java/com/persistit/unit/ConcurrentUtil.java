@@ -16,11 +16,11 @@
 
 package com.persistit.unit;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Helper methods to create, start, join and check error status of test threads.

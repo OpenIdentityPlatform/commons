@@ -16,11 +16,11 @@
 
 package com.persistit.stress.unit;
 
-import java.util.Random;
-
 import com.persistit.Key;
 import com.persistit.Value;
 import com.persistit.util.ArgParser;
+
+import java.util.Random;
 
 public class StressInsert extends StressBase {
 

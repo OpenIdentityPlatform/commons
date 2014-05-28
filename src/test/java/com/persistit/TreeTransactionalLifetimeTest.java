@@ -16,6 +16,13 @@
 
 package com.persistit;
 
+import com.persistit.exception.PersistitException;
+import com.persistit.unit.ConcurrentUtil.ThrowingRunnable;
+import org.junit.Test;
+
+import java.util.Map;
+import java.util.concurrent.Semaphore;
+
 import static com.persistit.unit.ConcurrentUtil.assertSuccess;
 import static com.persistit.unit.ConcurrentUtil.createThread;
 import static com.persistit.unit.ConcurrentUtil.join;
@@ -23,14 +30,6 @@ import static com.persistit.unit.ConcurrentUtil.start;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-
-import java.util.Map;
-import java.util.concurrent.Semaphore;
-
-import org.junit.Test;
-
-import com.persistit.exception.PersistitException;
-import com.persistit.unit.ConcurrentUtil.ThrowingRunnable;
 
 public class TreeTransactionalLifetimeTest extends PersistitUnitTestCase {
     final static int TIMEOUT_MS = 10000;

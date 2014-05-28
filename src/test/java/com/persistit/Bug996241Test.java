@@ -16,12 +16,10 @@
 
 package com.persistit;
 
-import static org.junit.Assert.assertTrue;
-
+import com.persistit.exception.PersistitException;
 import org.junit.Test;
 
-import com.persistit.exception.PersistitException;
-import com.persistit.unit.UnitTestProperties;
+import static org.junit.Assert.assertTrue;
 
 public class Bug996241Test extends PersistitUnitTestCase {
     final static String TREE_NAME1 = "Bug996241Test_1";
@@ -95,6 +93,6 @@ public class Bug996241Test extends PersistitUnitTestCase {
     }
 
     private Exchange getExchange(final String tree) throws PersistitException {
-        return _persistit.getExchange(UnitTestProperties.VOLUME_NAME, tree, true);
+        return _persistit.getExchange(VOLUME_NAME, tree, true);
     }
 }

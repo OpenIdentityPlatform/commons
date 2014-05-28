@@ -16,6 +16,8 @@
 
 package com.persistit;
 
+import com.persistit.MediatedFileChannel.TestChannelInjector;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
@@ -23,8 +25,6 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
-
-import com.persistit.MediatedFileChannel.TestChannelInjector;
 
 /**
  * <p>

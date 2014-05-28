@@ -16,15 +16,14 @@
 
 package com.persistit.unit;
 
-import static org.junit.Assert.fail;
-
-import java.util.Properties;
-
-import org.junit.Test;
-
 import com.persistit.Persistit;
 import com.persistit.PersistitUnitTestCase;
 import com.persistit.exception.PersistitException;
+import org.junit.Test;
+
+import java.util.Properties;
+
+import static org.junit.Assert.fail;
 
 /**
  * Test simple scenario to ensure a second Persistit instance referring to the

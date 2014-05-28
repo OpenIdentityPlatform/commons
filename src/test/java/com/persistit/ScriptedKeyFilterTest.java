@@ -16,12 +16,12 @@
 
 package com.persistit;
 
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
-import org.junit.Test;
+import static org.junit.Assert.assertTrue;
 
 public class ScriptedKeyFilterTest {
 

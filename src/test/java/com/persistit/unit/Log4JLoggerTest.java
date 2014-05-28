@@ -16,14 +16,13 @@
 
 package com.persistit.unit;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
-import org.junit.Test;
-
 import com.persistit.Persistit;
 import com.persistit.PersistitUnitTestCase;
 import com.persistit.exception.PersistitException;
 import com.persistit.logging.Log4JAdapter;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Logger;
+import org.junit.Test;
 
 public class Log4JLoggerTest extends PersistitUnitTestCase {
 
@@ -44,7 +43,7 @@ public class Log4JLoggerTest extends PersistitUnitTestCase {
         BasicConfigurator.configure();
         final Persistit persistit = new Persistit();
         persistit.setPersistitLogger(new Log4JAdapter(logger));
-        persistit.setProperties(UnitTestProperties.getAlternateProperties(true));
+        persistit.setProperties(getAlternateProperties(true));
         persistit.initialize();
         try {
             test1();

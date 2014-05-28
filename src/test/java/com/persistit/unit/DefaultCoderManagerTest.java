@@ -16,18 +16,17 @@
 
 package com.persistit.unit;
 
-import static org.junit.Assert.assertTrue;
+import com.persistit.DefaultCoderManager;
+import com.persistit.PersistitUnitTestCase;
+import com.persistit.exception.PersistitException;
+import org.junit.Test;
 
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 
-import org.junit.Test;
-
-import com.persistit.DefaultCoderManager;
-import com.persistit.PersistitUnitTestCase;
-import com.persistit.exception.PersistitException;
+import static org.junit.Assert.assertTrue;
 
 public class DefaultCoderManagerTest extends PersistitUnitTestCase implements Serializable {
 

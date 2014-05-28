@@ -16,10 +16,9 @@
 
 package com.persistit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import com.persistit.Transaction.CommitPolicy;
+import com.persistit.util.Util;
+import org.junit.Test;
 
 import java.io.InputStream;
 import java.io.Serializable;
@@ -29,10 +28,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.junit.Test;
-
-import com.persistit.Transaction.CommitPolicy;
-import com.persistit.util.Util;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class ClassIndexTest extends PersistitUnitTestCase {
 

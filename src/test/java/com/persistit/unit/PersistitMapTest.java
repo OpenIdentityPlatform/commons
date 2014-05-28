@@ -16,8 +16,13 @@
 
 package com.persistit.unit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import com.persistit.Exchange;
+import com.persistit.KeyFilter;
+import com.persistit.PersistitMap;
+import com.persistit.PersistitUnitTestCase;
+import com.persistit.exception.PersistitException;
+import com.persistit.util.Util;
+import org.junit.Test;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -30,14 +35,8 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.junit.Test;
-
-import com.persistit.Exchange;
-import com.persistit.KeyFilter;
-import com.persistit.PersistitMap;
-import com.persistit.PersistitUnitTestCase;
-import com.persistit.exception.PersistitException;
-import com.persistit.util.Util;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class PersistitMapTest extends PersistitUnitTestCase {
 

@@ -16,7 +16,9 @@
 
 package com.persistit;
 
-import static org.junit.Assert.assertEquals;
+import com.persistit.exception.PersistitException;
+import com.persistit.unit.ConcurrentUtil;
+import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,10 +26,7 @@ import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Test;
-
-import com.persistit.exception.PersistitException;
-import com.persistit.unit.ConcurrentUtil;
+import static org.junit.Assert.assertEquals;
 
 /**
  * <p>

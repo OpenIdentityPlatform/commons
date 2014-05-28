@@ -16,13 +16,11 @@
 
 package com.persistit;
 
-import static com.persistit.unit.UnitTestProperties.VOLUME_NAME;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
+import com.persistit.exception.PersistitException;
 import org.junit.Test;
 
-import com.persistit.exception.PersistitException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * A range delete that crosses at least two page boundaries can write an

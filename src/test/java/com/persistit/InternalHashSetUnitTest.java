@@ -16,15 +16,14 @@
 
 package com.persistit;
 
-import static org.junit.Assert.assertTrue;
+import com.persistit.util.InternalHashSet;
+import org.junit.Test;
 
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Random;
 
-import org.junit.Test;
-
-import com.persistit.util.InternalHashSet;
+import static org.junit.Assert.assertTrue;
 
 /**
  * 

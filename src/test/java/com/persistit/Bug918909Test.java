@@ -16,10 +16,10 @@
 
 package com.persistit;
 
+import org.junit.Test;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-
-import org.junit.Test;
 
 /**
  * At a DP site experiencing very low insert rates the JournalManager was

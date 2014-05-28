@@ -16,18 +16,17 @@
 
 package com.persistit;
 
-import static org.junit.Assert.assertEquals;
+import com.persistit.Transaction.CommitPolicy;
+import com.persistit.exception.PersistitIOException;
+import com.persistit.exception.PersistitInterruptedException;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import java.io.InterruptedIOException;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.junit.Ignore;
-import org.junit.Test;
-
-import com.persistit.Transaction.CommitPolicy;
-import com.persistit.exception.PersistitIOException;
-import com.persistit.exception.PersistitInterruptedException;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Interrupting a thread while it is performing a read or write closes the

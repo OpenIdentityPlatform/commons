@@ -16,11 +16,10 @@
 
 package com.persistit;
 
-import static org.junit.Assert.assertEquals;
-
+import com.persistit.Accumulator.SumAccumulator;
 import org.junit.Test;
 
-import com.persistit.Accumulator.SumAccumulator;
+import static org.junit.Assert.assertEquals;
 
 public class Bug920754Test extends PersistitUnitTestCase {
     /*

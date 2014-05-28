@@ -16,8 +16,13 @@
 
 package com.persistit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import com.persistit.Transaction.CommitPolicy;
+import com.persistit.exception.PersistitClosedException;
+import com.persistit.exception.PersistitException;
+import com.persistit.exception.PersistitIOException;
+import com.persistit.exception.PersistitInterruptedException;
+import com.persistit.exception.RollbackException;
+import org.junit.Test;
 
 import java.io.InterruptedIOException;
 import java.io.PrintStream;
@@ -27,14 +32,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Test;
-
-import com.persistit.Transaction.CommitPolicy;
-import com.persistit.exception.PersistitClosedException;
-import com.persistit.exception.PersistitException;
-import com.persistit.exception.PersistitIOException;
-import com.persistit.exception.PersistitInterruptedException;
-import com.persistit.exception.RollbackException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Demonstrates the use of Persistit Transactions. This demo runs multiple

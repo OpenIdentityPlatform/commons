@@ -16,19 +16,6 @@
 
 package com.persistit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicLong;
-
-import org.junit.Test;
-
 import com.persistit.Accumulator.SeqAccumulator;
 import com.persistit.Accumulator.SumAccumulator;
 import com.persistit.Accumulator.Type;
@@ -36,7 +23,18 @@ import com.persistit.exception.PersistitException;
 import com.persistit.exception.PersistitInterruptedException;
 import com.persistit.exception.TimeoutException;
 import com.persistit.unit.ConcurrentUtil;
-import com.persistit.unit.UnitTestProperties;
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicLong;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class AccumulatorTest extends PersistitUnitTestCase {
 
@@ -379,7 +377,7 @@ public class AccumulatorTest extends PersistitUnitTestCase {
         final int PASS_COUNT = 5;
         final int ROW_COUNT = 10;
         final int ACCUM_INDEX = 0;
-        final String TEST_VOLUME_NAME = UnitTestProperties.VOLUME_NAME;
+        final String TEST_VOLUME_NAME = VOLUME_NAME;
         final String TEST_TREE_NAME = "AccumulatorTest";
         final Accumulator.Type ACCUM_TYPE = Accumulator.Type.SUM;
 

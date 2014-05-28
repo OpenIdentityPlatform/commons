@@ -16,16 +16,15 @@
 
 package com.persistit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import com.persistit.CleanupManager.CleanupAction;
+import com.persistit.exception.PersistitException;
+import org.junit.Test;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
 
-import org.junit.Test;
-
-import com.persistit.CleanupManager.CleanupAction;
-import com.persistit.exception.PersistitException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class CleanupManagerTest extends PersistitUnitTestCase {
 

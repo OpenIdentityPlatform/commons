@@ -16,7 +16,7 @@
 
 package com.persistit;
 
-import static org.junit.Assert.assertTrue;
+import com.persistit.MediatedFileChannel.TestChannelInjector;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -28,7 +28,7 @@ import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.persistit.MediatedFileChannel.TestChannelInjector;
+import static org.junit.Assert.assertTrue;
 
 /**
  * <p>

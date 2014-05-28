@@ -16,13 +16,12 @@
 
 package com.persistit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import org.junit.Test;
-
 import com.persistit.exception.PersistitException;
 import com.persistit.util.Util;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class MVCCPruneBufferTest extends MVCCTestBase {
 

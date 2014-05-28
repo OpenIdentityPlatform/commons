@@ -16,17 +16,17 @@
 
 package com.persistit.stress.unit;
 
+import com.persistit.Exchange;
+import com.persistit.Transaction;
+import com.persistit.exception.RollbackException;
+import com.persistit.util.ArgParser;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicLong;
-
-import com.persistit.Exchange;
-import com.persistit.Transaction;
-import com.persistit.exception.RollbackException;
-import com.persistit.util.ArgParser;
 
 /**
  * This class tests recovery after a non-graceful shutdown. To test, run this

@@ -16,14 +16,13 @@
 
 package com.persistit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import com.persistit.Value.Version;
+import org.junit.Test;
 
 import java.util.List;
 
-import org.junit.Test;
-
-import com.persistit.Value.Version;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 public class ValueTest7 extends PersistitUnitTestCase {
 

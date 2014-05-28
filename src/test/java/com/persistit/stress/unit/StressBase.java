@@ -16,12 +16,12 @@
 
 package com.persistit.stress.unit;
 
-import java.util.Random;
-
 import com.persistit.Exchange;
 import com.persistit.Value;
 import com.persistit.stress.AbstractStressTest;
 import com.persistit.util.ArgParser;
+
+import java.util.Random;
 
 public abstract class StressBase extends AbstractStressTest {
 

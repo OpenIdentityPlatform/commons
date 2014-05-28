@@ -16,14 +16,13 @@
 
 package com.persistit;
 
+import com.persistit.exception.PersistitException;
+import com.persistit.unit.ConcurrentUtil.ThrowingRunnable;
+import org.junit.Test;
+
 import static com.persistit.unit.ConcurrentUtil.createThread;
 import static com.persistit.unit.ConcurrentUtil.startAndJoinAssertSuccess;
 import static org.junit.Assert.assertEquals;
-
-import org.junit.Test;
-
-import com.persistit.exception.PersistitException;
-import com.persistit.unit.ConcurrentUtil.ThrowingRunnable;
 
 public class MVCCConcurrentTest extends MVCCTestBase {
     private final String KEY1 = "key1";

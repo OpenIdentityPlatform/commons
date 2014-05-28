@@ -16,13 +16,11 @@
 
 package com.persistit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
+import com.persistit.exception.PersistitException;
 import org.junit.Test;
 
-import com.persistit.exception.PersistitException;
-import com.persistit.unit.UnitTestProperties;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * https://bugs.launchpad.net/akiban-persistit/+bug/1056489
@@ -68,7 +66,7 @@ public class Bug1056489Test extends PersistitUnitTestCase {
     @Test
     public void mvvStepCheck() throws Exception {
         final Transaction txn = _persistit.getTransaction();
-        final Exchange ex = _persistit.getExchange(UnitTestProperties.VOLUME_NAME, "new_tree1", true);
+        final Exchange ex = _persistit.getExchange(VOLUME_NAME, "new_tree1", true);
 
         txn.begin();
         for (int i = 1; i <= 3; ++i) {

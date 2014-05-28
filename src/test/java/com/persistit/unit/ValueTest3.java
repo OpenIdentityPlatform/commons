@@ -16,8 +16,18 @@
 
 package com.persistit.unit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import com.persistit.DefaultValueCoder;
+import com.persistit.Exchange;
+import com.persistit.Persistit;
+import com.persistit.PersistitUnitTestCase;
+import com.persistit.Value;
+import com.persistit.encoding.CoderContext;
+import com.persistit.encoding.CoderManager;
+import com.persistit.encoding.SerialValueCoder;
+import com.persistit.encoding.ValueCoder;
+import com.persistit.encoding.ValueRenderer;
+import com.persistit.exception.PersistitException;
+import org.junit.Test;
 
 import java.io.Externalizable;
 import java.io.IOException;
@@ -30,19 +40,8 @@ import java.io.ObjectStreamField;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import org.junit.Test;
-
-import com.persistit.DefaultValueCoder;
-import com.persistit.Exchange;
-import com.persistit.Persistit;
-import com.persistit.PersistitUnitTestCase;
-import com.persistit.Value;
-import com.persistit.encoding.CoderContext;
-import com.persistit.encoding.CoderManager;
-import com.persistit.encoding.SerialValueCoder;
-import com.persistit.encoding.ValueCoder;
-import com.persistit.encoding.ValueRenderer;
-import com.persistit.exception.PersistitException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class ValueTest3 extends PersistitUnitTestCase {
 

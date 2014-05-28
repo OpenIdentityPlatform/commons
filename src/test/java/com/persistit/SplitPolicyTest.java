@@ -16,15 +16,14 @@
 
 package com.persistit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import com.persistit.Exchange.Sequence;
+import com.persistit.policy.SplitPolicy;
+import org.junit.Test;
 
 import java.util.Random;
 
-import org.junit.Test;
-
-import com.persistit.Exchange.Sequence;
-import com.persistit.policy.SplitPolicy;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class SplitPolicyTest extends PersistitUnitTestCase {
 

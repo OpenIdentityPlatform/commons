@@ -16,17 +16,16 @@
 
 package com.persistit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import com.persistit.exception.PersistitException;
+import org.junit.Test;
 
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.junit.Test;
-
-import com.persistit.exception.PersistitException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class MVCCBasicTest extends MVCCTestBase {
     private static final String KEY1 = "k1";

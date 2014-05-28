@@ -16,11 +16,10 @@
 
 package com.persistit;
 
-import static org.junit.Assert.fail;
-
+import com.persistit.Persistit.FatalErrorException;
 import org.junit.Test;
 
-import com.persistit.Persistit.FatalErrorException;
+import static org.junit.Assert.fail;
 
 public class FatalErrorExceptionTest extends PersistitUnitTestCase {
 

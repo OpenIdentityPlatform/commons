@@ -16,9 +16,9 @@
 
 package com.persistit.stress;
 
-import static com.persistit.util.Util.NS_PER_S;
-
 import com.persistit.Persistit;
+
+import static com.persistit.util.Util.NS_PER_S;
 
 /**
  * Test classes must extend this class. The subclass must implement

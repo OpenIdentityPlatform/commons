@@ -16,12 +16,11 @@
 
 package com.persistit;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-
+import com.persistit.policy.SplitPolicy;
 import org.junit.Test;
 
-import com.persistit.policy.SplitPolicy;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 
 /*
  * Got this while loading sample data. Apparently the new PACK split policy 

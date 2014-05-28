@@ -16,12 +16,12 @@
 
 package com.persistit.stress.unit;
 
-import java.util.Random;
-
 import com.persistit.Exchange;
 import com.persistit.Key;
 import com.persistit.PersistitUnitTestCase;
 import com.persistit.exception.PersistitException;
+
+import java.util.Random;
 
 public class TestSamePageOptimization extends PersistitUnitTestCase {
     final int KEYS = 1000000;

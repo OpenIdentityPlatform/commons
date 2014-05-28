@@ -16,9 +16,9 @@
 
 package com.persistit;
 
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * I did an update that failed due to constraint violation and the transaction

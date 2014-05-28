@@ -16,18 +16,14 @@
 
 package com.persistit;
 
-import static com.persistit.unit.ConcurrentUtil.createThread;
-import static com.persistit.unit.ConcurrentUtil.startAndJoinAssertSuccess;
-import static com.persistit.util.SequencerConstants.PAGE_MAP_READ_INVALIDATE_B;
-import static com.persistit.util.SequencerConstants.PAGE_MAP_READ_INVALIDATE_C;
-import static com.persistit.util.SequencerConstants.PAGE_MAP_READ_INVALIDATE_SCHEDULE;
-import static com.persistit.util.ThreadSequencer.addSchedules;
-import static com.persistit.util.ThreadSequencer.disableSequencer;
-import static com.persistit.util.ThreadSequencer.enableSequencer;
-import static com.persistit.util.ThreadSequencer.sequence;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import com.persistit.Accumulator.SumAccumulator;
+import com.persistit.CheckpointManager.Checkpoint;
+import com.persistit.JournalManager.PageNode;
+import com.persistit.TransactionPlayer.TransactionPlayerListener;
+import com.persistit.exception.PersistitException;
+import com.persistit.unit.ConcurrentUtil.ThrowingRunnable;
+import com.persistit.util.Util;
+import org.junit.Test;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -40,16 +36,18 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import org.junit.Test;
-
-import com.persistit.Accumulator.SumAccumulator;
-import com.persistit.CheckpointManager.Checkpoint;
-import com.persistit.JournalManager.PageNode;
-import com.persistit.TransactionPlayer.TransactionPlayerListener;
-import com.persistit.exception.PersistitException;
-import com.persistit.unit.ConcurrentUtil.ThrowingRunnable;
-import com.persistit.unit.UnitTestProperties;
-import com.persistit.util.Util;
+import static com.persistit.unit.ConcurrentUtil.createThread;
+import static com.persistit.unit.ConcurrentUtil.startAndJoinAssertSuccess;
+import static com.persistit.util.SequencerConstants.PAGE_MAP_READ_INVALIDATE_B;
+import static com.persistit.util.SequencerConstants.PAGE_MAP_READ_INVALIDATE_C;
+import static com.persistit.util.SequencerConstants.PAGE_MAP_READ_INVALIDATE_SCHEDULE;
+import static com.persistit.util.ThreadSequencer.addSchedules;
+import static com.persistit.util.ThreadSequencer.disableSequencer;
+import static com.persistit.util.ThreadSequencer.enableSequencer;
+import static com.persistit.util.ThreadSequencer.sequence;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class JournalManagerTest extends PersistitUnitTestCase {
 
@@ -76,7 +74,7 @@ public class JournalManagerTest extends PersistitUnitTestCase {
         volume.resetHandle();
 
         final JournalManager jman = new JournalManager(_persistit);
-        final String path = UnitTestProperties.DATA_PATH + "/JournalManagerTest_journal_";
+        final String path = DATA_PATH + "/JournalManagerTest_journal_";
         jman.init(null, path, 100 * 1000 * 1000);
         final BufferPool pool = _persistit.getBufferPool(16384);
         final long pages = Math.min(1000, volume.getStorage().getNextAvailablePage() - 1);
@@ -241,7 +239,7 @@ public class JournalManagerTest extends PersistitUnitTestCase {
         final Volume volume = _persistit.getVolume(_volumeName);
         volume.resetHandle();
         final JournalManager jman = new JournalManager(_persistit);
-        final String path = UnitTestProperties.DATA_PATH + "/JournalManagerTest_journal_";
+        final String path = DATA_PATH + "/JournalManagerTest_journal_";
         jman.init(null, path, 100 * 1000 * 1000);
         final BufferPool pool = _persistit.getBufferPool(16384);
         final long pages = Math.min(1000, volume.getStorage().getNextAvailablePage() - 1);
@@ -268,7 +266,7 @@ public class JournalManagerTest extends PersistitUnitTestCase {
         final Transaction txn = _persistit.getTransaction();
         final Exchange exchange = _persistit.getExchange(_volumeName, "JournalManagerTest1", true);
         final JournalManager jman = new JournalManager(_persistit);
-        final String path = UnitTestProperties.DATA_PATH + "/JournalManagerTest_journal_";
+        final String path = DATA_PATH + "/JournalManagerTest_journal_";
         jman.init(null, path, 100 * 1000 * 1000);
         exchange.clear().append("key");
         final StringBuilder sb = new StringBuilder(1000000);
@@ -571,7 +569,7 @@ public class JournalManagerTest extends PersistitUnitTestCase {
 
         int total = 0;
         for (long curSize = 0; curSize < JournalManager.ROLLOVER_THRESHOLD;) {
-            final Exchange ex = _persistit.getExchange(UnitTestProperties.VOLUME_NAME, "JournalManagerTest", true);
+            final Exchange ex = _persistit.getExchange(VOLUME_NAME, "JournalManagerTest", true);
             final Transaction txn = _persistit.getTransaction();
             final SumAccumulator accum = ex.getTree().getSumAccumulator(0);
             txn.begin();

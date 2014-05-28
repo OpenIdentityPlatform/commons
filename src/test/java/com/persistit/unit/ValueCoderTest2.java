@@ -16,18 +16,17 @@
 
 package com.persistit.unit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.lang.reflect.Array;
-import java.util.TreeMap;
-
-import org.junit.Test;
-
 import com.persistit.DefaultObjectCoder;
 import com.persistit.Exchange;
 import com.persistit.PersistitUnitTestCase;
 import com.persistit.exception.PersistitException;
+import org.junit.Test;
+
+import java.lang.reflect.Array;
+import java.util.TreeMap;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class ValueCoderTest2 extends PersistitUnitTestCase {
 

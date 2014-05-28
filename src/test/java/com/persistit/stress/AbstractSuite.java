@@ -16,9 +16,13 @@
 
 package com.persistit.stress;
 
-import static com.persistit.util.Util.MS_PER_S;
-import static com.persistit.util.Util.NS_PER_MS;
-import static com.persistit.util.Util.NS_PER_S;
+import com.persistit.Configuration;
+import com.persistit.Configuration.BufferPoolConfiguration;
+import com.persistit.Persistit;
+import com.persistit.Transaction.CommitPolicy;
+import com.persistit.VolumeSpecification;
+import com.persistit.exception.PersistitException;
+import com.persistit.util.ArgParser;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -29,13 +33,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.persistit.Configuration;
-import com.persistit.Configuration.BufferPoolConfiguration;
-import com.persistit.Persistit;
-import com.persistit.Transaction.CommitPolicy;
-import com.persistit.VolumeSpecification;
-import com.persistit.exception.PersistitException;
-import com.persistit.util.ArgParser;
+import static com.persistit.util.Util.MS_PER_S;
+import static com.persistit.util.Util.NS_PER_MS;
+import static com.persistit.util.Util.NS_PER_S;
 
 public abstract class AbstractSuite {
 

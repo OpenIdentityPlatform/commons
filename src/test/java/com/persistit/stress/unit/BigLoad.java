@@ -16,9 +16,6 @@
 
 package com.persistit.stress.unit;
 
-import java.io.File;
-import java.util.Random;
-
 import com.persistit.Exchange;
 import com.persistit.Key;
 import com.persistit.Persistit;
@@ -29,6 +26,9 @@ import com.persistit.Volume;
 import com.persistit.stress.AbstractStressTest;
 import com.persistit.util.ArgParser;
 import com.persistit.util.Util;
+
+import java.io.File;
+import java.util.Random;
 
 /**
  * <p>

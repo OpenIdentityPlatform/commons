@@ -16,13 +16,13 @@
 
 package com.persistit.stress.unit;
 
-import java.util.Iterator;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
 import com.persistit.PersistitMap;
 import com.persistit.Value;
 import com.persistit.util.ArgParser;
+
+import java.util.Iterator;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 public class PersistitMapStress1 extends StressBase {
 

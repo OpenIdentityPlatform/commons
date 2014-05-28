@@ -16,14 +16,13 @@
 
 package com.persistit;
 
-import static com.persistit.TransactionStatus.ABORTED;
-import static com.persistit.TransactionStatus.UNCOMMITTED;
+import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import junit.framework.TestCase;
-
-import org.junit.Test;
+import static com.persistit.TransactionStatus.ABORTED;
+import static com.persistit.TransactionStatus.UNCOMMITTED;
 
 public class TransactionIndexTest extends TestCase {
 

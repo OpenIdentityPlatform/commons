@@ -16,7 +16,10 @@
 
 package com.persistit;
 
-import static org.junit.Assert.assertEquals;
+import com.persistit.JournalRecord.IV;
+import com.persistit.JournalRecord.PA;
+import com.persistit.exception.PersistitException;
+import org.junit.Test;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
@@ -28,11 +31,7 @@ import java.util.HashSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.junit.Test;
-
-import com.persistit.JournalRecord.IV;
-import com.persistit.JournalRecord.PA;
-import com.persistit.exception.PersistitException;
+import static org.junit.Assert.assertEquals;
 
 public class DumpTaskTest extends PersistitUnitTestCase {
 

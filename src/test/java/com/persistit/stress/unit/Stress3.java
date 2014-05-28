@@ -16,17 +16,17 @@
 
 package com.persistit.stress.unit;
 
+import com.persistit.Exchange;
+import com.persistit.Key;
+import com.persistit.Value;
+import com.persistit.util.ArgParser;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
-
-import com.persistit.Exchange;
-import com.persistit.Key;
-import com.persistit.Value;
-import com.persistit.util.ArgParser;
 
 public class Stress3 extends StressBase {
 

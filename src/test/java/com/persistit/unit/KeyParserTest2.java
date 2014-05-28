@@ -16,15 +16,14 @@
 
 package com.persistit.unit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import org.junit.Test;
-
 import com.persistit.Key;
 import com.persistit.KeyFilter;
 import com.persistit.KeyParser;
 import com.persistit.PersistitUnitTestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class KeyParserTest2 extends PersistitUnitTestCase {
 

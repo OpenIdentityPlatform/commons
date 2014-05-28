@@ -16,13 +16,12 @@
 
 package com.persistit;
 
-import static org.junit.Assert.assertTrue;
+import com.persistit.policy.SplitPolicy;
+import org.junit.Test;
 
 import java.util.Properties;
 
-import org.junit.Test;
-
-import com.persistit.policy.SplitPolicy;
+import static org.junit.Assert.assertTrue;
 
 /*
  * Stress10 with 1K pages exhibited a failure in which a value was simply not

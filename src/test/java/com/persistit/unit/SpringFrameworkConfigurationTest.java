@@ -16,14 +16,16 @@
 
 package com.persistit.unit;
 
-import static org.junit.Assert.assertTrue;
-
+import com.persistit.Persistit;
+import com.persistit.exception.PersistitException;
+import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import com.persistit.Persistit;
-import com.persistit.exception.PersistitException;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Create a Persistit instance using Spring Framework.
@@ -33,34 +35,42 @@ import com.persistit.exception.PersistitException;
  */
 public class SpringFrameworkConfigurationTest {
 
-    public static class TestClient {
-        final Persistit db;
+  @Rule
+  public TemporaryFolder temp = new TemporaryFolder();
 
-        public TestClient(final Persistit db) {
-            this.db = db;
-        }
+  public static class TestClient {
+    final Persistit db;
 
-        private void test() {
-            System.out.println(db.getVolumes());
-            try {
-                db.close();
-            } catch (final PersistitException e) {
-                e.printStackTrace();
-            }
-        }
+    public TestClient(final Persistit db) {
+      this.db = db;
     }
 
-    @Test
-    public void configurePersistitFromSpring() throws Exception {
-        System.setProperty("com.persistit.datapath", UnitTestProperties.DATA_PATH);
-        final ApplicationContext context = new ClassPathXmlApplicationContext(
-                "com/persistit/unit/SpringFrameworkConfiguraitonTest.xml");
-
-        final Persistit persistit = (Persistit) context.getBean("persistit");
-        assertTrue("Persistit should be initialized", persistit.isInitialized());
-
-        final TestClient testClient = (TestClient) context.getBean("testClient");
-        testClient.test();
+    private void test() {
+      System.out.println(db.getVolumes());
+      try {
+        db.close();
+      } catch (final PersistitException e) {
+        e.printStackTrace();
+      }
     }
+  }
+
+  @Test
+  public void configurePersistitFromSpring() throws Exception {
+    System.setProperty("com.persistit.datapath", temp.newFolder().getAbsolutePath().replaceAll("\\\\", "/"));
+    final ApplicationContext context = new ClassPathXmlApplicationContext(
+      "com/persistit/unit/SpringFrameworkConfiguraitonTest.xml");
+
+    final Persistit persistit = (Persistit) context.getBean("persistit");
+    assertTrue("Persistit should be initialized", persistit.isInitialized());
+
+    final TestClient testClient = (TestClient) context.getBean("testClient");
+    testClient.test();
+  }
+
+  @After
+  public void cleanup() {
+    System.clearProperty("com.persistit.datapath");
+  }
 
 }

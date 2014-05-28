@@ -16,10 +16,9 @@
 
 package com.persistit;
 
-import org.junit.Test;
-
 import com.persistit.exception.BufferSizeUnavailableException;
 import com.persistit.exception.UnderSpecifiedVolumeException;
+import org.junit.Test;
 
 /**
  * https://bugs.launchpad.net/akiban-persistit/+bug/1041293

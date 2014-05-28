@@ -16,13 +16,13 @@
 
 package com.persistit.stress.unit;
 
-import java.security.DigestException;
-import java.security.MessageDigest;
-
 import com.persistit.Exchange;
 import com.persistit.Key;
 import com.persistit.Volume;
 import com.persistit.stress.AbstractStressTest;
+
+import java.security.DigestException;
+import java.security.MessageDigest;
 
 public class MD5Sum extends AbstractStressTest {
     /**

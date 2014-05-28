@@ -16,9 +16,9 @@
 
 package com.persistit;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class Bug877656Test extends PersistitUnitTestCase {
 

@@ -16,22 +16,20 @@
 
 package com.persistit;
 
+import com.persistit.exception.PersistitException;
+import com.persistit.util.Util;
+import junit.framework.Assert;
+import org.junit.Test;
+
+import java.util.Map;
+import java.util.TreeMap;
+
 import static com.persistit.MVV.STORE_EXISTED_MASK;
 import static com.persistit.MVV.STORE_LENGTH_MASK;
 import static com.persistit.MVV.TYPE_MVV;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
-import java.util.Map;
-import java.util.TreeMap;
-
-import junit.framework.Assert;
-
-import org.junit.Test;
-
-import com.persistit.exception.PersistitException;
-import com.persistit.util.Util;
 
 public class MVVTest {
     @Test

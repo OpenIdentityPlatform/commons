@@ -16,8 +16,6 @@
 
 package com.persistit.stress.unit;
 
-import java.util.Random;
-
 import com.persistit.Accumulator.MaxAccumulator;
 import com.persistit.Accumulator.MinAccumulator;
 import com.persistit.Accumulator.SeqAccumulator;
@@ -29,6 +27,8 @@ import com.persistit.Transaction;
 import com.persistit.exception.PersistitException;
 import com.persistit.util.ArgParser;
 import com.persistit.util.Util;
+
+import java.util.Random;
 
 /**
  * Tests Accumulator values after restart. This test modifies accumulators and

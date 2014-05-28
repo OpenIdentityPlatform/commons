@@ -16,15 +16,13 @@
 
 package com.persistit;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 
 import java.io.PrintWriter;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Test;
-
-import com.persistit.unit.UnitTestProperties;
+import static org.junit.Assert.assertEquals;
 
 /**
  * https://bugs.launchpad.net/akiban-persistit/+bug/1017957
@@ -99,133 +97,133 @@ import com.persistit.unit.UnitTestProperties;
  */
 public class Bug1017957Test extends PersistitUnitTestCase {
 
-    @Override
-    protected Properties getProperties(final boolean cleanup) {
-        return UnitTestProperties.getBiggerProperties(cleanup);
-    }
+  @Override
+  protected Properties doGetProperties(final boolean cleanup) {
+    return getBiggerProperties(cleanup);
+  }
 
-    private final long STRESS_NANOS = 10L * 1000000000L;
+  private final long STRESS_NANOS = 10L * 1000000000L;
 
-    /**
-     * 
-     * @throws Exception
-     */
-    @Test
-    public void induceCorruptionByStress() throws Exception {
-        final long expiresAt = System.nanoTime() + STRESS_NANOS;
-        final AtomicInteger totalErrors = new AtomicInteger();
-        final Thread t1 = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                int count = 0;
-                int errors = 0;
-                try {
-                    final Exchange ex = _persistit.getExchange("persistit", "Bug1017957Test", true);
-                    while (System.nanoTime() < expiresAt) {
-                        try {
-                            final Key key = createUnsafeStructure(ex);
-                            removeInterestingKey(ex, key);
-                            if (++count % 5000 == 0) {
-                                System.out.printf("T1 iterations %,d\n", count);
-                            }
-                        } catch (final Exception e) {
-                            if (++errors < 10) {
-                                e.printStackTrace();
-                            }
-                            totalErrors.incrementAndGet();
-                        }
-                    }
-                } catch (final Exception e) {
-                    throw new RuntimeException(e);
-                }
+  /**
+   * 
+   * @throws Exception
+   */
+  @Test
+  public void induceCorruptionByStress() throws Exception {
+    final long expiresAt = System.nanoTime() + STRESS_NANOS;
+    final AtomicInteger totalErrors = new AtomicInteger();
+    final Thread t1 = new Thread(new Runnable() {
+      @Override
+      public void run() {
+        int count = 0;
+        int errors = 0;
+        try {
+          final Exchange ex = _persistit.getExchange("persistit", "Bug1017957Test", true);
+          while (System.nanoTime() < expiresAt) {
+            try {
+              final Key key = createUnsafeStructure(ex);
+              removeInterestingKey(ex, key);
+              if (++count % 5000 == 0) {
+                System.out.printf("T1 iterations %,d\n", count);
+              }
+            } catch (final Exception e) {
+              if (++errors < 10) {
+                e.printStackTrace();
+              }
+              totalErrors.incrementAndGet();
             }
-        });
-
-        final Thread t2 = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                int count = 0;
-                int errors = 0;
-                try {
-                    final Exchange ex = _persistit.getExchange("persistit", "Bug1017957Test", true);
-                    while (System.nanoTime() < expiresAt) {
-                        try {
-                            removeCoveringRange(ex);
-                            insertOtherStuff(ex);
-                            if (++count % 5000 == 0) {
-                                System.out.printf("T2 iterations %,d\n", count);
-                            }
-                        } catch (final Exception e) {
-                            if (++errors < 10) {
-                                e.printStackTrace();
-                            }
-                            totalErrors.incrementAndGet();
-                        }
-                    }
-                } catch (final Exception e) {
-                    if (++errors < 10) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        });
-
-        t1.start();
-        t2.start();
-        t1.join();
-        t2.join();
-
-        final IntegrityCheck icheck = new IntegrityCheck(_persistit);
-        icheck.setMessageLogVerbosity(Task.LOG_VERBOSE);
-        icheck.setMessageWriter(new PrintWriter(System.out));
-        icheck.checkVolume(_persistit.getVolume("persistit"));
-        System.out.printf("\nTotal errors %d", totalErrors.get());
-        assertEquals("Corrupt volume", 0, icheck.getFaults().length);
-        assertEquals("Exception occurred", 0, totalErrors.get());
-    }
-
-    /**
-     * Create a B-Tree with a structure that will induce a deferred index
-     * insertion on removal of key. We need an index page that's pretty full
-     * such that removing a key and inserting a different one will result in
-     * splitting the index page.
-     * 
-     * @throws Exception
-     */
-    private Key createUnsafeStructure(final Exchange ex) throws Exception {
-        Key result = null;
-        final String v = createString(5500); // less than long record
-        final String k = createString(1040);
-        for (int i = 1000; i < 1019; i++) {
-            if (i == 1009) {
-                ex.clear().append(i).append(k.substring(0, 20));
-                ex.getValue().put("interesting");
-                ex.store();
-                result = new Key(ex.getKey());
-            }
-            ex.clear().append(i).append(k);
-            ex.getValue().put(v);
-            ex.store();
+          }
+        } catch (final Exception e) {
+          throw new RuntimeException(e);
         }
-        return result;
-    }
+      }
+    });
 
-    private void removeInterestingKey(final Exchange ex, final Key interestingKey) throws Exception {
-        interestingKey.copyTo(ex.getKey());
-        ex.remove();
-    }
-
-    private void removeCoveringRange(final Exchange ex) throws Exception {
-        final Key key1 = new Key(_persistit).append(1005);
-        final Key key2 = new Key(_persistit).append(1015);
-        ex.removeKeyRange(key1, key2);
-    }
-
-    private void insertOtherStuff(final Exchange ex) throws Exception {
-        for (int k = 0; k < 100; k++) {
-            ex.clear().append(1009).append(k).append(RED_FOX);
-            ex.getValue().put(RED_FOX);
-            ex.store();
+    final Thread t2 = new Thread(new Runnable() {
+      @Override
+      public void run() {
+        int count = 0;
+        int errors = 0;
+        try {
+          final Exchange ex = _persistit.getExchange("persistit", "Bug1017957Test", true);
+          while (System.nanoTime() < expiresAt) {
+            try {
+              removeCoveringRange(ex);
+              insertOtherStuff(ex);
+              if (++count % 5000 == 0) {
+                System.out.printf("T2 iterations %,d\n", count);
+              }
+            } catch (final Exception e) {
+              if (++errors < 10) {
+                e.printStackTrace();
+              }
+              totalErrors.incrementAndGet();
+            }
+          }
+        } catch (final Exception e) {
+          if (++errors < 10) {
+            e.printStackTrace();
+          }
         }
+      }
+    });
+
+    t1.start();
+    t2.start();
+    t1.join();
+    t2.join();
+
+    final IntegrityCheck icheck = new IntegrityCheck(_persistit);
+    icheck.setMessageLogVerbosity(Task.LOG_VERBOSE);
+    icheck.setMessageWriter(new PrintWriter(System.out));
+    icheck.checkVolume(_persistit.getVolume("persistit"));
+    System.out.printf("\nTotal errors %d", totalErrors.get());
+    assertEquals("Corrupt volume", 0, icheck.getFaults().length);
+    assertEquals("Exception occurred", 0, totalErrors.get());
+  }
+
+  /**
+   * Create a B-Tree with a structure that will induce a deferred index
+   * insertion on removal of key. We need an index page that's pretty full
+   * such that removing a key and inserting a different one will result in
+   * splitting the index page.
+   * 
+   * @throws Exception
+   */
+  private Key createUnsafeStructure(final Exchange ex) throws Exception {
+    Key result = null;
+    final String v = createString(5500); // less than long record
+    final String k = createString(1040);
+    for (int i = 1000; i < 1019; i++) {
+      if (i == 1009) {
+        ex.clear().append(i).append(k.substring(0, 20));
+        ex.getValue().put("interesting");
+        ex.store();
+        result = new Key(ex.getKey());
+      }
+      ex.clear().append(i).append(k);
+      ex.getValue().put(v);
+      ex.store();
     }
+    return result;
+  }
+
+  private void removeInterestingKey(final Exchange ex, final Key interestingKey) throws Exception {
+    interestingKey.copyTo(ex.getKey());
+    ex.remove();
+  }
+
+  private void removeCoveringRange(final Exchange ex) throws Exception {
+    final Key key1 = new Key(_persistit).append(1005);
+    final Key key2 = new Key(_persistit).append(1015);
+    ex.removeKeyRange(key1, key2);
+  }
+
+  private void insertOtherStuff(final Exchange ex) throws Exception {
+    for (int k = 0; k < 100; k++) {
+      ex.clear().append(1009).append(k).append(RED_FOX);
+      ex.getValue().put(RED_FOX);
+      ex.store();
+    }
+  }
 }

@@ -16,16 +16,15 @@
 
 package com.persistit;
 
+import com.persistit.util.ThreadSequencer;
+import org.junit.Test;
+
 import static com.persistit.util.SequencerConstants.COMMIT_FLUSH_SCHEDULE;
 import static com.persistit.util.ThreadSequencer.addSchedules;
 import static com.persistit.util.ThreadSequencer.disableSequencer;
 import static com.persistit.util.ThreadSequencer.enableSequencer;
 import static com.persistit.util.ThreadSequencer.sequencerHistory;
 import static org.junit.Assert.assertTrue;
-
-import org.junit.Test;
-
-import com.persistit.util.ThreadSequencer;
 
 public class Bug937877Test extends PersistitUnitTestCase {
 

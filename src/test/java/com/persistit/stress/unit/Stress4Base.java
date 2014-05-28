@@ -16,12 +16,12 @@
 
 package com.persistit.stress.unit;
 
-import java.util.Arrays;
-
 import com.persistit.Key;
 import com.persistit.Value;
 import com.persistit.exception.PersistitException;
 import com.persistit.util.ArgParser;
+
+import java.util.Arrays;
 
 /**
  * A basic test sequence:

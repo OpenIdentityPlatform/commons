@@ -16,15 +16,14 @@
 
 package com.persistit;
 
-import static org.junit.Assert.assertEquals;
+import com.persistit.exception.PersistitException;
+import com.persistit.exception.RollbackException;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
-
-import com.persistit.exception.PersistitException;
-import com.persistit.exception.RollbackException;
+import static org.junit.Assert.assertEquals;
 
 public class MVCCPruneTest extends MVCCTestBase {
     final static String KEY = "a";

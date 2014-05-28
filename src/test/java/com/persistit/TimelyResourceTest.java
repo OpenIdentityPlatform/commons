@@ -16,6 +16,22 @@
 
 package com.persistit;
 
+import com.persistit.Version.PrunableVersion;
+import com.persistit.Version.VersionCreator;
+import com.persistit.exception.PersistitException;
+import com.persistit.exception.RollbackException;
+import com.persistit.unit.ConcurrentUtil.ThrowingRunnable;
+import com.persistit.unit.ConcurrentUtil.UncaughtExceptionHandler;
+import com.persistit.util.Util;
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import static com.persistit.TransactionIndex.tss2vh;
 import static com.persistit.TransactionStatus.UNCOMMITTED;
 import static com.persistit.unit.ConcurrentUtil.assertSuccess;
@@ -25,23 +41,6 @@ import static com.persistit.unit.ConcurrentUtil.start;
 import static com.persistit.util.Util.NS_PER_S;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import org.junit.Test;
-
-import com.persistit.Version.PrunableVersion;
-import com.persistit.Version.VersionCreator;
-import com.persistit.exception.PersistitException;
-import com.persistit.exception.RollbackException;
-import com.persistit.unit.ConcurrentUtil.ThrowingRunnable;
-import com.persistit.unit.ConcurrentUtil.UncaughtExceptionHandler;
-import com.persistit.util.Util;
 
 public class TimelyResourceTest extends PersistitUnitTestCase {
 

@@ -16,10 +16,10 @@
 
 package com.persistit.stress.unit;
 
-import java.util.UUID;
-
 import com.persistit.Key;
 import com.persistit.util.ArgParser;
+
+import java.util.UUID;
 
 public class StressUUID extends StressBase {
 

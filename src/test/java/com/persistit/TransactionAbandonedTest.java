@@ -16,14 +16,12 @@
 
 package com.persistit;
 
-import static org.junit.Assert.assertEquals;
-
+import com.persistit.exception.PersistitException;
+import com.persistit.unit.ConcurrentUtil;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.persistit.exception.PersistitException;
-import com.persistit.unit.ConcurrentUtil;
-import com.persistit.unit.UnitTestProperties;
+import static org.junit.Assert.assertEquals;
 
 /**
  * <p>
@@ -73,7 +71,7 @@ public class TransactionAbandonedTest extends PersistitUnitTestCase {
     }
 
     private static Exchange getExchange(final Persistit persistit) throws PersistitException {
-        return persistit.getExchange(UnitTestProperties.VOLUME_NAME, TREE, true);
+        return persistit.getExchange(VOLUME_NAME, TREE, true);
     }
 
     private static void loadData(final Persistit persistit, final int keyOffset, final int count)

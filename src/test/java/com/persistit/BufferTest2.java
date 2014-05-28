@@ -16,6 +16,15 @@
 
 package com.persistit;
 
+import com.persistit.ValueHelper.RawValueWriter;
+import com.persistit.exception.PersistitException;
+import com.persistit.exception.RebalanceException;
+import com.persistit.policy.JoinPolicy;
+import com.persistit.policy.SplitPolicy;
+import org.junit.Test;
+
+import java.util.Arrays;
+
 import static com.persistit.Buffer.EXACT_MASK;
 import static com.persistit.Buffer.FIXUP_MASK;
 import static com.persistit.Buffer.KEYBLOCK_LENGTH;
@@ -24,16 +33,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
-import java.util.Arrays;
-
-import org.junit.Test;
-
-import com.persistit.ValueHelper.RawValueWriter;
-import com.persistit.exception.PersistitException;
-import com.persistit.exception.RebalanceException;
-import com.persistit.policy.JoinPolicy;
-import com.persistit.policy.SplitPolicy;
 
 public class BufferTest2 extends PersistitUnitTestCase {
 

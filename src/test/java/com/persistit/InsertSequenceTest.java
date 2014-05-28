@@ -16,13 +16,12 @@
 
 package com.persistit;
 
-import static org.junit.Assert.assertEquals;
-
-import org.junit.Test;
-
 import com.persistit.Exchange.Sequence;
 import com.persistit.exception.PersistitException;
 import com.persistit.policy.SplitPolicy;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class InsertSequenceTest extends PersistitUnitTestCase {
 

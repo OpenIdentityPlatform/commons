@@ -16,14 +16,13 @@
 
 package com.persistit;
 
-import static org.junit.Assert.fail;
+import com.persistit.exception.CorruptVolumeException;
+import com.persistit.exception.PersistitException;
+import org.junit.Test;
 
 import java.util.Arrays;
 
-import org.junit.Test;
-
-import com.persistit.exception.CorruptVolumeException;
-import com.persistit.exception.PersistitException;
+import static org.junit.Assert.fail;
 
 public class CorruptVolumeTest extends PersistitUnitTestCase {
 

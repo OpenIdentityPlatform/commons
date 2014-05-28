@@ -16,17 +16,16 @@
 
 package com.persistit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import com.persistit.BufferPool.BufferHolder;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Random;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.junit.Test;
-
-import com.persistit.BufferPool.BufferHolder;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class BufferPoolTest extends PersistitUnitTestCase {
 

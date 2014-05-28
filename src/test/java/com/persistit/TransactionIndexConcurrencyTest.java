@@ -16,10 +16,9 @@
 
 package com.persistit;
 
-import static com.persistit.TransactionStatus.ABORTED;
-import static com.persistit.TransactionStatus.TIMED_OUT;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import com.persistit.exception.TimeoutException;
+import com.persistit.util.ArgParser;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,10 +28,10 @@ import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.junit.Test;
-
-import com.persistit.exception.TimeoutException;
-import com.persistit.util.ArgParser;
+import static com.persistit.TransactionStatus.ABORTED;
+import static com.persistit.TransactionStatus.TIMED_OUT;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class TransactionIndexConcurrencyTest {
     final static int HASH_TABLE_SIZE = 1000;

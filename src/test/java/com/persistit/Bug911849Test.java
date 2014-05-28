@@ -16,16 +16,15 @@
 
 package com.persistit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import com.persistit.Accumulator.SumAccumulator;
+import com.persistit.exception.RollbackException;
+import org.junit.Test;
 
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Test;
-
-import com.persistit.Accumulator.SumAccumulator;
-import com.persistit.exception.RollbackException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * TableStatusRecoveryIT and RenameTableIT fail intermittently

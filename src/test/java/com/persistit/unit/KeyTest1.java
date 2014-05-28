@@ -16,19 +16,6 @@
 
 package com.persistit.unit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.Date;
-
-import junit.framework.Assert;
-
-import org.junit.Test;
-
 import com.persistit.Buffer;
 import com.persistit.Key;
 import com.persistit.KeyState;
@@ -37,6 +24,17 @@ import com.persistit.TestShim;
 import com.persistit.exception.InvalidKeyException;
 import com.persistit.exception.KeyTooLongException;
 import com.persistit.exception.MissingKeySegmentException;
+import junit.framework.Assert;
+import org.junit.Test;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Date;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class KeyTest1 extends PersistitUnitTestCase {
 

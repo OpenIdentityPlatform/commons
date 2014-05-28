@@ -16,10 +16,10 @@
 
 package com.persistit;
 
+import org.junit.Test;
+
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
-
-import org.junit.Test;
 
 /**
  * Bug 790709 This happened on-site at XXX with the halo release. The server

@@ -16,6 +16,14 @@
 
 package com.persistit;
 
+import com.persistit.JournalManager.TreeDescriptor;
+import com.persistit.exception.PersistitException;
+import com.persistit.exception.TreeNotFoundException;
+import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -23,21 +31,11 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.Arrays;
-import java.util.List;
-
-import org.junit.Test;
-
-import com.persistit.JournalManager.TreeDescriptor;
-import com.persistit.exception.PersistitException;
-import com.persistit.exception.TreeNotFoundException;
-import com.persistit.unit.UnitTestProperties;
-
 public class TreeLifetimeTest extends PersistitUnitTestCase {
     private static final String TREE_NAME = "tree_one";
 
     private Volume getVolume() {
-        return _persistit.getVolume(UnitTestProperties.VOLUME_NAME);
+        return _persistit.getVolume(VOLUME_NAME);
     }
 
     private Exchange getExchange(final boolean create) throws PersistitException {

@@ -16,11 +16,6 @@
 
 package com.persistit;
 
-import static org.junit.Assert.assertTrue;
-
-import org.junit.Ignore;
-import org.junit.Test;
-
 import com.persistit.Exchange.Sequence;
 import com.persistit.Management.RecordInfo;
 import com.persistit.ValueHelper.RawValueWriter;
@@ -28,6 +23,10 @@ import com.persistit.exception.PersistitException;
 import com.persistit.exception.RebalanceException;
 import com.persistit.policy.JoinPolicy;
 import com.persistit.policy.SplitPolicy;
+import org.junit.Ignore;
+import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
 
 public class BufferTest extends PersistitUnitTestCase {
     int leftn;

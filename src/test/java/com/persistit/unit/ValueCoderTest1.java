@@ -16,18 +16,6 @@
 
 package com.persistit.unit;
 
-import static org.junit.Assert.assertEquals;
-
-import java.lang.reflect.Array;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
-
-import org.junit.Test;
-
 import com.persistit.Exchange;
 import com.persistit.PersistitUnitTestCase;
 import com.persistit.Value;
@@ -37,6 +25,17 @@ import com.persistit.encoding.ValueDisplayer;
 import com.persistit.encoding.ValueRenderer;
 import com.persistit.exception.ConversionException;
 import com.persistit.exception.PersistitException;
+import org.junit.Test;
+
+import java.lang.reflect.Array;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+
+import static org.junit.Assert.assertEquals;
 
 public class ValueCoderTest1 extends PersistitUnitTestCase {
 

@@ -16,15 +16,14 @@
 
 package com.persistit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import com.persistit.exception.PersistitException;
+import com.persistit.exception.TreeNotFoundException;
+import org.junit.Test;
 
 import java.nio.ByteBuffer;
 
-import org.junit.Test;
-
-import com.persistit.exception.PersistitException;
-import com.persistit.exception.TreeNotFoundException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * Attempt to cover all cases from the pseudo graph below and ensure that the

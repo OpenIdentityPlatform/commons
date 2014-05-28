@@ -15,23 +15,22 @@
  */
 package com.persistit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import javax.management.MBeanServer;
-import javax.management.Notification;
-import javax.management.NotificationListener;
-
-import org.junit.Test;
-
 import com.persistit.AlertMonitor.AlertLevel;
 import com.persistit.AlertMonitor.Event;
 import com.persistit.AlertMonitor.History;
 import com.persistit.logging.PersistitLevel;
 import com.persistit.logging.PersistitLogMessage.LogItem;
 import com.persistit.logging.PersistitLogger;
+import org.junit.Test;
+
+import javax.management.MBeanServer;
+import javax.management.Notification;
+import javax.management.NotificationListener;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class AlertMonitorTest extends PersistitUnitTestCase {
 

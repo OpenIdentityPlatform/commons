@@ -16,7 +16,13 @@
 
 package com.persistit;
 
-import static com.persistit.unit.UnitTestProperties.VOLUME_NAME;
+import com.persistit.Accumulator.SumAccumulator;
+import com.persistit.exception.PersistitException;
+import com.persistit.util.ThreadSequencer.Condition;
+import org.junit.Test;
+
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import static com.persistit.util.SequencerConstants.ACCUMULATOR_CHECKPOINT_A;
 import static com.persistit.util.SequencerConstants.ACCUMULATOR_CHECKPOINT_B;
 import static com.persistit.util.SequencerConstants.ACCUMULATOR_CHECKPOINT_C;
@@ -26,14 +32,6 @@ import static com.persistit.util.ThreadSequencer.enableSequencer;
 import static com.persistit.util.ThreadSequencer.sequence;
 import static com.persistit.util.ThreadSequencer.setCondition;
 import static org.junit.Assert.assertEquals;
-
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.junit.Test;
-
-import com.persistit.Accumulator.SumAccumulator;
-import com.persistit.exception.PersistitException;
-import com.persistit.util.ThreadSequencer.Condition;
 
 /**
  * https://bugs.launchpad.net/akiban-persistit/+bug/1064565

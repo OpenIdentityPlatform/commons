@@ -16,14 +16,14 @@
 
 package com.persistit;
 
+import org.junit.Ignore;
+import org.junit.Test;
+
 import static com.persistit.util.SequencerConstants.RECOVERY_PRUNING_SCHEDULE;
 import static com.persistit.util.ThreadSequencer.addSchedules;
 import static com.persistit.util.ThreadSequencer.disableSequencer;
 import static com.persistit.util.ThreadSequencer.enableSequencer;
 import static org.junit.Assert.assertNull;
-
-import org.junit.Ignore;
-import org.junit.Test;
 
 public class Bug942669Test extends PersistitUnitTestCase {
 

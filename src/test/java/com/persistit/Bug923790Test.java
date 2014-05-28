@@ -16,11 +16,10 @@
 
 package com.persistit;
 
-import static org.junit.Assert.assertEquals;
-
+import com.persistit.util.Util;
 import org.junit.Test;
 
-import com.persistit.util.Util;
+import static org.junit.Assert.assertEquals;
 
 /**
  * This is a subtle but serious database corruption issue that could lead to

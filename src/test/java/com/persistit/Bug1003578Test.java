@@ -16,6 +16,9 @@
 
 package com.persistit;
 
+import com.persistit.exception.PersistitException;
+import org.junit.Test;
+
 import static com.persistit.util.SequencerConstants.LONG_RECORD_ALLOCATE_B;
 import static com.persistit.util.SequencerConstants.LONG_RECORD_ALLOCATE_SCHEDULED;
 import static com.persistit.util.ThreadSequencer.addSchedules;
@@ -24,10 +27,6 @@ import static com.persistit.util.ThreadSequencer.enableSequencer;
 import static com.persistit.util.ThreadSequencer.sequence;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-
-import org.junit.Test;
-
-import com.persistit.exception.PersistitException;
 
 /**
  * https://bugs.launchpad.net/akiban-persistit/+bug/1003578

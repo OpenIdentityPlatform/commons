@@ -16,8 +16,12 @@
 
 package com.persistit.unit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import com.persistit.Exchange;
+import com.persistit.PersistitUnitTestCase;
+import com.persistit.Value;
+import com.persistit.encoding.CollectionValueCoder;
+import com.persistit.exception.PersistitException;
+import org.junit.Test;
 
 import java.io.Serializable;
 import java.lang.reflect.Array;
@@ -28,13 +32,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.junit.Test;
-
-import com.persistit.Exchange;
-import com.persistit.PersistitUnitTestCase;
-import com.persistit.Value;
-import com.persistit.encoding.CollectionValueCoder;
-import com.persistit.exception.PersistitException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class ValueTest2 extends PersistitUnitTestCase {
 

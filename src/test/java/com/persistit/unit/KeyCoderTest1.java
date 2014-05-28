@@ -16,17 +16,6 @@
 
 package com.persistit.unit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.io.Serializable;
-import java.net.MalformedURLException;
-import java.net.URL;
-
-import junit.framework.Assert;
-
-import org.junit.Test;
-
 import com.persistit.Key;
 import com.persistit.PersistitUnitTestCase;
 import com.persistit.TestShim;
@@ -37,6 +26,15 @@ import com.persistit.encoding.KeyRenderer;
 import com.persistit.exception.ConversionException;
 import com.persistit.exception.PersistitException;
 import com.persistit.util.Util;
+import junit.framework.Assert;
+import org.junit.Test;
+
+import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class KeyCoderTest1 extends PersistitUnitTestCase {
 
