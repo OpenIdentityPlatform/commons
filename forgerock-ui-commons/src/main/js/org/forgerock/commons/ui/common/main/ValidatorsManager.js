@@ -33,8 +33,8 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
 ], function(AbstractConfigurationAware, validatorUtils) {
     var obj = new AbstractConfigurationAware();
     
-    obj.bindValidators = function(el,baseEntity,callback) {
-        var inputs, event, input, policyDelegate,
+    obj.bindValidators = function(el, baseEntity, callback) {
+        var event, input, policyDelegate,
             validateDependents = function (input) {
                 // re-validate dependent form fields
                 if (input.attr("data-validation-dependents")) {
@@ -44,36 +44,36 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
                         .filter(function () { return $.inArray($(this).attr("name"), input.attr("data-validation-dependents").split(",")) !== -1; })
                         .trigger("change");
                 }
-
             },
             postValidation = function  (policyFailures) {
                 var simpleFailures = [], msg = [],
-                    thisInput = this.input,
+                    len = policyFailures.length,
+                    policyFailure,
                     k;
                 
-                for (k = 0; k<policyFailures.length; k++) {
-                    if ($.inArray(policyFailures[k].policyRequirement, simpleFailures) === -1) {
-                        simpleFailures.push(policyFailures[k].policyRequirement);
-                        msg.push($.t("common.form.validation." + policyFailures[k].policyRequirement, policyFailures[k].params));
+                for (k = 0; k < len; k++) {
+                    policyFailure = policyFailures[k];
+                    if ($.inArray(policyFailure.policyRequirement, simpleFailures) === -1) {
+                        simpleFailures.push(policyFailure.policyRequirement);
+                        msg.push($.t("common.form.validation." + policyFailure.policyRequirement, policyFailure.params));
                     }
                 }
-                validatorUtils.setErrors($(".validationRules[data-for-validator~='"+this.input.attr("name")+"']"), this.input.attr("name"), simpleFailures);
-                
+                validatorUtils.setErrors(el.find(".validationRules[data-for-validator~='" + this.input.attr("name") + "']"), this.input.attr("name"), simpleFailures);
+
                 if (policyFailures.length) {
                     this.input.attr("data-validation-status", "error");
-                }
-                else {
+                } else {
                     this.input.attr("data-validation-status", "ok");
                 }
                 
-                el.trigger("onValidate", [this.input, msg.length ? msg.join("<br>") : false]); 
+                el.trigger("onValidate", [this.input, msg.length ? msg.join("<br>") : false]);
                 
-                validateDependents(thisInput);
+                validateDependents(this.input);
             };
 
         
         _.each(el.find("[data-validator]"), function(input) {
-            input = $(input);
+            input = el.find(input);
 
             input.attr("data-validation-status", "error");
             
@@ -130,11 +130,12 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
                     });
                     
                     // This adds requirement descriptions for DOM containers specifically designated to hold them
-                    _.each($(".validationRules[data-for-validator~='"+property.name+"']"), function (ruleContainer) {
+                    _.each(el.find(".validationRules[data-for-validator~='" + property.name + "']"), function (ruleContainer) {
+                        ruleContainer = el.find(ruleContainer);
 
                         // we don't want to add the rules to this container more than once,
                         // so checking for this attribute prevents this from happening.
-                        if (!$(ruleContainer).attr('validation-loaded')) {
+                        if (!ruleContainer.attr('validation-loaded')) {
                             
                             // allPolicyReqParams is used to compile a set of all parameters that get made 
                             // available for policies which produce a given requirement
@@ -163,26 +164,26 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
                                         .attr("data-for-req", req)
                                         .attr("data-for-validator", input.attr("name"))
                                         .text($.t("common.form.validation." + req, allPolicyReqParams[req]));
-                                    $(ruleContainer).append(reqDiv);
+                                    ruleContainer.append(reqDiv);
                                 }
                             });
-                            $(ruleContainer).attr('validation-loaded', "true");
+                            ruleContainer.attr('validation-loaded', "true");
                         }
                     });
                     
                     
                     // This binds the events to all of our fields which have validation policies defined by the server
                     _.each(input, function (item, idx) {
-                        $(input[idx]).on(event, _.bind(function (e) {
+                        el.find(input[idx]).on(event, _.bind(function (e) {
                             var validationContext = (e.type === "change" || e.type === "blur") ? "server":"client";
-                            
+
                             $.doTimeout(this.input.attr('name')+'validation' + validationContext, 100, _.bind(function() {
         
                                 var j,params,policyFailures = [],
                                     hasServerPolicies = false,
                                     EVAL_IS_EVIL = eval; // JSLint doesn't like eval usage; this is a bit of a hack around that, while acknowledging it.
-        
-                                if (!this.input.closest("form")[0]) { 
+
+                                if (!this.input.closest("form")[0]) {
                                     // possible if the form has been removed between the time the event is triggered and the 
                                     // doTimeout is executed (particularly in unit tests)
                                     return;
@@ -217,8 +218,8 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
                                     policyDelegate.validateProperty(
                                         baseEntity,
                                         {
-                                            "fullObject": form2js(this.input.closest("form")[0], '.', false), 
-                                            "value": this.input.val(), 
+                                            "fullObject": form2js(this.input.closest("form")[0], '.', false),
+                                            "value": this.input.val(),
                                             "property": this.property.name
                                         }, 
                                         _.bind(function (result) {
@@ -239,7 +240,7 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
                             
                             }, this));
                             
-                        }, {property : property, input: $(input[idx])}));
+                        }, {property : property, input: el.find(input[idx])}));
                     }, this);
                 }, this));
                 
@@ -254,14 +255,15 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
     
     obj.validateAllFields = function(el) {
         _.each(el.find(":input"), function(input){
-            var event = $(input).attr('data-validator-event');
+            input = el.find(input);
+            var event = input.attr('data-validator-event');
             
             if(event) {
                 _.each(event.split(/\s+/), function (e) {
-                    $(input).trigger(e);
+                    input.trigger(e);
                 });
             } else {
-                $(input).trigger("change");
+                input.trigger("change");
             }
         });
     };
@@ -274,7 +276,7 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
         return el.find("[data-validation-status=error]").length === 0;
     };
 
-    obj.validate = function(event) {       
+    obj.validate = function(event) {
         var parameters = [this.el, this.input, _.bind(obj.afterValidation, this)], validatorConfig, i;
         _.each(this.validatorType.split(' '), _.bind(function (vt) {
 
@@ -306,7 +308,7 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
             this.input.attr("data-validation-status", "ok");
         }
         
-        this.el.trigger("onValidate", [this.input, msg, this.validatorType]); 
+        this.el.trigger("onValidate", [this.input, msg, this.validatorType]);
     };
 
     return obj;

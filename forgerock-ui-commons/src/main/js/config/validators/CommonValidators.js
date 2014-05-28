@@ -35,7 +35,7 @@ define("config/validators/CommonValidators", [
             "dependencies": [
             ],
             "validator": function(el, input, callback) {
-                var v = $(input).val();
+                var v = input.val();
                 if (!v || v === "") {
                     callback([$.t("common.form.validation.required")]);
                     return;
@@ -50,21 +50,21 @@ define("config/validators/CommonValidators", [
                 "org/forgerock/commons/ui/common/util/ValidatorsUtils"
             ],
             "validator": function(el, input, callback, utils) {
-                var v = $(input).val(), reg, errors = [], len = $(input).attr('minLength');
+                var v = input.val(),
+                    errors = [],
+                    len = input.attr('minLength');
                 
-                if(v.length < len) {
+                if (v.length < len) {
                     errors.push($.t("common.form.validation.MIN_LENGTH", {minLength: len}));
                 }
 
-                if(errors.length === 0) {
+                if (errors.length === 0) {
                     callback(); 
                 } else {
                     callback(errors);
                 }
-                
             }
         }        
     };
-    
     return obj;
 });

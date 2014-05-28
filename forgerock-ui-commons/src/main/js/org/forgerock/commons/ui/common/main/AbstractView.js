@@ -129,8 +129,7 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
          * change color of submit button.
          */
         onValidate: function(event, input, msg, validatorType) {
-            var button = this.$el.find("input[type=submit]"),
-                $input = $(input);
+            var button = this.$el.find("input[type=submit]");
 
             if(msg === "inProgress") {
                 //TODO spinner
@@ -140,7 +139,7 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
             if (!button.length) {
                 button = this.$el.find("#submit");
             }
-            if(validatorsManager.formValidated(this.$el)) {
+            if (validatorsManager.formValidated(this.$el)) {
                 button.prop('disabled', false);
                 this.$el.find(".input-validation-message").hide();
             } else {
@@ -148,37 +147,36 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
                 this.$el.find(".input-validation-message").show();
             }
             
-            if(msg === "disabled") {
-                validatorsUtils.hideValidation(input);
+            if (msg === "disabled") {
+                validatorsUtils.hideValidation(input, this.$el);
                 return;
             } else {
-                validatorsUtils.showValidation(input);
+                validatorsUtils.showValidation(input, this.$el);
             }
       
-            if($input.nextAll("span")) {
-                validatorsUtils.setTick(input, msg ? true : false);
+            if (input.nextAll("span")) {
+                validatorsUtils.setTick(input, msg);
             }
             
-            $input.nextAll("div.validation-message:first").attr("for", $input.attr('id')).html(msg ? msg : '');
-            $input.parents('.separate-message').children("div.validation-message:first").attr("for", $input.attr('id')).html(msg ? msg : '');
+            input.nextAll("div.validation-message:first").attr("for", input.attr('id')).html(msg ? msg : '');
+            input.parents('.separate-message').children("div.validation-message:first").attr("for", input.attr('id')).html(msg ? msg : '');
 
-            if(msg){
-                $input.parents('.separate-message').addClass('invalid');
-                $input.addClass('invalid');
-            }else{
-                $input.parents('.separate-message').removeClass('invalid'); 
-                $input.removeClass('invalid');
+            if (msg) {
+                input.parents('.separate-message').addClass('invalid');
+                input.addClass('invalid');
+            } else {
+                input.parents('.separate-message').removeClass('invalid'); 
+                input.removeClass('invalid');
             }
                 
           
-            $("div.validation-message[for='"+$input.attr('name')+"']").html(msg ? msg : '');
+            this.$el.find("div.validation-message[for='" + input.attr('name') + "']").html(msg ? msg : '');
             
-            if(validatorType) {
+            if (validatorType) {
                 validatorsUtils.setErrors(this.$el, validatorType, msg);
             }    
 
             this.$el.trigger("customValidate", [input, msg, validatorType]); 
-            
         },
         
         lock: function() {

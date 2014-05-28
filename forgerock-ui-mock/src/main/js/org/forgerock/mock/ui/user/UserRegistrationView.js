@@ -58,7 +58,7 @@ define("org/forgerock/mock/ui/user/UserRegistrationView", [
             if (validatorsManager.formValidated(this.$el) && !this.isFormLocked()) {
                 this.lock();
 
-                var data = form2js(this.$el.attr("id")),
+                var data = form2js(this.el),
                     self = this;
 
                 delete data.terms;

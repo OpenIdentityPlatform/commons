@@ -36,9 +36,9 @@ define("config/validators/UserValidators", [
                     "org/forgerock/commons/ui/common/util/ValidatorsUtils"
                 ],
                 "validator": function(el, input, callback, utils) {
-                    var v = $(input).val();
-            
-                    if( v === "" ||  $(el).find("input[name=password]").val() !== $(el).find("input[name=passwordConfirm]").val() ) {
+                    var v = input.val();
+
+                    if (v === "" || el.find("input[name=password]").val() !== el.find("input[name=passwordConfirm]").val()) {
                         callback([$.t("common.form.validation.confirmationMatchesPassword")]);
                         return;
                     }
@@ -51,15 +51,14 @@ define("config/validators/UserValidators", [
                 "dependencies": [
                 ],
                 "validator": function(el, input, callback) {
-                    var v = $(input).val();
-                    if($(el).find("input[name=oldPassPhrase]").length !== 0) {
-                        if($(el).find("input[name=oldPassPhrase]").val() === v) {
-                            callback("disabled");
-                            return;
-                        }
+                    var v = input.val(),
+                        oldPassPhrase = el.find("input[name=oldPassPhrase]");
+                    if (oldPassPhrase.length !== 0 && oldPassPhrase.val() === v) {
+                        callback("disabled");
+                        return;
                     }
                     
-                    if(v.length < 4) {
+                    if (v.length < 4) {
                         callback($.t("common.form.validation.minimum4Characters"));
                         return;
                     }
@@ -72,12 +71,11 @@ define("config/validators/UserValidators", [
                 "dependencies": [
                 ],
                 "validator": function(el, input, callback) {
-                    var v = $(input).val();
-                    if(el.find("input[name=oldSiteImage]").length !== 0) {
-                        if(el.find("input[name=oldSiteImage]").val() === v) {
-                            callback("disabled");
-                            return;
-                        }
+                    var v = input.val(),
+                        oldSiteImage = el.find("input[name=oldSiteImage]");
+                    if (oldSiteImage.length !== 0  && oldSiteImage.val() === v) {
+                        callback("disabled");
+                        return;
                     }
                     
                     callback();  
@@ -88,7 +86,7 @@ define("config/validators/UserValidators", [
                 "dependencies": [
                 ],
                 "validator": function(el, input, callback) {              
-                    if(!$(input).is(':checked')) {
+                    if(!input.is(':checked')) {
                         callback($.t("common.form.validation.acceptanceRequiredForRegistration"));
                         return;
                     }
@@ -103,7 +101,7 @@ define("config/validators/UserValidators", [
                     "UserDelegate"
                 ],
                 "validator": function(el, input, callback, conf, userDelegate) {
-                    var v = $(input).val();
+                    var v = input.val();
                     
                     if(v === "") {
                         callback($.t("common.form.validation.incorrectPassword"));
@@ -112,8 +110,8 @@ define("config/validators/UserValidators", [
                     
                     userDelegate.checkCredentials(v, function() {
                         callback();
-                        $(input).attr('data-validation-status', 'ok');
-                        $("input[name='Continue']").click();
+                        el.find(input).attr('data-validation-status', 'ok');
+                        el.find("input[name='Continue']").click();
                     },
                     function (result) {
                         callback($.t("common.form.validation.incorrectPassword"));
@@ -127,24 +125,24 @@ define("config/validators/UserValidators", [
                     "UserDelegate"
                 ],
                 "validator": function(el, input, callback, utils, userDelegate) {
-                    var v = $(input).val();
+                    var v = input.val();
                     
                     if(v === "") {
                         callback($.t("common.form.validation.required"));
-                        $(input).attr('data-validation-status', 'error');
-                        $("input[name='Update']").click();
+                        el.find(input).attr('data-validation-status', 'error');
+                        el.find("input[name='Update']").click();
                         return;
                     }
                    
                     userDelegate.getSecurityQuestionForUserName(v, 
                     _.bind(function(securityQuestion) {
-                        $(input).attr('data-validation-status', 'ok');
+                        el.find(input).attr('data-validation-status', 'ok');
                         callback();
                         $(this.el).trigger("userNameFound", securityQuestion);
                     }, this),
                     _.bind(function () {
                         callback("No such user");
-                        $(input).attr('data-validation-status', 'error');
+                        el.find(input).attr('data-validation-status', 'error');
                         $(this.el).trigger("userNameNotFound");
                     }, this)
                     );  
@@ -157,19 +155,19 @@ define("config/validators/UserValidators", [
                     "UserDelegate"
                 ],
                 "validator": function(el, input, callback, utils, userDelegate) {
-                    var v = $(input).val(), userName;
+                    var v = input.val(), userName;
                     if(v === "") {
                         callback($.t("common.form.validation.required"));
                         return;
                     }
-                    userName = $(el).find("input[name='resetUsername']").val();
+                    userName = el.find("input[name='resetUsername']").val();
                     userDelegate.getBySecurityAnswer(userName, v, 
                         function(result) {
-                            $(el).find("input[name=_id]").val(result._id);
+                            el.find("input[name=_id]").val(result._id);
                             callback();
                         },      
                         function() {
-                            $(el).find("input[name=_id]").val("");
+                            el.find("input[name=_id]").val("");
                             callback($.t("common.form.validation.incorrectSecurityAnswer"));
                         }
                     );
@@ -180,7 +178,7 @@ define("config/validators/UserValidators", [
                 "dependencies": [
                 ],
                 "validator": function(el, input, callback) {
-                    var v = $(input).val();
+                    var v = el.find(input).val();
                     
                     if(el.find("input[name=oldSecurityQuestion]").val() !== el.find("select[name=securityQuestion]").val()) {
                         if(v === "") {

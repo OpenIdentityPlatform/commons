@@ -32,10 +32,10 @@ define("org/forgerock/commons/ui/common/util/ValidatorsUtils", [
     obj.phonePattern = /^\+?([0-9\- \(\)])*$/;
     obj.emailPattern = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
     
-    obj.setTick = function(input, isOk) {
-        var span = $(input).nextAll("span");
-        
-        if(isOk) {
+    obj.setTick = function($input, ok) {
+        var span = $input.nextAll("span");
+
+        if(ok) {
             span.removeClass('ok');
             span.addClass('error');
             span.html('x');
@@ -48,11 +48,15 @@ define("org/forgerock/commons/ui/common/util/ValidatorsUtils", [
     
     obj.setErrors = function(el, validatorType, msg) {
         _.each(validatorType.split(' '), function (vt) {
-            _.each(el.find("span[data-for-validator="+vt+"]"), function(input) {
-                var type = $(input).attr("data-for-req"), span = $(input).prev("span");
-                if (!type) { type = $(input).text(); }
-                
-                if( $.inArray(type, msg) !== -1 ) {
+            _.each(el.find("span[data-for-validator=" + vt + "]"), function (input) {
+                var $input = el.find(input),
+                    type = $input.attr("data-for-req"),
+                    span = $input.prev("span");
+                if (!type) {
+                    type = $input.text();
+                }
+
+                if ($.inArray(type, msg) !== -1) {
                     span.removeClass('ok');
                     span.addClass('error');
                     span.html('x');
@@ -64,17 +68,17 @@ define("org/forgerock/commons/ui/common/util/ValidatorsUtils", [
             });
         });
     };
-    
-    obj.hideValidation = function(input, el) {
-        $(input).nextAll("span").hide();
-        $(input).nextAll("div.validation-message:first").hide();
-        $("div.validation-message[for='"+$(input).attr('name')+"']").hide();
+
+    obj.hideValidation = function ($input, el) {
+        $input.nextAll("span").hide();
+        $input.nextAll("div.validation-message:first").hide();
+        el.find("div.validation-message[for='" + $input.attr('name') + "']").hide();
     };
-    
-    obj.showValidation = function(input, el) {
-        $(input).nextAll("span").show();
-        $(input).nextAll("div.validation-message:first").show();
-        $("div.validation-message[for='"+$(input).attr('name')+"']").show();
+
+    obj.showValidation = function ($input, el) {
+        $input.nextAll("span").show();
+        $input.nextAll("div.validation-message:first").show();
+        el.find("div.validation-message[for='" + $input.attr('name') + "']").show();
     };
     
     obj.hideBox = function(el) {
