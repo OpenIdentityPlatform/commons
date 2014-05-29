@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global require, QUnit */
+/*global require, QUnit, localStorage */
 
 require([
     "org/forgerock/commons/ui/common/util/Constants",
@@ -53,6 +53,8 @@ require([
                     return userTests.executeAll(server);
                 }).then(function () {
                     return mockTests.executeAll(server, userParams);
+                }).then(function () {
+                    localStorage.clear();
                 });
 
         });
