@@ -37,6 +37,7 @@ import org.testng.annotations.Test;
 import static org.fest.assertions.Assertions.assertThat;
 
 import static org.forgerock.util.Iterables.filter;
+import static org.forgerock.util.Iterables.from;
 import static org.forgerock.util.Iterables.map;
 
 
@@ -162,6 +163,44 @@ public class IterablesTest {
     public void testMap(final String[] value, final String firstLetters) {
         StringBuilder sb = new StringBuilder();
         for (Character element : map(Arrays.asList(value), FIRST_LETTERS)) {
+            sb.append(element);
+        }
+        assertThat(sb.toString()).isEqualTo(firstLetters);
+    }
+
+    @Test(dataProvider = "filterCollections")
+    public void test_Filter(final String[] value, final String firstLetters) {
+        StringBuilder sb = new StringBuilder();
+        for (String element : from(Arrays.asList(value)).filter(IGNORE_G_WORDS)) {
+            sb.append(element.charAt(0));
+        }
+        assertThat(sb.toString()).isEqualTo(firstLetters);
+    }
+
+    @Test(dataProvider = "mapCollections")
+    public void test_Map(final String[] value, final String firstLetters) {
+        StringBuilder sb = new StringBuilder();
+        for (Character element : from(Arrays.asList(value)).map(FIRST_LETTERS)) {
+            sb.append(element);
+        }
+        assertThat(sb.toString()).isEqualTo(firstLetters);
+    }
+
+    @DataProvider
+    public Object[][] filterAndMapCollections() {
+        return new Object[][] {
+                // @formatter:off
+                { new String[] { "goo", "gah", "boo", "bah", "zoo" }, "bbz" },
+                { new String[] { "boo", "baz", "goo", "gah", "zoo" }, "bbz" },
+                { new String[] { "boo", "goo", "bah", "zoo", "gah" }, "bbz" }
+                // @formatter:on
+        };
+    }
+
+    @Test(dataProvider = "filterAndMapCollections")
+    public void test_FilterAndMap(final String[] value, final String firstLetters) {
+        StringBuilder sb = new StringBuilder();
+        for (Character element : from(Arrays.asList(value)).filter(IGNORE_G_WORDS).map(FIRST_LETTERS)) {
             sb.append(element);
         }
         assertThat(sb.toString()).isEqualTo(firstLetters);

@@ -156,6 +156,62 @@ public class Iterables {
         }
     }
 
+    /**
+     * An {@link Iterable} providing fluent expressions of
+     * <ul>
+     * <li>{@link Iterables#filter}</li>
+     * <li>{@link Iterables#map}</li>
+     * </ul>
+     *
+     * @param <T> The parameterized element type of the {@link Iterable}.
+     */
+    public static class FluentIterable<T> implements Iterable<T> {
+        /** The Iterable to wrap */
+        private final Iterable<T> iterable;
+
+        /**
+         * Construct the wrapped Iterable from <em>iterable</em>.
+         *
+         * @param iterable the Iterable to wrap
+         */
+        private FluentIterable(Iterable<T> iterable) {
+            this.iterable = iterable;
+        }
+
+        /**
+         * Return the wrapped Iterable's {@link Iterator}.
+         *
+         * @return the iterator.
+         */
+        @Override
+        public Iterator<T> iterator() {
+            return iterable.iterator();
+        }
+
+        /**
+         * Filter the wrapped Iterable according the given {@link Predicate}.
+         *
+         * @param predicate the {@linkplain Predicate} used to include elements in the filtered result
+         * @return the filtered {@linkplain Iterable}
+         */
+        public FluentIterable<T> filter(final Predicate<T> predicate) {
+            return new FluentIterable<T>(new FilteredIterable<T>(iterable, predicate));
+        }
+
+        /**
+         * Map the wrapped Iterable according the given {@link Function}.
+         *
+         * @param <R> The parameterized element type of the transform function's output,
+         *           also the returned element type of the new Iterable
+         * @param <E> An optional exception that the transform function may throw.
+         * @param mapper the {@linkplain Function} used to map elements from source type to return type
+         * @return the mapped {@linkplain Iterable}
+         */
+        public <R, E extends RuntimeException> FluentIterable<R> map(final Function<T, R, E> mapper) {
+            return new FluentIterable<R>(new MappedIterable<T, R, E>(iterable, mapper));
+        }
+    }
+
     private Iterables() {
         // prevent construction
     }
@@ -186,7 +242,7 @@ public class Iterables {
      *
      * @param <T> the element type
      * @param iterable the {@linkplain Iterable} to filter
-     * @param predicate the {@linkplan Predicate} used to include elements in the filtered result
+     * @param predicate the {@linkplain Predicate} used to include elements in the filtered result
      * @return the filtered {@linkplain Iterable}
      */
     public static <T> Iterable<T> filter(Iterable<T> iterable, Predicate<T> predicate) {
@@ -221,11 +277,68 @@ public class Iterables {
      * @param <R> the returned iterable element type
      * @param <E> a RuntimeException thrown by the map function
      * @param iterable the source {@linkplain Iterable} to map
-     * @param mapper the {@linkplan Function} used to map elements from source type to return type
+     * @param mapper the {@linkplain Function} used to map elements from source type to return type
      * @return the mapped {@linkplain Iterable}
      */
     public static <T, R, E extends RuntimeException> Iterable<R> map(Iterable<T> iterable, Function<T, R, E> mapper) {
-        return new MappedIterable(iterable, mapper);
+        return new MappedIterable<T, R, E>(iterable, mapper);
     }
 
+    /**
+     * Create a Iterable providing fluent expressions of
+     * <ul>
+     * <li>{@link Iterables#filter}</li>
+     * <li>{@link Iterables#map}</li>
+     * </ul>
+     * <p>
+     * Given
+     * <pre>
+     * {@code
+     *     List<String> fruit = new ArrayList<String>();
+     *     fruit.add("apple");
+     *     fruit.add("pineapple");
+     *     fruit.add("banana");
+     *     fruit.add("orange");
+     *     fruit.add("pear");
+     *
+     *     final Predicate<String> pFruits =
+     *              new Predicate<String>() {
+     *                  public boolean apply(String fruit) {
+     *                      return fruit.startsWith("p");
+     *                  }
+     *              };
+     *
+     *     final Function<String, Integer, NeverThrowsException> getLengths =
+     *              new Function<String, Integer, NeverThrowsException>() {
+     *                  public Integer apply(String fruit) {
+     *                      return fruit.length();
+     *                  }
+     *              };
+     * }
+     * </pre>
+     * the invocation
+     * <pre>
+     * {@code
+     *     from(fruit).filter(pFruits).map(getLengths);
+     * }
+     * </pre>
+     * is equivalent to
+     * <pre>
+     * {@code
+     *     map(filter(fruit, pFruits), getLengths);
+     * }
+     * </pre>
+     * and returns an {@linkplain Iterable} whose elements are
+     * <pre>
+     *     [ 9, 4 ]
+     * </pre>
+     *
+     *
+     * @param <T> The parameterized element type of the Iterable.
+     * @param iterable the Iterable to wrap
+     * @return a wrapped {@linkplain Iterable}
+     */
+    public static <T> FluentIterable<T> from(Iterable<T> iterable) {
+        return new FluentIterable<T>(iterable);
+    }
 }
