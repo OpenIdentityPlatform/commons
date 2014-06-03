@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2013 ForgeRock AS.
+ * Copyright 2012-2014 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -141,6 +141,7 @@ public final class Requests {
 
         private ActionRequestImpl() {
             // Default constructor.
+            content = new JsonValue(null);
         }
 
         private ActionRequestImpl(final ActionRequest request) {
@@ -177,7 +178,7 @@ public final class Requests {
 
         @Override
         public ActionRequest setContent(final JsonValue content) {
-            this.content = content;
+            this.content = content != null ? content : new JsonValue(null);
             return this;
         }
 
