@@ -88,6 +88,7 @@ define("org/forgerock/mock/ui/user/UserRegistrationView", [
 
             this.parentRender(function () {
                 validatorsManager.bindValidators(this.$el, userDelegate.serviceUrl + "/*", _.bind(function () {
+                    validatorsManager.validateAllFields(this.$el);
                     this.unlock();
                     if (callback) {
                         callback();

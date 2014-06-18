@@ -254,18 +254,10 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
     };
     
     obj.validateAllFields = function(el) {
-        _.each(el.find(":input"), function(input){
-            input = el.find(input);
-            var event = input.attr('data-validator-event');
-            
-            if(event) {
-                _.each(event.split(/\s+/), function (e) {
-                    input.trigger(e);
-                });
-            } else {
-                input.trigger("change");
-            }
-        });
+        // we bind "blur" as a validation event to all input fields, to this is enough to trigger the event.
+        // Also has the nice effect of not changing the state of the input, as was sometimes happening for different
+        // input types (notably, checkboxes with change events).
+        el.find(":input").trigger("blur");
     };
     
     obj.formValidated = function(el) {

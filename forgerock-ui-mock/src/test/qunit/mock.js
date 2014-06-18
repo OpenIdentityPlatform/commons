@@ -127,10 +127,12 @@ define([
                     testStatusAttr(mail, 'error');
                     testStatusAttr(givenName, 'error');
                     testStatusAttr(lastName, 'error');
-                    testStatusAttr(phone, 'error');
+                    testStatusAttr(phone, 'ok'); // phone is optional
                     testStatusAttr(pwd, 'error');
                     testStatusAttr(pwdConfirm, 'error');
                     testStatusAttr(terms, 'error');
+
+                    QUnit.ok(!terms.is(':checked'), 'Terms of use not checked by default');
 
                     // password
                     testFieldRule(pwd, 'abc', pwdRequired, pwdRequired.attr('data-for-req'), 'ok');
