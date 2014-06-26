@@ -114,10 +114,19 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
             this.$el.remove();
         },
 
+
         addAction: function(name, type) {
-            this.actions.push({
-                "name" : name,
-                "type" : type
+            if(!this.getAction(name)) {
+                this.actions.push({
+                    "name" : name,
+                    "type" : type
+                });
+            }
+        },
+
+        getAction: function(name) {
+            return _.find(this.actions, function(a) {
+                return a.name === name;
             });
         }
     });

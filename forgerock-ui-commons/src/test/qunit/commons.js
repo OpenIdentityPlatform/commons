@@ -26,8 +26,9 @@
 
 
 define([
-    "org/forgerock/commons/ui/common/main/Configuration"
-], function (conf) {
+    "org/forgerock/commons/ui/common/main/Configuration",
+    "org/forgerock/commons/ui/common/components/Dialog"
+], function (conf, Dialog) {
     return {
         executeAll: function (server, parameters) {
 
@@ -87,6 +88,18 @@ define([
 
                 });
             });
+
+            QUnit.test("Add Actions to Dialog", function () {
+                var testDialog = new Dialog();
+
+                QUnit.ok(testDialog.actions.length === 1 && testDialog.actions[0].name === "close", "Cancel Button is Available"); 
+
+                testDialog.addAction("Test", "TestValue");
+                testDialog.addAction("Test", "TestValue");
+
+                QUnit.ok(testDialog.actions.length === 2 && testDialog.actions[0].name === "close" && testDialog.actions[1].name === "Test", "Cancel and Test Buttons are Available"); 
+
+            });      
 
             return testPromise;
         }
