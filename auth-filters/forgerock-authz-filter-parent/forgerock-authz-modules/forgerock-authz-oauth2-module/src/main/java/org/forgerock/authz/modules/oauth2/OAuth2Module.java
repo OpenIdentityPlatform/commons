@@ -93,10 +93,11 @@ public class OAuth2Module {
      *
      * @param accessToken {@inheritDoc}
      * @param context {@inheritDoc}
-     * @return {@inheritDoc
+     * @return {@inheritDoc}
      * @throws AuthorizationException {@inheritDoc}
      */
-    public Promise<AuthorizationResult, AuthorizationException> authorize(String accessToken, AuthorizationContext context) {
+    public Promise<AuthorizationResult, AuthorizationException> authorize(String accessToken,
+                                                                          AuthorizationContext context) {
 
         if (accessToken != null) {
 

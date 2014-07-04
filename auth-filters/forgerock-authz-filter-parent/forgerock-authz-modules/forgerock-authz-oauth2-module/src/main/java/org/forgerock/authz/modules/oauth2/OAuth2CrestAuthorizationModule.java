@@ -34,8 +34,6 @@ import org.forgerock.json.resource.servlet.HttpContext;
 import org.forgerock.util.promise.AsyncFunction;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * <p>An implementation of a {@code CrestAuthorizationModule} which uses a OAuth2 Access Token from the
@@ -213,7 +211,8 @@ public class OAuth2CrestAuthorizationModule implements CrestAuthorizationModule 
                     new AsyncFunction<AuthorizationResult, AuthorizationResult, ResourceException>() {
                         @Override
                         public Promise<AuthorizationResult, ResourceException> apply(AuthorizationResult result) {
-//                            securityContext.getAuthorizationId().putAll(authorizationContext.getAttributes());    //TODO cannot add to the authzId as SecurityContext ensures this....
+//                            securityContext.getAuthorizationId().putAll(authorizationContext.getAttributes());
+// TODO cannot add to the authzId as SecurityContext ensures this....
                             return Promises.newSuccessfulPromise(result);
                         }
                     }, new AsyncFunction<AuthorizationException, AuthorizationResult, ResourceException>() {
