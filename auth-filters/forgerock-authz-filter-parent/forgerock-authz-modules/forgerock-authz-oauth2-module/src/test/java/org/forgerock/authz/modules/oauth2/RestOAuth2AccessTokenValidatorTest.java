@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.util.Arrays.asList;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -182,4 +183,27 @@ public class RestOAuth2AccessTokenValidatorTest {
         verifyZeroInteractions(userProfileRequest);
         assertEquals(response.getProfileInformation(), Collections.emptyMap());
     }
+
+    @Test
+    public void shouldAcceptScopeAsJsonArray() throws OAuth2Exception, IOException {
+
+        //Given
+        String accessToken = "ACCESS_TOKEN";
+        Representation response = mock(Representation.class);
+        Map<String, Object> jsonMap = new HashMap<String, Object>();
+        jsonMap.put("expires_in", -1);
+        jsonMap.put("scope", asList("A", "B", "C"));
+        JsonValue tokenInfoResponse = new JsonValue(jsonMap);
+
+        given(tokenInfoRequest.get()).willReturn(response);
+        given(response.getText()).willReturn("TOKEN_INFO");
+        given(jsonParser.parse("TOKEN_INFO")).willReturn(tokenInfoResponse);
+
+        //When
+        final AccessTokenValidationResponse validate = accessTokenValidator.validate(accessToken);
+
+        //Then
+        assertEquals(validate.getTokenScopes().size(), 3);
+    }
+
 }

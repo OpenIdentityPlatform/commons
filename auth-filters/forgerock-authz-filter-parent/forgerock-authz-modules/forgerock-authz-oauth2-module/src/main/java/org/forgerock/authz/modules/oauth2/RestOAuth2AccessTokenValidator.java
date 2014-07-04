@@ -129,7 +129,12 @@ public class RestOAuth2AccessTokenValidator implements OAuth2AccessTokenValidato
      * @return The Set of scopes.
      */
     protected Set<String> getScope(JsonValue tokenInfo) {
-        final String scopeList = tokenInfo.get("scope").required().asString();
-        return new HashSet<String>(Arrays.asList(scopeList.split(" ")));
+        final JsonValue scope = tokenInfo.get("scope").required();
+        // Some identity Providers are returning the "scope" attribute as an array of string
+        // where some others are using a simple space-delimited string
+        if (scope.isString()) {
+            return new HashSet<String>(Arrays.asList(scope.asString().split(" ")));
+        }
+        return new HashSet<String>(scope.asList(String.class));
     }
 }
