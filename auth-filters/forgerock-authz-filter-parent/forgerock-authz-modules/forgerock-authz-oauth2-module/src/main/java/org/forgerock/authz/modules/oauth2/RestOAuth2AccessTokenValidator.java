@@ -96,7 +96,8 @@ public class RestOAuth2AccessTokenValidator implements OAuth2AccessTokenValidato
                 return new AccessTokenValidationResponse(0);
             }
 
-            final long expiresIn = tokenInfo.get("expires_in").required().asLong();
+            // expires_in is expressed in seconds, and we compare it later with milliseconds since epoch
+            final long expiresIn = tokenInfo.get("expires_in").required().asLong() * 1000;
             final Set<String> scopes = getScope(tokenInfo);
 
             final Map<String, Object> profileInfo = new HashMap<String, Object>();

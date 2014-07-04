@@ -92,6 +92,65 @@ public class RestOAuth2AccessTokenValidatorTest {
     }
 
     @Test
+    public void shouldReturnInvalidAccessTokenResponseWhenTokenIsExpired() throws OAuth2Exception, IOException {
+
+        //Given
+        String accessToken = "ACCESS_TOKEN";
+        Representation response = mock(Representation.class);
+        Map<String, Object> jsonMap = new HashMap<String, Object>();
+        jsonMap.put("expires_in", -1);
+        jsonMap.put("scope", "A B C");
+        JsonValue tokenInfoResponse = new JsonValue(jsonMap);
+
+        given(tokenInfoRequest.get()).willReturn(response);
+        given(response.getText()).willReturn("TOKEN_INFO");
+        given(jsonParser.parse("TOKEN_INFO")).willReturn(tokenInfoResponse);
+
+        //When
+        final AccessTokenValidationResponse validate = accessTokenValidator.validate(accessToken);
+
+        //Then
+        assertFalse(validate.isTokenValid());
+        assertTrue(validate.getProfileInformation().isEmpty());
+        assertEquals(validate.getTokenScopes().size(), 3);
+    }
+
+    /**
+     * This test mimics a validation response that was placed in cache and re-used after some time.
+     */
+    @Test
+    public void shouldReturnValidAccessTokenResponseWhenTokenIsNotExpired() throws Exception {
+
+        //Given
+        JsonValue config = JsonValue.json(JsonValue.object(
+                JsonValue.field("token-info-endpoint", "TOKEN_INFO")
+                // No user info endpoint
+        ));
+        accessTokenValidator = new RestOAuth2AccessTokenValidator(config, restResourceFactory, jsonParser);
+        String accessToken = "ACCESS_TOKEN";
+        Representation response = mock(Representation.class);
+        Map<String, Object> jsonMap = new HashMap<String, Object>();
+        jsonMap.put("expires_in", 10);
+        jsonMap.put("scope", "A B C");
+        JsonValue tokenInfoResponse = new JsonValue(jsonMap);
+
+        given(tokenInfoRequest.get()).willReturn(response);
+        given(response.getText()).willReturn("TOKEN_INFO");
+        given(jsonParser.parse("TOKEN_INFO")).willReturn(tokenInfoResponse);
+
+        //When
+        final AccessTokenValidationResponse validate = accessTokenValidator.validate(accessToken);
+
+        // Mimics a delay before re-using the response
+        Thread.sleep(50);
+
+        //Then
+        assertTrue(validate.isTokenValid());
+        assertTrue(validate.getProfileInformation().isEmpty());
+        assertEquals(validate.getTokenScopes().size(), 3);
+    }
+
+    @Test
     public void shouldReturnInvalidAccessTokenResponseWithScope() throws OAuth2Exception, IOException {
 
         //Given
