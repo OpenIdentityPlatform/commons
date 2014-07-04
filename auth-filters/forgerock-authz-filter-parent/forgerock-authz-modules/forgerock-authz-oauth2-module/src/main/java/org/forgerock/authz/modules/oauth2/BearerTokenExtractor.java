@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
  *
  * @since 1.5.0
  */
-class BearerTokenExtractor {
+public class BearerTokenExtractor {
 
     private static final String BEARER_TOKEN_KEY = "BEARER";
 
@@ -37,7 +37,7 @@ class BearerTokenExtractor {
      * @return The access token, or <code>null</code> if the access token was not present or was not using Bearer
      * authorization.
      */
-    String getAccessToken(String authorizationHeader) {
+    public String getAccessToken(String authorizationHeader) {
 
         if (authorizationHeader == null) {
             logger.debug("Authorization header not present");

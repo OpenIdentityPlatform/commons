@@ -39,7 +39,7 @@ import java.util.Set;
  *
  * @since 1.4.0
  */
-class OAuth2Module {
+public class OAuth2Module {
 
     private final Logger logger = LoggerFactory.getLogger(OAuth2Module.class);
 
@@ -62,7 +62,7 @@ class OAuth2Module {
      * @param cacheEnabled {@code true} if the cache should be used.
      * @param cacheSize The size of the cache. Only used if {@code cacheEnabled} is set to
      */
-    OAuth2Module(OAuth2AccessTokenValidator accessTokenValidator,
+    public OAuth2Module(OAuth2AccessTokenValidator accessTokenValidator,
             Set<String> requiredScopes, boolean cacheEnabled, int cacheSize) {
         this.accessTokenValidator = accessTokenValidator;
         this.requiredScopes = requiredScopes;
@@ -96,7 +96,7 @@ class OAuth2Module {
      * @return {@inheritDoc
      * @throws AuthorizationException {@inheritDoc}
      */
-    Promise<AuthorizationResult, AuthorizationException> authorize(String accessToken, AuthorizationContext context) {
+    public Promise<AuthorizationResult, AuthorizationException> authorize(String accessToken, AuthorizationContext context) {
 
         if (accessToken != null) {
 

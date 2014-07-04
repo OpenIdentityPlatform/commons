@@ -42,7 +42,7 @@ public class AuthorizationContext {
      *
      * @param attributes The initial attributes to copy into the new context.
      */
-    protected AuthorizationContext(Map<String, Object> attributes) {
+    public AuthorizationContext(Map<String, Object> attributes) {
         this.attributes = attributes;
     }
 
