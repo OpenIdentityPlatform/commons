@@ -17,12 +17,9 @@
 package org.forgerock.authz.modules.oauth2;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.restlet.representation.Representation;
-import org.restlet.resource.ResourceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -49,7 +46,6 @@ public class RestOAuth2AccessTokenValidator implements OAuth2AccessTokenValidato
     private final Logger logger = LoggerFactory.getLogger(RestOAuth2AccessTokenValidator.class);
 
     private final RestResourceFactory restResourceFactory;
-    private final JsonParser jsonParser;
     private final String tokenInfoEndpoint;
     private final String userProfileEndpoint;
 
@@ -57,24 +53,13 @@ public class RestOAuth2AccessTokenValidator implements OAuth2AccessTokenValidato
      * Creates a new instance of the RestOAuth2AccessTokenValidator.
      *
      * @param config The configuration for the validator.
-     */
-    public RestOAuth2AccessTokenValidator(JsonValue config) {
-        this(config, new RestResourceFactory(), new JsonParser());
-    }
-
-    /**
-     * Constructor for test usage.
-     *
-     * @param config The configuration for the validator.
      * @param restResourceFactory An instance of the RestResourceFactory.
-     * @param jsonParser An instance of the JsonParser.
      */
-    RestOAuth2AccessTokenValidator(JsonValue config, RestResourceFactory restResourceFactory, JsonParser jsonParser) {
+    public RestOAuth2AccessTokenValidator(JsonValue config, RestResourceFactory restResourceFactory) {
         tokenInfoEndpoint = config.get(TOKEN_INFO_ENDPOINT_KEY).required().asString();
         // userInfo endpoint is optional
         userProfileEndpoint = config.get(USER_INFO_ENDPOINT_KEY).asString();
         this.restResourceFactory = restResourceFactory;
-        this.jsonParser = jsonParser;
     }
 
     /**
@@ -87,9 +72,7 @@ public class RestOAuth2AccessTokenValidator implements OAuth2AccessTokenValidato
                 .resource(tokenInfoEndpoint + "?access_token=" + accessToken);
 
         try {
-            final Representation tokenInfoResponse = tokenInfoRequest.get();
-
-            final JsonValue tokenInfo = jsonParser.parse(tokenInfoResponse.getText());
+            final JsonValue tokenInfo = tokenInfoRequest.get();
 
             // If response contains "error" then token is invalid
             if (tokenInfo.isDefined("error")) {
@@ -105,18 +88,18 @@ public class RestOAuth2AccessTokenValidator implements OAuth2AccessTokenValidato
                 logger.debug("Fetching user profile information from endpoint");
                 final RestResource userProfileRequest = restResourceFactory.resource(userProfileEndpoint);
                 userProfileRequest.addHeader("Authorization", "Bearer " + accessToken);
-                final Representation userProfileResponse = userProfileRequest.get();
-                final JsonValue userProfile = jsonParser.parse(userProfileResponse.getText());
+                final JsonValue userProfile = userProfileRequest.get();
                 profileInfo.putAll(userProfile.asMap());
             }
 
             return new AccessTokenValidationResponse(expiresIn + System.currentTimeMillis(), profileInfo, scopes);
-        } catch (IOException e) {
-            logger.error(e.getMessage(), e);
-            throw new OAuth2Exception(e.getMessage(), e);
-        } catch (ResourceException e) {
-            if (e.getStatus().getCode() >= 400 && e.getStatus().getCode() < 500) {
-                return new AccessTokenValidationResponse(0);
+        } catch (RestResourceException e) {
+            // If the error is from the 400 series, it should be treated as an authentication error
+            final RestResourceException.StatusCode status = e.getStatus();
+            if (status != null) {
+                if (status.getCode() >= 400 && status.getCode() < 500) {
+                    return new AccessTokenValidationResponse(0);
+                }
             }
             logger.error(e.getMessage(), e);
             throw new OAuth2Exception(e.getMessage(), e);

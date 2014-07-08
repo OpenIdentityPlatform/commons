@@ -14,19 +14,7 @@
  * Copyright 2014 ForgeRock AS.
  */
 
-package org.forgerock.authz.modules.oauth2;
-
 /**
- * Simple factory interface for creating new RestResource instance, to facilitate testing.
- *
- * @since 1.5.0
+ * This package helps to keep the restlet dependency separated from the rest of the code.
  */
-public interface RestResourceFactory {
-    /**
-     * Constructs a new RestResource with the provided uri.
-     *
-     * @param uri The uri of the resource.
-     * @return A new RestResource.
-     */
-    RestResource resource(String uri);
-}
+package org.forgerock.authz.modules.oauth2.restlet;

@@ -16,6 +16,8 @@
 
 package org.forgerock.authz.modules.oauth2;
 
+import org.forgerock.authz.modules.oauth2.restlet.RestletResourceFactory;
+
 import java.util.Set;
 
 import static org.forgerock.json.fluent.JsonValue.field;
@@ -50,9 +52,14 @@ public final class OAuth2Authorization {
      * @return A new {@code OAuth2CrestAuthorizationModule} instance.
      */
     public static OAuth2CrestAuthorizationModule forCrest(OAuth2AccessTokenValidator accessTokenValidator,
-            Set<String> requiredScopes, boolean cacheEnabled, int cacheSize) {
-        return new OAuth2CrestAuthorizationModule(new OAuth2Module(accessTokenValidator, requiredScopes,
-                cacheEnabled, cacheSize), new BearerTokenExtractor());
+                                                          Set<String> requiredScopes,
+                                                          boolean cacheEnabled,
+                                                          int cacheSize) {
+        return new OAuth2CrestAuthorizationModule(new OAuth2Module(accessTokenValidator,
+                                                                   requiredScopes,
+                                                                   cacheEnabled,
+                                                                   cacheSize),
+                                                  new BearerTokenExtractor());
     }
 
     /**
@@ -65,11 +72,20 @@ public final class OAuth2Authorization {
      * @param cacheSize The size of the cache. Only used if {@code cacheEnabled} is set to {@code true}.
      * @return A new {@code OAuth2CrestAuthorizationModule} instance.
      */
-    public static OAuth2CrestAuthorizationModule forCrest(String tokenInfoEndpoint, String userInfoEndpoint,
-            Set<String> requiredScopes, boolean cacheEnabled, int cacheSize) {
-        return forCrest(new RestOAuth2AccessTokenValidator(json(object(
-                        field(TOKEN_INFO_ENDPOINT_KEY, tokenInfoEndpoint),
-                        field(USER_INFO_ENDPOINT_KEY, userInfoEndpoint)))), requiredScopes, cacheEnabled, cacheSize);
+    public static OAuth2CrestAuthorizationModule forCrest(String tokenInfoEndpoint,
+                                                          String userInfoEndpoint,
+                                                          Set<String> requiredScopes,
+                                                          boolean cacheEnabled,
+                                                          int cacheSize) {
+        return forCrest(new RestOAuth2AccessTokenValidator(
+                                json(
+                                        object(
+                                                field(TOKEN_INFO_ENDPOINT_KEY, tokenInfoEndpoint),
+                                                field(USER_INFO_ENDPOINT_KEY, userInfoEndpoint))),
+                                new RestletResourceFactory()),
+                        requiredScopes,
+                        cacheEnabled,
+                        cacheSize);
     }
 
     /**
@@ -82,11 +98,10 @@ public final class OAuth2Authorization {
      * @param requiredScopes The required OAuth2 scopes for the request to be authorized.
      * @return A new {@code OAuth2CrestAuthorizationModule} instance.
      */
-    public static OAuth2CrestAuthorizationModule forCrest(String tokenInfoEndpoint, String userInfoEndpoint,
-            Set<String> requiredScopes) {
-        return forCrest(new RestOAuth2AccessTokenValidator(json(object(
-                        field(TOKEN_INFO_ENDPOINT_KEY, tokenInfoEndpoint),
-                        field(USER_INFO_ENDPOINT_KEY, userInfoEndpoint)))), requiredScopes, false, 0);
+    public static OAuth2CrestAuthorizationModule forCrest(String tokenInfoEndpoint,
+                                                          String userInfoEndpoint,
+                                                          Set<String> requiredScopes) {
+        return forCrest(tokenInfoEndpoint, userInfoEndpoint, requiredScopes, false, 0);
     }
 
     /**
@@ -99,9 +114,14 @@ public final class OAuth2Authorization {
      * @return A new {@code OAuth2HttpServletAuthorizationModule} instance.
      */
     public static OAuth2HttpServletAuthorizationModule forHttpServlet(OAuth2AccessTokenValidator accessTokenValidator,
-            Set<String> requiredScopes, boolean cacheEnabled, int cacheSize) {
-        return new OAuth2HttpServletAuthorizationModule(new OAuth2Module(accessTokenValidator, requiredScopes,
-                cacheEnabled, cacheSize), new BearerTokenExtractor());
+                                                                      Set<String> requiredScopes,
+                                                                      boolean cacheEnabled,
+                                                                      int cacheSize) {
+        return new OAuth2HttpServletAuthorizationModule(new OAuth2Module(accessTokenValidator,
+                                                                         requiredScopes,
+                                                                         cacheEnabled,
+                                                                         cacheSize),
+                                                        new BearerTokenExtractor());
     }
 
     /**
@@ -114,11 +134,20 @@ public final class OAuth2Authorization {
      * @param cacheSize The size of the cache. Only used if {@code cacheEnabled} is set to {@code true}.
      * @return A new {@code OAuth2HttpServletAuthorizationModule} instance.
      */
-    public static OAuth2HttpServletAuthorizationModule forHttpServlet(String tokenInfoEndpoint, String userInfoEndpoint,
-            Set<String> requiredScopes, boolean cacheEnabled, int cacheSize) {
-        return forHttpServlet(new RestOAuth2AccessTokenValidator(json(object(
-                        field(TOKEN_INFO_ENDPOINT_KEY, tokenInfoEndpoint),
-                        field(USER_INFO_ENDPOINT_KEY, userInfoEndpoint)))), requiredScopes, cacheEnabled, cacheSize);
+    public static OAuth2HttpServletAuthorizationModule forHttpServlet(String tokenInfoEndpoint,
+                                                                      String userInfoEndpoint,
+                                                                      Set<String> requiredScopes,
+                                                                      boolean cacheEnabled,
+                                                                      int cacheSize) {
+        return forHttpServlet(new RestOAuth2AccessTokenValidator(
+                                      json(
+                                              object(
+                                                      field(TOKEN_INFO_ENDPOINT_KEY, tokenInfoEndpoint),
+                                                      field(USER_INFO_ENDPOINT_KEY, userInfoEndpoint))),
+                                      new RestletResourceFactory()),
+                              requiredScopes,
+                              cacheEnabled,
+                              cacheSize);
     }
 
     /**
@@ -131,10 +160,9 @@ public final class OAuth2Authorization {
      * @param requiredScopes The required OAuth2 scopes for the request to be authorized.
      * @return A new {@code OAuth2HttpServletAuthorizationModule} instance.
      */
-    public static OAuth2HttpServletAuthorizationModule forHttpServlet(String tokenInfoEndpoint, String userInfoEndpoint,
-            Set<String> requiredScopes) {
-        return forHttpServlet(new RestOAuth2AccessTokenValidator(json(object(
-                        field(TOKEN_INFO_ENDPOINT_KEY, tokenInfoEndpoint),
-                        field(USER_INFO_ENDPOINT_KEY, userInfoEndpoint)))), requiredScopes, false, 0);
+    public static OAuth2HttpServletAuthorizationModule forHttpServlet(String tokenInfoEndpoint,
+                                                                      String userInfoEndpoint,
+                                                                      Set<String> requiredScopes) {
+        return forHttpServlet(tokenInfoEndpoint, userInfoEndpoint, requiredScopes, false, 0);
     }
 }

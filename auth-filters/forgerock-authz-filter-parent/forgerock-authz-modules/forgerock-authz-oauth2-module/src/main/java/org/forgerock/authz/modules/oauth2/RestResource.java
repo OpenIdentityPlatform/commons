@@ -16,41 +16,23 @@
 
 package org.forgerock.authz.modules.oauth2;
 
-import org.restlet.engine.header.Header;
-import org.restlet.representation.Representation;
-import org.restlet.resource.ClientResource;
-import org.restlet.resource.ResourceException;
-import org.restlet.util.Series;
+import org.forgerock.json.fluent.JsonValue;
 
 /**
- * Simple wrapper around Restlet's {@link ClientResource}, to help facilitate testing.
+ * Abstraction layer around the Json resource to access.
  *
- * @since 1.4.0
+ * @since 1.5.0
  */
-public class RestResource {
-
-    private final ClientResource resource;
-
-    /**
-     * Constructs a new RestResource for the provided uri.
-     *
-     * @param uri The uri of the resource.
-     */
-    public RestResource(String uri) {
-        resource = new ClientResource(uri);
-    }
-
+public interface RestResource {
     /**
      * Gets the resource.
      * <br>
-     * If a success status is not returned, then a resource exception is thrown.
+     * If a success status is not returned, then an exception is thrown.
      *
-     * @return The best representation.
-     * @throws ResourceException If the response from the request is unsuccessful.
+     * @return The JSON response content.
+     * @throws RestResourceException If the response from the request is unsuccessful.
      */
-    public Representation get() {
-        return resource.get();
-    }
+    JsonValue get() throws RestResourceException;
 
     /**
      * Adds a header onto the request for the resource.
@@ -58,13 +40,5 @@ public class RestResource {
      * @param name The header name.
      * @param value The header value.
      */
-    @SuppressWarnings("unchecked")
-    public void addHeader(String name, String value) {
-        Series<Header> headers = (Series<Header>) resource.getRequestAttributes().get("org.restlet.http.headers");
-        if (headers == null) {
-            headers = new Series<Header>(Header.class);
-            resource.getRequestAttributes().put("org.restlet.http.headers", headers);
-        }
-        headers.set(name, value);
-    }
+    void addHeader(String name, String value);
 }

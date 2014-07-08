@@ -14,36 +14,31 @@
  * Copyright 2014 ForgeRock AS.
  */
 
-package org.forgerock.authz.modules.oauth2;
+package org.forgerock.authz.modules.oauth2.restlet;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.util.Map;
 
-import static org.testng.Assert.assertEquals;
+/**
+ * Simple wrapper around the {@link ObjectMapper} class to facilitate testing.
+ *
+ * @since 1.4.0
+ */
+public class JsonParser {
 
-public class JsonParserTest {
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    private JsonParser jsonParser;
-
-    @BeforeMethod
-    public void setUp() {
-        jsonParser = new JsonParser();
-    }
-
-    @Test
-    public void shouldParseJson() throws IOException {
-
-        //Given
-        String jsonString = "{\"a\":[]}";
-        JsonValue expectedJsonValue = JsonValue.json(JsonValue.object(JsonValue.field("a", JsonValue.array())));
-
-        //When
-        final JsonValue jsonValue = jsonParser.parse(jsonString);
-
-        //Then
-        assertEquals(jsonValue.toString(), expectedJsonValue.toString());
+    /**
+     * Parses the Json String into a {@link JsonValue}.
+     *
+     * @param s The Json String to parse.
+     * @return A JsonValue
+     * @throws IOException If the String could not be parsed.
+     */
+    public JsonValue parse(String s) throws IOException {
+        return new JsonValue(MAPPER.readValue(s, Map.class));
     }
 }

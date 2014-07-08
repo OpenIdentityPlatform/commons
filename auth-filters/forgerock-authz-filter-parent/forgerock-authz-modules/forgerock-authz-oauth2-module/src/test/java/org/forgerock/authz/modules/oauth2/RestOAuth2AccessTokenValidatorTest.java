@@ -18,11 +18,11 @@ package org.forgerock.authz.modules.oauth2;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.mockito.ArgumentCaptor;
-import org.restlet.representation.Representation;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +31,6 @@ import static java.util.Arrays.asList;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.testng.Assert.assertEquals;
@@ -42,42 +41,41 @@ public class RestOAuth2AccessTokenValidatorTest {
 
     private RestOAuth2AccessTokenValidator accessTokenValidator;
 
+    @Mock
     private RestResourceFactory restResourceFactory;
-    private JsonParser jsonParser;
 
+    @Mock
     private RestResource tokenInfoRequest;
+
+    @Mock
     private RestResource userProfileRequest;
 
     @BeforeMethod
     public void setUp() {
+
+        MockitoAnnotations.initMocks(this);
+
         JsonValue config = JsonValue.json(JsonValue.object(
             JsonValue.field("token-info-endpoint", "TOKEN_INFO"),
             JsonValue.field("user-info-endpoint", "USER-PROFILE")
         ));
-        restResourceFactory = mock(RestResourceFactory.class);
-        jsonParser = mock(JsonParser.class);
-        accessTokenValidator = new RestOAuth2AccessTokenValidator(config, restResourceFactory, jsonParser);
+        accessTokenValidator = new RestOAuth2AccessTokenValidator(config, restResourceFactory);
 
-        tokenInfoRequest = mock(RestResource.class);
-        userProfileRequest = mock(RestResource.class);
         given(restResourceFactory.resource(anyString()))
                 .willReturn(tokenInfoRequest)
                 .willReturn(userProfileRequest);
     }
 
     @Test
-    public void shouldReturnInvalidAccessTokenResponse() throws OAuth2Exception, IOException {
+    public void shouldReturnInvalidAccessTokenResponse() throws Exception {
 
         //Given
         String accessToken = "ACCESS_TOKEN";
-        Representation response = mock(Representation.class);
         Map<String, Object> jsonMap = new HashMap<String, Object>();
         jsonMap.put("error", "ERROR");
         JsonValue tokenInfoResponse = new JsonValue(jsonMap);
 
-        given(tokenInfoRequest.get()).willReturn(response);
-        given(response.getText()).willReturn("TOKEN_INFO");
-        given(jsonParser.parse("TOKEN_INFO")).willReturn(tokenInfoResponse);
+        given(tokenInfoRequest.get()).willReturn(tokenInfoResponse);
 
         //When
         final AccessTokenValidationResponse validate = accessTokenValidator.validate(accessToken);
@@ -92,19 +90,16 @@ public class RestOAuth2AccessTokenValidatorTest {
     }
 
     @Test
-    public void shouldReturnInvalidAccessTokenResponseWhenTokenIsExpired() throws OAuth2Exception, IOException {
+    public void shouldReturnInvalidAccessTokenResponseWhenTokenIsExpired() throws Exception {
 
         //Given
         String accessToken = "ACCESS_TOKEN";
-        Representation response = mock(Representation.class);
         Map<String, Object> jsonMap = new HashMap<String, Object>();
         jsonMap.put("expires_in", -1);
         jsonMap.put("scope", "A B C");
         JsonValue tokenInfoResponse = new JsonValue(jsonMap);
 
-        given(tokenInfoRequest.get()).willReturn(response);
-        given(response.getText()).willReturn("TOKEN_INFO");
-        given(jsonParser.parse("TOKEN_INFO")).willReturn(tokenInfoResponse);
+        given(tokenInfoRequest.get()).willReturn(tokenInfoResponse);
 
         //When
         final AccessTokenValidationResponse validate = accessTokenValidator.validate(accessToken);
@@ -126,17 +121,14 @@ public class RestOAuth2AccessTokenValidatorTest {
                 JsonValue.field("token-info-endpoint", "TOKEN_INFO")
                 // No user info endpoint
         ));
-        accessTokenValidator = new RestOAuth2AccessTokenValidator(config, restResourceFactory, jsonParser);
+        accessTokenValidator = new RestOAuth2AccessTokenValidator(config, restResourceFactory);
         String accessToken = "ACCESS_TOKEN";
-        Representation response = mock(Representation.class);
         Map<String, Object> jsonMap = new HashMap<String, Object>();
         jsonMap.put("expires_in", 10);
         jsonMap.put("scope", "A B C");
         JsonValue tokenInfoResponse = new JsonValue(jsonMap);
 
-        given(tokenInfoRequest.get()).willReturn(response);
-        given(response.getText()).willReturn("TOKEN_INFO");
-        given(jsonParser.parse("TOKEN_INFO")).willReturn(tokenInfoResponse);
+        given(tokenInfoRequest.get()).willReturn(tokenInfoResponse);
 
         //When
         final AccessTokenValidationResponse validate = accessTokenValidator.validate(accessToken);
@@ -151,19 +143,16 @@ public class RestOAuth2AccessTokenValidatorTest {
     }
 
     @Test
-    public void shouldReturnInvalidAccessTokenResponseWithScope() throws OAuth2Exception, IOException {
+    public void shouldReturnInvalidAccessTokenResponseWithScope() throws Exception {
 
         //Given
         String accessToken = "ACCESS_TOKEN";
-        Representation response = mock(Representation.class);
         Map<String, Object> jsonMap = new HashMap<String, Object>();
         jsonMap.put("expires_in", -1);
         jsonMap.put("scope", "A B C");
         JsonValue tokenInfoResponse = new JsonValue(jsonMap);
 
-        given(tokenInfoRequest.get()).willReturn(response);
-        given(response.getText()).willReturn("TOKEN_INFO");
-        given(jsonParser.parse("TOKEN_INFO")).willReturn(tokenInfoResponse);
+        given(tokenInfoRequest.get()).willReturn(tokenInfoResponse);
 
         //When
         final AccessTokenValidationResponse validate = accessTokenValidator.validate(accessToken);
@@ -175,29 +164,23 @@ public class RestOAuth2AccessTokenValidatorTest {
     }
 
     @Test
-    public void shouldReturnValidAccessTokenResponseWithScopeAndUserProfile() throws OAuth2Exception, IOException {
+    public void shouldReturnValidAccessTokenResponseWithScopeAndUserProfile() throws Exception {
 
         //Given
         String accessToken = "ACCESS_TOKEN";
-        Representation accessTokenResponse = mock(Representation.class);
         Map<String, Object> tokenInfoMap = new HashMap<String, Object>();
         tokenInfoMap.put("expires_in", 1);
         tokenInfoMap.put("scope", "A B C");
         JsonValue tokenInfoResponse = new JsonValue(tokenInfoMap);
 
-        given(tokenInfoRequest.get()).willReturn(accessTokenResponse);
-        given(accessTokenResponse.getText()).willReturn("TOKEN_INFO");
-        given(jsonParser.parse("TOKEN_INFO")).willReturn(tokenInfoResponse);
+        given(tokenInfoRequest.get()).willReturn(tokenInfoResponse);
 
-        Representation userProfileResponse = mock(Representation.class);
         Map<String, Object> userProfileMap = new HashMap<String, Object>();
         userProfileMap.put("KEY1", "VAL");
         userProfileMap.put("KEY2", "VAL");
         JsonValue profileResponse = new JsonValue(userProfileMap);
 
-        given(userProfileRequest.get()).willReturn(userProfileResponse);
-        given(userProfileResponse.getText()).willReturn("USER_PROFILE");
-        given(jsonParser.parse("USER_PROFILE")).willReturn(profileResponse);
+        given(userProfileRequest.get()).willReturn(profileResponse);
 
         //When
         final AccessTokenValidationResponse validate = accessTokenValidator.validate(accessToken);
@@ -222,17 +205,14 @@ public class RestOAuth2AccessTokenValidatorTest {
                 JsonValue.field("token-info-endpoint", "TOKEN_INFO")
                 // No user info endpoint
         ));
-        accessTokenValidator = new RestOAuth2AccessTokenValidator(config, restResourceFactory, jsonParser);
+        accessTokenValidator = new RestOAuth2AccessTokenValidator(config, restResourceFactory);
         String accessToken = "ACCESS_TOKEN";
-        Representation accessTokenResponse = mock(Representation.class);
         Map<String, Object> tokenInfoMap = new HashMap<String, Object>();
         tokenInfoMap.put("expires_in", 1);
         tokenInfoMap.put("scope", "A B C");
         JsonValue tokenInfoResponse = new JsonValue(tokenInfoMap);
 
-        given(tokenInfoRequest.get()).willReturn(accessTokenResponse);
-        given(accessTokenResponse.getText()).willReturn("TOKEN_INFO");
-        given(jsonParser.parse("TOKEN_INFO")).willReturn(tokenInfoResponse);
+        given(tokenInfoRequest.get()).willReturn(tokenInfoResponse);
 
 
         // When
@@ -244,19 +224,16 @@ public class RestOAuth2AccessTokenValidatorTest {
     }
 
     @Test
-    public void shouldAcceptScopeAsJsonArray() throws OAuth2Exception, IOException {
+    public void shouldAcceptScopeAsJsonArray() throws Exception {
 
         //Given
         String accessToken = "ACCESS_TOKEN";
-        Representation response = mock(Representation.class);
         Map<String, Object> jsonMap = new HashMap<String, Object>();
         jsonMap.put("expires_in", -1);
         jsonMap.put("scope", asList("A", "B", "C"));
         JsonValue tokenInfoResponse = new JsonValue(jsonMap);
 
-        given(tokenInfoRequest.get()).willReturn(response);
-        given(response.getText()).willReturn("TOKEN_INFO");
-        given(jsonParser.parse("TOKEN_INFO")).willReturn(tokenInfoResponse);
+        given(tokenInfoRequest.get()).willReturn(tokenInfoResponse);
 
         //When
         final AccessTokenValidationResponse validate = accessTokenValidator.validate(accessToken);
