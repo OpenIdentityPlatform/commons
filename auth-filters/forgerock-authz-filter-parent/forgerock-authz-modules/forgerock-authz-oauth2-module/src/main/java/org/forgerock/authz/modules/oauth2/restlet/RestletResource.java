@@ -27,6 +27,7 @@ import org.restlet.util.Series;
 
 import java.io.IOException;
 
+import static org.restlet.engine.header.HeaderConstants.ATTRIBUTE_HEADERS;
 /**
  * Simple wrapper around Restlet's {@link org.restlet.resource.ClientResource}.
  *
@@ -80,10 +81,10 @@ public class RestletResource implements RestResource {
      */
     @Override@SuppressWarnings("unchecked")
     public void addHeader(String name, String value) {
-        Series<Header> headers = (Series<Header>) resource.getRequestAttributes().get("org.restlet.http.headers");
+        Series<Header> headers = (Series<Header>) resource.getRequestAttributes().get(ATTRIBUTE_HEADERS);
         if (headers == null) {
             headers = new Series<Header>(Header.class);
-            resource.getRequestAttributes().put("org.restlet.http.headers", headers);
+            resource.getRequestAttributes().put(ATTRIBUTE_HEADERS, headers);
         }
         headers.set(name, value);
     }
