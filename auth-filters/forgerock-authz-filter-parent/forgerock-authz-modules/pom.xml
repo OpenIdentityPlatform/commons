@@ -31,6 +31,7 @@
 
     <modules>
         <module>forgerock-authz-oauth2-module</module>
+        <module>forgerock-authz-oauth2-restlet</module>
     </modules>
 
 </project>

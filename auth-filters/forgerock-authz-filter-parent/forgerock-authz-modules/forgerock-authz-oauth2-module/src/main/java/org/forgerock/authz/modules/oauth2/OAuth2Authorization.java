@@ -16,8 +16,6 @@
 
 package org.forgerock.authz.modules.oauth2;
 
-import org.forgerock.authz.modules.oauth2.restlet.RestletResourceFactory;
-
 import java.util.Set;
 
 import static org.forgerock.json.fluent.JsonValue.field;
@@ -65,6 +63,7 @@ public final class OAuth2Authorization {
     /**
      * Creates a new {@code OAuth2CrestAuthorizationModule} with the provided configuration parameters.
      *
+     * @param resourceFactory {@link RestResourceFactory} used to get content from REST endpoints.
      * @param tokenInfoEndpoint The URI for the OAuth2 token info endpoint.
      * @param userInfoEndpoint The URI for the OAuth2 user info endpoint.
      * @param requiredScopes The required OAuth2 scopes for the request to be authorized.
@@ -72,7 +71,8 @@ public final class OAuth2Authorization {
      * @param cacheSize The size of the cache. Only used if {@code cacheEnabled} is set to {@code true}.
      * @return A new {@code OAuth2CrestAuthorizationModule} instance.
      */
-    public static OAuth2CrestAuthorizationModule forCrest(String tokenInfoEndpoint,
+    public static OAuth2CrestAuthorizationModule forCrest(RestResourceFactory resourceFactory,
+                                                          String tokenInfoEndpoint,
                                                           String userInfoEndpoint,
                                                           Set<String> requiredScopes,
                                                           boolean cacheEnabled,
@@ -82,7 +82,7 @@ public final class OAuth2Authorization {
                                         object(
                                                 field(TOKEN_INFO_ENDPOINT_KEY, tokenInfoEndpoint),
                                                 field(USER_INFO_ENDPOINT_KEY, userInfoEndpoint))),
-                                new RestletResourceFactory()),
+                                resourceFactory),
                         requiredScopes,
                         cacheEnabled,
                         cacheSize);
@@ -93,15 +93,17 @@ public final class OAuth2Authorization {
      *
      * <p>Disables the cache.</p>
      *
+     * @param resourceFactory {@link RestResourceFactory} used to get content from REST endpoints.
      * @param tokenInfoEndpoint The URI for the OAuth2 token info endpoint.
      * @param userInfoEndpoint The URI for the OAuth2 user info endpoint.
      * @param requiredScopes The required OAuth2 scopes for the request to be authorized.
      * @return A new {@code OAuth2CrestAuthorizationModule} instance.
      */
-    public static OAuth2CrestAuthorizationModule forCrest(String tokenInfoEndpoint,
+    public static OAuth2CrestAuthorizationModule forCrest(RestResourceFactory resourceFactory,
+                                                          String tokenInfoEndpoint,
                                                           String userInfoEndpoint,
                                                           Set<String> requiredScopes) {
-        return forCrest(tokenInfoEndpoint, userInfoEndpoint, requiredScopes, false, 0);
+        return forCrest(resourceFactory, tokenInfoEndpoint, userInfoEndpoint, requiredScopes, false, 0);
     }
 
     /**
@@ -127,6 +129,7 @@ public final class OAuth2Authorization {
     /**
      * Creates a new {@code OAuth2HttpServletAuthorizationModule} with the provided configuration parameters.
      *
+     * @param resourceFactory {@link RestResourceFactory} used to get content from REST endpoints.
      * @param tokenInfoEndpoint The URI for the OAuth2 token info endpoint.
      * @param userInfoEndpoint The URI for the OAuth2 user info endpoint.
      * @param requiredScopes The required OAuth2 scopes for the request to be authorized.
@@ -134,7 +137,8 @@ public final class OAuth2Authorization {
      * @param cacheSize The size of the cache. Only used if {@code cacheEnabled} is set to {@code true}.
      * @return A new {@code OAuth2HttpServletAuthorizationModule} instance.
      */
-    public static OAuth2HttpServletAuthorizationModule forHttpServlet(String tokenInfoEndpoint,
+    public static OAuth2HttpServletAuthorizationModule forHttpServlet(RestResourceFactory resourceFactory,
+                                                                      String tokenInfoEndpoint,
                                                                       String userInfoEndpoint,
                                                                       Set<String> requiredScopes,
                                                                       boolean cacheEnabled,
@@ -144,7 +148,7 @@ public final class OAuth2Authorization {
                                               object(
                                                       field(TOKEN_INFO_ENDPOINT_KEY, tokenInfoEndpoint),
                                                       field(USER_INFO_ENDPOINT_KEY, userInfoEndpoint))),
-                                      new RestletResourceFactory()),
+                                      resourceFactory),
                               requiredScopes,
                               cacheEnabled,
                               cacheSize);
@@ -155,14 +159,16 @@ public final class OAuth2Authorization {
      *
      * <p>Disables the cache.</p>
      *
+     * @param resourceFactory {@link RestResourceFactory} used to get content from REST endpoints.
      * @param tokenInfoEndpoint The URI for the OAuth2 token info endpoint.
      * @param userInfoEndpoint The URI for the OAuth2 user info endpoint.
      * @param requiredScopes The required OAuth2 scopes for the request to be authorized.
      * @return A new {@code OAuth2HttpServletAuthorizationModule} instance.
      */
-    public static OAuth2HttpServletAuthorizationModule forHttpServlet(String tokenInfoEndpoint,
+    public static OAuth2HttpServletAuthorizationModule forHttpServlet(RestResourceFactory resourceFactory,
+                                                                      String tokenInfoEndpoint,
                                                                       String userInfoEndpoint,
                                                                       Set<String> requiredScopes) {
-        return forHttpServlet(tokenInfoEndpoint, userInfoEndpoint, requiredScopes, false, 0);
+        return forHttpServlet(resourceFactory, tokenInfoEndpoint, userInfoEndpoint, requiredScopes, false, 0);
     }
 }
