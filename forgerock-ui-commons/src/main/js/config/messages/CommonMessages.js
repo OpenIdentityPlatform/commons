@@ -35,6 +35,10 @@ define("config/messages/CommonMessages", [
                 msg: "config.messages.CommonMessages.authenticationFailed",
                 type: "error"
             },
+            "loginFailureLockout": {
+                msg: "config.messages.CommonMessages.loginFailureLockout",
+                type: "error"
+            },
             "serviceUnavailable": {
                 msg: "config.messages.CommonMessages.serviceUnavailable",
                 type: "error"
