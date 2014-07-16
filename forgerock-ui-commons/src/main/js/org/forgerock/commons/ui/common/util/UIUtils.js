@@ -126,7 +126,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
             if (obj.templates[templateUrl]) {
                 var code = Handlebars.compile(obj.templates[templateUrl])(data);
                                 
-                if(callback) {
+                if (callback) {
                     callback(code);
                 }
                 
@@ -139,12 +139,16 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                     success: function(template) {
                         if(data === 'unknown' || data === null) {
                             //don't fill the template
-                            callback(template);
+                            if (callback) {
+                                callback(template);
+                            }
                         } else {
                             obj.templates[templateUrl] = template;
 
                             //fill the template
-                            callback(Handlebars.compile(template)(data));
+                            if (callback) {
+                                callback(Handlebars.compile(template)(data));
+                            }     
                         }
                     },
                     error: callback
