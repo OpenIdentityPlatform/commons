@@ -96,6 +96,7 @@
                             org.forgerock.util;version=${project.version},
                             org.forgerock.util.promise;version=${project.version},
                             org.forgerock.util.xml;version=${project.version},
+                            org.forgerock.util.time;version=${project.version},
                             org.forgerock.util.encode;version=${project.version}
 			</Export-Package>
                     </instructions>
