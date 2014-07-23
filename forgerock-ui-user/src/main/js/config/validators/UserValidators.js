@@ -30,22 +30,6 @@
 define("config/validators/UserValidators", [
 ], function(constants, eventManager) {
     var obj = {
-            "passwordConfirm": {
-                "name": "Password confirmation",
-                "dependencies": [
-                    "org/forgerock/commons/ui/common/util/ValidatorsUtils"
-                ],
-                "validator": function(el, input, callback, utils) {
-                    var v = input.val();
-
-                    if (v === "" || el.find("input[name=password]").val() !== el.find("input[name=passwordConfirm]").val()) {
-                        callback([$.t("common.form.validation.confirmationMatchesPassword")]);
-                        return;
-                    }
-
-                    callback(); 
-                }
-            },
             "passPhrase": {
                 "name": "Min 4 characters",
                 "dependencies": [

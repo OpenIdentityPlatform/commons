@@ -44,6 +44,22 @@ define("config/validators/CommonValidators", [
                 callback();  
             }
         },
+        "passwordConfirm": {
+            "name": "Password confirmation",
+            "dependencies": [
+                "org/forgerock/commons/ui/common/util/ValidatorsUtils"
+            ],
+            "validator": function(el, input, callback, utils) {
+                var v = input.val();
+
+                if (v === "" || el.find("input[name=password]").val() !== el.find("input[name=passwordConfirm]").val()) {
+                    callback([$.t("common.form.validation.confirmationMatchesPassword")]);
+                    return;
+                }
+
+                callback(); 
+            }
+        },
         "minLength": {
             "name": "Password validator",
             "dependencies": [

@@ -21,6 +21,7 @@
                 "badRequestError" : "Bad request error.",
                 "conflictError" : "Detected conflict in request.",
                 "incorrectRevisionError" : "Cannot update the record because the version is not the latest.",
+                "securityDataChanged" : "Security data has been changed",
                 "tokenNotFound" : "Token not found."
             },
             "UserMessages" : {
@@ -30,7 +31,6 @@
                 "userNameUpdated" : "Username has been modified succesfully.",
                 "afterRegistration" : "User has been registered successfully",
                 "siteIdentificationChanged" : "Site identification image has been changed",
-                "securityDataChanged" : "Security data has been changed",
                 "userAlreadyExists" : "User already exists",
                 "errorDeletingNotification" : "Error deleting notification.",
                 "errorFetchingNotifications" : "Error Fetching notifications."

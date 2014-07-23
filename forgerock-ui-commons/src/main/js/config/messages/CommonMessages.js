@@ -94,6 +94,10 @@ define("config/messages/CommonMessages", [
             "tokenNotFound": {
                 msg: "config.messages.CommonMessages.tokenNotFound",
                 type: "error"
+            },
+            "securityDataChanged": {
+                msg: "config.messages.CommonMessages.securityDataChanged",
+                type: "info"
             }
     };
     
