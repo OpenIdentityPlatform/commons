@@ -253,11 +253,18 @@ define("config/process/CommonConfig", [
                 conf.setProperty("baseViewArgs", params); 
                 
                 navigation.init();
-                
-                viewManager.changeView(route.baseView.view, viewManager.currentViewArgs, function() {  
-                    viewManager.showDialog(route.dialog, params, callback);
-                    router.navigate(router.getLink(route, params));
-                });
+
+                if (!_.has(route, "baseView") && _.has(route, "base")) {
+                    viewManager.changeView(router.configuration.routes[route.base].view, viewManager.currentViewArgs, function() {
+                        viewManager.showDialog(route.dialog, params, callback);
+                        router.navigate(router.getLink(route, params));
+                    });
+                } else {
+                    viewManager.changeView(route.baseView.view, viewManager.currentViewArgs, function() {
+                        viewManager.showDialog(route.dialog, params, callback);
+                        router.navigate(router.getLink(route, params));
+                    });
+                }
             }
         },
         {
