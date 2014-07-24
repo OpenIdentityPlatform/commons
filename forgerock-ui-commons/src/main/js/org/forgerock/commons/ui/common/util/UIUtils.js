@@ -427,7 +427,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     };
     
     
-    obj.jqConfirm = function(message,confirmCallback){
+    obj.jqConfirm = function(message,confirmCallback,width){
         var btns = {};
         btns[$.t('common.form.cancel')] = function(){
             $('#jqConfirm').dialog('close');
@@ -436,13 +436,18 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
             $('#jqConfirm').dialog('close');
             confirmCallback();
         };
+
+        if(_.isUndefined(width)) {
+            width = "550px";
+        }
+
         $('<div id="jqConfirm">' + message + '</div>')
             .dialog({
                 title: $.t('common.form.confirm'),
                 modal: true,
                 resizable: false,
                 bgiframe: true,
-                width: '550px',
+                width: width,
                 buttons: btns,
                 close: function(){
                     $('#jqConfirm').dialog('destroy').remove();
