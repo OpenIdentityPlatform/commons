@@ -175,7 +175,7 @@ public final class Utils {
             }
         }
         final StringBuilder sb = new StringBuilder("Expecting String containing one of: ");
-        sb.append(joinAsString(" ", constants));
+        sb.append(joinAsString(" ", (Object[]) constants));
         throw new IllegalArgumentException(sb.toString());
     }
 

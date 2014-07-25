@@ -20,6 +20,7 @@ import static org.fest.assertions.Assertions.assertThat;
 
 import org.testng.annotations.Test;
 
+@SuppressWarnings("javadoc")
 public class TimeServiceTest {
 
     @Test

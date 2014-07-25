@@ -35,7 +35,6 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import static org.fest.assertions.Assertions.assertThat;
-
 import static org.forgerock.util.Iterables.filter;
 import static org.forgerock.util.Iterables.from;
 import static org.forgerock.util.Iterables.map;
@@ -44,6 +43,7 @@ import static org.forgerock.util.Iterables.map;
 /**
  * Test the Iterables methods.
  */
+@SuppressWarnings("javadoc")
 public class IterablesTest {
 
     private static final Predicate<String> IGNORE_G_WORDS =

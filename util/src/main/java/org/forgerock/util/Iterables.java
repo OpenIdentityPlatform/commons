@@ -217,32 +217,37 @@ public class Iterables {
     }
 
     /**
-     * Filter an {@link Iterable} according to a {@link Predicate}.  The {@link Predicate}
-     * determines which elements are <em>filtered <strong>in</strong></em>.
+     * Filter an {@link Iterable} according to a {@link Predicate}. The
+     * {@link Predicate} determines which elements are
+     * <em>filtered <strong>in</strong></em>.
+     *
      * <pre>
-     * {@code
-     *     List<String> fruit = new ArrayList<String>();
-     *     fruit.add("apple");
-     *     fruit.add("pineapple");
-     *     fruit.add("banana");
-     *     fruit.add("orange");
-     *     fruit.add("pear");
-     *     return filter(fruit,
-     *              new Predicate<String>() {
-     *                  public boolean apply(String fruit) {
-     *                      return fruit.startsWith("p");
-     *                  }
-     *              });
-     * }
+     * List&lt;String&gt; fruit = new ArrayList&lt;String&gt;();
+     * fruit.add(&quot;apple&quot;);
+     * fruit.add(&quot;pineapple&quot;);
+     * fruit.add(&quot;banana&quot;);
+     * fruit.add(&quot;orange&quot;);
+     * fruit.add(&quot;pear&quot;);
+     * return filter(fruit, new Predicate&lt;String&gt;() {
+     *     public boolean apply(String fruit) {
+     *         return fruit.startsWith(&quot;p&quot;);
+     *     }
+     * });
      * </pre>
+     *
      * would return
+     *
      * <pre>
      *     [ "pineapple, "pear" ]
      * </pre>
      *
-     * @param <T> the element type
-     * @param iterable the {@linkplain Iterable} to filter
-     * @param predicate the {@linkplain Predicate} used to include elements in the filtered result
+     * @param <T>
+     *            the element type
+     * @param iterable
+     *            the {@linkplain Iterable} to filter
+     * @param predicate
+     *            the {@linkplain Predicate} used to include elements in the
+     *            filtered result
      * @return the filtered {@linkplain Iterable}
      */
     public static <T> Iterable<T> filter(Iterable<T> iterable, Predicate<T> predicate) {
@@ -250,34 +255,41 @@ public class Iterables {
     }
 
     /**
-     * Create an {@link Iterable} according to a source {@link Iterable} and a mapper {@link Function}.
-     * The {@link Function} transforms the source elements in the source Iterable.
+     * Create an {@link Iterable} according to a source {@link Iterable} and a
+     * mapper {@link Function}. The {@link Function} transforms the source
+     * elements in the source Iterable.
+     *
      * <pre>
-     * {@code
-     *     List<String> fruit = new ArrayList<String>();
-     *     fruit.add("apple");
-     *     fruit.add("pineapple");
-     *     fruit.add("banana");
-     *     fruit.add("orange");
-     *     fruit.add("pear");
-     *     return map(fruit,
-     *              new Function<String, Integer, NeverThrowsException>() {
-     *                  public Integer apply(String fruit) {
-     *                      return fruit.length();
-     *                  }
-     *              });
-     * }
+     * List&lt;String&gt; fruit = new ArrayList&lt;String&gt;();
+     * fruit.add(&quot;apple&quot;);
+     * fruit.add(&quot;pineapple&quot;);
+     * fruit.add(&quot;banana&quot;);
+     * fruit.add(&quot;orange&quot;);
+     * fruit.add(&quot;pear&quot;);
+     * return map(fruit, new Function&lt;String, Integer, NeverThrowsException&gt;() {
+     *     public Integer apply(String fruit) {
+     *         return fruit.length();
+     *     }
+     * });
      * </pre>
+     *
      * would return an iterable whose elements are
+     *
      * <pre>
      *     [ 5, 9, 6, 6, 4 ]
      * </pre>
      *
-     * @param <T> the source element type
-     * @param <R> the returned iterable element type
-     * @param <E> a RuntimeException thrown by the map function
-     * @param iterable the source {@linkplain Iterable} to map
-     * @param mapper the {@linkplain Function} used to map elements from source type to return type
+     * @param <T>
+     *            the source element type
+     * @param <R>
+     *            the returned iterable element type
+     * @param <E>
+     *            a RuntimeException thrown by the map function
+     * @param iterable
+     *            the source {@linkplain Iterable} to map
+     * @param mapper
+     *            the {@linkplain Function} used to map elements from source
+     *            type to return type
      * @return the mapped {@linkplain Iterable}
      */
     public static <T, R, E extends RuntimeException> Iterable<R> map(Iterable<T> iterable, Function<T, R, E> mapper) {
@@ -292,50 +304,51 @@ public class Iterables {
      * </ul>
      * <p>
      * Given
+     *
      * <pre>
-     * {@code
-     *     List<String> fruit = new ArrayList<String>();
-     *     fruit.add("apple");
-     *     fruit.add("pineapple");
-     *     fruit.add("banana");
-     *     fruit.add("orange");
-     *     fruit.add("pear");
+     * List&lt;String&gt; fruit = new ArrayList&lt;String&gt;();
+     * fruit.add(&quot;apple&quot;);
+     * fruit.add(&quot;pineapple&quot;);
+     * fruit.add(&quot;banana&quot;);
+     * fruit.add(&quot;orange&quot;);
+     * fruit.add(&quot;pear&quot;);
      *
-     *     final Predicate<String> pFruits =
-     *              new Predicate<String>() {
-     *                  public boolean apply(String fruit) {
-     *                      return fruit.startsWith("p");
-     *                  }
-     *              };
+     * final Predicate&lt;String&gt; pFruits = new Predicate&lt;String&gt;() {
+     *     public boolean apply(String fruit) {
+     *         return fruit.startsWith(&quot;p&quot;);
+     *     }
+     * };
      *
-     *     final Function<String, Integer, NeverThrowsException> getLengths =
-     *              new Function<String, Integer, NeverThrowsException>() {
-     *                  public Integer apply(String fruit) {
-     *                      return fruit.length();
-     *                  }
-     *              };
-     * }
+     * final Function&lt;String, Integer, NeverThrowsException&gt; getLengths =
+     *         new Function&lt;String, Integer, NeverThrowsException&gt;() {
+     *             public Integer apply(String fruit) {
+     *                 return fruit.length();
+     *             }
+     *         };
      * </pre>
+     *
      * the invocation
+     *
      * <pre>
-     * {@code
-     *     from(fruit).filter(pFruits).map(getLengths);
-     * }
+     * from(fruit).filter(pFruits).map(getLengths);
      * </pre>
+     *
      * is equivalent to
+     *
      * <pre>
-     * {@code
-     *     map(filter(fruit, pFruits), getLengths);
-     * }
+     * map(filter(fruit, pFruits), getLengths);
      * </pre>
+     *
      * and returns an {@linkplain Iterable} whose elements are
+     *
      * <pre>
      *     [ 9, 4 ]
      * </pre>
      *
-     *
-     * @param <T> The parameterized element type of the Iterable.
-     * @param iterable the Iterable to wrap
+     * @param <T>
+     *            The parameterized element type of the Iterable.
+     * @param iterable
+     *            the Iterable to wrap
      * @return a wrapped {@linkplain Iterable}
      */
     public static <T> FluentIterable<T> from(Iterable<T> iterable) {

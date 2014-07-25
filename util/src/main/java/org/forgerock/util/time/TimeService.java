@@ -17,48 +17,52 @@
 package org.forgerock.util.time;
 
 /**
- * Provides time related methods for computing durations, for providing the now instant and other use cases.
+ * Provides time related methods for computing durations, for providing the now
+ * instant and other use cases.
  * <p>
  * Why using a service interface instead of JVM provided time methods?
  * <p>
- * Simply because you gain better control over the time understood by the application.
- * For example, if you would have to code an expiration time logic, you would check periodically if the computed
- * expiration timestamp is greater than the now timestamp. So far, so good.
+ * Simply because you gain better control over the time understood by the
+ * application. For example, if you would have to code an expiration time logic,
+ * you would check periodically if the computed expiration timestamp is greater
+ * than the now timestamp. So far, so good.
  * <p>
- * When it comes to testing, things gets worst: you typically have to use {@link Thread#sleep(long)} to wait for a
- * given amount of time so that your expiration date is reached. That makes tests much longer to execute and somehow
- * brittle when you're testing short timeouts.
+ * When it comes to testing, things gets worst: you typically have to use
+ * {@link Thread#sleep(long)} to wait for a given amount of time so that your
+ * expiration date is reached. That makes tests much longer to execute and
+ * somehow brittle when you're testing short timeouts.
  * <p>
- * Using a {@link TimeService} helps you to keep your code readable and provides a way to better control how the
- * time is flowing for your application (especially useful in the tests).
+ * Using a {@link TimeService} helps you to keep your code readable and provides
+ * a way to better control how the time is flowing for your application
+ * (especially useful in the tests).
  * <p>
- * For example, {@link #now()} is used in place of {@link System#currentTimeMillis()}. in your code and you can
- * easily mock it and make it return controlled values.
- * Here is an example with <a href="https://code.google.com/p/mockito/">Mockito</a>:
+ * For example, {@link #now()} is used in place of
+ * {@link System#currentTimeMillis()}. in your code and you can easily mock it
+ * and make it return controlled values. Here is an example with <a
+ * href="https://code.google.com/p/mockito/">Mockito</a>:
  *
- * <pre>{@code
- *    &#064;Mock
- *    private TimeService time;
+ * <pre>
+ * &#064;Mock
+ * private TimeService time;
  *
- *    &#064;BeforeMethod
- *    public void setUp() throws Exception {
- *        MockitoAnnotations.initMocks(this);
- *    }
+ * &#064;BeforeMethod
+ * public void setUp() throws Exception {
+ *     MockitoAnnotations.initMocks(this);
+ * }
  *
- *    &#064;Test
- *    public shouldAdvanceInTime() throws Exception {
- *        // Mimics steps in the future at each call
- *        when(time.now()).thenReturn(0L, 1000L, 10000L);
+ * &#064;Test
+ * public shouldAdvanceInTime() throws Exception {
+ *     // Mimics steps in the future at each call
+ *     when(time.now()).thenReturn(0L, 1000L, 10000L);
  *
- *        assertThat(time.now()).isEqualTo(0L);
- *        assertThat(time.now()).isEqualTo(1000L);
- *        assertThat(time.now()).isEqualTo(10000L);
- *    }
+ *     assertThat(time.now()).isEqualTo(0L);
+ *     assertThat(time.now()).isEqualTo(1000L);
+ *     assertThat(time.now()).isEqualTo(10000L);
  * }
  * </pre>
  *
- * TimeService provides a {@linkplain #SYSTEM default service implementation} using the System provided time methods
- * for ease of use.
+ * TimeService provides a {@linkplain #SYSTEM default service implementation}
+ * using the System provided time methods for ease of use.
  *
  * @see System#currentTimeMillis()
  * @since 1.3.4
