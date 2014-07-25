@@ -23,7 +23,7 @@
     </parent>
     <groupId>org.forgerock.commons</groupId>
     <artifactId>forgerock-util</artifactId>
-    <version>1.3.4-SNAPSHOT</version>
+    <version>1.3.4</version>
     <name>ForgeRock Utility Classes</name>
     <description>Miscellaneous utility classes used within ForgeRock projects.</description>
     <packaging>bundle</packaging>
@@ -33,9 +33,9 @@
         <url>https://bugster.forgerock.org/jira/browse/CREST</url>
     </issueManagement>
     <scm>
-        <url>https://svn.forgerock.org/commons/forgerock-util/trunk/</url>
-        <connection>scm:svn:https://svn.forgerock.org/commons/forgerock-util/trunk/</connection>
-        <developerConnection>scm:svn:https://svn.forgerock.org/commons/forgerock-util/trunk/</developerConnection>
+        <url>https://svn.forgerock.org/commons/forgerock-util/tags/1.3.4</url>
+        <connection>scm:svn:https://svn.forgerock.org/commons/forgerock-util/tags/1.3.4</connection>
+        <developerConnection>scm:svn:https://svn.forgerock.org/commons/forgerock-util/tags/1.3.4</developerConnection>
     </scm>
     <ciManagement>
         <system>jenkins</system>
