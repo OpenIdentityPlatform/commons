@@ -18,6 +18,7 @@ package org.forgerock.json.resource;
 import static org.forgerock.util.Reject.checkNotNull;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.descriptor.Version;
 
 /**
  * A {@link Context} containing information about the REST API exposed by the
@@ -51,6 +52,7 @@ public final class ApiInfoContext extends AbstractContext {
     // Persisted attribute names.
     private static final String ATTR_API_NAME = "apiName";
     private static final String ATTR_API_VERSION = "apiVersion";
+    private static final String ATTR_RESOURCE_VERSION = "resourceVersion";
 
     /**
      * Creates a new API information context having the provided parent and an
@@ -63,11 +65,22 @@ public final class ApiInfoContext extends AbstractContext {
      *            end-point.
      * @param apiVersion
      *            The version of the REST API exposed by the network end-point.
+     * @param resourceVersion
+     *            The version of the resource version.
      */
-    public ApiInfoContext(final Context parent, final String apiName, final String apiVersion) {
+    public ApiInfoContext(final Context parent, final String apiName,
+                          final String apiVersion, final String resourceVersion) {
         super(checkNotNull(parent, "Cannot instantiate ApiInfoContext with null parent Context"));
+
         data.put(ATTR_API_NAME, checkNotNull(apiName, "Cannot instantiate ApiInfoContext with null apiName"));
-        data.put(ATTR_API_VERSION, checkNotNull(apiVersion, "Cannot instantiate ApiInfoContext with null apiVersion"));
+
+        if (apiVersion != null) {
+            data.put(ATTR_API_VERSION, apiVersion);
+        }
+
+        if (resourceVersion != null) {
+            data.put(ATTR_RESOURCE_VERSION, resourceVersion);
+        }
     }
 
     /**
@@ -109,9 +122,19 @@ public final class ApiInfoContext extends AbstractContext {
     /**
      * Returns the version of the REST API exposed by the network end-point.
      *
-     * @return The version of the REST API exposed by the network end-point.
+     * @return The API version or null if not defined
      */
-    public String getApiVersion() {
-        return data.get(ATTR_API_VERSION).asString();
+    public Version getApiVersion() {
+        final String apiVersion = data.get(ATTR_API_VERSION).asString();
+        return apiVersion == null ? null : Version.valueOf(apiVersion);
     }
+
+    /**
+     * @return The resource version or null if not defined
+     */
+    public Version getResourceVersion() {
+        final String resourceVersion = data.get(ATTR_RESOURCE_VERSION).asString();
+        return resourceVersion == null ? null : Version.valueOf(resourceVersion);
+    }
+
 }
