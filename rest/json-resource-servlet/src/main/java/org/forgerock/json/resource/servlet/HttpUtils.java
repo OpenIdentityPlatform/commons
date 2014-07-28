@@ -77,6 +77,7 @@ public final class HttpUtils {
     static final String HEADER_IF_NONE_MATCH = "If-None-Match";
     static final String HEADER_LOCATION = "Location";
     static final String HEADER_X_HTTP_METHOD_OVERRIDE = "X-HTTP-Method-Override";
+    static final String HEADER_X_VERSION_API = "X-ForgeRock-API-Version";
 
     static final String METHOD_DELETE = "DELETE";
     static final String METHOD_GET = "GET";
@@ -111,6 +112,9 @@ public final class HttpUtils {
     public static final String PARAM_QUERY_ID = param(QueryRequest.FIELD_QUERY_ID);
     /** the HTTP request parameter to specify the sort keys. */
     public static final String PARAM_SORT_KEYS = param(QueryRequest.FIELD_SORT_KEYS);
+
+    public static final String API_VERSION = "api-version";
+    public static final String RESOURCE_VERSION = "resource-version";
 
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
 
