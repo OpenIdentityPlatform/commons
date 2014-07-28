@@ -186,6 +186,16 @@ public final class HttpServletAdapter {
      */
     public void service(final HttpServletRequest req, final HttpServletResponse resp)
             throws IOException {
+
+        // Extract out the api and resource versions.
+        final String versionString = req.getHeader(HEADER_X_VERSION_API);
+
+        if (versionString != null && !versionString.isEmpty()) {
+            final VersionMap versionMap = VersionMap.valueOf(versionString);
+            req.setAttribute(API_VERSION, versionMap.getVersion(VersionType.CREST_API));
+            req.setAttribute(RESOURCE_VERSION, versionMap.getVersion(VersionType.RESOURCE));
+        }
+
         // Dispatch the request based on method, taking into account \
         // method override header.
         final String method = getMethod(req);
@@ -536,7 +546,9 @@ public final class HttpServletAdapter {
 
     private Context newRequestContext(final HttpServletRequest req) throws ResourceException {
         final Context root = contextFactory.createContext(req);
-        return new ApiInfoContext(new HttpContext(root, req), THIS_API_URI, THIS_API_VERSION);
+        final String apiVersion = (String)req.getAttribute(API_VERSION);
+        final String resourceVersion = (String)req.getAttribute(RESOURCE_VERSION);
+        return new ApiInfoContext(new HttpContext(root, req), THIS_API_URI, apiVersion, resourceVersion);
     }
 
     private boolean parseCommonParameter(final String name, final String[] values,
