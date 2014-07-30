@@ -21,7 +21,6 @@ import static org.forgerock.util.Reject.checkNotNull;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.ResourceBundle;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -30,7 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.ApiInfoContext;
+import org.forgerock.json.resource.VersionContext;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConflictException;
 import org.forgerock.json.resource.ConnectionFactory;
@@ -47,6 +46,8 @@ import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.json.resource.VersionMap;
+import org.forgerock.json.resource.VersionType;
 
 /**
  * HTTP adapter from Servlet calls to JSON resource calls. This class can be
@@ -81,19 +82,11 @@ import org.forgerock.json.resource.UpdateRequest;
  * @see HttpServlet
  */
 public final class HttpServletAdapter {
-    private static final String THIS_API_URI;
-    private static final String THIS_API_VERSION;
 
     private static final String FIELDS_DELIMITER = ",";
     private static final String SORT_KEYS_DELIMITER = ",";
     private static final String EMPTY_STRING = "";
     private static final String JOIN_STRINGS_DELIMITER = " , ";
-
-    static {
-        final ResourceBundle bundle = ResourceBundle.getBundle(HttpServletAdapter.class.getName());
-        THIS_API_URI = bundle.getString("rest-api-uri");
-        THIS_API_VERSION = bundle.getString("rest-api-version");
-    }
 
     private final ServletApiVersionAdapter syncFactory;
     private final ConnectionFactory connectionFactory;
@@ -187,12 +180,12 @@ public final class HttpServletAdapter {
     public void service(final HttpServletRequest req, final HttpServletResponse resp)
             throws IOException {
 
-        // Extract out the api and resource versions.
+        // Extract out the protocol and resource versions.
         final String versionString = req.getHeader(HEADER_X_VERSION_API);
 
         if (versionString != null && !versionString.isEmpty()) {
             final VersionMap versionMap = VersionMap.valueOf(versionString);
-            req.setAttribute(API_VERSION, versionMap.getVersion(VersionType.CREST_API));
+            req.setAttribute(PROTOCOL_VERSION, versionMap.getVersion(VersionType.PROTOCOL));
             req.setAttribute(RESOURCE_VERSION, versionMap.getVersion(VersionType.RESOURCE));
         }
 
@@ -546,9 +539,10 @@ public final class HttpServletAdapter {
 
     private Context newRequestContext(final HttpServletRequest req) throws ResourceException {
         final Context root = contextFactory.createContext(req);
-        final String apiVersion = (String)req.getAttribute(API_VERSION);
+        final String protocolVersion = (String)req.getAttribute(PROTOCOL_VERSION);
         final String resourceVersion = (String)req.getAttribute(RESOURCE_VERSION);
-        return new ApiInfoContext(new HttpContext(root, req), THIS_API_URI, apiVersion, resourceVersion);
+        return new VersionContext(new HttpContext(root, req), DEFAULT_PROTOCOL_NAME,
+                protocolVersion == null ? DEFAULT_PROTOCOL_VERSION : protocolVersion, resourceVersion);
     }
 
     private boolean parseCommonParameter(final String name, final String[] values,
