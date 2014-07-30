@@ -77,6 +77,7 @@ public final class HttpUtils {
     static final String HEADER_IF_NONE_MATCH = "If-None-Match";
     static final String HEADER_LOCATION = "Location";
     static final String HEADER_X_HTTP_METHOD_OVERRIDE = "X-HTTP-Method-Override";
+    /** The header key that maps the version information */
     static final String HEADER_X_VERSION_API = "X-ForgeRock-API-Version";
 
     static final String METHOD_DELETE = "DELETE";
@@ -113,7 +114,14 @@ public final class HttpUtils {
     /** the HTTP request parameter to specify the sort keys. */
     public static final String PARAM_SORT_KEYS = param(QueryRequest.FIELD_SORT_KEYS);
 
-    public static final String API_VERSION = "api-version";
+    /** The name of the protocol defined here */
+    public static final String DEFAULT_PROTOCOL_NAME = "crest";
+    /** The version of the named protocol */
+    public static final String DEFAULT_PROTOCOL_VERSION = "1.0";
+
+    /** Request attribute name to get the protocol version */
+    public static final String PROTOCOL_VERSION = "protocol-version";
+    /** Request attribute name to get the resource version */
     public static final String RESOURCE_VERSION = "resource-version";
 
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
