@@ -32,5 +32,6 @@
         <module>forgerock-jaspi-runtime</module>
         <module>forgerock-jaspi-modules</module>
         <module>forgerock-jaspi-test-server</module>
+        <module>forgerock-jaspi-functional-tests</module>
     </modules>
 </project>

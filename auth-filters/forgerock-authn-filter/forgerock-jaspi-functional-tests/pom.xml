@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  * The contents of this file are subject to the terms of the Common Development and
+  * Distribution License (the License). You may not use this file except in compliance with the
+  * License.
+  *
+  * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  * specific language governing permission and limitations under the License.
+  *
+  * When distributing Covered Software, include this CDDL Header Notice in each file and include
+  * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  * Header, with the fields enclosed by brackets [] replaced by your own identifying
+  * information: "Portions copyright [year] [name of copyright owner]".
+  *
+  * Copyright 2014 ForgeRock AS.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.forgerock.commons</groupId>
+        <artifactId>forgerock-authn-filter</artifactId>
+        <version>1.5.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>forgerock-jaspi-functional-tests</artifactId>
+    <packaging>war</packaging>
+
+    <name>ForgeRock JASPI (JSR-196) Functional Tests</name>
+    <description>Functional Test framework for running functional tests against the Jaspi runtime.</description>
+
+    <properties>
+        <servlet.http.port>18080</servlet.http.port>
+        <hostname>localhost</hostname>
+        <context.uri>jaspi</context.uri>
+        <servlet.ajp.port>18009</servlet.ajp.port>
+
+        <forgerock.guice.version>1.0.1</forgerock.guice.version>
+    </properties>
+
+    <build>
+        <finalName>jaspi</finalName>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <workingDirectory>target/</workingDirectory>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <includes>
+                        <include>**/*.java</include>
+                    </includes>
+                    <systemPropertyVariables>
+                        <HTTP_PORT>${servlet.http.port}</HTTP_PORT>
+                        <HOSTNAME>${hostname}</HOSTNAME>
+                        <CONTEXT_URI>${context.uri}</CONTEXT_URI>
+                        <ROOT_PATH>${project.build.directory}</ROOT_PATH>
+                    </systemPropertyVariables>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>integration-test</id>
+                        <phase>integration-test</phase>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.cargo</groupId>
+                <artifactId>cargo-maven2-plugin</artifactId>
+                <version>1.4.7</version>
+                <configuration>
+                    <!-- Container configuration -->
+                    <container>
+                        <containerId>tomcat7x</containerId>
+                        <zipUrlInstaller>
+                            <url>http://archive.apache.org/dist/tomcat/tomcat-7/v7.0.54/bin/apache-tomcat-7.0.54.zip</url>
+                            <downloadDir>${project.build.directory}/downloads</downloadDir>
+                            <extractDir>${project.build.directory}/extracts</extractDir>
+                        </zipUrlInstaller>
+                    </container>
+                    <!-- Configuration to use with the container or the deployer -->
+                    <configuration>
+                        <home>${project.build.directory}/deploy</home>
+                        <properties>
+                            <cargo.servlet.port>${servlet.http.port}</cargo.servlet.port>
+                            <cargo.tomcat.ajp.port>${servlet.ajp.port}</cargo.tomcat.ajp.port>
+                            <!---Xdebug--> <!-- Causes tomcat to fail to shutdown, so only uncomment when testing -->
+                            <!--<cargo.jvmargs>-->
+                                <!---Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8787-->
+                            <!--</cargo.jvmargs>-->
+                        </properties>
+                    </configuration>
+                    <deployables>
+                        <deployable>
+                            <groupId>org.forgerock.commons</groupId>
+                            <artifactId>forgerock-jaspi-functional-tests</artifactId>
+                            <type>war</type>
+                            <properties>
+                                <context>${context.uri}</context>
+                            </properties>
+                        </deployable>
+                    </deployables>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>start-container</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>start</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>stop-container</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>stop</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>forgerock-jaspi-runtime</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>json-resource-servlet</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>forgerock-guice-core</artifactId>
+            <version>${forgerock.guice.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.jayway.restassured</groupId>
+            <artifactId>rest-assured</artifactId>
+        </dependency>
+    </dependencies>
+</project>
