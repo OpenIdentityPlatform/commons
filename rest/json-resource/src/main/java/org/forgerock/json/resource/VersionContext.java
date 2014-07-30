@@ -21,62 +21,57 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.descriptor.Version;
 
 /**
- * A {@link Context} containing information about the REST API exposed by the
- * network end-point (Servlet, listener). A REST API information {@link Context}
- * will be created for each REST request.
+ * A {@link Context} containing version information about the protocol and resource endpoint.
+ * A version {@link Context} will be created for each request.
  * <p>
- * The name which identifies the REST API exposed by the
- * {@code json-resource-servlet} module is
- * {@code org.forgerock.commons.json-resource-servlet}.
+ * For instance the name which identifies the protocol exposed by the {@code json-resource-servlet}
+ * module is {@code crest}.
  * <p>
- * Here is an example of the JSON representation of a REST API information
- * context:
+ * Here is an example of the JSON representation of a version context:
  *
  * <pre>
  * {
  *   "id"     : "56f0fb7e-3837-464d-b9ec-9d3b6af665c3",
- *   "class"  : "org.forgerock.json.resource.ApiInfoContext",
+ *   "class"  : "org.forgerock.json.resource.VersionContext",
  *   "parent" : {
  *       ...
  *   },
- *   "apiName"     : "org.forgerock.commons.json-resource-servlet",
- *   "apiVersion" : "2.0"
+ *   "protocolName"     : "crest",
+ *   "protocolVersion" : "2.0"
  * }
  * </pre>
  */
-public final class ApiInfoContext extends AbstractContext {
+public final class VersionContext extends AbstractContext {
 
     /** a client-friendly name for this context. */
-    private static final String CONTEXT_NAME = "apiInfo";
+    private static final String CONTEXT_NAME = "version";
 
     // Persisted attribute names.
-    private static final String ATTR_API_NAME = "apiName";
-    private static final String ATTR_API_VERSION = "apiVersion";
+    private static final String ATTR_PROTOCOL_NAME = "protocolName";
+    private static final String ATTR_PROTOCOL_VERSION = "protocolVersion";
     private static final String ATTR_RESOURCE_VERSION = "resourceVersion";
 
     /**
-     * Creates a new API information context having the provided parent and an
+     * Creates a new version context having the provided parent and an
      * ID automatically generated using {@code UUID.randomUUID()}.
      *
      * @param parent
      *            The parent context.
-     * @param apiName
-     *            The URI identifying the REST API exposed by the network
-     *            end-point.
-     * @param apiVersion
-     *            The version of the REST API exposed by the network end-point.
+     * @param protocolName
+     *            The non-null name of the protocol in use
+     * @param protocolVersion
+     *            The non-null version of the protocol in use
      * @param resourceVersion
-     *            The version of the resource version.
+     *            The version of the resource
      */
-    public ApiInfoContext(final Context parent, final String apiName,
-                          final String apiVersion, final String resourceVersion) {
-        super(checkNotNull(parent, "Cannot instantiate ApiInfoContext with null parent Context"));
+    public VersionContext(final Context parent,
+                          final String protocolName, final String protocolVersion, final String resourceVersion) {
+        super(checkNotNull(parent, "Cannot instantiate VersionContext with null parent Context"));
 
-        data.put(ATTR_API_NAME, checkNotNull(apiName, "Cannot instantiate ApiInfoContext with null apiName"));
-
-        if (apiVersion != null) {
-            data.put(ATTR_API_VERSION, apiVersion);
-        }
+        data.put(ATTR_PROTOCOL_NAME,
+                checkNotNull(protocolName, "Cannot instantiate VersionContext with null protocolName"));
+        data.put(ATTR_PROTOCOL_VERSION,
+                checkNotNull(protocolVersion, "Cannot instantiate VersionContext with null protocolVersion"));
 
         if (resourceVersion != null) {
             data.put(ATTR_RESOURCE_VERSION, resourceVersion);
@@ -94,7 +89,7 @@ public final class ApiInfoContext extends AbstractContext {
      * @throws ResourceException
      *             If the JSON representation could not be parsed.
      */
-    ApiInfoContext(final JsonValue savedContext, final PersistenceConfig config)
+    VersionContext(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
         super(savedContext, config);
     }
@@ -109,24 +104,17 @@ public final class ApiInfoContext extends AbstractContext {
     }
 
     /**
-     * Returns the URI identifying the REST API exposed by the network
-     * end-point.
-     *
-     * @return The URI identifying the REST API exposed by the network
-     *         end-point.
+     * @return The protocol name
      */
-    public String getApiName() {
-        return data.get(ATTR_API_NAME).asString();
+    public String getProtocolName() {
+        return data.get(ATTR_PROTOCOL_NAME).asString();
     }
 
     /**
-     * Returns the version of the REST API exposed by the network end-point.
-     *
-     * @return The API version or null if not defined
+     * @return The version of the protocol
      */
-    public Version getApiVersion() {
-        final String apiVersion = data.get(ATTR_API_VERSION).asString();
-        return apiVersion == null ? null : Version.valueOf(apiVersion);
+    public Version getProtocolVersion() {
+        return Version.valueOf(data.get(ATTR_PROTOCOL_VERSION).asString());
     }
 
     /**

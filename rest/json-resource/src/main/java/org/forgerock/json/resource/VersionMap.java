@@ -13,11 +13,11 @@
  *
  * Copyright 2014 ForgeRock AS.
  */
-package org.forgerock.json.resource.servlet;
+package org.forgerock.json.resource;
 
 import org.forgerock.util.Reject;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -26,20 +26,20 @@ import java.util.regex.Pattern;
  * provides an easy way to retrieve the verified version information.
  * <p/>
  * Expects the version string to be in the format:
- * <code>versionType=majorNumber.minorNumber; versionType=majorNumber.minorNumber; ...</code>
+ * <code>versionType=majorNumber.minorNumber,versionType=majorNumber.minorNumber,...</code>
  */
 public final class VersionMap {
 
-    // Pattern matches: text=123.123; text=123.123
-    private static final Pattern API_VERSION_REGEX = Pattern.compile("^\\w+=\\d+\\.\\d+(;\\s*\\w+=\\d+\\.\\d+)*$");
+    // Pattern matches: text=123.123,text=123.123
+    private static final Pattern API_VERSION_REGEX = Pattern.compile("^\\w+=\\d+\\.\\d+(,\\w+=\\d+\\.\\d+)*$");
 
-    private static final String DELIMITER = ";\\s*";
+    private static final String DELIMITER = ",";
     private static final String EQUALS = "=";
 
-    private final Map<VersionType, String> versionMap;
+    private final Map<VersionType, String> versions;
 
-    private VersionMap(final Map<VersionType, String> versionMap) {
-        this.versionMap = versionMap;
+    private VersionMap(final Map<VersionType, String> versions) {
+        this.versions = versions;
     }
 
     /**
@@ -51,7 +51,7 @@ public final class VersionMap {
      * @return The corresponding version value (major.minor) else null if no match
      */
     public String getVersion(final VersionType type) {
-        return versionMap.get(type);
+        return versions.get(type);
     }
 
     /**
@@ -60,7 +60,7 @@ public final class VersionMap {
      * <p/>
      * Expects version string to be in the format:
      * <code>
-     * versionType=majorNumber.minorNumber; versionType=majorNumber.minorNumber
+     * versionType=majorNumber.minorNumber;versionType=majorNumber.minorNumber
      * </code>
      *
      * @param versionString
@@ -75,25 +75,15 @@ public final class VersionMap {
      */
     public static VersionMap valueOf(final String versionString) {
         Reject.ifNull(versionString);
-        Reject.ifTrue(versionString.isEmpty(), "Version string is empty");
+        Reject.ifFalse(API_VERSION_REGEX.matcher(versionString).matches(),
+                "Version string is in an invalid format");
 
-        if (!API_VERSION_REGEX.matcher(versionString).matches()) {
-            throw new IllegalArgumentException("Version string is in an invalid format");
-        }
-
-        final Map<VersionType, String> versions = new HashMap<VersionType, String>();
+        final Map<VersionType, String> versions = new EnumMap<VersionType, String>(VersionType.class);
         final String[] versionTypes = versionString.split(DELIMITER);
 
         for (String versionType : versionTypes) {
             final String[] versionParts = versionType.split(EQUALS);
-            final VersionType type = VersionType.getType(versionParts[0]);
-
-            if (type == null) {
-                // Flag up as warning.
-                continue;
-            }
-
-            versions.put(type, versionParts[1]);
+            versions.put(VersionType.getType(versionParts[0]), versionParts[1]);
         }
 
         return new VersionMap(versions);

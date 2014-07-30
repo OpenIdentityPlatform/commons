@@ -19,16 +19,31 @@ import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
 
-public class ApiInfoContextTest {
+/**
+ * Unit test for {@link VersionContext}.
+ *
+ * @since 2.4.0
+ */
+public class VersionContextTest {
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void rejectsNullProtocolName() {
+        // Given
+        new VersionContext(new RootContext(), null, "2.4.0", "1.0");
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void rejectsNullProtocolVersion() {
+        // Given
+        new VersionContext(new RootContext(), "name", null, "1.0");
+    }
 
     @Test
-    public void handlesNullVersions() {
+    public void acceptsNullResourceVersion() {
         // Given
-        RootContext root = new RootContext();
-        ApiInfoContext context = new ApiInfoContext(root, "name", null, null);
+        VersionContext context = new VersionContext(new RootContext(), "name", "2.4.0", null);
 
         // Then
-        assertNull(context.getApiVersion());
         assertNull(context.getResourceVersion());
     }
 
@@ -36,14 +51,14 @@ public class ApiInfoContextTest {
     public void handlesValidVersions() {
         // Given
         RootContext root = new RootContext();
-        ApiInfoContext context = new ApiInfoContext(root, "name", "123.45", "678.90");
+        VersionContext context = new VersionContext(root, "name", "123.45", "678.90");
 
         // Then
-        assertNotNull(context.getApiVersion());
+        assertNotNull(context.getProtocolVersion());
         assertNotNull(context.getResourceVersion());
 
-        assertEquals(123, context.getApiVersion().getMajor());
-        assertEquals(45, context.getApiVersion().getMinor());
+        assertEquals(123, context.getProtocolVersion().getMajor());
+        assertEquals(45, context.getProtocolVersion().getMinor());
 
         assertEquals(678, context.getResourceVersion().getMajor());
         assertEquals(90, context.getResourceVersion().getMinor());

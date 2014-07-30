@@ -13,14 +13,22 @@
  *
  * Copyright 2014 ForgeRock AS.
  */
-package org.forgerock.json.resource.servlet;
+package org.forgerock.json.resource;
 
 /**
  * Represents potential version types that may be included within the version header.
  */
 public enum VersionType {
 
-    CREST_API("api"), RESOURCE("resource");
+    /**
+     * Version information for the protocol in use.
+     */
+    PROTOCOL("protocol"),
+
+    /**
+     * Version information for a resource endpoint.
+     */
+    RESOURCE("resource");
 
     private final String type;
 
@@ -34,7 +42,10 @@ public enum VersionType {
      * @param typeString
      *         The type string
      *
-     * @return The corresponding type instance or null if no match.
+     * @return The corresponding type instance
+     *
+     * @throws IllegalArgumentException
+     *         If no matching type is found
      */
     public static VersionType getType(final String typeString) {
         for (VersionType versionType : values()) {
@@ -43,7 +54,7 @@ public enum VersionType {
             }
         }
 
-        return null;
+        throw new IllegalArgumentException("Unknown version type: " + typeString);
     }
 
 }
