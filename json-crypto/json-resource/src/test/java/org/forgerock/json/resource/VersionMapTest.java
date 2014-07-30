@@ -13,7 +13,7 @@
  *
  * Copyright 2014 ForgeRock AS.
  */
-package org.forgerock.json.resource.servlet;
+package org.forgerock.json.resource;
 
 import org.testng.annotations.Test;
 
@@ -21,8 +21,12 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
+/**
+ * Unit test for {@link VersionMap}.
+ *
+ * @since 2.4.0
+ */
 public class VersionMapTest {
-
 
     @Test(expectedExceptions = NullPointerException.class)
     public void nullInstanceWithBlankString() {
@@ -36,46 +40,51 @@ public class VersionMapTest {
         VersionMap.valueOf("");
     }
 
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void handlesInvalidFormat() {
+        // Given
+        VersionMap.valueOf("someRandomString");
+    }
+
     @Test
     public void validApiVersionString() {
-
         // Given
         VersionMap versionMap = VersionMap.valueOf("resource=1.2");
 
         // Then
         assertNotNull(versionMap);
-        assertNull(versionMap.getVersion(VersionType.CREST_API));
+        assertNull(versionMap.getVersion(VersionType.PROTOCOL));
         assertEquals(versionMap.getVersion(VersionType.RESOURCE), "1.2");
 
         // Given
-        versionMap = VersionMap.valueOf("api=2.1");
+        versionMap = VersionMap.valueOf("protocol=2.1");
 
         // Then
         assertNotNull(versionMap);
         assertNull(versionMap.getVersion(VersionType.RESOURCE));
-        assertEquals(versionMap.getVersion(VersionType.CREST_API), "2.1");
+        assertEquals(versionMap.getVersion(VersionType.PROTOCOL), "2.1");
 
         // Given
-        versionMap = VersionMap.valueOf("api=2.1; resource=1.2");
+        versionMap = VersionMap.valueOf("protocol=2.1,resource=1.2");
 
         // Then
         assertNotNull(versionMap);
         assertEquals(versionMap.getVersion(VersionType.RESOURCE), "1.2");
-        assertEquals(versionMap.getVersion(VersionType.CREST_API), "2.1");
+        assertEquals(versionMap.getVersion(VersionType.PROTOCOL), "2.1");
 
         // Given
-        versionMap = VersionMap.valueOf("resource=1.2; api=2.1");
+        versionMap = VersionMap.valueOf("resource=1.2,protocol=2.1");
 
         // Then
         assertNotNull(versionMap);
         assertEquals(versionMap.getVersion(VersionType.RESOURCE), "1.2");
-        assertEquals(versionMap.getVersion(VersionType.CREST_API), "2.1");
+        assertEquals(versionMap.getVersion(VersionType.PROTOCOL), "2.1");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void invalidDelimiter() {
         // Given
-        VersionMap.valueOf("resource=1.2, api=2.1");
+        VersionMap.valueOf("resource=1.2;protocol=2.1");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
