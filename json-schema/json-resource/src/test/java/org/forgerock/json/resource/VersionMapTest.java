@@ -46,8 +46,14 @@ public class VersionMapTest {
         VersionMap.valueOf("someRandomString");
     }
 
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void unknownVersionType() {
+        // Given
+        VersionMap.valueOf("unknownType=1.2");
+    }
+
     @Test
-    public void validApiVersionString() {
+    public void validVersionStringSingleValue() {
         // Given
         VersionMap versionMap = VersionMap.valueOf("resource=1.2");
 
@@ -55,25 +61,12 @@ public class VersionMapTest {
         assertNotNull(versionMap);
         assertNull(versionMap.getVersion(VersionType.PROTOCOL));
         assertEquals(versionMap.getVersion(VersionType.RESOURCE), "1.2");
+    }
 
+    @Test
+    public void validVersionStringMultipleValues() {
         // Given
-        versionMap = VersionMap.valueOf("protocol=2.1");
-
-        // Then
-        assertNotNull(versionMap);
-        assertNull(versionMap.getVersion(VersionType.RESOURCE));
-        assertEquals(versionMap.getVersion(VersionType.PROTOCOL), "2.1");
-
-        // Given
-        versionMap = VersionMap.valueOf("protocol=2.1,resource=1.2");
-
-        // Then
-        assertNotNull(versionMap);
-        assertEquals(versionMap.getVersion(VersionType.RESOURCE), "1.2");
-        assertEquals(versionMap.getVersion(VersionType.PROTOCOL), "2.1");
-
-        // Given
-        versionMap = VersionMap.valueOf("resource=1.2,protocol=2.1");
+        VersionMap versionMap = VersionMap.valueOf("protocol=2.1,resource=1.2");
 
         // Then
         assertNotNull(versionMap);
