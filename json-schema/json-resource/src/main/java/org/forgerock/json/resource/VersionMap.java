@@ -31,9 +31,9 @@ import java.util.regex.Pattern;
 public final class VersionMap {
 
     // Pattern matches: text=123.123,text=123.123
-    private static final Pattern API_VERSION_REGEX = Pattern.compile("^\\w+=\\d+\\.\\d+(,\\w+=\\d+\\.\\d+)*$");
+    private static final Pattern API_VERSION_REGEX = Pattern.compile("^\\w+=\\d+\\.\\d+(\\s*,\\s*\\w+=\\d+\\.\\d+)*$");
 
-    private static final String DELIMITER = ",";
+    private static final String DELIMITER = "\\s*,\\s*";
     private static final String EQUALS = "=";
 
     private final Map<VersionType, String> versions;
