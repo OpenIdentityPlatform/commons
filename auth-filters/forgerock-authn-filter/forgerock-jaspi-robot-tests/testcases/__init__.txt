@@ -1,3 +1,0 @@
-*** Settings ***
-Resource 	    jaspi_keywords.txt
-Test Timeout    ${TIMEOUT}
