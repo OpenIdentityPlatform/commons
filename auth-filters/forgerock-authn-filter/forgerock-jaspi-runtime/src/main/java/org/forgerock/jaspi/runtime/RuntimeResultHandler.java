@@ -28,6 +28,8 @@ import static javax.security.auth.message.AuthStatus.SEND_FAILURE;
 import static javax.security.auth.message.AuthStatus.SEND_SUCCESS;
 import static javax.security.auth.message.AuthStatus.SUCCESS;
 
+import static org.forgerock.jaspi.runtime.AuthStatusUtils.asString;
+
 /**
  * Handler which handles the result of calls to a ServerAuthContexts validateRequest and secureResponse methods.
  *
@@ -68,11 +70,10 @@ public class RuntimeResultHandler {
         } else if (SEND_CONTINUE.equals(authStatus)) {
             // Send HttpServletResponse to client and exit.
             DEBUG.debug("Has not finished validating request. Requires more information from client.");
-            response.setStatus(100);
             return false;
         } else {
-            DEBUG.error("Invalid AuthStatus, " + authStatus.toString());
-            throw new AuthException("Invalid AuthStatus from validateRequest: " + authStatus.toString());
+            DEBUG.error("Invalid AuthStatus, " + asString(authStatus));
+            throw new AuthException("Invalid AuthStatus from validateRequest: " + asString(authStatus));
         }
     }
 
@@ -98,10 +99,9 @@ public class RuntimeResultHandler {
         } else if (SEND_CONTINUE.equals(authStatus)) {
             // Send HttpServletResponse to client and exit.
             DEBUG.debug("Has not finished securing response. Requires more information from client.");
-            response.setStatus(100);
         } else {
-            DEBUG.error("Invalid AuthStatus, " + authStatus.toString());
-            throw new AuthException("Invalid AuthStatus from secureResponse: " + authStatus.toString());
+            DEBUG.error("Invalid AuthStatus, " + asString(authStatus));
+            throw new AuthException("Invalid AuthStatus from secureResponse: " + asString(authStatus));
         }
     }
 }

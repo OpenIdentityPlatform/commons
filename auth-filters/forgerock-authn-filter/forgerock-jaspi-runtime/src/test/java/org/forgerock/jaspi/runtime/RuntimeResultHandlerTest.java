@@ -24,6 +24,7 @@ import javax.security.auth.message.AuthStatus;
 import javax.servlet.http.HttpServletResponse;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.testng.Assert.assertFalse;
@@ -96,7 +97,7 @@ public class RuntimeResultHandlerTest {
 
         //Then
         assertFalse(result);
-        verify(response).setStatus(100);
+        verify(response, never()).setStatus(100);
     }
 
     @Test (expectedExceptions = AuthException.class)
@@ -152,7 +153,7 @@ public class RuntimeResultHandlerTest {
         resultHandler.handleSecureResponseResult(authStatus, response);
 
         //Then
-        verify(response).setStatus(100);
+        verify(response, never()).setStatus(100);
     }
 
     @Test (expectedExceptions = AuthException.class)
