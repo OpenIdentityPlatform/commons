@@ -50,8 +50,7 @@ public final class AcceptAPIVersionContext extends AbstractContext {
     private static final String ATTR_PROTOCOL_VERSION = "protocolVersion";
     private static final String ATTR_RESOURCE_VERSION = "resourceVersion";
 
-    private final Version protocolVersion;
-    private final Version resourceVersion;
+    private final AcceptAPIVersion acceptVersion;
 
     /**
      * Creates a new version context having the provided parent and an
@@ -61,18 +60,17 @@ public final class AcceptAPIVersionContext extends AbstractContext {
      *            The parent context.
      * @param protocolName
      *            The non-null name of the protocol in use
-     * @param protocolVersion
-     *            The non-null version of the protocol in use
-     * @param resourceVersion
+     * @param acceptVersion
      *            The version of the resource
      */
     public AcceptAPIVersionContext(final Context parent, final String protocolName,
-                                   final Version protocolVersion, final Version resourceVersion) {
+                                   final AcceptAPIVersion acceptVersion) {
         super(checkNotNull(parent, "Cannot instantiate AcceptAPIVersionContext with null parent Context"));
 
         // Cache locally to avoid unnecessary string parsing.
-        this.protocolVersion = protocolVersion;
-        this.resourceVersion = resourceVersion;
+        this.acceptVersion = acceptVersion;
+        final Version protocolVersion = acceptVersion.getProtocolVersion();
+        final Version resourceVersion = acceptVersion.getResourceVersion();
 
         data.put(ATTR_PROTOCOL_NAME,
                 checkNotNull(protocolName, "Cannot instantiate AcceptAPIVersionContext with null protocolName"));
@@ -98,10 +96,12 @@ public final class AcceptAPIVersionContext extends AbstractContext {
     AcceptAPIVersionContext(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
         super(savedContext, config);
-
-        protocolVersion = Version.valueOf(data.get(ATTR_PROTOCOL_VERSION).required().asString());
-        final String resourceVersionString = data.get(ATTR_RESOURCE_VERSION).asString();
-        resourceVersion = resourceVersionString == null ? null : Version.valueOf(resourceVersionString);
+        acceptVersion = AcceptAPIVersion
+                .newBuilder()
+                .withDefaultProtocolVersion(data.get(ATTR_PROTOCOL_VERSION).asString())
+                .withDefaultResourceVersion(data.get(ATTR_RESOURCE_VERSION).asString())
+                .expectsProtocolVersion()
+                .build();
     }
 
     /**
@@ -124,14 +124,14 @@ public final class AcceptAPIVersionContext extends AbstractContext {
      * @return The version of the protocol
      */
     public Version getProtocolVersion() {
-        return protocolVersion;
+        return acceptVersion.getProtocolVersion();
     }
 
     /**
      * @return The resource version or null if not defined
      */
     public Version getResourceVersion() {
-        return resourceVersion;
+        return acceptVersion.getResourceVersion();
     }
 
 }
