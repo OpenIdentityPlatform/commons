@@ -15,90 +15,78 @@
  */
 package org.forgerock.json.resource;
 
-@SuppressWarnings("javadoc")
+/**
+ * Represents some version in the form majorNumber.minorNumber, for instance 2.4.
+ */
 public final class Version implements Comparable<Version> {
+
     private static final Version[] DOT_ZERO_CACHE = new Version[10];
+
     static {
         for (int i = 0; i < DOT_ZERO_CACHE.length; i++) {
-            DOT_ZERO_CACHE[i] = new Version(i, 0, 0, null);
+            DOT_ZERO_CACHE[i] = new Version(i, 0, null);
         }
     }
 
     private final int major;
     private final int minor;
-    private final int micro;
     private final String s;
 
     /**
      * Creates a new version using the provided version information.
      *
      * @param major
-     *            Major version number.
+     *         Major version number.
      * @param minor
-     *            Minor version number.
-     * @param micro
-     *            Micro version number.
-     * @return The version.
-     */
-    public static Version valueOf(final int major, final int minor, final int micro) {
-        return valueOf(major, minor, micro, null);
-    }
-
-    /**
-     * Creates a new version using the provided version information and a micro
-     * version of 0.
+     *         Minor version number.
      *
-     * @param major
-     *            Major version number.
-     * @param minor
-     *            Minor version number.
      * @return The version.
      */
     public static Version valueOf(final int major, final int minor) {
-        return valueOf(major, minor, 0);
+        return valueOf(major, minor, null);
     }
 
     /**
-     * Creates a new version using the provided version information and a minor
-     * and micro version of 0.
+     * Creates a new version using the provided version information and a minor.
      *
      * @param major
-     *            Major version number.
+     *         Major version number.
+     *
      * @return The version.
      */
     public static Version valueOf(final int major) {
-        return valueOf(major, 0, 0);
+        return valueOf(major, 0);
     }
 
-    private static Version valueOf(final int major, final int minor, final int micro, final String s) {
-        if (minor == 0 && micro == 0 && major >= 0 && major < DOT_ZERO_CACHE.length) {
+    private static Version valueOf(final int major, final int minor, final String s) {
+        if (minor == 0 && major >= 0 && major < DOT_ZERO_CACHE.length) {
             return DOT_ZERO_CACHE[major];
         }
-        return new Version(major, minor, micro, s);
+        return new Version(major, minor, s);
     }
 
-    private Version(final int major, final int minor, final int micro, final String s) {
+    private Version(final int major, final int minor, final String s) {
         this.major = major;
         this.minor = minor;
-        this.micro = micro;
-        this.s = s != null ? s : (major + "." + minor + "." + micro);
+        this.s = s != null ? s : (major + "." + minor);
     }
 
     /**
      * Parses the string argument as a version. The string must be one of the
      * following forms:
-     *
+     * <p/>
      * <pre>
      * major
      * major.minor
-     * major.minor.micro
      * </pre>
      *
      * @param s
-     *            The string to be parsed as a version.
+     *         The string to be parsed as a version.
+     *
      * @return The parsed version.
+     *
      * @throws IllegalArgumentException
-     *             If the string does not contain a parsable version.
+     *         If the string does not contain a parsable version.
      */
     public static Version valueOf(final String s) {
         final String[] fields = s.split("\\.");
@@ -107,8 +95,7 @@ public final class Version implements Comparable<Version> {
         }
         final int major = Integer.parseInt(fields[0]);
         final int minor = fields.length > 1 ? Integer.parseInt(fields[1]) : 0;
-        final int micro = fields.length > 2 ? Integer.parseInt(fields[2]) : 0;
-        return valueOf(major, minor, micro, s);
+        return valueOf(major, minor, s);
     }
 
     /**
@@ -129,18 +116,9 @@ public final class Version implements Comparable<Version> {
         return minor;
     }
 
-    /**
-     * Returns the micro version number.
-     *
-     * @return The micro version number.
-     */
-    public int getMicro() {
-        return micro;
-    }
-
     @Override
     public int hashCode() {
-        return ((31 + major) * 31 + minor) * 31 + micro;
+        return (31 + major) * 31 + minor;
     }
 
     @Override
@@ -148,8 +126,8 @@ public final class Version implements Comparable<Version> {
         if (this == obj) {
             return true;
         } else if (obj instanceof Version) {
-            final Version that = (Version) obj;
-            return major == that.major && minor == that.minor && micro == that.micro;
+            final Version that = (Version)obj;
+            return major == that.major && minor == that.minor;
         } else {
             return false;
         }
@@ -163,9 +141,6 @@ public final class Version implements Comparable<Version> {
         if (minor != that.minor) {
             return minor - that.minor;
         }
-        if (micro != that.micro) {
-            return micro - that.micro;
-        }
         return 0;
     }
 
@@ -173,4 +148,5 @@ public final class Version implements Comparable<Version> {
     public String toString() {
         return s;
     }
+
 }
