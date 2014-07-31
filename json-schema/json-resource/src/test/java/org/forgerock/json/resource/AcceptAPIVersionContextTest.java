@@ -15,7 +15,6 @@
  */
 package org.forgerock.json.resource;
 
-import org.forgerock.json.resource.descriptor.Version;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -24,11 +23,11 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
 /**
- * Unit test for {@link ClientVersionContext}.
+ * Unit test for {@link AcceptAPIVersionContext}.
  *
  * @since 2.4.0
  */
-public class ClientVersionContextTest {
+public class AcceptAPIVersionContextTest {
 
     private Version protocolVersion;
     private Version resourceVersion;
@@ -42,19 +41,19 @@ public class ClientVersionContextTest {
     @Test(expectedExceptions = NullPointerException.class)
     public void rejectsNullProtocolName() {
         // Given
-        new ClientVersionContext(new RootContext(), null, protocolVersion, resourceVersion);
+        new AcceptAPIVersionContext(new RootContext(), null, protocolVersion, resourceVersion);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void rejectsNullProtocolVersion() {
         // Given
-        new ClientVersionContext(new RootContext(), "name", null, resourceVersion);
+        new AcceptAPIVersionContext(new RootContext(), "name", null, resourceVersion);
     }
 
     @Test
     public void acceptsNullResourceVersion() {
         // Given
-        ClientVersionContext context = new ClientVersionContext(new RootContext(), "name", protocolVersion, null);
+        AcceptAPIVersionContext context = new AcceptAPIVersionContext(new RootContext(), "name", protocolVersion, null);
 
         // Then
         assertNull(context.getResourceVersion());
@@ -64,7 +63,7 @@ public class ClientVersionContextTest {
     public void handlesValidVersions() {
         // Given
         RootContext root = new RootContext();
-        ClientVersionContext context = new ClientVersionContext(root, "name", protocolVersion, resourceVersion);
+        AcceptAPIVersionContext context = new AcceptAPIVersionContext(root, "name", protocolVersion, resourceVersion);
 
         // Then
         assertNotNull(context.getProtocolVersion());

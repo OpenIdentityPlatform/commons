@@ -13,7 +13,7 @@
  *
  * Copyright 2013 ForgeRock AS.
  */
-package org.forgerock.json.resource.descriptor;
+package org.forgerock.json.resource;
 
 @SuppressWarnings("javadoc")
 public final class Version implements Comparable<Version> {

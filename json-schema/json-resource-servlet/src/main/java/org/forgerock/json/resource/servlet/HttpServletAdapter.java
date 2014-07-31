@@ -28,8 +28,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.AcceptAPIVersion;
+import org.forgerock.json.resource.AcceptAPIVersionContext;
 import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.ClientVersionContext;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConflictException;
 import org.forgerock.json.resource.ConnectionFactory;
@@ -46,8 +47,7 @@ import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.json.resource.ClientVersion;
-import org.forgerock.json.resource.descriptor.Version;
+import org.forgerock.json.resource.Version;
 
 /**
  * HTTP adapter from Servlet calls to JSON resource calls. This class can be
@@ -208,7 +208,7 @@ public final class HttpServletAdapter {
             preprocessRequest(req);
             rejectIfNoneMatch(req);
 
-            final ClientVersion version = buildClientVersion(req);
+            final AcceptAPIVersion version = parseAcceptAPIVersion(req);
 
             final Map<String, String[]> parameters = req.getParameterMap();
             final DeleteRequest request =
@@ -237,7 +237,7 @@ public final class HttpServletAdapter {
             preprocessRequest(req);
             rejectIfMatch(req);
 
-            final ClientVersion version = buildClientVersion(req);
+            final AcceptAPIVersion version = parseAcceptAPIVersion(req);
 
             final Map<String, String[]> parameters = req.getParameterMap();
             if (hasParameter(req, PARAM_QUERY_ID) || hasParameter(req, PARAM_QUERY_EXPRESSION)
@@ -358,7 +358,7 @@ public final class HttpServletAdapter {
                         "Use of If-None-Match not supported for PATCH requests");
             }
 
-            final ClientVersion version = buildClientVersion(req);
+            final AcceptAPIVersion version = parseAcceptAPIVersion(req);
 
             final Map<String, String[]> parameters = req.getParameterMap();
             final PatchRequest request =
@@ -391,7 +391,7 @@ public final class HttpServletAdapter {
             rejectIfNoneMatch(req);
             rejectIfMatch(req);
 
-            final ClientVersion version = buildClientVersion(req);
+            final AcceptAPIVersion version = parseAcceptAPIVersion(req);
 
             final Map<String, String[]> parameters = req.getParameterMap();
             final String action = asSingleValue(PARAM_ACTION, getParameter(req, PARAM_ACTION));
@@ -454,7 +454,7 @@ public final class HttpServletAdapter {
                                 + "supported for PUT requests");
             }
 
-            final ClientVersion version = buildClientVersion(req);
+            final AcceptAPIVersion version = parseAcceptAPIVersion(req);
 
             final Map<String, String[]> parameters = req.getParameterMap();
             final JsonValue content = getJsonContent(req);
@@ -513,7 +513,7 @@ public final class HttpServletAdapter {
     }
 
     private void doRequest(final HttpServletRequest req, final HttpServletResponse resp,
-                           final ClientVersion version, final Request request) throws ResourceException, Exception {
+                           final AcceptAPIVersion version, final Request request) throws ResourceException, Exception {
         final Context context = newRequestContext(req, version);
         final ServletSynchronizer sync = syncFactory.createServletSynchronizer(req, resp);
         final RequestRunner runner = new RequestRunner(context, request, req, resp, sync);
@@ -539,11 +539,12 @@ public final class HttpServletAdapter {
         return resourceName;
     }
 
-    private Context newRequestContext(final HttpServletRequest req, final ClientVersion version) throws ResourceException {
+    private Context newRequestContext(final HttpServletRequest req,
+                                      final AcceptAPIVersion version) throws ResourceException {
         final Context root = contextFactory.createContext(req);
         final Version protocolVersion = version.getProtocolVersion();
         final Version resourceVersion = version.getResourceVersion();
-        return new ClientVersionContext(new HttpContext(root, req), PROTOCOL_NAME, protocolVersion, resourceVersion);
+        return new AcceptAPIVersionContext(new HttpContext(root, req), PROTOCOL_NAME, protocolVersion, resourceVersion);
     }
 
     private boolean parseCommonParameter(final String name, final String[] values,
@@ -598,21 +599,28 @@ public final class HttpServletAdapter {
 
     /**
      * Attempts to parse the version header and return a corresponding {@link CreateRequest} representation.
+     * Further validates that the specified versions are valid. That being not in the future and no earlier
+     * that the current major version.
      *
      * @param req
-     * @return
+     *         The HTTP servlet request
+     *
+     * @return A non-null {@link AcceptAPIVersion} instance
+     *
+     * @throws IllegalArgumentException
+     *         If the specified accept versions are invalid
      */
-    private ClientVersion buildClientVersion(final HttpServletRequest req) {
+    private AcceptAPIVersion parseAcceptAPIVersion(final HttpServletRequest req) {
         // Extract out the protocol and resource versions.
         final String versionString = req.getHeader(HEADER_X_VERSION_API);
 
-        final ClientVersion.Builder builder = new ClientVersion.Builder();
-        final ClientVersion clientVersion = builder
+        final AcceptAPIVersion.Builder builder = new AcceptAPIVersion.Builder();
+        final AcceptAPIVersion acceptAPIVersion = builder
                 .parseVersionString(versionString)
                 .setProtocolVersionIfNull(PROTOCOL_VERSION)
                 .build();
 
-        final Version protocolVersion = clientVersion.getProtocolVersion();
+        final Version protocolVersion = acceptAPIVersion.getProtocolVersion();
 
         if (protocolVersion.getMajor() != PROTOCOL_VERSION.getMajor()) {
             throw new IllegalArgumentException("Unsupported major version: " + protocolVersion);
@@ -622,7 +630,7 @@ public final class HttpServletAdapter {
             throw new IllegalArgumentException("Unsupported minor version: " + protocolVersion);
         }
 
-        return clientVersion;
+        return acceptAPIVersion;
     }
 
 }
