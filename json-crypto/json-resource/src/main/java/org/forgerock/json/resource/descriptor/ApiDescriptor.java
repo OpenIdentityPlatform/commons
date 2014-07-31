@@ -31,6 +31,7 @@ import org.forgerock.i18n.LocalizableMessage;
 import org.forgerock.i18n.LocalizedIllegalArgumentException;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ResourceName;
+import org.forgerock.json.resource.Version;
 
 @SuppressWarnings("javadoc")
 public final class ApiDescriptor {
