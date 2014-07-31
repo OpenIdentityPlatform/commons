@@ -16,10 +16,9 @@
 
 package org.forgerock.json.resource;
 
-import java.util.List;
-import java.util.Map;
-
 import org.forgerock.json.fluent.JsonPointer;
+
+import java.util.List;
 
 /**
  * A request to search for all JSON resources matching a user specified set of
