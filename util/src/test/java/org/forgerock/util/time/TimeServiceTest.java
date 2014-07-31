@@ -24,16 +24,6 @@ import org.testng.annotations.Test;
 public class TimeServiceTest {
 
     @Test
-    public void shouldGivesSystemTime() throws Exception {
-        long before = System.currentTimeMillis();
-        long now = TimeService.SYSTEM.now();
-        long after = System.currentTimeMillis();
-
-        assertThat(before >= now).isTrue();
-        assertThat(now >= after).isTrue();
-    }
-
-    @Test
     public void shouldComputesElapsedTime() throws Exception {
         long past = System.currentTimeMillis() - 100;
         long elapsed = TimeService.SYSTEM.since(past);
