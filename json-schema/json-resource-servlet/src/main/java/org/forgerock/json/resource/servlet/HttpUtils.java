@@ -54,6 +54,7 @@ import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.Version;
 import org.forgerock.util.encode.Base64url;
 
 /**
@@ -77,6 +78,8 @@ public final class HttpUtils {
     static final String HEADER_IF_NONE_MATCH = "If-None-Match";
     static final String HEADER_LOCATION = "Location";
     static final String HEADER_X_HTTP_METHOD_OVERRIDE = "X-HTTP-Method-Override";
+    /** The header key that is used to determine the acceptable API versions */
+    static final String HEADER_X_VERSION_API = "Accept-API-Version";
 
     static final String METHOD_DELETE = "DELETE";
     static final String METHOD_GET = "GET";
@@ -111,6 +114,11 @@ public final class HttpUtils {
     public static final String PARAM_QUERY_ID = param(QueryRequest.FIELD_QUERY_ID);
     /** the HTTP request parameter to specify the sort keys. */
     public static final String PARAM_SORT_KEYS = param(QueryRequest.FIELD_SORT_KEYS);
+
+    /** The name of the protocol in use */
+    public static final String PROTOCOL_NAME = "crest";
+    /** The version of the named protocol */
+    public static final Version PROTOCOL_VERSION = Version.valueOf("1.0");
 
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
 

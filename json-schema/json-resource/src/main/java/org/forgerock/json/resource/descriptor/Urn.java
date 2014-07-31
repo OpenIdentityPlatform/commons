@@ -15,6 +15,8 @@
  */
 package org.forgerock.json.resource.descriptor;
 
+import org.forgerock.json.resource.Version;
+
 import java.util.Locale;
 
 @SuppressWarnings("javadoc")
