@@ -15,33 +15,46 @@
  */
 package org.forgerock.json.resource;
 
+import org.forgerock.json.resource.descriptor.Version;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 
 /**
- * Unit test for {@link VersionContext}.
+ * Unit test for {@link ClientVersionContext}.
  *
  * @since 2.4.0
  */
-public class VersionContextTest {
+public class ClientVersionContextTest {
+
+    private Version protocolVersion;
+    private Version resourceVersion;
+
+    @BeforeMethod
+    public void setUp() {
+        protocolVersion = Version.valueOf(1, 0);
+        resourceVersion = Version.valueOf(2, 1);
+    }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void rejectsNullProtocolName() {
         // Given
-        new VersionContext(new RootContext(), null, "2.4.0", "1.0");
+        new ClientVersionContext(new RootContext(), null, protocolVersion, resourceVersion);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void rejectsNullProtocolVersion() {
         // Given
-        new VersionContext(new RootContext(), "name", null, "1.0");
+        new ClientVersionContext(new RootContext(), "name", null, resourceVersion);
     }
 
     @Test
     public void acceptsNullResourceVersion() {
         // Given
-        VersionContext context = new VersionContext(new RootContext(), "name", "2.4.0", null);
+        ClientVersionContext context = new ClientVersionContext(new RootContext(), "name", protocolVersion, null);
 
         // Then
         assertNull(context.getResourceVersion());
@@ -51,17 +64,17 @@ public class VersionContextTest {
     public void handlesValidVersions() {
         // Given
         RootContext root = new RootContext();
-        VersionContext context = new VersionContext(root, "name", "123.45", "678.90");
+        ClientVersionContext context = new ClientVersionContext(root, "name", protocolVersion, resourceVersion);
 
         // Then
         assertNotNull(context.getProtocolVersion());
         assertNotNull(context.getResourceVersion());
 
-        assertEquals(123, context.getProtocolVersion().getMajor());
-        assertEquals(45, context.getProtocolVersion().getMinor());
+        assertEquals(1, context.getProtocolVersion().getMajor());
+        assertEquals(0, context.getProtocolVersion().getMinor());
 
-        assertEquals(678, context.getResourceVersion().getMajor());
-        assertEquals(90, context.getResourceVersion().getMinor());
+        assertEquals(2, context.getResourceVersion().getMajor());
+        assertEquals(1, context.getResourceVersion().getMinor());
     }
 
 }
