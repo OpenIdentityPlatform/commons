@@ -114,6 +114,8 @@ public final class AcceptAPIVersionContext extends AbstractContext {
     }
 
     /**
+     * Get the protocol name.
+     *
      * @return The protocol name
      */
     public String getProtocolName() {
@@ -121,6 +123,8 @@ public final class AcceptAPIVersionContext extends AbstractContext {
     }
 
     /**
+     * Get the acceptable protocol version.
+     *
      * @return The version of the protocol
      */
     public Version getProtocolVersion() {
@@ -128,6 +132,8 @@ public final class AcceptAPIVersionContext extends AbstractContext {
     }
 
     /**
+     * Get the acceptable resource version.
+     *
      * @return The resource version or null if not defined
      */
     public Version getResourceVersion() {
