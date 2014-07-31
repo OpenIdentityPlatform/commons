@@ -18,10 +18,9 @@ package org.forgerock.json.resource;
 import static org.forgerock.util.Reject.checkNotNull;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.descriptor.Version;
 
 /**
- * A {@link Context} containing version information about the protocol and resource endpoint.
+ * A {@link Context} containing version information about the protocol and resource.
  * A version {@link Context} will be created for each request.
  * <p>
  * For instance the name which identifies the protocol exposed by the {@code json-resource-servlet}
@@ -32,7 +31,7 @@ import org.forgerock.json.resource.descriptor.Version;
  * <pre>
  * {
  *   "id"     : "56f0fb7e-3837-464d-b9ec-9d3b6af665c3",
- *   "class"  : "org.forgerock.json.resource.ClientVersionContext",
+ *   "class"  : "org.forgerock.json.resource.AcceptAPIVersionContext",
  *   "parent" : {
  *       ...
  *   },
@@ -41,7 +40,7 @@ import org.forgerock.json.resource.descriptor.Version;
  * }
  * </pre>
  */
-public final class ClientVersionContext extends AbstractContext {
+public final class AcceptAPIVersionContext extends AbstractContext {
 
     /** a client-friendly name for this context. */
     private static final String CONTEXT_NAME = "version";
@@ -67,18 +66,18 @@ public final class ClientVersionContext extends AbstractContext {
      * @param resourceVersion
      *            The version of the resource
      */
-    public ClientVersionContext(final Context parent, final String protocolName,
-                                final Version protocolVersion, final Version resourceVersion) {
-        super(checkNotNull(parent, "Cannot instantiate ClientVersionContext with null parent Context"));
+    public AcceptAPIVersionContext(final Context parent, final String protocolName,
+                                   final Version protocolVersion, final Version resourceVersion) {
+        super(checkNotNull(parent, "Cannot instantiate AcceptAPIVersionContext with null parent Context"));
 
         // Cache locally to avoid unnecessary string parsing.
         this.protocolVersion = protocolVersion;
         this.resourceVersion = resourceVersion;
 
         data.put(ATTR_PROTOCOL_NAME,
-                checkNotNull(protocolName, "Cannot instantiate ClientVersionContext with null protocolName"));
+                checkNotNull(protocolName, "Cannot instantiate AcceptAPIVersionContext with null protocolName"));
         data.put(ATTR_PROTOCOL_VERSION,
-                checkNotNull(protocolVersion, "Cannot instantiate ClientVersionContext with null protocolVersion"));
+                checkNotNull(protocolVersion, "Cannot instantiate AcceptAPIVersionContext with null protocolVersion"));
 
         if (resourceVersion != null) {
             data.put(ATTR_RESOURCE_VERSION, resourceVersion);
@@ -96,7 +95,7 @@ public final class ClientVersionContext extends AbstractContext {
      * @throws ResourceException
      *             If the JSON representation could not be parsed.
      */
-    ClientVersionContext(final JsonValue savedContext, final PersistenceConfig config)
+    AcceptAPIVersionContext(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
         super(savedContext, config);
 

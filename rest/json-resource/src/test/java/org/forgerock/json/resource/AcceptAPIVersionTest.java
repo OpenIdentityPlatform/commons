@@ -15,7 +15,6 @@
  */
 package org.forgerock.json.resource;
 
-import org.forgerock.json.resource.descriptor.Version;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -24,11 +23,11 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
 /**
- * Unit test for {@link ClientVersion}.
+ * Unit test for {@link AcceptAPIVersion}.
  *
  * @since 2.4.0
  */
-public class ClientVersionTest {
+public class AcceptAPIVersionTest {
 
     private Version protocolVersion;
     private Version resourceVersion;
@@ -42,90 +41,108 @@ public class ClientVersionTest {
     @Test
     public void nullInstanceWithBlankString() {
         // Given
-        ClientVersion.Builder builder = new ClientVersion.Builder();
-        ClientVersion clientVersion = builder
+        AcceptAPIVersion.Builder builder = new AcceptAPIVersion.Builder();
+        AcceptAPIVersion acceptAPIVersion = builder
                 .parseVersionString(null)
                 .build();
 
         // Then
-        assertNull(clientVersion.getProtocolVersion());
-        assertNull(clientVersion.getResourceVersion());
+        assertNull(acceptAPIVersion.getProtocolVersion());
+        assertNull(acceptAPIVersion.getResourceVersion());
     }
 
     @Test
     public void handlesEmptyString() {
         // Given
-        ClientVersion.Builder builder = new ClientVersion.Builder();
-        ClientVersion clientVersion = builder
+        AcceptAPIVersion.Builder builder = new AcceptAPIVersion.Builder();
+        AcceptAPIVersion acceptAPIVersion = builder
                 .parseVersionString("")
                 .build();
 
         // Then
-        assertNull(clientVersion.getProtocolVersion());
-        assertNull(clientVersion.getResourceVersion());
+        assertNull(acceptAPIVersion.getProtocolVersion());
+        assertNull(acceptAPIVersion.getResourceVersion());
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void handlesInvalidFormat() {
         // Given
-        ClientVersion.Builder builder = new ClientVersion.Builder();
+        AcceptAPIVersion.Builder builder = new AcceptAPIVersion.Builder();
         builder.parseVersionString("someInvalidString");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void unknownVersionType() {
         // Given
-        ClientVersion.Builder builder = new ClientVersion.Builder();
+        AcceptAPIVersion.Builder builder = new AcceptAPIVersion.Builder();
         builder.parseVersionString("unknownType=1.0");
     }
 
     @Test
     public void validVersionStringSingleValue() {
         // Given
-        ClientVersion.Builder builder = new ClientVersion.Builder();
-        ClientVersion clientVersion = builder
+        AcceptAPIVersion.Builder builder = new AcceptAPIVersion.Builder();
+        AcceptAPIVersion acceptAPIVersion = builder
                 .parseVersionString("resource=2.1")
                 .build();
 
         // Then
-        assertNotNull(clientVersion);
-        assertNull(clientVersion.getProtocolVersion());
-        assertEquals(clientVersion.getResourceVersion(), resourceVersion);
+        assertNotNull(acceptAPIVersion);
+        assertNull(acceptAPIVersion.getProtocolVersion());
+        assertEquals(acceptAPIVersion.getResourceVersion(), resourceVersion);
     }
 
     @Test
     public void validVersionStringMultipleValues() {
         // Given
-        ClientVersion.Builder builder = new ClientVersion.Builder();
-        ClientVersion clientVersion = builder
+        AcceptAPIVersion.Builder builder = new AcceptAPIVersion.Builder();
+        AcceptAPIVersion acceptAPIVersion = builder
                 .parseVersionString("protocol=1.0,resource=2.1")
                 .build();
 
         // Then
-        assertNotNull(clientVersion);
-        assertEquals(clientVersion.getProtocolVersion(), protocolVersion);
-        assertEquals(clientVersion.getResourceVersion(), resourceVersion);
+        assertNotNull(acceptAPIVersion);
+        assertEquals(acceptAPIVersion.getProtocolVersion(), protocolVersion);
+        assertEquals(acceptAPIVersion.getResourceVersion(), resourceVersion);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void handlesToManyVersionStrings() {
         // Given
-        ClientVersion.Builder builder = new ClientVersion.Builder();
+        AcceptAPIVersion.Builder builder = new AcceptAPIVersion.Builder();
         builder.parseVersionString("protocol=1.0,resource=2.1,resource=3.2");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void invalidDelimiter() {
         // Given
-        ClientVersion.Builder builder = new ClientVersion.Builder();
+        AcceptAPIVersion.Builder builder = new AcceptAPIVersion.Builder();
         builder.parseVersionString("resource=2.1;protocol=1.0");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void invalidVersionSchema() {
         // Given
-        ClientVersion.Builder builder = new ClientVersion.Builder();
+        AcceptAPIVersion.Builder builder = new AcceptAPIVersion.Builder();
         builder.parseVersionString("resource=1.2.3");
+    }
+
+    @Test
+    public void objectEquality() {
+        // Given
+        AcceptAPIVersion.Builder builder1 = new AcceptAPIVersion.Builder();
+        AcceptAPIVersion acceptAPIVersion1 = builder1
+                .parseVersionString("protocol=1.0,resource=2.1")
+                .build();
+
+        AcceptAPIVersion.Builder builder2 = new AcceptAPIVersion.Builder();
+        AcceptAPIVersion acceptAPIVersion2 = builder1
+                .parseVersionString("protocol=1.0,resource=2.1")
+                .build();
+
+        // Then
+        assertEquals(acceptAPIVersion1, acceptAPIVersion2);
+        assertEquals(acceptAPIVersion1.hashCode(), acceptAPIVersion2.hashCode());
     }
 
 }
