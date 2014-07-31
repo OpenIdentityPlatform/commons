@@ -32,7 +32,7 @@ import org.forgerock.json.resource.descriptor.Version;
  * <pre>
  * {
  *   "id"     : "56f0fb7e-3837-464d-b9ec-9d3b6af665c3",
- *   "class"  : "org.forgerock.json.resource.VersionContext",
+ *   "class"  : "org.forgerock.json.resource.ClientVersionContext",
  *   "parent" : {
  *       ...
  *   },
@@ -41,7 +41,7 @@ import org.forgerock.json.resource.descriptor.Version;
  * }
  * </pre>
  */
-public final class VersionContext extends AbstractContext {
+public final class ClientVersionContext extends AbstractContext {
 
     /** a client-friendly name for this context. */
     private static final String CONTEXT_NAME = "version";
@@ -50,6 +50,9 @@ public final class VersionContext extends AbstractContext {
     private static final String ATTR_PROTOCOL_NAME = "protocolName";
     private static final String ATTR_PROTOCOL_VERSION = "protocolVersion";
     private static final String ATTR_RESOURCE_VERSION = "resourceVersion";
+
+    private final Version protocolVersion;
+    private final Version resourceVersion;
 
     /**
      * Creates a new version context having the provided parent and an
@@ -64,14 +67,18 @@ public final class VersionContext extends AbstractContext {
      * @param resourceVersion
      *            The version of the resource
      */
-    public VersionContext(final Context parent,
-                          final String protocolName, final String protocolVersion, final String resourceVersion) {
-        super(checkNotNull(parent, "Cannot instantiate VersionContext with null parent Context"));
+    public ClientVersionContext(final Context parent, final String protocolName,
+                                final Version protocolVersion, final Version resourceVersion) {
+        super(checkNotNull(parent, "Cannot instantiate ClientVersionContext with null parent Context"));
+
+        // Cache locally to avoid unnecessary string parsing.
+        this.protocolVersion = protocolVersion;
+        this.resourceVersion = resourceVersion;
 
         data.put(ATTR_PROTOCOL_NAME,
-                checkNotNull(protocolName, "Cannot instantiate VersionContext with null protocolName"));
+                checkNotNull(protocolName, "Cannot instantiate ClientVersionContext with null protocolName"));
         data.put(ATTR_PROTOCOL_VERSION,
-                checkNotNull(protocolVersion, "Cannot instantiate VersionContext with null protocolVersion"));
+                checkNotNull(protocolVersion, "Cannot instantiate ClientVersionContext with null protocolVersion"));
 
         if (resourceVersion != null) {
             data.put(ATTR_RESOURCE_VERSION, resourceVersion);
@@ -89,9 +96,13 @@ public final class VersionContext extends AbstractContext {
      * @throws ResourceException
      *             If the JSON representation could not be parsed.
      */
-    VersionContext(final JsonValue savedContext, final PersistenceConfig config)
+    ClientVersionContext(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
         super(savedContext, config);
+
+        protocolVersion = Version.valueOf(data.get(ATTR_PROTOCOL_VERSION).required().asString());
+        final String resourceVersionString = data.get(ATTR_RESOURCE_VERSION).asString();
+        resourceVersion = resourceVersionString == null ? null : Version.valueOf(resourceVersionString);
     }
 
     /**
@@ -114,15 +125,14 @@ public final class VersionContext extends AbstractContext {
      * @return The version of the protocol
      */
     public Version getProtocolVersion() {
-        return Version.valueOf(data.get(ATTR_PROTOCOL_VERSION).asString());
+        return protocolVersion;
     }
 
     /**
      * @return The resource version or null if not defined
      */
     public Version getResourceVersion() {
-        final String resourceVersion = data.get(ATTR_RESOURCE_VERSION).asString();
-        return resourceVersion == null ? null : Version.valueOf(resourceVersion);
+        return resourceVersion;
     }
 
 }

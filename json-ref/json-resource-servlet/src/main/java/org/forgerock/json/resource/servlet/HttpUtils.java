@@ -54,6 +54,7 @@ import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.descriptor.Version;
 import org.forgerock.util.encode.Base64url;
 
 /**
@@ -115,14 +116,9 @@ public final class HttpUtils {
     public static final String PARAM_SORT_KEYS = param(QueryRequest.FIELD_SORT_KEYS);
 
     /** The name of the protocol defined here */
-    public static final String DEFAULT_PROTOCOL_NAME = "crest";
+    public static final String PROTOCOL_NAME = "crest";
     /** The version of the named protocol */
-    public static final String DEFAULT_PROTOCOL_VERSION = "1.0";
-
-    /** Request attribute name to get the protocol version */
-    public static final String PROTOCOL_VERSION = "protocol-version";
-    /** Request attribute name to get the resource version */
-    public static final String RESOURCE_VERSION = "resource-version";
+    public static final Version PROTOCOL_VERSION = Version.valueOf(1, 0);
 
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
 
