@@ -126,7 +126,7 @@ public final class Version implements Comparable<Version> {
         if (this == obj) {
             return true;
         } else if (obj instanceof Version) {
-            final Version that = (Version)obj;
+            final Version that = (Version) obj;
             return major == that.major && minor == that.minor;
         } else {
             return false;
