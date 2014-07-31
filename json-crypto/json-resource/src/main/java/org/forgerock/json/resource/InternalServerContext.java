@@ -22,18 +22,33 @@ import org.forgerock.json.fluent.JsonValue;
  * A {@link ServerContext} from an internal source.
  */
 public class InternalServerContext extends ServerContext implements ClientContext {
-    /** The client-friendly name of this context. */
+
+    /**
+     * The client-friendly name of this context.
+     */
     private static final String CONTEXT_NAME = "internalServer";
 
     /**
-     * {@inheritDoc}
+     * See {@link ServerContext#ServerContext(Context)}.
+     *
+     * @param parent
+     *         The parent context.
      */
     public InternalServerContext(Context parent) {
         super(parent);
     }
 
     /**
-     * {@inheritDoc}
+     * See {@link ServerContext#ServerContext(JsonValue, PersistenceConfig)}.
+     *
+     * @param savedContext
+     *         The JSON representation from which this context's attributes
+     *         should be parsed.
+     * @param config
+     *         The persistence configuration.
+     *
+     * @throws ResourceException
+     *         If the JSON representation could not be parsed.
      */
     public InternalServerContext(JsonValue savedContext, PersistenceConfig config) throws ResourceException {
         super(savedContext, config);

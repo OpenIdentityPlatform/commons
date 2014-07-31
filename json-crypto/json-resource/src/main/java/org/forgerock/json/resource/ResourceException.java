@@ -135,7 +135,7 @@ public class ResourceException extends ExecutionException {
     /** Serializable class a version number. */
     private static final long serialVersionUID = 1L;
 
-    /** flag to indicate whether to include the cause */
+    /** flag to indicate whether to include the cause. */
     private boolean includeCause = false;
 
     /**
