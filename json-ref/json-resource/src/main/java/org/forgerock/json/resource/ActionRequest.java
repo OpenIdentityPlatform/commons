@@ -1,4 +1,5 @@
 /*
+/*
  * The contents of this file are subject to the terms of the Common Development and
  * Distribution License (the License). You may not use this file except in compliance with the
  * License.
@@ -16,11 +17,10 @@
 
 package org.forgerock.json.resource;
 
-import java.util.List;
-import java.util.Map;
-
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
+
+import java.util.List;
 
 /**
  * An implementation specific action, or operation, upon a JSON resource.
