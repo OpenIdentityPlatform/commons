@@ -41,9 +41,8 @@ public class AcceptAPIVersionTest {
     @Test
     public void nullInstanceWithBlankString() {
         // Given
-        AcceptAPIVersion.Builder builder = new AcceptAPIVersion.Builder();
-        AcceptAPIVersion acceptAPIVersion = builder
-                .parseVersionString(null)
+        AcceptAPIVersion acceptAPIVersion = AcceptAPIVersion
+                .newBuilder(null)
                 .build();
 
         // Then
@@ -54,9 +53,8 @@ public class AcceptAPIVersionTest {
     @Test
     public void handlesEmptyString() {
         // Given
-        AcceptAPIVersion.Builder builder = new AcceptAPIVersion.Builder();
-        AcceptAPIVersion acceptAPIVersion = builder
-                .parseVersionString("")
+        AcceptAPIVersion acceptAPIVersion = AcceptAPIVersion
+                .newBuilder("")
                 .build();
 
         // Then
@@ -67,23 +65,22 @@ public class AcceptAPIVersionTest {
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void handlesInvalidFormat() {
         // Given
-        AcceptAPIVersion.Builder builder = new AcceptAPIVersion.Builder();
-        builder.parseVersionString("someInvalidString");
+        AcceptAPIVersion
+                .newBuilder("someInvalidString");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void unknownVersionType() {
         // Given
-        AcceptAPIVersion.Builder builder = new AcceptAPIVersion.Builder();
-        builder.parseVersionString("unknownType=1.0");
+        AcceptAPIVersion
+                .newBuilder("unknownType=1.0");
     }
 
     @Test
     public void validVersionStringSingleValue() {
         // Given
-        AcceptAPIVersion.Builder builder = new AcceptAPIVersion.Builder();
-        AcceptAPIVersion acceptAPIVersion = builder
-                .parseVersionString("resource=2.1")
+        AcceptAPIVersion acceptAPIVersion = AcceptAPIVersion
+                .newBuilder("resource=2.1")
                 .build();
 
         // Then
@@ -95,9 +92,8 @@ public class AcceptAPIVersionTest {
     @Test
     public void validVersionStringMultipleValues() {
         // Given
-        AcceptAPIVersion.Builder builder = new AcceptAPIVersion.Builder();
-        AcceptAPIVersion acceptAPIVersion = builder
-                .parseVersionString("protocol=1.0,resource=2.1")
+        AcceptAPIVersion acceptAPIVersion = AcceptAPIVersion
+                .newBuilder("protocol=1.0,resource=2.1")
                 .build();
 
         // Then
@@ -109,35 +105,100 @@ public class AcceptAPIVersionTest {
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void handlesToManyVersionStrings() {
         // Given
-        AcceptAPIVersion.Builder builder = new AcceptAPIVersion.Builder();
-        builder.parseVersionString("protocol=1.0,resource=2.1,resource=3.2");
+        AcceptAPIVersion
+                .newBuilder("protocol=1.0,resource=2.1,resource=3.2");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void invalidDelimiter() {
         // Given
-        AcceptAPIVersion.Builder builder = new AcceptAPIVersion.Builder();
-        builder.parseVersionString("resource=2.1;protocol=1.0");
+        AcceptAPIVersion
+                .newBuilder("resource=2.1;protocol=1.0");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void invalidVersionSchema() {
         // Given
-        AcceptAPIVersion.Builder builder = new AcceptAPIVersion.Builder();
-        builder.parseVersionString("resource=1.2.3");
+        AcceptAPIVersion
+                .newBuilder("resource=1.2.3");
+    }
+
+    @Test
+    public void defaultsDoNotOverride() {
+        // Given
+        AcceptAPIVersion acceptAPIVersion = AcceptAPIVersion
+                .newBuilder("protocol=1.0,resource=2.1")
+                .withDefaultProtocolVersion(Version.valueOf(2, 0))
+                .withDefaultProtocolVersion("3.0")
+                .withDefaultResourceVersion(Version.valueOf(3, 1))
+                .withDefaultResourceVersion("4.1")
+                .build();
+
+        // Then
+        assertNotNull(acceptAPIVersion);
+        assertEquals(acceptAPIVersion.getProtocolVersion(), protocolVersion);
+        assertEquals(acceptAPIVersion.getResourceVersion(), resourceVersion);
+    }
+
+    @Test
+    public void defaultsOnlyConstruction() {
+        // Given
+        AcceptAPIVersion acceptAPIVersion = AcceptAPIVersion
+                .newBuilder()
+                .withDefaultProtocolVersion("1.0")
+                .withDefaultResourceVersion("2.1")
+                .build();
+
+        // Then
+        assertNotNull(acceptAPIVersion);
+        assertEquals(acceptAPIVersion.getProtocolVersion(), protocolVersion);
+        assertEquals(acceptAPIVersion.getResourceVersion(), resourceVersion);
+    }
+
+    @Test
+    public void expectsSatisfiedWhenVersionsPresent() {
+        // Given
+        AcceptAPIVersion acceptAPIVersion = AcceptAPIVersion
+                .newBuilder("protocol=1.0,resource=2.1")
+                .expectsProtocolVersion()
+                .expectsResourceVersion()
+                .build();
+
+        // Then
+        assertNotNull(acceptAPIVersion);
+        assertEquals(acceptAPIVersion.getProtocolVersion(), protocolVersion);
+        assertEquals(acceptAPIVersion.getResourceVersion(), resourceVersion);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void expectsFailsNoProtocol() {
+        // Given
+        AcceptAPIVersion
+                .newBuilder("resource=2.1")
+                .expectsResourceVersion()
+                .expectsProtocolVersion()
+                .build();
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void expectsFailsNoResource() {
+        // Given
+        AcceptAPIVersion
+                .newBuilder("protocol=1.0")
+                .expectsProtocolVersion()
+                .expectsResourceVersion()
+                .build();
     }
 
     @Test
     public void objectEquality() {
         // Given
-        AcceptAPIVersion.Builder builder1 = new AcceptAPIVersion.Builder();
-        AcceptAPIVersion acceptAPIVersion1 = builder1
-                .parseVersionString("protocol=1.0,resource=2.1")
+        AcceptAPIVersion acceptAPIVersion1 = AcceptAPIVersion
+                .newBuilder("protocol=1.0,resource=2.1")
                 .build();
 
-        AcceptAPIVersion.Builder builder2 = new AcceptAPIVersion.Builder();
-        AcceptAPIVersion acceptAPIVersion2 = builder1
-                .parseVersionString("protocol=1.0,resource=2.1")
+        AcceptAPIVersion acceptAPIVersion2 = AcceptAPIVersion
+                .newBuilder("protocol=1.0,resource=2.1")
                 .build();
 
         // Then
