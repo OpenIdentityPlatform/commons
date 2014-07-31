@@ -29,31 +29,42 @@ import static org.testng.Assert.assertNull;
  */
 public class AcceptAPIVersionContextTest {
 
-    private Version protocolVersion;
-    private Version resourceVersion;
+    private AcceptAPIVersion acceptVersion;
 
     @BeforeMethod
     public void setUp() {
-        protocolVersion = Version.valueOf(1, 0);
-        resourceVersion = Version.valueOf(2, 1);
+        acceptVersion = AcceptAPIVersion
+                .newBuilder()
+                .withDefaultProtocolVersion("1.0")
+                .withDefaultResourceVersion("2.1")
+                .build();
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void rejectsNullProtocolName() {
         // Given
-        new AcceptAPIVersionContext(new RootContext(), null, protocolVersion, resourceVersion);
+        new AcceptAPIVersionContext(new RootContext(), null, acceptVersion);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void rejectsNullProtocolVersion() {
         // Given
-        new AcceptAPIVersionContext(new RootContext(), "name", null, resourceVersion);
+        acceptVersion = AcceptAPIVersion
+                .newBuilder()
+                .withDefaultResourceVersion("2.1")
+                .build();
+        new AcceptAPIVersionContext(new RootContext(), "name", acceptVersion);
     }
 
     @Test
     public void acceptsNullResourceVersion() {
         // Given
-        AcceptAPIVersionContext context = new AcceptAPIVersionContext(new RootContext(), "name", protocolVersion, null);
+        acceptVersion = AcceptAPIVersion
+                .newBuilder()
+                .withDefaultProtocolVersion("1.0")
+                .build();
+
+        AcceptAPIVersionContext context = new AcceptAPIVersionContext(new RootContext(), "name", acceptVersion);
 
         // Then
         assertNull(context.getResourceVersion());
@@ -63,7 +74,7 @@ public class AcceptAPIVersionContextTest {
     public void handlesValidVersions() {
         // Given
         RootContext root = new RootContext();
-        AcceptAPIVersionContext context = new AcceptAPIVersionContext(root, "name", protocolVersion, resourceVersion);
+        AcceptAPIVersionContext context = new AcceptAPIVersionContext(root, "name", acceptVersion);
 
         // Then
         assertNotNull(context.getProtocolVersion());

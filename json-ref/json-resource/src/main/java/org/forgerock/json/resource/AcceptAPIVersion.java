@@ -82,6 +82,30 @@ public final class AcceptAPIVersion {
     }
 
     /**
+     * @return A new instance of the builder
+     */
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
+    /**
+     * Creates a new builder instance and parses the passed version string. The expected
+     * format is <code>text=majorNumber.minorNumber,text=majorNumber.minorNumber</code>,
+     * where the supported text types are <code>protocol</code> and <code>resource</code>.
+     *
+     * @param versionString
+     *         The version string
+     *
+     * @return A new builder instance with the parsed version values set
+     *
+     * @throws IllegalArgumentException
+     *         If the string is an invalid format
+     */
+    public static Builder newBuilder(final String versionString) {
+        return new Builder(versionString);
+    }
+
+    /**
      * Builder to assist with the construction of a {@link AcceptAPIVersion}.
      *
      * @since 2.4.0
@@ -101,6 +125,9 @@ public final class AcceptAPIVersion {
         private Version protocolVersion;
         private Version resourceVersion;
 
+        private Builder() {
+        }
+
         /**
          * Attempts to parse the passed version string, constructing corresponding {@link Version} objects as required.
          * If the version string is null or empty then no {@link Version} objects are created. Otherwise the expected
@@ -109,14 +136,12 @@ public final class AcceptAPIVersion {
          * @param versionString
          *         The version string
          *
-         * @return The builder instance
-         *
          * @throws IllegalArgumentException
          *         If the string is an invalid format
          */
-        public Builder parseVersionString(final String versionString) {
+        private Builder(final String versionString) {
             if (versionString == null || versionString.isEmpty()) {
-                return this;
+                return;
             }
 
             Reject.ifFalse(EXPECTED_VERSION_FORMAT.matcher(versionString).matches(),
@@ -137,21 +162,18 @@ public final class AcceptAPIVersion {
                     throw new IllegalArgumentException("Unknown version type: " + versionType);
                 }
             }
-
-            return this;
         }
 
         /**
          * Sets the accepted protocol version if it's not already set.
          *
          * @param protocolVersion
-         *         Non-null protocol version
+         *         Protocol version
          *
          * @return The builder instance
          */
         public Builder withDefaultProtocolVersion(final Version protocolVersion) {
-            Reject.ifNull(protocolVersion);
-            if (this.protocolVersion == null) {
+            if (this.protocolVersion == null && protocolVersion != null) {
                 this.protocolVersion = protocolVersion;
             }
             return this;
@@ -161,15 +183,64 @@ public final class AcceptAPIVersion {
          * Sets the accepted resource version if it's not already set.
          *
          * @param resourceVersion
-         *         Non-null resource version
+         *         Resource version
          *
          * @return The builder instance
          */
         public Builder withDefaultResourceVersion(final Version resourceVersion) {
-            Reject.ifNull(resourceVersion);
-            if (this.resourceVersion == null) {
+            if (this.resourceVersion == null && resourceVersion != null) {
                 this.resourceVersion = resourceVersion;
             }
+            return this;
+        }
+
+        /**
+         * Sets the accepted protocol version if it's not already set.
+         *
+         * @param protocolVersion
+         *         Protocol version
+         *
+         * @return The builder instance
+         */
+        public Builder withDefaultProtocolVersion(final String protocolVersion) {
+            if (this.protocolVersion == null && protocolVersion != null) {
+                this.protocolVersion = Version.valueOf(protocolVersion);
+            }
+            return this;
+        }
+
+        /**
+         * Sets the accepted resource version if it's not already set.
+         *
+         * @param resourceVersion
+         *         Resource version
+         *
+         * @return The builder instance
+         */
+        public Builder withDefaultResourceVersion(final String resourceVersion) {
+            if (this.resourceVersion == null && resourceVersion != null) {
+                this.resourceVersion = Version.valueOf(resourceVersion);
+            }
+            return this;
+        }
+
+        /**
+         * Tests whether the protocol version has been set.
+         *
+         * @return The builder instance
+         */
+        public Builder expectsProtocolVersion() {
+            Reject.ifNull(protocolVersion, "Protocol version is expected");
+            return this;
+        }
+
+        /**
+         * Tests whether the resource version has been set.
+         *
+         * @return The bulder instance
+         */
+        public Builder expectsResourceVersion() {
+            Reject.ifNull(resourceVersion, "Resource version is expected");
             return this;
         }
 

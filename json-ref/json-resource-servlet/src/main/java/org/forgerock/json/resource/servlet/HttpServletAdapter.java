@@ -201,14 +201,15 @@ public final class HttpServletAdapter {
 
     void doDelete(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
+            // Parse out the required API versions.
+            final AcceptAPIVersion acceptVersion = parseAcceptAPIVersion(req);
+
             // Prepare response.
             prepareResponse(req, resp);
 
             // Validate request.
             preprocessRequest(req);
             rejectIfNoneMatch(req);
-
-            final AcceptAPIVersion version = parseAcceptAPIVersion(req);
 
             final Map<String, String[]> parameters = req.getParameterMap();
             final DeleteRequest request =
@@ -222,7 +223,7 @@ public final class HttpServletAdapter {
                     request.setAdditionalParameter(name, asSingleValue(name, values));
                 }
             }
-            doRequest(req, resp, version, request);
+            doRequest(req, resp, acceptVersion, request);
         } catch (final Exception e) {
             fail(req, resp, e);
         }
@@ -230,14 +231,15 @@ public final class HttpServletAdapter {
 
     void doGet(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
+            // Parse out the required API versions.
+            final AcceptAPIVersion acceptVersion = parseAcceptAPIVersion(req);
+
             // Prepare response.
             prepareResponse(req, resp);
 
             // Validate request.
             preprocessRequest(req);
             rejectIfMatch(req);
-
-            final AcceptAPIVersion version = parseAcceptAPIVersion(req);
 
             final Map<String, String[]> parameters = req.getParameterMap();
             if (hasParameter(req, PARAM_QUERY_ID) || hasParameter(req, PARAM_QUERY_EXPRESSION)
@@ -309,7 +311,7 @@ public final class HttpServletAdapter {
                             + PARAM_QUERY_EXPRESSION + " are mutually exclusive");
                 }
 
-                doRequest(req, resp, version, request);
+                doRequest(req, resp, acceptVersion, request);
             } else {
                 // Read of instance within collection or singleton.
                 final String rev = getIfNoneMatch(req);
@@ -338,7 +340,7 @@ public final class HttpServletAdapter {
                         request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
                 }
-                doRequest(req, resp, version, request);
+                doRequest(req, resp, acceptVersion, request);
             }
         } catch (final Exception e) {
             fail(req, resp, e);
@@ -347,6 +349,9 @@ public final class HttpServletAdapter {
 
     void doPatch(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
+            // Parse out the required API versions.
+            final AcceptAPIVersion acceptVersion = parseAcceptAPIVersion(req);
+
             // Prepare response.
             prepareResponse(req, resp);
 
@@ -357,8 +362,6 @@ public final class HttpServletAdapter {
                 throw new PreconditionFailedException(
                         "Use of If-None-Match not supported for PATCH requests");
             }
-
-            final AcceptAPIVersion version = parseAcceptAPIVersion(req);
 
             final Map<String, String[]> parameters = req.getParameterMap();
             final PatchRequest request =
@@ -375,7 +378,7 @@ public final class HttpServletAdapter {
                     request.setAdditionalParameter(name, asSingleValue(name, values));
                 }
             }
-            doRequest(req, resp, version, request);
+            doRequest(req, resp, acceptVersion, request);
         } catch (final Exception e) {
             fail(req, resp, e);
         }
@@ -383,6 +386,9 @@ public final class HttpServletAdapter {
 
     void doPost(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
+            // Parse out the required API versions.
+            final AcceptAPIVersion acceptVersion = parseAcceptAPIVersion(req);
+
             // Prepare response.
             prepareResponse(req, resp);
 
@@ -390,8 +396,6 @@ public final class HttpServletAdapter {
             preprocessRequest(req);
             rejectIfNoneMatch(req);
             rejectIfMatch(req);
-
-            final AcceptAPIVersion version = parseAcceptAPIVersion(req);
 
             final Map<String, String[]> parameters = req.getParameterMap();
             final String action = asSingleValue(PARAM_ACTION, getParameter(req, PARAM_ACTION));
@@ -412,7 +416,7 @@ public final class HttpServletAdapter {
                         request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
                 }
-                doRequest(req, resp, version, request);
+                doRequest(req, resp, acceptVersion, request);
             } else {
                 // Action request.
                 final JsonValue content = getJsonActionContent(req);
@@ -431,7 +435,7 @@ public final class HttpServletAdapter {
                         request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
                 }
-                doRequest(req, resp, version, request);
+                doRequest(req, resp, acceptVersion, request);
             }
         } catch (final Exception e) {
             fail(req, resp, e);
@@ -440,6 +444,9 @@ public final class HttpServletAdapter {
 
     void doPut(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
+            // Parse out the required API versions.
+            final AcceptAPIVersion acceptVersion = parseAcceptAPIVersion(req);
+
             // Prepare response.
             prepareResponse(req, resp);
 
@@ -453,8 +460,6 @@ public final class HttpServletAdapter {
                         "Simultaneous use of If-Match and If-None-Match not "
                                 + "supported for PUT requests");
             }
-
-            final AcceptAPIVersion version = parseAcceptAPIVersion(req);
 
             final Map<String, String[]> parameters = req.getParameterMap();
             final JsonValue content = getJsonContent(req);
@@ -489,7 +494,7 @@ public final class HttpServletAdapter {
                         request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
                 }
-                doRequest(req, resp, version, request);
+                doRequest(req, resp, acceptVersion, request);
             } else {
                 final UpdateRequest request =
                         Requests.newUpdateRequest(getResourceName(req), content).setRevision(
@@ -505,7 +510,7 @@ public final class HttpServletAdapter {
                         request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
                 }
-                doRequest(req, resp, version, request);
+                doRequest(req, resp, acceptVersion, request);
             }
         } catch (final Exception e) {
             fail(req, resp, e);
@@ -513,8 +518,9 @@ public final class HttpServletAdapter {
     }
 
     private void doRequest(final HttpServletRequest req, final HttpServletResponse resp,
-                           final AcceptAPIVersion version, final Request request) throws ResourceException, Exception {
-        final Context context = newRequestContext(req, version);
+                           final AcceptAPIVersion acceptVersion, final Request request)
+            throws ResourceException, Exception {
+        final Context context = newRequestContext(req, acceptVersion);
         final ServletSynchronizer sync = syncFactory.createServletSynchronizer(req, resp);
         final RequestRunner runner = new RequestRunner(context, request, req, resp, sync);
         connectionFactory.getConnectionAsync().then(runner, runner);
@@ -540,11 +546,9 @@ public final class HttpServletAdapter {
     }
 
     private Context newRequestContext(final HttpServletRequest req,
-                                      final AcceptAPIVersion version) throws ResourceException {
+                                      final AcceptAPIVersion acceptVersion) throws ResourceException {
         final Context root = contextFactory.createContext(req);
-        final Version protocolVersion = version.getProtocolVersion();
-        final Version resourceVersion = version.getResourceVersion();
-        return new AcceptAPIVersionContext(new HttpContext(root, req), PROTOCOL_NAME, protocolVersion, resourceVersion);
+        return new AcceptAPIVersionContext(new HttpContext(root, req), PROTOCOL_NAME, acceptVersion);
     }
 
     private boolean parseCommonParameter(final String name, final String[] values,
@@ -607,27 +611,27 @@ public final class HttpServletAdapter {
      *
      * @return A non-null {@link AcceptAPIVersion} instance
      *
-     * @throws IllegalArgumentException
-     *         If the specified accept versions are invalid
+     * @throws BadRequestException
+     *         If an invalid version is requested
      */
-    private AcceptAPIVersion parseAcceptAPIVersion(final HttpServletRequest req) {
+    private AcceptAPIVersion parseAcceptAPIVersion(final HttpServletRequest req) throws BadRequestException {
         // Extract out the protocol and resource versions.
         final String versionString = req.getHeader(HEADER_X_VERSION_API);
 
-        final AcceptAPIVersion.Builder builder = new AcceptAPIVersion.Builder();
-        final AcceptAPIVersion acceptAPIVersion = builder
-                .parseVersionString(versionString)
+        final AcceptAPIVersion acceptAPIVersion = AcceptAPIVersion
+                .newBuilder(versionString)
                 .withDefaultProtocolVersion(PROTOCOL_VERSION)
+                .expectsProtocolVersion()
                 .build();
 
         final Version protocolVersion = acceptAPIVersion.getProtocolVersion();
 
         if (protocolVersion.getMajor() != PROTOCOL_VERSION.getMajor()) {
-            throw new IllegalArgumentException("Unsupported major version: " + protocolVersion);
+            throw new BadRequestException("Unsupported major version: " + protocolVersion);
         }
 
         if (protocolVersion.getMinor() > PROTOCOL_VERSION.getMinor()) {
-            throw new IllegalArgumentException("Unsupported minor version: " + protocolVersion);
+            throw new BadRequestException("Unsupported minor version: " + protocolVersion);
         }
 
         return acceptAPIVersion;
