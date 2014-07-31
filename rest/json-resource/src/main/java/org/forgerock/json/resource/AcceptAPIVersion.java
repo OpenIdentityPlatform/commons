@@ -35,6 +35,8 @@ public final class AcceptAPIVersion {
     }
 
     /**
+     * Gets the acceptable protocol version.
+     *
      * @return The acceptable protocol version
      */
     public Version getProtocolVersion() {
@@ -42,6 +44,8 @@ public final class AcceptAPIVersion {
     }
 
     /**
+     * Gets the acceptable resource version.
+     *
      * @return The acceptable resource version
      */
     public Version getResourceVersion() {
@@ -58,15 +62,15 @@ public final class AcceptAPIVersion {
             return false;
         }
 
-        AcceptAPIVersion other = (AcceptAPIVersion)obj;
+        AcceptAPIVersion other = (AcceptAPIVersion) obj;
 
-        if (protocolVersion == null ?
-                other.protocolVersion != null : !protocolVersion.equals(other.protocolVersion)) {
+        if (protocolVersion == null
+                ? other.protocolVersion != null : !protocolVersion.equals(other.protocolVersion)) {
             return false;
         }
 
-        if (resourceVersion == null ?
-                other.resourceVersion != null : !resourceVersion.equals(other.resourceVersion)) {
+        if (resourceVersion == null
+                ? other.resourceVersion != null : !resourceVersion.equals(other.resourceVersion)) {
             return false;
         }
 
@@ -82,6 +86,8 @@ public final class AcceptAPIVersion {
     }
 
     /**
+     * Creates a new builder instance.
+     *
      * @return A new instance of the builder
      */
     public static Builder newBuilder() {
