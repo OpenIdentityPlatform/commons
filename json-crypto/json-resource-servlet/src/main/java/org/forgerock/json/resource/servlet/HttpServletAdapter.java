@@ -21,7 +21,6 @@ import static org.forgerock.util.Reject.checkNotNull;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.ResourceBundle;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -29,8 +28,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.AcceptAPIVersion;
+import org.forgerock.json.resource.AcceptAPIVersionContext;
 import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.ApiInfoContext;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConflictException;
 import org.forgerock.json.resource.ConnectionFactory;
@@ -47,6 +47,7 @@ import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.json.resource.Version;
 
 /**
  * HTTP adapter from Servlet calls to JSON resource calls. This class can be
@@ -81,19 +82,11 @@ import org.forgerock.json.resource.UpdateRequest;
  * @see HttpServlet
  */
 public final class HttpServletAdapter {
-    private static final String THIS_API_URI;
-    private static final String THIS_API_VERSION;
 
     private static final String FIELDS_DELIMITER = ",";
     private static final String SORT_KEYS_DELIMITER = ",";
     private static final String EMPTY_STRING = "";
     private static final String JOIN_STRINGS_DELIMITER = " , ";
-
-    static {
-        final ResourceBundle bundle = ResourceBundle.getBundle(HttpServletAdapter.class.getName());
-        THIS_API_URI = bundle.getString("rest-api-uri");
-        THIS_API_VERSION = bundle.getString("rest-api-version");
-    }
 
     private final ServletApiVersionAdapter syncFactory;
     private final ConnectionFactory connectionFactory;
@@ -186,6 +179,7 @@ public final class HttpServletAdapter {
      */
     public void service(final HttpServletRequest req, final HttpServletResponse resp)
             throws IOException {
+
         // Dispatch the request based on method, taking into account \
         // method override header.
         final String method = getMethod(req);
@@ -207,6 +201,9 @@ public final class HttpServletAdapter {
 
     void doDelete(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
+            // Parse out the required API versions.
+            final AcceptAPIVersion acceptVersion = parseAcceptAPIVersion(req);
+
             // Prepare response.
             prepareResponse(req, resp);
 
@@ -226,7 +223,7 @@ public final class HttpServletAdapter {
                     request.setAdditionalParameter(name, asSingleValue(name, values));
                 }
             }
-            doRequest(req, resp, request);
+            doRequest(req, resp, acceptVersion, request);
         } catch (final Exception e) {
             fail(req, resp, e);
         }
@@ -234,6 +231,9 @@ public final class HttpServletAdapter {
 
     void doGet(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
+            // Parse out the required API versions.
+            final AcceptAPIVersion acceptVersion = parseAcceptAPIVersion(req);
+
             // Prepare response.
             prepareResponse(req, resp);
 
@@ -311,7 +311,7 @@ public final class HttpServletAdapter {
                             + PARAM_QUERY_EXPRESSION + " are mutually exclusive");
                 }
 
-                doRequest(req, resp, request);
+                doRequest(req, resp, acceptVersion, request);
             } else {
                 // Read of instance within collection or singleton.
                 final String rev = getIfNoneMatch(req);
@@ -340,7 +340,7 @@ public final class HttpServletAdapter {
                         request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
                 }
-                doRequest(req, resp, request);
+                doRequest(req, resp, acceptVersion, request);
             }
         } catch (final Exception e) {
             fail(req, resp, e);
@@ -349,6 +349,9 @@ public final class HttpServletAdapter {
 
     void doPatch(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
+            // Parse out the required API versions.
+            final AcceptAPIVersion acceptVersion = parseAcceptAPIVersion(req);
+
             // Prepare response.
             prepareResponse(req, resp);
 
@@ -375,7 +378,7 @@ public final class HttpServletAdapter {
                     request.setAdditionalParameter(name, asSingleValue(name, values));
                 }
             }
-            doRequest(req, resp, request);
+            doRequest(req, resp, acceptVersion, request);
         } catch (final Exception e) {
             fail(req, resp, e);
         }
@@ -383,6 +386,9 @@ public final class HttpServletAdapter {
 
     void doPost(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
+            // Parse out the required API versions.
+            final AcceptAPIVersion acceptVersion = parseAcceptAPIVersion(req);
+
             // Prepare response.
             prepareResponse(req, resp);
 
@@ -410,7 +416,7 @@ public final class HttpServletAdapter {
                         request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
                 }
-                doRequest(req, resp, request);
+                doRequest(req, resp, acceptVersion, request);
             } else {
                 // Action request.
                 final JsonValue content = getJsonActionContent(req);
@@ -429,7 +435,7 @@ public final class HttpServletAdapter {
                         request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
                 }
-                doRequest(req, resp, request);
+                doRequest(req, resp, acceptVersion, request);
             }
         } catch (final Exception e) {
             fail(req, resp, e);
@@ -438,11 +444,15 @@ public final class HttpServletAdapter {
 
     void doPut(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
+            // Parse out the required API versions.
+            final AcceptAPIVersion acceptVersion = parseAcceptAPIVersion(req);
+
             // Prepare response.
             prepareResponse(req, resp);
 
             // Validate request.
             preprocessRequest(req);
+
             if (req.getHeader(HEADER_IF_MATCH) != null
                     && req.getHeader(HEADER_IF_NONE_MATCH) != null) {
                 // FIXME: i18n
@@ -484,7 +494,7 @@ public final class HttpServletAdapter {
                         request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
                 }
-                doRequest(req, resp, request);
+                doRequest(req, resp, acceptVersion, request);
             } else {
                 final UpdateRequest request =
                         Requests.newUpdateRequest(getResourceName(req), content).setRevision(
@@ -500,7 +510,7 @@ public final class HttpServletAdapter {
                         request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
                 }
-                doRequest(req, resp, request);
+                doRequest(req, resp, acceptVersion, request);
             }
         } catch (final Exception e) {
             fail(req, resp, e);
@@ -508,8 +518,9 @@ public final class HttpServletAdapter {
     }
 
     private void doRequest(final HttpServletRequest req, final HttpServletResponse resp,
-            final Request request) throws ResourceException, Exception {
-        final Context context = newRequestContext(req);
+                           final AcceptAPIVersion acceptVersion, final Request request)
+            throws ResourceException, Exception {
+        final Context context = newRequestContext(req, acceptVersion);
         final ServletSynchronizer sync = syncFactory.createServletSynchronizer(req, resp);
         final RequestRunner runner = new RequestRunner(context, request, req, resp, sync);
         connectionFactory.getConnectionAsync().then(runner, runner);
@@ -534,9 +545,10 @@ public final class HttpServletAdapter {
         return resourceName;
     }
 
-    private Context newRequestContext(final HttpServletRequest req) throws ResourceException {
+    private Context newRequestContext(final HttpServletRequest req,
+                                      final AcceptAPIVersion acceptVersion) throws ResourceException {
         final Context root = contextFactory.createContext(req);
-        return new ApiInfoContext(new HttpContext(root, req), THIS_API_URI, THIS_API_VERSION);
+        return new AcceptAPIVersionContext(new HttpContext(root, req), PROTOCOL_NAME, acceptVersion);
     }
 
     private boolean parseCommonParameter(final String name, final String[] values,
@@ -587,6 +599,42 @@ public final class HttpServletAdapter {
             // TODO: i18n
             throw new ConflictException("Header If-Unmodified-Since not supported");
         }
+    }
+
+    /**
+     * Attempts to parse the version header and return a corresponding {@link AcceptAPIVersion} representation.
+     * Further validates that the specified versions are valid. That being not in the future and no earlier
+     * that the current major version.
+     *
+     * @param req
+     *         The HTTP servlet request
+     *
+     * @return A non-null {@link AcceptAPIVersion} instance
+     *
+     * @throws BadRequestException
+     *         If an invalid version is requested
+     */
+    private AcceptAPIVersion parseAcceptAPIVersion(final HttpServletRequest req) throws BadRequestException {
+        // Extract out the protocol and resource versions.
+        final String versionString = req.getHeader(HEADER_X_VERSION_API);
+
+        final AcceptAPIVersion acceptAPIVersion = AcceptAPIVersion
+                .newBuilder(versionString)
+                .withDefaultProtocolVersion(PROTOCOL_VERSION)
+                .expectsProtocolVersion()
+                .build();
+
+        final Version protocolVersion = acceptAPIVersion.getProtocolVersion();
+
+        if (protocolVersion.getMajor() != PROTOCOL_VERSION.getMajor()) {
+            throw new BadRequestException("Unsupported major version: " + protocolVersion);
+        }
+
+        if (protocolVersion.getMinor() > PROTOCOL_VERSION.getMinor()) {
+            throw new BadRequestException("Unsupported minor version: " + protocolVersion);
+        }
+
+        return acceptAPIVersion;
     }
 
 }
