@@ -149,7 +149,7 @@ public final class AcceptAPIVersion {
          *
          * @return The builder instance
          */
-        public Builder setProtocolVersionIfNull(final Version protocolVersion) {
+        public Builder withDefaultProtocolVersion(final Version protocolVersion) {
             Reject.ifNull(protocolVersion);
             if (this.protocolVersion == null) {
                 this.protocolVersion = protocolVersion;
@@ -165,7 +165,7 @@ public final class AcceptAPIVersion {
          *
          * @return The builder instance
          */
-        public Builder setResourceVersionIfNull(final Version resourceVersion) {
+        public Builder withDefaultResourceVersion(final Version resourceVersion) {
             Reject.ifNull(resourceVersion);
             if (this.resourceVersion == null) {
                 this.resourceVersion = resourceVersion;

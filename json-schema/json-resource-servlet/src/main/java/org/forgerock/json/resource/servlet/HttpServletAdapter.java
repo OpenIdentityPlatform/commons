@@ -598,7 +598,7 @@ public final class HttpServletAdapter {
     }
 
     /**
-     * Attempts to parse the version header and return a corresponding {@link CreateRequest} representation.
+     * Attempts to parse the version header and return a corresponding {@link AcceptAPIVersion} representation.
      * Further validates that the specified versions are valid. That being not in the future and no earlier
      * that the current major version.
      *
@@ -617,7 +617,7 @@ public final class HttpServletAdapter {
         final AcceptAPIVersion.Builder builder = new AcceptAPIVersion.Builder();
         final AcceptAPIVersion acceptAPIVersion = builder
                 .parseVersionString(versionString)
-                .setProtocolVersionIfNull(PROTOCOL_VERSION)
+                .withDefaultProtocolVersion(PROTOCOL_VERSION)
                 .build();
 
         final Version protocolVersion = acceptAPIVersion.getProtocolVersion();
