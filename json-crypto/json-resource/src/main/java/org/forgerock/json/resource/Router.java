@@ -31,7 +31,7 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.Route.RouteMatcher;
+import org.forgerock.json.resource.UriRoute.RouteMatcher;
 
 /**
  * A request handler which routes requests using URI template matching against
@@ -81,7 +81,7 @@ import org.forgerock.json.resource.Route.RouteMatcher;
 public final class Router implements RequestHandler {
 
     private volatile RequestHandler defaultRoute = null;
-    private final Set<Route> routes = new CopyOnWriteArraySet<Route>();
+    private final Set<UriRoute> routes = new CopyOnWriteArraySet<UriRoute>();
 
     /**
      * Creates a new router with no routes defined.
@@ -166,7 +166,7 @@ public final class Router implements RequestHandler {
      */
     public Route addRoute(final RoutingMode mode, final String uriTemplate,
             final RequestHandler handler) {
-        return addRoute(new Route(mode, uriTemplate, handler));
+        return addRoute(new UriRoute(mode, uriTemplate, handler));
     }
 
     /**
@@ -335,7 +335,7 @@ public final class Router implements RequestHandler {
         return this;
     }
 
-    Route addRoute(final Route route) {
+    Route addRoute(final UriRoute route) {
         routes.add(route);
         return route;
     }
@@ -343,7 +343,7 @@ public final class Router implements RequestHandler {
     private RouteMatcher getBestRoute(final ServerContext context, final Request request)
             throws ResourceException {
         RouteMatcher bestMatcher = null;
-        for (final Route route : routes) {
+        for (final UriRoute route : routes) {
             final RouteMatcher matcher = route.getRouteMatcher(context, request);
             if (matcher != null && matcher.isBetterMatchThan(bestMatcher)) {
                 bestMatcher = matcher;
