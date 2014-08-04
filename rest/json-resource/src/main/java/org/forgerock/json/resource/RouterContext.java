@@ -78,7 +78,7 @@ import org.forgerock.json.fluent.JsonValue;
  * }
  * </pre>
  *
- * @see Router
+ * @see UriRouter
  */
 public final class RouterContext extends ServerContext {
 
