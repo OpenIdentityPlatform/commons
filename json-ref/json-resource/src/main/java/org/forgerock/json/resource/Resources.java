@@ -548,7 +548,7 @@ public final class Resources {
      */
     public static RequestHandler newCollection(final CollectionResourceProvider provider) {
         // Route requests to the collection/instance using a router.
-        final Router router = new Router();
+        final UriRouter router = new UriRouter();
 
         // Create a route for the collection.
         final RequestHandler collectionHandler = new CollectionHandler(provider);

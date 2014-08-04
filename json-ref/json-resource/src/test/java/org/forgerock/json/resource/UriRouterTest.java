@@ -16,25 +16,28 @@
 
 package org.forgerock.json.resource;
 
-import org.mockito.ArgumentCaptor;
-import org.mockito.Matchers;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import static org.fest.assertions.Assertions.assertThat;
+import static org.forgerock.json.resource.Requests.newReadRequest;
+import static org.forgerock.json.resource.Resources.newInternalConnection;
+import static org.mockito.Matchers.same;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static org.fest.assertions.Assertions.assertThat;
-import static org.forgerock.json.resource.Requests.newReadRequest;
-import static org.forgerock.json.resource.Resources.newInternalConnection;
-import static org.mockito.Mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Matchers;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
 /**
- * Tests {@code VersionRouter}.
+ * Tests {@code Router}.
  */
 @SuppressWarnings("javadoc")
-public final class RouterTest {
+public final class UriRouterTest {
 
     // TODO: starts with match
     // TODO: more precedence tests
@@ -57,7 +60,7 @@ public final class RouterTest {
 
     @Test(dataProvider = "absoluteRouteHitTestData")
     public void testAbsoluteRouteHit(final String resourceName) throws ResourceException {
-        final Router router = new Router();
+        final UriRouter router = new UriRouter();
         final RequestHandler h = mock(RequestHandler.class);
         router.addRoute(RoutingMode.EQUALS, resourceName, h);
         final ServerContext c = newServerContext(router);
@@ -76,7 +79,7 @@ public final class RouterTest {
 
     private void checkRouterContext(ArgumentCaptor<RouterContext> rc, final ServerContext c,
             final String expectedMatchedUri) {
-        checkRouterContext(rc, c, expectedMatchedUri, Collections.<String, String>emptyMap());
+        checkRouterContext(rc, c, expectedMatchedUri, Collections.<String, String> emptyMap());
     }
 
     private void checkRouterContext(ArgumentCaptor<RouterContext> rc, final ServerContext c,
@@ -85,6 +88,36 @@ public final class RouterTest {
         assertThat(rc.getValue().getMatchedUri()).isEqualTo(expectedMatchedUri);
         assertThat(rc.getValue().getBaseUri()).isEqualTo(expectedMatchedUri);
         assertThat(rc.getValue().getUriTemplateVariables()).isEqualTo(expectedUriTemplateVariables);
+    }
+
+    @Test
+    public void testDefaultRouteWithOne() throws ResourceException {
+        final UriRouter router = new UriRouter();
+        final RequestHandler h1 = mock(RequestHandler.class);
+        router.addRoute(RoutingMode.EQUALS, "users", h1);
+        final RequestHandler h2 = mock(RequestHandler.class);
+        router.setDefaultRoute(h2);
+
+        final ServerContext c = newServerContext(router);
+        final ReadRequest r = newReadRequest("object");
+        router.handleRead(c, r, null);
+        final ArgumentCaptor<RouterContext> rc = ArgumentCaptor.forClass(RouterContext.class);
+        verify(h2).handleRead(rc.capture(), same(r), Matchers.<ResultHandler<Resource>> any());
+        checkRouterContext(rc, c, "");
+    }
+
+    @Test
+    public void testDefaultRouteWithZero() throws ResourceException {
+        final UriRouter router = new UriRouter();
+        final RequestHandler h = mock(RequestHandler.class);
+        router.setDefaultRoute(h);
+
+        final ServerContext c = newServerContext(router);
+        final ReadRequest r = newReadRequest("object");
+        router.handleRead(c, r, null);
+        final ArgumentCaptor<RouterContext> rc = ArgumentCaptor.forClass(RouterContext.class);
+        verify(h).handleRead(rc.capture(), same(r), Matchers.<ResultHandler<Resource>> any());
+        checkRouterContext(rc, c, "");
     }
 
     @DataProvider
@@ -104,14 +137,14 @@ public final class RouterTest {
     @Test(dataProvider = "invalidTemplatesTestData",
             expectedExceptions = IllegalArgumentException.class)
     public void testInvalidTemplates(final String template) throws ResourceException {
-        final Router router = new Router();
+        final UriRouter router = new UriRouter();
         final RequestHandler h = mock(RequestHandler.class);
         router.addRoute(RoutingMode.EQUALS, template, h);
     }
 
     @Test
     public void testMultipleRoutePrecedence() throws ResourceException {
-        final Router router = new Router();
+        final UriRouter router = new UriRouter();
         final RequestHandler h1 = mock(RequestHandler.class);
         router.addRoute(RoutingMode.EQUALS, "object", h1);
         final RequestHandler h2 = mock(RequestHandler.class);
@@ -135,7 +168,7 @@ public final class RouterTest {
 
     @Test
     public void testMultipleRoutes() throws ResourceException {
-        final Router router = new Router();
+        final UriRouter router = new UriRouter();
         final RequestHandler h1 = mock(RequestHandler.class);
         router.addRoute(RoutingMode.EQUALS, "users", h1);
         final RequestHandler h2 = mock(RequestHandler.class);
@@ -180,10 +213,9 @@ public final class RouterTest {
     @Test(dataProvider = "routeMissTestData", expectedExceptions = NotFoundException.class)
     public void testRouteMiss(final String template, final String resourceName)
             throws ResourceException {
-        final Router router = new Router();
+        final UriRouter router = new UriRouter();
         final RequestHandler h = mock(RequestHandler.class);
-        router.addRoute(RoutingMode.EQUALS, template)
-                .addVersion("1.0", h);
+        router.addRoute(RoutingMode.EQUALS, template, h);
         final ServerContext c = newServerContext(router);
         final ReadRequest r = newReadRequest(resourceName);
         try {
@@ -214,7 +246,7 @@ public final class RouterTest {
     @Test(dataProvider = "variableRouteHitTestData")
     public void testVariableRouteHit(final String template, final String resourceName,
             final String[] expectedVars) throws ResourceException {
-        final Router router = new Router();
+        final UriRouter router = new UriRouter();
         final RequestHandler h = mock(RequestHandler.class);
         router.addRoute(RoutingMode.EQUALS, template, h);
         final ServerContext c = newServerContext(router);
@@ -232,7 +264,7 @@ public final class RouterTest {
 
     @Test(expectedExceptions = NotFoundException.class)
     public void testZeroRoutes() throws ResourceException {
-        final Router router = new Router();
+        final UriRouter router = new UriRouter();
         final Context c = new RootContext();
         final ReadRequest r = newReadRequest("object");
         newInternalConnection(router).read(c, r);

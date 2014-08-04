@@ -21,15 +21,15 @@ import static org.forgerock.json.resource.RoutingMode.EQUALS;
 import static org.forgerock.json.resource.RoutingMode.STARTS_WITH;
 import static org.mockito.Mockito.mock;
 
-import org.forgerock.json.resource.Route.RouteMatcher;
+import org.forgerock.json.resource.UriRoute.RouteMatcher;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
- * Tests {@link Route}.
+ * Tests {@link UriRoute}.
  */
 @SuppressWarnings("javadoc")
-public final class RouteTest {
+public final class UriRouteTest {
 
     @DataProvider
     public Object[][] testData() {
@@ -64,7 +64,7 @@ public final class RouteTest {
     @Test(dataProvider = "testData")
     public void testGetRouteMatcher(final RoutingMode mode, final String template,
             final String resourceName, final String expectedRemaining) {
-        final Route route = new Route(mode, template, null);
+        final UriRoute route = new UriRoute(mode, template, null);
         final RouteMatcher matcher =
                 route.getRouteMatcher(mock(ServerContext.class), newReadRequest(resourceName));
         if (expectedRemaining != null) {
