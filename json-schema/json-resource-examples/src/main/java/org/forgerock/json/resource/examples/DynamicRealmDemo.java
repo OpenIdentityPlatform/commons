@@ -15,13 +15,6 @@
  */
 package org.forgerock.json.resource.examples;
 
-import static org.forgerock.json.resource.examples.DemoUtils.ctx;
-import static org.forgerock.json.resource.examples.DemoUtils.log;
-
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.AbstractRequestHandler;
 import org.forgerock.json.resource.ActionRequest;
@@ -45,6 +38,13 @@ import org.forgerock.json.resource.RouterContext;
 import org.forgerock.json.resource.RoutingMode;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
+
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
+import static org.forgerock.json.resource.examples.DemoUtils.ctx;
+import static org.forgerock.json.resource.examples.DemoUtils.log;
 
 /**
  * An example illustrating how you can route realms / sub-realm requests using

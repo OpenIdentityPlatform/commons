@@ -15,13 +15,13 @@
  */
 package org.forgerock.json.resource.servlet;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.Router;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 
 /**
  * Default connection factory provider.

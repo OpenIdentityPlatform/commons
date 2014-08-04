@@ -11,31 +11,18 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2014 ForgeRock AS.
+ * Copyright 2014 ForgeRock AS.
  */
+
 package org.forgerock.json.resource;
 
-import static org.forgerock.json.resource.Requests.copyOfActionRequest;
-import static org.forgerock.json.resource.Requests.copyOfCreateRequest;
-import static org.forgerock.json.resource.Requests.copyOfDeleteRequest;
-import static org.forgerock.json.resource.Requests.copyOfPatchRequest;
-import static org.forgerock.json.resource.Requests.copyOfQueryRequest;
-import static org.forgerock.json.resource.Requests.copyOfReadRequest;
-import static org.forgerock.json.resource.Requests.copyOfUpdateRequest;
-import static org.forgerock.json.resource.Resources.newCollection;
-import static org.forgerock.json.resource.Resources.newSingleton;
-import static org.forgerock.json.resource.RoutingMode.EQUALS;
-import static org.forgerock.json.resource.RoutingMode.STARTS_WITH;
-
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
-
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.Route.RouteMatcher;
 
 /**
- * A request handler which routes requests using URI template matching against
- * the request's resource name. Examples of valid URI templates include:
+ * <p>A request handler which routes requests using URI template matching against the request's resource name and based
+ * on a version of a resource.</p>
+ *
+ * <p>Examples of valid URI templates include:</p>
  *
  * <pre>
  * users
@@ -44,44 +31,49 @@ import org.forgerock.json.resource.Route.RouteMatcher;
  * users/{userId}/devices/{deviceId}
  * </pre>
  *
- * Routes may be added and removed from a router as follows:
+ * <p>Routes may be added to the router as follows:</p>
  *
  * <pre>
- * RequestHandler users = ...;
+ * RequestHandler usersV1Dot0 = ...;
+ * RequestHandler usersV1Dot5 = ...;
  * Router router = new Router();
- * Route r1 = router.addRoute(EQUALS, &quot;users&quot;, users);
- * Route r2 = router.addRoute(EQUALS, &quot;users/{userId}&quot;, users);
  *
- * // Deregister a route.
- * router.removeRoute(r1, r2);
+ * router.addRoute(&quot;users&quot;)
+ * .addVersion(EQUALS, &quot;1.0&quot;, usersV1Dot0)
+ * .addVersion(EQUALS, &quot;1.5&quot;, usersV1Dot5);
  * </pre>
  *
- * A request handler receiving a routed request may access the associated
- * route's URI template variables via
- * {@link RouterContext#getUriTemplateVariables()}. For example, a request
- * handler processing requests for the route users/{userId} may obtain the value
- * of {@code userId} as follows:
+ * <p>A request handler receiving a routed request may access the associated route's URI template variables via
+ * {@link RouterContext#getUriTemplateVariables()}. For example, a request handler processing requests for the route
+ * users/{userId} may obtain the value of {@code userId} as follows:</p>
  *
  * <pre>
  * String userId = context.asContext(RouterContext.class).getUriTemplateVariables().get(&quot;userId&quot;);
  * </pre>
  *
- * During routing resource names are "relativized" by removing the leading path
- * components which matched the template. See the documentation for
- * {@link RouterContext} for more information.
- * <p>
- * <b>NOTE:</b> for simplicity this implementation only supports a small sub-set
- * of the functionality described in RFC 6570.
+ * <p>The request handler receiving the routed request may access the associated resource's version via
+ * {@link AcceptAPIVersionContext#getResourceVersion()}. For example, a request handler processing requests for a version of
+ * a resource may obtain the resource's version as follows:</p>
+ *
+ * <pre>
+ * Version resourceVersion = context.asContext(AcceptAPIVersionContext.class).getResourceVersion();
+ * </pre>
+ *
+ * <p>During routing resource names are "relativized" by removing the leading path components which matched the
+ * template. See the documentation for {@link RouterContext} for more information.</p>
+ *
+ * <p><b>NOTE:</b> for simplicity this implementation only supports a small sub-set of the functionality described in
+ * RFC 6570.</p>
  *
  * @see RouterContext
- * @see Router
- * @see <a href="http://tools.ietf.org/html/rfc6570">RFC 6570 - URI Template
- *      </a>
+ * @see AcceptAPIVersionContext
+ * @see <a href="http://tools.ietf.org/html/rfc6570">RFC 6570 - URI Template</a>
+ * @since 2.4.0
  */
 public final class Router implements RequestHandler {
 
-    private volatile RequestHandler defaultRoute = null;
-    private final Set<Route> routes = new CopyOnWriteArraySet<Route>();
+    private final UriRouter uriRouter = new UriRouter();
+    private Boolean defaultVersioningToLatest;
 
     /**
      * Creates a new router with no routes defined.
@@ -91,40 +83,32 @@ public final class Router implements RequestHandler {
     }
 
     /**
-     * Creates a new router containing the same routes and default route as the
-     * provided router. Changes to the returned router's routing table will not
-     * impact the provided router.
+     * Creates a new router containing the same routes and default route as the provided router. Changes to the
+     * returned router's routing table will not impact the provided router.
      *
-     * @param router
-     *            The router to be copied.
+     * @param router The router to be copied.
      */
-    public Router(final Router router) {
-        this.defaultRoute = router.defaultRoute;
-        this.routes.addAll(router.routes);
+    public Router(Router router) {
+        uriRouter.addAllRoutes(router.uriRouter);
     }
 
     /**
-     * Adds all of the routes defined in the provided router to this router. New
-     * routes may be added while this router is processing requests.
+     * Adds all of the routes defined in the provided router to this router. New routes may be added while this router
+     * is processing requests.
      *
-     * @param router
-     *            The router whose routes are to be copied into this router.
+     * @param router The router whose routes are to be copied into this router.
      * @return This router.
      */
-    public Router addAllRoutes(final Router router) {
-        if (this != router) {
-            routes.addAll(router.routes);
-        }
+    public Router addAllRoutes(Router router) {
+        uriRouter.addAllRoutes(router.uriRouter);
         return this;
     }
 
     /**
-     * Adds a new route to this router for the provided collection resource
-     * provider. New routes may be added while this router is processing
-     * requests.
-     * <p>
-     * The provided URI template must match the resource collection itself, not
-     * resource instances. For example:
+     * <p>Adds a new route to this router for the provided collection resource provider. New routes may be added while
+     * this router is processing requests.</p>
+     *
+     * <p>The provided URI template must match the resource collection itself, not resource instances. For example:</p>
      *
      * <pre>
      * CollectionResourceProvider users = ...;
@@ -137,227 +121,172 @@ public final class Router implements RequestHandler {
      * router.addRoute("users/{userId}", users);
      * </pre>
      *
-     * @param uriTemplate
-     *            The URI template which request resource names must match.
-     * @param provider
-     *            The collection resource provider to which matching requests
-     *            will be routed.
-     * @return An opaque handle for the route which may be used for removing the
-     *         route later.
+     * @param uriTemplate The URI template which request resource names must match.
+     * @param provider The collection resource provider to which matching requests will be routed.
+     * @return An opaque handle for the route which may be used for removing the route later.
      */
-    public Route addRoute(final String uriTemplate,
-            final CollectionResourceProvider provider) {
-        return addRoute(STARTS_WITH, uriTemplate, newCollection(provider));
+    public Route addRoute(String uriTemplate, CollectionResourceProvider provider) {
+        return uriRouter.addRoute(uriTemplate, provider);
     }
 
     /**
-     * Adds a new route to this router for the provided request handler. New
-     * routes may be added while this router is processing requests.
+     * Adds a new route to this router for the provided singleton resource provider. New routes may be added while this
+     * router is processing requests.
      *
-     * @param mode
-     *            Indicates how the URI template should be matched against
-     *            resource names.
-     * @param uriTemplate
-     *            The URI template which request resource names must match.
-     * @param handler
-     *            The request handler to which matching requests will be routed.
-     * @return An opaque handle for the route which may be used for removing the
-     *         route later.
+     * @param uriTemplate The URI template which request resource names must match.
+     * @param provider The singleton resource provider to which matching requests will be routed.
+     * @return An opaque handle for the route which may be used for removing the route later.
      */
-    public Route addRoute(final RoutingMode mode, final String uriTemplate,
-            final RequestHandler handler) {
-        return addRoute(new Route(mode, uriTemplate, handler));
+    public Route addRoute(String uriTemplate, SingletonResourceProvider provider) {
+        return uriRouter.addRoute(uriTemplate, provider);
     }
 
     /**
-     * Adds a new route to this router for the provided singleton resource
-     * provider. New routes may be added while this router is processing
-     * requests.
+     * Adds a new route to this router for the provided request handler. New routes may be added while this router is
+     * processing requests.
      *
-     * @param uriTemplate
-     *            The URI template which request resource names must match.
-     * @param provider
-     *            The singleton resource provider to which matching requests
-     *            will be routed.
-     * @return An opaque handle for the route which may be used for removing the
-     *         route later.
+     * @param mode Indicates how the URI template should be matched against resource names.
+     * @param uriTemplate The URI template which request resource names must match.
+     * @param handler The request handler to which matching requests will be routed.
+     * @return An opaque handle for the route which may be used for removing the route later.
      */
-    public Route addRoute(final String uriTemplate,
-            final SingletonResourceProvider provider) {
-        return addRoute(EQUALS, uriTemplate, newSingleton(provider));
+    public Route addRoute(RoutingMode mode, String uriTemplate, RequestHandler handler) {
+        return uriRouter.addRoute(mode, uriTemplate, handler);
     }
 
     /**
-     * Returns the request handler to be used as the default route for requests
-     * which do not match any of the other defined routes.
+     * Sets the request handler to be used as the default route for requests which do not match any of the other defined
+     * routes.
+     *
+     * @param handler The request handler to be used as the default route.
+     * @return This router.
+     */
+    public Router setDefaultRoute(final RequestHandler handler) {
+        uriRouter.setDefaultRoute(handler);
+        return this;
+    }
+
+    /**
+     * Returns the request handler to be used as the default route for requests which do not match any of the other
+     * defined routes.
      *
      * @return The request handler to be used as the default route.
      */
     public RequestHandler getDefaultRoute() {
-        return defaultRoute;
-    }
-
-    @Override
-    public void handleAction(final ServerContext context, final ActionRequest request,
-            final ResultHandler<JsonValue> handler) {
-        try {
-            final RouteMatcher bestMatch = getBestRoute(context, request);
-            final ActionRequest routedRequest = bestMatch.wasRouted()
-                    ? copyOfActionRequest(request).setResourceName(bestMatch.getRemaining())
-                    : request;
-            bestMatch.getRequestHandler().handleAction(bestMatch.getServerContext(), routedRequest, handler);
-        } catch (final ResourceException e) {
-            handler.handleError(e);
-        }
-    }
-
-    @Override
-    public void handleCreate(final ServerContext context, final CreateRequest request,
-            final ResultHandler<Resource> handler) {
-        try {
-            final RouteMatcher bestMatch = getBestRoute(context, request);
-            final CreateRequest routedRequest = bestMatch.wasRouted()
-                    ? copyOfCreateRequest(request).setResourceName(bestMatch.getRemaining())
-                    : request;
-            bestMatch.getRequestHandler().handleCreate(bestMatch.getServerContext(), routedRequest, handler);
-        } catch (final ResourceException e) {
-            handler.handleError(e);
-        }
-    }
-
-    @Override
-    public void handleDelete(final ServerContext context, final DeleteRequest request,
-            final ResultHandler<Resource> handler) {
-        try {
-            final RouteMatcher bestMatch = getBestRoute(context, request);
-            final DeleteRequest routedRequest = bestMatch.wasRouted()
-                    ? copyOfDeleteRequest(request).setResourceName(bestMatch.getRemaining())
-                    : request;
-            bestMatch.getRequestHandler().handleDelete(bestMatch.getServerContext(), routedRequest, handler);
-        } catch (final ResourceException e) {
-            handler.handleError(e);
-        }
-    }
-
-    @Override
-    public void handlePatch(final ServerContext context, final PatchRequest request,
-            final ResultHandler<Resource> handler) {
-        try {
-            final RouteMatcher bestMatch = getBestRoute(context, request);
-            final PatchRequest routedRequest = bestMatch.wasRouted()
-                    ? copyOfPatchRequest(request).setResourceName(bestMatch.getRemaining())
-                    : request;
-            bestMatch.getRequestHandler().handlePatch(bestMatch.getServerContext(), routedRequest, handler);
-        } catch (final ResourceException e) {
-            handler.handleError(e);
-        }
-    }
-
-    @Override
-    public void handleQuery(final ServerContext context, final QueryRequest request,
-            final QueryResultHandler handler) {
-        try {
-            final RouteMatcher bestMatch = getBestRoute(context, request);
-            final QueryRequest routedRequest = bestMatch.wasRouted()
-                    ? copyOfQueryRequest(request).setResourceName(bestMatch.getRemaining())
-                    : request;
-            bestMatch.getRequestHandler().handleQuery(bestMatch.getServerContext(), routedRequest, handler);
-        } catch (final ResourceException e) {
-            handler.handleError(e);
-        }
-    }
-
-    @Override
-    public void handleRead(final ServerContext context, final ReadRequest request,
-            final ResultHandler<Resource> handler) {
-        try {
-            final RouteMatcher bestMatch = getBestRoute(context, request);
-            final ReadRequest routedRequest = bestMatch.wasRouted()
-                    ? copyOfReadRequest(request).setResourceName(bestMatch.getRemaining())
-                    : request;
-            bestMatch.getRequestHandler().handleRead(bestMatch.getServerContext(), routedRequest, handler);
-        } catch (final ResourceException e) {
-            handler.handleError(e);
-        }
-    }
-
-    @Override
-    public void handleUpdate(final ServerContext context, final UpdateRequest request,
-            final ResultHandler<Resource> handler) {
-        try {
-            final RouteMatcher bestMatch = getBestRoute(context, request);
-            final UpdateRequest routedRequest = bestMatch.wasRouted()
-                    ? copyOfUpdateRequest(request).setResourceName(bestMatch.getRemaining())
-                    : request;
-            bestMatch.getRequestHandler().handleUpdate(bestMatch.getServerContext(), routedRequest, handler);
-        } catch (final ResourceException e) {
-            handler.handleError(e);
-        }
+        return uriRouter.getDefaultRoute();
     }
 
     /**
-     * Removes all of the routes from this router. Routes may be removed while
-     * this router is processing requests.
+     * <p>Initiates the creation of a new route, to a versioned resource, on this router for the provided URI template.
+     * The route is not actually added to the router until a specific version and request handler has been specified by
+     * calling #addVersion on the return {@code VersionHandler}.</p>
+     *
+     * <p>Use this method when adding routes to {@link CollectionResourceProvider}s and
+     * {@link SingletonResourceProvider}s. To add routes to {@link RequestHandler}s use the
+     * {@link #addRoute(RoutingMode, String)} method.</p>
+     *
+     * @param uriTemplate The URI template which request resource names must match.
+     * @return An {@code VersionHandler} instance to add resource version routes on.
+     */
+    public VersionRouter addRoute(String uriTemplate) {
+        return addRoute(null, uriTemplate);
+    }
+
+    /**
+     * <p>Initiates the creation of a new route, to a versioned resource, on this router for the provided URI template.
+     * The route is not actually added to the router until a specific version and request handler has been specified by
+     * calling #addVersion on the return {@code VersionHandler}.</p>
+     *
+     * <p>Use this method when adding routes to {@link RequestHandler}s. To add routes to
+     * {@link CollectionResourceProvider}s and {@link SingletonResourceProvider}s use the
+     * {@link #addRoute(String)} method.</p>
+     *
+     * @param mode Indicates how the URI template should be matched against resource names.
+     * @param uriTemplate The URI template which request resource names must match.
+     * @return An {@code VersionHandler} instance to add resource version routes on.
+     */
+    public VersionRouter addRoute(RoutingMode mode, String uriTemplate) {
+        VersionRouter versionRouter = new VersionRouter(this, mode, uriTemplate);
+        if (defaultVersioningToLatest != null) {
+            if (defaultVersioningToLatest) {
+                versionRouter.defaultToLatest();
+            } else {
+                versionRouter.defaultToOldest();
+            }
+        }
+        return versionRouter;
+    }
+
+    /**
+     * Sets the behaviour of the version routing process to always use the latest resource version when the requested
+     * version is {@code null}.
+     */
+    public Router setVersioningToDefaultToLatest() {
+        defaultVersioningToLatest = true;
+        return this;
+    }
+
+    /**
+     * Sets the behaviour of the version routing process to always use the oldest resource version when the requested
+     * version is {@code null}.
+     */
+    public Router setVersioningToDefaultToOldest() {
+        defaultVersioningToLatest = false;
+        return this;
+    }
+
+    @Override
+    public void handleAction(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
+        uriRouter.handleAction(context, request, handler);
+    }
+
+    @Override
+    public void handleCreate(ServerContext context, CreateRequest request, ResultHandler<Resource> handler) {
+        uriRouter.handleCreate(context, request, handler);
+    }
+
+    @Override
+    public void handleDelete(ServerContext context, DeleteRequest request, ResultHandler<Resource> handler) {
+        uriRouter.handleDelete(context, request, handler);
+    }
+
+    @Override
+    public void handlePatch(ServerContext context, PatchRequest request, ResultHandler<Resource> handler) {
+        uriRouter.handlePatch(context, request, handler);
+    }
+
+    @Override
+    public void handleQuery(ServerContext context, QueryRequest request, QueryResultHandler handler) {
+        uriRouter.handleQuery(context, request, handler);
+    }
+
+    @Override
+    public void handleRead(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
+        uriRouter.handleRead(context, request, handler);
+    }
+
+    @Override
+    public void handleUpdate(ServerContext context, UpdateRequest request, ResultHandler<Resource> handler) {
+        uriRouter.handleUpdate(context, request, handler);
+    }
+
+    /**
+     * Removes all of the routes from this router. Routes may be removed while this router is processing requests.
      *
      * @return This router.
      */
     public Router removeAllRoutes() {
-        routes.clear();
+        uriRouter.removeAllRoutes();
         return this;
     }
 
     /**
-     * Removes one or more routes from this router. Routes may be removed while
-     * this router is processing requests.
+     * Removes one or more routes from this router. Routes may be removed while this router is processing requests.
      *
-     * @param routes
-     *            The routes to be removed.
+     * @param routes The routes to be removed.
      * @return {@code true} if at least one of the routes was found and removed.
      */
-    public boolean removeRoute(final Route... routes) {
-        boolean isModified = false;
-        for (final Route route : routes) {
-            isModified |= this.routes.remove(route);
-        }
-        return isModified;
-    }
-
-    /**
-     * Sets the request handler to be used as the default route for requests
-     * which do not match any of the other defined routes.
-     *
-     * @param handler
-     *            The request handler to be used as the default route.
-     * @return This router.
-     */
-    public Router setDefaultRoute(final RequestHandler handler) {
-        this.defaultRoute = handler;
-        return this;
-    }
-
-    Route addRoute(final Route route) {
-        routes.add(route);
-        return route;
-    }
-
-    private RouteMatcher getBestRoute(final ServerContext context, final Request request)
-            throws ResourceException {
-        RouteMatcher bestMatcher = null;
-        for (final Route route : routes) {
-            final RouteMatcher matcher = route.getRouteMatcher(context, request);
-            if (matcher != null && matcher.isBetterMatchThan(bestMatcher)) {
-                bestMatcher = matcher;
-            }
-        }
-        if (bestMatcher != null) {
-            return bestMatcher;
-        }
-        final RequestHandler handler = defaultRoute;
-        if (handler != null) {
-            return new RouteMatcher(context, handler);
-        }
-        // TODO: i18n
-        throw new NotFoundException(String.format("Resource '%s' not found", request
-                .getResourceName()));
+    public boolean removeRoute(final UriRoute... routes) {
+        return uriRouter.removeRoute(routes);
     }
 }
