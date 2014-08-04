@@ -26,13 +26,12 @@ public final class Version implements Comparable<Version> {
 
     static {
         for (int i = 0; i < DOT_ZERO_CACHE.length; i++) {
-            DOT_ZERO_CACHE[i] = new Version(i, 0, null);
+            DOT_ZERO_CACHE[i] = new Version(i, 0);
         }
     }
 
     private final int major;
     private final int minor;
-    private final String s;
 
     /**
      * Creates a new version using the provided version information.
@@ -45,7 +44,10 @@ public final class Version implements Comparable<Version> {
      * @return The version.
      */
     public static Version valueOf(final int major, final int minor) {
-        return valueOf(major, minor, null);
+        if (minor == 0 && major >= 0 && major < DOT_ZERO_CACHE.length) {
+            return DOT_ZERO_CACHE[major];
+        }
+        return new Version(major, minor);
     }
 
     /**
@@ -60,17 +62,9 @@ public final class Version implements Comparable<Version> {
         return valueOf(major, 0);
     }
 
-    private static Version valueOf(final int major, final int minor, final String s) {
-        if (minor == 0 && major >= 0 && major < DOT_ZERO_CACHE.length) {
-            return DOT_ZERO_CACHE[major];
-        }
-        return new Version(major, minor, s);
-    }
-
-    private Version(final int major, final int minor, final String s) {
+    private Version(final int major, final int minor) {
         this.major = major;
         this.minor = minor;
-        this.s = s != null ? s : (major + "." + minor);
     }
 
     /**
@@ -97,7 +91,7 @@ public final class Version implements Comparable<Version> {
         }
         final int major = Integer.parseInt(fields[0]);
         final int minor = fields.length > 1 ? Integer.parseInt(fields[1]) : 0;
-        return valueOf(major, minor, s);
+        return valueOf(major, minor);
     }
 
     /**
@@ -129,7 +123,7 @@ public final class Version implements Comparable<Version> {
             return true;
         } else if (obj instanceof Version) {
             final Version that = (Version) obj;
-            return major == that.major && minor == that.minor;
+            return this.compareTo(that) == 0;
         } else {
             return false;
         }
@@ -148,8 +142,30 @@ public final class Version implements Comparable<Version> {
 
     @Override
     public String toString() {
-        return s;
+        return major + "." + minor;
     }
 
+    /**
+     * Returns {@code false} if:
+     * <ul>
+     *     <li>
+     *         the MAJOR version numbers are not the same.
+     *     </li>
+     *     <li>
+     *         Returns {@code false} if the MAJOR version numbers are the same but {@code this} MINOR version number is
+     *         LOWER than {@code that} MINOR version number.
+     *     </li>
+     * </ul>
+     *
+     * <p>i.e. this version number - "2.0", that version number - "2.1" WILL NOT match, but this version number - "2.4",
+     * that version number - "2.1" WILL match.</p>
+     *
+     * @param that The {@code Version} to match against.
+     * @return {@code true} if both MAJOR version numbers are the same and if {@code this} MINOR version number is
+     * HIGHER than {@code that} MINOR version number.
+     */
+    public boolean isCompatibleWith(Version that) {
+        return that != null && this.major == that.major && this.minor >= that.minor;
+    }
 }
 
