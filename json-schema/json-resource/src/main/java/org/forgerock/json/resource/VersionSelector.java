@@ -31,7 +31,7 @@ import java.util.TreeMap;
  */
 public class VersionSelector {
 
-    private boolean defaultToLatest = true;
+    private DefaultVersionBehaviour defaultBehaviour = DefaultVersionBehaviour.LATEST;
 
     /**
      * Constructs a new VersionSelector instance with the default versioning behaviour of selecting the latest resource
@@ -65,10 +65,17 @@ public class VersionSelector {
         SortedMap<Version, T> sortedCandidates = sort(candidates);
 
         if (requested == null) {
-            if (!defaultToLatest) {
-                return candidates.get(sortedCandidates.lastKey());
-            } else {
-                return candidates.get(sortedCandidates.firstKey());
+            switch (defaultBehaviour) {
+                case LATEST: {
+                    return candidates.get(sortedCandidates.firstKey());
+                }
+                case OLDEST: {
+                    return candidates.get(sortedCandidates.lastKey());
+                }
+                default: {
+                    //TODO i18n
+                    throw new NotFoundException("No resource version specified.");
+                }
             }
         }
 
@@ -87,7 +94,7 @@ public class VersionSelector {
      * is {@code null}.
      */
     public void defaultToLatest() {
-        this.defaultToLatest = true;
+        this.defaultBehaviour = DefaultVersionBehaviour.LATEST;
     }
 
     /**
@@ -95,7 +102,15 @@ public class VersionSelector {
      * is {@code null}.
      */
     public void defaultToOldest() {
-        this.defaultToLatest = false;
+        this.defaultBehaviour = DefaultVersionBehaviour.OLDEST;
+    }
+
+    /**
+     * Removes the default behaviour of the selection process which will result in {@code NotFoundException}s when the
+     * requested version is {@code null}.
+     */
+    public void noDefault() {
+        this.defaultBehaviour = DefaultVersionBehaviour.NONE;
     }
 
     /**
@@ -109,5 +124,14 @@ public class VersionSelector {
         SortedMap<Version, T> sortedMap = new TreeMap<Version, T>(Collections.reverseOrder());
         sortedMap.putAll(map);
         return sortedMap;
+    }
+
+    /**
+     * Enum for describing the default behaviour when no resource version is requested.
+     */
+    enum DefaultVersionBehaviour {
+        LATEST,
+        OLDEST,
+        NONE
     }
 }
