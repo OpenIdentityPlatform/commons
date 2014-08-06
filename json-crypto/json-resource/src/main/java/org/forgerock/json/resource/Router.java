@@ -18,6 +18,9 @@ package org.forgerock.json.resource;
 
 import org.forgerock.json.fluent.JsonValue;
 
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
+
 /**
  * <p>A request handler which routes requests using URI template matching against the request's resource name and based
  * on a version of a resource.</p>
@@ -75,6 +78,7 @@ public final class Router implements RequestHandler {
     private final UriRouter uriRouter = new UriRouter();
     private VersionSelector.DefaultVersionBehaviour defaultVersioningBehaviour =
             VersionSelector.DefaultVersionBehaviour.LATEST;
+    private final Set<VersionRouter> versionRouters = new CopyOnWriteArraySet<VersionRouter>();
 
     /**
      * Creates a new router with no routes defined.
@@ -208,6 +212,12 @@ public final class Router implements RequestHandler {
      */
     public VersionRouter addRoute(RoutingMode mode, String uriTemplate) {
         VersionRouter versionRouter = new VersionRouter(this, mode, uriTemplate);
+        setVersionRouterDefaultBehaviour(versionRouter);
+        versionRouters.add(versionRouter);
+        return versionRouter;
+    }
+
+    private void setVersionRouterDefaultBehaviour(VersionRouter versionRouter) {
         switch (defaultVersioningBehaviour) {
             case LATEST: {
                 versionRouter.defaultToLatest();
@@ -221,7 +231,12 @@ public final class Router implements RequestHandler {
                 versionRouter.noDefault();
             }
         }
-        return versionRouter;
+    }
+
+    private void updateVersionRoutersDefaultBehaviour() {
+        for (VersionRouter versionRouter : versionRouters) {
+            setVersionRouterDefaultBehaviour(versionRouter);
+        }
     }
 
     /**
@@ -230,6 +245,7 @@ public final class Router implements RequestHandler {
      */
     public Router setVersioningToDefaultToLatest() {
         defaultVersioningBehaviour = VersionSelector.DefaultVersionBehaviour.LATEST;
+        updateVersionRoutersDefaultBehaviour();
         return this;
     }
 
@@ -239,6 +255,7 @@ public final class Router implements RequestHandler {
      */
     public Router setVersioningToDefaultToOldest() {
         defaultVersioningBehaviour = VersionSelector.DefaultVersionBehaviour.OLDEST;
+        updateVersionRoutersDefaultBehaviour();
         return this;
     }
 
@@ -248,6 +265,7 @@ public final class Router implements RequestHandler {
      */
     public Router setVersioningToDefaultToNone() {
         defaultVersioningBehaviour = VersionSelector.DefaultVersionBehaviour.NONE;
+        updateVersionRoutersDefaultBehaviour();
         return this;
     }
 
