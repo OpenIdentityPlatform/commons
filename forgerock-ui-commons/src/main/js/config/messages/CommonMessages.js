@@ -39,6 +39,10 @@ define("config/messages/CommonMessages", [
                 msg: "config.messages.CommonMessages.loginFailureLockout",
                 type: "error"
             },
+            "invalidRealm": {
+                msg: "config.messages.CommonMessages.invalidRealm",
+                type: "error"
+            },   
             "serviceUnavailable": {
                 msg: "config.messages.CommonMessages.serviceUnavailable",
                 type: "error"
