@@ -73,7 +73,8 @@ import org.forgerock.json.fluent.JsonValue;
 public final class Router implements RequestHandler {
 
     private final UriRouter uriRouter = new UriRouter();
-    private Boolean defaultVersioningToLatest;
+    private VersionSelector.DefaultVersionBehaviour defaultVersioningBehaviour =
+            VersionSelector.DefaultVersionBehaviour.LATEST;
 
     /**
      * Creates a new router with no routes defined.
@@ -207,11 +208,17 @@ public final class Router implements RequestHandler {
      */
     public VersionRouter addRoute(RoutingMode mode, String uriTemplate) {
         VersionRouter versionRouter = new VersionRouter(this, mode, uriTemplate);
-        if (defaultVersioningToLatest != null) {
-            if (defaultVersioningToLatest) {
+        switch (defaultVersioningBehaviour) {
+            case LATEST: {
                 versionRouter.defaultToLatest();
-            } else {
+                break;
+            }
+            case OLDEST: {
                 versionRouter.defaultToOldest();
+                break;
+            }
+            default: {
+                versionRouter.noDefault();
             }
         }
         return versionRouter;
@@ -222,7 +229,7 @@ public final class Router implements RequestHandler {
      * version is {@code null}.
      */
     public Router setVersioningToDefaultToLatest() {
-        defaultVersioningToLatest = true;
+        defaultVersioningBehaviour = VersionSelector.DefaultVersionBehaviour.LATEST;
         return this;
     }
 
@@ -231,7 +238,16 @@ public final class Router implements RequestHandler {
      * version is {@code null}.
      */
     public Router setVersioningToDefaultToOldest() {
-        defaultVersioningToLatest = false;
+        defaultVersioningBehaviour = VersionSelector.DefaultVersionBehaviour.OLDEST;
+        return this;
+    }
+
+    /**
+     * Removes the default behaviour of the version routing process which will result in {@code NotFoundException}s when
+     * the requested version is {@code null}.
+     */
+    public Router setVersioningToDefaultToNone() {
+        defaultVersioningBehaviour = VersionSelector.DefaultVersionBehaviour.NONE;
         return this;
     }
 

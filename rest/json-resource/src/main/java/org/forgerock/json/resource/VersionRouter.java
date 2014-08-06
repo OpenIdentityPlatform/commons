@@ -173,6 +173,15 @@ public final class VersionRouter implements RequestHandler {
     }
 
     /**
+     * Removes the default behaviour of the version routing process which will result in {@code NotFoundException}s when
+     * the requested version is {@code null}.
+     */
+    VersionRouter noDefault() {
+        VERSION_SELECTOR.noDefault();
+        return this;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
