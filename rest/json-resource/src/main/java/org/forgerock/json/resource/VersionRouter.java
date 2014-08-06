@@ -83,6 +83,7 @@ public final class VersionRouter implements RequestHandler {
     private final Router uriRouter = new Router();
     private VersionSelector.DefaultVersionBehaviour defaultVersioningBehaviour =
             VersionSelector.DefaultVersionBehaviour.LATEST;
+    private final Set<VersionRouterImpl> versionRouters = new CopyOnWriteArraySet<VersionRouterImpl>();
 
     /**
      * Creates a new router with no routes defined.
@@ -194,6 +195,33 @@ public final class VersionRouter implements RequestHandler {
      */
     public VersionHandler addRoute(RoutingMode mode, String uriTemplate) {
         VersionRouterImpl versionRouter = new VersionRouterImpl();
+        setVersionRouterDefaultBehaviour(versionRouter);
+        return new VersionHandler(this, mode, versionRouter, uriTemplate);
+    }
+
+    /**
+     * Sets the request handler to be used as the default route for requests which do not match any of the other
+     * defined routes.
+     *
+     * @param handler The request handler to be used as the default route.
+     * @return This router.
+     */
+    public VersionRouter setDefaultRoute(RequestHandler handler) {
+        this.uriRouter.setDefaultRoute(handler);
+        return this;
+    }
+
+    /**
+     * Returns the request handler to be used as the default route for requests which do not match any of the other
+     * defined routes.
+     *
+     * @return The request handler to be used as the default route.
+     */
+    public RequestHandler getDefaultRoute() {
+        return uriRouter.getDefaultRoute();
+    }
+
+    private void setVersionRouterDefaultBehaviour(VersionRouterImpl versionRouter) {
         switch (defaultVersioningBehaviour) {
             case LATEST: {
                 versionRouter.defaultToLatest();
@@ -207,7 +235,12 @@ public final class VersionRouter implements RequestHandler {
                 versionRouter.noDefault();
             }
         }
-        return new VersionHandler(this, mode, versionRouter, uriTemplate);
+    }
+
+    private synchronized void updateVersionRoutersDefaultBehaviour() {
+        for (VersionRouterImpl versionRouter : versionRouters) {
+            setVersionRouterDefaultBehaviour(versionRouter);
+        }
     }
 
     /**
@@ -216,6 +249,7 @@ public final class VersionRouter implements RequestHandler {
      */
     public VersionRouter setVersioningToDefaultToLatest() {
         defaultVersioningBehaviour = VersionSelector.DefaultVersionBehaviour.LATEST;
+        updateVersionRoutersDefaultBehaviour();
         return this;
     }
 
@@ -225,6 +259,7 @@ public final class VersionRouter implements RequestHandler {
      */
     public VersionRouter setVersioningToDefaultToOldest() {
         defaultVersioningBehaviour = VersionSelector.DefaultVersionBehaviour.OLDEST;
+        updateVersionRoutersDefaultBehaviour();
         return this;
     }
 
@@ -234,6 +269,7 @@ public final class VersionRouter implements RequestHandler {
      */
     public VersionRouter setVersioningBehaviourToNone() {
         defaultVersioningBehaviour = VersionSelector.DefaultVersionBehaviour.NONE;
+        updateVersionRoutersDefaultBehaviour();
         return this;
     }
 
