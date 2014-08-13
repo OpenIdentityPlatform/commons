@@ -27,6 +27,7 @@ import org.testng.annotations.Test;
 import java.util.List;
 import java.util.Map;
 
+import static org.forgerock.caf.authn.AuditParameters.auditParams;
 import static org.forgerock.caf.authn.AuthModuleParameters.moduleArray;
 import static org.forgerock.caf.authn.AuthModuleParameters.moduleParams;
 import static org.forgerock.caf.authn.BodyMatcher.exceptionMatcher;
@@ -75,7 +76,7 @@ public class UnsupportedMessageTypesIT {
             {"Session Module Only - Unsupported Message Types",
                 moduleParams(AuthModuleUnsupportedMessageTypes.class, null, null, null),
                 moduleArray(), 500, false, exceptionMatcher(500),
-                null
+                auditParams(null, null, false)
             },
             /**
              * Single Auth Module Only - SUCCESS:SEND_FAILURE
@@ -103,7 +104,7 @@ public class UnsupportedMessageTypesIT {
                 moduleArray(moduleParams(AuthModuleUnsupportedMessageTypes.class, null, null, null)), 500,
                 false,
                 exceptionMatcher(500),
-                null
+                auditParams(null, null, false)
             },
         };
     }

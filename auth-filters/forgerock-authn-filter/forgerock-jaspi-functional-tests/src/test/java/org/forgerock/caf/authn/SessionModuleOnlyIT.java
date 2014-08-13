@@ -27,16 +27,16 @@ import org.testng.annotations.Test;
 import java.util.List;
 import java.util.Map;
 
+import static org.forgerock.caf.authn.AuditParameters.Entry.entry;
 import static org.forgerock.caf.authn.AuditParameters.auditParams;
 import static org.forgerock.caf.authn.AuthModuleParameters.moduleArray;
 import static org.forgerock.caf.authn.AuthModuleParameters.moduleParams;
-import static org.forgerock.caf.authn.BodyMatcher.exceptionMatcher;
-import static org.forgerock.caf.authn.BodyMatcher.noData;
-import static org.forgerock.caf.authn.BodyMatcher.resourceMatcher;
+import static org.forgerock.caf.authn.BodyMatcher.*;
 import static org.forgerock.caf.authn.TestFramework.runTest;
 import static org.forgerock.caf.authn.TestFramework.setUpConnection;
 import static org.forgerock.caf.authn.test.modules.SessionAuthModule.*;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
 
 /**
  * Functional tests for the JASPI runtime when configured with just a "Session" auth module.
@@ -72,7 +72,8 @@ public class SessionModuleOnlyIT {
              *
              */
             {
-                "No Modules", null, moduleArray(), 401, false, exceptionMatcher(401), auditParams("FAILURE")
+                "No Modules", null, moduleArray(), 401, false, exceptionMatcher(401),
+                    auditParams("FAILED", null, false)
             },
             /**
              * Session Module Only - SEND_SUCCESS:AuthException
@@ -86,15 +87,19 @@ public class SessionModuleOnlyIT {
              *
              * Expected Result:
              * * HTTP 200 status
-//                 * * Does not audit Session Module success
-             * * Does not audit overall result as success
+             * * Audit Session Module success
+             * * Audit overall result as success
+             * * Audit record contains principal
+             * * Audit record does not contain session id
 //                 * * No state cookie on response
              * * Requested resource not called (resource will set header 'RESOURCE_CALLED':true on response)
              *
              */
             {"Session Module Only - SEND_SUCCESS:AuthException",
                 moduleParams(SessionAuthModule.class, "SESSION", SEND_SUCCESS_AUTH_STATUS, null),
-                moduleArray(), 200, false, noData(), null
+                moduleArray(), 200, false, noData(),
+                auditParams("SUCCESSFUL", SESSION_MODULE_PRINCIPAL, false,
+                        entry("Session-SessionAuthModule", "SUCCESSFUL"))
             },
             /**
              * Session Module Only - SEND_FAILURE:AuthException
@@ -108,15 +113,18 @@ public class SessionModuleOnlyIT {
              *
              * Expected Result:
              * * HTTP 401 status
-//                 * * Audit Session Module failure
+             * * Audit Session Module failure
              * * Audit overall result as failure
+             * * Audit record contains principal - only if set by module (optional)
+             * * Audit record does not contain session id
 //                 * * No state cookie on response
              * * Requested resource not called (resource will set header 'RESOURCE_CALLED':true on response)
              *
              */
             {"Session Module Only - SEND_FAILURE:AuthException",
                 moduleParams(SessionAuthModule.class, "SESSION", SEND_FAILURE_AUTH_STATUS, null),
-                moduleArray(), 401, false, exceptionMatcher(401), auditParams("FAILURE")
+                moduleArray(), 401, false, exceptionMatcher(401),
+                auditParams("FAILED", null, false, entry("Session-SessionAuthModule", "FAILED"))
             },
             /**
              * Session Module Only - SEND_CONTINUE:AuthException
@@ -125,12 +133,11 @@ public class SessionModuleOnlyIT {
              * * Session Module configured
              * * No Auth Modules configured
              * * Session Module #validateRequest will return SEND_CONTINUE
-//                 * * Session Module will set HTTP 100 status
              * * Session Module #secureResponse will throw AuthException (but should not be called)
              *
              *
              * Expected Result:
-//                * ** HTTP response requesting more information from the client (contents of response are out of scope)
+             * ** HTTP response requesting more information from the client (contents of response are out of scope)
              * ** No auditing to occur
 //                 * ** State cookie on response
              * * Requested resource not called (resource will set header 'RESOURCE_CALLED':true on response)
@@ -153,15 +160,20 @@ public class SessionModuleOnlyIT {
              * Expected Result:
              * * HTTP 500 status
              * * HTTP response detailing the cause of the failure
-//                 * * Audit Session Module failure
+             * * Audit Session Module failure
              * * Audit overall result as failure
+             * * Audit record does not contain principal
+             * * Audit record does not contain session id
 //                 * * No state cookie on response
              * * Requested resource not called (resource will set header 'RESOURCE_CALLED':true on response)
              *
              */
             {"Session Module Only - AuthException:SEND_SUCCESS",
                 moduleParams(SessionAuthModule.class, "SESSION", null, SEND_SUCCESS_AUTH_STATUS),
-                moduleArray(), 500, false, exceptionMatcher(500), auditParams("FAILURE")
+                moduleArray(), 500, false, exceptionMatcher(500),
+                    auditParams("FAILED", null, false, entry("Session-SessionAuthModule", "FAILED",
+                            equalTo(SESSION_VALIDATE_REQUEST_HEADER_NAME
+                                    + " header not set, so throwing AuthException.")))
             },
             /**
              * Session Module Only - SUCCESS:SEND_SUCCESS
@@ -177,8 +189,10 @@ public class SessionModuleOnlyIT {
              * Expected Result:
              * * HTTP 200 status
              * * HTTP response from resource
-//                 * * Does not audit Session Module success
-             * * Does not audit overall result as success
+             * * Audit Session Module success
+             * * Audit overall result as success
+             * * Audit record contains principal
+             * * Audit record contains session id
 //                 * * No state cookie on response
              * * Requested resource called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -186,7 +200,8 @@ public class SessionModuleOnlyIT {
             {"Session Module Only - SUCCESS:SEND_SUCCESS",
                 moduleParams(SessionAuthModule.class, "SESSION", SUCCESS_AUTH_STATUS, SEND_SUCCESS_AUTH_STATUS),
                 moduleArray(), 200, true, resourceMatcher(SESSION_MODULE_PRINCIPAL, SESSION_MODULE_CONTEXT_ENTRY),
-                null
+                auditParams("SUCCESSFUL", SESSION_MODULE_PRINCIPAL, true,
+                        entry("Session-SessionAuthModule", "SUCCESSFUL"))
             },
             /**
              * Session Module Only - SUCCESS:SEND_FAILURE
@@ -202,8 +217,10 @@ public class SessionModuleOnlyIT {
              * Expected Result:
              * * HTTP 500 status
              * * HTTP response from resource
-//                 * * Does not audit Session Module success
-             * * Does not audit overall result as success
+             * * Audit Session Module success
+             * * Audit overall result as success
+             * * Audit record contains principal
+             * * Audit record does not contain session id
 //                 * * No state cookie on response
              * * Requested resource called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -212,7 +229,8 @@ public class SessionModuleOnlyIT {
                 moduleParams(SessionAuthModule.class, "SESSION", SUCCESS_AUTH_STATUS, SEND_FAILURE_AUTH_STATUS),
                 moduleArray(), 500, true,
                 resourceMatcher(SESSION_MODULE_PRINCIPAL, SESSION_MODULE_CONTEXT_ENTRY),
-                null
+                auditParams("SUCCESSFUL", SESSION_MODULE_PRINCIPAL, false,
+                        entry("Session-SessionAuthModule", "SUCCESSFUL"))
             },
             /**
              * Session Module Only - SUCCESS:AuthException
@@ -228,8 +246,10 @@ public class SessionModuleOnlyIT {
              * Expected Result:
              * * HTTP 500 status
              * * HTTP response from resource
-//                 * * Does not audit Session Module success
-             * * Does not audit overall result as success
+             * * Audit Session Module success
+             * * Audit overall result as success
+             * * Audit record contains principal
+             * * Audit record does not contain session id
 //                 * * No state cookie on response
              * * Requested resource called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -238,7 +258,8 @@ public class SessionModuleOnlyIT {
                 moduleParams(SessionAuthModule.class, "SESSION", SUCCESS_AUTH_STATUS, null),
                 moduleArray(), 500, true,
                 resourceMatcher(SESSION_MODULE_PRINCIPAL, SESSION_MODULE_CONTEXT_ENTRY),
-                null
+                auditParams("SUCCESSFUL", SESSION_MODULE_PRINCIPAL, false,
+                        entry("Session-SessionAuthModule", "SUCCESSFUL"))
             },
         };
     }
@@ -259,8 +280,10 @@ public class SessionModuleOnlyIT {
              * Expected Result:
              * * HTTP 500 status
              * * HTTP response detailing the cause of the failure
-//                 * * Does not audit Session Module failure
-             * * Does not audit overall result as failure
+             * * Audit Session Module failure
+             * * Audit overall result as failure
+             * * Audit record does not contain principal
+             * * Audit record does not contain session id
 //                 * * No state cookie on response
              * * Requested resource not called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -269,7 +292,8 @@ public class SessionModuleOnlyIT {
                 moduleParams(SessionAuthModule.class, "SESSION", FAILURE_AUTH_STATUS, SEND_SUCCESS_AUTH_STATUS),
                 moduleArray(), 500, false,
                 exceptionMatcher(500, containsString("Invalid AuthStatus returned from validateRequest, FAILURE")),
-                null
+                auditParams("FAILED", null, false, entry("Session-SessionAuthModule", "FAILED",
+                        equalTo("Invalid AuthStatus returned from validateRequest, FAILURE")))
             },
             /**
              * Session Module Only - null:SEND_SUCCESS
@@ -284,8 +308,10 @@ public class SessionModuleOnlyIT {
              * Expected Result:
              * * HTTP 500 status
              * * HTTP response detailing the cause of the failure
-//                 * * Does not audit Session Module failure
-             * * Does not audit overall result as failure
+             * * Audit Session Module failure
+             * * Audit overall result as failure
+             * * Audit record does not contain principal
+             * * Audit record does not contain session id
 //                 * * No state cookie on response
              * * Requested resource not called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -294,7 +320,8 @@ public class SessionModuleOnlyIT {
                 moduleParams(SessionAuthModule.class, "SESSION", NULL_AUTH_STATUS, SEND_SUCCESS_AUTH_STATUS),
                 moduleArray(), 500, false,
                 exceptionMatcher(500, containsString("Invalid AuthStatus returned from validateRequest, null")),
-                null
+                auditParams("FAILED", null, false, entry("Session-SessionAuthModule", "FAILED",
+                        equalTo("Invalid AuthStatus returned from validateRequest, null")))
             },
             /**
              * Session Module Only - SUCCESS:SEND_CONTINUE
@@ -310,15 +337,19 @@ public class SessionModuleOnlyIT {
              * Expected Result:
              * * HTTP 200 status
              * * HTTP response from resource
-//                 * * Does not audit Session Module success
-             * * Does not audit overall result as success
+             * * Audit Session Module success
+             * * Audit overall result as success
+             * * Audit record contains principal
+             * * Audit record does not contain session id
 //                 * * No state cookie on response
              * * Requested resource called (resource will set header 'RESOURCE_CALLED':true on response)
              *
              */
             {"Session Module Only - SUCCESS:SEND_CONTINUE",
                 moduleParams(SessionAuthModule.class, "SESSION", SUCCESS_AUTH_STATUS, SEND_CONTINUE_AUTH_STATUS),
-                moduleArray(), 200, true, resourceMatcher(SESSION_MODULE_PRINCIPAL, SESSION_MODULE_CONTEXT_ENTRY), null
+                moduleArray(), 200, true, resourceMatcher(SESSION_MODULE_PRINCIPAL, SESSION_MODULE_CONTEXT_ENTRY),
+                auditParams("SUCCESSFUL", SESSION_MODULE_PRINCIPAL, false,
+                        entry("Session-SessionAuthModule", "SUCCESSFUL"))
             },
             /**
              * Session Module Only - SUCCESS:SUCCESS
@@ -334,8 +365,10 @@ public class SessionModuleOnlyIT {
              * Expected Result:
              * * HTTP 500 status
              * * HTTP response from resource
-//                 * * Does not audit Session Module success
-             * * Does not audit overall result as success
+             * * Audit Session Module success
+             * * Audit overall result as success
+             * * Audit record contains principal
+             * * Audit record does not contain session id
 //                 * * No state cookie on response
              * * Requested resource called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -344,7 +377,8 @@ public class SessionModuleOnlyIT {
                 moduleParams(SessionAuthModule.class, "SESSION", SUCCESS_AUTH_STATUS, SUCCESS_AUTH_STATUS),
                 moduleArray(), 500, true,
                 resourceMatcher(SESSION_MODULE_PRINCIPAL, SESSION_MODULE_CONTEXT_ENTRY),
-                null
+                auditParams("SUCCESSFUL", SESSION_MODULE_PRINCIPAL, false,
+                        entry("Session-SessionAuthModule", "SUCCESSFUL"))
             },
             /**
              * Session Module Only - SUCCESS:FAILURE
@@ -359,8 +393,10 @@ public class SessionModuleOnlyIT {
              * Expected Result:
              * * HTTP 500 status
              * * HTTP response from resource
-//                 * * Does not audit Session Module success
-             * * Does not audit overall result as success
+             * * Audit Session Module success
+             * * Audit overall result as success
+             * * Audit record contains principal
+             * * Audit record does not contain session id
 //                 * * No state cookie on response
              * * Requested resource called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -369,7 +405,8 @@ public class SessionModuleOnlyIT {
                 moduleParams(SessionAuthModule.class, "SESSION", SUCCESS_AUTH_STATUS, FAILURE_AUTH_STATUS),
                 moduleArray(), 500, true,
                 resourceMatcher(SESSION_MODULE_PRINCIPAL, SESSION_MODULE_CONTEXT_ENTRY),
-                null
+                auditParams("SUCCESSFUL", SESSION_MODULE_PRINCIPAL, false,
+                        entry("Session-SessionAuthModule", "SUCCESSFUL"))
             },
             /**
              * Session Module Only - SUCCESS:null
@@ -385,8 +422,10 @@ public class SessionModuleOnlyIT {
              * Expected Result:
              * * HTTP 500 status
              * * HTTP response from resource
-//                 * * Does not audit Session Module success
-             * * Does not audit overall result as success
+             * * Audit Session Module success
+             * * Audit overall result as success
+             * * Audit record contains principal
+             * * Audit record does not contain session id
 //                 * * No state cookie on response
              * * Requested resource called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -395,7 +434,8 @@ public class SessionModuleOnlyIT {
                 moduleParams(SessionAuthModule.class, "SESSION", SUCCESS_AUTH_STATUS, NULL_AUTH_STATUS),
                 moduleArray(), 500, true,
                 resourceMatcher(SESSION_MODULE_PRINCIPAL, SESSION_MODULE_CONTEXT_ENTRY),
-                null
+                auditParams("SUCCESSFUL", SESSION_MODULE_PRINCIPAL, false,
+                        entry("Session-SessionAuthModule", "SUCCESSFUL"))
             },
         };
     }

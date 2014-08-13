@@ -16,6 +16,13 @@
 
 package org.forgerock.caf.authn;
 
+import org.hamcrest.Matcher;
+
+import java.util.Arrays;
+import java.util.List;
+
+import static org.hamcrest.Matchers.nullValue;
+
 /**
  * Object containing the expected audit operations to have been performed.
  *
@@ -23,23 +30,77 @@ package org.forgerock.caf.authn;
  */
 final class AuditParameters {
 
-    private final String expectedOutcome;
+    private final String result;
+    private final String principal;
+    private final boolean sessionPresent;
+    private final List<Entry> entries;
 
-    private AuditParameters(String expectedOutcome) {
-        this.expectedOutcome = expectedOutcome;
+    private AuditParameters(String result, String principal, boolean sessionPresent, List<Entry> entries) {
+        this.result = result;
+        this.principal = principal;
+        this.sessionPresent = sessionPresent;
+        this.entries = entries;
     }
 
     /**
      * Creates a new {@code AuditParameters} object with the given parameters.
      *
-     * @param expectedOutcome The expected audit outcome of the request.
-     * @return An {@code AuditParameters} object/
+     * @param result The expected overall audit result of the request.
+     * @param principal The expected principal to be set in the audit record.
+     * @param sessionPresent Whether a session id should be present in the audit record.
+     * @param entries The expected module entries to be in the audit record.
+     * @return An {@code AuditParameters} object.
      */
-    static AuditParameters auditParams(String expectedOutcome) {
-        return new AuditParameters(expectedOutcome);
+    static AuditParameters auditParams(String result, String principal, boolean sessionPresent, Entry... entries) {
+        return new AuditParameters(result, principal, sessionPresent, Arrays.asList(entries));
     }
 
-    public String expectedOutcome() {
-        return expectedOutcome;
+    public String result() {
+        return result;
+    }
+
+    public String principal() {
+        return principal;
+    }
+
+    public boolean sessionPresent() {
+        return sessionPresent;
+    }
+
+    public List<Entry> entries() {
+        return entries;
+    }
+
+    static final class Entry {
+
+        private final String moduleId;
+        private final String result;
+        private final Matcher<?> reasonMatcher;
+
+        private Entry(String moduleId, String result, Matcher<?> reasonMatcher) {
+            this.moduleId = moduleId;
+            this.result = result;
+            this.reasonMatcher = reasonMatcher;
+        }
+
+        static Entry entry(String moduleId, String result) {
+            return entry(moduleId, result, nullValue());
+        }
+
+        static Entry entry(String moduleId, String result, Matcher<?> reasonMatcher) {
+            return new Entry(moduleId, result, reasonMatcher);
+        }
+
+        public String getModuleId() {
+            return moduleId;
+        }
+
+        public String getResult() {
+            return result;
+        }
+
+        public Matcher<?> getReasonMatcher() {
+            return reasonMatcher;
+        }
     }
 }

@@ -28,6 +28,7 @@ import org.testng.annotations.Test;
 import java.util.List;
 import java.util.Map;
 
+import static org.forgerock.caf.authn.AuditParameters.Entry.entry;
 import static org.forgerock.caf.authn.AuditParameters.auditParams;
 import static org.forgerock.caf.authn.AuthModuleParameters.moduleArray;
 import static org.forgerock.caf.authn.AuthModuleParameters.moduleParams;
@@ -37,7 +38,6 @@ import static org.forgerock.caf.authn.TestFramework.setUpConnection;
 import static org.forgerock.caf.authn.test.modules.AuthModuleOne.AUTH_MODULE_ONE_CONTEXT_ENTRY;
 import static org.forgerock.caf.authn.test.modules.AuthModuleOne.AUTH_MODULE_ONE_PRINCIPAL;
 import static org.forgerock.caf.authn.test.modules.SessionAuthModule.*;
-import static org.forgerock.json.fluent.JsonValue.object;
 
 /**
  * Functional tests for the JASPI runtime when the protected resource causes the response to be committed.
@@ -72,8 +72,10 @@ public class CommittedResponseIT {
              * Expected Result:
              * * HTTP 201 status
              * * HTTP response from resource
-//                 * * Does not audit Session Module success
-             * * Does not audit overall result as success
+             * * Audit Session Module success
+             * * Audit overall result as success
+             * * Audit record contains Session Module principal
+             * * Audit record contains session id
 //                 * * No state cookie on response
              * * Requested resource called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -81,7 +83,8 @@ public class CommittedResponseIT {
             {"Session Module Only - SUCCESS:SEND_SUCCESS",
                 moduleParams(SessionAuthModule.class, "SESSION", SUCCESS_AUTH_STATUS, SEND_SUCCESS_AUTH_STATUS),
                 moduleArray(), 201, true, resourceMatcher(SESSION_MODULE_PRINCIPAL, SESSION_MODULE_CONTEXT_ENTRY),
-                null
+                auditParams("SUCCESSFUL", SESSION_MODULE_PRINCIPAL, true,
+                        entry("Session-SessionAuthModule", "SUCCESSFUL"))
             },
             /**
              * Session Module Only - SUCCESS:SEND_FAILURE
@@ -99,8 +102,10 @@ public class CommittedResponseIT {
              * * HTTP 201 status
              * * No HTTP response detailing the cause of the failure
              * * HTTP response from resource
-//                 * * Does not audit Session Module success
-             * * Does not audit overall result as success
+             * * Audit Session Module success
+             * * Audit overall result as success
+             * * Audit record contains Session Module principal
+             * * Audit record does not contain session id
 //                 * * No state cookie on response
              * * Requested resource called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -109,7 +114,8 @@ public class CommittedResponseIT {
                 moduleParams(SessionAuthModule.class, "SESSION", SUCCESS_AUTH_STATUS, SEND_FAILURE_AUTH_STATUS),
                 moduleArray(), 201, true,
                 resourceMatcher(SESSION_MODULE_PRINCIPAL, SESSION_MODULE_CONTEXT_ENTRY),
-                null
+                auditParams("SUCCESSFUL", SESSION_MODULE_PRINCIPAL, false,
+                        entry("Session-SessionAuthModule", "SUCCESSFUL"))
             },
             /**
              * Session Module Only - SUCCESS:AuthException
@@ -127,8 +133,10 @@ public class CommittedResponseIT {
              * * HTTP 201 status
              * * No HTTP response detailing the cause of the failure
              * * HTTP response from resource
-//                 * * Does not audit Session Module success
-             * * Does not audit overall result as success
+             * * Audit Session Module success
+             * * Audit overall result as success
+             * * Audit record contains Session Module principal
+             * * Audit record does not contain session id
 //                 * * No state cookie on response
              * * Requested resource called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -137,7 +145,8 @@ public class CommittedResponseIT {
                 moduleParams(SessionAuthModule.class, "SESSION", SUCCESS_AUTH_STATUS, null),
                 moduleArray(), 201, true,
                 resourceMatcher(SESSION_MODULE_PRINCIPAL, SESSION_MODULE_CONTEXT_ENTRY),
-                null
+                auditParams("SUCCESSFUL", SESSION_MODULE_PRINCIPAL, false,
+                        entry("Session-SessionAuthModule", "SUCCESSFUL"))
             },
         };
     }
@@ -160,8 +169,10 @@ public class CommittedResponseIT {
              * Expected Result:
              * * HTTP 201 status
              * * HTTP response from resource
-//                 * * Audit Auth Module success
+             * * Audit Auth Module success
              * * Audit overall result as success
+             * * Audit record contains Auth Module One principal
+             * * Audit record does not contain session id
 //                 * * No state cookie on response
              * * Requested resource called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -172,7 +183,8 @@ public class CommittedResponseIT {
                         SEND_SUCCESS_AUTH_STATUS)),
                 201, true,
                 resourceMatcher(AUTH_MODULE_ONE_PRINCIPAL, AUTH_MODULE_ONE_CONTEXT_ENTRY),
-                auditParams("SUCCESS")
+                auditParams("SUCCESSFUL", AUTH_MODULE_ONE_PRINCIPAL, false,
+                        entry("AuthModule-AuthModuleOne-0", "SUCCESSFUL"))
             },
             /**
              * Single Auth Module Only - SUCCESS:SEND_FAILURE
@@ -190,8 +202,10 @@ public class CommittedResponseIT {
              * * HTTP 201 status
              * * No HTTP response detailing the cause of the failure
              * * HTTP response from resource
-//                 * * Audit Auth Module success
+             * * Audit Auth Module success
              * * Audit overall result as success
+             * * Audit record contains Auth Module One principal
+             * * Audit record does not contain session id
 //                 * * No state cookie on response
              * * Requested resource called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -202,7 +216,8 @@ public class CommittedResponseIT {
                         SEND_FAILURE_AUTH_STATUS)),
                 201, true,
                 resourceMatcher(AUTH_MODULE_ONE_PRINCIPAL, AUTH_MODULE_ONE_CONTEXT_ENTRY),
-                auditParams("SUCCESS")
+                auditParams("SUCCESSFUL", AUTH_MODULE_ONE_PRINCIPAL, false,
+                        entry("AuthModule-AuthModuleOne-0", "SUCCESSFUL"))
             },
             /**
              * Single Auth Module Only - SUCCESS:AuthException
@@ -220,8 +235,10 @@ public class CommittedResponseIT {
              * * HTTP 201 status
              * * No HTTP response detailing the cause of the failure
              * * HTTP response from resource
-//                 * * Audit Auth Module success
+             * * Audit Auth Module success
              * * Audit overall result as success
+             * * Audit record contains Auth Module One principal
+             * * Audit record does not contain session id
 //                 * * No state cookie on response
              * * Requested resource called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -230,7 +247,8 @@ public class CommittedResponseIT {
                 null, moduleArray(
                     moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", SUCCESS_AUTH_STATUS, null)), 201, true,
                 resourceMatcher(AUTH_MODULE_ONE_PRINCIPAL, AUTH_MODULE_ONE_CONTEXT_ENTRY),
-                auditParams("SUCCESS")
+                auditParams("SUCCESSFUL", AUTH_MODULE_ONE_PRINCIPAL, false,
+                        entry("AuthModule-AuthModuleOne-0", "SUCCESSFUL"))
             },
         };
     }
@@ -252,8 +270,10 @@ public class CommittedResponseIT {
              *
              * Expected Result:
              * * HTTP 201 status
-//                 * * Does not audit Session Module success
-             * * Does not audit overall result as success
+             * * Audit Session Module success
+             * * Audit overall result as success
+             * * Audit record contains Session Module principal
+             * * Audit record contains session id
 //                 * * No state cookie on response
              * * Requested resource will be called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -262,7 +282,10 @@ public class CommittedResponseIT {
                 moduleParams(SessionAuthModule.class, "SESSION", SUCCESS_AUTH_STATUS, SEND_SUCCESS_AUTH_STATUS),
                     moduleArray(
                         moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", null, null)
-                ), 201, true, object(), null},
+                ), 201, true, resourceMatcher(SESSION_MODULE_PRINCIPAL, SESSION_MODULE_CONTEXT_ENTRY),
+                auditParams("SUCCESSFUL", SESSION_MODULE_PRINCIPAL, true,
+                        entry("Session-SessionAuthModule", "SUCCESSFUL"))
+            },
             /**
              * Session Module and single Auth Module - SEND_FAILURE:SEND_SUCCESS & SUCCESS:SEND_SUCCESS
              *
@@ -277,9 +300,11 @@ public class CommittedResponseIT {
              *
              * Expected Result:
              * * HTTP 201 status
-//                 * * Audit Session Module success
-//                 * * Audit Auth Module One success
+             * * Audit Session Module failure
+             * * Audit Auth Module One success
              * * Audit overall result as success
+             * * Audit record contains Auth Module Onw principal
+             * * Audit record contains session id
 //                 * * No state cookie on response
              * * Requested resource will be called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -290,7 +315,10 @@ public class CommittedResponseIT {
                 moduleArray(
                     moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", SUCCESS_AUTH_STATUS,
                         SEND_SUCCESS_AUTH_STATUS)
-                ), 201, true, object(), auditParams("SUCCESS")},
+                ), 201, true, resourceMatcher(AUTH_MODULE_ONE_PRINCIPAL, SESSION_MODULE_CONTEXT_ENTRY,
+                    AUTH_MODULE_ONE_CONTEXT_ENTRY),
+                auditParams("SUCCESSFUL", AUTH_MODULE_ONE_PRINCIPAL, true, entry("Session-SessionAuthModule", "FAILED"),
+                        entry("AuthModule-AuthModuleOne-0", "SUCCESSFUL"))},
         };
     }
 

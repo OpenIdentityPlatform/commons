@@ -30,15 +30,16 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import static org.forgerock.caf.authn.AuditParameters.Entry.entry;
 import static org.forgerock.caf.authn.AuditParameters.auditParams;
 import static org.forgerock.caf.authn.AuthModuleParameters.moduleArray;
 import static org.forgerock.caf.authn.AuthModuleParameters.moduleParams;
 import static org.forgerock.caf.authn.BodyMatcher.noData;
 import static org.forgerock.caf.authn.TestFramework.runTest;
 import static org.forgerock.caf.authn.TestFramework.setUpConnection;
-import static org.forgerock.caf.authn.test.modules.SessionAuthModule.SEND_CONTINUE_AUTH_STATUS;
-import static org.forgerock.caf.authn.test.modules.SessionAuthModule.SEND_FAILURE_AUTH_STATUS;
-import static org.forgerock.caf.authn.test.modules.SessionAuthModule.SEND_SUCCESS_AUTH_STATUS;
+import static org.forgerock.caf.authn.test.modules.AuthModuleOne.AUTH_MODULE_ONE_PRINCIPAL;
+import static org.forgerock.caf.authn.test.modules.AuthModuleTwo.AUTH_MODULE_TWO_PRINCIPAL;
+import static org.forgerock.caf.authn.test.modules.SessionAuthModule.*;
 
 /**
  * Functional tests for the JASPI runtime to test that SEND_CONTINUE (multi-stage module) support works.
@@ -66,22 +67,22 @@ public class SendContinueSupportIT {
              * * No Auth Modules configured
              * * Session Module #validateRequest will return SEND_CONTINUE for first request and will return
              * SEND_SUCCESS for subsequent requests
-//                 * * Session Module will set HTTP 100 status
              * * Session Module #secureResponse will throw AuthException (but should not be called)
              *
              *
              * Expected Result:
              * * First request:
-//                 * ** HTTP 100 status (as set by Session Module)
-//                * ** HTTP response requesting more information from the client (contents of response are out of scope)
+             * ** HTTP response requesting more information from the client (contents of response are out of scope)
              * ** No auditing to occur
 //                 * ** State cookie on response
              * ** Requested resource not called
              * *-------------------------------
              * * Second request:
              * ** HTTP 200 status
-//                 * * Does not audit Session Module success
-             * * Does not audit overall result as success
+             * * Audit Session Module success
+             * * Audit overall result as success
+             * * Audit record contains Session Module principal
+             * * Audit record does not contain session id
 //                 * ** No state cookie on response
              * * Requested resource not called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -90,8 +91,9 @@ public class SendContinueSupportIT {
                 request(moduleParams(SessionAuthModule.class, "SESSION", SEND_CONTINUE_AUTH_STATUS, null),
                     moduleArray(), 200, false, noData(), null),
                 request(moduleParams(SessionAuthModule.class, "SESSION", SEND_SUCCESS_AUTH_STATUS, null),
-                        moduleArray(), 200, false, noData(), null))
-
+                        moduleArray(), 200, false, noData(),
+                    auditParams("SUCCESSFUL", SESSION_MODULE_PRINCIPAL, false,
+                            entry("Session-SessionAuthModule", "SUCCESSFUL"))))
             },
             /**
              * Single Auth Module Only - SEND_CONTINUE->SEND_SUCCESS:AuthException
@@ -101,22 +103,22 @@ public class SendContinueSupportIT {
              * * Single Auth Module configured
              * * Auth Module #validateRequest will return SEND_CONTINUE for first request and will return
              * SEND_SUCCESS for subsequent requests
-//                 * * Auth Module will set HTTP 100 status
              * * Auth Module #secureResponse will throw AuthException (but should not be called)
              *
              *
              * Expected Result:
              * * First request:
-//                 * ** HTTP 100 status (as set by Session Module)
-//                * ** HTTP response requesting more information from the client (contents of response are out of scope)
+             * ** HTTP response requesting more information from the client (contents of response are out of scope)
              * ** No auditing to occur
 //                 * ** State cookie on response
              * ** Requested resource not called
              * *-------------------------------
              * * Second request:
              * ** HTTP 200 status
-//                 * ** Audit Auth Module success
+             * ** Audit Auth Module success
              * ** Audit overall result as success
+             * * Audit record contains Auth Module One principal
+             * * Audit record does not contain session id
 //                 * ** No state cookie on response
              * * Requested resource not called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -127,8 +129,9 @@ public class SendContinueSupportIT {
                     200, false, noData(), null),
                 request(null, moduleArray(
                         moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", SEND_SUCCESS_AUTH_STATUS, null)),
-                    200, false, noData(), auditParams("SUCCESS")))
-
+                    200, false, noData(),
+                    auditParams("SUCCESSFUL", AUTH_MODULE_ONE_PRINCIPAL, false,
+                            entry("AuthModule-AuthModuleOne-0", "SUCCESSFUL"))))
             },
             /**
              * Session Module and Two Auth Modules - SEND_CONTINUE->SEND_SUCCESS:AuthException &
@@ -139,7 +142,6 @@ public class SendContinueSupportIT {
              * * Two Auth Modules configured
              * * Session Module #validateRequest will return SEND_CONTINUE for first request and will return
              * SEND_SUCCESS for subsequent requests
-//                 * * Session Module will set HTTP 100 status
              * * Session Module #secureResponse will throw AuthException (but should not be called)
              * * Auth Module One #validateRequest will throw AuthException (but should not be called)
              * * Auth Module One #secureResponse will throw AuthException (but should not be called)
@@ -149,16 +151,17 @@ public class SendContinueSupportIT {
              *
              * Expected Result:
              * * First request:
-//                 * ** HTTP 100 status (as set by Session Module)
-//                * ** HTTP response requesting more information from the client (contents of response are out of scope)
+             * ** HTTP response requesting more information from the client (contents of response are out of scope)
              * ** No auditing to occur
 //                 * ** State cookie on response
              * ** Requested resource not called
              * *-------------------------------
              * * Second request:
              * ** HTTP 200 status
-//                 * ** Does not audit Session Module success
-             * ** Does not audit overall result as success
+             * ** Audit Session Module success
+             * ** Audit overall result as success
+             * * Audit record contains Session Module principal
+             * * Audit record does not contain session id
 //                 * ** No state cookie on response
              * * Requested resource not called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -173,7 +176,9 @@ public class SendContinueSupportIT {
                     moduleArray(
                         moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", null, null),
                         moduleParams(AuthModuleTwo.class, "AUTH-MODULE-TWO", null, null)), 200, false,
-                    noData(), null))
+                    noData(),
+                    auditParams("SUCCESSFUL", SESSION_MODULE_PRINCIPAL, false,
+                            entry("Session-SessionAuthModule", "SUCCESSFUL"))))
             },
             /**
              * Session Module and Two Auth Modules - SEND_FAILURE:AuthException &
@@ -186,7 +191,6 @@ public class SendContinueSupportIT {
              * * Session Module #secureResponse will throw AuthException (but should not be called)
              * * Auth Module One #validateRequest will return SEND_CONTINUE for first request and will return
              * SEND_SUCCESS for subsequent requests
-//                 * * Auth Module One will set HTTP 100 status
              * * Auth Module One #secureResponse will throw AuthException (but should not be called)
              * * Auth Module Two #validateRequest will throw AuthException (but should not be called)
              * * Auth Module Two #secureResponse will throw AuthException (but should not be called)
@@ -194,17 +198,18 @@ public class SendContinueSupportIT {
              *
              * Expected Result:
              * * First request:
-//                 * ** HTTP 100 status (as set by Auth Module One)
-//                * ** HTTP response requesting more information from the client (contents of response are out of scope)
+             * ** HTTP response requesting more information from the client (contents of response are out of scope)
              * ** No auditing to occur
 //                 * ** State cookie on response
              * ** Requested resource not called
              * *-------------------------------
              * * Second request:
              * ** HTTP 200 status
-//                 * ** Does not audit Session Module success
-//                 * ** Audit Auth Module One success
+             * ** Audit Session Module success
+             * ** Audit Auth Module One success
              * ** Audit overall result as success
+             * * Audit record contains Auth Module One principal
+             * * Audit record does not contain session id
 //                 * ** No state cookie on response
              * * Requested resource not called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -219,7 +224,10 @@ public class SendContinueSupportIT {
                     moduleArray(
                         moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", SEND_SUCCESS_AUTH_STATUS, null),
                         moduleParams(AuthModuleTwo.class, "AUTH-MODULE-TWO", null, null)), 200, false,
-                    noData(), auditParams("SUCCESS")))
+                    noData(),
+                    auditParams("SUCCESSFUL", AUTH_MODULE_ONE_PRINCIPAL, false,
+                            entry("Session-SessionAuthModule", "FAILED"),
+                            entry("AuthModule-AuthModuleOne-0", "SUCCESSFUL"))))
             },
             /**
              * Session Module and Two Auth Modules - SEND_FAILURE:AuthException & SEND_FAILURE:AuthException &
@@ -234,24 +242,24 @@ public class SendContinueSupportIT {
              * * Auth Module One #secureResponse will throw AuthException (but should not be called)
              * * Auth Module Two #validateRequest will return SEND_CONTINUE for first request and will return
              * SEND_SUCCESS for subsequent requests
-//                 * * Auth Module Two will set HTTP 100 status
              * * Auth Module Two #secureResponse will throw AuthException (but should not be called)
              *
              *
              * Expected Result:
              * * First request:
-//                 * ** HTTP 100 status (as set by Auth Module Two)
-//                * ** HTTP response requesting more information from the client (contents of response are out of scope)
+             * ** HTTP response requesting more information from the client (contents of response are out of scope)
              * ** No auditing to occur
 //                 * ** State cookie on response
              * ** Requested resource not called
              * *-------------------------------
              * * Second request:
              * ** HTTP 200 status
-//                 * ** Does not audit Session Module success
-//                 * ** Audit Auth Module One failure
-//                 * ** Audit Auth Module Two success
+             * ** Audit Session Module success
+             * ** Audit Auth Module One failure
+             * ** Audit Auth Module Two success
              * ** Audit overall result as success
+             * * Audit record contains Auth Module Two principal
+             * * Audit record does not contain session id
 //                 * ** No state cookie on response
              * * Requested resource not called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -266,7 +274,10 @@ public class SendContinueSupportIT {
                     moduleArray(
                         moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", SEND_FAILURE_AUTH_STATUS, null),
                         moduleParams(AuthModuleTwo.class, "AUTH-MODULE-TWO", SEND_SUCCESS_AUTH_STATUS, null)), 200,
-                    false, noData(), auditParams("SUCCESS")))
+                    false, noData(),
+                    auditParams("SUCCESSFUL", AUTH_MODULE_TWO_PRINCIPAL, false,
+                            entry("Session-SessionAuthModule", "FAILED"), entry("AuthModule-AuthModuleOne-0", "FAILED"),
+                            entry("AuthModule-AuthModuleTwo-1", "SUCCESSFUL"))))
             },
         };
     }

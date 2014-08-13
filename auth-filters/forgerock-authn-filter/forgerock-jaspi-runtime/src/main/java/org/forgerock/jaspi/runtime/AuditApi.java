@@ -11,21 +11,24 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2014 ForgeRock AS.
  */
 
-package org.forgerock.jaspi.logging;
+package org.forgerock.jaspi.runtime;
 
-import org.forgerock.auth.common.LoggingConfigurator;
-
-import javax.security.auth.message.MessageInfo;
+import org.forgerock.json.fluent.JsonValue;
 
 /**
- * Wrapper interface which contains the type for all LoggingConfigurators for the Jaspi Runtime.
+ * Audit API interface for auditing the result of an authentication request.
  *
- * @since 1.3.0
- * @deprecated Use {@link org.forgerock.jaspi.runtime.AuditApi} for auditing and use slf4j for debugging.
+ * @since 1.5.0
  */
-@Deprecated
-public interface JaspiLoggingConfigurator extends LoggingConfigurator<MessageInfo> {
+public interface AuditApi {
+
+    /**
+     * Audits the authentication request, using the audit information from the given audit message.
+     *
+     * @param auditMessage The audit message.
+     */
+    void audit(JsonValue auditMessage);
 }

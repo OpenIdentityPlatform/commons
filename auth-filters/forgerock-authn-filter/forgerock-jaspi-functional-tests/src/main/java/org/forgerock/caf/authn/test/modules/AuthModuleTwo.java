@@ -106,23 +106,29 @@ public class AuthModuleTwo implements ServerAuthModule {
 
         String header = request.getHeader(AUTH_MODULE_TWO_VALIDATE_REQUEST_HEADER_NAME.toLowerCase());
 
-        clientSubject.getPrincipals().clear();
-        clientSubject.getPrincipals().add(new Principal() {
-            @Override
-            public String getName() {
-                return AUTH_MODULE_TWO_PRINCIPAL;
-            }
-        });
-
         Map<String, Object> context =
                 (Map<String, Object>) messageInfo.getMap().get(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT);
         context.put(AUTH_MODULE_TWO_CONTEXT_ENTRY, true);
 
         if (SUCCESS_AUTH_STATUS.equalsIgnoreCase(header)) {
+            clientSubject.getPrincipals().clear();
+            clientSubject.getPrincipals().add(new Principal() {
+                @Override
+                public String getName() {
+                    return AUTH_MODULE_TWO_PRINCIPAL;
+                }
+            });
             return AuthStatus.SUCCESS;
         }
 
         if (SEND_SUCCESS_AUTH_STATUS.equalsIgnoreCase(header)) {
+            clientSubject.getPrincipals().clear();
+            clientSubject.getPrincipals().add(new Principal() {
+                @Override
+                public String getName() {
+                    return AUTH_MODULE_TWO_PRINCIPAL;
+                }
+            });
             return AuthStatus.SEND_SUCCESS;
         }
 

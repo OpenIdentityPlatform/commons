@@ -17,6 +17,7 @@
 package org.forgerock.jaspi.runtime.context;
 
 import org.forgerock.jaspi.exceptions.JaspiAuthException;
+import org.forgerock.jaspi.runtime.AuditTrail;
 import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.jaspi.utils.MessageInfoUtils;
 import org.mockito.Matchers;
@@ -37,9 +38,7 @@ import static org.mockito.BDDMockito.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.never;
 import static org.mockito.Matchers.anyListOf;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.fail;
@@ -209,6 +208,11 @@ public class JaspiServerAuthContextTest {
         MessageInfo messageInfo = mock(MessageInfo.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
+        Map<String, Object> messageInfoMap = new HashMap<String, Object>();
+        AuditTrail auditTrail = mock(AuditTrail.class);
+
+        given(messageInfo.getMap()).willReturn(messageInfoMap);
+        messageInfoMap.put("org.forgerock.authentication.audit.trail", auditTrail);
 
         given(sessionAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject))
                 .willReturn(AuthStatus.SUCCESS);
@@ -237,6 +241,11 @@ public class JaspiServerAuthContextTest {
         MessageInfo messageInfo = mock(MessageInfo.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
+        Map<String, Object> messageInfoMap = new HashMap<String, Object>();
+        AuditTrail auditTrail = mock(AuditTrail.class);
+
+        given(messageInfo.getMap()).willReturn(messageInfoMap);
+        messageInfoMap.put("org.forgerock.authentication.audit.trail", auditTrail);
 
         given(sessionAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject))
                 .willReturn(AuthStatus.SEND_SUCCESS);
@@ -265,6 +274,11 @@ public class JaspiServerAuthContextTest {
         MessageInfo messageInfo = mock(MessageInfo.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
+        Map<String, Object> messageInfoMap = new HashMap<String, Object>();
+        AuditTrail auditTrail = mock(AuditTrail.class);
+
+        given(messageInfo.getMap()).willReturn(messageInfoMap);
+        messageInfoMap.put("org.forgerock.authentication.audit.trail", auditTrail);
 
         given(sessionAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject))
                 .willReturn(AuthStatus.SEND_CONTINUE);
@@ -294,6 +308,11 @@ public class JaspiServerAuthContextTest {
         MessageInfo messageInfo = mock(MessageInfo.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
+        Map<String, Object> messageInfoMap = new HashMap<String, Object>();
+        AuditTrail auditTrail = mock(AuditTrail.class);
+
+        given(messageInfo.getMap()).willReturn(messageInfoMap);
+        messageInfoMap.put("org.forgerock.authentication.audit.trail", auditTrail);
 
         given(sessionAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject))
                 .willReturn(AuthStatus.FAILURE);
@@ -325,6 +344,11 @@ public class JaspiServerAuthContextTest {
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
         Map<String, Object> contextMap = new HashMap<String, Object>();
+        Map<String, Object> messageInfoMap = new HashMap<String, Object>();
+        AuditTrail auditTrail = mock(AuditTrail.class);
+
+        given(messageInfo.getMap()).willReturn(messageInfoMap);
+        messageInfoMap.put("org.forgerock.authentication.audit.trail", auditTrail);
 
         given(sessionAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject))
                 .willReturn(AuthStatus.SEND_FAILURE);
@@ -337,7 +361,8 @@ public class JaspiServerAuthContextTest {
         //Then
         verify(sessionAuthModule).validateRequest(messageInfo, clientSubject, serviceSubject);
         verify(contextHandler).handleCompletion(messageInfo, clientSubject, AuthStatus.SEND_FAILURE);
-        verify(contextHandler).audit(messageInfo, AuthStatus.SEND_FAILURE);
+        verify(auditTrail).auditFailure(startsWith("Session-ServerAuthModule"), anyString(),
+                anyMapOf(String.class, Object.class));
         assertEquals(authStatus, AuthStatus.SEND_FAILURE);
     }
 
@@ -355,6 +380,11 @@ public class JaspiServerAuthContextTest {
         MessageInfo messageInfo = mock(MessageInfo.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
+        Map<String, Object> messageInfoMap = new HashMap<String, Object>();
+        AuditTrail auditTrail = mock(AuditTrail.class);
+
+        given(messageInfo.getMap()).willReturn(messageInfoMap);
+        messageInfoMap.put("org.forgerock.authentication.audit.trail", auditTrail);
 
         given(sessionAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject))
                 .willReturn(AuthStatus.SEND_FAILURE);
@@ -385,6 +415,11 @@ public class JaspiServerAuthContextTest {
         MessageInfo messageInfo = mock(MessageInfo.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
+        Map<String, Object> messageInfoMap = new HashMap<String, Object>();
+        AuditTrail auditTrail = mock(AuditTrail.class);
+
+        given(messageInfo.getMap()).willReturn(messageInfoMap);
+        messageInfoMap.put("org.forgerock.authentication.audit.trail", auditTrail);
 
         given(sessionAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject))
                 .willReturn(AuthStatus.SEND_FAILURE);
@@ -415,6 +450,11 @@ public class JaspiServerAuthContextTest {
         MessageInfo messageInfo = mock(MessageInfo.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
+        Map<String, Object> messageInfoMap = new HashMap<String, Object>();
+        AuditTrail auditTrail = mock(AuditTrail.class);
+
+        given(messageInfo.getMap()).willReturn(messageInfoMap);
+        messageInfoMap.put("org.forgerock.authentication.audit.trail", auditTrail);
 
         given(sessionAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject))
                 .willReturn(AuthStatus.SEND_FAILURE);
@@ -443,6 +483,11 @@ public class JaspiServerAuthContextTest {
         MessageInfo messageInfo = mock(MessageInfo.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
+        Map<String, Object> messageInfoMap = new HashMap<String, Object>();
+        AuditTrail auditTrail = mock(AuditTrail.class);
+
+        given(messageInfo.getMap()).willReturn(messageInfoMap);
+        messageInfoMap.put("org.forgerock.authentication.audit.trail", auditTrail);
 
         given(sessionAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject))
                 .willReturn(AuthStatus.SEND_FAILURE);
@@ -453,7 +498,8 @@ public class JaspiServerAuthContextTest {
         //Then
         verify(sessionAuthModule).validateRequest(messageInfo, clientSubject, serviceSubject);
         verify(contextHandler).handleCompletion(messageInfo, clientSubject, AuthStatus.SUCCESS);
-        verify(contextHandler).audit(messageInfo, AuthStatus.SUCCESS);
+        verify(auditTrail).auditFailure(startsWith("Session-ServerAuthModule"), anyString(),
+                anyMapOf(String.class, Object.class));
         assertEquals(authStatus, AuthStatus.SUCCESS);
     }
 
@@ -471,6 +517,11 @@ public class JaspiServerAuthContextTest {
         MessageInfo messageInfo = mock(MessageInfo.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
+        Map<String, Object> messageInfoMap = new HashMap<String, Object>();
+        AuditTrail auditTrail = mock(AuditTrail.class);
+
+        given(messageInfo.getMap()).willReturn(messageInfoMap);
+        messageInfoMap.put("org.forgerock.authentication.audit.trail", auditTrail);
 
         given(sessionAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject))
                 .willReturn(AuthStatus.SEND_FAILURE);
@@ -481,7 +532,8 @@ public class JaspiServerAuthContextTest {
         //Then
         verify(sessionAuthModule).validateRequest(messageInfo, clientSubject, serviceSubject);
         verify(contextHandler).handleCompletion(messageInfo, clientSubject, AuthStatus.SEND_SUCCESS);
-        verify(contextHandler).audit(messageInfo, AuthStatus.SEND_SUCCESS);
+        verify(auditTrail).auditFailure(startsWith("Session-ServerAuthModule"), anyString(),
+                anyMapOf(String.class, Object.class));
         assertEquals(authStatus, AuthStatus.SEND_SUCCESS);
     }
 
@@ -499,6 +551,11 @@ public class JaspiServerAuthContextTest {
         MessageInfo messageInfo = mock(MessageInfo.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
+        Map<String, Object> messageInfoMap = new HashMap<String, Object>();
+        AuditTrail auditTrail = mock(AuditTrail.class);
+
+        given(messageInfo.getMap()).willReturn(messageInfoMap);
+        messageInfoMap.put("org.forgerock.authentication.audit.trail", auditTrail);
 
         given(sessionAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject))
                 .willReturn(AuthStatus.SEND_FAILURE);
@@ -509,7 +566,8 @@ public class JaspiServerAuthContextTest {
         //Then
         verify(sessionAuthModule).validateRequest(messageInfo, clientSubject, serviceSubject);
         verify(contextHandler).handleCompletion(messageInfo, clientSubject, AuthStatus.SEND_FAILURE);
-        verify(contextHandler).audit(messageInfo, AuthStatus.SEND_FAILURE);
+        verify(auditTrail).auditFailure(startsWith("Session-ServerAuthModule"), anyString(),
+                anyMapOf(String.class, Object.class));
         assertEquals(authStatus, AuthStatus.SEND_FAILURE);
     }
 
@@ -527,13 +585,18 @@ public class JaspiServerAuthContextTest {
         MessageInfo messageInfo = mock(MessageInfo.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
+        Map<String, Object> messageInfoMap = new HashMap<String, Object>();
+        AuditTrail auditTrail = mock(AuditTrail.class);
+
+        given(messageInfo.getMap()).willReturn(messageInfoMap);
+        messageInfoMap.put("org.forgerock.authentication.audit.trail", auditTrail);
 
         //When
         AuthStatus authStatus = jaspiServerAuthContext.validateRequest(messageInfo, clientSubject, serviceSubject);
 
         //Then
         verify(contextHandler).handleCompletion(messageInfo, clientSubject, AuthStatus.SUCCESS);
-        verify(contextHandler).audit(messageInfo, AuthStatus.SUCCESS);
+        verifyZeroInteractions(auditTrail);
         assertEquals(authStatus, AuthStatus.SUCCESS);
     }
 
@@ -613,6 +676,11 @@ public class JaspiServerAuthContextTest {
 
         MessageInfo messageInfo = mock(MessageInfo.class);
         Subject serviceSubject = new Subject();
+        Map<String, Object> messageInfoMap = new HashMap<String, Object>();
+        AuditTrail auditTrail = mock(AuditTrail.class);
+
+        given(messageInfo.getMap()).willReturn(messageInfoMap);
+        messageInfoMap.put("org.forgerock.authentication.audit.trail", auditTrail);
 
         given(sessionAuthModule.secureResponse(messageInfo, serviceSubject)).willReturn(AuthStatus.SEND_SUCCESS);
 
@@ -637,6 +705,11 @@ public class JaspiServerAuthContextTest {
 
         MessageInfo messageInfo = mock(MessageInfo.class);
         Subject serviceSubject = new Subject();
+        Map<String, Object> messageInfoMap = new HashMap<String, Object>();
+        AuditTrail auditTrail = mock(AuditTrail.class);
+
+        given(messageInfo.getMap()).willReturn(messageInfoMap);
+        messageInfoMap.put("org.forgerock.authentication.audit.trail", auditTrail);
 
         given(sessionAuthModule.secureResponse(messageInfo, serviceSubject)).willReturn(AuthStatus.SEND_FAILURE);
 

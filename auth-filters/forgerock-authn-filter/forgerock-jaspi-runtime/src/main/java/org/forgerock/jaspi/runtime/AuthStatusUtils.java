@@ -85,7 +85,7 @@ public final class AuthStatusUtils {
      * @param authStatus The {@code AuthStatus} value.
      * @return {@code true} if the given {@code AuthStatus} value is {@link AuthStatus#SEND_CONTINUE}.
      */
-    private static boolean isSendContinue(AuthStatus authStatus) {
+    static boolean isSendContinue(AuthStatus authStatus) {
         return SEND_CONTINUE.equals(authStatus);
     }
 

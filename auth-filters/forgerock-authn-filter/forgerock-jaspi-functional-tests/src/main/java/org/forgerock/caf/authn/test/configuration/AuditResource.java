@@ -16,8 +16,7 @@
 
 package org.forgerock.caf.authn.test.configuration;
 
-import org.forgerock.auth.common.AuditRecord;
-import org.forgerock.caf.authn.test.runtime.TestAuditLogger;
+import org.forgerock.caf.authn.test.runtime.TestAuditApi;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.PatchRequest;
@@ -30,13 +29,9 @@ import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
 
 import javax.inject.Inject;
-import javax.security.auth.message.MessageInfo;
-import java.util.List;
 
 import static org.forgerock.json.fluent.JsonValue.array;
-import static org.forgerock.json.fluent.JsonValue.field;
 import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
 
 /**
  * <p>CREST resource responsible for exposing the audit records created by the JASPI runtime.</p>
@@ -48,16 +43,16 @@ import static org.forgerock.json.fluent.JsonValue.object;
  */
 public class AuditResource implements SingletonResourceProvider {
 
-    private TestAuditLogger auditLogger;
+    private TestAuditApi auditApi;
 
     /**
      * Constructs a new AuditResource instance.
      *
-     * @param auditLogger An instance of the TestAuditLogger, which stores the audit records made by the JASPI runtime.
+     * @param auditApi An instance of the TestAuditApi, which stores the audit records made by the JASPI runtime.
      */
     @Inject
-    public AuditResource(TestAuditLogger auditLogger) {
-        this.auditLogger = auditLogger;
+    public AuditResource(TestAuditApi auditApi) {
+        this.auditApi = auditApi;
     }
 
     /**
@@ -73,9 +68,10 @@ public class AuditResource implements SingletonResourceProvider {
         if ("readAndClear".equalsIgnoreCase(request.getAction())) {
 
             JsonValue jsonAuditRecords = getAuditRecords();
-            auditLogger.clear();
 
             handler.handleResult(jsonAuditRecords);
+
+            auditApi.clear();
 
         } else {
             handler.handleError(ResourceException.getException(ResourceException.NOT_SUPPORTED));
@@ -127,16 +123,10 @@ public class AuditResource implements SingletonResourceProvider {
      * @return A {@code JsonValue} representation of the audit records.
      */
     private JsonValue getAuditRecords() {
-
-        List<AuditRecord<MessageInfo>> auditRecords = auditLogger.getAuditRecords();
-
-        JsonValue jsonAuditRecords = json(array());
-        for (AuditRecord<MessageInfo> auditRecord : auditRecords) {
-            jsonAuditRecords.add(object(
-                    field("outcome", auditRecord.getAuthResult().toString()),
-                    field("", auditRecord.getAuditObject().getMap())));
+        JsonValue auditRecords = json(array());
+        for (JsonValue auditRecord : auditApi.getAuditRecords()) {
+            auditRecords.add(auditRecord.getObject());
         }
-
-        return jsonAuditRecords;
+        return auditRecords;
     }
 }

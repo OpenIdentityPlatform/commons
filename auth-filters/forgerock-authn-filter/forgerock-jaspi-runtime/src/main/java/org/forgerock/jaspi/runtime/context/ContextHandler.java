@@ -175,7 +175,9 @@ public class ContextHandler {
      *
      * @param messageInfo The MessageInfo to use as the audit object.
      * @param authStatus The AuthStatus of the request.
+     * @deprecated use {@link org.forgerock.jaspi.runtime.AuditApi#audit(org.forgerock.json.fluent.JsonValue)} instead.
      */
+    @Deprecated
     public void audit(final MessageInfo messageInfo, final AuthStatus authStatus) {
         AuditRecord<MessageInfo> auditRecord = new MessageInfoAuditRecord(
                 isAuthStatusSuccessful(authStatus) ? AuthResult.SUCCESS : AuthResult.FAILURE, messageInfo);

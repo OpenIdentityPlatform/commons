@@ -21,6 +21,7 @@ import org.forgerock.jaspi.logging.LogFactory;
 import org.forgerock.json.resource.ResourceException;
 
 import javax.security.auth.Subject;
+import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.config.ServerAuthContext;
@@ -31,6 +32,9 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+
+import static org.forgerock.jaspi.runtime.AuthStatusUtils.isSendContinue;
+import static org.forgerock.jaspi.runtime.AuditTrail.AUDIT_TRAIL_KEY;
 
 /**
  * This class is the entry point for the JASPI runtime.
@@ -75,9 +79,14 @@ public class JaspiRuntime {
      * will be set. It MUST contain a {@code Map<String, Object>} if present.
      */
     public static final String ATTRIBUTE_AUTH_CONTEXT = "org.forgerock.authentication.context";
+    /**
+     * The name of the HTTP Servlet Request attribute where the unique id of the request will be set.
+     */
+    public static final String ATTRIBUTE_REQUEST_ID = "org.forgerock.authentication.request.id";
 
     private final ServerAuthContext serverAuthContext;
     private final RuntimeResultHandler resultHandler;
+    private final AuditApi auditApi;
 
     /**
      * Constructs a new instance of the JaspiRuntime.
@@ -85,10 +94,13 @@ public class JaspiRuntime {
      * @param serverAuthContext The instance of a ServerAuthContext that the runtime has been configured to use
      *                          to orchestrate calling the ServerAuthModules.
      * @param resultHandler An instance of the RuntimeResultHandler.
+     * @param auditApi An instance of the {@code AuditApi}.
      */
-    public JaspiRuntime(final ServerAuthContext serverAuthContext, final RuntimeResultHandler resultHandler) {
+    public JaspiRuntime(final ServerAuthContext serverAuthContext, final RuntimeResultHandler resultHandler,
+            AuditApi auditApi) {
         this.serverAuthContext = serverAuthContext;
         this.resultHandler = resultHandler;
+        this.auditApi = auditApi;
     }
 
     /**
@@ -118,7 +130,10 @@ public class JaspiRuntime {
         final Subject clientSubject = new Subject();
         // Can be null if no details required for service subject.
         final Subject serviceSubject = null;
+        AuditTrail auditTrail = new AuditTrail(auditApi);
+        messageInfo.getMap().put(AUDIT_TRAIL_KEY, auditTrail);
 
+        AuthStatus requestAuthStatus = null;
         try {
             // Could be null if no modules found
             if (serverAuthContext == null) {
@@ -129,13 +144,19 @@ public class JaspiRuntime {
             }
 
             // This is where the modules are called
-            AuthStatus requestAuthStatus = serverAuthContext.validateRequest(messageInfo, clientSubject,
-                    serviceSubject);
+            try {
+                requestAuthStatus = serverAuthContext.validateRequest(messageInfo, clientSubject, serviceSubject);
 
-            if (!resultHandler.handleValidateRequestResult(requestAuthStatus,
-                    (HttpServletResponse) messageInfo.getResponseMessage())) {
-                return;
+                if (!resultHandler.handleValidateRequestResult(requestAuthStatus, auditTrail, clientSubject,
+                        (HttpServletResponse) messageInfo.getResponseMessage())) {
+                    return;
+                }
+            } catch (AuthException e) {
+                auditTrail.completeAuditAsFailure(null);
+                throw e;
             }
+
+            request.setAttribute(JaspiRuntime.ATTRIBUTE_REQUEST_ID, auditTrail.getRequestId());
 
             filterChain.doFilter((ServletRequest) messageInfo.getRequestMessage(),
                     (ServletResponse) messageInfo.getResponseMessage());
@@ -163,6 +184,10 @@ public class JaspiRuntime {
                 httpResponse.setContentType(JSON_HTTP_MEDIA_TYPE);
             } catch (IOException ioe) {
                 throw new ServletException(ioe.getMessage(), ioe);
+            }
+        } finally {
+            if (!isSendContinue(requestAuthStatus)) {
+                auditTrail.audit();
             }
         }
     }

@@ -21,6 +21,7 @@ import com.google.inject.Injector;
 import com.google.inject.Provides;
 import org.forgerock.caf.authn.test.configuration.ConfigurationResource;
 import org.forgerock.jaspi.context.FallbackServerAuthContext;
+import org.forgerock.jaspi.runtime.AuditApi;
 import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.jaspi.runtime.RuntimeResultHandler;
 import org.forgerock.jaspi.runtime.context.ContextHandler;
@@ -59,6 +60,7 @@ public class GuiceModule extends AbstractModule {
         bind(MessageInfoUtils.class).in(Singleton.class);
         bind(RuntimeResultHandler.class).in(Singleton.class);
         bind(ServerAuthContext.class).to(ConfigurableServerAuthContext.class).in(Singleton.class);
+        bind(AuditApi.class).to(TestAuditApi.class);
     }
 
     /**
@@ -79,14 +81,15 @@ public class GuiceModule extends AbstractModule {
      *
      * @param serverAuthContext The {@code ServerAuthContext} instance.
      * @param resultHandler An instance of the {@code RuntimeResultHandler}.
+     * @param auditApi An instance of the {@code AuditApi}.
      * @return The JASPI runtime instance.
      */
     @Provides
     @Inject
     @Singleton
     public JaspiRuntime getJaspiRuntime(ServerAuthContext serverAuthContext,
-            RuntimeResultHandler resultHandler) {
-        return new JaspiRuntime(serverAuthContext, resultHandler);
+            RuntimeResultHandler resultHandler, AuditApi auditApi) {
+        return new JaspiRuntime(serverAuthContext, resultHandler, auditApi);
     }
 
     /**

@@ -24,6 +24,8 @@ import javax.security.auth.message.MessageInfo;
  * Wrapper interface which contains the type for all AuditLoggers for the Jaspi Runtime.
  *
  * @since 1.3.0
+ * @deprecated use {@link org.forgerock.jaspi.runtime.AuditApi} instead.
  */
+@Deprecated
 public interface JaspiAuditLogger extends AuditLogger<MessageInfo> {
 }

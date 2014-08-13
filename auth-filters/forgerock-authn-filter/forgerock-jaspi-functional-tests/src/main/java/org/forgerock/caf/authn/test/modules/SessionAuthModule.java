@@ -30,6 +30,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.security.Principal;
 import java.util.Map;
 
+import static org.forgerock.jaspi.runtime.AuditTrail.AUDIT_SESSION_ID_KEY;
+
 /**
  * A test "Session" auth module in which the {@link #validateRequest(MessageInfo, Subject, Subject)} and
  * {@link #secureResponse(MessageInfo, Subject)} methods return values can be decided based on the value of two request
@@ -132,23 +134,29 @@ public class SessionAuthModule implements ServerAuthModule {
 
         String header = request.getHeader(SESSION_VALIDATE_REQUEST_HEADER_NAME.toLowerCase());
 
-        clientSubject.getPrincipals().clear();
-        clientSubject.getPrincipals().add(new Principal() {
-            @Override
-            public String getName() {
-                return SESSION_MODULE_PRINCIPAL;
-            }
-        });
-
         Map<String, Object> context =
                 (Map<String, Object>) messageInfo.getMap().get(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT);
         context.put(SESSION_MODULE_CONTEXT_ENTRY, true);
 
         if (SUCCESS_AUTH_STATUS.equalsIgnoreCase(header)) {
+            clientSubject.getPrincipals().clear();
+            clientSubject.getPrincipals().add(new Principal() {
+                @Override
+                public String getName() {
+                    return SESSION_MODULE_PRINCIPAL;
+                }
+            });
             return AuthStatus.SUCCESS;
         }
 
         if (SEND_SUCCESS_AUTH_STATUS.equalsIgnoreCase(header)) {
+            clientSubject.getPrincipals().clear();
+            clientSubject.getPrincipals().add(new Principal() {
+                @Override
+                public String getName() {
+                    return SESSION_MODULE_PRINCIPAL;
+                }
+            });
             return AuthStatus.SEND_SUCCESS;
         }
 
@@ -191,6 +199,7 @@ public class SessionAuthModule implements ServerAuthModule {
         }
 
         if (SEND_SUCCESS_AUTH_STATUS.equalsIgnoreCase(header)) {
+            messageInfo.getMap().put(AUDIT_SESSION_ID_KEY, "SESSION_ID");
             return AuthStatus.SEND_SUCCESS;
         }
 

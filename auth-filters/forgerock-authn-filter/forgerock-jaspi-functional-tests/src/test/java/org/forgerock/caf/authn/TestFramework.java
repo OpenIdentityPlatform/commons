@@ -36,10 +36,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 import static org.forgerock.caf.authn.test.ProtectedResource.RESOURCE_CALLED_HEADER;
-import static org.forgerock.json.fluent.JsonValue.array;
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.json.fluent.JsonValue.*;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
 
@@ -59,6 +56,9 @@ class TestFramework {
         RestAssured.port = Integer.parseInt(System.getProperty("HTTP_PORT"));
         RestAssured.baseURI = "http://" + System.getProperty("HOSTNAME");
         RestAssured.basePath = System.getProperty("CONTEXT_URI");
+//        RestAssured.port = 8080;
+//        RestAssured.baseURI = "http://localhost";
+//        RestAssured.basePath = "jaspi";
 
         RestAssured.defaultParser = Parser.JSON;
         RestAssured.config = RestAssuredConfig.newConfig()
@@ -108,7 +108,7 @@ class TestFramework {
      * information.
      */
     @SuppressWarnings("unchecked")
-    private static List<Map<String, String>> getAuditRecords() {
+    static JsonValue getAuditRecords() {
 
         RequestSpecification given = com.jayway.restassured.RestAssured.given()
                 .contentType(ContentType.JSON)
@@ -118,9 +118,9 @@ class TestFramework {
                 .statusCode(200);
 
         try {
-            return OBJECT_MAPPER.readValue(expect.when()
+            return json(OBJECT_MAPPER.readValue(expect.when()
                     .post("/auditrecords?_action=readAndClear")
-                    .getBody().asString(), List.class);
+                    .getBody().asString(), List.class));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -134,7 +134,7 @@ class TestFramework {
      * @param authModuleParametersList A {@code List} of configuration and parameters for the auth modules.
      * @return A RestAssured RequestSpecification instance.
      */
-    private static RequestSpecification given(AuthModuleParameters sessionModuleParams,
+    static RequestSpecification given(AuthModuleParameters sessionModuleParams,
             List<AuthModuleParameters> authModuleParametersList) {
         Class<? extends ServerAuthModule> sessionModuleClass = null;
         List<Class<? extends ServerAuthModule>> authModuleClasses = new ArrayList<Class<? extends ServerAuthModule>>();
@@ -179,7 +179,7 @@ class TestFramework {
      * @param expectedResponseStatus The expected response status.
      * @param expectResourceToBeCalled Whether it is expected that the resource have been accessed.
      * @param expectedBody A {@code Map} of the JSON path and {@code Matcher}s to verify the response body.
-     * @param auditParams The expected audit operations to have occured.
+     * @param auditParams The expected audit operations to have occurred.
      */
     static void runTest(String resourceName, AuthModuleParameters sessionModuleParams,
             List<AuthModuleParameters> authModuleParametersList, int expectedResponseStatus,
@@ -208,10 +208,28 @@ class TestFramework {
         expect.when()
                 .get(resourceName);
 
-        List<Map<String, String>> auditRecords = getAuditRecords();
+        JsonValue auditRecords = getAuditRecords();
         if (auditParams != null) {
             assertThat(auditRecords).hasSize(1);
-            assertThat(auditRecords.get(0)).contains(entry("outcome", auditParams.expectedOutcome()));
+
+            JsonValue auditRecord = auditRecords.get(0);
+            assertThat(auditRecord.get("result").asString()).isEqualTo(auditParams.result());
+            assertThat(auditRecord.get("requestId").asString()).isNotNull();
+            assertThat(auditRecord.get("principal").asString()).isEqualTo(auditParams.principal());
+            if (auditParams.sessionPresent()) {
+                assertThat(auditRecord.get("sessionId").getObject()).isNotNull();
+            } else {
+                assertThat(auditRecord.get("sessionId").getObject()).isNull();
+            }
+            assertThat(auditRecord.get("entries")).hasSize(auditParams.entries().size());
+
+            for (int i = 0; i < auditParams.entries().size(); i++) {
+                AuditParameters.Entry entry = auditParams.entries().get(i);
+                Map<String, Object> entries = auditRecord.get("entries").get(i).asMap();
+                assertThat(entries).contains(
+                        entry("moduleId", entry.getModuleId()), entry("result", entry.getResult()));
+                assertThat(entry.getReasonMatcher().matches(entries.get("reason"))).isTrue();
+            }
         } else {
             assertThat(auditRecords).isEmpty();
         }

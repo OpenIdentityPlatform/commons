@@ -37,28 +37,23 @@ import javax.servlet.http.HttpServletResponseWrapper;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.json.fluent.JsonValue.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 public class JaspiRuntimeTest {
 
     private RuntimeResultHandler runtimeResultHandler;
+    private AuditApi auditApi;
 
     @BeforeMethod
     public void setUp() {
-
         runtimeResultHandler = mock(RuntimeResultHandler.class);
+
+        auditApi = mock(AuditApi.class);
     }
 
     @Test
@@ -72,7 +67,7 @@ public class JaspiRuntimeTest {
 
         ServerAuthContext serverAuthContext = null;
 
-        JaspiRuntime jaspiRuntime = new JaspiRuntime(serverAuthContext, runtimeResultHandler);
+        JaspiRuntime jaspiRuntime = new JaspiRuntime(serverAuthContext, runtimeResultHandler, auditApi);
 
         //When
         jaspiRuntime.processMessage(request, response, filterChain);
@@ -94,9 +89,10 @@ public class JaspiRuntimeTest {
         ServerAuthContext serverAuthContext = mock(ServerAuthContext.class);
 
         given(runtimeResultHandler.handleValidateRequestResult(Matchers.<AuthStatus>anyObject(),
+                Matchers.<AuditTrail>anyObject(), Matchers.<Subject>anyObject(),
                 Matchers.<HttpServletResponse>anyObject())).willReturn(false);
 
-        JaspiRuntime jaspiRuntime = new JaspiRuntime(serverAuthContext, runtimeResultHandler);
+        JaspiRuntime jaspiRuntime = new JaspiRuntime(serverAuthContext, runtimeResultHandler, auditApi);
 
         //When
         jaspiRuntime.processMessage(request, response, filterChain);
@@ -118,9 +114,10 @@ public class JaspiRuntimeTest {
         ServerAuthContext serverAuthContext = mock(ServerAuthContext.class);
 
         given(runtimeResultHandler.handleValidateRequestResult(Matchers.<AuthStatus>anyObject(),
+                Matchers.<AuditTrail>anyObject(), Matchers.<Subject>anyObject(),
                 Matchers.<HttpServletResponse>anyObject())).willReturn(true);
 
-        JaspiRuntime jaspiRuntime = new JaspiRuntime(serverAuthContext, runtimeResultHandler);
+        JaspiRuntime jaspiRuntime = new JaspiRuntime(serverAuthContext, runtimeResultHandler, auditApi);
 
         //When
         jaspiRuntime.processMessage(request, response, filterChain);
@@ -154,7 +151,7 @@ public class JaspiRuntimeTest {
 
         given(response.getWriter()).willReturn(writer);
 
-        JaspiRuntime jaspiRuntime = new JaspiRuntime(serverAuthContext, runtimeResultHandler);
+        JaspiRuntime jaspiRuntime = new JaspiRuntime(serverAuthContext, runtimeResultHandler, auditApi);
 
         //When
         jaspiRuntime.processMessage(request, response, filterChain);
@@ -181,7 +178,7 @@ public class JaspiRuntimeTest {
         resourceException.setDetail(json(object(field("DETAIL_KEY", "DETAIL_VALUE"))));
         JaspiAuthException authException = new JaspiAuthException("AUTH_EXCEPTION", resourceException);
 
-        JaspiRuntime jaspiRuntime = new JaspiRuntime(serverAuthContext, runtimeResultHandler);
+        JaspiRuntime jaspiRuntime = new JaspiRuntime(serverAuthContext, runtimeResultHandler, auditApi);
 
         doThrow(authException).when(serverAuthContext).validateRequest(Matchers.<MessageInfo>anyObject(),
                 Matchers.<Subject>anyObject(), Matchers.<Subject>anyObject());

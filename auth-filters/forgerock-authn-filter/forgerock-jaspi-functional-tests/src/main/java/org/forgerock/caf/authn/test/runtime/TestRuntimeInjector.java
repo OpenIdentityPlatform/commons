@@ -16,9 +16,7 @@
 
 package org.forgerock.caf.authn.test.runtime;
 
-import com.google.inject.Key;
 import org.forgerock.guice.core.InjectorHolder;
-import org.forgerock.jaspi.logging.LogFactory;
 import org.forgerock.jaspi.runtime.config.inject.RuntimeInjector;
 
 /**
@@ -28,13 +26,6 @@ import org.forgerock.jaspi.runtime.config.inject.RuntimeInjector;
  * @since 1.5.0
  */
 public class TestRuntimeInjector implements RuntimeInjector {
-
-    /**
-     * Constructs a new TestRuntimeInjector instance.
-     */
-    public TestRuntimeInjector() {
-        LogFactory.setAuditLogger(InjectorHolder.getInstance(Key.get(TestAuditLogger.class)));
-    }
 
     /**
      * Gets the RuntimeInjector.

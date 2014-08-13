@@ -27,7 +27,9 @@ import javax.security.auth.message.MessageInfo;
  * Responsible for managing logging implementation, for both Debug and Audit logging.
  *
  * @since 1.3.0
+ * @deprecated Use {@link org.forgerock.jaspi.runtime.AuditApi} for auditing and use slf4j for debugging.
  */
+@Deprecated
 public final class LogFactory {
 
     private static DebugLogger debugLogger;
@@ -43,7 +45,9 @@ public final class LogFactory {
      * Sets the Debug Logger for the JASPI runtime.
      *
      * @param debug The DebugLogger instance.
+     * @deprecated use slf4j for debugging.
      */
+    @Deprecated
     public static void setDebugLogger(final DebugLogger debug) {
         debugLogger = debug;
     }
@@ -54,7 +58,9 @@ public final class LogFactory {
      * If no Debug Logger has been set then a NoOp Debug Logger will be returned.
      *
      * @return The DebugLogger instance.
+     * @deprecated use slf4j for debugging.
      */
+    @Deprecated
     public static DebugLogger getDebug() {
         if (debugLogger == null) {
             return new NoOpDebugLogger();
@@ -66,7 +72,10 @@ public final class LogFactory {
      * Sets the Audit Logger for the JASPI runtime.
      *
      * @param audit The AuditLogger instance.
+     *
+     * @deprecated use {@link org.forgerock.jaspi.runtime.AuditApi} instead
      */
+    @Deprecated
     public static void setAuditLogger(final AuditLogger<MessageInfo> audit) {
         auditLogger = audit;
     }
@@ -77,7 +86,10 @@ public final class LogFactory {
      * If no Audit Logger has been set then a NoOp Audit Logger will be returned.
      *
      * @return The AuditLogger instance.
+     *
+     * @deprecated use {@link org.forgerock.jaspi.runtime.AuditApi} instead
      */
+    @Deprecated
     public static AuditLogger<MessageInfo> getAuditLogger() {
         if (auditLogger == null) {
             return new NoOpAuditLogger<MessageInfo>();

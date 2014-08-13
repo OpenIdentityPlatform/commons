@@ -27,18 +27,17 @@ import org.testng.annotations.Test;
 import java.util.List;
 import java.util.Map;
 
+import static org.forgerock.caf.authn.AuditParameters.Entry.entry;
 import static org.forgerock.caf.authn.AuditParameters.auditParams;
 import static org.forgerock.caf.authn.AuthModuleParameters.moduleArray;
 import static org.forgerock.caf.authn.AuthModuleParameters.moduleParams;
-import static org.forgerock.caf.authn.BodyMatcher.exceptionMatcher;
-import static org.forgerock.caf.authn.BodyMatcher.noData;
-import static org.forgerock.caf.authn.BodyMatcher.resourceMatcher;
+import static org.forgerock.caf.authn.BodyMatcher.*;
 import static org.forgerock.caf.authn.TestFramework.runTest;
 import static org.forgerock.caf.authn.TestFramework.setUpConnection;
-import static org.forgerock.caf.authn.test.modules.AuthModuleOne.AUTH_MODULE_ONE_CONTEXT_ENTRY;
-import static org.forgerock.caf.authn.test.modules.AuthModuleOne.AUTH_MODULE_ONE_PRINCIPAL;
+import static org.forgerock.caf.authn.test.modules.AuthModuleOne.*;
 import static org.forgerock.caf.authn.test.modules.SessionAuthModule.*;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
 
 /**
  * Functional tests for the JASPI runtime when configured with just a single auth module.
@@ -70,8 +69,10 @@ public class SingleAuthModuleOnlyIT {
              *
              * Expected Result:
              * * HTTP 200 status
-//                 * * Audit Auth Module success
+             * * Audit Auth Module success
              * * Audit overall result as success
+             * * Audit record contains principal
+             * * Audit record does not contain session id
 //                 * * No state cookie on response
              * * Requested resource not called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -79,7 +80,9 @@ public class SingleAuthModuleOnlyIT {
             {"Single Auth Module Only - SEND_SUCCESS:AuthException",
                 null, moduleArray(
                     moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", SEND_SUCCESS_AUTH_STATUS, null)),
-                200, false, noData(), auditParams("SUCCESS")
+                200, false, noData(),
+                auditParams("SUCCESSFUL", AUTH_MODULE_ONE_PRINCIPAL, false,
+                        entry("AuthModule-AuthModuleOne-0", "SUCCESSFUL"))
             },
             /**
              * Single Auth Module Only - SEND_FAILURE:AuthException
@@ -93,8 +96,10 @@ public class SingleAuthModuleOnlyIT {
              *
              * Expected Result:
              * * HTTP 401 status
-//                 * * Audit Auth Module failure
+             * * Audit Auth Module failure
              * * Audit overall result as failure
+             * * Audit record contains principal
+             * * Audit record does not contain session id
 //                 * * No state cookie on response
              * * Requested resource not called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -102,7 +107,8 @@ public class SingleAuthModuleOnlyIT {
             {"Single Auth Module Only - SEND_FAILURE:AuthException",
                 null, moduleArray(
                     moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", SEND_FAILURE_AUTH_STATUS, null)),
-                401, false, exceptionMatcher(401), auditParams("FAILURE")
+                401, false, exceptionMatcher(401),
+                auditParams("FAILED", null, false, entry("AuthModule-AuthModuleOne-0", "FAILED"))
             },
             /**
              * Single Auth Module Only - SEND_CONTINUE:AuthException
@@ -140,8 +146,10 @@ public class SingleAuthModuleOnlyIT {
              * Expected Result:
              * * HTTP 500 status
              * * HTTP response detailing the cause of the failure
-//                 * * Audit Auth Module failure
+             * * Audit Auth Module failure
              * * Audit overall result as failure
+             * * Audit record does not contain principal
+             * * Audit record does not contain session id
 //                 * * No state cookie on response
              * * Requested resource not called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -149,7 +157,10 @@ public class SingleAuthModuleOnlyIT {
             {"Single Auth Module Only - AuthException:SEND_SUCCESS",
                 null, moduleArray(
                     moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", null, SEND_SUCCESS_AUTH_STATUS)),
-                500, false, exceptionMatcher(500), auditParams("FAILURE")
+                500, false, exceptionMatcher(500),
+                auditParams("FAILED", null, false, entry("AuthModule-AuthModuleOne-0", "FAILED",
+                        equalTo(AUTH_MODULE_ONE_VALIDATE_REQUEST_HEADER_NAME
+                                + " header not set, so throwing AuthException.")))
             },
             /**
              * Single Auth Module Only - SUCCESS:SEND_SUCCESS
@@ -165,8 +176,10 @@ public class SingleAuthModuleOnlyIT {
              * Expected Result:
              * * HTTP 200 status
              * * HTTP response from resource
-//                 * * Audit Auth Module success
+             * * Audit Auth Module success
              * * Audit overall result as success
+             * * Audit record contains principal
+             * * Audit record does not contain session id
 //                 * * No state cookie on response
              * * Requested resource called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -176,7 +189,8 @@ public class SingleAuthModuleOnlyIT {
                     moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", SUCCESS_AUTH_STATUS,
                         SEND_SUCCESS_AUTH_STATUS)),
                 200, true, resourceMatcher(AUTH_MODULE_ONE_PRINCIPAL, AUTH_MODULE_ONE_CONTEXT_ENTRY),
-                auditParams("SUCCESS")
+                auditParams("SUCCESSFUL", AUTH_MODULE_ONE_PRINCIPAL, false,
+                        entry("AuthModule-AuthModuleOne-0", "SUCCESSFUL"))
             },
             /**
              * Single Auth Module Only - SUCCESS:SEND_FAILURE
@@ -192,8 +206,10 @@ public class SingleAuthModuleOnlyIT {
              * Expected Result:
              * * HTTP 500 status
              * * HTTP response from resource
-//                 * * Audit Auth Module success
+             * * Audit Auth Module success
              * * Audit overall result as success
+             * * Audit record contains principal
+             * * Audit record does not contain session id
 //                 * * No state cookie on response
              * * Requested resource called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -204,7 +220,8 @@ public class SingleAuthModuleOnlyIT {
                         SEND_FAILURE_AUTH_STATUS)),
                 500, true,
                 resourceMatcher(AUTH_MODULE_ONE_PRINCIPAL, AUTH_MODULE_ONE_CONTEXT_ENTRY),
-                auditParams("SUCCESS")
+                auditParams("SUCCESSFUL", AUTH_MODULE_ONE_PRINCIPAL, false,
+                        entry("AuthModule-AuthModuleOne-0", "SUCCESSFUL"))
             },
             /**
              * Single Auth Module Only - SUCCESS:AuthException
@@ -220,8 +237,10 @@ public class SingleAuthModuleOnlyIT {
              * Expected Result:
              * * HTTP 500 status
              * * HTTP response from resource
-//                 * * Audit Auth Module success
+             * * Audit Auth Module success
              * * Audit overall result as success
+             * * Audit record contains principal
+             * * Audit record does not contain session id
 //                 * * No state cookie on response
              * * Requested resource called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -230,7 +249,8 @@ public class SingleAuthModuleOnlyIT {
                 null, moduleArray(
                     moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", SUCCESS_AUTH_STATUS, null)), 500, true,
                 resourceMatcher(AUTH_MODULE_ONE_PRINCIPAL, AUTH_MODULE_ONE_CONTEXT_ENTRY),
-                auditParams("SUCCESS")
+                auditParams("SUCCESSFUL", AUTH_MODULE_ONE_PRINCIPAL, false,
+                        entry("AuthModule-AuthModuleOne-0", "SUCCESSFUL"))
             },
         };
     }
@@ -251,8 +271,10 @@ public class SingleAuthModuleOnlyIT {
              * Expected Result:
              * * HTTP 500 status
              * * HTTP response detailing the cause of the failure
-//                 * * Does not audit Auth Module failure
-             * * Does not audit overall result as failure
+             * * Audit Auth Module failure
+             * * Audit overall result as failure
+             * * Audit record does not contain principal
+             * * Audit record does not contain session id
 //                 * * No state cookie on response
              * * Requested resource not called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -262,7 +284,8 @@ public class SingleAuthModuleOnlyIT {
                     moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", FAILURE_AUTH_STATUS,
                         SEND_SUCCESS_AUTH_STATUS)), 500, false,
                 exceptionMatcher(500, containsString("Invalid AuthStatus returned from validateRequest, FAILURE")),
-                null
+                auditParams("FAILED", null, false, entry("AuthModule-AuthModuleOne-0", "FAILED",
+                        equalTo("Invalid AuthStatus returned from validateRequest, FAILURE")))
             },
             /**
              * Single Auth Module Only - null:SEND_SUCCESS
@@ -277,8 +300,10 @@ public class SingleAuthModuleOnlyIT {
              * Expected Result:
              * * HTTP 500 status
              * * HTTP response detailing the cause of the failure
-//                 * * Does not audit Auth Module failure
-             * * Does not audit overall result as failure
+             * * Audit Auth Module failure
+             * * Audit overall result as failure
+             * * Audit record does not contain principal
+             * * Audit record does not contain session id
 //                 * * No state cookie on response
              * * Requested resource not called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -288,7 +313,8 @@ public class SingleAuthModuleOnlyIT {
                     moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", NULL_AUTH_STATUS,
                         SEND_SUCCESS_AUTH_STATUS)), 500, false,
                 exceptionMatcher(500, containsString("Invalid AuthStatus returned from validateRequest, null")),
-                null
+                auditParams("FAILED", null, false, entry("AuthModule-AuthModuleOne-0", "FAILED",
+                        equalTo("Invalid AuthStatus returned from validateRequest, null")))
             },
             /**
              * Single Auth Module Only - SUCCESS:SEND_CONTINUE
@@ -305,8 +331,10 @@ public class SingleAuthModuleOnlyIT {
              * * HTTP 200 status
              * * HTTP response from resource
              * * HTTP response detailing the cause of the failure
-//                 * * Audit Auth Module success
+             * * Audit Auth Module success
              * * Audit overall result as success
+             * * Audit record contains principal
+             * * Audit record does not contain session id
 //                 * * No state cookie on response
              * * Requested resource called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -316,7 +344,8 @@ public class SingleAuthModuleOnlyIT {
                     moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", SUCCESS_AUTH_STATUS,
                         SEND_CONTINUE_AUTH_STATUS)),
                 200, true, resourceMatcher(AUTH_MODULE_ONE_PRINCIPAL, AUTH_MODULE_ONE_CONTEXT_ENTRY),
-                auditParams("SUCCESS")
+                auditParams("SUCCESSFUL", AUTH_MODULE_ONE_PRINCIPAL, false,
+                        entry("AuthModule-AuthModuleOne-0", "SUCCESSFUL"))
             },
             /**
              * Single Auth Module Only - SUCCESS:SUCCESS
@@ -332,8 +361,10 @@ public class SingleAuthModuleOnlyIT {
              * Expected Result:
              * * HTTP 500 status
              * * HTTP response from resource
-//                 * * Audit Auth Module success
+             * * Audit Auth Module success
              * * Audit overall result as success
+             * * Audit record contains principal
+             * * Audit record does not contain session id
 //                 * * No state cookie on response
              * * Requested resource called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -343,7 +374,8 @@ public class SingleAuthModuleOnlyIT {
                     moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", SUCCESS_AUTH_STATUS, SUCCESS_AUTH_STATUS)),
                 500, true,
                 resourceMatcher(AUTH_MODULE_ONE_PRINCIPAL, AUTH_MODULE_ONE_CONTEXT_ENTRY),
-                auditParams("SUCCESS")
+                auditParams("SUCCESSFUL", AUTH_MODULE_ONE_PRINCIPAL, false,
+                        entry("AuthModule-AuthModuleOne-0", "SUCCESSFUL"))
             },
             /**
              * Single Auth Module Only - SUCCESS:FAILURE
@@ -358,8 +390,10 @@ public class SingleAuthModuleOnlyIT {
              * Expected Result:
              * * HTTP 500 status
              * * HTTP response from resource
-//                 * * Audit Auth Module success
+             * * Audit Auth Module success
              * * Audit overall result as success
+             * * Audit record contains principal
+             * * Audit record does not contain session id
 //                 * * No state cookie on response
              * * Requested resource called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -369,7 +403,8 @@ public class SingleAuthModuleOnlyIT {
                     moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", SUCCESS_AUTH_STATUS, FAILURE_AUTH_STATUS)),
                 500, true,
                 resourceMatcher(AUTH_MODULE_ONE_PRINCIPAL, AUTH_MODULE_ONE_CONTEXT_ENTRY),
-                auditParams("SUCCESS")
+                auditParams("SUCCESSFUL", AUTH_MODULE_ONE_PRINCIPAL, false,
+                        entry("AuthModule-AuthModuleOne-0", "SUCCESSFUL"))
             },
             /**
              * Single Auth Module Only - SUCCESS:null
@@ -385,8 +420,10 @@ public class SingleAuthModuleOnlyIT {
              * Expected Result:
              * * HTTP 500 status
              * * HTTP response from resource
-//                 * * Audit Auth Module success
+             * * Audit Auth Module success
              * * Audit overall result as success
+             * * Audit record contains principal
+             * * Audit record does not contain session id
 //                 * * No state cookie on response
              * * Requested resource called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -396,7 +433,8 @@ public class SingleAuthModuleOnlyIT {
                     moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", SUCCESS_AUTH_STATUS, NULL_AUTH_STATUS)),
                 500, true,
                 resourceMatcher(AUTH_MODULE_ONE_PRINCIPAL, AUTH_MODULE_ONE_CONTEXT_ENTRY),
-                auditParams("SUCCESS")
+                auditParams("SUCCESSFUL", AUTH_MODULE_ONE_PRINCIPAL, false,
+                        entry("AuthModule-AuthModuleOne-0", "SUCCESSFUL"))
             },
         };
     }

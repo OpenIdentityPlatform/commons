@@ -16,33 +16,29 @@
 
 package org.forgerock.caf.authn.test.runtime;
 
-import org.forgerock.auth.common.AuditLogger;
-import org.forgerock.auth.common.AuditRecord;
+import com.google.inject.Singleton;
+import org.forgerock.jaspi.runtime.AuditApi;
+import org.forgerock.json.fluent.JsonValue;
 
-import javax.inject.Singleton;
-import javax.security.auth.message.MessageInfo;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>Test implementation of the JASPI runtime's {@code AuditLogger} interface.</p>
+ * <p>Test implementation of the JASPI runtime's {@code AuditApi} interface.</p>
  *
- * <p>Stores each of the audit records locally and provides methods for reading and clearing the store audit records.
+ * <p>Stores each of the audit records locally and provides methods for reading and clearing the stored audit records.
  * </p>
  *
  * @since 1.5.0
  */
 @Singleton
-public class TestAuditLogger implements AuditLogger<MessageInfo> {
+public class TestAuditApi implements AuditApi {
 
-    private final List<AuditRecord<MessageInfo>> auditRecords = new ArrayList<AuditRecord<MessageInfo>>();
+    private final List<JsonValue> auditRecords = new ArrayList<JsonValue>();
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void audit(AuditRecord<MessageInfo> auditRecord) {
-        auditRecords.add(auditRecord);
+    public void audit(JsonValue auditMessage) {
+        auditRecords.add(auditMessage);
     }
 
     /**
@@ -50,7 +46,7 @@ public class TestAuditLogger implements AuditLogger<MessageInfo> {
      *
      * @return The audit records.
      */
-    public List<AuditRecord<MessageInfo>> getAuditRecords() {
+    public List<JsonValue> getAuditRecords() {
         return auditRecords;
     }
 

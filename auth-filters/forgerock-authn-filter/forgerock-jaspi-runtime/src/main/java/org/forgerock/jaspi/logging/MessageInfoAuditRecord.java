@@ -25,7 +25,9 @@ import javax.security.auth.message.MessageInfo;
  * Audit Record which contains a MessageInfo instance.
  *
  * @since 1.3.0
+ * @deprecated use {@link org.forgerock.jaspi.runtime.AuditApi#audit(org.forgerock.json.fluent.JsonValue)} instead.
  */
+@Deprecated
 public class MessageInfoAuditRecord extends AuditRecord<MessageInfo> {
 
     /**
@@ -33,7 +35,10 @@ public class MessageInfoAuditRecord extends AuditRecord<MessageInfo> {
      *
      * @param authResult The AuthResult of the auth operation.
      * @param messageInfo The MessageInfo of the auth operation.
+     *
+     * @deprecated use {@link org.forgerock.jaspi.runtime.AuditApi#audit(org.forgerock.json.fluent.JsonValue)} instead.
      */
+    @Deprecated
     public MessageInfoAuditRecord(final AuthResult authResult, final MessageInfo messageInfo) {
         super(authResult, messageInfo);
     }

@@ -42,6 +42,7 @@ import static org.forgerock.caf.authn.test.modules.AuthModuleOne.AUTH_MODULE_ONE
 import static org.forgerock.caf.authn.test.modules.AuthModuleTwo.AUTH_MODULE_TWO_CONTEXT_ENTRY;
 import static org.forgerock.caf.authn.test.modules.AuthModuleTwo.AUTH_MODULE_TWO_PRINCIPAL;
 import static org.forgerock.caf.authn.test.modules.SessionAuthModule.*;
+import static org.forgerock.caf.authn.AuditParameters.Entry.entry;
 
 /**
  * Functional tests for the JASPI runtime when configured with a "Session" auth module and two auth modules.
@@ -78,8 +79,10 @@ public class SessionAndAuthModulesIT {
              *
              * Expected Result:
              * * HTTP 200 status
-//                 * * Does not audit Session Module success
-             * * Does not audit overall result as success
+             * * Audit Session Module success
+             * * Audit overall result as success
+             * * Audit record contains Session Module principal
+             * * Audit record does not contain session id
 //                 * * No state cookie on response
              * * Requested resource not called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -89,7 +92,9 @@ public class SessionAndAuthModulesIT {
                 moduleArray(
                         moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", null, null),
                         moduleParams(AuthModuleTwo.class, "AUTH-MODULE-TWO", null, null)),
-                200, false, noData(), null
+                200, false, noData(),
+                auditParams("SUCCESSFUL", SESSION_MODULE_PRINCIPAL, false,
+                        entry("Session-SessionAuthModule", "SUCCESSFUL"))
             },
             /**
              * Session Module and Two Auth Modules - SUCCESS:SEND_SUCCESS & AuthException:AuthException &
@@ -109,8 +114,10 @@ public class SessionAndAuthModulesIT {
              * Expected Result:
              * * HTTP 200 status
              * * HTTP response from resource
-//                 * * Does not audit Session Module success
-             * * Does not audit overall result as success
+             * * Audit Session Module success
+             * * Audit overall result as success
+             * * Audit record contains Session Module principal
+             * * Audit record contains session id
 //                 * * No state cookie on response
              * * Requested resource will be called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -121,7 +128,8 @@ public class SessionAndAuthModulesIT {
                         moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", null, null),
                         moduleParams(AuthModuleTwo.class, "AUTH-MODULE-TWO", null, null)),
                 200, true, resourceMatcher(SESSION_MODULE_PRINCIPAL, SESSION_MODULE_CONTEXT_ENTRY),
-                null
+                auditParams("SUCCESSFUL", SESSION_MODULE_PRINCIPAL, true,
+                        entry("Session-SessionAuthModule", "SUCCESSFUL"))
             },
             /**
              * Session Module and Two Auth Modules - SEND_CONTINUE:AuthException &
@@ -169,9 +177,11 @@ public class SessionAndAuthModulesIT {
              *
              * Expected Result:
              * * HTTP 200 status
-//                 * * Does not audit Session Module success
-//                 * * Audit Auth Module One success
+             * * Audit Session Module success
+             * * Audit Auth Module One success
              * * Audit overall result as success
+             * * Audit record contains Auth Module One principal
+             * * Audit record does not contain session id
 //                 * * No state cookie on response
              * * Requested resource not called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -181,7 +191,9 @@ public class SessionAndAuthModulesIT {
                 moduleArray(
                         moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", SEND_SUCCESS_AUTH_STATUS, null),
                         moduleParams(AuthModuleTwo.class, "AUTH-MODULE-TWO", null, null)),
-                200, false, noData(), auditParams("SUCCESS")
+                200, false, noData(),
+                auditParams("SUCCESSFUL", AUTH_MODULE_ONE_PRINCIPAL, false,
+                        entry("Session-SessionAuthModule", "FAILED"), entry("AuthModule-AuthModuleOne-0", "SUCCESSFUL"))
             },
             /**
              * Session Module and Two Auth Modules - SEND_FAILURE:AuthException & SEND_CONTINUE:AuthException &
@@ -229,9 +241,11 @@ public class SessionAndAuthModulesIT {
              *
              * Expected Result:
              * * HTTP 200 status
-//                 * * Does not audit Session Module success
-//                 * * Audit Auth Module One success
+             * * Audit Session Module success
+             * * Audit Auth Module One success
              * * Audit overall result as success
+             * * Audit record contains Auth Module One principal
+             * * Audit record contains session id
 //                 * * No state cookie on response
              * * Requested resource will be called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -245,7 +259,8 @@ public class SessionAndAuthModulesIT {
                         moduleParams(AuthModuleTwo.class, "AUTH-MODULE-TWO", null, null)),
                 200, true, resourceMatcher(AUTH_MODULE_ONE_PRINCIPAL, SESSION_MODULE_CONTEXT_ENTRY,
                     AUTH_MODULE_ONE_CONTEXT_ENTRY),
-                auditParams("SUCCESS")
+                auditParams("SUCCESSFUL", AUTH_MODULE_ONE_PRINCIPAL, true, entry("Session-SessionAuthModule", "FAILED"),
+                        entry("AuthModule-AuthModuleOne-0", "SUCCESSFUL"))
             },
             /**
              * Session Module and Two Auth Modules - SEND_FAILURE:AuthException & SEND_FAILURE:AuthException &
@@ -264,10 +279,12 @@ public class SessionAndAuthModulesIT {
              *
              * Expected Result:
              * * HTTP 200 status
-//                 * * Does not audit Session Module success
-//                 * * Audit Auth Module One failure
-//                 * * Audit Auth Module Two success
+             * * Audit Session Module success
+             * * Audit Auth Module One failure
+             * * Audit Auth Module Two success
              * * Audit overall result as success
+             * * Audit record contains Auth Module Two principal
+             * * Audit record does not contain session id
 //                 * * No state cookie on response
              * * Requested resource not called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -277,7 +294,10 @@ public class SessionAndAuthModulesIT {
                 moduleArray(
                         moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", SEND_FAILURE_AUTH_STATUS, null),
                         moduleParams(AuthModuleTwo.class, "AUTH-MODULE-TWO", SEND_SUCCESS_AUTH_STATUS, null)),
-                200, false, noData(), auditParams("SUCCESS")
+                200, false, noData(),
+                auditParams("SUCCESSFUL", AUTH_MODULE_TWO_PRINCIPAL, false,
+                        entry("Session-SessionAuthModule", "FAILED"), entry("AuthModule-AuthModuleOne-0", "FAILED"),
+                        entry("AuthModule-AuthModuleTwo-1", "SUCCESSFUL"))
             },
             /**
              * Session Module and Two Auth Modules - SEND_FAILURE:AuthException & SEND_FAILURE:AuthException &
@@ -291,7 +311,6 @@ public class SessionAndAuthModulesIT {
              * * Auth Module One #validateRequest will SEND_FAILURE
              * * Auth Module One #secureResponse will throw AuthException (but should not be called)
              * * Auth Module Two #validateRequest will return SEND_CONTINUE
-//                 * * Auth Module Two will set HTTP 100 status
              * * Auth Module Two #secureResponse will throw AuthException (but should not be called)
              *
              *
@@ -302,7 +321,7 @@ public class SessionAndAuthModulesIT {
              * * Requested resource not called (resource will set header 'RESOURCE_CALLED':true on response)
              *
              */
-            {"Session Module and Two Auth Modules - SF:AE & SF:AE & SC->SS:AE",
+            {"Session Module and Two Auth Modules - SF:AE & SF:AE & SC:AE",
                 moduleParams(SessionAuthModule.class, "SESSION", SEND_FAILURE_AUTH_STATUS, null),
                 moduleArray(
                     moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", SEND_FAILURE_AUTH_STATUS, null),
@@ -326,10 +345,12 @@ public class SessionAndAuthModulesIT {
              *
              * Expected Result:
              * * HTTP 401 status
-//                 * * Audit Session Module failure
-//                 * * Audit Auth Module One failure
-//                 * * Audit Auth Module Two failure
+             * * Audit Session Module failure
+             * * Audit Auth Module One failure
+             * * Audit Auth Module Two failure
              * * Audit overall result as failure
+             * * Audit record does not contain principal
+             * * Audit record does not contain session id
 //                 * * No state cookie on response
              * * Requested resource not called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -339,7 +360,9 @@ public class SessionAndAuthModulesIT {
                 moduleArray(
                         moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", SEND_FAILURE_AUTH_STATUS, null),
                         moduleParams(AuthModuleTwo.class, "AUTH-MODULE-TWO", SEND_FAILURE_AUTH_STATUS, null)),
-                401, false, exceptionMatcher(401), auditParams("FAILURE")
+                401, false, exceptionMatcher(401),
+                auditParams("FAILED", null, false, entry("Session-SessionAuthModule", "FAILED"),
+                        entry("AuthModule-AuthModuleOne-0", "FAILED"), entry("AuthModule-AuthModuleTwo-1", "FAILED"))
             },
             /**
              * Session Module and Two Auth Modules - SEND_FAILURE:AuthException & SEND_FAILURE:AuthException &
@@ -358,10 +381,12 @@ public class SessionAndAuthModulesIT {
              *
              * Expected Result:
              * * HTTP 500 status
-//                 * * Audit Session Module failure
-//                 * * Audit Auth Module One failure
-//                 * * Audit Auth Module Two success
+             * * Audit Session Module failure
+             * * Audit Auth Module One failure
+             * * Audit Auth Module Two success
              * * Audit overall result as success
+             * * Audit record contains Auth Module Two principal
+             * * Audit record does not contain session id
 //                 * * No state cookie on response
              * * Requested resource will be called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -374,7 +399,9 @@ public class SessionAndAuthModulesIT {
                                 SEND_FAILURE_AUTH_STATUS)),
                 500, true, resourceMatcher(AUTH_MODULE_TWO_PRINCIPAL, SESSION_MODULE_CONTEXT_ENTRY,
                     AUTH_MODULE_TWO_CONTEXT_ENTRY),
-                auditParams("SUCCESS")
+                auditParams("SUCCESSFUL", AUTH_MODULE_TWO_PRINCIPAL, false,
+                        entry("Session-SessionAuthModule", "FAILED"), entry("AuthModule-AuthModuleOne-0", "FAILED"),
+                        entry("AuthModule-AuthModuleTwo-1", "SUCCESSFUL"))
             },
             /**
              * Session Module and Two Auth Modules - SEND_FAILURE:SEND_FAILURE & SEND_FAILURE:AuthException &
@@ -393,10 +420,12 @@ public class SessionAndAuthModulesIT {
              *
              * Expected Result:
              * * HTTP 500 status
-//                 * * Audit Session Module failure
-//                 * * Audit Auth Module One failure
-//                 * * Audit Auth Module Two success
+             * * Audit Session Module failure
+             * * Audit Auth Module One failure
+             * * Audit Auth Module Two success
              * * Audit overall result as success
+             * * Audit record contains Auth Module Two principal
+             * * Audit record does not contain session id
 //                 * * No state cookie on response
              * * Requested resource will be called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -410,7 +439,9 @@ public class SessionAndAuthModulesIT {
                                 SEND_SUCCESS_AUTH_STATUS)),
                 500, true, resourceMatcher(AUTH_MODULE_TWO_PRINCIPAL, SESSION_MODULE_CONTEXT_ENTRY,
                     AUTH_MODULE_TWO_CONTEXT_ENTRY),
-                auditParams("SUCCESS")
+                auditParams("SUCCESSFUL", AUTH_MODULE_TWO_PRINCIPAL, false,
+                        entry("Session-SessionAuthModule", "FAILED"), entry("AuthModule-AuthModuleOne-0", "FAILED"),
+                        entry("AuthModule-AuthModuleTwo-1", "SUCCESSFUL"))
             },
             /**
              * Session Module and Two Auth Modules - SEND_FAILURE:SEND_SUCCESS & SEND_FAILURE:AuthException &
@@ -429,10 +460,12 @@ public class SessionAndAuthModulesIT {
              *
              * Expected Result:
              * * HTTP 200 status
-//                 * * Audit Session Module failure
-//                 * * Audit Auth Module One failure
-//                 * * Audit Auth Module Two success
+             * * Audit Session Module failure
+             * * Audit Auth Module One failure
+             * * Audit Auth Module Two success
              * * Audit overall result as success
+             * * Audit record contains Auth Module Two principal
+             * * Audit record contains session id
 //                 * * No state cookie on response
              * * Requested resource will be called (resource will set header 'RESOURCE_CALLED':true on response)
              *
@@ -446,7 +479,9 @@ public class SessionAndAuthModulesIT {
                                 SEND_SUCCESS_AUTH_STATUS)),
                 200, true, resourceMatcher(AUTH_MODULE_TWO_PRINCIPAL, SESSION_MODULE_CONTEXT_ENTRY,
                     AUTH_MODULE_TWO_CONTEXT_ENTRY),
-                auditParams("SUCCESS")
+                auditParams("SUCCESSFUL", AUTH_MODULE_TWO_PRINCIPAL, true, entry("Session-SessionAuthModule", "FAILED"),
+                        entry("AuthModule-AuthModuleOne-0", "FAILED"),
+                        entry("AuthModule-AuthModuleTwo-1", "SUCCESSFUL"))
             },
         };
     }

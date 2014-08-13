@@ -19,6 +19,7 @@ package org.forgerock.jaspi.runtime.context;
 import org.forgerock.auth.common.DebugLogger;
 import org.forgerock.jaspi.exceptions.JaspiAuthException;
 import org.forgerock.jaspi.logging.LogFactory;
+import org.forgerock.jaspi.runtime.AuditTrail;
 import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.jaspi.utils.MessageInfoUtils;
 
@@ -29,8 +30,11 @@ import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.config.ServerAuthContext;
 import javax.security.auth.message.module.ServerAuthModule;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import static org.forgerock.jaspi.runtime.AuditTrail.*;
 import static org.forgerock.jaspi.runtime.AuthStatusUtils.asString;
 
 /**
@@ -155,44 +159,61 @@ public abstract class JaspiServerAuthContext<T extends ServerAuthModule> impleme
             final Subject serviceSubject) throws AuthException {
 
         getMessageInfoUtils().addMap(messageInfo, JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT);
+        AuditTrail auditTrail = (AuditTrail) messageInfo.getMap().get(AUDIT_TRAIL_KEY);
+        Map<String, Object> moduleAuditInfo = new HashMap<String, Object>();
+        messageInfo.getMap().put(AUDIT_INFO_KEY, moduleAuditInfo);
 
         AuthStatus authStatus = null;
         // validate session module
-            if (sessionAuthModule != null) {
+        if (sessionAuthModule != null) {
+            String moduleId = "Session-" + sessionAuthModule.getClass().getSimpleName();
+            try {
                 try {
                     authStatus = sessionAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject);
                 } catch (AuthException e) {
                     LOGGER.debug("Auditing authentication result");
                     contextHandler.audit(messageInfo, authStatus);
+                    auditTrail.auditFailure(moduleId, e.getMessage(), moduleAuditInfo);
                     throw e;
                 }
                 if (AuthStatus.SUCCESS.equals(authStatus)) {
+                    auditTrail.auditSuccess(moduleId, moduleAuditInfo);
                     // The module has successfully authenticated the client.
                     LOGGER.debug(sessionAuthModule.getClass().getSimpleName() + " has successfully authenticated the "
                             + "client");
                     contextHandler.handleCompletion(messageInfo, clientSubject, authStatus);
                     return authStatus;
                 } else if (AuthStatus.SEND_SUCCESS.equals(authStatus)) {
+                    auditTrail.auditSuccess(moduleId, moduleAuditInfo);
                     // The module may have completely/partially/not authenticated the client.
                     LOGGER.debug(sessionAuthModule.getClass().getSimpleName() + " may have completely/partially/not "
                             + "authenticated the client and has a response to return to the client");
                     return authStatus;
                 } else if (AuthStatus.SEND_FAILURE.equals(authStatus)) {
+                    String failureReason = (String) messageInfo.getMap().remove(AUDIT_FAILURE_REASON_KEY);
+                    auditTrail.auditFailure(moduleId, failureReason, moduleAuditInfo);
                     // The module has failed to authenticate the client.
                     // -- In our implementation we will let subsequent modules try before sending the failure.
                     LOGGER.debug(sessionAuthModule.getClass().getSimpleName() + " has failed to authenticated the "
                             + "client, passing to Auth Modules");
                 } else if (AuthStatus.SEND_CONTINUE.equals(authStatus)) {
                     // The module has not completed authenticating the client.
-                    LOGGER.debug(sessionAuthModule.getClass().getSimpleName() + " has not completed authenticating the"
+                    LOGGER.debug(sessionAuthModule.getClass().getSimpleName() + " has not completed authenticating the "
                             + "client");
                     return authStatus;
                 } else {
-                    LOGGER.error("Invalid AuthStatus returned from validateRequest, " + asString(authStatus));
-                    throw new JaspiAuthException("Invalid AuthStatus returned from validateRequest, "
-                            + asString(authStatus));
+                    String message = "Invalid AuthStatus returned from validateRequest, " + asString(authStatus);
+                    auditTrail.auditFailure(moduleId, message, moduleAuditInfo);
+                    LOGGER.error(message);
+                    throw new JaspiAuthException(message);
                 }
+            } finally {
+                messageInfo.getMap().remove(AUDIT_INFO_KEY);
+                messageInfo.getMap().remove(AUDIT_FAILURE_REASON_KEY);
+                String sessionId = (String) messageInfo.getMap().remove(AUDIT_SESSION_ID_KEY);
+                auditTrail.setSessionId(sessionId);
             }
+        }
 
         try {
             try {
@@ -308,6 +329,8 @@ public abstract class JaspiServerAuthContext<T extends ServerAuthModule> impleme
     public final AuthStatus secureResponse(final MessageInfo messageInfo, final Subject serviceSubject)
             throws AuthException {
 
+        AuditTrail auditTrail = (AuditTrail) messageInfo.getMap().get(AUDIT_TRAIL_KEY);
+
         AuthStatus authStatus = secureResponse(authModules, messageInfo, serviceSubject);
         if (AuthStatus.SUCCESS.equals(authStatus) || AuthStatus.FAILURE.equals(authStatus)) {
             LOGGER.error("Invalid AuthStatus returned from validateRequest, " + asString(authStatus));
@@ -320,7 +343,12 @@ public abstract class JaspiServerAuthContext<T extends ServerAuthModule> impleme
          * AuthStatus.SUCCESS or the AuthModule secureResponse has not been called and hence the authStatus is null.
          */
         if (sessionAuthModule != null && (authStatus == null || AuthStatus.SEND_SUCCESS.equals(authStatus))) {
-            authStatus = sessionAuthModule.secureResponse(messageInfo, serviceSubject);
+            try {
+                authStatus = sessionAuthModule.secureResponse(messageInfo, serviceSubject);
+            } finally {
+                String sessionId = (String) messageInfo.getMap().remove(AUDIT_SESSION_ID_KEY);
+                auditTrail.setSessionId(sessionId);
+            }
         }
 
         /*

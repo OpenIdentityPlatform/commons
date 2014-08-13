@@ -16,6 +16,7 @@
 
 package org.forgerock.jaspi.context;
 
+import org.forgerock.jaspi.runtime.AuditTrail;
 import org.forgerock.jaspi.runtime.context.ContextHandler;
 import org.forgerock.jaspi.utils.MessageInfoUtils;
 import org.testng.annotations.BeforeMethod;
@@ -64,6 +65,11 @@ public class FallbackServerAuthContextTest {
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
         Map<String, Object> privateContextMap = new HashMap<String, Object>();
+        Map<String, Object> messageInfoMap = new HashMap<String, Object>();
+        AuditTrail auditTrail = mock(AuditTrail.class);
+
+        given(messageInfo.getMap()).willReturn(messageInfoMap);
+        messageInfoMap.put("org.forgerock.authentication.audit.trail", auditTrail);
 
         ServerAuthModule authModuleOne = mock(ServerAuthModule.class);
         ServerAuthModule authModuleTwo = mock(ServerAuthModule.class);
@@ -97,6 +103,11 @@ public class FallbackServerAuthContextTest {
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
         Map<String, Object> privateContextMap = new HashMap<String, Object>();
+        Map<String, Object> messageInfoMap = new HashMap<String, Object>();
+        AuditTrail auditTrail = mock(AuditTrail.class);
+
+        given(messageInfo.getMap()).willReturn(messageInfoMap);
+        messageInfoMap.put("org.forgerock.authentication.audit.trail", auditTrail);
 
         ServerAuthModule authModuleOne = mock(ServerAuthModule.class);
         ServerAuthModule authModuleTwo = mock(ServerAuthModule.class);
@@ -159,6 +170,11 @@ public class FallbackServerAuthContextTest {
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
         Map<String, Object> privateContextMap = new HashMap<String, Object>();
+        Map<String, Object> messageInfoMap = new HashMap<String, Object>();
+        AuditTrail auditTrail = mock(AuditTrail.class);
+
+        given(messageInfo.getMap()).willReturn(messageInfoMap);
+        messageInfoMap.put("org.forgerock.authentication.audit.trail", auditTrail);
 
         ServerAuthModule authModuleOne = mock(ServerAuthModule.class);
         ServerAuthModule authModuleTwo = mock(ServerAuthModule.class);
@@ -191,7 +207,11 @@ public class FallbackServerAuthContextTest {
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
         Map<String, Object> privateContextMap = new HashMap<String, Object>();
+        Map<String, Object> messageInfoMap = new HashMap<String, Object>();
+        AuditTrail auditTrail = mock(AuditTrail.class);
 
+        given(messageInfo.getMap()).willReturn(messageInfoMap);
+        messageInfoMap.put("org.forgerock.authentication.audit.trail", auditTrail);
         ServerAuthModule authModuleOne = mock(ServerAuthModule.class);
         authModules.add(authModuleOne);
         given(authModuleOne.validateRequest(messageInfo, clientSubject, serviceSubject))
@@ -216,6 +236,11 @@ public class FallbackServerAuthContextTest {
         MessageInfo messageInfo = mock(MessageInfo.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
+        Map<String, Object> messageInfoMap = new HashMap<String, Object>();
+        AuditTrail auditTrail = mock(AuditTrail.class);
+
+        given(messageInfo.getMap()).willReturn(messageInfoMap);
+        messageInfoMap.put("org.forgerock.authentication.audit.trail", auditTrail);
 
         ServerAuthModule authModule = mock(ServerAuthModule.class);
         authModules.add(authModule);

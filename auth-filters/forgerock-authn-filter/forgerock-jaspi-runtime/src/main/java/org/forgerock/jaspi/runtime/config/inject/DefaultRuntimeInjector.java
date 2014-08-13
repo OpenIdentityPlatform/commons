@@ -18,18 +18,20 @@ package org.forgerock.jaspi.runtime.config.inject;
 
 import org.forgerock.auth.common.AuditLogger;
 import org.forgerock.auth.common.DebugLogger;
+import org.forgerock.auth.common.FilterConfiguration;
+import org.forgerock.auth.common.FilterConfigurationImpl;
 import org.forgerock.auth.common.LoggingConfigurator;
 import org.forgerock.jaspi.context.DefaultServerContextFactory;
 import org.forgerock.jaspi.logging.LogFactory;
+import org.forgerock.jaspi.runtime.AuditApi;
 import org.forgerock.jaspi.runtime.HttpServletCallbackHandler;
 import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.jaspi.runtime.RuntimeResultHandler;
 import org.forgerock.jaspi.runtime.config.ServerContextFactory;
 import org.forgerock.jaspi.runtime.context.ContextHandler;
 import org.forgerock.jaspi.utils.DebugLoggerBuffer;
-import org.forgerock.auth.common.FilterConfiguration;
-import org.forgerock.auth.common.FilterConfigurationImpl;
 import org.forgerock.jaspi.utils.MessageInfoUtils;
+import org.forgerock.json.fluent.JsonValue;
 
 import javax.security.auth.message.AuthException;
 import javax.security.auth.message.MessageInfo;
@@ -53,6 +55,9 @@ public class DefaultRuntimeInjector implements RuntimeInjector {
     private static final String INIT_PARAM_LOGGING_CONFIGURATOR_CLASS = "logging-configurator-class";
     private static final String INIT_PARAM_LOGGING_CONFIGURATOR_METHOD = "logging-configurator-method";
     private static final String INIT_PARAM_LOGGING_CONFIGURATOR_METHOD_DEFAULT = "getLoggingConfigurator";
+    private static final String INIT_PARAM_AUDIT_API_CLASS = "audit-api-class";
+    private static final String INIT_PARAM_AUDIT_API_METHOD = "audit-api-method";
+    private static final String INIT_PARAM_AUDIT_API_METHOD_DEFAULT = "getAuditApi";
 
     private final FilterConfiguration filterConfiguration;
 
@@ -96,12 +101,13 @@ public class DefaultRuntimeInjector implements RuntimeInjector {
         MessageInfoUtils messageInfoUtils = new MessageInfoUtils();
         HttpServletCallbackHandler callbackHandler = new HttpServletCallbackHandler();
         ContextHandler contextHandler = new ContextHandler(messageInfoUtils);
+        AuditApi auditApi = getAuditApi(config);
         ServerAuthContext serverAuthContext = serverContextFactory.getServerAuthContext(messageInfoUtils,
                 callbackHandler, contextHandler);
 
         RuntimeResultHandler runtimeResultHandler = new RuntimeResultHandler();
 
-        this.jaspiRuntime = new JaspiRuntime(serverAuthContext, runtimeResultHandler);
+        this.jaspiRuntime = new JaspiRuntime(serverAuthContext, runtimeResultHandler, auditApi);
         LOGGER.debug("Finished initialising the DefaultRuntimeInjector");
     }
 
@@ -202,5 +208,26 @@ public class DefaultRuntimeInjector implements RuntimeInjector {
         }
 
         return loggingConfigurator;
+    }
+
+    /**
+     * Gets the {@code AuditApi} instance from the filter configuration. If none defined a NoOp implementation will be
+     * returned.
+     */
+    private AuditApi getAuditApi(FilterConfig config) throws ServletException {
+        AuditApi auditApi = filterConfiguration.get(config, INIT_PARAM_AUDIT_API_CLASS, INIT_PARAM_AUDIT_API_METHOD,
+                INIT_PARAM_AUDIT_API_METHOD_DEFAULT);
+
+        if (auditApi == null) {
+            LOGGER.debug("Filter init param, " + INIT_PARAM_AUDIT_API_CLASS + ", not set. Falling back "
+                    + "to the NoOp Audit Api.");
+            auditApi = new AuditApi() {
+                @Override
+                public void audit(JsonValue auditMessage) {
+                }
+            };
+        }
+
+        return auditApi;
     }
 }

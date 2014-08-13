@@ -17,14 +17,14 @@
 package org.forgerock.jaspi.context;
 
 import org.forgerock.auth.common.DebugLogger;
+import org.forgerock.auth.common.FilterConfiguration;
+import org.forgerock.auth.common.FilterConfigurationImpl;
 import org.forgerock.jaspi.exceptions.JaspiAuthException;
 import org.forgerock.jaspi.logging.LogFactory;
 import org.forgerock.jaspi.runtime.config.ServerContextFactory;
 import org.forgerock.jaspi.runtime.config.SessionServerContextFactory;
 import org.forgerock.jaspi.runtime.context.ContextHandler;
 import org.forgerock.jaspi.runtime.context.config.ModuleConfigurationFactory;
-import org.forgerock.auth.common.FilterConfiguration;
-import org.forgerock.auth.common.FilterConfigurationImpl;
 import org.forgerock.jaspi.utils.MessageInfoUtils;
 import org.forgerock.json.fluent.JsonValue;
 
