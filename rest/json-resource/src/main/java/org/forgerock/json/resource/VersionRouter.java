@@ -161,6 +161,10 @@ public final class VersionRouter implements RequestHandler {
      * @return An opaque handle for the route which may be used for removing the route later.
      */
     public Route addRoute(RoutingMode mode, String uriTemplate, RequestHandler handler) {
+        if (handler instanceof VersionRouterImpl) {
+            versionRouters.add((VersionRouterImpl) handler);
+            setVersionRouterDefaultBehaviour((VersionRouterImpl) handler);
+        }
         return uriRouter.addRoute(mode, uriTemplate, handler);
     }
 
@@ -355,8 +359,7 @@ public final class VersionRouter implements RequestHandler {
      */
     static final class VersionRouterImpl implements RequestHandler {
 
-        private static final VersionSelector VERSION_SELECTOR = new VersionSelector();
-
+        private final VersionSelector versionSelector = new VersionSelector();
         private final Set<VersionRoute> routes = new CopyOnWriteArraySet<VersionRoute>();
 
         /**
@@ -412,7 +415,7 @@ public final class VersionRouter implements RequestHandler {
          * version is {@code null}.
          */
         void defaultToLatest() {
-            VERSION_SELECTOR.defaultToLatest();
+            versionSelector.defaultToLatest();
         }
 
         /**
@@ -420,7 +423,7 @@ public final class VersionRouter implements RequestHandler {
          * version is {@code null}.
          */
         void defaultToOldest() {
-            VERSION_SELECTOR.defaultToOldest();
+            versionSelector.defaultToOldest();
         }
         /**
          * Removes the default behaviour of the selection process which will result in {@code NotFoundException}s when
@@ -428,7 +431,7 @@ public final class VersionRouter implements RequestHandler {
          */
 
         void noDefault() {
-            VERSION_SELECTOR.noDefault();
+            versionSelector.noDefault();
         }
 
         /**
@@ -518,7 +521,7 @@ public final class VersionRouter implements RequestHandler {
         private RequestHandler getBestRoute(ServerContext context, Request request) throws NotFoundException {
             AcceptAPIVersionContext apiVersionContext = context.asContext(AcceptAPIVersionContext.class);
             try {
-                return VERSION_SELECTOR.select(apiVersionContext.getResourceVersion(), getRoutesMap());
+                return versionSelector.select(apiVersionContext.getResourceVersion(), getRoutesMap());
             } catch (ResourceException e) {
                 // TODO: i18n
                 throw new NotFoundException(String.format("Version '%s' of resource '%s' not found",
