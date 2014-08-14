@@ -17,6 +17,7 @@
 package org.forgerock.json.resource;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.VersionSelector.DefaultVersionBehaviour;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.testng.annotations.BeforeClass;
@@ -67,8 +68,8 @@ public class VersionRouterVersionTest {
                 .addVersion("2.1", groupsHandlerThree);
     }
 
-    @DataProvider(name = "data")
-    private Object[][] dataProvider() {
+    @DataProvider(name = "dataWithVersionHeader")
+    private Object[][] dataWithVersionHeader() {
         return new Object[][]{
                 {"users", "3.0", true, null},
                 {"groups", "1.0", false, groupsHandlerTwo},
@@ -79,7 +80,7 @@ public class VersionRouterVersionTest {
         };
     }
 
-    @Test (dataProvider = "data")
+    @Test (dataProvider = "dataWithVersionHeader")
     @SuppressWarnings("unchecked")
     public void shouldRouteCreateVersionRequests(String resource, String requestedVersion, boolean expectException,
             RequestHandler provider) {
@@ -107,7 +108,7 @@ public class VersionRouterVersionTest {
         }
     }
 
-    @Test (dataProvider = "data")
+    @Test (dataProvider = "dataWithVersionHeader")
     @SuppressWarnings("unchecked")
     public void shouldRouteReadVersionRequests(String resource, String requestedVersion, boolean expectException,
             RequestHandler provider) {
@@ -136,7 +137,7 @@ public class VersionRouterVersionTest {
         }
     }
 
-    @Test (dataProvider = "data")
+    @Test (dataProvider = "dataWithVersionHeader")
     @SuppressWarnings("unchecked")
     public void shouldRouteUpdateVersionRequests(String resource, String requestedVersion, boolean expectException,
             RequestHandler provider) {
@@ -165,7 +166,7 @@ public class VersionRouterVersionTest {
         }
     }
 
-    @Test (dataProvider = "data")
+    @Test (dataProvider = "dataWithVersionHeader")
     @SuppressWarnings("unchecked")
     public void shouldRouteDeleteVersionRequests(String resource, String requestedVersion, boolean expectException,
             RequestHandler provider) {
@@ -194,7 +195,7 @@ public class VersionRouterVersionTest {
         }
     }
 
-    @Test (dataProvider = "data")
+    @Test (dataProvider = "dataWithVersionHeader")
     @SuppressWarnings("unchecked")
     public void shouldRoutePatchVersionRequests(String resource, String requestedVersion, boolean expectException,
             RequestHandler provider) {
@@ -223,7 +224,7 @@ public class VersionRouterVersionTest {
         }
     }
 
-    @Test (dataProvider = "data")
+    @Test (dataProvider = "dataWithVersionHeader")
     @SuppressWarnings("unchecked")
     public void shouldRouteActionVersionRequests(String resource, String requestedVersion, boolean expectException,
             RequestHandler provider) {
@@ -252,7 +253,7 @@ public class VersionRouterVersionTest {
         }
     }
 
-    @Test (dataProvider = "data")
+    @Test (dataProvider = "dataWithVersionHeader")
     @SuppressWarnings("unchecked")
     public void shouldRouteQueryVersionRequests(String resource, String requestedVersion, boolean expectException,
             RequestHandler provider) {
@@ -278,6 +279,234 @@ public class VersionRouterVersionTest {
         } else {
             verify(provider).handleQuery(Matchers.<ServerContext>anyObject(), Matchers.<QueryRequest>anyObject(),
                     eq(handler));
+        }
+    }
+
+    @DataProvider(name = "dataWithoutVersionHeader")
+    private Object[][] dataWithoutVersionHeader() {
+        return new Object[][]{
+                {"users", DefaultVersionBehaviour.LATEST, false, usersHandlerThree},
+                {"groups", DefaultVersionBehaviour.LATEST, false, groupsHandlerThree},
+                {"users", DefaultVersionBehaviour.OLDEST, false, usersHandlerOne},
+                {"groups", DefaultVersionBehaviour.OLDEST, false, groupsHandlerOne},
+                {"users", DefaultVersionBehaviour.NONE, true, null},
+                {"groups", DefaultVersionBehaviour.NONE, true, null},
+        };
+    }
+
+    @Test (dataProvider = "dataWithoutVersionHeader")
+    @SuppressWarnings("unchecked")
+    public void shouldRouteCreateRequestsUsingDefaultVersionBehaviour(String resource,
+            DefaultVersionBehaviour versionBehaviour, boolean expectException, RequestHandler provider) {
+
+        //Given
+        AcceptAPIVersionContext apiVersionContext = new AcceptAPIVersionContext(new RootContext(), "PROTOCOL_NAME",
+                AcceptAPIVersion.newBuilder().withDefaultProtocolVersion("1.0").build());
+        ServerContext context = new ServerContext(apiVersionContext);
+        CreateRequest request = Requests.newCreateRequest(resource, json(object()));
+        ResultHandler<Resource> handler = mock(ResultHandler.class);
+        setDefaultVersionBehaviour(router, versionBehaviour);
+
+        //When
+        router.handleCreate(context, request, handler);
+
+        //Then
+        if (expectException) {
+            ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
+            verify(handler).handleError(exceptionCaptor.capture());
+            assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
+            verifyZeroInteractions(usersHandlerOne, usersHandlerTwo, usersHandlerThree, groupsHandlerOne,
+                    groupsHandlerTwo, groupsHandlerThree);
+        } else {
+            verify(provider).handleCreate(Matchers.<ServerContext>anyObject(), Matchers.<CreateRequest>anyObject(), eq(handler));
+        }
+    }
+
+    @Test (dataProvider = "dataWithoutVersionHeader")
+    @SuppressWarnings("unchecked")
+    public void shouldRouteReadRequestsUsingDefaultVersionBehaviour(String resource,
+            DefaultVersionBehaviour versionBehaviour, boolean expectException, RequestHandler provider) {
+
+        //Given
+        AcceptAPIVersionContext apiVersionContext = new AcceptAPIVersionContext(new RootContext(), "PROTOCOL_NAME",
+                AcceptAPIVersion.newBuilder().withDefaultProtocolVersion("1.0").build());
+        ServerContext context = new ServerContext(apiVersionContext);
+        ReadRequest request = Requests.newReadRequest(resource);
+        ResultHandler<Resource> handler = mock(ResultHandler.class);
+        setDefaultVersionBehaviour(router, versionBehaviour);
+
+        //When
+        router.handleRead(context, request, handler);
+
+        //Then
+        if (expectException) {
+            ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
+            verify(handler).handleError(exceptionCaptor.capture());
+            assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
+            verifyZeroInteractions(usersHandlerOne, usersHandlerTwo, usersHandlerThree, groupsHandlerOne,
+                    groupsHandlerTwo, groupsHandlerThree);
+        } else {
+            verify(provider).handleRead(Matchers.<ServerContext>anyObject(), Matchers.<ReadRequest>anyObject(),
+                    eq(handler));
+        }
+    }
+
+    @Test (dataProvider = "dataWithoutVersionHeader")
+    @SuppressWarnings("unchecked")
+    public void shouldRouteUpdateRequestsUsingDefaultVersionBehaviour(String resource,
+            DefaultVersionBehaviour versionBehaviour, boolean expectException, RequestHandler provider) {
+
+        //Given
+        AcceptAPIVersionContext apiVersionContext = new AcceptAPIVersionContext(new RootContext(), "PROTOCOL_NAME",
+                AcceptAPIVersion.newBuilder().withDefaultProtocolVersion("1.0").build());
+        ServerContext context = new ServerContext(apiVersionContext);
+        UpdateRequest request = Requests.newUpdateRequest(resource, json(object()));
+        ResultHandler<Resource> handler = mock(ResultHandler.class);
+        setDefaultVersionBehaviour(router, versionBehaviour);
+
+        //When
+        router.handleUpdate(context, request, handler);
+
+        //Then
+        if (expectException) {
+            ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
+            verify(handler).handleError(exceptionCaptor.capture());
+            assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
+            verifyZeroInteractions(usersHandlerOne, usersHandlerTwo, usersHandlerThree, groupsHandlerOne,
+                    groupsHandlerTwo, groupsHandlerThree);
+        } else {
+            verify(provider).handleUpdate(Matchers.<ServerContext>anyObject(), Matchers.<UpdateRequest>anyObject(),
+                    eq(handler));
+        }
+    }
+
+    @Test (dataProvider = "dataWithoutVersionHeader")
+    @SuppressWarnings("unchecked")
+    public void shouldRouteDeleteRequestsUsingDefaultVersionBehaviour(String resource,
+            DefaultVersionBehaviour versionBehaviour, boolean expectException, RequestHandler provider) {
+
+        //Given
+        AcceptAPIVersionContext apiVersionContext = new AcceptAPIVersionContext(new RootContext(), "PROTOCOL_NAME",
+                AcceptAPIVersion.newBuilder().withDefaultProtocolVersion("1.0").build());
+        ServerContext context = new ServerContext(apiVersionContext);
+        DeleteRequest request = Requests.newDeleteRequest(resource);
+        ResultHandler<Resource> handler = mock(ResultHandler.class);
+        setDefaultVersionBehaviour(router, versionBehaviour);
+
+        //When
+        router.handleDelete(context, request, handler);
+
+        //Then
+        if (expectException) {
+            ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
+            verify(handler).handleError(exceptionCaptor.capture());
+            assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
+            verifyZeroInteractions(usersHandlerOne, usersHandlerTwo, usersHandlerThree, groupsHandlerOne,
+                    groupsHandlerTwo, groupsHandlerThree);
+        } else {
+            verify(provider).handleDelete(Matchers.<ServerContext>anyObject(), Matchers.<DeleteRequest>anyObject(),
+                    eq(handler));
+        }
+    }
+
+    @Test (dataProvider = "dataWithoutVersionHeader")
+    @SuppressWarnings("unchecked")
+    public void shouldRoutePatchRequestsUsingDefaultVersionBehaviour(String resource,
+            DefaultVersionBehaviour versionBehaviour, boolean expectException, RequestHandler provider) {
+
+        //Given
+        AcceptAPIVersionContext apiVersionContext = new AcceptAPIVersionContext(new RootContext(), "PROTOCOL_NAME",
+                AcceptAPIVersion.newBuilder().withDefaultProtocolVersion("1.0").build());
+        ServerContext context = new ServerContext(apiVersionContext);
+        PatchRequest request = Requests.newPatchRequest(resource);
+        ResultHandler<Resource> handler = mock(ResultHandler.class);
+        setDefaultVersionBehaviour(router, versionBehaviour);
+
+        //When
+        router.handlePatch(context, request, handler);
+
+        //Then
+        if (expectException) {
+            ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
+            verify(handler).handleError(exceptionCaptor.capture());
+            assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
+            verifyZeroInteractions(usersHandlerOne, usersHandlerTwo, usersHandlerThree, groupsHandlerOne,
+                    groupsHandlerTwo, groupsHandlerThree);
+        } else {
+            verify(provider).handlePatch(Matchers.<ServerContext>anyObject(), Matchers.<PatchRequest>anyObject(),
+                    eq(handler));
+        }
+    }
+
+    @Test (dataProvider = "dataWithoutVersionHeader")
+    @SuppressWarnings("unchecked")
+    public void shouldRouteActionRequestsUsingDefaultVersionBehaviour(String resource,
+            DefaultVersionBehaviour versionBehaviour, boolean expectException, RequestHandler provider) {
+
+        //Given
+        AcceptAPIVersionContext apiVersionContext = new AcceptAPIVersionContext(new RootContext(), "PROTOCOL_NAME",
+                AcceptAPIVersion.newBuilder().withDefaultProtocolVersion("1.0").build());
+        ServerContext context = new ServerContext(apiVersionContext);
+        ActionRequest request = Requests.newActionRequest(resource, "ACTION_ID").setContent(json(object()));
+        ResultHandler<JsonValue> handler = mock(ResultHandler.class);
+        setDefaultVersionBehaviour(router, versionBehaviour);
+
+        //When
+        router.handleAction(context, request, handler);
+
+        //Then
+        if (expectException) {
+            ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
+            verify(handler).handleError(exceptionCaptor.capture());
+            assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
+            verifyZeroInteractions(usersHandlerOne, usersHandlerTwo, usersHandlerThree, groupsHandlerOne,
+                    groupsHandlerTwo, groupsHandlerThree);
+        } else {
+            verify(provider).handleAction(Matchers.<ServerContext>anyObject(), Matchers.<ActionRequest>anyObject(),
+                    eq(handler));
+        }
+    }
+
+    @Test (dataProvider = "dataWithoutVersionHeader")
+    @SuppressWarnings("unchecked")
+    public void shouldRouteQueryRequestsUsingDefaultVersionBehaviour(String resource,
+            DefaultVersionBehaviour versionBehaviour, boolean expectException, RequestHandler provider) {
+
+        //Given
+        AcceptAPIVersionContext apiVersionContext = new AcceptAPIVersionContext(new RootContext(), "PROTOCOL_NAME",
+                AcceptAPIVersion.newBuilder().withDefaultProtocolVersion("1.0").build());
+        ServerContext context = new ServerContext(apiVersionContext);
+        QueryRequest request = Requests.newQueryRequest(resource);
+        QueryResultHandler handler = mock(QueryResultHandler.class);
+        setDefaultVersionBehaviour(router, versionBehaviour);
+
+        //When
+        router.handleQuery(context, request, handler);
+
+        //Then
+        if (expectException) {
+            ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
+            verify(handler).handleError(exceptionCaptor.capture());
+            assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
+            verifyZeroInteractions(usersHandlerOne, usersHandlerTwo, usersHandlerThree, groupsHandlerOne,
+                    groupsHandlerTwo, groupsHandlerThree);
+        } else {
+            verify(provider).handleQuery(Matchers.<ServerContext>anyObject(), Matchers.<QueryRequest>anyObject(),
+                    eq(handler));
+        }
+    }
+
+    private static void setDefaultVersionBehaviour(VersionRouter router, DefaultVersionBehaviour versionBehaviour) {
+        switch (versionBehaviour) {
+            case LATEST:
+                router.setVersioningToDefaultToLatest();
+                break;
+            case OLDEST:
+                router.setVersioningToDefaultToOldest();
+                break;
+            case NONE:
+                router.setVersioningBehaviourToNone();
+                break;
         }
     }
 }
