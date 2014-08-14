@@ -56,8 +56,7 @@ import static org.forgerock.json.resource.RoutingMode.STARTS_WITH;
  */
 public final class VersionRouter implements RequestHandler {
 
-    private static final VersionSelector VERSION_SELECTOR = new VersionSelector();
-
+    private final VersionSelector versionSelector = new VersionSelector();
     private final Set<VersionRoute> routes = new CopyOnWriteArraySet<VersionRoute>();
     private final Router router;
     private final RoutingMode mode;
@@ -159,7 +158,7 @@ public final class VersionRouter implements RequestHandler {
      * version is {@code null}.
      */
     VersionRouter defaultToLatest() {
-        VERSION_SELECTOR.defaultToLatest();
+        versionSelector.defaultToLatest();
         return this;
     }
 
@@ -168,7 +167,7 @@ public final class VersionRouter implements RequestHandler {
      * version is {@code null}.
      */
     VersionRouter defaultToOldest() {
-        VERSION_SELECTOR.defaultToLatest();
+        versionSelector.defaultToOldest();
         return this;
     }
 
@@ -177,7 +176,7 @@ public final class VersionRouter implements RequestHandler {
      * the requested version is {@code null}.
      */
     VersionRouter noDefault() {
-        VERSION_SELECTOR.noDefault();
+        versionSelector.noDefault();
         return this;
     }
 
@@ -281,7 +280,7 @@ public final class VersionRouter implements RequestHandler {
     private RequestHandler getBestRoute(ServerContext context, Request request) throws NotFoundException {
         AcceptAPIVersionContext apiVersionContext = context.asContext(AcceptAPIVersionContext.class);
         try {
-            return VERSION_SELECTOR.select(apiVersionContext.getResourceVersion(), getRoutesMap());
+            return versionSelector.select(apiVersionContext.getResourceVersion(), getRoutesMap());
         } catch (ResourceException e) {
             // TODO: i18n
             throw new NotFoundException(String.format("Version '%s' of resource '%s' not found",
