@@ -86,7 +86,7 @@ public final class Version implements Comparable<Version> {
      */
     public static Version valueOf(final String s) {
         final String[] fields = s.split("\\.");
-        if (fields.length == 0 || fields.length > 3) {
+        if (fields.length == 0 || fields.length >= 3) {
             throw new IllegalArgumentException("Invalid version string " + s);
         }
         final int major = Integer.parseInt(fields[0]);
