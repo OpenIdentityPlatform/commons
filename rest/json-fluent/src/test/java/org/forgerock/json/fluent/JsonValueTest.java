@@ -25,14 +25,17 @@ import static org.forgerock.json.fluent.JsonValue.array;
 import static org.forgerock.json.fluent.JsonValue.field;
 import static org.forgerock.json.fluent.JsonValue.json;
 import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.json.fluent.JsonValue.set;
 
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.forgerock.util.promise.Function;
 import org.testng.annotations.BeforeMethod;
@@ -126,6 +129,17 @@ public class JsonValueTest {
     public void testAddToEndOfList() {
         final JsonValue value = json(array()).add("one").add("two").add("three");
         assertThat(value.asList()).containsExactly("one", "two", "three");
+    }
+
+    @Test
+    public void testAddToEndOfSet() {
+        final JsonValue value = json(set()).add("one").add("two").add("three");
+        assertThat(value.asSet()).containsOnly("one", "two", "three");
+    }
+
+    @Test(expectedExceptions = JsonValueException.class)
+    public void testAddOnNonCollection() {
+        final JsonValue value = json(object(field("hello", "world"))).add("one");
     }
 
     @Test
@@ -353,13 +367,69 @@ public class JsonValueTest {
         json("asdf://nowhere").asURL();
     }
 
+    @Test
+    public void testAsCollectionOfUnTyped() {
+        // test List as Collection
+        Collection list = json(array(2, 3, 5, 8)).asCollection();
+        assertThat(list.size()).isEqualTo(4);
+        assertThat(list).containsOnly(2, 3, 5, 8);
+
+        // test Set as Collection
+        Collection set = json(set(2, 3, 5, 8)).asCollection();
+        assertThat(set.size()).isEqualTo(4);
+        assertThat(set).containsOnly(2, 3, 5, 8);
+    }
+
+    @Test
+    public void testAsCollectionOfType() {
+        // test List as Collection
+        Collection<Integer> list = json(array(2, 3, 5, 8)).asCollection(Integer.class);
+        assertThat(list.size()).isEqualTo(4);
+        assertThat(list).containsOnly(2, 3, 5, 8);
+
+        // test Set as Collection
+        Collection<Integer> set = json(set(2, 3, 5, 8)).asCollection(Integer.class);
+        assertThat(set.size()).isEqualTo(4);
+        assertThat(set).containsOnly(2, 3, 5, 8);
+    }
+
+    @Test(expectedExceptions = JsonValueException.class)
+    public void testAsCollectionOfBadType() {
+        json(array(2, 3, 5, 8)).asCollection(String.class);
+    }
+
+    @Test(expectedExceptions = JsonValueException.class)
+    public void testAsCollectionOfBadElementType() {
+        json(array(2, 3, "5", 8)).asCollection(Integer.class);
+    }
+
+    @Test
+    public void testAsListOfType() {
+        List<Integer> list = json(array(2, 3, 5, 8)).asList(Integer.class);
+        assertThat(list.size()).isEqualTo(4);
+        assertThat(list.get(0)).isEqualTo(2);
+        assertThat(list.get(1)).isEqualTo(3);
+        assertThat(list.get(2)).isEqualTo(5);
+        assertThat(list.get(3)).isEqualTo(8);
+    }
+
+    @Test(expectedExceptions = JsonValueException.class)
+    public void testAsListOfBadType() {
+        json(array(2, 3, 5, 8)).asList(String.class);
+    }
+
+    @Test(expectedExceptions = JsonValueException.class)
+    public void testAsListOfBadElementType() {
+        json(array(2, 3, "5", 8)).asList(Integer.class);
+    }
+
     private static final Function AS_INTEGER = new Function<JsonValue, Integer, Exception>() {
         @Override
         public Integer apply(JsonValue jsonValue) throws Exception {
             if (jsonValue.isString()) {
                 return Integer.valueOf(jsonValue.asString());
             }
-            throw new Exception("jsonValue value " + jsonValue.getObject() + " is not an integer");
+            throw new JsonValueException(jsonValue, "jsonValue value " + jsonValue.getObject() + " is not an integer");
         }
     };
 
@@ -378,6 +448,37 @@ public class JsonValueTest {
     public void testAsListTransformFunctionBadType() throws Exception {
         final JsonValue badValue = json(array("a", "b", "c"));
         badValue.asList(AS_INTEGER);
+    }
+
+    @Test
+    public void testAsSetOfType() {
+        Set<Integer> set = json(set(2, 3, 5, 8)).asSet(Integer.class);
+        assertThat(set.size()).isEqualTo(4);
+        assertThat(set).containsOnly(2, 3, 5, 8);
+    }
+
+    @Test(expectedExceptions = JsonValueException.class)
+    public void testAsSetOfBadType() {
+        json(set(2, 3, 5, 8)).asSet(String.class);
+    }
+
+    @Test(expectedExceptions = JsonValueException.class)
+    public void testAsSetOfBadElementType() {
+        json(set(2, 3, "5", 8)).asSet(Integer.class);
+    }
+
+    @Test
+    public void testAsSetTransformFunction() throws Exception {
+        final JsonValue value = json(set("2", "3", "5", "8"));
+        final Set<Integer> set = value.asSet(AS_INTEGER);
+        assertThat(set.size()).isEqualTo(4);
+        assertThat(set).containsOnly(2, 3, 5, 8);
+    }
+
+    @Test(expectedExceptions = Exception.class)
+    public void testAsSetTransformFunctionBadType() throws Exception {
+        final JsonValue badValue = json(set("a", "b", "c"));
+        badValue.asSet(AS_INTEGER);
     }
 
     @Test
@@ -423,6 +524,46 @@ public class JsonValueTest {
         Map<String, Object> m = mapValue.asMap();
         m.put("a", listValue.getObject());
         Map<String, List<String>> stringListMap = mapValue.asMapOfList(String.class);
+    }
+
+    @Test
+    public void testToStringOfList() {
+        final JsonValue value = json(array()).add("one").add("two").add("three");
+        assertThat(value.toString()).matches("\\[\\s*\"one\"\\s*,\\s*\"two\"\\s*,\\s*\"three\"\\s*\\]");
+    }
+
+    @Test
+    public void testToStringOfSet() {
+        final JsonValue value = json(set()).add("one").add("two").add("three").add("four").add("five");
+        String s = value.toString();
+        // do our best to test containment and presence of values since sets are unordered
+        assertThat(s).startsWith("[");
+        assertThat(s).endsWith("]");
+        assertThat(s.substring(1, s.length() - 1)).doesNotContain("[");
+        assertThat(s.substring(1, s.length() - 1)).doesNotContain("]");
+        assertThat(s.contains("\"one\""));
+        assertThat(s.contains("\"two\""));
+        assertThat(s.contains("\"three\""));
+        assertThat(s.contains("\"four\""));
+        assertThat(s.contains("\"five\""));
+    }
+
+    @Test
+    public void testCoerceListToSet() {
+        final JsonValue value = json(array()).add("2").add("3").add("5").add("2");
+        assertThat(value.isList()).isTrue();
+        assertThat(value.isSet()).isFalse();
+        assertThat(value.asSet().size()).isEqualTo(3); // Set has no duplicates
+        assertThat(value.asSet()).containsOnly("2", "3", "5");
+    }
+
+    @Test
+    public void testCoerceSetToList() {
+        final JsonValue value = json(set()).add("2").add("3").add("5").add("8");
+        assertThat(value.isList()).isFalse();
+        assertThat(value.isSet()).isTrue();
+        assertThat(value.asList().size()).isEqualTo(4);
+        assertThat(value.asList()).containsOnly("2", "3", "5", "8");
     }
 
     private JsonPointer ptr(final String pointer) {
