@@ -55,6 +55,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.fluent.JsonValue.object;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.anyMap;
@@ -460,6 +462,7 @@ public class JwtSessionModuleTest {
         Map<String, Object> newContext = new HashMap<String, Object>();
         newContext.put("KEY", "VALUE");
         given(claimsSet.getClaim(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT, Map.class)).willReturn(newContext);
+        given(claimsSet.get("sessionId")).willReturn(json("SESSION_ID"));
 
         //When
         AuthStatus authStatus = jwtSessionModule.validateRequest(messageInfo, clientSubject, serviceSubject);
@@ -539,6 +542,7 @@ public class JwtSessionModuleTest {
         Map<String, Object> newContext = new HashMap<String, Object>();
         newContext.put("KEY", "VALUE");
         given(claimsSet.getClaim(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT, Map.class)).willReturn(newContext);
+        given(claimsSet.get("sessionId")).willReturn(json("SESSION_ID"));
 
         //When
         AuthStatus authStatus = jwtSessionModule.validateRequest(messageInfo, clientSubject, serviceSubject);

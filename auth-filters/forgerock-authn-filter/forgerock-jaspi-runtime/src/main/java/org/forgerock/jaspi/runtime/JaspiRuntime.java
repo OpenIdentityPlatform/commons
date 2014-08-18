@@ -32,6 +32,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.forgerock.jaspi.runtime.AuthStatusUtils.isSendContinue;
 import static org.forgerock.jaspi.runtime.AuditTrail.AUDIT_TRAIL_KEY;
@@ -130,7 +132,9 @@ public class JaspiRuntime {
         final Subject clientSubject = new Subject();
         // Can be null if no details required for service subject.
         final Subject serviceSubject = null;
-        AuditTrail auditTrail = new AuditTrail(auditApi);
+        Map<String, Object> contextMap = new HashMap<String, Object>();
+        messageInfo.getMap().put(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT, contextMap);
+        AuditTrail auditTrail = new AuditTrail(auditApi, contextMap);
         messageInfo.getMap().put(AUDIT_TRAIL_KEY, auditTrail);
 
         AuthStatus requestAuthStatus = null;

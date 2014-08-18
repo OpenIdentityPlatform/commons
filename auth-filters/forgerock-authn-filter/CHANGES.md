@@ -17,6 +17,9 @@ New audit api, which will be given a JsonValue such as the following:
    "result": "SUCCESSFUL",
    "requestId": "...",
    "principal": "demo",
+   "context": {
+       ....
+   },
    "sessionId": "...",
    "entries": [
      {
@@ -35,6 +38,9 @@ New audit api, which will be given a JsonValue such as the following:
     "result": "FAILED",
     "requestId": "...",
     "principal": "demo",
+    "context": {
+        ....
+    },
     "entries": [
       {
         "moduleId": "Session-JwtSessionModule",

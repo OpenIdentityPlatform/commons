@@ -26,7 +26,53 @@ import org.forgerock.json.fluent.JsonValue;
 public interface AuditApi {
 
     /**
-     * Audits the authentication request, using the audit information from the given audit message.
+     * <p>Audits the authentication request, using the audit information from the given audit message.</p>
+     *
+     * <p>For successful authentications:</p>
+     * {@code
+     * {
+     *   "result": "SUCCESSFUL",
+     *   "requestId": "...",
+     *   "principal": "demo",
+     *   "context": {
+     *     ...
+     *   },
+     *   "sessionId": "...",
+     *   "entries": [
+     *     {
+     *       "moduleId": "Session-JwtSessionModule",
+     *       "result": "SUCCESSFUL",
+     *       "info": {
+     *         "...": "...",
+     *         ...
+     *       }
+     *     }, ...
+     *   ]
+     * }
+     * }
+     *
+     * <p>for failed authentications:</p>
+     * {@code
+     * {
+     *   "result": "FAILED",
+     *   "requestId": "...",
+     *   "principal": "demo",
+     *   "context": {
+     *     ...
+     *   },
+     *   "entries": [
+     *     {
+     *       "moduleId": "Session-JwtSessionModule",
+     *       "result": "FAILED",
+     *       "reason": "...",
+     *       "info": {
+     *         "...": "...",
+     *         ...
+     *       }
+     *     }, ...
+     *   ]
+     * }
+     * }
      *
      * @param auditMessage The audit message.
      */

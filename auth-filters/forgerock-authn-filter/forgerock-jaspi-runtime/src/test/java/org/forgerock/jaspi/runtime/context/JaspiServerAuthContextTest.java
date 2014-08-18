@@ -189,7 +189,6 @@ public class JaspiServerAuthContextTest {
         AuthStatus authStatus = jaspiServerAuthContext.validateRequest(messageInfo, clientSubject, serviceSubject);
 
         //Then
-        verify(messageInfoUtils).addMap(messageInfo, JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT);
         verify(contextHandler).handleCompletion(messageInfo, clientSubject, AuthStatus.SUCCESS);
         assertEquals(authStatus, AuthStatus.SUCCESS);
     }

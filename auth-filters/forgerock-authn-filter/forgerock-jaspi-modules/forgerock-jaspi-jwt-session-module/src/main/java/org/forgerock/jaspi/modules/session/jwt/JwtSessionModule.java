@@ -51,6 +51,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.forgerock.jaspi.runtime.AuditTrail.AUDIT_SESSION_ID_KEY;
+
 /**
  * A JASPI Session Module which creates a JWT when securing the response from a successful authentication and sets it
  * as a Cookie on the response. Then on subsequent requests checks for the presents of the JWT as a Cookie on the
@@ -184,6 +186,7 @@ public class JwtSessionModule implements ServerAuthModule {
                 if (claimsSetContext != null) {
                     context.putAll(claimsSetContext);
                 }
+                messageInfo.getMap().put(AUDIT_SESSION_ID_KEY, jwt.getClaimsSet().get("sessionId").asString());
             } catch (IOException e) {
                 DEBUG.error("Error setting user principal", e);
                 throw new AuthException(e.getMessage());
@@ -414,6 +417,9 @@ public class JwtSessionModule implements ServerAuthModule {
         if (!jwtValidated) {
             // create jwt
             HttpServletResponse response = (HttpServletResponse) messageInfo.getResponseMessage();
+            String sessionId = UUID.randomUUID().toString();
+            jwtParameters.put("sessionId", sessionId);
+            messageInfo.getMap().put(AUDIT_SESSION_ID_KEY, sessionId);
             Cookie jwtSessionCookie = createSessionJwtCookie(jwtParameters);
             response.addCookie(jwtSessionCookie);
         }

@@ -158,7 +158,6 @@ public abstract class JaspiServerAuthContext<T extends ServerAuthModule> impleme
     public final AuthStatus validateRequest(final MessageInfo messageInfo, final Subject clientSubject,
             final Subject serviceSubject) throws AuthException {
 
-        getMessageInfoUtils().addMap(messageInfo, JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT);
         AuditTrail auditTrail = (AuditTrail) messageInfo.getMap().get(AUDIT_TRAIL_KEY);
         Map<String, Object> moduleAuditInfo = new HashMap<String, Object>();
         messageInfo.getMap().put(AUDIT_INFO_KEY, moduleAuditInfo);

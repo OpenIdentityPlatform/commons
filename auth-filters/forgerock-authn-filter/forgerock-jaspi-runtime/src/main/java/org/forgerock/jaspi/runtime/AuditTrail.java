@@ -59,6 +59,7 @@ public class AuditTrail {
     private static final String MODULE_ID_KEY = "moduleId";
     private static final String RESULT_KEY = "result";
     private static final String PRINCIPAL_KEY = "principal";
+    private static final String CONTEXT_KEY = "context";
     private static final String SESSION_ID_KEY = "sessionId";
     private static final String REQUEST_ID_KEY = "requestId";
     private static final String ENTRIES_KEY = "entries";
@@ -78,8 +79,9 @@ public class AuditTrail {
      *
      * @param api An instance of the {@code AuditApi}.
      */
-    public AuditTrail(AuditApi api) {
+    public AuditTrail(AuditApi api, Map<String, Object> contextMap) {
         this.api = api;
+        auditMessage.put(CONTEXT_KEY, contextMap);
     }
 
     /**
