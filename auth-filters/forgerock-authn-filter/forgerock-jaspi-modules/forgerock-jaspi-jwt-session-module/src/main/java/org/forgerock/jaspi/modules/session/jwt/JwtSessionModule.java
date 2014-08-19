@@ -236,7 +236,7 @@ public class JwtSessionModule implements ServerAuthModule {
             try {
                 jwt = verifySessionJwt(jwtSessionCookie.getValue());
             } catch (JweDecryptionException e) {
-                DEBUG.error("Failed to decrypt Jwt", e);
+                DEBUG.debug("Failed to decrypt Jwt", e);
                 return null;
             }
             if (jwt != null) {
