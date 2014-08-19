@@ -78,9 +78,9 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
             input.attr("data-validation-status", "error");
             
             if(input.attr('data-validator-event')) {
-                event = input.attr('data-validator-event');
+                event = input.attr('data-validator-event') + " keyup change blur paste";
             } else {
-                event = "change paste";
+                event = "keyup change blur paste";
             }
   
             _.each(input.attr('data-validator').split(' '), function(type){
@@ -110,9 +110,9 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
                     input.attr("data-validation-status", "error");
                     
                     if (input.attr('data-validator-event')) {
-                        event = input.attr('data-validator-event') + " keyup change blur";
+                        event = input.attr('data-validator-event') + " keyup change blur paste";
                     } else {
-                        event = "keyup change blur";
+                        event = "keyup change blur paste";
                     }
                     
 
