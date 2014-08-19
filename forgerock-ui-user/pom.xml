@@ -48,12 +48,12 @@
             <type>js</type>
             <classifier>min</classifier>
         </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons.ui.libs</groupId>
-                <artifactId>jquery.jqGrid</artifactId>
-                <classifier>min</classifier>
-                <type>js</type>
-            </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <artifactId>jquery.jqGrid</artifactId>
+            <classifier>min</classifier>
+            <type>js</type>
+        </dependency>
         <dependency>
             <groupId>org.forgerock.commons.ui.libs</groupId>
             <artifactId>contentflow</artifactId>

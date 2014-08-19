@@ -96,6 +96,7 @@
                             <goal>copy-dependencies</goal>
                         </goals>
                         <configuration>
+                            <includeGroupIds>org.forgerock.commons.ui.libs</includeGroupIds>
                             <outputDirectory>${project.build.directory}/www/libs</outputDirectory>
                             <overWriteReleases>false</overWriteReleases>
                             <overWriteSnapshots>false</overWriteSnapshots>
@@ -191,7 +192,7 @@
         <dependency>
             <groupId>org.forgerock.commons.ui</groupId>
             <artifactId>forgerock-ui-user</artifactId>
-            <version>1.0.17-SNAPSHOT</version>
+            <version>${forgerock-ui.version}</version>
             <type>zip</type>
             <classifier>www</classifier>
         </dependency>
