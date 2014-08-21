@@ -100,6 +100,51 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         return null;
     };
 
+    obj.commonJQGridFormatters = {
+        objectFormatter: function (cellvalue, options, rowObject) {
+            if (!cellvalue) {
+                return '';
+            }
+
+            var result = '',
+                prop;
+            for (prop in cellvalue) {
+                if (result) {
+                    result += '<br>';
+                }
+                if (cellvalue.hasOwnProperty(prop)) {
+                    result += prop + ': ' + cellvalue[prop];
+                }
+            }
+
+            return result;
+        },
+        arrayFormatter: function (cellvalue, options, rowObject) {
+            if (!cellvalue) {
+                return '';
+            }
+
+            var result = '',
+                i,
+                len = cellvalue.length;
+            for (i = 0; i < len; i++) {
+                if (result) {
+                    result += '<br>';
+                }
+                result += cellvalue[i];
+            }
+
+            return result;
+        },
+        dateFormatter: function (cellvalue, options, rowObject) {
+            if (!cellvalue) {
+                return '';
+            }
+
+            return Handlebars.helpers.date(cellvalue);
+        }
+    };
+
     obj.buildRestResponseBasedJQGrid = function (options) {
         options = options ? options : {};
 
