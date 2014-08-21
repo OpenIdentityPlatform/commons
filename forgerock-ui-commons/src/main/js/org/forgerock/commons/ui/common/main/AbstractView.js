@@ -74,7 +74,7 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
                 _this.data.theme = theme;
                 
                 if(needsNewBaseTemplate()) {
-                    uiUtils.renderTemplate(_this.data.theme.path + _this.baseTemplate, $("#wrapper"), _.extend(conf.globalData, _this.data), _.bind(_this.loadTemplate, _this), "replace", needsNewBaseTemplate);
+                    uiUtils.renderTemplate(_this.data.theme.path + _this.baseTemplate, $("#wrapper"), _.extend({}, conf.globalData, _this.data), _.bind(_this.loadTemplate, _this), "replace", needsNewBaseTemplate);
                 } else {
                     _this.loadTemplate();
                 }
@@ -105,9 +105,9 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
             }
             
             if(this.callback) {
-                uiUtils.renderTemplate(this.data.theme.path + this.template, this.$el, _.extend(conf.globalData, this.data), _.bind(this.callback, this), this.mode, validateCurrent);
+                uiUtils.renderTemplate(this.data.theme.path + this.template, this.$el, _.extend({}, conf.globalData, this.data), _.bind(this.callback, this), this.mode, validateCurrent);
             } else {
-                uiUtils.renderTemplate(this.data.theme.path + this.template, this.$el, _.extend(conf.globalData, this.data), null, this.mode, validateCurrent);
+                uiUtils.renderTemplate(this.data.theme.path + this.template, this.$el, _.extend({}, conf.globalData, this.data), null, this.mode, validateCurrent);
             }
            
         },

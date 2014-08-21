@@ -43,6 +43,14 @@ define([
 
             });
 
+            QUnit.asyncTest("View data does not pollute globalData (CUI-24)", function () {
+                var loginView = require("LoginView");
+                loginView.render([], function () {
+                    QUnit.ok(!_.has(conf.globalData, 'hasOptionalUIFeatures'), "There should be no hasOptionalUIFeatures within conf.globalData");
+                    QUnit.start();
+                });
+            })
+
             QUnit.asyncTest("Login / Logout", function () {
 
                 var loginView = require("LoginView"),
@@ -53,8 +61,6 @@ define([
 
                     var loggedUserBarView = require("org/forgerock/commons/ui/common/LoggedUserBarView"),
                         loggedUserEl = $('<div>').append('<ul id="loginContent"><li id="user_name"></li><li id="logout_link"></a></li></ul>');
-
-                    QUnit.start();
 
                     QUnit.ok($("#login", loginView.$el).length                                  , "Username field available");
                     QUnit.ok($("#password", loginView.$el).length                               , "Password field available");
@@ -85,6 +91,7 @@ define([
                     });
 
                     testPromise.resolve(); // make sure this is only called after the last async test is finished
+                    QUnit.start();
 
                 });
             });
@@ -99,7 +106,7 @@ define([
 
                 QUnit.ok(testDialog.actions.length === 2 && testDialog.actions[0].name === "close" && testDialog.actions[1].name === "Test", "Cancel and Test Buttons are Available"); 
 
-            });      
+            });
 
             return testPromise;
         }
