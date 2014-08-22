@@ -17,6 +17,7 @@
 package org.forgerock.caf.authn.test.runtime;
 
 import com.google.inject.Singleton;
+import org.forgerock.guice.core.InjectorHolder;
 import org.forgerock.jaspi.runtime.AuditApi;
 import org.forgerock.json.fluent.JsonValue;
 
@@ -34,8 +35,21 @@ import java.util.List;
 @Singleton
 public class TestAuditApi implements AuditApi {
 
+    /**
+     * Factory method called by the Jaspi runtime to get the instance of the {@code AuditApi} to use when auditing
+     * authentication requests.
+     *
+     * @return An instance of the {@code TestAuditApi}.
+     */
+    public static AuditApi getAuditApi() {
+        return InjectorHolder.getInstance(AuditApi.class);
+    }
+
     private final List<JsonValue> auditRecords = new ArrayList<JsonValue>();
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void audit(JsonValue auditMessage) {
         auditRecords.add(auditMessage);

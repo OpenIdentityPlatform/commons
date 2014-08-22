@@ -65,9 +65,11 @@ public class JaspiRuntimeTest {
         HttpServletResponse response = mock(HttpServletResponse.class);
         FilterChain filterChain = mock(FilterChain.class);
 
+        ContextFactory contextFactory = mock(ContextFactory.class);
         ServerAuthContext serverAuthContext = null;
 
-        JaspiRuntime jaspiRuntime = new JaspiRuntime(serverAuthContext, runtimeResultHandler, auditApi);
+        given(contextFactory.getContext()).willReturn(serverAuthContext);
+        JaspiRuntime jaspiRuntime = new JaspiRuntime(contextFactory, runtimeResultHandler, auditApi);
 
         //When
         jaspiRuntime.processMessage(request, response, filterChain);
@@ -86,13 +88,15 @@ public class JaspiRuntimeTest {
         HttpServletResponse response = mock(HttpServletResponse.class);
         FilterChain filterChain = mock(FilterChain.class);
 
+        ContextFactory contextFactory = mock(ContextFactory.class);
         ServerAuthContext serverAuthContext = mock(ServerAuthContext.class);
 
+        given(contextFactory.getContext()).willReturn(serverAuthContext);
         given(runtimeResultHandler.handleValidateRequestResult(Matchers.<AuthStatus>anyObject(),
                 Matchers.<AuditTrail>anyObject(), Matchers.<Subject>anyObject(),
                 Matchers.<HttpServletResponse>anyObject())).willReturn(false);
 
-        JaspiRuntime jaspiRuntime = new JaspiRuntime(serverAuthContext, runtimeResultHandler, auditApi);
+        JaspiRuntime jaspiRuntime = new JaspiRuntime(contextFactory, runtimeResultHandler, auditApi);
 
         //When
         jaspiRuntime.processMessage(request, response, filterChain);
@@ -111,13 +115,15 @@ public class JaspiRuntimeTest {
         HttpServletResponse response = mock(HttpServletResponse.class);
         FilterChain filterChain = mock(FilterChain.class);
 
+        ContextFactory contextFactory = mock(ContextFactory.class);
         ServerAuthContext serverAuthContext = mock(ServerAuthContext.class);
 
+        given(contextFactory.getContext()).willReturn(serverAuthContext);
         given(runtimeResultHandler.handleValidateRequestResult(Matchers.<AuthStatus>anyObject(),
                 Matchers.<AuditTrail>anyObject(), Matchers.<Subject>anyObject(),
                 Matchers.<HttpServletResponse>anyObject())).willReturn(true);
 
-        JaspiRuntime jaspiRuntime = new JaspiRuntime(serverAuthContext, runtimeResultHandler, auditApi);
+        JaspiRuntime jaspiRuntime = new JaspiRuntime(contextFactory, runtimeResultHandler, auditApi);
 
         //When
         jaspiRuntime.processMessage(request, response, filterChain);
@@ -144,14 +150,16 @@ public class JaspiRuntimeTest {
         FilterChain filterChain = mock(FilterChain.class);
         PrintWriter writer = mock(PrintWriter.class);
 
+        ContextFactory contextFactory = mock(ContextFactory.class);
         ServerAuthContext serverAuthContext = mock(ServerAuthContext.class);
 
+        given(contextFactory.getContext()).willReturn(serverAuthContext);
         doThrow(AuthException.class).when(serverAuthContext).validateRequest(Matchers.<MessageInfo>anyObject(),
                 Matchers.<Subject>anyObject(), Matchers.<Subject>anyObject());
 
         given(response.getWriter()).willReturn(writer);
 
-        JaspiRuntime jaspiRuntime = new JaspiRuntime(serverAuthContext, runtimeResultHandler, auditApi);
+        JaspiRuntime jaspiRuntime = new JaspiRuntime(contextFactory, runtimeResultHandler, auditApi);
 
         //When
         jaspiRuntime.processMessage(request, response, filterChain);
@@ -172,14 +180,16 @@ public class JaspiRuntimeTest {
         HttpServletResponse resp = mock(HttpServletResponse.class);
         FilterChain chain = mock(FilterChain.class);
         PrintWriter writer = mock(PrintWriter.class);
+        ContextFactory contextFactory = mock(ContextFactory.class);
         ServerAuthContext serverAuthContext = mock(ServerAuthContext.class);
         ResourceException resourceException = ResourceException.getException(ResourceException.BAD_REQUEST,
                 "BAD_REQUEST");
         resourceException.setDetail(json(object(field("DETAIL_KEY", "DETAIL_VALUE"))));
         JaspiAuthException authException = new JaspiAuthException("AUTH_EXCEPTION", resourceException);
 
-        JaspiRuntime jaspiRuntime = new JaspiRuntime(serverAuthContext, runtimeResultHandler, auditApi);
+        JaspiRuntime jaspiRuntime = new JaspiRuntime(contextFactory, runtimeResultHandler, auditApi);
 
+        given(contextFactory.getContext()).willReturn(serverAuthContext);
         doThrow(authException).when(serverAuthContext).validateRequest(Matchers.<MessageInfo>anyObject(),
                 Matchers.<Subject>anyObject(), Matchers.<Subject>anyObject());
         given(resp.getWriter()).willReturn(writer);

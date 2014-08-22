@@ -16,9 +16,8 @@
 
 package org.forgerock.jaspi;
 
-import org.forgerock.jaspi.runtime.JaspiRuntime;
-import org.forgerock.jaspi.runtime.config.inject.RuntimeInjector;
-import org.forgerock.auth.common.FilterConfiguration;
+import org.forgerock.jaspi.runtime.AuditApi;
+import org.forgerock.jaspi.runtime.ContextFactory;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -31,11 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.fail;
 
@@ -43,24 +38,15 @@ public class JaspiRuntimeFilterTest {
 
     private JaspiRuntimeFilter jaspiRuntimeFilter;
 
-    private RuntimeInjector runtimeInjector;
-    private JaspiRuntime jaspiRuntime;
-
     @BeforeMethod
     public void setUp() throws ServletException {
 
-        FilterConfiguration filterConfiguration = mock(FilterConfiguration.class);
-        runtimeInjector = mock(RuntimeInjector.class);
+        ContextFactory contextFactory = mock(ContextFactory.class);
+        AuditApi auditApi = mock(AuditApi.class);
 
-        jaspiRuntimeFilter = new JaspiRuntimeFilter(filterConfiguration);
-
-        jaspiRuntime = mock(JaspiRuntime.class);
-
-        given(runtimeInjector.getInstance(JaspiRuntime.class)).willReturn(jaspiRuntime);
+        jaspiRuntimeFilter = new JaspiRuntimeFilter(contextFactory, auditApi);
 
         FilterConfig filterConfig = mock(FilterConfig.class);
-        given(filterConfiguration.get(eq(filterConfig), anyString(), anyString(), anyString()))
-                .willReturn(runtimeInjector);
         jaspiRuntimeFilter.init(filterConfig);
     }
 
@@ -104,21 +90,6 @@ public class JaspiRuntimeFilterTest {
 
         //Then
         fail();
-    }
-
-    @Test
-    public void shouldProcessMessage() throws ServletException, IOException {
-
-        //Given
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        HttpServletResponse response = mock(HttpServletResponse.class);
-        FilterChain filterChain = mock(FilterChain.class);
-
-        //When
-        jaspiRuntimeFilter.doFilter(request, response, filterChain);
-
-        //Then
-        verify(jaspiRuntime).processMessage(request, response, filterChain);
     }
 
     @Test

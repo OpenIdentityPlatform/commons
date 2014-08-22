@@ -11,24 +11,26 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2014 ForgeRock AS.
  */
 
-package org.forgerock.jaspi.runtime.config.inject;
+package org.forgerock.jaspi.runtime;
+
+import javax.security.auth.message.config.ServerAuthContext;
 
 /**
- * Injector interface for getting instances of the Jaspi runtime classes.
- *
- * @since 1.3.0
+ * A factory which is responsible for creating {@code ServerAuthContext}s for authenticating requests.
  */
-public interface RuntimeInjector {
+public interface ContextFactory {
 
     /**
-     * Returns an instance of the request type.
+     * <p>Returns the context which should be used to authenticate requests.</p>
      *
-     * @param type The class of the type to return.
-     * @param <T> The type of the instance.
-     * @return An instance of the type.
+     * <p>This method is called for each request. This means that the {@code ServerAuthContext} instance can be
+     * changed/updated with new ServerAuthModules and any changes will be picked up by the runtime for subsequent
+     * authentication requests.</p>
+     *
+     * @return The context which should be used for authenticating requests.
      */
-    <T> T getInstance(final Class<T> type);
+    ServerAuthContext getContext();
 }

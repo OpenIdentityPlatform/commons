@@ -39,20 +39,23 @@ import static org.forgerock.jaspi.runtime.AuthStatusUtils.isSendContinue;
 import static org.forgerock.jaspi.runtime.AuditTrail.AUDIT_TRAIL_KEY;
 
 /**
- * This class is the entry point for the JASPI runtime.
- * <br/>
- * Provides a single method #processMessage that takes a HttpServletRequest, HttpServletResponse and the FilterChain
+ * <p>This class is the entry point for the JASPI runtime.</p>
+ *
+ * <p>Provides a single method #processMessage that takes a HttpServletRequest, HttpServletResponse and the FilterChain
  * and will run the configured ServerAuthModules to determine whether the request is allowed to be passed down
- * the filter chain.
- * <br/>
- * <strong>Note:</strong> if the Jaspi runtime is not configured properly with a non-null ServerAuthContext
+ * the filter chain.</p>
+ *
+ * <p><strong>Note:</strong> if the Jaspi runtime is not configured properly with a non-null ServerAuthContext
  * each request will be passed straight to the filter chain with no further processing. So it is VERY important
- * to ensure the runtime is configured correctly.
+ * to ensure the runtime is configured correctly.</p>
  *
  * @since 1.3.0
  */
 public class JaspiRuntime {
 
+    /**
+     * Runtime slf4j debug logger.
+     */
     public static final Logger LOG = LoggerFactory.getLogger(JaspiRuntime.class);
 
     /**
@@ -86,45 +89,43 @@ public class JaspiRuntime {
      */
     public static final String ATTRIBUTE_REQUEST_ID = "org.forgerock.authentication.request.id";
 
-    private final ServerAuthContext serverAuthContext;
+    private final ContextFactory contextFactory;
     private final RuntimeResultHandler resultHandler;
     private final AuditApi auditApi;
 
     /**
      * Constructs a new instance of the JaspiRuntime.
      *
-     * @param serverAuthContext The instance of a ServerAuthContext that the runtime has been configured to use
-     *                          to orchestrate calling the ServerAuthModules.
-     * @param resultHandler An instance of the RuntimeResultHandler.
+     * @param contextFactory An instance of the {@code ContextFactory}.
+     * @param resultHandler An instance of the {@code RuntimeResultHandler}.
      * @param auditApi An instance of the {@code AuditApi}.
      */
-    public JaspiRuntime(final ServerAuthContext serverAuthContext, final RuntimeResultHandler resultHandler,
-            AuditApi auditApi) {
-        this.serverAuthContext = serverAuthContext;
+    public JaspiRuntime(ContextFactory contextFactory, RuntimeResultHandler resultHandler, AuditApi auditApi) {
+        this.contextFactory = contextFactory;
         this.resultHandler = resultHandler;
         this.auditApi = auditApi;
     }
 
     /**
-     * Processes the given request and response.
-     * <br/>
-     * Guaranteed to call the configured ServerAuthModules validateRequest method to determine whether the request is
+     * <p>Processes the given request and response.</p>
+     *
+     * <p>Guaranteed to call the configured ServerAuthModules validateRequest method to determine whether the request is
      * allowed through and if validation was successful, to call secureResponse after the service call has completed.
-     * <br/>
-     * Any authentication exceptions that occur during this process will be caught and converted into a Json response
-     * that matches a HTTP 500 status code.
-     * <br/>
-     * If no ServerAuthContext is configured for the HttpServlet layer and the requests application context, then
-     * the request will be allowed through.
+     * </p>
+     *
+     * <p>Any authentication exceptions that occur during this process will be caught and converted into a Json response
+     * that matches a HTTP 500 status code.</p>
+     *
+     * <p>If no ServerAuthContext is configured for the HttpServlet layer and the requests application context, then
+     * the request will be allowed through.</p>
      *
      * @param request The HttpServletRequest.
      * @param response The HttpServletResponse.
      * @param filterChain The filter chain.
-     * @throws java.io.IOException If there is an error processing the request.
-     * @throws javax.servlet.ServletException If there is an error processing the request.
+     * @throws ServletException If there is an error processing the request.
      */
     public void processMessage(final HttpServletRequest request, final HttpServletResponse response,
-            final FilterChain filterChain) throws IOException, ServletException {
+            final FilterChain filterChain) throws ServletException {
 
         MessageInfo messageInfo = new HttpServletMessageInfo(request, response);
 
@@ -139,6 +140,7 @@ public class JaspiRuntime {
 
         AuthStatus requestAuthStatus = null;
         try {
+            ServerAuthContext serverAuthContext = contextFactory.getContext();
             // Could be null if no modules found
             if (serverAuthContext == null) {
                 LOG.error("No ServerAuthContext configured! Jaspi Runtime not configured properly!");

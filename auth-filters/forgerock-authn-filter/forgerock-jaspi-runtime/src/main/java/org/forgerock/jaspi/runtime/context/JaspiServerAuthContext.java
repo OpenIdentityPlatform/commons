@@ -18,7 +18,6 @@ package org.forgerock.jaspi.runtime.context;
 
 import org.forgerock.jaspi.exceptions.JaspiAuthException;
 import org.forgerock.jaspi.runtime.AuditTrail;
-import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.jaspi.utils.MessageInfoUtils;
 
 import javax.security.auth.Subject;
@@ -159,7 +158,7 @@ public abstract class JaspiServerAuthContext<T extends ServerAuthModule> impleme
         Map<String, Object> moduleAuditInfo = new HashMap<String, Object>();
         messageInfo.getMap().put(AUDIT_INFO_KEY, moduleAuditInfo);
 
-        AuthStatus authStatus = null;
+        AuthStatus authStatus;
         // validate session module
         if (sessionAuthModule != null) {
             String moduleId = "Session-" + sessionAuthModule.getClass().getSimpleName();
@@ -195,7 +194,7 @@ public abstract class JaspiServerAuthContext<T extends ServerAuthModule> impleme
                     // The module has not completed authenticating the client.
                     LOG.debug("{} has not completed authenticating the client",
                             sessionAuthModule.getClass().getSimpleName());
-                    return authStatus;
+                     return authStatus;
                 } else {
                     String message = "Invalid AuthStatus returned from validateRequest, " + asString(authStatus);
                     auditTrail.auditFailure(moduleId, message, moduleAuditInfo);

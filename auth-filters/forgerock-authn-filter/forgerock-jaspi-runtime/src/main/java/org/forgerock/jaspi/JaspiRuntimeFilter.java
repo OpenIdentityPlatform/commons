@@ -16,11 +16,10 @@
 
 package org.forgerock.jaspi;
 
-import org.forgerock.auth.common.FilterConfiguration;
-import org.forgerock.auth.common.FilterConfigurationImpl;
+import org.forgerock.jaspi.runtime.AuditApi;
+import org.forgerock.jaspi.runtime.ContextFactory;
 import org.forgerock.jaspi.runtime.JaspiRuntime;
-import org.forgerock.jaspi.runtime.config.inject.DefaultRuntimeInjector;
-import org.forgerock.jaspi.runtime.config.inject.RuntimeInjector;
+import org.forgerock.jaspi.runtime.RuntimeResultHandler;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -30,128 +29,151 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-
-import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
+import java.lang.reflect.Method;
 
 /**
- * This Servlet Filter class provides a method of integrating the Jaspi runtime into a Servlet Container, such that
+ * <p>This Servlet Filter class provides a method of integrating the Jaspi runtime into a Servlet Container, such that
  * requests made to the url this filter is registered at will cause the Jaspi runtime to validate and secure the
- * request and response using it configured ServerAuthModules.
- * <br/>
- * To configure the Jaspi runtime the Servlet Filter registration must contain the configuration for the
- * LoggingConfigurator.
+ * request and response using it configured {@code ServerAuthModule}s.</p>
+ *
+ * <p>To configure the Jaspi runtime the Servlet Filter registration must contain the configuration for the
+ * {@link ContextFactory} and the {@link AuditApi}.</p>
  *
  * @since 1.3.0
  */
 public class JaspiRuntimeFilter implements Filter {
 
-    private static final String INIT_PARAM_INJECTOR_CLASS = "runtime-injector-class";
-    private static final String INIT_PARAM_INJECTOR_METHOD = "runtime-injector-method";
-    private static final String INIT_PARAM_INJECTOR_METHOD_DEFAULT = "getRuntimeInjector";
+    private static final String INIT_PARAM_CONTEXT_FACTORY_CLASS = "context-factory-class";
+    private static final String INIT_PARAM_CONTEXT_FACTORY_METHOD = "context-factory-method";
+    private static final String INIT_PARAM_CONTEXT_FACTORY_METHOD_DEFAULT = "getContextFactory";
 
-    private final FilterConfiguration filterConfiguration;
+    private static final String INIT_PARAM_AUDIT_API_CLASS = "audit-api-factory-class";
+    private static final String INIT_PARAM_AUDIT_API_METHOD = "audit-api-factory-method";
+    private static final String INIT_PARAM_AUDIT_API_METHOD_DEFAULT = "getAuditApi";
 
-    private FilterConfig filterConfig;
-    private JaspiRuntime jaspiRuntime;
+    private ContextFactory contextFactory;
+    private AuditApi auditApi;
+    private JaspiRuntime runtime;
 
     /**
-     * Constructs a new instance of the JaspiRuntimeFilter.
+     * Default constructor called during normal Filter initialization. Implementations MUST override
+     * {@link #getContextFactory(FilterConfig)} and {@link #getAuditApi(FilterConfig)} in order for the HTTP Servlet to
+     * function.
      */
     public JaspiRuntimeFilter() {
-        this(FilterConfigurationImpl.INSTANCE);
+        this.contextFactory = null;
+        this.auditApi = null;
     }
 
     /**
-     * Constructs a new instance of the JaspiRuntimeFilter for use in tests.
-     * <br/>
-     * Allows tests to pass in a mock of the FilterConfiguration.
+     * <p>Creates a new Jaspi HTTP Filter with the provided context factory and audit api. This constructor is provided
+     * as a convenience for cases where the HTTP Filter is instantiated programmatically.</p>
      *
-     * @param filterConfiguration A mock of the FilterConfiguration.
+     * <p>If the HTTP Filter is created using this constructor then there is no need to override
+     * {@link #getContextFactory(FilterConfig)} or {@link #getAuditApi(FilterConfig)}.</p>
+     *
+     * @param contextFactory The context factory.
+     * @param auditApi The audit api.
      */
-    protected JaspiRuntimeFilter(final FilterConfiguration filterConfiguration) {
-        this.filterConfiguration = filterConfiguration;
+    public JaspiRuntimeFilter(ContextFactory contextFactory, AuditApi auditApi) {
+        this.contextFactory = contextFactory;
+        this.auditApi = auditApi;
     }
 
     /**
      * Initialises the filter with the provided filter configuration.
      *
-     * @param filterConfig The filter config.
+     * @param config The filter config.
+     * @throws ServletException If either the {@code ContextFactory} or {@code AuditApi} instance could not be created.
      */
     @Override
-    public void init(final FilterConfig filterConfig) {
-        this.filterConfig = filterConfig;
-    }
-
-    /**
-     * Lazy initialises the Jaspi runtime, using the config classes provided in the init-param filter config.
-     *
-     * @return The instance of the Jaspi Runtime.
-     * @throws ServletException If there is an error configuring the Jaspi Runtime.
-     */
-    private synchronized JaspiRuntime getJaspiRuntime() throws ServletException {
-        if (jaspiRuntime == null) {
-            RuntimeInjector runtimeInjector = getRuntimeInjector(filterConfig);
-            LOG.debug("Initialising the JaspiRuntime");
-            jaspiRuntime = runtimeInjector.getInstance(JaspiRuntime.class);
+    public void init(FilterConfig config) throws ServletException {
+        if (contextFactory == null) {
+            contextFactory = getContextFactory(config);
         }
-        return jaspiRuntime;
+        if (auditApi == null) {
+            auditApi = getAuditApi(config);
+        }
+        this.runtime = new JaspiRuntime(contextFactory, new RuntimeResultHandler(), auditApi);
     }
 
     /**
      * On receipt of a request the Jaspi runtime is invoked to validate the request and secure the response, (providing
      * validation was successful).
      *
-     * @param servletRequest The ServletRequest. MUST be of type HttpServletRequest.
-     * @param servletResponse The ServletResponse. MUST be of type HttpServletResponse.
+     * @param request The ServletRequest. MUST be of type HttpServletRequest.
+     * @param response The ServletResponse. MUST be of type HttpServletResponse.
      * @param chain The filter chain.
-     * @throws IOException If there is an exception thrown from the Jaspi runtime.
      * @throws ServletException If there is an exception thrown from the Jaspi runtime.
      */
     @Override
-    public void doFilter(final ServletRequest servletRequest, final ServletResponse servletResponse,
-            final FilterChain chain) throws IOException, ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws ServletException {
 
-        if ((!HttpServletRequest.class.isAssignableFrom(servletRequest.getClass())
-                || !HttpServletResponse.class.isAssignableFrom(servletResponse.getClass()))) {
-            LOG.error("Unsupported protocol");
-            throw new ServletException("Unsupported protocol");
+        if (!(request instanceof HttpServletRequest && response instanceof HttpServletResponse)) {
+            throw new ServletException("Non HTTP request");
         }
 
-        HttpServletRequest request = (HttpServletRequest) servletRequest;
-        HttpServletResponse response = (HttpServletResponse) servletResponse;
-
-        getJaspiRuntime().processMessage(request, response, chain);
+        runtime.processMessage((HttpServletRequest) request, (HttpServletResponse) response, chain);
     }
 
-    /**
-     * Gets the instance of the configured {@link RuntimeInjector}, configured in the Filter Config init params.
-     * <br/>
-     * If no RuntimeInjector is configured in the Filter Config, then the {@link DefaultRuntimeInjector} will be
-     * returned.
-     *
-     * @param config The Filter Config.
-     * @return An instance of the RuntimeInjector.
-     * @throws ServletException If there is an error reading the Filter Config.
-     */
-    private RuntimeInjector getRuntimeInjector(final FilterConfig config) throws ServletException {
-        RuntimeInjector runtimeInjector = filterConfiguration.get(config, INIT_PARAM_INJECTOR_CLASS,
-                INIT_PARAM_INJECTOR_METHOD, INIT_PARAM_INJECTOR_METHOD_DEFAULT);
+    private ContextFactory getContextFactory(FilterConfig config) throws ServletException {
 
-        if (runtimeInjector == null) {
-            runtimeInjector = DefaultRuntimeInjector.getRuntimeInjector(config);
-            LOG.debug("Filter init param, {}, not set. Falling back to the {}.", INIT_PARAM_INJECTOR_CLASS,
-                    DefaultRuntimeInjector.class.getSimpleName());
+        if (config != null) {
+            // Check for configured connection factory class first.
+            final String className = config.getInitParameter(INIT_PARAM_CONTEXT_FACTORY_CLASS);
+            if (className != null) {
+                try {
+                    final Class<?> cls = Class.forName(className);
+                    final String tmp = config.getInitParameter(INIT_PARAM_CONTEXT_FACTORY_METHOD);
+                    final String methodName = tmp != null ? tmp : INIT_PARAM_CONTEXT_FACTORY_METHOD_DEFAULT;
+                    try {
+                        final Method factoryMethod = cls.getDeclaredMethod(methodName);
+                        return (ContextFactory) factoryMethod.invoke(null, config);
+                    } catch (final IllegalArgumentException e) {
+                        // Try no-arg method.
+                        final Method factoryMethod = cls.getDeclaredMethod(methodName);
+                        return (ContextFactory) factoryMethod.invoke(null);
+                    }
+                } catch (final Exception e) {
+                    throw new ServletException(e);
+                }
+            }
         }
 
-        return runtimeInjector;
+        // FIXME: i18n
+        throw new ServletException("Unable to initialize ContextFactory");
     }
 
-    /**
-     * Nullifies any state in the filter.
-     */
+    private AuditApi getAuditApi(FilterConfig config) throws ServletException {
+
+        if (config != null) {
+            // Check for configured connection factory class first.
+            final String className = config.getInitParameter(INIT_PARAM_AUDIT_API_CLASS);
+            if (className != null) {
+                try {
+                    final Class<?> cls = Class.forName(className);
+                    final String tmp = config.getInitParameter(INIT_PARAM_AUDIT_API_METHOD);
+                    final String methodName = tmp != null ? tmp : INIT_PARAM_AUDIT_API_METHOD_DEFAULT;
+                    try {
+                        final Method factoryMethod = cls.getDeclaredMethod(methodName);
+                        return (AuditApi) factoryMethod.invoke(null, config);
+                    } catch (final IllegalArgumentException e) {
+                        // Try no-arg method.
+                        final Method factoryMethod = cls.getDeclaredMethod(methodName);
+                        return (AuditApi) factoryMethod.invoke(null);
+                    }
+                } catch (final Exception e) {
+                    throw new ServletException(e);
+                }
+            }
+        }
+
+        // FIXME: i18n
+        throw new ServletException("Unable to initialize AuditApi");
+    }
+
     @Override
     public void destroy() {
-        jaspiRuntime = null;
+        //TODO what if context is still processing something?...
     }
 }

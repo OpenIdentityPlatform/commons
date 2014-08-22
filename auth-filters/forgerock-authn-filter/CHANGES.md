@@ -1,3 +1,32 @@
+2.0.0
+
+To use create an instance of the FallbackServerAuthContext you need to wire in the following interfaces/classes with
+the specified scope:
+* MessageInfoUtils in Singleton scope
+* ContextHandler in Singleton scope
+* "Session" ServerAuthModule instance
+* List of ServerAuthModule instances 
+
+e.g.
+MessageInfoUtils messageInfoUtils = new MessageInfoUtils();
+ContextHandler contextHandler = new ContextHandler(messageInfoUtils);
+ServerAuthModule sessionAuthModule = new ...;
+List<ServerAuthModule> authModules = new ...;
+
+FallbackServerAuthContext context = new FallbackServerAuthContext(messageInfoUtils, contextHandler, sessionAuthModule, authModules);
+
+
+
+The ContextFactory#getContext() method will be called for each authentication request. This means that the 
+ServerAuthContext instance can be changed/updated with new ServerAuthModules and any changes will be picked up by the 
+runtime for subsequent authentication requests.
+
+
+
+
+
+-----------------------------------------
+
 1.5.0
 
 Added new properties to MessageInfo map:
