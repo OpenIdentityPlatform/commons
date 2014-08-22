@@ -32,35 +32,18 @@ define([
     return {
         executeAll: function (server, parameters) {
 
-            var testPromise = $.Deferred();
-
             module('Common Tests');
-
-            QUnit.test("Test setup", function () {
-
-                QUnit.ok(parameters.username !== undefined && parameters.username.length        , "A username has been passed into the test suite");
-                QUnit.ok(parameters.password !== undefined && parameters.password.length        , "A password has been passed into the test suite");
-
-            });
-
-            QUnit.asyncTest("View data does not pollute globalData (CUI-24)", function () {
-                var loginView = require("LoginView");
-                loginView.render([], function () {
-                    QUnit.ok(!_.has(conf.globalData, 'hasOptionalUIFeatures'), "There should be no hasOptionalUIFeatures within conf.globalData");
-                    QUnit.start();
-                });
-            })
 
             QUnit.asyncTest("Login / Logout", function () {
 
-                var loginView = require("LoginView"),
-                    cachedUser;
-
+                var loginView = require("LoginView");
                 loginView.element = $("<div>")[0];
                 loginView.render([], function () {
 
                     var loggedUserBarView = require("org/forgerock/commons/ui/common/LoggedUserBarView"),
                         loggedUserEl = $('<div>').append('<ul id="loginContent"><li id="user_name"></li><li id="logout_link"></a></li></ul>');
+
+                    QUnit.ok(!_.has(conf.globalData, 'hasOptionalUIFeatures'), "There should be no hasOptionalUIFeatures within conf.globalData (CUI-24)");
 
                     QUnit.ok($("#login", loginView.$el).length                                  , "Username field available");
                     QUnit.ok($("#password", loginView.$el).length                               , "Password field available");
@@ -86,17 +69,14 @@ define([
                         $("#logout_link", loggedUserBarView.$el).trigger("click");
                         QUnit.ok(conf.loggedUser === null                                                       , "User should be logged out");
 
-                        conf.loggedUser = cachedUser;
-
+                        QUnit.start();
                     });
 
-                    testPromise.resolve(); // make sure this is only called after the last async test is finished
-                    QUnit.start();
 
                 });
             });
 
-            QUnit.test("Add Actions to Dialog", function () {
+            QUnit.asyncTest("Add Actions to Dialog", function () {
                 var testDialog = new Dialog();
 
                 QUnit.ok(testDialog.actions.length === 1 && testDialog.actions[0].name === "close", "Cancel Button is Available"); 
@@ -106,9 +86,8 @@ define([
 
                 QUnit.ok(testDialog.actions.length === 2 && testDialog.actions[0].name === "close" && testDialog.actions[1].name === "Test", "Cancel and Test Buttons are Available"); 
 
+                QUnit.start();
             });
-
-            return testPromise;
         }
     };
 });

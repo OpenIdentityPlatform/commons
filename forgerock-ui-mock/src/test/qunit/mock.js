@@ -28,8 +28,10 @@ define([
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/mock/ui/common/main/LocalStorage",
-    "org/forgerock/commons/ui/common/main/Configuration"
-], function (eventManager, constants, localStorage, conf) {
+    "org/forgerock/commons/ui/common/main/Configuration",
+    "org/forgerock/commons/ui/common/util/CookieHelper",
+    "./getLoggedUser"
+], function (eventManager, constants, localStorage, conf, cookieHelper, getLoggedUser) {
     return {
         executeAll: function (server, parameters) {
 
@@ -39,20 +41,17 @@ define([
 
             module('Mock Tests');
 
-            QUnit.test("Test setup", function () {
-                QUnit.ok(parameters.username !== undefined && parameters.username.length, "A username has been passed into the test suite");
-                QUnit.ok(parameters.password !== undefined && parameters.password.length, "A password has been passed into the test suite");
-            });
-
             QUnit.asyncTest("Remember Login", function () {
+
+                conf.loggedUser = null;
                 var loginView = require("LoginView");
                 loginView.element = $("<div>")[0];
+
                 delete loginView.route;
 
                 localStorage.remove('remember-login');
 
                 loginView.render([], function () {
-                    QUnit.start();
 
                     // login with loginRemember checked
                     $("#login", loginView.$el).val(parameters.username).trigger('keyup');
@@ -69,14 +68,19 @@ define([
                     QUnit.equal($("#login", loginView.$el).val(), parameters.username, "Username is remembered after logout.");                    
 
                     localStorage.remove('remember-login');
-                    rememberPromise.resolve();
+
+                    cookieHelper.deleteCookie("login");
+
+                    QUnit.start();
                 });
             });            
 
             QUnit.asyncTest('User Registration', function () {
+                conf.loggedUser = null;
 
                 var view = require('RegisterView');
                 view.element = $("<div>")[0];
+
                 delete view.route;
 
                 view.render(null, function () {
@@ -117,8 +121,6 @@ define([
                         QUnit.ok(status === 'ok' ? rule.parent().find('.ok').length === 1 : rule.parent().find('.error').length === 1,
                             '"' + ruleName + '" rule has "' + status + '" status for value "' + val + '"');
                     }
-
-                    QUnit.start();
 
                     // initial state
                     QUnit.equal($('input[name="register"]', view.$el).attr('disabled'), 'disabled', 'Initial state of submit button is not disabled');
@@ -183,13 +185,13 @@ define([
                     register.trigger('click');
                     QUnit.ok(conf.loggedUser && conf.loggedUser.userName === "qqq", 'Logged in with newly created user');
 
-
-                    userRegPromise.resolve();
+                    QUnit.start();
 
                 });
             });
 
             QUnit.asyncTest('Change Security Data', function () {
+                conf.loggedUser = getLoggedUser();
 
                 var loginView = require("LoginView");
                 loginView.render([], function () {
@@ -200,12 +202,11 @@ define([
 
                 var changeDataView = require('ChangeSecurityDataDialog');
                 changeDataView.element = $("<div>")[0];
+
                 delete changeDataView.route;
                 changeDataView.render([], function () {
                     var pwd = $('input[name="password"]', changeDataView.$el),
                         pwdConfirm = $('input[name="passwordConfirm"]', changeDataView.$el);
-
-                    QUnit.start();
 
                     // Test if inputs and submit button are available
                     QUnit.ok($('input[name="password"]', changeDataView.$el).length, "Password field is available");
@@ -258,11 +259,9 @@ define([
                     localStorage.remove('mock/repo/internal/user/test');
                     conf.setProperty('loggedUser', null);
 
-                    securityDataPromise.resolve();
+                    QUnit.start();
                 });
             });
-
-            return $.when(userRegPromise, rememberPromise, securityDataPromise);
         }
     }
 });

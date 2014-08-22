@@ -28,26 +28,19 @@ define([
         "org/forgerock/commons/ui/common/main/Configuration"
     ], function (conf) {
     return {
-        executeAll: function (server) {
-
-            var testPromise = $.Deferred();
-
+        executeAll: function (server, loggedUser) {
             
             module('User Tests');
-
-            QUnit.test("Logged in user", function () {
-
-                QUnit.ok(conf.loggedUser !== null && conf.loggedUser !== undefined, "There must be a user logged in before running this test suite");
-
-            });
 
             //Test 1: Update User Info
  
             QUnit.asyncTest("Update User Info", function () {
 
+                conf.loggedUser = loggedUser;
+
                 var userProfileView = require("UserProfileView");
                 userProfileView.element = $("<div>")[0];
-
+                
                 delete userProfileView.route; // necessary to prevent some error-checking code from causing problems in this context
 
                 userProfileView.render(null,function() {
@@ -60,9 +53,6 @@ define([
                             telephoneNumber     : '123456789'
                         },
                         modifiedUser = _.extend(_.clone(conf.loggedUser), testVals);
-
-
-                    QUnit.start();
 
                     // Testing inputs
                     QUnit.ok($('input[name="saveButton"]', userProfileView.$el).length          , "Update button appears to be defined");
@@ -126,12 +116,12 @@ define([
                     QUnit.equal($('input[name="sn"]', userProfileView.$el).val(), testVals.sn                               , "Last Name was reset");
                     QUnit.equal($('input[name="telephoneNumber"]', userProfileView.$el).val(), testVals.telephoneNumber     , "Mobile Phone was reset");
 
-                   
-                    testPromise.resolve(); // make sure this is only called after the last async test is finished
+
+                    QUnit.start();
+
                 });
             });
 
-            return testPromise;
         }
     };
 });
