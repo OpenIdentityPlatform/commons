@@ -16,14 +16,13 @@
 
 package org.forgerock.jaspi.context;
 
-import org.forgerock.auth.common.DebugLogger;
-import org.forgerock.jaspi.logging.LogFactory;
-
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthException;
 import javax.security.auth.message.MessagePolicy;
 import javax.security.auth.message.module.ServerAuthModule;
 import java.util.Map;
+
+import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
 
 /**
  * Responsible for constructing and initialising ServerAuthModules.
@@ -36,8 +35,6 @@ public enum ServerAuthModuleInstanceCreatorImpl implements ServerAuthModuleInsta
      * The Singleton instance of the ServerAuthModuleInstanceCreatorImpl.
      */
     INSTANCE;
-
-    private static final DebugLogger LOGGER = LogFactory.getDebug();
 
     /**
      * Constructs a new ServerAuthModule instance, using the given class name.
@@ -60,21 +57,21 @@ public enum ServerAuthModuleInstanceCreatorImpl implements ServerAuthModuleInsta
             try {
                 ServerAuthModule module = Class.forName(className).asSubclass(ServerAuthModule.class).newInstance();
                 module.initialize(messagePolicy, null, handler, moduleProperties);
-                LOGGER.debug("Created module, className: " + className);
+                LOG.debug("Created module, className: {}", className);
                 return module;
             } catch (ClassNotFoundException e) {
-                LOGGER.error("Failed to instantiate module, className: " + className);
+                LOG.error("Failed to instantiate module, className: {}", className);
                 throw new AuthException("Failed to instantiate module, className: " + className);
             } catch (IllegalAccessException e) {
-                LOGGER.error("Failed to instantiate module, className: " + className);
+                LOG.error("Failed to instantiate module, className: {}", className);
                 throw new AuthException("Failed to instantiate module, className: " + className);
             } catch (InstantiationException e) {
-                LOGGER.error("Failed to instantiate module, className: " + className);
+                LOG.error("Failed to instantiate module, className: {}", className);
                 throw new AuthException("Failed to instantiate module, className: " + className);
             }
         }
 
-        LOGGER.error("Class name cannot be null.");
+        LOG.error("Class name cannot be null.");
         throw new AuthException("Class name cannot be null.");
     }
 }

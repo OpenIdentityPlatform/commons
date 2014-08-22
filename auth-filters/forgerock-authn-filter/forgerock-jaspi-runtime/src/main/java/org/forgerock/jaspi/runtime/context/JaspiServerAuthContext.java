@@ -16,9 +16,7 @@
 
 package org.forgerock.jaspi.runtime.context;
 
-import org.forgerock.auth.common.DebugLogger;
 import org.forgerock.jaspi.exceptions.JaspiAuthException;
-import org.forgerock.jaspi.logging.LogFactory;
 import org.forgerock.jaspi.runtime.AuditTrail;
 import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.jaspi.utils.MessageInfoUtils;
@@ -36,6 +34,7 @@ import java.util.Map;
 
 import static org.forgerock.jaspi.runtime.AuditTrail.*;
 import static org.forgerock.jaspi.runtime.AuthStatusUtils.asString;
+import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
 
 /**
  * Encapsulates ServerAuthModules that are used to validate service requests received from clients, and to secure any
@@ -55,8 +54,6 @@ import static org.forgerock.jaspi.runtime.AuthStatusUtils.asString;
  * @since 1.3.0
  */
 public abstract class JaspiServerAuthContext<T extends ServerAuthModule> implements ServerAuthContext {
-
-    private static final DebugLogger LOGGER = LogFactory.getDebug();
 
     /**
      * Key to the private context map, shared between ServerAuthContext implementations.
@@ -170,40 +167,39 @@ public abstract class JaspiServerAuthContext<T extends ServerAuthModule> impleme
                 try {
                     authStatus = sessionAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject);
                 } catch (AuthException e) {
-                    LOGGER.debug("Auditing authentication result");
-                    contextHandler.audit(messageInfo, authStatus);
+                    LOG.debug("Auditing authentication result");
                     auditTrail.auditFailure(moduleId, e.getMessage(), moduleAuditInfo);
                     throw e;
                 }
                 if (AuthStatus.SUCCESS.equals(authStatus)) {
                     auditTrail.auditSuccess(moduleId, moduleAuditInfo);
                     // The module has successfully authenticated the client.
-                    LOGGER.debug(sessionAuthModule.getClass().getSimpleName() + " has successfully authenticated the "
-                            + "client");
+                    LOG.debug("{} has successfully authenticated the client",
+                            sessionAuthModule.getClass().getSimpleName());
                     contextHandler.handleCompletion(messageInfo, clientSubject, authStatus);
                     return authStatus;
                 } else if (AuthStatus.SEND_SUCCESS.equals(authStatus)) {
                     auditTrail.auditSuccess(moduleId, moduleAuditInfo);
                     // The module may have completely/partially/not authenticated the client.
-                    LOGGER.debug(sessionAuthModule.getClass().getSimpleName() + " may have completely/partially/not "
-                            + "authenticated the client and has a response to return to the client");
+                    LOG.debug("{} may have completely/partially/not authenticated the client and has a response to "
+                            + "return to the client", sessionAuthModule.getClass().getSimpleName());
                     return authStatus;
                 } else if (AuthStatus.SEND_FAILURE.equals(authStatus)) {
                     String failureReason = (String) messageInfo.getMap().remove(AUDIT_FAILURE_REASON_KEY);
                     auditTrail.auditFailure(moduleId, failureReason, moduleAuditInfo);
                     // The module has failed to authenticate the client.
                     // -- In our implementation we will let subsequent modules try before sending the failure.
-                    LOGGER.debug(sessionAuthModule.getClass().getSimpleName() + " has failed to authenticated the "
-                            + "client, passing to Auth Modules");
+                    LOG.debug("{} has failed to authenticated the client, passing to Auth Modules",
+                            sessionAuthModule.getClass().getSimpleName());
                 } else if (AuthStatus.SEND_CONTINUE.equals(authStatus)) {
                     // The module has not completed authenticating the client.
-                    LOGGER.debug(sessionAuthModule.getClass().getSimpleName() + " has not completed authenticating the "
-                            + "client");
+                    LOG.debug("{} has not completed authenticating the client",
+                            sessionAuthModule.getClass().getSimpleName());
                     return authStatus;
                 } else {
                     String message = "Invalid AuthStatus returned from validateRequest, " + asString(authStatus);
                     auditTrail.auditFailure(moduleId, message, moduleAuditInfo);
-                    LOGGER.error(message);
+                    LOG.error(message);
                     throw new JaspiAuthException(message);
                 }
             } finally {
@@ -214,30 +210,14 @@ public abstract class JaspiServerAuthContext<T extends ServerAuthModule> impleme
             }
         }
 
-        try {
-            try {
-                authStatus = validateRequest(authModules, messageInfo, clientSubject, serviceSubject);
-            } catch (AuthException e) {
-                LOGGER.debug("Auditing authentication result");
-                contextHandler.audit(messageInfo, authStatus);
-                throw e;
+        authStatus = validateRequest(authModules, messageInfo, clientSubject, serviceSubject);
+        if (authStatus == null || AuthStatus.FAILURE.equals(authStatus)) {
+            final AuthStatus exceptionAuthStatus = authStatus;
+            // Setting authStatus to null so auditing does not happen. As this exception is a configuration issue.
+            LOG.error("Invalid AuthStatus returned from validateRequest, {}", asString(exceptionAuthStatus));
+            throw new JaspiAuthException("Invalid AuthStatus returned from validateRequest, "
+                    + asString(exceptionAuthStatus));
             }
-            if (authStatus == null || AuthStatus.FAILURE.equals(authStatus)) {
-                final AuthStatus exceptionAuthStatus = authStatus;
-                // Setting authStatus to null so auditing does not happen. As this exception is a configuration issue.
-                authStatus = null;
-                LOGGER.error("Invalid AuthStatus returned from validateRequest, " + asString(exceptionAuthStatus));
-                throw new JaspiAuthException("Invalid AuthStatus returned from validateRequest, "
-                        + asString(exceptionAuthStatus));
-            }
-        } finally {
-            // Should not audit if the authentication process hasn't yet finished
-            if (authStatus != null && !AuthStatus.SEND_CONTINUE.equals(authStatus)) {
-                // Once all Auth modules have had the chance to authenticate, audit the attempt.
-                LOGGER.debug("Auditing authentication result");
-                contextHandler.audit(messageInfo, authStatus);
-            }
-        }
 
         contextHandler.handleCompletion(messageInfo, clientSubject, authStatus);
 
@@ -332,7 +312,7 @@ public abstract class JaspiServerAuthContext<T extends ServerAuthModule> impleme
 
         AuthStatus authStatus = secureResponse(authModules, messageInfo, serviceSubject);
         if (AuthStatus.SUCCESS.equals(authStatus) || AuthStatus.FAILURE.equals(authStatus)) {
-            LOGGER.error("Invalid AuthStatus returned from validateRequest, " + asString(authStatus));
+            LOG.error("Invalid AuthStatus returned from validateRequest, {}", asString(authStatus));
             throw new JaspiAuthException("Invalid AuthStatus returned from validateRequest, "
                     + asString(authStatus));
         }

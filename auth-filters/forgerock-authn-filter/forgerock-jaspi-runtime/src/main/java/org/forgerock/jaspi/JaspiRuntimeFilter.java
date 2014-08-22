@@ -16,13 +16,11 @@
 
 package org.forgerock.jaspi;
 
-import org.forgerock.jaspi.logging.LogFactory;
+import org.forgerock.auth.common.FilterConfiguration;
+import org.forgerock.auth.common.FilterConfigurationImpl;
 import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.jaspi.runtime.config.inject.DefaultRuntimeInjector;
 import org.forgerock.jaspi.runtime.config.inject.RuntimeInjector;
-import org.forgerock.jaspi.utils.DebugLoggerBuffer;
-import org.forgerock.auth.common.FilterConfiguration;
-import org.forgerock.auth.common.FilterConfigurationImpl;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -33,6 +31,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+
+import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
 
 /**
  * This Servlet Filter class provides a method of integrating the Jaspi runtime into a Servlet Container, such that
@@ -45,8 +45,6 @@ import java.io.IOException;
  * @since 1.3.0
  */
 public class JaspiRuntimeFilter implements Filter {
-
-    private static final DebugLoggerBuffer LOGGER = new DebugLoggerBuffer();
 
     private static final String INIT_PARAM_INJECTOR_CLASS = "runtime-injector-class";
     private static final String INIT_PARAM_INJECTOR_METHOD = "runtime-injector-method";
@@ -94,7 +92,7 @@ public class JaspiRuntimeFilter implements Filter {
     private synchronized JaspiRuntime getJaspiRuntime() throws ServletException {
         if (jaspiRuntime == null) {
             RuntimeInjector runtimeInjector = getRuntimeInjector(filterConfig);
-            LOGGER.debug("Initialising the JaspiRuntime");
+            LOG.debug("Initialising the JaspiRuntime");
             jaspiRuntime = runtimeInjector.getInstance(JaspiRuntime.class);
         }
         return jaspiRuntime;
@@ -116,7 +114,7 @@ public class JaspiRuntimeFilter implements Filter {
 
         if ((!HttpServletRequest.class.isAssignableFrom(servletRequest.getClass())
                 || !HttpServletResponse.class.isAssignableFrom(servletResponse.getClass()))) {
-            LOGGER.error("Unsupported protocol");
+            LOG.error("Unsupported protocol");
             throw new ServletException("Unsupported protocol");
         }
 
@@ -142,9 +140,8 @@ public class JaspiRuntimeFilter implements Filter {
 
         if (runtimeInjector == null) {
             runtimeInjector = DefaultRuntimeInjector.getRuntimeInjector(config);
-            LOGGER.setDebugLogger(LogFactory.getDebug());
-            LOGGER.debug("Filter init param, " + INIT_PARAM_INJECTOR_CLASS + ", not set. Falling back to the "
-                    + DefaultRuntimeInjector.class.getSimpleName() + ".");
+            LOG.debug("Filter init param, {}, not set. Falling back to the {}.", INIT_PARAM_INJECTOR_CLASS,
+                    DefaultRuntimeInjector.class.getSimpleName());
         }
 
         return runtimeInjector;

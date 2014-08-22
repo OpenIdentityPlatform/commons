@@ -16,8 +16,6 @@
 
 package org.forgerock.jaspi.modules.iwa;
 
-import org.forgerock.auth.common.DebugLogger;
-import org.forgerock.jaspi.logging.LogFactory;
 import org.forgerock.jaspi.modules.iwa.wdsso.WDSSO;
 
 import javax.security.auth.Subject;
@@ -33,6 +31,8 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.Map;
 
+import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
+
 /**
  * Authentication module that uses IWA for authentication.
  *
@@ -40,8 +40,6 @@ import java.util.Map;
  * @since 1.0.0
  */
 public class IWAModule implements ServerAuthModule {
-
-    private static final DebugLogger LOGGER = LogFactory.getDebug();
 
     private static final String IWA_FAILED = "iwa-failed";
 
@@ -80,7 +78,7 @@ public class IWAModule implements ServerAuthModule {
     public AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject)
             throws AuthException {
 
-        LOGGER.debug("IWAModule: validateRequest START");
+        LOG.debug("IWAModule: validateRequest START");
 
         HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
         HttpServletResponse response = (HttpServletResponse) messageInfo.getResponseMessage();
@@ -89,23 +87,23 @@ public class IWAModule implements ServerAuthModule {
 
         try {
             if (httpAuthorization == null || "".equals(httpAuthorization)) {
-                LOGGER.debug("IWAModule: Authorization Header NOT set in request.");
+                LOG.debug("IWAModule: Authorization Header NOT set in request.");
 
                 response.addHeader("WWW-Authenticate", "Negotiate");
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 try {
                     response.getWriter().write("{\"failure\":true,\"reason\":\"" + IWA_FAILED + "\"}");
                 } catch (IOException e) {
-                    LOGGER.debug("IWAModule: Error writing Negotiate header to Response. " + e.getMessage());
+                    LOG.debug("IWAModule: Error writing Negotiate header to Response. {}", e.getMessage());
                     throw new AuthException("Error writing to Response");
                 }
 
                 return AuthStatus.SEND_CONTINUE;
             } else {
-                LOGGER.debug("IWAModule: Authorization Header set in request.");
+                LOG.debug("IWAModule: Authorization Header set in request.");
                 try {
                     final String username = new WDSSO().process(options, request);
-                    LOGGER.debug("IWAModule: IWA successful with username, " + username);
+                    LOG.debug("IWAModule: IWA successful with username, {}", username);
 
                     clientSubject.getPrincipals().add(new Principal() {
                         public String getName() {
@@ -113,14 +111,14 @@ public class IWAModule implements ServerAuthModule {
                         }
                     });
                 } catch (Exception e) {
-                    LOGGER.debug("IWAModule: IWA has failed. " + e.getMessage());
+                    LOG.debug("IWAModule: IWA has failed. {}", e.getMessage());
                     throw new AuthException("IWA has failed");
                 }
 
                 return AuthStatus.SUCCESS;
             }
         } finally {
-            LOGGER.debug("IWAModule: validateRequest END");
+            LOG.debug("IWAModule: validateRequest END");
         }
     }
 

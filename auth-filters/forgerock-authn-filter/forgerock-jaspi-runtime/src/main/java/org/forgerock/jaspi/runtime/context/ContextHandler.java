@@ -16,12 +16,7 @@
 
 package org.forgerock.jaspi.runtime.context;
 
-import org.forgerock.auth.common.AuditRecord;
-import org.forgerock.auth.common.AuthResult;
-import org.forgerock.auth.common.DebugLogger;
 import org.forgerock.jaspi.exceptions.JaspiAuthException;
-import org.forgerock.jaspi.logging.LogFactory;
-import org.forgerock.jaspi.logging.MessageInfoAuditRecord;
 import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.jaspi.utils.MessageInfoUtils;
 import org.forgerock.json.resource.ResourceException;
@@ -39,9 +34,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static org.forgerock.jaspi.runtime.JaspiRuntime.JSON_HTTP_MEDIA_TYPE;
-import static org.forgerock.jaspi.runtime.JaspiRuntime.UNAUTHORIZED_ERROR_MESSAGE;
-import static org.forgerock.jaspi.runtime.JaspiRuntime.UNAUTHORIZED_HTTP_ERROR_CODE;
+import static org.forgerock.jaspi.runtime.JaspiRuntime.*;
 
 /**
  * A handler for ServerAuthContext, which exposes helper methods that will be called at the varying end states
@@ -50,8 +43,6 @@ import static org.forgerock.jaspi.runtime.JaspiRuntime.UNAUTHORIZED_HTTP_ERROR_C
  * @since 1.3.0
  */
 public class ContextHandler {
-
-    private static final DebugLogger LOGGER = LogFactory.getDebug();
 
     private final MessageInfoUtils messageInfoUtils;
 
@@ -101,7 +92,7 @@ public class ContextHandler {
 
         if (!(supportedTypes.contains(HttpServletRequest.class)
                 && supportedTypes.contains(HttpServletResponse.class))) {
-            LOGGER.error("ServerAuthModule does not support the HttpServlet profile, "
+            LOG.error("ServerAuthModule does not support the HttpServlet profile, "
                     + authModule.getClass().getName());
             throw new JaspiAuthException("ServerAuthModule does not support the HttpServlet profile, "
                     + authModule.getClass().getName());
@@ -125,7 +116,7 @@ public class ContextHandler {
             final AuthStatus authStatus) throws AuthException {
 
         if (authStatus == null || AuthStatus.SEND_FAILURE.equals(authStatus)) {
-            LOGGER.debug("Authentication has failed.");
+            LOG.debug("Authentication has failed.");
             HttpServletResponse response = (HttpServletResponse) messageInfo.getResponseMessage();
             ResourceException jre = ResourceException.getException(UNAUTHORIZED_HTTP_ERROR_CODE,
                     UNAUTHORIZED_ERROR_MESSAGE);
@@ -133,7 +124,7 @@ public class ContextHandler {
                 response.setContentType(JSON_HTTP_MEDIA_TYPE);
                 response.getWriter().write(jre.toJsonValue().toString());
             } catch (IOException e) {
-                LOGGER.error("Failed to write to response", e);
+                LOG.error("Failed to write to response", e);
                 throw new JaspiAuthException(e);
             }
         } else {
@@ -163,34 +154,9 @@ public class ContextHandler {
         }
 
         Map<String, Object> context = messageInfoUtils.getMap(messageInfo, JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT);
-        LOGGER.debug("Setting principal name, " + principalName + ", and " + context.size() + " context values on to "
-                + "the request.");
+        LOG.debug("Setting principal name, {}, and {} context values on to the request.", principalName,
+                context.size());
         request.setAttribute(JaspiRuntime.ATTRIBUTE_AUTH_PRINCIPAL, principalName);
         request.setAttribute(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT, context);
-    }
-
-    /**
-     * Creates an audit record containing the given MessageInfo and whether the AuthStatus is a success or not
-     * and calls the configured audit logger.
-     *
-     * @param messageInfo The MessageInfo to use as the audit object.
-     * @param authStatus The AuthStatus of the request.
-     * @deprecated use {@link org.forgerock.jaspi.runtime.AuditApi#audit(org.forgerock.json.fluent.JsonValue)} instead.
-     */
-    @Deprecated
-    public void audit(final MessageInfo messageInfo, final AuthStatus authStatus) {
-        AuditRecord<MessageInfo> auditRecord = new MessageInfoAuditRecord(
-                isAuthStatusSuccessful(authStatus) ? AuthResult.SUCCESS : AuthResult.FAILURE, messageInfo);
-        LogFactory.getAuditLogger().audit(auditRecord);
-    }
-
-    /**
-     * Checks if the AuthStatus value is a successful status or not.
-     *
-     * @param authStatus The AuthStatus.
-     * @return <code>true</code> if the AuthStatus is SUCCESS or SEND_SUCCESS.
-     */
-    private boolean isAuthStatusSuccessful(final AuthStatus authStatus) {
-        return AuthStatus.SUCCESS.equals(authStatus) || AuthStatus.SEND_SUCCESS.equals(authStatus);
     }
 }

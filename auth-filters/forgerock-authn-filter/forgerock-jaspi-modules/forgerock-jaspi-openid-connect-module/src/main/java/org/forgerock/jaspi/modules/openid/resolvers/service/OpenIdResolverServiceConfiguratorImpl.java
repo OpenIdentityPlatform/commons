@@ -15,21 +15,20 @@
 */
 package org.forgerock.jaspi.modules.openid.resolvers.service;
 
+import org.forgerock.jaspi.modules.openid.resolvers.OpenIdResolver;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
-import org.forgerock.auth.common.DebugLogger;
-import org.forgerock.jaspi.logging.LogFactory;
-import org.forgerock.jaspi.modules.openid.resolvers.OpenIdResolver;
+
+import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
 
 /**
  * Implementation of the {@link OpenIdResolverServiceConfigurator} interface which
  * applies a simple priority ordering when reading a service configuration.
  */
 public class OpenIdResolverServiceConfiguratorImpl implements OpenIdResolverServiceConfigurator {
-
-    private static final DebugLogger DEBUG = LogFactory.getDebug();
 
     /**
      * This implementation includes a priority system for ensuring invalid configs still
@@ -69,7 +68,7 @@ public class OpenIdResolverServiceConfiguratorImpl implements OpenIdResolverServ
             final String issuer = resolverConfig.get(OpenIdResolver.ISSUER_KEY);
 
             if (issuer == null) {
-                DEBUG.debug("No issuer name found for non-Open ID Configuration configured resolver");
+                LOG.debug("No issuer name found for non-Open ID Configuration configured resolver");
                 continue;
             }
 
@@ -116,13 +115,13 @@ public class OpenIdResolverServiceConfiguratorImpl implements OpenIdResolverServ
         if ((keystoreLocation == null || keystoreLocation.isEmpty())
                 || (keystoreType == null || keystoreType.isEmpty())
                 || (keystorePass == null || keystorePass.isEmpty())) {
-            DEBUG.debug("Unable to configure resolver using keyAlias for " + issuer);
+            LOG.debug("Unable to configure resolver using keyAlias for {}", issuer);
             return false;
         }
 
         if (!service.configureResolverWithKey(issuer, keyAlias,
                 keystoreLocation, keystoreType, keystorePass)) {
-            DEBUG.debug("Unable to configure resolver using keyAlias for " + issuer);
+            LOG.debug("Unable to configure resolver using keyAlias for {}", issuer);
             return false;
         } else {
             return true;
@@ -140,7 +139,7 @@ public class OpenIdResolverServiceConfiguratorImpl implements OpenIdResolverServ
      */
     private boolean sharedSecretConfiguration(OpenIdResolverService service, String secret, String issuer) {
         if (!service.configureResolverWithSecret(issuer, secret)) {
-            DEBUG.debug("Unable to configure resolver using sharedSecret for " + issuer);
+            LOG.debug("Unable to configure resolver using sharedSecret for {}", issuer);
             return false;
         } else {
             return true;
@@ -162,12 +161,12 @@ public class OpenIdResolverServiceConfiguratorImpl implements OpenIdResolverServ
         try {
             jwkUrl = new URL(jwk);
         } catch (MalformedURLException e) {
-            DEBUG.debug("Supplied JWKs URL at " + jwk + " is invalid.");
+            LOG.debug("Supplied JWKs URL at {} is invalid.", jwk);
             return false;
         }
 
         if (!service.configureResolverWithJWK(issuer, jwkUrl)) {
-            DEBUG.debug("Unable to configure resolver using JWK for " + issuer);
+            LOG.debug("Unable to configure resolver using JWK for {}", issuer);
             return false;
         } else {
             return true;
@@ -188,12 +187,12 @@ public class OpenIdResolverServiceConfiguratorImpl implements OpenIdResolverServ
         try {
             configUrl = new URL(openIdConfig);
         } catch (MalformedURLException e) {
-            DEBUG.debug("Supplied JWKs URL at " + openIdConfig + " is invalid.");
+            LOG.debug("Supplied JWKs URL at {} is invalid.", openIdConfig);
             return false;
         }
 
         if (!service.configureResolverWithWellKnownOpenIdConfiguration(configUrl)) {
-            DEBUG.debug("Unable to configure resolver using Open ID Configuration at url: " + openIdConfig);
+            LOG.debug("Unable to configure resolver using Open ID Configuration at url: {}", openIdConfig);
             return false;
         } else {
             return true;

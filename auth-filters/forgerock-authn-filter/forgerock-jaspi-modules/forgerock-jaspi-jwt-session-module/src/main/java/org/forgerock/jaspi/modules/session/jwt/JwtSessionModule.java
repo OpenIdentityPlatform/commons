@@ -16,8 +16,6 @@
 
 package org.forgerock.jaspi.modules.session.jwt;
 
-import org.forgerock.auth.common.DebugLogger;
-import org.forgerock.jaspi.logging.LogFactory;
 import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.json.jose.builders.JwtBuilderFactory;
 import org.forgerock.json.jose.exceptions.JweDecryptionException;
@@ -52,6 +50,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.forgerock.jaspi.runtime.AuditTrail.AUDIT_SESSION_ID_KEY;
+import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
 
 /**
  * A JASPI Session Module which creates a JWT when securing the response from a successful authentication and sets it
@@ -61,8 +60,6 @@ import static org.forgerock.jaspi.runtime.AuditTrail.AUDIT_SESSION_ID_KEY;
  * @since 1.0.0
  */
 public class JwtSessionModule implements ServerAuthModule {
-
-    private static final DebugLogger DEBUG = LogFactory.getDebug();
 
     private static final String JWT_SESSION_COOKIE_NAME = "session-jwt";
     private static final String SKIP_SESSION_PARAMETER_NAME = "skipSession";
@@ -172,10 +169,10 @@ public class JwtSessionModule implements ServerAuthModule {
 
         Jwt jwt = validateJwtSessionCookie(messageInfo);
         if (jwt == null) {
-            DEBUG.debug("Session JWT NOT valid");
+            LOG.debug("Session JWT NOT valid");
             return AuthStatus.SEND_FAILURE;
         } else {
-            DEBUG.debug("Session JWT valid");
+            LOG.debug("Session JWT valid");
             try {
                 handler.handle(new Callback[]{
                     new CallerPrincipalCallback(clientSubject, jwt.getClaimsSet().getClaim("prn", String.class))
@@ -188,10 +185,10 @@ public class JwtSessionModule implements ServerAuthModule {
                 }
                 messageInfo.getMap().put(AUDIT_SESSION_ID_KEY, jwt.getClaimsSet().get("sessionId").asString());
             } catch (IOException e) {
-                DEBUG.error("Error setting user principal", e);
+                LOG.error("Error setting user principal", e);
                 throw new AuthException(e.getMessage());
             } catch (UnsupportedCallbackException e) {
-                DEBUG.error("Error setting user principal", e);
+                LOG.error("Error setting user principal", e);
                 throw new AuthException(e.getMessage());
             }
             return AuthStatus.SUCCESS;
@@ -223,7 +220,7 @@ public class JwtSessionModule implements ServerAuthModule {
         if (cookies != null) {
             for (Cookie cookie : request.getCookies()) {
                 if (JWT_SESSION_COOKIE_NAME.equals(cookie.getName())) {
-                    DEBUG.debug("Session JWT cookie found");
+                    LOG.debug("Session JWT cookie found");
                     jwtSessionCookie = cookie;
                     break;
                 }
@@ -236,7 +233,7 @@ public class JwtSessionModule implements ServerAuthModule {
             try {
                 jwt = verifySessionJwt(jwtSessionCookie.getValue());
             } catch (JweDecryptionException e) {
-                DEBUG.debug("Failed to decrypt Jwt", e);
+                LOG.error("Failed to decrypt Jwt", e);
                 return null;
             }
             if (jwt != null) {
@@ -262,7 +259,7 @@ public class JwtSessionModule implements ServerAuthModule {
                 return jwt;
             }
         } else {
-            DEBUG.debug("Session JWT cookie not set");
+            LOG.debug("Session JWT cookie not set");
         }
 
         return null;
@@ -409,7 +406,7 @@ public class JwtSessionModule implements ServerAuthModule {
         }
 
         if (map.containsKey(SKIP_SESSION_PARAMETER_NAME) && ((Boolean) map.get(SKIP_SESSION_PARAMETER_NAME))) {
-            DEBUG.debug("Skipping creating session as jwtParameters contains, " + SKIP_SESSION_PARAMETER_NAME);
+            LOG.debug("Skipping creating session as jwtParameters contains, {}", SKIP_SESSION_PARAMETER_NAME);
             return AuthStatus.SEND_SUCCESS;
         }
 

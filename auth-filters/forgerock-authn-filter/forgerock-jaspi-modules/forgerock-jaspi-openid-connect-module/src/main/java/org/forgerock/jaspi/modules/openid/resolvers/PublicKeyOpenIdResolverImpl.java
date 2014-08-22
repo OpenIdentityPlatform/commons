@@ -15,14 +15,14 @@
 */
 package org.forgerock.jaspi.modules.openid.resolvers;
 
-import org.forgerock.auth.common.DebugLogger;
-import org.forgerock.jaspi.logging.LogFactory;
 import org.forgerock.jaspi.modules.openid.exceptions.InvalidSignatureException;
 import org.forgerock.jaspi.modules.openid.exceptions.OpenIdConnectVerificationException;
 import org.forgerock.json.jose.jws.SignedJwt;
 import org.forgerock.json.jose.jws.SigningManager;
 
 import java.security.PublicKey;
+
+import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
 
 
 /**
@@ -32,8 +32,6 @@ import java.security.PublicKey;
  * signature.
  */
 public class PublicKeyOpenIdResolverImpl extends BaseOpenIdResolver {
-
-    private static final DebugLogger DEBUG = LogFactory.getDebug();
 
     private final SigningManager signingManager;
 
@@ -70,7 +68,7 @@ public class PublicKeyOpenIdResolverImpl extends BaseOpenIdResolver {
      */
     public void verifySignature(final SignedJwt idClaim) throws InvalidSignatureException {
         if (!idClaim.verify(signingManager.newRsaSigningHandler(key))) {
-            DEBUG.debug("JWS signature not signed with supplied key");
+            LOG.debug("JWS signature not signed with supplied key");
             throw new InvalidSignatureException("JWS signature not signed with supplied key");
         }
     }

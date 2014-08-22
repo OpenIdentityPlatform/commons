@@ -16,28 +16,24 @@
 
 package org.forgerock.jaspi.runtime.config.inject;
 
-import org.forgerock.auth.common.AuditLogger;
-import org.forgerock.auth.common.DebugLogger;
 import org.forgerock.auth.common.FilterConfiguration;
 import org.forgerock.auth.common.FilterConfigurationImpl;
-import org.forgerock.auth.common.LoggingConfigurator;
 import org.forgerock.jaspi.context.DefaultServerContextFactory;
-import org.forgerock.jaspi.logging.LogFactory;
 import org.forgerock.jaspi.runtime.AuditApi;
 import org.forgerock.jaspi.runtime.HttpServletCallbackHandler;
 import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.jaspi.runtime.RuntimeResultHandler;
 import org.forgerock.jaspi.runtime.config.ServerContextFactory;
 import org.forgerock.jaspi.runtime.context.ContextHandler;
-import org.forgerock.jaspi.utils.DebugLoggerBuffer;
 import org.forgerock.jaspi.utils.MessageInfoUtils;
 import org.forgerock.json.fluent.JsonValue;
 
 import javax.security.auth.message.AuthException;
-import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.config.ServerAuthContext;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
+
+import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
 
 /**
  * Default implementation of the RuntimeInjector interface which will allow for getting the instance of the
@@ -47,14 +43,9 @@ import javax.servlet.ServletException;
  */
 public class DefaultRuntimeInjector implements RuntimeInjector {
 
-    private static final DebugLoggerBuffer LOGGER = new DebugLoggerBuffer();
-
     private static final String INIT_PARAM_CONTEXT_CLASS = "context-factory-class";
     private static final String INIT_PARAM_CONTEXT_METHOD = "context-factory-method";
     private static final String INIT_PARAM_CONTEXT_METHOD_DEFAULT = "getServerContextFactory";
-    private static final String INIT_PARAM_LOGGING_CONFIGURATOR_CLASS = "logging-configurator-class";
-    private static final String INIT_PARAM_LOGGING_CONFIGURATOR_METHOD = "logging-configurator-method";
-    private static final String INIT_PARAM_LOGGING_CONFIGURATOR_METHOD_DEFAULT = "getLoggingConfigurator";
     private static final String INIT_PARAM_AUDIT_API_CLASS = "audit-api-class";
     private static final String INIT_PARAM_AUDIT_API_METHOD = "audit-api-method";
     private static final String INIT_PARAM_AUDIT_API_METHOD_DEFAULT = "getAuditApi";
@@ -87,15 +78,6 @@ public class DefaultRuntimeInjector implements RuntimeInjector {
 
         this.filterConfiguration = filterConfiguration;
 
-        /*
-         * Must set the loggers before initialising anything else otherwise classes with static loggers will get the
-         * NOP implementations
-         */
-        LoggingConfigurator<MessageInfo> loggingConfigurator = getLoggingConfigurator(config);
-        LogFactory.setAuditLogger(loggingConfigurator.getAuditLogger());
-        LogFactory.setDebugLogger(loggingConfigurator.getDebugLogger());
-        LOGGER.setDebugLogger(LogFactory.getDebug());
-
         ServerContextFactory serverContextFactory = getServerContextFactory(config);
 
         MessageInfoUtils messageInfoUtils = new MessageInfoUtils();
@@ -108,7 +90,7 @@ public class DefaultRuntimeInjector implements RuntimeInjector {
         RuntimeResultHandler runtimeResultHandler = new RuntimeResultHandler();
 
         this.jaspiRuntime = new JaspiRuntime(serverAuthContext, runtimeResultHandler, auditApi);
-        LOGGER.debug("Finished initialising the DefaultRuntimeInjector");
+        LOG.debug("Finished initialising the DefaultRuntimeInjector");
     }
 
     /**
@@ -126,7 +108,7 @@ public class DefaultRuntimeInjector implements RuntimeInjector {
         try {
             return new DefaultRuntimeInjector(config);
         } catch (AuthException e) {
-            LOGGER.error("Failed to construct RuntimeInjector", e);
+            LOG.error("Failed to construct RuntimeInjector", e);
             throw new ServletException("Failed to construct RuntimeInjector", e);
         }
     }
@@ -146,7 +128,7 @@ public class DefaultRuntimeInjector implements RuntimeInjector {
     public <T> T getInstance(final Class<T> type) {
 
         if (!JaspiRuntime.class.equals(type)) {
-            LOGGER.error("Type not registered! " + type.getName());
+            LOG.error("Type not registered! {}", type.getName());
             throw new RuntimeException("Type not registered! " + type.getName());
         }
 
@@ -169,45 +151,12 @@ public class DefaultRuntimeInjector implements RuntimeInjector {
                 INIT_PARAM_CONTEXT_METHOD, INIT_PARAM_CONTEXT_METHOD_DEFAULT);
 
         if (serverContextFactory == null) {
-            LOGGER.debug("Filter init param, " + INIT_PARAM_CONTEXT_CLASS + ", not set. Falling back to the "
-                    + DefaultServerContextFactory.class.getSimpleName() + ".");
+            LOG.debug("Filter init param, {}, not set. Falling back to the .", INIT_PARAM_CONTEXT_CLASS,
+                    DefaultServerContextFactory.class.getSimpleName());
             return DefaultServerContextFactory.getServerContextFactory(config);
         }
 
         return serverContextFactory;
-    }
-
-    /**
-     * Gets the instance of the configured {@link LoggingConfigurator}, configured in the Filter Config init params.
-     * <br/>
-     * If no LoggingConfigurator is configured in the Filter Config, then a NoOp LoggingConfigurator will be returned.
-     *
-     * @param config The Filter Config.
-     * @return An instance of the LoggingConfigurator.
-     * @throws ServletException If there is an error reading the Filter Config.
-     */
-    private LoggingConfigurator<MessageInfo> getLoggingConfigurator(final FilterConfig config) throws ServletException {
-        LoggingConfigurator<MessageInfo> loggingConfigurator = filterConfiguration.get(config,
-                INIT_PARAM_LOGGING_CONFIGURATOR_CLASS, INIT_PARAM_LOGGING_CONFIGURATOR_METHOD,
-                INIT_PARAM_LOGGING_CONFIGURATOR_METHOD_DEFAULT);
-
-        if (loggingConfigurator == null) {
-            LOGGER.debug("Filter init param, " + INIT_PARAM_LOGGING_CONFIGURATOR_CLASS + ", not set. Falling back "
-                    + "to the NoOp Logging Configurator.");
-            loggingConfigurator = new LoggingConfigurator<MessageInfo>() {
-                @Override
-                public DebugLogger getDebugLogger() {
-                    return null;
-                }
-
-                @Override
-                public AuditLogger<MessageInfo> getAuditLogger() {
-                    return null;
-                }
-            };
-        }
-
-        return loggingConfigurator;
     }
 
     /**
@@ -219,8 +168,8 @@ public class DefaultRuntimeInjector implements RuntimeInjector {
                 INIT_PARAM_AUDIT_API_METHOD_DEFAULT);
 
         if (auditApi == null) {
-            LOGGER.debug("Filter init param, " + INIT_PARAM_AUDIT_API_CLASS + ", not set. Falling back "
-                    + "to the NoOp Audit Api.");
+            LOG.debug("Filter init param, {}, not set. Falling back to the NoOp Audit Api.",
+                    INIT_PARAM_AUDIT_API_CLASS);
             auditApi = new AuditApi() {
                 @Override
                 public void audit(JsonValue auditMessage) {

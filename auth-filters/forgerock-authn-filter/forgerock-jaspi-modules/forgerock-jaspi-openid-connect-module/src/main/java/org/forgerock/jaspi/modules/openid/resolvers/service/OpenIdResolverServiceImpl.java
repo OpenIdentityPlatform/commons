@@ -15,17 +15,18 @@
 */
 package org.forgerock.jaspi.modules.openid.resolvers.service;
 
-import java.net.URL;
-import java.security.PublicKey;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import org.forgerock.auth.common.DebugLogger;
-import org.forgerock.jaspi.logging.LogFactory;
 import org.forgerock.jaspi.modules.openid.exceptions.FailedToLoadJWKException;
 import org.forgerock.jaspi.modules.openid.resolvers.OpenIdResolver;
 import org.forgerock.jaspi.modules.openid.resolvers.OpenIdResolverFactory;
 import org.forgerock.json.jose.utils.KeystoreManager;
 import org.forgerock.json.jose.utils.KeystoreManagerException;
+
+import java.net.URL;
+import java.security.PublicKey;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
+import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
 
 /**
  * Holds a copy of the current OpenID Resolvers.
@@ -37,8 +38,6 @@ import org.forgerock.json.jose.utils.KeystoreManagerException;
  * so the appropriate {@link org.forgerock.jaspi.modules.openid.resolvers.OpenIdResolver} can be looked up.
  */
 public class OpenIdResolverServiceImpl implements OpenIdResolverService {
-
-    private static final DebugLogger DEBUG = LogFactory.getDebug();
 
     private final ConcurrentMap<String, OpenIdResolver> openIdResolvers =
             new ConcurrentHashMap<String, OpenIdResolver>();
@@ -109,10 +108,10 @@ public class OpenIdResolverServiceImpl implements OpenIdResolverService {
             final OpenIdResolver impl = openIdResolverFactory.createPublicKeyResolver(issuer, key);
             openIdResolvers.put(issuer, impl);
         } catch (KeystoreManagerException kme) {
-            DEBUG.debug("Error accessing the KeystoreManager", kme);
+            LOG.debug("Error accessing the KeystoreManager", kme);
             return false;
         } catch (NullPointerException npe) {
-            DEBUG.debug("No key found in keystore with appropriate alias", npe);
+            LOG.debug("No key found in keystore with appropriate alias", npe);
             return false;
         }
 
@@ -133,7 +132,7 @@ public class OpenIdResolverServiceImpl implements OpenIdResolverService {
             final OpenIdResolver impl = openIdResolverFactory.createSharedSecretResolver(issuer, sharedSecret);
             openIdResolvers.put(issuer, impl);
         } catch (IllegalArgumentException iae) {
-            DEBUG.debug("Shared secret must not be null", iae);
+            LOG.debug("Shared secret must not be null", iae);
             return false;
         }
 
@@ -155,7 +154,7 @@ public class OpenIdResolverServiceImpl implements OpenIdResolverService {
                     readTimeout, connTimeout);
             openIdResolvers.put(issuer, impl);
         } catch (FailedToLoadJWKException e) {
-            DEBUG.debug("Unable to load JSON Web Keys", e);
+            LOG.debug("Unable to load JSON Web Keys", e);
             return false;
         }
 
@@ -175,7 +174,7 @@ public class OpenIdResolverServiceImpl implements OpenIdResolverService {
             final OpenIdResolver impl = openIdResolverFactory.createFromOpenIDConfigUrl(configUrl);
             openIdResolvers.put(impl.getIssuer(), impl);
         } catch (FailedToLoadJWKException e) {
-            DEBUG.debug("Unable to load JSON Web Keys", e);
+            LOG.debug("Unable to load JSON Web Keys", e);
             return false;
         }
 

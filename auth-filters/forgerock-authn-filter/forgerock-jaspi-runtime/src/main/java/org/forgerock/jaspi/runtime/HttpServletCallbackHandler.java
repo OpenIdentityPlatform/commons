@@ -16,9 +16,6 @@
 
 package org.forgerock.jaspi.runtime;
 
-import org.forgerock.auth.common.DebugLogger;
-import org.forgerock.jaspi.logging.LogFactory;
-
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
@@ -33,14 +30,14 @@ import javax.security.auth.message.callback.TrustStoreCallback;
 import java.security.Principal;
 import java.util.Set;
 
+import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
+
 /**
  * Callback handler for the JASPI runtime.
  *
  * @since 1.0.0
  */
 public class HttpServletCallbackHandler implements CallbackHandler {
-
-    private static final DebugLogger LOGGER = LogFactory.getDebug();
 
     /**
      * Called by Authentication modules to request more information about the request and response message.
@@ -75,10 +72,10 @@ public class HttpServletCallbackHandler implements CallbackHandler {
                 Principal principal = callerPrincipalCallback.getPrincipal();
 
                 if (principal != null) {
-                    LOGGER.trace("Adding principal, " + principal.getName() + ", to Subject");
+                    LOG.trace("Adding principal, {}, to Subject", principal.getName());
                     subject.getPrincipals().add(principal);
                 } else if (name != null) {
-                    LOGGER.trace("Adding principal, " + name + ", to Subject");
+                    LOG.trace("Adding principal, {}, to Subject", name);
                     subject.getPrincipals().add(new Principal() {
                         @Override
                         public String getName() {
@@ -87,7 +84,7 @@ public class HttpServletCallbackHandler implements CallbackHandler {
                     });
                 } else {
                     //Both name and principal are null so not adding either.
-                    LOGGER.trace("Not adding principal as no name or principal set on callback");
+                    LOG.trace("Not adding principal as no name or principal set on callback");
                 }
 
             } else if (GroupPrincipalCallback.class.isAssignableFrom(callback.getClass())) {
@@ -103,7 +100,7 @@ public class HttpServletCallbackHandler implements CallbackHandler {
                 Set<Principal> principals = subject.getPrincipals();
 
                 for (final String group : groups) {
-                    LOGGER.trace("Adding principal, " + group + ", to Subject");
+                    LOG.trace("Adding principal, {}, to Subject", group);
                     principals.add(new Principal() {
                         @Override
                         public String getName() {
@@ -115,23 +112,23 @@ public class HttpServletCallbackHandler implements CallbackHandler {
             } else if (PasswordValidationCallback.class.isAssignableFrom(callback.getClass())) {
                 // JSR-196 Spec states this MUST be implemented but as this is not actually a "real" container
                 // we don't need to do this here.
-                LOGGER.error("PasswordValidationCallback not supported");
+                LOG.error("PasswordValidationCallback not supported");
                 throw new UnsupportedCallbackException(callback);
             } else if (CertStoreCallback.class.isAssignableFrom(callback.getClass())) {
                 //SHOULD implement
-                LOGGER.error("CertStoreCallback not supported");
+                LOG.error("CertStoreCallback not supported");
                 throw new UnsupportedCallbackException(callback);
             } else if (PrivateKeyCallback.class.isAssignableFrom(callback.getClass())) {
                 //SHOULD implement
-                LOGGER.error("PrivateKeyCallback not supported");
+                LOG.error("PrivateKeyCallback not supported");
                 throw new UnsupportedCallbackException(callback);
             } else if (SecretKeyCallback.class.isAssignableFrom(callback.getClass())) {
                 //SHOULD implement
-                LOGGER.error("SecretKeyCallback not supported");
+                LOG.error("SecretKeyCallback not supported");
                 throw new UnsupportedCallbackException(callback);
             } else if (TrustStoreCallback.class.isAssignableFrom(callback.getClass())) {
                 //SHOULD implement
-                LOGGER.error("TrustStoreCallback not supported");
+                LOG.error("TrustStoreCallback not supported");
                 throw new UnsupportedCallbackException(callback);
 //            } else if (HttpCallback.class.isAssignableFrom(callback.getClass())) {
 //                //SHOULD implement

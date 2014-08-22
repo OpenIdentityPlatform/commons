@@ -16,9 +16,7 @@
 
 package org.forgerock.jaspi.modules.session.openam;
 
-import org.forgerock.auth.common.DebugLogger;
 import org.forgerock.jaspi.exceptions.JaspiAuthException;
-import org.forgerock.jaspi.logging.LogFactory;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.util.Reject;
@@ -41,6 +39,8 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.Map;
 
+import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
+
 /**
  * A JASPI Session Module which uses OpenAM to validate SSO Tokens issued by an OpenAM instance.
  * <br/>
@@ -54,7 +54,6 @@ public class OpenAMSessionModule implements ServerAuthModule {
     private static final String JSON_SESSIONS_RELATIVE_URI = JSON_REST_ROOT_ENDPOINT + "/sessions/";
     private static final String JSON_USERS_ENDPOINT = "users/";
 
-    private final DebugLogger logger = LogFactory.getDebug();
     private final RestClient restClient;
 
     private CallbackHandler handler;
@@ -126,8 +125,8 @@ public class OpenAMSessionModule implements ServerAuthModule {
         if (!openamDeploymentUrl.endsWith("/")) {
             openamDeploymentUrl += "/";
         }
-        logger.debug("OpenAM configuration: Deployment URL = " + openamDeploymentUrl + ", SSO Token Cookie Name = "
-                + openamSSOTokenCookieName);
+        LOG.debug("OpenAM configuration: Deployment URL = {}, SSO Token Cookie Name = {}", openamDeploymentUrl,
+                openamSSOTokenCookieName);
 
         final boolean useSSL;
         try {
@@ -136,7 +135,7 @@ public class OpenAMSessionModule implements ServerAuthModule {
             throw new IllegalArgumentException("OpenAM Deployment URL malformed.");
         }
 
-        logger.debug("Using SSL? " + useSSL);
+        LOG.debug("Using SSL? {}", useSSL);
 
         if (useSSL) {
             restClient.setSslConfiguration(configureSsl(options));
@@ -165,8 +164,8 @@ public class OpenAMSessionModule implements ServerAuthModule {
             trustManagerAlgorithm = "SunX509";
         }
 
-        logger.debug("SSL configuration:  Trust Manager Algorithm = " + trustManagerAlgorithm + ", Trust Store Path = "
-                + trustStorePath + ", Trust Store Type = " + trustStoreType);
+        LOG.debug("SSL configuration:  Trust Manager Algorithm = {}, Trust Store Path = {}, Trust Store Type = {}",
+                trustManagerAlgorithm, trustStorePath, trustStoreType);
 
         final SslConfiguration sslConfiguration = new SslConfiguration();
 
@@ -219,11 +218,11 @@ public class OpenAMSessionModule implements ServerAuthModule {
             final Subject serviceSubject) throws JaspiAuthException {
 
         final String tokenId = getSsoTokenId((HttpServletRequest) messageInfo.getRequestMessage());
-        logger.debug("SSO Token found.");
-        logger.trace("SSO Token value, " + tokenId);
+        LOG.debug("SSO Token found.");
+        LOG.trace("SSO Token value, {}", tokenId);
 
         if (tokenId == null) {
-            logger.trace("SSO Token not found on request.");
+            LOG.trace("SSO Token not found on request.");
             return AuthStatus.SEND_FAILURE;
         }
 
@@ -233,7 +232,7 @@ public class OpenAMSessionModule implements ServerAuthModule {
                     Collections.<String, String>emptyMap());
 
             if (validationResponse.isDefined("valid") && validationResponse.get("valid").asBoolean()) {
-                logger.debug("REST validation call returned true.");
+                LOG.debug("REST validation call returned true.");
 
                 final String uid = validationResponse.get("uid").asString();
                 final String realm = validationResponse.get("realm").asString();
@@ -250,11 +249,11 @@ public class OpenAMSessionModule implements ServerAuthModule {
                 return AuthStatus.SUCCESS;
             }
 
-            logger.debug("REST validation call returned false.");
+            LOG.debug("REST validation call returned false.");
             return AuthStatus.SEND_FAILURE;
 
         } catch (ResourceException e) {
-            logger.error("REST validation call returned non HTTP 200 response", e);
+            LOG.error("REST validation call returned non HTTP 200 response", e);
             return AuthStatus.SEND_FAILURE;
         } catch (UnsupportedCallbackException e) {
             throw new JaspiAuthException(e.getMessage(), e);
@@ -278,7 +277,7 @@ public class OpenAMSessionModule implements ServerAuthModule {
 
         final String ssoTokenId = request.getHeader(openamSSOTokenCookieName);
         if (ssoTokenId != null) {
-            logger.debug("Found SSO Token in header with name, " + openamSSOTokenCookieName);
+            LOG.debug("Found SSO Token in header with name, {}", openamSSOTokenCookieName);
             return ssoTokenId;
         }
 
@@ -287,7 +286,7 @@ public class OpenAMSessionModule implements ServerAuthModule {
         if (cookies != null) {
             for (final Cookie cookie : cookies) {
                 if (openamSSOTokenCookieName.equals(cookie.getName())) {
-                    logger.debug("SSO Token cookie found");
+                    LOG.debug("SSO Token cookie found");
                     ssoTokenCookie = cookie;
                     break;
                 }

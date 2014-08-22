@@ -16,13 +16,11 @@
 
 package org.forgerock.jaspi.runtime.config;
 
-import org.forgerock.auth.common.DebugLogger;
 import org.forgerock.auth.common.FilterConfiguration;
 import org.forgerock.auth.common.FilterConfigurationImpl;
 import org.forgerock.jaspi.context.ServerAuthModuleInstanceCreator;
 import org.forgerock.jaspi.context.ServerAuthModuleInstanceCreatorImpl;
 import org.forgerock.jaspi.exceptions.JaspiAuthException;
-import org.forgerock.jaspi.logging.LogFactory;
 import org.forgerock.jaspi.runtime.context.ContextHandler;
 import org.forgerock.jaspi.runtime.context.config.ModuleConfigurationFactory;
 import org.forgerock.jaspi.utils.MessageInfoUtils;
@@ -37,6 +35,8 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import java.util.Map;
 
+import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
+
 /**
  * Factory class for getting the ServerAuthContext instance that the JaspiRuntime will be configured to use.
  * <br/>
@@ -48,8 +48,6 @@ import java.util.Map;
  * @since 1.3.0
  */
 public abstract class SessionServerContextFactory implements ServerContextFactory {
-
-    private static final DebugLogger LOGGER = LogFactory.getDebug();
 
     private static final String INIT_PARAM_CONTEXT_CLASS = "module-configuration-factory-class";
     private static final String INIT_PARAM_CONTEXT_METHOD = "module-configuration-factory-method";
@@ -105,7 +103,7 @@ public abstract class SessionServerContextFactory implements ServerContextFactor
             configurationFactory = filterConfiguration.get(config,
                     INIT_PARAM_CONTEXT_CLASS, INIT_PARAM_CONTEXT_METHOD, INIT_PARAM_CONTEXT_METHOD_DEFAULT);
         } catch (ServletException e) {
-            LOGGER.error("Failed to get ModuleConfigurationFactory from Servlet Filter init params", e);
+            LOG.error("Failed to get ModuleConfigurationFactory from Servlet Filter init params", e);
             throw new JaspiAuthException("Failed to get ModuleConfigurationFactory from Servlet Filter init params", e);
         }
 
@@ -116,7 +114,7 @@ public abstract class SessionServerContextFactory implements ServerContextFactor
         if (configuration.isDefined(ModuleConfigurationFactory.SESSION_MODULE_KEY)) {
             JsonValue sessionModule = configuration.get(ModuleConfigurationFactory.SESSION_MODULE_KEY);
             if (!sessionModule.isMap()) {
-                LOGGER.error("Only one Session Auth Module can be defined.");
+                LOG.error("Only one Session Auth Module can be defined.");
                 throw new JaspiAuthException("Only one Session Auth Module can be defined.");
             }
             String className = sessionModule.get(ModuleConfigurationFactory.AUTH_MODULE_CLASS_NAME_KEY).required()

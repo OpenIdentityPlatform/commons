@@ -17,8 +17,6 @@
 package org.forgerock.jaspi.modules.session.openam;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.forgerock.auth.common.DebugLogger;
-import org.forgerock.jaspi.logging.LogFactory;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ResourceException;
 import org.json.JSONObject;
@@ -33,6 +31,7 @@ import org.restlet.util.Series;
 import java.io.IOException;
 import java.util.Map;
 
+import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
 import static org.forgerock.json.fluent.JsonValue.json;
 import static org.forgerock.json.fluent.JsonValue.object;
 
@@ -44,8 +43,6 @@ import static org.forgerock.json.fluent.JsonValue.object;
 class RestletRestClient implements RestClient {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
-    private final DebugLogger logger = LogFactory.getDebug();
 
     private volatile SslContextFactory sslContextFactory;
 
@@ -83,10 +80,10 @@ class RestletRestClient implements RestClient {
             final JSONObject response = resource.get(JSONObject.class);
             return convertResponse(response);
         } catch (org.restlet.resource.ResourceException e) {
-            logger.error("REST GET request failed.", e);
+            LOG.error("REST GET request failed.", e);
             throw ResourceException.getException(e.getStatus().getCode(), e.getMessage());
         } catch (Exception e) {
-            logger.error("REST GET request failed.", e);
+            LOG.error("REST GET request failed.", e);
             throw ResourceException.getException(ResourceException.INTERNAL_ERROR, e.getMessage());
         }
     }
@@ -106,10 +103,10 @@ class RestletRestClient implements RestClient {
 
             return convertResponse(response);
         } catch (org.restlet.resource.ResourceException e) {
-            logger.error("REST POST request failed.", e);
+            LOG.error("REST POST request failed.", e);
             throw ResourceException.getException(e.getStatus().getCode(), e.getMessage());
         } catch (Exception e) {
-            logger.error("REST POST request failed.", e);
+            LOG.error("REST POST request failed.", e);
             throw ResourceException.getException(ResourceException.INTERNAL_ERROR, e.getMessage());
         }
     }
@@ -139,7 +136,7 @@ class RestletRestClient implements RestClient {
         }
 
         if (sslContextFactory != null) {
-            logger.debug("Making REST call to validate SSO Token using SSL");
+            LOG.debug("Making REST call to validate SSO Token using SSL");
             resource.getContext().getAttributes().put("sslContextFactory", sslContextFactory);
         }
 

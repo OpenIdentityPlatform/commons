@@ -15,8 +15,6 @@
 */
 package org.forgerock.jaspi.modules.openid.resolvers;
 
-import org.forgerock.auth.common.DebugLogger;
-import org.forgerock.jaspi.logging.LogFactory;
 import org.forgerock.jaspi.modules.openid.exceptions.FailedToLoadJWKException;
 import org.forgerock.jaspi.modules.openid.exceptions.InvalidSignatureException;
 import org.forgerock.jaspi.modules.openid.exceptions.OpenIdConnectVerificationException;
@@ -29,6 +27,8 @@ import java.net.URL;
 import java.security.Key;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
 
 /**
  * This class exists to allow Open Id Providers to supply or promote a JWK exposure point for
@@ -52,8 +52,6 @@ public class JWKOpenIdResolverImpl extends BaseOpenIdResolver {
 
     private final JWKSetParser jwkParser;
 
-    private static final DebugLogger DEBUG = LogFactory.getDebug();
-
     /**
      * Constructor using provided timeout values to generate the
      * {@link SimpleHTTPClient} used for communicating over HTTP.
@@ -75,7 +73,7 @@ public class JWKOpenIdResolverImpl extends BaseOpenIdResolver {
         try {
             reloadKeys();
         } catch (FailedToLoadJWKException e) {
-            DEBUG.debug("Unable to load keys from the JWK over HTTP");
+            LOG.debug("Unable to load keys from the JWK over HTTP");
             throw new FailedToLoadJWKException("Unable to load keys from the JWK over HTTP", e);
         }
     }
@@ -99,7 +97,7 @@ public class JWKOpenIdResolverImpl extends BaseOpenIdResolver {
         try {
             reloadKeys();
         } catch (FailedToLoadJWKException e) {
-            DEBUG.debug("Unable to load keys from the JWK over HTTP");
+            LOG.debug("Unable to load keys from the JWK over HTTP");
             throw new FailedToLoadJWKException("Unable to load keys from the JWK over HTTP", e);
         }
     }
@@ -122,7 +120,7 @@ public class JWKOpenIdResolverImpl extends BaseOpenIdResolver {
         try {
             reloadKeys();
         } catch (FailedToLoadJWKException e) {
-            DEBUG.debug("Unable to load keys from the JWK over HTTP");
+            LOG.debug("Unable to load keys from the JWK over HTTP");
             throw new FailedToLoadJWKException("Unable to load keys from the JWK over HTTP", e);
         }
     }
@@ -156,7 +154,7 @@ public class JWKOpenIdResolverImpl extends BaseOpenIdResolver {
 
         key = keyMap.get(idClaim.getHeader().getKeyId());
         if (key == null || !idClaim.verify(signingManager.newRsaSigningHandler(key))) {
-            DEBUG.debug("JWS unable to be verified");
+            LOG.debug("JWS unable to be verified");
             throw new InvalidSignatureException("JWS unable to be verified");
         }
     }

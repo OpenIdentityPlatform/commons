@@ -15,16 +15,17 @@
 */
 package org.forgerock.jaspi.modules.openid.resolvers;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Map;
-import org.forgerock.auth.common.DebugLogger;
-import org.forgerock.jaspi.logging.LogFactory;
 import org.forgerock.jaspi.modules.openid.exceptions.FailedToLoadJWKException;
 import org.forgerock.jaspi.modules.openid.helpers.SimpleHTTPClient;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.jose.utils.Utils;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Map;
+
+import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
 
 /**
  * This class creates JWKOpenIdResolverImpl's from a supplied
@@ -34,8 +35,6 @@ public class WellKnownOpenIdConfigurationFactory {
 
     private final static String ISSUER = "issuer";
     private final static String JWKS_URI = "jwks_uri";
-
-    private static final DebugLogger DEBUG = LogFactory.getDebug();
 
     private final SimpleHTTPClient simpleHTTPClient;
 
@@ -71,7 +70,7 @@ public class WellKnownOpenIdConfigurationFactory {
         try {
             configurationContents = simpleHTTPClient.get(configUrl);
         } catch (IOException e) {
-            DEBUG.debug("Unable to load the Configuration at  " + configUrl + " over HTTP", e);
+            LOG.debug("Unable to load the Configuration at  " + configUrl + " over HTTP", e);
             throw new FailedToLoadJWKException("Unable to load the Configuration over HTTP", e);
         }
 
@@ -82,12 +81,12 @@ public class WellKnownOpenIdConfigurationFactory {
         final String jwkUri = configuration.get(JWKS_URI).asString();
 
         if (issuer == null || issuer.isEmpty()) {
-            DEBUG.debug("Invalid configuration - must include an issuer key");
+            LOG.debug("Invalid configuration - must include an issuer key");
             throw new FailedToLoadJWKException("Invalid configuration - must include an issuer key");
         }
 
         if (jwkUri == null || jwkUri.isEmpty()) {
-            DEBUG.debug("No JWK URI in the supplied configuration");
+            LOG.debug("No JWK URI in the supplied configuration");
             throw new FailedToLoadJWKException("No JWK URI in the supplied configuration");
         }
 
@@ -96,7 +95,7 @@ public class WellKnownOpenIdConfigurationFactory {
         try {
             jwkUrl = new URL(jwkUri);
         } catch (MalformedURLException e) {
-            DEBUG.debug("Invalid URL supplied to generate JWKs");
+            LOG.debug("Invalid URL supplied to generate JWKs");
             throw new FailedToLoadJWKException("Invalid URL supplied to generate JWKs", e);
         }
 

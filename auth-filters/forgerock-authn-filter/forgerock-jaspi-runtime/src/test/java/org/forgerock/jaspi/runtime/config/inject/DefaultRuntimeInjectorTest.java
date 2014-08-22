@@ -18,12 +18,11 @@ package org.forgerock.jaspi.runtime.config.inject;
 
 import org.forgerock.auth.common.AuditLogger;
 import org.forgerock.auth.common.DebugLogger;
+import org.forgerock.auth.common.FilterConfiguration;
 import org.forgerock.auth.common.LoggingConfigurator;
-import org.forgerock.jaspi.logging.LogFactory;
 import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.jaspi.runtime.config.ServerContextFactory;
 import org.forgerock.jaspi.runtime.context.ContextHandler;
-import org.forgerock.auth.common.FilterConfiguration;
 import org.forgerock.jaspi.utils.MessageInfoUtils;
 import org.mockito.Matchers;
 import org.testng.annotations.BeforeMethod;
@@ -37,10 +36,7 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.testng.Assert.assertEquals;
+import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.fail;
 
@@ -88,8 +84,6 @@ public class DefaultRuntimeInjectorTest {
         //Then
         JaspiRuntime jaspiRuntime = injector.getInstance(JaspiRuntime.class);
         assertNotNull(jaspiRuntime);
-        assertEquals(LogFactory.getAuditLogger(), auditLogger);
-        assertEquals(LogFactory.getDebug(), debugLogger);
     }
 
     @Test

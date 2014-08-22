@@ -16,9 +16,6 @@
 
 package org.forgerock.jaspi.runtime;
 
-import org.forgerock.auth.common.DebugLogger;
-import org.forgerock.jaspi.logging.LogFactory;
-
 import javax.security.auth.Subject;
 import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
@@ -27,6 +24,7 @@ import java.security.Principal;
 
 import static javax.security.auth.message.AuthStatus.*;
 import static org.forgerock.jaspi.runtime.AuthStatusUtils.asString;
+import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
 
 /**
  * Handler which handles the result of calls to a ServerAuthContexts validateRequest and secureResponse methods.
@@ -34,8 +32,6 @@ import static org.forgerock.jaspi.runtime.AuthStatusUtils.asString;
  * @since 1.3.0
  */
 public class RuntimeResultHandler {
-
-    private static final DebugLogger DEBUG = LogFactory.getDebug();
 
     /**
      * <p>Handles the result of the call to the ServerAuthContext validateRequest method.</p>
@@ -56,26 +52,26 @@ public class RuntimeResultHandler {
         if (SUCCESS.equals(authStatus)) {
             auditTrail.completeAuditAsSuccessful(getPrincipal(clientSubject));
             // nothing to do here just carry on
-            DEBUG.debug("Successfully validated request.");
+            LOG.debug("Successfully validated request.");
             return true;
         } else if (SEND_SUCCESS.equals(authStatus)) {
             auditTrail.completeAuditAsSuccessful(getPrincipal(clientSubject));
             // Send HttpServletResponse to client and exit.
-            DEBUG.debug("Successfully validated request, with response message");
+            LOG.debug("Successfully validated request, with response message");
             return false;
         } else if (SEND_FAILURE.equals(authStatus)) {
             auditTrail.completeAuditAsFailure(getPrincipal(clientSubject));
             // Send HttpServletResponse to client and exit.
-            DEBUG.debug("Failed to validate request, included response message.");
+            LOG.debug("Failed to validate request, included response message.");
             response.setStatus(401);
             return false;
         } else if (SEND_CONTINUE.equals(authStatus)) {
             // Send HttpServletResponse to client and exit.
-            DEBUG.debug("Has not finished validating request. Requires more information from client.");
+            LOG.debug("Has not finished validating request. Requires more information from client.");
             return false;
         } else {
             auditTrail.completeAuditAsFailure(getPrincipal(clientSubject));
-            DEBUG.error("Invalid AuthStatus, " + asString(authStatus));
+            LOG.error("Invalid AuthStatus, {}", asString(authStatus));
             throw new AuthException("Invalid AuthStatus from validateRequest: " + asString(authStatus));
         }
     }
@@ -104,16 +100,16 @@ public class RuntimeResultHandler {
 
         if (SEND_SUCCESS.equals(authStatus)) {
             // nothing to do here just carry on
-            DEBUG.debug("Successfully secured response.");
+            LOG.debug("Successfully secured response.");
         } else if (SEND_FAILURE.equals(authStatus)) {
             // Send HttpServletResponse to client and exit.
-            DEBUG.debug("Failed to secured response, included response message");
+            LOG.debug("Failed to secured response, included response message");
             response.setStatus(500);
         } else if (SEND_CONTINUE.equals(authStatus)) {
             // Send HttpServletResponse to client and exit.
-            DEBUG.debug("Has not finished securing response. Requires more information from client.");
+            LOG.debug("Has not finished securing response. Requires more information from client.");
         } else {
-            DEBUG.error("Invalid AuthStatus, " + asString(authStatus));
+            LOG.error("Invalid AuthStatus, {}", asString(authStatus));
             throw new AuthException("Invalid AuthStatus from secureResponse: " + asString(authStatus));
         }
     }

@@ -20,7 +20,6 @@ import org.forgerock.jaspi.exceptions.JaspiAuthException;
 import org.forgerock.jaspi.runtime.AuditTrail;
 import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.jaspi.utils.MessageInfoUtils;
-import org.mockito.Matchers;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -34,14 +33,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.mockito.BDDMockito.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.never;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.*;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.fail;
+import static org.testng.Assert.*;
 
 public class JaspiServerAuthContextTest {
 
@@ -222,7 +218,6 @@ public class JaspiServerAuthContextTest {
         //Then
         verify(sessionAuthModule).validateRequest(messageInfo, clientSubject, serviceSubject);
         verify(contextHandler).handleCompletion(messageInfo, clientSubject, AuthStatus.SUCCESS);
-        verify(contextHandler, never()).audit(eq(messageInfo), Matchers.<AuthStatus>anyObject());
         assertEquals(authStatus, AuthStatus.SUCCESS);
     }
 
@@ -255,7 +250,6 @@ public class JaspiServerAuthContextTest {
         //Then
         verify(sessionAuthModule).validateRequest(messageInfo, clientSubject, serviceSubject);
         verify(contextHandler, never()).handleCompletion(messageInfo, clientSubject, AuthStatus.SEND_SUCCESS);
-        verify(contextHandler, never()).audit(eq(messageInfo), Matchers.<AuthStatus>anyObject());
         assertEquals(authStatus, AuthStatus.SEND_SUCCESS);
     }
 
@@ -288,7 +282,6 @@ public class JaspiServerAuthContextTest {
         //Then
         verify(sessionAuthModule).validateRequest(messageInfo, clientSubject, serviceSubject);
         verify(contextHandler, never()).handleCompletion(messageInfo, clientSubject, AuthStatus.SEND_CONTINUE);
-        verify(contextHandler, never()).audit(eq(messageInfo), Matchers.<AuthStatus>anyObject());
         assertEquals(authStatus, AuthStatus.SEND_CONTINUE);
     }
 
@@ -317,15 +310,10 @@ public class JaspiServerAuthContextTest {
                 .willReturn(AuthStatus.FAILURE);
 
         //When
-        try {
-            jaspiServerAuthContext.validateRequest(messageInfo, clientSubject, serviceSubject);
-        } catch (JaspiAuthException e) {
-            verify(contextHandler, never()).audit(eq(messageInfo), Matchers.<AuthStatus>anyObject());
-            throw e;
-        }
+        jaspiServerAuthContext.validateRequest(messageInfo, clientSubject, serviceSubject);
 
         //Then
-        fail();
+        //Expected JaspiAuthException
     }
 
     @Test
@@ -389,15 +377,10 @@ public class JaspiServerAuthContextTest {
                 .willReturn(AuthStatus.SEND_FAILURE);
 
         //When
-        try {
-            jaspiServerAuthContext.validateRequest(messageInfo, clientSubject, serviceSubject);
-        } catch (JaspiAuthException e) {
-            verify(contextHandler, never()).audit(eq(messageInfo), Matchers.<AuthStatus>anyObject());
-            throw e;
-        }
+        jaspiServerAuthContext.validateRequest(messageInfo, clientSubject, serviceSubject);
 
         //Then
-        fail();
+        //Expected JaspiAuthException
     }
 
     @Test (expectedExceptions = JaspiAuthException.class)
@@ -424,15 +407,10 @@ public class JaspiServerAuthContextTest {
                 .willReturn(AuthStatus.SEND_FAILURE);
 
         //When
-        try {
-            jaspiServerAuthContext.validateRequest(messageInfo, clientSubject, serviceSubject);
-        } catch (JaspiAuthException e) {
-            verify(contextHandler, never()).audit(eq(messageInfo), Matchers.<AuthStatus>anyObject());
-            throw e;
-        }
+        jaspiServerAuthContext.validateRequest(messageInfo, clientSubject, serviceSubject);
 
         //Then
-        fail();
+        //Expected JaspiAuthException
     }
 
     @Test
@@ -464,7 +442,6 @@ public class JaspiServerAuthContextTest {
         //Then
         verify(sessionAuthModule).validateRequest(messageInfo, clientSubject, serviceSubject);
         verify(contextHandler).handleCompletion(messageInfo, clientSubject, AuthStatus.SEND_CONTINUE);
-        verify(contextHandler, never()).audit(eq(messageInfo), Matchers.<AuthStatus>anyObject());
         assertEquals(authStatus, AuthStatus.SEND_CONTINUE);
     }
 

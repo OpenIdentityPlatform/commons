@@ -16,11 +16,9 @@
 
 package org.forgerock.jaspi.context;
 
-import org.forgerock.auth.common.DebugLogger;
 import org.forgerock.auth.common.FilterConfiguration;
 import org.forgerock.auth.common.FilterConfigurationImpl;
 import org.forgerock.jaspi.exceptions.JaspiAuthException;
-import org.forgerock.jaspi.logging.LogFactory;
 import org.forgerock.jaspi.runtime.config.ServerContextFactory;
 import org.forgerock.jaspi.runtime.config.SessionServerContextFactory;
 import org.forgerock.jaspi.runtime.context.ContextHandler;
@@ -37,14 +35,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
+
 /**
  * Concrete implementation of a factory class for getting the ServerAuthContext.
  *
  * @since 1.3.0
  */
 public class DefaultServerContextFactory extends SessionServerContextFactory {
-
-    private static final DebugLogger LOGGER = LogFactory.getDebug();
 
     /**
      * Constructs an instance of the DefaultServerContextFactory.
@@ -92,7 +90,7 @@ public class DefaultServerContextFactory extends SessionServerContextFactory {
         List<ServerAuthModule> authModules = new ArrayList<ServerAuthModule>();
         if (configuration.isDefined(ModuleConfigurationFactory.AUTH_MODULES_KEY)) {
             if (!configuration.get(ModuleConfigurationFactory.AUTH_MODULES_KEY).isList()) {
-                LOGGER.error("Auth Modules must be defined as a List.");
+                LOG.error("Auth Modules must be defined as a List.");
                 throw new JaspiAuthException("Auth Modules must be defined as a List.");
             }
             for (JsonValue authModule : configuration.get(ModuleConfigurationFactory.AUTH_MODULES_KEY)) {

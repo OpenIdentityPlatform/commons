@@ -16,11 +16,7 @@
 
 package org.forgerock.jaspi.runtime.context;
 
-import org.forgerock.auth.common.AuditLogger;
-import org.forgerock.auth.common.AuditRecord;
-import org.forgerock.auth.common.AuthResult;
 import org.forgerock.jaspi.exceptions.JaspiAuthException;
-import org.forgerock.jaspi.logging.LogFactory;
 import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.jaspi.utils.MessageInfoUtils;
 import org.mockito.ArgumentCaptor;
@@ -43,13 +39,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.anyObject;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.testng.Assert.assertEquals;
+import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
@@ -261,137 +251,5 @@ public class ContextHandlerTest {
         //Then
         verify(request).setAttribute(JaspiRuntime.ATTRIBUTE_AUTH_PRINCIPAL, "PRN_ONE");
         verify(request).setAttribute(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT, contextMap);
-    }
-
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Test
-    public void shouldAuditWhenAuthStatusSuccess() {
-
-        //Given
-        MessageInfo messageInfo = mock(MessageInfo.class);
-        AuthStatus authStatus = AuthStatus.SUCCESS;
-        AuditLogger<MessageInfo> auditLogger = mock(AuditLogger.class);
-
-        LogFactory.setAuditLogger(auditLogger);
-
-        //When
-        contextHandler.audit(messageInfo, authStatus);
-
-        //Then
-        ArgumentCaptor<AuditRecord> auditRecordCaptor = ArgumentCaptor.forClass(AuditRecord.class);
-        verify(auditLogger).audit(auditRecordCaptor.capture());
-        AuditRecord<MessageInfo> auditRecord = auditRecordCaptor.getValue();
-        assertEquals(auditRecord.getAuditObject(), messageInfo);
-        assertEquals(auditRecord.getAuthResult(), AuthResult.SUCCESS);
-    }
-
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Test
-    public void shouldAuditWhenAuthStatusSendSuccess() {
-
-        //Given
-        MessageInfo messageInfo = mock(MessageInfo.class);
-        AuthStatus authStatus = AuthStatus.SEND_SUCCESS;
-        AuditLogger<MessageInfo> auditLogger = mock(AuditLogger.class);
-
-        LogFactory.setAuditLogger(auditLogger);
-
-        //When
-        contextHandler.audit(messageInfo, authStatus);
-
-        //Then
-        ArgumentCaptor<AuditRecord> auditRecordCaptor = ArgumentCaptor.forClass(AuditRecord.class);
-        verify(auditLogger).audit(auditRecordCaptor.capture());
-        AuditRecord<MessageInfo> auditRecord = auditRecordCaptor.getValue();
-        assertEquals(auditRecord.getAuditObject(), messageInfo);
-        assertEquals(auditRecord.getAuthResult(), AuthResult.SUCCESS);
-    }
-
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Test
-    public void shouldAuditWhenAuthStatusSendContinue() {
-
-        //Given
-        MessageInfo messageInfo = mock(MessageInfo.class);
-        AuthStatus authStatus = AuthStatus.SEND_CONTINUE;
-        AuditLogger<MessageInfo> auditLogger = mock(AuditLogger.class);
-
-        LogFactory.setAuditLogger(auditLogger);
-
-        //When
-        contextHandler.audit(messageInfo, authStatus);
-
-        //Then
-        ArgumentCaptor<AuditRecord> auditRecordCaptor = ArgumentCaptor.forClass(AuditRecord.class);
-        verify(auditLogger).audit(auditRecordCaptor.capture());
-        AuditRecord<MessageInfo> auditRecord = auditRecordCaptor.getValue();
-        assertEquals(auditRecord.getAuditObject(), messageInfo);
-        assertEquals(auditRecord.getAuthResult(), AuthResult.FAILURE);
-    }
-
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Test
-    public void shouldAuditWhenAuthStatusSendFailure() {
-
-        //Given
-        MessageInfo messageInfo = mock(MessageInfo.class);
-        AuthStatus authStatus = AuthStatus.SEND_FAILURE;
-        AuditLogger<MessageInfo> auditLogger = mock(AuditLogger.class);
-
-        LogFactory.setAuditLogger(auditLogger);
-
-        //When
-        contextHandler.audit(messageInfo, authStatus);
-
-        //Then
-        ArgumentCaptor<AuditRecord> auditRecordCaptor = ArgumentCaptor.forClass(AuditRecord.class);
-        verify(auditLogger).audit(auditRecordCaptor.capture());
-        AuditRecord<MessageInfo> auditRecord = auditRecordCaptor.getValue();
-        assertEquals(auditRecord.getAuditObject(), messageInfo);
-        assertEquals(auditRecord.getAuthResult(), AuthResult.FAILURE);
-    }
-
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Test
-    public void shouldAuditWhenAuthStatusFailure() {
-
-        //Given
-        MessageInfo messageInfo = mock(MessageInfo.class);
-        AuthStatus authStatus = AuthStatus.FAILURE;
-        AuditLogger<MessageInfo> auditLogger = mock(AuditLogger.class);
-
-        LogFactory.setAuditLogger(auditLogger);
-
-        //When
-        contextHandler.audit(messageInfo, authStatus);
-
-        //Then
-        ArgumentCaptor<AuditRecord> auditRecordCaptor = ArgumentCaptor.forClass(AuditRecord.class);
-        verify(auditLogger).audit(auditRecordCaptor.capture());
-        AuditRecord<MessageInfo> auditRecord = auditRecordCaptor.getValue();
-        assertEquals(auditRecord.getAuditObject(), messageInfo);
-        assertEquals(auditRecord.getAuthResult(), AuthResult.FAILURE);
-    }
-
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Test
-    public void shouldAuditWhenAuthStatusNull() {
-
-        //Given
-        MessageInfo messageInfo = mock(MessageInfo.class);
-        AuthStatus authStatus = null;
-        AuditLogger<MessageInfo> auditLogger = mock(AuditLogger.class);
-
-        LogFactory.setAuditLogger(auditLogger);
-
-        //When
-        contextHandler.audit(messageInfo, authStatus);
-
-        //Then
-        ArgumentCaptor<AuditRecord> auditRecordCaptor = ArgumentCaptor.forClass(AuditRecord.class);
-        verify(auditLogger).audit(auditRecordCaptor.capture());
-        AuditRecord<MessageInfo> auditRecord = auditRecordCaptor.getValue();
-        assertEquals(auditRecord.getAuditObject(), messageInfo);
-        assertEquals(auditRecord.getAuthResult(), AuthResult.FAILURE);
     }
 }

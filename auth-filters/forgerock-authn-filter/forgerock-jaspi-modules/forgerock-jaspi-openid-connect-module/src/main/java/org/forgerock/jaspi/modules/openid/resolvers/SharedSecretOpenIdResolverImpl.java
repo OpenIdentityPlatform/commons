@@ -15,14 +15,14 @@
 */
 package org.forgerock.jaspi.modules.openid.resolvers;
 
-import org.forgerock.auth.common.DebugLogger;
-import org.forgerock.jaspi.logging.LogFactory;
 import org.forgerock.jaspi.modules.openid.exceptions.InvalidSignatureException;
 import org.forgerock.jaspi.modules.openid.exceptions.OpenIdConnectVerificationException;
 import org.forgerock.json.jose.jws.SignedJwt;
 import org.forgerock.json.jose.jws.SigningManager;
 
 import java.nio.charset.Charset;
+
+import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
 
 /**
  * This class exists to allow functionality for those Open ID Connect providers which
@@ -32,8 +32,6 @@ import java.nio.charset.Charset;
  * {@link SharedSecretOpenIdResolverImpl#verifySignature}.
  */
 public class SharedSecretOpenIdResolverImpl extends BaseOpenIdResolver {
-
-    private static final DebugLogger DEBUG = LogFactory.getDebug();
 
     private final SigningManager signingManager;
 
@@ -74,7 +72,7 @@ public class SharedSecretOpenIdResolverImpl extends BaseOpenIdResolver {
      */
     public void verifySignature(final SignedJwt idClaim) throws InvalidSignatureException {
         if (!idClaim.verify(signingManager.newHmacSigningHandler(sharedSecret.getBytes(Charset.forName("UTF-8"))))) {
-            DEBUG.debug("JWS signature not signed with supplied key");
+            LOG.debug("JWS signature not signed with supplied key");
             throw new InvalidSignatureException("JWS signature not signed with supplied key");
         }
     }

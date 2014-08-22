@@ -16,9 +16,9 @@
 
 package org.forgerock.jaspi.runtime;
 
-import org.forgerock.auth.common.DebugLogger;
-import org.forgerock.jaspi.logging.LogFactory;
 import org.forgerock.json.resource.ResourceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.security.auth.Subject;
 import javax.security.auth.message.AuthException;
@@ -53,7 +53,7 @@ import static org.forgerock.jaspi.runtime.AuditTrail.AUDIT_TRAIL_KEY;
  */
 public class JaspiRuntime {
 
-    private static final DebugLogger DEBUG = LogFactory.getDebug();
+    public static final Logger LOG = LoggerFactory.getLogger(JaspiRuntime.class);
 
     /**
      * Indicates that the request could not be authenticated either because no credentials were provided or
@@ -141,8 +141,8 @@ public class JaspiRuntime {
         try {
             // Could be null if no modules found
             if (serverAuthContext == null) {
-                DEBUG.error("No ServerAuthContext configured! Jaspi Runtime not configured properly!");
-                DEBUG.warn("Proceeding with filter chain call.");
+                LOG.error("No ServerAuthContext configured! Jaspi Runtime not configured properly!");
+                LOG.warn("Proceeding with filter chain call.");
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -174,7 +174,7 @@ public class JaspiRuntime {
             serverAuthContext.cleanSubject(messageInfo, clientSubject);
 
         } catch (Exception e) {
-            DEBUG.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             ResourceException jre;
             if (e.getCause() instanceof ResourceException) {
                 jre = (ResourceException) e.getCause();
