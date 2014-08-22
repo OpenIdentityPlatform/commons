@@ -10,9 +10,20 @@
     </parent>
 
     <artifactId>forgerock-jaspi-openid-connect-module</artifactId>
+    <packaging>bundle</packaging>
 
     <name>ForgeRock JASPI (JSR-196) OpenID Connect Authentication Module</name>
     <description>ForgeRock JASPI (JSR-196) OpenID Connect Authentication Module</description>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+            </plugin>
+        </plugins>
+    </build>
 
     <dependencies>
         <dependency>
