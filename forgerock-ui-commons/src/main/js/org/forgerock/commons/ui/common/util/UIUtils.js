@@ -145,85 +145,88 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         }
     };
 
-    obj.buildRestResponseBasedJQGrid = function (options) {
+    obj.buildRestResponseBasedJQGrid = function (view, id, options, callback) {
         options = options ? options : {};
 
-        if (!options.id || !options.view || !options.url) {
+        if (!id || !view || !options.url) {
             return null;
         }
 
-        var grid = options.view.$el.find(options.id),
-            defaultJsonReader = {
-                root: function (obj) {
-                    return obj.result;
+        var grid = view.$el.find(id),
+            defaultOptions = {
+                datatype: "json",
+                loadBeforeSend: function (jqXHR) {
+                    jqXHR.setRequestHeader('Accept-API-Version', 'protocol=1.0,resource=1.0');
                 },
-                total: function (obj) {  // total number of pages
-                    var postedData = grid.jqGrid('getGridParam', 'postData'),
-                        records = postedData._pagedResultsOffset + obj.remainingPagedResults + obj.resultCount,
-                        pageSize = postedData._pageSize,
-                        pages = Math.floor(records / pageSize);
+                colNames: [],
+                colModel: [],
+                height: 'auto',
+                width: 'none',
+                jsonReader: {
+                    root: function (obj) {
+                        return obj.result;
+                    },
+                    total: function (obj) {  // total number of pages
+                        var postedData = grid.jqGrid('getGridParam', 'postData'),
+                            records = postedData._pagedResultsOffset + obj.remainingPagedResults + obj.resultCount,
+                            pageSize = postedData._pageSize,
+                            pages = Math.floor(records / pageSize);
 
-                    if (records % pageSize > 0) {
-                        pages += 1;
-                    }
-                    return pages;
+                        if (records % pageSize > 0) {
+                            pages += 1;
+                        }
+                        return pages;
+                    },
+                    records: function (obj) {  // total number of records
+                        return grid.jqGrid('getGridParam', 'postData')._pagedResultsOffset + obj.remainingPagedResults +
+                            obj.resultCount;
+                    },
+                    userdata: function (obj) {
+                        return { remaining: obj.remainingPagedResults };
+                    },
+                    repeatitems: false
                 },
-                records: function (obj) {  // total number of records
-                    return grid.jqGrid('getGridParam', 'postData')._pagedResultsOffset + obj.remainingPagedResults +
-                        obj.resultCount;
-                },
-                userdata: function (obj) {
-                    return { remaining: obj.remainingPagedResults };
-                },
-                repeatitems: false
-            },
-            defaultParamNames = {
-                nd: null,
-                order: null,
-                sort: null,
                 search: null,
-                rows: '_pageSize' // number of records to fetch
+                prmNames: {
+                    nd: null,
+                    order: null,
+                    sort: null,
+                    search: null,
+                    rows: '_pageSize' // number of records to fetch
+                },
+                serializeGridData: function (postedData) {
+                    postedData._pagedResultsOffset = postedData._pageSize * (postedData.page - 1);
+                    delete postedData.page;
+                    return $.param(postedData);
+                },
+                loadComplete: function (data) {
+                    _.extend(view.data, data);
+                },
+                pager: null,
+                rowNum: 10,
+                viewrecords: true,
+                rowList: [10, 20, 30]
             };
 
-        if (options.jsonReader) {
-            $.extend(defaultJsonReader, options.jsonReader);
-        }
+        $.extend(true, defaultOptions, options);
 
-        if (options.prmNames) {
-            $.extend(defaultParamNames, options.prmNames);
-        }
-
-        grid.jqGrid({
-            url: options.url,
-            datatype: options.datatype ? options.datatype : "json",
-            loadBeforeSend: options.loadBeforeSend ? options.loadBeforeSend : function (jqXHR) {
-                jqXHR.setRequestHeader('Accept-API-Version', 'protocol=1.0,resource=1.0');
-            },
-            colNames: options.colNames ? options.colNames : [],
-            colModel: options.colModel ? options.colModel : [],
-            height: options.height ? options.height : 'auto',
-            width: options.width ? options.width : 'none',
-            jsonReader: defaultJsonReader,
-            search: options.search ? options.search : null,
-            prmNames: defaultParamNames,
-            serializeGridData: options.serializeGridData ? options.serializeGridData : function (postedData) {
-                postedData._pagedResultsOffset = postedData._pageSize * (postedData.page - 1);
-                delete postedData.page;
-                return $.param(postedData);
-            },
-            loadComplete: options.loadComplete ? options.loadComplete : function (data) {
-                _.extend(options.view.data, data);
-            },
-            pager: options.pager ? options.pager : null,
-            rowNum: options.rowNum ? options.rowNum : 10,
-            viewrecords: true,
-            rowList: options.rowList ? options.rowList : [10, 20, 30]
-        });
+        grid.jqGrid(defaultOptions);
 
         grid.on("jqGridAfterGridComplete", function () {
-            if (options.callback) {
-                options.callback();
+            if (callback) {
+                callback();
             }
+        });
+
+        grid.on('jqGridAfterLoadComplete.setFrozenColumns', function () {
+            view.$el.find(id + '_frozen').find('tr').each(function () {
+                if ($.jgrid.jqID(this.id)) {
+                    var row = $("#" + $.jgrid.jqID(this.id)),
+                        height = row.outerHeight();
+                    $(this).find('td').height(height);
+                    row.find('td').height(height);
+                }
+            });
         });
 
         return grid;
