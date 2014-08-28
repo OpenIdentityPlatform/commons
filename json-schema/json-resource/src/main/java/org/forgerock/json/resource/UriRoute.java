@@ -44,10 +44,10 @@ final class UriRoute implements Route {
         private final UriTemplate template;
 
         // Constructor for default route.
-        RouteMatcher(final ServerContext context, final RequestHandler handler) {
+        RouteMatcher(final ServerContext context, final RequestHandler handler, final String remaining) {
             this.template = null;
             this.match = null;
-            this.remaining = null;
+            this.remaining = remaining;
             this.context = new RouterContext(context, "", Collections.<String, String> emptyMap());
             this.handler = handler;
         }
