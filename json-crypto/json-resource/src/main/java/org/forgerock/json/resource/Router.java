@@ -353,9 +353,15 @@ public final class Router implements RequestHandler {
             return bestMatcher;
         }
         final RequestHandler handler = defaultRoute;
+
+        /*
+        * Passing the resourceName through explicitly means if an incorrect version was requested the error returned
+        * is specific to the endpoint requested.
+        */
         if (handler != null) {
-            return new RouteMatcher(context, handler);
+            return new RouteMatcher(context, handler, request.getResourceName());
         }
+
         // TODO: i18n
         throw new NotFoundException(String.format("Resource '%s' not found", request
                 .getResourceName()));
