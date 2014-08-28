@@ -80,10 +80,14 @@ import static org.forgerock.json.resource.Resources.newSingleton;
  */
 public final class VersionRouter implements RequestHandler {
 
+    private static final String agentName = "CREST";
+    private static final String headerName = "Accept-API-Version";
+
     private final Router uriRouter = new Router();
     private VersionSelector.DefaultVersionBehaviour defaultVersioningBehaviour =
             VersionSelector.DefaultVersionBehaviour.LATEST;
     private final Set<VersionRouterImpl> versionRouters = new CopyOnWriteArraySet<VersionRouterImpl>();
+    private boolean warningEnabled = true;
 
     /**
      * Creates a new router with no routes defined.
@@ -164,6 +168,7 @@ public final class VersionRouter implements RequestHandler {
         if (handler instanceof VersionRouterImpl) {
             versionRouters.add((VersionRouterImpl) handler);
             setVersionRouterDefaultBehaviour((VersionRouterImpl) handler);
+            setWarningEnabledBehaviour((VersionRouterImpl) handler);
         }
         return uriRouter.addRoute(mode, uriTemplate, handler);
     }
@@ -200,6 +205,7 @@ public final class VersionRouter implements RequestHandler {
     public VersionHandler addRoute(RoutingMode mode, String uriTemplate) {
         VersionRouterImpl versionRouter = new VersionRouterImpl();
         setVersionRouterDefaultBehaviour(versionRouter);
+        setWarningEnabledBehaviour(versionRouter);
         return new VersionHandler(this, mode, versionRouter, uriTemplate);
     }
 
@@ -238,6 +244,16 @@ public final class VersionRouter implements RequestHandler {
             default: {
                 versionRouter.noDefault();
             }
+        }
+    }
+
+    private void setWarningEnabledBehaviour(VersionRouterImpl versionRouter) {
+        versionRouter.setWarningEnabledBehaviour(warningEnabled);
+    }
+
+    private synchronized void updateVersionRoutersWarningBehaviour() {
+        for (VersionRouterImpl versionRouter : versionRouters) {
+            setWarningEnabledBehaviour(versionRouter);
         }
     }
 
@@ -361,6 +377,7 @@ public final class VersionRouter implements RequestHandler {
 
         private final VersionSelector versionSelector = new VersionSelector();
         private final Set<VersionRoute> routes = new CopyOnWriteArraySet<VersionRoute>();
+        private boolean warningEnabled = true;
 
         /**
          * Creates a new router with no routes defined.
@@ -425,11 +442,11 @@ public final class VersionRouter implements RequestHandler {
         void defaultToOldest() {
             versionSelector.defaultToOldest();
         }
+
         /**
          * Removes the default behaviour of the selection process which will result in {@code NotFoundException}s when
          * the requested version is {@code null}.
          */
-
         void noDefault() {
             versionSelector.noDefault();
         }
@@ -521,11 +538,21 @@ public final class VersionRouter implements RequestHandler {
         private RequestHandler getBestRoute(ServerContext context, Request request) throws NotFoundException {
             AcceptAPIVersionContext apiVersionContext = context.asContext(AcceptAPIVersionContext.class);
             try {
+
+                addWarningAdvice(context, apiVersionContext.getResourceVersion());
                 return versionSelector.select(apiVersionContext.getResourceVersion(), getRoutesMap());
             } catch (ResourceException e) {
                 // TODO: i18n
                 throw new NotFoundException(String.format("Version '%s' of resource '%s' not found",
                         apiVersionContext.getResourceVersion(), request.getResourceName()), e);
+            }
+        }
+
+        private void addWarningAdvice(ServerContext context, Version version) {
+            if (warningEnabled && version == null && context.containsContext(AdviceContext.class)) {
+                AdviceContext adviceContext = context.asContext(AdviceContext.class);
+                adviceContext.putAdvice("Warning",
+                        getVersionMissingAdvice(agentName, headerName).toString());
             }
         }
 
@@ -536,5 +563,24 @@ public final class VersionRouter implements RequestHandler {
             }
             return routesMap;
         }
+
+        public void setWarningEnabledBehaviour(boolean warningEnabled) {
+            this.warningEnabled = warningEnabled;
+        }
+    }
+
+    /**
+     * Determines whether or not the responses returned by the resources under this router
+     * will add a warning to the response if there is no Accept-API-Version header in them.
+     *
+     * @param warningEnabled <code>true</code> to enable warning, false otherwise.
+     */
+    public void setWarningEnabled(boolean warningEnabled) {
+        this.warningEnabled = warningEnabled;
+        updateVersionRoutersWarningBehaviour();
+    }
+
+    static AdviceWarning getVersionMissingAdvice(String agentName, String headerName) {
+        return AdviceWarning.getNotPresent(agentName, headerName);
     }
 }

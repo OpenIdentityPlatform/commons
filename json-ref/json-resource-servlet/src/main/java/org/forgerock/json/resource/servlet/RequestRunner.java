@@ -11,23 +11,20 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2013 ForgeRock AS.
+ * Copyright 2012-2014 ForgeRock AS.
  */
 package org.forgerock.json.resource.servlet;
 
-import static org.forgerock.json.resource.QueryResult.*;
-import static org.forgerock.json.resource.servlet.HttpUtils.*;
-
 import java.io.IOException;
-
+import java.util.Map;
 import javax.mail.internet.ContentType;
 import javax.mail.internet.ParseException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.codehaus.jackson.JsonGenerator;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.AdviceContext;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.CreateRequest;
@@ -35,6 +32,11 @@ import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResult;
+import static org.forgerock.json.resource.QueryResult.FIELD_ERROR;
+import static org.forgerock.json.resource.QueryResult.FIELD_PAGED_RESULTS_COOKIE;
+import static org.forgerock.json.resource.QueryResult.FIELD_REMAINING_PAGED_RESULTS;
+import static org.forgerock.json.resource.QueryResult.FIELD_RESULT;
+import static org.forgerock.json.resource.QueryResult.FIELD_RESULT_COUNT;
 import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
@@ -44,6 +46,14 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceName;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.UpdateRequest;
+import static org.forgerock.json.resource.servlet.HttpUtils.HEADER_ETAG;
+import static org.forgerock.json.resource.servlet.HttpUtils.HEADER_LOCATION;
+import static org.forgerock.json.resource.servlet.HttpUtils.MIME_TYPE_APPLICATION_JSON;
+import static org.forgerock.json.resource.servlet.HttpUtils.MIME_TYPE_TEXT_PLAIN;
+import static org.forgerock.json.resource.servlet.HttpUtils.adapt;
+import static org.forgerock.json.resource.servlet.HttpUtils.closeQuietly;
+import static org.forgerock.json.resource.servlet.HttpUtils.getIfNoneMatch;
+import static org.forgerock.json.resource.servlet.HttpUtils.getJsonGenerator;
 import org.forgerock.util.encode.Base64url;
 
 /**
@@ -110,6 +120,7 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
             @Override
             public void handleResult(final JsonValue result) {
                 try {
+                    writeAdvice();
                     if (result != null) {
                         writeJsonValue(result);
                     } else {
@@ -145,6 +156,7 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
             @Override
             public void handleResult(final Resource result) {
                 try {
+                    writeAdvice();
                     if (result.getId() != null) {
                         httpResponse.setHeader(HEADER_LOCATION, getResourceURL(request, result));
                     }
@@ -213,6 +225,7 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
             @Override
             public boolean handleResource(final Resource resource) {
                 try {
+                    writeAdvice();
                     writeHeader();
                     writeJsonValue(resource.getContent());
                     resultCount++;
@@ -335,6 +348,7 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
             @Override
             public void handleResult(final Resource result) {
                 try {
+                    writeAdvice();
                     // Don't return the resource if this is a read request and the
                     // If-None-Match header was specified.
                     if (request instanceof ReadRequest) {
@@ -413,5 +427,18 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
             writeBinaryValue(resource.getContent());
         }
 
+    }
+
+    /**
+     * Writes {@link org.forgerock.json.resource.AdviceWarning}s into the httpResponse in the form of HTTP headers.
+     * Uses the name of the advice as the header key and the advice itself as the header's value.
+     */
+    private void writeAdvice() {
+        if (context.containsContext(AdviceContext.class)) {
+            AdviceContext adviceContext = context.asContext(AdviceContext.class);
+            for (Map.Entry<String, String> entry : adviceContext.getAdvices().entrySet()) {
+                httpResponse.setHeader(entry.getKey(), entry.getValue());
+            }
+        }
     }
 }

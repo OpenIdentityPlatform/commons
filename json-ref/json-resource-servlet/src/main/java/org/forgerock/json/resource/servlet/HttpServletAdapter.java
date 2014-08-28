@@ -15,21 +15,18 @@
  */
 package org.forgerock.json.resource.servlet;
 
-import static org.forgerock.json.resource.ActionRequest.ACTION_ID_CREATE;
-import static org.forgerock.json.resource.servlet.HttpUtils.*;
-
 import java.io.IOException;
 import java.util.Map;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.AcceptAPIVersion;
 import org.forgerock.json.resource.AcceptAPIVersionContext;
 import org.forgerock.json.resource.ActionRequest;
+import static org.forgerock.json.resource.ActionRequest.ACTION_ID_CREATE;
+import org.forgerock.json.resource.AdviceContext;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConflictException;
 import org.forgerock.json.resource.ConnectionFactory;
@@ -47,6 +44,47 @@ import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.json.resource.Version;
+import static org.forgerock.json.resource.servlet.HttpUtils.CONTENT_TYPE_REGEX;
+import static org.forgerock.json.resource.servlet.HttpUtils.ETAG_ANY;
+import static org.forgerock.json.resource.servlet.HttpUtils.HEADER_IF_MATCH;
+import static org.forgerock.json.resource.servlet.HttpUtils.HEADER_IF_NONE_MATCH;
+import static org.forgerock.json.resource.servlet.HttpUtils.HEADER_X_VERSION_API;
+import static org.forgerock.json.resource.servlet.HttpUtils.METHOD_DELETE;
+import static org.forgerock.json.resource.servlet.HttpUtils.METHOD_GET;
+import static org.forgerock.json.resource.servlet.HttpUtils.METHOD_PATCH;
+import static org.forgerock.json.resource.servlet.HttpUtils.METHOD_POST;
+import static org.forgerock.json.resource.servlet.HttpUtils.METHOD_PUT;
+import static org.forgerock.json.resource.servlet.HttpUtils.MIME_TYPE_APPLICATION_JSON;
+import static org.forgerock.json.resource.servlet.HttpUtils.MIME_TYPE_MULTIPART_FORM_DATA;
+import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_ACTION;
+import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_FIELDS;
+import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_MIME_TYPE;
+import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_PAGED_RESULTS_COOKIE;
+import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_PAGED_RESULTS_OFFSET;
+import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_PAGE_SIZE;
+import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_PRETTY_PRINT;
+import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_EXPRESSION;
+import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_FILTER;
+import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_ID;
+import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_SORT_KEYS;
+import static org.forgerock.json.resource.servlet.HttpUtils.PROTOCOL_NAME;
+import static org.forgerock.json.resource.servlet.HttpUtils.PROTOCOL_VERSION;
+import static org.forgerock.json.resource.servlet.HttpUtils.asBooleanValue;
+import static org.forgerock.json.resource.servlet.HttpUtils.asIntValue;
+import static org.forgerock.json.resource.servlet.HttpUtils.asSingleValue;
+import static org.forgerock.json.resource.servlet.HttpUtils.checkNotNull;
+import static org.forgerock.json.resource.servlet.HttpUtils.fail;
+import static org.forgerock.json.resource.servlet.HttpUtils.getIfMatch;
+import static org.forgerock.json.resource.servlet.HttpUtils.getIfNoneMatch;
+import static org.forgerock.json.resource.servlet.HttpUtils.getJsonActionContent;
+import static org.forgerock.json.resource.servlet.HttpUtils.getJsonContent;
+import static org.forgerock.json.resource.servlet.HttpUtils.getJsonPatchContent;
+import static org.forgerock.json.resource.servlet.HttpUtils.getMethod;
+import static org.forgerock.json.resource.servlet.HttpUtils.getParameter;
+import static org.forgerock.json.resource.servlet.HttpUtils.hasParameter;
+import static org.forgerock.json.resource.servlet.HttpUtils.prepareResponse;
+import static org.forgerock.json.resource.servlet.HttpUtils.rejectIfMatch;
+import static org.forgerock.json.resource.servlet.HttpUtils.rejectIfNoneMatch;
 
 /**
  * HTTP adapter from Servlet calls to JSON resource calls. This class can be
@@ -544,10 +582,12 @@ public final class HttpServletAdapter {
         return resourceName;
     }
 
-    private Context newRequestContext(final HttpServletRequest req,
-                                      final AcceptAPIVersion acceptVersion) throws ResourceException {
+    private Context newRequestContext(final HttpServletRequest req, final AcceptAPIVersion acceptVersion)
+           throws ResourceException {
         final Context root = contextFactory.createContext(req);
-        return new AcceptAPIVersionContext(new HttpContext(root, req), PROTOCOL_NAME, acceptVersion);
+        return new AdviceContext(
+                new AcceptAPIVersionContext(
+                        new HttpContext(root, req), PROTOCOL_NAME, acceptVersion));
     }
 
     private boolean parseCommonParameter(final String name, final String[] values,
