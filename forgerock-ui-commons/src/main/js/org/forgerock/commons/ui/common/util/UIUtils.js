@@ -189,14 +189,21 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                 search: null,
                 prmNames: {
                     nd: null,
-                    order: null,
-                    sort: null,
+                    sort: '_sortKeys',
                     search: null,
                     rows: '_pageSize' // number of records to fetch
                 },
                 serializeGridData: function (postedData) {
                     postedData._pagedResultsOffset = postedData._pageSize * (postedData.page - 1);
                     delete postedData.page;
+
+                    if (postedData._sortKeys) {
+                        if (postedData.sord === 'desc') {
+                            postedData._sortKeys = '-' + postedData._sortKeys;
+                        }
+                    }
+                    delete postedData.sord;
+
                     return $.param(postedData);
                 },
                 loadComplete: function (data) {
