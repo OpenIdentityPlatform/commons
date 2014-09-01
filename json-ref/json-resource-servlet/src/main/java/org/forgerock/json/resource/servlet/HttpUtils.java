@@ -77,8 +77,6 @@ public final class HttpUtils {
     static final String HEADER_IF_NONE_MATCH = "If-None-Match";
     static final String HEADER_LOCATION = "Location";
     static final String HEADER_X_HTTP_METHOD_OVERRIDE = "X-HTTP-Method-Override";
-    /** The header key that is used to determine the acceptable API versions */
-    static final String HEADER_X_VERSION_API = "Accept-API-Version";
 
     static final String METHOD_DELETE = "DELETE";
     static final String METHOD_GET = "GET";
