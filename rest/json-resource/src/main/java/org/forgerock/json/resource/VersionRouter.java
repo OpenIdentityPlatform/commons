@@ -18,13 +18,14 @@ package org.forgerock.json.resource;
 
 import org.forgerock.json.fluent.JsonValue;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import static org.forgerock.json.resource.Resources.newCollection;
 import static org.forgerock.json.resource.Resources.newSingleton;
+import static org.forgerock.json.resource.VersionConstants.*;
 
 /**
  * <p>A request handler which routes requests using URI template matching against the request's resource name and based
@@ -81,7 +82,8 @@ import static org.forgerock.json.resource.Resources.newSingleton;
 public final class VersionRouter implements RequestHandler {
 
     private static final String agentName = "CREST";
-    private static final String headerName = "Accept-API-Version";
+    private static final String EQUALS = "=";
+    private static final String COMMA = ",";
 
     private final Router uriRouter = new Router();
     private VersionSelector.DefaultVersionBehaviour defaultVersioningBehaviour =
@@ -376,7 +378,7 @@ public final class VersionRouter implements RequestHandler {
     static final class VersionRouterImpl implements RequestHandler {
 
         private final VersionSelector versionSelector = new VersionSelector();
-        private final Set<VersionRoute> routes = new CopyOnWriteArraySet<VersionRoute>();
+        private final Map<Version, VersionRoute> routes = new ConcurrentHashMap<Version, VersionRoute>();
         private boolean warningEnabled = true;
 
         /**
@@ -423,7 +425,7 @@ public final class VersionRouter implements RequestHandler {
         }
 
         private VersionRoute addVersion(VersionRoute route) {
-            routes.add(route);
+            routes.put(route.getVersion(), route);
             return route;
         }
 
@@ -540,7 +542,10 @@ public final class VersionRouter implements RequestHandler {
             try {
 
                 addWarningAdvice(context, apiVersionContext.getResourceVersion());
-                return versionSelector.select(apiVersionContext.getResourceVersion(), getRoutesMap());
+                final VersionRoute<RequestHandler> selectedRoute =
+                        versionSelector.select(apiVersionContext.getResourceVersion(), routes);
+                addVersionAdvice(context, apiVersionContext.getProtocolVersion(), selectedRoute.getVersion());
+                return selectedRoute.getRequestHandler();
             } catch (ResourceException e) {
                 // TODO: i18n
                 throw new NotFoundException(String.format("Version '%s' of resource '%s' not found",
@@ -552,16 +557,23 @@ public final class VersionRouter implements RequestHandler {
             if (warningEnabled && version == null && context.containsContext(AdviceContext.class)) {
                 AdviceContext adviceContext = context.asContext(AdviceContext.class);
                 adviceContext.putAdvice("Warning",
-                        getVersionMissingAdvice(agentName, headerName).toString());
+                        getVersionMissingAdvice(agentName, ACCEPT_API_VERSION).toString());
             }
         }
 
-        private Map<Version, RequestHandler> getRoutesMap() {
-            Map<Version , RequestHandler> routesMap = new HashMap<Version, RequestHandler>();
-            for (VersionRoute route : routes) {
-                routesMap.put(route.getVersion(), route.getRequestHandler());
+        private void addVersionAdvice(ServerContext context, Version protocolVersion, Version resourceVersion) {
+            if (context.containsContext(AdviceContext.class)) {
+                final AdviceContext adviceContext = context.asContext(AdviceContext.class);
+                adviceContext.putAdvice(CONTENT_API_VERSION, new StringBuilder()
+                        .append(PROTOCOL)
+                        .append(EQUALS)
+                        .append(protocolVersion.toString())
+                        .append(COMMA)
+                        .append(RESOURCE)
+                        .append(EQUALS)
+                        .append(resourceVersion.toString())
+                        .toString());
             }
-            return routesMap;
         }
 
         public void setWarningEnabledBehaviour(boolean warningEnabled) {
