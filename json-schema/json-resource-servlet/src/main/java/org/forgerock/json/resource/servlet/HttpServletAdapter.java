@@ -44,11 +44,11 @@ import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.json.resource.Version;
+
 import static org.forgerock.json.resource.servlet.HttpUtils.CONTENT_TYPE_REGEX;
 import static org.forgerock.json.resource.servlet.HttpUtils.ETAG_ANY;
 import static org.forgerock.json.resource.servlet.HttpUtils.HEADER_IF_MATCH;
 import static org.forgerock.json.resource.servlet.HttpUtils.HEADER_IF_NONE_MATCH;
-import static org.forgerock.json.resource.servlet.HttpUtils.HEADER_X_VERSION_API;
 import static org.forgerock.json.resource.servlet.HttpUtils.METHOD_DELETE;
 import static org.forgerock.json.resource.servlet.HttpUtils.METHOD_GET;
 import static org.forgerock.json.resource.servlet.HttpUtils.METHOD_PATCH;
@@ -85,6 +85,7 @@ import static org.forgerock.json.resource.servlet.HttpUtils.hasParameter;
 import static org.forgerock.json.resource.servlet.HttpUtils.prepareResponse;
 import static org.forgerock.json.resource.servlet.HttpUtils.rejectIfMatch;
 import static org.forgerock.json.resource.servlet.HttpUtils.rejectIfNoneMatch;
+import static org.forgerock.json.resource.VersionConstants.ACCEPT_API_VERSION;
 
 /**
  * HTTP adapter from Servlet calls to JSON resource calls. This class can be
@@ -655,7 +656,7 @@ public final class HttpServletAdapter {
      */
     private AcceptAPIVersion parseAcceptAPIVersion(final HttpServletRequest req) throws BadRequestException {
         // Extract out the protocol and resource versions.
-        final String versionString = req.getHeader(HEADER_X_VERSION_API);
+        final String versionString = req.getHeader(ACCEPT_API_VERSION);
 
         final AcceptAPIVersion acceptAPIVersion = AcceptAPIVersion
                 .newBuilder(versionString)

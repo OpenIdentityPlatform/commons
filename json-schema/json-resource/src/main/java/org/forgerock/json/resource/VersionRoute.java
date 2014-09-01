@@ -22,10 +22,10 @@ package org.forgerock.json.resource;
  * @see VersionRouter
  * @since 2.4.0
  */
-final class VersionRoute implements Route {
+public final class VersionRoute<T> implements Route {
 
     private final Version version;
-    private final RequestHandler handler;
+    private final T handler;
 
     /**
      * Constructs a new VersionRoute.
@@ -33,7 +33,7 @@ final class VersionRoute implements Route {
      * @param version The version of the route.
      * @param handler The request handler for the route.
      */
-    VersionRoute(Version version, RequestHandler handler) {
+    public VersionRoute(Version version, T handler) {
         this.version = version;
         this.handler = handler;
     }
@@ -43,7 +43,7 @@ final class VersionRoute implements Route {
      *
      * @return The version.
      */
-    Version getVersion() {
+    public Version getVersion() {
         return version;
     }
 
@@ -52,7 +52,7 @@ final class VersionRoute implements Route {
      *
      * @return The request handler.
      */
-    RequestHandler getRequestHandler() {
+    public T getRequestHandler() {
         return handler;
     }
 
