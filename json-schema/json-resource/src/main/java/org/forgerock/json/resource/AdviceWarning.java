@@ -111,8 +111,27 @@ public class AdviceWarning {
      * @return a newly constructed AdviceWarning indicating the expected key was not found in the request.
      */
     public static AdviceWarning getNotPresent(String agentName, String missingKey) {
-        return AdviceWarning.newBuilder().withWarningAgent(agentName).withWarningCode(NOT_PRESENT)
-                .withWarningText(missingKey + " should be included in the request.").build();
+        return AdviceWarning.newBuilder()
+                .withWarningAgent(agentName)
+                .withWarningCode(NOT_PRESENT)
+                .withWarningText(missingKey + " should be included in the request.")
+                .build();
+    }
+
+    /**
+     * Generate a warning using the builder provided.
+     * @param agentName the agent name
+     * @param fmt The format, which may include embedded %s, etc.
+     * @param args Zero or more args, passed into String.format to generate the warning text
+     * @return a newly built WarningHeader object
+     */
+    public static AdviceWarning generateWarning(String agentName, String fmt, String... args) {
+        return AdviceWarning
+                .newBuilder()
+                .withWarningAgent(agentName)
+                .withWarningCode(NOT_PRESENT)
+                .withWarningText(String.format(fmt, args))
+                .build();
     }
 
     /**
