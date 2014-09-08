@@ -359,13 +359,6 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         }
     };
 
-    Handlebars.registerHelper('select', function(value, options){
-        var selected = $('<select />').html(options.fn(this));
-        selected.find('[value=' + value + ']').attr({'selected':'selected'});
-
-        return selected.html();
-    });
-    
     Handlebars.registerHelper('t', function(i18nKey) {        
         var params = { postProcess: 'sprintf', sprintf: _.map(_.toArray(arguments).slice(1, -1), Handlebars.Utils.escapeExpression)}, result;
         
@@ -442,7 +435,14 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         result = prePart + content + postPart;
         return new Handlebars.SafeString(result);
     });
-    
+
+    Handlebars.registerHelper('staticSelect', function(value, options){
+        var selected = $('<select />').html(options.fn(this));
+        selected.find('[value=' + value + ']').attr({'selected':'selected'});
+
+        return selected.html();
+    });
+
     Handlebars.registerHelper('select', function(map, elementName, selectedKey, selectedValue, additionalParams) {
         var result, prePart, postPart, content = "", isSelected, entityName, entityKey;
         
