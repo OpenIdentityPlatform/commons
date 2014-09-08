@@ -58,8 +58,9 @@ define("org/forgerock/mock/ui/user/login/InternalLoginHelper", [
         );
     };
 
-    obj.logout = function () {
+    obj.logout = function (successCallback, errorCallback) {
         delete conf.loggedUser;
+        successCallback();
     };
 
     obj.getLoggedUser = function (successCallback, errorCallback) {

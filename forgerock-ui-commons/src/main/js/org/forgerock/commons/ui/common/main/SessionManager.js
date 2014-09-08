@@ -39,8 +39,8 @@ define("org/forgerock/commons/ui/common/main/SessionManager", [
         require(obj.configuration.loginHelperClass).login(params, successCallback, errorCallback);
     };
     
-    obj.logout = function() {
-        require(obj.configuration.loginHelperClass).logout();
+    obj.logout = function(successCallback, errorCallback) {
+        require(obj.configuration.loginHelperClass).logout(successCallback, errorCallback);
     };
     
     obj.getLoggedUser = function(successCallback, errorCallback) {

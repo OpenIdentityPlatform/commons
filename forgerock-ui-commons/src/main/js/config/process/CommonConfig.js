@@ -144,15 +144,17 @@ define("config/process/CommonConfig", [
                 
                 eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: true});
                 sessionManager.getLoggedUser(function(user) {
-                    sessionManager.logout();
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unauthorized");
-                    eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
+                    sessionManager.logout(function() {
+                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unauthorized");
+                        eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
+                    });
                 }, function() {
                     if (error.error.type === "GET") {
                         conf.setProperty("gotoURL", window.location.hash); 
-                        sessionManager.logout();
-                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unauthorized");
-                        eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
+                        sessionManager.logout(function() {
+                            eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unauthorized");
+                            eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
+                        });
                     } else {
                         viewManager.showDialog(router.configuration.routes.loginDialog.dialog);
                     }
@@ -354,12 +356,13 @@ define("config/process/CommonConfig", [
                 "org/forgerock/commons/ui/common/main/SessionManager"
             ],
             processDescription: function(event, router, conf, sessionManager) {
-                sessionManager.logout();
-                conf.setProperty('loggedUser', null);
-                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "loggedOut");
-                eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
-                eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: true});
-                delete conf.gotoURL;
+                sessionManager.logout(function() {
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "loggedOut");
+                    conf.setProperty('loggedUser', null);
+                    eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
+                    eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: true});
+                    delete conf.gotoURL;
+                });
             }
         }
         
