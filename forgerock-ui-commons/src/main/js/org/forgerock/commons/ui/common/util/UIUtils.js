@@ -145,7 +145,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         }
     };
 
-    obj.buildRestResponseBasedJQGrid = function (view, id, options, callback) {
+    obj.buildRestResponseBasedJQGrid = function (view, id, options, columnChooserOptions, callback) {
         options = options ? options : {};
 
         if (!id || !view || !options.url) {
@@ -218,6 +218,16 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         $.extend(true, defaultOptions, options);
 
         grid.jqGrid(defaultOptions);
+
+        grid.navGrid(options.pager,{edit:false,add:false,del:false,search:false,refresh:false})
+            .navButtonAdd(options.pager,{
+                caption:"Columns",
+                buttonicon:"ui-icon-add",
+                position: "first",
+                onClickButton: function(){
+                    grid.jqGrid('columnChooser', {width : columnChooserOptions.width, height : columnChooserOptions.height});
+                }
+            });
 
         grid.on("jqGridAfterGridComplete", function () {
             if (callback) {
