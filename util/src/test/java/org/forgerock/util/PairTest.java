@@ -15,102 +15,116 @@
  */
 package org.forgerock.util;
 
-import org.forgerock.util.Pair;
+import java.math.BigDecimal;
+import java.util.Comparator;
+
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.forgerock.util.Pair.*;
+
+import static org.fest.assertions.Assertions.*;
 
 /**
- * Test the pair class
+ * Tests the {@link Pair} class.
  */
+@SuppressWarnings("javadoc")
 public class PairTest {
 
     @Test
-    public void shouldRetrieveValuesCorrectly() {
+    public void getters() throws Exception {
+        final Pair<BigDecimal, BigDecimal> pair = of(BigDecimal.ONE, BigDecimal.TEN);
+        assertThat(pair.getFirst()).isSameAs(BigDecimal.ONE);
+        assertThat(pair.getSecond()).isSameAs(BigDecimal.TEN);
+    }
+
+    @DataProvider
+    public Object[][] pairsEqualDataProvider() {
+        final Pair<Integer, Integer> p12 = of(1, 2);
+        return new Object[][] {
+            { p12, p12 },
+            { p12, of(1, 2) },
+            { of(null, null), empty() },
+        };
+    }
+
+    @Test(dataProvider = "pairsEqualDataProvider")
+    public void pairsEqual(Pair<Integer, Integer> p1, Pair<Integer, Integer> p2) {
+        assertThat(p1).isEqualTo(p2);
+        assertThat(p1.hashCode()).isEqualTo(p2.hashCode());
+    }
+
+    @Test
+    public void morePairsEqual() {
         String left = "left";
         String right = "right";
-
-        Pair<String, String> pair = Pair.of(left, right);
-
-        assertThat(pair.getLeft() == left && pair.getRight() == right);
-    }
-
-    @Test
-    public void shouldRetrieveDifferentTypesCorrectly() {
-        String left = "left";
-        Integer right = 1;
-
-        Pair<String, Integer> pair = Pair.of(left, right);
-
-        assertThat(pair.getLeft() == left && pair.getRight() == right);
-    }
-
-    @Test
-    public void equalShouldWork() {
-        String left = "left";
-        String right = "right";
-
-        Pair<String, String> pairOne = Pair.of(left, right);
-        Pair<String, String> pairTwo = Pair.of(right, left);
-        Pair<String, String> pairThree = Pair.of(right, left);
-        Pair<String, String> pairFour = Pair.of("foo", "bar");
-
-        assertThat(pairOne.equals(pairOne));
-
-        assertThat(pairOne.equals(pairTwo));
-        assertThat(pairTwo.equals(pairOne));
-        assertThat(pairOne.equals(pairThree));
-        assertThat(pairTwo.equals(pairThree));
-        assertThat(pairThree.equals(pairOne));
-        assertThat(pairThree.equals(pairTwo));
-
-        assertThat(!pairOne.equals(pairFour));
-        assertThat(!pairTwo.equals(pairFour));
-        assertThat(!pairFour.equals(pairOne));
-        assertThat(!pairFour.equals(pairTwo));
-
-        Pair<String, String> backwards = Pair.of(right, left);
-
-        assertThat(!pairOne.equals(backwards));
-
-        left = "1";
-        Integer otherRight = 1;
-
-        Pair<String, Integer> otherPairOne = Pair.of(left, otherRight);
-        Pair<Integer, String> otherBackwardPair = Pair.of(otherRight, left);
-
-        assertThat(!otherPairOne.equals(otherBackwardPair));
-
-        Pair<String, Integer> emptyOne = Pair.of(null, null);
-        Pair<Integer, String> emptyTwo = Pair.of(null, null);
-
-        assertThat(pairOne.equals(pairOne));
-        assertThat(pairTwo.equals(pairTwo));
-        assertThat(pairOne.equals(pairTwo));
-    }
-
-    @Test
-    public void hashCodeShouldWork() {
-        String left = "L";
-        String right = "R";
 
         Pair<String, String> pairOne = Pair.of(left, right);
         Pair<String, String> pairTwo = Pair.of(left, right);
+        Pair<String, String> pairThree = Pair.of(left, right);
+        Pair<String, String> pairFour = Pair.of("foo", "bar");
+
+        // equals is reflexive
+        assertThat(pairOne).isEqualTo(pairOne);
+        assertThat(pairTwo).isEqualTo(pairTwo);
+        assertThat(pairThree).isEqualTo(pairThree);
+        assertThat(pairFour).isEqualTo(pairFour);
+
+        // symmetric
+        assertThat(pairOne).isEqualTo(pairTwo);
+        assertThat(pairTwo).isEqualTo(pairOne);
+
+        // transitive
+        assertThat(pairOne).isEqualTo(pairThree);
+        assertThat(pairTwo).isEqualTo(pairThree);
+        assertThat(pairThree).isEqualTo(pairOne);
+        assertThat(pairThree).isEqualTo(pairTwo);
+
+        assertThat(pairOne).isNotEqualTo(pairFour);
+        assertThat(pairTwo).isNotEqualTo(pairFour);
+        assertThat(pairFour).isNotEqualTo(pairOne);
+        assertThat(pairFour).isNotEqualTo(pairTwo);
+
         Pair<String, String> backwards = Pair.of(right, left);
 
-        assertThat(pairOne.hashCode() == pairOne.hashCode());
-        assertThat(pairOne.hashCode() == pairTwo.hashCode());
-        assertThat(backwards.hashCode() == backwards.hashCode());
+        assertThat(pairOne).isNotEqualTo(backwards);
+    }
 
-        left = "1";
-        Integer otherRight = 1;
-        Pair<String, Integer> otherPairOne = Pair.of(left, otherRight);
-        Pair<Integer, String> otherBackwards = Pair.of(otherRight, left);
+    @DataProvider
+    public Object[][] pairsNotEqualDataProvider() {
+        final Pair<Integer, Integer> p12 = of(1, 2);
+        return new Object[][] {
+            { p12, null },
+            { p12, empty() },
+            { empty(), p12 },
+            { of(null, 2), empty() },
+            { empty(), of(null, 2) },
+            { of(1, 2), of(2, 1)},
+        };
+    }
 
-        // hmmm... can't assert that two objects hashCode values are not equal, since a valid (but exceptionally bad)
-        // implementation of hashCode could be to return a constant.  This would mean unequal objects had the same
-        // hashCode value.  All we can assert is that equal objects have equal hashCodes.
-        assertThat(otherPairOne.hashCode() == otherPairOne.hashCode());
-        assertThat(otherBackwards.hashCode() == otherBackwards.hashCode());
+    @Test(dataProvider = "pairsNotEqualDataProvider")
+    public void pairsNotEqual(Pair<Integer, Integer> p1, Pair<Integer, Integer> p2) throws Exception {
+        assertThat(p1).isNotEqualTo(p2);
+    }
+
+    @DataProvider
+    public Object[][] pairComparatorDataProvider() {
+        return new Object[][] {
+            { of(2, 3), of(2, 3), 0 },
+            { of(2, 3), of(1, 4), 1 },
+            { of(1, 4), of(2, 3), -1 },
+            { of(1, 3), of(1, 2), 1 },
+            { of(1, 2), of(1, 3), -1 },
+        };
+    }
+
+    @Test(dataProvider = "pairComparatorDataProvider")
+    public void pairComparator(
+            Pair<Integer, Integer> p1,
+            Pair<Integer, Integer> p2,
+            int compareResult) {
+        final Comparator<Pair<Integer, Integer>> cmp = getPairComparator();
+        assertThat(cmp.compare(p1, p2)).isEqualTo(compareResult);
     }
 }
