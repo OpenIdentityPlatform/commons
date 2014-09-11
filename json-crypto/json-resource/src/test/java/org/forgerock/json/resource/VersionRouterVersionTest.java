@@ -314,7 +314,7 @@ public class VersionRouterVersionTest {
         if (expectException) {
             ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
             verify(handler).handleError(exceptionCaptor.capture());
-            assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
+            assertThat(exceptionCaptor.getValue()).isInstanceOf(BadRequestException.class);
             verifyZeroInteractions(usersHandlerOne, usersHandlerTwo, usersHandlerThree, groupsHandlerOne,
                     groupsHandlerTwo, groupsHandlerThree);
         } else {
@@ -342,7 +342,7 @@ public class VersionRouterVersionTest {
         if (expectException) {
             ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
             verify(handler).handleError(exceptionCaptor.capture());
-            assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
+            assertThat(exceptionCaptor.getValue()).isInstanceOf(BadRequestException.class);
             verifyZeroInteractions(usersHandlerOne, usersHandlerTwo, usersHandlerThree, groupsHandlerOne,
                     groupsHandlerTwo, groupsHandlerThree);
         } else {
@@ -371,7 +371,7 @@ public class VersionRouterVersionTest {
         if (expectException) {
             ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
             verify(handler).handleError(exceptionCaptor.capture());
-            assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
+            assertThat(exceptionCaptor.getValue()).isInstanceOf(BadRequestException.class);
             verifyZeroInteractions(usersHandlerOne, usersHandlerTwo, usersHandlerThree, groupsHandlerOne,
                     groupsHandlerTwo, groupsHandlerThree);
         } else {
@@ -400,7 +400,7 @@ public class VersionRouterVersionTest {
         if (expectException) {
             ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
             verify(handler).handleError(exceptionCaptor.capture());
-            assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
+            assertThat(exceptionCaptor.getValue()).isInstanceOf(BadRequestException.class);
             verifyZeroInteractions(usersHandlerOne, usersHandlerTwo, usersHandlerThree, groupsHandlerOne,
                     groupsHandlerTwo, groupsHandlerThree);
         } else {
@@ -429,7 +429,7 @@ public class VersionRouterVersionTest {
         if (expectException) {
             ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
             verify(handler).handleError(exceptionCaptor.capture());
-            assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
+            assertThat(exceptionCaptor.getValue()).isInstanceOf(BadRequestException.class);
             verifyZeroInteractions(usersHandlerOne, usersHandlerTwo, usersHandlerThree, groupsHandlerOne,
                     groupsHandlerTwo, groupsHandlerThree);
         } else {
@@ -458,7 +458,7 @@ public class VersionRouterVersionTest {
         if (expectException) {
             ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
             verify(handler).handleError(exceptionCaptor.capture());
-            assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
+            assertThat(exceptionCaptor.getValue()).isInstanceOf(BadRequestException.class);
             verifyZeroInteractions(usersHandlerOne, usersHandlerTwo, usersHandlerThree, groupsHandlerOne,
                     groupsHandlerTwo, groupsHandlerThree);
         } else {
@@ -487,7 +487,7 @@ public class VersionRouterVersionTest {
         if (expectException) {
             ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
             verify(handler).handleError(exceptionCaptor.capture());
-            assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
+            assertThat(exceptionCaptor.getValue()).isInstanceOf(BadRequestException.class);
             verifyZeroInteractions(usersHandlerOne, usersHandlerTwo, usersHandlerThree, groupsHandlerOne,
                     groupsHandlerTwo, groupsHandlerThree);
         } else {

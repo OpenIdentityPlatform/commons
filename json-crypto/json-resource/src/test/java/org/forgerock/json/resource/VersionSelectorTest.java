@@ -38,12 +38,12 @@ public class VersionSelectorTest {
     private Version twoDotOne;
     private Version twoDotFive;
 
-    private Object candiateOneDotZero;
-    private Object candiateOneDotOne;
-    private Object candiateOneDotFive;
-    private Object candiateOneDotNine;
-    private Object candiateTwoDotOne;
-    private Object candiateTwoDotFive;
+    private Object candidateOneDotZero;
+    private Object candidateOneDotOne;
+    private Object candidateOneDotFive;
+    private Object candidateOneDotNine;
+    private Object candidateTwoDotOne;
+    private Object candidateTwoDotFive;
 
     private Map<Version, Object> candidates = new HashMap<Version, Object>();
 
@@ -56,19 +56,19 @@ public class VersionSelectorTest {
         twoDotOne = Version.valueOf(2, 1);
         twoDotFive = Version.valueOf(2, 5);
 
-        candiateOneDotZero = mock(Object.class);
-        candiateOneDotOne = mock(Object.class);
-        candiateOneDotFive = mock(Object.class);
-        candiateOneDotNine = mock(Object.class);
-        candiateTwoDotOne = mock(Object.class);
-        candiateTwoDotFive = mock(Object.class);
+        candidateOneDotZero = mock(Object.class);
+        candidateOneDotOne = mock(Object.class);
+        candidateOneDotFive = mock(Object.class);
+        candidateOneDotNine = mock(Object.class);
+        candidateTwoDotOne = mock(Object.class);
+        candidateTwoDotFive = mock(Object.class);
 
-        candidates.put(oneDotZero, candiateOneDotZero);
-        candidates.put(oneDotOne, candiateOneDotOne);
-        candidates.put(oneDotFive, candiateOneDotFive);
-        candidates.put(oneDotNine, candiateOneDotNine);
-        candidates.put(twoDotOne, candiateTwoDotOne);
-        candidates.put(twoDotFive, candiateTwoDotFive);
+        candidates.put(oneDotZero, candidateOneDotZero);
+        candidates.put(oneDotOne, candidateOneDotOne);
+        candidates.put(oneDotFive, candidateOneDotFive);
+        candidates.put(oneDotNine, candidateOneDotNine);
+        candidates.put(twoDotOne, candidateTwoDotOne);
+        candidates.put(twoDotFive, candidateTwoDotFive);
     }
 
     @BeforeMethod
@@ -76,8 +76,8 @@ public class VersionSelectorTest {
         versionSelector = new VersionSelector();
     }
 
-    @Test (expectedExceptions = ResourceException.class)
-    public void selectShouldThrowVersionSelectionExceptionWhenCandidatesNull() throws Exception {
+    @Test (expectedExceptions = InternalServerErrorException.class)
+    public void selectShouldThrowInternalServerErrorExceptionWhenCandidatesNull() throws Exception {
 
         //Given
         Version requested = Version.valueOf(1, 0);
@@ -86,11 +86,11 @@ public class VersionSelectorTest {
         versionSelector.select(requested, null);
 
         //Then
-        //Expected VersionSelectionException
+        //Expected InternalServerErrorException
     }
 
-    @Test (expectedExceptions = ResourceException.class)
-    public void selectShouldThrowVersionSelectionExceptionWhenCandidatesEmpty() throws Exception {
+    @Test (expectedExceptions = InternalServerErrorException.class)
+    public void selectShouldThrowInternalServerErrorExceptionWhenCandidatesEmpty() throws Exception {
 
         //Given
         Version requested = Version.valueOf(1, 0);
@@ -100,7 +100,34 @@ public class VersionSelectorTest {
         versionSelector.select(requested, candidates);
 
         //Then
-        //Expected VersionSelectionException
+        //Expected InternalServerErrorException
+    }
+
+    @Test (expectedExceptions = NotFoundException.class)
+    public void selectShouldThrowNotFoundExceptionWhenVersionNotMatched() throws Exception {
+
+        //Given
+        Version requested = Version.valueOf(3, 5);
+        versionSelector.noDefault();
+
+        //When
+        versionSelector.select(requested, candidates);
+
+        //Then
+        //Expected NotFoundException
+    }
+
+    @Test (expectedExceptions = BadRequestException.class)
+    public void selectShouldThrowBadRequestExceptionWhenNoVersion() throws Exception {
+
+        //Given
+        versionSelector.noDefault();
+
+        //When
+        versionSelector.select(null, candidates);
+
+        //Then
+        //Expected BadRequestException
     }
 
     @Test
@@ -112,7 +139,7 @@ public class VersionSelectorTest {
         Object selected = versionSelector.select(null, candidates);
 
         //Then
-        assertThat(selected).isEqualTo(candiateTwoDotFive);
+        assertThat(selected).isEqualTo(candidateTwoDotFive);
     }
 
     @Test
@@ -125,7 +152,7 @@ public class VersionSelectorTest {
         Object selected = versionSelector.select(null, candidates);
 
         //Then
-        assertThat(selected).isEqualTo(candiateOneDotZero);
+        assertThat(selected).isEqualTo(candidateOneDotZero);
     }
 
     @Test (expectedExceptions = ResourceException.class)
@@ -138,7 +165,7 @@ public class VersionSelectorTest {
         Object selected = versionSelector.select(null, candidates);
 
         //Then
-        assertThat(selected).isEqualTo(candiateOneDotZero);
+        assertThat(selected).isEqualTo(candidateOneDotZero);
     }
 
     @Test
@@ -151,7 +178,7 @@ public class VersionSelectorTest {
         Object selected = versionSelector.select(requested, candidates);
 
         //Then
-        assertThat(selected).isEqualTo(candiateOneDotNine);
+        assertThat(selected).isEqualTo(candidateOneDotNine);
     }
 
     @Test (expectedExceptions = ResourceException.class)
@@ -164,6 +191,6 @@ public class VersionSelectorTest {
         Object selected = versionSelector.select(requested, candidates);
 
         //Then
-        assertThat(selected).isEqualTo(candiateOneDotFive);
+        assertThat(selected).isEqualTo(candidateOneDotFive);
     }
 }

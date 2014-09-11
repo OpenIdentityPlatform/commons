@@ -125,7 +125,7 @@ public class AdviceWarning {
      * @param args Zero or more args, passed into String.format to generate the warning text
      * @return a newly built WarningHeader object
      */
-    public static AdviceWarning generateWarning(String agentName, String fmt, String... args) {
+    public static AdviceWarning newAdviceWarning(String agentName, String fmt, Object... args) {
         return AdviceWarning
                 .newBuilder()
                 .withWarningAgent(agentName)
@@ -137,11 +137,17 @@ public class AdviceWarning {
     /**
      * Accessed via {@link AdviceWarning#newBuilder()}.
      */
-    static final class Builder {
+    public static final class Builder {
 
         private int warningCode;
         private String warningAgent;
         private String warningText;
+
+        /**
+         * Package private default CTOR to prevent direct instantiation by other than us.
+         */
+        Builder() {
+        }
 
         /**
          * A three-digit code which can be linked back to the cause of the Warning.
@@ -189,6 +195,5 @@ public class AdviceWarning {
         public AdviceWarning build() {
             return new AdviceWarning(this);
         }
-
     }
 }
