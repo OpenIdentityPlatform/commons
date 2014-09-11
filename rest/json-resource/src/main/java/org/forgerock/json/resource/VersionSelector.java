@@ -16,10 +16,6 @@
 
 package org.forgerock.json.resource;
 
-import org.forgerock.json.resource.exception.AcceptApiVersionException;
-import org.forgerock.json.resource.exception.AcceptApiVersionNoRoutesException;
-import org.forgerock.json.resource.exception.NoAcceptApiVersionSpecifiedException;
-
 import java.util.Collections;
 import java.util.Map;
 import java.util.SortedMap;
@@ -55,18 +51,15 @@ public class VersionSelector {
      *
      * @param requested The requested version.
      * @param candidates A {@code Map} of candidates.
-     * @param &lt;T&gt; The candidate value type.
      * @return &lt;T&gt; The candidate value type that most closely matched the requested version.
-     * @throws AcceptApiVersionException If the requested version cannot be found.
-     * @throws NoAcceptApiVersionSpecifiedException If no version is requested and the default behaviour is NONE.
-     * @throws AcceptApiVersionNoRoutesException If no routes are available (internal config error).
+     * @throws ResourceException if no routes, or no version specified, or version unmatched.
      */
-    public <T> T select(Version requested, Map<Version, T> candidates)
-        throws AcceptApiVersionException,  AcceptApiVersionNoRoutesException, NoAcceptApiVersionSpecifiedException {
+    public <T> T select(Version requested, Map<Version, T> candidates) throws ResourceException {
 
         if (candidates == null || candidates.isEmpty()) {
             //TODO i18n
-            throw new AcceptApiVersionNoRoutesException("No match found. No routes registered.");
+            throw ResourceException.getException(ResourceException.INTERNAL_ERROR,
+                                                        "No match found. No routes registered.");
         }
 
         SortedMap<Version, T> sortedCandidates = sort(candidates);
@@ -81,7 +74,8 @@ public class VersionSelector {
                 }
                 default: {
                     //TODO i18n
-                    throw new NoAcceptApiVersionSpecifiedException("No resource version specified.");
+                    throw ResourceException.getException(ResourceException.BAD_REQUEST,
+                                                         "No requested version specified and behavior set to NONE.");
                 }
             }
         }
@@ -93,7 +87,8 @@ public class VersionSelector {
         }
 
         //TODO i18n
-        throw new AcceptApiVersionException("Requested version \"" + requested + "\" does not match any routes.");
+        throw ResourceException.getException(ResourceException.NOT_FOUND,
+                      "Requested version \"" + requested + "\" does not match any routes.");
     }
 
     /**
