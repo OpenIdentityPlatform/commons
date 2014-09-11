@@ -378,7 +378,8 @@ public final class VersionRouter implements RequestHandler {
     static final class VersionRouterImpl implements RequestHandler {
 
         private final VersionSelector versionSelector = new VersionSelector();
-        private final Map<Version, VersionRoute> routes = new ConcurrentHashMap<Version, VersionRoute>();
+        private final Map<Version, VersionRoute<RequestHandler>> routes =
+                                            new ConcurrentHashMap<Version, VersionRoute<RequestHandler>>();
         private boolean warningEnabled = true;
 
         /**
@@ -396,7 +397,7 @@ public final class VersionRouter implements RequestHandler {
          * @param provider The collection resource provider to which matching requests will be routed.
          * @return An opaque handle for the route which may be used for removing the route later.
          */
-        VersionRoute addVersion(String version, CollectionResourceProvider provider) {
+        VersionRoute<RequestHandler> addVersion(String version, CollectionResourceProvider provider) {
             return addVersion(version, newCollection(provider));
         }
 
@@ -408,7 +409,7 @@ public final class VersionRouter implements RequestHandler {
          * @param provider The singleton resource provider to which matching requests will be routed.
          * @return An opaque handle for the route which may be used for removing the route later.
          */
-        VersionRoute addVersion(String version, SingletonResourceProvider provider) {
+        VersionRoute<RequestHandler> addVersion(String version, SingletonResourceProvider provider) {
             return addVersion(version, newSingleton(provider));
         }
 
@@ -420,11 +421,11 @@ public final class VersionRouter implements RequestHandler {
          * @param handler The request handler to which matching requests will be routed.
          * @return An opaque handle for the route which may be used for removing the route later.
          */
-        VersionRoute addVersion(String version, RequestHandler handler) {
-            return addVersion(new VersionRoute(Version.valueOf(version), handler));
+        VersionRoute<RequestHandler> addVersion(String version, RequestHandler handler) {
+            return addVersion(new VersionRoute<RequestHandler>(Version.valueOf(version), handler));
         }
 
-        private VersionRoute addVersion(VersionRoute route) {
+        private VersionRoute<RequestHandler> addVersion(VersionRoute<RequestHandler> route) {
             routes.put(route.getVersion(), route);
             return route;
         }
@@ -460,7 +461,7 @@ public final class VersionRouter implements RequestHandler {
         public void handleAction(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
             try {
                 getBestRoute(context, request).handleAction(context, request, handler);
-            } catch (NotFoundException e) {
+            } catch (ResourceException e) {
                 handler.handleError(e);
             }
         }
@@ -472,7 +473,7 @@ public final class VersionRouter implements RequestHandler {
         public void handleCreate(ServerContext context, CreateRequest request, ResultHandler<Resource> handler) {
             try {
                 getBestRoute(context, request).handleCreate(context, request, handler);
-            } catch (NotFoundException e) {
+            } catch (ResourceException e) {
                 handler.handleError(e);
             }
         }
@@ -484,7 +485,7 @@ public final class VersionRouter implements RequestHandler {
         public void handleDelete(ServerContext context, DeleteRequest request, ResultHandler<Resource> handler) {
             try {
                 getBestRoute(context, request).handleDelete(context, request, handler);
-            } catch (NotFoundException e) {
+            } catch (ResourceException e) {
                 handler.handleError(e);
             }
         }
@@ -496,7 +497,7 @@ public final class VersionRouter implements RequestHandler {
         public void handlePatch(ServerContext context, PatchRequest request, ResultHandler<Resource> handler) {
             try {
                 getBestRoute(context, request).handlePatch(context, request, handler);
-            } catch (NotFoundException e) {
+            } catch (ResourceException e) {
                 handler.handleError(e);
             }
         }
@@ -508,7 +509,7 @@ public final class VersionRouter implements RequestHandler {
         public void handleQuery(ServerContext context, QueryRequest request, QueryResultHandler handler) {
             try {
                 getBestRoute(context, request).handleQuery(context, request, handler);
-            } catch (NotFoundException e) {
+            } catch (ResourceException e) {
                 handler.handleError(e);
             }
         }
@@ -520,7 +521,7 @@ public final class VersionRouter implements RequestHandler {
         public void handleRead(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
             try {
                 getBestRoute(context, request).handleRead(context, request, handler);
-            } catch (NotFoundException e) {
+            } catch (ResourceException e) {
                 handler.handleError(e);
             }
         }
@@ -532,25 +533,19 @@ public final class VersionRouter implements RequestHandler {
         public void handleUpdate(ServerContext context, UpdateRequest request, ResultHandler<Resource> handler) {
             try {
                 getBestRoute(context, request).handleUpdate(context, request, handler);
-            } catch (NotFoundException e) {
+            } catch (ResourceException e) {
                 handler.handleError(e);
             }
         }
 
-        private RequestHandler getBestRoute(ServerContext context, Request request) throws NotFoundException {
+        private RequestHandler getBestRoute(ServerContext context, Request request) throws ResourceException {
             AcceptAPIVersionContext apiVersionContext = context.asContext(AcceptAPIVersionContext.class);
-            try {
 
-                addWarningAdvice(context, apiVersionContext.getResourceVersion());
-                final VersionRoute<RequestHandler> selectedRoute =
-                        versionSelector.select(apiVersionContext.getResourceVersion(), routes);
-                addVersionAdvice(context, apiVersionContext.getProtocolVersion(), selectedRoute.getVersion());
-                return selectedRoute.getRequestHandler();
-            } catch (ResourceException e) {
-                // TODO: i18n
-                throw new NotFoundException(String.format("Version '%s' of resource '%s' not found",
-                        apiVersionContext.getResourceVersion(), request.getResourceName()), e);
-            }
+            addWarningAdvice(context, apiVersionContext.getResourceVersion());
+            final VersionRoute<RequestHandler> selectedRoute =
+                    versionSelector.select(apiVersionContext.getResourceVersion(), routes);
+            addVersionAdvice(context, apiVersionContext.getProtocolVersion(), selectedRoute.getVersion());
+            return selectedRoute.getRequestHandler();
         }
 
         private void addWarningAdvice(ServerContext context, Version version) {

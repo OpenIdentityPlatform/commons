@@ -68,7 +68,7 @@ public final class VersionRoute<T> implements Route {
             return false;
         }
 
-        VersionRoute route = (VersionRoute) o;
+        VersionRoute<?> route = (VersionRoute<?>) o;
         return handler.equals(route.handler) && version.equals(route.version);
     }
 
