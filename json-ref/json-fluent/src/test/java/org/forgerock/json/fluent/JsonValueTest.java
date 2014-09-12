@@ -12,7 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright © 2010–2011 ApexIdentity Inc. All rights reserved.
- * Portions Copyrighted 2011-2013 ForgeRock AS.
+ * Portions Copyrighted 2011-2014 ForgeRock AS.
  */
 
 package org.forgerock.json.fluent;
@@ -546,6 +546,16 @@ public class JsonValueTest {
         assertThat(s.contains("\"three\""));
         assertThat(s.contains("\"four\""));
         assertThat(s.contains("\"five\""));
+    }
+
+    @Test
+    public void toStringShouldEscapeSpecialCharacters() {
+        final JsonValue value =
+                json(object(field("a \"silly\" key", "value containing a \\ and a \" and "
+                        + "some controls \b\f\n\r\t\u0000\u001f\u007f\u009f")));
+        assertThat(value.toString()).isEqualTo(
+                "{ \"a \\\"silly\\\" key\": \"value containing a \\\\ and a \\\" and "
+                        + "some controls \\b\\f\\n\\r\\t\\u0000\\u001F\\u007F\\u009F\" }");
     }
 
     @Test
