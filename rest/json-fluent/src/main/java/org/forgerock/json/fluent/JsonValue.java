@@ -37,6 +37,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -1678,7 +1679,9 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
             final Map<Object, Object> map = (Map<Object, Object>) object;
             for (final Iterator<Object> i = map.keySet().iterator(); i.hasNext();) {
                 final Object key = i.next();
-                sb.append('"').append(key.toString()).append("\": ");
+                sb.append('"');
+                appendEscapedString(sb, key.toString());
+                sb.append("\": ");
                 sb.append(new JsonValue(map.get(key)).toString()); // recursion
                 if (i.hasNext()) {
                     sb.append(", ");
@@ -1695,11 +1698,72 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
             }
             sb.append(" ]");
         } else if (isString()) {
-            sb.append('"').append(object).append('"');
+            sb.append('"');
+            appendEscapedString(sb, object.toString());
+            sb.append('"');
         } else {
             sb.append(object.toString());
         }
         return sb.toString();
+    }
+
+    /**
+     * As per json.org a string is any Unicode character except " or \ or
+     * control characters. Special characters will be escaped using a \ as
+     * follows:
+     * <ul>
+     * <li> {@literal \ "} - double quote
+     * <li> {@literal \ \} - back slash
+     * <li> {@literal \ b} - backspace
+     * <li> {@literal \ f} - form feed
+     * <li> {@literal \ n} - new line
+     * <li> {@literal \ r} - carriage return
+     * <li> {@literal \ t} - tab
+     * <li> {@literal \ u xxxx} - other control characters.
+     * </ul>
+     */
+    private static void appendEscapedString(final StringBuilder sb, final String s) {
+        final int size = s.length();
+        for (int i = 0; i < size; i++) {
+            final char c = s.charAt(i);
+            switch (c) {
+            // Escape characters which must be escaped.
+            case '"':
+                sb.append("\\\"");
+                break;
+            case '\\':
+                sb.append("\\\\");
+                break;
+            // Escape common controls to the C equivalent to make them easier to read.
+            case '\b':
+                sb.append("\\b");
+                break;
+            case '\f':
+                sb.append("\\f");
+                break;
+            case '\n':
+                sb.append("\\n");
+                break;
+            case '\r':
+                sb.append("\\r");
+                break;
+            case '\t':
+                sb.append("\\t");
+                break;
+            default:
+                if (Character.isISOControl(c)) {
+                    final String hex = Integer.toHexString(c).toUpperCase(Locale.ENGLISH);
+                    final int hexPadding = 4 - hex.length();
+                    sb.append("\\u");
+                    for (int j = 0; j < hexPadding; j++) {
+                        sb.append('0');
+                    }
+                    sb.append(hex);
+                } else {
+                    sb.append(c);
+                }
+            }
+        }
     }
 
     private void addToken(final String token, final Object object) {
