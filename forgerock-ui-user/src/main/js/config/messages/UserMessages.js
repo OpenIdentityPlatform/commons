@@ -90,6 +90,10 @@ define("config/messages/UserMessages", [
             "identityNoSpace": {
                 msg: "config.messages.UserMessages.identityNoSpace",
                 type: "error"
+            },
+            "selfRegistrationDisabled": {
+                msg: "config.messages.UserMessages.selfRegistrationDisabled",
+                type: "error"
             }
     };
     
