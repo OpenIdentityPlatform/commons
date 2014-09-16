@@ -198,22 +198,14 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons.ui.libs</groupId>
-            <artifactId>jquery-ui</artifactId>
-            <type>js</type>
-            <classifier>min</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
             <artifactId>sinon</artifactId>
-            <version>1.9.1</version>
             <type>js</type>
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons.ui.libs</groupId>
             <artifactId>qunit</artifactId>
-            <version>1.14.0</version>
             <type>js</type>
-        </dependency> 
+        </dependency>
         <dependency>
             <groupId>de.matrixweb.osgi.wrapped</groupId>
             <artifactId>osgi-wrapped-rhino</artifactId>
@@ -224,6 +216,6 @@
                     <artifactId>rhino</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>        
+        </dependency>
     </dependencies>
 </project>

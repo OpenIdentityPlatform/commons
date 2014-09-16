@@ -32,26 +32,24 @@
 require.config({
     paths: {
         // sinon only needed (or available) for Mock project
-        sinon: "libs/sinon-1.9.1",
+        sinon: "libs/sinon-1.10.3",
 
         i18next: "libs/i18next-1.7.3-min",
         i18nGrid: "libs/i18n/grid.locale-en",
-        backbone: "libs/backbone-0.9.2-min",
-        underscore: "libs/underscore-1.4.4-min",
-        js2form: "libs/js2form-1.0",
-        form2js: "libs/form2js-1.0",
-        spin: "libs/spin-1.2.5-min",
-        jqueryui: "libs/jquery-ui-1.10.4.custom-min",
+        backbone: "libs/backbone-1.1.0-min",
+        underscore: "libs/lodash-2.4.1-min",
+        js2form: "libs/js2form-2.0",
+        form2js: "libs/form2js-2.0",
+        spin: "libs/spin-2.0.1-min",
+        jquery: "libs/jquery-1.11.1-min",
+        jqueryui: "libs/jquery-ui-1.11.1-min",
         jqgrid: "libs/jquery.jqGrid-4.5.4-min",
-        xdate: "libs/xdate-0.7-min",
+        xdate: "libs/xdate-0.8-min",
         doTimeout: "libs/jquery.ba-dotimeout-1.0-min",
-        handlebars: "libs/handlebars-1.0.rc.1",
-        moment: "libs/moment-1.7.2-min",
+        handlebars: "libs/handlebars-1.3.0-min",
+        moment: "libs/moment-2.8.1-min",
         UserDelegate: "org/forgerock/mock/ui/user/delegates/UserDelegate",
-        ThemeManager: "org/forgerock/mock/ui/common/util/ThemeManager",
-        SiteIdentificationDelegate: "org/forgerock/mock/ui/user/delegates/SiteIdentificationDelegate",
-        LoginDialog: "org/forgerock/commons/ui/common/LoginDialog",
-        LoginView: "org/forgerock/mock/ui/user/LoginView"
+        ThemeManager: "org/forgerock/mock/ui/common/util/ThemeManager"
     },
 
     shim: {
@@ -119,7 +117,6 @@ require([
     "i18next",
     "org/forgerock/mock/ui/common/main/MockServer",
     "org/forgerock/commons/ui/common/main/i18nManager",
-    "org/forgerock/mock/ui/common/util/ThemeManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/mock/ui/common/main/LocalStorage",
@@ -127,9 +124,11 @@ require([
     "org/forgerock/mock/ui/user/main",
     "org/forgerock/commons/ui/user/main",
     "org/forgerock/commons/ui/common/main",
+    "UserDelegate",
+    "ThemeManager",
     "config/main"
 ], function ( sinon, _, Backbone, form2js, js2form, spin, $ui, xdate, moment, doTimeout, Handlebars, i18n,
-             mockServer, i18nManager, themeManager, constants, eventManager, localStorage) {
+             mockServer, i18nManager, constants, eventManager, localStorage) {
 
     // Mock project is run without server. Framework requires cookies to be enabled in order to be able to login.
     // Default CookieHelper.cookiesEnabled() implementation will always return false as cookies cannot be set from local

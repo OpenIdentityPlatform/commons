@@ -132,6 +132,6 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-sync');
 
     grunt.task.run('notify_hooks');
-    grunt.registerTask('default', ['watch']);
+    grunt.registerTask('default', ['sync', 'qunit', 'watch']);
 
 };

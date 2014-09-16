@@ -29,7 +29,6 @@
  */
 
 define("org/forgerock/mock/ui/common/main", [
-    "./util/ThemeManager",
     "./delegates/SiteConfigurationDelegate",
     "./delegates/PolicyDelegate"
 ]);

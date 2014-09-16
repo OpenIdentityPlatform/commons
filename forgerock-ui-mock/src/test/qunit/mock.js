@@ -123,7 +123,7 @@ define([
                     }
 
                     // initial state
-                    QUnit.equal($('input[name="register"]', view.$el).attr('disabled'), 'disabled', 'Initial state of submit button is not disabled');
+                    QUnit.equal($('input[name="register"]', view.$el).prop('disabled'), true, 'Initial state of submit button is disabled');
 
                     testStatusAttr(userName, 'error');
                     testStatusAttr(mail, 'error');
@@ -173,12 +173,12 @@ define([
                     testValue(phone, '12345', '', 'ok', view);
 
                     // terms of use
-                    terms.attr('checked', true).trigger('click');
+                    terms.prop('checked', true).trigger('change');
                     QUnit.equal($('.validation-message-checkbox').text(), '', '"Acceptance required for registration" is not shown for checked checkbox');
                     testStatusAttr(terms, 'ok');
 
                     // register button
-                    QUnit.ok(typeof register.attr('disabled') === 'undefined', 'Register button is enabled for correct field values');
+                    QUnit.ok(register.prop('disabled') === false, 'Register button is enabled for correct field values');
 
 
                     // localStorage.removeItem('mock/repo/internal/user/qqq');
