@@ -30,8 +30,9 @@ define([
     "org/forgerock/mock/ui/common/main/LocalStorage",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/CookieHelper",
+    "org/forgerock/commons/ui/common/main/Router",
     "./getLoggedUser"
-], function (eventManager, constants, localStorage, conf, cookieHelper, getLoggedUser) {
+], function (eventManager, constants, localStorage, conf, cookieHelper, router, getLoggedUser) {
     return {
         executeAll: function (server, parameters) {
 
@@ -262,6 +263,37 @@ define([
                     QUnit.start();
                 });
             });
+
+            QUnit.asyncTest("Unauthorized GET Request", function () {
+                conf.loggedUser = getLoggedUser();
+                eventManager.sendEvent(constants.EVENT_SHOW_DIALOG, {
+                    route: router.configuration.routes.changeSecurityData,
+                    callback: function () {
+                        eventManager.sendEvent(constants.EVENT_UNAUTHORIZED, {error: {type:"GET"} });
+                        QUnit.ok(conf.loggedUser === null, "User info should be discarded after UNAUTHORIZED GET error");
+                        QUnit.ok(conf.gotoURL === "#profile/change_security_data/", "gotoURL should be set to change security data after UNAUTHORIZED GET error");
+                        QUnit.start();
+                    }
+                });
+            });
+
+            QUnit.asyncTest("Unauthorized non-GET Request", function () {
+                var loginDialog = require("LoginDialog"),
+                    loginDialogSpy = sinon.spy(loginDialog, 'render');
+
+                QUnit.ok(!loginDialogSpy.called, "Login Dialog render function has not yet been called");
+                conf.loggedUser = getLoggedUser();
+                eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {
+                    route: router.configuration.routes.profile,
+                    callback: function () {
+                        eventManager.sendEvent(constants.EVENT_UNAUTHORIZED, {error: {type:"POST"} });
+                        QUnit.ok(conf.loggedUser !== null, "User info should be retained after UNAUTHORIZED POST error");
+                        QUnit.ok(loginDialogSpy.called, "Login Dialog render function was called");
+                        QUnit.start();
+                    } 
+                });
+            });
+
         }
     }
 });

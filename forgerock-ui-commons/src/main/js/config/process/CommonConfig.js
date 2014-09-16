@@ -141,24 +141,18 @@ define("config/process/CommonConfig", [
                     eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
                     return;
                 }
-                
-                eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: true});
-                sessionManager.getLoggedUser(function(user) {
+
+                if (error.error.type === "GET") {
+                    conf.setProperty("gotoURL", window.location.hash); 
                     sessionManager.logout(function() {
+                        eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: true});
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unauthorized");
                         eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
                     });
-                }, function() {
-                    if (error.error.type === "GET") {
-                        conf.setProperty("gotoURL", window.location.hash); 
-                        sessionManager.logout(function() {
-                            eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unauthorized");
-                            eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
-                        });
-                    } else {
-                        viewManager.showDialog(router.configuration.routes.loginDialog.dialog);
-                    }
-                });
+                } else {
+                    viewManager.showDialog(router.configuration.routes.loginDialog.dialog);
+                }
+
             }
         },
         {

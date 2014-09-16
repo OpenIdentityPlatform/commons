@@ -73,15 +73,20 @@ require.config({
             exports: "spin"
         },
         jqueryui: {
+            deps: ["jquery"],
             exports: "jqueryui"
+        },
+        i18nGrid: {
+            deps: ["jquery"]
         },
         jqgrid: {
             deps: ["jqueryui", "i18nGrid"]
-        },
+        }, 
         xdate: {
             exports: "xdate"
         },
         doTimeout: {
+            deps: ["jquery"],
             exports: "doTimeout"
         },
         handlebars: {
