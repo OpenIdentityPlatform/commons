@@ -18,16 +18,19 @@ package org.forgerock.json.resource;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.util.Reject;
+import sun.misc.REException;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import static org.forgerock.json.resource.Resources.newCollection;
 import static org.forgerock.json.resource.Resources.newSingleton;
 import static org.forgerock.json.resource.RoutingMode.EQUALS;
 import static org.forgerock.json.resource.RoutingMode.STARTS_WITH;
+import static org.forgerock.json.resource.VersionConstants.*;
 
 /**
  * <p>A request handler which routes requests using a request resource version.</p>
@@ -56,13 +59,19 @@ import static org.forgerock.json.resource.RoutingMode.STARTS_WITH;
  */
 public final class VersionRouter implements RequestHandler {
 
+    private static final String agentName = "CREST";
+    private static final String EQUALS = "=";
+    private static final String COMMA = ",";
+
     private final VersionSelector versionSelector = new VersionSelector();
-    private final Set<VersionRoute> routes = new CopyOnWriteArraySet<VersionRoute>();
+    private final Map<Version, VersionRoute<RequestHandler>> routes =
+            new ConcurrentHashMap<Version, VersionRoute<RequestHandler>>();
     private final Router router;
     private final RoutingMode mode;
     private final String uriTemplate;
     private RequestHandlerType requestHandlerType;
     private volatile Route uriRoute;
+    private boolean warningEnabled = true;
 
     /**
      * Creates a new router with no routes defined.
@@ -97,7 +106,7 @@ public final class VersionRouter implements RequestHandler {
      * @return An opaque handle for the route which may be used for removing the route later.
      */
     public VersionRouter addVersion(String version, SingletonResourceProvider provider) {
-        addVersion(RequestHandlerType.SINGLETON, EQUALS, version, newSingleton(provider));
+        addVersion(RequestHandlerType.SINGLETON, RoutingMode.EQUALS, version, newSingleton(provider));
         return this;
     }
 
@@ -118,13 +127,13 @@ public final class VersionRouter implements RequestHandler {
 
     private VersionRouter addVersion(RequestHandlerType type, RoutingMode mode, String version,
             RequestHandler handler) {
-        addVersion(new VersionRoute(Version.valueOf(version), handler));
+        addVersion(new VersionRoute<RequestHandler>(Version.valueOf(version), handler));
         addRoute(type, mode);
         return this;
     }
 
-    private void addVersion(VersionRoute route) {
-        routes.add(route);
+    private void addVersion(VersionRoute<RequestHandler> route) {
+        routes.put(route.getVersion(), route);
     }
 
     /**
@@ -180,6 +189,11 @@ public final class VersionRouter implements RequestHandler {
         return this;
     }
 
+    VersionRouter setWarningEnabledBehaviour(boolean warningEnabled) {
+        this.warningEnabled = warningEnabled;
+        return this;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -187,7 +201,7 @@ public final class VersionRouter implements RequestHandler {
     public void handleAction(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
         try {
             getBestRoute(context, request).handleAction(context, request, handler);
-        } catch (NotFoundException e) {
+        } catch (ResourceException e) {
             handler.handleError(e);
         }
     }
@@ -199,7 +213,7 @@ public final class VersionRouter implements RequestHandler {
     public void handleCreate(ServerContext context, CreateRequest request, ResultHandler<Resource> handler) {
         try {
             getBestRoute(context, request).handleCreate(context, request, handler);
-        } catch (NotFoundException e) {
+        } catch (ResourceException e) {
             handler.handleError(e);
         }
     }
@@ -211,7 +225,7 @@ public final class VersionRouter implements RequestHandler {
     public void handleDelete(ServerContext context, DeleteRequest request, ResultHandler<Resource> handler) {
         try {
             getBestRoute(context, request).handleDelete(context, request, handler);
-        } catch (NotFoundException e) {
+        } catch (ResourceException e) {
             handler.handleError(e);
         }
     }
@@ -223,7 +237,7 @@ public final class VersionRouter implements RequestHandler {
     public void handlePatch(ServerContext context, PatchRequest request, ResultHandler<Resource> handler) {
         try {
             getBestRoute(context, request).handlePatch(context, request, handler);
-        } catch (NotFoundException e) {
+        } catch (ResourceException e) {
             handler.handleError(e);
         }
     }
@@ -235,7 +249,7 @@ public final class VersionRouter implements RequestHandler {
     public void handleQuery(ServerContext context, QueryRequest request, QueryResultHandler handler) {
         try {
             getBestRoute(context, request).handleQuery(context, request, handler);
-        } catch (NotFoundException e) {
+        } catch (ResourceException e) {
             handler.handleError(e);
         }
     }
@@ -247,7 +261,7 @@ public final class VersionRouter implements RequestHandler {
     public void handleRead(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
         try {
             getBestRoute(context, request).handleRead(context, request, handler);
-        } catch (NotFoundException e) {
+        } catch (ResourceException e) {
             handler.handleError(e);
         }
     }
@@ -259,7 +273,7 @@ public final class VersionRouter implements RequestHandler {
     public void handleUpdate(ServerContext context, UpdateRequest request, ResultHandler<Resource> handler) {
         try {
             getBestRoute(context, request).handleUpdate(context, request, handler);
-        } catch (NotFoundException e) {
+        } catch (ResourceException e) {
             handler.handleError(e);
         }
     }
@@ -277,23 +291,39 @@ public final class VersionRouter implements RequestHandler {
      * @return The best matching {@code RequestHandler}
      * @throws NotFoundException If no match is found.
      */
-    private RequestHandler getBestRoute(ServerContext context, Request request) throws NotFoundException {
+    private RequestHandler getBestRoute(ServerContext context, Request request) throws ResourceException {
         AcceptAPIVersionContext apiVersionContext = context.asContext(AcceptAPIVersionContext.class);
-        try {
-            return versionSelector.select(apiVersionContext.getResourceVersion(), getRoutesMap());
-        } catch (ResourceException e) {
-            // TODO: i18n
-            throw new NotFoundException(String.format("Version '%s' of resource '%s' not found",
-                    apiVersionContext.getResourceVersion(), request.getResourceName()), e);
+        addWarningAdvice(context, apiVersionContext.getResourceVersion());
+        final VersionRoute<RequestHandler> selectedRoute =
+                versionSelector.select(apiVersionContext.getResourceVersion(), routes);
+        addVersionAdvice(context, apiVersionContext.getProtocolVersion(), selectedRoute.getVersion());
+        return selectedRoute.getRequestHandler();
+    }
+
+    private void addWarningAdvice(ServerContext context, Version version) {
+        if (warningEnabled && version == null && context.containsContext(AdviceContext.class)) {
+            AdviceContext adviceContext = context.asContext(AdviceContext.class);
+            adviceContext.putAdvice("Warning", getVersionMissingAdvice(agentName, ACCEPT_API_VERSION).toString());
         }
     }
 
-    private Map<Version, RequestHandler> getRoutesMap() {
-        Map<Version , RequestHandler> routesMap = new HashMap<Version, RequestHandler>();
-        for (VersionRoute route : routes) {
-            routesMap.put(route.getVersion(), route.getRequestHandler());
+    static AdviceWarning getVersionMissingAdvice(String agentName, String headerName) {
+        return AdviceWarning.getNotPresent(agentName, headerName);
+    }
+
+    private void addVersionAdvice(ServerContext context, Version protocolVersion, Version resourceVersion) {
+        if (context.containsContext(AdviceContext.class)) {
+            final AdviceContext adviceContext = context.asContext(AdviceContext.class);
+            adviceContext.putAdvice(CONTENT_API_VERSION, new StringBuilder()
+                    .append(PROTOCOL)
+                    .append(EQUALS)
+                    .append(protocolVersion.toString())
+                    .append(COMMA)
+                    .append(RESOURCE)
+                    .append(EQUALS)
+                    .append(resourceVersion.toString())
+                    .toString());
         }
-        return routesMap;
     }
 
     /**

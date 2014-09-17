@@ -16,6 +16,7 @@
 
 package org.forgerock.json.resource;
 
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import static org.fest.assertions.Assertions.assertThat;
@@ -75,5 +76,43 @@ public class VersionTest {
 
         //Then
         assertThat(version.isCompatibleWith(requestedVersion)).isFalse();
+    }
+
+    @DataProvider
+    public Object[][] versionStringsTestData() {
+        return new Object[][]{
+            /* columns are:
+               - version string
+ 	           - boolean indicating whether parsing should throw an exception
+ 	           - the major number that should result if parsing succeeds
+ 	           - the minor number that should result if parsing succeeds
+ 	        */
+                {"1.0", false, 1, 0},
+                {"10.10", false, 10, 10},
+                {"1.30", false, 1, 30},
+                {".3", true, -1, -1},
+                {"", true, -1, -1},
+                {"N.1", true, -1, -1},
+                {"1.2.3", true, -1, -1},
+                {"1.2.3.4", true, -1, -1},
+                {"1.2..4", true, -1, -1},
+                {"1.2..", false, 1, 2},
+        };
+    }
+
+    @Test(dataProvider = "versionStringsTestData")
+    public void shouldParseVersionStrings(String versionString, boolean shouldThrowException, int major, int minor) {
+        try {
+            Version version = Version.valueOf(versionString);
+
+            // if we reach this point, and an exception was expected, we have failed.
+            assertThat(shouldThrowException).isFalse();
+            assertThat(version.getMajor()).isEqualTo(major);
+            assertThat(version.getMinor()).isEqualTo(minor);
+
+        } catch (IllegalArgumentException iae) {
+            // if we reach this point, and an exception was not expected, we have failed.
+            assertThat(shouldThrowException).isTrue();
+        }
     }
 }

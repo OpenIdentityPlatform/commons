@@ -21,21 +21,21 @@ package org.forgerock.json.resource;
  *
  * @see VersionRouter
  */
-final class VersionRoute implements Route {
+public final class VersionRoute<T> implements Route {
 
     private final Version version;
-    private final RequestHandler handler;
+    private final T handler;
 
-    VersionRoute(Version version, RequestHandler handler) {
+    public VersionRoute(Version version, T handler) {
         this.version = version;
         this.handler = handler;
     }
 
-    Version getVersion() {
+    public Version getVersion() {
         return version;
     }
 
-    RequestHandler getRequestHandler() {
+    public T getRequestHandler() {
         return handler;
     }
 
@@ -48,7 +48,7 @@ final class VersionRoute implements Route {
             return false;
         }
 
-        VersionRoute route = (VersionRoute) o;
+        VersionRoute<?> route = (VersionRoute<?>) o;
         return handler.equals(route.handler) && version.equals(route.version);
     }
 
