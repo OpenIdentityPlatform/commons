@@ -78,6 +78,7 @@ public final class Router implements RequestHandler {
     private final UriRouter uriRouter = new UriRouter();
     private VersionSelector.DefaultVersionBehaviour defaultVersioningBehaviour =
             VersionSelector.DefaultVersionBehaviour.LATEST;
+    private boolean warningEnabled = true;
     private final Set<VersionRouter> versionRouters = new CopyOnWriteArraySet<VersionRouter>();
 
     /**
@@ -213,6 +214,7 @@ public final class Router implements RequestHandler {
     public VersionRouter addRoute(RoutingMode mode, String uriTemplate) {
         VersionRouter versionRouter = new VersionRouter(this, mode, uriTemplate);
         setVersionRouterDefaultBehaviour(versionRouter);
+        setWarningEnabledBehaviour(versionRouter);
         versionRouters.add(versionRouter);
         return versionRouter;
     }
@@ -266,6 +268,28 @@ public final class Router implements RequestHandler {
     public Router setVersioningToDefaultToNone() {
         defaultVersioningBehaviour = VersionSelector.DefaultVersionBehaviour.NONE;
         updateVersionRoutersDefaultBehaviour();
+        return this;
+    }
+
+    private void setWarningEnabledBehaviour(VersionRouter versionRouter) {
+        versionRouter.setWarningEnabledBehaviour(warningEnabled);
+    }
+
+    private void updateVersionRoutersWarningBehaviour() {
+        for (VersionRouter versionRouter : versionRouters) {
+            setWarningEnabledBehaviour(versionRouter);
+        }
+    }
+
+    /**
+     * Determines whether or not the responses returned by the resources under this router will add a warning to the
+     * response if there is no Accept-API-Version header in them.
+     *
+     * @param warningEnabled {@code true} to enable warning, false otherwise.
+     */
+    public Router setWarningEnabled(boolean warningEnabled) {
+        this.warningEnabled = warningEnabled;
+        updateVersionRoutersWarningBehaviour();
         return this;
     }
 

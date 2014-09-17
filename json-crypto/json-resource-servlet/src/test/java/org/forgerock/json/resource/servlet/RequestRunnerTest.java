@@ -107,7 +107,7 @@ public class RequestRunnerTest {
     private QueryResultHandler getAnonymousQueryResultHandler(StringBuilder output)
             throws Exception {
         // mock everything
-        Context context = null;
+        Context context = mock(Context.class);
         QueryRequest request = Requests.newQueryRequest("");
         HttpServletRequest httpRequest = mock(HttpServletRequest.class);
         HttpServletResponse httpResponse = mock(HttpServletResponse.class);
