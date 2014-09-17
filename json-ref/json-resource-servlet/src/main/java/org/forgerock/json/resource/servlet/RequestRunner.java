@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2013 ForgeRock AS.
+ * Copyright 2012-2014 ForgeRock AS.
  */
 package org.forgerock.json.resource.servlet;
 
@@ -20,6 +20,7 @@ import static org.forgerock.json.resource.servlet.HttpUtils.*;
 import static org.forgerock.util.Utils.closeSilently;
 
 import java.io.IOException;
+import java.util.Map;
 
 import javax.mail.internet.ContentType;
 import javax.mail.internet.ParseException;
@@ -29,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.codehaus.jackson.JsonGenerator;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.AdviceContext;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.CreateRequest;
@@ -102,6 +104,7 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
                     @Override
                     public void handleResult(final JsonValue result) {
                         try {
+                            writeAdvice();
                             if (result != null) {
                                 writeJsonValue(result);
                             } else {
@@ -127,6 +130,7 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
                     @Override
                     public void handleResult(final Resource result) {
                         try {
+                            writeAdvice();
                             if (result.getId() != null) {
                                 httpResponse.setHeader(HEADER_LOCATION, getResourceURL(request,
                                         result));
@@ -192,6 +196,7 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
             @Override
             public boolean handleResource(final Resource resource) {
                 try {
+                    writeAdvice();
                     writeHeader();
                     writeJsonValue(resource.getContent());
                     resultCount++;
@@ -302,6 +307,7 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
             @Override
             public void handleResult(final Resource result) {
                 try {
+                    writeAdvice();
                     // Don't return the resource if this is a read request and the
                     // If-None-Match header was specified.
                     if (request instanceof ReadRequest) {
@@ -380,5 +386,14 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
             writeBinaryValue(resource.getContent());
         }
 
+    }
+
+    private void writeAdvice() {
+        if (context.containsContext(AdviceContext.class)) {
+            AdviceContext adviceContext = context.asContext(AdviceContext.class);
+            for (Map.Entry<String, String> entry : adviceContext.getAdvices().entrySet()) {
+                httpResponse.setHeader(entry.getKey(), entry.getValue());
+            }
+        }
     }
 }

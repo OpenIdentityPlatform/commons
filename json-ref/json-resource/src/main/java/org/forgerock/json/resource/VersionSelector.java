@@ -52,14 +52,15 @@ public class VersionSelector {
      * @param requested The requested version.
      * @param candidates A {@code Map} of candidates.
      * @param <T> The candidate value type.
-     * @return The candidate that matched the requested version.
-     * @throws NotFoundException If the requested version does not match and candidate.
+     * @return The candidate value type that most closely matched the requested version.
+     * @throws ResourceException if no routes, or no version specified, or version unmatched.
      */
-    public <T> T select(Version requested, Map<Version, T> candidates) throws NotFoundException {
+    public <T> T select(Version requested, Map<Version, T> candidates) throws ResourceException {
 
         if (candidates == null || candidates.isEmpty()) {
             //TODO i18n
-            throw new NotFoundException("No match found. No routes registered.");
+            throw ResourceException.getException(ResourceException.INTERNAL_ERROR,
+                    "No match found. No routes registered.");
         }
 
         SortedMap<Version, T> sortedCandidates = sort(candidates);
@@ -74,7 +75,8 @@ public class VersionSelector {
                 }
                 default: {
                     //TODO i18n
-                    throw new NotFoundException("No resource version specified.");
+                    throw ResourceException.getException(ResourceException.BAD_REQUEST,
+                            "No resource version specified.");
                 }
             }
         }
@@ -86,7 +88,8 @@ public class VersionSelector {
         }
 
         //TODO i18n
-        throw new NotFoundException("Requested version, " + requested + ", does not match any routes.");
+        throw ResourceException.getException(ResourceException.NOT_FOUND,
+                "Requested version, " + requested + ", does not match any routes.");
     }
 
     /**

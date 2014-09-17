@@ -18,6 +18,7 @@ package org.forgerock.json.resource.servlet;
 import static org.forgerock.json.resource.ActionRequest.ACTION_ID_CREATE;
 import static org.forgerock.json.resource.servlet.HttpUtils.*;
 import static org.forgerock.util.Reject.checkNotNull;
+import static org.forgerock.json.resource.VersionConstants.ACCEPT_API_VERSION;
 
 import java.io.IOException;
 import java.util.Map;
@@ -31,6 +32,7 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.AcceptAPIVersion;
 import org.forgerock.json.resource.AcceptAPIVersionContext;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.AdviceContext;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConflictException;
 import org.forgerock.json.resource.ConnectionFactory;
@@ -545,10 +547,10 @@ public final class HttpServletAdapter {
         return resourceName;
     }
 
-    private Context newRequestContext(final HttpServletRequest req,
-                                      final AcceptAPIVersion acceptVersion) throws ResourceException {
+    private Context newRequestContext(final HttpServletRequest req, final AcceptAPIVersion acceptVersion)
+            throws ResourceException {
         final Context root = contextFactory.createContext(req);
-        return new AcceptAPIVersionContext(new HttpContext(root, req), PROTOCOL_NAME, acceptVersion);
+        return new AdviceContext(new AcceptAPIVersionContext(new HttpContext(root, req), PROTOCOL_NAME, acceptVersion));
     }
 
     private boolean parseCommonParameter(final String name, final String[] values,
@@ -616,7 +618,7 @@ public final class HttpServletAdapter {
      */
     private AcceptAPIVersion parseAcceptAPIVersion(final HttpServletRequest req) throws BadRequestException {
         // Extract out the protocol and resource versions.
-        final String versionString = req.getHeader(HEADER_X_VERSION_API);
+        final String versionString = req.getHeader(ACCEPT_API_VERSION);
 
         final AcceptAPIVersion acceptAPIVersion = AcceptAPIVersion
                 .newBuilder(versionString)

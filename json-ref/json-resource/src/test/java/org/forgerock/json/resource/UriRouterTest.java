@@ -89,6 +89,11 @@ public final class UriRouterTest {
         assertThat(rc.getValue().getBaseUri()).isEqualTo(expectedMatchedUri);
         assertThat(rc.getValue().getUriTemplateVariables()).isEqualTo(expectedUriTemplateVariables);
     }
+    private void checkReadRequest(ArgumentCaptor<ReadRequest> rr, ReadRequest r) {
+        assertThat(rr.getValue().getFields()).isEqualTo(r.getFields());
+        assertThat(rr.getValue().getRequestType()).isEqualTo(r.getRequestType());
+        assertThat(rr.getValue().getResourceName()).isEqualTo(r.getResourceName());
+    }
 
     @Test
     public void testDefaultRouteWithOne() throws ResourceException {
@@ -102,8 +107,10 @@ public final class UriRouterTest {
         final ReadRequest r = newReadRequest("object");
         router.handleRead(c, r, null);
         final ArgumentCaptor<RouterContext> rc = ArgumentCaptor.forClass(RouterContext.class);
-        verify(h2).handleRead(rc.capture(), same(r), Matchers.<ResultHandler<Resource>> any());
+        final ArgumentCaptor<ReadRequest> rr = ArgumentCaptor.forClass(ReadRequest.class);
+        verify(h2).handleRead(rc.capture(), rr.capture(), Matchers.<ResultHandler<Resource>> any());
         checkRouterContext(rc, c, "");
+        checkReadRequest(rr, r);
     }
 
     @Test
@@ -116,8 +123,10 @@ public final class UriRouterTest {
         final ReadRequest r = newReadRequest("object");
         router.handleRead(c, r, null);
         final ArgumentCaptor<RouterContext> rc = ArgumentCaptor.forClass(RouterContext.class);
-        verify(h).handleRead(rc.capture(), same(r), Matchers.<ResultHandler<Resource>> any());
+        final ArgumentCaptor<ReadRequest> rr = ArgumentCaptor.forClass(ReadRequest.class);
+        verify(h).handleRead(rc.capture(), rr.capture(), Matchers.<ResultHandler<Resource>> any());
         checkRouterContext(rc, c, "");
+        checkReadRequest(rr, r);
     }
 
     @DataProvider
