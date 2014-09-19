@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions Copyrighted [year] [name of copyright owner]".
+
+  Copyright © 2014 ForgeRock AS. All rights reserved.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.forgerock.commons.guava</groupId>
+        <artifactId>forgerock-guava</artifactId>
+        <version>18.0</version>
+    </parent>
+    <packaging>jar</packaging>
+    <artifactId>io</artifactId>
+    <name>Google Guava IO</name>
+    <description>Repackaged version of Guava to avoid dependency collisions.</description>
+    <dependencies>
+        <dependency>
+            <groupId>org.forgerock.commons.guava</groupId>
+            <artifactId>all</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons.guava</groupId>
+            <artifactId>annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons.guava</groupId>
+            <artifactId>base</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons.guava</groupId>
+            <artifactId>collect</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons.guava</groupId>
+            <artifactId>hash</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons.guava</groupId>
+            <artifactId>primitives</artifactId>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <configuration>
+                    <artifactSet>
+                        <includes>
+                            <include>org.forgerock.commons.guava:all</include>
+                        </includes>
+                    </artifactSet>
+                    <filters>
+                        <filter>
+                            <artifact>org.forgerock.commons.guava:all</artifact>
+                            <includes>
+                                <include>org/forgerock/guava/common/io/**</include>
+                            </includes>
+                        </filter>
+                    </filters>
+                    <transformers>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                            <manifestEntries>
+                                <Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
+                                <Bundle-Name>${project.name}</Bundle-Name>
+                                <Import-Package>javax.annotation;resolution:=optional,org.forgerock.guava.common.base;version="${project.version}",org.forgerock.guava.common.math;version="${project.version}",org.forgerock.guava.common.hash;version="${project.version}",org.forgerock.guava.common.collect;version="${project.version}",org.forgerock.guava.common.primitives;version="${project.version}"</Import-Package>
+                                <Export-Package>org.forgerock.guava.common.io;version="${project.version}"</Export-Package>
+                            </manifestEntries>
+                        </transformer>
+                    </transformers>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

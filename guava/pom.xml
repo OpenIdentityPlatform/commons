@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions Copyrighted [year] [name of copyright owner]".
+ 
+  Copyright © 2014 ForgeRock AS. All rights reserved.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.forgerock</groupId>
+        <artifactId>forgerock-parent</artifactId>
+        <version>1.2.1</version>
+    </parent>
+    <packaging>pom</packaging>
+    <groupId>org.forgerock.commons.guava</groupId>
+    <artifactId>forgerock-guava</artifactId>
+    <version>18.0</version>
+    <name>ForgeRock Guava</name>
+    <description>Repackaged version of Guava to avoid dependency collisions.</description>
+    <modules>
+        <module>all</module>
+        <module>annotations</module>
+        <module>base</module>
+        <module>cache</module>
+        <module>collect</module>
+        <module>concurrent</module>
+        <module>escape</module>
+        <module>eventbus</module>
+        <module>hash</module>
+        <module>html</module>
+        <module>io</module>
+        <module>math</module>
+        <module>net</module>
+        <module>primitives</module>
+        <module>reflect</module>
+        <module>xml</module>
+    </modules>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.forgerock.commons.guava</groupId>
+                <artifactId>all</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons.guava</groupId>
+                <artifactId>annotations</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons.guava</groupId>
+                <artifactId>base</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons.guava</groupId>
+                <artifactId>cache</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons.guava</groupId>
+                <artifactId>collect</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons.guava</groupId>
+                <artifactId>concurrent</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons.guava</groupId>
+                <artifactId>escape</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons.guava</groupId>
+                <artifactId>eventbus</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons.guava</groupId>
+                <artifactId>hash</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons.guava</groupId>
+                <artifactId>io</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons.guava</groupId>
+                <artifactId>math</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons.guava</groupId>
+                <artifactId>net</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons.guava</groupId>
+                <artifactId>primitives</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons.guava</groupId>
+                <artifactId>reflect</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons.guava</groupId>
+                <artifactId>xml</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>2.3</version>
+                    <executions>
+                        <execution>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>shade</goal>
+                            </goals>
+                            <configuration>
+                                <shadedArtifactAttached>false</shadedArtifactAttached>
+                                <createDependencyReducedPom>true</createDependencyReducedPom>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+    <!-- Maven Repositories -->
+    <repositories>
+        <!-- ForgeRock Common Internal Project Repositories -->
+        <repository>
+            <id>forgerock-staging-repo</id>
+            <name>ForgeRock Release Repository</name>
+            <url>http://maven.forgerock.org/repo/releases</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+</project>

@@ -1,0 +1,49 @@
+Bundle-Description: Guava is a suite of core and expanded libraries that
+  include    utility classes, google's collections, io classes, and much
+     much more.    Guava has only one code dependency - javax.annotation
+ ,    per the JSR-305 spec. This bundle is repackaged under org.forgeroc
+ k.guava
+Bundle-DocURL: https://guava-libraries.googlecode.com/
+Bundle-License: http://www.apache.org/licenses/LICENSE-2.0.txt
+Bundle-ManifestVersion: 2
+Bundle-Name: Guava: Google Core Libraries for Java
+Bundle-SymbolicName: ${project.groupId}.${project.artifactId}
+Bundle-Version: ${project.version}
+Import-Package: javax.annotation;resolution:=optional,sun.misc;resolutio
+ n:=optional
+Export-Package: org.forgerock.guava.common.net;uses:="javax.annotation,o
+ rg.forgerock.guava.common.base,org.forgerock.guava.common.hash,org.forg
+ erock.guava.common.io,org.forgerock.guava.common.primitives,org.forgero
+ ck.guava.common.collect,org.forgerock.guava.common.escape";version="18.
+ 0.0",org.forgerock.guava.common.html;uses:="org.forgerock.guava.common.
+ escape,javax.annotation";version="18.0.0",org.forgerock.guava.common.co
+ llect;uses:="org.forgerock.guava.common.base,javax.annotation,org.forge
+ rock.guava.common.primitives,org.forgerock.guava.common.math";version="
+ 18.0.0",org.forgerock.guava.common.primitives;uses:="org.forgerock.guav
+ a.common.base,javax.annotation,sun.misc";version="18.0.0",org.forgerock
+ .guava.common.base;uses:="javax.annotation";version="18.0.0",org.forger
+ ock.guava.common.escape;uses:="org.forgerock.guava.common.base,javax.an
+ notation";version="18.0.0",org.forgerock.guava.common.cache;uses:="org.
+ forgerock.guava.common.collect,org.forgerock.guava.common.util.concurre
+ nt,javax.annotation,org.forgerock.guava.common.base,org.forgerock.guava
+ .common.primitives,sun.misc";version="18.0.0",org.forgerock.guava.commo
+ n.eventbus;uses:="org.forgerock.guava.common.collect,org.forgerock.guav
+ a.common.cache,javax.annotation,org.forgerock.guava.common.base,org.for
+ gerock.guava.common.util.concurrent,org.forgerock.guava.common.reflect"
+ ;version="18.0.0",org.forgerock.guava.common.util.concurrent;uses:="org
+ .forgerock.guava.common.base,javax.annotation,org.forgerock.guava.commo
+ n.collect,org.forgerock.guava.common.primitives,org.forgerock.guava.com
+ mon.math";version="18.0.0",org.forgerock.guava.common.hash;uses:="org.f
+ orgerock.guava.common.primitives,org.forgerock.guava.common.base,javax.
+ annotation,org.forgerock.guava.common.math";version="18.0.0",org.forger
+ ock.guava.common.io;uses:="javax.annotation,org.forgerock.guava.common.
+ base,org.forgerock.guava.common.math,org.forgerock.guava.common.hash,or
+ g.forgerock.guava.common.collect,org.forgerock.guava.common.primitives"
+ ;version="18.0.0",org.forgerock.guava.common.xml;uses:="org.forgerock.g
+ uava.common.escape,javax.annotation";version="18.0.0",org.forgerock.gua
+ va.common.reflect;uses:="javax.annotation,org.forgerock.guava.common.ba
+ se,org.forgerock.guava.common.collect,org.forgerock.guava.common.primit
+ ives";version="18.0.0",org.forgerock.guava.common.math;uses:="org.forge
+ rock.guava.common.base,org.forgerock.guava.common.primitives,javax.anno
+ tation";version="18.0.0",org.forgerock.guava.common.annotations;version
+ ="18.0.0"
