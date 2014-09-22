@@ -12,7 +12,7 @@
   Header, with the fields enclosed by brackets [] replaced by your own identifying
   information: "Portions Copyrighted [year] [name of copyright owner]".
 
-  Copyright © 2014 ForgeRock AS. All rights reserved.
+  Copyright 2014 ForgeRock AS.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
@@ -23,7 +23,7 @@
         <version>18.0</version>
     </parent>
     <packaging>jar</packaging>
-    <artifactId>all</artifactId>
+    <artifactId>forgerock-guava-all</artifactId>
     <name>Google Guava</name>
     <description>Repackaged version of Guava to avoid dependency collisions.</description>
     <dependencies>

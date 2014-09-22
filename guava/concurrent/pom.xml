@@ -12,7 +12,7 @@
   Header, with the fields enclosed by brackets [] replaced by your own identifying
   information: "Portions Copyrighted [year] [name of copyright owner]".
 
-  Copyright © 2014 ForgeRock AS. All rights reserved.
+  Copyright 2014 ForgeRock AS.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
@@ -23,33 +23,33 @@
         <version>18.0</version>
     </parent>
     <packaging>jar</packaging>
-    <artifactId>concurrent</artifactId>
+    <artifactId>forgerock-guava-concurrent</artifactId>
     <name>Google Guava Concurrent</name>
     <description>Repackaged version of Guava to avoid dependency collisions.</description>
     <dependencies>
         <dependency>
             <groupId>org.forgerock.commons.guava</groupId>
-            <artifactId>all</artifactId>
+            <artifactId>forgerock-guava-all</artifactId>
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons.guava</groupId>
-            <artifactId>annotations</artifactId>
+            <artifactId>forgerock-guava-annotations</artifactId>
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons.guava</groupId>
-            <artifactId>base</artifactId>
+            <artifactId>forgerock-guava-base</artifactId>
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons.guava</groupId>
-            <artifactId>collect</artifactId>
+            <artifactId>forgerock-guava-collect</artifactId>
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons.guava</groupId>
-            <artifactId>math</artifactId>
+            <artifactId>forgerock-guava-math</artifactId>
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons.guava</groupId>
-            <artifactId>primitives</artifactId>
+            <artifactId>forgerock-guava-primitives</artifactId>
         </dependency>
     </dependencies>
     <build>
@@ -60,14 +60,14 @@
                 <configuration>
                     <artifactSet>
                         <includes>
-                            <include>org.forgerock.commons.guava:all</include>
+                            <include>org.forgerock.commons.guava:forgerock-guava-all</include>
                         </includes>
                     </artifactSet>
                     <filters>
                         <filter>
-                            <artifact>org.forgerock.commons.guava:all</artifact>
+                            <artifact>org.forgerock.commons.guava:forgerock-guava-all</artifact>
                             <includes>
-                                <include>org/forgerock/guava/common/util.concurrent</include>
+                                <include>org/forgerock/guava/common/util/concurrent/**</include>
                             </includes>
                         </filter>
                     </filters>
