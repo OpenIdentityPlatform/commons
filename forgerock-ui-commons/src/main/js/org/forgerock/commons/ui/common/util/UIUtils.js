@@ -225,7 +225,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                 buttonicon:"ui-icon-add",
                 position: "first",
                 onClickButton: function(){
-                    grid.jqGrid('columnChooser', {width : columnChooserOptions.width, height : columnChooserOptions.height});
+                    grid.jqGrid('columnChooser', {width : columnChooserOptions.width, height : columnChooserOptions.height, done: function (){grid.trigger('jqGridAfterLoadComplete.setFrozenColumns');}});
                 }
             });
 
