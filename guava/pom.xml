@@ -159,10 +159,9 @@
             </snapshots>
         </repository>
     </repositories>
-
-  <scm>
-    <connection>scm:svn:https://svn.forgerock.org/commons/forgerock-parent/trunk/18.0</connection>
-    <developerConnection>scm:svn:https://svn.forgerock.org/commons/forgerock-parent/trunk/18.0</developerConnection>
-    <url>http://sources.forgerock.org/browse/commons/forgerock-parent/trunk/18.0</url>
-  </scm>
+    <scm>
+        <connection>scm:svn:https://svn.forgerock.org/commons/forgerock-parent/trunk</connection>
+        <developerConnection>scm:svn:https://svn.forgerock.org/commons/forgerock-parent/trunk</developerConnection>
+        <url>http://sources.forgerock.org/browse/commons/forgerock-parent/trunk</url>
+    </scm>
 </project>
