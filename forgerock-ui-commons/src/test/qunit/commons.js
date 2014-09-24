@@ -27,8 +27,9 @@
 
 define([
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/commons/ui/common/components/Dialog"
-], function (conf, Dialog) {
+    "org/forgerock/commons/ui/common/components/Dialog",
+    "org/forgerock/commons/ui/common/util/UIUtils"
+], function (conf, Dialog, UIUtils) {
     return {
         executeAll: function (server, parameters) {
 
@@ -87,6 +88,23 @@ define([
                 QUnit.ok(testDialog.actions.length === 2 && testDialog.actions[0].name === "close" && testDialog.actions[1].name === "Test", "Cancel and Test Buttons are Available"); 
 
                 QUnit.start();
+            });
+
+            QUnit.test("UIUtils loadSelect", function () {
+                var select = $("<select>");
+                UIUtils.loadSelectOptions([
+                        { "data": "option 1", "key": 1},
+                        { "data": "option 2", "key": 2}
+                    ], select);
+
+                QUnit.ok($("option", select).length, 2, "Options are listed within select box, from data");
+
+                UIUtils.loadSelectOptions([
+                        { "data": "option 1", "key": 1},
+                        { "data": "option 2", "key": 2}
+                    ], select, true);
+
+                QUnit.ok($("option", select).length, 3, "Options are listed within select box, from data (including 'Please choose' prompt)");
             });
         }
     };

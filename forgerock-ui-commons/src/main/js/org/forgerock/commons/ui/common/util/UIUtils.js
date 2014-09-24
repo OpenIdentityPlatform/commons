@@ -348,17 +348,13 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                 var i, option, selectElement = this;
                 for(i=0;i<optionsDataArray.length;i++){
                     option = new Option(optionsDataArray[i].value, optionsDataArray[i].key);
-                    if ($.browser.msie) {
-                        selectElement.add(option);
-                    } else {
-                        selectElement.add(option, null);
-                    }
+                    selectElement.options[selectElement.options.length] = option;
                 }
             }
         });
     };
     
-    $.event.special.delayedkeyup = {            
+    $.event.special.delayedkeyup = {
         setup: function( data, namespaces ) {
             $(this).bind("keyup", $.event.special.delayedkeyup.handler);
         },
