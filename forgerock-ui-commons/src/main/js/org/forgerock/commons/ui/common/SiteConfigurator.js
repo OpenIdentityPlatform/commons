@@ -71,30 +71,8 @@ define("org/forgerock/commons/ui/common/SiteConfigurator", [
        }
    });
 
-  obj.configurePage = function (route, params) {
-      var promise = $.Deferred(),
-          configurationDelegate;
-
-          if (obj.configuration.remoteConfig === true) {
-                configurationDelegate = require(obj.configuration.delegate);
-                if (typeof configurationDelegate.checkForDifferences === "function") {
-                    configurationDelegate.checkForDifferences(route, params).then(function (config) {
-                        if (config) {
-                            obj.processConfiguration(config);
-                        }
-                        promise.resolve();
-                    });
-          } else {
-              promise.resolve();
-          }
-      } else {
-            promise.resolve();
-      }
-
-      return promise;
-  };
-   
    obj.processConfiguration = function(config) {
+
 
        if (config.securityQuestions === true) {
            conf.globalData.securityQuestions = true;             
@@ -120,18 +98,45 @@ define("org/forgerock/commons/ui/common/SiteConfigurator", [
            conf.defaultType = config.defaultNotificationType;
        }
 
+       if (config.policyEditorConfig) {
+           conf.globalData.policyEditorConfig = config.policyEditorConfig;
+       }
+
        conf.globalData.selfRegistration =                       config.selfRegistration;
        conf.globalData.siteIdentification =                     config.siteIdentification;
        conf.globalData.protectedUserAttributes =                config.protectedUserAttributes;
        conf.globalData.requirePasswordForEmailChange =          config.requirePasswordForEmailChange;
        conf.globalData.forgotPassword =                         config.forgotPassword;            
-       conf.globalData.successfulUserRegistrationDestination =  config.successfulUserRegistrationDestination ;
+       conf.globalData.successfulUserRegistrationDestination =  config.successfulUserRegistrationDestination;
        conf.globalData.auth.cookieName =                        config.cookieName;
        conf.globalData.auth.cookieDomains =                     config.domains;
 
-       i18nManager.init(config.lang);    
-       
+       i18nManager.init(config.lang);
+
    };
+
+   obj.configurePage = function (route, params) {
+      var promise = $.Deferred(),
+          configurationDelegate;
+
+          if (obj.configuration.remoteConfig === true) {
+                configurationDelegate = require(obj.configuration.delegate);
+                if (typeof configurationDelegate.checkForDifferences === "function") {
+                    configurationDelegate.checkForDifferences(route, params).then(function (config) {
+                        if (config) {
+                            obj.processConfiguration(config);
+                        }
+                        promise.resolve();
+                    });
+          } else {
+              promise.resolve();
+          }
+      } else {
+            promise.resolve();
+      }
+
+      return promise;
+  };
    
    return obj;
 });

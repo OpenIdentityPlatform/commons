@@ -87,15 +87,15 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
             //create a json object from a query string
             //by taking a query string and splitting it up into individual key=value strings
             return _.object(
-                        //queryParameters.match(/([^&]+)/g) returns an array of key value pair strings
-                        _.map(queryParameters.match(/([^&]+)/g), function (pair) { 
-                           //convert each string into a an array 0 index being the key and 1 index being the value
-                           var keyAndValue = pair.match(/([^=]+)=?(.*)/).slice(1);
-                               //decode the value
-                               keyAndValue[1] = decodeURIComponent(keyAndValue[1]);
-                               return keyAndValue;
-                        })
-                    );
+                //queryParameters.match(/([^&]+)/g) returns an array of key value pair strings
+                _.map(queryParameters.match(/([^&]+)/g), function (pair) { 
+                   //convert each string into a an array 0 index being the key and 1 index being the value
+                   var keyAndValue = pair.match(/([^=]+)=?(.*)/).slice(1);
+                       //decode the value
+                       keyAndValue[1] = decodeURIComponent(keyAndValue[1]);
+                       return keyAndValue;
+                })
+            );
         }
         return null;
     };
@@ -145,7 +145,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         }
     };
 
-    obj.buildRestResponseBasedJQGrid = function (view, id, options, columnChooserOptions, callback) {
+    obj.buildRestResponseBasedJQGrid = function (view, id, options, additional, callback) {
         options = options ? options : {};
 
         if (!id || !view || !options.url) {
@@ -206,6 +206,11 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
 
                     return $.param(postedData);
                 },
+                beforeProcessing: function (data, status, xhr) {
+                    if(additional && typeof additional.preProcessing === 'function'){
+                        additional.preProcessing(data, status, xhr);
+                    }      
+                },
                 loadComplete: function (data) {
                     _.extend(view.data, data);
                 },
@@ -225,7 +230,11 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                 buttonicon:"ui-icon-add",
                 position: "first",
                 onClickButton: function(){
-                    grid.jqGrid('columnChooser', {width : columnChooserOptions.width, height : columnChooserOptions.height, done: function (){grid.trigger('jqGridAfterLoadComplete.setFrozenColumns');}});
+                    grid.jqGrid('columnChooser', { 
+                        width : additional.columnChooserOptions.width, height : additional.columnChooserOptions.height, 
+                        done: function (){
+                            grid.trigger('jqGridAfterLoadComplete.setFrozenColumns');
+                        }});
                 }
             });
 
@@ -611,6 +620,55 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
             })
         ;
     };
+
+    // Registering global mixins 
     
+    _.mixin({
+
+        /*  findByValues takes a collection and returns a subset made up of objects where the given property name matches a value in the list.  
+            For example:
+
+            var collections = [
+                {id: 1, stack: 'am'}, 
+                {id: 2, stack: 'dj'},
+                {id: 3, stack: 'idm'},
+                {id: 4, stack: 'api'},
+                {id: 5, stack: 'rest'}
+            ];
+
+            var filtered = _.findByValues(collections, "id", [1,3,4]);
+            
+            filtered = [
+                {id: 1, stack: 'am'}, 
+                {id: 3, stack: 'idm'},
+                {id: 4, stack: 'api'}
+            ]
+         
+         */
+
+        'findByValues': function(collection, property, values) {
+            return _.filter(collection, function(item) {
+                return _.contains(values, item[property]);
+            });
+        },
+
+        /*  removeByValues takes a collection and returns a subset made up of objects where there is no match between the given property name and the values in the list.  
+            For example:
+
+            var filtered = _.removeByValues(collections, "id", [1,3,4]);
+            
+            filtered = [  
+                {id: 2, stack: 'dj'},
+                {id: 5, stack: 'rest'}
+            ]
+   
+         */
+        'removeByValues': function(collection, property, values) {
+            return _.reject(collection, function(item) {
+                return _.contains(values, item[property]);
+            });
+        }
+    });
+
     return obj;
 });
