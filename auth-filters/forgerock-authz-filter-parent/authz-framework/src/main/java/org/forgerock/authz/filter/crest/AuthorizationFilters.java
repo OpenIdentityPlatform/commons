@@ -108,6 +108,29 @@ public final class AuthorizationFilters {
     }
 
     /**
+     * Returns a new {@link FilterChain} which will perform authorization for each request before allowing access to the
+     * provided RequestHandler.
+     *
+     * @param target The RequestHandler.
+     * @param modules The {@code CrestAuthorizationModule}s that will perform authorization for each request.
+     * @return A new {@code FilterChain} which will filter requests before allowing access to the provided RequestHandler.
+     * @throws java.lang.NullPointerException If either the specified {@code target} or {@code modules} parameters are
+     * {@code null}.
+     */
+    public static FilterChain createFilter(RequestHandler target, CrestAuthorizationModule... modules) {
+        Reject.ifNull(target, "Target cannot be null.");
+        Reject.ifNull(modules, "Authorization module cannot be null.");
+        Reject.ifTrue(modules.length == 0, "Authorization filters cannot be empty.");
+
+        final List<Filter> filters = new ArrayList<Filter>();
+        for (final CrestAuthorizationModule module : modules) {
+            filters.add(new AuthorizationFilter(module));
+        }
+
+        return new FilterChain(target, filters);
+    }
+
+    /**
      * <p>A {@code AuthorizationFilter} will filter requests based on the result of the authorization performed by the
      * specified {@link CrestAuthorizationModule}.</p>
      *

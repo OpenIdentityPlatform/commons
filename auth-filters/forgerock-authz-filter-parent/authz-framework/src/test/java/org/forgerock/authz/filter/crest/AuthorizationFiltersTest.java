@@ -28,6 +28,7 @@ import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
@@ -158,6 +159,21 @@ public class AuthorizationFiltersTest {
 
         //Given
         SingletonResourceProvider target = mock(SingletonResourceProvider.class);
+        CrestAuthorizationModule module = mock(CrestAuthorizationModule.class);
+        CrestAuthorizationModule[] modules = new CrestAuthorizationModule[] {module};
+
+        //When
+        FilterChain chain = AuthorizationFilters.createFilter(target, modules);
+
+        //Then
+        assertNotNull(chain);
+    }
+
+    @Test
+    public void shouldCreateFilterForRequestHandler() {
+
+        //Given
+        RequestHandler target = mock(RequestHandler.class);
         CrestAuthorizationModule module = mock(CrestAuthorizationModule.class);
         CrestAuthorizationModule[] modules = new CrestAuthorizationModule[] {module};
 
