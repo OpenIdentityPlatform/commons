@@ -160,8 +160,8 @@
         </repository>
     </repositories>
     <scm>
-        <connection>scm:svn:https://svn.forgerock.org/commons/forgerock-parent/trunk</connection>
-        <developerConnection>scm:svn:https://svn.forgerock.org/commons/forgerock-parent/trunk</developerConnection>
-        <url>http://sources.forgerock.org/browse/commons/forgerock-parent/trunk</url>
+        <connection>scm:svn:https://svn.forgerock.org/commons/forgerock-guava/trunk</connection>
+        <developerConnection>scm:svn:https://svn.forgerock.org/commons/forgerock-guava/trunk</developerConnection>
+        <url>http://sources.forgerock.org/browse/commons/forgerock-guava/trunk</url>
     </scm>
 </project>
