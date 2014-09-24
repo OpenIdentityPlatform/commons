@@ -50,6 +50,7 @@ import org.forgerock.util.LazyMap;
  *   },
  *   "method"     : "GET",
  *   "path" : "/users/bjensen",
+ *   "remoteAddress" : "192.0.2.17",
  *   "headers" : {
  *       ...
  *   },
@@ -66,10 +67,12 @@ public final class HttpContext extends AbstractContext implements ClientContext 
 
     // TODO: security parameters such as user name, etc?
 
-    // Persisted attribute names.
     /** the persisted attribute name for the HTTP headers. */
     public static final String ATTR_HEADERS = "headers";
+    /** the persisted attribute name for the request method */
     private static final String ATTR_METHOD = "method";
+    /** the persisted attribute name for the remote addres */
+    private static final String ATTR_REMOTE_ADDRESS = "remoteAddress";
     /** the persisted attribute name for the HTTP parameters. */
     public static final String ATTR_PARAMETERS = "parameters";
     private static final String ATTR_PATH = "path";
@@ -108,6 +111,7 @@ public final class HttpContext extends AbstractContext implements ClientContext 
         super(parent);
         data.put(ATTR_METHOD, HttpUtils.getMethod(req));
         data.put(ATTR_PATH, req.getRequestURL().toString());
+        data.put(ATTR_REMOTE_ADDRESS, req.getRemoteAddr());
         this.headers = Collections.unmodifiableMap(new LazyMap<String, List<String>>(
                 new Factory<Map<String, List<String>>>() {
                     @Override
@@ -200,6 +204,18 @@ public final class HttpContext extends AbstractContext implements ClientContext 
      */
     public String getMethod() {
         return data.get(ATTR_METHOD).asString();
+    }
+
+    /**
+     * Returns the address of the client making the request.  This may be an IPV4 or
+     * an IPv6 address depending on server configuration.  Note that the address returned
+     * may also be the address of a proxy per {@link javax.servlet.http.HttpServletRequest#getRemoteAddr()}
+     * No guarantees of whether the returned address is reachable are made.
+     *
+     * @return The address of the client or proxy making the request.
+     */
+    public String getRemoteAddress() {
+        return data.get(ATTR_REMOTE_ADDRESS).asString();
     }
 
     /**
