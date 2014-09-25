@@ -53,10 +53,10 @@ public class JwtClaimsSetKeyTest {
         //Given
 
         //When
-        JwtClaimsSetKey claimsSetKey = JwtClaimsSetKey.getClaimSetKey("PRN");
+        JwtClaimsSetKey claimsSetKey = JwtClaimsSetKey.getClaimSetKey("SUB");
 
         //Then
-        assertEquals(claimsSetKey, JwtClaimsSetKey.PRN);
+        assertEquals(claimsSetKey, JwtClaimsSetKey.SUB);
     }
 
     @Test

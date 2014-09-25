@@ -114,27 +114,27 @@ public class JwtClaimsSetBuilder {
     }
 
     /**
-     * Sets the principal this JWT is issued to.
+     * Sets the subject this JWT is issued to.
      * <p>
-     * @see JwtClaimsSet#setPrincipal(String)
+     * @see JwtClaimsSet#setSubject(String)
      *
-     * @param prn The JWT's principal.
+     * @param sub The JWT's subject.
      * @return This JwtClaimsSetBuilder.
      */
-    public JwtClaimsSetBuilder prn(String prn) {
-        return claim("prn", prn);
+    public JwtClaimsSetBuilder sub(String sub) {
+        return claim("sub", sub);
     }
 
     /**
-     * Sets the principal this JWT is issued to.
+     * Sets the subject this JWT is issued to.
      * <p>
-     * @see JwtClaimsSet#setPrincipal(java.net.URI)
+     * @see JwtClaimsSet#setSubject(java.net.URI)
      *
-     * @param prn The JWT's principal.
+     * @param sub The JWT's subject.
      * @return This JwtClaimsSetBuilder.
      */
-    public JwtClaimsSetBuilder prn(URI prn) {
-        return claim("prn", prn);
+    public JwtClaimsSetBuilder sub(URI sub) {
+        return claim("sub", sub);
     }
 
     /**

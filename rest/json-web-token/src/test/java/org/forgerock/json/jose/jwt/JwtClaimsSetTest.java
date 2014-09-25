@@ -94,33 +94,33 @@ public class JwtClaimsSetTest {
     }
 
     @Test
-    public void shouldSetPrincipal() {
+    public void shouldSetSubject() {
 
         //Given
         JwtClaimsSet claimsSet = new JwtClaimsSet();
 
         //When
-        claimsSet.setPrincipal("PRINCIPAL");
+        claimsSet.setSubject("SUBJECT");
 
         //Then
-        assertTrue(claimsSet.get("prn").required().isString());
-        assertEquals(claimsSet.get("prn").asString(), "PRINCIPAL");
+        assertTrue(claimsSet.get("sub").required().isString());
+        assertEquals(claimsSet.get("sub").asString(), "SUBJECT");
     }
 
     @Test
-    public void shouldSetPrincipalURI() throws URISyntaxException {
+    public void shouldSetSubjectURI() throws URISyntaxException {
 
         //Given
         JwtClaimsSet claimsSet = new JwtClaimsSet();
-        URI principal = new URI("urn:example:animal:ferret:nose");
+        URI subject = new URI("urn:example:animal:ferret:nose");
 
         //When
-        claimsSet.setPrincipal(principal);
+        claimsSet.setSubject(subject);
 
         //Then
-        assertTrue(claimsSet.get("prn").required().isString());
-        assertEquals(claimsSet.get("prn").asString(), "urn:example:animal:ferret:nose");
-        assertEquals(new URI(claimsSet.get("prn").asString()), principal);
+        assertTrue(claimsSet.get("sub").required().isString());
+        assertEquals(claimsSet.get("sub").asString(), "urn:example:animal:ferret:nose");
+        assertEquals(new URI(claimsSet.get("sub").asString()), subject);
     }
 
     @Test
@@ -290,17 +290,17 @@ public class JwtClaimsSetTest {
     }
 
     @Test
-    public void shouldGetPrincipal() {
+    public void shouldGetSubject() {
 
         //Given
         JwtClaimsSet claimsSet = new JwtClaimsSet();
-        claimsSet.setClaim("prn", "PRINCIPAL");
+        claimsSet.setClaim("sub", "SUBJECT");
 
         //When
-        String principal = claimsSet.getPrincipal();
+        String subject = claimsSet.getSubject();
 
         //Then
-        assertEquals(principal, "PRINCIPAL");
+        assertEquals(subject, "SUBJECT");
     }
 
     @Test
@@ -446,7 +446,7 @@ public class JwtClaimsSetTest {
         claims.put("typ", "TYPE");
         claims.put("jti", "JWT_ID");
         claims.put("iss", "ISSUER");
-        claims.put("prn", "PRINCIPAL");
+        claims.put("sub", "SUBJECT");
         List<String> audience = new ArrayList<String>();
         audience.add("AUDIENCE1");
         audience.add("AUDIENCE2");
@@ -475,8 +475,8 @@ public class JwtClaimsSetTest {
         assertTrue(claimsSet.get("iss").required().isString());
         assertEquals(claimsSet.get("iss").asString(), "ISSUER");
 
-        assertTrue(claimsSet.get("prn").required().isString());
-        assertEquals(claimsSet.get("prn").asString(), "PRINCIPAL");
+        assertTrue(claimsSet.get("sub").required().isString());
+        assertEquals(claimsSet.get("sub").asString(), "SUBJECT");
 
         assertTrue(claimsSet.get("aud").required().isList());
         assertEquals(claimsSet.get("aud").asList(String.class).size(), 2);
@@ -518,8 +518,8 @@ public class JwtClaimsSetTest {
         claims.put("jti", "JWT_ID");
         URI issuer = new URI("urn:issuer:animal:ferret:nose");
         claims.put("iss", issuer);
-        URI principal = new URI("urn:principal:animal:ferret:nose");
-        claims.put("prn", principal);
+        URI subject = new URI("urn:subject:animal:ferret:nose");
+        claims.put("sub", subject);
         List<URI> audienceList = new ArrayList<URI>();
         URI audience1 = new URI("urn:audience1:animal:ferret:nose");
         URI audience2 = new URI("urn:audience2:animal:ferret:nose");
@@ -551,9 +551,9 @@ public class JwtClaimsSetTest {
         assertEquals(claimsSet.get("iss").asString(), "urn:issuer:animal:ferret:nose");
         assertEquals(new URI(claimsSet.get("iss").asString()), issuer);
 
-        assertTrue(claimsSet.get("prn").required().isString());
-        assertEquals(claimsSet.get("prn").asString(), "urn:principal:animal:ferret:nose");
-        assertEquals(new URI(claimsSet.get("prn").asString()), principal);
+        assertTrue(claimsSet.get("sub").required().isString());
+        assertEquals(claimsSet.get("sub").asString(), "urn:subject:animal:ferret:nose");
+        assertEquals(new URI(claimsSet.get("sub").asString()), subject);
 
         assertTrue(claimsSet.get("aud").required().isList());
         assertEquals(claimsSet.get("aud").asList(String.class).size(), 2);
