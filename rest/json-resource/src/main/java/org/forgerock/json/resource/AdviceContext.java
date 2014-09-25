@@ -18,6 +18,8 @@ package org.forgerock.json.resource;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.util.Reject;
 
 /**
@@ -32,14 +34,35 @@ public class AdviceContext extends AbstractContext {
     /** a client-friendly name for this context. */
     private static final String CONTEXT_NAME = "advice";
 
+    /** the persisted attribute name for the advices */
+    private static final String ADVICE_ATTR = "advice";
+
     /** advice currently stored for this context is help in this map. **/
-    private Map<String, String> myAdvice = new HashMap<String, String>();
+    private final Map<String, String> myAdvice = new HashMap<String, String>();
 
     /**
      * Creates a new AdviceContext with the provided parent
      */
     public AdviceContext(Context parent) {
         super(parent);
+        data.put(ADVICE_ATTR, myAdvice);
+    }
+
+    /**
+     * Restore from JSON representation.
+     *
+     * @param savedContext
+     *            The JSON representation from which this context's attributes
+     *            should be parsed.
+     * @param config
+     *            The persistence configuration.
+     *
+     * @throws ResourceException
+     *             If the JSON representation could not be parsed.
+     */
+    AdviceContext(final JsonValue savedContext, final PersistenceConfig config) throws ResourceException {
+        super(savedContext, config);
+        myAdvice.putAll(data.get(ADVICE_ATTR).asMap(String.class));
     }
 
     /**
