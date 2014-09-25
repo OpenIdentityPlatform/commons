@@ -16,10 +16,6 @@
 
 package org.forgerock.json.jose.spec;
 
-import static org.fest.assertions.Fail.fail;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -31,7 +27,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
+import static org.fest.assertions.Fail.fail;
 import org.forgerock.json.jose.builders.JwtBuilderFactory;
 import org.forgerock.json.jose.exceptions.JwtRuntimeException;
 import org.forgerock.json.jose.helper.JwtTestHelper;
@@ -40,7 +36,6 @@ import org.forgerock.json.jose.jwe.EncryptionMethod;
 import org.forgerock.json.jose.jwe.JweAlgorithm;
 import org.forgerock.json.jose.jws.JwsAlgorithm;
 import org.forgerock.json.jose.jws.SigningManager;
-import org.forgerock.json.jose.jws.handlers.SigningHandler;
 import org.forgerock.json.jose.jwt.Jwt;
 import org.forgerock.json.jose.jwt.JwtClaimsSet;
 import org.forgerock.json.jose.jwt.JwtType;
@@ -48,6 +43,8 @@ import org.forgerock.json.jose.utils.DuplicateMapEntryException;
 import org.forgerock.json.jose.utils.IntDate;
 import org.forgerock.json.jose.utils.StringOrURI;
 import org.forgerock.util.encode.Base64url;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")
@@ -356,15 +353,15 @@ public class JwtImplementationSpecTest {
     }
 
     @Test
-    public void shouldStorePrincipalAsString() throws IOException, URISyntaxException {
+    public void shouldStoreSubjectAsString() throws IOException, URISyntaxException {
 
         //Given
         JwtBuilderFactory jwtBuilderFactory = new JwtBuilderFactory();
-        URI principal = new URI("urn:ietf:params:oauth:token-type:jwt");
+        URI subject = new URI("urn:ietf:params:oauth:token-type:jwt");
 
         //When
         JwtClaimsSet claimsSet = jwtBuilderFactory.claims()
-                .prn(principal)
+                .sub(subject)
                 .build();
         String jwtString = jwtBuilderFactory.jwt()
                 .claims(claimsSet)
@@ -374,7 +371,7 @@ public class JwtImplementationSpecTest {
         String[] jwtParts = jwtString.split("\\.", -1);
         String claimsSetString = new String(Base64url.decode(jwtParts[1]));
         Map<String, Object> jwtMap = JwtTestHelper.jsonToMap(claimsSetString);
-        assertTrue(jwtMap.get("prn") instanceof String);
+        assertTrue(jwtMap.get("sub") instanceof String);
     }
 
     @Test
