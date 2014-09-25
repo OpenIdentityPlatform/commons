@@ -207,7 +207,7 @@ public class OpenIdConnectModule implements ServerAuthModule {
             resolver.validateIdentity(retrievedJwt);
 
             callbackHandler.handle(new Callback[]{
-                new CallerPrincipalCallback(clientSubject, jwtClaimSet.getPrincipal())
+                new CallerPrincipalCallback(clientSubject, jwtClaimSet.getSubject())
             });
 
         } catch (OpenIdConnectVerificationException oice) {
