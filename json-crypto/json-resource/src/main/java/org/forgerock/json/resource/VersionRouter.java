@@ -18,17 +18,12 @@ package org.forgerock.json.resource;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.util.Reject;
-import sun.misc.REException;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 import static org.forgerock.json.resource.Resources.newCollection;
 import static org.forgerock.json.resource.Resources.newSingleton;
-import static org.forgerock.json.resource.RoutingMode.EQUALS;
 import static org.forgerock.json.resource.RoutingMode.STARTS_WITH;
 import static org.forgerock.json.resource.VersionConstants.*;
 
