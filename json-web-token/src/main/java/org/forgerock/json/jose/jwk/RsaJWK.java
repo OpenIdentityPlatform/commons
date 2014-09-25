@@ -48,6 +48,9 @@ import org.forgerock.util.encode.Base64url;
  * Implements a RsaJWK.
  */
 public class RsaJWK extends JWK {
+
+    private static final int BIG_INTEGER_POSITIVE = 1;
+
     /**
      * Holds the other prime factors.
      */
@@ -417,8 +420,8 @@ public class RsaJWK extends JWK {
      */
     public RSAPublicKey toRSAPublicKey() {
         try {
-            RSAPublicKeySpec spec = new RSAPublicKeySpec(new BigInteger(Base64url.decode(getModulus())),
-                                                         new BigInteger(Base64url.decode(getPublicExponent())));
+            RSAPublicKeySpec spec = new RSAPublicKeySpec(asPositiveBigInteger(getModulus()),
+                    asPositiveBigInteger(getPublicExponent()));
             KeyFactory factory = KeyFactory.getInstance("RSA");
             return (RSAPublicKey) factory.generatePublic(spec);
         } catch (Exception e) {
@@ -436,8 +439,8 @@ public class RsaJWK extends JWK {
             return null;
         }
 
-        BigInteger modulus = new BigInteger(Base64url.decode(getModulus()));
-        BigInteger privateExponent = new BigInteger(Base64url.decode(getPrivateExponent()));
+        BigInteger modulus = asPositiveBigInteger(getModulus());
+        BigInteger privateExponent = asPositiveBigInteger(getPrivateExponent());
 
         RSAPrivateKeySpec spec;
 
@@ -447,12 +450,12 @@ public class RsaJWK extends JWK {
 
         } else {
 
-            BigInteger publicExponent = new BigInteger(Base64url.decode(getPublicExponent()));
-            BigInteger p = new BigInteger(Base64url.decode(getPrimeP()));
-            BigInteger q = new BigInteger(Base64url.decode(getPrimeQ()));
-            BigInteger dp = new BigInteger(Base64url.decode(getCRTCoefficient()));
-            BigInteger dq = new BigInteger(Base64url.decode(getPrimeQExponent()));
-            BigInteger qi = new BigInteger(Base64url.decode(getCRTCoefficient()));
+            BigInteger publicExponent = asPositiveBigInteger(getPublicExponent());
+            BigInteger p = asPositiveBigInteger(getPrimeP());
+            BigInteger q = asPositiveBigInteger(getPrimeQ());
+            BigInteger dp = asPositiveBigInteger(getCRTCoefficient());
+            BigInteger dq = asPositiveBigInteger(getPrimeQExponent());
+            BigInteger qi = asPositiveBigInteger(getCRTCoefficient());
 
             if (getOtherFactors() != null && !getOtherFactors().isEmpty()) {
 
@@ -462,9 +465,9 @@ public class RsaJWK extends JWK {
 
                     OtherFactors factor = (OtherFactors) getOtherFactors().get(i);
 
-                    BigInteger factorR = new BigInteger(Base64url.decode(factor.getFactor()));
-                    BigInteger factorD = new BigInteger(Base64url.decode(factor.getCRTExponent()));
-                    BigInteger factorT = new BigInteger(Base64url.decode(factor.getCRTCoefficient()));
+                    BigInteger factorR = asPositiveBigInteger(factor.getFactor());
+                    BigInteger factorD = asPositiveBigInteger(factor.getCRTExponent());
+                    BigInteger factorT = asPositiveBigInteger(factor.getCRTCoefficient());
 
                     otherInfo[i] = new RSAOtherPrimeInfo(factorR, factorD, factorT);
                 }
@@ -562,5 +565,13 @@ public class RsaJWK extends JWK {
      */
     public String toJsonString() {
         return super.toString();
+    }
+
+    /**
+     * Base64 decodes the string, and then returns its positive BigInteger representation.
+     * @return a Base64 decoded, positively-forced BigInteger representation of the provided String.
+     */
+    private BigInteger asPositiveBigInteger(String toConvert) {
+        return new BigInteger(BIG_INTEGER_POSITIVE, Base64url.decode(toConvert));
     }
 }
