@@ -263,8 +263,8 @@ public class RsaJWKTest {
         RsaJWK jwk = new RsaJWK((RSAPublicKey) keypair.getPublic(), null, ALG, KID, null, null, null);
 
         //Then
-        BigInteger modulus = new BigInteger(Base64url.decode(jwk.getModulus()));
-        BigInteger pubExponent = new BigInteger(Base64url.decode(jwk.getPublicExponent()));
+        BigInteger modulus = toPosBigInt(jwk.getModulus());
+        BigInteger pubExponent = toPosBigInt(jwk.getPublicExponent());
         assertEquals(modulus, ((RSAPublicKey) keypair.getPublic()).getModulus());
         assertEquals(pubExponent, ((RSAPublicKey) keypair.getPublic()).getPublicExponent());
 
@@ -288,9 +288,9 @@ public class RsaJWKTest {
                 null, null, null);
 
         //Then
-        BigInteger modulus = new BigInteger(Base64url.decode(jwk.getModulus()));
-        BigInteger pubExponent = new BigInteger(Base64url.decode(jwk.getPublicExponent()));
-        BigInteger privExponent = new BigInteger(Base64url.decode(jwk.getPrivateExponent()));
+        BigInteger modulus = toPosBigInt(jwk.getModulus());
+        BigInteger pubExponent = toPosBigInt(jwk.getPublicExponent());
+        BigInteger privExponent = toPosBigInt(jwk.getPrivateExponent());
 
         assertEquals(modulus, ((RSAPublicKey) keypair.getPublic()).getModulus());
         assertEquals(pubExponent, ((RSAPublicKey) keypair.getPublic()).getPublicExponent());
@@ -315,14 +315,14 @@ public class RsaJWKTest {
                 null, null, null);
 
         //Then
-        BigInteger modulus = new BigInteger(Base64url.decode(jwk.getModulus()));
-        BigInteger pubExponent = new BigInteger(Base64url.decode(jwk.getPublicExponent()));
-        BigInteger privExponent = new BigInteger(Base64url.decode(jwk.getPrivateExponent()));
-        BigInteger primeP = new BigInteger(Base64url.decode(jwk.getPrimeP()));
-        BigInteger primeQ = new BigInteger(Base64url.decode(jwk.getPrimeQ()));
-        BigInteger primePExponent = new BigInteger(Base64url.decode(jwk.getPrimePExponent()));
-        BigInteger primeQExponent = new BigInteger(Base64url.decode(jwk.getPrimeQExponent()));
-        BigInteger crtCoefficient = new BigInteger(Base64url.decode(jwk.getCRTCoefficient()));
+        BigInteger modulus = toPosBigInt(jwk.getModulus());
+        BigInteger pubExponent = toPosBigInt(jwk.getPublicExponent());
+        BigInteger privExponent = toPosBigInt(jwk.getPrivateExponent());
+        BigInteger primeP = toPosBigInt(jwk.getPrimeP());
+        BigInteger primeQ = toPosBigInt(jwk.getPrimeQ());
+        BigInteger primePExponent = toPosBigInt(jwk.getPrimePExponent());
+        BigInteger primeQExponent = toPosBigInt(jwk.getPrimeQExponent());
+        BigInteger crtCoefficient = toPosBigInt(jwk.getCRTCoefficient());
 
         assertEquals(modulus, ((RSAPublicKey) keypair.getPublic()).getModulus());
         assertEquals(pubExponent, ((RSAPublicKey) keypair.getPublic()).getPublicExponent());
@@ -356,8 +356,8 @@ public class RsaJWKTest {
 
     private void testPrivateKey(RSAPrivateKey privKey){
 
-        BigInteger modulus = new BigInteger(Base64url.decode(N));
-        BigInteger privateExponent = new BigInteger(Base64url.decode(D));
+        BigInteger modulus = toPosBigInt(N);
+        BigInteger privateExponent = toPosBigInt(D);
 
         assertEquals(privKey.getModulus(), modulus);
         assertEquals(privKey.getPrivateExponent(), privateExponent);
@@ -365,18 +365,14 @@ public class RsaJWKTest {
     }
 
     private void testPublicKey(RSAPublicKey pubKey){
-        BigInteger modulus = new BigInteger(Base64url.decode(N));
-        BigInteger publicExponent = new BigInteger(Base64url.decode(E));
+        BigInteger modulus = toPosBigInt(N);
+        BigInteger publicExponent = toPosBigInt(E);
 
         assertEquals(pubKey.getPublicExponent(), publicExponent);
         assertEquals(pubKey.getModulus(), modulus);
     }
 
-    /*
-     * These three tests fail on solaris and IBM JDK due to OPENAM-3251, which needs to be addressed before these
-     * tests can be re-enabled, as otherwise the Jenkins release Jobs will fail
-     */
-    @Test (enabled = false)
+    @Test
     public void testSecurityProviderWithCreatePrivateKey(){
         //Given
         RsaJWK jwk = RsaJWK.parse(createJsonForSecurityProviderTest());
@@ -388,7 +384,7 @@ public class RsaJWKTest {
         testSecurityProviderPrivateKey(privKey);
     }
 
-    @Test (enabled = false)
+    @Test
     public void testSecurityProviderWithCreatePublicKey(){
         //Given
         RsaJWK jwk = RsaJWK.parse(createJsonForSecurityProviderTest());
@@ -400,7 +396,7 @@ public class RsaJWKTest {
         testSecurityProviderPublicKey(pubKey);
     }
 
-    @Test (enabled = false)
+    @Test
     public void testSecurityProviderWithCreatePairKey(){
         //Given
         RsaJWK jwk = RsaJWK.parse(createJsonForSecurityProviderTest());
@@ -415,8 +411,8 @@ public class RsaJWKTest {
 
     private void testSecurityProviderPrivateKey(RSAPrivateKey privKey){
 
-        BigInteger modulus = new BigInteger(Base64url.decode(N_SP));
-        BigInteger privateExponent = new BigInteger(Base64url.decode(D_SP));
+        BigInteger modulus = toPosBigInt(N_SP);
+        BigInteger privateExponent = toPosBigInt(D_SP);
 
         assertEquals(privKey.getModulus(), modulus);
         assertEquals(privKey.getPrivateExponent(), privateExponent);
@@ -424,10 +420,14 @@ public class RsaJWKTest {
     }
 
     private void testSecurityProviderPublicKey(RSAPublicKey pubKey){
-        BigInteger modulus = new BigInteger(Base64url.decode(N_SP));
-        BigInteger publicExponent = new BigInteger(Base64url.decode(E_SP));
+        BigInteger modulus = toPosBigInt(N_SP);
+        BigInteger publicExponent = toPosBigInt(E_SP);
 
         assertEquals(pubKey.getPublicExponent(), publicExponent);
         assertEquals(pubKey.getModulus(), modulus);
+    }
+
+    private BigInteger toPosBigInt(String s) {
+        return new BigInteger(1, Base64url.decode(s));
     }
 }
