@@ -77,8 +77,11 @@ public final class AcceptAPIVersionContext extends AbstractContext {
         data.put(ATTR_PROTOCOL_VERSION,
                 checkNotNull(protocolVersion, "Cannot instantiate AcceptAPIVersionContext with null protocolVersion"));
 
+        if (protocolVersion != null) {
+            data.put(ATTR_PROTOCOL_VERSION, protocolVersion.toString());
+        }
         if (resourceVersion != null) {
-            data.put(ATTR_RESOURCE_VERSION, resourceVersion);
+            data.put(ATTR_RESOURCE_VERSION, resourceVersion.toString());
         }
     }
 
