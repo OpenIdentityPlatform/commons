@@ -206,11 +206,6 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
 
                     return $.param(postedData);
                 },
-                beforeProcessing: function (data, status, xhr) {
-                    if(additional && typeof additional.preProcessing === 'function'){
-                        additional.preProcessing(data, status, xhr);
-                    }      
-                },
                 loadComplete: function (data) {
                     _.extend(view.data, data);
                 },

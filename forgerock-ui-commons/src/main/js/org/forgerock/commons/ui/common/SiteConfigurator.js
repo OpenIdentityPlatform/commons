@@ -73,7 +73,6 @@ define("org/forgerock/commons/ui/common/SiteConfigurator", [
 
    obj.processConfiguration = function(config) {
 
-
        if (config.securityQuestions === true) {
            conf.globalData.securityQuestions = true;             
        } 
@@ -96,10 +95,6 @@ define("org/forgerock/commons/ui/common/SiteConfigurator", [
        
        if (config.defaultNotificationType) {
            conf.defaultType = config.defaultNotificationType;
-       }
-
-       if (config.policyEditorConfig) {
-           conf.globalData.policyEditorConfig = config.policyEditorConfig;
        }
 
        conf.globalData.selfRegistration =                       config.selfRegistration;
