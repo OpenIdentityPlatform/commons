@@ -311,13 +311,14 @@ public final class FiltersTest {
         testAsFilterContinueWithResult0(type, true);
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test(dataProvider = "requestTypes")
     public void testAsFilterStopWithError(final RequestType type) {
         final MockFilter filter = new MockFilter(ERROR);
         final Filter wrapped = Filters.asFilter(filter);
         final RequestHandler next = mock(RequestHandler.class);
         final ServerContext context = mock(ServerContext.class);
-        final ResultHandler<Object> handler = mockHandler(type);
+        final ResultHandler handler = mockHandler(type);
         invokeFilter(context, type, wrapped, handler, next);
 
         // Check post-conditions: the request handler should not have been invoked.
@@ -330,6 +331,7 @@ public final class FiltersTest {
         verify(handler).handleError(ERROR);
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test(dataProvider = "requestTypes")
     public void testAsFilterStopWithResult(final RequestType type) {
         final Object result = result(type);
@@ -337,7 +339,7 @@ public final class FiltersTest {
         final Filter wrapped = Filters.asFilter(filter);
         final RequestHandler next = mock(RequestHandler.class);
         final ServerContext context = mock(ServerContext.class);
-        final ResultHandler<Object> handler = mockHandler(type);
+        final ResultHandler handler = mockHandler(type);
         invokeFilter(context, type, wrapped, handler, next);
 
         // Check post-conditions: the request handler should not have been invoked.
@@ -520,8 +522,8 @@ public final class FiltersTest {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private ResultHandler<Object> mockHandler(final RequestType type) {
+    @SuppressWarnings({ "rawtypes" })
+    private ResultHandler mockHandler(final RequestType type) {
         return type == RequestType.QUERY ? mock(QueryResultHandler.class)
                 : mock(ResultHandler.class);
     }
