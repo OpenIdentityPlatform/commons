@@ -18,7 +18,6 @@ package org.forgerock.json.resource;
 import org.forgerock.json.fluent.JsonValue;
 import org.testng.annotations.Test;
 
-import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -36,10 +35,7 @@ public class AdviceContextTest {
         AdviceContext advice = new AdviceContext(root);
         advice.putAdvice("Warning", "version is not supported");
         ServerContext context = new ServerContext(advice);
-        PersistenceConfig config = PersistenceConfig
-                .builder()
-                .connectionProvider(mock(ConnectionProvider.class))
-                .build();
+        PersistenceConfig config = PersistenceConfig.builder().build();
 
         JsonValue savedContext = context.toJsonValue();
         ServerContext restoredContext = new ServerContext(savedContext, config);
