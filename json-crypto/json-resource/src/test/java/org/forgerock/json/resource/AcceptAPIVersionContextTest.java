@@ -19,7 +19,6 @@ import org.forgerock.json.fluent.JsonValue;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -95,10 +94,7 @@ public class AcceptAPIVersionContextTest {
         RootContext root = new RootContext();
         AcceptAPIVersionContext advice = new AcceptAPIVersionContext(root, "name", acceptVersion);
         ServerContext context = new ServerContext(advice);
-        PersistenceConfig config = PersistenceConfig
-                .builder()
-                .connectionProvider(mock(ConnectionProvider.class))
-                .build();
+        PersistenceConfig config = PersistenceConfig.builder().build();
 
         JsonValue savedContext = context.toJsonValue();
         ServerContext restoredContext = new ServerContext(savedContext, config);
