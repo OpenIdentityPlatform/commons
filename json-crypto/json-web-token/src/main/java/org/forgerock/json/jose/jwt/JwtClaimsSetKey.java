@@ -51,11 +51,11 @@ public enum JwtClaimsSetKey {
      */
     ISS,
     /**
-     * Principal Claim.
+     * Subject Claim.
      * <p>
      * Identifies the subject of the JWT.
      */
-    PRN,
+    SUB,
     /**
      * Audience Claim.
      * <p>
