@@ -44,9 +44,9 @@ Copyright 2014 ForgeRock AS.
 
     <distributionManagement>
         <site>
-            <id>forgerock.org</id>
+            <id>community.internal.forgerock.com</id>
             <name>ForgeRock Community</name>
-            <url>scp://forgerock.org/var/www/vhosts/commons.forgerock.org/httpdocs/forgerock-guice</url>
+            <url>scp://community.internal.forgerock.com/var/www/vhosts/commons.forgerock.org/httpdocs/forgerock-guice</url>
         </site>
     </distributionManagement>
 
