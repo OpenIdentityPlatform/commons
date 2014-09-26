@@ -338,11 +338,10 @@
                     <configuration>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                         <mavenExecutorId>forked-path</mavenExecutorId>
-                        <useReleaseProfile>true</useReleaseProfile>
+                        <releaseProfiles>enforce,forgerock-release</releaseProfiles>
                         <suppressCommitBeforeTag>false</suppressCommitBeforeTag>
                         <goals>deploy</goals>
-                        <arguments>-Penforce,forgerock-release</arguments>
-                       <tagNameFormat>@{project.version}</tagNameFormat>
+                        <tagNameFormat>@{project.version}</tagNameFormat>
                     </configuration>
                 </plugin>
                 <plugin>
