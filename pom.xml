@@ -28,7 +28,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.forgerock</groupId>
     <artifactId>forgerock-parent</artifactId>
-    <version>1.2.5</version>
+    <version>1.2.6-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>ForgeRock Parent</name>
     <description>Parent POM for ForgeRock projects. Provides default project build configuration.</description>
@@ -50,9 +50,9 @@
         <url>https://bugster.forgerock.org</url>
     </issueManagement>
     <scm>
-        <connection>scm:svn:https://svn.forgerock.org/commons/forgerock-parent/tags/1.2.5</connection>
-        <developerConnection>scm:svn:https://svn.forgerock.org/commons/forgerock-parent/tags/1.2.5</developerConnection>
-        <url>http://sources.forgerock.org/browse/commons/forgerock-parent/tags/1.2.5</url>
+        <connection>scm:svn:https://svn.forgerock.org/commons/forgerock-parent/trunk</connection>
+        <developerConnection>scm:svn:https://svn.forgerock.org/commons/forgerock-parent/trunk</developerConnection>
+        <url>http://sources.forgerock.org/browse/commons/forgerock-parent/trunk</url>
     </scm>
     <distributionManagement>
         <snapshotRepository>
