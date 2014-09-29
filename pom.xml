@@ -1024,9 +1024,9 @@
                                      <!-- The Maven SCM plugin clean the target folder when using the export command (it's a bug...) -->
                                      <!-- That's why we are using the svn export command -->
                                      <exec dir="${include.binary.license}" executable="svn">
-                                        <arg line="export" />
-                                        <arg line="${binary.license.url}" />
-                                        <arg line="${include.binary.license}/license.txt" />
+                                        <arg value="export" />
+                                        <arg value="${binary.license.url}" />
+                                        <arg value="${include.binary.license}/license.txt" />
                                      </exec>
                                   </then>
                                   <else>
