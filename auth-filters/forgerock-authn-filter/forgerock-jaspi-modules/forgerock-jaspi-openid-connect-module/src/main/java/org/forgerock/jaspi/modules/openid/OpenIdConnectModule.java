@@ -211,13 +211,13 @@ public class OpenIdConnectModule implements ServerAuthModule {
             });
 
         } catch (OpenIdConnectVerificationException oice) {
-            LOG.error("Unable to validate authenticated identity from JWT.", oice);
+            LOG.debug("Unable to validate authenticated identity from JWT.", oice);
             return AuthStatus.SEND_FAILURE;
         } catch (IOException e) {
-            LOG.error("Error setting user principal", e);
+            LOG.debug("Error setting user principal", e);
             throw new AuthException(e.getMessage());
         } catch (UnsupportedCallbackException e) {
-            LOG.error("Error setting user principal", e);
+            LOG.debug("Error setting user principal", e);
             throw new AuthException(e.getMessage());
         }
 
