@@ -16,6 +16,7 @@
 
 package org.forgerock.json.jose.jwt;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.fest.assertions.Fail.fail;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -435,7 +436,7 @@ public class JwtClaimsSetTest {
         String jsonString = claimsSet.build();
 
         //Then
-        assertEquals(jsonString, "{ \"KEY2\": true, \"KEY1\": \"CLAIM1\", \"jti\": \"JWT_ID\" }");
+        assertThat(jsonString).contains("\"KEY2\": true", "\"KEY1\": \"CLAIM1\"", "\"jti\": \"JWT_ID\"");
     }
 
     @Test
