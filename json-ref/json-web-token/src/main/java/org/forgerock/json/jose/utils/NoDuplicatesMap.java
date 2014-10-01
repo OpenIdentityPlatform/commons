@@ -16,7 +16,7 @@
 
 package org.forgerock.json.jose.utils;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -31,9 +31,9 @@ import java.util.Map;
  * @param <V> Value type.
  * @since 2.0.0
  * @see Map
- * @see HashMap
+ * @see LinkedHashMap
  */
-public class NoDuplicatesMap<K, V> extends HashMap<K, V> {
+public class NoDuplicatesMap<K, V> extends LinkedHashMap<K, V> {
 
     /** Serializable class version number. */
     private static final long serialVersionUID = 1L;
@@ -41,7 +41,7 @@ public class NoDuplicatesMap<K, V> extends HashMap<K, V> {
     /**
      * Constructs an empty <tt>NoDuplicatesMap</tt> with the default initial capacity (16) and the default
      * load factor (0.75).
-     * @see java.util.HashMap#HashMap()
+     * @see java.util.LinkedHashMap#LinkedHashMap()
      */
     public NoDuplicatesMap() {
         super();
@@ -53,7 +53,7 @@ public class NoDuplicatesMap<K, V> extends HashMap<K, V> {
      *
      * @param initialCapacity The initial capacity.
      * @throws IllegalArgumentException if the initial capacity is negative.
-     * @see java.util.HashMap#HashMap(int)
+     * @see java.util.LinkedHashMap#LinkedHashMap(int)
      */
     public NoDuplicatesMap(int initialCapacity) {
         super(initialCapacity);
@@ -65,7 +65,7 @@ public class NoDuplicatesMap<K, V> extends HashMap<K, V> {
      * @param initialCapacity The initial capacity.
      * @param loadFactor The load factor.
      * @throws IllegalArgumentException if the initial capacity is negative or the load factor is non-positive.
-     * @see java.util.HashMap#HashMap(int, float)
+     * @see java.util.LinkedHashMap#LinkedHashMap(int, float)
      */
     public NoDuplicatesMap(int initialCapacity, float loadFactor) {
         super(initialCapacity, loadFactor);
@@ -78,7 +78,7 @@ public class NoDuplicatesMap<K, V> extends HashMap<K, V> {
      *
      * @param map The map whose mappings are to be placed in this map.
      * @throws NullPointerException if the specified map is null.
-     * @see java.util.HashMap#HashMap(java.util.Map)
+     * @see java.util.LinkedHashMap#LinkedHashMap(java.util.Map)
      */
     public NoDuplicatesMap(Map<? extends K, ? extends V> map) {
         super(map);
@@ -92,7 +92,7 @@ public class NoDuplicatesMap<K, V> extends HashMap<K, V> {
      * @param value {@inheritDoc}
      * @return {@inheritDoc}
      * @throws DuplicateMapEntryException if a
-     * @see java.util.HashMap#put(Object, Object)
+     * @see java.util.LinkedHashMap#put(Object, Object)
      */
     @Override
     public V put(K key, V value) {
@@ -109,7 +109,7 @@ public class NoDuplicatesMap<K, V> extends HashMap<K, V> {
      *
      * @param m {@inheritDoc}
      * @throws NullPointerException if the specified map is null
-     * @see java.util.HashMap#putAll(java.util.Map)
+     * @see java.util.LinkedHashMap#putAll(java.util.Map)
      */
     @Override
     public void putAll(Map<? extends K, ? extends V> m) {
