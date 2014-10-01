@@ -16,6 +16,7 @@
 
 package org.forgerock.json.jose.jwt;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -176,7 +177,8 @@ public class JwtHeaderTest {
         String jsonString = header.build();
 
         //Then
-        assertEquals(jsonString, "{ \"alg\": \"NONE\", \"KEY2\": true, \"KEY1\": \"HEADER1\", \"typ\": \"jwt\" }");
+        assertThat(jsonString).contains("\"alg\": \"NONE\"", "\"KEY2\": true", "\"KEY1\": \"HEADER1\"",
+                "\"typ\": \"jwt\"");
     }
 
     @Test

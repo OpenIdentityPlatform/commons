@@ -16,26 +16,18 @@
 
 package org.forgerock.json.jose.spec;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SignatureException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import static org.fest.assertions.Fail.fail;
 import org.forgerock.json.jose.builders.JwtBuilderFactory;
+import org.forgerock.json.jose.common.JwtReconstruction;
 import org.forgerock.json.jose.exceptions.JwtRuntimeException;
 import org.forgerock.json.jose.helper.JwtTestHelper;
 import org.forgerock.json.jose.helper.KeysHelper;
+import org.forgerock.json.jose.jwe.EncryptedJwt;
 import org.forgerock.json.jose.jwe.EncryptionMethod;
 import org.forgerock.json.jose.jwe.JweAlgorithm;
 import org.forgerock.json.jose.jws.JwsAlgorithm;
+import org.forgerock.json.jose.jws.SignedJwt;
 import org.forgerock.json.jose.jws.SigningManager;
+import org.forgerock.json.jose.jws.handlers.HmacSigningHandler;
 import org.forgerock.json.jose.jwt.Jwt;
 import org.forgerock.json.jose.jwt.JwtClaimsSet;
 import org.forgerock.json.jose.jwt.JwtType;
@@ -43,12 +35,61 @@ import org.forgerock.json.jose.utils.DuplicateMapEntryException;
 import org.forgerock.json.jose.utils.IntDate;
 import org.forgerock.json.jose.utils.StringOrURI;
 import org.forgerock.util.encode.Base64url;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
+import java.io.IOException;
+import java.math.BigInteger;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.security.InvalidKeyException;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.RSAPrivateKeySpec;
+import java.security.spec.RSAPublicKeySpec;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.fest.assertions.Fail.fail;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
-import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")
 public class JwtImplementationSpecTest {
+
+
+    private static final BigInteger MODULUS = new BigInteger("879124164627360636353074313846668285771000666574628892333"
+            + "5499993647975314172150182688142208337957780959253668641058299308924577038067798942355217080985221");
+    private static final BigInteger PRV_EXP = new BigInteger("528504706687113870205758195999891416926189103290870862704"
+            + "2668481159292909395626068592006158226313005725007395275807957072135194469637529567961288974510261");
+    private static final BigInteger PUB_EXP = new BigInteger("65537");
+
+    private KeyPair keyPair;
+    private JwtReconstruction reconstruction;
+
+
+    @BeforeClass
+    public void setUp() throws InvalidKeySpecException, NoSuchAlgorithmException {
+
+        RSAPublicKeySpec publicKeySpec = new RSAPublicKeySpec(MODULUS, PUB_EXP);
+        RSAPrivateKeySpec privateKeySpec = new RSAPrivateKeySpec(MODULUS, PRV_EXP);
+
+        KeyFactory factory = KeyFactory.getInstance("RSA");
+        PrivateKey privateKey = factory.generatePrivate(privateKeySpec);
+        PublicKey publicKey = factory.generatePublic(publicKeySpec);
+
+        keyPair = new KeyPair(publicKey, privateKey);
+        reconstruction = new JwtReconstruction();
+    }
 
     /**
      * JWT Spec: http://tools.ietf.org/html/draft-jones-json-web-token-10, Section 2 Terminology, StringOrURI:
@@ -543,5 +584,71 @@ public class JwtImplementationSpecTest {
 
         //Then
         assertTrue(exceptionCaught);
+    }
+
+    @Test
+    public void shouldDecryptJDK6Or7JweWithJDK8() throws NoSuchAlgorithmException, InvalidKeySpecException {
+
+        //Given
+        String originalJwe = "eyAiYWxnIjogIlJTQUVTX1BLQ1MxX1YxXzUiLCAidHlwIjogImp3dCIsICJlbmMiOiAiQTEyOENCQ19IUzI1NiIgf"
+                + "Q.Ew8KPoUx-PoD3gsYreWud9n0KNqIOSYOgr4EiTgDdMqT_IKZ1juAFV9JUIK2FhN0r5yD6261v_ltlW95voCL3w.1-ERoOvu1Tv"
+                + "0JhEh7Utdxg.kexUc5ESTVIOns4HJMmp-eR4bFiBMkIUTuNnDMGsyPkQMSqIIqWnIHRKzxMR1CXo.QzTRu5uBtUqdAXhcRj8TJw";
+        EncryptedJwt encryptedJwt = reconstruction.reconstructJwt(originalJwe, EncryptedJwt.class);
+
+        //When
+        encryptedJwt.decrypt(keyPair.getPrivate());
+
+        //Then
+        assertThat(encryptedJwt.getClaimsSet().get("a-value").asString()).isEqualTo("ForgeRock OpenIG");
+    }
+
+    @Test
+    public void shouldVerifyJDK6Or7JwsWithJDK8() throws NoSuchAlgorithmException, InvalidKeySpecException {
+
+        //Given
+        String originalJws = "eyAiYWxnIjogIkhTMjU2IiwgInR5cCI6ICJqd3QiIH0."
+                + "eyAiYS12YWx1ZSI6ICJGb3JnZVJvY2sgT3BlbkFNIiB9."
+                + "A8Z4xSPTfobTUYwwBaAymm1Ovfe1T3oMG5W9zFkOC-o";
+        SignedJwt signedJwt = reconstruction.reconstructJwt(originalJws, SignedJwt.class);
+
+        //When
+        signedJwt.verify(new HmacSigningHandler(keyPair.getPrivate().getEncoded()));
+
+        //Then
+        assertThat(signedJwt.getClaimsSet().get("a-value").asString()).isEqualTo("ForgeRock OpenAM");
+    }
+
+    @Test
+    public void shouldDecryptJweWhenOriginalContainsNoSpaces() {
+
+        //Given
+        String noSpaceJwe = "eyJ0eXAiOiJqd3QiLCJhbGciOiJSU0FFU19QS0NTMV9WMV81IiwiaGVhZGVyLWtleSI6ImhlYWRlci12YWx1ZSIsIm"
+                + "VuYyI6IkExMjhDQkNfSFMyNTYifQ.C7hfe8oQWYLhaSdp_IKTATQz2A1um5OCZK4WM73itYRT5VesE1Ne9ZHTXWjQ96XQhC4gFh-"
+                + "XrFr5s005FMAZVA.KTX2TzreIU5Mgu5lQ0Lflg.qy_V5xI6hv-elGYuJilD8O-3Usa3ySsD5w819v0lP24.CYm_wYWjjGBEr_Pad"
+                + "u-OJA";
+        EncryptedJwt encryptedJwt = reconstruction.reconstructJwt(noSpaceJwe, EncryptedJwt.class);
+
+        //When
+        encryptedJwt.decrypt(keyPair.getPrivate());
+
+        //Then
+        assertThat(encryptedJwt.getHeader().get("header-key").asString()).isEqualTo("header-value");
+        assertThat(encryptedJwt.getClaimsSet().get("claim-key").asString()).isEqualTo("claim-value");
+    }
+
+    @Test
+    public void shouldVerifyJwsWhenOriginalContainsNoSpaces() {
+
+        //Given
+        String noSpaceJws = "eyJ0eXAiOiJqd3QiLCJhbGciOiJIUzI1NiIsImhlYWRlci1rZXkiOiJoZWFkZXItdmFsdWUifQ.eyJjbGFpbS1rZXk"
+                + "iOiJjbGFpbS12YWx1ZSJ9.UgppKz2ubXBQs_c8cX-8QUTGtZQyFcgCfBKOVleun_c";
+        SignedJwt signedJwt = reconstruction.reconstructJwt(noSpaceJws, SignedJwt.class);
+
+        //When
+        signedJwt.verify(new HmacSigningHandler(keyPair.getPrivate().getEncoded()));
+
+        //Then
+        assertThat(signedJwt.getHeader().get("header-key").asString()).isEqualTo("header-value");
+        assertThat(signedJwt.getClaimsSet().get("claim-key").asString()).isEqualTo("claim-value");
     }
 }
