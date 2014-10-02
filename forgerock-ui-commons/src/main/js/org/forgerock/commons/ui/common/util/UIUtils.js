@@ -612,6 +612,11 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         ;
     };
 
+    obj.responseMessageMatch = function(error, string){
+        var responseMessage = JSON.parse(error).message;
+        return responseMessage.indexOf(string) > -1;
+    };
+
     // Registering global mixins 
     
     _.mixin({
