@@ -24,7 +24,7 @@
     <packaging>pom</packaging>
     <groupId>org.forgerock.commons.guava</groupId>
     <artifactId>forgerock-guava</artifactId>
-    <version>18.0</version>
+    <version>18.0.1</version>
     <name>ForgeRock Guava</name>
     <description>Repackaged version of Guava to avoid dependency collisions.</description>
     <modules>
@@ -45,6 +45,9 @@
         <module>reflect</module>
         <module>xml</module>
     </modules>
+    <properties>
+        <manifestSourceLocation>../src/main/resources</manifestSourceLocation>
+    </properties>
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -143,6 +146,15 @@
                             </configuration>
                         </execution>
                     </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <configuration>
+                        <archive>
+                            <manifestFile>target/classes/META-INF/MANIFEST.MF</manifestFile>
+                        </archive>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>

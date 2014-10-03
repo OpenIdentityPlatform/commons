@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.forgerock.commons.guava</groupId>
         <artifactId>forgerock-guava</artifactId>
-        <version>18.0</version>
+        <version>18.0.1</version>
     </parent>
     <packaging>jar</packaging>
     <artifactId>forgerock-guava-escape</artifactId>
@@ -40,6 +40,12 @@
         </dependency>
     </dependencies>
     <build>
+        <resources>
+            <resource>
+                <directory>${manifestSourceLocation}</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -61,8 +67,6 @@
                     <transformers>
                         <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                             <manifestEntries>
-                                <Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
-                                <Bundle-Name>${project.name}</Bundle-Name>
                                 <Import-Package>javax.annotation;resolution:=optional,org.forgerock.guava.common.base;version="${project.version}"</Import-Package>
                                 <Export-Package>org.forgerock.guava.common.escape;version="${project.version}"</Export-Package>
                             </manifestEntries>

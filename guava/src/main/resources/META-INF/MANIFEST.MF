@@ -1,16 +1,13 @@
+Bundle-Name: ${project.name}
+Bundle-SymbolicName: ${project.groupId}.${project.artifactId}
+Bundle-Version: ${project.version}
 Bundle-Description: Guava is a suite of core and expanded libraries that
-  include    utility classes, google's collections, io classes, and much
-     much more.    Guava has only one code dependency - javax.annotation
- ,    per the JSR-305 spec. This bundle is repackaged under org.forgeroc
- k.guava
+  include utility classes, google's collections, io classes, and much mu
+  ch more. Guava has only one code dependency - javax.annotation, per th
+  e JSR-305 spec. This bundle is repackaged under org.forgerock.guava
 Bundle-DocURL: https://guava-libraries.googlecode.com/
 Bundle-License: http://www.apache.org/licenses/LICENSE-2.0.txt
 Bundle-ManifestVersion: 2
-Bundle-Name: Guava: Google Core Libraries for Java
-Bundle-SymbolicName: ${project.groupId}.${project.artifactId}
-Bundle-Version: ${project.version}
-Import-Package: javax.annotation;resolution:=optional,sun.misc;resolutio
- n:=optional
 Export-Package: org.forgerock.guava.common.net;uses:="javax.annotation,o
  rg.forgerock.guava.common.base,org.forgerock.guava.common.hash,org.forg
  erock.guava.common.io,org.forgerock.guava.common.primitives,org.forgero

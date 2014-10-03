@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.forgerock.commons.guava</groupId>
         <artifactId>forgerock-guava</artifactId>
-        <version>18.0</version>
+        <version>18.0.1</version>
     </parent>
     <packaging>jar</packaging>
     <artifactId>forgerock-guava-concurrent</artifactId>
@@ -52,6 +52,12 @@
         </dependency>
     </dependencies>
     <build>
+        <resources>
+            <resource>
+                <directory>${manifestSourceLocation}</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
