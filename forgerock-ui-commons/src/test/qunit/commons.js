@@ -26,10 +26,14 @@
 
 
 define([
+    "sinon",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/components/Dialog",
+    "org/forgerock/commons/ui/common/main/EventManager",
+    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/util/CookieHelper",
     "org/forgerock/commons/ui/common/util/UIUtils"
-], function (conf, Dialog, UIUtils) {
+], function (sinon, conf, Dialog, eventManager, constants, cookieHelper, UIUtils) {
     return {
         executeAll: function (server, parameters) {
 
@@ -74,6 +78,48 @@ define([
                     });
 
 
+                });
+            });
+
+            QUnit.asyncTest("Remember Login", function () {
+
+                conf.loggedUser = null;
+                var loginView = require("LoginView");
+                //loginView.element = $("<div>")[0];
+
+                delete loginView.route;
+
+                loginView.render([], function () {
+                    // login with loginRemember checked
+                    $("#login", loginView.$el).val(parameters.username).trigger('keyup');
+                    $("#password", loginView.$el).val(parameters.password).trigger('keyup');
+                    $("[name=loginRemember]", loginView.$el).trigger("click");
+                    $("[name=loginButton]", loginView.$el).trigger("click"); // login occurs
+
+                    _.delay(function () {
+                        sinon.stub(loginView, "render", function (args, callback) {
+
+                            loginView.render.restore();
+                            loginView.render(args, function () {
+                                QUnit.equal(cookieHelper.getCookie('login'), parameters.username, "Remember-login matches provided username");
+                                console.log("LOGIN FORM : " + $("#login", loginView.$el).val())
+                                QUnit.equal($("#login", loginView.$el).val(), parameters.username, "Username is remembered after logout.");
+                                QUnit.ok($("input[name=loginRemember]", loginView.$el).prop('checked'), "Login Remember is still checked when the login form is re-rendered");
+
+                                cookieHelper.deleteCookie("login");
+
+                                if (callback) {
+                                    callback();
+                                }
+
+                                QUnit.start();
+
+                            });
+
+                        });
+
+                        eventManager.sendEvent(constants.EVENT_LOGOUT);
+                    }, 10);
                 });
             });
 

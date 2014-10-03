@@ -50,30 +50,11 @@ define("org/forgerock/mock/ui/user/LoginView", [
 
         commonLoginView.render.call(this, args, _.bind(function () {
 
-            var login = localStorage.get('remember-login');
-            if (login) {
-                this.$el.find("input[name=login]").val(login);
-                this.$el.find("[name=loginRemember]").attr("checked", "true");
-                validatorsManager.validateAllFields(this.$el);
-                this.$el.find("[name=password]").focus();
-            }
-
             if (callback) {
                 callback();
             }
 
-        }, this));        
-    };
-
-    obj.formSubmit = function (event) {
-        commonLoginView.formSubmit.call(this, event);
-
-        if (this.$el.find("[name=loginRemember]:checked").length) {
-            localStorage.remove('remember-login');
-            localStorage.add('remember-login', this.$el.find("input[name=login]").val());
-        } else {
-            localStorage.remove('remember-login');
-        }
+        }, this));
     };
 
     return obj;

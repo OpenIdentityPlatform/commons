@@ -29,10 +29,9 @@ define([
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/mock/ui/common/main/LocalStorage",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/commons/ui/common/util/CookieHelper",
     "org/forgerock/commons/ui/common/main/Router",
     "./getLoggedUser"
-], function (eventManager, constants, localStorage, conf, cookieHelper, router, getLoggedUser) {
+], function (eventManager, constants, localStorage, conf, router, getLoggedUser) {
     return {
         executeAll: function (server, parameters) {
 
@@ -41,40 +40,6 @@ define([
                 securityDataPromise = $.Deferred();
 
             module('Mock Tests');
-
-            QUnit.asyncTest("Remember Login", function () {
-
-                conf.loggedUser = null;
-                var loginView = require("LoginView");
-                loginView.element = $("<div>")[0];
-
-                delete loginView.route;
-
-                localStorage.remove('remember-login');
-
-                loginView.render([], function () {
-
-                    // login with loginRemember checked
-                    $("#login", loginView.$el).val(parameters.username).trigger('keyup');
-                    $("#password", loginView.$el).val(parameters.password).trigger('keyup');
-                    $("[name=loginRemember]", loginView.$el).trigger("click");
-                    $("[name=loginButton]", loginView.$el).trigger("click");
-
-                    QUnit.equal(localStorage.get('remember-login'), parameters.username, "Remember-login matches provided username");
-
-                    eventManager.sendEvent(constants.EVENT_LOGOUT);
-
-                    loginView.render();
-
-                    QUnit.equal($("#login", loginView.$el).val(), parameters.username, "Username is remembered after logout.");                    
-
-                    localStorage.remove('remember-login');
-
-                    cookieHelper.deleteCookie("login");
-
-                    QUnit.start();
-                });
-            });            
 
             QUnit.asyncTest('User Registration', function () {
                 conf.loggedUser = null;
