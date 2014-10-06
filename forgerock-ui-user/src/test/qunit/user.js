@@ -25,8 +25,9 @@
 /*global require, define, QUnit */
 
 define([
+        "sinon",
         "org/forgerock/commons/ui/common/main/Configuration"
-    ], function (conf) {
+    ], function (sinon, conf) {
     return {
         executeAll: function (server, loggedUser) {
             
@@ -120,6 +121,37 @@ define([
                     QUnit.start();
 
                 });
+            });
+
+            QUnit.test("Client-side Validators", function () {
+                var validatorsManager = require("org/forgerock/commons/ui/common/main/ValidatorsManager"),
+                    userDelegate = require("UserDelegate"),
+                    testElement = $('<div><input data-validator="resetPasswordCorrectLogin"></div>'),
+                    spy;
+
+                    validatorsManager.bindValidators(testElement);
+
+                    
+                    userDelegate.getSecurityQuestionForUserName = function (value, successCallback, errorCallback) {
+                        if (value === "testUser") {
+                            successCallback(1);
+                        } else {
+                            errorCallback();
+                        }
+                    };
+
+                    spy = sinon.spy(userDelegate, "getSecurityQuestionForUserName");
+
+                    testElement.find("input").val("t").trigger("keyup");
+                    QUnit.equal(spy.callCount, 0, "Delegate function should not be called after keyup event");
+
+                    testElement.find("input").val("test").trigger("blur");
+                    QUnit.equal(spy.callCount, 1, "Delegate function should have been called once after keyup event");
+                    QUnit.equal(testElement.find("input").attr('data-validation-status'), "error", "Validation status should be error when provided with incorrect value");
+
+                    testElement.find("input").val("testUser").trigger("blur");
+                    QUnit.equal(testElement.find("input").attr('data-validation-status'), "ok", "Validation status should be ok when provided with correct value");
+
             });
 
         }

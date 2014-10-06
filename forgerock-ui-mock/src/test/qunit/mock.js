@@ -139,15 +139,13 @@ define([
                     testValue(phone, '12345', '', 'ok', view);
 
                     // terms of use
-                    terms.prop('checked', true).trigger('change');
+                    terms.prop('checked', true).trigger('blur');
                     QUnit.equal($('.validation-message-checkbox').text(), '', '"Acceptance required for registration" is not shown for checked checkbox');
                     testStatusAttr(terms, 'ok');
 
                     // register button
                     QUnit.ok(register.prop('disabled') === false, 'Register button is enabled for correct field values');
 
-
-                    // localStorage.removeItem('mock/repo/internal/user/qqq');
                     register.trigger('click');
                     QUnit.ok(conf.loggedUser && conf.loggedUser.userName === "qqq", 'Logged in with newly created user');
 
