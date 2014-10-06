@@ -91,3 +91,8 @@ init-param with the name 'audit-api-class' with a value of the fully qualified c
 
 
 NOTE: Deprecated classes and methods will be removed in the next major release.
+
+
+--- MODULE CHANGES ---
+
+JwtSessionModule now supports HttpOnly and Secure cookies. When configuring set 'isHttpOnly' and 'isSecure' as true.

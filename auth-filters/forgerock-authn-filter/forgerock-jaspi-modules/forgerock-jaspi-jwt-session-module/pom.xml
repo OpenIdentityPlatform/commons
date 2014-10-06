@@ -51,9 +51,12 @@
             <artifactId>json-web-token</artifactId>
         </dependency>
 
+        <!-- Included only to allow building the Cookie class. Do not use APIs not present in 2.5 -->
         <dependency>
             <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.0.1</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.glassfish</groupId>

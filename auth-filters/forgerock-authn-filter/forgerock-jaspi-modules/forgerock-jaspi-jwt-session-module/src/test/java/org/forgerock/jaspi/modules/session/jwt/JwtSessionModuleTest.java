@@ -138,8 +138,7 @@ public class JwtSessionModuleTest {
 
         given(messageInfo.getRequestMessage()).willReturn(request);
         given(messageInfo.getResponseMessage()).willReturn(response);
-
-        given(request.getCookies()).willReturn(null);
+        given(request.getCookies()).willReturn(new Cookie[0]);
 
         //When
         AuthStatus authStatus = jwtSessionModule.validateRequest(messageInfo, clientSubject, serviceSubject);
