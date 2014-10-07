@@ -15,10 +15,10 @@
    information: "Portions copyright [year] [name of copyright owner]".
 -->
 <project name="${project.name}"
-    xmlns="http://maven.apache.org/DECORATION/1.0.1"
+    xmlns="http://maven.apache.org/DECORATION/1.4.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/DECORATION/1.0.1
-                        http://maven.apache.org/xsd/decoration-1.0.1.xsd">
+    xsi:schemaLocation="http://maven.apache.org/DECORATION/1.4.0
+                        http://maven.apache.org/xsd/decoration-1.4.0.xsd">
     <skin>
         <groupId>org.forgerock.commons</groupId>
         <artifactId>forgerock-community-skin</artifactId>
@@ -30,8 +30,6 @@
     <body>
         <breadcrumbs>
             <item name="Developer Community" href="http://forgerock.org/" />
-            <item name="Commons" href="http://commons.forgerock.org/" />
-            <item name="${project.name}" href="${project.url}" />
         </breadcrumbs>
 
         <menu ref="reports" />
