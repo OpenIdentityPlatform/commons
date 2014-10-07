@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define, window, Handlebars, i18n, _ */
+/*global $, define, window, Handlebars, i18n, _ , sessionStorage */
 /*jslint regexp: false*/
 define("org/forgerock/commons/ui/common/util/UIUtils", [
     "org/forgerock/commons/ui/common/util/typeextentions/String",
@@ -35,26 +35,26 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     var obj = new AbstractConfigurationAware();
 
     obj.getUrl = function() {
-        return window.location.href;    
+        return window.location.href;
     };
 
     obj.getCurrentUrlBasePart = function() {
-        return window.location.protocol + "//" + window.location.host;  
+        return window.location.protocol + "//" + window.location.host;
     };
 
     obj.getCurrentHash = function() {
         // cannot use window.location.hash due to FF which de-encodes this parameter.
-        return window.location.href.substring(window.location.href.indexOf('#') + 1);  
+        return window.location.href.substring(window.location.href.indexOf('#') + 1);
     };
 
-    obj.getCurrentUrlQueryParameters = function() { 
+    obj.getCurrentUrlQueryParameters = function() {
         var hash = obj.getCurrentHash(),
-            queries = window.location.search.substr(1,window.location.search.length);  
+            queries = window.location.search.substr(1,window.location.search.length);
             // location.search will only return a value if there are queries before the hash.
         if (hash && hash.indexOf('&') > -1) {
             queries = hash.substring(hash.indexOf('&') + 1);
         }
-        return queries;   
+        return queries;
     };
 
     obj.getCurrentPathName = function() {
@@ -62,7 +62,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     };
 
     obj.setUrl = function(url) {
-        window.location.href = url; 
+        window.location.href = url;
     };
 
     obj.normalizeSubPath = function(subPath) {
@@ -71,24 +71,24 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         }
         return subPath;
     };
- 
+
     obj.convertCurrentUrlToJSON = function() {
         var result = {}, parsedQueryParams;
 
         result.url = obj.getCurrentUrlBasePart();
         result.pathName = obj.normalizeSubPath(obj.getCurrentPathName());
-        
+
         result.params = obj.convertQueryParametersToJSON(obj.getCurrentUrlQueryParameters());
         return result;
     };
-    
+
     obj.convertQueryParametersToJSON = function(queryParameters) {
         if(queryParameters) {
             //create a json object from a query string
             //by taking a query string and splitting it up into individual key=value strings
             return _.object(
                 //queryParameters.match(/([^&]+)/g) returns an array of key value pair strings
-                _.map(queryParameters.match(/([^&]+)/g), function (pair) { 
+                _.map(queryParameters.match(/([^&]+)/g), function (pair) {
                    //convert each string into a an array 0 index being the key and 1 index being the value
                    var keyAndValue = pair.match(/([^=]+)=?(.*)/).slice(1);
                        //decode the value
@@ -153,6 +153,50 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         }
 
         var grid = view.$el.find(id),
+            cm = options.colModel,
+            columnStateName = additional.storageKey,
+            saveColumnState = function (perm) {
+                var colModel = this.jqGrid('getGridParam', 'colModel'), i, l = colModel.length, colItem, cmName,
+                    postData = this.jqGrid('getGridParam', 'postData'),
+                    columnsState = {
+                        search: this.jqGrid('getGridParam', 'search'),
+                        page: this.jqGrid('getGridParam', 'page'),
+                        sortname: this.jqGrid('getGridParam', 'sortname'),
+                        sortorder: this.jqGrid('getGridParam', 'sortorder'),
+                        permutation: perm,
+                        colStates: {}
+                    },
+                    colStates = columnsState.colStates;
+
+                for (i = 0; i < l; i++) {
+                    colItem = colModel[i];
+                    cmName = colItem.name;
+                    if (cmName !== 'rn' && cmName !== 'cb' && cmName !== 'subgrid') {
+                        colStates[cmName] = {
+                            width: colItem.width,
+                            hidden: colItem.hidden
+                        };
+                    }
+                }
+                sessionStorage.setItem(columnStateName, JSON.stringify(columnsState));
+            },
+            columnsState,
+            restoreColumnState = function (colModel) {
+                var colItem, i, l = colModel.length, colStates, cmName,
+                    columnsState = JSON.parse(sessionStorage.getItem(columnStateName));
+
+                if (columnsState) {
+                    colStates = columnsState.colStates;
+                    for (i = 0; i < l; i++) {
+                        colItem = colModel[i];
+                        cmName = colItem.name;
+                        if (cmName !== 'rn' && cmName !== 'cb' && cmName !== 'subgrid') {
+                            colModel[i] = $.extend(true, {}, colModel[i], colStates[cmName]);
+                        }
+                    }
+                }
+                return columnsState;
+            },
             defaultOptions = {
                 datatype: "json",
                 loadBeforeSend: function (jqXHR) {
@@ -214,9 +258,12 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                 viewrecords: true,
                 rowList: [10, 20, 30]
             };
+        columnsState = restoreColumnState(cm);
 
         $.extend(true, defaultOptions, options);
-
+        if (columnsState) {
+            $.extend(true, defaultOptions, columnsState);
+        }
         grid.jqGrid(defaultOptions);
 
         grid.navGrid(options.pager,{edit:false,add:false,del:false,search:false,refresh:false})
@@ -225,9 +272,13 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                 buttonicon:"ui-icon-add",
                 position: "first",
                 onClickButton: function(){
-                    grid.jqGrid('columnChooser', { 
-                        width : additional.columnChooserOptions.width, height : additional.columnChooserOptions.height, 
-                        done: function (){
+                    grid.jqGrid('columnChooser', {
+                        modal : true,
+                        width : additional.columnChooserOptions.width, height : additional.columnChooserOptions.height,
+                        done: function (perm){
+                            if (perm) {
+                                saveColumnState.call(this, perm);
+                            }
                             grid.trigger('jqGridAfterLoadComplete.setFrozenColumns');
                         }});
                 }
@@ -261,7 +312,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
             if (validation && !validation()) {
                 return false;
             }
-            
+
             if(mode === "append") {
                 el.append(tpl);
             } else {
@@ -278,13 +329,13 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         if(templateUrl) {
             if (obj.templates[templateUrl]) {
                 var code = Handlebars.compile(obj.templates[templateUrl])(data);
-                                
+
                 if (callback) {
                     callback(code);
                 }
-                
+
                 return code;
-            } else {               
+            } else {
                 $.ajax({
                     type: "GET",
                     url: templateUrl,
@@ -301,7 +352,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                             //fill the template
                             if (callback) {
                                 callback(Handlebars.compile(template)(data));
-                            }     
+                            }
                         }
                     },
                     error: callback
@@ -309,7 +360,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
             }
         }
     };
-    
+
     obj.reloadTemplate = function(url) {
         $.ajax({
             type: "GET",
@@ -320,10 +371,10 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
             }
         });
     };
-    
+
     obj.preloadTemplates = function() {
         var url;
-        
+
         for(url in obj.configuration.templateUrls) {
             obj.reloadTemplate(obj.configuration.templateUrls[url]);
         }
@@ -348,7 +399,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
             }
         });
     };
-    
+
     $.event.special.delayedkeyup = {
         setup: function( data, namespaces ) {
             $(this).bind("keyup", $.event.special.delayedkeyup.handler);
@@ -360,69 +411,69 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
 
         handler: function( event ) {
             var self = this, args = arguments;
-            
+
             event.type = "delayedkeyup";
-                
+
             $.doTimeout('delayedkeyup', 250, function() {
                 $.event.handle.apply(self, args);
             });
         }
     };
 
-    Handlebars.registerHelper('t', function(i18nKey) {        
+    Handlebars.registerHelper('t', function(i18nKey) {
         var params = { postProcess: 'sprintf', sprintf: _.map(_.toArray(arguments).slice(1, -1), Handlebars.Utils.escapeExpression)}, result;
-        
+
         result = i18n.t(i18nKey, params);
-        
+
         return new Handlebars.SafeString(result);
      });
-    
+
     Handlebars.registerHelper('url', function(routeKey) {
         var result = "#" + router.getLink(router.configuration.routes[routeKey], _.toArray([arguments[1]]));
-        
+
         //Don't return a safe string to prevent XSS.
         return result;
     });
-    
+
     //format ISO8601; example: 2012-10-29T10:49:49.419+01:00
     Handlebars.registerHelper('date', function(unformattedDate, datePattern) {
         var date = dateUtil.parseDateString(unformattedDate), formattedDate;
-        
+
         if(!dateUtil.isDateValid(date)) {
             return "";
         }
-        
+
         if (datePattern && _.isString(datePattern)) {
             formattedDate = dateUtil.formatDate(date,datePattern);
         } else {
             formattedDate = dateUtil.formatDate(date);
         }
-        
+
         return new Handlebars.SafeString(formattedDate);
     });
-    
+
     //map should have format key : value
     Handlebars.registerHelper('selectm', function(map, elementName, selectedKey, selectedValue, multiple, height) {
         var result, prePart, postPart, content = "", isSelected, entityName;
-        
+
         prePart = '<select';
-        
+
         if (elementName && _.isString(elementName)) {
             prePart += ' name="' + elementName + '"';
         }
-        
+
         if(multiple) {
             prePart += ' multiple="multiple"';
         }
-        
+
         if(height) {
             prePart += ' style="height: '+ height +'px"';
         }
-        
+
         prePart += '>';
-        
+
         postPart = '</select> ';
-        
+
         for (entityName in map) {
             isSelected = false;
             if (selectedValue && _.isString(selectedValue)) {
@@ -434,14 +485,14 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                     isSelected = true;
                 }
             }
-            
+
             if (isSelected) {
                 content += '<option value="' + entityName + '" selected="true">' + $.t(map[entityName]) + '</option>';
             } else {
                 content += '<option value="' + entityName + '">' + $.t(map[entityName]) + '</option>';
             }
         }
-  
+
         result = prePart + content + postPart;
         return new Handlebars.SafeString(result);
     });
@@ -455,19 +506,19 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
 
     Handlebars.registerHelper('select', function(map, elementName, selectedKey, selectedValue, additionalParams) {
         var result, prePart, postPart, content = "", isSelected, entityName, entityKey;
-        
+
         if (map && _.isString(map)) {
             map = JSON.parse(map);
         }
-        
+
         if (elementName && _.isString(elementName)) {
             prePart = '<select name="' + elementName + '" ' + additionalParams + '>';
         } else{
             prePart = '<select>';
         }
-        
+
         postPart = '</select> ';
-        
+
         for (entityName in map) {
             isSelected = false;
             if (selectedValue && _.isString(selectedValue) && selectedValue !== '') {
@@ -479,13 +530,13 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                     isSelected = true;
                 }
             }
-            
+
             if (entityName === '__null') {
                 entityKey = '';
             } else {
                 entityKey = entityName;
             }
-            
+
             if (isSelected) {
                 content += '<option value="' + entityKey + '" selected="true">' + $.t(map[entityName]) + '</option>';
             } else {
@@ -496,47 +547,47 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         result = prePart + content + postPart;
         return new Handlebars.SafeString(result);
     });
-    
-    Handlebars.registerHelper('p', function(countValue, options) { 
+
+    Handlebars.registerHelper('p', function(countValue, options) {
         var params, result;
         params = { count: countValue };
         result = i18n.t(options.hash.key, params);
         return new Handlebars.SafeString(result);
      });
-    
-    
+
+
     Handlebars.registerHelper('equals', function(val, val2, options) {
         if(val === val2){
             return options.fn(this);
         }
     });
-    
+
     Handlebars.registerHelper('checkbox', function(map, name, options) {
         var ret = "<div class='checkboxList' id='"+name+"'><ol>", idx,
             sortedMap = _.chain(map)
                             .pairs()
                             .sortBy(function (arr) { return arr[1]; })
                             .value();
-        
+
         for(idx=0;idx<sortedMap.length;idx++) {
             ret += '<li><input type="checkbox" name="'+ name +'" value="'+ sortedMap[idx][0] +'" id="'+ name +'_'+ encodeURIComponent(sortedMap[idx][0]) +'"><label for="'+ name +'_'+ encodeURIComponent(sortedMap[idx][0]) +'">' + sortedMap[idx][1] + '</label></li>';
         }
-        
+
         ret += "</ol></div>";
-        
+
         return new Handlebars.SafeString(ret);
     });
-    
+
     Handlebars.registerHelper('siteImages', function(images, options) {
         var ret = "", i;
-        
+
         for(i = 0; i < images.length; i++) {
             ret += '<img class="item" src="' + encodeURI(images[i]) +'" data-site-image="'+ encodeURI(images[i]) +'" />';
         }
-        
+
         return new Handlebars.SafeString(ret);
     });
-    
+
     Handlebars.registerHelper("each_with_index", function(array, fn) {
         var buffer = "",
             item,
@@ -548,13 +599,13 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
             if (array[i]) {
                 item = {};
                 item.value = array[i];
-        
+
                 // stick an index property onto the item, starting with 0
                 item.index = k;
-                
+
                 item.first = (k === 0);
                 item.last = (k === array.length);
-    
+
                 // show the inside of the block
                 buffer += fn.fn(item);
 
@@ -564,7 +615,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
 
         // return the finished buffer
         return buffer;
-    
+
     });
 
     obj.loadSelectOptions = function(data, el, empty, callback) {
@@ -574,15 +625,15 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                 "value" : $.t("common.form.pleaseSelect")
             } ].concat(data);
             }
-                
+
         el.loadSelect(data);
-                
+
         if(callback) {
             callback(data);
         }
     };
-    
-    
+
+
     obj.jqConfirm = function(message,confirmCallback,width){
         var btns = {};
         btns[$.t('common.form.cancel')] = function(){
@@ -617,15 +668,15 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         return responseMessage.indexOf(string) > -1;
     };
 
-    // Registering global mixins 
-    
+    // Registering global mixins
+
     _.mixin({
 
         /*  findByValues takes a collection and returns a subset made up of objects where the given property name matches a value in the list.  
             For example:
 
             var collections = [
-                {id: 1, stack: 'am'}, 
+                {id: 1, stack: 'am'},
                 {id: 2, stack: 'dj'},
                 {id: 3, stack: 'idm'},
                 {id: 4, stack: 'api'},
@@ -633,13 +684,13 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
             ];
 
             var filtered = _.findByValues(collections, "id", [1,3,4]);
-            
+
             filtered = [
-                {id: 1, stack: 'am'}, 
+                {id: 1, stack: 'am'},
                 {id: 3, stack: 'idm'},
                 {id: 4, stack: 'api'}
             ]
-         
+
          */
 
         'findByValues': function(collection, property, values) {
@@ -652,12 +703,12 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
             For example:
 
             var filtered = _.removeByValues(collections, "id", [1,3,4]);
-            
-            filtered = [  
+
+            filtered = [
                 {id: 2, stack: 'dj'},
                 {id: 5, stack: 'rest'}
             ]
-   
+
          */
         'removeByValues': function(collection, property, values) {
             return _.reject(collection, function(item) {
