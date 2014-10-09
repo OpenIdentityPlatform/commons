@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2014 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jws;
@@ -30,16 +30,16 @@ public enum JwsAlgorithm implements Algorithm {
     /** No digital signature or MAC value included. */
     NONE(null, null, JwsAlgorithmType.NONE),
     /** HMAC using SHA-256 hash algorithm. */
-    HS256("HmacSHA256", "HmacSHA256", JwsAlgorithmType.HMAC),
+    HS256("HmacSHA256", "SHA-256", JwsAlgorithmType.HMAC),
     /** HMAC using SHA-384 hash algorithm. */
-    HS384("HmacSHA384", "HmacSHA384", JwsAlgorithmType.HMAC),
+    HS384("HmacSHA384", "SHA-384", JwsAlgorithmType.HMAC),
     /** HMAC using SHA-512 hash algorithm. */
-    HS512("HmacSHA512", "HmacSHA512", JwsAlgorithmType.HMAC),
+    HS512("HmacSHA512", "SHA-512", JwsAlgorithmType.HMAC),
     /** RSA using SHA-256 hash algorithm **/
-    RS256("RS256", "SHA256withRSA", JwsAlgorithmType.RSA);
+    RS256("SHA256withRSA", "SHA-256", JwsAlgorithmType.RSA);
 
     private final String algorithm;
-    private final String knownName;
+    private final String mdAlgorithm;
     private final JwsAlgorithmType algorithmType;
 
     /**
@@ -47,11 +47,12 @@ public enum JwsAlgorithm implements Algorithm {
      * of the algorithm.
      *
      * @param algorithm The Java Cryptographic algorithm name.
+     * @param mdAlgorithm The MessageDigest algorithm.
      * @param algorithmType The JwsAlgorithmType of the JwsAlgorithm.
      */
-    private JwsAlgorithm(String algorithm, String knownName, JwsAlgorithmType algorithmType) {
+    private JwsAlgorithm(String algorithm, String mdAlgorithm, JwsAlgorithmType algorithmType) {
         this.algorithm = algorithm;
-        this.knownName = knownName;
+        this.mdAlgorithm = mdAlgorithm;
         this.algorithmType = algorithmType;
     }
 
@@ -61,6 +62,14 @@ public enum JwsAlgorithm implements Algorithm {
     @Override
     public String getAlgorithm() {
         return algorithm;
+    }
+
+    /**
+     * Returns the Java-friendly name of the message digest algorithm implementation.
+     * @see <a href="http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html">Standard Names</a>
+     */
+    public String getMdAlgorithm() {
+        return mdAlgorithm;
     }
 
     /**
