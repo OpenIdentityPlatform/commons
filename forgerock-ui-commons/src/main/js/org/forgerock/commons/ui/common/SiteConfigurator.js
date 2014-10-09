@@ -105,6 +105,7 @@ define("org/forgerock/commons/ui/common/SiteConfigurator", [
        conf.globalData.successfulUserRegistrationDestination =  config.successfulUserRegistrationDestination;
        conf.globalData.auth.cookieName =                        config.cookieName;
        conf.globalData.auth.cookieDomains =                     config.domains;
+       conf.globalData.socialImplementations =                  config.socialImplementations;
 
        i18nManager.init(config.lang);
 
