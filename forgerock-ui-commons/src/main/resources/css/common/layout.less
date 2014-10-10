@@ -68,8 +68,12 @@
 
     a:hover, .active a {
         .rounded-corners(5px);
-        background-color: #F98624;
+        background-color: @color-active;
         color: #F9F9F9;
+    }
+    
+    a:hover {
+        background-color: mix(@active-menu-color, @inactive-menu-color, 70%);
     }
 }
 
