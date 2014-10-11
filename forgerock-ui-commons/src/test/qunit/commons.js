@@ -152,6 +152,24 @@ define([
 
                 QUnit.ok($("option", select).length, 3, "Options are listed within select box, from data (including 'Please choose' prompt)");
             });
+
+            QUnit.test("Dialog globalData pollution (CUI-24)", function () {
+                var testDialog = new Dialog();
+                sinon.stub(UIUtils, "renderTemplate", function (template, el, data, callback) {
+                    if (!callback) {
+                        QUnit.ok(data["FOO"] === "BAR", "Custom dialog data correctly passed into renderTemplate with no callback");
+                    } else {
+                        QUnit.ok(data["FOO"] === "BAZ", "Custom dialog data correctly passed into renderTemplate with callback");
+                    }
+                });
+                testDialog.data = {"FOO": "BAR", "theme": {"path": ""}};
+                testDialog.loadContent();
+                testDialog.data["FOO"] = "BAZ";
+                testDialog.loadContent(function () { return });
+
+                QUnit.ok(conf.globalData.FOO === undefined, "No data pollution in global scope from dialog render");
+                UIUtils.renderTemplate.restore();
+            })
         }
     };
 });
