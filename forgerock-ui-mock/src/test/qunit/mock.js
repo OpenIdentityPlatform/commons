@@ -246,6 +246,7 @@ define([
 
                 QUnit.ok(!loginDialogSpy.called, "Login Dialog render function has not yet been called");
                 conf.loggedUser = getLoggedUser();
+                delete conf.globalData.authorizationFailurePending;
                 eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {
                     route: router.configuration.routes.profile,
                     callback: function () {

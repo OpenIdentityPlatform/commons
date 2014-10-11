@@ -99,11 +99,12 @@ define("config/process/CommonConfig", [
                 "org/forgerock/commons/ui/common/components/Navigation",
                 "org/forgerock/commons/ui/common/LoggedUserBarView"
             ],
-            processDescription: function(event, configuration, navigation, loggedUserBarView) {
+            processDescription: function(event, conf, navigation, loggedUserBarView) {
                 var serviceInvokerModuleName, serviceInvokerConfig; 
                 serviceInvokerModuleName = "org/forgerock/commons/ui/common/main/ServiceInvoker";
-                serviceInvokerConfig = configuration.getModuleConfiguration(serviceInvokerModuleName);
+                serviceInvokerConfig = conf.getModuleConfiguration(serviceInvokerModuleName);
                 if(!event.anonymousMode) {
+                    delete conf.globalData.authorizationFailurePending;
                     delete serviceInvokerConfig.defaultHeaders[constants.HEADER_PARAM_PASSWORD];
                     delete serviceInvokerConfig.defaultHeaders[constants.HEADER_PARAM_USERNAME];
                     delete serviceInvokerConfig.defaultHeaders[constants.HEADER_PARAM_NO_SESSION];
@@ -114,11 +115,11 @@ define("config/process/CommonConfig", [
                     serviceInvokerConfig.defaultHeaders[constants.HEADER_PARAM_USERNAME] = constants.ANONYMOUS_USERNAME;
                     serviceInvokerConfig.defaultHeaders[constants.HEADER_PARAM_NO_SESSION]= true; 
                     
-                    configuration.setProperty('loggedUser', null);
+                    conf.setProperty('loggedUser', null);
                     loggedUserBarView.render();
                     navigation.reload();
                 }
-                configuration.sendSingleModuleConfigurationChangeInfo(serviceInvokerModuleName);
+                conf.sendSingleModuleConfigurationChangeInfo(serviceInvokerModuleName);
             }
         },
         {
@@ -132,6 +133,13 @@ define("config/process/CommonConfig", [
                 "LoginDialog"
             ],
             processDescription: function(error, viewManager, router, conf, sessionManager, loginDialog) {
+
+                // multiple rest calls that all return authz failures will cause this event to be called multiple times
+                if (conf.globalData.authorizationFailurePending !== undefined) {
+                    return;
+                }
+
+                conf.globalData.authorizationFailurePending = true;
 
                 if(!conf.loggedUser) {
                     if(!conf.gotoURL && !window.location.hash.replace(/^#/, '').match(router.configuration.routes.login.url)) {

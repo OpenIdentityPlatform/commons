@@ -126,13 +126,14 @@ define("org/forgerock/commons/ui/common/main/Router", [
                 args = route.defaults;
             }
         }
-        if(!_.isRegExp(route.url)) {
+
+        if (!_.isRegExp(route.url)) {
             pattern = route.url.replace(/:[A-Za-z@.]+/, "?");
         } else {
             pattern = route.pattern;
         }
         
-        if(args) {            
+        if (args) {
             for(i = 0; i < args.length; i++) {
                 if (args[i] !== undefined) {
                     pattern = pattern.replace("?", args[i]);
@@ -140,13 +141,12 @@ define("org/forgerock/commons/ui/common/main/Router", [
                     break;
                 }
             }
-            
             pattern = pattern.replace(/\?/g, "");
         }
-        
+
         return pattern;
     };
 
     return obj;
 
-});    
+});
