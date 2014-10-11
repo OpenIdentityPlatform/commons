@@ -186,8 +186,9 @@ public class JaspiRuntime {
             HttpServletResponse httpResponse = (HttpServletResponse) messageInfo.getResponseMessage();
             httpResponse.setStatus(jre.getCode());
             try {
-                httpResponse.getWriter().write(jre.toJsonValue().toString());
                 httpResponse.setContentType(JSON_HTTP_MEDIA_TYPE);
+                httpResponse.setCharacterEncoding("UTF-8");
+                httpResponse.getWriter().write(jre.toJsonValue().toString());
             } catch (IOException ioe) {
                 throw new ServletException(ioe.getMessage(), ioe);
             }

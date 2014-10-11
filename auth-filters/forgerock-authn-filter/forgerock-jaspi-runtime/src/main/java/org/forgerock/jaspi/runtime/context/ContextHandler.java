@@ -122,6 +122,7 @@ public class ContextHandler {
                     UNAUTHORIZED_ERROR_MESSAGE);
             try {
                 response.setContentType(JSON_HTTP_MEDIA_TYPE);
+                response.setCharacterEncoding("UTF-8");
                 response.getWriter().write(jre.toJsonValue().toString());
             } catch (IOException e) {
                 LOG.error("Failed to write to response", e);

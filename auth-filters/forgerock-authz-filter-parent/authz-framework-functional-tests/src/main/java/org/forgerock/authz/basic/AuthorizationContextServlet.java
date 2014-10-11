@@ -45,6 +45,7 @@ public class AuthorizationContextServlet extends HttpServlet {
 
         // Note: JsonValue.toString() may not produce valid JSON, but it should be sufficient for testing.
         response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
         response.getWriter().write(json.toString());
         response.getWriter().close();
     }
