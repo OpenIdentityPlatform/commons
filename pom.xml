@@ -114,7 +114,7 @@
     </build>
 
     <dependencyManagement>
-        <dependencies>          
+        <dependencies>
           <dependency>
                 <groupId>org.forgerock.commons.ui.libs</groupId>
                 <artifactId>moment</artifactId>
@@ -153,7 +153,7 @@
             <dependency>
                 <groupId>org.forgerock.commons.ui.libs</groupId>
                 <artifactId>backbone</artifactId>
-                <version>1.1.0</version>
+                <version>1.1.2</version>
                 <type>js</type>
                 <classifier>min</classifier>
             </dependency>
