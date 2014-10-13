@@ -618,6 +618,11 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
 
     });
 
+    Handlebars.registerHelper('camelCaseToTitle', function(string) {
+        var newString = string.replace(/([a-z])([A-Z])/g, '$1 $2');
+        return new Handlebars.SafeString(newString[0].toUpperCase() + newString.slice(1));
+    });
+
     obj.loadSelectOptions = function(data, el, empty, callback) {
         if( empty === undefined || empty === true ) {
             data = [ {
