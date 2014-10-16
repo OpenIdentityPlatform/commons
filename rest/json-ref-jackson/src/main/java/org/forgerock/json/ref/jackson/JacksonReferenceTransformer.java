@@ -20,10 +20,9 @@ package org.forgerock.json.ref.jackson;
 import java.io.InputStream;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URL;
 
 // Jackson
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 // JSON Fluent
 import org.forgerock.json.fluent.JsonException;

@@ -15,7 +15,6 @@
  */
 package org.forgerock.json.schema;
 
-import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.schema.validator.Constants;
 import org.forgerock.json.schema.validator.ErrorHandler;
@@ -28,6 +27,8 @@ import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.*;
 import java.net.URI;
@@ -241,6 +242,7 @@ public class Main {
                     }
 
                     @Override
+                    @Deprecated
                     public void assembleException() throws ValidationException {
                     }
                 });

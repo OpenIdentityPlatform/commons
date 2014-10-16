@@ -41,10 +41,6 @@ import javax.mail.internet.ParseException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
@@ -56,6 +52,11 @@ import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Version;
 import org.forgerock.util.encode.Base64url;
+
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * HTTP utility methods and constants.
@@ -320,7 +321,7 @@ public final class HttpUtils {
     static JsonGenerator getJsonGenerator(final HttpServletRequest req,
             final HttpServletResponse resp) throws IOException {
         final JsonGenerator writer =
-                JSON_MAPPER.getJsonFactory().createJsonGenerator(resp.getOutputStream());
+                JSON_MAPPER.getFactory().createGenerator(resp.getOutputStream());
         writer.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
 
         // Enable pretty printer if requested.
@@ -599,9 +600,9 @@ public final class HttpUtils {
             if (isMultiPartRequest) {
                 mimeMultiparts = new MimeMultipart(new HttpServletRequestDataSource(req));
                 BodyPart jsonPart = getJsonRequestPart(mimeMultiparts);
-                parser = JSON_MAPPER.getJsonFactory().createJsonParser(jsonPart.getInputStream());
+                parser = JSON_MAPPER.getFactory().createParser(jsonPart.getInputStream());
             } else {
-                parser = JSON_MAPPER.getJsonFactory().createJsonParser(req.getInputStream());
+                parser = JSON_MAPPER.getFactory().createParser(req.getInputStream());
             }
             Object content = parser.readValueAs(Object.class);
 
@@ -656,7 +657,7 @@ public final class HttpUtils {
     private static class HttpServletRequestDataSource implements DataSource {
         private HttpServletRequest request;
 
-        HttpServletRequestDataSource(HttpServletRequest request) throws IOException {
+        HttpServletRequestDataSource(HttpServletRequest request) {
             this.request = request;
         }
 

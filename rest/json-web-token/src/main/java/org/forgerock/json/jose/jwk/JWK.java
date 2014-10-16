@@ -28,11 +28,12 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.jose.jwt.JWObject;
 import org.forgerock.util.encode.Base64;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * The abstract base class for the 3 implementations of JWK.
