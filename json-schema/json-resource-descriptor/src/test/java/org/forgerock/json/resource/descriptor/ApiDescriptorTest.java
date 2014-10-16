@@ -19,6 +19,7 @@ import static org.forgerock.json.fluent.JsonValue.field;
 import static org.forgerock.json.fluent.JsonValue.json;
 import static org.forgerock.json.fluent.JsonValue.object;
 import static org.forgerock.json.resource.Requests.newReadRequest;
+import static org.forgerock.json.resource.descriptor.Api.JSON_MAPPER;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -43,10 +44,27 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonGenerator.Feature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SuppressWarnings("javadoc")
 public final class ApiDescriptorTest {
+    public static class User {
+        public String forname;
+        public String surname;
+        public int age;
+    }
+
+    public final static class AdminUser extends User {
+        public String role;
+    }
+
+    public final static class Group {
+        public String name;
+    }
+
+    public final static class Realm {
+        public String name;
+    }
+
     private static final class ResolverFactoryImpl implements ResolverFactory {
         private final ApiDescriptor api;
 
@@ -94,8 +112,6 @@ public final class ApiDescriptorTest {
     }
 
     private static final Urn API_URN = Urn.valueOf("urn:forgerock:common:resource:api:1.0");
-    private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
-
     private static final Urn USERS_URN = Urn.valueOf("urn:forgerock:openam:resource:user:1.0");
     private static final JsonGenerator WRITER;
 
@@ -127,7 +143,7 @@ public final class ApiDescriptorTest {
                                     .build()
                                 .addResource(API_URN)
                                     .setDescription("Commons Rest API Descriptor")
-                                    .setSchema(Schema.builder().build())
+                                    .setSchema(ApiDescriptor.class)
                                     .build()
                                 .addResource("urn:forgerock:openam:resource:user:1.0")
                                     .setDescription("An OpenAM user")
@@ -135,18 +151,18 @@ public final class ApiDescriptorTest {
                                         .setDescription("Authenticates a user")
                                         .addParameter("password", "The user's password")
                                         .build()
-                                    .setSchema(Schema.builder().build())
+                                    .setSchema(User.class)
                                     .addProfile("urn:forgerock:ldap:profile:schema:1.0",
                                             json(object(field("objectClass", "inetOrgPerson"))))
                                     .build()
                                 .addResource("urn:forgerock:openam:resource:admin:1.0")
                                     .setDescription("An OpenAM administrator")
                                     .setParent("urn:forgerock:openam:resource:user:1.0")
-                                    .setSchema(Schema.builder().build())
+                                    .setSchema(AdminUser.class)
                                     .build()
                                 .addResource("urn:forgerock:openam:resource:group:1.0")
                                     .setDescription("An OpenAM group")
-                                    .setSchema(Schema.builder().build())
+                                    .setSchema(Group.class)
                                     .build()
                                 .addResource("urn:forgerock:openam:resource:realm:1.0")
                                     .setDescription("An OpenAM realm")
@@ -160,6 +176,7 @@ public final class ApiDescriptorTest {
                                     .addRelation("subrealms", "urn:forgerock:openam:resource:realm:1.0")
                                         .setDescription("An OpenAM sub-realm")
                                         .build()
+                                    .setSchema(Realm.class)
                                     .build()
                                 .build();
         // @formatter:on
@@ -178,5 +195,9 @@ public final class ApiDescriptorTest {
                 connection.read(new RootContext(),
                         newReadRequest("realms/com/subrealms/example/users/bjensen"));
         WRITER.writeObject(bjensen.getContent().getObject());
+
+        //        System.out.println("#### Serializing API Descriptor");
+        //        System.out.println();
+        //        WRITER.writeObject(api);
     }
 }

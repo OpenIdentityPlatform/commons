@@ -26,13 +26,20 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ResourceName;
 import org.forgerock.json.resource.Version;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
+import com.fasterxml.jackson.module.jsonSchema.factories.SchemaFactoryWrapper;
+
 @SuppressWarnings("javadoc")
 public final class ResourceDescriptor {
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     public static final class Builder {
         private LocalizableMessage description;
         private final Set<RelationDescriptor> relations = new LinkedHashSet<RelationDescriptor>();
         private Urn parentResourceUrn;
-        private Schema schema;
+        private JsonSchema schema;
         private final Set<ActionDescriptor> actions = new LinkedHashSet<ActionDescriptor>();
         private final ApiDescriptor.Builder parentBuilder;
         private final Set<Profile> profiles = new LinkedHashSet<Profile>();
@@ -112,8 +119,15 @@ public final class ResourceDescriptor {
             return setParent(Urn.valueOf(parentResourceUrn));
         }
 
-        public Builder setSchema(final Schema schema) {
+        public Builder setSchema(final JsonSchema schema) {
             this.schema = schema;
+            return this;
+        }
+
+        public Builder setSchema(final Class<?> clazz) throws JsonMappingException {
+            SchemaFactoryWrapper visitor = new SchemaFactoryWrapper();
+            OBJECT_MAPPER.acceptJsonFormatVisitor(OBJECT_MAPPER.constructType(clazz), visitor);
+            this.schema = visitor.finalSchema();
             return this;
         }
 
@@ -153,7 +167,7 @@ public final class ResourceDescriptor {
     }
 
     private final LocalizableMessage description;
-    private final Schema schema;
+    private final JsonSchema schema;
     private ResourceDescriptor parent;
     private final Urn parentUrn;
     private final Set<ResourceDescriptor> mutableChildren = new LinkedHashSet<ResourceDescriptor>();
@@ -164,7 +178,7 @@ public final class ResourceDescriptor {
     private final Urn urn;
 
     private ResourceDescriptor(final Urn urn, final LocalizableMessage description,
-            final Urn parentUrn, final Schema schema, final Set<ActionDescriptor> actions,
+            final Urn parentUrn, final JsonSchema schema, final Set<ActionDescriptor> actions,
             final Set<RelationDescriptor> relations, final Set<Profile> profiles) {
         this.urn = urn;
         this.description = Api.defaultToEmptyMessageIfNull(description);
@@ -220,7 +234,7 @@ public final class ResourceDescriptor {
         return actions;
     }
 
-    public Schema getSchema() {
+    public JsonSchema getSchema() {
         return schema;
     }
 

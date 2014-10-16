@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -56,8 +57,12 @@ import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.json.resource.descriptor.RelationDescriptor.Multiplicity;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @SuppressWarnings("javadoc")
 public final class Api {
+    static final ObjectMapper JSON_MAPPER = new ObjectMapper();
+
     private static abstract class AbstractResolverHandler implements ResultHandler<RequestHandler> {
         private final ResultHandler<?> handler;
         private final Resolver resolver;
@@ -432,6 +437,7 @@ public final class Api {
                     field("name", String.valueOf(resource.getUrn().getName())),
                     field("version", String.valueOf(resource.getUrn().getVersion())),
                     field("description", resource.getDescription()),
+                    field("schema", JSON_MAPPER.convertValue(resource.getSchema(), Map.class)),
                     parentToJson(resource.getParentUrn()),
                     actionsToJson(resource.getActions()),
                     relationsToJson(resource.getRelations()),
