@@ -24,9 +24,10 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.util.Map;
 
-import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.jose.utils.Utils;
 import org.forgerock.util.encode.Base64url;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Helper class to create encoded JWT strings.
@@ -39,7 +40,7 @@ public class JwtTestHelper {
     @SuppressWarnings("unchecked")
     public static Map<String, Object> jsonToMap(String json) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
-        return (Map<String, Object>) objectMapper.readValue(json, Map.class);
+        return objectMapper.readValue(json, Map.class);
     }
 
     public static String encodedPlaintextJwt(String header, String payload) {
