@@ -20,7 +20,7 @@ import java.net.URLDecoder;
 import java.util.Map;
 
 // Jackson
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 // JSON Fluent
 import org.forgerock.json.fluent.JsonValue;

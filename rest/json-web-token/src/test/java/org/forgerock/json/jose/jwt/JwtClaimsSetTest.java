@@ -608,7 +608,7 @@ public class JwtClaimsSetTest {
     }
 
     @Test
-    public void shouldSetAudienceWithURIs() throws URISyntaxException {
+    public void shouldSetAudienceWithURIs() {
 
         //Given
         Map<String, Object> claims = new HashMap<String, Object>();
@@ -624,7 +624,7 @@ public class JwtClaimsSetTest {
     }
 
     @Test (expectedExceptions = JwtRuntimeException.class)
-    public void shouldThrowJwtRuntimeExceptionWhenValueIsOfWrongType() throws URISyntaxException {
+    public void shouldThrowJwtRuntimeExceptionWhenValueIsOfWrongType() {
 
         //Given
         Map<String, Object> claims = new HashMap<String, Object>();

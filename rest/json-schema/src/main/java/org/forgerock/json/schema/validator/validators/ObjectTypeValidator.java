@@ -43,7 +43,6 @@ import org.forgerock.json.schema.validator.CollectErrorsHandler;
 import org.forgerock.json.schema.validator.ErrorHandler;
 import org.forgerock.json.schema.validator.ObjectValidatorFactory;
 import org.forgerock.json.schema.validator.exceptions.ValidationException;
-import org.forgerock.json.schema.validator.helpers.EnumHelper;
 
 /**
  * ObjectTypeValidator applies all the constraints of a <code>object</code> type.
@@ -74,10 +73,6 @@ public class ObjectTypeValidator extends Validator {
     /**
      * An object instance is valid against this keyword if its property set
      * contains all elements in this keyword's array value.
-     *
-     * @see <a
-     *      href=http://tools.ietf.org/html/draft-fge-json-schema-validation-00#
-     *      section-5.4.3">required</a>
      */
     private final Set<String> requiredPropertyNames = new HashSet<String>();
     /**
@@ -120,30 +115,6 @@ public class ObjectTypeValidator extends Validator {
      */
     private boolean allowAdditionalProperties = true;
     private Validator additionalPropertyValidator = null;
-    /**
-     * This provides an enumeration of all possible values that are valid
-     * for the instance property.  This MUST be an array, and each item in
-     * the array represents a possible value for the instance value.  If
-     * this attribute is defined, the instance value MUST be one of the
-     * values in the array in order for the schema to be valid.
-     */
-    private EnumHelper enumHelper = null;
-    /**
-     * The value of this property MUST be another schema which will provide
-     * a base schema which the current schema will inherit from.  The
-     * inheritance rules are such that any instance that is valid according
-     * to the current schema MUST be valid according to the referenced
-     * schema.  This MAY also be an array, in which case, the instance MUST
-     * be valid for all the schemas in the array.  A schema that extends
-     * another schema MAY define additional attributes, constrain existing
-     * attributes, or add other constraints.
-     * <p/>
-     * Conceptually, the behavior of extends can be seen as validating an
-     * instance against all constraints in the extending schema as well as
-     * the extended schema(s).  More optimized implementations that merge
-     * schemas are possible, but are not required.
-     */
-    private List<Validator> extendsValidators = null;
     /**
      * An instance validates successfully against this keyword if it validates
      * successfully against exactly one schema defined by this keyword's value.

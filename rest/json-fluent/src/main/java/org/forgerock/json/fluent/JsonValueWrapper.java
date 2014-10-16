@@ -17,14 +17,14 @@
 package org.forgerock.json.fluent;
 
 /**
- * TODO: Description.
- *
- * @author Paul C. Bryan
+ * An object that wraps an underlying JSON value.
  */
 public interface JsonValueWrapper {
 
     /**
-     * TODO: Description.
+     * Returns the wrapped JSON value.
+     * 
+     * @return the wrapped JSON value.
      */
-    JsonValue unwrap(); 
+    JsonValue unwrap();
 }

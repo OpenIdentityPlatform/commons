@@ -20,8 +20,10 @@ package org.forgerock.json.patch;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+
 // FEST-Assert
 import static org.fest.assertions.Assertions.assertThat;
+
 
 // TestNG
 import org.testng.annotations.BeforeMethod;
@@ -31,32 +33,23 @@ import org.testng.annotations.Test;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 
-/**
- * @author Paul C. Bryan
- */
+@SuppressWarnings("javadoc")
 public class JsonPatchTest {
 
     /** JSON value encapsulating a map. */
     private JsonValue mapValue;
 
-    /** JSON value encapsulating a list. */
-    private JsonValue listValue;
-
-    /** TODO: Description. */
     private JsonValue v1;
 
-    /** TODO: Description. */
     private JsonValue v2;
 
-    /** TODO: Description. */
     private JsonValue diff;
 
     // ----- preparation ----------
 
     @BeforeMethod
     public void beforeMethod() {
-        mapValue = new JsonValue(new HashMap());
-        listValue = new JsonValue(new ArrayList());
+        mapValue = new JsonValue(new HashMap<String, Object>());
         v1 = null;
         v2 = null;
     }

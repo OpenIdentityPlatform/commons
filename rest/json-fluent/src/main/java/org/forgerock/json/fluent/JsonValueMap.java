@@ -25,20 +25,18 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * TODO: Description.
- *
- * @author Paul C. Bryan
+ * A map view of a JSON object.
  */
 public class JsonValueMap implements JsonValueWrapper, Map<String, Object> {
-
-    /** TODO: Description. */
     private JsonValue jsonValue;
 
     /**
-     * TODO: Description.
+     * Create a new map view for the provided JSON object.
      *
-     * @param jsonValue TODO.
-     * @throws JsonValueException if the {@code jsonValue} is not a List.
+     * @param jsonValue
+     *            The JSON object value.
+     * @throws JsonValueException
+     *             if the {@code jsonValue} is not a map.
      */
     public JsonValueMap(JsonValue jsonValue) {
         this.jsonValue = jsonValue.expect(Map.class);

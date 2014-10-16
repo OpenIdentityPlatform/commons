@@ -27,6 +27,7 @@ import java.util.Map;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
+@SuppressWarnings("javadoc")
 public class VersionSelectorTest {
 
     private VersionSelector versionSelector;

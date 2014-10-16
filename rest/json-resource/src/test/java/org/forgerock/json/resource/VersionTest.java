@@ -24,6 +24,7 @@ import static org.fest.assertions.Assertions.assertThat;
 /**
  * @since 2.4.0
  */
+@SuppressWarnings("javadoc")
 public class VersionTest {
 
     @Test

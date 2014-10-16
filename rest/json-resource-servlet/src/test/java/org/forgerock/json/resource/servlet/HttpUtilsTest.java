@@ -18,7 +18,6 @@ package org.forgerock.json.resource.servlet;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
-import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.util.encode.Base64url;
@@ -30,11 +29,9 @@ import org.testng.annotations.Test;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -181,7 +178,7 @@ public class HttpUtilsTest {
 
     @Test
     public void testShouldPopulateReferencesWhenGetJsonActionContentIsCalled()
-            throws ResourceException, IOException, ServletException {
+            throws ResourceException, IOException {
         //given
         request = mock(HttpServletRequest.class);
         createMultiPartRequest(jsonBody);
@@ -196,7 +193,7 @@ public class HttpUtilsTest {
 
     @Test
     public void testShouldPopulateReferencesWhenGetJsonPatchContentIsCalled()
-            throws ResourceException, IOException, ServletException {
+            throws ResourceException, IOException {
         //given
         request = mock(HttpServletRequest.class);
         createMultiPartRequest(jsonPatchBody);
@@ -223,7 +220,7 @@ public class HttpUtilsTest {
 
     @Test
     public void testShouldPopulateReferencesWhenGetJsonContentIsCalled() throws ResourceException,
-            IOException, ServletException {
+            IOException {
         //given
         request = mock(HttpServletRequest.class);
         createMultiPartRequest(jsonBody);
@@ -238,7 +235,7 @@ public class HttpUtilsTest {
 
     @Test
     public void testShouldProcessARequestThatIsNotMultiPartWhenGetJsonActionContentIsCalled()
-            throws ResourceException, IOException, ServletException {
+            throws ResourceException, IOException {
         //given
         request = mock(HttpServletRequest.class);
         createRequest(jsonBody);
@@ -253,7 +250,7 @@ public class HttpUtilsTest {
 
     @Test
     public void testShouldProcessARequestThatIsNotMultiPartWhenGetJsonPatchContentIsCalled()
-            throws ResourceException, IOException, ServletException {
+            throws ResourceException, IOException {
         //given
         request = mock(HttpServletRequest.class);
         createRequest(jsonPatchBody);
@@ -282,7 +279,7 @@ public class HttpUtilsTest {
 
     @Test
     public void testShouldProcessARequestThatIsNotMultiPartWhenGetJsonContentCalled()
-            throws ResourceException, IOException, ServletException {
+            throws ResourceException, IOException {
         //given
         request = mock(HttpServletRequest.class);
         createRequest(jsonBody);

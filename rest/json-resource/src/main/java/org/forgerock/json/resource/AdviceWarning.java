@@ -100,6 +100,11 @@ public class AdviceWarning {
         return sb.toString();
     }
 
+    /**
+     * Returns a new builder for constructing new {@code AdviceWarning}.
+     *
+     * @return a new builder for constructing new {@code AdviceWarning}.
+     */
     public static Builder newBuilder() {
         return new Builder();
     }
@@ -191,7 +196,10 @@ public class AdviceWarning {
         }
 
         /**
-         * Builds and returns a valid and usable WarningHeader from this builder.
+         * Builds and returns a valid and usable {@code WarningHeader} from this
+         * builder.
+         *
+         * @return The built {@code WarningHeader}.
          */
         public AdviceWarning build() {
             return new AdviceWarning(this);

@@ -17,24 +17,44 @@
 package org.forgerock.json.resource;
 
 /**
- * An opaque handle for a route which has been registered in a {@link VersionRouter router}.
+ * An opaque handle for a route which has been registered in a
+ * {@link VersionRouter router}.
  *
+ * @param <T>
+ *            The type of handler.
  * @see VersionRouter
  */
 public final class VersionRoute<T> implements Route {
-
     private final Version version;
     private final T handler;
 
-    public VersionRoute(Version version, T handler) {
+    /**
+     * Creates a new version route for the provided version and request handler.
+     *
+     * @param version
+     *            The supported version.
+     * @param handler
+     *            The request handler.
+     */
+    VersionRoute(Version version, T handler) {
         this.version = version;
         this.handler = handler;
     }
 
+    /**
+     * Returns the supported version.
+     *
+     * @return The supported version.
+     */
     public Version getVersion() {
         return version;
     }
 
+    /**
+     * Returns the request handler.
+     *
+     * @return The request handler.
+     */
     public T getRequestHandler() {
         return handler;
     }

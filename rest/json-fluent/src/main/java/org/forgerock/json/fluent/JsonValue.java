@@ -848,7 +848,7 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
                     if (value != null && !(value instanceof List)) {
                         throw new JsonValueException(this, "Expecting a Map of List values");
                     }
-                    final List list = (List) value;
+                    final List<?> list = (List<?>) value;
                     for (final Object element : list) {
                         if (element != null && !elementType.isInstance(element)) {
                             throw new JsonValueException(this, "Expecting a Map of Lists with "
