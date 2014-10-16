@@ -27,7 +27,6 @@ import javax.mail.internet.ParseException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.codehaus.jackson.JsonGenerator;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.AdviceContext;
@@ -49,6 +48,8 @@ import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.util.encode.Base64url;
 import org.forgerock.util.promise.SuccessHandler;
+
+import com.fasterxml.jackson.core.JsonGenerator;
 
 /**
  * Common request processing.

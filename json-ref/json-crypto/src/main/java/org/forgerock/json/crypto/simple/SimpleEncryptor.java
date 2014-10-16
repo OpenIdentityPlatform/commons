@@ -21,15 +21,17 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.util.HashMap;
+
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+
 
 // Apache Commons Codec
 import org.apache.commons.codec.binary.Base64;
 
 // Jackson
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 // JSON Fluent
 import org.forgerock.json.fluent.JsonValue;
@@ -37,6 +39,7 @@ import org.forgerock.json.fluent.JsonValue;
 // JSON Crypto
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.crypto.JsonEncryptor;
+
 
 /**
  * Encrypts a JSON value into an {@code x-simple-encryption} type {@code $crypto} JSON object.
@@ -95,7 +98,7 @@ public class SimpleEncryptor implements JsonEncryptor {
         result.put("cipher", this.cipher);
         result.put("key", this.alias);
         result.put("data", data);
-        if (iv != null) {            
+        if (iv != null) {
             result.put("iv", Base64.encodeBase64String(iv));
         }
         return result;

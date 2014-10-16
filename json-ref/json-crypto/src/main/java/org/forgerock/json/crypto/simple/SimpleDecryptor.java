@@ -20,15 +20,17 @@ package org.forgerock.json.crypto.simple;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.Key;
+
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+
 
 // Apache Commons Codec
 import org.apache.commons.codec.binary.Base64;
 
 // Jackson
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 // JSON Fluent
 import org.forgerock.json.fluent.JsonValue;
@@ -37,6 +39,7 @@ import org.forgerock.json.fluent.JsonValueException;
 // JSON Crypto
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.crypto.JsonDecryptor;
+
 
 /**
  * Decrypts a {@code $crypto} JSON object value encrypted with the
