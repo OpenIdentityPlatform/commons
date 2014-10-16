@@ -77,9 +77,10 @@ public class NumberTypeValidator extends Validator {
      */
     private EnumHelper enumHelper = null;
 
-    private SimpleValidator minimumValidator = null;
-    private SimpleValidator maximumValidator = null;
+    private SimpleValidator<Number> minimumValidator = null;
+    private SimpleValidator<Number> maximumValidator = null;
 
+    @SuppressWarnings({ "deprecation", "unchecked" })
     public NumberTypeValidator(Map<String, Object> schema, List<String> jsonPointer) {
         super(schema, jsonPointer);
         Number minimum = null;
@@ -135,10 +136,10 @@ public class NumberTypeValidator extends Validator {
         if (node instanceof Number) {
             Number nodeValue = (Number) node;
             if (null != minimumValidator) {
-                minimumValidator.validate(node, getPath(at, null), handler);
+                minimumValidator.validate(nodeValue, getPath(at, null), handler);
             }
             if (null != maximumValidator) {
-                maximumValidator.validate(node, getPath(at, null), handler);
+                maximumValidator.validate(nodeValue, getPath(at, null), handler);
             }
 
             //TODO: Implement this in the DivisibleByHelper

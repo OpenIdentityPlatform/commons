@@ -45,6 +45,7 @@ import org.forgerock.json.schema.validator.validators.Validator;
 /**
  * ObjectValidatorFactory initialises the validator instances for given schemas.
  */
+@SuppressWarnings("deprecation")
 public class ObjectValidatorFactory {
 
     private static final Map<String, Class<? extends Validator>> VALIDATORS;

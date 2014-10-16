@@ -26,18 +26,23 @@ package org.forgerock.json.schema.validator;
 
 import org.forgerock.json.schema.validator.ObjectValidatorFactory;
 import org.forgerock.json.schema.validator.Constants;
+
 import junit.framework.Assert;
+
 import org.forgerock.json.schema.validator.validators.*;
 import org.testng.annotations.Test;
 
 import javax.script.ScriptEngineFactory;
 import javax.script.ScriptEngineManager;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@SuppressWarnings("javadoc")
 public class ObjectValidatorFactoryTest {
+    @SuppressWarnings("deprecation")
     @Test
     public void testGetTypeValidatorBySchema() throws Exception {
         Map<String, Object> schema = new HashMap<String, Object>();

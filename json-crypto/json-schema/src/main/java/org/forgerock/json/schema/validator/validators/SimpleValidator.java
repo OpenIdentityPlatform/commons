@@ -31,8 +31,6 @@ import org.forgerock.json.schema.validator.exceptions.SchemaException;
 /**
  * SimpleValidator is a base interface for all validator implementation.
  *
- * @author $author$
- * @version $Revision$ $Date$
  */
 public interface SimpleValidator<T> {
     /**

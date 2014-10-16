@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 
 
+@SuppressWarnings("javadoc")
 public abstract class ValidatorTestBase {
     protected List<Object[]> getTestJSON(String instanceType, String testFilePath) throws IOException, ParseException {
         InputStream is = ArrayTypeValidatorTest.class.getResourceAsStream(testFilePath);
@@ -46,10 +47,13 @@ public abstract class ValidatorTestBase {
         Object o = parser.parse(new InputStreamReader(is));
         Assert.assertTrue(o instanceof List, "Expect JSON Array");
         List<Object[]> tests = new ArrayList<Object[]>();
-        for (Object s : (List) o) {
+        for (Object s : (List<?>) o) {
             Assert.assertTrue(s instanceof Map, "Expect JSON Object");
-            Validator v = ObjectValidatorFactory.getTypeValidator((Map<String, Object>) ((Map) s).get("schema"));
-            for (Object i : (List) ((Map) s).get(instanceType)) {
+            @SuppressWarnings("unchecked")
+            Validator v =
+                    ObjectValidatorFactory.getTypeValidator((Map<String, Object>) ((Map<?, ?>) s)
+                            .get("schema"));
+            for (Object i : (List<?>) ((Map<?, ?>) s).get(instanceType)) {
                 tests.add(new Object[]{v, i});
             }
         }

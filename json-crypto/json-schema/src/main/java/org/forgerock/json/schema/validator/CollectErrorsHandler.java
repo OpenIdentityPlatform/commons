@@ -47,6 +47,7 @@ public class CollectErrorsHandler extends ErrorHandler {
 
     /** {@inheritDoc} */
     @Override
+    @Deprecated
     public void assembleException() throws ValidationException {
         if (!exceptions.isEmpty()) {
             throw exceptions.get(0);

@@ -57,6 +57,14 @@ public final class VersionedResourcesDemo {
         // No implementation.
     }
 
+    /**
+     * Main application.
+     *
+     * @param args
+     *            CLI arguments.
+     * @throws ResourceException
+     *             If an unexpected error occurs.
+     */
     public static void main(String... args) throws ResourceException {
         ConnectionFactory server = getConnectionFactory();
         Connection connection = server.getConnection();

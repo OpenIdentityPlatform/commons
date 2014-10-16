@@ -50,6 +50,7 @@ public class FailFastErrorHandler extends ErrorHandler {
      * @throws ValidationException when there is any error wrapped inside the handler.
      */
     @Override
+    @Deprecated
     public void assembleException() throws ValidationException {
         if (ex instanceof ValidationException) {
             throw (ValidationException) ex;

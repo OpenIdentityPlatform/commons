@@ -88,7 +88,6 @@ public final class HttpServletAdapter {
     private static final String FIELDS_DELIMITER = ",";
     private static final String SORT_KEYS_DELIMITER = ",";
     private static final String EMPTY_STRING = "";
-    private static final String JOIN_STRINGS_DELIMITER = " , ";
 
     private final ServletApiVersionAdapter syncFactory;
     private final ConnectionFactory connectionFactory;
@@ -532,7 +531,7 @@ public final class HttpServletAdapter {
     /*
      * Removes leading and trailing forward slashes.
      */
-    private String getResourceName(final HttpServletRequest req) throws ResourceException {
+    private String getResourceName(final HttpServletRequest req) {
         // Treat null path info as root resource.
         String resourceName = req.getPathInfo();
         if (resourceName == null) {

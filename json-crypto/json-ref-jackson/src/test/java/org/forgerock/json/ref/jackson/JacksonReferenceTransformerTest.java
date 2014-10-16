@@ -24,11 +24,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 
+
 // FEST-Assert
 import static org.fest.assertions.Assertions.assertThat;
 
+
 // TestNG
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 // JSON Fluent
@@ -37,9 +38,7 @@ import org.forgerock.json.fluent.JsonValue;
 // JSON Reference
 import org.forgerock.json.ref.JsonReference;
 
-/**
- * @author Paul C. Bryan
- */
+@SuppressWarnings("javadoc")
 public class JacksonReferenceTransformerTest {
 
     @Test
