@@ -18,6 +18,7 @@ package org.forgerock.json.jose.spec;
 
 import org.forgerock.json.jose.builders.JwtBuilderFactory;
 import org.forgerock.json.jose.common.JwtReconstruction;
+import org.forgerock.json.jose.exceptions.InvalidJwtException;
 import org.forgerock.json.jose.exceptions.JwtRuntimeException;
 import org.forgerock.json.jose.helper.JwtTestHelper;
 import org.forgerock.json.jose.helper.KeysHelper;
@@ -31,7 +32,6 @@ import org.forgerock.json.jose.jws.handlers.HmacSigningHandler;
 import org.forgerock.json.jose.jwt.Jwt;
 import org.forgerock.json.jose.jwt.JwtClaimsSet;
 import org.forgerock.json.jose.jwt.JwtType;
-import org.forgerock.json.jose.utils.DuplicateMapEntryException;
 import org.forgerock.json.jose.utils.IntDate;
 import org.forgerock.json.jose.utils.StringOrURI;
 import org.forgerock.util.encode.Base64url;
@@ -42,13 +42,11 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.RSAPublicKeySpec;
@@ -161,7 +159,7 @@ public class JwtImplementationSpecTest {
      *
      * The Claim Names within this object MUST be unique; JWTs with duplicate Claim Names MUST be rejected.
      */
-    @Test
+    @Test(expectedExceptions = InvalidJwtException.class)
     public void shouldRejectJwtWithDuplicateClaimParameterNames() {
 
         //Given
@@ -174,19 +172,11 @@ public class JwtImplementationSpecTest {
         String jwtString = JwtTestHelper.encodedPlaintextJwt("{}", claimsSet.toString());
 
         //When
-        boolean exceptionCaught = false;
-        try {
-            new JwtBuilderFactory().reconstruct(jwtString, Jwt.class);
-        } catch (DuplicateMapEntryException e) {
-            exceptionCaught = true;
-        }
-
-        //Then
-        assertTrue(exceptionCaught);
+        new JwtBuilderFactory().reconstruct(jwtString, Jwt.class);
     }
 
 
-             //TODO Javadoc with reference to Spec
+    //TODO Javadoc with reference to Spec
 
 
     @Test
@@ -416,7 +406,7 @@ public class JwtImplementationSpecTest {
     }
 
     @Test
-    public void shouldStoreJWTIDAsString() throws IOException, URISyntaxException {
+    public void shouldStoreJWTIDAsString() throws IOException {
 
         //Given
         JwtBuilderFactory jwtBuilderFactory = new JwtBuilderFactory();
@@ -437,7 +427,7 @@ public class JwtImplementationSpecTest {
         assertTrue(jwtMap.get("jti") instanceof String);
     }
 
-    @Test
+    @Test(expectedExceptions = InvalidJwtException.class)
     public void shouldRejectJwtWithDuplicateHeaderParameterNames() {
 
         //Given
@@ -451,19 +441,11 @@ public class JwtImplementationSpecTest {
 
 
         //When
-        boolean exceptionCaught = false;
-        try {
-            new JwtBuilderFactory().reconstruct(jwtString, Jwt.class);
-        } catch (DuplicateMapEntryException e) {
-            exceptionCaught = true;
-        }
-
-        //Then
-        assertTrue(exceptionCaught);
+        new JwtBuilderFactory().reconstruct(jwtString, Jwt.class);
     }
 
     @Test
-    public void shouldStoreTypeAsString() throws IOException, URISyntaxException {
+    public void shouldStoreTypeAsString() throws IOException {
 
         //Given
         JwtBuilderFactory jwtBuilderFactory = new JwtBuilderFactory();
@@ -558,9 +540,8 @@ public class JwtImplementationSpecTest {
         assertEquals(JwtType.jwtType((String) jwtMap.get("typ")), JwtType.JWE);
     }
 
-    @Test
-    public void shouldRejectJwsWithDuplicateHeaderParameterNames() throws NoSuchAlgorithmException, SignatureException,
-            InvalidKeyException {
+    @Test(expectedExceptions = InvalidJwtException.class)
+    public void shouldRejectJwsWithDuplicateHeaderParameterNames() throws Exception {
 
         //Given
         StringBuilder header = new StringBuilder();
@@ -575,19 +556,11 @@ public class JwtImplementationSpecTest {
 
 
         //When
-        boolean exceptionCaught = false;
-        try {
-            new JwtBuilderFactory().reconstruct(jwtString, Jwt.class);
-        } catch (DuplicateMapEntryException e) {
-            exceptionCaught = true;
-        }
-
-        //Then
-        assertTrue(exceptionCaught);
+        new JwtBuilderFactory().reconstruct(jwtString, Jwt.class);
     }
 
     @Test
-    public void shouldDecryptJDK6Or7JweWithJDK8() throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public void shouldDecryptJDK6Or7JweWithJDK8() {
 
         //Given
         String originalJwe = "eyAiYWxnIjogIlJTQUVTX1BLQ1MxX1YxXzUiLCAidHlwIjogImp3dCIsICJlbmMiOiAiQTEyOENCQ19IUzI1NiIgf"
@@ -603,7 +576,7 @@ public class JwtImplementationSpecTest {
     }
 
     @Test
-    public void shouldVerifyJDK6Or7JwsWithJDK8() throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public void shouldVerifyJDK6Or7JwsWithJDK8() {
 
         //Given
         String originalJws = "eyAiYWxnIjogIkhTMjU2IiwgInR5cCI6ICJqd3QiIH0."

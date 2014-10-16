@@ -36,14 +36,37 @@ public class SigningManager {
 
     private final SignatureUtil signatureUtil = SignatureUtil.getInstance();
 
+    /**
+     * Constructs an implementation of the SigningHandler which does not perform
+     * any signing or verifying.
+     *
+     * @return an implementation of the SigningHandler which does not perform
+     *         any signing or verifying.
+     */
     public SigningHandler newNopSigningHandler() {
         return new NOPSigningHandler();
     }
 
+    /**
+     * Constructs a new HmacSigningHandler.
+     * 
+     * @param sharedSecret
+     *            The shared secret to use to sign the data.
+     * @return a new HmacSigningHandler.
+     */
     public SigningHandler newHmacSigningHandler(byte[] sharedSecret) {
         return new HmacSigningHandler(sharedSecret);
     }
 
+    /**
+     * Constructs a new RSASigningHandler, with a SignatureUtil instance to
+     * delegate the signing and verifying calls to.
+     *
+     * @param key
+     *            The key used to sign and verify the signature.
+     * @return a new RSASigningHandler, with a SignatureUtil instance to
+     *         delegate the signing and verifying calls to.
+     */
     public SigningHandler newRsaSigningHandler(Key key) {
         return new RSASigningHandler(key, signatureUtil);
     }
