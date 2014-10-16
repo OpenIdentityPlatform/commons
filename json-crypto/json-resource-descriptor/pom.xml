@@ -21,9 +21,9 @@
         <artifactId>forgerock-rest</artifactId>
         <version>3.0.0-SNAPSHOT</version>
     </parent>
-    <artifactId>json-resource</artifactId>
-    <name>JSON Resource core library</name>
-    <description>JSON resource-oriented core library</description>
+    <artifactId>json-resource-descriptor</artifactId>
+    <name>JSON Resource API descriptor library</name>
+    <description>JSON resource-oriented API descriptors, schema, and binding support</description>
     <packaging>bundle</packaging>
     <dependencies>
         <dependency>
@@ -36,7 +36,24 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
+            <artifactId>json-resource</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
             <artifactId>i18n-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
         </dependency>
     </dependencies>
     <build>
@@ -48,7 +65,7 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            org.forgerock.json.resource;version=${project.version}
+                            org.forgerock.json.resource.descriptor;version=${project.version}
                         </Export-Package>
                     </instructions>
                 </configuration>
