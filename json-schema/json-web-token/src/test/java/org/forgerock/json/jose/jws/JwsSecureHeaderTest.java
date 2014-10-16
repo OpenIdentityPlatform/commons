@@ -66,7 +66,7 @@ public class JwsSecureHeaderTest {
     }
 
     @Test
-    public void shouldGetJsonWebKey() throws MalformedURLException {
+    public void shouldGetJsonWebKey() {
 
         //Given
         JwsHeader header = new JwsHeader();
@@ -112,7 +112,7 @@ public class JwsSecureHeaderTest {
     }
 
     @Test
-    public void shouldSetX509CertificateThumbprint() throws MalformedURLException {
+    public void shouldSetX509CertificateThumbprint() {
 
         //Given
         JwsHeader header = new JwsHeader();
@@ -126,7 +126,7 @@ public class JwsSecureHeaderTest {
     }
 
     @Test
-    public void shouldGetX509CertificateThumbprint() throws MalformedURLException {
+    public void shouldGetX509CertificateThumbprint() {
 
         //Given
         JwsHeader header = new JwsHeader();
@@ -140,7 +140,7 @@ public class JwsSecureHeaderTest {
     }
 
     @Test
-    public void shouldSetX509CertificateChain() throws MalformedURLException {
+    public void shouldSetX509CertificateChain() {
 
         //Given
         JwsHeader header = new JwsHeader();
@@ -161,7 +161,7 @@ public class JwsSecureHeaderTest {
     }
 
     @Test
-    public void shouldGetX509CertificateChain() throws MalformedURLException {
+    public void shouldGetX509CertificateChain() {
 
         //Given
         JwsHeader header = new JwsHeader();
@@ -181,7 +181,7 @@ public class JwsSecureHeaderTest {
     }
 
     @Test
-    public void shouldSetKeyId() throws MalformedURLException {
+    public void shouldSetKeyId() {
 
         //Given
         JwsHeader header = new JwsHeader();
@@ -195,7 +195,7 @@ public class JwsSecureHeaderTest {
     }
 
     @Test
-    public void shouldGetKeyId() throws MalformedURLException {
+    public void shouldGetKeyId() {
 
         //Given
         JwsHeader header = new JwsHeader();
@@ -209,7 +209,7 @@ public class JwsSecureHeaderTest {
     }
 
     @Test
-    public void shouldSetContentType() throws MalformedURLException {
+    public void shouldSetContentType() {
 
         //Given
         JwsHeader header = new JwsHeader();
@@ -223,7 +223,7 @@ public class JwsSecureHeaderTest {
     }
 
     @Test
-    public void shouldGetContentType() throws MalformedURLException {
+    public void shouldGetContentType() {
 
         //Given
         JwsHeader header = new JwsHeader();
@@ -237,7 +237,7 @@ public class JwsSecureHeaderTest {
     }
 
     @Test
-    public void shouldGetCriticalHeaders() throws MalformedURLException {
+    public void shouldGetCriticalHeaders() {
 
         //Given
         JwsHeader header = new JwsHeader();

@@ -26,6 +26,7 @@ import static org.testng.Assert.assertNotNull;
  *
  * @since 2.4.0
  */
+@SuppressWarnings("javadoc")
 public class AdviceContextTest {
 
     @Test

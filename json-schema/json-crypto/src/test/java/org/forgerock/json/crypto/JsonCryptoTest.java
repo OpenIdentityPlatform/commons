@@ -17,7 +17,6 @@
 package org.forgerock.json.crypto;
 
 // Java Standard Edition
-import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyPair;
@@ -42,7 +41,7 @@ import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonTransformer;
 
-// JSON Crypto 
+// JSON Crypto
 import org.forgerock.json.crypto.simple.SimpleDecryptor;
 import org.forgerock.json.crypto.simple.SimpleEncryptor;
 import org.forgerock.json.crypto.simple.SimpleKeySelector;
@@ -81,7 +80,7 @@ public class JsonCryptoTest {
     // ----- initialization ----------
 
     @BeforeClass
-    public void beforeClass() throws GeneralSecurityException, IOException {
+    public void beforeClass() throws GeneralSecurityException {
 
         // generate AES 128-bit secret key
         KeyGenerator kg = KeyGenerator.getInstance("AES");
@@ -145,7 +144,7 @@ public class JsonCryptoTest {
         value.put("user", inner);
         value.put("description", PLAINTEXT);
 
-        // decrypt the deep object        
+        // decrypt the deep object
         value.getTransformers().addAll(transformers);
         value = value.copy();
         assertThat(value.get(new JsonPointer("/user/password")).getObject()).isEqualTo(PASSWORD);

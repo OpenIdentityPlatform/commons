@@ -42,6 +42,9 @@ public class AdviceContext extends AbstractContext {
 
     /**
      * Creates a new AdviceContext with the provided parent
+     * 
+     * @param parent
+     *            The parent context.
      */
     public AdviceContext(Context parent) {
         super(parent);
@@ -67,6 +70,8 @@ public class AdviceContext extends AbstractContext {
 
     /**
      * Returns the advices contained within this context.
+     * 
+     * @return the advices contained within this context.
      */
     public Map<String, String> getAdvices() {
         return myAdvice;

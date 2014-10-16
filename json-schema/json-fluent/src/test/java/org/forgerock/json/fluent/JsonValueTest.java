@@ -139,7 +139,7 @@ public class JsonValueTest {
 
     @Test(expectedExceptions = JsonValueException.class)
     public void testAddOnNonCollection() {
-        final JsonValue value = json(object(field("hello", "world"))).add("one");
+        json(object(field("hello", "world"))).add("one");
     }
 
     @Test
@@ -370,12 +370,12 @@ public class JsonValueTest {
     @Test
     public void testAsCollectionOfUnTyped() {
         // test List as Collection
-        Collection list = json(array(2, 3, 5, 8)).asCollection();
+        Collection<?> list = json(array(2, 3, 5, 8)).asCollection();
         assertThat(list.size()).isEqualTo(4);
         assertThat(list).containsOnly(2, 3, 5, 8);
 
         // test Set as Collection
-        Collection set = json(set(2, 3, 5, 8)).asCollection();
+        Collection<?> set = json(set(2, 3, 5, 8)).asCollection();
         assertThat(set.size()).isEqualTo(4);
         assertThat(set).containsOnly(2, 3, 5, 8);
     }
@@ -423,7 +423,8 @@ public class JsonValueTest {
         json(array(2, 3, "5", 8)).asList(Integer.class);
     }
 
-    private static final Function AS_INTEGER = new Function<JsonValue, Integer, Exception>() {
+    private static final Function<JsonValue, Integer, Exception> AS_INTEGER =
+            new Function<JsonValue, Integer, Exception>() {
         @Override
         public Integer apply(JsonValue jsonValue) throws Exception {
             if (jsonValue.isString()) {
@@ -487,7 +488,7 @@ public class JsonValueTest {
         m.put("a", "aString");
         m.put("b", "bString");
         m.put("c", "cString");
-        Map<String, String> stringMap = mapValue.asMap(String.class);
+        Map<?, ?> stringMap = mapValue.asMap(String.class);
         assertThat(stringMap.get("a") instanceof String).isTrue();
     }
 
@@ -497,7 +498,7 @@ public class JsonValueTest {
         m.put("a", "aString");
         m.put("b", true);
         m.put("c", 4);
-        Map<String, String> stringMap = mapValue.asMap(String.class);
+        Map<?, ?> stringMap = mapValue.asMap(String.class);
         assertThat(stringMap.get("a") instanceof String).isTrue();
     }
 
@@ -506,16 +507,16 @@ public class JsonValueTest {
         listValue.add("String");
         Map<String, Object> m = mapValue.asMap();
         m.put("a", listValue.getObject());
-        Map<String, List<String>> stringListMap = mapValue.asMapOfList(String.class);
+        Map<String, ?> stringListMap = mapValue.asMapOfList(String.class);
         assertThat(stringListMap.get("a") instanceof List).isTrue();
-        assertThat(stringListMap.get("a").get(0)).isEqualTo("String");
+        assertThat(((List<?>) stringListMap.get("a")).get(0)).isEqualTo("String");
     }
 
     @Test(expectedExceptions = JsonValueException.class)
     public void testAsMapOfListNonList() {
         Map<String, Object> m = mapValue.asMap();
         m.put("a", true);
-        Map<String, List<String>> stringListMap = mapValue.asMapOfList(String.class);
+        mapValue.asMapOfList(String.class);
     }
 
     @Test(expectedExceptions = JsonValueException.class)
@@ -524,7 +525,7 @@ public class JsonValueTest {
         listValue.add(false);
         Map<String, Object> m = mapValue.asMap();
         m.put("a", listValue.getObject());
-        Map<String, List<String>> stringListMap = mapValue.asMapOfList(String.class);
+        mapValue.asMapOfList(String.class);
     }
 
     @Test

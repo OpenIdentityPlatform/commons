@@ -291,7 +291,7 @@ public final class ResourceNameTest {
     public void testHead() {
         ResourceName name = ResourceName.valueOf("ONE/TWO/THREE/FOUR");
         ResourceName expected = ResourceName.valueOf("ONE/two");
-        assertThat((Object) name.head(2)).isEqualTo((Object) expected);
+        assertThat((Object) name.head(2)).isEqualTo(expected);
 
     }
 
@@ -299,7 +299,7 @@ public final class ResourceNameTest {
     public void testTail() {
         ResourceName name = ResourceName.valueOf("ONE/TWO/THREE/FOUR");
         ResourceName expected = ResourceName.valueOf("THREE/four");
-        assertThat((Object) name.tail(2)).isEqualTo((Object) expected);
+        assertThat((Object) name.tail(2)).isEqualTo(expected);
     }
 
     @DataProvider

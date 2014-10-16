@@ -34,13 +34,19 @@ public class JsonException extends RuntimeException {
 
     /**
      * Constructs a new exception with the specified detail message.
+     *
+     * @param message
+     *            The message.
      */
     public JsonException(String message) {
         super(message);
     }
-    
+
     /**
      * Constructs a new exception with the specified cause.
+     *
+     * @param cause
+     *            The cause.
      */
     public JsonException(Throwable cause) {
         super(cause);
@@ -48,6 +54,11 @@ public class JsonException extends RuntimeException {
 
     /**
      * Constructs a new exception with the specified detail message and cause.
+     *
+     * @param message
+     *            The message.
+     * @param cause
+     *            The cause.
      */
     public JsonException(String message, Throwable cause) {
         super(message, cause);

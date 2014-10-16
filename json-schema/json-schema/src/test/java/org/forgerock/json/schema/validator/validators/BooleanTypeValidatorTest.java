@@ -43,6 +43,7 @@ public class BooleanTypeValidatorTest {
     @Test
     public void requiredValueNotBoolean() throws Exception {
         JSONParser parser = new JSONParser();
+        @SuppressWarnings("unchecked")
         Map<String, Object> schema = (Map<String, Object>) parser.parse(SCHEMA);
         Validator v = ObjectValidatorFactory.getTypeValidator(schema);
         CollectErrorsHandler errorHandler = new CollectErrorsHandler();
@@ -53,6 +54,7 @@ public class BooleanTypeValidatorTest {
     @Test
     public void requiredValueNull() throws Exception {
         JSONParser parser = new JSONParser();
+        @SuppressWarnings("unchecked")
         Map<String, Object> schema = (Map<String, Object>) parser.parse(SCHEMA);
         Validator v = ObjectValidatorFactory.getTypeValidator(schema);
         CollectErrorsHandler errorHandler = new CollectErrorsHandler();
@@ -63,6 +65,7 @@ public class BooleanTypeValidatorTest {
     @Test
     public void requiredValueNotNull() throws Exception {
         JSONParser parser = new JSONParser();
+        @SuppressWarnings("unchecked")
         Map<String, Object> schema = (Map<String, Object>) parser.parse(SCHEMA);
         Validator v = ObjectValidatorFactory.getTypeValidator(schema);
         CollectErrorsHandler errorHandler = new CollectErrorsHandler();

@@ -65,8 +65,14 @@ public enum JwsAlgorithm implements Algorithm {
     }
 
     /**
-     * Returns the Java-friendly name of the message digest algorithm implementation.
-     * @see <a href="http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html">Standard Names</a>
+     * Returns the Java-friendly name of the message digest algorithm
+     * implementation.
+     * 
+     * @return the Java-friendly name of the message digest algorithm
+     *         implementation.
+     * @see <a
+     *      href="http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html">Standard
+     *      Names</a>
      */
     public String getMdAlgorithm() {
         return mdAlgorithm;

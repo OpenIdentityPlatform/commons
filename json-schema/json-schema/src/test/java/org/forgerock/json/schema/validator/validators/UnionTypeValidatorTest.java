@@ -36,19 +36,6 @@ import java.util.Map;
 @SuppressWarnings("javadoc")
 public class UnionTypeValidatorTest {
 
-    private String schema1 = "{"
-            + "\"type\": [\"string\",\"boolean\"],"
-            + "\"pattern\": \".*\","
-            + "\"required\": true"
-            + "\"minLength\": 0"
-            + "\"maxLength\": 11"
-            + "\"enum\": [\"number1\",\"number2\"]"
-            + "\"format\": \"date-time\""
-            + "}";
-    private String schema2 = "{"
-            + "\"type\": [\"string\",\"any\"],"
-            + "\"required\": true"
-            + "}";
     private String schema3 = "{"
             + "\"type\": [\"string\",\"null\"],"
             + "\"minLength\": 0"
@@ -58,6 +45,7 @@ public class UnionTypeValidatorTest {
     @Test
     public void unionWithNullType() throws Exception  {
         JSONParser parser = new JSONParser();
+        @SuppressWarnings("unchecked")
         Map<String, Object> schema = (Map<String, Object>) parser.parse(schema3);
         Validator v = ObjectValidatorFactory.getTypeValidator(schema);
         CollectErrorsHandler errorHandler = new CollectErrorsHandler();
@@ -68,6 +56,7 @@ public class UnionTypeValidatorTest {
     @Test
     public void unionWithBooleanType()  throws Exception {
         JSONParser parser = new JSONParser();
+        @SuppressWarnings("unchecked")
         Map<String, Object> schema = (Map<String, Object>) parser.parse(schema3);
         Validator v = ObjectValidatorFactory.getTypeValidator(schema);
         CollectErrorsHandler errorHandler = new CollectErrorsHandler();

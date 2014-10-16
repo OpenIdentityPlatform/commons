@@ -17,7 +17,6 @@
 package org.forgerock.json.common.util;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URISyntaxException;
 import java.net.URLDecoder;
 
 import org.forgerock.json.jose.utils.KeystoreManager;
@@ -27,7 +26,7 @@ import org.testng.annotations.Test;
 public class KeystoreManagerTest {
 
     @Test
-    public void should() throws URISyntaxException, UnsupportedEncodingException {
+    public void should() throws UnsupportedEncodingException {
 
         KeystoreManager keystoreManager = new KeystoreManager("password", "JKS",
                 URLDecoder.decode(ClassLoader.getSystemResource("keystore.jks").getFile(), "UTF-8"), "password");
