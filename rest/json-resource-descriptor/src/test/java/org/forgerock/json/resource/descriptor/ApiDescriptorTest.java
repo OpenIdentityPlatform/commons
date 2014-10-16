@@ -25,9 +25,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonGenerator.Feature;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.AbstractRequestHandler;
 import org.forgerock.json.resource.Connection;
@@ -43,6 +40,10 @@ import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.descriptor.RelationDescriptor.Multiplicity;
 import org.testng.annotations.Test;
+
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonGenerator.Feature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SuppressWarnings("javadoc")
 public final class ApiDescriptorTest {
@@ -100,7 +101,7 @@ public final class ApiDescriptorTest {
 
     static {
         try {
-            WRITER = JSON_MAPPER.getJsonFactory().createJsonGenerator(System.out);
+            WRITER = JSON_MAPPER.getFactory().createGenerator(System.out);
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }
