@@ -29,10 +29,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.jose.jwt.JWObject;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Holds a Set of JWKs.

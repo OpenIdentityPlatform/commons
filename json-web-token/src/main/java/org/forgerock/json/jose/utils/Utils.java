@@ -20,9 +20,10 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Map;
 
-import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.jose.exceptions.InvalidJwtException;
 import org.forgerock.util.encode.Base64url;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * This class provides utility methods to share common behaviour.
@@ -99,7 +100,6 @@ public final class Utils {
      */
     @SuppressWarnings("unchecked")
     public static Map<String, Object> parseJson(String json) {
-
         ObjectMapper mapper = new ObjectMapper();
         try {
             return mapper.readValue(json, NoDuplicatesMap.class);
