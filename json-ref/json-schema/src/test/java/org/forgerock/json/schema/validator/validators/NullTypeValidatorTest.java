@@ -35,16 +35,6 @@ import java.util.Map;
 
 @SuppressWarnings("javadoc")
 public class NullTypeValidatorTest {
-
-    private String schema1 = "{"
-            + "\"type\": \"null\","
-            + "\"pattern\": \".*\","
-            + "\"required\": true"
-            + "\"minLength\": 0"
-            + "\"maxLength\": 11"
-            + "\"enum\": [\"number1\",\"number2\"]"
-            + "\"format\": \"date-time\""
-            + "}";
     private String schema2 = "{"
             + "\"type\": \"null\","
             + "\"required\": true"
@@ -57,6 +47,7 @@ public class NullTypeValidatorTest {
     @Test
     public void valueIsNull() throws Exception  {
         JSONParser parser = new JSONParser();
+        @SuppressWarnings("unchecked")
         Map<String, Object> schema = (Map<String, Object>) parser.parse(schema2);
         Validator v = ObjectValidatorFactory.getTypeValidator(schema);
         assertTrue(v.isRequired(), "Required MUST be true");
@@ -68,6 +59,7 @@ public class NullTypeValidatorTest {
     @Test
     public void valueIsNotNull()  throws Exception {
         JSONParser parser = new JSONParser();
+        @SuppressWarnings("unchecked")
         Map<String, Object> schema = (Map<String, Object>) parser.parse(schema3);
         Validator v = ObjectValidatorFactory.getTypeValidator(schema);
         assertTrue(v.isRequired(), "Required MUST be true");

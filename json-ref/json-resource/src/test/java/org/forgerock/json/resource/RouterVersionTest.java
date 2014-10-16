@@ -32,6 +32,7 @@ import static org.mockito.Mockito.*;
 /**
  * @since 2.4.0
  */
+@SuppressWarnings("javadoc")
 public class RouterVersionTest {
 
     private Router router;
@@ -253,7 +254,6 @@ public class RouterVersionTest {
     }
 
     @Test (dataProvider = "data")
-    @SuppressWarnings("unchecked")
     public void shouldRouteQueryVersionRequests(String resource, String requestedVersion, boolean expectException,
             RequestHandler provider) {
 

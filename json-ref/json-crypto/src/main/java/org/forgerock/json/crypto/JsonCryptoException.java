@@ -16,9 +16,6 @@
 
 package org.forgerock.json.crypto;
 
-// JSON Fluent
-import org.forgerock.json.fluent.JsonException;
-
 /**
  * An exception that is thrown during JSON cryptographic operations.
  *

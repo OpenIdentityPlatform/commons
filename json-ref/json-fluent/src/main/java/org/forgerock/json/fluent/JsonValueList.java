@@ -21,23 +21,22 @@ import java.util.AbstractList;
 import java.util.List;
 
 /**
- * TODO: Description.
+ * Modification of the wrapped JSON value through this implementation is only
+ * allowed if the JSON value is a list.
  *
- * Modification of the wrapped JSON value through this implementation is only allowed if the
- * JSON value is a list.
- *
- * @author Paul C. Bryan
+ * @param <E>
+ *            The type of elements contained in the list.
  */
 public class JsonValueList<E> extends AbstractList<E> implements JsonValueWrapper {
-
-    /** TODO: Description. */
     private JsonValue jsonValue;
 
     /**
-     * TODO: Description.
+     * Create a new list view for the provided JSON array.
      *
-     * @param jsonValue TODO.
-     * @throws JsonValueException if the {@code jsonValue} is not a List.
+     * @param jsonValue
+     *            The JSON array value.
+     * @throws JsonValueException
+     *             if the {@code jsonValue} is not a List.
      */
     public JsonValueList(JsonValue jsonValue) {
         this.jsonValue = jsonValue.expect(List.class);

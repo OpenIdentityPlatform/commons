@@ -19,7 +19,6 @@ package org.forgerock.json.resource;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.forgerock.json.resource.Requests.newReadRequest;
 import static org.forgerock.json.resource.Resources.newInternalConnection;
-import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -59,7 +58,7 @@ public final class UriRouterTest {
     }
 
     @Test(dataProvider = "absoluteRouteHitTestData")
-    public void testAbsoluteRouteHit(final String resourceName) throws ResourceException {
+    public void testAbsoluteRouteHit(final String resourceName) {
         final UriRouter router = new UriRouter();
         final RequestHandler h = mock(RequestHandler.class);
         router.addRoute(RoutingMode.EQUALS, resourceName, h);
@@ -96,7 +95,7 @@ public final class UriRouterTest {
     }
 
     @Test
-    public void testDefaultRouteWithOne() throws ResourceException {
+    public void testDefaultRouteWithOne() {
         final UriRouter router = new UriRouter();
         final RequestHandler h1 = mock(RequestHandler.class);
         router.addRoute(RoutingMode.EQUALS, "users", h1);
@@ -114,7 +113,7 @@ public final class UriRouterTest {
     }
 
     @Test
-    public void testDefaultRouteWithZero() throws ResourceException {
+    public void testDefaultRouteWithZero() {
         final UriRouter router = new UriRouter();
         final RequestHandler h = mock(RequestHandler.class);
         router.setDefaultRoute(h);
@@ -145,14 +144,14 @@ public final class UriRouterTest {
 
     @Test(dataProvider = "invalidTemplatesTestData",
             expectedExceptions = IllegalArgumentException.class)
-    public void testInvalidTemplates(final String template) throws ResourceException {
+    public void testInvalidTemplates(final String template) {
         final UriRouter router = new UriRouter();
         final RequestHandler h = mock(RequestHandler.class);
         router.addRoute(RoutingMode.EQUALS, template, h);
     }
 
     @Test
-    public void testMultipleRoutePrecedence() throws ResourceException {
+    public void testMultipleRoutePrecedence() {
         final UriRouter router = new UriRouter();
         final RequestHandler h1 = mock(RequestHandler.class);
         router.addRoute(RoutingMode.EQUALS, "object", h1);
@@ -176,7 +175,7 @@ public final class UriRouterTest {
     }
 
     @Test
-    public void testMultipleRoutes() throws ResourceException {
+    public void testMultipleRoutes() {
         final UriRouter router = new UriRouter();
         final RequestHandler h1 = mock(RequestHandler.class);
         router.addRoute(RoutingMode.EQUALS, "users", h1);
@@ -254,7 +253,7 @@ public final class UriRouterTest {
 
     @Test(dataProvider = "variableRouteHitTestData")
     public void testVariableRouteHit(final String template, final String resourceName,
-            final String[] expectedVars) throws ResourceException {
+            final String[] expectedVars) {
         final UriRouter router = new UriRouter();
         final RequestHandler h = mock(RequestHandler.class);
         router.addRoute(RoutingMode.EQUALS, template, h);

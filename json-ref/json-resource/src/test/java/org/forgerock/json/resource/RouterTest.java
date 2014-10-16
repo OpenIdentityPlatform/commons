@@ -56,7 +56,7 @@ public final class RouterTest {
     }
 
     @Test(dataProvider = "absoluteRouteHitTestData")
-    public void testAbsoluteRouteHit(final String resourceName) throws ResourceException {
+    public void testAbsoluteRouteHit(final String resourceName) {
         final Router router = new Router();
         final RequestHandler h = mock(RequestHandler.class);
         router.addRoute(RoutingMode.EQUALS, resourceName, h);
@@ -103,14 +103,14 @@ public final class RouterTest {
 
     @Test(dataProvider = "invalidTemplatesTestData",
             expectedExceptions = IllegalArgumentException.class)
-    public void testInvalidTemplates(final String template) throws ResourceException {
+    public void testInvalidTemplates(final String template) {
         final Router router = new Router();
         final RequestHandler h = mock(RequestHandler.class);
         router.addRoute(RoutingMode.EQUALS, template, h);
     }
 
     @Test
-    public void testMultipleRoutePrecedence() throws ResourceException {
+    public void testMultipleRoutePrecedence() {
         final Router router = new Router();
         final RequestHandler h1 = mock(RequestHandler.class);
         router.addRoute(RoutingMode.EQUALS, "object", h1);
@@ -134,7 +134,7 @@ public final class RouterTest {
     }
 
     @Test
-    public void testMultipleRoutes() throws ResourceException {
+    public void testMultipleRoutes() {
         final Router router = new Router();
         final RequestHandler h1 = mock(RequestHandler.class);
         router.addRoute(RoutingMode.EQUALS, "users", h1);
@@ -213,7 +213,7 @@ public final class RouterTest {
 
     @Test(dataProvider = "variableRouteHitTestData")
     public void testVariableRouteHit(final String template, final String resourceName,
-            final String[] expectedVars) throws ResourceException {
+            final String[] expectedVars) {
         final Router router = new Router();
         final RequestHandler h = mock(RequestHandler.class);
         router.addRoute(RoutingMode.EQUALS, template, h);

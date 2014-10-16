@@ -76,11 +76,12 @@ public class IntegerTypeValidator extends Validator {
      */
     private EnumHelper enumHelper = null;
 
-    private SimpleValidator minimumValidator = null;
-    private SimpleValidator maximumValidator = null;
+    private SimpleValidator<Number> minimumValidator = null;
+    private SimpleValidator<Number> maximumValidator = null;
 
     private final long LONG_HIGH_BITS = 0xFFFFFFFF80000000L;
 
+    @SuppressWarnings({ "deprecation", "unchecked" })
     public IntegerTypeValidator(Map<String, Object> schema, List<String> jsonPointer) {
         super(schema, jsonPointer);
         int minimum = Integer.MIN_VALUE;
@@ -132,13 +133,14 @@ public class IntegerTypeValidator extends Validator {
      */
     public void validate(Object node, JsonPointer at, ErrorHandler handler) throws SchemaException {
         if (node instanceof Number) {
+            Number number = (Long) node;
             int nodeValue = truncate((Long) node, at, handler);
 
             if (null != minimumValidator) {
-                minimumValidator.validate(node, getPath(at, null), handler);
+                minimumValidator.validate(number, getPath(at, null), handler);
             }
             if (null != maximumValidator) {
-                maximumValidator.validate(node, getPath(at, null), handler);
+                maximumValidator.validate(number, getPath(at, null), handler);
             }
 
             if (0 != divisibleBy && nodeValue % divisibleBy != 0) {

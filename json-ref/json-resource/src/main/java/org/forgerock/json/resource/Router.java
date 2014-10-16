@@ -242,8 +242,10 @@ public final class Router implements RequestHandler {
     }
 
     /**
-     * Sets the behaviour of the version routing process to always use the latest resource version when the requested
-     * version is {@code null}.
+     * Sets the behaviour of the version routing process to always use the
+     * latest resource version when the requested version is {@code null}.
+     *
+     * @return This router.
      */
     public Router setVersioningToDefaultToLatest() {
         defaultVersioningBehaviour = VersionSelector.DefaultVersionBehaviour.LATEST;
@@ -252,8 +254,10 @@ public final class Router implements RequestHandler {
     }
 
     /**
-     * Sets the behaviour of the version routing process to always use the oldest resource version when the requested
-     * version is {@code null}.
+     * Sets the behaviour of the version routing process to always use the
+     * oldest resource version when the requested version is {@code null}.
+     *
+     * @return This router.
      */
     public Router setVersioningToDefaultToOldest() {
         defaultVersioningBehaviour = VersionSelector.DefaultVersionBehaviour.OLDEST;
@@ -262,8 +266,11 @@ public final class Router implements RequestHandler {
     }
 
     /**
-     * Removes the default behaviour of the version routing process which will result in {@code NotFoundException}s when
-     * the requested version is {@code null}.
+     * Removes the default behaviour of the version routing process which will
+     * result in {@code NotFoundException}s when the requested version is
+     * {@code null}.
+     *
+     * @return This router.
      */
     public Router setVersioningToDefaultToNone() {
         defaultVersioningBehaviour = VersionSelector.DefaultVersionBehaviour.NONE;
@@ -282,10 +289,13 @@ public final class Router implements RequestHandler {
     }
 
     /**
-     * Determines whether or not the responses returned by the resources under this router will add a warning to the
-     * response if there is no Accept-API-Version header in them.
+     * Determines whether or not the responses returned by the resources under
+     * this router will add a warning to the response if there is no
+     * Accept-API-Version header in them.
      *
-     * @param warningEnabled {@code true} to enable warning, false otherwise.
+     * @param warningEnabled
+     *            {@code true} to enable warning, false otherwise.
+     * @return This router.
      */
     public Router setWarningEnabled(boolean warningEnabled) {
         this.warningEnabled = warningEnabled;

@@ -39,6 +39,7 @@ import java.util.HashMap;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 
+@SuppressWarnings("javadoc")
 public class RsaJWKTest {
 
     //RSA parameter values

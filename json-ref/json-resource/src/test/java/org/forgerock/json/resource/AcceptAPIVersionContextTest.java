@@ -28,6 +28,7 @@ import static org.testng.Assert.assertNull;
  *
  * @since 2.4.0
  */
+@SuppressWarnings("javadoc")
 public class AcceptAPIVersionContextTest {
 
     private AcceptAPIVersion acceptVersion;

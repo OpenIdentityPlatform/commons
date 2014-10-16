@@ -33,6 +33,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
+@SuppressWarnings("javadoc")
 public class VersionRouterTest {
 
     private VersionRouter versionRouter;
@@ -350,7 +351,6 @@ public class VersionRouterTest {
     }
 
     @Test (dataProvider = "data")
-    @SuppressWarnings("unchecked")
     public void shouldRouteQueryVersionRequests(String requestedVersion, boolean expectException,
             RequestHandler provider) {
 

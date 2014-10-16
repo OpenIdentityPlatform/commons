@@ -31,23 +31,37 @@ public class JsonValueException extends JsonException {
     private final JsonValue value;
 
     /**
-     * Constructs a new exception with the specified JSON value and {@code null} as its
-     * detail message.
+     * Constructs a new exception with the specified JSON value and {@code null}
+     * as its detail message.
+     *
+     * @param value
+     *            The JSON value.
      */
     public JsonValueException(JsonValue value) {
         this.value = value;
     }
 
     /**
-     * Constructs a new exception with the specified JSON value and detail message.
+     * Constructs a new exception with the specified JSON value and detail
+     * message.
+     *
+     * @param value
+     *            The JSON value.
+     * @param message
+     *            The message.
      */
     public JsonValueException(JsonValue value, String message) {
         super(message);
         this.value = value;
     }
-    
+
     /**
      * Constructs a new exception with the specified JSON value and cause.
+     *
+     * @param value
+     *            The JSON value.
+     * @param cause
+     *            The cause.
      */
     public JsonValueException(JsonValue value, Throwable cause) {
         super(cause);
@@ -55,7 +69,15 @@ public class JsonValueException extends JsonException {
     }
 
     /**
-     * Constructs a new exception with the specified JSON value, detail message and cause.
+     * Constructs a new exception with the specified JSON value, detail message
+     * and cause.
+     *
+     * @param value
+     *            The JSON value.
+     * @param message
+     *            The message.
+     * @param cause
+     *            The cause.
      */
     public JsonValueException(JsonValue value, String message, Throwable cause) {
         super(message, cause);
@@ -83,6 +105,8 @@ public class JsonValueException extends JsonException {
 
     /**
      * Returns the JSON value for which the exception was thrown.
+     * 
+     * @return The JSON value for which the exception was thrown.
      */
     public JsonValue getJsonValue() {
         return value;

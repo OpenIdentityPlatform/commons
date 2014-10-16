@@ -26,7 +26,7 @@ import java.security.KeyStore;
 import java.util.ArrayList;
 
 // Jackson
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 // Apache Commons CLI
 import org.apache.commons.cli.CommandLine;

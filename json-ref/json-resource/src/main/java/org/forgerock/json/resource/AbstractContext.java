@@ -57,8 +57,7 @@ public abstract class AbstractContext implements Context {
     private static final String ATTR_ID = "id";
     private static final String ATTR_PARENT = "parent";
 
-    private static Context load0(final JsonValue savedContext, final PersistenceConfig config)
-            throws ResourceException {
+    private static Context load0(final JsonValue savedContext, final PersistenceConfig config) {
         // Determine the context implementation class and instantiate it.
         final String className = savedContext.get(ATTR_CLASS).required().asString();
         try {

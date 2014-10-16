@@ -27,6 +27,7 @@ import static org.testng.Assert.assertNull;
  *
  * @since 2.4.0
  */
+@SuppressWarnings("javadoc")
 public class AcceptAPIVersionTest {
 
     private Version protocolVersion;
