@@ -18,11 +18,13 @@ package org.forgerock.json.jose.utils;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.forgerock.json.jose.exceptions.InvalidJwtException;
 import org.forgerock.util.encode.Base64url;
 
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -32,6 +34,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @since 2.0.0
  */
 public final class Utils {
+
+    /**
+     * Cached JSON object mapper for parsing tokens.
+     */
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+        .configure(JsonParser.Feature.STRICT_DUPLICATE_DETECTION, true);
 
     /**
      * UTF-8 Charset.
@@ -100,11 +108,10 @@ public final class Utils {
      */
     @SuppressWarnings("unchecked")
     public static Map<String, Object> parseJson(String json) {
-        ObjectMapper mapper = new ObjectMapper();
         try {
-            return mapper.readValue(json, NoDuplicatesMap.class);
+            return OBJECT_MAPPER.readValue(json, LinkedHashMap.class);
         } catch (IOException e) {
-            throw new InvalidJwtException("Failed to parse json", e);
+            throw new InvalidJwtException("Failed to parse json: " + e.getMessage(), e);
         }
     }
 }
