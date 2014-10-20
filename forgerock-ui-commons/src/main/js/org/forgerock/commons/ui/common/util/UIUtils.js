@@ -652,6 +652,20 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         return new Handlebars.SafeString(newString[0].toUpperCase() + newString.slice(1));
     });
 
+    Handlebars.registerHelper('stringify', function(string, spaces) {
+        spaces = spaces ? spaces : 0 ;
+        var newString = JSON.stringify(string, null, spaces);
+        return newString;
+    });
+
+    Handlebars.registerHelper('ifObject', function(item, options) {
+        if(typeof item === 'object') {
+            return options.fn(this);
+        } else {
+            return options.inverse(this);
+        }
+    });
+
     obj.loadSelectOptions = function(data, el, empty, callback) {
         if( empty === undefined || empty === true ) {
             data = [ {
