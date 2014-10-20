@@ -234,10 +234,35 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                 prmNames: {
                     nd: null,
                     sort: '_sortKeys',
-                    search: null,
+                    search: '_queryFilter',
                     rows: '_pageSize' // number of records to fetch
                 },
                 serializeGridData: function (postedData) {
+                    var i, length, filter = '', colNames;
+
+                    colNames = _.pluck(grid.jqGrid('getGridParam', 'colModel'), 'name');
+                    _.each(colNames, function (element, index, list) {
+                        if (postedData[element]) {
+                            if (filter.length > 0) {
+                                filter += ' AND ';
+                            }
+                            filter = filter.concat(element, ' eq "*', postedData[element], '*"');
+                        }
+                        delete postedData[element];
+                    });
+
+                    if (additional.searchFilter) {
+                        for (i = 0, length = additional.searchFilter.length; i < length; i++) {
+                            if (filter.length > 0) {
+                                filter += ' AND ';
+                            }
+                            filter = filter.concat(additional.searchFilter[i].field, ' ', additional.searchFilter[i].op,
+                                ' "', additional.searchFilter[i].val, '"');
+                        }
+                    }
+
+                    postedData._queryFilter = filter === '' ? true : filter;
+
                     postedData._pagedResultsOffset = postedData._pageSize * (postedData.page - 1);
                     delete postedData.page;
 
@@ -266,7 +291,11 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         }
         grid.jqGrid(defaultOptions);
 
-        grid.navGrid(options.pager,{edit:false,add:false,del:false,search:false,refresh:false})
+        if (additional.search) {
+            grid.jqGrid('filterToolbar', {searchOnEnter: false, defaultSearch: 'eq'});
+        }
+
+        grid.navGrid(options.pager, {edit: false, add: false, del: false, search: false, refresh: false})
             .navButtonAdd(options.pager,{
                 caption:"Columns",
                 buttonicon:"ui-icon-add",
