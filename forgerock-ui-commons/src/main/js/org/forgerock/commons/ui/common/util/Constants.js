@@ -98,6 +98,7 @@ define("org/forgerock/commons/ui/common/util/Constants", [
     
     obj.ROUTE_REQUEST = "view.ROUTE_REQUEST";
     obj.EVENT_CHANGE_BASE_VIEW = "view.EVENT_CHANGE_BASE_VIEW";
+    obj.EVENT_INVALID_REALM = "main.EVENT_INVALID_REALM";
     
     //notifications
     obj.EVENT_NOTIFICATION_DELETE_FAILED = "notification.EVENT_NOTIFICATION_DELETE_FAILED";
