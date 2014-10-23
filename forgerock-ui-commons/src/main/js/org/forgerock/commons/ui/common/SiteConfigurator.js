@@ -97,6 +97,11 @@ define("org/forgerock/commons/ui/common/SiteConfigurator", [
            conf.defaultType = config.defaultNotificationType;
        }
 
+       if (config.policyEditorConfig) {
+           conf.globalData.policyEditorConfig = config.policyEditorConfig;
+       }
+
+
        conf.globalData.selfRegistration =                       config.selfRegistration;
        conf.globalData.siteIdentification =                     config.siteIdentification;
        conf.globalData.protectedUserAttributes =                config.protectedUserAttributes;
