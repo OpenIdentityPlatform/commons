@@ -256,8 +256,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                             if (filter.length > 0) {
                                 filter += ' AND ';
                             }
-                            filter = filter.concat(additional.searchFilter[i].field, ' ', additional.searchFilter[i].op,
-                                ' "', additional.searchFilter[i].val, '"');
+                            filter = filter.concat(additional.searchFilter[i].field, ' ', additional.searchFilter[i].op, ' "', additional.searchFilter[i].val, '"');
                         }
                     }
 
