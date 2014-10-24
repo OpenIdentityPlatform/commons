@@ -22,6 +22,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.forgerock.util.AsyncFunction;
+import org.forgerock.util.Function;
+
 /**
  * Utility methods for creating and composing {@link Promise}s.
  */
@@ -83,7 +86,7 @@ public final class Promises {
         }
 
         @Override
-        public final Promise<V, E> onFailure(final FailureHandler<? super E> onFail) {
+        public final Promise<V, E> thenOnFailure(final FailureHandler<? super E> onFail) {
             if (!isSuccess()) {
                 onFail.handleError(getError());
             }
@@ -91,7 +94,7 @@ public final class Promises {
         }
 
         @Override
-        public final Promise<V, E> onSuccess(final SuccessHandler<? super V> onSuccess) {
+        public final Promise<V, E> thenOnSuccess(final SuccessHandler<? super V> onSuccess) {
             if (isSuccess()) {
                 onSuccess.handleResult(getValue());
             }
@@ -99,7 +102,13 @@ public final class Promises {
         }
 
         @Override
-        public final Promise<V, E> onSuccessOrFailure(final Runnable onSuccessOrFail) {
+        public final Promise<V, E> thenOnSuccessOrFailure(final SuccessHandler<? super V> onSuccess,
+            final FailureHandler<? super E> onFail) {
+            return thenOnSuccess(onSuccess).thenOnFailure(onFail);
+        }
+
+        @Override
+        public final Promise<V, E> thenOnSuccessOrFailure(final Runnable onSuccessOrFail) {
             onSuccessOrFail.run();
             return this;
         }
@@ -107,6 +116,11 @@ public final class Promises {
         @Override
         public final <VOUT> Promise<VOUT, E> then(final Function<? super V, VOUT, E> onSuccess) {
             return then(onSuccess, Promises.<VOUT, E> failIdempotentFunction());
+        }
+
+        @Override
+        public <EOUT extends Exception> Promise<V, EOUT> thenCatch(Function<? super E, V, EOUT> onFailure) {
+            return then(Promises.<V, EOUT> successIdempotentFunction(), onFailure);
         }
 
         @Override
@@ -125,26 +139,27 @@ public final class Promises {
             }
         }
 
-        @Override
-        public final Promise<V, E> then(final SuccessHandler<? super V> onSuccess) {
-            return onSuccess(onSuccess);
-        }
-
-        @Override
-        public final Promise<V, E> then(final SuccessHandler<? super V> onSuccess,
-                final FailureHandler<? super E> onFail) {
-            return onSuccess(onSuccess).onFailure(onFail);
-        }
 
         @Override
         public final Promise<V, E> thenAlways(final Runnable onSuccessOrFail) {
-            return onSuccessOrFailure(onSuccessOrFail);
+            return thenOnSuccessOrFailure(onSuccessOrFail);
+        }
+
+        @Override
+        public Promise<V, E> thenFinally(Runnable onSuccessOrFailure) {
+            return thenOnSuccessOrFailure(onSuccessOrFailure);
         }
 
         @Override
         public final <VOUT> Promise<VOUT, E> thenAsync(
                 final AsyncFunction<? super V, VOUT, E> onSuccess) {
             return thenAsync(onSuccess, Promises.<VOUT, E> failIdempotentAsyncFunction());
+        }
+
+        @Override
+        public final <EOUT extends Exception> Promise<V, EOUT> thenCatchAsync(
+                final AsyncFunction<? super E, V, EOUT> onFailure) {
+            return thenAsync(Promises.<V, EOUT> successIdempotentAsyncFunction(), onFailure);
         }
 
         @Override
@@ -233,6 +248,14 @@ public final class Promises {
                 }
             };
 
+    private static final AsyncFunction<Exception, Object, Exception> SUCCESS_IDEM_ASYNC_FUNC =
+            new AsyncFunction<Exception, Object, Exception>() {
+                @Override
+                public Promise<Object, Exception> apply(final Exception error) throws Exception {
+                    throw error;
+                }
+            };
+
     private static final Function<Object, Object, Exception> SUCCESS_IDEM_FUNC =
             new Function<Object, Object, Exception>() {
                 @Override
@@ -307,7 +330,7 @@ public final class Promises {
         final List<V> results = new ArrayList<V>(size);
         final PromiseImpl<List<V>, E> composite = PromiseImpl.create();
         for (final Promise<V, E> promise : promises) {
-            promise.onSuccess(new SuccessHandler<V>() {
+            promise.thenOnSuccess(new SuccessHandler<V>() {
                 @Override
                 public void handleResult(final V value) {
                     synchronized (results) {
@@ -317,7 +340,7 @@ public final class Promises {
                         composite.handleResult(results);
                     }
                 }
-            }).onFailure(new FailureHandler<E>() {
+            }).thenOnFailure(new FailureHandler<E>() {
                 @Override
                 public void handleError(final E error) {
                     composite.handleError(error);
@@ -356,6 +379,11 @@ public final class Promises {
     @SuppressWarnings("unchecked")
     static <VOUT, E extends Exception> Function<E, VOUT, E> failIdempotentFunction() {
         return (Function<E, VOUT, E>) FAIL_IDEM_FUNC;
+    }
+
+    @SuppressWarnings("unchecked")
+    static <V, E extends Exception> AsyncFunction<V, V, E> successIdempotentAsyncFunction() {
+        return (AsyncFunction<V, V, E>) SUCCESS_IDEM_ASYNC_FUNC;
     }
 
     @SuppressWarnings("unchecked")

@@ -15,6 +15,9 @@
  */
 package org.forgerock.util.promise;
 
+import org.forgerock.util.AsyncFunction;
+import org.forgerock.util.Function;
+
 /**
  * The {@code NeverThrowsException} class is an uninstantiable placeholder
  * exception which should be used for indicating that a {@link Function} or

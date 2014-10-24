@@ -20,6 +20,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.forgerock.util.AsyncFunction;
+import org.forgerock.util.Function;
+
 /**
  * A {@code Promise} represents the result of an asynchronous task.
  *
@@ -33,7 +36,6 @@ import java.util.concurrent.TimeoutException;
  * @see Promises
  */
 public interface Promise<V, E extends Exception> extends Future<V> {
-    // TODO: do overloaded then methods work with closures (JDK8)?
     // TODO: progressible promise
 
     /**
@@ -207,11 +209,11 @@ public interface Promise<V, E extends Exception> extends Future<V> {
      * This method can be used for asynchronous completion notification.
      *
      * @param onFailure
-     *            The completion handler which will be notified upon successful
+     *            The completion handler which will be notified upon failure
      *            completion of this {@code Promise}.
      * @return This {@code Promise}.
      */
-    Promise<V, E> onFailure(FailureHandler<? super E> onFailure);
+    Promise<V, E> thenOnFailure(FailureHandler<? super E> onFailure);
 
     /**
      * Registers the provided completion handler for notification once this
@@ -223,11 +225,30 @@ public interface Promise<V, E extends Exception> extends Future<V> {
      * equivalent to {@link #then(SuccessHandler)}.
      *
      * @param onSuccess
+     *            The completion handler which will be notified upon success of
+     *            this {@code Promise}.
+     * @return This {@code Promise}.
+     */
+    Promise<V, E> thenOnSuccess(SuccessHandler<? super V> onSuccess);
+
+    /**
+     * Registers the provided completion handlers for notification once this
+     * {@code Promise} has completed. If this {@code Promise} completes
+     * successfully then {@code onSuccess} will be notified with the result,
+     * otherwise {@code onFailure} will be notified with the exception that
+     * occurred.
+     * <p>
+     * This method can be used for asynchronous completion notification.
+     *
+     * @param onSuccess
+     *            The completion handler which will be notified upon successful
+     *            completion of this {@code Promise}.
+     * @param onFailure
      *            The completion handler which will be notified upon failure of
      *            this {@code Promise}.
      * @return This {@code Promise}.
      */
-    Promise<V, E> onSuccess(SuccessHandler<? super V> onSuccess);
+    Promise<V, E> thenOnSuccessOrFailure(SuccessHandler<? super V> onSuccess, FailureHandler<? super E> onFailure);
 
     /**
      * Submits the provided runnable for execution once this {@code Promise} has
@@ -245,7 +266,7 @@ public interface Promise<V, E extends Exception> extends Future<V> {
      *            outcome of this {@code Promise}.
      * @return This {@code Promise}.
      */
-    Promise<V, E> onSuccessOrFailure(Runnable onSuccessOrFailure);
+    Promise<V, E> thenOnSuccessOrFailure(Runnable onSuccessOrFailure);
 
     /**
      * Submits the provided function for execution once this {@code Promise} has
@@ -269,6 +290,29 @@ public interface Promise<V, E extends Exception> extends Future<V> {
      *         function.
      */
     <VOUT> Promise<VOUT, E> then(Function<? super V, VOUT, E> onSuccess);
+
+    /**
+     * Submits the provided function for execution once this {@code Promise} has
+     * not completed successfully, and returns a new {@code Promise} representing
+     * the success or failure of the function. If this {@code Promise} completes
+     * successfully then the function will not be invoked and the success notification
+     * will be forwarded to the returned {@code Promise}.
+     * <p>
+     * This method can be used for transforming the result of an asynchronous
+     * task.
+     *
+     * @param <EOUT>
+     *            The type of the exception thrown by the function if it
+     *            fails, or {@link NeverThrowsException} if it cannot fails.
+     *            Note that the type may be different to the type of this
+     *            {@code Promise}.
+     * @param onFailure
+     *            The function which will be executed upon failure completion
+     *            of this {@code Promise}.
+     * @return A new {@code Promise} representing the success or failure of the
+     *         function.
+     */
+    <EOUT extends Exception> Promise<V, EOUT> thenCatch(Function<? super E, V, EOUT> onFailure);
 
     /**
      * Submits the provided functions for execution once this {@code Promise}
@@ -303,40 +347,6 @@ public interface Promise<V, E extends Exception> extends Future<V> {
     <VOUT, EOUT extends Exception> Promise<VOUT, EOUT> then(
             Function<? super V, VOUT, EOUT> onSuccess, Function<? super E, VOUT, EOUT> onFailure);
 
-    /**
-     * Registers the provided completion handler for notification once this
-     * {@code Promise} has completed successfully. If this {@code Promise} does
-     * not complete successfully then the completion handler will not be
-     * notified.
-     * <p>
-     * This method can be used for asynchronous completion notification and is
-     * equivalent to {@link #onSuccess(SuccessHandler)}.
-     *
-     * @param onSuccess
-     *            The completion handler which will be notified upon successful
-     *            completion of this {@code Promise}.
-     * @return This {@code Promise}.
-     */
-    Promise<V, E> then(SuccessHandler<? super V> onSuccess);
-
-    /**
-     * Registers the provided completion handlers for notification once this
-     * {@code Promise} has completed. If this {@code Promise} completes
-     * successfully then {@code onSuccess} will be notified with the result,
-     * otherwise {@code onFailure} will be notified with the exception that
-     * occurred.
-     * <p>
-     * This method can be used for asynchronous completion notification.
-     *
-     * @param onSuccess
-     *            The completion handler which will be notified upon successful
-     *            completion of this {@code Promise}.
-     * @param onFailure
-     *            The completion handler which will be notified upon failure of
-     *            this {@code Promise}.
-     * @return This {@code Promise}.
-     */
-    Promise<V, E> then(SuccessHandler<? super V> onSuccess, FailureHandler<? super E> onFailure);
 
     /**
      * Submits the provided runnable for execution once this {@code Promise} has
@@ -347,7 +357,7 @@ public interface Promise<V, E extends Exception> extends Future<V> {
      * be used in a similar manner to {@code finally} statements in
      * {@code try...catch} expressions.
      * <p>
-     * This method is equivalent to {@link #onSuccessOrFailure(Runnable)}.
+     * This method is equivalent to {@link #thenOnSuccessOrFailure(Runnable)}.
      *
      * @param onSuccessOrFailure
      *            The runnable which will be notified regardless of the final
@@ -355,6 +365,24 @@ public interface Promise<V, E extends Exception> extends Future<V> {
      * @return This {@code Promise}.
      */
     Promise<V, E> thenAlways(Runnable onSuccessOrFailure);
+
+    /**
+     * Submits the provided runnable for execution once this {@code Promise} has
+     * completed, and regardless of whether it succeeded or failed.
+     * <p>
+     * This method can be used for resource cleanup after a series of
+     * asynchronous tasks have completed. More specifically, this method should
+     * be used in a similar manner to {@code finally} statements in
+     * {@code try...catch} expressions.
+     * <p>
+     * This method is equivalent to {@link #thenAlways(Runnable)}.
+     *
+     * @param onSuccessOrFailure
+     *            The runnable which will be notified regardless of the final
+     *            outcome of this {@code Promise}.
+     * @return This {@code Promise}.
+     */
+    Promise<V, E> thenFinally(Runnable onSuccessOrFailure);
 
     /**
      * Submits the provided asynchronous function for execution once this
@@ -379,6 +407,31 @@ public interface Promise<V, E extends Exception> extends Future<V> {
      *         function.
      */
     <VOUT> Promise<VOUT, E> thenAsync(AsyncFunction<? super V, VOUT, E> onSuccess);
+
+    /**
+     * Submits the provided asynchronous function for execution once this
+     * {@code Promise} has not completed successfully, and returns a new
+     * {@code Promise} representing the success or failure of the function. If
+     * this {@code Promise} completes successfully then the function
+     * will not be invoked and the error will be forwarded to the returned
+     * {@code Promise}.
+     * <p>
+     * This method may be used for chaining together a series of asynchronous
+     * tasks.
+     *
+     * @param <EOUT>
+     *            The type of the exception thrown by the function if it
+     *            fails, or {@link NeverThrowsException} if it cannot fails.
+     *            Note that the type may be different to the type of this
+     *            {@code Promise}.
+     * @param onFailure
+     *            The asynchronous function which will be executed upon failure completion
+     *            of this {@code Promise}.
+     *
+     * @return A new {@code Promise} representing the success or failure of the
+     *         function.
+     */
+    <EOUT extends Exception> Promise<V, EOUT> thenCatchAsync(AsyncFunction<? super E, V, EOUT> onFailure);
 
     /**
      * Submits the provided asynchronous functions for execution once this
