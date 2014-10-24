@@ -319,12 +319,6 @@ public class JsonValueKeyAccessChecker extends JsonValue {
 
     /** {@inheritDoc} */
     @Override
-    public Object getWrappedObject() {
-        throw new UnsupportedOperationException();
-    }
-
-    /** {@inheritDoc} */
-    @Override
     public boolean isBoolean() {
         return this.delegate.isBoolean();
     }
