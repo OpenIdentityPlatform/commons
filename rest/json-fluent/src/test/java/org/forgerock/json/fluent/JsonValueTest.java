@@ -33,12 +33,14 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.forgerock.util.promise.Function;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
@@ -576,6 +578,26 @@ public class JsonValueTest {
         assertThat(value.isSet()).isTrue();
         assertThat(value.asList().size()).isEqualTo(4);
         assertThat(value.asList()).containsOnly("2", "3", "5", "8");
+    }
+
+    @DataProvider
+    private Object[][] shouldIterateChildElementsInOrderData() {
+        // @formatter:off
+        return new Object[][] {
+            { field("key-1", "value-1"), field("key-2", "value-2") },
+            { field("key-2", "value-2"), field("key-1", "value-1") }
+        };
+        // @formatter:on
+    }
+
+    @Test(dataProvider = "shouldIterateChildElementsInOrderData")
+    public void shouldIterateChildElementsInOrder(Map.Entry<String, Object> field1,
+            Map.Entry<String, Object> field2) throws Exception {
+        JsonValue iterable = json(object(field1, field2));
+        Iterator<JsonValue> iterator = iterable.iterator();
+        assertThat(iterator.next().asString()).isEqualTo(field1.getValue().toString());
+        assertThat(iterator.next().asString()).isEqualTo(field2.getValue().toString());
+        assertThat(iterator.hasNext()).isFalse();
     }
 
     private JsonPointer ptr(final String pointer) {

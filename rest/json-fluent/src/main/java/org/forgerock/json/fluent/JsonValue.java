@@ -31,8 +31,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -198,8 +196,7 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
 
     /**
      * Constructs a JSON value object with a given object. This constructor will
-     * automatically unwrap any {@link JsonValueWrapper} and/or
-     * {@link JsonValue} objects.
+     * automatically unwrap {@link JsonValue} objects.
      *
      * @param object
      *            the Java object representing the JSON value.
@@ -210,8 +207,7 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
 
     /**
      * Constructs a JSON value object with a given object and transformers. This
-     * constructor will automatically unwrap any {@link JsonValueWrapper} and/or
-     * {@link JsonValue} objects.
+     * constructor will automatically unwrap {@link JsonValue} objects.
      *
      * @param object
      *            the Java object representing the JSON value.
@@ -226,8 +222,7 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
 
     /**
      * Constructs a JSON value object with a given object and pointer. This
-     * constructor will automatically unwrap any {@link JsonValueWrapper} and/or
-     * {@link JsonValue} objects.
+     * constructor will automatically unwrap {@link JsonValue} objects.
      *
      * @param object
      *            the Java object representing the JSON value.
@@ -240,11 +235,7 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
 
     /**
      * Constructs a JSON value object with given object, pointer and
-     * transformers. This constructor will automatically unwrap any
-     * {@link JsonValueWrapper} and/or {@link JsonValue} objects. The pointer is
-     * inherited from the wrapped value, except if {@code pointer} is not
-     * {@code null}. The transformers are inherited from the wrapped value,
-     * except if {@code transformers} is not {@code null}.
+     * transformers.
      *
      * @param object
      *            the Java object representing the JSON value.
@@ -259,8 +250,8 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
             final Collection<? extends JsonTransformer> transformers) {
         this.object = object;
         this.pointer = pointer;
-        final JsonValue jv = unwrapObject(object);
-        if (jv != null) {
+        if (object instanceof JsonValue) {
+            final JsonValue jv = (JsonValue) object;
             this.object = jv.object;
             if (pointer == null) {
                 this.pointer = jv.pointer;
@@ -1018,7 +1009,7 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
         final JsonValue result = new JsonValue(this.object, this.pointer);
         result.transformers.addAll(this.transformers); // avoid re-applying transformers
         if (isMap()) {
-            result.object = new HashMap<String, Object>(this.asMap());
+            result.object = new LinkedHashMap<String, Object>(this.asMap());
         } else if (isList()) {
             result.object = new ArrayList<Object>(this.asList());
         } else if (isSet()) {
@@ -1062,7 +1053,7 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
         // TODO: track original values to resolve cyclic references
         final JsonValue result = new JsonValue(object, pointer); // start with shallow copy
         if (this.isMap()) {
-            final HashMap<String, Object> map = new HashMap<String, Object>(size());
+            final Map<String, Object> map = new LinkedHashMap<String, Object>(size());
             for (final String key : keys()) {
                 map.put(key, this.get(key).copy().getObject()); // recursion
             }
@@ -1215,24 +1206,6 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
      */
     public List<JsonTransformer> getTransformers() {
         return transformers;
-    }
-
-    /**
-     * Returns a Java object representing this JSON value. If the object is a
-     * {@code Map} or {@code List}, it is wrapped with a {@link JsonValueMap} or
-     * {@link JsonValueList} object respectively. This maintains and applies
-     * transformations as these objects (and their children) are accessed.
-     *
-     * @return a Java object representing this JSON value.
-     */
-    public Object getWrappedObject() {
-        if (isMap()) {
-            return new JsonValueMap(this);
-        } else if (isList()) {
-            return new JsonValueList<Object>(this);
-        } else {
-            return object;
-        }
     }
 
     /**
@@ -1405,22 +1378,17 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
 
     /**
      * Returns the set of keys for this JSON value's child values. If this value
-     * is a {@code Map}, then the order of the resulting keys is undefined. If
-     * there are no child values, this method returns an empty set.
+     * is a {@code Map}, then the order of the resulting keys is the same as the
+     * underlying Map implementation. If there are no child values, this method
+     * returns an empty set.
      *
      * @return the set of keys for this JSON value's child values.
      */
     public Set<String> keys() {
-        Set<String> result;
         if (isMap()) {
-            result = new HashSet<String>();
-            for (final Object key : asMap().keySet()) {
-                if (key instanceof String) {
-                    result.add((String) key); // only expose string keys in map
-                }
-            }
+            return asMap().keySet();
         } else if (isList()) {
-            result = new AbstractSet<String>() {
+            return new AbstractSet<String>() {
                 final RangeSet range = new RangeSet(JsonValue.this.size()); // 0 through size-1 inclusive
 
                 @Override
@@ -1464,9 +1432,8 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
                 }
             };
         } else {
-            result = Collections.emptySet();
+            return Collections.emptySet();
         }
-        return result;
     }
 
     /**
@@ -1630,17 +1597,17 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
      * Sets the Java object representing this JSON value. Does not apply
      * transformers to the new value.
      * <p>
-     * This method will automatically unwrap any {@link JsonValueWrapper} and/or
-     * {@link JsonValue} objects. Transformers are inherited from the wrapped
-     * value. This value's pointer remains unaffected.
+     * This method will automatically unwrap {@link JsonValue} objects.
+     * Transformers are inherited from the wrapped value. This value's pointer
+     * remains unaffected.
      *
      * @param object
      *            the object to set.
      */
     public void setObject(final Object object) {
         this.object = object;
-        final JsonValue jv = unwrapObject(object);
-        if (jv != null) {
+        if (object instanceof JsonValue) {
+            final JsonValue jv = (JsonValue) object;
             this.object = jv.object;
             this.transformers.addAll(jv.transformers);
         }
@@ -1837,20 +1804,5 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
         } else {
             put(token, object);
         }
-    }
-
-    /**
-     * Unwraps a {@link JsonValueWrapper} and/or {@link JsonValue} object. If
-     * nothing was unwrapped, then {@code null} is returned.
-     */
-    private JsonValue unwrapObject(Object object) {
-        JsonValue result = null;
-        if (object != null && object instanceof JsonValueWrapper) {
-            object = ((JsonValueWrapper) object).unwrap();
-        }
-        if (object != null && object instanceof JsonValue) {
-            result = (JsonValue) object;
-        }
-        return result;
     }
 }
