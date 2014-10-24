@@ -135,7 +135,7 @@ public class SimpleEncryptor implements JsonEncryptor {
 
     @Override
     public JsonValue encrypt(JsonValue value) throws JsonCryptoException {
-        Object object = value.getWrappedObject();
+        Object object = value.getObject();
         try {
             return new JsonValue((key instanceof SecretKey ? symmetric(object) : asymmetric(object)));
         } catch (GeneralSecurityException gse) { // Java Cryptography Extension
