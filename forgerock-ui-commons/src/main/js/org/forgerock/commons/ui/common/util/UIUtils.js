@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -240,13 +240,17 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                 serializeGridData: function (postedData) {
                     var i, length, filter = '', colNames;
 
+                    if (additional.serializeGridData) {
+                        filter = additional.serializeGridData.call(this, postedData);
+                    }
+
                     colNames = _.pluck(grid.jqGrid('getGridParam', 'colModel'), 'name');
                     _.each(colNames, function (element, index, list) {
                         if (postedData[element]) {
                             if (filter.length > 0) {
                                 filter += ' AND ';
                             }
-                            filter = filter.concat(element, ' eq "*', postedData[element], '*"');
+                            filter = filter.concat(element, ' co "', postedData[element], '"');
                         }
                         delete postedData[element];
                     });
