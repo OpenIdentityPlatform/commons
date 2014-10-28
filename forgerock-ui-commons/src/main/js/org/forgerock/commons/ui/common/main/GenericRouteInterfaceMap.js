@@ -22,14 +22,15 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, form2js, _, js2form, window, require */
+/*global define, require */
 
 /**
  * @author huck.elliott
  */
 define("org/forgerock/commons/ui/common/main/GenericRouteInterfaceMap", [
-"org/forgerock/commons/ui/common/main/AbstractConfigurationAware"
-], function(AbstractConfigurationAware) {
+    "underscore",
+    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware"
+], function(_, AbstractConfigurationAware) {
     var obj = new AbstractConfigurationAware();
     //this module is a generic way of defining require js routes
     //another way of doing this same thing would be to add a route to app_root/main.js

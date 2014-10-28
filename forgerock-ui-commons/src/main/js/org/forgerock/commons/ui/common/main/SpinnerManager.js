@@ -22,14 +22,15 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define, Spinner, window */
+/*global define, window */
 
 /**
  * @author mbilski
  */
 define("org/forgerock/commons/ui/common/main/SpinnerManager", [
+    "jquery",
     "spin"
-], function(Spinner) {
+], function($, Spinner) {
 
     var obj = {};
     

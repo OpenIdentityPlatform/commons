@@ -22,15 +22,17 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global require, define, form2js, _, $ */
+/*global require, define, form2js */
 
 /**
  * @author mbilski
  */
 define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
+    "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "org/forgerock/commons/ui/common/util/ValidatorsUtils"
-], function(AbstractConfigurationAware, validatorUtils) {
+], function($, _, AbstractConfigurationAware, validatorUtils) {
     var obj = new AbstractConfigurationAware();
     
     obj.bindValidators = function(el, baseEntity, callback) {

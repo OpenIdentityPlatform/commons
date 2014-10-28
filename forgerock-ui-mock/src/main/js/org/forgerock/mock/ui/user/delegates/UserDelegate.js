@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define, _ */
+/*global define */
 
 /**
  * @author yaromin
@@ -30,12 +30,13 @@
  */
 
 define("UserDelegate", [
+    "jquery",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/mock/ui/common/main/LocalStorage"
-], function (constants, AbstractDelegate, configuration, eventManager, localStorage) {
+], function ($, constants, AbstractDelegate, configuration, eventManager, localStorage) {
 
     var obj = new AbstractDelegate("mock/repo/internal/user");
 

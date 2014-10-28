@@ -22,19 +22,21 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Backbone, window */
+/*global define */
 
 /**
  * @author mbilski
  */
 
 define("org/forgerock/commons/ui/common/components/Dialog", [
+    "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/util/Constants", 
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/Configuration"
-], function(AbstractView, uiUtils, constants, eventManager, conf) {
+], function($, _, AbstractView, uiUtils, constants, eventManager, conf) {
     var Dialog = AbstractView.extend({
         template: "templates/common/DialogTemplate.html",
         element: "#dialogs",
@@ -65,7 +67,7 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
          * Then creates actions buttons and bind events. If actions map is empty, default
          * close action is added.
          */
-        show: function(callback) {   
+        show: function(callback) {
             
             this.setElement($("#dialogs"));
             this.parentRender(_.bind(function() {

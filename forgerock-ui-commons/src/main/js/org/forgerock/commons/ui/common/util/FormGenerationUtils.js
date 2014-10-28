@@ -22,11 +22,12 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define*/
+/*global define*/
 
 define("org/forgerock/commons/ui/common/util/FormGenerationUtils", [
-    "org/forgerock/commons/ui/common/util/DateUtil"                                                                    
-], function (dateUtil) {
+    "jquery",
+    "org/forgerock/commons/ui/common/util/DateUtil"
+], function ($, dateUtil) {
     
     var obj = {};
     

@@ -22,18 +22,20 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, ContentFlow */
+/*global define */
 
 /**
  * @author mbilski
  */
 define("org/forgerock/mock/ui/user/profile/EnterOldPasswordDialog", [
+    "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/components/Dialog",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants"
-], function (Dialog, validatorsManager, conf, eventManager, constants) {
+], function ($, _, Dialog, validatorsManager, conf, eventManager, constants) {
     var EnterOldPasswordDialog = Dialog.extend({
         contentTemplate: "templates/user/EnterOldPasswordDialog.html",
 

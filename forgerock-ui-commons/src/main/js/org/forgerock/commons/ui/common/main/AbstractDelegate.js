@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define, _ */
+/*global define, _ */
 
 /**
  * @author yaromin
@@ -60,7 +60,7 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
     };
 
     obj.prototype.createEntity = function(id, objectParam, successCallback, errorCallback) {
-        console.debug("create entity");      
+        console.debug("create entity");
         var headers = {}; 
 
         if (typeof id === "object" && id !== null) {
@@ -76,19 +76,19 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
             }
             return this.serviceCall({url: "/" + id,
                 type: "PUT",
-                success: successCallback, 
-                error: errorCallback, 
+                success: successCallback,
+                error: errorCallback,
                 data: JSON.stringify(objectParam),
                 headers: headers
             });
         } else {
             return this.serviceCall({url: "?_action=create",
                 type: "POST",
-                success: successCallback, 
-                error: errorCallback, 
+                success: successCallback,
+                error: errorCallback,
                 data: JSON.stringify(objectParam),
                 headers: headers
-            });            
+            });
         }
     };
 
@@ -102,7 +102,7 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
                 callParams.headers["If-Match"] = '"' + data._rev + '"';
             }
             current.serviceCall(callParams);
-        }, errorCallback);      
+        }, errorCallback);
 
     };
 
@@ -123,8 +123,8 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
         
         return this.serviceCall({url: "/" + id,
             type: "PUT",
-            success: successCallback, 
-            error: errorCallback, 
+            success: successCallback,
+            error: errorCallback,
             data: JSON.stringify(objectParam),
             headers: headers
         });
@@ -156,7 +156,7 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
         for(i = 0; i < patchDefinition.length; i++) {
             if (typeof(patchDefinition[i].field) !== "undefined") {
                 patchDefinition[i].field = "/" + patchDefinition[i].field;
-            }            
+            }
         }
         return this.serviceCall({url: "/" + queryParameters.id, 
             type: "PATCH", 

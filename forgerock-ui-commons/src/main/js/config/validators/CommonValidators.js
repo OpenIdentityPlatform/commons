@@ -22,13 +22,14 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _ */
+/*global define */
 
 /**
  * @author mbilski
  */
 define("config/validators/CommonValidators", [
-], function(constants, eventManager) {
+    "jquery"
+], function($) {
     var obj = {
         "required": {
             "name": "Required field",
@@ -41,7 +42,7 @@ define("config/validators/CommonValidators", [
                     return;
                 }
 
-                callback();  
+                callback();
             }
         },
         "passwordConfirm": {
@@ -57,7 +58,7 @@ define("config/validators/CommonValidators", [
                     return;
                 }
 
-                callback(); 
+                callback();
             }
         },
         "minLength": {
@@ -75,12 +76,12 @@ define("config/validators/CommonValidators", [
                 }
 
                 if (errors.length === 0) {
-                    callback(); 
+                    callback();
                 } else {
                     callback(errors);
                 }
             }
-        }        
+        }
     };
     return obj;
 });

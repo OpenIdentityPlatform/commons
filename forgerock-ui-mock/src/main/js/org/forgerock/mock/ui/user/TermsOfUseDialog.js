@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _*/
+/*global define */
 
 /**
  * @author mbilski

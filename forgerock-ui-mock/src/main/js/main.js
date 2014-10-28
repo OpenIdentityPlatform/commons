@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global require, _ */
+/*global require, window */
 
 /**
  * @author yaromin
@@ -93,7 +93,7 @@ require.config({
             exports: "handlebars"
         },
         i18next: {
-            deps: ["handlebars"],
+            deps: ["jquery", "handlebars"],
             exports: "i18next"
         },
         moment: {
@@ -109,6 +109,7 @@ require.config({
 require([
     // sinon only needed (or available) for Mock project
     "sinon",
+    "jquery",
     "underscore",
     "backbone",
     "form2js",
@@ -132,8 +133,13 @@ require([
     "UserDelegate",
     "ThemeManager",
     "config/main"
-], function ( sinon, _, Backbone, form2js, js2form, spin, $ui, xdate, moment, doTimeout, Handlebars, i18n,
+], function ( sinon, $, _, Backbone, form2js, js2form, spin, $ui, xdate, moment, doTimeout, Handlebars, i18n,
              mockServer, i18nManager, constants, eventManager, localStorage) {
+
+    // Helpers for the code that hasn't been properly migrated to require these as explicit dependencies:
+    window.$ = $;
+    window._ = _;
+    window.Backbone = Backbone;
 
     // Mock project is run without server. Framework requires cookies to be enabled in order to be able to login.
     // Default CookieHelper.cookiesEnabled() implementation will always return false as cookies cannot be set from local

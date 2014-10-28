@@ -22,15 +22,16 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global require, define, _, $ */
+/*global require, define */
 
 /**
  * @author mbilski
  */
 define("org/forgerock/commons/ui/common/main/ViewManager", [
+    "underscore",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/components/Messages"
-], function(uiUtils, msg) {
+], function(_, uiUtils, msg) {
     var obj = {};
     
     obj.currentView = "null";

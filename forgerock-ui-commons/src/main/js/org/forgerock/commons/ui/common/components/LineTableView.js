@@ -22,14 +22,16 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Backbone, window */
+/*global define */
 
 /**
  * @author jdabrowski
  */
 
 define("org/forgerock/commons/ui/common/components/LineTableView", [
-], function() {
+    "jquery",
+    "backbone"
+], function($, Backbone) {
     
     var LineTableView = Backbone.View.extend({
         

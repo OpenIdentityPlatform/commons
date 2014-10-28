@@ -22,13 +22,15 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _ */
+/*global define */
 
 /**
  * @author mbilski
  * @author Eugenia Sergueeva
  */
 define("org/forgerock/mock/ui/user/profile/ChangeSecurityDataDialog", [
+    "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/components/Dialog",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/main/Configuration",
@@ -36,7 +38,7 @@ define("org/forgerock/mock/ui/user/profile/ChangeSecurityDataDialog", [
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants"
-], function (Dialog, validatorsManager, conf, userDelegate, uiUtils, eventManager, constants) {
+], function ($, _, Dialog, validatorsManager, conf, userDelegate, uiUtils, eventManager, constants) {
     var ChangeSecurityDataDialog = Dialog.extend({
         contentTemplate: "templates/mock/ChangeSecurityDataDialogTemplate.html",
 

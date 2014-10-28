@@ -22,12 +22,15 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, Backbone, _, $, window */
+/*global define, window */
 
 /**
  * @author mbilski
  */
 define("org/forgerock/commons/ui/common/main/AbstractView", [
+    "jquery",
+    "underscore",
+    "backbone",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/util/ValidatorsUtils",
@@ -36,7 +39,7 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
     "org/forgerock/commons/ui/common/main/Router", 
     "org/forgerock/commons/ui/common/util/Constants",
     "ThemeManager"
-], function(uiUtils, validatorsManager, validatorsUtils, conf, eventManager, router, constants, themeManager) {
+], function($, _, Backbone, uiUtils, validatorsManager, validatorsUtils, conf, eventManager, router, constants, themeManager) {
     var View = Backbone.View.extend({
 
         /**
@@ -165,18 +168,17 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
                 input.parents('.separate-message').addClass('invalid');
                 input.addClass('invalid');
             } else {
-                input.parents('.separate-message').removeClass('invalid'); 
+                input.parents('.separate-message').removeClass('invalid');
                 input.removeClass('invalid');
             }
-                
-          
+
             this.$el.find("div.validation-message[for='" + input.attr('name') + "']").html(msg ? msg : '');
             
             if (validatorType) {
                 validatorsUtils.setErrors(this.$el, validatorType, msg);
-            }    
+            }
 
-            this.$el.trigger("customValidate", [input, msg, validatorType]); 
+            this.$el.trigger("customValidate", [input, msg, validatorType]);
         },
         
         lock: function() {
@@ -184,7 +186,7 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
         },
         
         unlock: function() {
-            this.formLock = false; 
+            this.formLock = false;
         },
         
         isFormLocked: function() {

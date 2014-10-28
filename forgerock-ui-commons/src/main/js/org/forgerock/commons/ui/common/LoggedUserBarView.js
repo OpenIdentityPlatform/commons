@@ -22,16 +22,17 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, Backbone */
+/*global define */
 
 /**
  * @author mbilski
  */
 define("org/forgerock/commons/ui/common/LoggedUserBarView", [
+    "backbone",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration"
-], function(eventManager, constants, conf) {
+], function(Backbone, eventManager, constants, conf) {
     var LoggedUserBarView = Backbone.View.extend({
         element: "#loginContent",
         events : {

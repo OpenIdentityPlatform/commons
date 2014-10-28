@@ -22,15 +22,15 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define*/
+/*global define, document */
 
 /**
  * @author yaromin
  */
 define("org/forgerock/commons/ui/common/main/EventManager", [
-    "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/util/CustomPolyfill"
-], function(constants) {
+    "jquery",
+    "org/forgerock/commons/ui/common/util/Constants"
+], function($, constants) {
     
     /**
      * listenerProxyMap - Association of real listeners and proxies which transforms parameter set

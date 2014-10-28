@@ -22,18 +22,19 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, form2js, _, js2form, window */
+/*global define */
 
 /**
  * @author huck.elliott
  * @author Eugenia Sergueeva
  */
 define("org/forgerock/mock/ui/user/LoginView", [
+    "underscore",
     "org/forgerock/commons/ui/common/LoginView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/mock/ui/common/main/LocalStorage"
-], function (commonLoginView, validatorsManager, conf, localStorage) {
+], function (_, commonLoginView, validatorsManager, conf, localStorage) {
     var LoginView = function () {
         },
         obj;

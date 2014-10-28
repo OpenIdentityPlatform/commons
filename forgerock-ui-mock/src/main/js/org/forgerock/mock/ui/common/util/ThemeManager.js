@@ -22,16 +22,18 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, less */
+/*global define, less */
 
 /**
  * @author Eugenia Sergueeva
  */
 
 define("ThemeManager", [
+    "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration"
-], function (constants, conf) {
+], function ($, _, constants, conf) {
     var obj = {},
         themePromise;
 

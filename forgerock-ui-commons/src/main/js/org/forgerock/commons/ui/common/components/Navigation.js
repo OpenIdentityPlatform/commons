@@ -22,13 +22,14 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Backbone, window */
+/*global define, window */
 
 /**
  * @author mbilski
  */
 
 define("org/forgerock/commons/ui/common/components/Navigation", [
+    "jquery",
     "underscore",
     "backbone",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
@@ -38,7 +39,7 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/ViewManager",
     "org/forgerock/commons/ui/common/main/Router"
-], function(_, Backbone, AbstractConfigurationAware, AbstractView, conf, constants, eventManager, viewManager, router) {
+], function($, _, Backbone, AbstractConfigurationAware, AbstractView, conf, constants, eventManager, viewManager, router) {
     var obj = new AbstractConfigurationAware();
     
     obj.init = function() {
@@ -74,11 +75,11 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                                 subUrl = url.urls[subUrlName];
                                 this.addSubLink(subUrl.name, subUrl.url, this.isCurrent(subUrl.url), subUrl.icon, subUrl.inactive);
                             }
-                        }         
+                        }
 
                     } else {
                         this.addLink(url.name, url.url, false,url.icon, url.inactive);
-                    }                    
+                    }
                 }
        
             },
@@ -91,7 +92,7 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                     isActive: isActive,
                     isInactive: isInactive,
                     icon: icon
-                });            
+                });
             },
             
             addSubLink: function(name, url, isActive, icon, isInactive) {
@@ -102,7 +103,7 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                     isActive: isActive,
                     isInactive: isInactive,
                     icon: icon
-                });     
+                });
             },
             
             childIsCurrent: function(urls) {
@@ -148,7 +149,7 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                 }
             }
         });
-                
+
         obj.navigation = new Navigation();
         obj.navigation.render();
     };

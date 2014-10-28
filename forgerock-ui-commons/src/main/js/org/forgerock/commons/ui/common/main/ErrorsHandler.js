@@ -22,16 +22,17 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global require, define, _, $ */
+/*global define */
 
 /**
  * @author mbilski
  */
 define("org/forgerock/commons/ui/common/main/ErrorsHandler", [
+    "jquery",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants"
-], function(AbstractConfigurationAware, eventManager, constants) {
+], function($, AbstractConfigurationAware, eventManager, constants) {
     var obj = new AbstractConfigurationAware();
     
     obj.handleError = function(error, handlers) {

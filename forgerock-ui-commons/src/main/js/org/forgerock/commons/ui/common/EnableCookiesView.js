@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $ */
+/*global define, location, */
 
 /**
  * @author Huck Elliott
@@ -35,14 +35,13 @@ define("org/forgerock/commons/ui/common/EnableCookiesView", [
         template: "templates/common/EnableCookiesTemplate.html",
         baseTemplate: "templates/common/LoginBaseTemplate.html",
         render: function() {
-            if(!cookieHelper.cookiesEnabled()){
+            if (!cookieHelper.cookiesEnabled()) {
                 this.parentRender();
-            }
-            else{
+            } else {
                 location.href = "#login/";
             }
         }
-    }); 
+    });
     
     return new EnableCookiesView();
 });

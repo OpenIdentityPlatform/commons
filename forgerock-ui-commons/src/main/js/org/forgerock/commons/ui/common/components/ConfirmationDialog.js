@@ -22,17 +22,18 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Backbone, window */
+/*global define */
 
 /**
  * @author mbilski
  */
 
 define("org/forgerock/commons/ui/common/components/ConfirmationDialog", [
-    "org/forgerock/commons/ui/common/components/Dialog"
-], function(Dialog) {
+    "org/forgerock/commons/ui/common/components/Dialog",
+    "underscore"
+], function(Dialog, _) {
     var ConfirmationDialog = Dialog.extend({
-        template: "templates/common/DialogTemplate.html",        
+        template: "templates/common/DialogTemplate.html",
         contentTemplate: "templates/common/ConfirmationDialogTemplate.html",
         
         events: {
@@ -43,9 +44,7 @@ define("org/forgerock/commons/ui/common/components/ConfirmationDialog", [
             "click .dialogContainer": "stop"
         },
         
-        data: {         
-            
-        },
+        data: { },
         
         formSubmit: function() {
             this.okCallback();
@@ -62,7 +61,7 @@ define("org/forgerock/commons/ui/common/components/ConfirmationDialog", [
             
             this.show(_.bind(function() {
                 this.$el.find("input[type=submit]").prop('disabled', false);
-            }, this));            
+            }, this));
         }
     });
 

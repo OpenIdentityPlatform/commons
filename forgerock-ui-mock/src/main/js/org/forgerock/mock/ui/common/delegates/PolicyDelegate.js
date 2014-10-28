@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define, _ */
+/*global define */
 
 /**
  * @author jdabrowski
@@ -30,9 +30,10 @@
  */
 
 define("org/forgerock/mock/ui/common/delegates/PolicyDelegate", [
+    "underscore",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate"
-], function (constants, AbstractDelegate) {
+], function (_, constants, AbstractDelegate) {
     var obj = new AbstractDelegate("/policy");
 
     obj.validateProperty = function (baseEntity, args, callback) {

@@ -22,122 +22,102 @@
 * "Portions Copyrighted [year] [name of copyright owner]"
 */
 
-/*global $, define, require */
+/*global define, require */
 
 /**
 * @author mbilski
 */
 define("org/forgerock/commons/ui/common/SiteConfigurator", [
-   "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
-   "org/forgerock/commons/ui/common/util/Constants", 
-   "org/forgerock/commons/ui/common/main/EventManager",
-   "org/forgerock/commons/ui/common/main/Configuration",
-   "org/forgerock/commons/ui/common/main/i18nManager"
-], function(AbstractConfigurationAware, constants, eventManager, conf, i18nManager) {
-   var obj = new AbstractConfigurationAware();
-   
-   obj.initialized = false;
-   
-   $(document).on(constants.EVENT_READ_CONFIGURATION_REQUEST, function() {
-       var configurationDelegate;
+    "jquery",
+    "underscore",
+    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
+    "org/forgerock/commons/ui/common/util/Constants", 
+    "org/forgerock/commons/ui/common/main/EventManager",
+    "org/forgerock/commons/ui/common/main/Configuration",
+    "org/forgerock/commons/ui/common/main/i18nManager"
+], function($, _, AbstractConfigurationAware, constants, eventManager, conf, i18nManager) {
+    var obj = new AbstractConfigurationAware();
+    
+    obj.initialized = false;
+    
+    $(document).on(constants.EVENT_READ_CONFIGURATION_REQUEST, function() {
+        var configurationDelegate;
 
-       if (!conf.globalData) {
-           conf.setProperty('globalData', {});
-           conf.globalData.auth = {};
-       }
+        if (!conf.globalData) {
+            conf.setProperty('globalData', {});
+            conf.globalData.auth = {};
+        }
 
-       if (!conf.delegateCache) {
-           conf.setProperty('delegateCache', {});
-       }
+        if (!conf.delegateCache) {
+            conf.setProperty('delegateCache', {});
+        }
 
-       console.info("READING CONFIGURATION");
+        console.info("READING CONFIGURATION");
 
-       if (obj.configuration && obj.initialized === false) {
-           obj.initialized = true;
-           
-           if (obj.configuration.remoteConfig === true) {
-               configurationDelegate = require(obj.configuration.delegate);
-               configurationDelegate.getConfiguration(function(config) {
-                   obj.processConfiguration(config); 
-                   eventManager.sendEvent(constants.EVENT_APP_INTIALIZED);
-               }, function() {
-                   obj.processConfiguration({}); 
-                   eventManager.sendEvent(constants.EVENT_APP_INTIALIZED);                   
-               });
-           } else {
-               obj.processConfiguration(obj.configuration); 
-               eventManager.sendEvent(constants.EVENT_APP_INTIALIZED);
-           }          
-       }
-   });
-
-   obj.processConfiguration = function(config) {
-
-       if (config.securityQuestions === true) {
-           conf.globalData.securityQuestions = true;             
-       } 
- 
-       if (config.siteImages) {
-           conf.globalData.siteImages = config.siteImages;
-       }
-       
-       if (config.passwordResetLink) {
-           conf.globalData.passwordResetLink = config.passwordResetLink;
-       }
-
-       if (config.roles) {
-           conf.globalData.userRoles = config.roles;
-       }
-       
-       if (config.notificationTypes) {
-           conf.notificationTypes = config.notificationTypes;
-       }
-       
-       if (config.defaultNotificationType) {
-           conf.defaultType = config.defaultNotificationType;
-       }
-
-       if (config.policyEditorConfig) {
-           conf.globalData.policyEditorConfig = config.policyEditorConfig;
-       }
-
-
-       conf.globalData.selfRegistration =                       config.selfRegistration;
-       conf.globalData.siteIdentification =                     config.siteIdentification;
-       conf.globalData.protectedUserAttributes =                config.protectedUserAttributes;
-       conf.globalData.requirePasswordForEmailChange =          config.requirePasswordForEmailChange;
-       conf.globalData.forgotPassword =                         config.forgotPassword;            
-       conf.globalData.successfulUserRegistrationDestination =  config.successfulUserRegistrationDestination;
-       conf.globalData.auth.cookieName =                        config.cookieName;
-       conf.globalData.auth.cookieDomains =                     config.domains;
-       conf.globalData.socialImplementations =                  config.socialImplementations;
-
-       i18nManager.init(config.lang);
-
-   };
-
-   obj.configurePage = function (route, params) {
-      var promise = $.Deferred(),
-          configurationDelegate;
-
-          if (obj.configuration.remoteConfig === true) {
+        if (obj.configuration && obj.initialized === false) {
+            obj.initialized = true;
+            
+            if (obj.configuration.remoteConfig === true) {
                 configurationDelegate = require(obj.configuration.delegate);
-                if (typeof configurationDelegate.checkForDifferences === "function") {
-                    configurationDelegate.checkForDifferences(route, params).then(function (config) {
-                        if (config) {
-                            obj.processConfiguration(config);
-                        }
-                        promise.resolve();
-                    });
-          } else {
-              promise.resolve();
-          }
-      } else {
-            promise.resolve();
-      }
+                configurationDelegate.getConfiguration(function(config) {
+                    obj.processConfiguration(config); 
+                    eventManager.sendEvent(constants.EVENT_APP_INTIALIZED);
+                }, function() {
+                    obj.processConfiguration({}); 
+                    eventManager.sendEvent(constants.EVENT_APP_INTIALIZED);
+                });
+            } else {
+                obj.processConfiguration(obj.configuration); 
+                eventManager.sendEvent(constants.EVENT_APP_INTIALIZED);
+            }
+        }
+    });
 
-      return promise;
-  };
-   
-   return obj;
+    obj.processConfiguration = function(config) {
+        // whatever settings were found will be saved in globalData
+        _.extend(conf.globalData, config);
+
+        if (config.defaultNotificationType) {
+            conf.defaultType = config.defaultNotificationType;
+        }
+
+        if (config.notificationTypes) {
+            conf.notificationTypes = config.notificationTypes;
+        }
+
+        if (config.roles) {
+            conf.globalData.userRoles = config.roles;
+        }
+
+        conf.globalData.auth.cookieName = config.cookieName;
+        conf.globalData.auth.cookieDomains = config.domains;
+
+        i18nManager.init(config.lang);
+
+    };
+
+    obj.configurePage = function (route, params) {
+       var promise = $.Deferred(),
+           configurationDelegate;
+
+           if (obj.configuration.remoteConfig === true) {
+                 configurationDelegate = require(obj.configuration.delegate);
+                 if (typeof configurationDelegate.checkForDifferences === "function") {
+                     configurationDelegate.checkForDifferences(route, params).then(function (config) {
+                         if (config) {
+                             obj.processConfiguration(config);
+                         }
+                         promise.resolve();
+                     });
+           } else {
+               promise.resolve();
+           }
+       } else {
+             promise.resolve();
+       }
+
+       return promise;
+   };
+    
+    return obj;
 });

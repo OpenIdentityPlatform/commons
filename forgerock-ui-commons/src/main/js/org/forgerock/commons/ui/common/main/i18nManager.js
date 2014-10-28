@@ -22,16 +22,17 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global require, define, _, $*/
+/*global define */
 
 /**
  * @author jkigwana
  */
 
 define( "org/forgerock/commons/ui/common/main/i18nManager", [
-        "org/forgerock/commons/ui/common/util/Constants",
-        "org/forgerock/commons/ui/common/util/UIUtils"
-], function(consts,uiUtils) {
+    "jquery",
+    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/util/UIUtils"
+], function($, consts, uiUtils) {
 
     /*
      * i18nManger with i18next try to detect the user language and load the corresponding translation in the following order:
@@ -44,7 +45,7 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
 
     obj.init = function(lang) {
 
-        var locales = [], opts = { }, params = uiUtils.convertCurrentUrlToJSON().params;    
+        var locales = [], opts = { }, params = uiUtils.convertCurrentUrlToJSON().params;
 
         if (params && params.locale) {
             lang = params.locale;

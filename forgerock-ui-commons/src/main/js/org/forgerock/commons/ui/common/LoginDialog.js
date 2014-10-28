@@ -22,9 +22,11 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, _, define*/
+/*global define*/
 
 define("org/forgerock/commons/ui/common/LoginDialog", [
+    "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/EventManager", 
@@ -32,7 +34,7 @@ define("org/forgerock/commons/ui/common/LoginDialog", [
     "org/forgerock/commons/ui/common/components/Dialog",
     "org/forgerock/commons/ui/common/main/SessionManager",
     "org/forgerock/commons/ui/common/main/ViewManager"
-], function(validatorsManager, conf, eventManager, constants, Dialog, sessionManager, viewManager) {
+], function($, _, validatorsManager, conf, eventManager, constants, Dialog, sessionManager, viewManager) {
     var LoginDialog = Dialog.extend({
         contentTemplate: "templates/common/LoginDialog.html",
         element: '#dialogs',
@@ -62,7 +64,7 @@ define("org/forgerock/commons/ui/common/LoginDialog", [
                     validatorsManager.bindValidators(this.$el);
                     
                     $(".dialog-background").off('click').on('click', _.bind(this.loginClose, this));
-                                        
+
                     if (conf.loggedUser && conf.loggedUser.userName)
                     {
                         $("input[name=login]").val(conf.loggedUser.userName).trigger("keyup");
@@ -71,7 +73,7 @@ define("org/forgerock/commons/ui/common/LoginDialog", [
                     else
                     {
                         $("input[name=login]").focus();
-                    }  
+                    }
                 }, this));
             }
         },
@@ -105,12 +107,12 @@ define("org/forgerock/commons/ui/common/LoginDialog", [
                     }
                     
                 }, function() {
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "authenticationFailed"); 
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "authenticationFailed");
                 });
             }
         },
         data : {
-            height: 200, 
+            height: 200,
             width: 400
         }
     });

@@ -22,13 +22,14 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define*/
+/*global define*/
 
 /**
  * @author mbilski
  */
 define("org/forgerock/commons/ui/common/components/popup/PopupView", [
-], function() {
+    "jquery"
+], function($) {
 
     var obj = {};
 
@@ -56,7 +57,7 @@ define("org/forgerock/commons/ui/common/components/popup/PopupView", [
     };
 
     obj.show = function() {
-        $("#popup").show();		
+        $("#popup").show();
     };
 
     obj.hide = function() {

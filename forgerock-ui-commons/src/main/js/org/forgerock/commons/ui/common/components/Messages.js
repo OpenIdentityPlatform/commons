@@ -22,17 +22,18 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Backbone, window */
+/*global define, window */
 
 /**
  * @author jkigwana
  */
 
 define("org/forgerock/commons/ui/common/components/Messages", [
+    "jquery",
     "underscore",
     "backbone",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware"
-], function(_, backbone, AbstractConfigurationAware) {
+], function($, _, Backbone, AbstractConfigurationAware) {
     var obj = new AbstractConfigurationAware(), Messages;
 
     Messages = Backbone.View.extend({
@@ -73,20 +74,20 @@ define("org/forgerock/commons/ui/common/components/Messages", [
             }
             console.info(msg.type + ":", msg.message, msg);
             _this.list.push(msg); 
-            if (_this.list.length <= 1) {               
-                _this.showMessage(msg);    
-            }    
+            if (_this.list.length <= 1) {
+                _this.showMessage(msg);
+            }
         },
     
         nextMessage: function() {   
             var _this = obj.messages;
             _this.list.shift();
-            if (_this.list.length > 0) {                
-                _this.showMessage();      
+            if (_this.list.length > 0) {
+                _this.showMessage();
             }
         },
 
-        removeAndNext: function() {  
+        removeAndNext: function() {
             var _this = obj.messages;
             window.clearTimeout(obj.messages.timer);
             _this.$el.find("div").fadeOut(300, function(){
@@ -105,11 +106,11 @@ define("org/forgerock/commons/ui/common/components/Messages", [
             });
         },
 
-        hideMessages: function() {  
+        hideMessages: function() {
             var _this = obj.messages;
-            if (_this.list.length > 1) {    
-                _this.list = [_this.list[1]];    
-            }   
+            if (_this.list.length > 1) {
+                _this.list = [_this.list[1]];
+            }
         }
 
     });

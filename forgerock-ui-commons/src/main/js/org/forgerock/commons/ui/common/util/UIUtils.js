@@ -22,16 +22,19 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define, window, Handlebars, i18n, _ , sessionStorage */
+/*global define, window, Handlebars, i18n, sessionStorage */
 /*jslint regexp: false*/
+
 define("org/forgerock/commons/ui/common/util/UIUtils", [
+    "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/util/typeextentions/String",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "handlebars",
     "i18next",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/util/DateUtil"
-], function (String, AbstractConfigurationAware, handlebars, i18next, router, dateUtil) {
+], function ($, _, String, AbstractConfigurationAware, handlebars, i18next, router, dateUtil) {
     var obj = new AbstractConfigurationAware();
 
     obj.getUrl = function() {

@@ -22,17 +22,18 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define*/
+/*global define*/
 
 /**
  * @author yaromin
  */
 define("org/forgerock/commons/ui/common/main/ServiceInvoker", [
-	"org/forgerock/commons/ui/common/util/Constants",
-	"org/forgerock/commons/ui/common/main/EventManager", 
+    "jquery",
+    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/ObjectUtil",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware"
-], function(constants, em, objUtil, AbstractConfigurationAware) {
+], function($, constants, em, objUtil, AbstractConfigurationAware) {
 
     var obj = new AbstractConfigurationAware();
 

@@ -22,16 +22,17 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Backbone, window, document */
+/*global define, window, document */
 
 /**
  * @author mbilski
  */
 
 define("org/forgerock/commons/ui/common/components/Breadcrumbs", [
+    "jquery",
     "underscore",
     "backbone"
-], function(_, Backbone) {
+], function($, _, Backbone) {
     var Breadcrumbs= Backbone.View.extend({
 
         size: 0,
