@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2014 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwt;
@@ -44,15 +44,5 @@ public enum JwtType {
      */
     public static JwtType jwtType(String jwtType) {
         return valueOf(jwtType.toUpperCase());
-    }
-
-    /**
-     * Turns the JwtType constant into a lowercase String.
-     *
-     * @return {@inheritDoc}
-     */
-    @Override
-    public String toString() {
-        return super.toString().toLowerCase();
     }
 }
