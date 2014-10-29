@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2014 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwt;
@@ -178,7 +178,7 @@ public class JwtHeaderTest {
 
         //Then
         assertThat(jsonString).contains("\"alg\": \"NONE\"", "\"KEY2\": true", "\"KEY1\": \"HEADER1\"",
-                "\"typ\": \"jwt\"");
+                "\"typ\": \"JWT\"");
     }
 
     @Test
@@ -199,7 +199,7 @@ public class JwtHeaderTest {
         //Then
         assertTrue(header.isDefined("typ"));
         assertTrue(header.get("typ").required().isString());
-        assertEquals(header.get("typ").asString(), "jwt");
+        assertEquals(header.get("typ").asString(), "JWT");
 
         assertTrue(header.get("alg").required().isString());
         assertEquals(header.get("alg").asString(), JwsAlgorithm.NONE.toString());
@@ -219,5 +219,15 @@ public class JwtHeaderTest {
         assertTrue(header.isDefined("KEY4"));
         assertTrue(header.get("KEY4").required().isNumber());
         assertEquals(header.get("KEY4").asInteger(), (Integer) 1234);
+    }
+
+    @Test
+    public void shouldReturnJwtTypeWithUpperCase() {
+        JwtHeader header = new JwsHeader();
+        for (JwtType type : JwtType.values()) {
+            header.setType(type);
+            assertThat(header.isDefined("typ")).isTrue();
+            assertThat(header.get("typ").asString()).isEqualTo(type.name().toUpperCase());
+        }
     }
 }
