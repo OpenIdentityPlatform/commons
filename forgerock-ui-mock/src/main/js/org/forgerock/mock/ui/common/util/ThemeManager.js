@@ -84,8 +84,8 @@ define("ThemeManager", [
                         "src": "images/logo.png",
                         "title": "ForgeRock",
                         "alt": "ForgeRock",
-                        "height": "80",
-                        "width": "120"
+                        "height": "80px",
+                        "width": "120px"
                     },
                     "lessVars": {
                         "background-image": "url('../images/box-bg.png')",

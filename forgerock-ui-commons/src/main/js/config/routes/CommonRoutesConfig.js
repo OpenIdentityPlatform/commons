@@ -31,9 +31,9 @@
 define("config/routes/CommonRoutesConfig", [
     "org/forgerock/commons/ui/common/util/Constants"
 ], function(constants) {
-    
+
     var obj = {
-            "404":  { //this route must be the first route
+            "404": { //this route must be the first route
                 view: "org/forgerock/commons/ui/common/NotFoundView",
                 url: /^([\w\W]*)$/,
                 pattern: "?"
@@ -43,30 +43,30 @@ define("config/routes/CommonRoutesConfig", [
                 role: "ui-user",
                 url: /^$/
             },
-            "enableCookies":  { 
+            "enableCookies": {
                 view: "org/forgerock/commons/ui/common/EnableCookiesView",
                 url: "enableCookies/"
             },
             //definitions for the following views here are generic
             //the actual path to each view is defined in config/AppConfiguration.js
             //view files are loaded when the GenericRouteInterfaceMap module is initialized
-            "login" : {
+            "login": {
                 view: "LoginView",
                 url: /login([^\&]+)?(&.+)?/, 
                 pattern: "login??",
                 defaults: ["/",""],
                 forceUpdate: true,
                 argumentNames: ["realm","additionalParameters"]
-            },            
-            "logout" : {
+            },
+            "logout": {
                 event: constants.EVENT_LOGOUT,
                 url: /logout\/.*/
             },
-            "loginDialog" : {
+            "loginDialog": {
                 dialog: "LoginDialog",
                 url: "loginDialog/"
             }
-    };
-    
+        };
+
     return obj;
 });

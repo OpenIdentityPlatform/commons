@@ -58,7 +58,10 @@ define("org/forgerock/commons/ui/common/LoginView", [
         },
         
         render: function(args, callback) {
-            this.data.hasOptionalUIFeatures = conf.globalData.selfRegistration || conf.globalData.securityQuestions || conf.globalData.siteIdentification || conf.globalData.passwordResetLink;
+            this.data.hasOptionalUIFeatures =   !!conf.globalData.selfRegistration ||
+                                                !!conf.globalData.securityQuestions ||
+                                                !!conf.globalData.siteIdentification ||
+                                                !!conf.globalData.passwordResetLink;
 
             this.parentRender(function() {
                 validatorsManager.bindValidators(this.$el);

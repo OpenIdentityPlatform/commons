@@ -84,7 +84,7 @@ define("config/process/CommonConfig", [
             ],
             processDescription: function(event, navigation, popupCtrl, breadcrumbs, conf, loggedUserBarView,footer) {
                 navigation.init();
-                popupCtrl.init();                
+                popupCtrl.init();
                 
                 breadcrumbs.buildByUrl();
                 loggedUserBarView.render();
@@ -169,13 +169,15 @@ define("config/process/CommonConfig", [
             dependencies: [
                 "org/forgerock/commons/ui/common/main/Router",
                 "org/forgerock/commons/ui/common/main/Configuration",
-                "org/forgerock/commons/ui/common/main/ViewManager"
+                "org/forgerock/commons/ui/common/main/ViewManager",
+                "org/forgerock/commons/ui/common/components/Navigation"
             ],
-            processDescription: function(event, router, conf, viewManager) {
+            processDescription: function(event, router, conf, viewManager, navigation) {
                 if(conf.baseView) {
                     require(router.configuration.routes[conf.baseView].view).rebind();
                     viewManager.currentDialog = "null";
                     router.navigate(router.getLink(router.configuration.routes[conf.baseView], conf.baseViewArgs));
+                    navigation.reload();
                 }
             }
         },
