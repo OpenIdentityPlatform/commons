@@ -148,14 +148,14 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         }
     };
 
-    obj.buildRestResponseBasedJQGrid = function (view, id, options, additional, callback) {
+    obj.buildJQGrid = function (view, id, options, additional, callback) {
         options = options ? options : {};
 
         if (!id || !view || !options.url) {
             return null;
         }
 
-        var grid = view.$el.find(id),
+        var grid = view.$el.find('#' + id),
             cm = options.colModel,
             columnStateName = additional.storageKey,
             saveColumnState = function (perm) {
@@ -282,7 +282,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                     return $.param(postedData);
                 },
                 loadComplete: function (data) {
-                    _.extend(view.data, data);
+                    _.extend(view.data[id], data);
                 },
                 pager: null,
                 rowNum: 10,
@@ -326,10 +326,11 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         });
 
         grid.on('jqGridAfterLoadComplete.setFrozenColumns', function () {
-            view.$el.find(id + '_frozen').find('tr').each(function () {
+            var table = view.$el.find('#' + id), row, height;
+            view.$el.find('#' + id + '_frozen').find('tr').each(function () {
                 if ($.jgrid.jqID(this.id)) {
-                    var row = $("#" + $.jgrid.jqID(this.id)),
-                        height = row.outerHeight();
+                    row = table.find("#" + $.jgrid.jqID(this.id));
+                    height = row.outerHeight();
                     $(this).find('td').height(height);
                     row.find('td').height(height);
                 }
