@@ -521,6 +521,51 @@
                         </lifecycleMappingMetadata>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <!-- Check Open Source licenses for all the dependencies -->
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>license-maven-plugin</artifactId>
+                    <version>1.7</version>
+                    <configuration>
+                        <useMissingFile>true</useMissingFile>
+                        <fileTemplate>/org/codehaus/mojo/license/third-party-file-groupByLicense.ftl</fileTemplate>
+                        <failIfWarning>true</failIfWarning>
+                        <excludedScopes>test</excludedScopes>
+                        <licenseMerges>
+                            <licenseMerge>Apache License, Version 2.0|
+                                The Apache Software License, Version 2.0|
+                                Apache v2|Apache 2|ASL, version 2|
+                                Apache 2.0|
+                                Apache License|
+                                Apache-2.0|
+                                ALv2|
+                                Apache 2.0 license|
+                                Apache 2.0 License|
+                                Apache License Version 2.0|
+                                Apache Software License - Version 2.0|
+                                Apache License 2.0</licenseMerge>
+                            <licenseMerge>Common Development and Distribution License 1.0|
+                                CDDL 1.0|
+                                COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0|
+                                CDDL|
+                                CDDL-1.0|
+                                CDDL 1.0 license|
+                                CDDL License, Version 1.0|
+                                Common Development and Distribution License (CDDL) v1.0</licenseMerge>
+                            <licenseMerge>The MIT License|
+                                MIT License|
+                                MIT</licenseMerge>
+                            <licenseMerge>The GNU Lesser General Public License, version 2.1|
+                                LGPL 2.1 license|
+                                LGPL, version 2.1|
+                                GNU Lesser General Public License, Version 2.1</licenseMerge>
+                            <licenseMerge>The GNU Lesser General Public License, version 3.0|
+                                LGPL 3.0 license|
+                                LGPL, version 3.0|
+                                GNU Lesser General Public License, Version 3.0</licenseMerge>
+                        </licenseMerges>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
@@ -620,6 +665,20 @@
                                 <phase>process-test-classes</phase>
                                 <goals>
                                     <goal>checkstyle</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <!-- Check Open Source licenses for all the dependencies -->
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>license-maven-plugin</artifactId>
+                        <version>1.7</version>
+                        <executions>
+                            <execution>
+                                <id>generate-oss-license-report</id>
+                                <goals>
+                                    <goal>add-third-party</goal>
                                 </goals>
                             </execution>
                         </executions>
