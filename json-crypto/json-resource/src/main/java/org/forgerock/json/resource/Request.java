@@ -183,6 +183,7 @@ public interface Request {
      * @param name
      *            The non-{@code null} name of the JSON resource to which this
      *            request should be targeted, which may be the empty string.
+     *            The name should be URL-encoded.
      * @return This request.
      * @throws UnsupportedOperationException
      *             If this request does not permit changes to the JSON resource
