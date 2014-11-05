@@ -528,12 +528,12 @@ public final class HttpServletAdapter {
         sync.awaitIfNeeded(); // Only blocks when async is not supported.
     }
 
-    /*
-     * Removes leading and trailing forward slashes.
+    /**
+     * Gets the raw (still url-encoded) resource name from the request. Removes leading and trailing forward slashes.
      */
     private String getResourceName(final HttpServletRequest req) {
+        String resourceName = HttpUtils.getRawPathInfo(req);
         // Treat null path info as root resource.
-        String resourceName = req.getPathInfo();
         if (resourceName == null) {
             return EMPTY_STRING;
         }

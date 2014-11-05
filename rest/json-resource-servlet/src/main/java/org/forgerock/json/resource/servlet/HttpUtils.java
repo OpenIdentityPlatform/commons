@@ -136,6 +136,34 @@ public final class HttpUtils {
     private static final int EOF = -1;
 
     /**
+     * Returns the same information as {@link javax.servlet.http.HttpServletRequest#getPathInfo()} but does not
+     * URL-decode the path information.
+     *
+     * @param request the http request.
+     * @return the raw extra path information from the request, still url-encoded.
+     */
+    static String getRawPathInfo(final HttpServletRequest request) {
+        final String context = nullToEmpty(request.getContextPath()) + nullToEmpty(request.getServletPath());
+        final String requestUri = request.getRequestURI();
+        if (requestUri == null) {
+            return null;
+        }
+
+        String result = requestUri;
+        final int idx = requestUri.indexOf(context);
+        if (idx >= 0) {
+            result = requestUri.substring(idx + context.length());
+        }
+
+        return result;
+    }
+
+    /** Converts null strings to empty strings. */
+    private static String nullToEmpty(final String value) {
+        return value == null ? "" : value;
+    }
+
+    /**
      * Adapts an {@code Exception} to a {@code ResourceException}.
      *
      * @param t
