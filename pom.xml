@@ -532,7 +532,7 @@
                         <failIfWarning>true</failIfWarning>
                         <excludedScopes>test</excludedScopes>
                         <licenseMerges>
-                            <licenseMerge>Apache License, Version 2.0|
+                            <licenseMerge>Apache Software License, Version 2.0|
                                 The Apache Software License, Version 2.0|
                                 Apache v2|Apache 2|ASL, version 2|
                                 Apache 2.0|
@@ -542,6 +542,7 @@
                                 Apache 2.0 license|
                                 Apache 2.0 License|
                                 Apache License Version 2.0|
+                                Apache License, Version 2.0|
                                 Apache Software License - Version 2.0|
                                 Apache License 2.0</licenseMerge>
                             <licenseMerge>Common Development and Distribution License 1.0|
