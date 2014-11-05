@@ -20,6 +20,7 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceName;
 import org.forgerock.util.encode.Base64url;
 import org.mockito.ArgumentCaptor;
 import org.testng.annotations.BeforeClass;
@@ -374,5 +375,50 @@ public class HttpUtilsTest {
         assertThat(captor.getValue().equalsIgnoreCase(HttpUtils.CHARACTER_ENCODING));
         assertThat(captor.getValue().equalsIgnoreCase(HttpUtils.HEADER_CACHE_CONTROL));
         assertThat(captor.getValue().equalsIgnoreCase(HttpUtils.CACHE_CONTROL));
+    }
+
+    @Test
+    public void testGetRawPathInfoShouldReturnNullWhenRequestUriIsNull() {
+        assertThat(testGetRawPathInfo(null, null, null)).isNull();
+    }
+
+    @Test
+    public void testGetRawPathInfoShouldStripContextAndServletPath() {
+        // Given
+        final String contextPath = "/openam";
+        final String servletPath = "/json";
+        final String resourcePath = "/bar";
+
+        // When
+        final String result = testGetRawPathInfo(contextPath, servletPath, resourcePath);
+
+        // Then
+        assertThat(result).isEqualTo(resourcePath);
+    }
+
+    @Test
+    public void testGetRawPathInfoShouldNotDecodePath() {
+        // Given
+        final String contextPath = "/openam";
+        final String servletPath = "/json";
+        final String resourcePath = "applications/%21%40%23%24%25";
+
+        // When
+        final String result = testGetRawPathInfo(contextPath, servletPath, resourcePath);
+
+        // Then
+        assertThat(result).isEqualTo(resourcePath);
+        assertThat(ResourceName.valueOf(result).toString()).isEqualTo(resourcePath);
+    }
+
+    private String testGetRawPathInfo(final String context, final String servlet, final String resource) {
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        when(request.getServletPath()).thenReturn(servlet);
+        when(request.getContextPath()).thenReturn(context);
+        // As per section 3.5 of the servlet 3.0 spec, requestURI = contextPath + servletPath + pathInfo (excluding
+        // encoding differences)
+        when(request.getRequestURI()).thenReturn(resource == null ? null : context + servlet + resource);
+
+        return HttpUtils.getRawPathInfo(request);
     }
 }
