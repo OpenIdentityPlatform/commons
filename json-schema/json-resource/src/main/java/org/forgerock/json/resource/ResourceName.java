@@ -199,7 +199,7 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
      * Parses the provided string representation of a resource name.
      *
      * @param path
-     *            The resource name to be parsed.
+     *            The URL-encoded resource name to be parsed.
      * @return The provided string representation of a resource name.
      * @throws IllegalArgumentException
      *             If the resource name contains empty path elements.

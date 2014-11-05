@@ -714,7 +714,7 @@ public final class Requests {
      * Except that the resource ID is already URL encoded in the first form.
      *
      * @param resourceName
-     *            The resource name.
+     *            The URL-encoded resource name.
      * @param actionId
      *            The action ID.
      * @return The new action request.
@@ -740,7 +740,7 @@ public final class Requests {
      * Except that the resource ID is already URL encoded in the second form.
      *
      * @param resourceContainer
-     *            The name of the resource container.
+     *            The URL-encoded name of the resource container.
      * @param resourceId
      *            The URL decoded ID of the resource.
      * @param actionId
@@ -771,7 +771,7 @@ public final class Requests {
      * Except that the resource ID is already URL encoded in the first form.
      *
      * @param resourceContainer
-     *            The name of the resource container beneath which the new
+     *            The URL-encoded name of the resource container beneath which the new
      *            resource should be created.
      * @param content
      *            The JSON content.
@@ -799,7 +799,7 @@ public final class Requests {
      * Except that the resource ID is already URL encoded in the second form.
      *
      * @param resourceContainer
-     *            The name of the resource container beneath which the new
+     *            The URL-encoded name of the resource container beneath which the new
      *            resource should be created.
      * @param newResourceId
      *            The URL decoded client provided ID of the resource to be
@@ -831,7 +831,7 @@ public final class Requests {
      * Except that the resource ID is already URL encoded in the first form.
      *
      * @param resourceName
-     *            The resource name.
+     *            The URL-encoded resource name.
      * @return The new delete request.
      */
     public static DeleteRequest newDeleteRequest(final String resourceName) {
@@ -855,7 +855,7 @@ public final class Requests {
      * Except that the resource ID is already URL encoded in the second form.
      *
      * @param resourceContainer
-     *            The name of the resource container.
+     *            The URL-encoded name of the resource container.
      * @param resourceId
      *            The URL decoded ID of the resource.
      * @return The new delete request.
@@ -882,7 +882,7 @@ public final class Requests {
      * Except that the resource ID is already URL encoded in the first form.
      *
      * @param resourceName
-     *            The resource name.
+     *            The URL-encoded resource name.
      * @param operations
      *            The JSON patch operations.
      * @return The new patch request.
@@ -909,7 +909,7 @@ public final class Requests {
      * Except that the resource ID is already URL encoded in the second form.
      *
      * @param resourceContainer
-     *            The name of the resource container.
+     *            The URL-encoded name of the resource container.
      * @param resourceId
      *            The URL decoded ID of the resource.
      * @param operations
@@ -930,7 +930,7 @@ public final class Requests {
      * </pre>
      *
      * @param resourceContainer
-     *            The name of the resource container.
+     *            The URL-encoded name of the resource container.
      * @return The new query request.
      */
     public static QueryRequest newQueryRequest(final String resourceContainer) {
@@ -954,7 +954,7 @@ public final class Requests {
      * Except that the resource ID is already URL encoded in the first form.
      *
      * @param resourceName
-     *            The resource name.
+     *            The URL-encoded resource name.
      * @return The new read request.
      */
     public static ReadRequest newReadRequest(final String resourceName) {
@@ -978,7 +978,7 @@ public final class Requests {
      * Except that the resource ID is already URL encoded in the second form.
      *
      * @param resourceContainer
-     *            The name of the resource container.
+     *            The URL-encoded name of the resource container.
      * @param resourceId
      *            The URL decoded ID of the resource.
      * @return The new read request.
@@ -1004,7 +1004,7 @@ public final class Requests {
      * Except that the resource ID is already URL encoded in the first form.
      *
      * @param resourceName
-     *            The resource name.
+     *            The URL-encoded resource name.
      * @param newContent
      *            The new JSON content.
      * @return The new update request.
@@ -1031,7 +1031,7 @@ public final class Requests {
      * Except that the resource ID is already URL encoded in the second form.
      *
      * @param resourceContainer
-     *            The name of the resource container.
+     *            The URL-encoded name of the resource container.
      * @param resourceId
      *            The URL decoded ID of the resource.
      * @param newContent
