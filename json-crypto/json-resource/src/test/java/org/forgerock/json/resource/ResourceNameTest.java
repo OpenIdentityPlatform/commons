@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2014 ForgeRock AS.
  */
 package org.forgerock.json.resource;
 
@@ -45,7 +45,7 @@ public final class ResourceNameTest {
     }
 
     @Test(dataProvider = "invalidStrings", expectedExceptions = IllegalArgumentException.class)
-    public void testValueOfInvalidString(final String value) {
+    public void valueOfShouldRejectEmptyPathElements(final String value) {
         ResourceName.valueOf(value);
     }
 
@@ -53,10 +53,13 @@ public final class ResourceNameTest {
     public Object[][] valueOfStrings() {
         // @formatter:off
         return new Object[][] {
+            // URL encoded path | normalized path | URL decoded path elements.
+
             // Test empty resource name and normalization.
             { "", "", e() },
             { "/", "", e() },
-            // Test non-empty resource names and normalization.
+
+            // Test non-empty resource names and slash trimming.
             { "users", "users", e("users") },
             { "/users", "users", e("users") },
             { "users/", "users", e("users") },
@@ -65,10 +68,32 @@ public final class ResourceNameTest {
             { "/users/1", "users/1", e("users", "1") },
             { "users/1/", "users/1", e("users", "1") },
             { "/users/1/", "users/1", e("users", "1") },
-            // Test decoding.
+
+            // Safe characters which do not need percent encoding according to RFC 3986.
+            { "abcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwxyz", e("abcdefghijklmnopqrstuvwxyz") },
+            { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz", e("ABCDEFGHIJKLMNOPQRSTUVWXYZ") },
+            { "01234567890", "01234567890", e("01234567890") },
+            { "-._~!$&'()*+,;=:@", "-._~!$&'()*+,;=:@", e("-._~!$&'()*+,;=:@") },
+
+            // A selection of unsafe characters which do need percent encoding according to RFC 3986.
+            { "%00%1F%20%22%23%25%2F%3C%3E%3F%5B%5C%5D%5E%60%7B%7C%7D%7F%C2%80%C3%BF",
+              "%00%1F%20%22%23%25%2F%3C%3E%3F%5B%5C%5D%5E%60%7B%7C%7D%7F%C2%80%C3%BF",
+              e("\u0000\u001f \"#%/<>?[\\]^`{|}\u007f\u0080\u00ff") },
+
+            // Percent encoded safe characters should be normalized to their safe equivalent.
+            { "%21%24%30%3A%41%5A%5F%61%7A", "!$0:az_az", e("!$0:AZ_az") },
+
+            // Unsafe characters which have not been percent encoded should be normalized to their
+            // percent encoded form. Note the inclusion of a Unicode surrogate pair at the end.
+            { "\u0000\u001f \"#<>?[\\]^`{|}\u007f\u0080\u00ff\ud800\udc00",
+              "%00%1F%20%22%23%3C%3E%3F%5B%5C%5D%5E%60%7B%7C%7D%7F%C2%80%C3%BF%F0%90%80%80",
+              e("\u0000\u001f \"#<>?[\\]^`{|}\u007f\u0080\u00ff\ud800\udc00") },
+
+            // Some more realistic examples.
             { "foo%30%41%42%43/test/", "foo0abc/test", e("foo0ABC", "test") },
-            { "hello+world/test/user", "hello+world/test/user", e("hello world", "test", "user") },
-            { "hello+world/test%2Fuser", "hello+world/test%2Fuser", e("hello world", "test/user") },
+            { "hello+world/test/user", "hello+world/test/user", e("hello+world", "test", "user") },
+            { "hello+world/test%2Fuser", "hello+world/test%2Fuser", e("hello+world", "test/user") },
+            { "test/hello%20world/user", "test/hello%20world/user", e("test", "hello world", "user") },
         };
         // @formatter:on
     }
@@ -141,7 +166,7 @@ public final class ResourceNameTest {
             { "users", 123, "users/123" },
             { "users", "BJENSEN", "users/BJENSEN" },
             { "users", "bjensen", "users/bjensen" },
-            { "users", "hello /world",  "users/hello+%2Fworld"},
+            { "users", "hello /+world",  "users/hello%20%2F+world"},
         };
         // @formatter:on
     }
@@ -181,7 +206,9 @@ public final class ResourceNameTest {
             { "users/1", "users/2", -1 },
             { "users/2", "users/1", 1 },
             { "Users/%30", "users/0", 0 },
-            { "Users/this+that", "users/this%20That", 0 }
+            { "Users/this th%41t", "users/this%20That", 0 },
+            { "Users/this+that", "users/this That", 1 },
+            { "Users/this+that", "users/this+That", 0 }
         };
         // @formatter:on
     }
@@ -257,6 +284,47 @@ public final class ResourceNameTest {
         final Iterator<String> i = ResourceName.valueOf("hello/world").iterator();
         assertThat(i.next()).isEqualTo("hello");
         i.remove();
+    }
+
+    @DataProvider
+    private Object[][] validHexOctets() {
+        // @formatter:off
+        return new Object[][] {
+            { "", "" },
+            { "123", "123" },
+            { "%31", "1" },
+            { "%31%32", "12" },
+            { "%31%32%33", "123" },
+            { "%31%32%33aa", "123aa" },
+            { "aa%31%32%33aa", "aa123aa" },
+            { "surrogate pair %f0%90%80%80", "surrogate pair \ud800\udc00" },
+        };
+        // @formatter:on
+    }
+
+    @Test(dataProvider = "validHexOctets")
+    public void testUrlDecode(String s, String expected) {
+        assertThat(ResourceName.urlDecode(s)).isEqualTo(expected);
+    }
+
+    @DataProvider
+    private Object[][] invalidHexOctets() {
+        // @formatter:off
+        return new Object[][] {
+            { "%0" },
+            { "%-1" },
+            { "%pp" },
+            { "%ap" },
+            { "%-10" },
+            { "%ff%" },
+            { "%ff%f" },
+        };
+        // @formatter:on
+    }
+
+    @Test(dataProvider = "invalidHexOctets", expectedExceptions = IllegalArgumentException.class)
+    public void testUrlDecodeForInvalidData(String s) {
+        ResourceName.urlDecode(s);
     }
 
     @DataProvider
