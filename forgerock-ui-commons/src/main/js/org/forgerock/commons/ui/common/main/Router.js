@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -38,6 +38,25 @@ define("org/forgerock/commons/ui/common/main/Router", [
     obj.bindedRoutes = {};
     obj.currentRoute = {};
     
+    obj.checkRole = function (route) {
+        if(route.role) {
+            if(!conf.loggedUser || !_.find(route.role.split(','), function(role) {
+                return conf.loggedUser.roles.indexOf(role) !== -1;
+            })) {
+                eventManager.sendEvent(constants.EVENT_UNAUTHORIZED);
+                return false;
+            }
+        }
+
+        if(route.excludedRole) {
+            if(conf.loggedUser && conf.loggedUser.roles.indexOf(route.excludedRole) !== -1) {
+                eventManager.sendEvent(constants.EVENT_UNAUTHORIZED);
+                return false;
+            }
+        }
+        return true;
+    };
+
     obj.init = function() {
         console.debug("Router init");
         
@@ -45,7 +64,7 @@ define("org/forgerock/commons/ui/common/main/Router", [
             initialize: function(routes) {
                 var route, url;
                 
-                for(route in routes) {                     
+                for(route in routes) {
                     url = routes[route].url;
                     this.route(url, route, _.bind(this.processRoute, {key: route}));
                     obj.bindedRoutes[route] = _.bind(this.processRoute, {key: route});
@@ -56,23 +75,11 @@ define("org/forgerock/commons/ui/common/main/Router", [
                 var route = obj.configuration.routes[this.key], baseView, i, args;
                 
                 args = _.toArray(arguments);
-                
-                if(route.excludedRole) {
-                    if(conf.loggedUser && conf.loggedUser.roles.indexOf(route.excludedRole) !== -1) {
-                        eventManager.sendEvent(constants.EVENT_UNAUTHORIZED);
-                        return;
-                    }
-                }                
-                
-                if(route.role) {
-                    if(!conf.loggedUser || !_.find(route.role.split(','), function(role) {
-                        return conf.loggedUser.roles.indexOf(role) !== -1;
-                    })) {
-                        eventManager.sendEvent(constants.EVENT_UNAUTHORIZED);
-                        return;
-                    }
+
+                if (!obj.checkRole(route)) {
+                    return;
                 }
-                
+
                 if(route.event) {
                     eventManager.sendEvent(route.event, args);
                 } else if(route.dialog) {
@@ -83,7 +90,7 @@ define("org/forgerock/commons/ui/common/main/Router", [
                     eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: route, args: args});
                 }
             }
-        });        
+        });
         
         obj.router = new Router(obj.configuration.routes);
         Backbone.history.start();

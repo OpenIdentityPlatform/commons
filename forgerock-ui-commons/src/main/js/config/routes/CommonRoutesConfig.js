@@ -41,7 +41,8 @@ define("config/routes/CommonRoutesConfig", [
             "default": {
                 event: constants.EVENT_HANDLE_DEFAULT_ROUTE,
                 role: "ui-user",
-                url: /^$/
+                url: /^$/,
+                pattern: ""
             },
             "enableCookies": {
                 view: "org/forgerock/commons/ui/common/EnableCookiesView",

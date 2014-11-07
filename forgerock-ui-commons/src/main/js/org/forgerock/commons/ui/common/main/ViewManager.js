@@ -43,7 +43,7 @@ define("org/forgerock/commons/ui/common/main/ViewManager", [
      * Initializes view if it is not equal to current view.
      * Changes URL without triggering event.
      */
-    obj.changeView = function(viewPath, args, callback, forceUpdate) {        
+    obj.changeView = function(viewPath, args, callback, forceUpdate) {
         var view;
         
         
@@ -87,7 +87,7 @@ define("org/forgerock/commons/ui/common/main/ViewManager", [
         if(obj.currentDialog !== "null") {
             require(obj.currentDialog).close();
         }
-                
+
         obj.currentDialog = dialogPath;
         obj.currentDialogArgs = args;
     };
@@ -103,5 +103,5 @@ define("org/forgerock/commons/ui/common/main/ViewManager", [
 
     return obj;
 
-});    
+});
 

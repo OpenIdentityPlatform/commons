@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -45,31 +45,31 @@ define("config/process/CommonConfig", [
                 "org/forgerock/commons/ui/common/util/CookieHelper",
                 "org/forgerock/commons/ui/common/main/SessionManager"
             ],
-            processDescription: function(event, 
-                    navigation, 
-                    popupCtrl, 
-                    breadcrumbs, 
+            processDescription: function(event,
+                    navigation,
+                    popupCtrl,
+                    breadcrumbs,
                     router,
                     conf,
                     uiUtils,
                     cookieHelper,
                     sessionManager) {
-                              
+
                 breadcrumbs.init();
                 uiUtils.preloadTemplates();
-                
+
                 sessionManager.getLoggedUser(function(user) {
                     conf.setProperty('loggedUser', user);
                     eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: false});
                     router.init();
                 }, function() {
-                    if(!cookieHelper.cookiesEnabled()){
+                    if (!cookieHelper.cookiesEnabled()) {
                         location.href = "#enableCookies/";
                     }
                     eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: true});
                     router.init();
                 });
-            }    
+            }
         },
         {
             startEvent: constants.EVENT_CHANGE_BASE_VIEW,
@@ -130,9 +130,16 @@ define("config/process/CommonConfig", [
                 "org/forgerock/commons/ui/common/main/Router",
                 "org/forgerock/commons/ui/common/main/Configuration",
                 "org/forgerock/commons/ui/common/main/SessionManager",
+                "org/forgerock/commons/ui/common/util/UIUtils",
                 "LoginDialog"
             ],
-            processDescription: function(error, viewManager, router, conf, sessionManager, loginDialog) {
+            processDescription: function(error, viewManager, router, conf, sessionManager, uiUtils, loginDialog) {
+                var saveGotoURL = function () {
+                    var hash = uiUtils.getCurrentHash();
+                    if(!conf.gotoURL && !hash.match(router.configuration.routes.login.url)) {
+                        conf.setProperty("gotoURL", "#" + hash);
+                    }
+                };
 
                 // multiple rest calls that all return authz failures will cause this event to be called multiple times
                 if (conf.globalData.authorizationFailurePending !== undefined) {
@@ -142,16 +149,14 @@ define("config/process/CommonConfig", [
                 conf.globalData.authorizationFailurePending = true;
 
                 if(!conf.loggedUser) {
-                    if(!conf.gotoURL && !window.location.hash.replace(/^#/, '').match(router.configuration.routes.login.url)) {
-                        conf.setProperty("gotoURL", window.location.hash);
-                    }
+                    saveGotoURL();
                     eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: true});
                     eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
                     return;
                 }
 
-                if (error.error.type === "GET") {
-                    conf.setProperty("gotoURL", window.location.hash); 
+                if (typeof error !== "object" || error === null || typeof error.error !== "object" || error.error === null || error.error.type === "GET") {
+                    saveGotoURL();
                     sessionManager.logout(function() {
                         eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: true});
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unauthorized");
@@ -230,11 +235,16 @@ define("config/process/CommonConfig", [
                 var route = args.route, params = args.args, callback = args.callback,
                     view = require(route.view);
 
+                if (!router.checkRole(route)) {
+                    return;
+                }
+
                 view.route = route;
+
                 params = params || route.defaults;
-                conf.setProperty("baseView", ""); 
-                conf.setProperty("baseViewArgs", ""); 
-                                        
+                conf.setProperty("baseView", "");
+                conf.setProperty("baseViewArgs", "");
+
                 siteConfigurator.configurePage(route, params).then(function () {
                     spinner.hideSpinner(10);
                     router.routeTo(route, {trigger: true, args: params});
@@ -254,7 +264,11 @@ define("config/process/CommonConfig", [
             ],
             processDescription: function(args, viewManager, router, conf, navigation) {
                 var route = args.route, params = args.args, callback = args.callback;
-                
+
+                if (!router.checkRole(route)) {
+                    return;
+                }
+
                 conf.setProperty("baseView", args.base); 
                 conf.setProperty("baseViewArgs", params); 
                 
@@ -324,8 +338,7 @@ define("config/process/CommonConfig", [
                     
                     eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: false});
                     
-                    if (! conf.backgroundLogin)
-                    {
+                    if (! conf.backgroundLogin) {
                         if(conf.globalData.auth.urlParams && conf.globalData.auth.urlParams.goto){
                             window.location.href = conf.globalData.auth.urlParams.goto;
                             return false;
@@ -335,12 +348,17 @@ define("config/process/CommonConfig", [
                             router.navigate(conf.gotoURL, {trigger: true});
                             delete conf.gotoURL;
                         } else {
-                            router.navigate("", {trigger: true});
+                            if (router.checkRole(router.configuration.routes["default"])) {
+                                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "default", args: []});
+                            } else {
+                                eventManager.sendEvent(constants.EVENT_UNAUTHORIZED);
+                                return;
+                            }
                         }
                     } else if (viewManager.currentDialog !== "null") {
                         require(viewManager.currentDialog).close();
                     }
-                    
+
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "loggedIn");
                 }, function() {
                     if(conf.globalData.auth.urlParams && conf.globalData.auth.urlParams.gotoOnFail){
