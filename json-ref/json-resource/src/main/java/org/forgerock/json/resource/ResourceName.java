@@ -11,31 +11,48 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013-2014 ForgeRock AS.
  */
 package org.forgerock.json.resource;
 
 import static java.util.Arrays.asList;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.BitSet;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.NoSuchElementException;
+import java.util.regex.Pattern;
 
 /**
  * A relative path, or URL, to a resource. A resource name is an ordered list of
  * zero or more path elements in big-endian order. The string representation of
- * a resource name conforms to the URL encoding rules defined in RFC 2396.
- * Specifically, all path elements will be encoded according to the rules
- * described in the {@link URLEncoder} documentation.
- * <p>
+ * a resource name conforms to the URL path encoding rules defined in <a
+ * href="http://tools.ietf.org/html/rfc3986#section-3.3">RFC 3986 section
+ * 3.3</a>:
+ *
+ * <pre>
+ * path          = path-abempty    ; begins with "/" or is empty
+ *                 / ...
+ *
+ * path-abempty  = *( "/" segment )
+ * segment       = *pchar
+ * pchar         = unreserved / pct-encoded / sub-delims / ":" / "@"
+ *
+ * unreserved    = ALPHA / DIGIT / "-" / "." / "_" / "~"
+ * pct-encoded   = "%" HEXDIG HEXDIG
+ * sub-delims    = "!" / "$" / "&" / "'" / "(" / ")"
+ *                 / "*" / "+" / "," / ";" / "="
+ *
+ * HEXDIG        =  DIGIT / "A" / "B" / "C" / "D" / "E" / "F"
+ * ALPHA         =  %x41-5A / %x61-7A   ; A-Z / a-z
+ * DIGIT         =  %x30-39             ; 0-9
+ * </pre>
+ *
  * The empty resource name having zero path elements may be obtained by calling
  * {@link #empty()}. Resource names are case insensitive and empty path elements
- * are not allowed. In addition, resource names will be automatically normalized
+ * are not allowed. In addition, resource names will be automatically trimmed
  * such that any leading or trailing slashes are removed. In other words, all
  * resource names will be considered to be "relative". At the moment the
  * relative path elements "." and ".." are not supported.
@@ -49,7 +66,7 @@ import java.util.NoSuchElementException;
  * <pre>
  * ResourceName base = ResourceName.valueOf(&quot;commons/rest&quot;);
  * ResourceName child = base.child(&quot;hello world&quot;);
- * child.toString(); // commons/rest/hello+world
+ * child.toString(); // commons/rest/hello%20world
  *
  * ResourceName user = base.child(&quot;users&quot;).child(123);
  * user.toString(); // commons/rest/users/123
@@ -59,19 +76,22 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
     private static final ResourceName EMPTY = new ResourceName();
 
     /**
+     * Non-safe characters are escaped as UTF-8 octets using "%" HEXDIG HEXDIG
+     * production.
+     */
+    private static final char URL_ESCAPE_CHAR = '%';
+
+    /**
      * Look up table for characters which do not need URL encoding.
      */
     private static final BitSet SAFE_URL_CHARS = new BitSet(128);
     static {
         /*
-         * These characters do not need encoding. A space character only needs
-         * converting to '+' but since it mutates the string, we'll exclude it
-         * from the list below.
+         * These characters do not need encoding.
          */
-        SAFE_URL_CHARS.set('-');
-        SAFE_URL_CHARS.set('_');
-        SAFE_URL_CHARS.set('.');
-        SAFE_URL_CHARS.set('*');
+        for (char c : "-._~!$&'()*+,;=:@".toCharArray()) {
+            SAFE_URL_CHARS.set(c);
+        }
 
         /*
          * ASCII alphanumeric characters are ok as well.
@@ -79,20 +99,6 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
         SAFE_URL_CHARS.set('0', '9' + 1);
         SAFE_URL_CHARS.set('a', 'z' + 1);
         SAFE_URL_CHARS.set('A', 'Z' + 1);
-    }
-
-    /**
-     * Look up table for characters which do not need normalizing - same as
-     * SAFE_URL_CHARS except for upper-case ASCII letters.
-     */
-    private static final BitSet NORMALIZED_URL_CHARS = new BitSet(128);
-    static {
-        NORMALIZED_URL_CHARS.set('-');
-        NORMALIZED_URL_CHARS.set('_');
-        NORMALIZED_URL_CHARS.set('.');
-        NORMALIZED_URL_CHARS.set('*');
-        NORMALIZED_URL_CHARS.set('0', '9' + 1);
-        NORMALIZED_URL_CHARS.set('a', 'z' + 1);
     }
 
     /**
@@ -140,60 +146,121 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
     }
 
     /**
-     * Returns the URL decoding of the provided object's string representation.
+     * Returns the URL path decoding of the provided object's string
+     * representation.
      *
      * @param value
-     *            The value to be URL decoded.
-     * @return The URL decoding of the provided object's string representation.
+     *            The value to be URL path decoded.
+     * @return The URL path decoding of the provided object's string
+     *         representation.
      */
     public static String urlDecode(final Object value) {
-        /*
-         * Before delegating to the costly URLDecoder class, first try fast-path
-         * decode of simple ASCII.
-         */
+        // First try fast-path decode of simple ASCII.
         final String s = value.toString();
         final int size = s.length();
         for (int i = 0; i < size; i++) {
             if (isUrlEscapeChar(s.charAt(i))) {
-                try {
-                    return URLDecoder.decode(s, "UTF-8");
-                } catch (final UnsupportedEncodingException e) {
-                    // UTF-8 should always be supported.
-                    throw new RuntimeException(e);
-                }
+                // Slow path.
+                return urlDecode0(s);
             }
         }
         return s;
     }
 
     /**
-     * Returns the URL encoding of the provided object's string representation.
+     * The UTF-8 character set which will be used for percent encoding.
+     */
+    private static final Charset UTF8 = Charset.forName("UTF-8");
+
+    private static String urlDecode0(String s) {
+        final StringBuilder builder = new StringBuilder(s.length());
+        final int size = s.length();
+        final byte[] buffer = new byte[size / 3];
+        for (int i = 0; i < size;) {
+            final char c = s.charAt(i);
+            if (!isUrlEscapeChar(c)) {
+                builder.append(c);
+                i++;
+            } else {
+                int bufferPos = 0;
+                for (; i < size && isUrlEscapeChar(s.charAt(i)); i += 3) {
+                    if ((i + 2) >= size) {
+                        throw new IllegalArgumentException(
+                                "Path contains an incomplete percent encoding");
+                    }
+                    final String hexPair = s.substring(i + 1, i + 3);
+                    try {
+                        final int octet = Integer.parseInt(hexPair, 16);
+                        if (octet < 0) {
+                            throw new IllegalArgumentException(
+                                    "Path contains an invalid percent encoding '" + hexPair + "'");
+                        }
+                        buffer[bufferPos++] = (byte) octet;
+                    } catch (NumberFormatException e) {
+                        throw new IllegalArgumentException(
+                                "Path contains an invalid percent encoding '" + hexPair + "'");
+                    }
+                }
+                builder.append(new String(buffer, 0, bufferPos, UTF8));
+            }
+        }
+        return builder.toString();
+    }
+
+    /**
+     * Returns the URL path encoding of the provided object's string
+     * representation.
      *
      * @param value
-     *            The value to be URL encoded.
-     * @return The URL encoding of the provided object's string representation.
+     *            The value to be URL path encoded.
+     * @return The URL path encoding of the provided object's string
+     *         representation.
      */
     public static String urlEncode(final Object value) {
-        /*
-         * Before delegating to the costly URLEncoder class, first try fast-path
-         * encode of simple ASCII.
-         */
+        // First try fast-path encode of simple ASCII.
         final String s = value.toString();
         final int size = s.length();
         for (int i = 0; i < size; i++) {
             final int c = s.charAt(i);
             if (!SAFE_URL_CHARS.get(c)) {
-                // Contains a character that needs encoding so delegate to URLEncoder.
-                try {
-                    return URLEncoder.encode(s, "UTF-8");
-                } catch (final UnsupportedEncodingException e) {
-                    // UTF-8 should always be supported.
-                    throw new RuntimeException(e);
-                }
+                // Slow path.
+                return urlEncode0(s);
             }
         }
         return s;
     }
+
+    /**
+     * Fast lookup for encoding octets as hex.
+     */
+    private static final String[] byteToHex = new String[256];
+    static {
+        for (int i = 0; i < byteToHex.length; i++) {
+            byteToHex[i] = String.format(Locale.ENGLISH, "%02X", i);
+        }
+    }
+
+    private static String urlEncode0(String s) {
+        final byte[] utf8 = s.getBytes(UTF8);
+        final int size = utf8.length;
+        final StringBuilder builder = new StringBuilder(size + 16);
+        for (int i = 0; i < size; i++) {
+            final int octet = utf8[i] & 0xff;
+            if (SAFE_URL_CHARS.get(octet)) {
+                builder.append((char) octet);
+            } else {
+                builder.append(URL_ESCAPE_CHAR);
+                builder.append(byteToHex[octet]);
+            }
+        }
+        return builder.toString();
+    }
+
+    /**
+     * Compiled regular expression for splitting resource names into path
+     * elements.
+     */
+    private static final Pattern PATH_SPLITTER = Pattern.compile("/");
 
     /**
      * Parses the provided string representation of a resource name.
@@ -209,130 +276,40 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
         if (path.isEmpty()) {
             // Fast-path.
             return EMPTY;
-        } else {
-            /*
-             * This method is optimized for the case where resource names do not
-             * contained encoded characters and are already normalized. In
-             * particular, it avoids performing multiple passes through the
-             * string, unnecessary normalization, and unnecessary URL
-             * decode/encodes.
-             */
-            final int size = path.length();
-            StringBuilder normalizedPathBuilder = null;
-            boolean lastCharWasSlash = false;
-            int startOfLastElement = 0;
-            boolean lastElementNeedsNormalizing = false;
-            boolean lastElementNeedsDecoding = false;
-            boolean trimLeadingSlash = false;
-            int elementCount = 0;
-            for (int i = 0; i < size; i++) {
-                final char c = path.charAt(i);
-                if (c == '/') {
-                    if (lastCharWasSlash) {
-                        throw new IllegalArgumentException("Resource name '" + path
-                                + "' contains empty path elements");
-                    }
-                    lastCharWasSlash = true;
-                    if (i != 0) {
-                        if (lastElementNeedsDecoding || lastElementNeedsNormalizing) {
-                            if (normalizedPathBuilder == null) {
-                                normalizedPathBuilder = new StringBuilder(size);
-                                if (startOfLastElement > 0) {
-                                    // Include slash.
-                                    final String pathStart =
-                                            path.substring(trimLeadingSlash ? 1 : 0,
-                                                    startOfLastElement);
-                                    normalizedPathBuilder.append(pathStart);
-                                }
-                            } else {
-                                normalizedPathBuilder.append('/');
-                            }
-                            final String element = path.substring(startOfLastElement, i);
-                            final String normalizedElement =
-                                    normalizePathElement(element, lastElementNeedsDecoding);
-                            normalizedPathBuilder.append(normalizedElement);
-                        } else if (normalizedPathBuilder != null) {
-                            normalizedPathBuilder.append('/');
-                            normalizedPathBuilder.append(path.substring(startOfLastElement, i));
-                        }
-                        elementCount++;
-                    } else {
-                        trimLeadingSlash = true;
-                    }
-                } else if (lastCharWasSlash) {
-                    // Reset state for next element.
-                    lastCharWasSlash = false;
-                    startOfLastElement = i;
-                    lastElementNeedsDecoding = isUrlEscapeChar(c);
-                    lastElementNeedsNormalizing = needsNormalizing(c);
-                } else if (isUrlEscapeChar(c)) {
-                    lastElementNeedsDecoding = true;
-                } else if (needsNormalizing(c)) {
-                    lastElementNeedsNormalizing = true;
-                }
-            }
-            // Normalize the path string by removing leading and trailing slashes.
-            final String trimmedPath;
-            if (trimLeadingSlash) {
-                if (size == 1) {
-                    return EMPTY;
-                } else if (lastCharWasSlash) {
-                    trimmedPath = path.substring(1, size - 1);
-                } else {
-                    trimmedPath = path.substring(1, size);
-                }
-            } else if (lastCharWasSlash) {
-                trimmedPath = path.substring(0, size - 1);
-            } else {
-                trimmedPath = path;
-            }
-            final String normalizedPath;
-            if (!lastCharWasSlash) {
-                // Decode remaining trailing path element.
-                if (lastElementNeedsDecoding || lastElementNeedsNormalizing) {
-                    final String element = path.substring(startOfLastElement, size);
-                    final String normalizedElement =
-                            normalizePathElement(element, lastElementNeedsDecoding);
-                    if (normalizedPathBuilder == null) {
-                        if (startOfLastElement > 0) {
-                            // Include slash.
-                            final String pathStart =
-                                    path.substring(trimLeadingSlash ? 1 : 0, startOfLastElement);
-                            normalizedPathBuilder = new StringBuilder(size);
-                            normalizedPathBuilder.append(pathStart);
-                            normalizedPathBuilder.append(normalizedElement);
-                            normalizedPath = normalizedPathBuilder.toString();
-                        } else {
-                            normalizedPath = normalizedElement;
-                        }
-                    } else {
-                        normalizedPathBuilder.append('/');
-                        normalizedPathBuilder.append(normalizedElement);
-                        normalizedPath = normalizedPathBuilder.toString();
-                    }
-                } else if (normalizedPathBuilder != null) {
-                    normalizedPathBuilder.append('/');
-                    normalizedPathBuilder.append(path.substring(startOfLastElement, size));
-                    normalizedPath = normalizedPathBuilder.toString();
-                } else {
-                    normalizedPath = trimmedPath;
-                }
-                elementCount++;
-            } else if (normalizedPathBuilder != null) {
-                normalizedPath = normalizedPathBuilder.toString();
-            } else {
-                normalizedPath = trimmedPath;
-            }
-            return new ResourceName(trimmedPath, normalizedPath, elementCount);
         }
+
+        // Split on path separators and trim leading slash or trailing slash.
+        final String[] elements = PATH_SPLITTER.split(path, -1);
+        final int sz = elements.length;
+        final int startIndex = elements[0].isEmpty() ? 1 : 0;
+        final int endIndex = sz > 1 && elements[sz - 1].isEmpty() ? sz - 1 : sz;
+        if (startIndex == endIndex) {
+            return EMPTY;
+        }
+
+        // Normalize the path elements checking for empty elements.
+        final StringBuilder trimmedPath = new StringBuilder(path.length());
+        final StringBuilder normalizedPath = new StringBuilder(path.length());
+        for (int i = startIndex; i < endIndex; i++) {
+            final String element = elements[i];
+            if (element.isEmpty()) {
+                throw new IllegalArgumentException("Resource name '" + path
+                        + "' contains empty path elements");
+            }
+            final String normalizedElement = normalizePathElement(element, true);
+            if (i != startIndex) {
+                trimmedPath.append('/');
+                normalizedPath.append('/');
+            }
+            trimmedPath.append(element);
+            normalizedPath.append(normalizedElement);
+        }
+        return new ResourceName(trimmedPath.toString(), normalizedPath.toString(), endIndex
+                - startIndex);
     }
 
     private static boolean isUrlEscapeChar(final char c) {
-        return c == '+' || c == '%';
-    }
-
-    private static boolean needsNormalizing(final char c) {
-        return !NORMALIZED_URL_CHARS.get(c);
+        return c == URL_ESCAPE_CHAR;
     }
 
     private static String normalizePathElement(final String element, final boolean needsDecoding) {
@@ -377,12 +354,8 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
             }
             final String encodedPathElement = urlEncode(s);
             pathBuilder.append(encodedPathElement);
-            final String normalizedPathElement = s.toLowerCase(Locale.ENGLISH);
-            if (normalizedPathElement == s) {
-                normalizedPathBuilder.append(encodedPathElement);
-            } else {
-                normalizedPathBuilder.append(urlEncode(normalizedPathElement));
-            }
+            final String normalizedPathElement = normalizePathElement(s, false);
+            normalizedPathBuilder.append(urlEncode(normalizedPathElement));
             i++;
         }
         this.path = pathBuilder.toString();
@@ -418,10 +391,8 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
     public ResourceName child(final Object pathElement) {
         final String s = pathElement.toString();
         final String encodedPathElement = urlEncode(s);
-        final String normalizedPathElement = s.toLowerCase(Locale.ENGLISH);
-        final String normalizedEncodedPathElement =
-                (s == normalizedPathElement) ? encodedPathElement
-                        : urlEncode(normalizedPathElement);
+        final String normalizedPathElement = normalizePathElement(s, false);
+        final String normalizedEncodedPathElement = urlEncode(normalizedPathElement);
         if (isEmpty()) {
             return new ResourceName(encodedPathElement, normalizedEncodedPathElement, 1);
         } else {
@@ -744,9 +715,9 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
     }
 
     /**
-     * Returns the URL encoded string representation of this resource name.
+     * Returns the URL path encoded string representation of this resource name.
      *
-     * @return The URL encoded string representation of this resource name.
+     * @return The URL path encoded string representation of this resource name.
      * @see #valueOf(String)
      */
     @Override
