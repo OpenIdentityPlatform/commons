@@ -48,6 +48,7 @@ import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceName;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.json.resource.Version;
 
@@ -87,7 +88,6 @@ public final class HttpServletAdapter {
 
     private static final String FIELDS_DELIMITER = ",";
     private static final String SORT_KEYS_DELIMITER = ",";
-    private static final String EMPTY_STRING = "";
 
     private final ServletApiVersionAdapter syncFactory;
     private final ConnectionFactory connectionFactory;
@@ -469,21 +469,16 @@ public final class HttpServletAdapter {
             if (ETAG_ANY.equals(rev)) {
                 // This is a create with a user provided resource ID: split the
                 // path into the parent resource name and resource ID.
-                final String resourceName = getResourceName(req);
-                final int i = resourceName.lastIndexOf('/');
-                final CreateRequest request;
+                final ResourceName resourceName = getResourceName(req);
                 if (resourceName.isEmpty()) {
                     // FIXME: i18n.
                     throw new BadRequestException("No new resource ID in HTTP PUT request");
-                } else if (i < 0) {
-                    // We have a pathInfo of the form "{id}"
-                    request = Requests.newCreateRequest(EMPTY_STRING, content);
-                    request.setNewResourceId(resourceName);
-                } else {
-                    // We have a pathInfo of the form "{container}/{id}"
-                    request = Requests.newCreateRequest(resourceName.substring(0, i), content);
-                    request.setNewResourceId(resourceName.substring(i + 1));
                 }
+
+                // We have a pathInfo of the form "{container}/{id}"
+                final CreateRequest request =
+                        Requests.newCreateRequest(resourceName.parent(), content).setNewResourceId(
+                                resourceName.leaf());
                 for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
                     final String name = p.getKey();
                     final String[] values = p.getValue();
@@ -531,19 +526,17 @@ public final class HttpServletAdapter {
     /**
      * Gets the raw (still url-encoded) resource name from the request. Removes leading and trailing forward slashes.
      */
-    private String getResourceName(final HttpServletRequest req) {
+    private ResourceName getResourceName(final HttpServletRequest req) throws ResourceException {
         String resourceName = HttpUtils.getRawPathInfo(req);
         // Treat null path info as root resource.
         if (resourceName == null) {
-            return EMPTY_STRING;
+            return ResourceName.empty();
         }
-        if (resourceName.startsWith("/")) {
-            resourceName = resourceName.substring(1);
+        try {
+            return ResourceName.valueOf(resourceName);
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException(e.getMessage());
         }
-        if (resourceName.endsWith("/")) {
-            resourceName = resourceName.substring(0, resourceName.length() - 1);
-        }
-        return resourceName;
     }
 
     private Context newRequestContext(final HttpServletRequest req, final AcceptAPIVersion acceptVersion)
