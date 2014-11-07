@@ -38,8 +38,9 @@ public final class RequestsTest {
             { "users/", "test", "users/test" },
             { "/users", "test", "users/test" },
             { "/users/", "test", "users/test" },
-            { "users", "test user", "users/test+user" },
+            { "users", "test user", "users/test%20user" },
             { "users", "test/user", "users/test%2Fuser" },
+            { "users", "test+user", "users/test+user" }
             // @formatter:on
         };
     }
@@ -54,7 +55,7 @@ public final class RequestsTest {
     // test the contract that resource name must not be null
     @Test(expectedExceptions = NullPointerException.class)
     public void testNullResourceName() {
-        newReadRequest(null);
+        newReadRequest((String) null);
     }
 
     // test the contract that request.getResourceName/getResourceNameObject
