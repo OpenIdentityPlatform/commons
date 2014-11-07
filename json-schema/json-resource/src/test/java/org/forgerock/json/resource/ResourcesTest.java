@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2013 ForgeRock AS.
+ * Copyright 2012-2014 ForgeRock AS.
  */
 package org.forgerock.json.resource;
 
@@ -166,8 +166,9 @@ public final class ResourcesTest {
         return new Object[][] {
             { "test", "test" },
             { "test%2fuser", "test/user" },
-            { "test+user", "test user" },
-            { "test%20user", "test user" }
+            { "test user", "test user" },
+            { "test%20user", "test user" },
+            { "test+%2buser", "test++user" }
         };
         // @formatter:on
     }

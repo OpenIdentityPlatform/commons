@@ -88,6 +88,7 @@ public final class UriRouterTest {
         assertThat(rc.getValue().getBaseUri()).isEqualTo(expectedMatchedUri);
         assertThat(rc.getValue().getUriTemplateVariables()).isEqualTo(expectedUriTemplateVariables);
     }
+
     private void checkReadRequest(ArgumentCaptor<ReadRequest> rr, ReadRequest r) {
         assertThat(rr.getValue().getFields()).isEqualTo(r.getFields());
         assertThat(rr.getValue().getRequestType()).isEqualTo(r.getRequestType());
@@ -245,7 +246,7 @@ public final class UriRouterTest {
             { "{userId}/devices", "test/devices", new String[] {"userId", "test" }},
             { "{a}/{b}", "aaa/bbb", new String[] {"a", "aaa", "b", "bbb" }},
             { "{a}/b/{c}", "aaa/b/ccc", new String[] {"a", "aaa", "c", "ccc" }},
-            { "users/{id}/devices", "users/test+user/devices", new String[] {"id", "test user" }},
+            { "users/{id}/devices", "users/test%20user/devices", new String[] {"id", "test user" }},
             { "users/{id}/devices", "users/test%2fdevices/devices", new String[] {"id", "test/devices" }},
         };
         // @formatter:on
