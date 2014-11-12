@@ -178,9 +178,9 @@ define("config/process/CommonConfig", [
                 "org/forgerock/commons/ui/common/components/Navigation"
             ],
             processDescription: function(event, router, conf, viewManager, navigation) {
+                viewManager.currentDialog = "null";
                 if(conf.baseView) {
                     require(router.configuration.routes[conf.baseView].view).rebind();
-                    viewManager.currentDialog = "null";
                     router.navigate(router.getLink(router.configuration.routes[conf.baseView], conf.baseViewArgs));
                     navigation.reload();
                 }
@@ -269,8 +269,8 @@ define("config/process/CommonConfig", [
                     return;
                 }
 
-                conf.setProperty("baseView", args.base); 
-                conf.setProperty("baseViewArgs", params); 
+                conf.setProperty("baseView", args.base);
+                conf.setProperty("baseViewArgs", params);
                 
                 navigation.init();
 
