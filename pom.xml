@@ -43,9 +43,9 @@
 
     <inceptionYear>2012</inceptionYear>
     <scm>
-        <connection>scm:svn:https://svn.forgerock.org/commons/forgerock-ui/trunk</connection>
-        <developerConnection>scm:svn:https://svn.forgerock.org/commons/forgerock-ui/trunk</developerConnection>
-        <url>http://sources.forgerock.org/browse/commons/forgerock-ui/trunk</url>
+        <connection>scm:svn:https://svn.forgerock.org/commons/forgerock-ui/branches/1.1.7</connection>
+        <developerConnection>scm:svn:https://svn.forgerock.org/commons/forgerock-ui/branches/1.1.7</developerConnection>
+        <url>http://sources.forgerock.org/browse/commons/forgerock-ui/branches/1.1.7</url>
     </scm>
     <distributionManagement>
         <site>
