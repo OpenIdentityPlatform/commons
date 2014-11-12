@@ -59,7 +59,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         }
         return queries;
     };
-
+ 
     obj.getCurrentPathName = function() {
         return window.location.pathname;
     };
@@ -109,16 +109,18 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                 return '';
             }
 
-            var result = '',
+            var result = '<dl>',
                 prop;
             for (prop in cellvalue) {
-                if (result) {
-                    result += '<br>';
-                }
-                if (cellvalue.hasOwnProperty(prop)) {
-                    result += prop + ': ' + cellvalue[prop];
+
+                if (_.isString(cellvalue[prop])){
+                    result += '<dt>' + prop + '</dt><dd>' + cellvalue[prop] + '</dd>';
+                } else{
+                    result += '<dt>' + prop + '</dt><dd>' + JSON.stringify(cellvalue[prop]) + '</dd>';
                 }
             }
+
+            result += '</dl>';
 
             return result;
         },
@@ -127,18 +129,23 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                 return '';
             }
 
-            var result = '',
+            var result = '<ul>',
                 i,
                 len = cellvalue.length;
             for (i = 0; i < len; i++) {
-                if (result) {
-                    result += '<br>';
+               
+                if (_.isString(cellvalue[i])){
+                    result += '<li>' + cellvalue[i] + '</li>';
+                } else{
+                    result += '<li>' + JSON.stringify(cellvalue[i]) + '</li>';
                 }
-                result += cellvalue[i];
             }
+
+            result += '</ul>';
 
             return result;
         },
+  
         dateFormatter: function (cellvalue, options, rowObject) {
             if (!cellvalue) {
                 return '';
