@@ -46,8 +46,12 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     };
 
     obj.getCurrentHash = function() {
-        // cannot use window.location.hash due to FF which de-encodes this parameter.
-        return window.location.href.substring(window.location.href.indexOf('#') + 1);
+        if (window.location.href.indexOf('#') === -1) {
+            return "";
+        } else {
+            // cannot use window.location.hash due to FF which de-encodes this parameter.
+            return window.location.href.substring(window.location.href.indexOf('#') + 1);
+        }
     };
 
     obj.getCurrentUrlQueryParameters = function() {
