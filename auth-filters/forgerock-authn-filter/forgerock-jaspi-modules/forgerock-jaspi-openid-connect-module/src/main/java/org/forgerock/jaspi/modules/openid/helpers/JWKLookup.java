@@ -54,7 +54,7 @@ public class JWKLookup {
                 final String jwkKey = octJWK.getKey();
 
                 final Key key = new SecretKeySpec(jwkKey.getBytes(),
-                        JwsAlgorithm.getJwsAlgorithm(octJWK.getAlgorithm()).getKnownName());
+                        JwsAlgorithm.getJwsAlgorithm(octJWK.getAlgorithm()).getMdAlgorithm());
 
                 return key;
             default:
