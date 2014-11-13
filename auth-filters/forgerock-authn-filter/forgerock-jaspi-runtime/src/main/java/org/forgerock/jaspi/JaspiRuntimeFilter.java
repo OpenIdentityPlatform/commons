@@ -16,9 +16,12 @@
 
 package org.forgerock.jaspi;
 
+import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
+
 import org.forgerock.jaspi.runtime.AuditApi;
 import org.forgerock.jaspi.runtime.ContextFactory;
 import org.forgerock.jaspi.runtime.JaspiRuntime;
+import org.forgerock.jaspi.runtime.ResourceExceptionHandler;
 import org.forgerock.jaspi.runtime.RuntimeResultHandler;
 
 import javax.servlet.Filter;
@@ -46,7 +49,11 @@ public class JaspiRuntimeFilter implements Filter {
     private static final String INIT_PARAM_CONTEXT_FACTORY_CLASS = "context-factory-class";
     private static final String INIT_PARAM_CONTEXT_FACTORY_METHOD = "context-factory-method";
     private static final String INIT_PARAM_CONTEXT_FACTORY_METHOD_DEFAULT = "getContextFactory";
-
+    /**
+     * Filter config can register different {@code ResourceException} handlers.
+     * @see org.forgerock.jaspi.runtime.ResourceExceptionHandler
+     */
+    public static final String INIT_PARAM_EXCEPTION_HANDLERS = "resource-exception-handlers";
     private static final String INIT_PARAM_AUDIT_API_CLASS = "audit-api-factory-class";
     private static final String INIT_PARAM_AUDIT_API_METHOD = "audit-api-factory-method";
     private static final String INIT_PARAM_AUDIT_API_METHOD_DEFAULT = "getAuditApi";
@@ -95,6 +102,19 @@ public class JaspiRuntimeFilter implements Filter {
             auditApi = getAuditApi(config);
         }
         this.runtime = new JaspiRuntime(contextFactory, new RuntimeResultHandler(), auditApi);
+        String exceptionHandlers = config.getInitParameter(INIT_PARAM_EXCEPTION_HANDLERS);
+        if (exceptionHandlers != null) {
+            for (String handlerClassName : exceptionHandlers.split(",")) {
+                try {
+                    Class<? extends ResourceExceptionHandler> handlerClass = Class.forName(handlerClassName.trim())
+                            .asSubclass(ResourceExceptionHandler.class);
+                    runtime.registerExceptionHandler(handlerClass);
+                } catch (ClassNotFoundException e) {
+                    LOG.warn("Class is not available: " + handlerClassName, e);
+                }
+            }
+        }
+
     }
 
     /**

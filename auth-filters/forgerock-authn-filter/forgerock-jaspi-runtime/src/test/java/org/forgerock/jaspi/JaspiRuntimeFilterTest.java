@@ -16,6 +16,10 @@
 
 package org.forgerock.jaspi;
 
+import static org.mockito.Mockito.mock;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.fail;
+
 import org.forgerock.jaspi.runtime.AuditApi;
 import org.forgerock.jaspi.runtime.ContextFactory;
 import org.testng.annotations.BeforeMethod;
@@ -29,10 +33,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-
-import static org.mockito.Mockito.mock;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.fail;
 
 public class JaspiRuntimeFilterTest {
 

@@ -33,7 +33,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import static org.forgerock.jaspi.runtime.AuthStatusUtils.isSendContinue;
 import static org.forgerock.jaspi.runtime.AuditTrail.AUDIT_TRAIL_KEY;
@@ -92,6 +94,7 @@ public class JaspiRuntime {
     private final ContextFactory contextFactory;
     private final RuntimeResultHandler resultHandler;
     private final AuditApi auditApi;
+    private final Set<ResourceExceptionHandler> exceptionHandlers = new HashSet<ResourceExceptionHandler>();
 
     /**
      * Constructs a new instance of the JaspiRuntime.
@@ -186,9 +189,15 @@ public class JaspiRuntime {
             HttpServletResponse httpResponse = (HttpServletResponse) messageInfo.getResponseMessage();
             httpResponse.setStatus(jre.getCode());
             try {
+                for (ResourceExceptionHandler handler : exceptionHandlers) {
+                    if (handler.canHandle(request)) {
+                        handler.write(jre, httpResponse);
+                        return;
+                    }
+                }
+                httpResponse.getWriter().write(jre.toJsonValue().toString());
                 httpResponse.setContentType(JSON_HTTP_MEDIA_TYPE);
                 httpResponse.setCharacterEncoding("UTF-8");
-                httpResponse.getWriter().write(jre.toJsonValue().toString());
             } catch (IOException ioe) {
                 throw new ServletException(ioe.getMessage(), ioe);
             }
@@ -196,6 +205,20 @@ public class JaspiRuntime {
             if (!isSendContinue(requestAuthStatus)) {
                 auditTrail.audit();
             }
+        }
+    }
+
+    /**
+     * Register a class to handle {@code ResourceException}s.
+     * @param handlerClass The implementation class.
+     */
+    public void registerExceptionHandler(Class<? extends ResourceExceptionHandler> handlerClass) {
+        try {
+            this.exceptionHandlers.add(handlerClass.newInstance());
+        } catch (InstantiationException e) {
+            throw new IllegalArgumentException("Cannot instantiate " + handlerClass.getName(), e);
+        } catch (IllegalAccessException e) {
+            throw new IllegalArgumentException("Cannot access " + handlerClass.getName(), e);
         }
     }
 }
