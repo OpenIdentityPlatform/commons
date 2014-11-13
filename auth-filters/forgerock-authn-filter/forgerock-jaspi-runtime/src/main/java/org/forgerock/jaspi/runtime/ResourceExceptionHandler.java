@@ -16,12 +16,14 @@
 
 package org.forgerock.jaspi.runtime;
 
+import org.forgerock.guava.common.net.MediaType;
 import org.forgerock.json.resource.ResourceException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Collection;
 
 /**
  * Handle ResourceException responses for different media types. Implementations should be thread-safe.
@@ -29,12 +31,10 @@ import java.io.Writer;
 public interface ResourceExceptionHandler {
 
     /**
-     * Can this implementation handle a specific request. Implementations will want to check headers such as
-     * {@code Accept} and {@code Content-Type}.
-     * @param request The current request.
-     * @return If the implementation can give a response to the request.
+     * Which media types can this handler handle
+     * @return A list of media types.
      */
-    boolean canHandle(HttpServletRequest request);
+    Collection<MediaType> handles();
 
     /**
      * Write the details of the exception out, and set the content type of the response.

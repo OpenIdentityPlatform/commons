@@ -16,15 +16,11 @@
 
 package org.forgerock.jaspi.runtime;
 
-import static org.forgerock.json.fluent.JsonValue.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.eq;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
-import org.forgerock.jaspi.exceptions.JaspiAuthException;
+import org.forgerock.jaspi.runtime.response.FailureResponseHandler;
 import org.forgerock.json.resource.ResourceException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
@@ -41,8 +37,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
-import java.io.IOException;
-import java.io.PrintWriter;
 
 public class JaspiRuntimeTest {
 
@@ -68,7 +62,7 @@ public class JaspiRuntimeTest {
         ServerAuthContext serverAuthContext = null;
 
         given(contextFactory.getContext()).willReturn(serverAuthContext);
-        JaspiRuntime jaspiRuntime = new JaspiRuntime(contextFactory, runtimeResultHandler, auditApi);
+        JaspiRuntime jaspiRuntime = new JaspiRuntime(contextFactory, runtimeResultHandler, auditApi, null);
 
         //When
         jaspiRuntime.processMessage(request, response, filterChain);
@@ -94,7 +88,7 @@ public class JaspiRuntimeTest {
                 Matchers.<AuditTrail>anyObject(), Matchers.<Subject>anyObject(),
                 Matchers.<HttpServletResponse>anyObject())).willReturn(false);
 
-        JaspiRuntime jaspiRuntime = new JaspiRuntime(contextFactory, runtimeResultHandler, auditApi);
+        JaspiRuntime jaspiRuntime = new JaspiRuntime(contextFactory, runtimeResultHandler, auditApi, null);
 
         //When
         jaspiRuntime.processMessage(request, response, filterChain);
@@ -121,7 +115,7 @@ public class JaspiRuntimeTest {
                 Matchers.<AuditTrail>anyObject(), Matchers.<Subject>anyObject(),
                 Matchers.<HttpServletResponse>anyObject())).willReturn(true);
 
-        JaspiRuntime jaspiRuntime = new JaspiRuntime(contextFactory, runtimeResultHandler, auditApi);
+        JaspiRuntime jaspiRuntime = new JaspiRuntime(contextFactory, runtimeResultHandler, auditApi, null);
 
         //When
         jaspiRuntime.processMessage(request, response, filterChain);
@@ -145,7 +139,7 @@ public class JaspiRuntimeTest {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         FilterChain filterChain = mock(FilterChain.class);
-        PrintWriter writer = mock(PrintWriter.class);
+        FailureResponseHandler failureResponseHandler = mock(FailureResponseHandler.class);
 
         ContextFactory contextFactory = mock(ContextFactory.class);
         ServerAuthContext serverAuthContext = mock(ServerAuthContext.class);
@@ -154,90 +148,15 @@ public class JaspiRuntimeTest {
         doThrow(AuthException.class).when(serverAuthContext).validateRequest(Matchers.<MessageInfo>anyObject(),
                 Matchers.<Subject>anyObject(), Matchers.<Subject>anyObject());
 
-        given(response.getWriter()).willReturn(writer);
-
-        JaspiRuntime jaspiRuntime = new JaspiRuntime(contextFactory, runtimeResultHandler, auditApi);
-
-        //When
-        jaspiRuntime.processMessage(request, response, filterChain);
-
-        //Then
-        verify(response).setStatus(500);
-        ArgumentCaptor<String> writerArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        verify(writer).write(writerArgumentCaptor.capture(), anyInt(), anyInt());
-        assertTrue(writerArgumentCaptor.getValue().contains("500"));
-        verify(response).setContentType("application/json");
-    }
-
-    @Test
-    public void shouldUnwrapResourceExceptionCause() throws Exception {
-
-        //Given
-        HttpServletRequest req = mock(HttpServletRequest.class);
-        HttpServletResponse resp = mock(HttpServletResponse.class);
-        FilterChain chain = mock(FilterChain.class);
-        PrintWriter writer = mock(PrintWriter.class);
-        ContextFactory contextFactory = mock(ContextFactory.class);
-        ServerAuthContext serverAuthContext = mock(ServerAuthContext.class);
-        ResourceException resourceException = ResourceException.getException(ResourceException.BAD_REQUEST,
-                "BAD_REQUEST");
-        resourceException.setDetail(json(object(field("DETAIL_KEY", "DETAIL_VALUE"))));
-        JaspiAuthException authException = new JaspiAuthException("AUTH_EXCEPTION", resourceException);
-
-        JaspiRuntime jaspiRuntime = new JaspiRuntime(contextFactory, runtimeResultHandler, auditApi);
-
-        given(contextFactory.getContext()).willReturn(serverAuthContext);
-        doThrow(authException).when(serverAuthContext).validateRequest(Matchers.<MessageInfo>anyObject(),
-                Matchers.<Subject>anyObject(), Matchers.<Subject>anyObject());
-        given(resp.getWriter()).willReturn(writer);
-
-        //When
-        jaspiRuntime.processMessage(req, resp, chain);
-
-        //Then
-        verify(resp).setStatus(resourceException.getCode());
-        ArgumentCaptor<String> writerArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        verify(writer).write(writerArgumentCaptor.capture(), anyInt(), anyInt());
-        assertTrue(writerArgumentCaptor.getValue().contains("400"));
-        assertTrue(writerArgumentCaptor.getValue().contains("BAD_REQUEST"));
-        assertTrue(writerArgumentCaptor.getValue().contains("DETAIL_KEY"));
-        assertTrue(writerArgumentCaptor.getValue().contains("DETAIL_VALUE"));
-        verify(resp).setContentType("application/json");
-    }
-
-    @Test
-    public void shouldUseExceptionHandlerIfAvailable() throws Exception {
-
-        //Given
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        HttpServletResponse response = mock(HttpServletResponse.class);
-        FilterChain filterChain = mock(FilterChain.class);
-        PrintWriter writer = mock(PrintWriter.class);
-
-        doThrow(Exception.class).when(filterChain).doFilter(request, response);
-
-        given(response.getWriter()).willReturn(writer);
-
-        JaspiRuntime jaspiRuntime = new JaspiRuntime(null, runtimeResultHandler, auditApi);
-        jaspiRuntime.registerExceptionHandler(TestExceptionHandler.class);
+        JaspiRuntime jaspiRuntime = new JaspiRuntime(contextFactory, runtimeResultHandler, auditApi,
+                failureResponseHandler);
 
         //When
         jaspiRuntime.processMessage(request, response, filterChain);
 
         //Then
-        verify(response).setStatus(500);
-        verify(writer).write(eq("Hello 500"), anyInt(), anyInt());
-    }
-
-    public static final class TestExceptionHandler implements ResourceExceptionHandler {
-
-        public boolean canHandle(HttpServletRequest request) {
-            return true;
-        }
-
-        public void write(ResourceException exception, HttpServletResponse response) throws IOException {
-            response.getWriter().write("Hello "+exception.getCode());
-        }
-
+        ArgumentCaptor<ResourceException> resourceExceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
+        verify(failureResponseHandler).handle(resourceExceptionCaptor.capture(), any(MessageInfo.class));
+        assertEquals(resourceExceptionCaptor.getValue().getCode(), 500);
     }
 }

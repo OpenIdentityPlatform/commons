@@ -275,6 +275,11 @@
                 <artifactId>javax.security.auth.message</artifactId>
                 <version>3.1</version>
             </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons.guava</groupId>
+                <artifactId>forgerock-guava-net</artifactId>
+                <version>18.0.1</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.testng</groupId>

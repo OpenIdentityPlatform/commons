@@ -16,10 +16,14 @@
 
 package org.forgerock.jaspi.runtime.context;
 
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.*;
+
 import org.forgerock.jaspi.exceptions.JaspiAuthException;
 import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.jaspi.utils.MessageInfoUtils;
-import org.mockito.ArgumentCaptor;
+import org.forgerock.json.resource.ResourceException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -31,17 +35,11 @@ import javax.security.auth.message.module.ServerAuthModule;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
 
 public class ContextHandlerTest {
 
@@ -163,48 +161,17 @@ public class ContextHandlerTest {
         MessageInfo messageInfo = mock(MessageInfo.class);
         Subject clientSubject = new Subject();
         AuthStatus authStatus = null;
-        HttpServletResponse response = mock(HttpServletResponse.class);
-        PrintWriter writer = mock(PrintWriter.class);
 
-        given(messageInfo.getResponseMessage()).willReturn(response);
-        given(response.getWriter()).willReturn(writer);
-
-        //When
-        contextHandler.handleCompletion(messageInfo, clientSubject, authStatus);
-
-        //Then
-        ArgumentCaptor<String> contentCaptor = ArgumentCaptor.forClass(String.class);
-        verify(writer).write(contentCaptor.capture());
-        verify(response).setContentType("application/json");
-        assertTrue(contentCaptor.getValue().contains("401"));
-        assertTrue(contentCaptor.getValue().contains("Unauthorized"));
-    }
-
-    @Test (expectedExceptions = JaspiAuthException.class)
-    public void handleCompletionShouldThrowJaspiAuthExceptionWhenAuthStatusIsNullAndWriterThrowsIOException()
-            throws AuthException, IOException {
-
-        //Given
-        MessageInfo messageInfo = mock(MessageInfo.class);
-        Subject clientSubject = new Subject();
-        AuthStatus authStatus = null;
-        HttpServletResponse response = mock(HttpServletResponse.class);
-        PrintWriter writer = mock(PrintWriter.class);
-
-        given(messageInfo.getResponseMessage()).willReturn(response);
-        given(response.getWriter()).willReturn(writer);
-        doThrow(IOException.class).when(writer).write(anyString());
-
-        //When
         try {
+            //When
             contextHandler.handleCompletion(messageInfo, clientSubject, authStatus);
-        } catch (JaspiAuthException e) {
-            verify(response).setContentType("application/json");
-            throw e;
-        }
 
-        //Then
-        fail();
+            //Then
+            fail("Expect exception");
+        } catch (AuthException e) {
+            assertTrue(e.getCause() instanceof ResourceException);
+            assertEquals(((ResourceException) e.getCause()).getCode(), 401);
+        }
     }
 
     @Test

@@ -16,6 +16,8 @@
 
 package org.forgerock.jaspi.runtime.context;
 
+import static org.forgerock.jaspi.runtime.JaspiRuntime.*;
+
 import org.forgerock.jaspi.exceptions.JaspiAuthException;
 import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.jaspi.utils.MessageInfoUtils;
@@ -28,13 +30,10 @@ import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.module.ServerAuthModule;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-
-import static org.forgerock.jaspi.runtime.JaspiRuntime.*;
 
 /**
  * A handler for ServerAuthContext, which exposes helper methods that will be called at the varying end states
@@ -117,17 +116,9 @@ public class ContextHandler {
 
         if (authStatus == null || AuthStatus.SEND_FAILURE.equals(authStatus)) {
             LOG.debug("Authentication has failed.");
-            HttpServletResponse response = (HttpServletResponse) messageInfo.getResponseMessage();
             ResourceException jre = ResourceException.getException(UNAUTHORIZED_HTTP_ERROR_CODE,
                     UNAUTHORIZED_ERROR_MESSAGE);
-            try {
-                response.setContentType(JSON_HTTP_MEDIA_TYPE);
-                response.setCharacterEncoding("UTF-8");
-                response.getWriter().write(jre.toJsonValue().toString());
-            } catch (IOException e) {
-                LOG.error("Failed to write to response", e);
-                throw new JaspiAuthException(e);
-            }
+            throw new JaspiAuthException(jre);
         } else {
             setAuthenticationRequestAttributes(messageInfo, clientSubject);
         }

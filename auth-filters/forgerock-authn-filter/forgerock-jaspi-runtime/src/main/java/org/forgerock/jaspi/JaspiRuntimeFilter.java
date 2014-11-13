@@ -23,6 +23,7 @@ import org.forgerock.jaspi.runtime.ContextFactory;
 import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.jaspi.runtime.ResourceExceptionHandler;
 import org.forgerock.jaspi.runtime.RuntimeResultHandler;
+import org.forgerock.jaspi.runtime.response.FailureResponseHandler;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -101,20 +102,21 @@ public class JaspiRuntimeFilter implements Filter {
         if (auditApi == null) {
             auditApi = getAuditApi(config);
         }
-        this.runtime = new JaspiRuntime(contextFactory, new RuntimeResultHandler(), auditApi);
-        String exceptionHandlers = config.getInitParameter(INIT_PARAM_EXCEPTION_HANDLERS);
+        FailureResponseHandler failureResponseHandler = new FailureResponseHandler();
+        String exceptionHandlers = config.getInitParameter(JaspiRuntimeFilter.INIT_PARAM_EXCEPTION_HANDLERS);
         if (exceptionHandlers != null) {
             for (String handlerClassName : exceptionHandlers.split(",")) {
                 try {
                     Class<? extends ResourceExceptionHandler> handlerClass = Class.forName(handlerClassName.trim())
                             .asSubclass(ResourceExceptionHandler.class);
-                    runtime.registerExceptionHandler(handlerClass);
+                    failureResponseHandler.registerExceptionHandler(handlerClass);
                 } catch (ClassNotFoundException e) {
                     LOG.warn("Class is not available: " + handlerClassName, e);
                 }
             }
         }
-
+        this.runtime = new JaspiRuntime(contextFactory, new RuntimeResultHandler(), auditApi,
+                failureResponseHandler);
     }
 
     /**
