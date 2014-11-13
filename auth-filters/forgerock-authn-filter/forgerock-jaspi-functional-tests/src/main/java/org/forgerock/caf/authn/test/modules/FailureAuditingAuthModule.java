@@ -25,6 +25,7 @@ import javax.security.auth.message.MessagePolicy;
 import javax.security.auth.message.module.ServerAuthModule;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Collections;
 import java.util.Map;
 
 import static org.forgerock.jaspi.runtime.AuditTrail.AUDIT_FAILURE_REASON_KEY;
@@ -76,7 +77,7 @@ public class FailureAuditingAuthModule implements ServerAuthModule {
     public AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject)
             throws AuthException {
 
-        messageInfo.getMap().put(AUDIT_FAILURE_REASON_KEY, "FAILURE_REASON");
+        messageInfo.getMap().put(AUDIT_FAILURE_REASON_KEY, Collections.singletonMap("message", "FAILURE_REASON"));
 
         return AuthStatus.SEND_FAILURE;
     }

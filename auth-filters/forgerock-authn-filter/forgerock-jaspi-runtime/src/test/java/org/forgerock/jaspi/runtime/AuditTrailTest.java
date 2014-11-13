@@ -68,9 +68,11 @@ public class AuditTrailTest {
     public void shouldAuditFullSuccessfulAuditMessage() {
 
         //Given
-        auditTrail.auditFailure("MODULE_ONE_ID", "MODULE_ONE_REASON",
+        auditTrail.auditFailure("MODULE_ONE_ID",
+                Collections.<String, Object>singletonMap("message", "MODULE_ONE_REASON"),
                 Collections.<String, Object>singletonMap("MODULE_ONE", "INFO"));
-        auditTrail.auditFailure("MODULE_TWO_ID", "MODULE_TWO_REASON",
+        auditTrail.auditFailure("MODULE_TWO_ID",
+                Collections.<String, Object>singletonMap("message", "MODULE_TWO_REASON"),
                 Collections.<String, Object>singletonMap("MODULE_TWO", "INFO"));
         auditTrail.auditSuccess("MODULE_THREE_ID", Collections.<String, Object>singletonMap("MODULE_THREE", "INFO"));
         auditTrail.completeAuditAsSuccessful("PRINCIPAL");
@@ -87,7 +89,7 @@ public class AuditTrailTest {
         assertThat(auditMessage.asMap()).hasSize(6);
         assertThat(auditMessage.get("requestId").getObject()).isNotNull();
         assertThat(auditMessage.get("result").asString()).isEqualTo("SUCCESSFUL");
-        assertThat(auditMessage.get("principal").asString()).isEqualTo("PRINCIPAL");
+        assertThat(auditMessage.get("principal").asList(String.class)).containsExactly("PRINCIPAL");
         assertThat(auditMessage.get("context").required().size()).isEqualTo(0);
         assertThat(auditMessage.get("sessionId").asString()).isEqualTo("SESSION_ID");
         assertThat(auditMessage.get("entries").required().size()).isEqualTo(3);
@@ -99,13 +101,13 @@ public class AuditTrailTest {
         assertThat(moduleOneEntry.asMap()).hasSize(4);
         assertThat(moduleOneEntry.get("moduleId").asString()).isEqualTo("MODULE_ONE_ID");
         assertThat(moduleOneEntry.get("result").asString()).isEqualTo("FAILED");
-        assertThat(moduleOneEntry.get("reason").asString()).isEqualTo("MODULE_ONE_REASON");
+        assertThat(moduleOneEntry.get("reason").asMap()).containsOnly(entry("message", "MODULE_ONE_REASON"));
         assertThat(moduleOneEntry.get("info").asMap()).containsOnly(entry("MODULE_ONE", "INFO"));
 
         assertThat(moduleTwoEntry.asMap()).hasSize(4);
         assertThat(moduleTwoEntry.get("moduleId").asString()).isEqualTo("MODULE_TWO_ID");
         assertThat(moduleTwoEntry.get("result").asString()).isEqualTo("FAILED");
-        assertThat(moduleTwoEntry.get("reason").asString()).isEqualTo("MODULE_TWO_REASON");
+        assertThat(moduleTwoEntry.get("reason").asMap()).containsOnly(entry("message", "MODULE_TWO_REASON"));
         assertThat(moduleTwoEntry.get("info").asMap()).containsOnly(entry("MODULE_TWO", "INFO"));
 
         assertThat(moduleThreeEntry.asMap()).hasSize(3);
@@ -118,11 +120,17 @@ public class AuditTrailTest {
     public void shouldAuditFullFailedAuditMessage() {
 
         //Given
-        auditTrail.auditFailure("MODULE_ONE_ID", "MODULE_ONE_REASON",
-                Collections.<String, Object>singletonMap("MODULE_ONE", "INFO"));
-        auditTrail.auditFailure("MODULE_TWO_ID", "MODULE_TWO_REASON",
-                Collections.<String, Object>singletonMap("MODULE_TWO", "INFO"));
-        auditTrail.completeAuditAsFailure("PRINCIPAL");
+        Map<String, Object> moduleOneAuditInfo = new HashMap<String, Object>();
+        moduleOneAuditInfo.put("MODULE_ONE", "INFO");
+        moduleOneAuditInfo.put(AuditTrail.AUDIT_PRINCIPAL_KEY, "admin");
+        auditTrail.auditFailure("MODULE_ONE_ID",
+                Collections.<String, Object>singletonMap("message", "MODULE_ONE_REASON"), moduleOneAuditInfo);
+        Map<String, Object> moduleTwoAuditInfo = new HashMap<String, Object>();
+        moduleTwoAuditInfo.put("MODULE_TWO", "INFO");
+        moduleTwoAuditInfo.put(AuditTrail.AUDIT_PRINCIPAL_KEY, "demo");
+        auditTrail.auditFailure("MODULE_TWO_ID",
+                Collections.<String, Object>singletonMap("message", "MODULE_TWO_REASON"), moduleTwoAuditInfo);
+        auditTrail.completeAuditAsFailure();
 
         //When
         auditTrail.audit();
@@ -135,7 +143,7 @@ public class AuditTrailTest {
         assertThat(auditMessage.asMap()).hasSize(5);
         assertThat(auditMessage.get("requestId").getObject()).isNotNull();
         assertThat(auditMessage.get("result").asString()).isEqualTo("FAILED");
-        assertThat(auditMessage.get("principal").asString()).isEqualTo("PRINCIPAL");
+        assertThat(auditMessage.get("principal").asList(String.class)).containsExactly("admin", "demo");
         assertThat(auditMessage.get("context").required().size()).isEqualTo(0);
         assertThat(auditMessage.get("entries").required().size()).isEqualTo(2);
 
@@ -145,13 +153,15 @@ public class AuditTrailTest {
         assertThat(moduleOneEntry.asMap()).hasSize(4);
         assertThat(moduleOneEntry.get("moduleId").asString()).isEqualTo("MODULE_ONE_ID");
         assertThat(moduleOneEntry.get("result").asString()).isEqualTo("FAILED");
-        assertThat(moduleOneEntry.get("reason").asString()).isEqualTo("MODULE_ONE_REASON");
-        assertThat(moduleOneEntry.get("info").asMap()).containsOnly(entry("MODULE_ONE", "INFO"));
+        assertThat(moduleOneEntry.get("reason").asMap()).containsOnly(entry("message", "MODULE_ONE_REASON"));
+        assertThat(moduleOneEntry.get("info").asMap()).containsOnly(entry("MODULE_ONE", "INFO"),
+                entry(AuditTrail.AUDIT_PRINCIPAL_KEY, "admin"));
 
         assertThat(moduleTwoEntry.asMap()).hasSize(4);
         assertThat(moduleTwoEntry.get("moduleId").asString()).isEqualTo("MODULE_TWO_ID");
         assertThat(moduleTwoEntry.get("result").asString()).isEqualTo("FAILED");
-        assertThat(moduleTwoEntry.get("reason").asString()).isEqualTo("MODULE_TWO_REASON");
-        assertThat(moduleTwoEntry.get("info").asMap()).containsOnly(entry("MODULE_TWO", "INFO"));
+        assertThat(moduleTwoEntry.get("reason").asMap()).containsOnly(entry("message", "MODULE_TWO_REASON"));
+        assertThat(moduleTwoEntry.get("info").asMap()).containsOnly(entry("MODULE_TWO", "INFO"),
+                entry(AuditTrail.AUDIT_PRINCIPAL_KEY, "demo"));
     }
 }

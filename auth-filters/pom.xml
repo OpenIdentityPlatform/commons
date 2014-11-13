@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.forgerock</groupId>
         <artifactId>forgerock-parent</artifactId>
-        <version>1.2.1</version>
+        <version>1.2.5</version>
     </parent>
 
     <groupId>org.forgerock.commons</groupId>
@@ -73,8 +73,8 @@
         <restlet.version>2.1.2</restlet.version>
         <jackson.version>2.1.5</jackson.version>
 
-        <testng.version>6.8</testng.version>
-        <mockito.version>1.9.0</mockito.version>
+        <testng.version>6.8.8</testng.version>
+        <mockito.version>1.9.5</mockito.version>
         <assertj.version>1.6.1</assertj.version>
     </properties>
 
@@ -86,7 +86,7 @@
 
     <ciManagement>
         <system>jenkins</system>
-        <url>https://builds.forgerock.org/job/Commons%20Auth%20Filters</url>
+        <url>https://builds.forgerock.org/job/Commons%20-%20Auth%20Filters%20-%20trunk%20-%20postcommit/</url>
         <notifiers>
             <notifier>
                 <type>mail</type>

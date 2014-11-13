@@ -16,6 +16,7 @@
 
 package org.forgerock.caf.authn;
 
+import org.assertj.core.data.MapEntry;
 import org.forgerock.caf.authn.test.modules.SessionAuthModule;
 import org.hamcrest.Matcher;
 import org.slf4j.Logger;
@@ -73,7 +74,7 @@ public class SessionModuleOnlyIT {
              */
             {
                 "No Modules", null, moduleArray(), 401, false, exceptionMatcher(401),
-                    auditParams("FAILED", null, false)
+                    auditParams("FAILED", "", false)
             },
             /**
              * Session Module Only - SEND_SUCCESS:AuthException
@@ -124,7 +125,7 @@ public class SessionModuleOnlyIT {
             {"Session Module Only - SEND_FAILURE:AuthException",
                 moduleParams(SessionAuthModule.class, "SESSION", SEND_FAILURE_AUTH_STATUS, null),
                 moduleArray(), 401, false, exceptionMatcher(401),
-                auditParams("FAILED", null, false, entry("Session-SessionAuthModule", "FAILED"))
+                auditParams("FAILED", "", false, entry("Session-SessionAuthModule", "FAILED"))
             },
             /**
              * Session Module Only - SEND_CONTINUE:AuthException
@@ -171,8 +172,8 @@ public class SessionModuleOnlyIT {
             {"Session Module Only - AuthException:SEND_SUCCESS",
                 moduleParams(SessionAuthModule.class, "SESSION", null, SEND_SUCCESS_AUTH_STATUS),
                 moduleArray(), 500, false, exceptionMatcher(500),
-                    auditParams("FAILED", null, false, entry("Session-SessionAuthModule", "FAILED",
-                            equalTo(SESSION_VALIDATE_REQUEST_HEADER_NAME
+                    auditParams("FAILED", "", false, entry("Session-SessionAuthModule", "FAILED",
+                            MapEntry.entry("exception", SESSION_VALIDATE_REQUEST_HEADER_NAME
                                     + " header not set, so throwing AuthException.")))
             },
             /**
@@ -292,8 +293,8 @@ public class SessionModuleOnlyIT {
                 moduleParams(SessionAuthModule.class, "SESSION", FAILURE_AUTH_STATUS, SEND_SUCCESS_AUTH_STATUS),
                 moduleArray(), 500, false,
                 exceptionMatcher(500, containsString("Invalid AuthStatus returned from validateRequest, FAILURE")),
-                auditParams("FAILED", null, false, entry("Session-SessionAuthModule", "FAILED",
-                        equalTo("Invalid AuthStatus returned from validateRequest, FAILURE")))
+                auditParams("FAILED", "", false, entry("Session-SessionAuthModule", "FAILED",
+                        MapEntry.entry("message", "Invalid AuthStatus returned from validateRequest, FAILURE")))
             },
             /**
              * Session Module Only - null:SEND_SUCCESS
@@ -320,8 +321,8 @@ public class SessionModuleOnlyIT {
                 moduleParams(SessionAuthModule.class, "SESSION", NULL_AUTH_STATUS, SEND_SUCCESS_AUTH_STATUS),
                 moduleArray(), 500, false,
                 exceptionMatcher(500, containsString("Invalid AuthStatus returned from validateRequest, null")),
-                auditParams("FAILED", null, false, entry("Session-SessionAuthModule", "FAILED",
-                        equalTo("Invalid AuthStatus returned from validateRequest, null")))
+                auditParams("FAILED", "", false, entry("Session-SessionAuthModule", "FAILED",
+                        MapEntry.entry("message", "Invalid AuthStatus returned from validateRequest, null")))
             },
             /**
              * Session Module Only - SUCCESS:SEND_CONTINUE

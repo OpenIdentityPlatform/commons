@@ -85,7 +85,7 @@ public class JaspiRuntimeTest {
 
         given(contextFactory.getContext()).willReturn(serverAuthContext);
         given(runtimeResultHandler.handleValidateRequestResult(Matchers.<AuthStatus>anyObject(),
-                Matchers.<AuditTrail>anyObject(), Matchers.<Subject>anyObject(),
+                Matchers.<MessageInfo>anyObject(), Matchers.<AuditTrail>anyObject(), Matchers.<Subject>anyObject(),
                 Matchers.<HttpServletResponse>anyObject())).willReturn(false);
 
         JaspiRuntime jaspiRuntime = new JaspiRuntime(contextFactory, runtimeResultHandler, auditApi, null);
@@ -112,7 +112,7 @@ public class JaspiRuntimeTest {
 
         given(contextFactory.getContext()).willReturn(serverAuthContext);
         given(runtimeResultHandler.handleValidateRequestResult(Matchers.<AuthStatus>anyObject(),
-                Matchers.<AuditTrail>anyObject(), Matchers.<Subject>anyObject(),
+                Matchers.<MessageInfo>anyObject(), Matchers.<AuditTrail>anyObject(), Matchers.<Subject>anyObject(),
                 Matchers.<HttpServletResponse>anyObject())).willReturn(true);
 
         JaspiRuntime jaspiRuntime = new JaspiRuntime(contextFactory, runtimeResultHandler, auditApi, null);

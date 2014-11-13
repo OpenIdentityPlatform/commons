@@ -16,7 +16,10 @@
 
 package org.forgerock.jaspi.runtime.response;
 
-import junit.framework.TestCase;
+import static org.forgerock.json.fluent.JsonValue.*;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.assertTrue;
+
 import org.forgerock.guava.common.net.MediaType;
 import org.forgerock.jaspi.runtime.HttpServletMessageInfo;
 import org.forgerock.jaspi.runtime.ResourceExceptionHandler;
@@ -25,7 +28,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -34,11 +36,7 @@ import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.forgerock.json.fluent.JsonValue.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
-
-public class FailureResponseHandlerTest extends TestCase {
+public class FailureResponseHandlerTest {
 
     private static final String APPLICATION_XML = "application/xml";
     private static final String APPLICATION_JSON = "application/json";

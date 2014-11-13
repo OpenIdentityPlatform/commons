@@ -33,7 +33,9 @@ public interface AuditApi {
      * {
      *   "result": "SUCCESSFUL",
      *   "requestId": "...",
-     *   "principal": "demo",
+     *   "principal": [
+     *     "demo"
+     *   ],
      *   "context": {
      *     ...
      *   },
@@ -43,6 +45,7 @@ public interface AuditApi {
      *       "moduleId": "Session-JwtSessionModule",
      *       "result": "SUCCESSFUL",
      *       "info": {
+     *         "principal": "alice",
      *         "...": "...",
      *         ...
      *       }
@@ -51,12 +54,15 @@ public interface AuditApi {
      * }
      * }
      *
-     * <p>for failed authentications:</p>
+     * <p>For failed authentications:</p>
      * {@code
      * {
      *   "result": "FAILED",
      *   "requestId": "...",
-     *   "principal": "demo",
+     *   "principal": [
+     *     "demo",
+     *     ... //Multiple auth modules could identify different principals
+     *   ],
      *   "context": {
      *     ...
      *   },
@@ -66,6 +72,7 @@ public interface AuditApi {
      *       "result": "FAILED",
      *       "reason": "...",
      *       "info": {
+     *         "principal": "bob",
      *         "...": "...",
      *         ...
      *       }

@@ -18,6 +18,7 @@ package org.forgerock.caf.authn;
 
 import com.jayway.restassured.specification.RequestSpecification;
 import org.assertj.core.api.Assertions;
+import org.assertj.core.data.MapEntry;
 import org.forgerock.caf.authn.test.modules.AuditingAuthModule;
 import org.forgerock.caf.authn.test.modules.AuditingSessionAuthModule;
 import org.forgerock.caf.authn.test.modules.FailureAuditingAuthModule;
@@ -34,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.data.MapEntry.entry;
 import static org.forgerock.caf.authn.AuthModuleParameters.moduleArray;
 import static org.forgerock.caf.authn.AuthModuleParameters.moduleParams;
 import static org.forgerock.caf.authn.TestFramework.*;
@@ -42,6 +44,7 @@ import static org.forgerock.caf.authn.test.modules.SessionAuthModule.SEND_SUCCES
 import static org.forgerock.caf.authn.test.modules.SessionAuthModule.SUCCESS_AUTH_STATUS;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
+import static org.testng.Assert.fail;
 
 /**
  * Functional tests for auditing in the JASPI runtime.
@@ -82,7 +85,7 @@ public class ModuleAuditingIT {
                 moduleParams(AuditingSessionAuthModule.class, "SESSION", SUCCESS_AUTH_STATUS,
                     SEND_SUCCESS_AUTH_STATUS),
                 moduleArray(), 200, "SUCCESSFUL", true, "Session-AuditingSessionAuthModule",
-                    Collections.singletonMap("AUDITING_SESSION_AUTH_MODULE_AUDIT_INFO", "AUDIT_INFO"), nullValue()
+                    Collections.singletonMap("AUDITING_SESSION_AUTH_MODULE_AUDIT_INFO", "AUDIT_INFO"), new MapEntry[0]
             },
             /**
              * Auditing Auth Module
@@ -105,7 +108,7 @@ public class ModuleAuditingIT {
                 null, moduleArray(moduleParams(AuditingAuthModule.class, "AUTH-MODULE-ONE",
                     SUCCESS_AUTH_STATUS, SEND_SUCCESS_AUTH_STATUS)), 200, "SUCCESSFUL", false,
                 "AuthModule-AuditingAuthModule-0",
-                Collections.singletonMap("AUDITING_AUTH_MODULE_AUDIT_INFO", "AUDIT_INFO"), nullValue()
+                Collections.singletonMap("AUDITING_AUTH_MODULE_AUDIT_INFO", "AUDIT_INFO"), new MapEntry[0]
             },
             /**
              * Failing Auditing Session Auth Module
@@ -125,7 +128,7 @@ public class ModuleAuditingIT {
             {"Failing Session Module Only",
                 moduleParams(FailureAuditingAuthModule.class, "SESSION", SEND_FAILURE_AUTH_STATUS, null), moduleArray(),
                 401, "FAILED", false, "Session-FailureAuditingAuthModule", Collections.emptyMap(),
-                equalTo("FAILURE_REASON")
+                new MapEntry[]{entry("message", "FAILURE_REASON")}
             },
             /**
              * Failing Auditing Auth Module
@@ -145,7 +148,7 @@ public class ModuleAuditingIT {
             {"Single Failing Auth Module Only",
                 null, moduleArray(moduleParams(FailureAuditingAuthModule.class, "AUTH-MODULE-ONE",
                     SEND_FAILURE_AUTH_STATUS, null)), 401, "FAILED", false, "AuthModule-FailureAuditingAuthModule-0",
-                    Collections.emptyMap(), equalTo("FAILURE_REASON")
+                    Collections.emptyMap(), new MapEntry[]{entry("message", "FAILURE_REASON")}
             },
         };
     }
@@ -154,7 +157,7 @@ public class ModuleAuditingIT {
     public void auditing(String dataName, AuthModuleParameters sessionModuleParams,
             List<AuthModuleParameters> authModuleParametersList, int expectedResponseStatus, String auditResult,
             boolean sessionPresent, String moduleId, Map<String, Object> moduleAuditInfo,
-            Matcher<?> auditReasonMatcher) {
+            MapEntry[] auditReasonMatchers) {
         logger.info("Running ModuleAuditing test with data set: " + dataName);
 
         RequestSpecification given = given(sessionModuleParams, authModuleParametersList);
@@ -183,6 +186,11 @@ public class ModuleAuditingIT {
         assertThat(entries)
                 .contains(Assertions.entry("moduleId", moduleId), Assertions.entry("result", auditResult),
                         Assertions.entry("info", moduleAuditInfo));
-        assertThat(auditReasonMatcher.matches(entries.get("reason"))).isTrue();
+        Map<String, Object> reason = (Map<String, Object>) entries.get("reason");
+        if (reason != null) {
+            assertThat(reason).containsOnly(auditReasonMatchers);
+        } else if (auditReasonMatchers.length != 0) {
+            fail("Module reason is unexpectedly null!");
+        }
     }
 }

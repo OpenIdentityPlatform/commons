@@ -46,6 +46,11 @@ public class ContextHandler {
     private final MessageInfoUtils messageInfoUtils;
 
     /**
+     * Constant for the list of auth module failure reasons.
+     */
+    public static final String FAILURE_REASONS = "org.forgerock.authentication.failure.reasons";
+
+    /**
      * Constructs a new instance of the ContextHandler.
      *
      * @param messageInfoUtils An instance of the MessageInfoUtils.

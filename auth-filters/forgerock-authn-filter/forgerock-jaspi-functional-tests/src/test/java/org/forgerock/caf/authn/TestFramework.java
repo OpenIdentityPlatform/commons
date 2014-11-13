@@ -39,6 +39,7 @@ import static org.forgerock.caf.authn.test.ProtectedResource.RESOURCE_CALLED_HEA
 import static org.forgerock.json.fluent.JsonValue.*;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
+import static org.testng.Assert.fail;
 
 /**
  * Test framework for running tests and verifing results against the JASPI runtime.
@@ -215,7 +216,13 @@ class TestFramework {
             JsonValue auditRecord = auditRecords.get(0);
             assertThat(auditRecord.get("result").asString()).isEqualTo(auditParams.result());
             assertThat(auditRecord.get("requestId").asString()).isNotNull();
-            assertThat(auditRecord.get("principal").asString()).isEqualTo(auditParams.principal());
+            if (auditParams.principal() == null) {
+                assertThat(auditRecord.get("principal").asList(String.class)).isNull();
+            } else if (auditParams.principal().isEmpty()) {
+                assertThat(auditRecord.get("principal").asList(String.class)).isEmpty();
+            } else {
+                assertThat(auditRecord.get("principal").asList(String.class)).containsExactly(auditParams.principal());
+            }
             if (auditParams.sessionPresent()) {
                 assertThat(auditRecord.get("sessionId").getObject()).isNotNull();
             } else {
@@ -228,7 +235,12 @@ class TestFramework {
                 Map<String, Object> entries = auditRecord.get("entries").get(i).asMap();
                 assertThat(entries).contains(
                         entry("moduleId", entry.getModuleId()), entry("result", entry.getResult()));
-                assertThat(entry.getReasonMatcher().matches(entries.get("reason"))).isTrue();
+                Map<String, Object> reason = (Map<String, Object>) entries.get("reason");
+                if (reason != null) {
+                    assertThat(reason).containsOnly(entry.getReasonMatchers());
+                } else if (entry.getReasonMatchers().length != 0) {
+                    fail("Module reason is unexpectedly null!");
+                }
             }
         } else {
             assertThat(auditRecords).isEmpty();

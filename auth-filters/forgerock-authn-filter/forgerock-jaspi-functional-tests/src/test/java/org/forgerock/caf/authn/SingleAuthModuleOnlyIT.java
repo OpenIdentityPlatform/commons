@@ -16,6 +16,7 @@
 
 package org.forgerock.caf.authn;
 
+import org.assertj.core.data.MapEntry;
 import org.forgerock.caf.authn.test.modules.AuthModuleOne;
 import org.hamcrest.Matcher;
 import org.slf4j.Logger;
@@ -108,7 +109,7 @@ public class SingleAuthModuleOnlyIT {
                 null, moduleArray(
                     moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", SEND_FAILURE_AUTH_STATUS, null)),
                 401, false, exceptionMatcher(401),
-                auditParams("FAILED", null, false, entry("AuthModule-AuthModuleOne-0", "FAILED"))
+                auditParams("FAILED", "", false, entry("AuthModule-AuthModuleOne-0", "FAILED"))
             },
             /**
              * Single Auth Module Only - SEND_CONTINUE:AuthException
@@ -158,8 +159,8 @@ public class SingleAuthModuleOnlyIT {
                 null, moduleArray(
                     moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", null, SEND_SUCCESS_AUTH_STATUS)),
                 500, false, exceptionMatcher(500),
-                auditParams("FAILED", null, false, entry("AuthModule-AuthModuleOne-0", "FAILED",
-                        equalTo(AUTH_MODULE_ONE_VALIDATE_REQUEST_HEADER_NAME
+                auditParams("FAILED", "", false, entry("AuthModule-AuthModuleOne-0", "FAILED",
+                        MapEntry.entry("exception", AUTH_MODULE_ONE_VALIDATE_REQUEST_HEADER_NAME
                                 + " header not set, so throwing AuthException.")))
             },
             /**
@@ -284,8 +285,8 @@ public class SingleAuthModuleOnlyIT {
                     moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", FAILURE_AUTH_STATUS,
                         SEND_SUCCESS_AUTH_STATUS)), 500, false,
                 exceptionMatcher(500, containsString("Invalid AuthStatus returned from validateRequest, FAILURE")),
-                auditParams("FAILED", null, false, entry("AuthModule-AuthModuleOne-0", "FAILED",
-                        equalTo("Invalid AuthStatus returned from validateRequest, FAILURE")))
+                auditParams("FAILED", "", false, entry("AuthModule-AuthModuleOne-0", "FAILED",
+                        MapEntry.entry("message", "Invalid AuthStatus returned from validateRequest, FAILURE")))
             },
             /**
              * Single Auth Module Only - null:SEND_SUCCESS
@@ -313,8 +314,8 @@ public class SingleAuthModuleOnlyIT {
                     moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", NULL_AUTH_STATUS,
                         SEND_SUCCESS_AUTH_STATUS)), 500, false,
                 exceptionMatcher(500, containsString("Invalid AuthStatus returned from validateRequest, null")),
-                auditParams("FAILED", null, false, entry("AuthModule-AuthModuleOne-0", "FAILED",
-                        equalTo("Invalid AuthStatus returned from validateRequest, null")))
+                auditParams("FAILED", "", false, entry("AuthModule-AuthModuleOne-0", "FAILED",
+                        MapEntry.entry("message", "Invalid AuthStatus returned from validateRequest, null")))
             },
             /**
              * Single Auth Module Only - SUCCESS:SEND_CONTINUE

@@ -79,4 +79,10 @@ final class AuthModuleParameters {
     String secureResponseReturnValue() {
         return secureResponseReturnValue;
     }
+
+    @Override
+    public String toString() {
+        return "ModuleParams:" + moduleClass.getSimpleName() + "," + moduleName + "," + validateRequestReturnValue + ","
+                + secureResponseReturnValue;
+    }
 }

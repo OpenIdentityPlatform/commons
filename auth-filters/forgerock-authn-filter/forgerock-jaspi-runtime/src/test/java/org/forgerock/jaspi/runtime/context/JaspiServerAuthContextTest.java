@@ -16,9 +16,14 @@
 
 package org.forgerock.jaspi.runtime.context;
 
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.never;
+import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.*;
+
 import org.forgerock.jaspi.exceptions.JaspiAuthException;
 import org.forgerock.jaspi.runtime.AuditTrail;
-import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.jaspi.utils.MessageInfoUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -32,12 +37,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.never;
-import static org.mockito.Matchers.anyListOf;
-import static org.mockito.Mockito.*;
-import static org.testng.Assert.*;
 
 public class JaspiServerAuthContextTest {
 
@@ -348,7 +347,7 @@ public class JaspiServerAuthContextTest {
         //Then
         verify(sessionAuthModule).validateRequest(messageInfo, clientSubject, serviceSubject);
         verify(contextHandler).handleCompletion(messageInfo, clientSubject, AuthStatus.SEND_FAILURE);
-        verify(auditTrail).auditFailure(startsWith("Session-ServerAuthModule"), anyString(),
+        verify(auditTrail).auditFailure(startsWith("Session-ServerAuthModule"), anyMapOf(String.class, Object.class),
                 anyMapOf(String.class, Object.class));
         assertEquals(authStatus, AuthStatus.SEND_FAILURE);
     }
@@ -474,7 +473,7 @@ public class JaspiServerAuthContextTest {
         //Then
         verify(sessionAuthModule).validateRequest(messageInfo, clientSubject, serviceSubject);
         verify(contextHandler).handleCompletion(messageInfo, clientSubject, AuthStatus.SUCCESS);
-        verify(auditTrail).auditFailure(startsWith("Session-ServerAuthModule"), anyString(),
+        verify(auditTrail).auditFailure(startsWith("Session-ServerAuthModule"), anyMapOf(String.class, Object.class),
                 anyMapOf(String.class, Object.class));
         assertEquals(authStatus, AuthStatus.SUCCESS);
     }
@@ -508,7 +507,7 @@ public class JaspiServerAuthContextTest {
         //Then
         verify(sessionAuthModule).validateRequest(messageInfo, clientSubject, serviceSubject);
         verify(contextHandler).handleCompletion(messageInfo, clientSubject, AuthStatus.SEND_SUCCESS);
-        verify(auditTrail).auditFailure(startsWith("Session-ServerAuthModule"), anyString(),
+        verify(auditTrail).auditFailure(startsWith("Session-ServerAuthModule"), anyMapOf(String.class, Object.class),
                 anyMapOf(String.class, Object.class));
         assertEquals(authStatus, AuthStatus.SEND_SUCCESS);
     }
@@ -542,7 +541,7 @@ public class JaspiServerAuthContextTest {
         //Then
         verify(sessionAuthModule).validateRequest(messageInfo, clientSubject, serviceSubject);
         verify(contextHandler).handleCompletion(messageInfo, clientSubject, AuthStatus.SEND_FAILURE);
-        verify(auditTrail).auditFailure(startsWith("Session-ServerAuthModule"), anyString(),
+        verify(auditTrail).auditFailure(startsWith("Session-ServerAuthModule"), anyMapOf(String.class, Object.class),
                 anyMapOf(String.class, Object.class));
         assertEquals(authStatus, AuthStatus.SEND_FAILURE);
     }

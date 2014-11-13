@@ -16,12 +16,10 @@
 
 package org.forgerock.caf.authn;
 
-import org.hamcrest.Matcher;
+import org.assertj.core.data.MapEntry;
 
 import java.util.Arrays;
 import java.util.List;
-
-import static org.hamcrest.Matchers.nullValue;
 
 /**
  * Object containing the expected audit operations to have been performed.
@@ -75,20 +73,20 @@ final class AuditParameters {
 
         private final String moduleId;
         private final String result;
-        private final Matcher<?> reasonMatcher;
+        private final MapEntry[] reasonMatchers;
 
-        private Entry(String moduleId, String result, Matcher<?> reasonMatcher) {
+        private Entry(String moduleId, String result, MapEntry... reasonMatchers) {
             this.moduleId = moduleId;
             this.result = result;
-            this.reasonMatcher = reasonMatcher;
+            this.reasonMatchers = reasonMatchers;
         }
 
         static Entry entry(String moduleId, String result) {
-            return entry(moduleId, result, nullValue());
+            return entry(moduleId, result, new MapEntry[0]);
         }
 
-        static Entry entry(String moduleId, String result, Matcher<?> reasonMatcher) {
-            return new Entry(moduleId, result, reasonMatcher);
+        static Entry entry(String moduleId, String result, MapEntry... reasonMatchers) {
+            return new Entry(moduleId, result, reasonMatchers);
         }
 
         public String getModuleId() {
@@ -99,8 +97,8 @@ final class AuditParameters {
             return result;
         }
 
-        public Matcher<?> getReasonMatcher() {
-            return reasonMatcher;
+        public MapEntry[] getReasonMatchers() {
+            return reasonMatchers;
         }
     }
 }

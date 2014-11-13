@@ -27,6 +27,7 @@ import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.config.ServerAuthContext;
 import javax.security.auth.message.module.ServerAuthModule;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -155,21 +156,16 @@ public abstract class JaspiServerAuthContext<T extends ServerAuthModule> impleme
             final Subject serviceSubject) throws AuthException {
 
         AuditTrail auditTrail = (AuditTrail) messageInfo.getMap().get(AUDIT_TRAIL_KEY);
-        Map<String, Object> moduleAuditInfo = new HashMap<String, Object>();
-        messageInfo.getMap().put(AUDIT_INFO_KEY, moduleAuditInfo);
+        Map<String, Object> moduleAuditInfo = messageInfoUtils.getMap(messageInfo, AUDIT_INFO_KEY);
 
         AuthStatus authStatus;
         // validate session module
         if (sessionAuthModule != null) {
             String moduleId = "Session-" + sessionAuthModule.getClass().getSimpleName();
             try {
-                try {
-                    authStatus = sessionAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject);
-                } catch (AuthException e) {
-                    LOG.debug("Auditing authentication result");
-                    auditTrail.auditFailure(moduleId, e.getMessage(), moduleAuditInfo);
-                    throw e;
-                }
+                authStatus = doValidateRequest(sessionAuthModule, messageInfo, clientSubject, serviceSubject, moduleId,
+                        auditTrail);
+
                 if (AuthStatus.SUCCESS.equals(authStatus)) {
                     auditTrail.auditSuccess(moduleId, moduleAuditInfo);
                     // The module has successfully authenticated the client.
@@ -184,8 +180,13 @@ public abstract class JaspiServerAuthContext<T extends ServerAuthModule> impleme
                             + "return to the client", sessionAuthModule.getClass().getSimpleName());
                     return authStatus;
                 } else if (AuthStatus.SEND_FAILURE.equals(authStatus)) {
-                    String failureReason = (String) messageInfo.getMap().remove(AUDIT_FAILURE_REASON_KEY);
-                    auditTrail.auditFailure(moduleId, failureReason, moduleAuditInfo);
+                    Map<String, Object> failureReason =
+                            messageInfoUtils.removeMap(messageInfo, AUDIT_FAILURE_REASON_KEY);
+                    if (failureReason != null) {
+                        auditTrail.auditFailure(moduleId, failureReason, moduleAuditInfo);
+                    } else {
+                        auditTrail.auditFailure(moduleId, Collections.<String, Object>emptyMap(), moduleAuditInfo);
+                    }
                     // The module has failed to authenticate the client.
                     // -- In our implementation we will let subsequent modules try before sending the failure.
                     LOG.debug("{} has failed to authenticated the client, passing to Auth Modules",
@@ -197,7 +198,8 @@ public abstract class JaspiServerAuthContext<T extends ServerAuthModule> impleme
                      return authStatus;
                 } else {
                     String message = "Invalid AuthStatus returned from validateRequest, " + asString(authStatus);
-                    auditTrail.auditFailure(moduleId, message, moduleAuditInfo);
+                    auditTrail.auditFailure(moduleId, Collections.<String, Object>singletonMap("message", message),
+                            moduleAuditInfo);
                     LOG.error(message);
                     throw new JaspiAuthException(message);
                 }
@@ -219,6 +221,54 @@ public abstract class JaspiServerAuthContext<T extends ServerAuthModule> impleme
             }
 
         contextHandler.handleCompletion(messageInfo, clientSubject, authStatus);
+
+        return authStatus;
+    }
+
+    /**
+     * Performs the actual {@code #validateRequest} call on the auth module ensuring that the principal set by the
+     * auth module is set in the audit trail and in the case of an exception that the failure reason is captured.
+     *
+     * @param authModule The auth module to call {@code #validateRequest} on.
+     * @param messageInfo A contextual object that encapsulates the client request and server response objects.
+     * @param clientSubject A Subject that represents the source of the service request. It is used to store Principals
+     *                      and credentials validated in the request.
+     * @param serviceSubject A Subject that represents the recipient of the service request, or null. It may be used as
+     *                       the source of Principals or credentials to be used to validate the request. If the Subject
+     *                       is not null, the method implementation may add additional Principals or credentials
+     *                       (pertaining to the recipient of the service request) to the Subject.
+     * @param moduleId The module identifier.
+     * @param auditTrail The audit trail.
+     * @return The {@code AuthStatus} from the {@code #validateRequest} call.
+     * @throws AuthException If the {@code #validateRequest} call fails.
+     */
+    protected AuthStatus doValidateRequest(ServerAuthModule authModule, MessageInfo messageInfo, Subject clientSubject,
+            Subject serviceSubject, String moduleId, AuditTrail auditTrail) throws AuthException {
+
+        Map<String, Object> moduleAuditInfo = messageInfoUtils.getMap(messageInfo, AUDIT_INFO_KEY);
+        AuthStatus authStatus = null;
+        try {
+            try {
+                authStatus = authModule.validateRequest(messageInfo, clientSubject, serviceSubject);
+            } finally {
+                String principal = (String) messageInfo.getMap().get(AUDIT_PRINCIPAL_KEY);
+                if (principal != null && !principal.isEmpty()) {
+                    Map<String, Object> auditInfo = messageInfoUtils.getMap(messageInfo, AUDIT_INFO_KEY);
+                    auditInfo.put(AUDIT_PRINCIPAL_KEY, principal);
+                }
+            }
+        } catch (AuthException e) {
+            LOG.debug("Auditing authentication result");
+            Map<String, Object> failureReason =
+                    messageInfoUtils.removeMap(messageInfo, AUDIT_FAILURE_REASON_KEY);
+            if (failureReason != null) {
+                failureReason.put("exception", e.getMessage());
+            } else {
+                failureReason = Collections.<String, Object>singletonMap("exception", e.getMessage());
+            }
+            auditTrail.auditFailure(moduleId, failureReason, moduleAuditInfo);
+            throw e;
+        }
 
         return authStatus;
     }

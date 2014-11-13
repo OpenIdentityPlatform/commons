@@ -28,6 +28,20 @@ import java.util.Map;
 public class MessageInfoUtils {
 
     /**
+     * <p>Removes the map with the given key from the root map in the MessageInfo.</p>
+     *
+     * <p>If the map does not exist in the root map of the MessageInfo, then {@code null} will be returned.</p>
+     *
+     * @param messageInfo The MessageInfo to remove the map from.
+     * @param mapKey The key for the map.
+     * @return The map that is contained in the MessageInfo map with the given key or {@code null} if it does not exist.
+     */
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> removeMap(MessageInfo messageInfo, String mapKey) {
+        return (Map<String, Object>) messageInfo.getMap().remove(mapKey);
+    }
+
+    /**
      * Gets the map with the given key from the root map in the MessageInfo.
      * <br/>
      * If the map does not exist in the root map of the MessageInfo, the a new {@code <String, Object>} map will

@@ -172,9 +172,11 @@ public class FallbackServerAuthContextTest {
         Map<String, Object> privateContextMap = new HashMap<String, Object>();
         Map<String, Object> messageInfoMap = new HashMap<String, Object>();
         AuditTrail auditTrail = mock(AuditTrail.class);
+        List<Object> failureReasonList = new ArrayList<Object>();
 
         given(messageInfo.getMap()).willReturn(messageInfoMap);
         messageInfoMap.put("org.forgerock.authentication.audit.trail", auditTrail);
+        messageInfoMap.put("org.forgerock.authentication.failure.reasons", failureReasonList);
 
         ServerAuthModule authModuleOne = mock(ServerAuthModule.class);
         ServerAuthModule authModuleTwo = mock(ServerAuthModule.class);
@@ -209,9 +211,11 @@ public class FallbackServerAuthContextTest {
         Map<String, Object> privateContextMap = new HashMap<String, Object>();
         Map<String, Object> messageInfoMap = new HashMap<String, Object>();
         AuditTrail auditTrail = mock(AuditTrail.class);
+        List<Object> failureReasonList = new ArrayList<Object>();
 
         given(messageInfo.getMap()).willReturn(messageInfoMap);
         messageInfoMap.put("org.forgerock.authentication.audit.trail", auditTrail);
+        messageInfoMap.put("org.forgerock.authentication.failure.reasons", failureReasonList);
         ServerAuthModule authModuleOne = mock(ServerAuthModule.class);
         authModules.add(authModuleOne);
         given(authModuleOne.validateRequest(messageInfo, clientSubject, serviceSubject))
@@ -238,9 +242,11 @@ public class FallbackServerAuthContextTest {
         Subject serviceSubject = new Subject();
         Map<String, Object> messageInfoMap = new HashMap<String, Object>();
         AuditTrail auditTrail = mock(AuditTrail.class);
+        List<Object> failureReasonList = new ArrayList<Object>();
 
         given(messageInfo.getMap()).willReturn(messageInfoMap);
         messageInfoMap.put("org.forgerock.authentication.audit.trail", auditTrail);
+        messageInfoMap.put("org.forgerock.authentication.failure.reasons", failureReasonList);
 
         ServerAuthModule authModule = mock(ServerAuthModule.class);
         authModules.add(authModule);

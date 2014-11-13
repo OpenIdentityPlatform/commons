@@ -18,7 +18,11 @@ package org.forgerock.jaspi.runtime;
 
 import static org.forgerock.jaspi.runtime.AuditTrail.AUDIT_TRAIL_KEY;
 import static org.forgerock.jaspi.runtime.AuthStatusUtils.isSendContinue;
+import static org.forgerock.json.fluent.JsonValue.field;
+import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.fluent.JsonValue.object;
 
+import org.forgerock.auth.common.DebugLogger;
 import org.forgerock.jaspi.runtime.response.FailureResponseHandler;
 import org.forgerock.json.resource.ResourceException;
 import org.slf4j.Logger;
@@ -37,6 +41,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -158,12 +163,12 @@ public class JaspiRuntime {
             try {
                 requestAuthStatus = serverAuthContext.validateRequest(messageInfo, clientSubject, serviceSubject);
 
-                if (!resultHandler.handleValidateRequestResult(requestAuthStatus, auditTrail, clientSubject,
-                        (HttpServletResponse) messageInfo.getResponseMessage())) {
+                if (!resultHandler.handleValidateRequestResult(requestAuthStatus, messageInfo, auditTrail,
+                        clientSubject, (HttpServletResponse) messageInfo.getResponseMessage())) {
                     return;
                 }
             } catch (AuthException e) {
-                auditTrail.completeAuditAsFailure(null);
+                auditTrail.completeAuditAsFailure();
                 throw e;
             }
 
@@ -181,16 +186,22 @@ public class JaspiRuntime {
             serverAuthContext.cleanSubject(messageInfo, clientSubject);
 
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
             ResourceException jre;
             if (e.getCause() instanceof ResourceException) {
+                LOG.debug(e.getMessage(), e);
                 jre = (ResourceException) e.getCause();
             } else {
+                LOG.error(e.getMessage(), e);
                 jre = ResourceException.getException(ResourceException.INTERNAL_ERROR, e.getMessage());
+            }
+            List<Map<String, Object>> failureReasonList = auditTrail.getFailureReasons();
+            if (failureReasonList != null && !failureReasonList.isEmpty()) {
+                jre.setDetail(json(object(field("failureReasons", failureReasonList))));
             }
             try {
                 failureResponseHandler.handle(jre, messageInfo);
             } catch (IOException ioe) {
+                LOG.error(e.getMessage(), ioe);
                 throw new ServletException(ioe.getMessage(), ioe);
             }
         } finally {

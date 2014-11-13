@@ -47,6 +47,12 @@ public class AuditTrail {
     public static final String AUDIT_INFO_KEY = "org.forgerock.authentication.audit.info";
 
     /**
+     * MessageInfo map key for setting the principal that the auth module has identified that will be set in the audit
+     * log entry.
+     */
+    public static final String AUDIT_PRINCIPAL_KEY = JaspiRuntime.ATTRIBUTE_AUTH_PRINCIPAL;
+
+    /**
      * MessageInfo map key for setting the session id for the authentication request.
      */
     public static final String AUDIT_SESSION_ID_KEY = "org.forgerock.authentication.audit.session.id";
@@ -105,7 +111,7 @@ public class AuditTrail {
      * @param reason The reason the module is reporting a failure.
      * @param info The module audit info map.
      */
-    public void auditFailure(String moduleId, String reason, Map<String, Object> info) {
+    public void auditFailure(String moduleId, Map<String, Object> reason, Map<String, Object> info) {
         entries.add(json(object(
                 field(MODULE_ID_KEY, moduleId),
                 field(RESULT_KEY, FAILED_RESULT),
@@ -120,16 +126,35 @@ public class AuditTrail {
      * @param principal The principal. Must have been set by the successful module.
      */
     void completeAuditAsSuccessful(String principal) {
-        auditMessage.put(RESULT_KEY, "SUCCESSFUL").put(PRINCIPAL_KEY, principal);
+        auditMessage.put(RESULT_KEY, "SUCCESSFUL").put(PRINCIPAL_KEY, array(principal));
     }
 
     /**
-     * Completes the entire audit record as a failure.
+     * <p>Completes the entire audit record as a failure.</p>
      *
-     * @param principal The principal. May have been set by one of the modules.
+     * <p>No auth module successfully completed so will check each auth module entry's audit info map for the
+     * {@link #AUDIT_PRINCIPAL_KEY} key and will created an ordered list of all non-null principal values.</p>
      */
-    void completeAuditAsFailure(String principal) {
-        auditMessage.put(RESULT_KEY, "FAILED").put(PRINCIPAL_KEY, principal);
+    void completeAuditAsFailure() {
+
+        List<Object> principals = array();
+
+        for (Map<String, Object> entry : entries) {
+
+            Map<String, Object> auditInfo = (Map<String, Object>) entry.get(INFO_KEY);
+
+            if (auditInfo == null) {
+                continue;
+            }
+
+            String principal = (String) auditInfo.get(AUDIT_PRINCIPAL_KEY);
+
+            if (principal != null) {
+                principals.add(principal);
+            }
+        }
+
+        auditMessage.put(RESULT_KEY, "FAILED").put(PRINCIPAL_KEY, principals);
     }
 
     /**
@@ -158,6 +183,29 @@ public class AuditTrail {
      */
     String getRequestId() {
         return auditMessage.get(REQUEST_ID_KEY).asString();
+    }
+
+    /**
+     * Gets the list of failure reasons from each of the module entries.
+     *
+     * @return A {@code List} of failure reasons as {@code Map}s of {@code String} to {@code Object}s.
+     */
+    List<Map<String, Object>> getFailureReasons() {
+
+        List<Map<String, Object>> failureReasons = new ArrayList<Map<String, Object>>();
+
+        for (Map<String, Object> entry : entries) {
+
+            Map<String, Object> failureReason = (Map<String, Object>) entry.get(REASON_KEY);
+
+            if (failureReason == null || failureReason.isEmpty()) {
+                continue;
+            }
+
+            failureReasons.add(failureReason);
+        }
+
+        return failureReasons;
     }
 
     /**

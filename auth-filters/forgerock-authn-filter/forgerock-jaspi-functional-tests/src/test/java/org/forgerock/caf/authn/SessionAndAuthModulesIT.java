@@ -361,7 +361,7 @@ public class SessionAndAuthModulesIT {
                         moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", SEND_FAILURE_AUTH_STATUS, null),
                         moduleParams(AuthModuleTwo.class, "AUTH-MODULE-TWO", SEND_FAILURE_AUTH_STATUS, null)),
                 401, false, exceptionMatcher(401),
-                auditParams("FAILED", null, false, entry("Session-SessionAuthModule", "FAILED"),
+                auditParams("FAILED", "", false, entry("Session-SessionAuthModule", "FAILED"),
                         entry("AuthModule-AuthModuleOne-0", "FAILED"), entry("AuthModule-AuthModuleTwo-1", "FAILED"))
             },
             /**
