@@ -16,6 +16,10 @@
 
 package org.forgerock.jaspi.modules.session.jwt;
 
+import static org.forgerock.caf.http.Cookie.*;
+import static org.forgerock.jaspi.runtime.AuditTrail.AUDIT_SESSION_ID_KEY;
+import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
+
 import org.forgerock.caf.http.Cookie;
 import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.json.jose.builders.JwtBuilderFactory;
@@ -44,15 +48,14 @@ import java.io.IOException;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-
-import static org.forgerock.caf.http.Cookie.*;
-import static org.forgerock.jaspi.runtime.AuditTrail.AUDIT_SESSION_ID_KEY;
-import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
 
 /**
  * A JASPI Session Module which creates a JWT when securing the response from a successful authentication and sets it
@@ -90,6 +93,8 @@ public class JwtSessionModule implements ServerAuthModule {
     public static final String HTTP_ONLY_COOKIE_KEY = "isHttpOnly";
     /** Whether the JWT should always be encrypted when sent to client browser property key. */
     public static final String SECURE_COOKIE_KEY = "isSecure";
+    /** The domains the cookie should be set on property key. */
+    public static final String COOKIE_DOMAINS_KEY = "cookieDomains";
 
     private final JwtBuilderFactory jwtBuilderFactory;
 
@@ -106,6 +111,7 @@ public class JwtSessionModule implements ServerAuthModule {
     private boolean browserSessionOnly;
     private boolean isHttpOnly;
     private boolean isSecure;
+    private Collection<String> cookieDomains;
 
     /**
      * Constructs an instance of the JwtSessionModule.
@@ -161,6 +167,10 @@ public class JwtSessionModule implements ServerAuthModule {
         this.isHttpOnly = httpOnly == null ? false : httpOnly;
         Boolean secure = (Boolean) options.get(SECURE_COOKIE_KEY);
         this.isSecure = secure == null ? false : secure;
+        cookieDomains = (Collection<String>) options.get(COOKIE_DOMAINS_KEY);
+        if (cookieDomains == null || cookieDomains.isEmpty()) {
+            cookieDomains = Collections.singleton(null);
+        }
     }
 
     /**
@@ -270,7 +280,7 @@ public class JwtSessionModule implements ServerAuthModule {
                 if (hasCoolOffPeriodExpired(jwt)) {
                     // reset tokenIdleTime
                     HttpServletResponse response = (HttpServletResponse) messageInfo.getResponseMessage();
-                    addCookie(resetIdleTimeout(jwt), response);
+                    resetIdleTimeout(jwt, response);
                 }
 
                 messageInfo.getMap().put(JWT_VALIDATED_KEY, true);
@@ -355,9 +365,9 @@ public class JwtSessionModule implements ServerAuthModule {
      * Resets the idle timeout value on the Jwt, as well as the issued at time and not before time.
      *
      * @param jwt The Jwt, which has been decrypted and validated prior to this call.
-     * @return The same cookie with the new Jwt value set.
+     * @param response The HttpServletResponse with the Jwt Session Cookie.
      */
-    private Cookie resetIdleTimeout(Jwt jwt) {
+    private void resetIdleTimeout(Jwt jwt, HttpServletResponse response) {
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
@@ -380,13 +390,7 @@ public class JwtSessionModule implements ServerAuthModule {
 
         String jwtString = rebuildEncryptedJwt((EncryptedJwt) jwt, publicKey);
 
-        Cookie cookie = newCookie(sessionCookieName, jwtString);
-        cookie.setPath("/");
-        setCookieMaxAge(cookie, now, exp);
-        cookie.setSecure(isSecure);
-        cookie.setHttpOnly(isHttpOnly);
-
-        return cookie;
+        addCookies(createCookies(jwtString, getCookieMaxAge(now, exp), "/"), response);
     }
 
     /**
@@ -438,10 +442,8 @@ public class JwtSessionModule implements ServerAuthModule {
             String sessionId = UUID.randomUUID().toString();
             jwtParameters.put("sessionId", sessionId);
             messageInfo.getMap().put(AUDIT_SESSION_ID_KEY, sessionId);
-            Cookie jwtSessionCookie = createSessionJwtCookie(jwtParameters);
-            addCookie(jwtSessionCookie, response);
+            addCookies(createSessionJwtCookies(jwtParameters), response);
         }
-
 
         return AuthStatus.SEND_SUCCESS;
     }
@@ -451,10 +453,9 @@ public class JwtSessionModule implements ServerAuthModule {
      * sets the JWT onto the response as a Cookie.
      *
      * @param jwtParameters The parameters that should be added to the JWT payload.
-     * @return The JWT Session Cookie.
      * @throws AuthException If there is a problem creating and encrypting the JWT.
      */
-    private Cookie createSessionJwtCookie(Map<String, Object> jwtParameters) throws AuthException {
+    private Collection<Cookie> createSessionJwtCookies(Map<String, Object> jwtParameters) throws AuthException {
 
         KeystoreManager keystoreManager = new KeystoreManager(keystoreType,
                 keystoreFile, keystorePassword);
@@ -492,28 +493,23 @@ public class JwtSessionModule implements ServerAuthModule {
                 .claims(claimsSet)
                 .build();
 
-
-        Cookie cookie = newCookie(sessionCookieName, jwtString);
-        cookie.setPath("/");
-        setCookieMaxAge(cookie, now, exp);
-        cookie.setSecure(isSecure);
-        cookie.setHttpOnly(isHttpOnly);
-        return cookie;
+        return createCookies(jwtString, getCookieMaxAge(now, exp), "/");
     }
 
     /**
-     * Sets the max age for the cookie, based on whether the cookie should be browser session only.
+     * Returns the max age for the cookie, based on whether the cookie should be browser session only.
      * <br/>
      * If the cookie is only meant to last the same length the users browser is open, then the max age is set to -1.
      * Otherwise the max age is set to expiry time.
      *
-     * @param cookie The Cookie.
      * @param now The Date at which the cookie was created.
      * @param exp The expiry Date of the cookie.
      */
-    private void setCookieMaxAge(Cookie cookie, Date now, Date exp) {
+    private int getCookieMaxAge(Date now, Date exp) {
         if (!browserSessionOnly) {
-            cookie.setMaxAge(new Long(exp.getTime() - now.getTime()).intValue() / 1000);
+            return new Long(exp.getTime() - now.getTime()).intValue() / 1000;
+        } else {
+            return -1;
         }
     }
 
@@ -524,12 +520,21 @@ public class JwtSessionModule implements ServerAuthModule {
      * @param response The HttpServletResponse with the Jwt Session Cookie.
      */
     public void deleteSessionJwtCookie(HttpServletResponse response) {
-        Cookie cookie = newCookie(sessionCookieName, null);
-        cookie.setMaxAge(0);
-        cookie.setPath("/");
-        cookie.setSecure(isSecure);
-        cookie.setHttpOnly(isHttpOnly);
-        addCookie(cookie, response);
+        addCookies(createCookies(null, 0, "/"), response);
+    }
+
+    private Collection<Cookie> createCookies(String value, int maxAge, String path) {
+        Collection<Cookie> cookies = new HashSet<Cookie>();
+        for (String cookieDomain : cookieDomains) {
+            Cookie cookie = newCookie(sessionCookieName, value);
+            cookie.setMaxAge(maxAge);
+            cookie.setPath(path);
+            cookie.setDomain(cookieDomain);
+            cookie.setSecure(isSecure);
+            cookie.setHttpOnly(isHttpOnly);
+            cookies.add(cookie);
+        }
+        return cookies;
     }
 
     /**

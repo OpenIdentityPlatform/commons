@@ -18,7 +18,7 @@ package org.forgerock.caf.http;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Date;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -326,6 +326,18 @@ public class Cookie {
             resp.addCookie(cookie.cookie);
         } else {
             resp.addHeader("Set-Cookie", SetCookieSupport.generateHeader(cookie));
+        }
+    }
+
+    /**
+     * Adds the provided cookies to the provided {@code HttpServletResponse} as a 'Set-Cookie' header.
+     *
+     * @param cookies The cookies to add to the response.
+     * @param resp The response to add the cookie to.
+     */
+    public static void addCookies(Collection<Cookie> cookies, HttpServletResponse resp) {
+        for (Cookie cookie : cookies) {
+            addCookie(cookie, resp);
         }
     }
 
