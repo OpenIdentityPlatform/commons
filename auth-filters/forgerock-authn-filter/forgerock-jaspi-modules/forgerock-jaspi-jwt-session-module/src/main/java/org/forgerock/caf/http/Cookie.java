@@ -305,7 +305,7 @@ public class Cookie {
         }
     }
 
-    private static Cookie newCookie(javax.servlet.http.Cookie cookie) {
+    static Cookie newCookie(javax.servlet.http.Cookie cookie) {
 
         if (isServlet3xPresent) {
             return new Cookie(cookie);

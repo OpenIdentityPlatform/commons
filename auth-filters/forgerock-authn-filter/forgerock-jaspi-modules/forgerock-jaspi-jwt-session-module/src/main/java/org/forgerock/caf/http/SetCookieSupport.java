@@ -55,6 +55,16 @@ public class SetCookieSupport {
     }
 
     /**
+     * Method added to support transforming javax.servlet.http.Cookie instances into the String format needed by the
+     * AdviceContext.
+     * @param cookie The javax.servlet.http.Cookie instance whose String representation is desired
+     * @return the String representation of the cookie parameter
+     */
+    public String generateHeader(javax.servlet.http.Cookie cookie) {
+        return generateHeader(Cookie.newCookie(cookie));
+    }
+
+    /**
      * Generates the 'Set-Cookie' header string for the provided {@code Cookie}.
      *
      * @param cookie The {@code Cookie} to generate the header string for.
