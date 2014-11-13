@@ -199,7 +199,7 @@ public class AuthorizationFiltersTest {
         ActionRequest request = Requests.newActionRequest("RESOURCE_NAME", "ACTION_ID");
         ResultHandler<JsonValue> handler = mock(ResultHandler.class);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
-                Promises.newSuccessfulPromise(AuthorizationResult.success());
+                Promises.newSuccessfulPromise(AuthorizationResult.accessPermitted());
 
         given(module.authorizeAction(context, request)).willReturn(authorizePromise);
 
@@ -226,7 +226,7 @@ public class AuthorizationFiltersTest {
         ActionRequest request = Requests.newActionRequest("RESOURCE_NAME", "ACTION_ID");
         ResultHandler<JsonValue> handler = mock(ResultHandler.class);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
-                Promises.newSuccessfulPromise(AuthorizationResult.failure("REASON",
+                Promises.newSuccessfulPromise(AuthorizationResult.accessDenied("REASON",
                         json(object(field("DETAIL", "VALUE")))));
 
         given(module.authorizeAction(context, request)).willReturn(authorizePromise);
@@ -289,7 +289,7 @@ public class AuthorizationFiltersTest {
         CreateRequest request = Requests.newCreateRequest("", json(object()));
         ResultHandler<Resource> handler = mock(ResultHandler.class);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
-                Promises.newSuccessfulPromise(AuthorizationResult.success());
+                Promises.newSuccessfulPromise(AuthorizationResult.accessPermitted());
 
         given(module.authorizeCreate(context, request)).willReturn(authorizePromise);
 
@@ -315,7 +315,7 @@ public class AuthorizationFiltersTest {
         CreateRequest request = Requests.newCreateRequest("RESOURCE_NAME", json(object()));
         ResultHandler<Resource> handler = mock(ResultHandler.class);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
-                Promises.newSuccessfulPromise(AuthorizationResult.failure("REASON",
+                Promises.newSuccessfulPromise(AuthorizationResult.accessDenied("REASON",
                         json(object(field("DETAIL", "VALUE")))));
 
         given(module.authorizeCreate(context, request)).willReturn(authorizePromise);
@@ -378,7 +378,7 @@ public class AuthorizationFiltersTest {
         DeleteRequest request = Requests.newDeleteRequest("RESOURCE_NAME");
         ResultHandler<Resource> handler = mock(ResultHandler.class);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
-                Promises.newSuccessfulPromise(AuthorizationResult.success());
+                Promises.newSuccessfulPromise(AuthorizationResult.accessPermitted());
 
         given(module.authorizeDelete(context, request)).willReturn(authorizePromise);
 
@@ -405,7 +405,7 @@ public class AuthorizationFiltersTest {
         DeleteRequest request = Requests.newDeleteRequest("RESOURCE_NAME");
         ResultHandler<Resource> handler = mock(ResultHandler.class);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
-                Promises.newSuccessfulPromise(AuthorizationResult.failure("REASON",
+                Promises.newSuccessfulPromise(AuthorizationResult.accessDenied("REASON",
                         json(object(field("DETAIL", "VALUE")))));
 
         given(module.authorizeDelete(context, request)).willReturn(authorizePromise);
@@ -468,7 +468,7 @@ public class AuthorizationFiltersTest {
         PatchRequest request = Requests.newPatchRequest("RESOURCE_NAME");
         ResultHandler<Resource> handler = mock(ResultHandler.class);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
-                Promises.newSuccessfulPromise(AuthorizationResult.success());
+                Promises.newSuccessfulPromise(AuthorizationResult.accessPermitted());
 
         given(module.authorizePatch(context, request)).willReturn(authorizePromise);
 
@@ -495,7 +495,7 @@ public class AuthorizationFiltersTest {
         PatchRequest request = Requests.newPatchRequest("RESOURCE_NAME");
         ResultHandler<Resource> handler = mock(ResultHandler.class);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
-                Promises.newSuccessfulPromise(AuthorizationResult.failure("REASON",
+                Promises.newSuccessfulPromise(AuthorizationResult.accessDenied("REASON",
                         json(object(field("DETAIL", "VALUE")))));
 
         given(module.authorizePatch(context, request)).willReturn(authorizePromise);
@@ -557,7 +557,7 @@ public class AuthorizationFiltersTest {
         QueryRequest request = Requests.newQueryRequest("");
         QueryResultHandler handler = mock(QueryResultHandler.class);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
-                Promises.newSuccessfulPromise(AuthorizationResult.success());
+                Promises.newSuccessfulPromise(AuthorizationResult.accessPermitted());
 
         given(module.authorizeQuery(context, request)).willReturn(authorizePromise);
 
@@ -582,7 +582,7 @@ public class AuthorizationFiltersTest {
         QueryRequest request = Requests.newQueryRequest("RESOURCE_CONTAINER");
         QueryResultHandler handler = mock(QueryResultHandler.class);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
-                Promises.newSuccessfulPromise(AuthorizationResult.failure("REASON",
+                Promises.newSuccessfulPromise(AuthorizationResult.accessDenied("REASON",
                         json(object(field("DETAIL", "VALUE")))));
 
         given(module.authorizeQuery(context, request)).willReturn(authorizePromise);
@@ -644,7 +644,7 @@ public class AuthorizationFiltersTest {
         ReadRequest request = Requests.newReadRequest("RESOURCE_NAME");
         ResultHandler<Resource> handler = mock(ResultHandler.class);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
-                Promises.newSuccessfulPromise(AuthorizationResult.success());
+                Promises.newSuccessfulPromise(AuthorizationResult.accessPermitted());
 
         given(module.authorizeRead(context, request)).willReturn(authorizePromise);
 
@@ -671,7 +671,7 @@ public class AuthorizationFiltersTest {
         ReadRequest request = Requests.newReadRequest("RESOURCE_NAME");
         ResultHandler<Resource> handler = mock(ResultHandler.class);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
-                Promises.newSuccessfulPromise(AuthorizationResult.failure("REASON",
+                Promises.newSuccessfulPromise(AuthorizationResult.accessDenied("REASON",
                         json(object(field("DETAIL", "VALUE")))));
 
         given(module.authorizeRead(context, request)).willReturn(authorizePromise);
@@ -734,7 +734,7 @@ public class AuthorizationFiltersTest {
         UpdateRequest request = Requests.newUpdateRequest("RESOURCE_NAME", json(object()));
         ResultHandler<Resource> handler = mock(ResultHandler.class);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
-                Promises.newSuccessfulPromise(AuthorizationResult.success());
+                Promises.newSuccessfulPromise(AuthorizationResult.accessPermitted());
 
         given(module.authorizeUpdate(context, request)).willReturn(authorizePromise);
 
@@ -761,7 +761,7 @@ public class AuthorizationFiltersTest {
         UpdateRequest request = Requests.newUpdateRequest("RESOURCE_NAME", json(object()));
         ResultHandler<Resource> handler = mock(ResultHandler.class);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
-                Promises.newSuccessfulPromise(AuthorizationResult.failure("REASON",
+                Promises.newSuccessfulPromise(AuthorizationResult.accessDenied("REASON",
                         json(object(field("DETAIL", "VALUE")))));
 
         given(module.authorizeUpdate(context, request)).willReturn(authorizePromise);

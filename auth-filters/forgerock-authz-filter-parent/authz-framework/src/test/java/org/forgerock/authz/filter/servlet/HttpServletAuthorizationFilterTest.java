@@ -16,6 +16,10 @@
 
 package org.forgerock.authz.filter.servlet;
 
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.assertNotNull;
+
 import org.forgerock.authz.filter.api.AuthorizationContext;
 import org.forgerock.authz.filter.api.AuthorizationException;
 import org.forgerock.authz.filter.api.AuthorizationResult;
@@ -35,13 +39,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.testng.Assert.assertNotNull;
 
 public class HttpServletAuthorizationFilterTest {
 
@@ -224,7 +221,7 @@ public class HttpServletAuthorizationFilterTest {
         FilterChain chain = mock(FilterChain.class);
         HttpServletAuthorizationModule module = mock(HttpServletAuthorizationModule.class);
         Promise<AuthorizationResult, AuthorizationException> authorizePromise =
-                Promises.newSuccessfulPromise(AuthorizationResult.success());
+                Promises.newSuccessfulPromise(AuthorizationResult.accessPermitted());
         Promise<Void, ServletException> resultHandlerPromise = Promises.newSuccessfulPromise(null);
 
         initialiseFilter(module);
@@ -272,7 +269,7 @@ public class HttpServletAuthorizationFilterTest {
         FilterChain chain = mock(FilterChain.class);
         HttpServletAuthorizationModule module = mock(HttpServletAuthorizationModule.class);
         Promise<AuthorizationResult, AuthorizationException> authorizePromise =
-                Promises.newSuccessfulPromise(AuthorizationResult.success());
+                Promises.newSuccessfulPromise(AuthorizationResult.accessPermitted());
         ServletException exception = mock(ServletException.class);
         Promise<Void, ServletException> resultHandlerPromise = Promises.newFailedPromise(exception);
 

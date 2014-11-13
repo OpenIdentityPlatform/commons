@@ -66,7 +66,8 @@ public class FailureResponseHandlerTest {
         String responseText = sw.toString();
         assertTrue(responseText.contains("400"));
         assertTrue(responseText.contains("BAD_REQUEST"));
-        assertTrue(responseText.contains("\"DETAIL_KEY\": \"DETAIL_VALUE\""));
+        assertTrue(responseText.contains("DETAIL_KEY"));
+        assertTrue(responseText.contains("DETAIL_VALUE"));
         verify(response).setContentType("application/json");
 
     }

@@ -16,6 +16,12 @@
 
 package org.forgerock.authz.filter.servlet;
 
+import static org.forgerock.authz.filter.api.AuthorizationResult.*;
+import static org.forgerock.json.fluent.JsonValue.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.*;
+
 import org.forgerock.authz.filter.api.AuthorizationResult;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.util.promise.Promise;
@@ -28,20 +34,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-
-import static org.forgerock.authz.filter.api.AuthorizationResult.failure;
-import static org.forgerock.authz.filter.api.AuthorizationResult.success;
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
 
 public class SuccessHandlerTest {
 
@@ -67,7 +59,7 @@ public class SuccessHandlerTest {
     public void shouldCallDoFilter() throws ServletException, IOException {
 
         //Given
-        AuthorizationResult result = success();
+        AuthorizationResult result = accessPermitted();
 
         //When
         Promise<Void, ServletException> promise = successHandler.apply(result);
@@ -82,7 +74,7 @@ public class SuccessHandlerTest {
     public void shouldReturnServletExceptionWhenDoFilterThrowsIOException() throws ServletException, IOException {
 
         //Given
-        AuthorizationResult result = success();
+        AuthorizationResult result = accessPermitted();
 
         doThrow(IOException.class).when(chain).doFilter(req, res);
 
@@ -103,7 +95,7 @@ public class SuccessHandlerTest {
     public void shouldReturnServletExceptionWhenDoFilterThrowsServletException() throws ServletException, IOException {
 
         //Given
-        AuthorizationResult result = success();
+        AuthorizationResult result = accessPermitted();
 
         doThrow(ServletException.class).when(chain).doFilter(req, res);
 
@@ -126,7 +118,7 @@ public class SuccessHandlerTest {
 
         //Given
         JsonValue detail = json(object(field("INTERNAL", "VALUE")));
-        AuthorizationResult result = failure("REASON", detail);
+        AuthorizationResult result = accessDenied("REASON", detail);
         PrintWriter writer = mock(PrintWriter.class);
         JsonValue jsonResponse = json(object());
 
@@ -150,7 +142,7 @@ public class SuccessHandlerTest {
             IOException {
 
         //Given
-        AuthorizationResult result = failure("REASON");
+        AuthorizationResult result = accessDenied("REASON");
 
         given(res.isCommitted()).willReturn(true);
 

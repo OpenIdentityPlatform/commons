@@ -30,8 +30,8 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 
-import static org.forgerock.authz.filter.api.AuthorizationResult.failure;
-import static org.forgerock.authz.filter.api.AuthorizationResult.success;
+import static org.forgerock.authz.filter.api.AuthorizationResult.accessDenied;
+import static org.forgerock.authz.filter.api.AuthorizationResult.accessPermitted;
 import static org.forgerock.json.fluent.JsonValue.field;
 import static org.forgerock.json.fluent.JsonValue.json;
 import static org.forgerock.json.fluent.JsonValue.object;
@@ -49,7 +49,7 @@ public class NotDeleteAuthorizationModule implements CrestAuthorizationModule {
     @Override
     public Promise<AuthorizationResult, ResourceException> authorizeCreate(ServerContext context,
             CreateRequest request) {
-        return Promises.newSuccessfulPromise(success());
+        return Promises.newSuccessfulPromise(accessPermitted());
     }
 
     /**
@@ -57,7 +57,7 @@ public class NotDeleteAuthorizationModule implements CrestAuthorizationModule {
      */
     @Override
     public Promise<AuthorizationResult, ResourceException> authorizeRead(ServerContext context, ReadRequest request) {
-        return Promises.newSuccessfulPromise(success());
+        return Promises.newSuccessfulPromise(accessPermitted());
     }
 
     /**
@@ -66,7 +66,7 @@ public class NotDeleteAuthorizationModule implements CrestAuthorizationModule {
     @Override
     public Promise<AuthorizationResult, ResourceException> authorizeUpdate(ServerContext context,
             UpdateRequest request) {
-        return Promises.newSuccessfulPromise(success());
+        return Promises.newSuccessfulPromise(accessPermitted());
     }
 
     /**
@@ -75,7 +75,7 @@ public class NotDeleteAuthorizationModule implements CrestAuthorizationModule {
     @Override
     public Promise<AuthorizationResult, ResourceException> authorizeDelete(ServerContext context,
             DeleteRequest request) {
-        return Promises.newSuccessfulPromise(failure("Delete is not allowed",
+        return Promises.newSuccessfulPromise(accessDenied("Delete is not allowed",
                 json(object(field("internalCode", 123)))));
     }
 
@@ -84,7 +84,7 @@ public class NotDeleteAuthorizationModule implements CrestAuthorizationModule {
      */
     @Override
     public Promise<AuthorizationResult, ResourceException> authorizePatch(ServerContext context, PatchRequest request) {
-        return Promises.newSuccessfulPromise(success());
+        return Promises.newSuccessfulPromise(accessPermitted());
     }
 
     /**
@@ -93,7 +93,7 @@ public class NotDeleteAuthorizationModule implements CrestAuthorizationModule {
     @Override
     public Promise<AuthorizationResult, ResourceException> authorizeAction(ServerContext context,
             ActionRequest request) {
-        return Promises.newSuccessfulPromise(success());
+        return Promises.newSuccessfulPromise(accessPermitted());
     }
 
     /**
@@ -101,6 +101,6 @@ public class NotDeleteAuthorizationModule implements CrestAuthorizationModule {
      */
     @Override
     public Promise<AuthorizationResult, ResourceException> authorizeQuery(ServerContext context, QueryRequest request) {
-        return Promises.newSuccessfulPromise(success());
+        return Promises.newSuccessfulPromise(accessPermitted());
     }
 }

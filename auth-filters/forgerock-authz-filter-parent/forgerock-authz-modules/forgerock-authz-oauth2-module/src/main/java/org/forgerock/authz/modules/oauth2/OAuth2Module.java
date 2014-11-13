@@ -117,14 +117,14 @@ public class OAuth2Module {
 
                 if (!validationResponse.isTokenValid()) {
                     logger.debug("Access Token is invalid");
-                    return Promises.newSuccessfulPromise(AuthorizationResult.failure("Access Token is invalid."));
+                    return Promises.newSuccessfulPromise(AuthorizationResult.accessDenied("Access Token is invalid."));
                 }
 
                 // Verify scope is sufficient?...
                 final Set<String> tokenScopes = validationResponse.getTokenScopes();
                 if (!tokenScopes.containsAll(requiredScopes)) {
                     logger.debug("Access Token does not contain required scopes");
-                    return Promises.newSuccessfulPromise(AuthorizationResult.failure(
+                    return Promises.newSuccessfulPromise(AuthorizationResult.accessDenied(
                             "Access Token does not contain required scopes."));
                 }
 
@@ -132,14 +132,14 @@ public class OAuth2Module {
                 final Map<String, Object> profileInfo = validationResponse.getProfileInformation();
                 context.setAttribute(OAUTH2_PROFILE_INFO_CONTEXT_KEY, profileInfo);
 
-                return Promises.newSuccessfulPromise(AuthorizationResult.success());
+                return Promises.newSuccessfulPromise(AuthorizationResult.accessPermitted());
             } catch (OAuth2Exception e) {
                 logger.error("Failed to validate Access Token.", e);
                 return Promises.newFailedPromise(new AuthorizationException("Failed to validate Access Token.", e));
             }
         }
 
-        return Promises.newSuccessfulPromise(AuthorizationResult.failure("Access Token is null."));
+        return Promises.newSuccessfulPromise(AuthorizationResult.accessDenied("Access Token is null."));
     }
 
     /**

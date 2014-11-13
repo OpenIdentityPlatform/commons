@@ -60,9 +60,9 @@ public class HttpServletEndpointCheckerAuthorizationModule implements HttpServle
         final String endpoint = getResourceName(req);
         if (endpointChecker.check(endpoint)) {
             context.setAttribute("AuthorizationResult", "success");
-            return Promises.newSuccessfulPromise(AuthorizationResult.success());
+            return Promises.newSuccessfulPromise(AuthorizationResult.accessPermitted());
         }
-        return Promises.newSuccessfulPromise(AuthorizationResult.failure("Not authorized for endpoint: " + endpoint,
+        return Promises.newSuccessfulPromise(AuthorizationResult.accessDenied("Not authorized for endpoint: " + endpoint,
                 json(object(field("internalCode", 123)))));
     }
 
