@@ -34,7 +34,7 @@ public class AuthorizationResultTest {
         //Given
 
         //When
-        AuthorizationResult authorizationResult = AuthorizationResult.success();
+        AuthorizationResult authorizationResult = AuthorizationResult.accessPermitted();
 
         //Then
         assertTrue(authorizationResult.isAuthorized());
@@ -49,7 +49,7 @@ public class AuthorizationResultTest {
         String reason = "REASON";
 
         //When
-        AuthorizationResult authorizationResult = AuthorizationResult.failure(reason);
+        AuthorizationResult authorizationResult = AuthorizationResult.accessDenied(reason);
 
         //Then
         assertFalse(authorizationResult.isAuthorized());
@@ -65,7 +65,7 @@ public class AuthorizationResultTest {
         JsonValue detail = json(object());
 
         //When
-        AuthorizationResult authorizationResult = AuthorizationResult.failure(reason, detail);
+        AuthorizationResult authorizationResult = AuthorizationResult.accessDenied(reason, detail);
 
         //Then
         assertFalse(authorizationResult.isAuthorized());
