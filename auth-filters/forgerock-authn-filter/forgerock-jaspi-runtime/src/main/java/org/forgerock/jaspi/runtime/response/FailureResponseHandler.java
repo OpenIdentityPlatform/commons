@@ -16,6 +16,7 @@
 
 package org.forgerock.jaspi.runtime.response;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.guava.common.net.MediaType;
 import org.forgerock.jaspi.runtime.ResourceExceptionHandler;
 import org.forgerock.json.resource.ResourceException;
@@ -38,6 +39,8 @@ import java.util.regex.Pattern;
  * A handler class for rendering failures in the most acceptable supported content type.
  */
 public class FailureResponseHandler {
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private static final Pattern ACCEPT_HEADER = Pattern.compile("(?:(?:[^\",]*|(?:.*[^\\\\]\".*[^\\\\]\".*)))( *, *)");
     private static final MediaType WILDCARD = MediaType.parse("*/*");
@@ -140,7 +143,7 @@ public class FailureResponseHandler {
         public void write(ResourceException jre, HttpServletResponse response) throws IOException {
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
-            response.getWriter().write(jre.includeCauseInJsonValue().toJsonValue().toString());
+            OBJECT_MAPPER.writeValue(response.getWriter(), jre.includeCauseInJsonValue().toJsonValue().asMap());
         }
     }
 }

@@ -45,6 +45,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>forgerock-auth-filter-common</artifactId>
         </dependency>
