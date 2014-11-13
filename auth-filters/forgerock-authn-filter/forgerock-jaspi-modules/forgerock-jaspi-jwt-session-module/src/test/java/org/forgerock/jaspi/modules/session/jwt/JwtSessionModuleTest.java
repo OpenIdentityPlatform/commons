@@ -55,20 +55,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.anyMap;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.*;
 
 public class JwtSessionModuleTest {
 
@@ -1009,5 +1000,114 @@ public class JwtSessionModuleTest {
         assertEquals(jwtSessionCookie.getPath(), "/");
         assertEquals(jwtSessionCookie.getValue(), "ENCRYPTED_JWT");
         assertEquals(jwtSessionCookie.getMaxAge(), -1);
+    }
+
+    @BeforeMethod(groups = "sessionCookieName")
+    public void setupSessionCookieNameTests() throws Exception {
+        MessagePolicy requestPolicy = null;
+        MessagePolicy responsePolicy = null;
+        CallbackHandler callbackHandler = null;
+        Map<String, Object> options = getOptionsMap(1, 2);
+        options.put(JwtSessionModule.SESSION_COOKIE_NAME_KEY, "my-custom-name");
+
+        jwtSessionModule.initialize(requestPolicy, responsePolicy, callbackHandler, options);
+    }
+
+    @Test(groups = "sessionCookieName")
+    public void shouldUseCustomSessionCookieNameWhenCreatingCookie() throws Exception {
+        //Given
+        MessageInfo messageInfo = mock(MessageInfo.class);
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        Subject serviceSubject = null;
+        EncryptedJwtBuilder encryptedJwtBuilder = mock(EncryptedJwtBuilder.class);
+        JweHeaderBuilder jweHeaderBuilder = mock(JweHeaderBuilder.class);
+        JwtClaimsSetBuilder jwtClaimsSetBuilder = mock(JwtClaimsSetBuilder.class);
+        JwtClaimsSet claimsSet = mock(JwtClaimsSet.class);
+
+        given(jwtBuilderFactory.jwe(Matchers.<Key>anyObject())).willReturn(encryptedJwtBuilder);
+        given(encryptedJwtBuilder.headers()).willReturn(jweHeaderBuilder);
+        given(jweHeaderBuilder.alg(Matchers.<Algorithm>anyObject())).willReturn(jweHeaderBuilder);
+        given(jweHeaderBuilder.enc(Matchers.<EncryptionMethod>anyObject())).willReturn(jweHeaderBuilder);
+        given(jweHeaderBuilder.done()).willReturn(encryptedJwtBuilder);
+
+        given(jwtBuilderFactory.claims()).willReturn(jwtClaimsSetBuilder);
+        given(jwtClaimsSetBuilder.jti(anyString())).willReturn(jwtClaimsSetBuilder);
+        given(jwtClaimsSetBuilder.exp(Matchers.<Date>anyObject())).willReturn(jwtClaimsSetBuilder);
+        given(jwtClaimsSetBuilder.nbf(Matchers.<Date>anyObject())).willReturn(jwtClaimsSetBuilder);
+        given(jwtClaimsSetBuilder.iat(Matchers.<Date>anyObject())).willReturn(jwtClaimsSetBuilder);
+        given(jwtClaimsSetBuilder.claim(anyString(), anyObject())).willReturn(jwtClaimsSetBuilder);
+        given(jwtClaimsSetBuilder.claims(anyMap())).willReturn(jwtClaimsSetBuilder);
+        given(jwtClaimsSetBuilder.build()).willReturn(claimsSet);
+        given(encryptedJwtBuilder.claims(claimsSet)).willReturn(encryptedJwtBuilder);
+        given(encryptedJwtBuilder.build()).willReturn("ENCRYPTED_JWT");
+
+        given(messageInfo.getRequestMessage()).willReturn(request);
+        given(messageInfo.getResponseMessage()).willReturn(response);
+
+        //When
+        AuthStatus authStatus = jwtSessionModule.secureResponse(messageInfo, serviceSubject);
+
+        //Then
+        ArgumentCaptor<Cookie> cookieCaptor = ArgumentCaptor.forClass(Cookie.class);
+        verify(response).addCookie(cookieCaptor.capture());
+        assertThat(cookieCaptor.getValue().getName()).isEqualTo("my-custom-name");
+    }
+
+    @Test(groups = "sessionCookieName")
+    public void shouldUseCustomSessionCookieNameWhenDeletingCookie() throws Exception {
+        //Given
+        MessageInfo messageInfo = mock(MessageInfo.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+
+        given(messageInfo.getResponseMessage()).willReturn(response);
+
+        //When
+        jwtSessionModule.deleteSessionJwtCookie(response);
+
+        //Then
+        ArgumentCaptor<Cookie> cookieCaptor = ArgumentCaptor.forClass(Cookie.class);
+        verify(response).addCookie(cookieCaptor.capture());
+        assertThat(cookieCaptor.getValue().getName()).isEqualTo("my-custom-name");
+    }
+
+    @Test(groups = "sessionCookieName")
+    public void shouldUseCustomSessionCookieNameWhenResettingCookie() throws Exception {
+        //Given
+        MessageInfo messageInfo = mock(MessageInfo.class);
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        Cookie[] cookies = new Cookie[]{new Cookie("my-custom-name", "SESSION_JWT")};
+
+        given(messageInfo.getRequestMessage()).willReturn(request);
+        given(messageInfo.getResponseMessage()).willReturn(response);
+        given(request.getCookies()).willReturn(cookies);
+        EncryptedJwt encryptedJwt = mock(EncryptedJwt.class);
+        JwtClaimsSet claimsSet = mock(JwtClaimsSet.class);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.SECOND, 5);
+        Date expiryTime = calendar.getTime();
+        Date idleTimeout = calendar.getTime();
+        calendar.setTime(new Date());
+        calendar.add(Calendar.MINUTE, -1);
+        calendar.add(Calendar.SECOND, -5);
+        Date issuedAtTime = calendar.getTime();
+        int idleTimeoutSeconds = new Long(idleTimeout.getTime() / 1000L).intValue();
+
+        given(jwtBuilderFactory.reconstruct("SESSION_JWT", EncryptedJwt.class)).willReturn(encryptedJwt);
+        given(encryptedJwt.getClaimsSet()).willReturn(claimsSet);
+        given(claimsSet.getIssuedAtTime()).willReturn(issuedAtTime);
+        given(claimsSet.getExpirationTime()).willReturn(expiryTime);
+        given(claimsSet.getClaim(JwtSessionModule.TOKEN_IDLE_TIME_CLAIM_KEY, Integer.class))
+                .willReturn(idleTimeoutSeconds);
+
+        //When
+        jwtSessionModule.validateJwtSessionCookie(messageInfo);
+
+        //Then
+        ArgumentCaptor<Cookie> cookieCaptor = ArgumentCaptor.forClass(Cookie.class);
+        verify(response).addCookie(cookieCaptor.capture());
+        assertThat(cookieCaptor.getValue().getName()).isEqualTo("my-custom-name");
     }
 }
