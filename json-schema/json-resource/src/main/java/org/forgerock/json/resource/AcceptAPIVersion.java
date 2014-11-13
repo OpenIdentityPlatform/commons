@@ -107,7 +107,7 @@ public final class AcceptAPIVersion {
      * @throws IllegalArgumentException
      *         If the string is an invalid format
      */
-    public static Builder newBuilder(final String versionString) {
+    public static Builder newBuilder(final String versionString) throws BadRequestException {
         return new Builder(versionString);
     }
 
@@ -144,14 +144,18 @@ public final class AcceptAPIVersion {
          *
          * @throws IllegalArgumentException
          *         If the string is an invalid format
+         *         BadRequestException
+         *         If the version specified is unknown, or is in a non-parsable format
          */
-        private Builder(final String versionString) {
+        private Builder(final String versionString) throws BadRequestException {
             if (versionString == null || versionString.isEmpty()) {
                 return;
             }
 
-            Reject.ifFalse(EXPECTED_VERSION_FORMAT.matcher(versionString).matches(),
-                    "Version string is in an invalid format: " + versionString);
+            if (!EXPECTED_VERSION_FORMAT.matcher(versionString).matches()) {
+                throw new BadRequestException("Version string is in an invalid format: "
+                        + versionString);
+            }
 
             final String[] versionEntries = versionString.split(DELIMITER);
 
@@ -165,7 +169,7 @@ public final class AcceptAPIVersion {
                 } else if (RESOURCE_VERSION.equalsIgnoreCase(versionType)) {
                     resourceVersion = Version.valueOf(versionValue);
                 } else {
-                    throw new IllegalArgumentException("Unknown version type: " + versionType);
+                    throw new BadRequestException("Unknown version type: " + versionType);
                 }
             }
         }
