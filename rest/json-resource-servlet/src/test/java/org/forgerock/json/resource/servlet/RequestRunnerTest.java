@@ -11,8 +11,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2014 ForgeRock AS.
  */
+
 package org.forgerock.json.resource.servlet;
 
 import static org.mockito.Matchers.*;
@@ -28,13 +29,13 @@ import static org.forgerock.json.fluent.JsonValue.*;
 import org.forgerock.json.fluent.JsonValue;
 
 import org.forgerock.json.resource.Connection;
-import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.resource.core.Context;
 import org.forgerock.util.promise.Promises;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;

@@ -11,19 +11,20 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2013 ForgeRock AS.
+ * Copyright 2012-2014 ForgeRock AS.
  */
+
 package org.forgerock.json.resource.servlet;
 
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.SecurityContext;
+import org.forgerock.resource.core.Context;
+import org.forgerock.resource.core.RootContext;
 
 /**
  * An HTTP servlet context factory which will create a {@link SecurityContext}
