@@ -13,20 +13,18 @@
  *
  * Copyright 2012-2014 ForgeRock AS.
  */
+
 package org.forgerock.json.resource;
 
 import static org.forgerock.util.Reject.checkNotNull;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.resource.core.AbstractContext;
+import org.forgerock.resource.core.Context;
 
 /**
  * The context associated with a request currently being processed by a JSON
  * request handler within a server. A {@code ServerContext} provides an internal
  * {@code Connection} which can be used for performing internal operations.
- * <p>
- * Contexts <b>MUST</b> support persistence by providing a constructor having
- * the same declaration as {@link #ServerContext(JsonValue, PersistenceConfig)}.
- * See the method's documentation in {@link AbstractContext} for more details.
  * <p>
  * Here is an example of the JSON representation of a server context:
  *
@@ -42,9 +40,6 @@ import org.forgerock.json.fluent.JsonValue;
  */
 public class ServerContext extends AbstractContext {
 
-    /** the client-friendly name of this context. */
-    private static final String CONTEXT_NAME = "server";
-
     /**
      * Creates a new server context having the provided parent, an ID
      * automatically generated using {@code UUID.randomUUID()}, and an internal
@@ -57,7 +52,24 @@ public class ServerContext extends AbstractContext {
      *             server context.
      */
     public ServerContext(final Context parent) {
-        super(parent);
+        super(parent, "server");
+    }
+
+    /**
+     * Creates a new server context having the provided parent, an ID
+     * automatically generated using {@code UUID.randomUUID()}, and an internal
+     * connection inherited from a parent server context.
+     *
+     * @param parent
+     *            The parent context.
+     * @param name
+     *            The client-friendly name of the context.
+     * @throws IllegalStateException
+     *             If it was not possible to inherit a connection from a parent
+     *             server context.
+     */
+    public ServerContext(final Context parent, final String name) {
+        super(parent, name);
     }
 
     /**
@@ -73,31 +85,6 @@ public class ServerContext extends AbstractContext {
      *             server context.
      */
     public ServerContext(final String id, final Context parent) {
-        super(id, checkNotNull(parent, "Cannot instantiate ServerContext with null parent Context"));
-    }
-
-    /**
-     * Restore from JSON representation.
-     *
-     * @param savedContext
-     *            The JSON representation from which this context's attributes
-     *            should be parsed.
-     * @param config
-     *            The persistence configuration.
-     * @throws ResourceException
-     *             If the JSON representation could not be parsed.
-     */
-    public ServerContext(final JsonValue savedContext, final PersistenceConfig config)
-            throws ResourceException {
-        super(savedContext, config);
-    }
-
-    /**
-     * Get this Context's name.
-     *
-     * @return this object's name
-     */
-    public String getContextName() {
-        return CONTEXT_NAME;
+        super(id, "server", checkNotNull(parent, "Cannot instantiate ServerContext with null parent Context"));
     }
 }
