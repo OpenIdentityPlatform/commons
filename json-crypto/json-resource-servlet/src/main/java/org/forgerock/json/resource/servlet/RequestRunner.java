@@ -50,6 +50,7 @@ import javax.mail.internet.ParseException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -416,8 +417,10 @@ final class RequestRunner implements RequestVisitor<Promise<Void, NeverThrowsExc
     private void writeAdvice() {
         if (context.containsContext(AdviceContext.class)) {
             AdviceContext adviceContext = context.asContext(AdviceContext.class);
-            for (Map.Entry<String, String> entry : adviceContext.getAdvices().entrySet()) {
-                httpResponse.setHeader(entry.getKey(), entry.getValue());
+            for (Map.Entry<String, List<String>> entry : adviceContext.getAdvices().entrySet()) {
+                for (String value : entry.getValue()) {
+                    httpResponse.setHeader(entry.getKey(), value);
+                }
             }
         }
     }
