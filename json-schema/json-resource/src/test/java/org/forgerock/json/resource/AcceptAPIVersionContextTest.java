@@ -13,15 +13,14 @@
  *
  * Copyright 2014 ForgeRock AS.
  */
+
 package org.forgerock.json.resource;
 
-import org.forgerock.json.fluent.JsonValue;
+import static org.testng.Assert.*;
+
+import org.forgerock.resource.core.RootContext;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
 
 /**
  * Unit test for {@link AcceptAPIVersionContext}.
@@ -87,28 +86,5 @@ public class AcceptAPIVersionContextTest {
 
         assertEquals(2, context.getResourceVersion().getMajor());
         assertEquals(1, context.getResourceVersion().getMinor());
-    }
-
-    @Test
-    public void deserializes() throws ResourceException {
-        // Given
-        RootContext root = new RootContext();
-        AcceptAPIVersionContext advice = new AcceptAPIVersionContext(root, "name", acceptVersion);
-        ServerContext context = new ServerContext(advice);
-        PersistenceConfig config = PersistenceConfig.builder().build();
-
-        JsonValue savedContext = context.toJsonValue();
-        ServerContext restoredContext = new ServerContext(savedContext, config);
-        AcceptAPIVersionContext restored = restoredContext.asContext(AcceptAPIVersionContext.class);
-
-        // Then
-        assertNotNull(restored.getProtocolVersion());
-        assertNotNull(restored.getResourceVersion());
-
-        assertEquals(1, restored.getProtocolVersion().getMajor());
-        assertEquals(0, restored.getProtocolVersion().getMinor());
-
-        assertEquals(2, restored.getResourceVersion().getMajor());
-        assertEquals(1, restored.getResourceVersion().getMinor());
     }
 }

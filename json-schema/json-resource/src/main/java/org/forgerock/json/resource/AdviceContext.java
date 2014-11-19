@@ -19,7 +19,8 @@ package org.forgerock.json.resource;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.resource.core.AbstractContext;
+import org.forgerock.resource.core.Context;
 import org.forgerock.util.Reject;
 
 /**
@@ -31,14 +32,8 @@ import org.forgerock.util.Reject;
  */
 public class AdviceContext extends AbstractContext {
 
-    /** a client-friendly name for this context. */
-    private static final String CONTEXT_NAME = "advice";
-
-    /** the persisted attribute name for the advices */
-    private static final String ADVICE_ATTR = "advice";
-
-    /** advice currently stored for this context is help in this map. **/
-    private final Map<String, String> myAdvice = new HashMap<String, String>();
+    /** advice currently stored for this context is help in this map. */
+    private final Map<String, String> advice = new HashMap<String, String>();
 
     /**
      * Creates a new AdviceContext with the provided parent
@@ -47,25 +42,7 @@ public class AdviceContext extends AbstractContext {
      *            The parent context.
      */
     public AdviceContext(Context parent) {
-        super(parent);
-        data.put(ADVICE_ATTR, myAdvice);
-    }
-
-    /**
-     * Restore from JSON representation.
-     *
-     * @param savedContext
-     *            The JSON representation from which this context's attributes
-     *            should be parsed.
-     * @param config
-     *            The persistence configuration.
-     *
-     * @throws ResourceException
-     *             If the JSON representation could not be parsed.
-     */
-    AdviceContext(final JsonValue savedContext, final PersistenceConfig config) throws ResourceException {
-        super(savedContext, config);
-        myAdvice.putAll(data.get(ADVICE_ATTR).asMap(String.class));
+        super(parent, "advice");
     }
 
     /**
@@ -74,7 +51,7 @@ public class AdviceContext extends AbstractContext {
      * @return the advices contained within this context.
      */
     public Map<String, String> getAdvices() {
-        return myAdvice;
+        return advice;
     }
 
     /**
@@ -85,11 +62,6 @@ public class AdviceContext extends AbstractContext {
      */
     public void putAdvice(String adviceName, String advice) {
         Reject.ifNull(adviceName, advice);
-        myAdvice.put(adviceName, advice);
-    }
-
-    @Override
-    public String getContextName() {
-        return CONTEXT_NAME;
+        this.advice.put(adviceName, advice);
     }
 }

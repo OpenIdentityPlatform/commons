@@ -11,13 +11,15 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012 ForgeRock AS.
+ * Copyright 2012-2014 ForgeRock AS.
  */
+
 package org.forgerock.json.resource;
 
 import java.util.Collection;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.resource.core.Context;
 
 /**
  * An abstract connection whose synchronous methods are implemented in terms of

@@ -13,6 +13,7 @@
  *
  * Copyright 2014 ForgeRock AS.
  */
+
 package org.forgerock.json.resource.examples;
 
 import static org.forgerock.json.fluent.JsonValue.field;
@@ -24,12 +25,12 @@ import static org.forgerock.json.resource.Resources.newInternalConnection;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
-import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.Router;
+import org.forgerock.resource.core.Context;
+import org.forgerock.resource.core.RootContext;
 
 /**
  * Utility methods for demo apps.

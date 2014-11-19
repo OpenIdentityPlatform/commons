@@ -11,18 +11,18 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2015 ForgeRock AS.
+ * Copyright 2012-2014 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.resource.core.Context;
+import org.forgerock.resource.core.RootContext;
 import org.testng.annotations.Test;
+
+import java.util.HashMap;
 
 /**
  * Tests {@code Context}.
@@ -57,40 +57,6 @@ public final class ContextTest {
         assertThat(context.getId()).isNotEmpty();
         assertThat(context.isRootContext()).isFalse();
         assertThat(context.getContextName()).isEqualTo("server");
-
-        final JsonValue json = context.toJsonValue();
-        assertThat(json.isMap()).isTrue();
-        assertThat(json.size()).isEqualTo(2);
-        assertThat(json.get("class").asString()).isEqualTo(
-                "org.forgerock.json.resource.ServerContext");
-        assertThat(json.get("parent").isMap()).isTrue();
-        assertThat(json.get("parent").size()).isEqualTo(3);
-        assertThat(json.get("parent").get("class").asString()).isEqualTo(
-                "org.forgerock.json.resource.RootContext");
-        assertThat(json.get("parent").get("id").asString()).isEqualTo("root-id");
-        assertThat(json.get("parent").get("parent").asMap()).isNull();
-    }
-
-    @Test
-    public void testServerContextSaveLoad() throws Exception {
-        final PersistenceConfig config = PersistenceConfig.builder().build();
-
-        final JsonValue inRoot = new JsonValue(new LinkedHashMap<String, Object>());
-        inRoot.add("class", "org.forgerock.json.resource.RootContext");
-        inRoot.add("id", "root-id");
-        inRoot.add("parent", null);
-
-        final JsonValue in = new JsonValue(new LinkedHashMap<String, Object>());
-        in.add("class", "org.forgerock.json.resource.ServerContext");
-        in.add("id", "child-id");
-        in.add("parent", inRoot.asMap());
-
-        final ServerContext context = new ServerContext(in, config);
-        assertThat(context.getId()).isEqualTo("child-id");
-        assertThat(context.isRootContext()).isFalse();
-        assertThat(context.getParent().getId()).isEqualTo("root-id");
-        assertThat(context.getParent().getParent()).isNull();
-        assertThat(context.getParent().isRootContext()).isTrue();
     }
 
     @Test
