@@ -13,20 +13,13 @@
  *
  * Copyright 2012-2014 ForgeRock AS.
  */
+
 package org.forgerock.json.resource.servlet;
 
 import static org.forgerock.json.resource.ActionRequest.ACTION_ID_CREATE;
+import static org.forgerock.json.resource.VersionConstants.ACCEPT_API_VERSION;
 import static org.forgerock.json.resource.servlet.HttpUtils.*;
 import static org.forgerock.util.Reject.checkNotNull;
-import static org.forgerock.json.resource.VersionConstants.ACCEPT_API_VERSION;
-
-import java.io.IOException;
-import java.util.Map;
-
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.AcceptAPIVersion;
@@ -35,6 +28,7 @@ import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.AdviceContext;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConflictException;
+import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.CreateRequest;
@@ -51,6 +45,16 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceName;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.json.resource.Version;
+import org.forgerock.util.promise.AsyncFunction;
+import org.forgerock.util.promise.NeverThrowsException;
+import org.forgerock.util.promise.Promise;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.Map;
 
 /**
  * HTTP adapter from Servlet calls to JSON resource calls. This class can be
@@ -519,7 +523,18 @@ public final class HttpServletAdapter {
         final Context context = newRequestContext(req, acceptVersion);
         final ServletSynchronizer sync = syncFactory.createServletSynchronizer(req, resp);
         final RequestRunner runner = new RequestRunner(context, request, req, resp, sync);
-        connectionFactory.getConnectionAsync().then(runner, runner);
+        connectionFactory.getConnectionAsync()
+                .thenAsync(new AsyncFunction<Connection, Void, NeverThrowsException>() {
+                    @Override
+                    public Promise<Void, NeverThrowsException> apply(Connection connection) throws NeverThrowsException {
+                        return runner.handleResult(connection);
+                    }
+                }, new AsyncFunction<ResourceException, Void, NeverThrowsException>() {
+                    @Override
+                    public Promise<Void, NeverThrowsException> apply(ResourceException error) throws NeverThrowsException {
+                        return runner.handleError(error);
+                    }
+                });
         sync.awaitIfNeeded(); // Only blocks when async is not supported.
     }
 
