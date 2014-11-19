@@ -17,9 +17,12 @@
 package org.forgerock.json.jose.jwt;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.fest.assertions.Fail.fail;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+
+import org.forgerock.json.jose.exceptions.JwtRuntimeException;
+import org.testng.annotations.Test;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -29,9 +32,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.forgerock.json.jose.exceptions.JwtRuntimeException;
-import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")
 public class JwtClaimsSetTest {

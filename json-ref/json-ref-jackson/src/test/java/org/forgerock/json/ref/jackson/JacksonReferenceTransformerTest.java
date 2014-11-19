@@ -11,32 +11,23 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2014 ForgeRock AS.
  */
 
 package org.forgerock.json.ref.jackson;
 
-// Java Standard Edition
+import static org.assertj.core.api.Assertions.assertThat;
+
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.ref.JsonReference;
+import org.testng.annotations.Test;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
-
-
-// FEST-Assert
-import static org.fest.assertions.Assertions.assertThat;
-
-
-// TestNG
-import org.testng.annotations.Test;
-
-// JSON Fluent
-import org.forgerock.json.fluent.JsonValue;
-
-// JSON Reference
-import org.forgerock.json.ref.JsonReference;
 
 @SuppressWarnings("javadoc")
 public class JacksonReferenceTransformerTest {
