@@ -11,12 +11,24 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2014 ForgeRock AS.
  */
 
 package org.forgerock.json.crypto;
 
-// Java Standard Edition
+import static org.assertj.core.api.Assertions.assertThat;
+
+import org.forgerock.json.crypto.simple.SimpleDecryptor;
+import org.forgerock.json.crypto.simple.SimpleEncryptor;
+import org.forgerock.json.crypto.simple.SimpleKeySelector;
+import org.forgerock.json.fluent.JsonPointer;
+import org.forgerock.json.fluent.JsonTransformer;
+import org.forgerock.json.fluent.JsonValue;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyPair;
@@ -26,25 +38,6 @@ import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-
-// FEST-Assert
-import static org.fest.assertions.Assertions.assertThat;
-
-// TestNG
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
-// JSON Fluent
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonTransformer;
-
-// JSON Crypto
-import org.forgerock.json.crypto.simple.SimpleDecryptor;
-import org.forgerock.json.crypto.simple.SimpleEncryptor;
-import org.forgerock.json.crypto.simple.SimpleKeySelector;
 
 /**
  * @author Paul C. Bryan

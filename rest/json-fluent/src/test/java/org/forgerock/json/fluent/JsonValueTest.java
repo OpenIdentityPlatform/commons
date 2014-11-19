@@ -12,20 +12,20 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright © 2010–2011 ApexIdentity Inc. All rights reserved.
- * Portions Copyrighted 2011-2014 ForgeRock AS.
+ * Portions Copyrighted 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.fluent;
 
-// Java SE
-import static org.fest.assertions.Assertions.assertThat;
-import static org.fest.assertions.Fail.fail;
-import static org.fest.assertions.MapAssert.entry;
-import static org.forgerock.json.fluent.JsonValue.array;
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
-import static org.forgerock.json.fluent.JsonValue.set;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.data.MapEntry.entry;
+import static org.forgerock.json.fluent.JsonValue.*;
+import static org.testng.Assert.fail;
+
+import org.forgerock.util.promise.Function;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -37,11 +37,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.forgerock.util.promise.Function;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
 /**
  * Unit tests for JsonValue.
@@ -118,7 +113,7 @@ public class JsonValueTest {
 
         assertThat(value.get(ptr("/uid")).asString()).isEqualTo("bjensen");
         assertThat(value.get(ptr("/email")).asString()).isEqualTo("bjensen@example.com");
-        assertThat(value.get(ptr("/contactDetails")).asMap()).hasSize(2).includes(
+        assertThat(value.get(ptr("/contactDetails")).asMap()).hasSize(2).contains(
                 entry("mobile", "+33 61234567"), entry("fixed", "+33 47654321"));
         assertThat(value.get(ptr("/roles")).asList()).containsExactly("hr", "sales", "marketing");
         assertThat(value.get(ptr("/groups")).asList())
@@ -334,7 +329,7 @@ public class JsonValueTest {
 
         assertThat(value.get(ptr("/uid")).asString()).isEqualTo("trigden");
         assertThat(value.get(ptr("/email")).asString()).isEqualTo("trigden@example.com");
-        assertThat(value.get(ptr("/contactDetails")).asMap()).hasSize(2).includes(
+        assertThat(value.get(ptr("/contactDetails")).asMap()).hasSize(2).contains(
                 entry("mobile", "+33 61234567"), entry("fixed", "+33 47654321"));
         assertThat(value.get(ptr("/roles")).asList()).containsExactly("hr", "marketing");
         assertThat(value.get(ptr("/groups")).asList())
@@ -372,12 +367,12 @@ public class JsonValueTest {
     @Test
     public void testAsCollectionOfUnTyped() {
         // test List as Collection
-        Collection<?> list = json(array(2, 3, 5, 8)).asCollection();
+        Collection<Integer> list = json(array(2, 3, 5, 8)).asCollection(Integer.class);
         assertThat(list.size()).isEqualTo(4);
         assertThat(list).containsOnly(2, 3, 5, 8);
 
         // test Set as Collection
-        Collection<?> set = json(set(2, 3, 5, 8)).asCollection();
+        Collection<Integer> set = json(set(2, 3, 5, 8)).asCollection(Integer.class);
         assertThat(set.size()).isEqualTo(4);
         assertThat(set).containsOnly(2, 3, 5, 8);
     }
