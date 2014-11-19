@@ -507,7 +507,7 @@ public class JwtSessionModule implements ServerAuthModule {
      */
     private int getCookieMaxAge(Date now, Date exp) {
         if (!browserSessionOnly) {
-            return new Long(exp.getTime() - now.getTime()).intValue() / 1000;
+            return new Long((exp.getTime() - now.getTime()) / 1000L).intValue();
         } else {
             return -1;
         }
