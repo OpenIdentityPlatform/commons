@@ -182,29 +182,29 @@ public final class HttpServletAdapter {
      *             If an unexpected IO error occurred while sending the
      *             response.
      */
-    public void service(final HttpServletRequest req, final HttpServletResponse resp)
+    public Promise<Void, NeverThrowsException> service(final HttpServletRequest req, final HttpServletResponse resp)
             throws IOException {
 
         // Dispatch the request based on method, taking into account \
         // method override header.
         final String method = getMethod(req);
         if (METHOD_DELETE.equals(method)) {
-            doDelete(req, resp);
+            return doDelete(req, resp);
         } else if (METHOD_GET.equals(method)) {
-            doGet(req, resp);
+            return doGet(req, resp);
         } else if (METHOD_PATCH.equals(method)) {
-            doPatch(req, resp);
+            return doPatch(req, resp);
         } else if (METHOD_POST.equals(method)) {
-            doPost(req, resp);
+            return doPost(req, resp);
         } else if (METHOD_PUT.equals(method)) {
-            doPut(req, resp);
+            return doPut(req, resp);
         } else {
             // TODO: i18n
-            fail(req, resp, new NotSupportedException("Method " + method + " not supported"));
+            return fail(req, resp, new NotSupportedException("Method " + method + " not supported"));
         }
     }
 
-    void doDelete(final HttpServletRequest req, final HttpServletResponse resp) {
+    Promise<Void, NeverThrowsException> doDelete(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
             // Parse out the required API versions.
             final AcceptAPIVersion acceptVersion = parseAcceptAPIVersion(req);
@@ -228,13 +228,13 @@ public final class HttpServletAdapter {
                     request.setAdditionalParameter(name, asSingleValue(name, values));
                 }
             }
-            doRequest(req, resp, acceptVersion, request);
+            return doRequest(req, resp, acceptVersion, request);
         } catch (final Exception e) {
-            fail(req, resp, e);
+            return fail(req, resp, e);
         }
     }
 
-    void doGet(final HttpServletRequest req, final HttpServletResponse resp) {
+    Promise<Void, NeverThrowsException> doGet(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
             // Parse out the required API versions.
             final AcceptAPIVersion acceptVersion = parseAcceptAPIVersion(req);
@@ -316,7 +316,7 @@ public final class HttpServletAdapter {
                             + PARAM_QUERY_EXPRESSION + " are mutually exclusive");
                 }
 
-                doRequest(req, resp, acceptVersion, request);
+                return doRequest(req, resp, acceptVersion, request);
             } else {
                 // Read of instance within collection or singleton.
                 final String rev = getIfNoneMatch(req);
@@ -345,14 +345,14 @@ public final class HttpServletAdapter {
                         request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
                 }
-                doRequest(req, resp, acceptVersion, request);
+                return doRequest(req, resp, acceptVersion, request);
             }
         } catch (final Exception e) {
-            fail(req, resp, e);
+            return fail(req, resp, e);
         }
     }
 
-    void doPatch(final HttpServletRequest req, final HttpServletResponse resp) {
+    Promise<Void, NeverThrowsException> doPatch(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
             // Parse out the required API versions.
             final AcceptAPIVersion acceptVersion = parseAcceptAPIVersion(req);
@@ -383,13 +383,13 @@ public final class HttpServletAdapter {
                     request.setAdditionalParameter(name, asSingleValue(name, values));
                 }
             }
-            doRequest(req, resp, acceptVersion, request);
+            return doRequest(req, resp, acceptVersion, request);
         } catch (final Exception e) {
-            fail(req, resp, e);
+            return fail(req, resp, e);
         }
     }
 
-    void doPost(final HttpServletRequest req, final HttpServletResponse resp) {
+    Promise<Void, NeverThrowsException> doPost(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
             // Parse out the required API versions.
             final AcceptAPIVersion acceptVersion = parseAcceptAPIVersion(req);
@@ -421,7 +421,7 @@ public final class HttpServletAdapter {
                         request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
                 }
-                doRequest(req, resp, acceptVersion, request);
+                return doRequest(req, resp, acceptVersion, request);
             } else {
                 // Action request.
                 final JsonValue content = getJsonActionContent(req);
@@ -440,14 +440,14 @@ public final class HttpServletAdapter {
                         request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
                 }
-                doRequest(req, resp, acceptVersion, request);
+                return doRequest(req, resp, acceptVersion, request);
             }
         } catch (final Exception e) {
-            fail(req, resp, e);
+            return fail(req, resp, e);
         }
     }
 
-    void doPut(final HttpServletRequest req, final HttpServletResponse resp) {
+    Promise<Void, NeverThrowsException> doPut(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
             // Parse out the required API versions.
             final AcceptAPIVersion acceptVersion = parseAcceptAPIVersion(req);
@@ -494,7 +494,7 @@ public final class HttpServletAdapter {
                         request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
                 }
-                doRequest(req, resp, acceptVersion, request);
+                return doRequest(req, resp, acceptVersion, request);
             } else {
                 final UpdateRequest request =
                         Requests.newUpdateRequest(getResourceName(req), content).setRevision(
@@ -510,20 +510,20 @@ public final class HttpServletAdapter {
                         request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
                 }
-                doRequest(req, resp, acceptVersion, request);
+                return doRequest(req, resp, acceptVersion, request);
             }
         } catch (final Exception e) {
-            fail(req, resp, e);
+            return fail(req, resp, e);
         }
     }
 
-    private void doRequest(final HttpServletRequest req, final HttpServletResponse resp,
+    private Promise<Void, NeverThrowsException> doRequest(final HttpServletRequest req, final HttpServletResponse resp,
                            final AcceptAPIVersion acceptVersion, final Request request)
             throws ResourceException, Exception {
         final Context context = newRequestContext(req, acceptVersion);
         final ServletSynchronizer sync = syncFactory.createServletSynchronizer(req, resp);
         final RequestRunner runner = new RequestRunner(context, request, req, resp, sync);
-        connectionFactory.getConnectionAsync()
+        Promise<Void, NeverThrowsException> promise = connectionFactory.getConnectionAsync()
                 .thenAsync(new AsyncFunction<Connection, Void, NeverThrowsException>() {
                     @Override
                     public Promise<Void, NeverThrowsException> apply(Connection connection) throws NeverThrowsException {
@@ -536,6 +536,7 @@ public final class HttpServletAdapter {
                     }
                 });
         sync.awaitIfNeeded(); // Only blocks when async is not supported.
+        return promise;
     }
 
     /**
