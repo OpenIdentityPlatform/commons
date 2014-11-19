@@ -18,23 +18,21 @@ package org.forgerock.json.resource.servlet;
 
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
+import org.forgerock.http.HttpContext;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.resource.core.Context;
-import org.forgerock.resource.core.RootContext;
 
 /**
- * An HTTP servlet context factory which will create a {@link SecurityContext}
- * whose authentication ID and authorization ID are taken from attributes
- * contained in the HTTP servlet request.
+ * An HTTP context factory which will create a {@link SecurityContext} whose
+ * authentication ID and authorization ID are taken from attributes contained
+ * in the HTTP request.
  * <p>
  * This class provides integration with the common authentication framework and
  * is intended to work as follows:
  * <ol>
- * <li>An incoming HTTP request is first intercepted by a Servlet filter
+ * <li>An incoming HTTP request is first intercepted by a HTTP filter
  * responsible for authenticating the request.
  * <li>If authentication is successful, the authentication filter determines the
  * set of principals associated with the user which may be required in order to
@@ -49,15 +47,15 @@ import org.forgerock.resource.core.RootContext;
  * <li>The authentication filter stores the {@code Map} containing the
  * authorization principals in the HTTP servlet request's
  * {@link #ATTRIBUTE_AUTHZID} attribute.
- * <li>The JSON Resource Servlet uses the {@code SecurityContextFactory} to
+ * <li>The JSON Resource Handler uses the {@code SecurityContextFactory} to
  * obtain the authentication ID and authorization principals from the HTTP
- * servlet request's attributes.
+ * request's attributes.
  * </ol>
- * The following code illustrates how an authentication Servlet filter can
+ * The following code illustrates how an authentication HTTP filter can
  * populate the attributes:
  *
  * <pre>
- * public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) {
+ * public Promise<Response, ResponseException> (Context context, org.forgerock.http.Request request, Handler next) {
  *     // Authenticate the user.
  *     String authcid = getUserName(request);
  *     String password = getPassword(request);
@@ -69,88 +67,41 @@ import org.forgerock.resource.core.RootContext;
  *         authzid.put(AUTHZID_ID, id);
  *         ...
  *
- *         request.setAttribute(ATTRIBUTE_AUTHCID, authcid);
- *         request.setAttribute(ATTRIBUTE_AUTHZID, authzid);
+ *         org.forgerock.http.HttpContext httpContext = context.asContext(org.forgerock.http.HttpContext.class);
+ *         httpContext.getAttributes().put(ATTRIBUTE_AUTHCID, authcid);
+ *         httpContext.getAttributes().put(ATTRIBUTE_AUTHZID, authzid);
  *     }
  * }
  * </pre>
  */
-public final class SecurityContextFactory implements HttpServletContextFactory {
+public final class SecurityContextFactory implements HttpContextFactory {
 
     /**
-     * The value of {@link #ATTRIBUTE_AUTHCID} used in CREST versions 2.0.0 -
-     * 2.0.2. See the description of {@link #ATTRIBUTE_AUTHCID} for more
-     * information.
-     *
-     * @deprecated This version of the attribute was used in CREST versions
-     *             2.0.0 - 2.0.2 and deprecated in order to align with the
-     *             attribute names used by the common JASPI authentication
-     *             project. Applications should use
-     *             {@link #ATTRIBUTE_AUTHCID_V2} instead.
-     */
-    @Deprecated
-    public static final String ATTRIBUTE_AUTHCID_V1 = "org.forgerock.security.authcid";
-
-    /**
-     * The most recent value of {@link #ATTRIBUTE_AUTHCID}. See the description
-     * of {@link #ATTRIBUTE_AUTHCID} for more information.
-     */
-    public static final String ATTRIBUTE_AUTHCID_V2 = "org.forgerock.authentication.principal";
-
-    /**
-     * The name of the HTTP Servlet Request attribute where this factory expects
-     * to find the authenticated user's authentication ID. The name of this
+     * The name of the HTTP Request attribute where this factory expects to
+     * find the authenticated user's authentication ID. The name of this
      * attribute is {@code org.forgerock.authentication.principal} and it MUST
      * contain a {@code String} if it is present.
-     * <p>
-     * This constant has the same value as {@link #ATTRIBUTE_AUTHCID_V2}.
      *
      * @see SecurityContext#getAuthenticationId()
      */
-    public static final String ATTRIBUTE_AUTHCID = ATTRIBUTE_AUTHCID_V2;
+    public static final String ATTRIBUTE_AUTHCID = "org.forgerock.authentication.principal";
 
     /**
-     * The value of {@link #ATTRIBUTE_AUTHZID} used in CREST versions 2.0.0 -
-     * 2.0.2. See the description of {@link #ATTRIBUTE_AUTHZID} for more
-     * information.
-     *
-     * @deprecated This version of the attribute was used in CREST versions
-     *             2.0.0 - 2.0.2 and deprecated in order to align with the
-     *             attribute names used by the common JASPI authentication
-     *             project. Applications should use
-     *             {@link #ATTRIBUTE_AUTHZID_V2} instead.
-     */
-    @Deprecated
-    public static final String ATTRIBUTE_AUTHZID_V1 = "org.forgerock.security.authzid";
-
-    /**
-     * The most recent value of {@link #ATTRIBUTE_AUTHZID}. See the description
-     * of {@link #ATTRIBUTE_AUTHZID} for more information.
-     */
-    public static final String ATTRIBUTE_AUTHZID_V2 = "org.forgerock.authentication.context";
-
-    /**
-     * The name of the HTTP Servlet Request attribute where this factory expects
-     * to find the authenticated user's authorization ID. The name of this
+     * The name of the HTTP Request attribute where this factory expects to
+     * find the authenticated user's authorization ID. The name of this
      * attribute is {@code org.forgerock.authentication.context} and it MUST
      * contain a {@code Map<String, Object>} if it is present.
-     * <p>
-     * This constant has the same value as {@link #ATTRIBUTE_AUTHZID_V2}.
      *
      * @see SecurityContext#getAuthorizationId()
      */
-    public static final String ATTRIBUTE_AUTHZID = ATTRIBUTE_AUTHZID_V2;
+    public static final String ATTRIBUTE_AUTHZID = "org.forgerock.authentication.context";
 
     // Singleton instance.
     private static final SecurityContextFactory INSTANCE = new SecurityContextFactory();
 
     /**
      * Returns the singleton security context factory which can be used for
-     * obtaining context information from a HTTP servlet request.
-     * <p>
-     * This method is named {@code getHttpServletContextFactory} so that it can
-     * easily be used for {@link HttpServlet#getHttpServletContextFactory
-     * configuring} JSON Resource Servlets.
+     * obtaining context information from a HTTP request.
      *
      * @return The singleton security context factory.
      */
@@ -164,9 +115,9 @@ public final class SecurityContextFactory implements HttpServletContextFactory {
 
     /**
      * Creates a new {@code SecurityContext} using the attributes contained in
-     * the provided HTTP servlet request. The authentication ID will be obtained
-     * from the {@link #ATTRIBUTE_AUTHCID} attribute, and the authorization ID
-     * will be obtained from the {@link #ATTRIBUTE_AUTHCID} attribute.
+     * the provided HTTP request. The authentication ID will be obtained from
+     * the {@link #ATTRIBUTE_AUTHCID} attribute, and the authorization ID will
+     * be obtained from the {@link #ATTRIBUTE_AUTHCID} attribute.
      * <p>
      * It is not an error if either of the attributes are not present, but a
      * {@link ResourceException} will be thrown if they are present but have the
@@ -174,77 +125,67 @@ public final class SecurityContextFactory implements HttpServletContextFactory {
      *
      * @param parent
      *            The parent context.
-     * @param request
-     *            The HTTP servlet request from which the authentication ID and
-     *            authorization ID attributes should be obtained.
      * @return A security context initialized using the attributes contained in
-     *         the provided HTTP servlet request.
+     *         the provided HTTP request.
      * @throws ResourceException
      *             If one of the attributes was present but had the wrong type.
      */
-    public SecurityContext createContext(final Context parent, final HttpServletRequest request)
-            throws ResourceException {
-        String authcid = getAuthenticationIdAttribute(ATTRIBUTE_AUTHCID, request);
-        if (authcid == null) {
-            // Check legacy attribute name.
-            authcid = getAuthenticationIdAttribute(ATTRIBUTE_AUTHCID_V1, request);
-        }
-        Map<String, Object> authzid = getAuthorizationIdAttribute(ATTRIBUTE_AUTHZID, request);
-        if (authzid == null) {
-            // Check legacy attribute name.
-            authzid = getAuthorizationIdAttribute(ATTRIBUTE_AUTHZID_V1, request);
-        }
+    public SecurityContext createContext(Context parent) throws ResourceException {
+        HttpContext httpContext = parent.asContext(HttpContext.class);
+        String authcid = getAuthenticationIdAttribute(ATTRIBUTE_AUTHCID, httpContext);
+        Map<String, Object> authzid = getAuthorizationIdAttribute(ATTRIBUTE_AUTHZID, httpContext);
         return new SecurityContext(parent, authcid, authzid);
     }
 
-    private String getAuthenticationIdAttribute(final String attributeName,
-            final HttpServletRequest request) throws InternalServerErrorException {
+    private String getAuthenticationIdAttribute(String attributeName, org.forgerock.http.HttpContext context)
+            throws InternalServerErrorException {
         try {
-            return (String) request.getAttribute(attributeName);
+            return (String) context.getAttributes().get(attributeName);
         } catch (final ClassCastException e) {
             throw new InternalServerErrorException(
                     "The security context could not be created because the "
                             + "authentication ID attribute, " + attributeName
-                            + ", contained in the HTTP servlet request did "
-                            + "not have the correct type", e);
+                            + ", contained in the HTTP request did not have "
+                            + "the correct type", e);
         }
     }
 
     @SuppressWarnings("unchecked")
-    private Map<String, Object> getAuthorizationIdAttribute(final String attributeName,
-            final HttpServletRequest request) throws InternalServerErrorException {
+    private Map<String, Object> getAuthorizationIdAttribute(String attributeName,
+            org.forgerock.http.HttpContext context) throws InternalServerErrorException {
         try {
-            return (Map<String, Object>) request.getAttribute(attributeName);
+            return (Map<String, Object>) context.getAttributes().get(attributeName);
         } catch (final ClassCastException e) {
             throw new InternalServerErrorException(
                     "The security context could not be created because the "
                             + "authorization ID attribute, " + attributeName
-                            + ", contained in the HTTP servlet request did "
-                            + "not have the correct type", e);
+                            + ", contained in the HTTP request did not have "
+                            + "the correct type", e);
         }
     }
 
     /**
      * Creates a new {@code SecurityContext} using the attributes contained in
-     * the provided HTTP servlet request. The authentication ID will be obtained
-     * from the {@link #ATTRIBUTE_AUTHCID} attribute, and the authorization ID
-     * will be obtained from the {@link #ATTRIBUTE_AUTHCID} attribute.
+     * the provided HTTP request. The authentication ID will be obtained from
+     * the {@link #ATTRIBUTE_AUTHCID} attribute, and the authorization ID will
+     * be obtained from the {@link #ATTRIBUTE_AUTHCID} attribute.
      * <p>
      * It is not an error if either of the attributes are not present, but a
      * {@link ResourceException} will be thrown if they are present but have the
      * wrong type.
      *
      * @param request
-     *            The HTTP servlet request from which the authentication ID and
+     *            The HTTP request from which the authentication ID and
      *            authorization ID attributes should be obtained.
      * @return A security context initialized using the attributes contained in
-     *         the provided HTTP servlet request.
+     *         the provided HTTP request.
      * @throws ResourceException
      *             If one of the attributes was present but had the wrong type.
      */
     @Override
-    public SecurityContext createContext(final HttpServletRequest request) throws ResourceException {
-        return createContext(new RootContext(), request);
+    public SecurityContext createContext(Context context, org.forgerock.http.Request request)
+            throws ResourceException {
+        return createContext(context);
     }
 
 }

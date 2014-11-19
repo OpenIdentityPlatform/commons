@@ -61,23 +61,6 @@ import org.forgerock.resource.core.Context;
  * "devices/0". It will then be routed to the devices router with a base URI of
  * "users/1/devices/0", a matched URI of "devices/0", and a resource name of ""
  * (empty string).
- * <p>
- * Here is an example of the JSON representation of a routing context:
- *
- * <pre>
- * {
- *   "id"     : "56f0fb7e-3837-464d-b9ec-9d3b6af665c3",
- *   "class"  : "org.forgerock.json.resource.provider.RouterContext",
- *   "parent" : {
- *       ...
- *   },
- *   "matchedUri" : "users/bjensen",
- *   "uriTemplateVariables" : {
- *       "userId" : "bjensen",
- *       "deviceId" : "0"
- *   }
- * }
- * </pre>
  *
  * @see UriRouter
  */

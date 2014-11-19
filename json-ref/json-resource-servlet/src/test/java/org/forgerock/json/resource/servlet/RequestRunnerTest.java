@@ -16,18 +16,17 @@
 
 package org.forgerock.json.resource.servlet;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
-import static org.testng.Assert.*;
-
-import java.util.Collections;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import static org.forgerock.http.test.HttpTest.newRequest;
 import static org.forgerock.json.fluent.JsonValue.*;
-import org.forgerock.json.fluent.JsonValue;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.assertEquals;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
+import org.forgerock.http.Response;
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResult;
@@ -49,21 +48,21 @@ public class RequestRunnerTest {
 
     @Test
     public void testHandleResultAnonymousQueryResultHandlerInVisitQueryAsync() throws Exception {
-        StringBuilder output = new StringBuilder();
-        QueryResultHandler resultHandler = getAnonymousQueryResultHandler(output);
+        Response response = new Response();
+        QueryResultHandler resultHandler = getAnonymousQueryResultHandler(response);
         resultHandler.handleResult(new QueryResult());
-        assertEquals(output.toString(), "" + "{" + "\"result\":[],"
+        assertEquals(getResponseContent(response), "{" + "\"result\":[],"
                 + "\"resultCount\":0,\"pagedResultsCookie\":null,\"remainingPagedResults\":-1"
                 + "}");
     }
 
     @Test
     public void testHandleResourceAnonymousQueryResultHandlerInVisitQueryAsync() throws Exception {
-        StringBuilder output = new StringBuilder();
-        QueryResultHandler resultHandler = getAnonymousQueryResultHandler(output);
+        Response response = new Response();
+        QueryResultHandler resultHandler = getAnonymousQueryResultHandler(response);
         resultHandler.handleResource(new Resource("id", "revision", new JsonValue("jsonValue")));
         resultHandler.handleResult(new QueryResult());
-        assertEquals(output.toString(), "" + "{" + "\"result\":[\"jsonValue\"],"
+        assertEquals(getResponseContent(response), "{" + "\"result\":[\"jsonValue\"],"
                 + "\"resultCount\":1,\"pagedResultsCookie\":null,\"remainingPagedResults\":-1"
                 + "}");
     }
@@ -71,14 +70,14 @@ public class RequestRunnerTest {
     @Test
     public void testHandleResourceTwoAnonymousQueryResultHandlerInVisitQueryAsync()
             throws Exception {
-        StringBuilder output = new StringBuilder();
-        QueryResultHandler resultHandler = getAnonymousQueryResultHandler(output);
+        Response response = new Response();
+        QueryResultHandler resultHandler = getAnonymousQueryResultHandler(response);
         resultHandler.handleResource(new Resource("id", "revision", json(object(field("intField",
                 42), field("stringField", "stringValue")))));
         resultHandler.handleResource(new Resource("id", "revision", json(object(field("intField",
                 43), field("stringField", "otherString")))));
         resultHandler.handleResult(new QueryResult());
-        assertEquals(output.toString(), "" + "{" + "\"result\":["
+        assertEquals(getResponseContent(response), "{" + "\"result\":["
                 + "{\"intField\":42,\"stringField\":\"stringValue\"},"
                 + "{\"intField\":43,\"stringField\":\"otherString\"}" + "],"
                 + "\"resultCount\":2,\"pagedResultsCookie\":null,\"remainingPagedResults\":-1"
@@ -87,38 +86,40 @@ public class RequestRunnerTest {
 
     @Test
     public void testHandleErrorAnonymousQueryResultHandlerInVisitQueryAsync() throws Exception {
-        StringBuilder output = new StringBuilder();
-        QueryResultHandler resultHandler = getAnonymousQueryResultHandler(output);
+        Response response = new Response();
+        QueryResultHandler resultHandler = getAnonymousQueryResultHandler(response);
         resultHandler.handleError(EXCEPTION);
-        assertEquals(output.toString(), "");
+        assertEquals(getResponseContent(response), "");
     }
 
     @Test
     public void testHandleResourceThenErrorAnonymousQueryResultHandlerInVisitQueryAsync()
             throws Exception {
-        StringBuilder output = new StringBuilder();
-        QueryResultHandler resultHandler = getAnonymousQueryResultHandler(output);
+        Response response = new Response();
+        QueryResultHandler resultHandler = getAnonymousQueryResultHandler(response);
         resultHandler.handleResource(new Resource("id", "revision", json(object(field("intField",
                 42), field("stringField", "stringValue")))));
         resultHandler.handleError(EXCEPTION);
-        assertEquals(output.toString(), "" + "{" + "\"result\":["
+        assertEquals(getResponseContent(response), "{" + "\"result\":["
                 + "{\"intField\":42,\"stringField\":\"stringValue\"}" + "]," + "\"resultCount\":1,"
                 + "\"error\":{\"code\":404,\"reason\":\"Not Found\",\"message\":\"Not Found\"}"
                 + "}");
     }
 
-    private QueryResultHandler getAnonymousQueryResultHandler(StringBuilder output)
-            throws Exception {
+    private String getResponseContent(Response response) throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        response.getEntity().copyDecodedContentTo(outputStream);
+        return new String(outputStream.toByteArray());
+    }
+
+    private QueryResultHandler getAnonymousQueryResultHandler(Response httpResponse) throws Exception {
         // mock everything
         Context context = mock(Context.class);
         QueryRequest request = Requests.newQueryRequest("");
-        HttpServletRequest httpRequest = mock(HttpServletRequest.class);
-        HttpServletResponse httpResponse = mock(HttpServletResponse.class);
+        org.forgerock.http.Request httpRequest = newRequest();
         Connection connection = mock(Connection.class);
 
         // set the expectations
-        when(httpResponse.getOutputStream()).thenReturn(new StringBuilderOutputStream(output));
-        when(httpRequest.getParameterMap()).thenReturn(Collections.<String, String[]> emptyMap());
         when(connection.queryAsync(eq(context), eq(request), Matchers.<QueryResultHandler>anyObject()))
                 .thenReturn(Promises.<QueryResult, ResourceException>newSuccessfulPromise(null));
 
