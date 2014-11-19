@@ -17,6 +17,35 @@ package org.forgerock.json.resource.servlet;
 
 import static org.forgerock.util.Utils.closeSilently;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.PatchOperation;
+import org.forgerock.json.resource.PreconditionFailedException;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.Request;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.Version;
+import org.forgerock.util.encode.Base64url;
+import org.forgerock.util.promise.NeverThrowsException;
+import org.forgerock.util.promise.Promise;
+import org.forgerock.util.promise.Promises;
+
+import javax.activation.DataSource;
+import javax.mail.BodyPart;
+import javax.mail.MessagingException;
+import javax.mail.internet.ContentDisposition;
+import javax.mail.internet.ContentType;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.ParseException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
@@ -29,34 +58,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.activation.DataSource;
-import javax.mail.BodyPart;
-import javax.mail.MessagingException;
-import javax.mail.internet.ContentDisposition;
-import javax.mail.internet.ContentType;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMultipart;
-import javax.mail.internet.ParseException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.BadRequestException;
-import org.forgerock.json.resource.InternalServerErrorException;
-import org.forgerock.json.resource.PatchOperation;
-import org.forgerock.json.resource.PreconditionFailedException;
-import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.Request;
-import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.Version;
-import org.forgerock.util.encode.Base64url;
-
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * HTTP utility methods and constants.
@@ -252,7 +253,7 @@ public final class HttpUtils {
      * @param t
      *            The resource exception indicating why the request failed.
      */
-    static void fail(final HttpServletRequest req, final HttpServletResponse resp, final Throwable t) {
+    static Promise<Void, NeverThrowsException> fail(final HttpServletRequest req, final HttpServletResponse resp, final Throwable t) {
         if (!resp.isCommitted()) {
             final ResourceException re = adapt(t);
             try {
@@ -266,6 +267,7 @@ public final class HttpUtils {
                 // Ignore the error since this was probably the cause.
             }
         }
+        return Promises.newSuccessfulPromise(null);
     }
 
     static String getIfMatch(final HttpServletRequest req) {
