@@ -16,31 +16,28 @@
 
 package org.forgerock.json.resource.servlet;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.resource.core.Context;
 
 /**
  * A factory which is responsible for creating new request {@code Context}s for
- * each JSON request. The returned context must include a {@link org.forgerock.resource.core.RootContext} as
- * its root and may include zero or more sub-contexts.
+ * each JSON request. The returned context must include a
+ * {@link org.forgerock.resource.core.RootContext} as its root and may include
+ * zero or more sub-contexts.
  * <p>
  * As an example, a context factory may return a context chain which includes
  * authentication state information.
  */
-public interface HttpServletContextFactory {
+public interface HttpContextFactory {
 
     /**
-     * Returns the context which should be used for the provided HTTP servlet
-     * request.
+     * Returns the context which should be used for the provided HTTP request.
      *
      * @param request
-     *            The HTTP servlet request which is about to be processed.
-     * @return The context which should be used for the provided HTTP servlet
-     *         request.
+     *            The HTTP request which is about to be processed.
+     * @return The context which should be used for the provided HTTP request.
      * @throws ResourceException
      *             If a request context could not be obtained.
      */
-    Context createContext(HttpServletRequest request) throws ResourceException;
+    Context createContext(Context parent, org.forgerock.http.Request request) throws ResourceException;
 }

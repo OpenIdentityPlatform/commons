@@ -21,6 +21,14 @@ import static org.forgerock.json.resource.VersionConstants.ACCEPT_API_VERSION;
 import static org.forgerock.json.resource.servlet.HttpUtils.*;
 import static org.forgerock.util.Reject.checkNotNull;
 
+import java.util.List;
+import java.util.Map;
+
+import org.forgerock.http.Form;
+import org.forgerock.http.Response;
+import org.forgerock.http.ResponseException;
+import org.forgerock.http.header.ContentTypeHeader;
+import org.forgerock.http.routing.RouterContext;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.AcceptAPIVersion;
 import org.forgerock.json.resource.AcceptAPIVersionContext;
@@ -46,71 +54,63 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.json.resource.Version;
 import org.forgerock.resource.core.Context;
 import org.forgerock.util.promise.AsyncFunction;
-import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Map;
-
 /**
- * HTTP adapter from Servlet calls to JSON resource calls. This class can be
- * used in any Servlet, just create a new instance and override the service()
- * method in your Servlet to delegate all those calls to this class's service()
+ * HTTP adapter from HTTP calls to JSON resource calls. This class can be
+ * used in any {@link org.forgerock.http.Handler}, just create a new instance and override the handle(Context, Request)
+ * method in your HTTP Handler to delegate all those calls to this class's handle(Context, Request)
  * method.
  * <p>
  * For example:
  *
  * <pre>
- * public class TestServlet extends javax.servlet.http.HttpServlet {
- *     private HttpServletAdapter adapter;
+ * public class TestHandler extends org.forgerock.http.Handler {
+ *     private final  HttpAdapter adapter;
  *
- *     public void init() throws ServletException {
- *         super.init();
+ *     public TestHandler() {
  *         RequestHandler handler = xxx;
- *         adapter = new HttpServletAdapter(getServletContext(), handler);
+ *         ConnectionFactory connectionFactory =
+ *                 Resources.newInternalConnectionFactory(handler);
+ *         adapter = new HttpAdapter(connectionFactory);
  *     }
  *
- *     protected void service(HttpServletRequest req, HttpServletResponse res)
- *             throws ServletException, IOException {
- *         adapter.service(req, res);
+ *     protected Promise<Response, ResponseException> handler(Context context,
+ *                 org.forgerock.http.Request req)
+ *             throws ResponseException {
+ *         return adapter.handle(context, req);
  *     }
  * }
  * </pre>
  *
  * Note that this adapter does not provide implementations for the HTTP HEAD,
  * OPTIONS, or TRACE methods. A simpler approach is to use the
- * {@link HttpServlet} class contained within this package to build HTTP
- * Servlets since it provides support for these HTTP methods.
+ * {@link CrestHandler} class contained within this package to build HTTP
+ * Handlers since it provides support for these HTTP methods.
  *
- * @see HttpServlet
+ * @see CrestHandler
  */
-public final class HttpServletAdapter {
+public final class HttpAdapter {
 
     private static final String FIELDS_DELIMITER = ",";
     private static final String SORT_KEYS_DELIMITER = ",";
 
     private final ConnectionFactory connectionFactory;
-    private final HttpServletContextFactory contextFactory;
+    private final HttpContextFactory contextFactory;
 
     /**
-     * Creates a new servlet adapter with the provided connection factory and a
+     * Creates a new HTTP adapter with the provided connection factory and a
      * context factory the {@link SecurityContextFactory}.
      *
      * @param connectionFactory
      *            The connection factory.
-     * @throws ServletException
-     *             If the servlet container does not support Servlet 2.x or
-     *             beyond.
      */
-    public HttpServletAdapter(final ConnectionFactory connectionFactory) throws ServletException {
-        this(connectionFactory, (HttpServletContextFactory) null);
+    public HttpAdapter(ConnectionFactory connectionFactory) {
+        this(connectionFactory, (HttpContextFactory) null);
     }
 
     /**
-     * Creates a new servlet adapter with the provided connection factory and
+     * Creates a new HTTP adapter with the provided connection factory and
      * parent request context.
      *
      * @param connectionFactory
@@ -118,23 +118,18 @@ public final class HttpServletAdapter {
      * @param parentContext
      *            The parent request context which should be used as the parent
      *            context of each request context.
-     * @throws ServletException
-     *             If the servlet container does not support Servlet 2.x or
-     *             beyond.
      */
-    public HttpServletAdapter(final ConnectionFactory connectionFactory, final Context parentContext)
-            throws ServletException {
-        this(connectionFactory, new HttpServletContextFactory() {
-
+    public HttpAdapter(ConnectionFactory connectionFactory, final Context parentContext) {
+        this(connectionFactory, new HttpContextFactory() {
             @Override
-            public Context createContext(final HttpServletRequest request) {
+            public Context createContext(Context parent, org.forgerock.http.Request request) throws ResourceException {
                 return parentContext;
             }
         });
     }
 
     /**
-     * Creates a new servlet adapter with the provided connection factory and
+     * Creates a new HTTP adapter with the provided connection factory and
      * context factory.
      *
      * @param connectionFactory
@@ -143,109 +138,96 @@ public final class HttpServletAdapter {
      *            The context factory which will be used to obtain the parent
      *            context of each request context, or {@code null} if the
      *            {@link SecurityContextFactory} should be used.
-     * @throws ServletException
-     *             If the servlet container does not support Servlet 2.x or
-     *             beyond.
      */
-    public HttpServletAdapter(final ConnectionFactory connectionFactory,
-            final HttpServletContextFactory contextFactory) throws ServletException {
-        /*
-         * The servletContext field was removed as part of fix for CREST-146.
-         * The constructor parameter remains for API compatibility.
-         */
-        this.contextFactory =
-                contextFactory != null ? contextFactory : SecurityContextFactory
-                        .getHttpServletContextFactory();
+    public HttpAdapter(ConnectionFactory connectionFactory, HttpContextFactory contextFactory) {
+        this.contextFactory = contextFactory != null ? contextFactory : SecurityContextFactory
+                .getHttpServletContextFactory();
         this.connectionFactory = checkNotNull(connectionFactory);
     }
 
     /**
      * Services the provided HTTP servlet request.
      *
-     * @param req
-     *            The HTTP servlet request.
-     * @param resp
-     *            The HTTP servlet response.
-     * @throws IOException
-     *             If an unexpected IO error occurred while sending the
-     *             response.
+     * @param context
+     *            The request context.
+     * @param request
+     *            The request.
      */
-    public Promise<Void, NeverThrowsException> service(final HttpServletRequest req, final HttpServletResponse resp)
-            throws IOException {
+    public Promise<Response, ResponseException> handle(Context context, org.forgerock.http.Request request) {
 
         // Dispatch the request based on method, taking into account \
         // method override header.
-        final String method = getMethod(req);
+        final String method = getMethod(request);
         if (METHOD_DELETE.equals(method)) {
-            return doDelete(req, resp);
+            return doDelete(context, request);
         } else if (METHOD_GET.equals(method)) {
-            return doGet(req, resp);
+            return doGet(context, request);
         } else if (METHOD_PATCH.equals(method)) {
-            return doPatch(req, resp);
+            return doPatch(context, request);
         } else if (METHOD_POST.equals(method)) {
-            return doPost(req, resp);
+            return doPost(context, request);
         } else if (METHOD_PUT.equals(method)) {
-            return doPut(req, resp);
+            return doPut(context, request);
         } else {
             // TODO: i18n
-            return fail(req, resp, new NotSupportedException("Method " + method + " not supported"));
+            return fail(request, new NotSupportedException("Method " + method + " not supported"));
         }
     }
 
-    Promise<Void, NeverThrowsException> doDelete(final HttpServletRequest req, final HttpServletResponse resp) {
+    Promise<Response, ResponseException> doDelete(Context context, org.forgerock.http.Request req) {
         try {
             // Parse out the required API versions.
             final AcceptAPIVersion acceptVersion = parseAcceptAPIVersion(req);
 
             // Prepare response.
-            prepareResponse(req, resp);
+            Response resp = prepareResponse(req);
 
             // Validate request.
             preprocessRequest(req);
             rejectIfNoneMatch(req);
 
-            final Map<String, String[]> parameters = req.getParameterMap();
+            final Form parameters = req.getForm();
             final DeleteRequest request =
-                    Requests.newDeleteRequest(getResourceName(req)).setRevision(getIfMatch(req));
-            for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
+                    Requests.newDeleteRequest(getResourceName(context, req)).setRevision(getIfMatch(req));
+            for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
                 final String name = p.getKey();
-                final String[] values = p.getValue();
+                final List<String> values = p.getValue();
                 if (parseCommonParameter(name, values, request)) {
                     continue;
                 } else {
                     request.setAdditionalParameter(name, asSingleValue(name, values));
                 }
             }
-            return doRequest(req, resp, acceptVersion, request);
+            return doRequest(context, req, resp, acceptVersion, request);
         } catch (final Exception e) {
-            return fail(req, resp, e);
+            return fail(req, e);
         }
     }
 
-    Promise<Void, NeverThrowsException> doGet(final HttpServletRequest req, final HttpServletResponse resp) {
+    Promise<Response, ResponseException> doGet(Context context, org.forgerock.http.Request req) {
         try {
             // Parse out the required API versions.
             final AcceptAPIVersion acceptVersion = parseAcceptAPIVersion(req);
 
             // Prepare response.
-            prepareResponse(req, resp);
+            Response resp = prepareResponse(req);
 
             // Validate request.
             preprocessRequest(req);
             rejectIfMatch(req);
 
-            final Map<String, String[]> parameters = req.getParameterMap();
+            final Form parameters = req.getForm();
             if (hasParameter(req, PARAM_QUERY_ID) || hasParameter(req, PARAM_QUERY_EXPRESSION)
                     || hasParameter(req, PARAM_QUERY_FILTER)) {
                 // Additional pre-validation for queries.
                 rejectIfNoneMatch(req);
 
                 // Query against collection.
-                final QueryRequest request = Requests.newQueryRequest(getResourceName(req));
+                final QueryRequest request = Requests.newQueryRequest(getResourceName(context, req));
 
-                for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
+                for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
                     final String name = p.getKey();
-                    final String[] values = p.getValue();
+                    final List<String> values = p.getValue();
 
                     if (parseCommonParameter(name, values, request)) {
                         continue;
@@ -304,7 +286,7 @@ public final class HttpServletAdapter {
                             + PARAM_QUERY_EXPRESSION + " are mutually exclusive");
                 }
 
-                return doRequest(req, resp, acceptVersion, request);
+                return doRequest(context, req, resp, acceptVersion, request);
             } else {
                 // Read of instance within collection or singleton.
                 final String rev = getIfNoneMatch(req);
@@ -314,56 +296,57 @@ public final class HttpServletAdapter {
                             + getMethod(req) + " requests");
                 }
 
-                final ReadRequest request = Requests.newReadRequest(getResourceName(req));
-                for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
+                final ReadRequest request = Requests.newReadRequest(getResourceName(context, req));
+                for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
                     final String name = p.getKey();
-                    final String[] values = p.getValue();
+                    final List<String> values = p.getValue();
                     if (parseCommonParameter(name, values, request)) {
                         continue;
                     } else if (PARAM_MIME_TYPE.equalsIgnoreCase(name)) {
-                        if (values.length != 1 || values[0].split(FIELDS_DELIMITER).length > 1) {
+                        if (values.size() != 1 || values.get(0).split(FIELDS_DELIMITER).length > 1) {
                             // FIXME: i18n.
                             throw new BadRequestException("Only one mime type value allowed");
                         }
-                        if (parameters.get(PARAM_FIELDS).length != 1) {
+                        if (parameters.get(PARAM_FIELDS).size() != 1) {
                             // FIXME: i18n.
-                            throw new BadRequestException("The mime type parameter requires only 1 field to be specified");
+                            throw new BadRequestException("The mime type parameter requires only "
+                                    + "1 field to be specified");
                         }
                     } else {
                         request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
                 }
-                return doRequest(req, resp, acceptVersion, request);
+                return doRequest(context, req, resp, acceptVersion, request);
             }
         } catch (final Exception e) {
-            return fail(req, resp, e);
+            return fail(req, e);
         }
     }
 
-    Promise<Void, NeverThrowsException> doPatch(final HttpServletRequest req, final HttpServletResponse resp) {
+    Promise<Response, ResponseException> doPatch(Context context, org.forgerock.http.Request req) {
         try {
             // Parse out the required API versions.
             final AcceptAPIVersion acceptVersion = parseAcceptAPIVersion(req);
 
             // Prepare response.
-            prepareResponse(req, resp);
+            Response resp = prepareResponse(req);
 
             // Validate request.
             preprocessRequest(req);
-            if (req.getHeader(HEADER_IF_NONE_MATCH) != null) {
+            if (req.getHeaders().getFirst(HEADER_IF_NONE_MATCH) != null) {
                 // FIXME: i18n
                 throw new PreconditionFailedException(
                         "Use of If-None-Match not supported for PATCH requests");
             }
 
-            final Map<String, String[]> parameters = req.getParameterMap();
+            final Form parameters = req.getForm();
             final PatchRequest request =
-                    Requests.newPatchRequest(getResourceName(req)).setRevision(getIfMatch(req));
+                    Requests.newPatchRequest(getResourceName(context, req)).setRevision(getIfMatch(req));
             request.getPatchOperations().addAll(getJsonPatchContent(req));
-            for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
+            for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
                 final String name = p.getKey();
-                final String[] values = p.getValue();
-                if (HttpUtils.isMultiPartRequest(req.getContentType())) {
+                final List<String> values = p.getValue();
+                if (HttpUtils.isMultiPartRequest(ContentTypeHeader.valueOf(req).toString())) {
                     // Ignore - multipart content adds form parts to the parameter set
                 } else if (parseCommonParameter(name, values, request)) {
                     continue;
@@ -371,97 +354,97 @@ public final class HttpServletAdapter {
                     request.setAdditionalParameter(name, asSingleValue(name, values));
                 }
             }
-            return doRequest(req, resp, acceptVersion, request);
+            return doRequest(context, req, resp, acceptVersion, request);
         } catch (final Exception e) {
-            return fail(req, resp, e);
+            return fail(req, e);
         }
     }
 
-    Promise<Void, NeverThrowsException> doPost(final HttpServletRequest req, final HttpServletResponse resp) {
+    Promise<Response, ResponseException> doPost(Context context, org.forgerock.http.Request req) {
         try {
             // Parse out the required API versions.
             final AcceptAPIVersion acceptVersion = parseAcceptAPIVersion(req);
 
             // Prepare response.
-            prepareResponse(req, resp);
+            Response resp = prepareResponse(req);
 
             // Validate request.
             preprocessRequest(req);
             rejectIfNoneMatch(req);
             rejectIfMatch(req);
 
-            final Map<String, String[]> parameters = req.getParameterMap();
+            final Form parameters = req.getForm();
             final String action = asSingleValue(PARAM_ACTION, getParameter(req, PARAM_ACTION));
             if (action.equalsIgnoreCase(ACTION_ID_CREATE)) {
                 final JsonValue content = getJsonContent(req);
                 final CreateRequest request =
-                        Requests.newCreateRequest(getResourceName(req), content);
-                for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
+                        Requests.newCreateRequest(getResourceName(context, req), content);
+                for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
                     final String name = p.getKey();
-                    final String[] values = p.getValue();
+                    final List<String> values = p.getValue();
                     if (parseCommonParameter(name, values, request)) {
                         continue;
                     } else if (name.equalsIgnoreCase(PARAM_ACTION)) {
                         // Ignore - already handled.
-                    } else if (HttpUtils.isMultiPartRequest(req.getContentType())) {
+                    } else if (HttpUtils.isMultiPartRequest(ContentTypeHeader.valueOf(req).toString())) {
                         // Ignore - multipart content adds form parts to the parameter set
                     } else {
                         request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
                 }
-                return doRequest(req, resp, acceptVersion, request);
+                return doRequest(context, req, resp, acceptVersion, request);
             } else {
                 // Action request.
                 final JsonValue content = getJsonActionContent(req);
                 final ActionRequest request =
-                        Requests.newActionRequest(getResourceName(req), action).setContent(content);
-                for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
+                        Requests.newActionRequest(getResourceName(context, req), action).setContent(content);
+                for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
                     final String name = p.getKey();
-                    final String[] values = p.getValue();
+                    final List<String> values = p.getValue();
                     if (parseCommonParameter(name, values, request)) {
                         continue;
                     } else if (name.equalsIgnoreCase(PARAM_ACTION)) {
                         // Ignore - already handled.
-                    } else if (HttpUtils.isMultiPartRequest(req.getContentType())) {
+                    } else if (HttpUtils.isMultiPartRequest(ContentTypeHeader.valueOf(req).toString())) {
                         // Ignore - multipart content adds form parts to the parameter set
                     } else {
                         request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
                 }
-                return doRequest(req, resp, acceptVersion, request);
+                return doRequest(context, req, resp, acceptVersion, request);
             }
         } catch (final Exception e) {
-            return fail(req, resp, e);
+            return fail(req, e);
         }
     }
 
-    Promise<Void, NeverThrowsException> doPut(final HttpServletRequest req, final HttpServletResponse resp) {
+    Promise<Response, ResponseException> doPut(Context context, org.forgerock.http.Request req) {
         try {
             // Parse out the required API versions.
             final AcceptAPIVersion acceptVersion = parseAcceptAPIVersion(req);
 
             // Prepare response.
-            prepareResponse(req, resp);
+            Response resp = prepareResponse(req);
 
             // Validate request.
             preprocessRequest(req);
 
-            if (req.getHeader(HEADER_IF_MATCH) != null
-                    && req.getHeader(HEADER_IF_NONE_MATCH) != null) {
+            if (req.getHeaders().getFirst(HEADER_IF_MATCH) != null
+                    && req.getHeaders().getFirst(HEADER_IF_NONE_MATCH) != null) {
                 // FIXME: i18n
                 throw new PreconditionFailedException(
                         "Simultaneous use of If-Match and If-None-Match not "
                                 + "supported for PUT requests");
             }
 
-            final Map<String, String[]> parameters = req.getParameterMap();
+            final Form parameters = req.getForm();
             final JsonValue content = getJsonContent(req);
 
             final String rev = getIfNoneMatch(req);
             if (ETAG_ANY.equals(rev)) {
                 // This is a create with a user provided resource ID: split the
                 // path into the parent resource name and resource ID.
-                final ResourceName resourceName = getResourceName(req);
+                final ResourceName resourceName = getResourceName(context, req);
                 if (resourceName.isEmpty()) {
                     // FIXME: i18n.
                     throw new BadRequestException("No new resource ID in HTTP PUT request");
@@ -471,10 +454,10 @@ public final class HttpServletAdapter {
                 final CreateRequest request =
                         Requests.newCreateRequest(resourceName.parent(), content).setNewResourceId(
                                 resourceName.leaf());
-                for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
+                for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
                     final String name = p.getKey();
-                    final String[] values = p.getValue();
-                    if (HttpUtils.isMultiPartRequest(req.getContentType())) {
+                    final List<String> values = p.getValue();
+                    if (HttpUtils.isMultiPartRequest(ContentTypeHeader.valueOf(req).toString())) {
                         // Ignore - multipart content adds form parts to the parameter set
                     } else if (parseCommonParameter(name, values, request)) {
                         continue;
@@ -482,15 +465,15 @@ public final class HttpServletAdapter {
                         request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
                 }
-                return doRequest(req, resp, acceptVersion, request);
+                return doRequest(context, req, resp, acceptVersion, request);
             } else {
                 final UpdateRequest request =
-                        Requests.newUpdateRequest(getResourceName(req), content).setRevision(
+                        Requests.newUpdateRequest(getResourceName(context, req), content).setRevision(
                                 getIfMatch(req));
-                for (final Map.Entry<String, String[]> p : parameters.entrySet()) {
+                for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
                     final String name = p.getKey();
-                    final String[] values = p.getValue();
-                    if (HttpUtils.isMultiPartRequest(req.getContentType())) {
+                    final List<String> values = p.getValue();
+                    if (HttpUtils.isMultiPartRequest(ContentTypeHeader.valueOf(req).toString())) {
                         // Ignore - multipart content adds form parts to the parameter set
                     } else if (parseCommonParameter(name, values, request)) {
                         continue;
@@ -498,27 +481,27 @@ public final class HttpServletAdapter {
                         request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
                 }
-                return doRequest(req, resp, acceptVersion, request);
+                return doRequest(context, req, resp, acceptVersion, request);
             }
         } catch (final Exception e) {
-            return fail(req, resp, e);
+            return fail(req, e);
         }
     }
 
-    private Promise<Void, NeverThrowsException> doRequest(final HttpServletRequest req, final HttpServletResponse resp,
-                           final AcceptAPIVersion acceptVersion, final Request request)
-            throws ResourceException, Exception {
-        final Context context = newRequestContext(req, acceptVersion);
-        final RequestRunner runner = new RequestRunner(context, request, req, resp);
+    private Promise<Response, ResponseException> doRequest(Context context, org.forgerock.http.Request req,
+            Response resp, AcceptAPIVersion acceptVersion, Request request) throws Exception {
+
+        Context ctx = newRequestContext(context, req, acceptVersion);
+        final RequestRunner runner = new RequestRunner(ctx, request, req, resp);
         return connectionFactory.getConnectionAsync()
-                .thenAsync(new AsyncFunction<Connection, Void, NeverThrowsException>() {
+                .thenAsync(new AsyncFunction<Connection, Response, ResponseException>() {
                     @Override
-                    public Promise<Void, NeverThrowsException> apply(Connection connection) throws NeverThrowsException {
+                    public Promise<Response, ResponseException> apply(Connection connection) {
                         return runner.handleResult(connection);
                     }
-                }, new AsyncFunction<ResourceException, Void, NeverThrowsException>() {
+                }, new AsyncFunction<ResourceException, Response, ResponseException>() {
                     @Override
-                    public Promise<Void, NeverThrowsException> apply(ResourceException error) throws NeverThrowsException {
+                    public Promise<Response, ResponseException> apply(ResourceException error) {
                         return runner.handleError(error);
                     }
                 });
@@ -527,26 +510,30 @@ public final class HttpServletAdapter {
     /**
      * Gets the raw (still url-encoded) resource name from the request. Removes leading and trailing forward slashes.
      */
-    private ResourceName getResourceName(final HttpServletRequest req) throws ResourceException {
-        String resourceName = HttpUtils.getRawPathInfo(req);
-        // Treat null path info as root resource.
-        if (resourceName == null) {
-            return ResourceName.empty();
-        }
+    private ResourceName getResourceName(Context context, org.forgerock.http.Request req) throws ResourceException {
         try {
-            return ResourceName.valueOf(resourceName);
+            if (context.containsContext(RouterContext.class)) {
+                RouterContext routerContext = context.asContext(RouterContext.class);
+                StringBuilder buffer = new StringBuilder(req.getUri().getRawPath());
+                return ResourceName.valueOf(
+                        buffer.subSequence(routerContext.getMatchedUri().length(), buffer.length()).toString());
+            } else {
+                return ResourceName.valueOf(req.getUri().getRawPath()); //TODO is this a valid assumption?
+            }
         } catch (IllegalArgumentException e) {
             throw new BadRequestException(e.getMessage());
         }
     }
 
-    private Context newRequestContext(final HttpServletRequest req, final AcceptAPIVersion acceptVersion)
+    private Context newRequestContext(Context context, org.forgerock.http.Request req, AcceptAPIVersion acceptVersion)
             throws ResourceException {
-        final Context root = contextFactory.createContext(req);
-        return new AdviceContext(new AcceptAPIVersionContext(new HttpContext(root, req), PROTOCOL_NAME, acceptVersion));
+        final Context parent = contextFactory.createContext(context, req);
+        return new AdviceContext(
+                new AcceptAPIVersionContext(
+                        new HttpContext(parent, req), PROTOCOL_NAME, acceptVersion));
     }
 
-    private boolean parseCommonParameter(final String name, final String[] values,
+    private boolean parseCommonParameter(final String name, final List<String> values,
             final Request request) throws ResourceException {
         if (name.equalsIgnoreCase(PARAM_FIELDS)) {
             for (final String s : values) {
@@ -569,28 +556,28 @@ public final class HttpServletAdapter {
         }
     }
 
-    private void preprocessRequest(final HttpServletRequest req) throws ResourceException {
+    private void preprocessRequest(org.forgerock.http.Request req) throws ResourceException {
         // TODO: check Accept (including charset parameter) and Accept-Charset headers
 
         // Check content-type.
-        final String contentType = req.getContentType();
+        final String contentType = ContentTypeHeader.valueOf(req).getType();
         if (!req.getMethod().equalsIgnoreCase(HttpUtils.METHOD_GET) && contentType != null
                 && !CONTENT_TYPE_REGEX.matcher(contentType).matches()
                 && !HttpUtils.isMultiPartRequest(contentType)) {
             // TODO: i18n
             throw new BadRequestException(
                     "The request could not be processed because it specified the content-type '"
-                            + req.getContentType() + "' when only the content-type '"
+                            + contentType + "' when only the content-type '"
                             + MIME_TYPE_APPLICATION_JSON + "' and '"
                             + MIME_TYPE_MULTIPART_FORM_DATA + "' are supported");
         }
 
-        if (req.getHeader("If-Modified-Since") != null) {
+        if (req.getHeaders().getFirst("If-Modified-Since") != null) {
             // TODO: i18n
             throw new ConflictException("Header If-Modified-Since not supported");
         }
 
-        if (req.getHeader("If-Unmodified-Since") != null) {
+        if (req.getHeaders().getFirst("If-Unmodified-Since") != null) {
             // TODO: i18n
             throw new ConflictException("Header If-Unmodified-Since not supported");
         }
@@ -609,9 +596,9 @@ public final class HttpServletAdapter {
      * @throws BadRequestException
      *         If an invalid version is requested
      */
-    private AcceptAPIVersion parseAcceptAPIVersion(final HttpServletRequest req) throws BadRequestException {
+    private AcceptAPIVersion parseAcceptAPIVersion(org.forgerock.http.Request req) throws BadRequestException {
         // Extract out the protocol and resource versions.
-        final String versionString = req.getHeader(ACCEPT_API_VERSION);
+        final String versionString = req.getHeaders().getFirst(ACCEPT_API_VERSION);
 
         final AcceptAPIVersion acceptAPIVersion = AcceptAPIVersion
                 .newBuilder(versionString)

@@ -11,38 +11,31 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2013 ForgeRock AS.
+ * Copyright 2012-2014 ForgeRock AS.
  */
+
 package org.forgerock.json.resource.servlet;
 
-import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.http.Handler;
 import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.Router;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
+import org.forgerock.util.Reject;
 
 /**
  * Default connection factory provider.
  */
 final class MemoryBackendConnectionFactoryProvider {
-    private static final String INIT_PARAM_URI_TEMPLATE = "uri-template";
 
     // Prevent instantiation.
     private MemoryBackendConnectionFactoryProvider() {
         // Nothing to do.
     }
 
-    static ConnectionFactory getConnectionFactory(final ServletConfig config)
-            throws ServletException {
-        final String uriTemplate = config.getInitParameter(INIT_PARAM_URI_TEMPLATE);
-        if (uriTemplate == null) {
-            throw new ServletException("Servlet initialization parameter '"
-                    + INIT_PARAM_URI_TEMPLATE + "' not specified");
-        }
+    static Handler getConnectionFactory(String uriTemplate) {
+        Reject.ifNull(uriTemplate, "uriTemplate cannot be null");
         final Router router = new Router();
         router.addRoute(uriTemplate, new MemoryBackend());
-        return Resources.newInternalConnectionFactory(router);
+        return new CrestHandler(Resources.newInternalConnectionFactory(router));
     }
 }

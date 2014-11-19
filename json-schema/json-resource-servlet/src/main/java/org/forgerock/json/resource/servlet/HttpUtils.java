@@ -13,28 +13,11 @@
  *
  * Copyright 2012-2014 ForgeRock AS.
  */
+
 package org.forgerock.json.resource.servlet;
 
+import static org.forgerock.http.io.IO.newPipedOutputStream;
 import static org.forgerock.util.Utils.closeSilently;
-
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.BadRequestException;
-import org.forgerock.json.resource.InternalServerErrorException;
-import org.forgerock.json.resource.PatchOperation;
-import org.forgerock.json.resource.PreconditionFailedException;
-import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.Request;
-import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.Version;
-import org.forgerock.util.encode.Base64url;
-import org.forgerock.util.promise.NeverThrowsException;
-import org.forgerock.util.promise.Promise;
-import org.forgerock.util.promise.Promises;
 
 import javax.activation.DataSource;
 import javax.mail.BodyPart;
@@ -44,8 +27,6 @@ import javax.mail.internet.ContentType;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.ParseException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
@@ -58,6 +39,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.forgerock.http.Response;
+import org.forgerock.http.ResponseException;
+import org.forgerock.http.header.ContentTypeHeader;
+import org.forgerock.http.io.PipedOutputStream;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.PatchOperation;
+import org.forgerock.json.resource.PreconditionFailedException;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.Request;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.Version;
+import org.forgerock.util.encode.Base64url;
+import org.forgerock.util.promise.Promise;
+import org.forgerock.util.promise.Promises;
 
 /**
  * HTTP utility methods and constants.
@@ -137,34 +140,6 @@ public final class HttpUtils {
     private static final int EOF = -1;
 
     /**
-     * Returns the same information as {@link javax.servlet.http.HttpServletRequest#getPathInfo()} but does not
-     * URL-decode the path information.
-     *
-     * @param request the http request.
-     * @return the raw extra path information from the request, still url-encoded.
-     */
-    static String getRawPathInfo(final HttpServletRequest request) {
-        final String context = nullToEmpty(request.getContextPath()) + nullToEmpty(request.getServletPath());
-        final String requestUri = request.getRequestURI();
-        if (requestUri == null) {
-            return null;
-        }
-
-        String result = requestUri;
-        final int idx = requestUri.indexOf(context);
-        if (idx >= 0) {
-            result = requestUri.substring(idx + context.length());
-        }
-
-        return result;
-    }
-
-    /** Converts null strings to empty strings. */
-    private static String nullToEmpty(final String value) {
-        return value == null ? "" : value;
-    }
-
-    /**
      * Adapts an {@code Exception} to a {@code ResourceException}.
      *
      * @param t
@@ -190,7 +165,7 @@ public final class HttpUtils {
      * @throws ResourceException
      *             If the value could not be parsed as a boolean.
      */
-    static boolean asBooleanValue(final String name, final String[] values)
+    static boolean asBooleanValue(final String name, final List<String> values)
             throws ResourceException {
         final String value = asSingleValue(name, values);
         return Boolean.parseBoolean(value);
@@ -207,7 +182,7 @@ public final class HttpUtils {
      * @throws ResourceException
      *             If the value could not be parsed as a integer.
      */
-    static int asIntValue(final String name, final String[] values) throws ResourceException {
+    static int asIntValue(final String name, final List<String> values) throws ResourceException {
         final String value = asSingleValue(name, values);
         try {
             return Integer.parseInt(value);
@@ -229,18 +204,18 @@ public final class HttpUtils {
      * @throws ResourceException
      *             If the value could not be parsed as a single string.
      */
-    static String asSingleValue(final String name, final String[] values) throws ResourceException {
-        if (values == null || values.length == 0) {
+    static String asSingleValue(final String name, final List<String> values) throws ResourceException {
+        if (values == null || values.isEmpty()) {
             // FIXME: i18n.
             throw new BadRequestException("No values provided for the request parameter \'" + name
                     + "\'");
-        } else if (values.length > 1) {
+        } else if (values.size() > 1) {
             // FIXME: i18n.
             throw new BadRequestException(
                     "Multiple values provided for the single-valued request parameter \'" + name
                             + "\'");
         }
-        return values[0];
+        return values.get(0);
     }
 
     /**
@@ -248,30 +223,27 @@ public final class HttpUtils {
      *
      * @param req
      *            The HTTP request.
-     * @param resp
-     *            The HTTP response.
      * @param t
      *            The resource exception indicating why the request failed.
      */
-    static Promise<Void, NeverThrowsException> fail(final HttpServletRequest req, final HttpServletResponse resp, final Throwable t) {
-        if (!resp.isCommitted()) {
-            final ResourceException re = adapt(t);
-            try {
-                resp.reset();
-                prepareResponse(req, resp);
-                resp.setStatus(re.getCode());
-                final JsonGenerator writer = getJsonGenerator(req, resp);
-                writer.writeObject(re.toJsonValue().getObject());
-                closeSilently(writer, resp.getOutputStream());
-            } catch (final IOException ignored) {
-                // Ignore the error since this was probably the cause.
-            }
+    static Promise<Response, ResponseException> fail(org.forgerock.http.Request req, final Throwable t) {
+        final ResourceException re = adapt(t);
+        try {
+            Response resp = prepareResponse(req);
+            resp.setStatusAndReason(re.getCode());
+            final JsonGenerator writer = getJsonGenerator(req, resp);
+            writer.writeObject(re.toJsonValue().getObject());
+            closeSilently(writer);
+            return Promises.newSuccessfulPromise(resp);
+        } catch (final IOException ignored) {
+            // Ignore the error since this was probably the cause.
+            return Promises.newFailedPromise(
+                    new ResponseException(new Response().setStatusAndReason(500), ignored.getMessage(), ignored));
         }
-        return Promises.newSuccessfulPromise(null);
     }
 
-    static String getIfMatch(final HttpServletRequest req) {
-        final String etag = req.getHeader(HEADER_IF_MATCH);
+    static String getIfMatch(org.forgerock.http.Request req) {
+        final String etag = req.getHeaders().getFirst(HEADER_IF_MATCH);
         if (etag != null) {
             if (etag.length() >= 2) {
                 // Remove quotes.
@@ -286,8 +258,8 @@ public final class HttpUtils {
         return etag;
     }
 
-    static String getIfNoneMatch(final HttpServletRequest req) {
-        final String etag = req.getHeader(HEADER_IF_NONE_MATCH);
+    static String getIfNoneMatch(org.forgerock.http.Request req) {
+        final String etag = req.getHeaders().getFirst(HEADER_IF_NONE_MATCH);
         if (etag != null) {
             if (etag.length() >= 2) {
                 // Remove quotes.
@@ -315,7 +287,7 @@ public final class HttpUtils {
      *             If the content could not be read or if the content was not
      *             valid JSON.
      */
-    static JsonValue getJsonContentIfPresent(final HttpServletRequest req) throws ResourceException {
+    static JsonValue getJsonContentIfPresent(org.forgerock.http.Request req) throws ResourceException {
         return getJsonContent0(req, true);
     }
 
@@ -332,7 +304,7 @@ public final class HttpUtils {
      *             If the content could not be read or if the content was not
      *             valid JSON.
      */
-    static JsonValue getJsonContent(final HttpServletRequest req) throws ResourceException {
+    static JsonValue getJsonContent(org.forgerock.http.Request req) throws ResourceException {
         return getJsonContent0(req, false);
     }
 
@@ -348,14 +320,18 @@ public final class HttpUtils {
      * @throws IOException
      *             If an error occurred while obtaining an output stream.
      */
-    static JsonGenerator getJsonGenerator(final HttpServletRequest req,
-            final HttpServletResponse resp) throws IOException {
+    static JsonGenerator getJsonGenerator(org.forgerock.http.Request req,
+            Response resp) throws IOException {
+
+        PipedOutputStream pipeStream = newPipedOutputStream();
+        resp.setEntity(pipeStream.getInputStream());
+
         final JsonGenerator writer =
-                JSON_MAPPER.getFactory().createGenerator(resp.getOutputStream());
+                JSON_MAPPER.getFactory().createGenerator(pipeStream.getOutputStream());
         writer.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
 
         // Enable pretty printer if requested.
-        final String[] values = getParameter(req, PARAM_PRETTY_PRINT);
+        final List<String> values = getParameter(req, PARAM_PRETTY_PRINT);
         if (values != null) {
             try {
                 if (asBooleanValue(PARAM_PRETTY_PRINT, values)) {
@@ -381,7 +357,7 @@ public final class HttpUtils {
      *             If the content could not be read or if the content was not a
      *             valid JSON patch.
      */
-    static List<PatchOperation> getJsonPatchContent(final HttpServletRequest req)
+    static List<PatchOperation> getJsonPatchContent(org.forgerock.http.Request req)
             throws ResourceException {
         return PatchOperation.valueOfList(new JsonValue(parseJsonBody(req, false)));
     }
@@ -398,7 +374,7 @@ public final class HttpUtils {
      *             If the content could not be read or if the content was not
      *             valid JSON.
      */
-    static JsonValue getJsonActionContent(final HttpServletRequest req) throws ResourceException {
+    static JsonValue getJsonActionContent(org.forgerock.http.Request req) throws ResourceException {
         return new JsonValue(parseJsonBody(req, true));
     }
 
@@ -410,11 +386,11 @@ public final class HttpUtils {
      *            The HTTP request.
      * @return The effective method name.
      */
-    static String getMethod(final HttpServletRequest req) {
+    static String getMethod(org.forgerock.http.Request req) {
         String method = req.getMethod();
         if (HttpUtils.METHOD_POST.equals(method)
-                && req.getHeader(HttpUtils.HEADER_X_HTTP_METHOD_OVERRIDE) != null) {
-            method = req.getHeader(HttpUtils.HEADER_X_HTTP_METHOD_OVERRIDE);
+                && req.getHeaders().getFirst(HttpUtils.HEADER_X_HTTP_METHOD_OVERRIDE) != null) {
+            method = req.getHeaders().getFirst(HttpUtils.HEADER_X_HTTP_METHOD_OVERRIDE);
         }
         return method;
     }
@@ -429,9 +405,9 @@ public final class HttpUtils {
      *            The parameter to return.
      * @return The parameter values or {@code null} if it wasn't present.
      */
-    static String[] getParameter(final HttpServletRequest req, final String parameter) {
+    static List<String> getParameter(org.forgerock.http.Request req, String parameter) {
         // Need to do case-insensitive matching.
-        for (final Map.Entry<String, String[]> p : req.getParameterMap().entrySet()) {
+        for (final Map.Entry<String, List<String>> p : req.getForm().entrySet()) {
             if (p.getKey().equalsIgnoreCase(parameter)) {
                 return p.getValue();
             }
@@ -449,49 +425,51 @@ public final class HttpUtils {
      *            The parameter to return.
      * @return {@code true} if the named parameter is present.
      */
-    static boolean hasParameter(final HttpServletRequest req, final String parameter) {
+    static boolean hasParameter(org.forgerock.http.Request req, String parameter) {
         return getParameter(req, parameter) != null;
     }
 
-    static void prepareResponse(final HttpServletRequest req, final HttpServletResponse resp)
-            throws ResourceException {
+    static Response prepareResponse(org.forgerock.http.Request req) throws ResourceException {
         //get content type from req path
         try {
-            String mimeType = req.getParameter(PARAM_MIME_TYPE);
+            Response resp = new Response()
+                    .setStatusAndReason(200);
+            String mimeType = req.getForm().getFirst(PARAM_MIME_TYPE);
             if (METHOD_GET.equalsIgnoreCase(getMethod(req)) && mimeType != null && !mimeType.isEmpty()) {
                 ContentType contentType = new ContentType(mimeType);
-                resp.setContentType(contentType.toString());
+                resp.getHeaders().putSingle(new ContentTypeHeader(contentType.toString(), CHARACTER_ENCODING, null));
             } else {
-                resp.setContentType(MIME_TYPE_APPLICATION_JSON);
+                resp.getHeaders().putSingle(
+                        new ContentTypeHeader(MIME_TYPE_APPLICATION_JSON, CHARACTER_ENCODING, null));
             }
 
-            resp.setCharacterEncoding(CHARACTER_ENCODING);
-            resp.setHeader(HEADER_CACHE_CONTROL, CACHE_CONTROL);
+            resp.getHeaders().putSingle(HEADER_CACHE_CONTROL, CACHE_CONTROL);
+            return resp;
         } catch (ParseException e) {
-            throw new BadRequestException("The mime type parameter '"+ req.getParameter(PARAM_MIME_TYPE)
-                    +"' can't be parsed", e);
+            throw new BadRequestException("The mime type parameter '" + req.getForm().getFirst(PARAM_MIME_TYPE)
+                    + "' can't be parsed", e);
         }
     }
 
-    static void rejectIfMatch(final HttpServletRequest req) throws ResourceException,
+    static void rejectIfMatch(org.forgerock.http.Request req) throws ResourceException,
             PreconditionFailedException {
-        if (req.getHeader(HEADER_IF_MATCH) != null) {
+        if (req.getHeaders().getFirst(HEADER_IF_MATCH) != null) {
             // FIXME: i18n
             throw new PreconditionFailedException("If-Match not supported for " + getMethod(req)
                     + " requests");
         }
     }
 
-    static void rejectIfNoneMatch(final HttpServletRequest req) throws ResourceException,
+    static void rejectIfNoneMatch(org.forgerock.http.Request req) throws ResourceException,
             PreconditionFailedException {
-        if (req.getHeader(HEADER_IF_NONE_MATCH) != null) {
+        if (req.getHeaders().getFirst(HEADER_IF_NONE_MATCH) != null) {
             // FIXME: i18n
             throw new PreconditionFailedException("If-None-Match not supported for "
                     + getMethod(req) + " requests");
         }
     }
 
-    private static JsonValue getJsonContent0(final HttpServletRequest req, final boolean allowEmpty)
+    private static JsonValue getJsonContent0(org.forgerock.http.Request req, boolean allowEmpty)
             throws ResourceException {
         final Object body = parseJsonBody(req, allowEmpty);
         if (body == null) {
@@ -621,18 +599,18 @@ public final class HttpUtils {
         }
     }
 
-    private static Object parseJsonBody(final HttpServletRequest req, final boolean allowEmpty)
+    private static Object parseJsonBody(org.forgerock.http.Request req, boolean allowEmpty)
             throws BadRequestException, ResourceException {
         JsonParser parser = null;
         try {
-            boolean isMultiPartRequest = isMultiPartRequest(req.getContentType());
+            boolean isMultiPartRequest = isMultiPartRequest(ContentTypeHeader.valueOf(req).toString());
             MimeMultipart mimeMultiparts = null;
             if (isMultiPartRequest) {
                 mimeMultiparts = new MimeMultipart(new HttpServletRequestDataSource(req));
                 BodyPart jsonPart = getJsonRequestPart(mimeMultiparts);
                 parser = JSON_MAPPER.getFactory().createParser(jsonPart.getInputStream());
             } else {
-                parser = JSON_MAPPER.getFactory().createParser(req.getInputStream());
+                parser = JSON_MAPPER.getFactory().createParser(req.getEntity().getRawContentInputStream());
             }
             Object content = parser.readValueAs(Object.class);
 
@@ -685,14 +663,14 @@ public final class HttpUtils {
     }
 
     private static class HttpServletRequestDataSource implements DataSource {
-        private HttpServletRequest request;
+        private org.forgerock.http.Request request;
 
-        HttpServletRequestDataSource(HttpServletRequest request) {
+        HttpServletRequestDataSource(org.forgerock.http.Request request) {
             this.request = request;
         }
 
         public InputStream getInputStream() throws IOException {
-            return request.getInputStream();
+            return request.getEntity().getRawContentInputStream();
         }
 
         public OutputStream getOutputStream() throws IOException {
@@ -700,7 +678,7 @@ public final class HttpUtils {
         }
 
         public String getContentType() {
-            return request.getContentType();
+            return ContentTypeHeader.valueOf(request).toString();
         }
 
         public String getName() {

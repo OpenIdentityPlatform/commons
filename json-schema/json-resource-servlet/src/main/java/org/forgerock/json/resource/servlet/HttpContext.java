@@ -16,16 +16,13 @@
 
 package org.forgerock.json.resource.servlet;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.forgerock.http.ClientInfoContext;
 import org.forgerock.json.resource.ClientContext;
 import org.forgerock.resource.core.AbstractContext;
 import org.forgerock.resource.core.Context;
@@ -35,27 +32,6 @@ import org.forgerock.util.LazyMap;
 /**
  * A {@link Context} containing information relating to the originating HTTP
  * Servlet request.
- * <p>
- * Here is an example of the JSON representation of an HTTP context:
- *
- * <pre>
- * {
- *   "id"     : "56f0fb7e-3837-464d-b9ec-9d3b6af665c3",
- *   "class"  : "org.forgerock.json.resource.servlet",
- *   "parent" : {
- *       ...
- *   },
- *   "method"     : "GET",
- *   "path" : "/users/bjensen",
- *   "remoteAddress" : "192.0.2.17",
- *   "headers" : {
- *       ...
- *   },
- *   "parameters" : {
- *       ...
- *   }
- * }
- * </pre>
  */
 public final class HttpContext extends AbstractContext implements ClientContext {
 
@@ -74,24 +50,20 @@ public final class HttpContext extends AbstractContext implements ClientContext 
         return true;
     }
 
-    HttpContext(final Context parent, final HttpServletRequest req) {
+    HttpContext(Context parent, final org.forgerock.http.Request req) {
         super(parent, "http");
         this.method = HttpUtils.getMethod(req);
-        this.path = req.getRequestURL().toString();
-        this.remoteAddress = req.getRemoteAddr();
+        this.path = getRequestPath(req);
+        this.remoteAddress = getRemoteAddress(parent);
         this.headers = Collections.unmodifiableMap(new LazyMap<String, List<String>>(
                 new Factory<Map<String, List<String>>>() {
                     @Override
                     public Map<String, List<String>> newInstance() {
-                        final Map<String, List<String>> result = new LinkedHashMap<String, List<String>>();
-                        final Enumeration<String> i = req.getHeaderNames();
-                        while (i.hasMoreElements()) {
-                            final String name = i.nextElement();
-                            final Enumeration<String> j = req.getHeaders(name);
-                            final List<String> values = new LinkedList<String>();
-                            while (j.hasMoreElements()) {
-                                values.add(j.nextElement());
-                            }
+                        Map<String, List<String>> result = new LinkedHashMap<String, List<String>>();
+                        Set<Map.Entry<String, List<String>>> headers = req.getHeaders().entrySet();
+                        for (Map.Entry<String, List<String>> header : headers) {
+                            String name = header.getKey();
+                            List<String> values = header.getValue();
                             result.put(name, values);
                         }
                         return result;
@@ -101,17 +73,32 @@ public final class HttpContext extends AbstractContext implements ClientContext 
                 new Factory<Map<String, List<String>>>() {
                     @Override
                     public Map<String, List<String>> newInstance() {
-                        final Map<String, List<String>> result = new LinkedHashMap<String, List<String>>();
-                        final Set<Map.Entry<String, String[]>> parameters = req.getParameterMap()
-                                .entrySet();
-                        for (final Map.Entry<String, String[]> parameter : parameters) {
-                            final String name = parameter.getKey();
-                            final String[] values = parameter.getValue();
-                            result.put(name, Arrays.asList(values));
+                        Map<String, List<String>> result = new LinkedHashMap<String, List<String>>();
+                        Set<Map.Entry<String, List<String>>> parameters = req.getForm().entrySet();
+                        for (Map.Entry<String, List<String>> parameter : parameters) {
+                            String name = parameter.getKey();
+                            List<String> values = parameter.getValue();
+                            result.put(name, values);
                         }
                         return result;
                     }
                 }));
+    }
+
+    private String getRequestPath(org.forgerock.http.Request req) {
+        return new StringBuilder()
+                .append(req.getUri().getScheme())
+                .append("://")
+                .append(req.getUri().getRawAuthority())
+                .append(req.getUri().getRawPath()).toString();
+    }
+
+    private String getRemoteAddress(Context context) {
+        if (context.containsContext(ClientInfoContext.class)) {
+            return context.asContext(ClientInfoContext.class).getRemoteAddress();
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -124,8 +111,8 @@ public final class HttpContext extends AbstractContext implements ClientContext 
      *         request header, which may be empty if the header is not present
      *         in the request.
      */
-    public List<String> getHeader(final String name) {
-        final List<String> header = headers.get(name);
+    public List<String> getHeader(String name) {
+        List<String> header = headers.get(name);
         return Collections.unmodifiableList(header != null ? header : Collections.<String> emptyList());
     }
 
@@ -137,8 +124,8 @@ public final class HttpContext extends AbstractContext implements ClientContext 
      * @return The first value of the named HTTP request header, or {@code null}
      *         if the header is not present in the request.
      */
-    public String getHeaderAsString(final String name) {
-        final List<String> header = getHeader(name);
+    public String getHeaderAsString(String name) {
+        List<String> header = getHeader(name);
         return header.isEmpty() ? null : header.get(0);
     }
 
@@ -163,9 +150,9 @@ public final class HttpContext extends AbstractContext implements ClientContext 
     }
 
     /**
-     * Returns the address of the client making the request.  This may be an IPV4 or
-     * an IPv6 address depending on server configuration.  Note that the address returned
-     * may also be the address of a proxy per {@link javax.servlet.http.HttpServletRequest#getRemoteAddr()}
+     * Returns the address of the client making the request. This may be an IPV4 or
+     * an IPv6 address depending on server configuration. Note that the address returned
+     * may also be the address of a proxy.
      * No guarantees of whether the returned address is reachable are made.
      *
      * @return The address of the client or proxy making the request.
@@ -184,7 +171,7 @@ public final class HttpContext extends AbstractContext implements ClientContext 
      *         request parameter, which may be empty if the parameter is not
      *         present in the request.
      */
-    public List<String> getParameter(final String name) {
+    public List<String> getParameter(String name) {
         final List<String> parameter = parameters.get(name);
         return Collections.unmodifiableList(parameter != null ? parameter : Collections.<String> emptyList());
     }
@@ -197,7 +184,7 @@ public final class HttpContext extends AbstractContext implements ClientContext 
      * @return The first value of the named HTTP request parameter, or
      *         {@code null} if the parameter is not present in the request.
      */
-    public String getParameterAsString(final String name) {
+    public String getParameterAsString(String name) {
         final List<String> parameter = getParameter(name);
         return parameter.isEmpty() ? null : parameter.get(0);
     }
