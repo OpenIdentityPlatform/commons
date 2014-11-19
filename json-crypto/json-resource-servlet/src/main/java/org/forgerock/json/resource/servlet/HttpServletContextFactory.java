@@ -11,19 +11,19 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012 ForgeRock AS.
+ * Copyright 2012-2014 ForgeRock AS.
  */
+
 package org.forgerock.json.resource.servlet;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.RootContext;
+import org.forgerock.resource.core.Context;
 
 /**
  * A factory which is responsible for creating new request {@code Context}s for
- * each JSON request. The returned context must include a {@link RootContext} as
+ * each JSON request. The returned context must include a {@link org.forgerock.resource.core.RootContext} as
  * its root and may include zero or more sub-contexts.
  * <p>
  * As an example, a context factory may return a context chain which includes

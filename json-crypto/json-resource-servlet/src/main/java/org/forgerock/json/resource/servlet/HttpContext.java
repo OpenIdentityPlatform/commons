@@ -13,8 +13,10 @@
  *
  * Copyright 2012-2014 ForgeRock AS.
  */
+
 package org.forgerock.json.resource.servlet;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -24,14 +26,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.AbstractContext;
 import org.forgerock.json.resource.ClientContext;
-import org.forgerock.json.resource.Context;
-import org.forgerock.json.resource.PersistenceConfig;
-import org.forgerock.json.resource.ResourceException;
+import org.forgerock.resource.core.AbstractContext;
+import org.forgerock.resource.core.Context;
 import org.forgerock.util.Factory;
 import org.forgerock.util.LazyMap;
 
@@ -62,43 +59,13 @@ import org.forgerock.util.LazyMap;
  */
 public final class HttpContext extends AbstractContext implements ClientContext {
 
-    /** a client-friendly name for this context. */
-    public static final String CONTEXT_NAME = "http";
-
     // TODO: security parameters such as user name, etc?
 
-    /** the persisted attribute name for the HTTP headers */
-    private static final String ATTR_HEADERS = "headers";
-    /** the persisted attribute name for the request method */
-    private static final String ATTR_METHOD = "method";
-    /** the persisted attribute name for the remote address */
-    private static final String ATTR_REMOTE_ADDRESS = "remoteAddress";
-    /** the persisted attribute name for the HTTP parameters. */
-    private static final String ATTR_PARAMETERS = "parameters";
-    private static final String ATTR_PATH = "path";
-
+    private final String method;
+    private final String path;
+    private final String remoteAddress;
     private final Map<String, List<String>> headers;
     private final Map<String, List<String>> parameters;
-
-    /**
-     * Restore from JSON representation. This method is for internal use only
-     * and should not be called directly.
-     *
-     * @param savedContext
-     *            The JSON representation from which this context's attributes
-     *            should be parsed.
-     * @param config
-     *            The persistence configuration.
-     * @throws ResourceException
-     *             If the JSON representation could not be parsed.
-     */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public HttpContext(final JsonValue savedContext, final PersistenceConfig config)
-            throws ResourceException {
-        super(savedContext, config);
-        this.headers = (Map) data.get(ATTR_HEADERS).required().asMap();
-        this.parameters = (Map) data.get(ATTR_PARAMETERS).required().asMap();
-    }
 
     /**
      * {@inheritDoc}
@@ -108,10 +75,10 @@ public final class HttpContext extends AbstractContext implements ClientContext 
     }
 
     HttpContext(final Context parent, final HttpServletRequest req) {
-        super(parent);
-        data.put(ATTR_METHOD, HttpUtils.getMethod(req));
-        data.put(ATTR_PATH, req.getRequestURL().toString());
-        data.put(ATTR_REMOTE_ADDRESS, req.getRemoteAddr());
+        super(parent, "http");
+        this.method = HttpUtils.getMethod(req);
+        this.path = req.getRequestURL().toString();
+        this.remoteAddress = req.getRemoteAddr();
         this.headers = Collections.unmodifiableMap(new LazyMap<String, List<String>>(
                 new Factory<Map<String, List<String>>>() {
                     @Override
@@ -130,7 +97,6 @@ public final class HttpContext extends AbstractContext implements ClientContext 
                         return result;
                     }
                 }));
-        data.put(ATTR_HEADERS, headers);
         this.parameters = Collections.unmodifiableMap(new LazyMap<String, List<String>>(
                 new Factory<Map<String, List<String>>>() {
                     @Override
@@ -146,16 +112,6 @@ public final class HttpContext extends AbstractContext implements ClientContext 
                         return result;
                     }
                 }));
-        data.put(ATTR_PARAMETERS, parameters);
-    }
-
-    /**
-     * Get this Context's name.
-     *
-     * @return this object's name
-     */
-    public String getContextName() {
-        return CONTEXT_NAME;
     }
 
     /**
@@ -169,7 +125,7 @@ public final class HttpContext extends AbstractContext implements ClientContext 
      *         in the request.
      */
     public List<String> getHeader(final String name) {
-        final List<String> header = data.get(ATTR_HEADERS).get(name).asList(String.class);
+        final List<String> header = headers.get(name);
         return Collections.unmodifiableList(header != null ? header : Collections.<String> emptyList());
     }
 
@@ -203,7 +159,7 @@ public final class HttpContext extends AbstractContext implements ClientContext 
      *         {@code X-HTTP-Method-Override} header.
      */
     public String getMethod() {
-        return data.get(ATTR_METHOD).asString();
+        return method;
     }
 
     /**
@@ -215,7 +171,7 @@ public final class HttpContext extends AbstractContext implements ClientContext 
      * @return The address of the client or proxy making the request.
      */
     public String getRemoteAddress() {
-        return data.get(ATTR_REMOTE_ADDRESS).asString();
+        return remoteAddress;
     }
 
     /**
@@ -229,7 +185,7 @@ public final class HttpContext extends AbstractContext implements ClientContext 
      *         present in the request.
      */
     public List<String> getParameter(final String name) {
-        final List<String> parameter = data.get(ATTR_PARAMETERS).get(name).asList(String.class);
+        final List<String> parameter = parameters.get(name);
         return Collections.unmodifiableList(parameter != null ? parameter : Collections.<String> emptyList());
     }
 
@@ -261,6 +217,6 @@ public final class HttpContext extends AbstractContext implements ClientContext 
      * @return The HTTP request path.
      */
     public String getPath() {
-        return data.get(ATTR_PATH).asString();
+        return path;
     }
 }

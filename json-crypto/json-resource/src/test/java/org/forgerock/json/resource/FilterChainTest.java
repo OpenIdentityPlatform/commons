@@ -13,6 +13,7 @@
  *
  * Copyright 2013-2014 ForgeRock AS.
  */
+
 package org.forgerock.json.resource;
 
 import static org.mockito.Matchers.any;
@@ -25,6 +26,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import java.util.Collections;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.resource.core.RootContext;
 import org.mockito.InOrder;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;

@@ -13,11 +13,14 @@
  *
  * Copyright 2012-2014 ForgeRock AS.
  */
+
 package org.forgerock.json.resource;
 
 import static org.forgerock.util.Reject.checkNotNull;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.resource.core.AbstractContext;
+import org.forgerock.resource.core.Context;
+import org.forgerock.util.Reject;
 
 /**
  * A {@link Context} containing version information about the protocol and resource.
@@ -42,14 +45,7 @@ import org.forgerock.json.fluent.JsonValue;
  */
 public final class AcceptAPIVersionContext extends AbstractContext {
 
-    /** a client-friendly name for this context. */
-    private static final String CONTEXT_NAME = "version";
-
-    // Persisted attribute names.
-    private static final String ATTR_PROTOCOL_NAME = "protocolName";
-    private static final String ATTR_PROTOCOL_VERSION = "protocolVersion";
-    private static final String ATTR_RESOURCE_VERSION = "resourceVersion";
-
+    private final String protocolName;
     private final AcceptAPIVersion acceptVersion;
 
     /**
@@ -65,55 +61,15 @@ public final class AcceptAPIVersionContext extends AbstractContext {
      */
     public AcceptAPIVersionContext(final Context parent, final String protocolName,
                                    final AcceptAPIVersion acceptVersion) {
-        super(checkNotNull(parent, "Cannot instantiate AcceptAPIVersionContext with null parent Context"));
+        super(checkNotNull(parent, "Cannot instantiate AcceptAPIVersionContext with null parent Context"), "version");
 
-        // Cache locally to avoid unnecessary string parsing.
+        Reject.ifNull(acceptVersion, "Cannot instantiate AcceptAPIVersionContext with null acceptVersion");
+        Reject.ifNull(protocolName, "Cannot instantiate AcceptAPIVersionContext with null protocolName");
+        Reject.ifNull(acceptVersion.getProtocolVersion(),
+                "Cannot instantiate AcceptAPIVersionContext with null protocolVersion");
+        this.protocolName = protocolName;
         this.acceptVersion = acceptVersion;
-        final Version protocolVersion = acceptVersion.getProtocolVersion();
-        final Version resourceVersion = acceptVersion.getResourceVersion();
 
-        data.put(ATTR_PROTOCOL_NAME,
-                checkNotNull(protocolName, "Cannot instantiate AcceptAPIVersionContext with null protocolName"));
-        data.put(ATTR_PROTOCOL_VERSION,
-                checkNotNull(protocolVersion, "Cannot instantiate AcceptAPIVersionContext with null protocolVersion"));
-
-        if (protocolVersion != null) {
-            data.put(ATTR_PROTOCOL_VERSION, protocolVersion.toString());
-        }
-        if (resourceVersion != null) {
-            data.put(ATTR_RESOURCE_VERSION, resourceVersion.toString());
-        }
-    }
-
-    /**
-     * Restore from JSON representation.
-     *
-     * @param savedContext
-     *            The JSON representation from which this context's attributes
-     *            should be parsed.
-     * @param config
-     *            The persistence configuration.
-     * @throws ResourceException
-     *             If the JSON representation could not be parsed.
-     */
-    AcceptAPIVersionContext(final JsonValue savedContext, final PersistenceConfig config)
-            throws ResourceException {
-        super(savedContext, config);
-        acceptVersion = AcceptAPIVersion
-                .newBuilder()
-                .withDefaultProtocolVersion(data.get(ATTR_PROTOCOL_VERSION).asString())
-                .withDefaultResourceVersion(data.get(ATTR_RESOURCE_VERSION).asString())
-                .expectsProtocolVersion()
-                .build();
-    }
-
-    /**
-     * Get this Context's name.
-     *
-     * @return this object's name
-     */
-    public String getContextName() {
-        return CONTEXT_NAME;
     }
 
     /**
@@ -122,7 +78,7 @@ public final class AcceptAPIVersionContext extends AbstractContext {
      * @return The protocol name
      */
     public String getProtocolName() {
-        return data.get(ATTR_PROTOCOL_NAME).asString();
+        return protocolName;
     }
 
     /**

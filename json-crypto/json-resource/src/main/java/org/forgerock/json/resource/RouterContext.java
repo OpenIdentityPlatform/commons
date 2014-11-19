@@ -13,6 +13,7 @@
  *
  * Copyright 2012-2014 ForgeRock AS.
  */
+
 package org.forgerock.json.resource;
 
 import static org.forgerock.util.Reject.checkNotNull;
@@ -20,7 +21,7 @@ import static org.forgerock.util.Reject.checkNotNull;
 import java.util.Collections;
 import java.util.Map;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.resource.core.Context;
 
 /**
  * A {@link ServerContext} which is created when a request has been routed. The
@@ -82,34 +83,8 @@ import org.forgerock.json.fluent.JsonValue;
  */
 public final class RouterContext extends ServerContext {
 
-    /** the client-friendly name of this context. */
-    private static final String CONTEXT_NAME = "router";
-
-    // Persisted attribute names.
-    private static final String ATTR_MATCHED_URI = "matchedUri";
-    private static final String ATTR_URI_TEMPLATE_VARIABLES = "uriTemplateVariables";
-
+    private final String matchedUri;
     private final Map<String, String> uriTemplateVariables;
-
-    /**
-     * Restore from JSON representation.
-     *
-     * @param savedContext
-     *            The JSON representation from which this context's attributes
-     *            should be parsed.
-     * @param config
-     *            The persistence configuration.
-     * @throws ResourceException
-     *             If the JSON representation could not be parsed.
-     */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    RouterContext(final JsonValue savedContext, final PersistenceConfig config)
-            throws ResourceException {
-        super(savedContext, config);
-        this.uriTemplateVariables =
-                Collections.unmodifiableMap((Map) data.get(ATTR_URI_TEMPLATE_VARIABLES).required()
-                        .asMap());
-    }
 
     /**
      * Creates a new routing context having the provided parent, URI template
@@ -124,19 +99,9 @@ public final class RouterContext extends ServerContext {
      */
     RouterContext(final ServerContext parent, final String matchedUri,
             final Map<String, String> uriTemplateVariables) {
-        super(checkNotNull(parent, "Cannot instantiate RouterContext with null parent Context"));
-        data.put(ATTR_MATCHED_URI, matchedUri);
+        super(checkNotNull(parent, "Cannot instantiate RouterContext with null parent Context"), "router");
+        this.matchedUri = matchedUri;
         this.uriTemplateVariables = Collections.unmodifiableMap(uriTemplateVariables);
-        data.put(ATTR_URI_TEMPLATE_VARIABLES, this.uriTemplateVariables);
-    }
-
-    /**
-     * Get this Context's name.
-     *
-     * @return this object's name
-     */
-    public String getContextName() {
-        return CONTEXT_NAME;
     }
 
     /**
@@ -175,7 +140,7 @@ public final class RouterContext extends ServerContext {
      *         URI template.
      */
     public String getMatchedUri() {
-        return data.get(ATTR_MATCHED_URI).asString();
+        return matchedUri;
     }
 
     /**

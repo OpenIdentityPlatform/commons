@@ -24,6 +24,7 @@ import static org.mockito.Mockito.*;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.VersionSelector.DefaultVersionBehaviour;
+import org.forgerock.resource.core.RootContext;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.testng.annotations.BeforeClass;

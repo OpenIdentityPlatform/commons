@@ -11,22 +11,22 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2013 ForgeRock AS.
+ * Copyright 2012-2014 ForgeRock AS.
  */
+
 package org.forgerock.json.resource.servlet;
 
 import static org.forgerock.util.Reject.checkNotNull;
-
-import java.io.IOException;
-import java.lang.reflect.Method;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.lang.reflect.Method;
 
 import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.json.resource.Context;
+import org.forgerock.resource.core.Context;
 
 /**
  * An HTTP Servlet implementation which forwards requests to an
