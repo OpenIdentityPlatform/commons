@@ -28,20 +28,6 @@ import org.forgerock.util.Reject;
  * <p>
  * For instance the name which identifies the protocol exposed by the {@code json-resource-servlet}
  * module is {@code crest}.
- * <p>
- * Here is an example of the JSON representation of a version context:
- *
- * <pre>
- * {
- *   "id"     : "56f0fb7e-3837-464d-b9ec-9d3b6af665c3",
- *   "class"  : "org.forgerock.json.resource.AcceptAPIVersionContext",
- *   "parent" : {
- *       ...
- *   },
- *   "protocolName"     : "crest",
- *   "protocolVersion" : "2.0"
- * }
- * </pre>
  */
 public final class AcceptAPIVersionContext extends AbstractContext {
 

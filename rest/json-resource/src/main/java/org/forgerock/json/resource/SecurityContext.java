@@ -47,27 +47,6 @@ import org.forgerock.resource.core.Context;
  * Context context = ...;
  * String realm = (String) context.asContext(SecurityContext.class).getAuthorizationId(AUTHZID_REALM);
  * </pre>
- *
- * Here is an example of the JSON representation of a security context:
- *
- * <pre>
- * {
- *   "id"     : "56f0fb7e-3837-464d-b9ec-9d3b6af665c3",
- *   "class"  : "org.forgerock.json.resource.SecurityContext",
- *   "parent" : {
- *       ...
- *   },
- *   "authenticationId" : "bjensen@example.com",
- *   "authorizationId" : {
- *       "id"        : "1230fb7e-f83b-464d-19ef-789b6af66456",
- *       "component" : "users",
- *       "roles"     : [
- *           "administrators"
- *       ],
- *       "dn"        : "cn=bjensen,ou=people,dc=example,dc=com"
- *   }
- * }
- * </pre>
  */
 public final class SecurityContext extends AbstractContext {
 
