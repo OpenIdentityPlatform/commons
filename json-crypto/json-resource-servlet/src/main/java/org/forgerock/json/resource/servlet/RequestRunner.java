@@ -13,20 +13,14 @@
  *
  * Copyright 2012-2014 ForgeRock AS.
  */
+
 package org.forgerock.json.resource.servlet;
 
 import static org.forgerock.json.resource.QueryResult.*;
 import static org.forgerock.json.resource.servlet.HttpUtils.*;
 import static org.forgerock.util.Utils.closeSilently;
 
-import java.io.IOException;
-import java.util.Map;
-
-import javax.mail.internet.ContentType;
-import javax.mail.internet.ParseException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.fasterxml.jackson.core.JsonGenerator;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.AdviceContext;
@@ -44,17 +38,24 @@ import org.forgerock.json.resource.RequestVisitor;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceName;
-import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.util.encode.Base64url;
-import org.forgerock.util.promise.SuccessHandler;
+import org.forgerock.util.promise.AsyncFunction;
+import org.forgerock.util.promise.NeverThrowsException;
+import org.forgerock.util.promise.Promise;
+import org.forgerock.util.promise.Promises;
 
-import com.fasterxml.jackson.core.JsonGenerator;
+import javax.mail.internet.ContentType;
+import javax.mail.internet.ParseException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.Map;
 
 /**
  * Common request processing.
  */
-final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<Void, Void> {
+final class RequestRunner implements RequestVisitor<Promise<Void, NeverThrowsException>, Void> {
 
     // Connection set on handleResult(Connection).
     private Connection connection = null;
@@ -76,34 +77,27 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
         this.sync = sync;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final void handleError(final ResourceException error) {
+    public final Promise<Void, NeverThrowsException> handleError(final ResourceException error) {
         onError(error);
+        return Promises.newSuccessfulPromise(null);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final void handleResult(final Connection result) {
+    public final Promise<Void, NeverThrowsException> handleResult(final Connection result) {
         connection = result;
 
         // Dispatch request using visitor.
-        request.accept(this, null);
+        return request.accept(this, null);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public final Void visitActionRequest(final Void p, final ActionRequest request) {
-        connection.actionAsync(context, request).onFailure(this).onSuccess(
-                new SuccessHandler<JsonValue>() {
+    public final Promise<Void, NeverThrowsException> visitActionRequest(final Void p, final ActionRequest request) {
+        return connection.actionAsync(context, request)
+                .thenAsync(new AsyncFunction<JsonValue, Void, NeverThrowsException>() {
                     @Override
-                    public void handleResult(final JsonValue result) {
+                    public Promise<Void, NeverThrowsException> apply(JsonValue result) throws NeverThrowsException {
                         try {
                             writeAdvice();
                             if (result != null) {
@@ -116,20 +110,26 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
                         } catch (final Exception e) {
                             onError(e);
                         }
+
+                        return Promises.newSuccessfulPromise(null);
+                    }
+                }, new AsyncFunction<ResourceException, Void, NeverThrowsException>() {
+                    @Override
+                    public Promise<Void, NeverThrowsException> apply(ResourceException e) throws NeverThrowsException {
+                        return handleError(e);
                     }
                 });
-        return null; // return Void.
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public final Void visitCreateRequest(final Void p, final CreateRequest request) {
-        connection.createAsync(context, request).onFailure(this).onSuccess(
-                new SuccessHandler<Resource>() {
+    public final Promise<Void, NeverThrowsException> visitCreateRequest(final Void p, final CreateRequest request) {
+        return connection.createAsync(context, request)
+                .thenAsync(new AsyncFunction<Resource, Void, NeverThrowsException>() {
                     @Override
-                    public void handleResult(final Resource result) {
+                    public Promise<Void, NeverThrowsException> apply(Resource result) throws NeverThrowsException {
                         try {
                             writeAdvice();
                             if (result.getId() != null) {
@@ -142,37 +142,52 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
                         } catch (final Exception e) {
                             onError(e);
                         }
+                        return Promises.newSuccessfulPromise(null);
+                    }
+                }, new AsyncFunction<ResourceException, Void, NeverThrowsException>() {
+                    @Override
+                    public Promise<Void, NeverThrowsException> apply(ResourceException e) throws NeverThrowsException {
+                        return handleError(e);
                     }
                 });
-        return null; // return Void.
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public final Void visitDeleteRequest(final Void p, final DeleteRequest request) {
-        connection.deleteAsync(context, request).onFailure(this).onSuccess(
-                newResourceSuccessHandler());
-        return null; // return Void.
+    public final Promise<Void, NeverThrowsException> visitDeleteRequest(final Void p, final DeleteRequest request) {
+        return connection.deleteAsync(context, request)
+                .thenAsync(newResourceSuccessHandler(),
+                        new AsyncFunction<ResourceException, Void, NeverThrowsException>() {
+                            @Override
+                            public Promise<Void, NeverThrowsException> apply(ResourceException e) throws NeverThrowsException {
+                                return handleError(e);
+                            }
+                        });
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public final Void visitPatchRequest(final Void p, final PatchRequest request) {
-        connection.patchAsync(context, request).onFailure(this).onSuccess(
-                newResourceSuccessHandler());
-        return null; // return Void.
+    public final Promise<Void, NeverThrowsException> visitPatchRequest(final Void p, final PatchRequest request) {
+        return connection.patchAsync(context, request)
+                .thenAsync(newResourceSuccessHandler(),
+                        new AsyncFunction<ResourceException, Void, NeverThrowsException>() {
+                            @Override
+                            public Promise<Void, NeverThrowsException> apply(ResourceException e) throws NeverThrowsException {
+                                return handleError(e);
+                            }
+                        });
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public final Void visitQueryRequest(final Void p, final QueryRequest request) {
-        connection.queryAsync(context, request, new QueryResultHandler() {
+    public final Promise<Void, NeverThrowsException> visitQueryRequest(final Void p, final QueryRequest request) {
+        return connection.queryAsync(context, request, new QueryResultHandler() {
             private boolean isFirstResult = true;
             private int resultCount = 0;
 
@@ -232,28 +247,48 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
                     isFirstResult = false;
                 }
             }
-        });
-        return null; // return Void.
+        })
+                .thenAsync(new AsyncFunction<QueryResult, Void, NeverThrowsException>() {
+                    @Override
+                    public Promise<Void, NeverThrowsException> apply(QueryResult queryResult) throws NeverThrowsException {
+                        return Promises.newSuccessfulPromise(null);
+                    }
+                }, new AsyncFunction<ResourceException, Void, NeverThrowsException>() {
+                    @Override
+                    public Promise<Void, NeverThrowsException> apply(ResourceException e) throws NeverThrowsException {
+                        return Promises.newSuccessfulPromise(null);
+                    }
+                });
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public final Void visitReadRequest(final Void p, final ReadRequest request) {
-        connection.readAsync(context, request).onFailure(this).onSuccess(
-                newResourceSuccessHandler());
-        return null; // return Void.
+    public final Promise<Void, NeverThrowsException> visitReadRequest(final Void p, final ReadRequest request) {
+        return connection.readAsync(context, request)
+                .thenAsync(newResourceSuccessHandler(),
+                        new AsyncFunction<ResourceException, Void, NeverThrowsException>() {
+                            @Override
+                            public Promise<Void, NeverThrowsException> apply(ResourceException e) throws NeverThrowsException {
+                                return handleError(e);
+                            }
+                        });
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public final Void visitUpdateRequest(final Void p, final UpdateRequest request) {
-        connection.updateAsync(context, request).onFailure(this).onSuccess(
-                newResourceSuccessHandler());
-        return null; // return Void.
+    public final Promise<Void, NeverThrowsException> visitUpdateRequest(final Void p, final UpdateRequest request) {
+        return connection.updateAsync(context, request)
+                .thenAsync(newResourceSuccessHandler(),
+                        new AsyncFunction<ResourceException, Void, NeverThrowsException>() {
+                            @Override
+                            public Promise<Void, NeverThrowsException> apply(ResourceException e) throws NeverThrowsException {
+                                return handleError(e);
+                            }
+                        });
     }
 
     private void onSuccess() {
@@ -303,10 +338,10 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
         return buffer.toString();
     }
 
-    private SuccessHandler<Resource> newResourceSuccessHandler() {
-        return new SuccessHandler<Resource>() {
+    private AsyncFunction<Resource, Void, NeverThrowsException> newResourceSuccessHandler() {
+        return new AsyncFunction<Resource, Void, NeverThrowsException>() {
             @Override
-            public void handleResult(final Resource result) {
+            public Promise<Void, NeverThrowsException> apply(Resource result) throws NeverThrowsException {
                 try {
                     writeAdvice();
                     // Don't return the resource if this is a read request and the
@@ -324,6 +359,7 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
                 } catch (final Exception e) {
                     onError(e);
                 }
+                return Promises.newSuccessfulPromise(null);
             }
         };
     }
@@ -386,7 +422,6 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
         } else {
             writeBinaryValue(resource.getContent());
         }
-
     }
 
     private void writeAdvice() {
