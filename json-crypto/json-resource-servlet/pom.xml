@@ -16,7 +16,7 @@
         <artifactId>forgerock-rest</artifactId>
         <version>3.0.0-SNAPSHOT</version>
     </parent>
-    <artifactId>json-resource-servlet</artifactId>
+    <artifactId>json-resource-servlet</artifactId> <!-- TODO rename to json-resource-http? -->
     <name>JSON Resource Servlet binding</name>
     <description>Provides integration between the JSON Resource and Servlet APIs</description>
     <packaging>bundle</packaging>
@@ -27,10 +27,9 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>3.0.1</version>
-            <scope>provided</scope>
+            <groupId>org.forgerock.openig</groupId>
+            <artifactId>http-core</artifactId>
+            <version>3.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -47,6 +46,13 @@
         <dependency>
             <groupId>com.sun.mail</groupId>
             <artifactId>javax.mail</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.forgerock.openig</groupId>
+            <artifactId>http-test</artifactId>
+            <version>3.1.0-SNAPSHOT</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <build>
@@ -68,27 +74,6 @@
                         </Export-Package>
                     </instructions>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>war</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>war</goal>
-                        </goals>
-                        <configuration>
-                            <classifier>servlet</classifier>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-maven-plugin</artifactId>
-                <version>9.0.4.v20130625</version>
             </plugin>
         </plugins>
     </build>

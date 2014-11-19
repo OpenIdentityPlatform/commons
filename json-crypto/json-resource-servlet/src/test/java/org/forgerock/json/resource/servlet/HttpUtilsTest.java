@@ -17,27 +17,26 @@
 package org.forgerock.json.resource.servlet;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.data.MapEntry.entry;
+import static org.forgerock.http.test.HttpTest.newRequest;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.net.URISyntaxException;
+import java.util.Collections;
+import java.util.List;
+
+import org.forgerock.http.Response;
+import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResourceName;
 import org.forgerock.util.encode.Base64url;
-import org.mockito.ArgumentCaptor;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.List;
 
 @SuppressWarnings("javadoc")
 public class HttpUtilsTest {
@@ -56,7 +55,7 @@ public class HttpUtilsTest {
     private static final String REQUEST_CONTENT_TYPE =
             "multipart/form-data; boundary=kwkIqb-fsdbtcNpB4dJ_Xqf1-3b0Hp_VF9D0vsgL";
 
-    private HttpServletRequest request;
+    private org.forgerock.http.Request request;
 
     private byte[] requestInputStreamData;
 
@@ -127,17 +126,10 @@ public class HttpUtilsTest {
         this.requestInputStreamData = requestInputStreamData.toByteArray();
     }
 
-    private void setUpRequestMock(HttpServletRequest request, String contentType)
+    private void setUpRequestMock(org.forgerock.http.Request request, String contentType)
             throws IOException {
-        when(request.getContentType()).thenReturn(contentType);
-        final ByteArrayInputStream byteArrayInputStream =
-                new ByteArrayInputStream(requestInputStreamData);
-        when(request.getInputStream()).thenReturn(new ServletInputStream() {
-            @Override
-            public int read() throws IOException {
-                return byteArrayInputStream.read();
-            }
-        });
+        request.getHeaders().putSingle(ContentTypeHeader.NAME, contentType);
+        request.setEntity(requestInputStreamData);
     }
 
     private void testMultiPartResult(JsonValue result) {
@@ -180,7 +172,7 @@ public class HttpUtilsTest {
     public void testShouldPopulateReferencesWhenGetJsonActionContentIsCalled()
             throws ResourceException, IOException {
         //given
-        request = mock(HttpServletRequest.class);
+        request = newRequest();
         createMultiPartRequest(jsonBody);
         setUpRequestMock(request, REQUEST_CONTENT_TYPE);
 
@@ -195,7 +187,7 @@ public class HttpUtilsTest {
     public void testShouldPopulateReferencesWhenGetJsonPatchContentIsCalled()
             throws ResourceException, IOException {
         //given
-        request = mock(HttpServletRequest.class);
+        request = newRequest();
         createMultiPartRequest(jsonPatchBody);
         setUpRequestMock(request, REQUEST_CONTENT_TYPE);
 
@@ -222,7 +214,7 @@ public class HttpUtilsTest {
     public void testShouldPopulateReferencesWhenGetJsonContentIsCalled() throws ResourceException,
             IOException {
         //given
-        request = mock(HttpServletRequest.class);
+        request = newRequest();
         createMultiPartRequest(jsonBody);
         setUpRequestMock(request, REQUEST_CONTENT_TYPE);
 
@@ -237,7 +229,7 @@ public class HttpUtilsTest {
     public void testShouldProcessARequestThatIsNotMultiPartWhenGetJsonActionContentIsCalled()
             throws ResourceException, IOException {
         //given
-        request = mock(HttpServletRequest.class);
+        request = newRequest();
         createRequest(jsonBody);
         setUpRequestMock(request, HttpUtils.MIME_TYPE_APPLICATION_JSON);
 
@@ -252,7 +244,7 @@ public class HttpUtilsTest {
     public void testShouldProcessARequestThatIsNotMultiPartWhenGetJsonPatchContentIsCalled()
             throws ResourceException, IOException {
         //given
-        request = mock(HttpServletRequest.class);
+        request = newRequest();
         createRequest(jsonPatchBody);
         setUpRequestMock(request, HttpUtils.MIME_TYPE_APPLICATION_JSON);
 
@@ -281,7 +273,7 @@ public class HttpUtilsTest {
     public void testShouldProcessARequestThatIsNotMultiPartWhenGetJsonContentCalled()
             throws ResourceException, IOException {
         //given
-        request = mock(HttpServletRequest.class);
+        request = newRequest();
         createRequest(jsonBody);
         setUpRequestMock(request, HttpUtils.MIME_TYPE_APPLICATION_JSON);
 
@@ -300,51 +292,50 @@ public class HttpUtilsTest {
         };
     }
 
-    private void setupPrepareResponseMocks(final HttpServletRequest httpServletRequest,
-                                           final HttpServletResponse httpServletResponse,
-                                           final ArgumentCaptor<String> captor,
+    private void setupPrepareResponseMocks(org.forgerock.http.Request httpRequest,
                                            final String method,
-                                           final String contentType) {
-        when(httpServletRequest.getMethod()).thenReturn(method);
-        when(httpServletRequest.getHeader(HttpUtils.HEADER_X_HTTP_METHOD_OVERRIDE)).thenReturn(method);
-        when(httpServletRequest.getParameter(HttpUtils.PARAM_MIME_TYPE)).thenReturn(contentType);
-        doNothing().when(httpServletResponse).setContentType(captor.capture());
-        doNothing().when(httpServletResponse).setCharacterEncoding(captor.capture());
-        doNothing().when(httpServletResponse).setHeader(captor.capture(), captor.capture());
+                                           final String contentType) throws URISyntaxException {
+        httpRequest.setMethod(method);
+        httpRequest.getHeaders().putSingle(HttpUtils.HEADER_X_HTTP_METHOD_OVERRIDE, method);
+        httpRequest.getUri().setQuery(HttpUtils.PARAM_MIME_TYPE + "=" + contentType);
     }
 
     @Test(dataProvider = "ValidGetMethodContentTypeCombination")
     public void testShouldSetResponseContentType(final String method, final String contentType, final String result)
-            throws ResourceException {
+            throws Exception {
         //given
-        HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
-        HttpServletResponse httpServletResponse = mock(HttpServletResponse.class);
-        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+        org.forgerock.http.Request httpRequest = newRequest();
 
-        setupPrepareResponseMocks(httpServletRequest, httpServletResponse, captor, method, contentType);
+        setupPrepareResponseMocks(httpRequest, method, contentType);
 
         //when
-        HttpUtils.prepareResponse(httpServletRequest, httpServletResponse);
+        Response httpResponse = HttpUtils.prepareResponse(httpRequest);
 
         //then
-        assertThat(captor.getValue().equalsIgnoreCase(result));
-        assertThat(captor.getValue().equalsIgnoreCase(HttpUtils.CHARACTER_ENCODING));
-        assertThat(captor.getValue().equalsIgnoreCase(HttpUtils.HEADER_CACHE_CONTROL));
-        assertThat(captor.getValue().equalsIgnoreCase(HttpUtils.CACHE_CONTROL));
+        assertThat(httpResponse.getHeaders())
+                .hasSize(2)
+                .contains(
+                        entry(ContentTypeHeader.NAME, Collections.singletonList(
+                                new ContentTypeHeader(result, HttpUtils.CHARACTER_ENCODING, null).toString())),
+                        entry(HttpUtils.HEADER_CACHE_CONTROL, Collections.singletonList(HttpUtils.CACHE_CONTROL)));
     }
 
     @Test(expectedExceptions = BadRequestException.class)
     public void testShouldThrowBadRequestExceptionOnInvalidContentTypeForGet()
-            throws ResourceException {
+            throws Exception {
         //given
-        HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
-        HttpServletResponse httpServletResponse = mock(HttpServletResponse.class);
-        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+        org.forgerock.http.Request httpRequest = newRequest();
 
-        setupPrepareResponseMocks(httpServletRequest, httpServletResponse, captor, HttpUtils.METHOD_GET, "unknown content type");
+        setupPrepareResponseMocks(httpRequest, HttpUtils.METHOD_GET, "unknown content type");
 
         //when
-        HttpUtils.prepareResponse(httpServletRequest, httpServletResponse);
+        try {
+            HttpUtils.prepareResponse(httpRequest);
+        } catch (BadRequestException e) {
+            assertThat(e.getClass()).isEqualTo(BadRequestException.class);
+            int a = 1;
+            throw e;
+        }
     }
 
     @DataProvider
@@ -358,66 +349,21 @@ public class HttpUtilsTest {
 
     @Test(dataProvider = "ValidPostMethodContentTypeCombination")
     public void testShouldSetResponseContentTypeForPostMethod(final String method, final String contentType, final String result)
-            throws ResourceException {
+            throws Exception {
         //given
-        HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
-        HttpServletResponse httpServletResponse = mock(HttpServletResponse.class);
-        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+        org.forgerock.http.Request httpRequest = newRequest();
 
-        setupPrepareResponseMocks(httpServletRequest, httpServletResponse, captor, method, contentType);
+        setupPrepareResponseMocks(httpRequest, method, contentType);
 
         //when
-        HttpUtils.prepareResponse(httpServletRequest, httpServletResponse);
+        Response httpResponse = HttpUtils.prepareResponse(httpRequest);
 
         //then
-        assertThat(captor.getValue().equalsIgnoreCase(result));
-        assertThat(captor.getValue().equalsIgnoreCase(HttpUtils.CHARACTER_ENCODING));
-        assertThat(captor.getValue().equalsIgnoreCase(HttpUtils.HEADER_CACHE_CONTROL));
-        assertThat(captor.getValue().equalsIgnoreCase(HttpUtils.CACHE_CONTROL));
-    }
-
-    @Test
-    public void testGetRawPathInfoShouldReturnNullWhenRequestUriIsNull() {
-        assertThat(testGetRawPathInfo(null, null, null)).isNull();
-    }
-
-    @Test
-    public void testGetRawPathInfoShouldStripContextAndServletPath() {
-        // Given
-        final String contextPath = "/openam";
-        final String servletPath = "/json";
-        final String resourcePath = "/bar";
-
-        // When
-        final String result = testGetRawPathInfo(contextPath, servletPath, resourcePath);
-
-        // Then
-        assertThat(result).isEqualTo(resourcePath);
-    }
-
-    @Test
-    public void testGetRawPathInfoShouldNotDecodePath() {
-        // Given
-        final String contextPath = "/openam";
-        final String servletPath = "/json";
-        final String resourcePath = "applications/%21%40%23%24%25";
-
-        // When
-        final String result = testGetRawPathInfo(contextPath, servletPath, resourcePath);
-
-        // Then
-        assertThat(result).isEqualTo(resourcePath);
-        assertThat(ResourceName.valueOf(result).toString()).isEqualTo(resourcePath);
-    }
-
-    private String testGetRawPathInfo(final String context, final String servlet, final String resource) {
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        when(request.getServletPath()).thenReturn(servlet);
-        when(request.getContextPath()).thenReturn(context);
-        // As per section 3.5 of the servlet 3.0 spec, requestURI = contextPath + servletPath + pathInfo (excluding
-        // encoding differences)
-        when(request.getRequestURI()).thenReturn(resource == null ? null : context + servlet + resource);
-
-        return HttpUtils.getRawPathInfo(request);
+        assertThat(httpResponse.getHeaders())
+                .hasSize(2)
+                .contains(
+                        entry(ContentTypeHeader.NAME, Collections.singletonList(
+                                new ContentTypeHeader(result, HttpUtils.CHARACTER_ENCODING, null).toString())),
+                        entry(HttpUtils.HEADER_CACHE_CONTROL, Collections.singletonList(HttpUtils.CACHE_CONTROL)));
     }
 }

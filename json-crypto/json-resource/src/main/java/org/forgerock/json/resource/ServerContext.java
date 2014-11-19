@@ -25,18 +25,6 @@ import org.forgerock.resource.core.Context;
  * The context associated with a request currently being processed by a JSON
  * request handler within a server. A {@code ServerContext} provides an internal
  * {@code Connection} which can be used for performing internal operations.
- * <p>
- * Here is an example of the JSON representation of a server context:
- *
- * <pre>
- * {
- *   "id"     : "56f0fb7e-3837-464d-b9ec-9d3b6af665c3",
- *   "class"  : "org.forgerock.json.resource.provider.ServerContext",
- *   "parent" : {
- *       ...
- *   }
- * }
- * </pre>
  */
 public class ServerContext extends AbstractContext {
 
