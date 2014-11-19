@@ -113,7 +113,6 @@ public class RequestRunnerTest {
         QueryRequest request = Requests.newQueryRequest("");
         HttpServletRequest httpRequest = mock(HttpServletRequest.class);
         HttpServletResponse httpResponse = mock(HttpServletResponse.class);
-        ServletSynchronizer sync = mock(ServletSynchronizer.class);
         Connection connection = mock(Connection.class);
 
         // set the expectations
@@ -123,8 +122,7 @@ public class RequestRunnerTest {
                 .thenReturn(Promises.<QueryResult, ResourceException>newSuccessfulPromise(null));
 
         // run the code to access the anonymous class
-        RequestRunner requestRunner =
-                new RequestRunner(context, request, httpRequest, httpResponse, sync);
+        RequestRunner requestRunner = new RequestRunner(context, request, httpRequest, httpResponse);
         requestRunner.handleResult(connection);
 
         // Retrieve the anonymous class (phewww!)

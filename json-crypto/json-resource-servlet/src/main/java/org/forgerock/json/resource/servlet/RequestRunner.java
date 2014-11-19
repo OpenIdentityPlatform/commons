@@ -64,17 +64,14 @@ final class RequestRunner implements RequestVisitor<Promise<Void, NeverThrowsExc
     private final HttpServletResponse httpResponse;
     private final Request request;
     private final JsonGenerator writer;
-    private final ServletSynchronizer sync;
 
     RequestRunner(final Context context, final Request request,
-            final HttpServletRequest httpRequest, final HttpServletResponse httpResponse,
-            final ServletSynchronizer sync) throws Exception {
+            final HttpServletRequest httpRequest, final HttpServletResponse httpResponse) throws Exception {
         this.context = context;
         this.request = request;
         this.httpRequest = httpRequest;
         this.httpResponse = httpResponse;
         this.writer = getJsonGenerator(httpRequest, httpResponse);
-        this.sync = sync;
     }
 
     public final Promise<Void, NeverThrowsException> handleError(final ResourceException error) {
@@ -292,21 +289,13 @@ final class RequestRunner implements RequestVisitor<Promise<Void, NeverThrowsExc
     }
 
     private void onSuccess() {
-        try {
-            closeSilently(connection, writer);
-        } finally {
-            sync.signalAndComplete();
-        }
+        closeSilently(connection, writer);
     }
 
     private void onError(final Exception e) {
-        try {
-            // Don't close the JSON writer because the request will become
-            // "completed" which then prevents us from sending an error.
-            closeSilently(connection);
-        } finally {
-            sync.signalAndComplete(e);
-        }
+        // Don't close the JSON writer because the request will become
+        // "completed" which then prevents us from sending an error.
+        closeSilently(connection);
     }
 
     private String forceEmptyIfNull(final String s) {
