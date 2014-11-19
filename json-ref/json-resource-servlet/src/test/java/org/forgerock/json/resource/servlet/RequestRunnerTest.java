@@ -35,7 +35,9 @@ import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.util.promise.Promises;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Matchers;
 import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")
@@ -117,6 +119,8 @@ public class RequestRunnerTest {
         // set the expectations
         when(httpResponse.getOutputStream()).thenReturn(new StringBuilderOutputStream(output));
         when(httpRequest.getParameterMap()).thenReturn(Collections.<String, String[]> emptyMap());
+        when(connection.queryAsync(eq(context), eq(request), Matchers.<QueryResultHandler>anyObject()))
+                .thenReturn(Promises.<QueryResult, ResourceException>newSuccessfulPromise(null));
 
         // run the code to access the anonymous class
         RequestRunner requestRunner =
