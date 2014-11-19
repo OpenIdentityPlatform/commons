@@ -155,7 +155,7 @@ public class HttpServlet extends javax.servlet.http.HttpServlet {
         if (contextFactory == null) {
             contextFactory = getHttpServletContextFactory();
         }
-        adapter = new HttpServletAdapter(getServletContext(), connectionFactory, contextFactory);
+        adapter = new HttpServletAdapter(connectionFactory, contextFactory);
     }
 
     @Override
