@@ -13,15 +13,16 @@
  *
  * Copyright 2013-2014 ForgeRock AS.
  */
+
 package org.forgerock.json.resource;
 
-import static org.fest.assertions.Assertions.assertThat;
-
-import java.util.Arrays;
-import java.util.Iterator;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import java.util.Arrays;
+import java.util.Iterator;
 
 /**
  * Tests {@link ResourceName}.
@@ -98,12 +99,12 @@ public final class ResourceNameTest {
         // @formatter:on
     }
 
-    private Object[] e(final String... elements) {
+    private String[] e(final String... elements) {
         return elements;
     }
 
     @Test(dataProvider = "valueOfStrings")
-    public void testValueOf(final String path, final String normalizedPath, final Object[] elements) {
+    public void testValueOf(final String path, final String normalizedPath, final String[] elements) {
         final ResourceName name = ResourceName.valueOf(path);
         assertThat(name).hasSize(elements.length);
         assertThat(name.size()).isEqualTo(elements.length);
@@ -118,7 +119,7 @@ public final class ResourceNameTest {
 
     @Test(dataProvider = "valueOfStrings")
     public void testConstructorCollection(final String path, final String normalizedPath,
-            final Object[] elements) {
+            final String[] elements) {
         final ResourceName name = new ResourceName(Arrays.asList(elements));
         assertThat(name).hasSize(elements.length);
         assertThat(name.size()).isEqualTo(elements.length);
@@ -129,7 +130,7 @@ public final class ResourceNameTest {
 
     @Test(dataProvider = "valueOfStrings")
     public void testConstructorVarargs(final String path, final String normalizedPath,
-            final Object[] elements) {
+            final String[] elements) {
         final ResourceName name = new ResourceName(elements);
         assertThat(name).hasSize(elements.length);
         assertThat(name.size()).isEqualTo(elements.length);
