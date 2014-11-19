@@ -93,7 +93,6 @@ public final class HttpServletAdapter {
     private static final String FIELDS_DELIMITER = ",";
     private static final String SORT_KEYS_DELIMITER = ",";
 
-    private final ServletApiVersionAdapter syncFactory;
     private final ConnectionFactory connectionFactory;
     private final HttpServletContextFactory contextFactory;
 
@@ -101,25 +100,20 @@ public final class HttpServletAdapter {
      * Creates a new servlet adapter with the provided connection factory and a
      * context factory the {@link SecurityContextFactory}.
      *
-     * @param servletContext
-     *            The servlet context.
      * @param connectionFactory
      *            The connection factory.
      * @throws ServletException
      *             If the servlet container does not support Servlet 2.x or
      *             beyond.
      */
-    public HttpServletAdapter(final ServletContext servletContext,
-            final ConnectionFactory connectionFactory) throws ServletException {
-        this(servletContext, connectionFactory, (HttpServletContextFactory) null);
+    public HttpServletAdapter(final ConnectionFactory connectionFactory) throws ServletException {
+        this(connectionFactory, (HttpServletContextFactory) null);
     }
 
     /**
      * Creates a new servlet adapter with the provided connection factory and
      * parent request context.
      *
-     * @param servletContext
-     *            The servlet context.
      * @param connectionFactory
      *            The connection factory.
      * @param parentContext
@@ -129,10 +123,9 @@ public final class HttpServletAdapter {
      *             If the servlet container does not support Servlet 2.x or
      *             beyond.
      */
-    public HttpServletAdapter(final ServletContext servletContext,
-            final ConnectionFactory connectionFactory, final Context parentContext)
+    public HttpServletAdapter(final ConnectionFactory connectionFactory, final Context parentContext)
             throws ServletException {
-        this(servletContext, connectionFactory, new HttpServletContextFactory() {
+        this(connectionFactory, new HttpServletContextFactory() {
 
             @Override
             public Context createContext(final HttpServletRequest request) {
@@ -145,8 +138,6 @@ public final class HttpServletAdapter {
      * Creates a new servlet adapter with the provided connection factory and
      * context factory.
      *
-     * @param servletContext
-     *            The servlet context.
      * @param connectionFactory
      *            The connection factory.
      * @param contextFactory
@@ -157,8 +148,7 @@ public final class HttpServletAdapter {
      *             If the servlet container does not support Servlet 2.x or
      *             beyond.
      */
-    public HttpServletAdapter(final ServletContext servletContext,
-            final ConnectionFactory connectionFactory,
+    public HttpServletAdapter(final ConnectionFactory connectionFactory,
             final HttpServletContextFactory contextFactory) throws ServletException {
         /*
          * The servletContext field was removed as part of fix for CREST-146.
@@ -168,7 +158,6 @@ public final class HttpServletAdapter {
                 contextFactory != null ? contextFactory : SecurityContextFactory
                         .getHttpServletContextFactory();
         this.connectionFactory = checkNotNull(connectionFactory);
-        this.syncFactory = ServletApiVersionAdapter.getInstance(servletContext);
     }
 
     /**
@@ -521,9 +510,8 @@ public final class HttpServletAdapter {
                            final AcceptAPIVersion acceptVersion, final Request request)
             throws ResourceException, Exception {
         final Context context = newRequestContext(req, acceptVersion);
-        final ServletSynchronizer sync = syncFactory.createServletSynchronizer(req, resp);
-        final RequestRunner runner = new RequestRunner(context, request, req, resp, sync);
-        Promise<Void, NeverThrowsException> promise = connectionFactory.getConnectionAsync()
+        final RequestRunner runner = new RequestRunner(context, request, req, resp);
+        return connectionFactory.getConnectionAsync()
                 .thenAsync(new AsyncFunction<Connection, Void, NeverThrowsException>() {
                     @Override
                     public Promise<Void, NeverThrowsException> apply(Connection connection) throws NeverThrowsException {
@@ -535,8 +523,6 @@ public final class HttpServletAdapter {
                         return runner.handleError(error);
                     }
                 });
-        sync.awaitIfNeeded(); // Only blocks when async is not supported.
-        return promise;
     }
 
     /**
