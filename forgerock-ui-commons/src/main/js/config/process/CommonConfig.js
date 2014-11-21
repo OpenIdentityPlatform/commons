@@ -380,9 +380,8 @@ define("config/process/CommonConfig", [
             processDescription: function(event, router, conf, sessionManager) {
                 sessionManager.logout(function() {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "loggedOut");
-                    conf.setProperty('loggedUser', null);
-                    eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
                     eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: true});
+                    eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
                     delete conf.gotoURL;
                 });
             }
