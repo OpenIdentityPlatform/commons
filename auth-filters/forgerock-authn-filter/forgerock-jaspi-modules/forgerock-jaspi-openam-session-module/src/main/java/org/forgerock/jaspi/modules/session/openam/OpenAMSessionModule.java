@@ -237,8 +237,8 @@ public class OpenAMSessionModule implements ServerAuthModule {
                 final String uid = validationResponse.get("uid").asString();
                 final String realm = validationResponse.get("realm").asString();
 
-                JsonValue response = restClient.get(openamDeploymentUrl + JSON_REST_ROOT_ENDPOINT + realm + "/"
-                                + JSON_USERS_ENDPOINT + uid,
+                JsonValue response = restClient.get(openamDeploymentUrl + JSON_REST_ROOT_ENDPOINT
+                                + normalizeRealm(realm) + JSON_USERS_ENDPOINT + uid,
                         Collections.singletonMap("_fields", openamUserAttribute),
                         Collections.singletonMap(openamSSOTokenCookieName, tokenId));
 
@@ -259,6 +259,14 @@ public class OpenAMSessionModule implements ServerAuthModule {
             throw new JaspiAuthException(e.getMessage(), e);
         } catch (IOException e) {
             throw new JaspiAuthException(e.getMessage(), e);
+        }
+    }
+
+    private String normalizeRealm(String realm) {
+        if ("/".equals(realm)) {
+            return "/";
+        } else {
+            return realm + "/";
         }
     }
 

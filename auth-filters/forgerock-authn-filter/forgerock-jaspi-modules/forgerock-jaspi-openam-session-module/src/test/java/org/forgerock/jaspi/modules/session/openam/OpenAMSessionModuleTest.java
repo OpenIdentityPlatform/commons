@@ -692,6 +692,48 @@ public class OpenAMSessionModuleTest {
         assertEquals(usersQueryParameterCaptor.getValue().get("_fields"), "OPENAM_USER_ATTRIBUTE");
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Test
+    public void validateRequestShouldReturnSuccessWhenAccessingRootRealm() throws ResourceException, JaspiAuthException {
+
+        //Given
+        initialise();
+        final MessageInfo messageInfo = mock(MessageInfo.class);
+        final Subject clientSubject = new Subject();
+        final Subject serviceSubject = new Subject();
+        final HttpServletRequest request = mock(HttpServletRequest.class);
+        final Cookie cookieOne = mock(Cookie.class);
+        final Cookie[] cookies = new Cookie[]{cookieOne};
+        final JsonValue restValidateResponse = json(object(field("valid", true), field("uid", "UID"),
+                field("realm", "/")));
+        final JsonValue restUsersResponse = json(object(field("OPENAM_USER_ATTRIBUTE", array("VALUE"))));
+
+        given(messageInfo.getRequestMessage()).willReturn(request);
+        given(request.getHeader("OPENAM_SSO_TOKEN_COOKIE_NAME")).willReturn(null);
+        given(request.getCookies()).willReturn(cookies);
+        given(cookieOne.getName()).willReturn("OPENAM_SSO_TOKEN_COOKIE_NAME");
+        given(cookieOne.getValue()).willReturn("SSO_TOKEN_ID");
+        given(restClient.post(eq("https://OPENAM_DEPLOYMENT_URI/json/sessions/SSO_TOKEN_ID"),
+                anyMapOf(String.class, String.class), anyMapOf(String.class, String.class)))
+                .willReturn(restValidateResponse);
+        given(restClient.get(eq("https://OPENAM_DEPLOYMENT_URI/json/users/UID"),
+                anyMapOf(String.class, String.class), anyMapOf(String.class, String.class)))
+                .willReturn(restUsersResponse);
+
+        //When
+        final AuthStatus authStatus = openAMSessionModule.validateRequest(messageInfo, clientSubject, serviceSubject);
+
+        //Then
+        assertEquals(authStatus, AuthStatus.SUCCESS);
+        final ArgumentCaptor<Map> validateQueryParameterCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(restClient).post(anyString(), validateQueryParameterCaptor.capture(),
+                anyMapOf(String.class, String.class));
+        assertEquals(validateQueryParameterCaptor.getValue().get("_action"), "validate");
+        final ArgumentCaptor<Map> usersQueryParameterCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(restClient).get(anyString(), usersQueryParameterCaptor.capture(), anyMapOf(String.class, String.class));
+        assertEquals(usersQueryParameterCaptor.getValue().get("_fields"), "OPENAM_USER_ATTRIBUTE");
+    }
+
     @Test
     public void secureResponseShouldReturnSendSuccess() {
 
