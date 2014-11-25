@@ -5,15 +5,21 @@
   <groupId>org.codehaus.sonar</groupId>
   <artifactId>sonar-persistit</artifactId>
   <version>3.3.2-SNAPSHOT</version>
-  <packaging>jar</packaging>
+  <packaging>pom</packaging>
 
   <name>sonar-persistit</name>
+  <description>Java B+Tree Key-Value Store Library</description>
   <inceptionYear>2005</inceptionYear>
   <url>http://github.com/SonarSource/sonar-persistit</url>
   <organization>
     <name>SonarSource</name>
     <url>http://www.sonarsource.com</url>
   </organization>
+
+  <modules>
+    <module>persistit-core</module>
+    <module>persistit-ui</module>
+  </modules>
 
   <licenses>
     <license>
@@ -22,6 +28,24 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
+  
+  <scm>
+    <connection>scm:git:https://github.com/SonarSource/sonar-persistit</connection>
+    <url>https://github.com/SonarSource/sonar-persistit</url>
+  </scm>
+
+  <distributionManagement>
+    <repository>
+      <id>codehaus-nexus-staging</id>
+      <name>Codehaus Release Repository</name>
+      <url>https://nexus.codehaus.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+    <snapshotRepository>
+      <id>sonar-snapshots</id>
+      <url>${sonar.snapshotRepository.url}</url>
+      <uniqueVersion>false</uniqueVersion>
+    </snapshotRepository>
+  </distributionManagement>
 
   <prerequisites>
     <!-- Note that "prerequisites" not inherited, but used by versions-maven-plugin 1.3.1 -->
@@ -44,89 +68,7 @@
     <sonar.snapshotRepository.url>dav:https://dav.codehaus.org/snapshots.repository/sonar</sonar.snapshotRepository.url>
   </properties>
 
-  <distributionManagement>
-    <repository>
-      <id>codehaus-nexus-staging</id>
-      <name>Codehaus Release Repository</name>
-      <url>https://nexus.codehaus.org/service/local/staging/deploy/maven2/</url>
-    </repository>
-    <snapshotRepository>
-      <id>sonar-snapshots</id>
-      <url>${sonar.snapshotRepository.url}</url>
-      <uniqueVersion>false</uniqueVersion>
-    </snapshotRepository>
-  </distributionManagement>
-
-  <dependencies>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>1.6.1</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-logging</groupId>
-      <artifactId>commons-logging</artifactId>
-      <version>1.1</version>
-      <exclusions>
-        <exclusion>
-          <groupId>logkit</groupId>
-          <artifactId>logkit</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>avalon-framework</groupId>
-          <artifactId>avalon-framework</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>javax.servlet</groupId>
-          <artifactId>servlet-api</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.11</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.easytesting</groupId>
-      <artifactId>fest-assert</artifactId>
-      <version>1.4</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-context</artifactId>
-      <version>3.1.3.RELEASE</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
-
   <build>
-    <resources>
-      <resource>
-        <directory>${basedir}</directory>
-        <targetPath>META-INF</targetPath>
-        <filtering>false</filtering>
-        <includes>
-          <include>LICENSE.txt</include>
-        </includes>
-      </resource>
-      <resource>
-        <directory>src/main/resources</directory>
-        <filtering>true</filtering>
-        <includes>
-          <include>com/persistit/persistit_version</include>
-        </includes>
-      </resource>
-      <resource>
-        <directory>src/main/resources</directory>
-        <filtering>false</filtering>
-        <excludes>
-          <exclude>com/persistit/persistit_version</exclude>
-        </excludes>
-      </resource>
-    </resources>
     <pluginManagement>
       <!-- Plugins ordered by shortname (assembly, antrun ...) -->
       <plugins>
@@ -142,15 +84,16 @@
             </signature>
             <skip>${skipSanityChecks}</skip>
           </configuration>
-        </plugin>
-        <plugin>
-          <groupId>com.mycila</groupId>
-          <artifactId>license-maven-plugin</artifactId>
-          <version>${version.maven-license.plugin}</version>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-    <plugins>
+        <executions>
+          <execution>
+            <id>enforce-java-api-compatibility</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin> 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-clean-plugin</artifactId>
@@ -253,13 +196,13 @@
           </execution>
         </executions>
       </plugin>
-      <!-- check copyright/license headers -->
-      <plugin>
-        <inherited>false</inherited>
-        <groupId>com.mycila</groupId>
-        <artifactId>license-maven-plugin</artifactId>
+      <!-- check copyright/license headers -->    
+        <plugin>
+          <groupId>com.mycila</groupId>
+          <artifactId>license-maven-plugin</artifactId>
+          <version>${version.maven-license.plugin}</version>
         <configuration>
-          <header>${project.basedir}/copyright.txt</header>
+          <header>${project.basedir}/../copyright.txt</header>
           <headerSections>
             <headerSection>
               <key>__YEAR_SECTION__</key>
@@ -309,25 +252,10 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>animal-sniffer-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>enforce-java-api-compatibility</id>
-            <phase>verify</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>     
     </plugins>
+    </pluginManagement>
   </build>
-  <scm>
-    <connection>scm:git:https://github.com/SonarSource/sonar-persistit</connection>
-    <url>https://github.com/SonarSource/sonar-persistit</url>
-  </scm>
+  
   <developers>
     <developer>
       <id>peter</id>
@@ -361,7 +289,6 @@
       <timezone>+1</timezone>
     </developer>
   </developers>
-  <description>Java B+Tree Key-Value Store Library</description>
 
   <profiles>
     <profile>
