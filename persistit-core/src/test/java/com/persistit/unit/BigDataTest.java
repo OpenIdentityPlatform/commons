@@ -15,18 +15,19 @@
  */
 package com.persistit.unit;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.persistit.Exchange;
 import com.persistit.Key;
 import com.persistit.KeyFilter;
 import com.persistit.PersistitUnitTestCase;
 import com.persistit.Value;
 import com.persistit.exception.PersistitException;
+
 import org.junit.Test;
 
 import java.io.Serializable;
 import java.util.Date;
-
-import static org.fest.assertions.Assertions.assertThat;
 
 /**
  * @author Julien HENRY
