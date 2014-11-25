@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.codehaus.sonar</groupId>
@@ -28,7 +29,7 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
-  
+
   <scm>
     <connection>scm:git:https://github.com/SonarSource/sonar-persistit</connection>
     <url>https://github.com/SonarSource/sonar-persistit</url>
@@ -48,7 +49,8 @@
   </distributionManagement>
 
   <prerequisites>
-    <!-- Note that "prerequisites" not inherited, but used by versions-maven-plugin 1.3.1 -->
+    <!-- Note that "prerequisites" not inherited, but used by versions-maven-plugin 
+      1.3.1 -->
     <maven>${maven.min.version}</maven>
   </prerequisites>
 
@@ -68,6 +70,28 @@
     <sonar.snapshotRepository.url>dav:https://dav.codehaus.org/snapshots.repository/sonar</sonar.snapshotRepository.url>
   </properties>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>1.6.1</version>
+      </dependency>
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.11</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.easytesting</groupId>
+        <artifactId>fest-assert</artifactId>
+        <version>1.4</version>
+        <scope>test</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <build>
     <pluginManagement>
       <!-- Plugins ordered by shortname (assembly, antrun ...) -->
@@ -84,178 +108,178 @@
             </signature>
             <skip>${skipSanityChecks}</skip>
           </configuration>
-        <executions>
-          <execution>
-            <id>enforce-java-api-compatibility</id>
-            <phase>verify</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin> 
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-clean-plugin</artifactId>
-        <version>2.5</version>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-deploy-plugin</artifactId>
-        <version>2.8.1</version>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-install-plugin</artifactId>
-        <version>2.5.1</version>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>2.4</version>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-resources-plugin</artifactId>
-        <version>2.6</version>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-gpg-plugin</artifactId>
-        <version>1.4</version>
-      </plugin>      
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <version>1.8</version>
-        <executions>
-          <execution>
-            <id>reserve-network-port</id>
-            <goals>
-              <goal>reserve-network-port</goal>
-            </goals>
-            <phase>process-resources</phase>
-            <configuration>
-              <portNames>
-                <portName>rmiport</portName>
-              </portNames>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.1</version>
-        <configuration>
-          <source>${jdk.min.version}</source>
-          <target>${jdk.min.version}</target>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-source-plugin</artifactId>
-        <version>2.2.1</version>
-        <executions>
-          <execution>
-            <id>attach-sources</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.18</version>
-        <configuration>
-          <systemPropertyVariables>
-            <buildDirectory>${project.build.directory}</buildDirectory>
-          </systemPropertyVariables>
-          <argLine>-Drmiport=${rmiport}</argLine>
-          <includes>
-            <include>**/*Test.java</include>
-            <include>**/*Test?.java</include>
-          </includes>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>rmic-maven-plugin</artifactId>
-        <version>1.0</version>
-        <configuration>
-          <outputDirectory>target/classes/</outputDirectory>
-        </configuration>
-        <executions>
-          <execution>
-            <id>rmi compilation</id>
-            <goals>
-              <goal>rmic</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <!-- check copyright/license headers -->    
+          <executions>
+            <execution>
+              <id>enforce-java-api-compatibility</id>
+              <phase>verify</phase>
+              <goals>
+                <goal>check</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>2.5</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>2.8.1</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>2.5.1</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>2.4</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>2.6</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-gpg-plugin</artifactId>
+          <version>1.4</version>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+          <version>1.8</version>
+          <executions>
+            <execution>
+              <id>reserve-network-port</id>
+              <goals>
+                <goal>reserve-network-port</goal>
+              </goals>
+              <phase>process-resources</phase>
+              <configuration>
+                <portNames>
+                  <portName>rmiport</portName>
+                </portNames>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.1</version>
+          <configuration>
+            <source>${jdk.min.version}</source>
+            <target>${jdk.min.version}</target>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>2.2.1</version>
+          <executions>
+            <execution>
+              <id>attach-sources</id>
+              <goals>
+                <goal>jar</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.18</version>
+          <configuration>
+            <systemPropertyVariables>
+              <buildDirectory>${project.build.directory}</buildDirectory>
+            </systemPropertyVariables>
+            <argLine>-Drmiport=${rmiport}</argLine>
+            <includes>
+              <include>**/*Test.java</include>
+              <include>**/*Test?.java</include>
+            </includes>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>rmic-maven-plugin</artifactId>
+          <version>1.0</version>
+          <configuration>
+            <outputDirectory>target/classes/</outputDirectory>
+          </configuration>
+          <executions>
+            <execution>
+              <id>rmi compilation</id>
+              <goals>
+                <goal>rmic</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <!-- check copyright/license headers -->
         <plugin>
           <groupId>com.mycila</groupId>
           <artifactId>license-maven-plugin</artifactId>
           <version>${version.maven-license.plugin}</version>
-        <configuration>
-          <header>${project.basedir}/../copyright.txt</header>
-          <headerSections>
-            <headerSection>
-              <key>__YEAR_SECTION__</key>
-              <defaultValue>2014</defaultValue>
-              <!-- [2005-2011]-2013 | 2013 -->
-              <ensureMatch>20(05|06|07|08|09|10|11)\-20(12|13|14)|20(12|13|14)</ensureMatch>
-            </headerSection>
-            <headerSection>
-              <key>__ORG__</key>
-              <defaultValue>SonarSource</defaultValue>
-              <ensureMatch>(SonarSource|Akiban\ Technologies\,\ Inc\.)</ensureMatch>
-            </headerSection>
-          </headerSections>
-          <aggregate>true</aggregate>
-          <strictCheck>true</strictCheck>
-          <failIfMissing>true</failIfMissing>
-          <excludes>
-            <!-- Non-distributed benchmark code -->
-            <exclude>bench/**</exclude>
-            <!-- Docs -->
-            <exclude>doc/**</exclude>
-            <exclude>src/main/resources/**</exclude>
-            <exclude>src/test/resources/**</exclude>
-            <!-- IDE files -->
-            <exclude>.idea/**</exclude>
-            <exclude>.settings/**</exclude>
-            <exclude>.project</exclude>
-            <exclude>.classpath</exclude>
-            <exclude>.bzrignore</exclude>
-            <exclude>src/etc/eclipse*.xml</exclude>
-            <!-- Other -->
-            <exclude>README.rst</exclude>
-            <exclude>pom.xml</exclude>
-          </excludes>
-          <mapping>
-            <java>JAVADOC_STYLE</java>
-          </mapping>
-          <skip>${skipSanityChecks}</skip>
-        </configuration>
-        <executions>
-          <execution>
-            <id>enforce-license-headers</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
+          <configuration>
+            <header>${project.basedir}/../copyright.txt</header>
+            <headerSections>
+              <headerSection>
+                <key>__YEAR_SECTION__</key>
+                <defaultValue>2014</defaultValue>
+                <!-- [2005-2011]-2013 | 2013 -->
+                <ensureMatch>20(05|06|07|08|09|10|11)\-20(12|13|14)|20(12|13|14)</ensureMatch>
+              </headerSection>
+              <headerSection>
+                <key>__ORG__</key>
+                <defaultValue>SonarSource</defaultValue>
+                <ensureMatch>(SonarSource|Akiban\ Technologies\,\ Inc\.)</ensureMatch>
+              </headerSection>
+            </headerSections>
+            <aggregate>true</aggregate>
+            <strictCheck>true</strictCheck>
+            <failIfMissing>true</failIfMissing>
+            <excludes>
+              <!-- Non-distributed benchmark code -->
+              <exclude>bench/**</exclude>
+              <!-- Docs -->
+              <exclude>doc/**</exclude>
+              <exclude>src/main/resources/**</exclude>
+              <exclude>src/test/resources/**</exclude>
+              <!-- IDE files -->
+              <exclude>.idea/**</exclude>
+              <exclude>.settings/**</exclude>
+              <exclude>.project</exclude>
+              <exclude>.classpath</exclude>
+              <exclude>.bzrignore</exclude>
+              <exclude>src/etc/eclipse*.xml</exclude>
+              <!-- Other -->
+              <exclude>README.rst</exclude>
+              <exclude>pom.xml</exclude>
+            </excludes>
+            <mapping>
+              <java>JAVADOC_STYLE</java>
+            </mapping>
+            <skip>${skipSanityChecks}</skip>
+          </configuration>
+          <executions>
+            <execution>
+              <id>enforce-license-headers</id>
+              <phase>validate</phase>
+              <goals>
+                <goal>check</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
     </pluginManagement>
   </build>
-  
+
   <developers>
     <developer>
       <id>peter</id>
@@ -308,21 +332,21 @@
               </execution>
             </executions>
           </plugin>
-	      <plugin>
-	        <groupId>org.apache.maven.plugins</groupId>
-	        <artifactId>maven-gpg-plugin</artifactId>
-	        <executions>
-	          <execution>
-	            <id>sign-artifacts</id>
-	            <phase>verify</phase>
-	            <goals>
-	              <goal>sign</goal>
-	            </goals>
-	          </execution>
-	        </executions>
-	      </plugin>           
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
         </plugins>
       </build>
     </profile>
-  </profiles>  
+  </profiles>
 </project>
