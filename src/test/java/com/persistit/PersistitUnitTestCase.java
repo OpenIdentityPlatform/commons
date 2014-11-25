@@ -31,7 +31,7 @@ import java.util.Properties;
 public abstract class PersistitUnitTestCase {
 
   @Rule
-  public TemporaryFolder temp = new TemporaryFolder();
+  public TemporaryFolder temp = new TemporaryFolder(new File(System.getProperty("buildDirectory")));
 
   private final static long TEN_SECONDS = 10L * 1000L * 1000L * 1000L;
   protected String DATA_PATH;
