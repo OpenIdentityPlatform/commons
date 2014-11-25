@@ -26,9 +26,6 @@ import java.io.PrintWriter;
  * adapter classes instead of this class to connect Persistit's log output to an
  * existing infrastructure.
  * 
- * @see ApacheCommonsLogAdapter
- * @see JDK14LoggingAdapter
- * @see Log4JAdapter
  * @see Slf4jAdapter
  * 
  * @version 1.0
