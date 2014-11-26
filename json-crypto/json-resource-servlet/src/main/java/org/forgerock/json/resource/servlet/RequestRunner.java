@@ -19,14 +19,15 @@ import static org.forgerock.json.resource.QueryResult.*;
 import static org.forgerock.json.resource.servlet.HttpUtils.*;
 import static org.forgerock.util.Utils.closeSilently;
 
-import java.io.IOException;
-import java.util.Map;
-
 import javax.mail.internet.ContentType;
 import javax.mail.internet.ParseException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.AdviceContext;
@@ -48,8 +49,6 @@ import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.util.encode.Base64url;
 import org.forgerock.util.promise.SuccessHandler;
-
-import com.fasterxml.jackson.core.JsonGenerator;
 
 /**
  * Common request processing.
@@ -392,8 +391,10 @@ final class RequestRunner implements ResultHandler<Connection>, RequestVisitor<V
     private void writeAdvice() {
         if (context.containsContext(AdviceContext.class)) {
             AdviceContext adviceContext = context.asContext(AdviceContext.class);
-            for (Map.Entry<String, String> entry : adviceContext.getAdvices().entrySet()) {
-                httpResponse.setHeader(entry.getKey(), entry.getValue());
+            for (Map.Entry<String, List<String>> entry : adviceContext.getAdvices().entrySet()) {
+                for (String value : entry.getValue()) {
+                    httpResponse.setHeader(entry.getKey(), value);
+                }
             }
         }
     }
