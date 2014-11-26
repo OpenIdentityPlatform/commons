@@ -16,10 +16,15 @@
 package org.forgerock.json.resource;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+
+import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * Unit test for {@link org.forgerock.json.resource.AdviceContext}.
@@ -33,8 +38,8 @@ public class AdviceContextTest {
     public void deserializes() throws ResourceException {
         // Given
         RootContext root = new RootContext();
-        AdviceContext advice = new AdviceContext(root);
-        advice.putAdvice("Warning", "version is not supported");
+        AdviceContext advice = new AdviceContext(root, Collections.<String>emptyList());
+        advice.putAdvice("Warning", "version_is_not_supported");
         ServerContext context = new ServerContext(advice);
         PersistenceConfig config = PersistenceConfig.builder().build();
 
@@ -45,5 +50,69 @@ public class AdviceContextTest {
         // Then
         assertNotNull(restored.getAdvices());
         assertEquals(advice.getAdvices(), restored.getAdvices());
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void shouldNotAllowAdviceForRestrictedAdviceName() {
+
+        //Given
+        AdviceContext context = new AdviceContext(new RootContext(), Arrays.asList("Content-Type"));
+
+        //When
+        try {
+            context.putAdvice("Content-Type", "VALUE");
+        } catch (IllegalArgumentException e) {
+            //Then
+            assertThat(e.getMessage()).contains("restricted advice name");
+            throw e;
+        }
+    }
+
+    @DataProvider(name = "legalCharacters")
+    private Object[][] legalCharacters() {
+        Object[][] data = new Object[95][];
+        for (int i = 0; i < 95; i++) {
+            data[i] = new Object[]{(char) (i + 32)};
+        }
+        return data;
+    }
+
+    @Test(dataProvider = "legalCharacters")
+    public void shouldAllowAdviceWithLegalCharacters(char character) {
+
+        //Given
+        AdviceContext context = new AdviceContext(new RootContext(), Collections.<String>emptyList());
+
+        //When
+        context.putAdvice("ADVICE_NAME", "" + character);
+
+        //Then
+        // All good
+    }
+
+    @DataProvider(name = "illegalCharacters")
+    private Object[][] illegalCharacters() {
+        Object[][] data = new Object[33][];
+        for (int i = 0; i < 32; i++) {
+            data[i] = new Object[]{(char) i};
+        }
+        data[32] = new Object[]{(char) 127};
+        return data;
+    }
+
+    @Test(dataProvider = "illegalCharacters", expectedExceptions = IllegalArgumentException.class)
+    public void shouldNotAllowAdviceWithIllegalCharacters(char character) {
+
+        //Given
+        AdviceContext context = new AdviceContext(new RootContext(), Collections.<String>emptyList());
+
+        //When
+        try {
+            context.putAdvice("ADVICE_NAME", "" + character);
+        } catch (IllegalArgumentException e) {
+            //Then
+            assertThat(e.getMessage()).contains("illegal characters");
+            throw e;
+        }
     }
 }
