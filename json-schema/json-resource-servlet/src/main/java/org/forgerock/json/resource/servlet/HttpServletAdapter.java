@@ -542,7 +542,8 @@ public final class HttpServletAdapter {
     private Context newRequestContext(final HttpServletRequest req, final AcceptAPIVersion acceptVersion)
             throws ResourceException {
         final Context root = contextFactory.createContext(req);
-        return new AdviceContext(new AcceptAPIVersionContext(new HttpContext(root, req), PROTOCOL_NAME, acceptVersion));
+        return new AdviceContext(new AcceptAPIVersionContext(new HttpContext(root, req), PROTOCOL_NAME, acceptVersion),
+                RESTRICTED_HEADER_NAMES);
     }
 
     private boolean parseCommonParameter(final String name, final String[] values,
