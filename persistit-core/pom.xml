@@ -4,15 +4,15 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.codehaus.sonar</groupId>
-    <artifactId>sonar-persistit</artifactId>
-    <version>3.3.2-SNAPSHOT</version>
+    <groupId>org.forgerock.persistit</groupId>
+    <artifactId>forgerock-persistit</artifactId>
+    <version>4.0.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>sonar-persistit-core</artifactId>
+  <artifactId>forgerock-persistit-core</artifactId>
   <packaging>jar</packaging>
 
-  <name>sonar-persistit-core</name>
+  <name>forgerock-persistit-core</name>
 
   <dependencies>
     <dependency>
@@ -75,4 +75,23 @@
       </plugin>
     </plugins>
   </build>
+
+  <repositories>
+    <repository>
+      <id>forgerock-staging-repository</id>
+      <name>ForgeRock Release Repository</name>
+      <url>http://maven.forgerock.org/repo/releases</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>forgerock-snapshots-repository</id>
+      <name>ForgeRock Snapshot Repository</name>
+      <url>http://maven.forgerock.org/repo/snapshots</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+    </repository>
+  </repositories>
 </project>
