@@ -39,6 +39,10 @@ define("config/messages/CommonMessages", [
                 msg: "config.messages.CommonMessages.loginFailureLockout",
                 type: "error"
             },
+            "maxSessionsLimitOrSessionQuota": {
+                msg: "config.messages.CommonMessages.maxSessionsLimitOrSessionQuota",
+                type: "error"
+            },
             "invalidRealm": {
                 msg: "config.messages.CommonMessages.invalidRealm",
                 type: "error"

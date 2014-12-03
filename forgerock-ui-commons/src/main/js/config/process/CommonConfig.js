@@ -360,12 +360,13 @@ define("config/process/CommonConfig", [
                     }
 
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "loggedIn");
-                }, function() {
-                    if(conf.globalData.auth.urlParams && conf.globalData.auth.urlParams.gotoOnFail){
+                }, function (reason) {
+                    if (conf.globalData.auth.urlParams && conf.globalData.auth.urlParams.gotoOnFail) {
                         window.location.href = conf.globalData.auth.urlParams.gotoOnFail;
                         return false;
                     }
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "authenticationFailed"); 
+                    reason = reason ? reason : "authenticationFailed";
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, reason);
                 });
             }
         },
