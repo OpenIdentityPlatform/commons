@@ -16,15 +16,18 @@
 
 package org.forgerock.json.resource;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.regex.Pattern;
+
 import org.forgerock.resource.core.AbstractContext;
 import org.forgerock.resource.core.Context;
 import org.forgerock.util.Reject;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * A {@link Context} containing information which should be returned to the user in some
@@ -35,8 +38,12 @@ import java.util.Map;
  */
 public class AdviceContext extends AbstractContext {
 
-    /** advice currently stored for this context is help in this map. */
-    private final Map<String, List<String>> advice = new HashMap<String, List<String>>();
+    private static final Pattern ALLOWED_RFC_CHARACTERS = Pattern.compile("^[\\x20-\\x7E]*$");
+
+    private final Collection<String> restrictedAdviceNames = new HashSet<String>();
+
+    /** advice currently stored for this context is help in this map. **/
+    private final Map<String, List<String>> advice = new TreeMap<String, List<String>>(String.CASE_INSENSITIVE_ORDER);
 
     /**
      * Creates a new AdviceContext with the provided parent
@@ -44,8 +51,9 @@ public class AdviceContext extends AbstractContext {
      * @param parent
      *            The parent context.
      */
-    public AdviceContext(Context parent) {
+    public AdviceContext(Context parent, Collection<String> restrictedAdviceNames) {
         super(parent, "advice");
+        this.restrictedAdviceNames.addAll(restrictedAdviceNames);
     }
 
     /**
@@ -58,18 +66,30 @@ public class AdviceContext extends AbstractContext {
     }
 
     /**
-     * Adds a piece of advice to the context, which can be retrieved and later returned to the user.
+     * Adds advice to the context, which can be retrieved and later returned to the user.
      *
      * @param adviceName Name of the advice to return to the user. Not null.
      * @param advices Human-readable advice to return to the user. Not null.
      */
     public void putAdvice(String adviceName, String... advices) {
         Reject.ifNull(adviceName, advices);
+        Reject.ifTrue(isRestrictedAdvice(adviceName), "Illegal use of restricted advice name, " + adviceName);
+        for (String adviceEntry : advices) {
+            Reject.ifTrue(!isRfcCompliant(adviceEntry), "Advice contains illegal characters in, " + adviceEntry);
+        }
         List<String> adviceEntry = advice.get(adviceName);
         if (adviceEntry == null) {
             adviceEntry = new ArrayList<String>();
             advice.put(adviceName, adviceEntry);
         }
         adviceEntry.addAll(Arrays.asList(advices));
+    }
+
+    private boolean isRfcCompliant(String advice) {
+        return ALLOWED_RFC_CHARACTERS.matcher(advice).matches();
+    }
+
+    private boolean isRestrictedAdvice(String adviceName) {
+        return restrictedAdviceNames.contains(adviceName);
     }
 }
