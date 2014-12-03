@@ -28,7 +28,6 @@ import org.forgerock.http.Form;
 import org.forgerock.http.Response;
 import org.forgerock.http.ResponseException;
 import org.forgerock.http.header.ContentTypeHeader;
-import org.forgerock.http.routing.RouterContext;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.AcceptAPIVersion;
 import org.forgerock.json.resource.AcceptAPIVersionContext;
@@ -53,6 +52,7 @@ import org.forgerock.json.resource.ResourceName;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.json.resource.Version;
 import org.forgerock.resource.core.Context;
+import org.forgerock.resource.core.routing.RouterContext;
 import org.forgerock.util.promise.AsyncFunction;
 import org.forgerock.util.promise.Promise;
 
@@ -530,7 +530,7 @@ public final class HttpAdapter {
         final Context parent = contextFactory.createContext(context, req);
         return new AdviceContext(
                 new AcceptAPIVersionContext(
-                        new HttpContext(parent, req), PROTOCOL_NAME, acceptVersion));
+                        new HttpContext(parent, req), PROTOCOL_NAME, acceptVersion), RESTRICTED_HEADER_NAMES);
     }
 
     private boolean parseCommonParameter(final String name, final List<String> values,
