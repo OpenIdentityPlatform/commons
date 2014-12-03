@@ -17,6 +17,7 @@
 package org.forgerock.json.resource.servlet;
 
 import static org.forgerock.http.io.IO.newPipedOutputStream;
+import static org.forgerock.json.resource.VersionConstants.ACCEPT_API_VERSION;
 import static org.forgerock.util.Utils.closeSilently;
 
 import javax.activation.DataSource;
@@ -33,6 +34,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayDeque;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -83,6 +86,10 @@ public final class HttpUtils {
     static final String HEADER_IF_NONE_MATCH = "If-None-Match";
     static final String HEADER_LOCATION = "Location";
     static final String HEADER_X_HTTP_METHOD_OVERRIDE = "X-HTTP-Method-Override";
+    public static final String CONTENT_DISPOSITION = "Content-Disposition";
+    static final Collection<String> RESTRICTED_HEADER_NAMES = Arrays.asList("Content-Type", "If-Modified-Since",
+            ACCEPT_API_VERSION, "If-Unmodified-Since", HEADER_IF_MATCH, HEADER_IF_NONE_MATCH, HEADER_CACHE_CONTROL,
+            HEADER_ETAG, HEADER_LOCATION, HEADER_X_HTTP_METHOD_OVERRIDE, CONTENT_DISPOSITION);
 
     static final String METHOD_DELETE = "DELETE";
     static final String METHOD_GET = "GET";
@@ -128,7 +135,6 @@ public final class HttpUtils {
     private static final String FILENAME = "filename";
     private static final String MIME_TYPE = "mimetype";
     private static final String CONTENT = "content";
-    private static final String CONTENT_DISPOSITION = "Content-Disposition";
     private static final String NAME = "name";
     private static final Pattern MULTIPART_FIELD_REGEX = Pattern.compile("^cid:(.*)#(" + FILENAME
             + "|" + MIME_TYPE + "|" + CONTENT + ")$", Pattern.CASE_INSENSITIVE);
