@@ -53,6 +53,7 @@ define("org/forgerock/commons/ui/common/LoggedUserBarView", [
                     this.$el.find("#user_name").text(conf.loggedUser.userName); //idm
                 } else if (conf.loggedUser.cn) {
                     this.$el.find("#user_name").text(conf.loggedUser.cn); //am
+                    this.data.username = conf.loggedUser.cn;
                 }
                 
                 this.$el.show();

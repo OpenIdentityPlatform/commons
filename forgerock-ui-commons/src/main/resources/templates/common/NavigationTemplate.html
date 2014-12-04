@@ -1,18 +1,52 @@
-<ul class="menu">
-    {{#each topNav}}
-    <li {{#if isActive}} class="active"{{/if}}>
-        <a href="{{hashurl}}" title="{{title}}" {{#if isInactive}} class="inactive" {{/if}}><span class="glyph-icon glyph-icon-active {{icon}}"></span><span class="glyph-title">{{title}}</span></a>
-    </li>
-    {{/each}}
-</ul>
+<!--
 {{#if subNav.length}}
-    <div id="submenu" class="submenubar">
-        <ul>
+<div id="submenu" class="collapse navbar-collapse submenubar">
+    <div class="container">
+        <ul class="nav navbar-nav">
             {{#each subNav}}
             <li {{#if isActive}} class="active"{{/if}}>
-                <a href="{{hashurl}}" title="{{title}}" {{#if isInactive}} class="inactive" {{/if}}><span class="glyph-icon glyph-icon-active {{icon}}"></span><span class="glyph-title">{{title}}</span></a>
+            <a href="{{hashurl}}" title="{{title}}" {{#if isInactive}} class="inactive" {{/if}}><span class="glyph-icon glyph-icon-active {{icon}}"></span><span class="glyph-title">{{title}}</span></a>
             </li>
             {{/each}}
         </ul>
     </div>
+</div>
 {{/if}}
+-->
+<nav id="mainNavHolder" class="navbar navbar-default navbar-static-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#mainNavBar" aria-expanded="false" aria-controls="navbar">
+                {{#each topNav}}
+                <li class="icon-bar {{#if isActive}} active {{/if}} ">
+                    <a href="{{hashurl}}" title="{{title}}" {{#if isInactive}} class="inactive" {{/if}}><span class="glyph-icon glyph-icon-active {{icon}}"></span><span class="glyph-title">{{title}}</span></a>
+                </li>
+                {{/each}}
+            </button>
+            <a href="#" class="navbar-brand" title="{{theme.settings.logo.title}}"><img src="{{theme.settings.logo.src}}" alt="{{theme.settings.logo.alt}}" /> </a>
+        </div>
+        <div id="mainNavBar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                {{#each topNav}}
+                <li {{#if isActive}} class="active"{{/if}}>
+                <a href="{{hashurl}}" title="{{title}}" {{#if isInactive}} class="inactive" {{/if}}><span class="glyph-icon glyph-icon-active {{icon}}"></span><span class="glyph-title">{{title}}</span></a>
+                </li>
+                {{/each}}
+            </ul>
+            <ul id="loginContent" class="nav navbar-nav navbar-right">
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span id="user_name">
+                    {{#if username}}
+                        {{username}}
+                    {{/if}}
+                    </span><span class="caret"></span></a>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a href="#profile/" id="profile_link">{{t "common.user.profile"}}</a></li>
+                        <li><a href="#profile/change_security_data/" id="security_link">{{t "templates.user.UserProfileTemplate.changeSecurityData"}}</a></li>
+                        <li><a href="#logout/" id="logout_link">{{t "common.form.logout"}}</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

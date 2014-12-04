@@ -48,6 +48,7 @@ require.config({
         doTimeout: "libs/jquery.ba-dotimeout-1.0-min",
         handlebars: "libs/handlebars-1.3.0-min",
         moment: "libs/moment-2.8.1-min",
+        boostrapjs: "libs/bootstrap.min",
         UserDelegate: "org/forgerock/mock/ui/user/delegates/UserDelegate",
         ThemeManager: "org/forgerock/mock/ui/common/util/ThemeManager"
     },
@@ -121,6 +122,7 @@ require([
     "doTimeout",
     "handlebars",
     "i18next",
+    "boostrapjs",
     "org/forgerock/mock/ui/common/main/MockServer",
     "org/forgerock/commons/ui/common/main/i18nManager",
     "org/forgerock/commons/ui/common/util/Constants",
@@ -133,7 +135,7 @@ require([
     "UserDelegate",
     "ThemeManager",
     "config/main"
-], function ( sinon, $, _, Backbone, form2js, js2form, spin, $ui, xdate, moment, doTimeout, Handlebars, i18n,
+], function ( sinon, $, _, Backbone, form2js, js2form, spin, $ui, xdate, moment, doTimeout, Handlebars, i18n, boostrapjs,
              mockServer, i18nManager, constants, eventManager, localStorage) {
 
     // Helpers for the code that hasn't been properly migrated to require these as explicit dependencies:

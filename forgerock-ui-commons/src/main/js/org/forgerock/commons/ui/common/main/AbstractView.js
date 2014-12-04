@@ -35,8 +35,8 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/util/ValidatorsUtils",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/commons/ui/common/main/EventManager", 
-    "org/forgerock/commons/ui/common/main/Router", 
+    "org/forgerock/commons/ui/common/main/EventManager",
+    "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/util/Constants",
     "ThemeManager"
 ], function($, _, Backbone, uiUtils, validatorsManager, validatorsUtils, conf, eventManager, router, constants, themeManager) {
@@ -47,24 +47,25 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
          * new View({el: "#someId", template: "templates/main.html"});
          */
         element: "#content",
-        
+
         baseTemplate: "templates/common/DefaultBaseTemplate.html",
-        
+
         /**
          * View mode: replace or append
          */
         mode: "replace",
-        
+
         formLock: false,
-        
+
         data: {},
 
         /**
-         * Change content of 'el' element with 'viewTpl', 
+         * Change content of 'el' element with 'viewTpl',
          * which is compiled using 'data' attributes.
          */
-        parentRender: function(callback) {   
+        parentRender: function(callback) {
             this.callback = callback;
+
             var _this = this,
                 needsNewBaseTemplate = function () {
                     return (conf.baseTemplate !== _this.baseTemplate && !_this.noBaseTemplate);
@@ -72,20 +73,29 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
             eventManager.registerListener(constants.EVENT_REQUEST_RESEND_REQUIRED, function () {
                 _this.unlock();
             });
-            
+
             themeManager.getTheme().then(function(theme){
                 _this.data.theme = theme;
-                
+
                 if(needsNewBaseTemplate()) {
                     uiUtils.renderTemplate(_this.data.theme.path + _this.baseTemplate, $("#wrapper"), _.extend({}, conf.globalData, _this.data), _.bind(_this.loadTemplate, _this), "replace", needsNewBaseTemplate);
                 } else {
                     _this.loadTemplate();
                 }
             });
-            
-            //$(window).scrollTop(0);
+
+            //Added in due to the migration of the username to the main nav bar
+            if(conf.loggedUser) {
+                this.$el.find("#profile_link").show();
+
+                if (conf.loggedUser.userName) {
+                    this.$el.find("#user_name").text(conf.loggedUser.userName); //idm
+                } else if (conf.loggedUser.cn) {
+                    this.$el.find("#user_name").text(conf.loggedUser.cn); //am
+                }
+            }
         },
-        
+
         loadTemplate: function() {
             var _this = this,
                 validateCurrent = function () {
@@ -101,32 +111,32 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
             this.setElement($(this.element));
             this.$el.unbind();
             this.delegateEvents();
-            
+
             if(conf.baseTemplate !== this.baseTemplate && !this.noBaseTemplate) {
                 conf.setProperty("baseTemplate", this.baseTemplate);
                 eventManager.sendEvent(constants.EVENT_CHANGE_BASE_VIEW);
             }
-            
+
             if(this.callback) {
                 uiUtils.renderTemplate(this.data.theme.path + this.template, this.$el, _.extend({}, conf.globalData, this.data), _.bind(this.callback, this), this.mode, validateCurrent);
             } else {
                 uiUtils.renderTemplate(this.data.theme.path + this.template, this.$el, _.extend({}, conf.globalData, this.data), null, this.mode, validateCurrent);
             }
-           
+
         },
-        
+
         rebind: function() {
             this.setElement($(this.element));
             this.$el.unbind();
             this.delegateEvents();
         },
-        
+
         render: function(args, callback) {
             this.parentRender(callback);
         },
-        
+
         reload: function() {},
-        
+
         /**
          * Perform only view changes: displays tick, message and
          * change color of submit button.
@@ -149,18 +159,18 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
                 button.prop('disabled', true);
                 this.$el.find(".input-validation-message").show();
             }
-            
+
             if (msg === "disabled") {
                 validatorsUtils.hideValidation(input, this.$el);
                 return;
             } else {
                 validatorsUtils.showValidation(input, this.$el);
             }
-      
+
             if (input.nextAll("span")) {
                 validatorsUtils.setTick(input, msg);
             }
-            
+
             input.nextAll("div.validation-message:first").attr("for", input.attr('id')).html(msg ? msg : '');
             input.parents('.separate-message').children("div.validation-message:first").attr("for", input.attr('id')).html(msg ? msg : '');
 
@@ -173,22 +183,22 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
             }
 
             this.$el.find("div.validation-message[for='" + input.attr('name') + "']").html(msg ? msg : '');
-            
+
             if (validatorType) {
                 validatorsUtils.setErrors(this.$el, validatorType, msg);
             }
 
             this.$el.trigger("customValidate", [input, msg, validatorType]);
         },
-        
+
         lock: function() {
             this.formLock = true;
         },
-        
+
         unlock: function() {
             this.formLock = false;
         },
-        
+
         isFormLocked: function() {
             return this.formLock;
         }
