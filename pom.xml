@@ -163,6 +163,9 @@
         
         <!--  ForgeRock build tools version -->
         <forgerockBuildToolsVersion>1.0.2</forgerockBuildToolsVersion>
+
+        <!-- Forgerock binary license name -->
+        <binary.license.name>Forgerock_License.txt</binary.license.name>
     </properties>
 
     <prerequisites>
@@ -1083,10 +1086,11 @@
                                      <echo message="Fetching license from SVN" />
                                      <!-- The Maven SCM plugin clean the target folder when using the export command (it's a bug...) -->
                                      <!-- That's why we are using the svn export command -->
+                                     <mkdir dir="${include.binary.license}"/>
                                      <exec dir="${include.binary.license}" executable="svn">
                                         <arg value="export" />
                                         <arg value="${binary.license.url}" />
-                                        <arg value="${include.binary.license}/license.txt" />
+                                        <arg value="${include.binary.license}/${binary.license.name}" />
                                      </exec>
                                   </then>
                                   <else>
