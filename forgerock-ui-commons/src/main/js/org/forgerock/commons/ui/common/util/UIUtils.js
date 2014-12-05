@@ -233,6 +233,8 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                         if (records % pageSize > 0) {
                             pages += 1;
                         }
+
+                        sessionStorage.setItem(additional.storageKey + '-pages-number', pages);
                         return pages;
                     },
                     records: function (obj) {  // total number of records
@@ -294,6 +296,14 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                 },
                 loadComplete: function (data) {
                     _.extend(view.data[id], data);
+                },
+                onPaging: function () {
+                    var totalPagesNum = JSON.parse(sessionStorage.getItem(additional.storageKey + '-pages-number')),
+                        inputVal = $($(this).jqGrid('getGridParam', 'pager')).find('input').val();
+                    if (totalPagesNum !== null && /[0-9]+/.test(inputVal) && totalPagesNum < parseInt(inputVal, 10)) {
+                        $(this).trigger('reloadGrid', {page: 1});
+                        return 'stop';
+                    }
                 },
                 pager: null,
                 rowNum: 10,
