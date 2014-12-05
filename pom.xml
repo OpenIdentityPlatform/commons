@@ -28,7 +28,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.forgerock</groupId>
     <artifactId>forgerock-parent</artifactId>
-    <version>1.2.7-SNAPSHOT</version>
+    <version>1.2.7</version>
     <packaging>pom</packaging>
     <name>ForgeRock Parent</name>
     <description>Parent POM for ForgeRock projects. Provides default project build configuration.</description>
@@ -50,9 +50,9 @@
         <url>https://bugster.forgerock.org</url>
     </issueManagement>
     <scm>
-        <connection>scm:svn:https://svn.forgerock.org/commons/forgerock-parent/trunk</connection>
-        <developerConnection>scm:svn:https://svn.forgerock.org/commons/forgerock-parent/trunk</developerConnection>
-        <url>http://sources.forgerock.org/browse/commons/forgerock-parent/trunk</url>
+        <connection>scm:svn:https://svn.forgerock.org/commons/forgerock-parent/tags/1.2.7</connection>
+        <developerConnection>scm:svn:https://svn.forgerock.org/commons/forgerock-parent/tags/1.2.7</developerConnection>
+        <url>http://sources.forgerock.org/browse/commons/forgerock-parent/tags/1.2.7</url>
     </scm>
     <distributionManagement>
         <snapshotRepository>
@@ -1086,7 +1086,7 @@
                                      <echo message="Fetching license from SVN" />
                                      <!-- The Maven SCM plugin clean the target folder when using the export command (it's a bug...) -->
                                      <!-- That's why we are using the svn export command -->
-                                     <mkdir dir="${include.binary.license}"/>
+                                     <mkdir dir="${include.binary.license}" />
                                      <exec dir="${include.binary.license}" executable="svn">
                                         <arg value="export" />
                                         <arg value="${binary.license.url}" />
