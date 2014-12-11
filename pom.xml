@@ -36,7 +36,7 @@
 
     <groupId>org.forgerock.commons.ui</groupId>
     <artifactId>forgerock-ui</artifactId>
-    <version>1.1.9-SNAPSHOT</version>
+    <version>1.1.10-SNAPSHOT</version>
     <name>Forgerock Web UI</name>
     <description>Common modern ForgeRock Web UI</description>
     <packaging>pom</packaging>
