@@ -65,7 +65,9 @@ define("org/forgerock/commons/ui/common/LoginView", [
 
             this.parentRender(function() {
                 validatorsManager.bindValidators(this.$el);
-                
+
+                this.$el.find("input").placeholder();
+
                 var login = cookieHelper.getCookie("login");
                 if(login) {
                     this.$el.find("input[name=login]").val(login).prop('autofocus', false);

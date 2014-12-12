@@ -41,10 +41,10 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
     "org/forgerock/commons/ui/common/main/Router"
 ], function($, _, Backbone, AbstractConfigurationAware, AbstractView, conf, constants, eventManager, viewManager, router) {
     var obj = new AbstractConfigurationAware();
-    
+
     obj.init = function() {
         var Navigation = AbstractView.extend({
-            
+
             element: "#menu",
             template: "templates/common/NavigationTemplate.html",
             noBaseTemplate: true,
@@ -60,13 +60,13 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                 this.reload();
                 this.parentRender();
             },
-            
+
             addLinks: function(linkName) {
                 var url, urlName, subUrl, subUrlName,icon;
-                
+
                 for(urlName in obj.configuration.links[linkName].urls) {
                     url = obj.configuration.links[linkName].urls[urlName];
-                    
+
                     if (this.isCurrent(url.url) || this.isCurrent(url.baseUrl) || this.childIsCurrent(url.urls)) {
                         this.addLink(url.name, url.url, true, url.icon, url.inactive);
 
@@ -75,15 +75,17 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                                 subUrl = url.urls[subUrlName];
                                 this.addSubLink(subUrl.name, subUrl.url, this.isCurrent(subUrl.url), subUrl.icon, subUrl.inactive);
                             }
+
+                            //Added to provide reference for responsive design submenus to appear in the correct location.
+                            this.data.topNav[this.data.topNav.length - 1].subNav = this.data.subNav;
                         }
 
                     } else {
                         this.addLink(url.name, url.url, false,url.icon, url.inactive);
                     }
                 }
-       
             },
-            
+
             addLink: function(name, url, isActive, icon, isInactive) {
                 this.data.topNav.push({
                     key: name,
@@ -94,7 +96,7 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                     icon: icon
                 });
             },
-            
+
             addSubLink: function(name, url, isActive, icon, isInactive) {
                 this.data.subNav.push({
                     key: name,
@@ -105,7 +107,7 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                     icon: icon
                 });
             },
-            
+
             childIsCurrent: function(urls) {
                 var urlName;
                 for (urlName in urls) {
@@ -115,7 +117,7 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                 }
                 return false;
             },
-            
+
             isCurrent: function(urlName) {
                 var fromHash, afterHash = window.location.href.split('#')[1];
                 if (afterHash) {
@@ -125,20 +127,20 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                 }
                 return fromHash.indexOf(urlName) !== -1;
             },
-            
+
             clear: function() {
                 this.data.topNav = [];
                 this.data.subNav = [];
             },
-            
+
             reload: function() {
                 this.clear();
-                
+
                 var link, linkName;
-                
+
                 for(linkName in obj.configuration.links) {
                     link = obj.configuration.links[linkName];
-                    
+
                     if(link.role && conf.loggedUser && _.contains(conf.loggedUser.roles, link.role)) {
                         this.addLinks(linkName);
                         return;
@@ -153,7 +155,7 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
         obj.navigation = new Navigation();
         obj.navigation.render();
     };
-    
+
     obj.reload = function() {
         if(obj.navigation) {
             obj.navigation.render();

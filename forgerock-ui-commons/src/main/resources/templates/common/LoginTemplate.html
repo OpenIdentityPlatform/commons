@@ -1,48 +1,50 @@
 <div class="container">
     <form class="form-signin" role="form">
-        <input type="text" name="login" id="login" value="" class="form-control" placeholder="Username" required autofocus>
-        <input type="password" name="password" id="password" class="form-control" placeholder="Password" required>
-        <div class="checkbox">
-            <label>
-                <input type="checkbox" type="checkbox" name="loginRemember"> {{t "templates.user.LoginTemplate.loginRemember"}}
-            </label>
+        <div class="col-sm-6 col-sm-offset-3">
+            <div class="login">
+                <div class="form-group">
+                    <input type="text" name="login" id="login" value="" class="form-control input-lg" placeholder="Username" required autofocus>
+                </div>
+                <div class="form-group">
+                    <input type="password" name="password" id="password" class="form-control input-lg" placeholder="Password" required>
+                </div>
+                <div class="remember-forgot">
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" type="checkbox" name="loginRemember"> {{t "templates.user.LoginTemplate.loginRemember"}}
+                        </label>
+                    </div>
+                    {{#if hasOptionalUIFeatures}}
+                        {{#if passwordResetLink}}
+                            <a href="{{passwordResetLink}}">{{t "templates.user.LoginTemplate.resetPassword"}}</a>
+                        {{else}}
+                            {{#if securityQuestions}}
+                                <a href="{{url 'forgottenPassword'}}">{{t "templates.user.LoginTemplate.resetPassword"}}</a>
+                            {{/if}}
+                        {{/if}}
+                    {{/if}}
+                </div>
+                <input type="submit" name="loginButton" class="btn btn-lg btn-primary btn-block btn-uppercase" value="{{t "common.user.login"}}">
+                {{#if hasOptionalUIFeatures}}
+                    {{#selfRegistration}}
+                        <div class="toggle-login-register">
+                            {{t "templates.user.LoginTemplate.noAccountQuestion"}} <a href="{{url 'selfRegistration'}}">{{t "templates.user.LoginTemplate.registerAccount"}}</a>
+                        </div>
+                    {{/selfRegistration}}
+                {{/if}}
+            </div>
         </div>
-        <input type="submit" name="loginButton" class="btn btn-lg btn-primary btn-block" type="submit" value="{{t "common.user.login"}}">
         {{#if hasOptionalUIFeatures}}
-        <div class="col2">
-
-            {{#siteIdentification}}
-            <div class="fieldset clearfix">
-                <h5>{{t "templates.user.LoginTemplate.siteIdentificationHeader"}}</h5>
-                <p id="identificationMessage" class="last">{{t "templates.user.LoginTemplate.siteIdentificationExplanation"}}</p>
-                <div id="siteImage" class="float-right"></div>
-                <div id="passPhrase"></div>
+            <div class="col-sm-6 col-sm-offset-3">
+                {{#siteIdentification}}
+                    <div>
+                        <h5>{{t "templates.user.LoginTemplate.siteIdentificationHeader"}}</h5>
+                        <p id="identificationMessage" class="last">{{t "templates.user.LoginTemplate.siteIdentificationExplanation"}}</p>
+                        <div id="siteImage" class="float-right"></div>
+                        <div id="passPhrase"></div>
+                    </div>
+                {{/siteIdentification}}
             </div>
-            {{/siteIdentification}}
-            {{#selfRegistration}}
-            <div class="fieldset">
-                <h5>{{t "templates.user.LoginTemplate.noAccountQuestion"}}</h5>
-                <p class="last"><a href="{{url 'selfRegistration'}}">{{t "templates.user.LoginTemplate.registerAccount"}}</a></p>
-            </div>
-            {{/selfRegistration}}
-
-            {{#if passwordResetLink}}
-            <div class="fieldset">
-                <h5>{{t "templates.user.LoginTemplate.problemLoggingQuestion"}}</h5>
-                <p class="last"><a href="{{passwordResetLink}}">{{t "templates.user.LoginTemplate.resetPassword"}}</a></p>
-            </div>
-            {{else}}
-
-            {{#if securityQuestions}}
-            <div class="fieldset">
-                <h5>{{t "templates.user.LoginTemplate.problemLoggingQuestion"}}</h5>
-                <p class="last"><a href="{{url 'forgottenPassword'}}">{{t "templates.user.LoginTemplate.resetPassword"}}</a></p>
-            </div>
-            {{/if}}
-
-            {{/if}}
-
-        </div>
         {{/if}}
     </form>
 </div>

@@ -40,11 +40,9 @@ define("org/forgerock/commons/ui/common/util/ValidatorsUtils", [
         if(ok) {
             span.removeClass('ok');
             span.addClass('error');
-            span.html('x');
         } else {
             span.removeClass('error');
             span.addClass('ok');
-            span.html('');
         }
     };
     
@@ -61,11 +59,9 @@ define("org/forgerock/commons/ui/common/util/ValidatorsUtils", [
                 if ($.inArray(type, msg) !== -1) {
                     span.removeClass('ok');
                     span.addClass('error');
-                    span.html('x');
                 } else {
                     span.removeClass('error');
                     span.addClass('ok');
-                    span.html('&#10004;');
                 }
             });
         });

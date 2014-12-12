@@ -68,6 +68,7 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
          * close action is added.
          */
         show: function(callback) {
+            var buttonClass;
 
             this.setElement($("#dialogs"));
             this.parentRender(_.bind(function() {
@@ -77,7 +78,14 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
                 $("#dialog-background").off('click').on('click', _.bind(this.close, this));
 
                 _.each(this.actions, _.bind(function(a) {
-                    this.$el.find(".dialogActions").append("<input type='"+ a.type +"' name='"+ a.name +"' value='"+ a.name +"' class='btn btn-default pull-right' />");
+
+                    if(a.type ==="submit") {
+                        buttonClass = "btn-primary";
+                    } else {
+                        buttonClass = "btn-default";
+                    }
+
+                    this.$el.find(".dialogActions").append("<input type='"+ a.type +"' name='"+ a.name +"' value='"+ a.name +"' class='btn " +buttonClass +" pull-right' />");
                 }, this));
 
                 this.loadContent(callback);

@@ -80,7 +80,7 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
 
                 // buttons will be included in this structure, so remove those.
                 _.each(this.data, function (value, key, list) {
-                    if (this.$el.find("input[name=" + key + "]").hasClass('button')) {
+                    if (this.$el.find("input[name=" + key + "]").hasClass('btn')) {
                         delete this.data[key];
                     }
                 }, this);

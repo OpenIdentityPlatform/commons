@@ -1,71 +1,116 @@
-<h3>{{t "common.user.userProfile"}}</h3>
-
-<form id="userProfileForm">
-    <ul>
-        <li><a href="{{url 'changeSecurityData'}}">{{t "templates.user.UserProfileTemplate.changeSecurityData"}}</a></li>
-        {{#unless adminUser}}
-        {{#siteIdentification}}<li><a href="{{url 'siteIdentification'}}">{{t "templates.user.UserProfileTemplate.changeSiteIdentification"}}</a></li>{{/siteIdentification}}
-        {{/unless}}
-    </ul>
+<div class="page-header">
+    <div class='btn-toolbar pull-right'>
+        <div class='btn-group'>
+            <a class="pull-right" href="{{url 'changeSecurityData'}}"><button class="btn btn-primary" type="button" name="changeSecurity">{{t "templates.user.UserProfileTemplate.changeSecurityData"}}</button></a>
+            {{#unless adminUser}}
+            {{#siteIdentification}}<a class="pull-right" href="{{url 'siteIdentification'}}"><button class="btn btn-primary" type="button" name="changeSiteIdentification">{{t "templates.user.UserProfileTemplate.changeSiteIdentification"}}</button></a>{{/siteIdentification}}
+            {{/unless}}
+        </div>
+    </div>
+    <h3>{{t "common.user.userProfile"}}</h3>
+</div>
+<form class="form-horizontal" id="userProfileForm">
     <div class="form-group">
-        <label for="uid">{{t "common.user.username"}}</label>
-        <input class="form-control" type="text" id="uid" name="uid" value="" readonly>
+        <label class="col-sm-3 control-label" for="uid">{{t "common.user.username"}}</label>
+        <div class="col-sm-6">
+            <input class="form-control" type="text" id="uid" name="uid" value="" readonly>
+        </div>
     </div>
 
     {{#unless adminUser}}
-    <div class="form-group">
-        <label for="givenName">{{t "common.user.givenName"}}</label>
-        <input class="form-control" type="text" id="givenName" name="givenName" value="" autofocus />
+    <div class="form-group has-feedback">
+        <label class="col-sm-3 control-label" for="givenName">{{t "common.user.givenName"}}</label>
+        <div class="col-sm-6">
+            <input class="form-control" type="text" id="givenName" name="givenName" value="" autofocus />
+            <div class="validation-message"></div>
+            <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+        </div>
     </div>
-    <div class="form-group">
-        <label for="sn">{{t "common.user.familyName"}}</label>
-        <input class="form-control" type="text" id="sn" name="sn" value="" />
+    <div class="form-group has-feedback">
+        <label class="col-sm-3 control-label" for="sn">{{t "common.user.familyName"}}</label>
+        <div class="col-sm-6">
+            <input class="form-control" type="text" id="sn" name="sn" value="" />
+            <div class="validation-message"></div>
+            <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+        </div>
     </div>
-    <div class="form-group">
-        <label for="mail">{{t "common.user.emailAddress"}}</label>
-        <input class="form-control" type="email" id="mail" name="mail" value="" />
+    <div class="form-group has-feedback">
+        <label class="col-sm-3 control-label" for="mail">{{t "common.user.emailAddress"}}</label>
+        <div class="col-sm-6">
+            <input class="form-control" type="email" id="mail" name="mail" value="" />
+            <div class="validation-message"></div>
+            <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+        </div>
     </div>
-    <div class="form-group">
-        <label for="telephoneNumber">{{t "common.user.phoneNumber"}}</label>
-        <input class="form-control" type="tel" id="telephoneNumber" name="telephoneNumber" value="" />
+    <div class="form-group has-feedback">
+        <label class="col-sm-3 control-label" for="telephoneNumber">{{t "common.user.phoneNumber"}}</label>
+        <div class="col-sm-6">
+            <input class="form-control" type="tel" id="telephoneNumber" name="telephoneNumber" value="" />
+        </div>
     </div>
 
     {{#if hasAddressDetails}}
-    <div class="form-group">
-        <label for="postalAddress">{{t "common.user.address1"}}</label>
-        <input class="form-control" type="text" id="postalAddress" name="postalAddress" value=""  />
+    <div class="form-group has-feedback">
+        <label class="col-sm-3 control-label" for="postalAddress">{{t "common.user.address1"}}</label>
+        <div class="col-sm-6">
+            <input class="form-control" type="text" id="postalAddress" name="postalAddress" value=""  />
+            <div class="validation-message"></div>
+            <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+        </div>
     </div>
-    <div class="form-group">
-        <label for="address2">{{t "common.user.address2"}}</label>
-        <input class="form-control" type="text" id="address2" name="address2" value=""  />
+    <div class="form-group has-feedback">
+        <label class="col-sm-3 control-label" for="address2">{{t "common.user.address2"}}</label>
+        <div class="col-sm-6">
+            <input class="form-control" type="text" id="address2" name="address2" value=""  />
+            <div class="validation-message"></div>
+            <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+        </div>
     </div>
-    <div class="form-group">
-        <label for="city">{{t "common.user.city"}}</label>
-        <input class="form-control" type="text" id="city" name="city" value=""  />
+    <div class="form-group has-feedback">
+        <label class="col-sm-3 control-label" for="city">{{t "common.user.city"}}</label>
+        <div class="col-sm-6">
+            <input class="form-control" type="text" id="city" name="city" value=""  />
+            <div class="validation-message"></div>
+            <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+        </div>
     </div>
-    <div class="form-group">
-        <label for="city">{{t "common.user.city"}}</label>
-        <input class="form-control" type="text" id="city" name="city" value=""  />
+    <div class="form-group has-feedback">
+        <label class="col-sm-3 control-label" for="city">{{t "common.user.city"}}</label>
+        <div class="col-sm-6">
+            <input class="form-control" type="text" id="city" name="city" value=""  />
+            <div class="validation-message"></div>
+            <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+        </div>
     </div>
-    <div class="form-group">
-        <label for="postalCode">{{t "common.user.postalCode"}}</label>
-        <input class="form-control" type="text" id="postalCode" name="postalCode" value=""  />
+    <div class="form-group has-feedback">
+        <label class="col-sm-3 control-label" for="postalCode">{{t "common.user.postalCode"}}</label>
+        <div class="col-sm-6">
+            <input class="form-control" type="text" id="postalCode" name="postalCode" value=""  />
+            <div class="validation-message"></div>
+            <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+        </div>
     </div>
-    <div class="form-group">
-        <label for="country">{{t "common.user.country"}}</label>
-        <select class="form-control" id="country" name="country"></select>
+    <div class="form-group has-feedback">
+        <label class="col-sm-3 control-label" for="country">{{t "common.user.country"}}</label>
+        <div class="col-sm-6">
+            <select class="form-control" id="country" name="country"></select>
+            <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+        </div>
     </div>
-    <div class="form-group">
-        <label for="stateProvince">{{t "common.user.stateProvince"}}</label>
-        <select class="form-control" id="stateProvince" name="stateProvince"></select>
+    <div class="form-group has-feedback">
+        <label class="col-sm-3 control-label" for="stateProvince">{{t "common.user.stateProvince"}}</label>
+        <div class="col-sm-6">
+            <select class="form-control" id="stateProvince" name="stateProvince"></select>
+            <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+        </div>
     </div>
     {{/if}}
 
     {{/unless}}
-
-    <div class="pull-right">
-        <input class="btn btn-default" type="submit" name="saveButton" value="{{t "common.form.update"}}" disabled="true" />
-        <input class="btn btn-default" type="button" name="resetButton" value="{{t "common.form.reset"}}" />
+    <div class="form-group">
+        <div class="col-sm-offset-3 col-sm-9">
+            <input class="btn btn-primary" type="submit" name="saveButton" value="{{t "common.form.update"}}" disabled="true" />
+            <input class="btn btn-default" type="button" name="resetButton" value="{{t "common.form.reset"}}" />
+        </div>
     </div>
-
 </form>

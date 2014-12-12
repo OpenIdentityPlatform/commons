@@ -73,10 +73,6 @@
             "ChangeSiteIdentificationDialogTemplate" : {
                 "siteImageAndPhaseExplanation" : "The Site Image and Phrase selected will be shown to you upon login to confirm that you are logging in to the genuine site"
             },
-            "EnterOldPasswordDialog" : {
-                "passwordAndSecurityQuestionChange" : "Password and security question change",
-                "enterYourOldPassword" : "Please enter your old password"
-            },
             "ForgottenPasswordTemplate" : {
                 "forgottenPasswordQuestion" : "Forgotten password?",
                 "enterLogin" : "Please enter your login in the field below to continue."

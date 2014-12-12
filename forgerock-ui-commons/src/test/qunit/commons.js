@@ -95,7 +95,7 @@ define([
                     // login with loginRemember checked
                     $("#login", loginView.$el).val(parameters.username).trigger('keyup');
                     $("#password", loginView.$el).val(parameters.password).trigger('keyup');
-                    $("[name=loginRemember]", loginView.$el).trigger("click");
+                    $("[name=loginRemember]", loginView.$el).prop("checked", true);
                     $("[name=loginButton]", loginView.$el).trigger("click"); // login occurs
 
                     _.delay(function () {
@@ -104,7 +104,6 @@ define([
                             loginView.render.restore();
                             loginView.render(args, function () {
                                 QUnit.equal(cookieHelper.getCookie('login'), parameters.username, "Remember-login matches provided username");
-                                console.log("LOGIN FORM : " + $("#login", loginView.$el).val())
                                 QUnit.equal($("#login", loginView.$el).val(), parameters.username, "Username is remembered after logout.");
                                 QUnit.ok($("input[name=loginRemember]", loginView.$el).prop('checked'), "Login Remember is still checked when the login form is re-rendered");
 

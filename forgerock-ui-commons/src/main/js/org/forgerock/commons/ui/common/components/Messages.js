@@ -100,7 +100,7 @@ define("org/forgerock/commons/ui/common/components/Messages", [
             var _this = this, 
                 errorType = this.list[0].type === "error" ? "alert-warning" : "alert-info",
                 delay = _this.delay + (this.list[0].message.length * 20);
-            this.$el.append("<div role='alert' class='alert-message alert "+errorType+"'><span class='error-outter'><span class='error-inner'><span>" + this.list[0].message + "</span></span></span></div>");
+            this.$el.append("<div role='alert' class='alert-message alert "+errorType+"'><i class='fa alert-message-icon'></i><span class='message'>" +this.list[0].message +"</span></div>");
             this.$el.find("div:last").fadeIn(300, function () {
                 _this.timer = window.setTimeout(_this.removeAndNext, delay);
             });

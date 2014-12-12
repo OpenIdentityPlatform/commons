@@ -40,24 +40,24 @@ define("ThemeManager", [
     obj.loadThemeCSS = function(theme){
         $('head').find('link[href*=less]').remove();
         $('head').find('link[href*=favicon]').remove();
-        
+
         $("<link/>", {
             rel: "stylesheet/less",
             type: "text/css",
             href: theme.path + "css/styles.less"
-         }).appendTo("head");
+        }).appendTo("head");
 
         $("<link/>", {
             rel: "icon",
             type: "image/x-icon",
             href: theme.path + theme.icon
-         }).appendTo("head");
-        
+        }).appendTo("head");
+
         $("<link/>", {
             rel: "shortcut icon",
             type: "image/x-icon",
             href: theme.path + theme.icon
-         }).appendTo("head");
+        }).appendTo("head");
 
         return $.ajax({
             url: constants.LESS_VERSION,
@@ -84,8 +84,15 @@ define("ThemeManager", [
                         "src": "images/logo.png",
                         "title": "ForgeRock",
                         "alt": "ForgeRock",
-                        "height": "80px",
-                        "width": "120px"
+                        "height": "104px",
+                        "width": "156px"
+                    },
+                    "loginLogo": {
+                        "src": "images/login-logo.png",
+                        "title": "ForgeRock",
+                        "alt": "ForgeRock",
+                        "height": "104px",
+                        "width": "156px"
                     },
                     "lessVars": {
                         "background-image": "url('../images/box-bg.png')",
@@ -111,7 +118,7 @@ define("ThemeManager", [
             });
         }
     };
-    
+
     obj.getTheme = function(){
         if (themePromise === undefined) {
             themePromise = obj.loadThemeConfig().then(function(themeConfig){
@@ -123,13 +130,13 @@ define("ThemeManager", [
                         newLessVars['@' + key] = value;
                     });
                     less.modifyVars(newLessVars);
-                    
+
                     return themeConfig;
                 });
             });
         }
         return themePromise;
     };
-    
+
     return obj;
 });

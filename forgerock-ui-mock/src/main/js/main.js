@@ -33,7 +33,6 @@ require.config({
     paths: {
         // sinon only needed (or available) for Mock project
         sinon: "libs/sinon-1.10.3",
-
         i18next: "libs/i18next-1.7.3-min",
         i18nGrid: "libs/i18n/grid.locale-en",
         backbone: "libs/backbone-1.1.2-min",
@@ -48,7 +47,8 @@ require.config({
         doTimeout: "libs/jquery.ba-dotimeout-1.0-min",
         handlebars: "libs/handlebars-1.3.0-min",
         moment: "libs/moment-2.8.1-min",
-        boostrapjs: "libs/bootstrap.min",
+        bootstrapjs: "libs/bootstrap.min",
+        placeholder: "libs/jquery.placeholder",
         UserDelegate: "org/forgerock/mock/ui/user/delegates/UserDelegate",
         ThemeManager: "org/forgerock/mock/ui/common/util/ThemeManager"
     },
@@ -72,6 +72,13 @@ require.config({
         },
         spin: {
             exports: "spin"
+        },
+        bootstrapjs: {
+            deps: ["jquery"],
+            exports: "bootstrapjs"
+        },
+        placeholder: {
+            deps: ["jquery"]
         },
         jqueryui: {
             deps: ["jquery"],
@@ -122,7 +129,8 @@ require([
     "doTimeout",
     "handlebars",
     "i18next",
-    "boostrapjs",
+    "bootstrapjs",
+    "placeholder",
     "org/forgerock/mock/ui/common/main/MockServer",
     "org/forgerock/commons/ui/common/main/i18nManager",
     "org/forgerock/commons/ui/common/util/Constants",
@@ -135,8 +143,8 @@ require([
     "UserDelegate",
     "ThemeManager",
     "config/main"
-], function ( sinon, $, _, Backbone, form2js, js2form, spin, $ui, xdate, moment, doTimeout, Handlebars, i18n, boostrapjs,
-             mockServer, i18nManager, constants, eventManager, localStorage) {
+], function ( sinon, $, _, Backbone, form2js, js2form, spin, $ui, xdate, moment, doTimeout, Handlebars, i18n, bootstrapjs,
+             placeholder, mockServer, i18nManager, constants, eventManager, localStorage) {
 
     // Helpers for the code that hasn't been properly migrated to require these as explicit dependencies:
     window.$ = $;

@@ -99,6 +99,36 @@ define("config/AppConfiguration", function () {
                 moduleClass: "org/forgerock/commons/ui/common/components/Navigation",
                 configuration: {
                     links: {
+                        user: {
+                            urls: {
+                                dashboard: {
+                                    url: "#profile/",
+                                    name: "Resources",
+                                    icon: "fa fa-cogs",
+                                    inactive: false,
+                                    "urls": {
+                                        "sync": {
+                                            "url": "#profile/",
+                                            "name": "Sync",
+                                            "icon": "fa fa-clock-o",
+                                            "inactive": false
+                                        }
+                                    }
+                                },
+                                "properties": {
+                                    "url": "#properties/",
+                                    "name": "Properties",
+                                    "icon": "fa fa-list",
+                                    "inactive": false
+                                },
+                                "correlation": {
+                                    "url": "#correlation/",
+                                    "name": "Correlation",
+                                    "icon": "fa fa-random",
+                                    "inactive": false
+                                }
+                            }
+                        }
                     }
                 }
             },

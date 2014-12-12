@@ -33,42 +33,42 @@ define("org/forgerock/commons/ui/common/main/ViewManager", [
     "org/forgerock/commons/ui/common/components/Messages"
 ], function(_, uiUtils, msg) {
     var obj = {};
-    
+
     obj.currentView = "null";
     obj.currentDialog = "null";
     obj.currentViewArgs = "null";
     obj.currentDialogArgs = "null";
-    
+
     /**
      * Initializes view if it is not equal to current view.
      * Changes URL without triggering event.
      */
     obj.changeView = function(viewPath, args, callback, forceUpdate) {
         var view;
-        
-        
+
+
         if(obj.currentView !== viewPath || forceUpdate || !_.isEqual(obj.currentViewArgs, args)) {
             if(obj.currentDialog !== "null") {
                 require(obj.currentDialog).close();
             }
-            
+
             obj.currentDialog = "null";
 
             msg.messages.hideMessages();
 
             view = require(viewPath);
-            
+
             if(view.init) {
                 view.init();
             } else {
                 view.render(args, callback);
             }
-            
+
 
         } else {
             view = require(obj.currentView);
             view.rebind();
-            
+
             if(callback) {
                 callback();
             }
@@ -77,13 +77,13 @@ define("org/forgerock/commons/ui/common/main/ViewManager", [
         obj.currentViewArgs = args;
         obj.currentView = viewPath;
     };
-    
+
     obj.showDialog = function(dialogPath, args, callback) {
         if(obj.currentDialog !== dialogPath || !_.isEqual(obj.currentDialogArgs, args)) {
             require(dialogPath).render(args, callback);
             msg.messages.hideMessages();
         }
-        
+
         if(obj.currentDialog !== "null") {
             require(obj.currentDialog).close();
         }
@@ -91,10 +91,10 @@ define("org/forgerock/commons/ui/common/main/ViewManager", [
         obj.currentDialog = dialogPath;
         obj.currentDialogArgs = args;
     };
-    
+
     obj.refresh = function() {
         var cDialog = obj.currentDialog, cDialogArgs = obj.currentDialogArgs;
-        
+
         obj.changeView(obj.currentView, obj.currentViewArgs, function() {}, true);
         if (cDialog && cDialog !== 'null') {
             obj.showDialog(cDialog, cDialogArgs);
@@ -104,4 +104,3 @@ define("org/forgerock/commons/ui/common/main/ViewManager", [
     return obj;
 
 });
-
