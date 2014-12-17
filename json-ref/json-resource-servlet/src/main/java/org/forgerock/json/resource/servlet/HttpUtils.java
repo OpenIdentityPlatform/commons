@@ -262,7 +262,7 @@ public final class HttpUtils {
         if (!resp.isCommitted()) {
             final ResourceException re = adapt(t);
             try {
-                resp.reset();
+                resp.resetBuffer();
                 prepareResponse(req, resp);
                 resp.setStatus(re.getCode());
                 final JsonGenerator writer = getJsonGenerator(req, resp);
