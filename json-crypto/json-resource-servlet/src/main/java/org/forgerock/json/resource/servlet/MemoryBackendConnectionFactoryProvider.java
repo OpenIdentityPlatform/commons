@@ -36,6 +36,6 @@ final class MemoryBackendConnectionFactoryProvider {
         Reject.ifNull(uriTemplate, "uriTemplate cannot be null");
         final Router router = new Router();
         router.addRoute(uriTemplate, new MemoryBackend());
-        return new CrestHandler(Resources.newInternalConnectionFactory(router));
+        return CrestHandler.newHandler(Resources.newInternalConnectionFactory(router));
     }
 }
