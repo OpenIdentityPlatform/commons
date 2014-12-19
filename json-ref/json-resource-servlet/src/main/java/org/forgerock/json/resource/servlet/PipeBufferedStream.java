@@ -14,7 +14,7 @@
  * Portions Copyright 2014 ForgeRock AS.
  */
 
-package org.forgerock.json.resource.http;
+package org.forgerock.json.resource.servlet;
 
 import static org.forgerock.http.io.IO.newBranchingInputStream;
 
