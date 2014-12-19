@@ -16,27 +16,22 @@
 
 package org.forgerock.json.resource.servlet;
 
-import java.util.Arrays;
-
 import org.forgerock.http.Handler;
-import org.forgerock.http.Response;
-import org.forgerock.http.ResponseException;
+import org.forgerock.http.Http;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.resource.core.Context;
 import org.forgerock.util.Reject;
-import org.forgerock.util.promise.Promise;
-import org.forgerock.util.promise.Promises;
 
 /**
- * <p>A HTTP {@link Handler} implementation which forwards requests to an
- * {@link HttpAdapter}.</p>
+ * <p>A CREST HTTP utility class which creates instances of the {@link HttpAdapter}
+ * to handle CREST HTTP requests.</p>
  *
  * <p>Instances must be provided with a {@code ConnectionFactory} in order to
  * operate and optionally a {@code HttpContextFactory}.</p>
+ *
+ * @since 3.0.0
  */
-public class CrestHandler implements Handler {
-
-    private final HttpAdapter adapter;
+public class CrestHandler {
 
     /**
      * Creates a new JSON resource HTTP Handler with the provided connection
@@ -45,9 +40,9 @@ public class CrestHandler implements Handler {
      * @param connectionFactory
      *            The connection factory.
      */
-    public CrestHandler(ConnectionFactory connectionFactory) {
+    public static Handler newCrestHandler(ConnectionFactory connectionFactory) {
         Reject.ifNull(connectionFactory);
-        adapter = new HttpAdapter(connectionFactory);
+        return Http.chainOf(new HttpAdapter(connectionFactory), new OptionsHandler());
     }
 
     /**
@@ -61,10 +56,10 @@ public class CrestHandler implements Handler {
      *            The parent request context which should be used as the parent
      *            context of each request context.
      */
-    public CrestHandler(ConnectionFactory connectionFactory, Context parentContext) {
+    public static Handler newCrestHandler(ConnectionFactory connectionFactory, Context parentContext) {
         Reject.ifNull(connectionFactory);
         Reject.ifNull(parentContext);
-        adapter = new HttpAdapter(connectionFactory, parentContext);
+        return Http.chainOf(new HttpAdapter(connectionFactory, parentContext), new OptionsHandler());
     }
 
     /**
@@ -77,10 +72,10 @@ public class CrestHandler implements Handler {
      *            The context factory which will be used to obtain the parent
      *            context of each request context.
      */
-    public CrestHandler(ConnectionFactory connectionFactory, HttpContextFactory contextFactory) {
+    public static Handler newCrestHandler(ConnectionFactory connectionFactory, HttpContextFactory contextFactory) {
         Reject.ifNull(connectionFactory);
         Reject.ifNull(contextFactory);
-        adapter = new HttpAdapter(connectionFactory, contextFactory);
+        return Http.chainOf(new HttpAdapter(connectionFactory, contextFactory), new OptionsHandler());
     }
 
 //    public void destroy() { //TODO how to hook this into the shutdown of the application? Maybe its the HttpApplications job?
@@ -88,25 +83,4 @@ public class CrestHandler implements Handler {
 //            connectionFactory.close();
 //        }
 //    }
-
-    /**
-     * Handles the incoming HTTP request and forwards it on to an
-     * {@code HttpAdapter} to be converted to a CREST request.
-     *
-     * @param context {@inheritDoc}
-     * @param request {@inheritDoc}
-     * @return Promise containing a {@code Response} or {@code ResponseException}.
-     */
-    @Override
-    public Promise<Response, ResponseException> handle(Context context, org.forgerock.http.Request request) {
-        if ("OPTIONS".equals(request.getMethod())) {
-            Response response = new Response()
-                    .setStatusAndReason(200);
-            response.getHeaders().put("Allow",
-                    Arrays.asList("DELETE", "GET", "HEAD", "PATCH", "POST", "PUT", "OPTIONS", "TRACE"));
-            return Promises.newSuccessfulPromise(response);
-        } else {
-            return adapter.handle(context, request);
-        }
-    }
 }

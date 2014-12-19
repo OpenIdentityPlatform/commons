@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.forgerock.http.Form;
+import org.forgerock.http.Handler;
 import org.forgerock.http.Response;
 import org.forgerock.http.ResponseException;
 import org.forgerock.http.header.ContentTypeHeader;
@@ -87,10 +88,8 @@ import org.forgerock.util.promise.Promise;
  * OPTIONS, or TRACE methods. A simpler approach is to use the
  * {@link CrestHandler} class contained within this package to build HTTP
  * Handlers since it provides support for these HTTP methods.
- *
- * @see CrestHandler
  */
-public final class HttpAdapter {
+public final class HttpAdapter implements Handler {
 
     private static final String FIELDS_DELIMITER = ",";
     private static final String SORT_KEYS_DELIMITER = ",";
@@ -146,13 +145,13 @@ public final class HttpAdapter {
     }
 
     /**
-     * Services the provided HTTP servlet request.
+     * Handles the incoming HTTP request and converts it to a CREST request.
      *
-     * @param context
-     *            The request context.
-     * @param request
-     *            The request.
+     * @param context {@inheritDoc}
+     * @param request {@inheritDoc}
+     * @return Promise containing a {@code Response} or {@code ResponseException}.
      */
+    @Override
     public Promise<Response, ResponseException> handle(Context context, org.forgerock.http.Request request) {
 
         // Dispatch the request based on method, taking into account \
