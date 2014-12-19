@@ -16,7 +16,6 @@
 
 package org.forgerock.json.resource.servlet;
 
-import static org.forgerock.http.io.IO.newPipedOutputStream;
 import static org.forgerock.json.resource.VersionConstants.ACCEPT_API_VERSION;
 import static org.forgerock.util.Utils.closeSilently;
 
@@ -50,7 +49,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.http.Response;
 import org.forgerock.http.ResponseException;
 import org.forgerock.http.header.ContentTypeHeader;
-import org.forgerock.http.io.PipedOutputStream;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
@@ -329,11 +327,11 @@ public final class HttpUtils {
     static JsonGenerator getJsonGenerator(org.forgerock.http.Request req,
             Response resp) throws IOException {
 
-        PipedOutputStream pipeStream = newPipedOutputStream();
-        resp.setEntity(pipeStream.getInputStream());
+        PipeBufferedStream pipeStream = new PipeBufferedStream();
+        resp.setEntity(pipeStream.getOut());
 
         final JsonGenerator writer =
-                JSON_MAPPER.getFactory().createGenerator(pipeStream.getOutputStream());
+                JSON_MAPPER.getFactory().createGenerator(pipeStream.getIn());
         writer.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
 
         // Enable pretty printer if requested.
