@@ -33,6 +33,10 @@ import org.forgerock.util.Reject;
  */
 public class CrestHandler {
 
+    private CrestHandler() {
+        // Private utility constructor.
+    }
+
     /**
      * Creates a new JSON resource HTTP Handler with the provided connection
      * factory and no context factory.
@@ -40,7 +44,7 @@ public class CrestHandler {
      * @param connectionFactory
      *            The connection factory.
      */
-    public static Handler newCrestHandler(ConnectionFactory connectionFactory) {
+    public static Handler newHandler(ConnectionFactory connectionFactory) {
         Reject.ifNull(connectionFactory);
         return Http.chainOf(new HttpAdapter(connectionFactory), new OptionsHandler());
     }
@@ -56,7 +60,7 @@ public class CrestHandler {
      *            The parent request context which should be used as the parent
      *            context of each request context.
      */
-    public static Handler newCrestHandler(ConnectionFactory connectionFactory, Context parentContext) {
+    public static Handler newHandler(ConnectionFactory connectionFactory, Context parentContext) {
         Reject.ifNull(connectionFactory);
         Reject.ifNull(parentContext);
         return Http.chainOf(new HttpAdapter(connectionFactory, parentContext), new OptionsHandler());
@@ -72,7 +76,7 @@ public class CrestHandler {
      *            The context factory which will be used to obtain the parent
      *            context of each request context.
      */
-    public static Handler newCrestHandler(ConnectionFactory connectionFactory, HttpContextFactory contextFactory) {
+    public static Handler newHandler(ConnectionFactory connectionFactory, HttpContextFactory contextFactory) {
         Reject.ifNull(connectionFactory);
         Reject.ifNull(contextFactory);
         return Http.chainOf(new HttpAdapter(connectionFactory, contextFactory), new OptionsHandler());
