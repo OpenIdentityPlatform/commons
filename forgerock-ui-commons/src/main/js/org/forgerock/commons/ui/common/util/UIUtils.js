@@ -168,19 +168,19 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
 
         var grid = view.$el.find('#' + id),
             cm = options.colModel,
-            columnStateName = additional.storageKey,
             saveColumnState = function (perm) {
                 var colModel = this.jqGrid('getGridParam', 'colModel'), i, l = colModel.length, colItem, cmName,
                     postData = this.jqGrid('getGridParam', 'postData'),
-                    columnsState = {
+                    gridState = {
                         search: this.jqGrid('getGridParam', 'search'),
+                        rowNum: this.jqGrid('getGridParam', 'rowNum'),
                         page: this.jqGrid('getGridParam', 'page'),
                         sortname: this.jqGrid('getGridParam', 'sortname'),
                         sortorder: this.jqGrid('getGridParam', 'sortorder'),
                         permutation: perm,
                         colStates: {}
                     },
-                    colStates = columnsState.colStates;
+                    colStates = gridState.colStates;
 
                 for (i = 0; i < l; i++) {
                     colItem = colModel[i];
@@ -192,15 +192,15 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                         };
                     }
                 }
-                sessionStorage.setItem(columnStateName, JSON.stringify(columnsState));
+                sessionStorage.setItem(additional.storageKey + '-grid-state', JSON.stringify(gridState));
             },
-            columnsState,
+            gridState,
             restoreColumnState = function (colModel) {
                 var colItem, i, l = colModel.length, colStates, cmName,
-                    columnsState = JSON.parse(sessionStorage.getItem(columnStateName));
+                    gridState = JSON.parse(sessionStorage.getItem(additional.storageKey + '-grid-state'));
 
-                if (columnsState) {
-                    colStates = columnsState.colStates;
+                if (gridState) {
+                    colStates = gridState.colStates;
                     for (i = 0; i < l; i++) {
                         colItem = colModel[i];
                         cmName = colItem.name;
@@ -209,7 +209,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                         }
                     }
                 }
-                return columnsState;
+                return gridState;
             },
             defaultOptions = {
                 datatype: "json",
@@ -295,6 +295,9 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                     return $.param(postedData);
                 },
                 loadComplete: function (data) {
+                    saveColumnState.call( grid, grid[0].p.permutation);
+                    //because of the bug in the used version of jquery.jqGrid-4.5.4-min.js we need to set selected option manually
+                    view.$el.find(".ui-pg-selbox option[value=" + grid[0].p.rowNum + "]").prop("selected", true);
                     _.extend(view.data[id], data);
                 },
                 onPaging: function () {
@@ -307,14 +310,15 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                 },
                 pager: null,
                 rowNum: 10,
+                page: 1,
                 viewrecords: true,
                 rowList: [10, 20, 30]
             };
-        columnsState = restoreColumnState(cm);
+        gridState = restoreColumnState(cm);
 
         $.extend(true, defaultOptions, options);
-        if (columnsState) {
-            $.extend(true, defaultOptions, columnsState);
+        if (gridState) {
+            $.extend(true, defaultOptions, gridState);
         }
         grid.jqGrid(defaultOptions);
 
