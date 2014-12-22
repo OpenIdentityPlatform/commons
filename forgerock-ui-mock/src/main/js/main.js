@@ -32,7 +32,7 @@
 require.config({
     paths: {
         // sinon only needed (or available) for Mock project
-        sinon: "libs/sinon-1.10.3",
+        sinon: "libs/sinon-1.12.2",
 
         i18next: "libs/i18next-1.7.3-min",
         i18nGrid: "libs/i18n/grid.locale-en",
@@ -41,7 +41,7 @@ require.config({
         js2form: "libs/js2form-2.0",
         form2js: "libs/form2js-2.0",
         spin: "libs/spin-2.0.1-min",
-        jquery: "libs/jquery-1.11.1-min",
+        jquery: "libs/jquery-2.1.1-min",
         jqueryui: "libs/jquery-ui-1.11.1-min",
         jqgrid: "libs/jquery.jqGrid-4.5.4-min",
         xdate: "libs/xdate-0.8-min",
