@@ -46,7 +46,7 @@ define("org/forgerock/mock/ui/user/profile/ChangeSecurityDataDialog", [
             "click input[type=submit]": "formSubmit",
             "onValidate": "onValidate",
             "customValidate": "customValidate",
-            "click .dialogCloseCross img": "close",
+            "click .dialogCloseCross": "close",
             "click input[name='close']": "close",
             "click .dialogContainer": "stop",
             "check_reauth": "reauth"
@@ -96,6 +96,8 @@ define("org/forgerock/mock/ui/user/profile/ChangeSecurityDataDialog", [
             this.addAction($.t("common.form.update"), "submit");
 
             $("#dialogs").hide();
+
+            this.addTitle ($.t("templates.user.ChangeSecurityDataDialogTemplate.securityDataChange"));
 
             this.show(_.bind(function () {
                 validatorsManager.bindValidators(this.$el, userDelegate.serviceUrl + "/*", _.bind(function () {

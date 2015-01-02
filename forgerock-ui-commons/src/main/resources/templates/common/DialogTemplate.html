@@ -2,6 +2,9 @@
     <div class="dialogInner modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
+                {{#if dialogTitle}}
+                    <h3 class="modal-title">{{dialogTitle}}</h3>
+                {{/if}}
                 <div class="dialogCloseCross">
                     <a href="#"><i class="fa fa-times"></i></a>
                 </div>

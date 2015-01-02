@@ -46,7 +46,7 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
         mode: "append",
 
         events: {
-            "click .dialogCloseCross img": "close",
+            "click .dialogCloseCross": "close",
             "click input[name='close']": "close",
             "click .dialogContainer": "stop"
         },
@@ -133,6 +133,10 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
                     "type" : type
                 });
             }
+        },
+
+        addTitle: function(title) {
+          this.data.dialogTitle = title;
         },
 
         getAction: function(name) {
