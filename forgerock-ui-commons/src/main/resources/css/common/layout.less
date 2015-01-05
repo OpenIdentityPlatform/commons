@@ -1,11 +1,11 @@
 /* MENU & SUBMENU */
 
 .menubar {
-    
+
     margin-bottom: 10px;
 
     .menu {
-        .rounded-corners(5px);     
+        .rounded-corners(5px);
         background-color: @inactive-menu-color;
         .linear-gradient(top, lighten(@inactive-menu-color, 10%), @inactive-menu-color );
         height: 38px;
@@ -71,7 +71,7 @@
         background-color: @color-active;
         color: #F9F9F9;
     }
-    
+
     a:hover {
         background-color: mix(@active-menu-color, @inactive-menu-color, 70%);
     }
@@ -137,7 +137,7 @@
     background-color: #000;
 
     display: block;
-    opacity: 0; 
+    opacity: 0;
     height: 0;
     overflow: hidden;
 
@@ -150,10 +150,10 @@
 }
 
 #dialogs{
-    top: 0; 
+    top: 0;
     display: none;
-    position: fixed; 
-    z-index: 60001; 
+    position: fixed;
+    z-index: 60001;
     height: 100%;
     width: 100%;
 }
@@ -168,9 +168,9 @@
     vertical-align: middle;
 
     .dialogInner {
- 
+
         display: table;
-        min-width: 300px; 
+        min-width: 300px;
         max-width: 900px;
         margin: 0 auto;
         background: @content-background;
@@ -179,7 +179,7 @@
         .rounded-corners(5px);
     }
 
-    
+
 
     h1 {
         line-height: 20px;
@@ -204,7 +204,7 @@
             padding: 8px 0 8px 0;
             font-size: 14px;
         }
-        
+
     }
 
     .dialogActions {
@@ -226,9 +226,9 @@
     z-index:60002;
 
     div {
-        
+
         font-size: 14px;
-        line-height: 14px;  
+        line-height: 14px;
     }
 
     span.error-outter{
@@ -255,7 +255,7 @@
         margin: 0 auto;
     }
 
-    .confirmMessage { 
+    .confirmMessage {
         display:none;
         color: @color-success;
         span.error-inner span{
@@ -289,7 +289,7 @@
 button.button, a.button, input.button {
     display: inline-block;
     vertical-align: middle;
-    
+
     font-size: 12px;
     line-height: 16px;
     color: white;
@@ -304,13 +304,13 @@ button.button, a.button, input.button {
     .linear-gradient(top, @color-active, darken(@color-active, 10%));
     &:hover {
         .linear-gradient(top, lighten(@color-active, @button-hover-lightness), @color-active);
-        .box-shadow(0, 0, 0, 0); 
+        .box-shadow(0, 0, 0, 0);
     }
-    
+
     &.active {
         background-color: @color-active;
         &:hover {
-            .linear-gradient(top, @color-active, darken(@color-active, 10%));  
+            .linear-gradient(top, @color-active, darken(@color-active, 10%));
             border-color: lighten(@color-active, @button-hover-lightness);
         }
         &.gray {
@@ -318,7 +318,7 @@ button.button, a.button, input.button {
             border: 1px solid #C2C2C2;
             color: #636D76;
             &:hover {
-                .linear-gradient-reverse; 
+                .linear-gradient-reverse;
             }
         }
     }
@@ -338,13 +338,13 @@ button.button, a.button, input.button {
         padding: 9px 4px;
         &.choosen-decision {
             border: 1px solid #288ED7;
-            padding: 3px; 
+            padding: 3px;
             .linear-gradient;
         }
         &.choosable-static {
             border: 1px solid lightBlue;
             padding: 3px;
-            .linear-gradient; 
+            .linear-gradient;
         }
     }
 }
@@ -404,13 +404,6 @@ h3.black {
     }
 }
 
-#login-container{
+#login-container, #login-message, #logout-container{
     padding-top:50px;
 }
-
-#login-message{
-    padding-top:50px 30px;
-}
-
-
-
