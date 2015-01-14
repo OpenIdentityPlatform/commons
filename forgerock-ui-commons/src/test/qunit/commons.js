@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2014-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -225,6 +225,32 @@ define([
                 QUnit.strictEqual(Mime.encodeHeader(input), "=?UTF-8?B?44OR44K544Ov44O844OJ44OR44K544Ov44O844OJ?=",
                     "Incorrect Mime encoding in header");
             });
+
+            QUnit.asyncTest("Views using plain route url incorrectly rendered multiple times (CUI-50)", function () {
+                var router = require("org/forgerock/commons/ui/common/main/Router"),
+                    testView = require("org/forgerock/commons/ui/common/EnableCookiesView"), // a view with a plain (non-regexp) route url
+                    renderPromise = $.Deferred(),
+                    stub;
+
+                QUnit.equal(router.getFragmentParameters("login/foo&bar=abc")[0], "/foo", "Correctly able to parse regexp URL parameter");
+                QUnit.strictEqual(router.getFragmentParameters("enableCookies/")[0], null, "Plain URL arguments returned as null first value");
+
+                stub = sinon.stub(testView, "render", function (args, callback) {
+                    renderPromise.resolve();
+                });
+
+                window.location.hash = "enableCookies/";
+
+                eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.enableCookies});
+
+                renderPromise.then(_.delay(function () {
+                    QUnit.equal(stub.callCount, 1, "Render function only called once");
+                    testView.render.restore();
+                    QUnit.start();
+                }, 10));
+
+            });
+
         }
     };
 });

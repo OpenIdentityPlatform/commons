@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2014 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -28,11 +28,12 @@
  * @author mbilski
  */
 define("org/forgerock/commons/ui/common/main/Router", [
+    "underscore",
     "org/forgerock/commons/ui/common/main/EventManager", 
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware"
-], function(eventManager, constants, conf, AbstractConfigurationAware) {
+], function(_, eventManager, constants, conf, AbstractConfigurationAware) {
     var obj = new AbstractConfigurationAware();
     
     obj.bindedRoutes = {};
@@ -112,6 +113,27 @@ define("org/forgerock/commons/ui/common/main/Router", [
     
     obj.execRouteHandler = function(routeName) {
         obj.bindedRoutes[routeName]();
+    };
+
+    obj.translateParameters = function (route, args) {
+        return obj.getFragmentParameters(obj.getLink(route, args));
+    };
+
+    /* 
+     * This function processes the given fragment and returns the parameters found within it using Backbone functions.
+     * It is useful to be able to find out what parameters Backbone will produce when processing a particular fragment,
+     * before the actual navigation to that fragment
+     */
+    obj.getFragmentParameters = function(fragment) {
+        var handler = _.find(Backbone.history.handlers, function (handler) {
+            return handler.route.test(fragment);
+        });
+
+        if (handler) {
+            return obj.router._extractParameters(handler.route, fragment);
+        } else {
+            return undefined;
+        }
     };
     
     obj.navigate = function(link, params) {
