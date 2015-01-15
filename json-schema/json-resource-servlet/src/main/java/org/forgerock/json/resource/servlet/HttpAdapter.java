@@ -571,12 +571,12 @@ public final class HttpAdapter implements Handler {
                             + MIME_TYPE_MULTIPART_FORM_DATA + "' are supported");
         }
 
-        if (req.getHeaders().getFirst("If-Modified-Since") != null) {
+        if (req.getHeaders().getFirst(HEADER_IF_MODIFIED_SINCE) != null) {
             // TODO: i18n
             throw new ConflictException("Header If-Modified-Since not supported");
         }
 
-        if (req.getHeaders().getFirst("If-Unmodified-Since") != null) {
+        if (req.getHeaders().getFirst(HEADER_IF_UNMODIFIED_SINCE) != null) {
             // TODO: i18n
             throw new ConflictException("Header If-Unmodified-Since not supported");
         }
