@@ -82,12 +82,24 @@ public final class HttpUtils {
     static final String HEADER_ETAG = "ETag";
     static final String HEADER_IF_MATCH = "If-Match";
     static final String HEADER_IF_NONE_MATCH = "If-None-Match";
+    static final String HEADER_IF_MODIFIED_SINCE = "If-Modified-Since";
+    static final String HEADER_IF_UNMODIFIED_SINCE = "If-Unmodified-Since";
     static final String HEADER_LOCATION = "Location";
     static final String HEADER_X_HTTP_METHOD_OVERRIDE = "X-HTTP-Method-Override";
     public static final String CONTENT_DISPOSITION = "Content-Disposition";
-    static final Collection<String> RESTRICTED_HEADER_NAMES = Arrays.asList("Content-Type", "If-Modified-Since",
-            ACCEPT_API_VERSION, "If-Unmodified-Since", HEADER_IF_MATCH, HEADER_IF_NONE_MATCH, HEADER_CACHE_CONTROL,
-            HEADER_ETAG, HEADER_LOCATION, HEADER_X_HTTP_METHOD_OVERRIDE, CONTENT_DISPOSITION);
+    static final Collection<String> RESTRICTED_HEADER_NAMES = Arrays.asList(
+            ContentTypeHeader.NAME,
+            ACCEPT_API_VERSION,
+            HEADER_IF_MODIFIED_SINCE,
+            HEADER_IF_UNMODIFIED_SINCE,
+            HEADER_IF_MATCH,
+            HEADER_IF_NONE_MATCH,
+            HEADER_CACHE_CONTROL,
+            HEADER_ETAG,
+            HEADER_LOCATION,
+            HEADER_X_HTTP_METHOD_OVERRIDE,
+            CONTENT_DISPOSITION
+    );
 
     static final String METHOD_DELETE = "DELETE";
     static final String METHOD_GET = "GET";
