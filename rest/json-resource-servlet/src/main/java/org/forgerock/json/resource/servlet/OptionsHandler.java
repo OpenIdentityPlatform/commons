@@ -27,6 +27,8 @@ import org.forgerock.resource.core.Context;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 
+import static org.forgerock.json.resource.servlet.HttpUtils.*;
+
 /**
  * {@link Filter} which handles OPTION HTTP requests to CREST resources.
  *
@@ -47,10 +49,10 @@ public class OptionsHandler implements Filter {
     public Promise<Response, ResponseException> filter(Context context, Request request, Handler next)
             throws ResponseException {
         if ("OPTIONS".equals(request.getMethod())) {
-            Response response = new Response()
-                    .setStatusAndReason(200);
+            Response response = new Response().setStatusAndReason(200);
             response.getHeaders().put("Allow",
-                    Arrays.asList("DELETE", "GET", "HEAD", "PATCH", "POST", "PUT", "OPTIONS", "TRACE"));
+                    Arrays.asList(METHOD_DELETE, METHOD_GET, METHOD_HEAD, METHOD_PATCH, METHOD_POST, METHOD_PUT,
+                            METHOD_OPTIONS, METHOD_TRACE));
             return Promises.newSuccessfulPromise(response);
         } else {
             return next.handle(context, request);
