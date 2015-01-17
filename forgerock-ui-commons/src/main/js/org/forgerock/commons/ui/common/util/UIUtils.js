@@ -254,7 +254,8 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                     rows: '_pageSize' // number of records to fetch
                 },
                 serializeGridData: function (postedData) {
-                    var i, length, filter = '', colNames;
+                    var i, length, filter = '', colNames,
+                        searchOperator = additional.searchOperator || "co";
 
                     if (additional.serializeGridData) {
                         filter = additional.serializeGridData.call(this, postedData);
@@ -266,7 +267,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                             if (filter.length > 0) {
                                 filter += ' AND ';
                             }
-                            filter = filter.concat(element, ' co "', postedData[element], '"');
+                            filter = filter.concat(element, ' ' + searchOperator + ' "', postedData[element], '"');
                         }
                         delete postedData[element];
                     });
@@ -327,7 +328,9 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         }
 
         grid.navGrid(options.pager, {edit: false, add: false, del: false, search: false, refresh: false})
-            .navButtonAdd(options.pager,{
+        
+        if(!additional.suppressColumnChooser){
+            grid.navButtonAdd(options.pager,{
                 caption:"Columns",
                 buttonicon:"ui-icon-add",
                 position: "first",
@@ -343,6 +346,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                         }});
                 }
             });
+        }
 
         grid.on("jqGridAfterGridComplete", function () {
             if (callback) {
