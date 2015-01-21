@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.guice.core;
@@ -42,7 +42,7 @@ public enum InjectorHolder {
      */
     INSTANCE;
 
-    private final Injector injector;
+    private Injector injector;
 
     /**
      * Constructs an instance of the InjectorHolder and initialises the Guice Injector.
@@ -135,5 +135,9 @@ public enum InjectorHolder {
      */
     static Injector getInjector() {
         return INSTANCE.injector;
+    }
+
+    void register(Injector injector) {
+        this.injector = injector;
     }
 }

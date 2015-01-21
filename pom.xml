@@ -91,6 +91,7 @@ Copyright 2014 ForgeRock AS.
     <modules>
         <module>forgerock-guice-core</module>
         <module>forgerock-guice-servlet</module>
+        <module>forgerock-guice-test</module>
     </modules>
 
     <dependencies>
