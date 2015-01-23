@@ -21,6 +21,8 @@ import static org.forgerock.json.resource.VersionConstants.ACCEPT_API_VERSION;
 import static org.forgerock.json.resource.servlet.HttpUtils.*;
 import static org.forgerock.util.Reject.checkNotNull;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -512,16 +514,27 @@ public final class HttpAdapter implements Handler {
     private ResourceName getResourceName(Context context, org.forgerock.http.Request req) throws ResourceException {
         try {
             if (context.containsContext(RouterContext.class)) {
-                RouterContext routerContext = context.asContext(RouterContext.class);
-                StringBuilder buffer = new StringBuilder(req.getUri().getRawPath());
-                return ResourceName.valueOf(
-                        buffer.subSequence(routerContext.getMatchedUri().length(), buffer.length()).toString());
+                ResourceName reqName = ResourceName.valueOf(req.getUri().getRawPath());
+                return reqName.subSequence(getMatchedUri(context).size(), reqName.size());
             } else {
                 return ResourceName.valueOf(req.getUri().getRawPath()); //TODO is this a valid assumption?
             }
         } catch (IllegalArgumentException e) {
             throw new BadRequestException(e.getMessage());
         }
+    }
+
+    private ResourceName getMatchedUri(Context context) {
+        List<String> matched = new ArrayList<String>();
+        for (Context ctx = context; ctx != null; ctx = ctx.getParent()) {
+            if (!ctx.containsContext(RouterContext.class)) {
+                break;
+            } else {
+                matched.add(ctx.asContext(RouterContext.class).getMatchedUri());
+            }
+        }
+        Collections.reverse(matched);
+        return new ResourceName(matched);
     }
 
     private Context newRequestContext(Context context, org.forgerock.http.Request req, AcceptAPIVersion acceptVersion)
