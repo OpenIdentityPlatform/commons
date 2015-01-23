@@ -325,7 +325,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, ResponseEx
     private AsyncFunction<Resource, Response, ResponseException> newResourceSuccessHandler() {
         return new AsyncFunction<Resource, Response, ResponseException>() {
             @Override
-            public Promise<Response, ResponseException> apply(Resource result) throws ResponseException {
+            public Promise<Response, ResponseException> apply(Resource result) {
                 try {
                     writeAdvice();
                     // Don't return the resource if this is a read request and the
@@ -334,10 +334,12 @@ final class RequestRunner implements RequestVisitor<Promise<Response, ResponseEx
                         final String rev = getIfNoneMatch(httpRequest);
                         if (rev != null && rev.equals(result.getRevision())) {
                             // No change so 304.
-                            throw ResourceException.getException(304).setReason("Not Modified");
+                            Map<String, Object> responseBody = ResourceException.getException(304)
+                                    .setReason("Not Modified").toJsonValue().asMap();
+                            return Promises.newSuccessfulPromise(new Response().setStatusAndReason(304)
+                                    .setEntity(responseBody));
                         }
                     }
-
                     writeResource(result);
                     onSuccess();
                 } catch (final Exception e) {
