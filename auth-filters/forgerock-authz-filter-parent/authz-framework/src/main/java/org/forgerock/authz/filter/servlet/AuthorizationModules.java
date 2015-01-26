@@ -56,13 +56,8 @@ public final class AuthorizationModules {
                 throw new IllegalArgumentException("Servlet authz module class is not a " +
                         "HttpServletAuthorizationModule: " + moduleTypeName);
             }
-            final HttpServletAuthorizationModule module = moduleType.asSubclass(HttpServletAuthorizationModule.class).newInstance();
-            return new AuthorizationModuleFactory() {
-                @Override
-                public HttpServletAuthorizationModule getAuthorizationModule() {
-                    return module;
-                }
-            };
+            return newAuthorizationModuleFactory(
+                    moduleType.asSubclass(HttpServletAuthorizationModule.class).newInstance());
         } catch (ClassNotFoundException e) {
             throw new IllegalArgumentException("Servlet authz module class not found: " + moduleTypeName, e);
         } catch (InstantiationException e) {
@@ -70,5 +65,25 @@ public final class AuthorizationModules {
         } catch (IllegalAccessException e) {
             throw new IllegalArgumentException("Cannot instantiate module: " + moduleTypeName, e);
         }
+    }
+
+    /**
+     * Returns a new {@link AuthorizationModuleFactory} which contains the {@code HttpServletAuthorizationModule} which
+     * will be used to protect access to resources by performing authorization on each incoming request.
+     *
+     * @param module The {@code HttpServletAuthorizationModule} that will perform authorization for each request.
+     * @return A new {@code AuthorizationModuleFactory} which contains the {@code HttpServletAuthorizationModule} which
+     * will perform the authorization of requests.
+     * @throws java.lang.NullPointerException If either the specified {@code module} parameter is {@code null}.
+     */
+    public static AuthorizationModuleFactory newAuthorizationModuleFactory(
+            final HttpServletAuthorizationModule module) {
+        Reject.ifNull(module, "Authorization module cannot be null.");
+        return new AuthorizationModuleFactory() {
+            @Override
+            public HttpServletAuthorizationModule getAuthorizationModule() {
+                return module;
+            }
+        };
     }
 }
