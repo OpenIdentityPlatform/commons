@@ -16,25 +16,74 @@
 
 package org.forgerock.authz.filter.servlet;
 
-import org.forgerock.authz.filter.servlet.api.HttpServletAuthorizationModule;
-import org.testng.annotations.Test;
+import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.*;
 
-import static org.mockito.Mockito.mock;
-import static org.testng.Assert.assertEquals;
+import javax.servlet.FilterConfig;
+import javax.servlet.http.HttpServletRequest;
+
+import org.forgerock.authz.filter.api.AuthorizationContext;
+import org.forgerock.authz.filter.api.AuthorizationException;
+import org.forgerock.authz.filter.api.AuthorizationResult;
+import org.forgerock.authz.filter.servlet.api.HttpServletAuthorizationModule;
+import org.forgerock.util.promise.Promise;
+import org.testng.annotations.Test;
 
 public class AuthorizationModulesTest {
 
     @Test
     public void shouldCreateAuthorizationModuleFactory() {
-
         //Given
-        HttpServletAuthorizationModule module = mock(HttpServletAuthorizationModule.class);
+        FilterConfig config = mock(FilterConfig.class);
+        when(config.getInitParameter(AuthorizationModules.INIT_PARAM_MODULE_CLASS_NAME)).thenReturn(MyModule.class.getName());
 
         //When
-        AuthorizationModuleFactory moduleFactory = AuthorizationModules.newAuthorizationModuleFactory(module);
+        AuthorizationModuleFactory moduleFactory = AuthorizationModules.getAuthorizationModuleFactory(config);
 
         //Then
         HttpServletAuthorizationModule authorizationModule = moduleFactory.getAuthorizationModule();
-        assertEquals(authorizationModule, module);
+        assertThat(authorizationModule).isInstanceOf(MyModule.class);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void shouldFailWithoutConfig() {
+        //Given
+        FilterConfig config = mock(FilterConfig.class);
+
+        //When
+        AuthorizationModules.getAuthorizationModuleFactory(config);
+
+        //Then exception
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void shouldFailIfWrongType() {
+        //Given
+        FilterConfig config = mock(FilterConfig.class);
+        when(config.getInitParameter(AuthorizationModules.INIT_PARAM_MODULE_CLASS_NAME)).thenReturn(this.getClass().getName());
+
+        //When
+        AuthorizationModules.getAuthorizationModuleFactory(config);
+
+        //Then exception
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void shouldFailIfMissingType() {
+        //Given
+        FilterConfig config = mock(FilterConfig.class);
+        when(config.getInitParameter(AuthorizationModules.INIT_PARAM_MODULE_CLASS_NAME)).thenReturn("fred");
+
+        //When
+        AuthorizationModules.getAuthorizationModuleFactory(config);
+
+        //Then exception
+    }
+
+    public static class MyModule implements HttpServletAuthorizationModule {
+        @Override
+        public Promise<AuthorizationResult, AuthorizationException> authorize(HttpServletRequest req, AuthorizationContext context) {
+            return null;
+        }
     }
 }
