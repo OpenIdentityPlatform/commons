@@ -354,7 +354,7 @@ public final class Router implements RequestHandler {
      * @param routes The routes to be removed.
      * @return {@code true} if at least one of the routes was found and removed.
      */
-    public boolean removeRoute(final UriRoute... routes) {
+    public boolean removeRoute(final Route... routes) {
         return uriRouter.removeRoute(routes);
     }
 }
