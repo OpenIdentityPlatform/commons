@@ -16,9 +16,7 @@
 
 package org.forgerock.json.resource.examples;
 
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.json.fluent.JsonValue.*;
 import static org.forgerock.json.resource.Requests.newCreateRequest;
 import static org.forgerock.json.resource.Resources.newInternalConnection;
 
@@ -28,7 +26,7 @@ import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
-import org.forgerock.json.resource.Router;
+import org.forgerock.json.resource.UriRouter;
 import org.forgerock.resource.core.Context;
 import org.forgerock.resource.core.RootContext;
 
@@ -59,7 +57,7 @@ final class DemoUtils {
 
     static ConnectionFactory getConnectionFactory() throws ResourceException {
         final MemoryBackend users = new MemoryBackend();
-        final Router router = new Router();
+        final UriRouter router = new UriRouter();
         router.addRoute("users", users);
         final Connection connection = newInternalConnection(router);
         connection.create(ctx(), newCreateRequest("users", "1", userAliceWithIdAndRev(1, 0)));
