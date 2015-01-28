@@ -42,9 +42,9 @@ import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.RouterContext;
 import org.forgerock.json.resource.RoutingMode;
-import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.json.resource.UriRouter;
+import org.forgerock.resource.core.ServerContext;
 
 /**
  * An example illustrating how you can route realms / sub-realm requests using

@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.forgerock.resource.core.Context;
 import org.forgerock.resource.core.RootContext;
+import org.forgerock.resource.core.ServerContext;
 import org.testng.annotations.Test;
 
 import java.util.HashMap;
