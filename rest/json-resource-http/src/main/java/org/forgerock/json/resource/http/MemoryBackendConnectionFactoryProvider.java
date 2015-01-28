@@ -19,7 +19,7 @@ package org.forgerock.json.resource.http;
 import org.forgerock.http.Handler;
 import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.Resources;
-import org.forgerock.json.resource.Router;
+import org.forgerock.json.resource.UriRouter;
 import org.forgerock.util.Reject;
 
 /**
@@ -34,7 +34,7 @@ final class MemoryBackendConnectionFactoryProvider {
 
     static Handler getConnectionFactory(String uriTemplate) {
         Reject.ifNull(uriTemplate, "uriTemplate cannot be null");
-        final Router router = new Router();
+        final UriRouter router = new UriRouter();
         router.addRoute(uriTemplate, new MemoryBackend());
         return CrestHandler.newHandler(Resources.newInternalConnectionFactory(router));
     }
