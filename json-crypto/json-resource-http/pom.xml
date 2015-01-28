@@ -16,9 +16,9 @@
         <artifactId>forgerock-rest</artifactId>
         <version>3.0.0-SNAPSHOT</version>
     </parent>
-    <artifactId>json-resource-servlet</artifactId> <!-- TODO rename to json-resource-http? -->
-    <name>JSON Resource Servlet binding</name>
-    <description>Provides integration between the JSON Resource and Servlet APIs</description>
+    <artifactId>json-resource-http</artifactId>
+    <name>JSON Resource HTTP binding</name>
+    <description>Provides integration between the JSON Resource and HTTP Framework</description>
     <packaging>bundle</packaging>
     <dependencies>
         <dependency>
