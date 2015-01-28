@@ -14,10 +14,10 @@
  * Copyright 2012-2014 ForgeRock AS.
  */
 
-package org.forgerock.json.resource.servlet;
+package org.forgerock.json.resource.http;
 
 import static org.forgerock.json.resource.QueryResult.*;
-import static org.forgerock.json.resource.servlet.HttpUtils.*;
+import static org.forgerock.json.resource.http.HttpUtils.*;
 import static org.forgerock.util.Utils.closeSilently;
 
 import javax.mail.internet.ContentType;

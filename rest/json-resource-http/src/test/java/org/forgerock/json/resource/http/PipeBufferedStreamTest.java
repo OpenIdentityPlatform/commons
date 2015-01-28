@@ -14,7 +14,7 @@
  * Copyright 2014 ForgeRock AS.
  */
 
-package org.forgerock.json.resource.servlet;
+package org.forgerock.json.resource.http;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
