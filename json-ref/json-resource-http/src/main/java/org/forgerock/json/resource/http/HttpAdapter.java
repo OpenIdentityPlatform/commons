@@ -14,11 +14,11 @@
  * Copyright 2012-2014 ForgeRock AS.
  */
 
-package org.forgerock.json.resource.servlet;
+package org.forgerock.json.resource.http;
 
 import static org.forgerock.json.resource.ActionRequest.ACTION_ID_CREATE;
 import static org.forgerock.json.resource.VersionConstants.ACCEPT_API_VERSION;
-import static org.forgerock.json.resource.servlet.HttpUtils.*;
+import static org.forgerock.json.resource.http.HttpUtils.*;
 import static org.forgerock.util.Reject.checkNotNull;
 
 import java.util.ArrayList;

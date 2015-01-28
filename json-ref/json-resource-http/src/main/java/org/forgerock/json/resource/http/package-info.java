@@ -17,5 +17,5 @@
 /**
  * JSON resource J2EE Servlet integration providing support for Servlet API 2.5 and beyond.
  */
-package org.forgerock.json.resource.servlet;
+package org.forgerock.json.resource.http;
 

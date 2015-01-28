@@ -14,7 +14,7 @@
  * Copyright 2013-2014 ForgeRock AS.
  */
 
-package org.forgerock.json.resource.servlet;
+package org.forgerock.json.resource.http;
 
 import static org.forgerock.http.test.HttpTest.newRequest;
 import static org.forgerock.json.fluent.JsonValue.*;

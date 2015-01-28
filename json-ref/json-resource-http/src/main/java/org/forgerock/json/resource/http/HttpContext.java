@@ -14,7 +14,7 @@
  * Copyright 2012-2014 ForgeRock AS.
  */
 
-package org.forgerock.json.resource.servlet;
+package org.forgerock.json.resource.http;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
