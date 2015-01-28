@@ -16,16 +16,14 @@
 
 package org.forgerock.json.resource;
 
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.util.Reject;
+import static org.forgerock.json.resource.Resources.newCollection;
+import static org.forgerock.json.resource.Resources.newSingleton;
+import static org.forgerock.json.resource.VersionConstants.*;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static org.forgerock.json.resource.Resources.newCollection;
-import static org.forgerock.json.resource.Resources.newSingleton;
-import static org.forgerock.json.resource.RoutingMode.STARTS_WITH;
-import static org.forgerock.json.resource.VersionConstants.*;
+import org.forgerock.json.fluent.JsonValue;
 
 /**
  * <p>A request handler which routes requests using a request resource version.</p>
@@ -61,22 +59,37 @@ public final class VersionRouter implements RequestHandler {
     private final VersionSelector versionSelector = new VersionSelector();
     private final Map<Version, VersionRoute<RequestHandler>> routes =
             new ConcurrentHashMap<Version, VersionRoute<RequestHandler>>();
-    private final Router router;
-    private final RoutingMode mode;
-    private final String uriTemplate;
-    private RequestHandlerType requestHandlerType;
-    private volatile Route uriRoute;
     private boolean warningEnabled = true;
 
     /**
      * Creates a new router with no routes defined.
      */
-    VersionRouter(Router router, RoutingMode mode, String uriTemplate) {
-        Reject.ifNull(router, "router cannot be null.");
-        Reject.ifNull(uriTemplate, "uriTemplate cannot be null.");
-        this.router = router;
-        this.mode = mode;
-        this.uriTemplate = uriTemplate;
+    public VersionRouter() {
+        // Nothing to do.
+    }
+
+    /**
+     * Creates a new router containing the same routes and default route as the provided router. Changes to the
+     * returned router's routing table will not impact the provided router.
+     *
+     * @param router The router to be copied.
+     */
+    public VersionRouter(VersionRouter router) {
+        this.routes.putAll(router.routes);
+    }
+    /**
+     * Adds all of the routes defined in the provided router to this router. New
+     * routes may be added while this router is processing requests.
+     *
+     * @param router
+     *            The router whose routes are to be copied into this router.
+     * @return This router.
+     */
+    public VersionRouter addAllRoutes(VersionRouter router) {
+        if (this != router) {
+            routes.putAll(router.routes);
+        }
+        return this;
     }
 
     /**
@@ -88,7 +101,7 @@ public final class VersionRouter implements RequestHandler {
      * @return An opaque handle for the route which may be used for removing the route later.
      */
     public VersionRouter addVersion(String version, CollectionResourceProvider provider) {
-        addVersion(RequestHandlerType.COLLECTION, STARTS_WITH, version, newCollection(provider));
+        addVersion(version, newCollection(provider));
         return this;
     }
 
@@ -101,7 +114,7 @@ public final class VersionRouter implements RequestHandler {
      * @return An opaque handle for the route which may be used for removing the route later.
      */
     public VersionRouter addVersion(String version, SingletonResourceProvider provider) {
-        addVersion(RequestHandlerType.SINGLETON, RoutingMode.EQUALS, version, newSingleton(provider));
+        addVersion(version, newSingleton(provider));
         return this;
     }
 
@@ -114,16 +127,7 @@ public final class VersionRouter implements RequestHandler {
      * @return An opaque handle for the route which may be used for removing the route later.
      */
     public VersionRouter addVersion(String version, RequestHandler handler) {
-        Reject.ifNull(mode, "Routing mode is not set. Incorrect use of Router#addRoute(String), "
-                + "use Router#addRoute(RoutingMode, String) instead and specify the RoutingMode to use with the "
-                + "RequestHandler.");
-        return addVersion(RequestHandlerType.GENERIC, mode, version, handler);
-    }
-
-    private VersionRouter addVersion(RequestHandlerType type, RoutingMode mode, String version,
-            RequestHandler handler) {
         addVersion(new VersionRoute<RequestHandler>(Version.valueOf(version), handler));
-        addRoute(type, mode);
         return this;
     }
 
@@ -132,36 +136,10 @@ public final class VersionRouter implements RequestHandler {
     }
 
     /**
-     * <P>If the route to the resource URI has not been added, this method will add it. This is only ever done once for
-     * the very first call.</p>
-     *
-     * <p>Subsequent calls will be validated to ensure that the resource handler has not changed type, i.e. from a
-     * CollectionResourceProvider to a SingletonResourceProvider.</p>
-     *
-     * @param type The resource handler type.
-     * @param mode Indicates how the URI template should be matched against resource names.
-     */
-    private void addRoute(RequestHandlerType type, RoutingMode mode) {
-        validateRequestHandlerType(type);
-        if (uriRoute == null) {
-            uriRoute = router.addRoute(mode, uriTemplate, this);
-        }
-    }
-
-    private void validateRequestHandlerType(RequestHandlerType type) {
-        if (requestHandlerType != null) {
-            Reject.ifFalse(type.equals(requestHandlerType), "Incompatible request handler types, " + requestHandlerType
-                    + " and " + type);
-        } else {
-            requestHandlerType = type;
-        }
-    }
-
-    /**
      * Sets the behaviour of the version routing process to always use the latest resource version when the requested
      * version is {@code null}.
      */
-    VersionRouter defaultToLatest() {
+    public VersionRouter defaultToLatest() {
         versionSelector.defaultToLatest();
         return this;
     }
@@ -170,7 +148,7 @@ public final class VersionRouter implements RequestHandler {
      * Sets the behaviour of the version routing process to always use the oldest resource version when the requested
      * version is {@code null}.
      */
-    VersionRouter defaultToOldest() {
+    public VersionRouter defaultToOldest() {
         versionSelector.defaultToOldest();
         return this;
     }
@@ -179,12 +157,12 @@ public final class VersionRouter implements RequestHandler {
      * Removes the default behaviour of the version routing process which will result in {@code NotFoundException}s when
      * the requested version is {@code null}.
      */
-    VersionRouter noDefault() {
+    public VersionRouter noDefault() {
         versionSelector.noDefault();
         return this;
     }
 
-    VersionRouter setWarningEnabledBehaviour(boolean warningEnabled) {
+    public VersionRouter setWarningEnabledBehaviour(boolean warningEnabled) {
         this.warningEnabled = warningEnabled;
         return this;
     }
@@ -195,7 +173,7 @@ public final class VersionRouter implements RequestHandler {
     @Override
     public void handleAction(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
         try {
-            getBestRoute(context, request).handleAction(context, request, handler);
+            getBestRoute(context).handleAction(context, request, handler);
         } catch (ResourceException e) {
             handler.handleError(e);
         }
@@ -207,7 +185,7 @@ public final class VersionRouter implements RequestHandler {
     @Override
     public void handleCreate(ServerContext context, CreateRequest request, ResultHandler<Resource> handler) {
         try {
-            getBestRoute(context, request).handleCreate(context, request, handler);
+            getBestRoute(context).handleCreate(context, request, handler);
         } catch (ResourceException e) {
             handler.handleError(e);
         }
@@ -219,7 +197,7 @@ public final class VersionRouter implements RequestHandler {
     @Override
     public void handleDelete(ServerContext context, DeleteRequest request, ResultHandler<Resource> handler) {
         try {
-            getBestRoute(context, request).handleDelete(context, request, handler);
+            getBestRoute(context).handleDelete(context, request, handler);
         } catch (ResourceException e) {
             handler.handleError(e);
         }
@@ -231,7 +209,7 @@ public final class VersionRouter implements RequestHandler {
     @Override
     public void handlePatch(ServerContext context, PatchRequest request, ResultHandler<Resource> handler) {
         try {
-            getBestRoute(context, request).handlePatch(context, request, handler);
+            getBestRoute(context).handlePatch(context, request, handler);
         } catch (ResourceException e) {
             handler.handleError(e);
         }
@@ -243,7 +221,7 @@ public final class VersionRouter implements RequestHandler {
     @Override
     public void handleQuery(ServerContext context, QueryRequest request, QueryResultHandler handler) {
         try {
-            getBestRoute(context, request).handleQuery(context, request, handler);
+            getBestRoute(context).handleQuery(context, request, handler);
         } catch (ResourceException e) {
             handler.handleError(e);
         }
@@ -255,7 +233,7 @@ public final class VersionRouter implements RequestHandler {
     @Override
     public void handleRead(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
         try {
-            getBestRoute(context, request).handleRead(context, request, handler);
+            getBestRoute(context).handleRead(context, request, handler);
         } catch (ResourceException e) {
             handler.handleError(e);
         }
@@ -267,7 +245,7 @@ public final class VersionRouter implements RequestHandler {
     @Override
     public void handleUpdate(ServerContext context, UpdateRequest request, ResultHandler<Resource> handler) {
         try {
-            getBestRoute(context, request).handleUpdate(context, request, handler);
+            getBestRoute(context).handleUpdate(context, request, handler);
         } catch (ResourceException e) {
             handler.handleError(e);
         }
@@ -282,11 +260,10 @@ public final class VersionRouter implements RequestHandler {
      * changed by calling either {@link #defaultToLatest()} or {@link #defaultToOldest()}.</p>
      *
      * @param context The context.
-     * @param request The request being processed.
      * @return The best matching {@code RequestHandler}
      * @throws NotFoundException If no match is found.
      */
-    private RequestHandler getBestRoute(ServerContext context, Request request) throws ResourceException {
+    private RequestHandler getBestRoute(ServerContext context) throws ResourceException {
         AcceptAPIVersionContext apiVersionContext = context.asContext(AcceptAPIVersionContext.class);
         addWarningAdvice(context, apiVersionContext.getResourceVersion());
         final VersionRoute<RequestHandler> selectedRoute =
@@ -319,14 +296,5 @@ public final class VersionRouter implements RequestHandler {
                     .append(resourceVersion.toString())
                     .toString());
         }
-    }
-
-    /**
-     * An enum for the type of request handler for the resource.
-     */
-    private static enum RequestHandlerType {
-        COLLECTION,
-        SINGLETON,
-        GENERIC
     }
 }

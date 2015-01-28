@@ -13,6 +13,7 @@
  *
  * Copyright 2012-2014 ForgeRock AS.
  */
+
 package org.forgerock.json.resource;
 
 import static org.forgerock.json.resource.Requests.copyOfActionRequest;
@@ -74,11 +75,10 @@ import org.forgerock.json.resource.UriRoute.RouteMatcher;
  * of the functionality described in RFC 6570.
  *
  * @see RouterContext
- * @see UriRouter
  * @see <a href="http://tools.ietf.org/html/rfc6570">RFC 6570 - URI Template
  *      </a>
  */
-final class UriRouter implements RequestHandler {
+public final class UriRouter implements RequestHandler {
 
     private volatile RequestHandler defaultRoute = null;
     private final Set<UriRoute> routes = new CopyOnWriteArraySet<UriRoute>();
@@ -91,6 +91,19 @@ final class UriRouter implements RequestHandler {
     }
 
     /**
+     * Creates a new router containing the same routes and default route as the
+     * provided router. Changes to the returned router's routing table will not
+     * impact the provided router.
+     *
+     * @param router
+     *            The router to be copied.
+     */
+    public UriRouter(final UriRouter router) {
+        this.defaultRoute = router.defaultRoute;
+        this.routes.addAll(router.routes);
+    }
+
+    /**
      * Adds all of the routes defined in the provided router to this router. New
      * routes may be added while this router is processing requests.
      *
@@ -98,7 +111,7 @@ final class UriRouter implements RequestHandler {
      *            The router whose routes are to be copied into this router.
      * @return This router.
      */
-    UriRouter addAllRoutes(final UriRouter router) {
+    public UriRouter addAllRoutes(final UriRouter router) {
         if (this != router) {
             routes.addAll(router.routes);
         }
@@ -132,7 +145,7 @@ final class UriRouter implements RequestHandler {
      * @return An opaque handle for the route which may be used for removing the
      *         route later.
      */
-    UriRoute addRoute(final String uriTemplate,
+    public Route addRoute(final String uriTemplate,
             final CollectionResourceProvider provider) {
         return addRoute(STARTS_WITH, uriTemplate, newCollection(provider));
     }
@@ -151,7 +164,7 @@ final class UriRouter implements RequestHandler {
      * @return An opaque handle for the route which may be used for removing the
      *         route later.
      */
-    UriRoute addRoute(final RoutingMode mode, final String uriTemplate,
+    public Route addRoute(final RoutingMode mode, final String uriTemplate,
             final RequestHandler handler) {
         return addRoute(new UriRoute(mode, uriTemplate, handler));
     }
@@ -169,7 +182,8 @@ final class UriRouter implements RequestHandler {
      * @return An opaque handle for the route which may be used for removing the
      *         route later.
      */
-    UriRoute addRoute(final String uriTemplate, final SingletonResourceProvider provider) {
+    public Route addRoute(final String uriTemplate,
+            final SingletonResourceProvider provider) {
         return addRoute(EQUALS, uriTemplate, newSingleton(provider));
     }
 
@@ -179,7 +193,7 @@ final class UriRouter implements RequestHandler {
      *
      * @return The request handler to be used as the default route.
      */
-    RequestHandler getDefaultRoute() {
+    public RequestHandler getDefaultRoute() {
         return defaultRoute;
     }
 
@@ -287,7 +301,7 @@ final class UriRouter implements RequestHandler {
      *
      * @return This router.
      */
-    UriRouter removeAllRoutes() {
+    public UriRouter removeAllRoutes() {
         routes.clear();
         return this;
     }
@@ -300,7 +314,7 @@ final class UriRouter implements RequestHandler {
      *            The routes to be removed.
      * @return {@code true} if at least one of the routes was found and removed.
      */
-    boolean removeRoute(final Route... routes) {
+    public boolean removeRoute(final Route... routes) {
         boolean isModified = false;
         for (final Route route : routes) {
             isModified |= this.routes.remove(route);
@@ -316,12 +330,12 @@ final class UriRouter implements RequestHandler {
      *            The request handler to be used as the default route.
      * @return This router.
      */
-    UriRouter setDefaultRoute(final RequestHandler handler) {
+    public UriRouter setDefaultRoute(final RequestHandler handler) {
         this.defaultRoute = handler;
         return this;
     }
 
-    UriRoute addRoute(final UriRoute route) {
+    private Route addRoute(final UriRoute route) {
         routes.add(route);
         return route;
     }
@@ -341,12 +355,13 @@ final class UriRouter implements RequestHandler {
         final RequestHandler handler = defaultRoute;
 
         /*
-         * Passing the resourceName through explicitly means if an incorrect version was requested the error returned
-         * is specific to the endpoint requested.
-         */
+        * Passing the resourceName through explicitly means if an incorrect version was requested the error returned
+        * is specific to the endpoint requested.
+        */
         if (handler != null) {
             return new RouteMatcher(context, handler, request.getResourceName());
         }
+
         // TODO: i18n
         throw new NotFoundException(String.format("Resource '%s' not found", request
                 .getResourceName()));
