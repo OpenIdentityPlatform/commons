@@ -525,16 +525,20 @@ public final class HttpAdapter implements Handler {
     }
 
     private ResourceName getMatchedUri(Context context) {
-        List<String> matched = new ArrayList<String>();
+        List<ResourceName> matched = new ArrayList<ResourceName>();
         for (Context ctx = context; ctx != null; ctx = ctx.getParent()) {
             if (!ctx.containsContext(RouterContext.class)) {
                 break;
             } else {
-                matched.add(ctx.asContext(RouterContext.class).getMatchedUri());
+                matched.add(ResourceName.valueOf(ctx.asContext(RouterContext.class).getMatchedUri()));
             }
         }
         Collections.reverse(matched);
-        return new ResourceName(matched);
+        ResourceName matchedUri = new ResourceName();
+        for (ResourceName resourceName : matched) {
+            matchedUri = matchedUri.concat(resourceName);
+        }
+        return matchedUri;
     }
 
     private Context newRequestContext(Context context, org.forgerock.http.Request req, AcceptAPIVersion acceptVersion)
