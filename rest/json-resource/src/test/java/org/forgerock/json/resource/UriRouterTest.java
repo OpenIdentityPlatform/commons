@@ -23,6 +23,8 @@ import static org.mockito.Mockito.*;
 
 import org.forgerock.resource.core.Context;
 import org.forgerock.resource.core.RootContext;
+import org.forgerock.resource.core.routing.RouterContext;
+import org.forgerock.resource.core.routing.RoutingMode;
 import org.forgerock.resource.core.ServerContext;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
