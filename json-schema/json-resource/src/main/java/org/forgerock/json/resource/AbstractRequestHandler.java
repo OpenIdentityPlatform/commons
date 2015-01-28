@@ -16,6 +16,7 @@
 package org.forgerock.json.resource;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.resource.core.ServerContext;
 
 /**
  * An abstract base class from which request handlersmay be easily implemented.

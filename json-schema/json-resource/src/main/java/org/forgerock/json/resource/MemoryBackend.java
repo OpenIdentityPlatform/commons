@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.resource.core.ServerContext;
 
 /**
  * A simple in-memory collection resource provider which uses a {@code Map} to

@@ -40,12 +40,12 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.RoutingMode;
-import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.json.resource.UriRouter;
 import org.forgerock.json.resource.VersionRouter;
 import org.forgerock.resource.core.Context;
+import org.forgerock.resource.core.ServerContext;
 
 /**
  * An example client application which performs asynchronous reads against different versions of the same resource.

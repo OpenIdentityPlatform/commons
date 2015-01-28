@@ -13,6 +13,7 @@
  *
  * Copyright 2014 ForgeRock AS.
  */
+
 package org.forgerock.json.resource.examples;
 
 import static org.forgerock.json.resource.examples.DemoUtils.ctx;
@@ -31,7 +32,7 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceName;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.resource.core.ServerContext;
 
 /**
  * An example illustrating how you can route realms / sub-realm requests using

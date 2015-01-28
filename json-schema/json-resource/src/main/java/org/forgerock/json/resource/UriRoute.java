@@ -28,6 +28,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.forgerock.resource.core.ServerContext;
+
 /**
  * An opaque handle for a route which has been registered in a {@link UriRouter
  * router}. A reference to a route should be maintained if there is a chance
