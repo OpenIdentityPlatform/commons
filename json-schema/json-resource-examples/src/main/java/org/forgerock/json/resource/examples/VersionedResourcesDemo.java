@@ -39,12 +39,12 @@ import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.RoutingMode;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.json.resource.UriRouter;
 import org.forgerock.json.resource.VersionRouter;
 import org.forgerock.resource.core.Context;
+import org.forgerock.resource.core.routing.RoutingMode;
 import org.forgerock.resource.core.ServerContext;
 
 /**
