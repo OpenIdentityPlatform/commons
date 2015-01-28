@@ -35,9 +35,11 @@ import org.testng.annotations.Test;
  * @since 2.4.0
  */
 @SuppressWarnings("javadoc")
-public class VersionRouterVersionTest {
+public class VersionedRouterTest {
 
-    private Router router;
+    private UriRouter router;
+    private VersionRouter versionRouter1;
+    private VersionRouter versionRouter2;
 
     private RequestHandler usersHandlerOne;
     private RequestHandler usersHandlerTwo;
@@ -49,7 +51,7 @@ public class VersionRouterVersionTest {
 
     @BeforeClass
     public void setUp() {
-        router = new Router();
+        router = new UriRouter();
 
         usersHandlerOne = mock(RequestHandler.class);
         usersHandlerTwo = mock(RequestHandler.class);
@@ -59,15 +61,17 @@ public class VersionRouterVersionTest {
         groupsHandlerTwo = mock(RequestHandler.class);
         groupsHandlerThree = mock(RequestHandler.class);
 
-        router.addRoute(RoutingMode.EQUALS, "/users")
+        versionRouter1 = new VersionRouter();
+        versionRouter2 = new VersionRouter();
+        router.addRoute(RoutingMode.EQUALS, "/users", versionRouter1
                 .addVersion("1.0", usersHandlerOne)
                 .addVersion("1.5", usersHandlerTwo)
-                .addVersion("2.1", usersHandlerThree);
+                .addVersion("2.1", usersHandlerThree));
 
-        router.addRoute(RoutingMode.EQUALS, "/groups")
+        router.addRoute(RoutingMode.EQUALS, "/groups", versionRouter2
                 .addVersion("1.0", groupsHandlerOne)
-                .addVersion( "1.5", groupsHandlerTwo)
-                .addVersion("2.1", groupsHandlerThree);
+                .addVersion("1.5", groupsHandlerTwo)
+                .addVersion("2.1", groupsHandlerThree));
     }
 
     @DataProvider(name = "dataWithVersionHeader")
@@ -306,7 +310,8 @@ public class VersionRouterVersionTest {
         ServerContext context = new ServerContext(apiVersionContext);
         CreateRequest request = Requests.newCreateRequest(resource, json(object()));
         ResultHandler<Resource> handler = mock(ResultHandler.class);
-        setDefaultVersionBehaviour(router, versionBehaviour);
+        setDefaultVersionBehaviour(versionRouter1, versionBehaviour);
+        setDefaultVersionBehaviour(versionRouter2, versionBehaviour);
 
         //When
         router.handleCreate(context, request, handler);
@@ -334,7 +339,8 @@ public class VersionRouterVersionTest {
         ServerContext context = new ServerContext(apiVersionContext);
         ReadRequest request = Requests.newReadRequest(resource);
         ResultHandler<Resource> handler = mock(ResultHandler.class);
-        setDefaultVersionBehaviour(router, versionBehaviour);
+        setDefaultVersionBehaviour(versionRouter1, versionBehaviour);
+        setDefaultVersionBehaviour(versionRouter2, versionBehaviour);
 
         //When
         router.handleRead(context, request, handler);
@@ -363,7 +369,8 @@ public class VersionRouterVersionTest {
         ServerContext context = new ServerContext(apiVersionContext);
         UpdateRequest request = Requests.newUpdateRequest(resource, json(object()));
         ResultHandler<Resource> handler = mock(ResultHandler.class);
-        setDefaultVersionBehaviour(router, versionBehaviour);
+        setDefaultVersionBehaviour(versionRouter1, versionBehaviour);
+        setDefaultVersionBehaviour(versionRouter2, versionBehaviour);
 
         //When
         router.handleUpdate(context, request, handler);
@@ -392,7 +399,8 @@ public class VersionRouterVersionTest {
         ServerContext context = new ServerContext(apiVersionContext);
         DeleteRequest request = Requests.newDeleteRequest(resource);
         ResultHandler<Resource> handler = mock(ResultHandler.class);
-        setDefaultVersionBehaviour(router, versionBehaviour);
+        setDefaultVersionBehaviour(versionRouter1, versionBehaviour);
+        setDefaultVersionBehaviour(versionRouter2, versionBehaviour);
 
         //When
         router.handleDelete(context, request, handler);
@@ -421,7 +429,8 @@ public class VersionRouterVersionTest {
         ServerContext context = new ServerContext(apiVersionContext);
         PatchRequest request = Requests.newPatchRequest(resource);
         ResultHandler<Resource> handler = mock(ResultHandler.class);
-        setDefaultVersionBehaviour(router, versionBehaviour);
+        setDefaultVersionBehaviour(versionRouter1, versionBehaviour);
+        setDefaultVersionBehaviour(versionRouter2, versionBehaviour);
 
         //When
         router.handlePatch(context, request, handler);
@@ -450,7 +459,8 @@ public class VersionRouterVersionTest {
         ServerContext context = new ServerContext(apiVersionContext);
         ActionRequest request = Requests.newActionRequest(resource, "ACTION_ID").setContent(json(object()));
         ResultHandler<JsonValue> handler = mock(ResultHandler.class);
-        setDefaultVersionBehaviour(router, versionBehaviour);
+        setDefaultVersionBehaviour(versionRouter1, versionBehaviour);
+        setDefaultVersionBehaviour(versionRouter2, versionBehaviour);
 
         //When
         router.handleAction(context, request, handler);
@@ -478,7 +488,8 @@ public class VersionRouterVersionTest {
         ServerContext context = new ServerContext(apiVersionContext);
         QueryRequest request = Requests.newQueryRequest(resource);
         QueryResultHandler handler = mock(QueryResultHandler.class);
-        setDefaultVersionBehaviour(router, versionBehaviour);
+        setDefaultVersionBehaviour(versionRouter1, versionBehaviour);
+        setDefaultVersionBehaviour(versionRouter2, versionBehaviour);
 
         //When
         router.handleQuery(context, request, handler);
@@ -496,16 +507,16 @@ public class VersionRouterVersionTest {
         }
     }
 
-    private static void setDefaultVersionBehaviour(Router router, DefaultVersionBehaviour versionBehaviour) {
+    private static void setDefaultVersionBehaviour(VersionRouter router, DefaultVersionBehaviour versionBehaviour) {
         switch (versionBehaviour) {
             case LATEST:
-                router.setVersioningToDefaultToLatest();
+                router.defaultToLatest();
                 break;
             case OLDEST:
-                router.setVersioningToDefaultToOldest();
+                router.defaultToOldest();
                 break;
             case NONE:
-                router.setVersioningToDefaultToNone();
+                router.noDefault();
                 break;
         }
     }
