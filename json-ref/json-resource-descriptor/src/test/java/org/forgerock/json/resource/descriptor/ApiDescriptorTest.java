@@ -38,9 +38,9 @@ import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.descriptor.RelationDescriptor.Multiplicity;
 import org.forgerock.resource.core.RootContext;
+import org.forgerock.resource.core.ServerContext;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonGenerator;

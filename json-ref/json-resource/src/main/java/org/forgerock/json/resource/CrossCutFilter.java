@@ -17,6 +17,7 @@
 package org.forgerock.json.resource;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.resource.core.ServerContext;
 
 /**
  * A strongly typed version of {@link UntypedCrossCutFilter}. Cross cutting
