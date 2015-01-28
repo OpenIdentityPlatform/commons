@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.resource.core.ServerContext;
 
 /**
  * <p>A request handler which routes requests using a request resource version.</p>

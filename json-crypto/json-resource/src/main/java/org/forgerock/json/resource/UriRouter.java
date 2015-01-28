@@ -33,6 +33,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.UriRoute.RouteMatcher;
+import org.forgerock.resource.core.ServerContext;
 
 /**
  * A request handler which routes requests using URI template matching against

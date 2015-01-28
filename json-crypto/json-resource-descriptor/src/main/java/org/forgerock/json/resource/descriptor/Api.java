@@ -53,11 +53,11 @@ import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceName;
 import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.json.resource.descriptor.RelationDescriptor.Multiplicity;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.forgerock.resource.core.ServerContext;
 
 @SuppressWarnings("javadoc")
 public final class Api {

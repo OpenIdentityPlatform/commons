@@ -23,6 +23,7 @@ import static org.forgerock.json.resource.RoutingMode.STARTS_WITH;
 import static org.mockito.Mockito.mock;
 
 import org.forgerock.json.resource.UriRoute.RouteMatcher;
+import org.forgerock.resource.core.ServerContext;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
