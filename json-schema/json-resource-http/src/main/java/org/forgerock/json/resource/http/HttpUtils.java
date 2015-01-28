@@ -14,7 +14,7 @@
  * Copyright 2012-2014 ForgeRock AS.
  */
 
-package org.forgerock.json.resource.servlet;
+package org.forgerock.json.resource.http;
 
 import static org.forgerock.json.resource.VersionConstants.ACCEPT_API_VERSION;
 import static org.forgerock.util.Utils.closeSilently;

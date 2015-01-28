@@ -14,7 +14,7 @@
  * Copyright 2014 ForgeRock AS.
  */
 
-package org.forgerock.json.resource.servlet;
+package org.forgerock.json.resource.http;
 
 import java.util.Arrays;
 
@@ -27,7 +27,7 @@ import org.forgerock.resource.core.Context;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 
-import static org.forgerock.json.resource.servlet.HttpUtils.*;
+import static org.forgerock.json.resource.http.HttpUtils.*;
 
 /**
  * {@link Filter} which handles OPTION HTTP requests to CREST resources.
