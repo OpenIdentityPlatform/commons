@@ -246,18 +246,17 @@ final class RequestRunner implements RequestVisitor<Promise<Response, ResponseEx
                     isFirstResult = false;
                 }
             }
-        })
-                .thenAsync(new AsyncFunction<QueryResult, Response, ResponseException>() {
-                    @Override
-                    public Promise<Response, ResponseException> apply(QueryResult queryResult) throws ResponseException {
-                        return Promises.newSuccessfulPromise(httpResponse);
-                    }
-                }, new AsyncFunction<ResourceException, Response, ResponseException>() {
-                    @Override
-                    public Promise<Response, ResponseException> apply(ResourceException e) throws ResponseException {
-                        return Promises.newSuccessfulPromise(httpResponse);
-                    }
-                });
+        }).thenAsync(new AsyncFunction<QueryResult, Response, ResponseException>() {
+            @Override
+            public Promise<Response, ResponseException> apply(QueryResult queryResult) throws ResponseException {
+                return Promises.newSuccessfulPromise(httpResponse);
+            }
+        }, new AsyncFunction<ResourceException, Response, ResponseException>() {
+            @Override
+            public Promise<Response, ResponseException> apply(ResourceException e) throws ResponseException {
+                return handleError(e);
+            }
+        });
     }
 
     /**
