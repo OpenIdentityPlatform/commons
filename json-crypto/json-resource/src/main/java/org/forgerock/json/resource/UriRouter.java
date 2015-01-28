@@ -300,9 +300,9 @@ final class UriRouter implements RequestHandler {
      *            The routes to be removed.
      * @return {@code true} if at least one of the routes was found and removed.
      */
-    boolean removeRoute(final UriRoute... routes) {
+    boolean removeRoute(final Route... routes) {
         boolean isModified = false;
-        for (final UriRoute route : routes) {
+        for (final Route route : routes) {
             isModified |= this.routes.remove(route);
         }
         return isModified;
