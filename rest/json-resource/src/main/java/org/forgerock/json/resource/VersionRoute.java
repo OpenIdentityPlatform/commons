@@ -36,7 +36,7 @@ public final class VersionRoute<T> implements Route {
      * @param handler
      *            The request handler.
      */
-    VersionRoute(Version version, T handler) {
+    public VersionRoute(Version version, T handler) {
         this.version = version;
         this.handler = handler;
     }
