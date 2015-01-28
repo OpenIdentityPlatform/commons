@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2013 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -129,7 +129,7 @@ public interface Request {
      * <p>
      * <b>NOTE</b>: for resource provider implementations the resource name is
      * relative to the current resource being accessed. See the description of
-     * {@link RouterContext} for more information.
+     * {@link org.forgerock.resource.core.routing.RouterContext} for more information.
      *
      * @return The non-{@code null} name of the JSON resource to which this
      *         request should be targeted, which may be the empty string.
@@ -143,7 +143,7 @@ public interface Request {
      * <p>
      * <b>NOTE</b>: for resource provider implementations the resource name is
      * relative to the current resource being accessed. See the description of
-     * {@link RouterContext} for more information.
+     * {@link org.forgerock.resource.core.routing.RouterContext} for more information.
      *
      * @return The non-{@code null} name of the JSON resource to which this
      *         request should be targeted, which may be the empty string.
@@ -178,7 +178,7 @@ public interface Request {
      * <p>
      * <b>NOTE</b>: for resource provider implementations the resource name is
      * relative to the current resource being accessed. See the description of
-     * {@link RouterContext} for more information.
+     * {@link org.forgerock.resource.core.routing.RouterContext} for more information.
      *
      * @param name
      *            The non-{@code null} name of the JSON resource to which this
@@ -198,7 +198,7 @@ public interface Request {
      * <p>
      * <b>NOTE</b>: for resource provider implementations the resource name is
      * relative to the current resource being accessed. See the description of
-     * {@link RouterContext} for more information.
+     * {@link org.forgerock.resource.core.routing.RouterContext} for more information.
      *
      * @param name
      *            The non-{@code null} name of the JSON resource to which this
