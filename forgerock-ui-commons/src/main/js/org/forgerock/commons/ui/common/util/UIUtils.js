@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2014 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -168,6 +168,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
 
         var grid = view.$el.find('#' + id),
             cm = options.colModel,
+            showSearch,
             saveColumnState = function (perm) {
                 var colModel = this.jqGrid('getGridParam', 'colModel'), i, l = colModel.length, colItem, cmName,
                     postData = this.jqGrid('getGridParam', 'postData'),
@@ -246,7 +247,6 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                     },
                     repeatitems: false
                 },
-                search: null,
                 prmNames: {
                     nd: null,
                     sort: '_sortKeys',
@@ -254,7 +254,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                     rows: '_pageSize' // number of records to fetch
                 },
                 serializeGridData: function (postedData) {
-                    var i, length, filter = '', colNames,
+                    var i, length, filter = '', colNames, postedFilters, filterDataToDate,
                         searchOperator = additional.searchOperator || "co";
 
                     if (additional.serializeGridData) {
@@ -278,6 +278,24 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                                 filter += ' AND ';
                             }
                             filter = filter.concat(additional.searchFilter[i].field, ' ', additional.searchFilter[i].op, ' "', additional.searchFilter[i].val, '"');
+                        }
+                    }
+
+                    // search window filters
+                    if (postedData.filters) {
+                        postedFilters = JSON.parse(postedData.filters);
+                        for (i = 0, length = postedFilters.rules.length; i < length; i++) {
+                            if (postedFilters.rules[i].data) {
+                                if (filter.length > 0) {
+                                    filter += ' AND ';
+                                }
+                                filterDataToDate = new Date(postedFilters.rules[i].data);
+                                if (dateUtil.isDateValid(filterDataToDate)) {
+                                    filter = filter.concat(postedFilters.rules[i].field, ' ', postedFilters.rules[i].op, ' ', filterDataToDate.getTime().toString());
+                                } else {
+                                    filter = filter.concat(postedFilters.rules[i].field, ' ', postedFilters.rules[i].op, ' "*', postedFilters.rules[i].data, '*"');
+                                }
+                            }
                         }
                     }
 
@@ -327,7 +345,9 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
             grid.jqGrid('filterToolbar', {searchOnEnter: false, defaultSearch: 'eq'});
         }
 
-        grid.navGrid(options.pager, {edit: false, add: false, del: false, search: false, refresh: false})
+        showSearch = !!options.search;
+        grid.navGrid(options.pager, {edit: false, add: false, del: false, search: showSearch, refresh: false},
+                     {},{},{},{multipleSearch: true, closeOnEscape: true, closeAfterSearch: true});
         
         if(!additional.suppressColumnChooser){
             grid.navButtonAdd(options.pager,{
