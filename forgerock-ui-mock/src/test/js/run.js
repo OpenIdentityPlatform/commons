@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2014-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -37,28 +37,36 @@ require([
         func(); // run the function immediately rather than delayed.
     }
 
-    eventManager.registerListener(constants.EVENT_APP_INTIALIZED, function () {
+    sinon.stub(eventManager, "sendEvent", function (eventId, event) {
 
-        require("ThemeManager").getTheme().then(function () {
+        // the normal behavior for sendEvent:
+        $(document).trigger(eventId, event);
 
-            var server = require("org/forgerock/mock/ui/common/main/MockServer").instance,
-                userParams = {
-                    "username": "test",
-                    "password": "test"
-                };
+        // special extended behavior for our stub:
+        if (eventId === constants.EVENT_APP_INTIALIZED) {
+            eventManager.sendEvent.restore();
+            // delayed testing start gives the app time to stablize during startup
+            _.delay(function () {
 
-            QUnit.start();
+                var server = require("org/forgerock/mock/ui/common/main/MockServer").instance,
+                    userParams = {
+                        "username": "test",
+                        "password": "test"
+                    };
 
-            QUnit.done(function () {
-                localStorage.clear();
-            });
+                QUnit.start();
 
-            commonsTests.executeAll(server, userParams);
-            userTests.executeAll(server, getLoggedUser());
-            mockTests.executeAll(server, userParams);
+                commonsTests.executeAll(server, userParams);
+                userTests.executeAll(server, getLoggedUser());
+                mockTests.executeAll(server, userParams);
 
-        });
-
-
+                QUnit.done(function () {
+                    localStorage.clear();
+                    Backbone.history.stop();
+                    window.location.hash = "";
+                });
+                
+            }, 100);
+        }
     });
 });

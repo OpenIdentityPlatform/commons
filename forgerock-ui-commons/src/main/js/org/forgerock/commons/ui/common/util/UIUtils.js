@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2014 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -168,19 +168,20 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
 
         var grid = view.$el.find('#' + id),
             cm = options.colModel,
-            columnStateName = additional.storageKey,
+            showSearch,
             saveColumnState = function (perm) {
                 var colModel = this.jqGrid('getGridParam', 'colModel'), i, l = colModel.length, colItem, cmName,
                     postData = this.jqGrid('getGridParam', 'postData'),
-                    columnsState = {
+                    gridState = {
                         search: this.jqGrid('getGridParam', 'search'),
+                        rowNum: this.jqGrid('getGridParam', 'rowNum'),
                         page: this.jqGrid('getGridParam', 'page'),
                         sortname: this.jqGrid('getGridParam', 'sortname'),
                         sortorder: this.jqGrid('getGridParam', 'sortorder'),
                         permutation: perm,
                         colStates: {}
                     },
-                    colStates = columnsState.colStates;
+                    colStates = gridState.colStates;
 
                 for (i = 0; i < l; i++) {
                     colItem = colModel[i];
@@ -192,15 +193,15 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                         };
                     }
                 }
-                sessionStorage.setItem(columnStateName, JSON.stringify(columnsState));
+                sessionStorage.setItem(additional.storageKey + '-grid-state', JSON.stringify(gridState));
             },
-            columnsState,
+            gridState,
             restoreColumnState = function (colModel) {
                 var colItem, i, l = colModel.length, colStates, cmName,
-                    columnsState = JSON.parse(sessionStorage.getItem(columnStateName));
+                    gridState = JSON.parse(sessionStorage.getItem(additional.storageKey + '-grid-state'));
 
-                if (columnsState) {
-                    colStates = columnsState.colStates;
+                if (gridState) {
+                    colStates = gridState.colStates;
                     for (i = 0; i < l; i++) {
                         colItem = colModel[i];
                         cmName = colItem.name;
@@ -209,7 +210,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                         }
                     }
                 }
-                return columnsState;
+                return gridState;
             },
             defaultOptions = {
                 datatype: "json",
@@ -233,6 +234,8 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                         if (records % pageSize > 0) {
                             pages += 1;
                         }
+
+                        sessionStorage.setItem(additional.storageKey + '-pages-number', pages);
                         return pages;
                     },
                     records: function (obj) {  // total number of records
@@ -244,7 +247,6 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                     },
                     repeatitems: false
                 },
-                search: null,
                 prmNames: {
                     nd: null,
                     sort: '_sortKeys',
@@ -252,7 +254,8 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                     rows: '_pageSize' // number of records to fetch
                 },
                 serializeGridData: function (postedData) {
-                    var i, length, filter = '', colNames;
+                    var i, length, filter = '', colNames, postedFilters, filterDataToDate,
+                        searchOperator = additional.searchOperator || "co";
 
                     if (additional.serializeGridData) {
                         filter = additional.serializeGridData.call(this, postedData);
@@ -264,7 +267,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                             if (filter.length > 0) {
                                 filter += ' AND ';
                             }
-                            filter = filter.concat(element, ' co "', postedData[element], '"');
+                            filter = filter.concat(element, ' ' + searchOperator + ' "', postedData[element], '"');
                         }
                         delete postedData[element];
                     });
@@ -275,6 +278,24 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                                 filter += ' AND ';
                             }
                             filter = filter.concat(additional.searchFilter[i].field, ' ', additional.searchFilter[i].op, ' "', additional.searchFilter[i].val, '"');
+                        }
+                    }
+
+                    // search window filters
+                    if (postedData.filters) {
+                        postedFilters = JSON.parse(postedData.filters);
+                        for (i = 0, length = postedFilters.rules.length; i < length; i++) {
+                            if (postedFilters.rules[i].data) {
+                                if (filter.length > 0) {
+                                    filter += ' AND ';
+                                }
+                                filterDataToDate = new Date(postedFilters.rules[i].data);
+                                if (dateUtil.isDateValid(filterDataToDate)) {
+                                    filter = filter.concat(postedFilters.rules[i].field, ' ', postedFilters.rules[i].op, ' ', filterDataToDate.getTime().toString());
+                                } else {
+                                    filter = filter.concat(postedFilters.rules[i].field, ' ', postedFilters.rules[i].op, ' "*', postedFilters.rules[i].data, '*"');
+                                }
+                            }
                         }
                     }
 
@@ -293,18 +314,30 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                     return $.param(postedData);
                 },
                 loadComplete: function (data) {
+                    saveColumnState.call( grid, grid[0].p.permutation);
+                    //because of the bug in the used version of jquery.jqGrid-4.5.4-min.js we need to set selected option manually
+                    view.$el.find(".ui-pg-selbox option[value=" + grid[0].p.rowNum + "]").prop("selected", true);
                     _.extend(view.data[id], data);
+                },
+                onPaging: function () {
+                    var totalPagesNum = JSON.parse(sessionStorage.getItem(additional.storageKey + '-pages-number')),
+                        inputVal = $($(this).jqGrid('getGridParam', 'pager')).find('input').val();
+                    if (totalPagesNum !== null && /[0-9]+/.test(inputVal) && totalPagesNum < parseInt(inputVal, 10)) {
+                        $(this).trigger('reloadGrid', {page: 1});
+                        return 'stop';
+                    }
                 },
                 pager: null,
                 rowNum: 10,
+                page: 1,
                 viewrecords: true,
                 rowList: [10, 20, 30]
             };
-        columnsState = restoreColumnState(cm);
+        gridState = restoreColumnState(cm);
 
         $.extend(true, defaultOptions, options);
-        if (columnsState) {
-            $.extend(true, defaultOptions, columnsState);
+        if (gridState) {
+            $.extend(true, defaultOptions, gridState);
         }
         grid.jqGrid(defaultOptions);
 
@@ -312,8 +345,12 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
             grid.jqGrid('filterToolbar', {searchOnEnter: false, defaultSearch: 'eq'});
         }
 
-        grid.navGrid(options.pager, {edit: false, add: false, del: false, search: false, refresh: false})
-            .navButtonAdd(options.pager,{
+        showSearch = !!options.search;
+        grid.navGrid(options.pager, {edit: false, add: false, del: false, search: showSearch, refresh: false},
+                     {},{},{},{multipleSearch: true, closeOnEscape: true, closeAfterSearch: true});
+        
+        if(!additional.suppressColumnChooser){
+            grid.navButtonAdd(options.pager,{
                 caption:"Columns",
                 buttonicon:"ui-icon-add",
                 position: "first",
@@ -329,6 +366,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                         }});
                 }
             });
+        }
 
         grid.on("jqGridAfterGridComplete", function () {
             if (callback) {

@@ -36,7 +36,7 @@
 
     <groupId>org.forgerock.commons.ui</groupId>
     <artifactId>forgerock-ui</artifactId>
-    <version>1.1.9-SNAPSHOT</version>
+    <version>1.1.12-SNAPSHOT</version>
     <name>Forgerock Web UI</name>
     <description>Common modern ForgeRock Web UI</description>
     <packaging>pom</packaging>
@@ -160,7 +160,7 @@
             <dependency>
                 <groupId>org.forgerock.commons.ui.libs</groupId>
                 <artifactId>jquery</artifactId>
-                <version>1.11.1</version>
+                <version>2.1.1</version>
                 <type>js</type>
                 <classifier>min</classifier>
             </dependency>
@@ -221,7 +221,7 @@
             <dependency>
                 <groupId>org.forgerock.commons.ui.libs</groupId>
                 <artifactId>sinon</artifactId>
-                <version>1.10.3</version>
+                <version>1.12.2</version>
                 <type>js</type>
             </dependency>
             <dependency>

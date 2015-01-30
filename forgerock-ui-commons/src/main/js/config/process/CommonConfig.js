@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2014 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -248,7 +248,7 @@ define("config/process/CommonConfig", [
                 siteConfigurator.configurePage(route, params).then(function () {
                     spinner.hideSpinner(10);
                     router.routeTo(route, {trigger: true, args: params});
-                    viewManager.changeView(route.view, params, callback, route.forceUpdate);
+                    viewManager.changeView(route.view, router.translateParameters(route, params), callback, route.forceUpdate);
                     navigation.reload();
                 });
             }
@@ -360,12 +360,13 @@ define("config/process/CommonConfig", [
                     }
 
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "loggedIn");
-                }, function() {
-                    if(conf.globalData.auth.urlParams && conf.globalData.auth.urlParams.gotoOnFail){
+                }, function (reason) {
+                    if (conf.globalData.auth.urlParams && conf.globalData.auth.urlParams.gotoOnFail) {
                         window.location.href = conf.globalData.auth.urlParams.gotoOnFail;
                         return false;
                     }
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "authenticationFailed"); 
+                    reason = reason ? reason : "authenticationFailed";
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, reason);
                 });
             }
         },
