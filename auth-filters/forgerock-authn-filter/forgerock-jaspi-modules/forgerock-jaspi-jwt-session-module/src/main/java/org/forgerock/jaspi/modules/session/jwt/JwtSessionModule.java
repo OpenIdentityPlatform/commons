@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.jaspi.modules.session.jwt;
@@ -81,10 +81,14 @@ public class JwtSessionModule implements ServerAuthModule {
     public static final String KEYSTORE_PASSWORD_KEY = "keystorePassword";
     /** The Jwt Session Cookie Name configuration property key. */
     public static final String SESSION_COOKIE_NAME_KEY = "sessionCookieName";
-    /** The Jwt Token Idle timeout configuration property key. */
-    public static final String TOKEN_IDLE_TIME_CLAIM_KEY = "tokenIdleTimeMinutes";
-    /** The Jwt Token Maximum life configuration property key. */
-    public static final String MAX_TOKEN_LIFE_KEY = "maxTokenLifeMinutes";
+    /** The Jwt Token Idle timeout configuration property key in minutes. */
+    public static final String TOKEN_IDLE_TIME_IN_MINUTES_CLAIM_KEY = "tokenIdleTimeMinutes";
+    /** The Jwt Token Maximum life configuration property key in minutes. */
+    public static final String MAX_TOKEN_LIFE_IN_MINUTES_KEY = "maxTokenLifeMinutes";
+    /** The Jwt Token Idle timeout configuration property key in seconds. */
+    public static final String TOKEN_IDLE_TIME_IN_SECONDS_CLAIM_KEY = "tokenIdleTimeSeconds";
+    /** The Jwt Token Maximum life configuration property key in seconds. */
+    public static final String MAX_TOKEN_LIFE_IN_SECONDS_KEY = "maxTokenLifeSeconds";
     /** The Jwt Validated configuration property key. */
     public static final String JWT_VALIDATED_KEY = "jwtValidated";
     /** Whether the JWT should persist between browser restarts property key. */
@@ -106,7 +110,9 @@ public class JwtSessionModule implements ServerAuthModule {
     private String keystoreFile;
     private String keystorePassword;
     private String sessionCookieName;
+    /** Stores the token idle time in seconds. */
     private int tokenIdleTime;
+    /** Stores the max token lifetime in seconds. */
     private int maxTokenLife;
     private boolean browserSessionOnly;
     private boolean isHttpOnly;
@@ -151,16 +157,30 @@ public class JwtSessionModule implements ServerAuthModule {
         if (isEmpty(sessionCookieName)) {
             this.sessionCookieName = DEFAULT_JWT_SESSION_COOKIE_NAME;
         }
-        String tokenIdleTime = (String) options.get(TOKEN_IDLE_TIME_CLAIM_KEY);
-        if (isEmpty(tokenIdleTime)) {
-            tokenIdleTime = "0";
+        final String tokenIdleTimeMinutes = (String) options.get(TOKEN_IDLE_TIME_IN_MINUTES_CLAIM_KEY);
+        final String tokenIdleTimeSeconds = (String) options.get(TOKEN_IDLE_TIME_IN_SECONDS_CLAIM_KEY);
+        if (!isEmpty(tokenIdleTimeMinutes) && !isEmpty(tokenIdleTimeSeconds)) {
+            throw new AuthException("Can't use both " + TOKEN_IDLE_TIME_IN_MINUTES_CLAIM_KEY + " setting and the "
+                    + TOKEN_IDLE_TIME_IN_SECONDS_CLAIM_KEY + " setting.");
+        } else if (!isEmpty(tokenIdleTimeMinutes)) {
+            this.tokenIdleTime = Integer.parseInt(tokenIdleTimeMinutes) * 60;
+        } else if (!isEmpty(tokenIdleTimeSeconds)) {
+            this.tokenIdleTime = Integer.parseInt(tokenIdleTimeSeconds);
+        } else {
+            this.tokenIdleTime = 0;
         }
-        this.tokenIdleTime = Integer.parseInt(tokenIdleTime);
-        String maxTokenLife = (String) options.get(MAX_TOKEN_LIFE_KEY);
-        if (isEmpty(maxTokenLife)) {
-            maxTokenLife = "0";
+        final String maxTokenLifeMinutes = (String) options.get(MAX_TOKEN_LIFE_IN_MINUTES_KEY);
+        final String maxTokenLifeSeconds = (String) options.get(MAX_TOKEN_LIFE_IN_SECONDS_KEY);
+        if (!isEmpty(maxTokenLifeMinutes) && !isEmpty(maxTokenLifeSeconds)) {
+            throw new AuthException("Can't use both the " + MAX_TOKEN_LIFE_IN_MINUTES_KEY + " setting and the "
+                    + MAX_TOKEN_LIFE_IN_SECONDS_KEY + " setting.");
+        } else if (!isEmpty(maxTokenLifeMinutes)) {
+            this.maxTokenLife = Integer.parseInt(maxTokenLifeMinutes) * 60;
+        } else if (!isEmpty(maxTokenLifeSeconds)) {
+            this.maxTokenLife = Integer.parseInt(maxTokenLifeSeconds);
+        } else {
+            this.maxTokenLife = 0;
         }
-        this.maxTokenLife = Integer.parseInt(maxTokenLife);
         Boolean sessionOnly = (Boolean) options.get(BROWSER_SESSION_ONLY_KEY);
         this.browserSessionOnly = sessionOnly == null ? false : sessionOnly;
         Boolean httpOnly = (Boolean) options.get(HTTP_ONLY_COOKIE_KEY);
@@ -331,7 +351,7 @@ public class JwtSessionModule implements ServerAuthModule {
         jwt.decrypt(privateKey);
 
         Date expirationTime = jwt.getClaimsSet().getExpirationTime();
-        Date tokenIdleTime = new Date(jwt.getClaimsSet().getClaim(TOKEN_IDLE_TIME_CLAIM_KEY, Integer.class)
+        Date tokenIdleTime = new Date(jwt.getClaimsSet().getClaim(TOKEN_IDLE_TIME_IN_SECONDS_CLAIM_KEY, Integer.class)
                 .longValue() * 1000L);
 
         Date now = new Date(System.currentTimeMillis());
@@ -375,13 +395,13 @@ public class JwtSessionModule implements ServerAuthModule {
         final Date now = calendar.getTime();
         Date nbf = now;
         Date iat = now;
-        calendar.add(Calendar.MINUTE, tokenIdleTime);
+        calendar.add(Calendar.SECOND, tokenIdleTime);
         Date tokenIdleTime = calendar.getTime();
         Date exp = jwt.getClaimsSet().getExpirationTime();
 
         jwt.getClaimsSet().setIssuedAtTime(iat);
         jwt.getClaimsSet().setNotBeforeTime(nbf);
-        jwt.getClaimsSet().setClaim(TOKEN_IDLE_TIME_CLAIM_KEY, tokenIdleTime.getTime() / 1000L);
+        jwt.getClaimsSet().setClaim(TOKEN_IDLE_TIME_IN_SECONDS_CLAIM_KEY, tokenIdleTime.getTime() / 1000L);
 
         KeystoreManager keystoreManager = new KeystoreManager(keystoreType,
                 keystoreFile, keystorePassword);
@@ -466,12 +486,12 @@ public class JwtSessionModule implements ServerAuthModule {
         calendar.setTime(new Date());
         calendar.set(Calendar.MILLISECOND, 0);
         final Date now = calendar.getTime();
-        calendar.add(Calendar.MINUTE, maxTokenLife);
+        calendar.add(Calendar.SECOND, maxTokenLife);
         final Date exp = calendar.getTime();
         Date nbf = now;
         Date iat = now;
         calendar.setTime(now);
-        calendar.add(Calendar.MINUTE, tokenIdleTime);
+        calendar.add(Calendar.SECOND, tokenIdleTime);
         Date tokenIdleTime = calendar.getTime();
         String jti = UUID.randomUUID().toString();
 
@@ -480,7 +500,7 @@ public class JwtSessionModule implements ServerAuthModule {
                 .exp(exp)
                 .nbf(nbf)
                 .iat(iat)
-                .claim(TOKEN_IDLE_TIME_CLAIM_KEY, tokenIdleTime.getTime() / 1000L)
+                .claim(TOKEN_IDLE_TIME_IN_SECONDS_CLAIM_KEY, tokenIdleTime.getTime() / 1000L)
                 .claims(jwtParameters)
                 .build();
 

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.jaspi.modules.session.jwt;
@@ -94,7 +94,7 @@ public class JwtSessionModuleTest {
         assertEquals(supportedMessageTypes[1], HttpServletResponse.class);
     }
 
-    private Map<String, Object> getOptionsMap(Integer idleTimeout, Integer maxLife)
+    private Map<String, Object> getOptionsMap(Integer idleTimeout, Integer maxLife, int timeUnit)
             throws UnsupportedEncodingException {
 
         Map<String, Object> options = new HashMap<String, Object>();
@@ -104,9 +104,13 @@ public class JwtSessionModuleTest {
         options.put(JwtSessionModule.KEYSTORE_FILE_KEY,
                 URLDecoder.decode(ClassLoader.getSystemResource("keystore.jks").getFile(), "UTF-8"));
         options.put(JwtSessionModule.KEYSTORE_PASSWORD_KEY, "password");
-        options.put(JwtSessionModule.TOKEN_IDLE_TIME_CLAIM_KEY, idleTimeout != null ? idleTimeout.toString() : null);
-        options.put(JwtSessionModule.MAX_TOKEN_LIFE_KEY, maxLife != null ? maxLife.toString() : null);
-
+        if (timeUnit == Calendar.MINUTE) {
+            options.put(JwtSessionModule.TOKEN_IDLE_TIME_IN_MINUTES_CLAIM_KEY, idleTimeout != null ? idleTimeout.toString() : null);
+            options.put(JwtSessionModule.MAX_TOKEN_LIFE_IN_MINUTES_KEY, maxLife != null ? maxLife.toString() : null);
+        } else if (timeUnit == Calendar.SECOND) {
+            options.put(JwtSessionModule.TOKEN_IDLE_TIME_IN_SECONDS_CLAIM_KEY, idleTimeout != null ? idleTimeout.toString() : null);
+            options.put(JwtSessionModule.MAX_TOKEN_LIFE_IN_SECONDS_KEY, maxLife != null ? maxLife.toString() : null);
+        }
         return options;
     }
 
@@ -117,7 +121,7 @@ public class JwtSessionModuleTest {
         MessagePolicy requestPolicy = null;
         MessagePolicy responsePolicy = null;
         CallbackHandler callbackHandler = null;
-        Map<String, Object> options = getOptionsMap(1, 2);
+        Map<String, Object> options = getOptionsMap(1, 2, Calendar.MINUTE);
 
         jwtSessionModule.initialize(requestPolicy, responsePolicy, callbackHandler, options);
 
@@ -147,7 +151,7 @@ public class JwtSessionModuleTest {
         MessagePolicy requestPolicy = null;
         MessagePolicy responsePolicy = null;
         CallbackHandler callbackHandler = null;
-        Map<String, Object> options = getOptionsMap(1, 2);
+        Map<String, Object> options = getOptionsMap(1, 2, Calendar.MINUTE);
 
         jwtSessionModule.initialize(requestPolicy, responsePolicy, callbackHandler, options);
 
@@ -181,7 +185,7 @@ public class JwtSessionModuleTest {
         MessagePolicy requestPolicy = null;
         MessagePolicy responsePolicy = null;
         CallbackHandler callbackHandler = null;
-        Map<String, Object> options = getOptionsMap(1, 2);
+        Map<String, Object> options = getOptionsMap(1, 2, Calendar.MINUTE);
 
         jwtSessionModule.initialize(requestPolicy, responsePolicy, callbackHandler, options);
 
@@ -220,7 +224,7 @@ public class JwtSessionModuleTest {
         MessagePolicy requestPolicy = null;
         MessagePolicy responsePolicy = null;
         CallbackHandler callbackHandler = null;
-        Map<String, Object> options = getOptionsMap(1, 2);
+        Map<String, Object> options = getOptionsMap(1, 2, Calendar.MINUTE);
 
         jwtSessionModule.initialize(requestPolicy, responsePolicy, callbackHandler, options);
 
@@ -259,7 +263,7 @@ public class JwtSessionModuleTest {
         MessagePolicy requestPolicy = null;
         MessagePolicy responsePolicy = null;
         CallbackHandler callbackHandler = null;
-        Map<String, Object> options = getOptionsMap(1, 2);
+        Map<String, Object> options = getOptionsMap(1, 2, Calendar.MINUTE);
 
         jwtSessionModule.initialize(requestPolicy, responsePolicy, callbackHandler, options);
 
@@ -296,7 +300,7 @@ public class JwtSessionModuleTest {
         given(jwtBuilderFactory.reconstruct("SESSION_JWT", EncryptedJwt.class)).willReturn(encryptedJwt);
         given(encryptedJwt.getClaimsSet()).willReturn(claimsSet);
         given(claimsSet.getExpirationTime()).willReturn(expiryTime);
-        given(claimsSet.getClaim(JwtSessionModule.TOKEN_IDLE_TIME_CLAIM_KEY, Integer.class))
+        given(claimsSet.getClaim(JwtSessionModule.TOKEN_IDLE_TIME_IN_SECONDS_CLAIM_KEY, Integer.class))
                 .willReturn(idleTimeoutSeconds);
 
         //When
@@ -312,7 +316,7 @@ public class JwtSessionModuleTest {
             UnsupportedEncodingException {
 
         //Given
-        jwtSessionModule.initialize(null, null, null, getOptionsMap(1, 2));
+        jwtSessionModule.initialize(null, null, null, getOptionsMap(1, 2, Calendar.MINUTE));
 
         MessageInfo messageInfo = mock(MessageInfo.class);
         HttpServletRequest request = mock(HttpServletRequest.class);
@@ -344,7 +348,7 @@ public class JwtSessionModuleTest {
         MessagePolicy requestPolicy = null;
         MessagePolicy responsePolicy = null;
         CallbackHandler callbackHandler = null;
-        Map<String, Object> options = getOptionsMap(1, 2);
+        Map<String, Object> options = getOptionsMap(1, 2, Calendar.MINUTE);
 
         jwtSessionModule.initialize(requestPolicy, responsePolicy, callbackHandler, options);
 
@@ -381,7 +385,7 @@ public class JwtSessionModuleTest {
         given(jwtBuilderFactory.reconstruct("SESSION_JWT", EncryptedJwt.class)).willReturn(encryptedJwt);
         given(encryptedJwt.getClaimsSet()).willReturn(claimsSet);
         given(claimsSet.getExpirationTime()).willReturn(expiryTime);
-        given(claimsSet.getClaim(JwtSessionModule.TOKEN_IDLE_TIME_CLAIM_KEY, Integer.class))
+        given(claimsSet.getClaim(JwtSessionModule.TOKEN_IDLE_TIME_IN_SECONDS_CLAIM_KEY, Integer.class))
                 .willReturn(idleTimeoutSeconds);
 
         //When
@@ -400,7 +404,7 @@ public class JwtSessionModuleTest {
         MessagePolicy requestPolicy = null;
         MessagePolicy responsePolicy = null;
         CallbackHandler callbackHandler = mock(CallbackHandler.class);
-        Map<String, Object> options = getOptionsMap(1, 2);
+        Map<String, Object> options = getOptionsMap(1, 2, Calendar.MINUTE);
 
         jwtSessionModule.initialize(requestPolicy, responsePolicy, callbackHandler, options);
 
@@ -445,7 +449,7 @@ public class JwtSessionModuleTest {
         given(jwtBuilderFactory.reconstruct("SESSION_JWT", EncryptedJwt.class)).willReturn(encryptedJwt);
         given(encryptedJwt.getClaimsSet()).willReturn(claimsSet);
         given(claimsSet.getExpirationTime()).willReturn(expiryTime);
-        given(claimsSet.getClaim(JwtSessionModule.TOKEN_IDLE_TIME_CLAIM_KEY, Integer.class))
+        given(claimsSet.getClaim(JwtSessionModule.TOKEN_IDLE_TIME_IN_SECONDS_CLAIM_KEY, Integer.class))
                 .willReturn(idleTimeoutSeconds);
         given(claimsSet.getIssuedAtTime()).willReturn(issuedAtTime);
         given(claimsSet.getClaim("prn", String.class)).willReturn("PRINCIPAL");
@@ -479,7 +483,7 @@ public class JwtSessionModuleTest {
         MessagePolicy requestPolicy = null;
         MessagePolicy responsePolicy = null;
         CallbackHandler callbackHandler = mock(CallbackHandler.class);
-        Map<String, Object> options = getOptionsMap(1, 2);
+        Map<String, Object> options = getOptionsMap(1, 2, Calendar.MINUTE);
 
         jwtSessionModule.initialize(requestPolicy, responsePolicy, callbackHandler, options);
 
@@ -525,7 +529,7 @@ public class JwtSessionModuleTest {
         given(jwtBuilderFactory.reconstruct("SESSION_JWT", EncryptedJwt.class)).willReturn(encryptedJwt);
         given(encryptedJwt.getClaimsSet()).willReturn(claimsSet);
         given(claimsSet.getExpirationTime()).willReturn(expiryTime);
-        given(claimsSet.getClaim(JwtSessionModule.TOKEN_IDLE_TIME_CLAIM_KEY, Integer.class))
+        given(claimsSet.getClaim(JwtSessionModule.TOKEN_IDLE_TIME_IN_SECONDS_CLAIM_KEY, Integer.class))
                 .willReturn(idleTimeoutSeconds);
         given(claimsSet.getIssuedAtTime()).willReturn(issuedAtTime);
         given(claimsSet.getClaim("prn", String.class)).willReturn("PRINCIPAL");
@@ -565,7 +569,7 @@ public class JwtSessionModuleTest {
         MessagePolicy requestPolicy = null;
         MessagePolicy responsePolicy = null;
         CallbackHandler callbackHandler = null;
-        Map<String, Object> options = getOptionsMap(1, 2);
+        Map<String, Object> options = getOptionsMap(1, 2, Calendar.MINUTE);
 
         jwtSessionModule.initialize(requestPolicy, responsePolicy, callbackHandler, options);
 
@@ -595,7 +599,7 @@ public class JwtSessionModuleTest {
         MessagePolicy requestPolicy = null;
         MessagePolicy responsePolicy = null;
         CallbackHandler callbackHandler = null;
-        Map<String, Object> options = getOptionsMap(1, 2);
+        Map<String, Object> options = getOptionsMap(1, 2, Calendar.MINUTE);
 
         jwtSessionModule.initialize(requestPolicy, responsePolicy, callbackHandler, options);
 
@@ -625,7 +629,7 @@ public class JwtSessionModuleTest {
         MessagePolicy requestPolicy = null;
         MessagePolicy responsePolicy = null;
         CallbackHandler callbackHandler = null;
-        Map<String, Object> options = getOptionsMap(1, 2);
+        Map<String, Object> options = getOptionsMap(1, 2, Calendar.MINUTE);
 
         jwtSessionModule.initialize(requestPolicy, responsePolicy, callbackHandler, options);
 
@@ -678,7 +682,7 @@ public class JwtSessionModuleTest {
         verify(jwtClaimsSetBuilder).exp(expCaptor.capture());
         verify(jwtClaimsSetBuilder).nbf(nbfCaptor.capture());
         verify(jwtClaimsSetBuilder).iat(iatCaptor.capture());
-        verify(jwtClaimsSetBuilder).claim(eq(JwtSessionModule.TOKEN_IDLE_TIME_CLAIM_KEY), idleTimeoutCaptor.capture());
+        verify(jwtClaimsSetBuilder).claim(eq(JwtSessionModule.TOKEN_IDLE_TIME_IN_SECONDS_CLAIM_KEY), idleTimeoutCaptor.capture());
         verify(jwtClaimsSetBuilder).claims(anyMap());
         verify(response).addCookie(cookieCaptor.capture());
 
@@ -711,7 +715,7 @@ public class JwtSessionModuleTest {
         MessagePolicy requestPolicy = null;
         MessagePolicy responsePolicy = null;
         CallbackHandler callbackHandler = null;
-        Map<String, Object> options = getOptionsMap(null, 2);
+        Map<String, Object> options = getOptionsMap(null, 2, Calendar.MINUTE);
 
         jwtSessionModule.initialize(requestPolicy, responsePolicy, callbackHandler, options);
 
@@ -764,7 +768,7 @@ public class JwtSessionModuleTest {
         verify(jwtClaimsSetBuilder).exp(expCaptor.capture());
         verify(jwtClaimsSetBuilder).nbf(nbfCaptor.capture());
         verify(jwtClaimsSetBuilder).iat(iatCaptor.capture());
-        verify(jwtClaimsSetBuilder).claim(eq(JwtSessionModule.TOKEN_IDLE_TIME_CLAIM_KEY), idleTimeoutCaptor.capture());
+        verify(jwtClaimsSetBuilder).claim(eq(JwtSessionModule.TOKEN_IDLE_TIME_IN_SECONDS_CLAIM_KEY), idleTimeoutCaptor.capture());
         verify(jwtClaimsSetBuilder).claims(anyMap());
         verify(response).addCookie(cookieCaptor.capture());
 
@@ -836,7 +840,7 @@ public class JwtSessionModuleTest {
         MessagePolicy requestPolicy = null;
         MessagePolicy responsePolicy = null;
         CallbackHandler callbackHandler = null;
-        Map<String, Object> options = getOptionsMap(1, null);
+        Map<String, Object> options = getOptionsMap(1, null, Calendar.MINUTE);
 
         jwtSessionModule.initialize(requestPolicy, responsePolicy, callbackHandler, options);
 
@@ -889,7 +893,7 @@ public class JwtSessionModuleTest {
         verify(jwtClaimsSetBuilder).exp(expCaptor.capture());
         verify(jwtClaimsSetBuilder).nbf(nbfCaptor.capture());
         verify(jwtClaimsSetBuilder).iat(iatCaptor.capture());
-        verify(jwtClaimsSetBuilder).claim(eq(JwtSessionModule.TOKEN_IDLE_TIME_CLAIM_KEY), idleTimeoutCaptor.capture());
+        verify(jwtClaimsSetBuilder).claim(eq(JwtSessionModule.TOKEN_IDLE_TIME_IN_SECONDS_CLAIM_KEY), idleTimeoutCaptor.capture());
         verify(jwtClaimsSetBuilder).claims(anyMap());
         verify(response).addCookie(cookieCaptor.capture());
 
@@ -921,7 +925,7 @@ public class JwtSessionModuleTest {
         MessagePolicy requestPolicy = null;
         MessagePolicy responsePolicy = null;
         CallbackHandler callbackHandler = null;
-        Map<String, Object> options = getOptionsMap(1, 10);
+        Map<String, Object> options = getOptionsMap(1, 10, Calendar.MINUTE);
         options.put(JwtSessionModule.BROWSER_SESSION_ONLY_KEY, true);
 
         jwtSessionModule.initialize(requestPolicy, responsePolicy, callbackHandler, options);
@@ -975,7 +979,7 @@ public class JwtSessionModuleTest {
         verify(jwtClaimsSetBuilder).exp(expCaptor.capture());
         verify(jwtClaimsSetBuilder).nbf(nbfCaptor.capture());
         verify(jwtClaimsSetBuilder).iat(iatCaptor.capture());
-        verify(jwtClaimsSetBuilder).claim(eq(JwtSessionModule.TOKEN_IDLE_TIME_CLAIM_KEY), idleTimeoutCaptor.capture());
+        verify(jwtClaimsSetBuilder).claim(eq(JwtSessionModule.TOKEN_IDLE_TIME_IN_SECONDS_CLAIM_KEY), idleTimeoutCaptor.capture());
         verify(jwtClaimsSetBuilder).claims(anyMap());
         verify(response).addCookie(cookieCaptor.capture());
 
@@ -1007,7 +1011,7 @@ public class JwtSessionModuleTest {
         MessagePolicy requestPolicy = null;
         MessagePolicy responsePolicy = null;
         CallbackHandler callbackHandler = null;
-        Map<String, Object> options = getOptionsMap(1, 2);
+        Map<String, Object> options = getOptionsMap(1, 2, Calendar.MINUTE);
         options.put(JwtSessionModule.SESSION_COOKIE_NAME_KEY, "my-custom-name");
 
         jwtSessionModule.initialize(requestPolicy, responsePolicy, callbackHandler, options);
@@ -1099,7 +1103,7 @@ public class JwtSessionModuleTest {
         given(encryptedJwt.getClaimsSet()).willReturn(claimsSet);
         given(claimsSet.getIssuedAtTime()).willReturn(issuedAtTime);
         given(claimsSet.getExpirationTime()).willReturn(expiryTime);
-        given(claimsSet.getClaim(JwtSessionModule.TOKEN_IDLE_TIME_CLAIM_KEY, Integer.class))
+        given(claimsSet.getClaim(JwtSessionModule.TOKEN_IDLE_TIME_IN_SECONDS_CLAIM_KEY, Integer.class))
                 .willReturn(idleTimeoutSeconds);
 
         //When
@@ -1109,5 +1113,41 @@ public class JwtSessionModuleTest {
         ArgumentCaptor<Cookie> cookieCaptor = ArgumentCaptor.forClass(Cookie.class);
         verify(response).addCookie(cookieCaptor.capture());
         assertThat(cookieCaptor.getValue().getName()).isEqualTo("my-custom-name");
+    }
+
+    @Test(expectedExceptions = AuthException.class)
+    public void shouldThrowAuthExceptionWhenUsingSecondsAndMinutesTokenIdleTimeOption() throws Exception  {
+        //given
+        MessagePolicy requestMessagePolicy = mock(MessagePolicy.class);
+        MessagePolicy responseMessagePolicy = mock(MessagePolicy.class);
+        CallbackHandler callbackHandler = mock(CallbackHandler.class);
+        Map<String, Object> options = getOptionsMap(1, 1, Calendar.MINUTE);
+        JwtSessionModule jwtSessionModule = new JwtSessionModule();
+
+        options.put(JwtSessionModule.TOKEN_IDLE_TIME_IN_SECONDS_CLAIM_KEY, "1");
+
+        //when
+        jwtSessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
+
+        //then
+        //should never get here
+    }
+
+    @Test(expectedExceptions = AuthException.class)
+    public void shouldThrowAuthExceptionWhenUsingSecondsAndMinutesMaxTokenLifeOption() throws Exception {
+        //given
+        MessagePolicy requestMessagePolicy = mock(MessagePolicy.class);
+        MessagePolicy responseMessagePolicy = mock(MessagePolicy.class);
+        CallbackHandler callbackHandler = mock(CallbackHandler.class);
+        Map<String, Object> options = getOptionsMap(1, 1, Calendar.MINUTE);
+        JwtSessionModule jwtSessionModule = new JwtSessionModule();
+
+        options.put(JwtSessionModule.MAX_TOKEN_LIFE_IN_SECONDS_KEY, "1");
+
+        //when
+        jwtSessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
+
+        //then
+        //should never get here
     }
 }
