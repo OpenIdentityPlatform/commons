@@ -1,11 +1,16 @@
-
 <div class="dialogContainer clearfix">
     <div class="dialogInner">
         <div class="dialogContent">
             <div class="dialogCloseCross">
-                <a href="#"><img src="images/dialog-close.png" width="16" height="16" alt="Close window" /></a>
+                <a href="#"><img src="images/dialog-close.png" width="16" height="16" alt="{{t 'common.form.common.form.close'}}" /></a>
             </div>
         </div>
-        <div class="dialogActions"></div>
+        <div class="dialogActions">
+
+        {{#each actions}}
+        <input type="{{this.type}}" name="{{this.name}}" value="{{this.name}}" class='button float-right' />
+        {{/each}}
+
+        </div>
     </div>
 </div>

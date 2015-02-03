@@ -33,7 +33,7 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
     "underscore",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/util/UIUtils",
-    "org/forgerock/commons/ui/common/util/Constants", 
+    "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/Configuration"
 ], function($, _, AbstractView, uiUtils, constants, eventManager, conf) {
@@ -50,42 +50,43 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
             "click input[name='close']": "close",
             "click .dialogContainer": "stop"
         },
-        
+
         actions: [
             {
                 "type": "button",
                 "name": "close"
             }
         ],
-        
+
         stop: function(event) {
             event.stopPropagation();
         },
-        
+
         /**
          * Creates new dialog in #dialogs div. Fills it with dialog template.
          * Then creates actions buttons and bind events. If actions map is empty, default
          * close action is added.
          */
         show: function(callback) {
-            
+
+            this.data.actions = this.actions;
+
             this.setElement($("#dialogs"));
             this.parentRender(_.bind(function() {
+
+                this.$el.addClass('show');
                 this.setElement(this.$el.find(".dialogContainer:last"));
-                $("#dialogs").addClass('show');
+
                 $("#dialog-background").addClass('show');
-                $("#dialog-background").off('click').on('click', _.bind(this.close, this));
-         
-                _.each(this.actions, _.bind(function(a) {
-                    this.$el.find(".dialogActions").append("<input type='"+ a.type +"' name='"+ a.name +"' value='"+ a.name +"' class='button float-right' />");                    
-                }, this));
-                
+                this.$el.off('click').on('click', _.bind(this.close, this));
+
                 this.loadContent(callback);
+                this.delegateEvents();
             }, this));
         },
-        
- 
-        
+
+
+
         /**
          * Loads template from 'contentTemplate'
          */
@@ -96,23 +97,29 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
                 uiUtils.renderTemplate(this.data.theme.path + this.contentTemplate, this.$el.find(".dialogContent"), _.extend({}, conf.globalData, this.data), null, "append");
             }
         },
-        
+
         render: function() {
             this.show();
         },
 
-        close: function(event) {
-            if(event) {
-                event.preventDefault();
+
+
+        close: function(e) {
+            if (e) {
+                e.preventDefault();
+                // return if not a button press
+                if (e.target !== e.currentTarget  ) {
+                    return;
+                }
             }
-            
-            if($(".dialogContainer").length < 2) {
+
+            if ($(".dialogContainer").length < 2) {
                 $("#dialog-background").removeClass('show');
                 $("#dialogs").removeClass('show');
             }
-            
+
             eventManager.sendEvent(constants.EVENT_DIALOG_CLOSE);
-            
+
             this.$el.remove();
         },
 
