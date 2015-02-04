@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions Copyright [year] [name of copyright owner]".
+
+  Copyright 2010–2011 ApexIdentity Inc.
+  Portions Copyright 2011-2015 ForgeRock AS.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.forgerock</groupId>
+    <artifactId>forgerock-parent</artifactId>
+    <version>1.2.7</version>
+  </parent>
+  <groupId>org.forgerock.http</groupId>
+  <artifactId>forgerock-http-framework</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <name>Commons HTTP Framework</name>
+  <description>
+       The HTTP framework provides a uniform client/server HTTP API, which is
+       script friendly, and includes adapters for various common HTTP libraries
+       such as Servlet, Apache HTTP Clients, and Grizzly.
+  </description>
+  <url>http://commons.forgerock.org/forgerock-http-framework</url>
+  <modules>
+    <module>resource-core</module>
+    <module>http-core</module>
+    <module>http-servlet</module>
+    <module>http-test</module>
+  </modules>
+  <properties>
+    <maven.compiler.target>1.6</maven.compiler.target>
+    <maven.compiler.source>1.6</maven.compiler.source>
+  </properties>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.testng</groupId>
+        <artifactId>testng</artifactId>
+        <version>6.8.8</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-all</artifactId>
+        <version>1.9.5</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.assertj</groupId>
+        <artifactId>assertj-core</artifactId>
+        <version>1.6.1</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.forgerock.commons</groupId>
+        <artifactId>forgerock-util</artifactId>
+        <version>1.3.4</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>2.4.3</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>1.7.5</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  <repositories>
+    <repository>
+      <id>forgerock-staging-repository</id>
+      <name>ForgeRock Release Repository</name>
+      <url>http://maven.forgerock.org/repo/releases</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+  <issueManagement>
+    <system>jira</system>
+    <url>https://bugster.forgerock.org/jira/browse/CHF</url>
+  </issueManagement>
+  <licenses>
+    <license>
+      <name>CDDL-1.0</name>
+      <url>http://www.opensource.org/licenses/CDDL-1.0</url>
+      <comments>Common Development and Distribution License (CDDL) 1.0.
+            This license applies to OpenIG source code as indicated in the
+            source code.</comments>
+      <distribution>repo</distribution>
+    </license>
+    <license>
+      <name>CC BY-NC-ND 3.0</name>
+      <url>http://creativecommons.org/licenses/by-nc-nd/3.0/</url>
+      <comments>Creative Commons Attribution-NonCommercial-NoDerivs 3.0
+            Unported. This license applies to the site content, and to the
+            documentation as indicated in the documentation source code.</comments>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <scm>
+    <url>https://svn.forgerock.org/commons/forgerock-http-framework/trunk/</url>
+    <connection>scm:svn:https://svn.forgerock.org/commons/forgerock-http-framework/trunk/</connection>
+    <developerConnection>scm:svn:https://svn.forgerock.org/commons/forgerock-http-framework/trunk/</developerConnection>
+  </scm>
+  <distributionManagement>
+    <site>
+      <id>forgerock.org</id>
+      <name>ForgeRock Community</name>
+      <url>scp://forgerock.org/var/www/vhosts/commons.forgerock.org/httpdocs/forgerock-http-framework</url>
+    </site>
+  </distributionManagement>
+</project>
