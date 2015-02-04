@@ -23,7 +23,7 @@
     <artifactId>forgerock-http-framework</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  <artifactId>resource-core</artifactId>
+  <artifactId>chf-resource-core</artifactId>
   <packaging>bundle</packaging>
   <name>Common HTTP and CREST APIs</name>
   <dependencies>

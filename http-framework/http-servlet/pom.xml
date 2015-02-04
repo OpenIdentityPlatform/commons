@@ -22,13 +22,13 @@
     <artifactId>forgerock-http-framework</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  <artifactId>http-servlet</artifactId>
+  <artifactId>chf-http-servlet</artifactId>
   <packaging>bundle</packaging>
   <name>HTTP Servlet integration library</name>
   <dependencies>
     <dependency>
       <groupId>org.forgerock.http</groupId>
-      <artifactId>http-core</artifactId>
+      <artifactId>chf-http-core</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

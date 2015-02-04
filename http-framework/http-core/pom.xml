@@ -23,13 +23,13 @@
     <artifactId>forgerock-http-framework</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  <artifactId>http-core</artifactId>
+  <artifactId>chf-http-core</artifactId>
   <packaging>bundle</packaging>
   <name>HTTP Core library</name>
   <dependencies>
     <dependency>
       <groupId>org.forgerock.http</groupId>
-      <artifactId>resource-core</artifactId>
+      <artifactId>chf-resource-core</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
