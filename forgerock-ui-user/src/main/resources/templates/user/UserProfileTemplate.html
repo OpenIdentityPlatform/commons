@@ -46,6 +46,7 @@
         <label class="col-sm-3 control-label" for="telephoneNumber">{{t "common.user.phoneNumber"}}</label>
         <div class="col-sm-6">
             <input class="form-control" type="tel" id="telephoneNumber" name="telephoneNumber" value="" />
+            <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
         </div>
     </div>
 
@@ -55,7 +56,6 @@
         <div class="col-sm-6">
             <input class="form-control" type="text" id="postalAddress" name="postalAddress" value=""  />
             <div class="validation-message"></div>
-            <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
         </div>
     </div>
     <div class="form-group has-feedback">
@@ -63,7 +63,6 @@
         <div class="col-sm-6">
             <input class="form-control" type="text" id="address2" name="address2" value=""  />
             <div class="validation-message"></div>
-            <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
         </div>
     </div>
     <div class="form-group has-feedback">
@@ -71,15 +70,6 @@
         <div class="col-sm-6">
             <input class="form-control" type="text" id="city" name="city" value=""  />
             <div class="validation-message"></div>
-            <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
-        </div>
-    </div>
-    <div class="form-group has-feedback">
-        <label class="col-sm-3 control-label" for="city">{{t "common.user.city"}}</label>
-        <div class="col-sm-6">
-            <input class="form-control" type="text" id="city" name="city" value=""  />
-            <div class="validation-message"></div>
-            <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
         </div>
     </div>
     <div class="form-group has-feedback">
@@ -87,21 +77,18 @@
         <div class="col-sm-6">
             <input class="form-control" type="text" id="postalCode" name="postalCode" value=""  />
             <div class="validation-message"></div>
-            <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
         </div>
     </div>
     <div class="form-group has-feedback">
         <label class="col-sm-3 control-label" for="country">{{t "common.user.country"}}</label>
         <div class="col-sm-6">
             <select class="form-control" id="country" name="country"></select>
-            <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
         </div>
     </div>
     <div class="form-group has-feedback">
         <label class="col-sm-3 control-label" for="stateProvince">{{t "common.user.stateProvince"}}</label>
         <div class="col-sm-6">
             <select class="form-control" id="stateProvince" name="stateProvince"></select>
-            <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
         </div>
     </div>
     {{/if}}

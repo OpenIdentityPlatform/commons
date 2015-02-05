@@ -57,6 +57,15 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                 e.preventDefault();
             },
             render: function() {
+                //Added to ensure username shows up on direct page load
+                if(conf.loggedUser) {
+                    if (conf.loggedUser.userName) {
+                        this.data.username = conf.loggedUser.userName;
+                    } else if (conf.loggedUser.cn) {
+                        this.data.username = conf.loggedUser.cn;
+                    }
+                }
+
                 this.reload();
                 this.parentRender();
             },

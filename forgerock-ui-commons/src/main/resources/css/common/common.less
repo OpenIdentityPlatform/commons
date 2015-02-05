@@ -9,7 +9,7 @@ html {
 }
 
 body {
-  background-color: #f7f7f7;
+  background-color: @background-color;
   background-image: url("../images/forgerock-background.png");
   background-position: right top;
   background-repeat: no-repeat;
@@ -58,15 +58,27 @@ table {
   Registration
 */
 
-#userregistration .group-field-errors {
+.registration .group-field-errors {
   padding-left:8px;
 }
 
-#userregistration .validationRules {
+.registration .validationRules {
   border: 1px solid #ddd;
   border-radius: 10px;
   margin-bottom: 10px;
   padding: 10px;
+}
+
+#passPhrasePictures img {
+  cursor:pointer;
+}
+
+#passPhrasePictures .pictureNotSelected {
+  box-shadow:none;
+}
+
+#passPhrasePictures .pictureSelected {
+  box-shadow:0px 6px 12px 1px #555;
 }
 
 /*
@@ -89,7 +101,7 @@ table {
 .has-feedback .form-control-feedback.error {
   .validation-icon {
     .fa-icon();
-    color: #ba4d51;
+    color: @failure-red;
 
     &:before {
       content:@fa-var-times;
@@ -147,12 +159,19 @@ table {
   }
 }
 
+/*
+
+*/
+.form-horizontal .has-feedback.no-right-padding .form-control-feedback {
+  right:0px;
+}
+
 .form-horizontal .form-group-large.has-feedback .form-control-feedback {
   right:0px;
   line-height:44px;
 }
 
-#userregistration {
+#userRegistration {
   .remember-forgot .checkbox{
     padding-top:0px;
     padding-bottom:15px;
@@ -179,8 +198,11 @@ table {
   bottom: 0;
   width: 100%;
   height:@footer-height;
-  color: #9D9D9D;
+  padding-top:10px;
   text-align:center;
+  color: #9D9D9D;
+  border-top: 1px solid #ccc;
+  background-color: #eee;
 
   .container {
     padding-bottom:10px;
@@ -487,6 +509,9 @@ table {
     float: left;
     border-radius: 40px;
     margin-right: 5px;
+    background: #519387;
+    color: #fff;
+    padding:4px 0px 0px 7px;
 
     i {
       display: table-cell;
@@ -496,8 +521,7 @@ table {
 
   .user-dropdown>a {
     line-height: 24px;
-    padding-top: 15px;
-    padding-bottom: 11px;
+    padding:15px 0px 11px 0px;
   }
 
   .fa {
@@ -511,8 +535,7 @@ table {
   .btn-navbar {
     float: left;
     padding: 9px 10px;
-    margin-left: 5px;
-    margin-right: 5px;
+    margin:0px 5px 0px 5px;
     color: #333;
     text-shadow: none;
     background-color: transparent;
@@ -608,7 +631,7 @@ table {
 
 #mainNavBar {
   .subnav {
-    background-color: #1D2124;
+    background-color: @nav-subnav-background-color;
     padding-bottom: 10px;
 
     .container {
@@ -617,19 +640,127 @@ table {
     }
 
     .nav-subnav li a {
-      color: #999;
+      color: @nav-subnav-color;
       padding-left: 40px;
     }
 
     .nav-subnav li a:hover,
     .nav-subnav li a:focus {
-      color: #fff;
+      color: @nav-subnav-color-hover;
     }
   }
 }
 
 #subNavHolder {
   display:none;
+}
+
+
+/*
+  Panel Styles
+*/
+
+.panel-default>.panel-heading {
+  background-color: transparent;
+  padding: 15px;
+}
+
+.panel-heading .panel-title-icon {
+  margin-right:10px;
+}
+
+.panel.panel-content {
+  margin-bottom: 50px;
+}
+
+.panel-title {
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+.panel-title .panel-title-icon {
+  display: inline-block;
+}
+.panel-title>a {
+  color: @panel-title-color;
+  position: relative;
+  padding-left: 17px;
+}
+.panel-title a:hover,
+.panel-title a:focus {
+  color: @panel-title-hover;
+}
+
+.panel-title a:hover,
+.panel-title a:focus {
+  text-decoration: none;
+}
+.panel-title a:before {
+  content: '';
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-left: 2px;
+  vertical-align: middle;
+  position: absolute;
+  left: 3px;
+  top: 5px;
+  border-left: 4px solid;
+  border-right: 0;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+}
+
+.panel-title a[aria-expanded="true"]:before {
+  content: '';
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-left: 2px;
+  vertical-align: middle;
+  position: absolute;
+  border-top: 4px solid;
+  border-right: 4px solid transparent;
+  border-left: 4px solid transparent;
+  top: 7px;
+  left: 0;
+}
+
+.panel-collapse {
+  box-shadow: none;
+  -webkit-box-shadow: none;
+  margin-bottom: 5px;
+  border: none;
+}
+
+.panel-collapse>.panel-heading {
+  background-color: @panel-header-color;
+  order-radius: 0;
+}
+
+.panel-collapse .panel-title {
+  font-weight: 300;
+  font-size: 18px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.panel-collapse>.panel-heading .badge {
+  background-color: @panel-badge-color;
+}
+
+.panel-collapse .panel-title>a {
+  color: @panel-title-collapse-color;
+}
+
+.panel-inset {
+  margin-left: -15px;
+  margin-right: -15px;
+}
+
+.page-header h1 {
+  font-weight:400;
 }
 
 /* Medium devices (desktops, 992px and up) */
