@@ -60,7 +60,7 @@ define("config/routes/CommonRoutesConfig", [
             },
             "logout": {
                 event: constants.EVENT_LOGOUT,
-                url: /logout\/.*/
+                url: /logout\/(.*)/
             },
             "loginDialog": {
                 dialog: "LoginDialog",

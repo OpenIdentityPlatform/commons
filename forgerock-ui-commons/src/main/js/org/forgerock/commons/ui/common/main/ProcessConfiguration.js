@@ -28,7 +28,7 @@
  * @author yaromin
  */
 define("org/forgerock/commons/ui/common/main/ProcessConfiguration", [
-	"org/forgerock/commons/ui/common/util/Constants", 
+    "org/forgerock/commons/ui/common/util/Constants", 
     "org/forgerock/commons/ui/common/main/EventManager", 
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware"
@@ -47,7 +47,7 @@ define("org/forgerock/commons/ui/common/main/ProcessConfiguration", [
         eventManager.sendEvent(constants.EVENT_READ_CONFIGURATION_REQUEST);
     });
 
-    obj.callRegisterListenerFromConfig = function (config) {		
+    obj.callRegisterListenerFromConfig = function (config) {
         eventManager.registerListener(config.startEvent, function(event) {
             var i, callParameters;
             if(config.description) {

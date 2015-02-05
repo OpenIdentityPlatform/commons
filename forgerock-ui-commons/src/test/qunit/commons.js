@@ -251,6 +251,31 @@ define([
 
             });
 
+            QUnit.asyncTest("Routes with special characters in parameter values (CUI-51)", function () {
+                var manySpecialCharacters = "/!@#$%",
+                    additionalSpecialCharacters = "a%b",
+                    loginView = require("org/forgerock/commons/ui/common/LoginView"),
+                    stub = sinon.stub(loginView, "render", function (args, callback) {
+                        QUnit.equal(args[0], manySpecialCharacters, "Characters properly passed to first arg of render function");
+                        QUnit.equal(args[1], '&' + additionalSpecialCharacters, "Characters properly passed to last arg of render function");
+                        stub.restore();
+                        QUnit.start();
+                    });
+
+                window.location.hash = "login" + encodeURIComponent(manySpecialCharacters) + '&' + encodeURIComponent(additionalSpecialCharacters);
+            });
+
+            QUnit.asyncTest("Parameters passed to logout event", function () {
+                
+                eventManager.registerListener(constants.EVENT_LOGOUT, function (event) {
+                    QUnit.equal(event.args[0], "foo/bar", "Logout event called with expected arguments");
+                    QUnit.start();
+                });
+
+                window.location.hash = "logout/foo/bar";
+
+            });
+
         }
     };
 });
