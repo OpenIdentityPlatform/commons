@@ -1,4 +1,4 @@
-/** 
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
@@ -29,7 +29,7 @@
  */
 define("config/messages/CommonMessages", [
 ], function() {
-    
+
     var obj = {
             "authenticationFailed": {
                 msg: "config.messages.CommonMessages.authenticationFailed",
@@ -43,10 +43,6 @@ define("config/messages/CommonMessages", [
                 msg: "config.messages.CommonMessages.maxSessionsLimitOrSessionQuota",
                 type: "error"
             },
-            "invalidRealm": {
-                msg: "config.messages.CommonMessages.invalidRealm",
-                type: "error"
-            },   
             "serviceUnavailable": {
                 msg: "config.messages.CommonMessages.serviceUnavailable",
                 type: "error"
@@ -108,6 +104,6 @@ define("config/messages/CommonMessages", [
                 type: "info"
             }
     };
-    
+
     return obj;
 });

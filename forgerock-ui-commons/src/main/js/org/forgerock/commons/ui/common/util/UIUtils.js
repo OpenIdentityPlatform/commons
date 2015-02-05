@@ -35,6 +35,9 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/util/DateUtil"
 ], function ($, _, String, AbstractConfigurationAware, handlebars, i18next, router, dateUtil) {
+    /**
+     * @exports org/forgerock/commons/ui/common/util/UIUtils
+     */
     var obj = new AbstractConfigurationAware();
 
     obj.getUrl = function() {
@@ -45,25 +48,84 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         return window.location.protocol + "//" + window.location.host;
     };
 
+    /**
+     * Returns the query string from the fragment component
+     * @returns {String} Unescaped query string or empty string if no query string was found
+     */
+    obj.getURIFragmentQueryString = function() {
+      var fragment = obj.getURIFragment(),
+          queryString = '';
+
+      if(fragment.indexOf('&') > -1) {
+        queryString = fragment.substring(fragment.indexOf('&') + 1);
+      }
+
+      return queryString;
+    };
+
+    /**
+     * Returns the query string from the URI
+     * @returns {String} Unescaped query string or empty string if no query string was found
+     */
+    obj.getURIQueryString = function() {
+      var queryString = window.location.search;
+
+      return queryString.substr(1, queryString.length);
+    };
+
+    /**
+     * @deprecated
+     * @see Use {@link module:org/forgerock/commons/ui/common/util/UIUtils.getURIFragment}
+     */
     obj.getCurrentHash = function() {
-        if (window.location.href.indexOf('#') === -1) {
+        if (obj.getUrl().indexOf('#') === -1) {
             return "";
         } else {
             // cannot use window.location.hash due to FF which de-encodes this parameter.
-            return window.location.href.substring(window.location.href.indexOf('#') + 1);
+            return obj.getUrl().substring(obj.getUrl().indexOf('#') + 1);
         }
     };
 
+    /**
+     * Returns the fragment component of the current URI
+     *
+     * Use instead of the inconsistent window.location.hash as Firefox unescapes this parameter incorrectly
+     * @see {@link https://bugzilla.mozilla.org/show_bug.cgi?id=135309}
+     * @returns {String} Unescaped fragment or empty string if no fragment was found
+     */
+    obj.getURIFragment = function() {
+        return obj.getUrl().split('#')[1] || '';
+    };
+
+    /**
+     * @deprecated
+     * @see Use {@link module:org/forgerock/commons/ui/common/util/UIUtils.getCompositeQueryString}
+     */
     obj.getCurrentUrlQueryParameters = function() {
         var hash = obj.getCurrentHash(),
-            queries = window.location.search.substr(1,window.location.search.length);
+            queries = obj.getURIQueryString();
             // location.search will only return a value if there are queries before the hash.
         if (hash && hash.indexOf('&') > -1) {
             queries = hash.substring(hash.indexOf('&') + 1);
         }
         return queries;
     };
- 
+
+    /**
+     * Returns an unescaped composite query string constructed from:<br>
+     * <ul><li>Fragment query string</li>
+     * <li>URL query string</li></ul>
+     * <p>
+     * If a fragment query string is present it overrides the URL query string entirely
+     * @returns {String} Unescaped query string
+     */
+    obj.getCompositeQueryString = function() {
+      var urlQueryString = obj.getURIQueryString(),
+          fragmentQueryString = obj.getURIFragmentQueryString();
+
+      return fragmentQueryString.length ? fragmentQueryString : urlQueryString;
+    };
+
     obj.getCurrentPathName = function() {
         return window.location.pathname;
     };
@@ -104,7 +166,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                 })
             );
         }
-        return null;
+        return {};
     };
 
     obj.commonJQGridFormatters = {
@@ -137,7 +199,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                 i,
                 len = cellvalue.length;
             for (i = 0; i < len; i++) {
-               
+
                 if (_.isString(cellvalue[i])){
                     result += '<li>' + cellvalue[i] + '</li>';
                 } else{
@@ -149,7 +211,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
 
             return result;
         },
-  
+
         dateFormatter: function (cellvalue, options, rowObject) {
             if (!cellvalue) {
                 return '';
@@ -348,7 +410,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         showSearch = !!options.search;
         grid.navGrid(options.pager, {edit: false, add: false, del: false, search: showSearch, refresh: false},
                      {},{},{},{multipleSearch: true, closeOnEscape: true, closeAfterSearch: true});
-        
+
         if(!additional.suppressColumnChooser){
             grid.navButtonAdd(options.pager,{
                 caption:"Columns",
@@ -776,7 +838,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
 
     _.mixin({
 
-        /*  findByValues takes a collection and returns a subset made up of objects where the given property name matches a value in the list.  
+        /*  findByValues takes a collection and returns a subset made up of objects where the given property name matches a value in the list.
             For example:
 
             var collections = [
@@ -803,7 +865,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
             });
         },
 
-        /*  removeByValues takes a collection and returns a subset made up of objects where there is no match between the given property name and the values in the list.  
+        /*  removeByValues takes a collection and returns a subset made up of objects where there is no match between the given property name and the values in the list.
             For example:
 
             var filtered = _.removeByValues(collections, "id", [1,3,4]);

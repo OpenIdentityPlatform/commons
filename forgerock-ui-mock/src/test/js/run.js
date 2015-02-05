@@ -30,8 +30,9 @@ require([
     "../test/tests/commons",
     "../test/tests/user",
     "../test/tests/mock",
-    "../test/tests/getLoggedUser"
-], function (constants, eventManager, commonsTests, userTests, mockTests, getLoggedUser) {
+    "../test/tests/getLoggedUser",
+    "../test/tests/utils"
+], function (constants, eventManager, commonsTests, userTests, mockTests, getLoggedUser, utilsTests) {
 
     $.doTimeout = function (name, time, func) {
         func(); // run the function immediately rather than delayed.
@@ -59,13 +60,14 @@ require([
                 commonsTests.executeAll(server, userParams);
                 userTests.executeAll(server, getLoggedUser());
                 mockTests.executeAll(server, userParams);
+                utilsTests.executeAll();
 
                 QUnit.done(function () {
                     localStorage.clear();
                     Backbone.history.stop();
                     window.location.hash = "";
                 });
-                
+
             }, 100);
         }
     });

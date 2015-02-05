@@ -37,6 +37,9 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/Configuration"
 ], function($, _, AbstractView, uiUtils, constants, eventManager, conf) {
+    /**
+     * @exports org/forgerock/commons/ui/common/components/Dialog
+     */
     var Dialog = AbstractView.extend({
         template: "templates/common/DialogTemplate.html",
         element: "#dialogs",
