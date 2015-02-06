@@ -18,11 +18,11 @@ package org.forgerock.json.resource.http;
 
 import java.util.Map;
 
+import org.forgerock.http.Context;
 import org.forgerock.http.HttpContext;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.SecurityContext;
-import org.forgerock.resource.core.Context;
 
 /**
  * An HTTP context factory which will create a {@link SecurityContext} whose

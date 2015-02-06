@@ -23,8 +23,8 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
+import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.resource.core.ServerContext;
 
 /**
  * This class contains methods for creating various kinds of {@code Filter} and

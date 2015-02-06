@@ -25,9 +25,9 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 
 import java.util.Collections;
 
+import org.forgerock.http.RootContext;
+import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.resource.core.RootContext;
-import org.forgerock.resource.core.ServerContext;
 import org.mockito.InOrder;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;

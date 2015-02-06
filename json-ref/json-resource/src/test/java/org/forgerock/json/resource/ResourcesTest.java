@@ -25,10 +25,10 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import org.forgerock.http.RootContext;
+import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.resource.core.RootContext;
-import org.forgerock.resource.core.ServerContext;
 import org.mockito.ArgumentCaptor;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;

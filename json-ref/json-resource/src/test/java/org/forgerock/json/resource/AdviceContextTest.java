@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.forgerock.resource.core.RootContext;
+import org.forgerock.http.RootContext;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 

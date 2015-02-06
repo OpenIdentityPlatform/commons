@@ -29,8 +29,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.resource.core.ServerContext;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 

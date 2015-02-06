@@ -16,18 +16,18 @@
 
 package org.forgerock.json.resource;
 
-import static org.forgerock.resource.core.routing.RoutingMode.EQUALS;
+import static org.forgerock.http.RoutingMode.EQUALS;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
+import org.forgerock.http.Context;
+import org.forgerock.http.RouterContext;
+import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.resource.core.Context;
-import org.forgerock.resource.core.routing.RouterContext;
-import org.forgerock.resource.core.ServerContext;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.PromiseImpl;
 import org.forgerock.util.promise.Promises;

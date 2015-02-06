@@ -22,10 +22,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.forgerock.http.AbstractContext;
 import org.forgerock.http.ClientInfoContext;
+import org.forgerock.http.Context;
 import org.forgerock.json.resource.ClientContext;
-import org.forgerock.resource.core.AbstractContext;
-import org.forgerock.resource.core.Context;
 import org.forgerock.util.Factory;
 import org.forgerock.util.LazyMap;
 

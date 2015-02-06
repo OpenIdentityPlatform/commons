@@ -22,8 +22,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.resource.core.ServerContext;
 
 /**
  * A chain of filters terminated by a target request handler. The filter chain
