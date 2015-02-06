@@ -667,7 +667,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         var ret = "", i;
 
         for(i = 0; i < images.length; i++) {
-            ret += '<img class="item" src="' + encodeURI(images[i]) +'" data-site-image="'+ encodeURI(images[i]) +'" />';
+            ret +=  '<label class="btn btn-default col-xs-3 item"><input type="radio" name="options" id="option1" autocomplete="off" checked=""> <img src="' + encodeURI(images[i]) +'" data-site-image="'+ encodeURI(images[i]) +'"></label>';
         }
 
         return new Handlebars.SafeString(ret);

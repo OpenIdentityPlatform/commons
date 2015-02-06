@@ -2,7 +2,7 @@
     <fieldset class="fieldset">
         <p>{{t "templates.user.ChangeSecurityDataDialogTemplate.enterNewPasswordToChange"}}</p>
 
-        <div class="col-md-6">
+        <div class="col-md-5">
             <div class="form-group has-feedback">
                 <label for="password">{{t "common.user.password"}}</label>
                 <input class="form-control" type="password" name="password" value="" data-validation-dependents="passwordConfirm" id="password" required autofocus/>
@@ -16,7 +16,7 @@
             </div>
         </div>
 
-        <div class="col-md-6 validationRules" data-for-validator="password passwordConfirm">
+        <div class="col-md-6 validationRules well" data-for-validator="password passwordConfirm">
             <div class="field-rule">
                 <span class="error"><i class="fa validation-icon"></i></span><span data-for-validator="passwordConfirm">{{t "common.form.validation.confirmationMatchesPassword"}}</span>
             </div>

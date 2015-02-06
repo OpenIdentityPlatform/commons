@@ -33,13 +33,10 @@
 
             <hr>
 
-            <div class="group-field-errors validationRules" data-for-validator="password passwordConfirm">
-                <div class="field-rule">
-                    <span class="error"><i class="fa validation-icon"></i></span><span data-for-validator="passwordConfirm">{{t "common.form.validation.confirmationMatchesPassword"}}</span>
-                </div>
-            </div>
+            <h4>{{t "common.user.password"}}</h4>
 
             <input style="display:none;" />
+
             <div class="form-group form-group-large has-feedback">
                 <input placeholder='{{t "common.user.password"}}' class="form-control input-lg" type="password" name="password" value="" data-validation-dependents="passwordConfirm" required/>
                 <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
@@ -49,6 +46,12 @@
                 <input placeholder='{{t "common.user.confirmPassword"}}' class="form-control input-lg" type="password" name="passwordConfirm" value="" data-validator="passwordConfirm"
                        data-validator-event="keyup change" required/>
                 <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+            </div>
+
+            <div class="group-field-errors validationRules well" data-for-validator="password passwordConfirm">
+                <div class="field-rule">
+                    <span class="error"><i class="fa validation-icon"></i></span><span data-for-validator="passwordConfirm">{{t "common.form.validation.confirmationMatchesPassword"}}</span>
+                </div>
             </div>
 
             <div class="remember-forgot">

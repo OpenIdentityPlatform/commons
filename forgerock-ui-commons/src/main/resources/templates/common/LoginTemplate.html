@@ -1,6 +1,24 @@
 <div class="container">
     <form class="form-signin" role="form">
         <div class="col-sm-6 col-sm-offset-3">
+
+            {{#if hasOptionalUIFeatures}}
+                {{#siteIdentification}}
+
+                <div class="well site-identification ">
+                    <div class="media">
+                        <div class="media-left media-middle">
+                            <div id="siteImage"></div>
+                        </div>
+                        <div class="media-body media-middle">
+                            <h4 class="media-heading">{{t "templates.user.LoginTemplate.siteIdentificationHeader"}}</h4>
+                            <h3 id="passPhrase" class="media-heading"></h3>
+                        </div>
+                    </div>
+                </div>
+
+                {{/siteIdentification}}
+            {{/if}}
             <div class="login">
                 <div class="form-group">
                     <input type="text" name="login" id="login" value="" class="form-control input-lg" placeholder="Username" required autofocus>
@@ -34,19 +52,5 @@
                 {{/if}}
             </div>
         </div>
-        {{#if hasOptionalUIFeatures}}
-        <div class="col-sm-6 col-sm-offset-3">
-            {{#siteIdentification}}
-            <div>
-                <h5>{{t "templates.user.LoginTemplate.siteIdentificationHeader"}}</h5>
-                <p id="identificationMessage" class="last">{{t "templates.user.LoginTemplate.siteIdentificationExplanation"}}</p>
-                <div class="center-block">
-                    <div id="siteImage" class="float-right"></div>
-                    <div id="passPhrase"></div>
-                </div>
-            </div>
-            {{/siteIdentification}}
-        </div>
-        {{/if}}
     </form>
 </div>
