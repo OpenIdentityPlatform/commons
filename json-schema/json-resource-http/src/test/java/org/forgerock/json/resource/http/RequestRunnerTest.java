@@ -25,6 +25,7 @@ import static org.testng.Assert.assertEquals;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import org.forgerock.http.Context;
 import org.forgerock.http.Response;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.Connection;
@@ -34,7 +35,6 @@ import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.resource.core.Context;
 import org.forgerock.util.promise.Promises;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;

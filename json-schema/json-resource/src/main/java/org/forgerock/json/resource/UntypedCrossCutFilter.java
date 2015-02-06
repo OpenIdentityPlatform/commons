@@ -16,7 +16,7 @@
 
 package org.forgerock.json.resource;
 
-import org.forgerock.resource.core.ServerContext;
+import org.forgerock.http.ServerContext;
 
 /**
  * An interface for implementing generic cross-cutting filters. Cross cutting

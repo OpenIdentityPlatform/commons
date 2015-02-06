@@ -20,6 +20,9 @@ import static org.forgerock.json.resource.Requests.newCreateRequest;
 import static org.forgerock.json.resource.Resources.newInternalConnection;
 import static org.forgerock.json.resource.examples.DemoUtils.*;
 
+import org.forgerock.http.Context;
+import org.forgerock.http.RoutingMode;
+import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.AcceptAPIVersion;
 import org.forgerock.json.resource.AcceptAPIVersionContext;
@@ -43,9 +46,6 @@ import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.json.resource.UriRouter;
 import org.forgerock.json.resource.VersionRouter;
-import org.forgerock.resource.core.Context;
-import org.forgerock.resource.core.routing.RoutingMode;
-import org.forgerock.resource.core.ServerContext;
 
 /**
  * An example client application which performs asynchronous reads against different versions of the same resource.

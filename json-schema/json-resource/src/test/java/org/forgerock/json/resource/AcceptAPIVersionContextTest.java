@@ -18,7 +18,7 @@ package org.forgerock.json.resource;
 
 import static org.testng.Assert.*;
 
-import org.forgerock.resource.core.RootContext;
+import org.forgerock.http.RootContext;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

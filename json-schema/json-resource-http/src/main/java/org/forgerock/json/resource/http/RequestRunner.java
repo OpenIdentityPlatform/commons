@@ -22,13 +22,17 @@ import static org.forgerock.util.Utils.closeSilently;
 
 import javax.mail.internet.ContentType;
 import javax.mail.internet.ParseException;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+
+import org.forgerock.http.Context;
 import org.forgerock.http.Response;
 import org.forgerock.http.ResponseException;
+import org.forgerock.http.RouterContext;
 import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -47,8 +51,6 @@ import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceName;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.resource.core.Context;
-import org.forgerock.resource.core.routing.RouterContext;
 import org.forgerock.util.encode.Base64url;
 import org.forgerock.util.promise.AsyncFunction;
 import org.forgerock.util.promise.Promise;

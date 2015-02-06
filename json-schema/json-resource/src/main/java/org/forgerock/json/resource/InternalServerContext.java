@@ -16,8 +16,8 @@
 
 package org.forgerock.json.resource;
 
-import org.forgerock.resource.core.Context;
-import org.forgerock.resource.core.ServerContext;
+import org.forgerock.http.Context;
+import org.forgerock.http.ServerContext;
 
 /**
  * A {@link ServerContext} from an internal source.
