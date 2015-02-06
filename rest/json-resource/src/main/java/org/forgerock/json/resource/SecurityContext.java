@@ -22,8 +22,8 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.forgerock.resource.core.AbstractContext;
-import org.forgerock.resource.core.Context;
+import org.forgerock.http.AbstractContext;
+import org.forgerock.http.Context;
 
 /**
  * A {@link Context} containing information about the client performing the

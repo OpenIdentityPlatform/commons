@@ -40,7 +40,7 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.http</groupId>
-            <artifactId>chf-resource-core</artifactId>
+            <artifactId>chf-http-core</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
     </dependencies>

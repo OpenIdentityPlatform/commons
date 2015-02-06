@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.forgerock.http.ServerContext;
 import org.forgerock.i18n.LocalizableMessage;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.AbstractRequestHandler;
@@ -57,7 +58,6 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.json.resource.descriptor.RelationDescriptor.Multiplicity;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.forgerock.resource.core.ServerContext;
 
 @SuppressWarnings("javadoc")
 public final class Api {

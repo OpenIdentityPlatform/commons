@@ -16,10 +16,10 @@
 
 package org.forgerock.json.resource.http;
 
+import org.forgerock.http.Context;
 import org.forgerock.http.Handler;
 import org.forgerock.http.Http;
 import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.resource.core.Context;
 import org.forgerock.util.Reject;
 
 /**

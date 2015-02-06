@@ -27,6 +27,8 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.forgerock.http.RootContext;
+import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.AbstractRequestHandler;
 import org.forgerock.json.resource.Connection;
@@ -39,8 +41,6 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.descriptor.RelationDescriptor.Multiplicity;
-import org.forgerock.resource.core.RootContext;
-import org.forgerock.resource.core.ServerContext;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonGenerator;

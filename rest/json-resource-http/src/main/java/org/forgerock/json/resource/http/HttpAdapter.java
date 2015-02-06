@@ -26,10 +26,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.forgerock.http.Context;
 import org.forgerock.http.Form;
 import org.forgerock.http.Handler;
 import org.forgerock.http.Response;
 import org.forgerock.http.ResponseException;
+import org.forgerock.http.RouterContext;
 import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.AcceptAPIVersion;
@@ -54,8 +56,6 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceName;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.json.resource.Version;
-import org.forgerock.resource.core.Context;
-import org.forgerock.resource.core.routing.RouterContext;
 import org.forgerock.util.promise.AsyncFunction;
 import org.forgerock.util.promise.Promise;
 

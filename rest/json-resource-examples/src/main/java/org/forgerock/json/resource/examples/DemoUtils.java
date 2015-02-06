@@ -20,6 +20,8 @@ import static org.forgerock.json.fluent.JsonValue.*;
 import static org.forgerock.json.resource.Requests.newCreateRequest;
 import static org.forgerock.json.resource.Resources.newInternalConnection;
 
+import org.forgerock.http.Context;
+import org.forgerock.http.RootContext;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
@@ -27,8 +29,6 @@ import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.UriRouter;
-import org.forgerock.resource.core.Context;
-import org.forgerock.resource.core.RootContext;
 
 /**
  * Utility methods for demo apps.
