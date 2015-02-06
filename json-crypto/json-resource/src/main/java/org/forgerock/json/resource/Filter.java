@@ -16,8 +16,8 @@
 
 package org.forgerock.json.resource;
 
+import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.resource.core.ServerContext;
 
 /**
  * An interface for implementing request handler filters. Filters are linked

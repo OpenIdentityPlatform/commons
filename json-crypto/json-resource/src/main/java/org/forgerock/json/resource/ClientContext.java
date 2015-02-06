@@ -16,7 +16,7 @@
 
 package org.forgerock.json.resource;
 
-import org.forgerock.resource.core.Context;
+import org.forgerock.http.Context;
 
 /**
  * A Context to differentiate the source of a client request as being

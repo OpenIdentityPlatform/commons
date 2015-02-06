@@ -18,8 +18,8 @@ package org.forgerock.json.resource;
 
 import java.util.Collection;
 
+import org.forgerock.http.Context;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.resource.core.Context;
 
 /**
  * An abstract connection whose synchronous methods are implemented in terms of

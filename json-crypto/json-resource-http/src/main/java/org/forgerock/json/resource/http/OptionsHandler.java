@@ -18,12 +18,12 @@ package org.forgerock.json.resource.http;
 
 import java.util.Arrays;
 
+import org.forgerock.http.Context;
 import org.forgerock.http.Filter;
 import org.forgerock.http.Handler;
 import org.forgerock.http.Request;
 import org.forgerock.http.Response;
 import org.forgerock.http.ResponseException;
-import org.forgerock.resource.core.Context;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 

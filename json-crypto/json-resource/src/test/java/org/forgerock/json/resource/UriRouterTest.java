@@ -21,11 +21,11 @@ import static org.forgerock.json.resource.Requests.newReadRequest;
 import static org.forgerock.json.resource.Resources.newInternalConnection;
 import static org.mockito.Mockito.*;
 
-import org.forgerock.resource.core.Context;
-import org.forgerock.resource.core.RootContext;
-import org.forgerock.resource.core.routing.RouterContext;
-import org.forgerock.resource.core.routing.RoutingMode;
-import org.forgerock.resource.core.ServerContext;
+import org.forgerock.http.Context;
+import org.forgerock.http.RootContext;
+import org.forgerock.http.RouterContext;
+import org.forgerock.http.RoutingMode;
+import org.forgerock.http.ServerContext;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.testng.annotations.DataProvider;

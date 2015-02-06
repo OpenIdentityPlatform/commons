@@ -18,8 +18,8 @@ package org.forgerock.json.resource;
 
 import static org.forgerock.util.Reject.checkNotNull;
 
-import org.forgerock.resource.core.AbstractContext;
-import org.forgerock.resource.core.Context;
+import org.forgerock.http.AbstractContext;
+import org.forgerock.http.Context;
 import org.forgerock.util.Reject;
 
 /**
