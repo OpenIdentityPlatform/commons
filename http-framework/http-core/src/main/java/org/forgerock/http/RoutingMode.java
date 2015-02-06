@@ -14,7 +14,7 @@
  * Copyright 2012 ForgeRock AS.
  */
 
-package org.forgerock.resource.core.routing;
+package org.forgerock.http;
 
 /**
  * The algorithm which should be used when matching URI templates against

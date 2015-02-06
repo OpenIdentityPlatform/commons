@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.forgerock.resource.core.Context;
 import org.forgerock.util.promise.Promise;
 
 /**

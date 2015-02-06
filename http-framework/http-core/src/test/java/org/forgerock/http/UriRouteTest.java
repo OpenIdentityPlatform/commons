@@ -14,19 +14,22 @@
  * Copyright 2013-2014 ForgeRock AS.
  */
 
-package org.forgerock.resource.core.routing;
+package org.forgerock.http;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.forgerock.resource.core.routing.RoutingMode.EQUALS;
-import static org.forgerock.resource.core.routing.RoutingMode.STARTS_WITH;
+import static org.forgerock.http.RoutingMode.EQUALS;
+import static org.forgerock.http.RoutingMode.STARTS_WITH;
 import static org.mockito.Mockito.mock;
 
-import org.forgerock.resource.core.Context;
+import org.forgerock.http.Context;
+import org.forgerock.http.RouteMatcher;
+import org.forgerock.http.RoutingMode;
+import org.forgerock.http.UriRoute;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
- * Tests {@link org.forgerock.resource.core.routing.UriRoute}.
+ * Tests {@link org.forgerock.http.UriRoute}.
  */
 @SuppressWarnings("javadoc")
 public final class UriRouteTest {

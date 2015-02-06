@@ -14,7 +14,7 @@
  * Copyright 2012-2014 ForgeRock AS.
  */
 
-package org.forgerock.resource.core;
+package org.forgerock.http;
 
 import org.forgerock.util.Reject;
 

@@ -22,16 +22,17 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.forgerock.http.Context;
 import org.forgerock.http.Handler;
 import org.forgerock.http.HttpContext;
 import org.forgerock.http.Request;
 import org.forgerock.http.Response;
 import org.forgerock.http.ResponseException;
-import org.forgerock.resource.core.Context;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 

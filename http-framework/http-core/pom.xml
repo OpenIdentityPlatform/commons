@@ -28,11 +28,6 @@
   <name>HTTP Core library</name>
   <dependencies>
     <dependency>
-      <groupId>org.forgerock.http</groupId>
-      <artifactId>chf-resource-core</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
       <groupId>org.forgerock.commons</groupId>
       <artifactId>forgerock-util</artifactId>
     </dependency>

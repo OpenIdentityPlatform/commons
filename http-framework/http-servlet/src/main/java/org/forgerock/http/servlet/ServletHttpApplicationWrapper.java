@@ -19,11 +19,12 @@ package org.forgerock.http.servlet;
 import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
+import org.forgerock.http.UriRouter;
 import org.forgerock.http.io.Buffer;
-import org.forgerock.http.routing.UriRouter;
 import org.forgerock.util.Factory;
 
 import javax.servlet.ServletContext;
+
 import java.util.Collections;
 import java.util.Map;
 import java.util.regex.Pattern;

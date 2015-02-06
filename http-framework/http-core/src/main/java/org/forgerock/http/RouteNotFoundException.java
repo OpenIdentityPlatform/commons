@@ -14,34 +14,24 @@
  * Copyright 2012-2014 ForgeRock AS.
  */
 
-package org.forgerock.resource.core;
+package org.forgerock.http;
 
-import java.util.UUID;
+import java.io.IOException;
 
 /**
- * A {@link Context} which has an an ID but no parent. All request context
- * chains are terminated by a root context as the top-most context.
+ * An exception that is thrown when a route to a specified URI cannot be found.
  *
  * @since 1.0.0
  */
-public final class RootContext extends AbstractContext {
+public class RouteNotFoundException extends IOException {
 
-    private static final ThreadLocal<String> ID_CACHE = new ThreadLocal<String>() {
-
-        private final String baseId = UUID.randomUUID().toString();
-        private long count = 0;
-
-        @Override
-        protected String initialValue() {
-            return baseId + count;
-        }
-    };
-
-    public RootContext() {
-        this(ID_CACHE.get());
-    }
-
-    public RootContext(String id) {
-        super(id, "root", null); // No parent
+    /**
+     * Constructs a new exception with the specified detail message.
+     *
+     * @param message
+     *            The detail message.
+     */
+    public RouteNotFoundException(final String message) {
+        super(message);
     }
 }

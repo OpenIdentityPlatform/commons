@@ -14,12 +14,9 @@
  * Copyright 2012-2014 ForgeRock AS.
  */
 
-package org.forgerock.resource.core.routing;
+package org.forgerock.http;
 
 import java.util.Collections;
-
-import org.forgerock.resource.core.Context;
-import org.forgerock.resource.core.ServerContext;
 
 /**
  * An opaque handle for a route which has been registered in a {@link AbstractUriRouter

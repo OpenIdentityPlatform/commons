@@ -14,22 +14,11 @@
  * Copyright 2012-2014 ForgeRock AS.
  */
 
-package org.forgerock.http.routing;
+package org.forgerock.http;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.forgerock.http.Handler;
-import org.forgerock.http.NotFoundException;
-import org.forgerock.http.Request;
-import org.forgerock.http.Response;
-import org.forgerock.http.ResponseException;
-import org.forgerock.resource.core.routing.AbstractUriRouter;
-import org.forgerock.resource.core.Context;
-import org.forgerock.resource.core.ResourceName;
-import org.forgerock.resource.core.routing.RouteMatcher;
-import org.forgerock.resource.core.routing.RouteNotFoundException;
-import org.forgerock.resource.core.routing.RouterContext;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 

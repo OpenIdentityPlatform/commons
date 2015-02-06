@@ -22,9 +22,6 @@ import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.List;
 
-import org.forgerock.resource.core.Context;
-import org.forgerock.resource.core.ServerContext;
-
 /**
  * ClientInfo gives easy access to client-related information that are available into the request.
  * Supported data includes:

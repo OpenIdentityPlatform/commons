@@ -14,12 +14,10 @@
  * Copyright 2014 ForgeRock AS.
  */
 
-package org.forgerock.resource.core.routing;
+package org.forgerock.http;
 
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-
-import org.forgerock.resource.core.Context;
 
 /**
  * A request handler which routes requests using URI template matching against
@@ -46,7 +44,7 @@ import org.forgerock.resource.core.Context;
  *
  * A request handler receiving a routed request may access the associated
  * route's URI template variables via
- * {@link org.forgerock.resource.core.routing.RouterContext#getUriTemplateVariables()}. For example, a request
+ * {@link org.forgerock.http.RouterContext#getUriTemplateVariables()}. For example, a request
  * handler processing requests for the route users/{userId} may obtain the value
  * of {@code userId} as follows:
  *
@@ -56,7 +54,7 @@ import org.forgerock.resource.core.Context;
  *
  * During routing resource names are "relativized" by removing the leading path
  * components which matched the template. See the documentation for
- * {@link org.forgerock.resource.core.routing.RouterContext} for more information.
+ * {@link org.forgerock.http.RouterContext} for more information.
  * <p>
  * <b>NOTE:</b> for simplicity this implementation only supports a small sub-set
  * of the functionality described in RFC 6570.

@@ -14,18 +14,15 @@
  * Copyright 2012-2014 ForgeRock AS.
  */
 
-package org.forgerock.resource.core.routing;
+package org.forgerock.http;
 
 import static org.forgerock.util.Reject.checkNotNull;
 
 import java.util.Collections;
 import java.util.Map;
 
-import org.forgerock.resource.core.Context;
-import org.forgerock.resource.core.ServerContext;
-
 /**
- * A {@link org.forgerock.resource.core.Context} which is created when a request has been routed. The
+ * A {@link org.forgerock.http.Context} which is created when a request has been routed. The
  * context includes:
  * <ul>
  * <li>the portion of the request URI which matched the URI template

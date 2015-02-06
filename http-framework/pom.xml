@@ -35,7 +35,6 @@
   </description>
   <url>http://commons.forgerock.org/forgerock-http-framework</url>
   <modules>
-    <module>resource-core</module>
     <module>http-core</module>
     <module>http-servlet</module>
     <module>http-test</module>

@@ -14,12 +14,12 @@
  * Copyright 2012-2014 ForgeRock AS.
  */
 
-package org.forgerock.resource.core;
+package org.forgerock.http;
 
 import static org.forgerock.util.Reject.checkNotNull;
 
-import org.forgerock.resource.core.AbstractContext;
-import org.forgerock.resource.core.Context;
+import org.forgerock.http.AbstractContext;
+import org.forgerock.http.Context;
 
 /**
  * The context associated with a request currently being processed by a {@code Handler}

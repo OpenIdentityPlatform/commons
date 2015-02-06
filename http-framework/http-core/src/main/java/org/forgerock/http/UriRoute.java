@@ -14,11 +14,11 @@
  * Copyright 2012-2014 ForgeRock AS.
  */
 
-package org.forgerock.resource.core.routing;
+package org.forgerock.http;
 
-import static org.forgerock.resource.core.ResourceName.urlDecode;
-import static org.forgerock.resource.core.routing.RoutingMode.EQUALS;
-import static org.forgerock.resource.core.routing.RoutingMode.STARTS_WITH;
+import static org.forgerock.http.ResourceName.urlDecode;
+import static org.forgerock.http.RoutingMode.EQUALS;
+import static org.forgerock.http.RoutingMode.STARTS_WITH;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -27,8 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.forgerock.resource.core.Context;
 
 /**
  * An opaque handle for a route which has been registered in a {@link AbstractUriRouter
