@@ -330,6 +330,15 @@ button.button, a.button, input.button {
         .box-shadow(0, 0, 0, 0);
     }
 
+    &.danger {
+        border: 1px solid darken(@color-danger, 10%);
+        .linear-gradient(top, @color-danger, darken(@color-danger, 10%));
+        &:hover {
+            .linear-gradient(top, lighten(@color-danger, @button-hover-lightness), @color-danger);
+            .box-shadow(0, 0, 0, 0);
+        }
+    }
+
     &.choosable {
         color: inherit;
         font-weight: normal;
