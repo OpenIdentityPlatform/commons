@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource.http;
@@ -38,16 +38,10 @@ public class OptionsHandler implements Filter {
 
     /**
      * Handles all OPTION requests to CREST resources, all other request methods are handled by the {@link Handler}.
-     *
-     * @param context {@inheritDoc}
-     * @param request {@inheritDoc}
-     * @param next {@inheritDoc}
-     * @return {@inheritDoc}
-     * @throws ResponseException {@inheritDoc}
      */
     @Override
-    public Promise<Response, ResponseException> filter(Context context, Request request, Handler next)
-            throws ResponseException {
+    public Promise<Response, ResponseException> filter(Context context, Request request,
+            Handler next) {
         if ("OPTIONS".equals(request.getMethod())) {
             Response response = new Response().setStatusAndReason(200);
             response.getHeaders().put("Allow",
