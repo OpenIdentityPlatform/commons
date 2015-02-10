@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.http;
@@ -44,7 +44,8 @@ class SessionFilter implements Filter {
     }
 
     @Override
-    public Promise<Response, ResponseException> filter(Context context, Request request, Handler next) throws ResponseException {
+    public Promise<Response, ResponseException> filter(Context context, Request request,
+            Handler next) {
         final HttpContext httpContext = context.asContext(HttpContext.class);
         final Session oldSession = httpContext.getSession();
         httpContext.setSession(sessionManager.load(request));

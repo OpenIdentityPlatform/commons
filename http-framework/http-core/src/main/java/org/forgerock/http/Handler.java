@@ -13,7 +13,7 @@
  *
  * Copyright 2009 Sun Microsystems Inc.
  * Portions Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2014 ForgeRock AS.
+ * Portions Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.http;
@@ -32,16 +32,15 @@ public interface Handler {
      * Called to request the handler respond to the request.
      * <p>
      * A handler that doesn't hand-off an exchange to another handler downstream
-     * is responsible for creating the response and returning it via the
-     * response handler or by throwing a {@code ResponseException}.
+     * is responsible for creating the response and returning it using a
+     * {@code Promise}.
      *
      * @param context
      *            The request context.
      * @param request
      *            The request.
-     * @throws ResponseException
-     *             If an exception occurs that prevents handling of the request.
+     * @return A {@code Promise} representing the response to be returned to the
+     *         client.
      */
-    Promise<Response, ResponseException> handle(Context context, Request request)
-            throws ResponseException;
+    Promise<Response, ResponseException> handle(Context context, Request request);
 }

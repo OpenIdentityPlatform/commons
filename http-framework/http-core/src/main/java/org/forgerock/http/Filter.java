@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.http;
@@ -34,8 +34,8 @@ public interface Filter {
      * handler, and instead handle the request itself. It can achieve this by
      * merely avoiding a call to {@code next.handle(context, request, handler)}
      * and creating its own response object. The filter is also at liberty to
-     * replace a response with another of its own by wrapping and intercepting
-     * the response handler.
+     * replace a response with another of its own by intercepting the response
+     * returned by the next handler.
      *
      * @param context
      *            The request context.
@@ -44,9 +44,8 @@ public interface Filter {
      * @param next
      *            The next filter or handler in the chain to handle the
      *            exchange.
-     * @throws ResponseException
-     *             If an exception occurs that prevents handling of the request.
+     * @return A {@code Promise} representing the response to be returned to the
+     *         client.
      */
-    Promise<Response, ResponseException> filter(Context context, Request request, Handler next)
-            throws ResponseException;
+    Promise<Response, ResponseException> filter(Context context, Request request, Handler next);
 }

@@ -176,54 +176,41 @@ public final class HttpFrameworkServlet extends HttpServlet {
 
         // handle request
         final ServletSynchronizer sync = adapter.createServletSynchronizer(req, resp);
-        try {
-            final Promise<Response, ResponseException> promise = handler.handle(context, request)
-                    .onSuccess(new SuccessHandler<Response>() {
-                        @Override
-                        public void handleResult(Response response) {
-                            try {
-                                writeResponse(httpContext, resp, response);
-                            } catch (IOException e) {
-                                log("Failed to write success response", e);
-                            } finally {
-                                closeSilently(request, response);
-                                sync.signalAndComplete();
-                            }
+        final Promise<Response, ResponseException> promise =
+                handler.handle(context, request).onSuccess(new SuccessHandler<Response>() {
+                    @Override
+                    public void handleResult(Response response) {
+                        try {
+                            writeResponse(httpContext, resp, response);
+                        } catch (IOException e) {
+                            log("Failed to write success response", e);
+                        } finally {
+                            closeSilently(request, response);
+                            sync.signalAndComplete();
                         }
-                    })
-                    .onFailure(new FailureHandler<ResponseException>() {
-                        @Override
-                        public void handleError(ResponseException error) {
-                            try {
-                                writeResponse(httpContext, resp, error.getResponse());
-                            } catch (IOException e) {
-                                log("Failed to write success response", e);
-                            } finally {
-                                closeSilently(request, error.getResponse());
-                                sync.signalAndComplete();
-                            }
+                    }
+                }).onFailure(new FailureHandler<ResponseException>() {
+                    @Override
+                    public void handleError(ResponseException error) {
+                        try {
+                            writeResponse(httpContext, resp, error.getResponse());
+                        } catch (IOException e) {
+                            log("Failed to write success response", e);
+                        } finally {
+                            closeSilently(request, error.getResponse());
+                            sync.signalAndComplete();
                         }
-                    });
+                    }
+                });
 
-            sync.setAsyncListener(new Runnable() {
-                @Override
-                public void run() {
-                    promise.cancel(true);
-                    //TODO is this needed? Not sure if the latch would have been freed by now.
-                    sync.signalAndComplete();
-                }
-            });
-
-        } catch (ResponseException error) {
-            try {
-                writeResponse(httpContext, resp, error.getResponse());
-            } catch (IOException e) {
-                log("Failed to write success response", e);
-            } finally {
-                closeSilently(request, error.getResponse());
+        sync.setAsyncListener(new Runnable() {
+            @Override
+            public void run() {
+                promise.cancel(true);
+                //TODO is this needed? Not sure if the latch would have been freed by now.
                 sync.signalAndComplete();
             }
-        }
+        });
 
         try {
             sync.awaitIfNeeded();

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2014 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.http;
@@ -58,7 +58,7 @@ public final class UriRouter extends AbstractUriRouter<UriRouter, Handler> imple
     }
 
     @Override
-    public Promise<Response, ResponseException> handle(Context context, Request request) throws ResponseException {
+    public Promise<Response, ResponseException> handle(Context context, Request request) {
         try {
             RouteMatcher<Handler> bestMatch = getBestRoute(context, request);
             return bestMatch.getHandler().handle(bestMatch.getContext(), request);
