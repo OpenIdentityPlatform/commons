@@ -252,8 +252,8 @@ define([
             });
 
             QUnit.asyncTest("Routes with special characters in parameter values (CUI-51)", function () {
-                var manySpecialCharacters = "/!@#$%",
-                    additionalSpecialCharacters = "a%b",
+                var manySpecialCharacters = "/!@?#$%",
+                    additionalSpecialCharacters = "a%?b",
                     loginView = require("org/forgerock/commons/ui/common/LoginView"),
                     stub = sinon.stub(loginView, "render", function (args, callback) {
                         QUnit.equal(args[0], manySpecialCharacters, "Characters properly passed to first arg of render function");
