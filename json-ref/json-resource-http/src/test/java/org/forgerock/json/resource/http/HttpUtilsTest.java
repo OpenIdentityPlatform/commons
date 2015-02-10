@@ -27,8 +27,8 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 
-import org.forgerock.http.Response;
 import org.forgerock.http.header.ContentTypeHeader;
+import org.forgerock.http.protocol.Response;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.PatchOperation;
@@ -55,7 +55,7 @@ public class HttpUtilsTest {
     private static final String REQUEST_CONTENT_TYPE =
             "multipart/form-data; boundary=kwkIqb-fsdbtcNpB4dJ_Xqf1-3b0Hp_VF9D0vsgL";
 
-    private org.forgerock.http.Request request;
+    private org.forgerock.http.protocol.Request request;
 
     private byte[] requestInputStreamData;
 
@@ -126,7 +126,7 @@ public class HttpUtilsTest {
         this.requestInputStreamData = requestInputStreamData.toByteArray();
     }
 
-    private void setUpRequestMock(org.forgerock.http.Request request, String contentType)
+    private void setUpRequestMock(org.forgerock.http.protocol.Request request, String contentType)
             throws IOException {
         request.getHeaders().putSingle(ContentTypeHeader.NAME, contentType);
         request.setEntity(requestInputStreamData);
@@ -292,7 +292,7 @@ public class HttpUtilsTest {
         };
     }
 
-    private void setupPrepareResponseMocks(org.forgerock.http.Request httpRequest,
+    private void setupPrepareResponseMocks(org.forgerock.http.protocol.Request httpRequest,
                                            final String method,
                                            final String contentType) throws URISyntaxException {
         httpRequest.setMethod(method);
@@ -304,7 +304,7 @@ public class HttpUtilsTest {
     public void testShouldSetResponseContentType(final String method, final String contentType, final String result)
             throws Exception {
         //given
-        org.forgerock.http.Request httpRequest = newRequest();
+        org.forgerock.http.protocol.Request httpRequest = newRequest();
 
         setupPrepareResponseMocks(httpRequest, method, contentType);
 
@@ -324,7 +324,7 @@ public class HttpUtilsTest {
     public void testShouldThrowBadRequestExceptionOnInvalidContentTypeForGet()
             throws Exception {
         //given
-        org.forgerock.http.Request httpRequest = newRequest();
+        org.forgerock.http.protocol.Request httpRequest = newRequest();
 
         setupPrepareResponseMocks(httpRequest, HttpUtils.METHOD_GET, "unknown content type");
 
@@ -351,7 +351,7 @@ public class HttpUtilsTest {
     public void testShouldSetResponseContentTypeForPostMethod(final String method, final String contentType, final String result)
             throws Exception {
         //given
-        org.forgerock.http.Request httpRequest = newRequest();
+        org.forgerock.http.protocol.Request httpRequest = newRequest();
 
         setupPrepareResponseMocks(httpRequest, method, contentType);
 
