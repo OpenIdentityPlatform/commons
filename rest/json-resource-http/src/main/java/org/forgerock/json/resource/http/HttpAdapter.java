@@ -27,12 +27,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.forgerock.http.Context;
-import org.forgerock.http.Form;
 import org.forgerock.http.Handler;
-import org.forgerock.http.Response;
-import org.forgerock.http.ResponseException;
 import org.forgerock.http.RouterContext;
 import org.forgerock.http.header.ContentTypeHeader;
+import org.forgerock.http.protocol.Form;
+import org.forgerock.http.protocol.Response;
+import org.forgerock.http.protocol.ResponseException;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.AcceptAPIVersion;
 import org.forgerock.json.resource.AcceptAPIVersionContext;
@@ -123,7 +123,7 @@ public final class HttpAdapter implements Handler {
     public HttpAdapter(ConnectionFactory connectionFactory, final Context parentContext) {
         this(connectionFactory, new HttpContextFactory() {
             @Override
-            public Context createContext(Context parent, org.forgerock.http.Request request) throws ResourceException {
+            public Context createContext(Context parent, org.forgerock.http.protocol.Request request) throws ResourceException {
                 return parentContext;
             }
         });
@@ -154,7 +154,7 @@ public final class HttpAdapter implements Handler {
      * @return Promise containing a {@code Response} or {@code ResponseException}.
      */
     @Override
-    public Promise<Response, ResponseException> handle(Context context, org.forgerock.http.Request request) {
+    public Promise<Response, ResponseException> handle(Context context, org.forgerock.http.protocol.Request request) {
 
         // Dispatch the request based on method, taking into account \
         // method override header.
@@ -175,7 +175,7 @@ public final class HttpAdapter implements Handler {
         }
     }
 
-    Promise<Response, ResponseException> doDelete(Context context, org.forgerock.http.Request req) {
+    Promise<Response, ResponseException> doDelete(Context context, org.forgerock.http.protocol.Request req) {
         try {
             // Parse out the required API versions.
             final AcceptAPIVersion acceptVersion = parseAcceptAPIVersion(req);
@@ -205,7 +205,7 @@ public final class HttpAdapter implements Handler {
         }
     }
 
-    Promise<Response, ResponseException> doGet(Context context, org.forgerock.http.Request req) {
+    Promise<Response, ResponseException> doGet(Context context, org.forgerock.http.protocol.Request req) {
         try {
             // Parse out the required API versions.
             final AcceptAPIVersion acceptVersion = parseAcceptAPIVersion(req);
@@ -324,7 +324,7 @@ public final class HttpAdapter implements Handler {
         }
     }
 
-    Promise<Response, ResponseException> doPatch(Context context, org.forgerock.http.Request req) {
+    Promise<Response, ResponseException> doPatch(Context context, org.forgerock.http.protocol.Request req) {
         try {
             // Parse out the required API versions.
             final AcceptAPIVersion acceptVersion = parseAcceptAPIVersion(req);
@@ -361,7 +361,7 @@ public final class HttpAdapter implements Handler {
         }
     }
 
-    Promise<Response, ResponseException> doPost(Context context, org.forgerock.http.Request req) {
+    Promise<Response, ResponseException> doPost(Context context, org.forgerock.http.protocol.Request req) {
         try {
             // Parse out the required API versions.
             final AcceptAPIVersion acceptVersion = parseAcceptAPIVersion(req);
@@ -419,7 +419,7 @@ public final class HttpAdapter implements Handler {
         }
     }
 
-    Promise<Response, ResponseException> doPut(Context context, org.forgerock.http.Request req) {
+    Promise<Response, ResponseException> doPut(Context context, org.forgerock.http.protocol.Request req) {
         try {
             // Parse out the required API versions.
             final AcceptAPIVersion acceptVersion = parseAcceptAPIVersion(req);
@@ -489,7 +489,7 @@ public final class HttpAdapter implements Handler {
         }
     }
 
-    private Promise<Response, ResponseException> doRequest(Context context, org.forgerock.http.Request req,
+    private Promise<Response, ResponseException> doRequest(Context context, org.forgerock.http.protocol.Request req,
             Response resp, AcceptAPIVersion acceptVersion, Request request) throws Exception {
 
         Context ctx = newRequestContext(context, req, acceptVersion);
@@ -511,7 +511,7 @@ public final class HttpAdapter implements Handler {
     /**
      * Gets the raw (still url-encoded) resource name from the request. Removes leading and trailing forward slashes.
      */
-    private ResourceName getResourceName(Context context, org.forgerock.http.Request req) throws ResourceException {
+    private ResourceName getResourceName(Context context, org.forgerock.http.protocol.Request req) throws ResourceException {
         try {
             if (context.containsContext(RouterContext.class)) {
                 ResourceName reqName = ResourceName.valueOf(req.getUri().getRawPath());
@@ -541,7 +541,7 @@ public final class HttpAdapter implements Handler {
         return matchedUri;
     }
 
-    private Context newRequestContext(Context context, org.forgerock.http.Request req, AcceptAPIVersion acceptVersion)
+    private Context newRequestContext(Context context, org.forgerock.http.protocol.Request req, AcceptAPIVersion acceptVersion)
             throws ResourceException {
         final Context parent = contextFactory.createContext(context, req);
         return new AdviceContext(
@@ -572,7 +572,7 @@ public final class HttpAdapter implements Handler {
         }
     }
 
-    private void preprocessRequest(org.forgerock.http.Request req) throws ResourceException {
+    private void preprocessRequest(org.forgerock.http.protocol.Request req) throws ResourceException {
         // TODO: check Accept (including charset parameter) and Accept-Charset headers
 
         // Check content-type.
@@ -612,7 +612,7 @@ public final class HttpAdapter implements Handler {
      * @throws BadRequestException
      *         If an invalid version is requested
      */
-    private AcceptAPIVersion parseAcceptAPIVersion(org.forgerock.http.Request req) throws BadRequestException {
+    private AcceptAPIVersion parseAcceptAPIVersion(org.forgerock.http.protocol.Request req) throws BadRequestException {
         // Extract out the protocol and resource versions.
         final String versionString = req.getHeaders().getFirst(ACCEPT_API_VERSION);
 

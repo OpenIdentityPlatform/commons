@@ -30,10 +30,10 @@ import java.util.Map;
 import com.fasterxml.jackson.core.JsonGenerator;
 
 import org.forgerock.http.Context;
-import org.forgerock.http.Response;
-import org.forgerock.http.ResponseException;
 import org.forgerock.http.RouterContext;
 import org.forgerock.http.header.ContentTypeHeader;
+import org.forgerock.http.protocol.Response;
+import org.forgerock.http.protocol.ResponseException;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.AdviceContext;
@@ -64,12 +64,12 @@ final class RequestRunner implements RequestVisitor<Promise<Response, ResponseEx
     // Connection set on handleResult(Connection).
     private Connection connection = null;
     private final Context context;
-    private final org.forgerock.http.Request httpRequest;
+    private final org.forgerock.http.protocol.Request httpRequest;
     private final Response httpResponse;
     private final Request request;
     private final JsonGenerator writer;
 
-    RequestRunner(Context context, Request request, org.forgerock.http.Request httpRequest, Response httpResponse)
+    RequestRunner(Context context, Request request, org.forgerock.http.protocol.Request httpRequest, Response httpResponse)
             throws Exception {
         this.context = context;
         this.request = request;
