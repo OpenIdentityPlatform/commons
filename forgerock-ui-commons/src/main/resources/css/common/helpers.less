@@ -12,7 +12,7 @@ table, caption, tbody, tfoot, thead, tr, th, td {
     font: inherit;
     vertical-align: baseline;
 }
-html,body { 
+html,body {
     height: 100%;
 }
 body {
@@ -62,7 +62,7 @@ h2 {
     line-height: 25px;
     margin-bottom: 15px;
   }
-  
+
 }
 
 h3 {
@@ -193,6 +193,16 @@ a.img-close {
     background-repeat: @background-repeat;
     background-position: @background-position;
 }
+
+.hideSearchCloseBtn {
+    input[type=text]::-ms-clear {  display: none; width : 0; height: 0; }
+    input[type=text]::-ms-reveal {  display: none; width : 0; height: 0; }
+    input[type="search"]::-webkit-search-decoration,
+    input[type="search"]::-webkit-search-cancel-button,
+    input[type="search"]::-webkit-search-results-button,
+    input[type="search"]::-webkit-search-results-decoration { display: none; }
+}
+
 
 .column-layout {
     width: 100%;
@@ -335,7 +345,7 @@ a.img-close {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
     content: "";
     position: absolute;
-    z-index: -2; 
+    z-index: -2;
 }
 
 #default-base .content-bg:before{
@@ -383,7 +393,7 @@ a.img-close {
 
 
 #login-container {
-    
+
     label {
         text-align:@login-container-label-align;
     }
@@ -485,11 +495,11 @@ a.img-close {
 .glyph-icon-signal {
     background-position: -408px 0;
 }
-.glyph-icon-star { 
-    background-position: -120px 0; 
+.glyph-icon-star {
+    background-position: -120px 0;
 }
-.glyph-icon-star-empty { 
-    background-position: -144px 0; 
+.glyph-icon-star-empty {
+    background-position: -144px 0;
 }
 .glyph-icon-filter {
     background-position: -408px -138px;

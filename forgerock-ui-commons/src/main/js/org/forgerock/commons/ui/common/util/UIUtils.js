@@ -834,53 +834,79 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         return responseMessage.indexOf(string) > -1;
     };
 
+    /**
+    * Takes a string and checks if there is a matching url parameter.
+    * @returns {String} parameter or null
+    */
+    obj.getParamByName = function(string){
+        var urlParams = obj.convertCurrentUrlToJSON().params;
+        if (urlParams && urlParams.hasOwnProperty(string)) {
+            return urlParams[string];
+        } else {
+            return null;
+        }
+    };
+
     // Registering global mixins
 
     _.mixin({
 
-        /*  findByValues takes a collection and returns a subset made up of objects where the given property name matches a value in the list.
-            For example:
-
-            var collections = [
-                {id: 1, stack: 'am'},
-                {id: 2, stack: 'dj'},
-                {id: 3, stack: 'idm'},
-                {id: 4, stack: 'api'},
-                {id: 5, stack: 'rest'}
-            ];
-
-            var filtered = _.findByValues(collections, "id", [1,3,4]);
-
-            filtered = [
-                {id: 1, stack: 'am'},
-                {id: 3, stack: 'idm'},
-                {id: 4, stack: 'api'}
-            ]
-
-         */
-
+        /**
+        * findByValues takes a collection and returns a subset made up of objects where the given property name matches a value in the list.
+        * @returns {Array} subset of made up of {Object} where there is no match between the given property name and the values in the list.
+        * @example
+        *
+        *    var collections = [
+        *        {id: 1, stack: 'am'},
+        *        {id: 2, stack: 'dj'},
+        *        {id: 3, stack: 'idm'},
+        *        {id: 4, stack: 'api'},
+        *        {id: 5, stack: 'rest'}
+        *    ];
+        *
+        *    var filtered = _.findByValues(collections, "id", [1,3,4]);
+        *
+        *    filtered = [
+        *        {id: 1, stack: 'am'},
+        *        {id: 3, stack: 'idm'},
+        *        {id: 4, stack: 'api'}
+        *    ]
+        *
+        */
         'findByValues': function(collection, property, values) {
             return _.filter(collection, function(item) {
                 return _.contains(values, item[property]);
             });
         },
 
-        /*  removeByValues takes a collection and returns a subset made up of objects where there is no match between the given property name and the values in the list.
-            For example:
-
-            var filtered = _.removeByValues(collections, "id", [1,3,4]);
-
-            filtered = [
-                {id: 2, stack: 'dj'},
-                {id: 5, stack: 'rest'}
-            ]
-
-         */
+        /**
+        * Returns subset array from a collection
+        * @returns {Array} subset of made up of {Object} where there is no match between the given property name and the values in the list.
+        * @example
+        *
+        *    var filtered = _.removeByValues(collections, "id", [1,3,4]);
+        *
+        *    filtered = [
+        *        {id: 2, stack: 'dj'},
+        *        {id: 5, stack: 'rest'}
+        *    ]
+        *
+        */
         'removeByValues': function(collection, property, values) {
             return _.reject(collection, function(item) {
                 return _.contains(values, item[property]);
             });
+        },
+
+        /**
+        * isUrl checks to see if string is a valid URL
+        * @returns {Boolean}
+        */
+        'isUrl': function(string){
+            var regexp = /(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
+            return regexp.test(string);
         }
+
     });
 
     return obj;
