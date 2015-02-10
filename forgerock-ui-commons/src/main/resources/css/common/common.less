@@ -10,7 +10,7 @@ html {
 
 body {
   background-color: @background-color;
-  background-image: url("../images/forgerock-background.png");
+  //background-image: url("../images/forgerock-background.png");
   background-position: right top;
   background-repeat: no-repeat;
   margin-bottom: @footer-height;
@@ -32,6 +32,10 @@ h2, h3 {
 
 table {
   font-size: 14px;
+}
+
+img {
+  width:100%;
 }
 
 #content {
@@ -337,7 +341,8 @@ hr {
   }
 }
 
-#dialogs .validationRules {
+#dialogs .validationRules,
+#dialogs .security-question {
   margin-left:45px;
 }
 
@@ -761,6 +766,25 @@ hr {
 
 .page-header h1 {
   font-weight:400;
+}
+
+.page-header .btn-toolbar .btn-group a button {
+  margin-left:10px;
+}
+
+.panel .panel-image {
+  text-align: center;
+  display: table;
+  min-height: 100px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+.panel .panel-image .panel-image-inner {
+  display: table-cell;
+  vertical-align: middle;
+}
+.panel .panel-image img {
+  max-width: 120px;
 }
 
 /* Medium devices (desktops, 992px and up) */
