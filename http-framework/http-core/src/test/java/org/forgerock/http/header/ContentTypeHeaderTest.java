@@ -20,9 +20,9 @@ import static org.forgerock.http.header.ContentTypeHeader.NAME;
 
 import java.nio.charset.Charset;
 
-import org.forgerock.http.Message;
-import org.forgerock.http.Request;
-import org.forgerock.http.Response;
+import org.forgerock.http.protocol.Message;
+import org.forgerock.http.protocol.Request;
+import org.forgerock.http.protocol.Response;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 

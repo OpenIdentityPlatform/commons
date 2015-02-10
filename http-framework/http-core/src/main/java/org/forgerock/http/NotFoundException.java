@@ -16,6 +16,9 @@
 
 package org.forgerock.http;
 
+import org.forgerock.http.protocol.Response;
+import org.forgerock.http.protocol.ResponseException;
+
 /**
  * An exception that is thrown when a specified resource cannot be found.
  */

@@ -13,7 +13,7 @@
  *
  * Copyright 2014 ForgeRock AS.
  */
-package org.forgerock.http;
+package org.forgerock.http.protocol;
 
 import java.io.IOException;
 

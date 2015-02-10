@@ -14,7 +14,7 @@
  * Copyright 2014-2015 ForgeRock AS.
  */
 
-package org.forgerock.http;
+package org.forgerock.http.protocol;
 
 import static org.forgerock.http.util.Json.*;
 import static org.forgerock.util.Utils.*;

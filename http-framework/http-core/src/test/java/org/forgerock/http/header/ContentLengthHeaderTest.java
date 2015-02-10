@@ -18,8 +18,8 @@ package org.forgerock.http.header;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.http.header.ContentLengthHeader.NAME;
 
-import org.forgerock.http.Request;
-import org.forgerock.http.Response;
+import org.forgerock.http.protocol.Request;
+import org.forgerock.http.protocol.Response;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 

@@ -18,6 +18,9 @@ package org.forgerock.http;
 
 import static org.forgerock.http.HttpApplication.LOGGER;
 
+import org.forgerock.http.protocol.Request;
+import org.forgerock.http.protocol.Response;
+import org.forgerock.http.protocol.ResponseException;
 import org.forgerock.util.Reject;
 import org.forgerock.util.promise.FailureHandler;
 import org.forgerock.util.promise.Promise;

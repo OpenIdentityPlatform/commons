@@ -17,7 +17,7 @@
 
 package org.forgerock.http.header;
 
-import org.forgerock.http.Header;
+import org.forgerock.http.protocol.Header;
 
 /**
  * An undecoded HTTP message header.

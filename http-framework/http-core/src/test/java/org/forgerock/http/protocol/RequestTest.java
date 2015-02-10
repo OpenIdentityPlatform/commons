@@ -9,20 +9,24 @@
  * When distributing Covered Software, include this CDDL Header Notice in each file and include
  * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
- * information: "Portions copyright [year] [name of copyright owner]".
+ * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2014 ForgeRock AS.
  */
 
-package org.forgerock.http.test;
+package org.forgerock.http.protocol;
 
-import java.net.URI;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.forgerock.http.protocol.Request;
+import org.testng.annotations.Test;
 
-public final class HttpTest {
-
-    public static Request newRequest() {
-        return new Request().setUri(URI.create(""));
+@SuppressWarnings("javadoc")
+public class RequestTest {
+    @Test
+    public void testMethodChaining() {
+        Request request = new Request().setVersion("123").setMethod("GET");
+        assertThat(request.getVersion()).isEqualTo("123");
+        assertThat(request.getMethod()).isEqualTo("GET");
     }
 }

@@ -18,9 +18,9 @@ package org.forgerock.http.spi;
 import java.io.Closeable;
 import java.io.IOException;
 
-import org.forgerock.http.Request;
-import org.forgerock.http.Response;
-import org.forgerock.http.ResponseException;
+import org.forgerock.http.protocol.Request;
+import org.forgerock.http.protocol.Response;
+import org.forgerock.http.protocol.ResponseException;
 import org.forgerock.http.util.Options;
 import org.forgerock.util.promise.Promise;
 

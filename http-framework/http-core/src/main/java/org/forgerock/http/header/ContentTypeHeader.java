@@ -23,8 +23,8 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
-import org.forgerock.http.Header;
-import org.forgerock.http.Message;
+import org.forgerock.http.protocol.Header;
+import org.forgerock.http.protocol.Message;
 
 /**
  * Processes the <strong>{@code Content-Type}</strong> message header. For more

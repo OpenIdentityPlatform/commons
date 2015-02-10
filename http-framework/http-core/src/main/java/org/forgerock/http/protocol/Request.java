@@ -16,11 +16,13 @@
  * Portions Copyright 2011-2015 ForgeRock AS.
  */
 
-package org.forgerock.http;
+package org.forgerock.http.protocol;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+
+import org.forgerock.http.MutableUri;
 
 /**
  * A request message.

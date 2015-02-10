@@ -23,6 +23,8 @@ import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 
+import org.forgerock.http.protocol.Form;
+
 /**
  * Utility class for performing operations on universal resource identifiers.
  */

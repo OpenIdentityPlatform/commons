@@ -11,31 +11,22 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2014 ForgeRock AS.
+ * Copyright 2014 ForgeRock AS.
  */
 
-package org.forgerock.http;
+package org.forgerock.http.protocol;
 
-/**
- * An HTTP message header.
- */
-public interface Header {
+import static org.assertj.core.api.Assertions.assertThat;
 
-    /**
-     * Returns the name of the header, as it would canonically appear within an
-     * HTTP message.
-     *
-     * @return The name of the header, as it would canonically appear within an
-     *         HTTP message.
-     */
-    String getName();
+import org.forgerock.http.protocol.Response;
+import org.testng.annotations.Test;
 
-    /**
-     * Returns the header as a single string value. If the header is empty, this
-     * method will return {@code null}.
-     *
-     * @return The header as a single string value or {@code null} if empty.
-     */
-    String toString();
+@SuppressWarnings("javadoc")
+public class ResponseTest {
+    @Test
+    public void testMethodChaining() {
+        Response response = new Response().setVersion("123").setStatus(200);
+        assertThat(response.getVersion()).isEqualTo("123");
+        assertThat(response.getStatus()).isEqualTo(200);
+    }
 }

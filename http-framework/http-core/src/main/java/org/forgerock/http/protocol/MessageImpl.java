@@ -16,7 +16,7 @@
  * Portions Copyright 2011-2015 ForgeRock AS.
  */
 
-package org.forgerock.http;
+package org.forgerock.http.protocol;
 
 import org.forgerock.http.io.BranchingInputStream;
 

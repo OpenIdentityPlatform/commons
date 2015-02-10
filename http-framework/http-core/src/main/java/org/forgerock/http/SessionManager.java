@@ -18,6 +18,9 @@ package org.forgerock.http;
 
 import java.io.IOException;
 
+import org.forgerock.http.protocol.Request;
+import org.forgerock.http.protocol.Response;
+
 /**
  * <p>A SessionFactory is responsible to create a new type of {@link Session}.</p>
  *

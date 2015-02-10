@@ -22,8 +22,8 @@ import static org.forgerock.http.header.HeaderUtil.parseMultiValuedHeader;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.forgerock.http.Header;
-import org.forgerock.http.Message;
+import org.forgerock.http.protocol.Header;
+import org.forgerock.http.protocol.Message;
 
 /**
  * Processes the <strong>{@code Connection}</strong> message header. For more

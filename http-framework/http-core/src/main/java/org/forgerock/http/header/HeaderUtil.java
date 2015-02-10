@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.forgerock.http.Message;
+import org.forgerock.http.protocol.Message;
 import org.forgerock.http.util.CaseInsensitiveMap;
 
 /**

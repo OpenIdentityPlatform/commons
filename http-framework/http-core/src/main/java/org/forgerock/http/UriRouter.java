@@ -19,6 +19,9 @@ package org.forgerock.http;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.forgerock.http.protocol.Request;
+import org.forgerock.http.protocol.Response;
+import org.forgerock.http.protocol.ResponseException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 

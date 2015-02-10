@@ -14,11 +14,11 @@
  * Copyright 2014-2015 ForgeRock AS.
  */
 
-package org.forgerock.http;
+package org.forgerock.http.protocol;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
-import static org.forgerock.http.Entity.APPLICATION_JSON_CHARSET_UTF_8;
+import static org.forgerock.http.protocol.Entity.APPLICATION_JSON_CHARSET_UTF_8;
 import static org.mockito.AdditionalAnswers.delegatesTo;
 import static org.mockito.Mockito.*;
 
@@ -26,6 +26,8 @@ import org.forgerock.http.header.ContentLengthHeader;
 import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.io.BranchingInputStream;
 import org.forgerock.http.io.IO;
+import org.forgerock.http.protocol.Entity;
+import org.forgerock.http.protocol.Request;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

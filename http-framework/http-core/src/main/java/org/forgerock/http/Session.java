@@ -20,6 +20,8 @@ package org.forgerock.http;
 import java.io.IOException;
 import java.util.Map;
 
+import org.forgerock.http.protocol.Response;
+
 /**
  * An interface for managing attributes across multiple requests from the same user agent.
  * Implementations should expose underlying container session attributes through this

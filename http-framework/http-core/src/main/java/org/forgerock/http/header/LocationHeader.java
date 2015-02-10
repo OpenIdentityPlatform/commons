@@ -18,8 +18,8 @@ package org.forgerock.http.header;
 
 import static org.forgerock.http.header.HeaderUtil.parseSingleValuedHeader;
 
-import org.forgerock.http.Header;
-import org.forgerock.http.Message;
+import org.forgerock.http.protocol.Header;
+import org.forgerock.http.protocol.Message;
 
 /**
  * Processes the <strong>{@code Location}</strong> message header. For more

@@ -21,8 +21,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.URI;
 
-import org.forgerock.http.Form;
 import org.forgerock.http.URIUtil;
+import org.forgerock.http.protocol.Form;
 import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")

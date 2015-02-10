@@ -11,21 +11,11 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.http;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-import org.testng.annotations.Test;
-
-@SuppressWarnings("javadoc")
-public class RequestTest {
-    @Test
-    public void testMethodChaining() {
-        Request request = new Request().setVersion("123").setMethod("GET");
-        assertThat(request.getVersion()).isEqualTo("123");
-        assertThat(request.getMethod()).isEqualTo("GET");
-    }
-}
+/**
+ * Models and manages elements of the Hypertext Transfer Protocol. For more information, see
+ * <a href="http://www.ietf.org/rfc/rfc2616.txt">RFC 2616</a>.
+ */
+package org.forgerock.http.protocol;

@@ -21,9 +21,9 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
-import org.forgerock.http.Cookie;
-import org.forgerock.http.Request;
-import org.forgerock.http.Response;
+import org.forgerock.http.protocol.Cookie;
+import org.forgerock.http.protocol.Request;
+import org.forgerock.http.protocol.Response;
 import org.testng.annotations.Test;
 
 /**

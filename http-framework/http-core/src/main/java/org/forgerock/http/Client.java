@@ -26,6 +26,9 @@ import javax.net.ssl.TrustManager;
 
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.io.IO;
+import org.forgerock.http.protocol.Request;
+import org.forgerock.http.protocol.Response;
+import org.forgerock.http.protocol.ResponseException;
 import org.forgerock.http.spi.ClientImpl;
 import org.forgerock.http.spi.ClientImplProvider;
 import org.forgerock.http.spi.Loader;
