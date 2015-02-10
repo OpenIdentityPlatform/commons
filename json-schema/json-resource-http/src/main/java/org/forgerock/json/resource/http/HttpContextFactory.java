@@ -39,5 +39,5 @@ public interface HttpContextFactory {
      * @throws ResourceException
      *             If a request context could not be obtained.
      */
-    Context createContext(Context parent, org.forgerock.http.Request request) throws ResourceException;
+    Context createContext(Context parent, org.forgerock.http.protocol.Request request) throws ResourceException;
 }

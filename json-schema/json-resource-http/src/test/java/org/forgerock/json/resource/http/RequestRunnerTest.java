@@ -26,7 +26,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import org.forgerock.http.Context;
-import org.forgerock.http.Response;
+import org.forgerock.http.protocol.Response;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.QueryRequest;
@@ -116,7 +116,7 @@ public class RequestRunnerTest {
         // mock everything
         Context context = mock(Context.class);
         QueryRequest request = Requests.newQueryRequest("");
-        org.forgerock.http.Request httpRequest = newRequest();
+        org.forgerock.http.protocol.Request httpRequest = newRequest();
         Connection connection = mock(Connection.class);
 
         // set the expectations

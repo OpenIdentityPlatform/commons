@@ -183,7 +183,7 @@ public final class SecurityContextFactory implements HttpContextFactory {
      *             If one of the attributes was present but had the wrong type.
      */
     @Override
-    public SecurityContext createContext(Context context, org.forgerock.http.Request request)
+    public SecurityContext createContext(Context context, org.forgerock.http.protocol.Request request)
             throws ResourceException {
         return createContext(context);
     }
