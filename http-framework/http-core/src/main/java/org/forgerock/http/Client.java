@@ -16,15 +16,23 @@
 
 package org.forgerock.http;
 
+import static org.forgerock.http.util.Duration.duration;
+
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Map;
 
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.TrustManager;
+
+import org.forgerock.http.io.Buffer;
+import org.forgerock.http.io.IO;
 import org.forgerock.http.spi.ClientImpl;
-import org.forgerock.http.spi.TransportProvider;
-import org.forgerock.http.util.CaseInsensitiveMap;
-import org.forgerock.http.util.Loader;
+import org.forgerock.http.spi.ClientImplProvider;
+import org.forgerock.http.spi.Loader;
+import org.forgerock.http.util.Duration;
+import org.forgerock.http.util.Option;
+import org.forgerock.http.util.Options;
+import org.forgerock.util.Factory;
 import org.forgerock.util.Reject;
 import org.forgerock.util.promise.Promise;
 
@@ -33,23 +41,112 @@ import org.forgerock.util.promise.Promise;
  */
 public final class Client implements Closeable {
 
-    /** Mapping of supported codings to associated providers. */
-    private static final Map<String, TransportProvider> PROVIDERS = Collections
-            .unmodifiableMap(new CaseInsensitiveMap<TransportProvider>(Loader.loadMap(String.class,
-                    TransportProvider.class)));
+    /**
+     * The TCP connect timeout for new HTTP connections. The default timeout is
+     * 10 seconds.
+     */
+    public static final Option<Duration> OPTION_CONNECT_TIMEOUT = Option.of(Duration.class,
+            duration("10 seconds"));
+
+    /**
+     * The TCP socket timeout when waiting for HTTP responses. The default
+     * timeout is 10 seconds.
+     */
+    public static final Option<Duration> OPTION_SO_TIMEOUT = Option.of(Duration.class,
+            duration("10 seconds"));
+
+    /**
+     * Specifies whether HTTP connections should be kept alive an reused for
+     * additional requests. By default, connections will be reused if possible.
+     */
+    public static final Option<Boolean> OPTION_REUSE_CONNECTIONS = Option.withDefault(true);
+
+    /**
+     * Specifies whether requests should be retried if a failure is detected. By
+     * default requests will be retried.
+     */
+    public static final Option<Boolean> OPTION_RETRY_REQUESTS = Option.withDefault(true);
+
+    /**
+     * Specifies the list of key managers that should be used when configuring
+     * SSL/TLS connections. By default the system key manager(s) will be used.
+     */
+    public static final Option<KeyManager[]> OPTION_KEY_MANAGERS = Option.of(KeyManager[].class,
+            null);
+
+    /**
+     * The strategy which should be used for loading the
+     * {@link ClientImplProvider}. By default, the provider will be loaded using
+     * a {@code ServiceLoader}.
+     *
+     * @see Loader#SERVICE_LOADER
+     */
+    public static final Option<Loader> OPTION_LOADER = Option.of(Loader.class,
+            Loader.SERVICE_LOADER);
+
+    /**
+     * Specifies the maximum number of connections that should be pooled by the
+     * HTTP client. At most 64 connections will be cached by default.
+     */
+    public static final Option<Integer> OPTION_MAX_CONNECTIONS = Option.of(Integer.class, 64);
+
+    /**
+     * Specifies the temporary storage that should be used for storing HTTP
+     * responses. By default {@link IO#newTemporaryStorage()} is used.
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static final Option<Factory<Buffer>> OPTION_TEMPORARY_STORAGE = (Option) Option.of(
+            Factory.class, IO.newTemporaryStorage());
+
+    /**
+     * Specifies the list of trust managers that should be used when configuring
+     * SSL/TLS connections. By default the system trust manager(s) will be used.
+     */
+    public static final Option<TrustManager[]> OPTION_TRUST_MANAGERS = Option.of(
+            TrustManager[].class, null);
 
     /** The client implementation. */
     private final ClientImpl impl;
+
+    /**
+     * SSL host name verification policies.
+     */
+    public static enum HostnameVerifier {
+        /**
+         * Accepts any host name (disables host name verification).
+         */
+        ALLOW_ALL,
+
+        /**
+         * Requires that the host name matches the host name presented in the
+         * certificate. Similar to {@code STRICT} except that wild-cards match
+         * any number of sub-domains.
+         */
+        BROWSER_COMPATIBLE,
+
+        /**
+         * Requires that the host name matches the host name presented in the
+         * certificate. Wild-cards only match a single domain.
+         */
+        STRICT;
+    }
+
+    /**
+     * Specifies the SSL host name verification policy. The default is to allow
+     * all host names.
+     */
+    public static final Option<HostnameVerifier> OPTION_HOSTNAME_VERIFIER = Option.of(
+            HostnameVerifier.class, HostnameVerifier.ALLOW_ALL);
 
     /**
      * Creates a new HTTP client using default client options. The returned
      * client must be closed when it is no longer needed by the application.
      *
      * @throws HttpApplicationException
-     *             If no transport provider could be found.
+     *             If no client provider could be found.
      */
     public Client() throws HttpApplicationException {
-        this(new ClientOptions());
+        this(Options.unmodifiableDefaultOptions());
     }
 
     /**
@@ -59,14 +156,19 @@ public final class Client implements Closeable {
      * @param options
      *            The options which will be used to configure the client.
      * @throws HttpApplicationException
-     *             If no transport provider could be found, or if the client
-     *             could not be configured using the provided set of options.
+     *             If no client provider could be found, or if the client could
+     *             not be configured using the provided set of options.
      * @throws NullPointerException
      *             If {@code options} was {@code null}.
      */
-    public Client(final ClientOptions options) throws HttpApplicationException {
+    public Client(final Options options) throws HttpApplicationException {
         Reject.ifNull(options);
-        this.impl = getTransportProvider(options.getTransportProvider()).newClientImpl(options);
+        final Loader loader = options.get(OPTION_LOADER);
+        final ClientImplProvider factory = loader.load(ClientImplProvider.class, options);
+        if (factory == null) {
+            throw new HttpApplicationException("No HTTP client factory found");
+        }
+        this.impl = factory.newClientImpl(options);
     }
 
     /**
@@ -109,19 +211,5 @@ public final class Client implements Closeable {
      */
     public Promise<Response, ResponseException> sendAsync(final Request request) {
         return impl.sendAsync(request);
-    }
-
-    private TransportProvider getTransportProvider(final String name)
-            throws HttpApplicationException {
-        if (PROVIDERS.isEmpty()) {
-            throw new HttpApplicationException("No transport providers found");
-        }
-        if (name == null) {
-            return PROVIDERS.values().iterator().next();
-        }
-        if (PROVIDERS.containsKey(name)) {
-            return PROVIDERS.get(name);
-        }
-        throw new HttpApplicationException("The transport provider '" + name + "' was not found");
     }
 }

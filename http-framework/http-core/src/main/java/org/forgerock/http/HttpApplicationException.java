@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.http;
@@ -34,10 +34,22 @@ public class HttpApplicationException extends Exception {
     }
 
     /**
+     * Constructs a new exception with the specified cause.
+     *
+     * @param cause
+     *            The exception which caused this exception to be thrown.
+     */
+    public HttpApplicationException(Throwable cause) {
+        super(cause);
+    }
+
+    /**
      * Constructs a new exception with the specified detail message and cause.
      *
-     * @param  message The detail message.
-     * @param  cause The exception which caused this exception to be thrown.
+     * @param message
+     *            The detail message.
+     * @param cause
+     *            The exception which caused this exception to be thrown.
      */
     public HttpApplicationException(String message, Throwable cause) {
         super(message, cause);

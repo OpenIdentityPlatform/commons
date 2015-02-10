@@ -21,17 +21,15 @@ import java.io.IOException;
 import org.forgerock.http.Request;
 import org.forgerock.http.Response;
 import org.forgerock.http.ResponseException;
+import org.forgerock.http.util.Options;
 import org.forgerock.util.promise.Promise;
 
 /**
- * Interface for all classes that actually implement {@code Client}.
- * <p>
- * An implementation class is provided by a {@code TransportProvider}.
- * <p>
- * The implementation can be automatically loaded using the
- * {@code java.util.ServiceLoader} facility if its provider extending
- * {@code TransportProvider} is declared in the provider-configuration file
- * {@code META-INF/services/org.forgerock.http.spi.TransportProvider}.
+ * An SPI interface for HTTP {@code Client} implementations. A
+ * {@link ClientImplProvider} is loaded during construction of a new HTTP
+ * {@link org.forgerock.http.Client Client}. The first available provider is
+ * selected and its {@link ClientImplProvider#newClientImpl(Options)} method
+ * invoked in order to construct and configure a new {@link ClientImpl}.
  */
 public interface ClientImpl extends Closeable {
 

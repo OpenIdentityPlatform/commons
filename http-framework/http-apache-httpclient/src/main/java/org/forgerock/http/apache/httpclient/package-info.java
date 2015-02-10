@@ -14,14 +14,8 @@
  * Copyright 2014 ForgeRock AS.
  */
 
-package org.forgerock.http;
-
 /**
- * Common options for HTTP {@link Client clients}.
+ * Provides {@link org.forgerock.http.Client client} client integration with
+ * Apache HttpComponents HttpClient.
  */
-public final class ClientOptions {
-
-    public String getTransportProvider() {
-        return null;
-    }
-}
+package org.forgerock.http.apache.httpclient;

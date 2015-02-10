@@ -16,29 +16,28 @@
 
 package org.forgerock.http.spi;
 
-import org.forgerock.http.ClientOptions;
 import org.forgerock.http.HttpApplicationException;
-import org.forgerock.http.util.Indexed;
+import org.forgerock.http.util.Options;
 
 /**
- * Interface for transport providers, which provide implementations of HTTP
- * {@code Client}s using a specific transport.
- * <p>
- * A transport provider must be declared in the provider-configuration file
- * {@code META-INF/services/org.forgerock.http.spi.TransportProvider} in order
- * to allow automatic loading of the implementation classes using the
- * {@code java.util.ServiceLoader} facility.
+ * A provider interface for obtaining {@link ClientImpl} instances. A
+ * {@link ClientImplProvider} is loaded during construction of a new HTTP
+ * {@link org.forgerock.http.Client Client}. The first available provider is
+ * selected and its {@link #newClientImpl(Options)} method invoked in order to
+ * construct and configure a new {@link ClientImpl}.
  */
-public interface TransportProvider extends Indexed<String> {
+public interface ClientImplProvider {
     /**
-     * Returns an implementation of {@code Client}.
+     * Returns a new {@link ClientImpl} configured using the provided set of
+     * options.
      *
      * @param options
      *            The client options (never {@code null}).
-     * @return An implementation of {@code Client}
+     * @return A new {@link ClientImpl} configured using the provided set of
+     *         options.
      * @throws HttpApplicationException
      *             If the client implementation could not be configured using
      *             the provided set of options.
      */
-    ClientImpl newClientImpl(ClientOptions options) throws HttpApplicationException;
+    ClientImpl newClientImpl(Options options) throws HttpApplicationException;
 }
