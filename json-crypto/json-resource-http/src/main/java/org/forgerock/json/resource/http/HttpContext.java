@@ -50,7 +50,7 @@ public final class HttpContext extends AbstractContext implements ClientContext 
         return true;
     }
 
-    HttpContext(Context parent, final org.forgerock.http.Request req) {
+    HttpContext(Context parent, final org.forgerock.http.protocol.Request req) {
         super(parent, "http");
         this.method = HttpUtils.getMethod(req);
         this.path = getRequestPath(req);
@@ -85,7 +85,7 @@ public final class HttpContext extends AbstractContext implements ClientContext 
                 }));
     }
 
-    private String getRequestPath(org.forgerock.http.Request req) {
+    private String getRequestPath(org.forgerock.http.protocol.Request req) {
         return new StringBuilder()
                 .append(req.getUri().getScheme())
                 .append("://")

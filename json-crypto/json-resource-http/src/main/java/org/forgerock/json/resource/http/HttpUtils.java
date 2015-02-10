@@ -27,6 +27,7 @@ import javax.mail.internet.ContentType;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.ParseException;
+
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
@@ -46,9 +47,10 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.forgerock.http.Response;
-import org.forgerock.http.ResponseException;
+
 import org.forgerock.http.header.ContentTypeHeader;
+import org.forgerock.http.protocol.Response;
+import org.forgerock.http.protocol.ResponseException;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
@@ -242,7 +244,7 @@ public final class HttpUtils {
      * @param t
      *            The resource exception indicating why the request failed.
      */
-    static Promise<Response, ResponseException> fail(org.forgerock.http.Request req, final Throwable t) {
+    static Promise<Response, ResponseException> fail(org.forgerock.http.protocol.Request req, final Throwable t) {
         final ResourceException re = adapt(t);
         try {
             Response resp = prepareResponse(req);
@@ -258,7 +260,7 @@ public final class HttpUtils {
         }
     }
 
-    static String getIfMatch(org.forgerock.http.Request req) {
+    static String getIfMatch(org.forgerock.http.protocol.Request req) {
         final String etag = req.getHeaders().getFirst(HEADER_IF_MATCH);
         if (etag != null) {
             if (etag.length() >= 2) {
@@ -274,7 +276,7 @@ public final class HttpUtils {
         return etag;
     }
 
-    static String getIfNoneMatch(org.forgerock.http.Request req) {
+    static String getIfNoneMatch(org.forgerock.http.protocol.Request req) {
         final String etag = req.getHeaders().getFirst(HEADER_IF_NONE_MATCH);
         if (etag != null) {
             if (etag.length() >= 2) {
@@ -303,7 +305,7 @@ public final class HttpUtils {
      *             If the content could not be read or if the content was not
      *             valid JSON.
      */
-    static JsonValue getJsonContentIfPresent(org.forgerock.http.Request req) throws ResourceException {
+    static JsonValue getJsonContentIfPresent(org.forgerock.http.protocol.Request req) throws ResourceException {
         return getJsonContent0(req, true);
     }
 
@@ -320,7 +322,7 @@ public final class HttpUtils {
      *             If the content could not be read or if the content was not
      *             valid JSON.
      */
-    static JsonValue getJsonContent(org.forgerock.http.Request req) throws ResourceException {
+    static JsonValue getJsonContent(org.forgerock.http.protocol.Request req) throws ResourceException {
         return getJsonContent0(req, false);
     }
 
@@ -336,7 +338,7 @@ public final class HttpUtils {
      * @throws IOException
      *             If an error occurred while obtaining an output stream.
      */
-    static JsonGenerator getJsonGenerator(org.forgerock.http.Request req,
+    static JsonGenerator getJsonGenerator(org.forgerock.http.protocol.Request req,
             Response resp) throws IOException {
 
         PipeBufferedStream pipeStream = new PipeBufferedStream();
@@ -373,7 +375,7 @@ public final class HttpUtils {
      *             If the content could not be read or if the content was not a
      *             valid JSON patch.
      */
-    static List<PatchOperation> getJsonPatchContent(org.forgerock.http.Request req)
+    static List<PatchOperation> getJsonPatchContent(org.forgerock.http.protocol.Request req)
             throws ResourceException {
         return PatchOperation.valueOfList(new JsonValue(parseJsonBody(req, false)));
     }
@@ -390,7 +392,7 @@ public final class HttpUtils {
      *             If the content could not be read or if the content was not
      *             valid JSON.
      */
-    static JsonValue getJsonActionContent(org.forgerock.http.Request req) throws ResourceException {
+    static JsonValue getJsonActionContent(org.forgerock.http.protocol.Request req) throws ResourceException {
         return new JsonValue(parseJsonBody(req, true));
     }
 
@@ -402,7 +404,7 @@ public final class HttpUtils {
      *            The HTTP request.
      * @return The effective method name.
      */
-    static String getMethod(org.forgerock.http.Request req) {
+    static String getMethod(org.forgerock.http.protocol.Request req) {
         String method = req.getMethod();
         if (HttpUtils.METHOD_POST.equals(method)
                 && req.getHeaders().getFirst(HttpUtils.HEADER_X_HTTP_METHOD_OVERRIDE) != null) {
@@ -421,7 +423,7 @@ public final class HttpUtils {
      *            The parameter to return.
      * @return The parameter values or {@code null} if it wasn't present.
      */
-    static List<String> getParameter(org.forgerock.http.Request req, String parameter) {
+    static List<String> getParameter(org.forgerock.http.protocol.Request req, String parameter) {
         // Need to do case-insensitive matching.
         for (final Map.Entry<String, List<String>> p : req.getForm().entrySet()) {
             if (p.getKey().equalsIgnoreCase(parameter)) {
@@ -441,11 +443,11 @@ public final class HttpUtils {
      *            The parameter to return.
      * @return {@code true} if the named parameter is present.
      */
-    static boolean hasParameter(org.forgerock.http.Request req, String parameter) {
+    static boolean hasParameter(org.forgerock.http.protocol.Request req, String parameter) {
         return getParameter(req, parameter) != null;
     }
 
-    static Response prepareResponse(org.forgerock.http.Request req) throws ResourceException {
+    static Response prepareResponse(org.forgerock.http.protocol.Request req) throws ResourceException {
         //get content type from req path
         try {
             Response resp = new Response()
@@ -467,7 +469,7 @@ public final class HttpUtils {
         }
     }
 
-    static void rejectIfMatch(org.forgerock.http.Request req) throws ResourceException,
+    static void rejectIfMatch(org.forgerock.http.protocol.Request req) throws ResourceException,
             PreconditionFailedException {
         if (req.getHeaders().getFirst(HEADER_IF_MATCH) != null) {
             // FIXME: i18n
@@ -476,7 +478,7 @@ public final class HttpUtils {
         }
     }
 
-    static void rejectIfNoneMatch(org.forgerock.http.Request req) throws ResourceException,
+    static void rejectIfNoneMatch(org.forgerock.http.protocol.Request req) throws ResourceException,
             PreconditionFailedException {
         if (req.getHeaders().getFirst(HEADER_IF_NONE_MATCH) != null) {
             // FIXME: i18n
@@ -485,7 +487,7 @@ public final class HttpUtils {
         }
     }
 
-    private static JsonValue getJsonContent0(org.forgerock.http.Request req, boolean allowEmpty)
+    private static JsonValue getJsonContent0(org.forgerock.http.protocol.Request req, boolean allowEmpty)
             throws ResourceException {
         final Object body = parseJsonBody(req, allowEmpty);
         if (body == null) {
@@ -615,7 +617,7 @@ public final class HttpUtils {
         }
     }
 
-    private static Object parseJsonBody(org.forgerock.http.Request req, boolean allowEmpty)
+    private static Object parseJsonBody(org.forgerock.http.protocol.Request req, boolean allowEmpty)
             throws BadRequestException, ResourceException {
         JsonParser parser = null;
         try {
@@ -679,9 +681,9 @@ public final class HttpUtils {
     }
 
     private static class HttpServletRequestDataSource implements DataSource {
-        private org.forgerock.http.Request request;
+        private org.forgerock.http.protocol.Request request;
 
-        HttpServletRequestDataSource(org.forgerock.http.Request request) {
+        HttpServletRequestDataSource(org.forgerock.http.protocol.Request request) {
             this.request = request;
         }
 
