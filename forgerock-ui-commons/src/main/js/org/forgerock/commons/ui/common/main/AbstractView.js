@@ -142,8 +142,17 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
          * change color of submit button.
          */
         onValidate: function(event, input, msg, validatorType) {
-            var button = this.$el.find("input[type=submit]");
-
+            var button = this.$el.find("input[type=submit]"),
+                validationMessage = (msg && !_.isArray(msg)) ? msg.split("<br>") : [];
+            
+            //clean up existing popover
+            $(input, this.$el).popover('destroy');
+            $(input, this.$el).removeClass('field-error');
+                
+            if(msg && _.isArray(msg)){
+                validationMessage = msg;
+            }
+            
             if(msg === "inProgress") {
                 //TODO spinner
                 //console.log("in progress..");
@@ -165,13 +174,23 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
                 return;
             } else {
                 validatorsUtils.showValidation(input, this.$el);
+                
+                if(validationMessage.length){
+                    $(input, this.$el).addClass('field-error');
+                    $(input, this.$el).popover({
+                        content: '<i class="fa fa-exclamation-circle"></i> ' + validationMessage.join('<br><i class="fa fa-exclamation-circle"></i> '),
+                        trigger:'hover',
+                        placement:'top',
+                        html: 'true',
+                        template: '<div class="popover popover-error" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>'
+                    });
+                }
             }
 
             if (input.nextAll("span")) {
                 validatorsUtils.setTick(input, msg);
             }
 
-            input.nextAll("div.validation-message:first").attr("for", input.attr('id')).html(msg ? msg : '');
             input.parents('.separate-message').children("div.validation-message:first").attr("for", input.attr('id')).html(msg ? msg : '');
 
             if (msg) {
