@@ -47,7 +47,8 @@ require.config({
         doTimeout: "libs/jquery.ba-dotimeout-1.0-min",
         handlebars: "libs/handlebars-1.3.0-min",
         moment: "libs/moment-2.8.1-min",
-        bootstrapjs: "libs/bootstrap.min",
+        bootstrap: "libs/bootstrap.min",
+        "bootstrap-dialog": "libs/bootstrap-dialog.min",
         placeholder: "libs/jquery.placeholder",
         UserDelegate: "org/forgerock/mock/ui/user/delegates/UserDelegate",
         ThemeManager: "org/forgerock/mock/ui/common/util/ThemeManager"
@@ -76,6 +77,12 @@ require.config({
         bootstrapjs: {
             deps: ["jquery"],
             exports: "bootstrapjs"
+        },
+        bootstrap: {
+            deps: ["jquery"]
+        },
+        'bootstrap-dialog': {
+            deps: ["jquery", "underscore","backbone", "bootstrap"]
         },
         placeholder: {
             deps: ["jquery"]
@@ -129,7 +136,6 @@ require([
     "doTimeout",
     "handlebars",
     "i18next",
-    "bootstrapjs",
     "placeholder",
     "org/forgerock/mock/ui/common/main/MockServer",
     "org/forgerock/commons/ui/common/main/i18nManager",
@@ -143,8 +149,8 @@ require([
     "UserDelegate",
     "ThemeManager",
     "config/main"
-], function ( sinon, $, _, Backbone, form2js, js2form, spin, $ui, xdate, moment, doTimeout, Handlebars, i18n, bootstrapjs,
-             placeholder, mockServer, i18nManager, constants, eventManager, localStorage) {
+], function ( sinon, $, _, Backbone, form2js, js2form, spin, $ui, xdate, moment, doTimeout, Handlebars, i18n,
+              placeholder, mockServer, i18nManager, constants, eventManager, localStorage) {
 
     // Helpers for the code that hasn't been properly migrated to require these as explicit dependencies:
     window.$ = $;

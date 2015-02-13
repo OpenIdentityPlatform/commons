@@ -31,10 +31,11 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     "org/forgerock/commons/ui/common/util/typeextentions/String",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "handlebars",
+    "bootstrap-dialog",
     "i18next",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/util/DateUtil"
-], function ($, _, String, AbstractConfigurationAware, handlebars, i18next, router, dateUtil) {
+], function ($, _, String, AbstractConfigurationAware, handlebars, BootstrapDialog, i18next, router, dateUtil) {
     var obj = new AbstractConfigurationAware();
 
     obj.getUrl = function() {
@@ -57,13 +58,13 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     obj.getCurrentUrlQueryParameters = function() {
         var hash = obj.getCurrentHash(),
             queries = window.location.search.substr(1,window.location.search.length);
-            // location.search will only return a value if there are queries before the hash.
+        // location.search will only return a value if there are queries before the hash.
         if (hash && hash.indexOf('&') > -1) {
             queries = hash.substring(hash.indexOf('&') + 1);
         }
         return queries;
     };
- 
+
     obj.getCurrentPathName = function() {
         return window.location.pathname;
     };
@@ -96,11 +97,11 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
             return _.object(
                 //queryParameters.match(/([^&]+)/g) returns an array of key value pair strings
                 _.map(queryParameters.match(/([^&]+)/g), function (pair) {
-                   //convert each string into a an array 0 index being the key and 1 index being the value
-                   var keyAndValue = pair.match(/([^=]+)=?(.*)/).slice(1);
-                       //decode the value
-                       keyAndValue[1] = decodeURIComponent(keyAndValue[1]);
-                       return keyAndValue;
+                    //convert each string into a an array 0 index being the key and 1 index being the value
+                    var keyAndValue = pair.match(/([^=]+)=?(.*)/).slice(1);
+                    //decode the value
+                    keyAndValue[1] = decodeURIComponent(keyAndValue[1]);
+                    return keyAndValue;
                 })
             );
         }
@@ -137,7 +138,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                 i,
                 len = cellvalue.length;
             for (i = 0; i < len; i++) {
-               
+
                 if (_.isString(cellvalue[i])){
                     result += '<li>' + cellvalue[i] + '</li>';
                 } else{
@@ -149,7 +150,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
 
             return result;
         },
-  
+
         dateFormatter: function (cellvalue, options, rowObject) {
             if (!cellvalue) {
                 return '';
@@ -347,8 +348,8 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
 
         showSearch = !!options.search;
         grid.navGrid(options.pager, {edit: false, add: false, del: false, search: showSearch, refresh: false},
-                     {},{},{},{multipleSearch: true, closeOnEscape: true, closeAfterSearch: true});
-        
+            {},{},{},{multipleSearch: true, closeOnEscape: true, closeAfterSearch: true});
+
         if(!additional.suppressColumnChooser){
             grid.navButtonAdd(options.pager,{
                 caption:"Columns",
@@ -511,7 +512,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         result = i18n.t(i18nKey, params);
 
         return new Handlebars.SafeString(result);
-     });
+    });
 
     Handlebars.registerHelper('url', function(routeKey) {
         var result = "#" + router.getLink(router.configuration.routes[routeKey], _.toArray([arguments[1]]));
@@ -638,7 +639,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         params = { count: countValue };
         result = i18n.t(options.hash.key, params);
         return new Handlebars.SafeString(result);
-     });
+    });
 
 
     Handlebars.registerHelper('equals', function(val, val2, options) {
@@ -650,9 +651,9 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     Handlebars.registerHelper('checkbox', function(map, name, options) {
         var ret = "<div class='checkboxList' id='"+name+"'><ol>", idx,
             sortedMap = _.chain(map)
-                            .pairs()
-                            .sortBy(function (arr) { return arr[1]; })
-                            .value();
+                .pairs()
+                .sortBy(function (arr) { return arr[1]; })
+                .value();
 
         for(idx=0;idx<sortedMap.length;idx++) {
             ret += '<li><input type="checkbox" name="'+ name +'" value="'+ sortedMap[idx][0] +'" id="'+ name +'_'+ encodeURIComponent(sortedMap[idx][0]) +'"><label for="'+ name +'_'+ encodeURIComponent(sortedMap[idx][0]) +'">' + sortedMap[idx][1] + '</label></li>';
@@ -728,7 +729,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                 "key" : "",
                 "value" : $.t("common.form.pleaseSelect")
             } ].concat(data);
-            }
+        }
 
         el.loadSelect(data);
 
@@ -738,33 +739,27 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     };
 
 
-    obj.jqConfirm = function(message,confirmCallback,width){
-        var btns = {};
-        btns[$.t('common.form.cancel')] = function(){
-            $('#jqConfirm').dialog('close');
-        };
-        btns[$.t('common.form.ok')] = function(){
-            $('#jqConfirm').dialog('close');
-            confirmCallback();
-        };
+    obj.jqConfirm = function(message, confirmCallback, width){
+        BootstrapDialog.show({
+            title: $.t('common.form.confirm'),
+            type: BootstrapDialog.TYPE_DEFAULT,
+            message: message,
+            buttons: [{
+                label: $.t('common.form.ok'),
+                action: function(dialog) {
+                    if(confirmCallback) {
+                        confirmCallback();
+                    }
 
-        if(_.isUndefined(width)) {
-            width = "550px";
-        }
-
-        $('<div id="jqConfirm">' + message + '</div>')
-            .dialog({
-                title: $.t('common.form.confirm'),
-                modal: true,
-                resizable: false,
-                bgiframe: true,
-                width: width,
-                buttons: btns,
-                close: function(){
-                    $('#jqConfirm').dialog('destroy').remove();
+                    dialog.close();
                 }
-            })
-        ;
+            }, {
+                label: $.t('common.form.cancel'),
+                action: function(dialog){
+                    dialog.close();
+                }
+            }]
+        });
     };
 
     obj.responseMessageMatch = function(error, string){
@@ -776,24 +771,24 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
 
     _.mixin({
 
-        /*  findByValues takes a collection and returns a subset made up of objects where the given property name matches a value in the list.  
-            For example:
+        /*  findByValues takes a collection and returns a subset made up of objects where the given property name matches a value in the list.
+         For example:
 
-            var collections = [
-                {id: 1, stack: 'am'},
-                {id: 2, stack: 'dj'},
-                {id: 3, stack: 'idm'},
-                {id: 4, stack: 'api'},
-                {id: 5, stack: 'rest'}
-            ];
+         var collections = [
+         {id: 1, stack: 'am'},
+         {id: 2, stack: 'dj'},
+         {id: 3, stack: 'idm'},
+         {id: 4, stack: 'api'},
+         {id: 5, stack: 'rest'}
+         ];
 
-            var filtered = _.findByValues(collections, "id", [1,3,4]);
+         var filtered = _.findByValues(collections, "id", [1,3,4]);
 
-            filtered = [
-                {id: 1, stack: 'am'},
-                {id: 3, stack: 'idm'},
-                {id: 4, stack: 'api'}
-            ]
+         filtered = [
+         {id: 1, stack: 'am'},
+         {id: 3, stack: 'idm'},
+         {id: 4, stack: 'api'}
+         ]
 
          */
 
@@ -803,15 +798,15 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
             });
         },
 
-        /*  removeByValues takes a collection and returns a subset made up of objects where there is no match between the given property name and the values in the list.  
-            For example:
+        /*  removeByValues takes a collection and returns a subset made up of objects where there is no match between the given property name and the values in the list.
+         For example:
 
-            var filtered = _.removeByValues(collections, "id", [1,3,4]);
+         var filtered = _.removeByValues(collections, "id", [1,3,4]);
 
-            filtered = [
-                {id: 2, stack: 'dj'},
-                {id: 5, stack: 'rest'}
-            ]
+         filtered = [
+         {id: 2, stack: 'dj'},
+         {id: 5, stack: 'rest'}
+         ]
 
          */
         'removeByValues': function(collection, property, values) {
