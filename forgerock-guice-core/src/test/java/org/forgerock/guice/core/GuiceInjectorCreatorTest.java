@@ -11,20 +11,20 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.guice.core;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Collections;
+import java.util.Set;
 
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import java.util.Collections;
-import java.util.Set;
-
-import static org.testng.Assert.assertNotNull;
 
 public class GuiceInjectorCreatorTest {
 
@@ -45,6 +45,6 @@ public class GuiceInjectorCreatorTest {
         Injector injector = injectorCreator.createInjector(modules);
 
         //Then
-        assertNotNull(injector);
+        assertThat(injector).isNotNull();
     }
 }

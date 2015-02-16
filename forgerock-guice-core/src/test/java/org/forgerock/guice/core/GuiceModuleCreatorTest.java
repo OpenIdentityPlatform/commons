@@ -11,10 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.guice.core;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -23,9 +25,6 @@ import org.forgerock.guice.core.test.TestModule2;
 import org.forgerock.guice.core.test.TestModule3;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.fail;
 
 public class GuiceModuleCreatorTest {
 
@@ -46,7 +45,7 @@ public class GuiceModuleCreatorTest {
         Object module = guiceModuleCreator.createInstance(moduleClass);
 
         //Then
-        assertNotNull(module);
+        assertThat(module).isNotNull();
     }
 
     @Test (expectedExceptions = ModuleCreationException.class)
@@ -59,7 +58,7 @@ public class GuiceModuleCreatorTest {
         guiceModuleCreator.createInstance(moduleClass);
 
         //Then
-        fail();
+        //Expected ModuleCreationException
     }
 
     @Test (expectedExceptions = ModuleCreationException.class)
@@ -72,7 +71,7 @@ public class GuiceModuleCreatorTest {
         guiceModuleCreator.createInstance(moduleClass);
 
         //Then
-        fail();
+        //Expected ModuleCreationException
     }
 
     @Test (expectedExceptions = ModuleCreationException.class)
@@ -85,7 +84,7 @@ public class GuiceModuleCreatorTest {
         guiceModuleCreator.createInstance(moduleClass);
 
         //Then
-        fail();
+        //Expected ModuleCreationException;
     }
 
     public static final class InstantiationExceptionClass implements Module {

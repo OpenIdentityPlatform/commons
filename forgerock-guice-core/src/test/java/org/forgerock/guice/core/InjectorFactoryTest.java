@@ -11,10 +11,19 @@
 * Header, with the fields enclosed by brackets [] replaced by your own identifying
 * information: "Portions copyright [year] [name of copyright owner]".
 *
-* Copyright 2013-2014 ForgeRock AS.
+* Copyright 2013-2015 ForgeRock AS.
 */
 
 package org.forgerock.guice.core;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.internal.verification.VerificationModeFactory.times;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import com.google.inject.Module;
 import org.forgerock.guice.core.test.TestModule1;
@@ -23,15 +32,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import java.util.HashSet;
-import java.util.Set;
-
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.internal.verification.VerificationModeFactory.times;
-import static org.testng.Assert.assertEquals;
 
 public class InjectorFactoryTest {
 
@@ -43,7 +43,6 @@ public class InjectorFactoryTest {
 
     @BeforeClass
     public void setUp() {
-
         moduleCreator = mock(GuiceModuleCreator.class);
         injectorCreator = mock(GuiceInjectorCreator.class);
         moduleLoader = mock(GuiceModuleLoader.class);
@@ -77,6 +76,6 @@ public class InjectorFactoryTest {
         ArgumentCaptor<Set> createInjectorCaptor = ArgumentCaptor.forClass(Set.class);
         verify(injectorCreator).createInjector(createInjectorCaptor.capture());
         Set<Module> modules = createInjectorCaptor.getValue();
-        assertEquals(modules.size(), 2);
+        assertThat(modules).hasSize(2);
     }
 }

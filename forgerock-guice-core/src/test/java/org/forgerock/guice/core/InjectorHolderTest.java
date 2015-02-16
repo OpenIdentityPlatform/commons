@@ -11,10 +11,17 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.guice.core;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import javax.inject.Inject;
+import java.lang.annotation.Annotation;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -22,15 +29,6 @@ import com.google.inject.Key;
 import com.google.inject.Module;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import javax.inject.Inject;
-import java.lang.annotation.Annotation;
-import java.util.HashSet;
-import java.util.Set;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 public class InjectorHolderTest {
 
@@ -49,7 +47,7 @@ public class InjectorHolderTest {
 
         //Then
         Injector sameInjector = InjectorHolder.getInjector();
-        assertEquals(injector, sameInjector);
+        assertThat(injector).isEqualTo(sameInjector);
     }
 
     @Test
@@ -58,11 +56,10 @@ public class InjectorHolderTest {
         //Given
 
         //When
-        final TestInterface instance = InjectorHolder.getInstance(TestInterface.class);
+        TestInterface instance = InjectorHolder.getInstance(TestInterface.class);
 
         //Then
-        assertNotNull(instance);
-        assertTrue(instance instanceof TestImplementation);
+        assertThat(instance).isNotNull().isInstanceOf(TestInterface.class);
     }
 
     @Test
@@ -71,11 +68,10 @@ public class InjectorHolderTest {
         //Given
 
         //When
-        final TestInterface instance = InjectorHolder.getInstance(Key.get(TestInterface.class));
+        TestInterface instance = InjectorHolder.getInstance(Key.get(TestInterface.class));
 
         //Then
-        assertNotNull(instance);
-        assertTrue(instance instanceof TestImplementation);
+        assertThat(instance).isNotNull().isInstanceOf(TestInterface.class);
     }
 
     @Test
@@ -88,7 +84,7 @@ public class InjectorHolderTest {
         InjectorHolder.injectMembers(testImplementation);
 
         //Then
-        assertNotNull(testImplementation.getTestDependency());
+        assertThat(testImplementation.getTestDependency()).isNotNull();
     }
 
     public static final class TestGuiceModuleLoader implements GuiceModuleLoader {
@@ -117,7 +113,7 @@ public class InjectorHolderTest {
         private TestDependency testDependency;
 
         @Inject
-        public void setTestDependency(final TestDependency testDependency) {
+        public void setTestDependency(TestDependency testDependency) {
             this.testDependency = testDependency;
         }
 

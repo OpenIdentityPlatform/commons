@@ -11,18 +11,18 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.guice.core;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.inject.AbstractModule;
 import org.forgerock.guice.core.test.TestModule4;
 import org.forgerock.guice.core.test.TestModule5;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import static org.testng.Assert.assertTrue;
 
 public class ServiceLoaderTest {
 
@@ -40,21 +40,11 @@ public class ServiceLoaderTest {
         Class<AbstractModule> service = AbstractModule.class;
 
         //When
-        final Iterable<AbstractModule> services = serviceLoader.load(service);
+        Iterable<AbstractModule> services = serviceLoader.load(service);
 
         //Then
-        boolean foundModule4 = false;
-        boolean foundModule5 = false;
-        for (final AbstractModule module : services) {
-            if (module.getClass().equals(TestModule4.class)) {
-                foundModule4 = true;
-                continue;
-            }
-            if (module.getClass().equals(TestModule5.class)) {
-                foundModule5 = true;
-            }
-        }
-
-        assertTrue(foundModule4 && foundModule5);
+        assertThat(services)
+                .hasSize(2)
+                .containsOnly(new TestModule4(), new TestModule5());
     }
 }

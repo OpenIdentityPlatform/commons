@@ -12,7 +12,7 @@ the License file at legal/CDDLv1.0.txt. If applicable, add the following below t
 Header, with the fields enclosed by brackets [] replaced by your own identifying
 information: "Portions Copyrighted [year] [name of copyright owner]".
 
-Copyright 2014 ForgeRock AS.
+Copyright 2014-2015 ForgeRock AS.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
@@ -80,12 +80,13 @@ Copyright 2014 ForgeRock AS.
         <java.source.version>1.6</java.source.version>
         <java.target.version>1.6</java.target.version>
 
-        <slf4j.api.version>1.7.5</slf4j.api.version>
+        <slf4j.api.version>1.7.10</slf4j.api.version>
         <guice.version>3.0</guice.version>
         <servlet.api.version>2.5</servlet.api.version>
 
-        <testng.version>6.8.7</testng.version>
-        <mockito.version>1.9.5</mockito.version>
+        <testng.version>6.8.17</testng.version>
+        <mockito.version>1.10.19</mockito.version>
+        <assertj.version>1.7.1</assertj.version>
     </properties>
 
     <modules>
@@ -106,6 +107,14 @@ Copyright 2014 ForgeRock AS.
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-nop</artifactId>
         </dependency>
     </dependencies>
 
@@ -156,6 +165,17 @@ Copyright 2014 ForgeRock AS.
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-all</artifactId>
                 <version>${mockito.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>${assertj.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-nop</artifactId>
+                <version>${slf4j.api.version}</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

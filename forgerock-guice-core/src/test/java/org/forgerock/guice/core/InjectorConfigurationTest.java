@@ -11,21 +11,20 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.guice.core;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.lang.annotation.Annotation;
+import java.util.Set;
 
 import com.google.inject.Module;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import java.lang.annotation.Annotation;
-import java.util.Set;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 public class InjectorConfigurationTest {
 
@@ -53,7 +52,7 @@ public class InjectorConfigurationTest {
         Class<? extends Annotation> moduleAnnotation = InjectorConfiguration.getModuleAnnotation();
 
         //Then
-        assertEquals(moduleAnnotation, GuiceModule.class);
+        assertThat(moduleAnnotation).isEqualTo(GuiceModule.class);
     }
 
     @Test
@@ -65,7 +64,7 @@ public class InjectorConfigurationTest {
         GuiceModuleLoader moduleLoader = InjectorConfiguration.getGuiceModuleLoader();
 
         //Then
-        assertTrue(GuiceModuleServiceLoader.class.isAssignableFrom(moduleLoader.getClass()));
+        assertThat(moduleLoader.getClass()).isAssignableFrom(GuiceModuleServiceLoader.class);
     }
 
     @Test
@@ -78,7 +77,7 @@ public class InjectorConfigurationTest {
 
         //Then
         Class<? extends Annotation> moduleAnnotation = InjectorConfiguration.getModuleAnnotation();
-        assertEquals(moduleAnnotation, Annotation.class);
+        assertThat(moduleAnnotation).isEqualTo(Annotation.class);
     }
 
     @Test
@@ -92,7 +91,7 @@ public class InjectorConfigurationTest {
 
         //Then
         GuiceModuleLoader moduleLoader = InjectorConfiguration.getGuiceModuleLoader();
-        assertEquals(moduleLoader, testModuleLoader);
+        assertThat(moduleLoader).isEqualTo(testModuleLoader);
     }
 
     private static final class TestGuiceModuleLoader implements GuiceModuleLoader {

@@ -11,10 +11,18 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.guice.core;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+
+import java.lang.annotation.Annotation;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
@@ -24,14 +32,6 @@ import org.forgerock.guice.core.test.TestModule6;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.lang.annotation.Annotation;
-import java.util.HashSet;
-import java.util.Set;
-
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.testng.Assert.assertEquals;
-
 public class GuiceModuleServiceLoaderTest {
 
     private GuiceModuleServiceLoader moduleServiceLoader;
@@ -40,7 +40,6 @@ public class GuiceModuleServiceLoaderTest {
 
     @BeforeMethod
     public void setUp() {
-
         serviceLoader = mock(ServiceLoader.class);
 
         moduleServiceLoader = new GuiceModuleServiceLoader(serviceLoader);
@@ -59,7 +58,7 @@ public class GuiceModuleServiceLoaderTest {
         Set<Class<? extends Module>> guiceModules = moduleServiceLoader.getGuiceModules(moduleAnnotation);
 
         //Then
-        assertEquals(guiceModules.size(), 0);
+        assertThat(guiceModules).hasSize(0);
     }
 
     @Test
@@ -78,6 +77,6 @@ public class GuiceModuleServiceLoaderTest {
         Set<Class<? extends Module>> guiceModules = moduleServiceLoader.getGuiceModules(moduleAnnotation);
 
         //Then
-        assertEquals(guiceModules.size(), 2);
+        assertThat(guiceModules).hasSize(2);
     }
 }
