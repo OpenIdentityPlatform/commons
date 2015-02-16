@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.guice.core;
@@ -19,17 +19,19 @@ package org.forgerock.guice.core;
 import java.lang.annotation.Annotation;
 
 /**
- * A thread-safe singleton holding the configuration information on how the Guice framework finds Guice Modules to
- * configure the Guice Injector instance.
- * <br/>
- * This singleton holds the Module annotation that all Guice Modules, that should be used to configure the injector,
+ * <p>A thread-safe singleton holding the configuration information on how the Guice framework finds Guice Modules to
+ * configure the Guice Injector instance.</p>
+ *
+ * <p>This singleton holds the Module annotation that all Guice Modules, that should be used to configure the injector,
  * MUST be annotated with. And the implementation of the {@link GuiceModuleLoader} that will be used to find and load
- * the module classes.
- * <br/>
- * By default the module annotation is configured to be {@link GuiceModule} and the GuiceModuleLoader implementation is
- * configured to be {@link GuiceModuleServiceLoader}.
+ * the module classes.</p>
+ *
+ * <p>By default the module annotation is configured to be {@link GuiceModule} and the GuiceModuleLoader implementation
+ * is configured to be {@link GuiceModuleServiceLoader}.
  * These configurations can be changed by calling, {@link #setModuleAnnotation(Class)} and
- * {@link #setGuiceModuleLoader(GuiceModuleLoader)},respectively.
+ * {@link #setGuiceModuleLoader(GuiceModuleLoader)},respectively.</p>
+ *
+ * @since 1.0.0
  */
 public enum InjectorConfiguration {
 
@@ -55,7 +57,7 @@ public enum InjectorConfiguration {
      *
      * @param moduleAnnotation The module annotation.
      */
-    public static synchronized void setModuleAnnotation(final Class<? extends Annotation> moduleAnnotation) {
+    public static synchronized void setModuleAnnotation(Class<? extends Annotation> moduleAnnotation) {
         INSTANCE.moduleAnnotation = moduleAnnotation;
     }
 
@@ -73,7 +75,7 @@ public enum InjectorConfiguration {
      *
      * @param guiceModuleLoader The GuiceModuleLoader implementation.
      */
-    public static synchronized void setGuiceModuleLoader(final GuiceModuleLoader guiceModuleLoader) {
+    public static synchronized void setGuiceModuleLoader(GuiceModuleLoader guiceModuleLoader) {
         INSTANCE.guiceModuleLoader = guiceModuleLoader;
     }
 }

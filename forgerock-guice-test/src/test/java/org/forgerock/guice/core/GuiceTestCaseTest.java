@@ -16,40 +16,46 @@
 
 package org.forgerock.guice.core;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.google.inject.Binder;
+import com.google.inject.Key;
+import com.google.inject.Module;
+import com.google.inject.TypeLiteral;
 import org.testng.annotations.Test;
 
-import com.google.inject.Binder;
-import com.google.inject.Module;
-
-@GuiceModules({GuiceTestCaseTest.ExtraModule.class})
+@GuiceModules({ GuiceTestCaseTest.ExtraModule.class })
 public class GuiceTestCaseTest extends GuiceTestCase {
 
     @Override
     public void configure(Binder binder) {
-        binder.bind(ArrayList.class).to(BoundOne.class);
+        binder.bind(Key.get(new TypeLiteral<ArrayList<Object>>() { })).to(BoundOne.class);
     }
 
     @Test
     public void testTestCase() throws Exception {
-        assertThat(InjectorHolder.getInstance(ArrayList.class)).isInstanceOf(BoundOne.class);
-        assertThat(InjectorHolder.getInstance(HashMap.class)).isInstanceOf(BoundTwo.class);
+        assertThat(InjectorHolder.getInstance(Key.get(new TypeLiteral<ArrayList<Object>>() { })))
+                .isInstanceOf(BoundOne.class);
+        assertThat(InjectorHolder.getInstance(Key.get(new TypeLiteral<HashMap<String, Object>>() { })))
+                .isInstanceOf(BoundTwo.class);
     }
 
-    public static class BoundOne extends ArrayList {}
+    public static class BoundOne extends ArrayList<Object> {
+        private static final long serialVersionUID = 0L;
+    }
 
-    public static class BoundTwo extends HashMap {}
+    public static class BoundTwo extends HashMap<String, Object> {
+        private static final long serialVersionUID = 0L;
+    }
 
     public static class ExtraModule implements Module {
 
         public void configure(Binder binder) {
-            binder.bind(HashMap.class).to(BoundTwo.class);
+            binder.bind(Key.get(new TypeLiteral<HashMap<String, Object>>() { })).to(BoundTwo.class);
         }
 
     }
-
 }

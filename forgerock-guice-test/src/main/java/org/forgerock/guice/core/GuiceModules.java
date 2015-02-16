@@ -25,9 +25,14 @@ import com.google.inject.Module;
 
 /**
  * This annotation allows the declaration of additional modules to be initialised in the Injector instance.
+ *
+ * @since 1.1.0
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface GuiceModules {
+    /**
+     * Returns the list of Modules to include in the test Injector.
+     */
     Class<? extends Module>[] value();
 }

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.guice.core;
@@ -21,9 +21,11 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 
 /**
- * Delegate for creating the Guice Injector.
- * <br/>
- * This allows for unit testing of the Guice initialisation code.
+ * <p>Delegate for creating the Guice Injector.</p>
+ *
+ * <p>This allows for unit testing of the Guice initialisation code.</p>
+ *
+ * @since 1.0.0
  */
 class GuiceInjectorCreator {
 
@@ -35,7 +37,7 @@ class GuiceInjectorCreator {
      * @param modules The modules that will be used to configure the Guice Injector instance.
      * @return A non-null configured Guice Injector instance.
      */
-    Injector createInjector(final Iterable<? extends Module> modules) {
+    Injector createInjector(Iterable<? extends Module> modules) {
         return Guice.createInjector(modules);
     }
 }

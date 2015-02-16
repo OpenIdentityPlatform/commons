@@ -1,3 +1,4 @@
+// @Checkstyle:off
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -15,7 +16,7 @@
  * limitations under the License.
  */
 /*
- * Portions Copyright 2014 ForgeRock AS.
+ * Portions Copyright 2014-2015 ForgeRock AS.
  * Copied from commons-lang:commons-lang:2.6 org.apache.commons.lang.reflect.ConstructUtils with un-required methods
  * removed.
  */
@@ -177,3 +178,4 @@ public final class SystemUtils {
         return JAVA_VERSION_FLOAT >= requiredVersion;
     }
 }
+// @Checkstyle:on

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.guice.core;
@@ -25,6 +25,8 @@ import java.lang.annotation.Target;
  * Signifies a {@link com.google.inject.Module Guice module} class that should be used to configure the
  * {@link com.google.inject.Injector Guice injector} when the system starts up. All classes with this annotation must
  * extend {@link com.google.inject.Module}).
+ *
+ * @since 1.0.0
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

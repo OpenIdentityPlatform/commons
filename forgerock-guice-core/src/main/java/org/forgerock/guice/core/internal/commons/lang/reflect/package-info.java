@@ -11,12 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 /**
- * Re-packaged code from the reflect package from org.apache.commons:commons-lang:2.6.
- * <br/>
- * Only code that is required by the forgerock-guice-core library has been re-packaged.
+ * <p>Re-packaged code from the reflect package from org.apache.commons:commons-lang:2.6.</p>
+ *
+ * <p>Only code that is required by the forgerock-guice-core library has been re-packaged.</p>
  */
 package org.forgerock.guice.core.internal.commons.lang.reflect;

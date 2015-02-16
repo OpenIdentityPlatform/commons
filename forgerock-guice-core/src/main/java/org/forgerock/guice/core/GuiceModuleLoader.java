@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.guice.core;
@@ -22,21 +22,21 @@ import java.lang.annotation.Annotation;
 import java.util.Set;
 
 /**
- * Implementations of this interface are responsible for finding and loading all Guice module classes which are
- * annotated with the provide module annotation.
- * <br/>
- * Implementations MUST only return subtypes of the Guice Module interface which are annotated with the provided
- * annotation. Any modules NOT annotated with the provided annotation MUST be ignored.
+ * <p>Implementations of this interface are responsible for finding and loading all Guice module classes which are
+ * annotated with the provide module annotation.</p>
+ *
+ * <p>Implementations MUST only return subtypes of the Guice Module interface which are annotated with the provided
+ * annotation. Any modules NOT annotated with the provided annotation MUST be ignored.</p>
+ *
+ * @since 1.0.0
  */
 public interface GuiceModuleLoader {
 
     /**
      * Finds and loads all the Guice modules that will be used to configure the Guice injector instance.
      *
-     *
-     *
      * @param moduleAnnotation The Annotation that all modules MUST be annotated with.
      * @return A Set of Guice modules.
      */
-    Set<Class<? extends Module>> getGuiceModules(final Class<? extends Annotation> moduleAnnotation);
+    Set<Class<? extends Module>> getGuiceModules(Class<? extends Annotation> moduleAnnotation);
 }

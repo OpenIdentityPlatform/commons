@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.guice.core;
@@ -24,11 +24,13 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Constructor;
 
 /**
- * Responsible for creating instances of Guice modules.
- * <br/>
- * All Guice modules must have one and only one public no-arg constructor.
- * <br/>
- * This class must be able to operate before Guice is initialised, as it is used to initialise Guice.
+ * <p>Responsible for creating instances of Guice modules.</p>
+ *
+ * <p>All Guice modules must have one and only one public no-arg constructor.</p>
+ *
+ * <p>This class must be able to operate before Guice is initialised, as it is used to initialise Guice.</p>
+ *
+ * @since 1.0.0
  */
 class GuiceModuleCreator {
 
@@ -41,7 +43,7 @@ class GuiceModuleCreator {
      * @param <T> The Guice module class type.
      * @return A non-null instance of the Guice module.
      */
-    <T extends Module> T createInstance(final Class<T> clazz) {
+    <T extends Module> T createInstance(Class<T> clazz) {
         try {
             final Constructor<T> constructor = getConstructor(clazz);
             return constructor.newInstance();
@@ -52,9 +54,9 @@ class GuiceModuleCreator {
     }
 
     /**
-     * Finds and returns the Constructor to use to create the Guice module.
-     * <br/>
-     * Note: There must be one and only one public no-arg constructor for the Guice module.
+     * <p>Finds and returns the Constructor to use to create the Guice module.</p>
+     *
+     * <p>Note: There must be one and only one public no-arg constructor for the Guice module.</p>
      *
      * @param clazz The Guice module class.
      * @param <T> The Guice module class type.
@@ -62,9 +64,9 @@ class GuiceModuleCreator {
      * @throws NoSuchMethodException If no public no-arg constructor exists in this class.
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private <T> Constructor<T> getConstructor(final Class<T> clazz) throws NoSuchMethodException {
+    private <T> Constructor<T> getConstructor(Class<T> clazz) throws NoSuchMethodException {
 
-        final Constructor constructor = ConstructorUtils.getAccessibleConstructor(clazz, new Class[]{});
+        Constructor constructor = ConstructorUtils.getAccessibleConstructor(clazz, new Class[]{});
 
         if (constructor != null) {
             return constructor;

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.guice.core;
@@ -24,15 +24,17 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Constructs a Guice injector to find all the Guice modules on the classpath, by using the configured
- * {@link GuiceModuleLoader} implementation, and uses them to initalise the Guice injector.
- * <br/>
- * The {@link InjectorHolder} is configured with an Annotation which all modules used to configure Guice MUST
- * be annotated with and the GuiceModuleLoader MUST only load modules which are annotated with the annotation.
- * <br/>
- * This class should not be used directly, but instead via the {@link InjectorHolder}.
+ * <p>Constructs a Guice injector to find all the Guice modules on the classpath, by using the configured
+ * {@link GuiceModuleLoader} implementation, and uses them to initalise the Guice injector.</p>
+ *
+ * <p>The {@link InjectorHolder} is configured with an Annotation which all modules used to configure Guice MUST
+ * be annotated with and the GuiceModuleLoader MUST only load modules which are annotated with the annotation.</p>
+ *
+ * <p>This class should not be used directly, but instead via the {@link InjectorHolder}.</p>
+ *
+ * @since 1.0.0
  */
-class InjectorFactory {
+final class InjectorFactory {
 
     private final GuiceModuleCreator moduleCreator;
     private final GuiceInjectorCreator injectorCreator;
@@ -45,8 +47,8 @@ class InjectorFactory {
      * @param injectorCreator An instance of the GuiceInjectorCreator.
      * @param moduleLoader An instance of the GuiceModuleLoader.
      */
-    InjectorFactory(final GuiceModuleCreator moduleCreator, final GuiceInjectorCreator injectorCreator,
-            final GuiceModuleLoader moduleLoader) {
+    InjectorFactory(GuiceModuleCreator moduleCreator, GuiceInjectorCreator injectorCreator,
+            GuiceModuleLoader moduleLoader) {
         this.moduleCreator = moduleCreator;
         this.injectorCreator = injectorCreator;
         this.moduleLoader = moduleLoader;
@@ -59,7 +61,7 @@ class InjectorFactory {
      * @param moduleAnnotation The module annotation.
      * @return A non-null Guice injector.
      */
-    Injector createInjector(final Class<? extends Annotation> moduleAnnotation) {
+    Injector createInjector(Class<? extends Annotation> moduleAnnotation) {
         /*
          This does not need to by synchronized as it is only ever called from the constructor of the
          InjectorHolder enum, which is thread-safe so no two threads can create an injector at the same time.
@@ -77,15 +79,14 @@ class InjectorFactory {
      * @return A Set of Guice modules.
      */
     @SuppressWarnings("unchecked")
-    private Set<Module> createModules(final Class<? extends Annotation> moduleAnnotation) {
+    private Set<Module> createModules(Class<? extends Annotation> moduleAnnotation) {
 
-        final Set<Class<? extends Module>> moduleClasses = moduleLoader.getGuiceModules(moduleAnnotation);
+        Set<Class<? extends Module>> moduleClasses = moduleLoader.getGuiceModules(moduleAnnotation);
 
-        final Set<Module> modules = new HashSet<Module>();
+        Set<Module> modules = new HashSet<Module>();
 
-        for (final Class<? extends Module> moduleClass : moduleClasses) {
-            final Module module = moduleCreator.createInstance(moduleClass);
-            modules.add(module);
+        for (Class<? extends Module> moduleClass : moduleClasses) {
+            modules.add(moduleCreator.createInstance(moduleClass));
         }
 
         return modules;

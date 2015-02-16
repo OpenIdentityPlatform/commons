@@ -11,15 +11,17 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.guice.core;
 
 /**
  * Thrown by the GuiceModuleCreator when a Guice module could not be instantiated.
+ *
+ * @since 1.0.0
  */
-public class ModuleCreationException extends RuntimeException {
+public final class ModuleCreationException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
@@ -28,7 +30,7 @@ public class ModuleCreationException extends RuntimeException {
      *
      * @param cause The Throwable which caused this exception.
      */
-    ModuleCreationException(final Throwable cause) {
+    ModuleCreationException(Throwable cause) {
         super(cause);
     }
 }

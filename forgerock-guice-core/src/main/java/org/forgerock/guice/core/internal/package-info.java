@@ -11,14 +11,14 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 /**
- * Classes under this internal package are internal private classes re-packaged from other existing libraries so as
- * to reduce required dependencies on third party applications which will depend on this library.
- * <br/>
- * These classes are for internal use only as they are subject to change without notification and as such use of these
- * classes by any third party is not supported.
+ * <p>Classes under this internal package are internal private classes re-packaged from other existing libraries so as
+ * to reduce required dependencies on third party applications which will depend on this library.</p>
+ *
+ * <p>These classes are for internal use only as they are subject to change without notification and as such use of
+ * these classes by any third party is not supported.</p>
  */
 package org.forgerock.guice.core.internal;

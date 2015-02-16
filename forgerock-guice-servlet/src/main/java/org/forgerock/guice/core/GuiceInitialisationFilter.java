@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.guice.core;
@@ -22,8 +22,10 @@ import javax.servlet.ServletContextListener;
 /**
  * Servlet Context Listener to start the Guice initialisation eagerly when the Container starts up, instead of
  * lazily waiting for the first request to kick-start the initialisation.
+ *
+ * @since 1.0.0
  */
-public class GuiceInitialisationFilter implements ServletContextListener {
+public final class GuiceInitialisationFilter implements ServletContextListener {
 
     /**
      * Tries to get the Guice Injector instance from the InjectorHolder, therefore kick-starting the Guice

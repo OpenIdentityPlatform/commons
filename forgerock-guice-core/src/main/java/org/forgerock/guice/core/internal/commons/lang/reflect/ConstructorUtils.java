@@ -1,3 +1,4 @@
+// @Checkstyle:off
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -15,7 +16,7 @@
  * limitations under the License.
  */
 /*
- * Portions Copyright 2014 ForgeRock AS.
+ * Portions Copyright 2014-2015 ForgeRock AS.
  * Copied from commons-lang:commons-lang:2.6 org.apache.commons.lang.reflect.ConstructUtils with un-required methods
  * removed.
  */
@@ -69,7 +70,7 @@ public final class ConstructorUtils {
      * @see Class#getConstructor
      * @see #getAccessibleConstructor(java.lang.reflect.Constructor)
      */
-    public static Constructor<?> getAccessibleConstructor(Class<?> cls, Class[] parameterTypes) {
+    public static Constructor<?> getAccessibleConstructor(Class<?> cls, Class<?>[] parameterTypes) {
         try {
             return getAccessibleConstructor(cls.getConstructor(parameterTypes));
         } catch (NoSuchMethodException e) {
@@ -88,3 +89,4 @@ public final class ConstructorUtils {
                 && Modifier.isPublic(ctor.getDeclaringClass().getModifiers()) ? ctor : null;
     }
 }
+// @Checkstyle:on

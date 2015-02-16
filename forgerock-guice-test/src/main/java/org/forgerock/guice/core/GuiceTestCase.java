@@ -29,6 +29,8 @@ import com.google.inject.Module;
 
 /**
  * A test case that allows registration of guice modules for the life of each test method being run.
+ *
+ * @since 1.1.0
  */
 public abstract class GuiceTestCase implements Module {
 

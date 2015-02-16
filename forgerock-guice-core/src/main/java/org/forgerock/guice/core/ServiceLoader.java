@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.guice.core;
@@ -21,6 +21,8 @@ import java.util.Iterator;
 /**
  * Simple wrapper around the Java ServiceLoader to help facilitate testing code which requires the use of the Java
  * ServiceLoader.
+ *
+ * @since 1.0.0
  */
 public class ServiceLoader {
 
@@ -33,14 +35,14 @@ public class ServiceLoader {
      * @param <S> The type of the service.
      * @return An Iterable backed by a Java ServiceLoader.
      */
-    <S> Iterable<S> load(final Class<S> service) {
+    <S> Iterable<S> load(Class<S> service) {
         return new ServiceSet<S>(java.util.ServiceLoader.load(service));
     }
 
     /**
-     * Simple wrapper around the java.util.ServiceLoader that is returned when loading services.
-     * <br/>
-     * This enables better testing as we cannot mock the java.util.ServiceLoader class as it is marked final.
+     * <p>Simple wrapper around the java.util.ServiceLoader that is returned when loading services.</p>
+     *
+     * <p>This enables better testing as we cannot mock the java.util.ServiceLoader class as it is marked final.</p>
      *
      * @param <T> The type of the Service.
      */

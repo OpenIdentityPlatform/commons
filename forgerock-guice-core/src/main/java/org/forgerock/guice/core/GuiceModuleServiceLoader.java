@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.guice.core;
@@ -26,19 +26,20 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Will find and load all classes which extend the Guice AbstractModule class and that are annotated with the
- * provided annotation by using the Java ServiceLoader framework.
- * <br/>
- * To register an AbstractModule with the ServiceLoader framework, create a file named,
+ * <p>Will find and load all classes which extend the Guice AbstractModule or PrivateModule class and that are
+ * annotated with the provided annotation by using the Java ServiceLoader framework.</p>
+ *
+ * <p>To register an AbstractModule with the ServiceLoader framework, create a file named,
  * "com.google.inject.AbstractModule", under META-INF/services with a new line delimited list of the fully
- * qualified names of the subtypes, in your jar/project, to be used to configure the Guice injector.
- * <br/>
- * Any AbstractModule subtypes which are registered with the Java ServiceLoader by are not annotated with the
- * provided annotation will be ignored and will not be included in the returned set of Guice Modules.
+ * qualified names of the subtypes, in your jar/project, to be used to configure the Guice injector.</p>
+ *
+ * <p>Any AbstractModule subtypes which are registered with the Java ServiceLoader by are not annotated with the
+ * provided annotation will be ignored and will not be included in the returned set of Guice Modules.</p>
  *
  * @see java.util.ServiceLoader
+ * @since 1.0.0
  */
-public class GuiceModuleServiceLoader implements GuiceModuleLoader {
+public final class GuiceModuleServiceLoader implements GuiceModuleLoader {
 
     private final Logger logger = LoggerFactory.getLogger(GuiceModuleServiceLoader.class);
 
@@ -49,7 +50,7 @@ public class GuiceModuleServiceLoader implements GuiceModuleLoader {
      *
      * @param serviceLoader An instance of a wrapper around the java.util.ServiceLoader.
      */
-    GuiceModuleServiceLoader(final ServiceLoader serviceLoader) {
+    GuiceModuleServiceLoader(ServiceLoader serviceLoader) {
         this.serviceLoader = serviceLoader;
     }
 
@@ -57,13 +58,13 @@ public class GuiceModuleServiceLoader implements GuiceModuleLoader {
      * {@inheritDoc}
      */
     @Override
-    public Set<Class<? extends Module>> getGuiceModules(final Class<? extends Annotation> moduleAnnotation) {
+    public Set<Class<? extends Module>> getGuiceModules(Class<? extends Annotation> moduleAnnotation) {
 
-        final Set<Class<? extends Module>> moduleClasses = new HashSet<Class<? extends Module>>();
+        Set<Class<? extends Module>> moduleClasses = new HashSet<Class<? extends Module>>();
 
-        final Iterable<AbstractModule> abstractModuleLoader = serviceLoader.load(AbstractModule.class);
+        Iterable<AbstractModule> abstractModuleLoader = serviceLoader.load(AbstractModule.class);
 
-        for (final AbstractModule module : abstractModuleLoader) {
+        for (AbstractModule module : abstractModuleLoader) {
             if (!hasAnnotation(module.getClass(), moduleAnnotation)) {
                 logger.debug(module.getClass().getCanonicalName()
                         + " extends the AbstractModule class but is not annotated with @"
@@ -83,14 +84,12 @@ public class GuiceModuleServiceLoader implements GuiceModuleLoader {
      * @param moduleAnnotation The annotation the class should be annotated with.
      * @return <code>true</code> if the class is annotated with the annotation, otherwise <code>false</code>.
      */
-    private boolean hasAnnotation(final Class<? extends AbstractModule> clazz,
-            final Class<? extends Annotation> moduleAnnotation) {
-        for (final Annotation annotation : clazz.getDeclaredAnnotations()) {
+    private boolean hasAnnotation(Class<? extends Module> clazz, Class<? extends Annotation> moduleAnnotation) {
+        for (Annotation annotation : clazz.getDeclaredAnnotations()) {
             if (moduleAnnotation.equals(annotation.annotationType())) {
                 return true;
             }
         }
-
         return false;
     }
 }
