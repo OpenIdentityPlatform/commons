@@ -17,6 +17,7 @@
 package org.forgerock.guice.core;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -58,7 +59,7 @@ public class GuiceModuleCreatorTest {
         guiceModuleCreator.createInstance(moduleClass);
 
         //Then
-        //Expected ModuleCreationException
+        failBecauseExceptionWasNotThrown(ModuleCreationException.class);
     }
 
     @Test (expectedExceptions = ModuleCreationException.class)
@@ -71,7 +72,7 @@ public class GuiceModuleCreatorTest {
         guiceModuleCreator.createInstance(moduleClass);
 
         //Then
-        //Expected ModuleCreationException
+        failBecauseExceptionWasNotThrown(ModuleCreationException.class);
     }
 
     @Test (expectedExceptions = ModuleCreationException.class)
@@ -84,7 +85,7 @@ public class GuiceModuleCreatorTest {
         guiceModuleCreator.createInstance(moduleClass);
 
         //Then
-        //Expected ModuleCreationException;
+        failBecauseExceptionWasNotThrown(ModuleCreationException.class);
     }
 
     public static final class InstantiationExceptionClass implements Module {
