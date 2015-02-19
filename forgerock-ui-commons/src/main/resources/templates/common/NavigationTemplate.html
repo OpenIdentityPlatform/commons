@@ -57,7 +57,10 @@
             <ul class="nav navbar-nav nav-subnav" role="menu">
                 {{#each subNav}}
                 <li {{#if isActive}} class="active" {{/if}}>
-                <a href="{{hashurl}}" title="{{title}}"><i class="{{icon}}"></i>{{title}}</a>
+                   <a href="{{hashurl}}" title="{{title}}">
+                      <i class="{{icon}}"></i>
+                      <span>{{title}}</span>
+                   </a>
                 </li>
                 {{/each}}
             </ul>
