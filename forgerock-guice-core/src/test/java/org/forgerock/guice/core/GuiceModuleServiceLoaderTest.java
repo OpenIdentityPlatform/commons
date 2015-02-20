@@ -50,8 +50,10 @@ public class GuiceModuleServiceLoaderTest {
 
         //Given
         Class<? extends Annotation> moduleAnnotation = GuiceModule.class;
+        Set<Module> modules = new HashSet<Module>();
         Set<AbstractModule> abstractModules = new HashSet<AbstractModule>();
 
+        given(serviceLoader.load(Module.class)).willReturn(modules);
         given(serviceLoader.load(AbstractModule.class)).willReturn(abstractModules);
 
         //When
@@ -66,11 +68,13 @@ public class GuiceModuleServiceLoaderTest {
 
         //Given
         Class<? extends Annotation> moduleAnnotation = GuiceModule.class;
+        Set<Module> modules = new HashSet<Module>();
+        modules.add(new TestModule5());
         Set<AbstractModule> abstractModules = new HashSet<AbstractModule>();
         abstractModules.add(new TestModule4());
-        abstractModules.add(new TestModule5());
         abstractModules.add(new TestModule6());
 
+        given(serviceLoader.load(Module.class)).willReturn(modules);
         given(serviceLoader.load(AbstractModule.class)).willReturn(abstractModules);
 
         //When

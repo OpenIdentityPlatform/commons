@@ -11,19 +11,19 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2015 ForgeRock AS.
  */
 
 package org.forgerock.guice.core.test;
 
-import com.google.inject.Binder;
-import com.google.inject.Module;
+import com.google.inject.PrivateModule;
 import org.forgerock.guice.core.GuiceModule;
 
 @GuiceModule
-public class TestModule5 implements Module {
+public class TestModule7 extends PrivateModule {
 
-    public void configure(Binder binder) {
+    @Override
+    protected void configure() {
 
     }
 

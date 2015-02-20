@@ -48,7 +48,9 @@ class GuiceModuleCreator {
             final Constructor<T> constructor = getConstructor(clazz);
             return constructor.newInstance();
         } catch (Exception e) {
-            logger.error("An exception occurred when trying to instantiate class, " + clazz.getName(), e);
+            if (logger.isErrorEnabled()) {
+                logger.error("An exception occurred when trying to instantiate class, " + clazz.getName(), e);
+            }
             throw new ModuleCreationException(e);
         }
     }

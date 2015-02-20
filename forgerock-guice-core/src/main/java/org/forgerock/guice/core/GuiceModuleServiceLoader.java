@@ -16,14 +16,14 @@
 
 package org.forgerock.guice.core;
 
+import java.lang.annotation.Annotation;
+import java.util.HashSet;
+import java.util.Set;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.lang.annotation.Annotation;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * <p>Will find and load all classes which extend the Guice AbstractModule or PrivateModule class and that are
@@ -41,8 +41,10 @@ import java.util.Set;
  */
 public final class GuiceModuleServiceLoader implements GuiceModuleLoader {
 
-    private final Logger logger = LoggerFactory.getLogger(GuiceModuleServiceLoader.class);
+    private static final Class<? extends Module> MODULE_SERVICE_CLASS = Module.class;
+    private static final Class<? extends Module> LEGACY_MODULE_SERVICE_CLASS = AbstractModule.class;
 
+    private final Logger logger = LoggerFactory.getLogger(GuiceModuleServiceLoader.class);
     private final ServiceLoader serviceLoader;
 
     /**
@@ -59,21 +61,31 @@ public final class GuiceModuleServiceLoader implements GuiceModuleLoader {
      */
     @Override
     public Set<Class<? extends Module>> getGuiceModules(Class<? extends Annotation> moduleAnnotation) {
+        Set<Class<? extends Module>> moduleClasses = new HashSet<Class<? extends Module>>();
+        moduleClasses.addAll(getGuiceModules(moduleAnnotation, MODULE_SERVICE_CLASS));
+        moduleClasses.addAll(getGuiceModules(moduleAnnotation, LEGACY_MODULE_SERVICE_CLASS));
+        return moduleClasses;
+    }
+
+    private <T extends Module> Set<Class<? extends Module>> getGuiceModules(
+            Class<? extends Annotation> moduleAnnotation, Class<T> serviceClass) {
 
         Set<Class<? extends Module>> moduleClasses = new HashSet<Class<? extends Module>>();
+        Iterable<T> abstractModuleLoader = serviceLoader.load(serviceClass);
 
-        Iterable<AbstractModule> abstractModuleLoader = serviceLoader.load(AbstractModule.class);
+        if (abstractModuleLoader == null) {
+            return moduleClasses;
+        }
 
-        for (AbstractModule module : abstractModuleLoader) {
+        for (T module : abstractModuleLoader) {
             if (!hasAnnotation(module.getClass(), moduleAnnotation)) {
-                logger.debug(module.getClass().getCanonicalName()
-                        + " extends the AbstractModule class but is not annotated with @"
-                        + moduleAnnotation.getSimpleName() + ", so will be ignored.");
+                logger.warn("{} extends the {} class but is not annotated with @{}, so will be ignored.",
+                        module.getClass().getCanonicalName(), serviceClass.getSimpleName(),
+                        moduleAnnotation.getSimpleName());
                 continue;
             }
             moduleClasses.add(module.getClass());
         }
-
         return moduleClasses;
     }
 

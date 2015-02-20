@@ -19,8 +19,10 @@ package org.forgerock.guice.core;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Module;
 import org.forgerock.guice.core.test.TestModule4;
 import org.forgerock.guice.core.test.TestModule5;
+import org.forgerock.guice.core.test.TestModule7;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -34,7 +36,22 @@ public class ServiceLoaderTest {
     }
 
     @Test
-    public void shouldLoadService() {
+    public void shouldLoadModuleService() {
+
+        //Given
+        Class<Module> service = Module.class;
+
+        //When
+        Iterable<Module> services = serviceLoader.load(service);
+
+        //Then
+        assertThat(services)
+                .hasSize(3)
+                .containsOnly(new TestModule4(), new TestModule5(), new TestModule7());
+    }
+
+    @Test
+    public void shouldLoadLegacyAbstractModuleService() {
 
         //Given
         Class<AbstractModule> service = AbstractModule.class;
@@ -44,7 +61,7 @@ public class ServiceLoaderTest {
 
         //Then
         assertThat(services)
-                .hasSize(2)
-                .containsOnly(new TestModule4(), new TestModule5());
+                .hasSize(1)
+                .containsOnly(new TestModule4());
     }
 }
