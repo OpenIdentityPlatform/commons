@@ -75,8 +75,9 @@ define([
 
                     function testValue(field, value, expectedValidationMsg, validationStatus, view) {
                         field.val(value).trigger('change');
+                        field.trigger('hover');
                         var fieldName = field.attr('name'),
-                            validationMsg = $('.validation-message[for="' + fieldName + '"]', view.$el).text();
+                            validationMsg = (field.data('bs.popover')) ? $("<div>" + field.data('bs.popover').options.content + "</div>").text().trim() : "";
                         QUnit.equal(validationMsg, expectedValidationMsg,
                             'Message "' + expectedValidationMsg + '" is displayed for ' + fieldName + ' for value "' + value + '"');
                         testStatusAttr(field, validationStatus);
