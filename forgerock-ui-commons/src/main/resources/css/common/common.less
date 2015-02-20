@@ -248,14 +248,14 @@ hr {
   Alert Messages
 */
 .alert-message {
-  position:absolute;
+  position:fixed;
   margin-left: auto;
   margin-right: auto;
   z-index:10000;
   left: 0;
   right: 0;
   margin-top:25px;
-  width:300px;
+  width:400px;
   min-height: 50px;
 }
 
@@ -705,13 +705,19 @@ hr {
   Panel Styles
 */
 
+.panel-default {
+  -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+}
+
 .panel-default>.panel-heading {
   background-color: transparent;
   padding: 15px;
 }
 
-.panel-heading .panel-title-icon {
-  margin-right:10px;
+.panel-heading .radio,
+.panel-heading .checkbox {
+  margin: 0;
 }
 
 .panel.panel-content {
@@ -724,23 +730,140 @@ hr {
   font-size: 13px;
   letter-spacing: 1px;
 }
+
 .panel-title .panel-title-icon {
   display: inline-block;
+  margin-right:5px;
 }
+
 .panel-title>a {
-  color: @panel-title-color;
+  color: #333;
   position: relative;
   padding-left: 17px;
 }
+
 .panel-title a:hover,
 .panel-title a:focus {
-  color: @panel-title-hover;
+  color: #36625a;
+}
+
+.panel .nav-list>li:last-child>a {
+  border-bottom: none;
+}
+
+.panel {
+  border-radius: 4px;
+  -webkit-box-shadow:none;
+  box-shadow:none;
+}
+
+.panel .inner {
+  padding: 20px;
+}
+
+.panel .panel-image {
+  text-align: center;
+  display: table;
+  min-height: 100px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.panel .panel-image .panel-image-inner {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.panel .panel-image img {
+  max-width: 120px;
+}
+
+.panel.inactive {
+  color: #999;
+  background: transparent;
+}
+
+.panel.selected,
+.panel.active {
+  background-color: #fff;
+}
+
+.panel.empty .panel-header {
+  border: none;
+}
+
+.panel.empty .panel-body {
+  display: none;
+}
+
+.panel .connection-status-inactive {
+  color: #ddd;
+}
+
+.panel .connection-status-active {
+  display: none;
+  color: #333;
+}
+
+.panel-connector h4 {
+  margin-bottom: 5px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.panel-config > .panel-heading,
+.panel-connector>.panel-heading {
+  color: #333;
+  background-color: #fff;
+  border-color: #ddd;
+  margin-bottom: 10px;
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 0;
+  position: relative;
+}
+
+.panel-config > .panel-heading img {
+  width: 120px;
+  float: left;
+}
+
+.panel-connector>.panel-heading a {
+  color: #666;
+}
+
+.panel-connector>.panel-heading a:hover,
+.panel-connector>.panel-heading a:focus,
+.panel-connector>.panel-heading a:active {
+  color: #333;
+}
+
+.panel-connector>.panel-heading .btn-group {
+  position: absolute;
+  right: 10px;
+}
+
+.panel-connector>.panel-heading .btn-group button {
+  color: #666;
+  padding: 0;
+  font-size: 18px;
+  line-height: 0;
+}
+
+.panel-connector>.panel-heading .btn-group .dropdown-menu {
+  top: 16px;
+  border-radius: 0;
+}
+
+.panel-connector>.panel-footer {
+  background-color: #fff;
 }
 
 .panel-title a:hover,
 .panel-title a:focus {
   text-decoration: none;
 }
+
 .panel-title a:before {
   content: '';
   display: inline-block;
@@ -780,33 +903,45 @@ hr {
 }
 
 .panel-collapse>.panel-heading {
-  background-color: @panel-header-color;
-  order-radius: 0;
+  background-color: transparent;
+  border-color: transparent;
+
+}
+
+.panel-default.panel-collapse {
+  border-bottom: 1px solid #eee;
+}
+
+.panel-default.panel-collapse:last-child {
+  border-bottom: none;
 }
 
 .panel-collapse .panel-title {
-  font-weight: 300;
   font-size: 18px;
   text-transform: none;
   letter-spacing: 0;
+  font-weight: 400;
 }
 
 .panel-collapse>.panel-heading .badge {
-  background-color: @panel-badge-color;
+  background-color: #519387;
 }
 
 .panel-collapse .panel-title>a {
-  color: @panel-title-collapse-color;
+  color: #519387;
+}
+
+.panel-default>.panel-heading+.panel-collapse>.panel-body {
+  padding-left: 30px;
+}
+
+.panel-default>.panel-heading+.panel-collapse>.panel-footer {
+  margin-bottom: 40px;
 }
 
 .panel-inset {
   margin-left: -15px;
   margin-right: -15px;
-}
-
-.page-header {
-  border-bottom: 1px solid #ddd;
-  position: relative;
 }
 
 /*
@@ -971,6 +1106,10 @@ Button Toolbar
     background-color: #111;
     background-image: none;
     filter: none;
+  }
+
+  .dropdown-menu .fa {
+    margin-right:5px;
   }
 
   .navbar-nav>li>a {

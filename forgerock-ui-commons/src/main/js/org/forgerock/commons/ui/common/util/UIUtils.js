@@ -745,17 +745,19 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
             type: BootstrapDialog.TYPE_DEFAULT,
             message: message,
             buttons: [{
+                label: $.t('common.form.cancel'),
+                action: function(dialog){
+                    dialog.close();
+                }
+            },
+            {
                 label: $.t('common.form.ok'),
+                cssClass: "btn-primary",
                 action: function(dialog) {
                     if(confirmCallback) {
                         confirmCallback();
                     }
 
-                    dialog.close();
-                }
-            }, {
-                label: $.t('common.form.cancel'),
-                action: function(dialog){
                     dialog.close();
                 }
             }]
