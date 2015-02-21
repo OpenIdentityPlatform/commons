@@ -36,6 +36,9 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/util/DateUtil"
 ], function ($, _, String, AbstractConfigurationAware, handlebars, BootstrapDialog, i18next, router, dateUtil) {
+    /**
+     * @exports org/forgerock/commons/ui/common/util/UIUtils
+     */
     var obj = new AbstractConfigurationAware();
 
     obj.getUrl = function() {
@@ -46,23 +49,82 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         return window.location.protocol + "//" + window.location.host;
     };
 
+    /**
+     * Returns the query string from the fragment component
+     * @returns {String} Unescaped query string or empty string if no query string was found
+     */
+    obj.getURIFragmentQueryString = function() {
+      var fragment = obj.getURIFragment(),
+          queryString = '';
+
+      if(fragment.indexOf('&') > -1) {
+        queryString = fragment.substring(fragment.indexOf('&') + 1);
+      }
+
+      return queryString;
+    };
+
+    /**
+     * Returns the query string from the URI
+     * @returns {String} Unescaped query string or empty string if no query string was found
+     */
+    obj.getURIQueryString = function() {
+      var queryString = window.location.search;
+
+      return queryString.substr(1, queryString.length);
+    };
+
+    /**
+     * @deprecated
+     * @see Use {@link module:org/forgerock/commons/ui/common/util/UIUtils.getURIFragment}
+     */
     obj.getCurrentHash = function() {
-        if (window.location.href.indexOf('#') === -1) {
+        if (obj.getUrl().indexOf('#') === -1) {
             return "";
         } else {
             // cannot use window.location.hash due to FF which de-encodes this parameter.
-            return window.location.href.substring(window.location.href.indexOf('#') + 1);
+            return obj.getUrl().substring(obj.getUrl().indexOf('#') + 1);
         }
     };
 
+    /**
+     * Returns the fragment component of the current URI
+     *
+     * Use instead of the inconsistent window.location.hash as Firefox unescapes this parameter incorrectly
+     * @see {@link https://bugzilla.mozilla.org/show_bug.cgi?id=135309}
+     * @returns {String} Unescaped fragment or empty string if no fragment was found
+     */
+    obj.getURIFragment = function() {
+        return obj.getUrl().split('#')[1] || '';
+    };
+
+    /**
+     * @deprecated
+     * @see Use {@link module:org/forgerock/commons/ui/common/util/UIUtils.getCompositeQueryString}
+     */
     obj.getCurrentUrlQueryParameters = function() {
         var hash = obj.getCurrentHash(),
-            queries = window.location.search.substr(1,window.location.search.length);
-        // location.search will only return a value if there are queries before the hash.
+            queries = obj.getURIQueryString();
+            // location.search will only return a value if there are queries before the hash.
         if (hash && hash.indexOf('&') > -1) {
             queries = hash.substring(hash.indexOf('&') + 1);
         }
         return queries;
+    };
+
+    /**
+     * Returns an unescaped composite query string constructed from:<br>
+     * <ul><li>Fragment query string</li>
+     * <li>URL query string</li></ul>
+     * <p>
+     * If a fragment query string is present it overrides the URL query string entirely
+     * @returns {String} Unescaped query string
+     */
+    obj.getCompositeQueryString = function() {
+      var urlQueryString = obj.getURIQueryString(),
+          fragmentQueryString = obj.getURIFragmentQueryString();
+
+      return fragmentQueryString.length ? fragmentQueryString : urlQueryString;
     };
 
     obj.getCurrentPathName = function() {
@@ -97,15 +159,15 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
             return _.object(
                 //queryParameters.match(/([^&]+)/g) returns an array of key value pair strings
                 _.map(queryParameters.match(/([^&]+)/g), function (pair) {
-                    //convert each string into a an array 0 index being the key and 1 index being the value
-                    var keyAndValue = pair.match(/([^=]+)=?(.*)/).slice(1);
-                    //decode the value
-                    keyAndValue[1] = decodeURIComponent(keyAndValue[1]);
-                    return keyAndValue;
+                   //convert each string into a an array 0 index being the key and 1 index being the value
+                   var keyAndValue = pair.match(/([^=]+)=?(.*)/).slice(1);
+                       //decode the value
+                       keyAndValue[1] = decodeURIComponent(keyAndValue[1]);
+                       return keyAndValue;
                 })
             );
         }
-        return null;
+        return {};
     };
 
     obj.commonJQGridFormatters = {
@@ -348,7 +410,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
 
         showSearch = !!options.search;
         grid.navGrid(options.pager, {edit: false, add: false, del: false, search: showSearch, refresh: false},
-            {},{},{},{multipleSearch: true, closeOnEscape: true, closeAfterSearch: true});
+                     {},{},{},{multipleSearch: true, closeOnEscape: true, closeAfterSearch: true});
 
         if(!additional.suppressColumnChooser){
             grid.navButtonAdd(options.pager,{
@@ -512,7 +574,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         result = i18n.t(i18nKey, params);
 
         return new Handlebars.SafeString(result);
-    });
+     });
 
     Handlebars.registerHelper('url', function(routeKey) {
         var result = "#" + router.getLink(router.configuration.routes[routeKey], _.toArray([arguments[1]]));
@@ -639,7 +701,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         params = { count: countValue };
         result = i18n.t(options.hash.key, params);
         return new Handlebars.SafeString(result);
-    });
+     });
 
 
     Handlebars.registerHelper('equals', function(val, val2, options) {
@@ -651,9 +713,9 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     Handlebars.registerHelper('checkbox', function(map, name, options) {
         var ret = "<div class='checkboxList' id='"+name+"'><ol>", idx,
             sortedMap = _.chain(map)
-                .pairs()
-                .sortBy(function (arr) { return arr[1]; })
-                .value();
+                            .pairs()
+                            .sortBy(function (arr) { return arr[1]; })
+                            .value();
 
         for(idx=0;idx<sortedMap.length;idx++) {
             ret += '<li><input type="checkbox" name="'+ name +'" value="'+ sortedMap[idx][0] +'" id="'+ name +'_'+ encodeURIComponent(sortedMap[idx][0]) +'"><label for="'+ name +'_'+ encodeURIComponent(sortedMap[idx][0]) +'">' + sortedMap[idx][1] + '</label></li>';
@@ -668,7 +730,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         var ret = "", i;
 
         for(i = 0; i < images.length; i++) {
-            ret +=  '<label class="btn btn-default col-xs-3 item"><input type="radio" name="options" id="option1" autocomplete="off" checked=""> <img src="' + encodeURI(images[i]) +'" data-site-image="'+ encodeURI(images[i]) +'"></label>';
+            ret += '<img class="item" src="' + encodeURI(images[i]) +'" data-site-image="'+ encodeURI(images[i]) +'" />';
         }
 
         return new Handlebars.SafeString(ret);
@@ -729,7 +791,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                 "key" : "",
                 "value" : $.t("common.form.pleaseSelect")
             } ].concat(data);
-        }
+            }
 
         el.loadSelect(data);
 
@@ -757,65 +819,91 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                     if(confirmCallback) {
                         confirmCallback();
                     }
-
+ 
                     dialog.close();
-                }
+                 }
             }]
         });
-    };
+     };
 
     obj.responseMessageMatch = function(error, string){
         var responseMessage = JSON.parse(error).message;
         return responseMessage.indexOf(string) > -1;
     };
 
+    /**
+    * Takes a string and checks if there is a matching url parameter.
+    * @returns {String} parameter or null
+    */
+    obj.getParamByName = function(string){
+        var urlParams = obj.convertCurrentUrlToJSON().params;
+        if (urlParams && urlParams.hasOwnProperty(string)) {
+            return urlParams[string];
+        } else {
+            return null;
+        }
+    };
+
     // Registering global mixins
 
     _.mixin({
 
-        /*  findByValues takes a collection and returns a subset made up of objects where the given property name matches a value in the list.
-         For example:
-
-         var collections = [
-         {id: 1, stack: 'am'},
-         {id: 2, stack: 'dj'},
-         {id: 3, stack: 'idm'},
-         {id: 4, stack: 'api'},
-         {id: 5, stack: 'rest'}
-         ];
-
-         var filtered = _.findByValues(collections, "id", [1,3,4]);
-
-         filtered = [
-         {id: 1, stack: 'am'},
-         {id: 3, stack: 'idm'},
-         {id: 4, stack: 'api'}
-         ]
-
-         */
-
+        /**
+        * findByValues takes a collection and returns a subset made up of objects where the given property name matches a value in the list.
+        * @returns {Array} subset of made up of {Object} where there is no match between the given property name and the values in the list.
+        * @example
+        *
+        *    var collections = [
+        *        {id: 1, stack: 'am'},
+        *        {id: 2, stack: 'dj'},
+        *        {id: 3, stack: 'idm'},
+        *        {id: 4, stack: 'api'},
+        *        {id: 5, stack: 'rest'}
+        *    ];
+        *
+        *    var filtered = _.findByValues(collections, "id", [1,3,4]);
+        *
+        *    filtered = [
+        *        {id: 1, stack: 'am'},
+        *        {id: 3, stack: 'idm'},
+        *        {id: 4, stack: 'api'}
+        *    ]
+        *
+        */
         'findByValues': function(collection, property, values) {
             return _.filter(collection, function(item) {
                 return _.contains(values, item[property]);
             });
         },
 
-        /*  removeByValues takes a collection and returns a subset made up of objects where there is no match between the given property name and the values in the list.
-         For example:
-
-         var filtered = _.removeByValues(collections, "id", [1,3,4]);
-
-         filtered = [
-         {id: 2, stack: 'dj'},
-         {id: 5, stack: 'rest'}
-         ]
-
-         */
+        /**
+        * Returns subset array from a collection
+        * @returns {Array} subset of made up of {Object} where there is no match between the given property name and the values in the list.
+        * @example
+        *
+        *    var filtered = _.removeByValues(collections, "id", [1,3,4]);
+        *
+        *    filtered = [
+        *        {id: 2, stack: 'dj'},
+        *        {id: 5, stack: 'rest'}
+        *    ]
+        *
+        */
         'removeByValues': function(collection, property, values) {
             return _.reject(collection, function(item) {
                 return _.contains(values, item[property]);
             });
+        },
+
+        /**
+        * isUrl checks to see if string is a valid URL
+        * @returns {Boolean}
+        */
+        'isUrl': function(string){
+            var regexp = /(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
+            return regexp.test(string);
         }
+
     });
 
     return obj;

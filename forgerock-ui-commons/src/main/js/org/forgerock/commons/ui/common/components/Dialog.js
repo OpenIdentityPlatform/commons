@@ -37,6 +37,9 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/Configuration"
 ], function($, _, AbstractView, uiUtils, constants, eventManager, conf) {
+    /**
+     * @exports org/forgerock/commons/ui/common/components/Dialog
+     */
     var Dialog = AbstractView.extend({
         template: "templates/common/DialogTemplate.html",
         element: "#dialogs",
@@ -68,27 +71,27 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
          * close action is added.
          */
         show: function(callback) {
-            var buttonClass;
+
+            this.data.actions = _.map(this.actions, function (a) {
+                if (a.type === "submit") {
+                    a.buttonClass = "btn-primary";
+                } else {
+                    a.buttonClass = "btn-default";
+                }
+                return a;
+            });
 
             this.setElement($("#dialogs"));
             this.parentRender(_.bind(function() {
+
+                this.$el.addClass('show');
                 this.setElement(this.$el.find(".dialogContainer:last"));
-                $("#dialogs").addClass('show');
+
                 $("#dialog-background").addClass('show');
-                $("#dialog-background").off('click').on('click', _.bind(this.close, this));
-
-                _.each(this.actions, _.bind(function(a) {
-
-                    if(a.type ==="submit") {
-                        buttonClass = "btn-primary";
-                    } else {
-                        buttonClass = "btn-default";
-                    }
-
-                    this.$el.find(".dialogActions").append("<input type='"+ a.type +"' name='"+ a.name +"' value='"+ a.name +"' class='btn " +buttonClass +" pull-right' />");
-                }, this));
+                this.$el.off('click').on('click', _.bind(this.close, this));
 
                 this.loadContent(callback);
+                this.delegateEvents();
             }, this));
         },
 
@@ -109,12 +112,14 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
             this.show();
         },
 
-        close: function(event) {
-            if(event) {
-                event.preventDefault();
+
+
+        close: function(e) {
+            if (e) {
+                e.preventDefault();
             }
 
-            if($(".dialogContainer").length < 2) {
+            if ($(".dialogContainer").length < 2) {
                 $("#dialog-background").removeClass('show');
                 $("#dialogs").removeClass('show');
                 $("#dialogs").hide();
@@ -124,7 +129,6 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
 
             this.$el.remove();
         },
-
 
         addAction: function(name, type) {
             if(!this.getAction(name)) {

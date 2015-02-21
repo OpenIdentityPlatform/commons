@@ -34,7 +34,18 @@ define("org/forgerock/commons/ui/common/main/Router", [
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware"
 ], function(_, eventManager, constants, conf, AbstractConfigurationAware) {
-    var obj = new AbstractConfigurationAware();
+    var obj = new AbstractConfigurationAware(),
+        decodeLastElement = function (array) {
+            // Return a modified version of the provided array, with only the last item changed (decoded)
+            // Has no side-effects on the passed-in array object.
+            return _.map(array, function (item, index) {
+                if (index === array.length-1 && typeof item === "string") {
+                    return decodeURIComponent(item);
+                } else {
+                    return item;
+                }
+            });
+        };
     
     obj.bindedRoutes = {};
     obj.currentRoute = {};
@@ -75,14 +86,14 @@ define("org/forgerock/commons/ui/common/main/Router", [
                 
                 var route = obj.configuration.routes[this.key], baseView, i, args;
                 
-                args = _.toArray(arguments);
+                args = decodeLastElement(_.toArray(arguments));
 
                 if (!obj.checkRole(route)) {
                     return;
                 }
 
                 if(route.event) {
-                    eventManager.sendEvent(route.event, args);
+                    eventManager.sendEvent(route.event, {route: route, args: args});
                 } else if(route.dialog) {
                     route.baseView = obj.configuration.routes[route.base];
                     
@@ -130,7 +141,7 @@ define("org/forgerock/commons/ui/common/main/Router", [
         });
 
         if (handler) {
-            return obj.router._extractParameters(handler.route, fragment);
+            return decodeLastElement(obj.router._extractParameters(handler.route, fragment));
         } else {
             return undefined;
         }
@@ -164,8 +175,9 @@ define("org/forgerock/commons/ui/common/main/Router", [
         
         if (args) {
             for(i = 0; i < args.length; i++) {
-                if (args[i] !== undefined) {
-                    pattern = pattern.replace("?", args[i]);
+                if (typeof args[i] === "string") {
+                    // # and % are known to cause problems with routing when unencoded in the fragment
+                    pattern = pattern.replace("?", args[i].replace(/[\#\%\?]/g, encodeURIComponent));
                 } else {
                     break;
                 }

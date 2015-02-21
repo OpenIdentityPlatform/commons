@@ -39,9 +39,9 @@ define("org/forgerock/commons/ui/common/main/ServiceInvoker", [
 
     obj.restCall = function(callParamsParam) {
         var current = this, callParams, realSuccess, realError, nonJsonRequest = false;
-        
+
         nonJsonRequest = (callParamsParam.hasOwnProperty('dataType') && callParamsParam.dataType !== "json");
-        
+
         if (!nonJsonRequest) {
             callParamsParam.contentType = 'application/json';
         }
@@ -62,7 +62,7 @@ define("org/forgerock/commons/ui/common/main/ServiceInvoker", [
                 if(realError) {
                     realError(data);
                 }
-            } else {            
+            } else {
                 em.sendEvent(constants.EVENT_END_REST_CALL, { data: data, textStatus: textStatus, jqXHR: jqXHR});
                 if(realSuccess) {
                     realSuccess(data);
@@ -86,11 +86,11 @@ define("org/forgerock/commons/ui/common/main/ServiceInvoker", [
             // http://www.html5rocks.com/en/tutorials/cors/#toc-withcredentials
             withCredentials: true
         };
-        
+
         // this is the jQuery default value for this header, but unless manually specified (like so) it won't be included in CORS requests
         callParams.headers["X-Requested-With"] = "XMLHttpRequest";
-        
-        return $.ajax(callParams); 
+
+        return $.ajax(callParams);
     };
 
     /**

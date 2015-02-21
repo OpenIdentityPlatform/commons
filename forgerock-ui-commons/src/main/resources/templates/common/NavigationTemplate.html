@@ -10,7 +10,7 @@
             <ul class="nav navbar-nav">
                 {{#each topNav}}
                 <li {{#if isActive}} class="active" {{/if}}>
-                <a href="{{hashurl}}" title="{{title}}"><i class="{{icon}}"></i>{{title}}</a>
+                <a href="{{hashurl}}" title="{{title}}">{{#if icon}}<i class="{{icon}}"></i>{{/if}}{{title}}</a>
 
                 {{#if subNav.length}}
                 <div class="subnav">
@@ -18,7 +18,7 @@
                         <ul class="nav nav-subnav" role="menu">
                             {{#each ../subNav}}
                             <li {{#if isActive}} class="active" {{/if}}>
-                            <a href="{{hashurl}}" title="{{title}}"><i class="{{icon}}"></i>{{title}}</a>
+                            <a href="{{hashurl}}" title="{{title}}">{{#if icon}}<i class="{{icon}}"></i>{{/if}}{{title}}</a>
                             </li>
                             {{/each}}
                         </ul>
@@ -58,7 +58,7 @@
                 {{#each subNav}}
                 <li {{#if isActive}} class="active" {{/if}}>
                    <a href="{{hashurl}}" title="{{title}}">
-                      <i class="{{icon}}"></i>
+                      {{#if icon}}<i class="{{icon}}"></i>{{/if}}
                       <span>{{title}}</span>
                    </a>
                 </li>

@@ -40,6 +40,9 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
     "org/forgerock/commons/ui/common/util/Constants",
     "ThemeManager"
 ], function($, _, Backbone, uiUtils, validatorsManager, validatorsUtils, conf, eventManager, router, constants, themeManager) {
+    /**
+     * @exports org/forgerock/commons/ui/common/main/AbstractView
+     */
     var View = Backbone.View.extend({
 
         /**

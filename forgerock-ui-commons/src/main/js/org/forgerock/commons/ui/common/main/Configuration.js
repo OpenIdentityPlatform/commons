@@ -33,7 +33,7 @@ define("org/forgerock/commons/ui/common/main/Configuration", [
     "config/AppConfiguration"
 ], function(eventManager, constants, appConfiguration) {
     var obj = {};
-    obj.appConfiguration = appConfiguration; 
+    obj.appConfiguration = appConfiguration;
 
     obj.setProperty = function(propertyName, propertyValue) {
         obj[propertyName] = propertyValue;
@@ -41,7 +41,7 @@ define("org/forgerock/commons/ui/common/main/Configuration", [
 
     obj.removeModuleConfigurationProperty = function(moduleClassName, propertyName, propertyValue) {
         var moduleConf = obj.getModuleConfiguration(moduleClassName);
-        moduleConf[propertyName] = propertyValue; 
+        moduleConf[propertyName] = propertyValue;
     };
 
     //NOT in use. NOT tested
@@ -77,7 +77,7 @@ define("org/forgerock/commons/ui/common/main/Configuration", [
                 eventManager.sendEvent(constants.EVENT_CONFIGURATION_CHANGED, obj.appConfiguration.moduleDefinition[i]);
                 return;
             }
-        }			
+        }
         console.warn("No module name " + moduleClassName + " found to send configuration to");
     };
 

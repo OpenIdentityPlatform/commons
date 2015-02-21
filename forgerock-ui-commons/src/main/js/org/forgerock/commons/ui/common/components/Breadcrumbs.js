@@ -33,6 +33,9 @@ define("org/forgerock/commons/ui/common/components/Breadcrumbs", [
     "underscore",
     "backbone"
 ], function($, _, Backbone) {
+    /**
+     * @exports org/forgerock/commons/ui/common/components/Breadcrumbs
+     */
     var Breadcrumbs= Backbone.View.extend({
 
         size: 0,
