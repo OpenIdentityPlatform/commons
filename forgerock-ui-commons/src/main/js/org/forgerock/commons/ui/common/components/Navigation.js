@@ -56,18 +56,29 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
             disableLink: function(e){
                 e.preventDefault();
             },
-            render: function() {
-                //Added to ensure username shows up on direct page load
-                if(conf.loggedUser) {
+            render: function(args, callback) {
+
+                this.data.userBar = _.map(obj.configuration.userBar, function (link) {
+                    if (_.has(link, "i18nKey")) {
+                        link.label = $.t(link.i18nKey);
+                    }
+                    return link;
+                });
+
+                // The user information is shown at the top of the userBar widget,
+                // but it is stored in different ways for different products.
+                if (conf.loggedUser) {
                     if (conf.loggedUser.userName) {
-                        this.data.username = conf.loggedUser.userName;
+                        this.data.username = conf.loggedUser.userName; //idm
                     } else if (conf.loggedUser.cn) {
-                        this.data.username = conf.loggedUser.cn;
+                        this.data.username = conf.loggedUser.cn; //am
+                    } else {
+                        this.data.username = conf.loggedUser._id; //fallback option
                     }
                 }
 
                 this.reload();
-                this.parentRender();
+                this.parentRender(callback);
             },
 
             addLinks: function(linkName) {
@@ -168,6 +179,19 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
     obj.reload = function() {
         if(obj.navigation) {
             obj.navigation.render();
+        }
+    };
+
+    obj.addUserBarLink = function (link, position) {
+        if (!_.find(obj.configuration.userBar, function (ub) {
+                return ub.id === link.id;
+            })) {
+
+            if (position === "top") {
+                obj.configuration.userBar.unshift(link);
+            } else {
+                obj.configuration.userBar.push(link);
+            }
         }
     };
 

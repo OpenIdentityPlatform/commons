@@ -109,7 +109,24 @@ define("config/AppConfiguration", function () {
                                 }
                             }
                         }
-                    }
+                     },
+                     userBar: [
+                         {
+                             "id": "profile_link",
+                             "href": "#profile/",
+                             "i18nKey": "common.user.profile"
+                         },
+                         {
+                             "id": "security_link",
+                             "href": "#profile/change_security_data/",
+                             "i18nKey": "templates.user.UserProfileTemplate.changeSecurityData"
+                         },
+                         {
+                             "id": "logout_link",
+                             "href": "#logout/",
+                             "i18nKey": "common.form.logout"
+                         }
+                     ]
                 }
             },
             {

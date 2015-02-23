@@ -32,6 +32,5 @@ define("org/forgerock/commons/ui/common/main", [
     "./EnableCookiesView",
     "./LoginView",
     "./LoginDialog",
-    "./LoggedUserBarView",
     "./SiteConfigurator"
 ]);

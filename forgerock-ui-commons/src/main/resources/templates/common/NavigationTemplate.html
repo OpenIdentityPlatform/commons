@@ -29,23 +29,30 @@
                 </li>
                 {{/each}}
             </ul>
+
             <ul id="loginContent" class="nav navbar-nav navbar-right">
                 <li class="dropdown">
                     <a href="#" aria-haspopup="true" aria-expanded="false" class="dropdown-toggle" data-toggle="dropdown">
                         <span class="user-avatar">
                             <i class="fa fa-user"></i>
                         </span>
-                        <span id="user_name">
-                            {{#if username}}
-                                {{username}}
-                            {{/if}}
-                        </span><span class="caret"></span></a>
+                        <span id="user_name">{{#if username}}{{username}}{{/if}}</span><span class="caret"></span>
+                    </a>
+                    {{#if userBar.length}}
                     <ul class="dropdown-menu" role="menu">
-                        <li><a href="#profile/" id="profile_link">{{t "common.user.profile"}}</a></li>
-                        <li><a href="#profile/change_security_data/" id="security_link">{{t "templates.user.UserProfileTemplate.changeSecurityData"}}</a></li>
-                        <li><a href="#logout/" id="logout_link">{{t "common.form.logout"}}</a></li>
+                        {{#each userBar}}
+                        <li>
+                            {{#if href}}
+                                <a href="{{href}}" id="{{id}}">{{label}}</a>
+                            {{else}}
+                                <span id="{{id}}">{{label}}</span>
+                            {{/if}}
+                        </li>
+                        {{/each}}
                     </ul>
+                    {{/if}}
                 </li>
+
             </ul>
         </div>
     </div>

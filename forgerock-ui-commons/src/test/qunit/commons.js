@@ -34,53 +34,77 @@ define([
     "org/forgerock/commons/ui/common/util/CookieHelper",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/util/Base64",
-    "org/forgerock/commons/ui/common/util/Mime"
-], function (sinon, conf, Dialog, eventManager, constants, cookieHelper, UIUtils, Base64, Mime) {
+    "org/forgerock/commons/ui/common/util/Mime",
+    "org/forgerock/commons/ui/common/main/Router"
+], function (sinon, conf, Dialog, eventManager, constants, cookieHelper, UIUtils, Base64, Mime, router) {
     return {
         executeAll: function (server, parameters) {
 
             module('Common Tests');
 
-            QUnit.asyncTest("Login / Logout", function () {
+            QUnit.asyncTest("Login", function () {
 
                 var loginView = require("LoginView");
-                loginView.element = $("<div>")[0];
-                loginView.render([], function () {
-
-                    var loggedUserBarView = require("org/forgerock/commons/ui/common/LoggedUserBarView"),
-                        loggedUserEl = $('<div>').append('<ul id="loginContent"><li id="user_name"></li><li id="logout_link"></a></li></ul>');
-
-                    QUnit.ok(!_.has(conf.globalData, 'hasOptionalUIFeatures'), "There should be no hasOptionalUIFeatures within conf.globalData (CUI-24)");
-
-                    QUnit.ok($("#login", loginView.$el).length                                  , "Username field available");
-                    QUnit.ok($("#password", loginView.$el).length                               , "Password field available");
-                    QUnit.ok($("[name=loginButton]", loginView.$el).length                      , "Login button available");
-
-                    $("#login", loginView.$el).val(parameters.username).trigger('keyup');
-                    $("#password", loginView.$el).val(parameters.password).trigger('keyup');
-
-                    $("[name=loginButton]", loginView.$el).trigger("click");
-
-                    QUnit.ok(conf.loggedUser !== undefined && conf.loggedUser !== null          , "User should be logged in");
-
-                    cachedUser = _.clone(conf.loggedUser);
-
-                    loggedUserBarView.element = loggedUserEl[0];
-
-                    // loggedUserBarView.render is synchronous
-                    loggedUserBarView.render([], function () {
-
-                        QUnit.equal($("#user_name", loggedUserBarView.$el).text(), conf.loggedUser.userName     , "Login Bar 'user_name' reflects logged user");
-                        QUnit.ok($("#logout_link", loggedUserBarView.$el).length                                , "Log out link available");
-
-                        $("#logout_link", loggedUserBarView.$el).trigger("click");
-                        QUnit.ok(conf.loggedUser === null                                                       , "User should be logged out");
-
+                // intercept the framework's invocation of the render function to define our own callback function
+                sinon.stub(loginView, "render", function (args, callback) {
+                    loginView.render.restore();
+                    loginView.render(args, function () {
+  
+                        QUnit.ok(!_.has(conf.globalData, 'hasOptionalUIFeatures'), "There should be no hasOptionalUIFeatures within conf.globalData (CUI-24)");
+  
+                        QUnit.ok($("#login", loginView.$el).length                                  , "Username field available");
+                        QUnit.ok($("#password", loginView.$el).length                               , "Password field available");
+                        QUnit.ok($("[name=loginButton]", loginView.$el).length                      , "Login button available");
+  
+                        $("#login", loginView.$el).val(parameters.username).trigger('keyup');
+                        $("#password", loginView.$el).val(parameters.password).trigger('keyup');
+  
+                        $("[name=loginButton]", loginView.$el).trigger("click");
+  
+                        QUnit.ok(conf.loggedUser !== undefined && conf.loggedUser !== null          , "User should be logged in");
+  
+                        delete router.configuration.routes.login.forceUpdate;
                         QUnit.start();
+  
+                    });
+  
+  
+                });
+                
+                router.configuration.routes.login.forceUpdate=true;
+                eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login});
+  
+            });
+  
+            QUnit.asyncTest("Logout", function () {
+                var nav = require("org/forgerock/commons/ui/common/components/Navigation"),
+                    sessionManager = require("org/forgerock/commons/ui/common/main/SessionManager");
+
+                $("#qunit-fixture").append("<div id='menu'></div>");
+  
+                conf.loggedUser = {
+                    "userName": "test"
+                };
+
+                nav.navigation.render(null, function () {
+                    QUnit.equal($("#user_name").text(), conf.loggedUser.userName                , "Login Bar 'user_name' reflects logged user");
+                    QUnit.ok($("#logout_link").length                                           , "Log out link available");
+
+                    sinon.stub(sessionManager, "logout", function (callback) {
+                        sessionManager.logout.restore();
+                        sessionManager.logout(function () {
+                            if (callback) {
+                                callback();
+                            }
+                            QUnit.ok(conf.loggedUser === null                                   , "User should be logged out");
+                            QUnit.start();
+                        });
                     });
 
+                    window.location.hash = $("#logout_link").attr('href');
 
                 });
+
             });
 
             QUnit.asyncTest("Remember Login", function () {
@@ -226,8 +250,7 @@ define([
             });
 
             QUnit.asyncTest("Views using plain route url incorrectly rendered multiple times (CUI-50)", function () {
-                var router = require("org/forgerock/commons/ui/common/main/Router"),
-                    testView = require("org/forgerock/commons/ui/common/EnableCookiesView"), // a view with a plain (non-regexp) route url
+                var testView = require("org/forgerock/commons/ui/common/EnableCookiesView"), // a view with a plain (non-regexp) route url
                     renderPromise = $.Deferred(),
                     stub;
 

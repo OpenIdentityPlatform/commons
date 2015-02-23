@@ -79,15 +79,13 @@ define("config/process/CommonConfig", [
                 "org/forgerock/commons/ui/common/components/popup/PopupCtrl",
                 "org/forgerock/commons/ui/common/components/Breadcrumbs",
                 "org/forgerock/commons/ui/common/main/Configuration",
-                "org/forgerock/commons/ui/common/LoggedUserBarView",
                 "org/forgerock/commons/ui/common/components/Footer"
             ],
-            processDescription: function(event, navigation, popupCtrl, breadcrumbs, conf, loggedUserBarView,footer) {
+            processDescription: function(event, navigation, popupCtrl, breadcrumbs, conf,footer) {
                 navigation.init();
                 popupCtrl.init();
                 
                 breadcrumbs.buildByUrl();
-                loggedUserBarView.render();
                 footer.render();
             }
         },
@@ -96,10 +94,9 @@ define("config/process/CommonConfig", [
             description: "",
             dependencies: [
                 "org/forgerock/commons/ui/common/main/Configuration",
-                "org/forgerock/commons/ui/common/components/Navigation",
-                "org/forgerock/commons/ui/common/LoggedUserBarView"
+                "org/forgerock/commons/ui/common/components/Navigation"
             ],
-            processDescription: function(event, conf, navigation, loggedUserBarView) {
+            processDescription: function(event, conf, navigation) {
                 var serviceInvokerModuleName, serviceInvokerConfig; 
                 serviceInvokerModuleName = "org/forgerock/commons/ui/common/main/ServiceInvoker";
                 serviceInvokerConfig = conf.getModuleConfiguration(serviceInvokerModuleName);
@@ -116,7 +113,6 @@ define("config/process/CommonConfig", [
                     serviceInvokerConfig.defaultHeaders[constants.HEADER_PARAM_NO_SESSION]= true; 
                     
                     conf.setProperty('loggedUser', null);
-                    loggedUserBarView.render();
                     navigation.reload();
                 }
                 conf.sendSingleModuleConfigurationChangeInfo(serviceInvokerModuleName);
