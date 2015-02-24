@@ -194,8 +194,6 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
                 validatorsUtils.setTick(input, msg);
             }
 
-            input.parents('.separate-message').children("div.validation-message:first").attr("for", input.attr('id')).html(msg ? msg : '');
-
             if (msg) {
                 input.parents('.separate-message').addClass('invalid');
                 input.addClass('invalid');
