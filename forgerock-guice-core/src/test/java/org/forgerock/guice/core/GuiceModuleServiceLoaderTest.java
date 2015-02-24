@@ -36,11 +36,11 @@ public class GuiceModuleServiceLoaderTest {
 
     private GuiceModuleServiceLoader moduleServiceLoader;
 
-    private ServiceLoader serviceLoader;
+    private ServiceLoaderWrapper serviceLoader;
 
     @BeforeMethod
     public void setUp() {
-        serviceLoader = mock(ServiceLoader.class);
+        serviceLoader = mock(ServiceLoaderWrapper.class);
 
         moduleServiceLoader = new GuiceModuleServiceLoader(serviceLoader);
     }

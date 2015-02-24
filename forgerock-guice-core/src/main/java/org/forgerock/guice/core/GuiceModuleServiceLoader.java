@@ -45,14 +45,14 @@ public final class GuiceModuleServiceLoader implements GuiceModuleLoader {
     private static final Class<? extends Module> LEGACY_MODULE_SERVICE_CLASS = AbstractModule.class;
 
     private final Logger logger = LoggerFactory.getLogger(GuiceModuleServiceLoader.class);
-    private final ServiceLoader serviceLoader;
+    private final ServiceLoaderWrapper serviceLoader;
 
     /**
      * Constructs an instance of the GuiceModuleServiceLoader.
      *
      * @param serviceLoader An instance of a wrapper around the java.util.ServiceLoader.
      */
-    GuiceModuleServiceLoader(ServiceLoader serviceLoader) {
+    GuiceModuleServiceLoader(ServiceLoaderWrapper serviceLoader) {
         this.serviceLoader = serviceLoader;
     }
 
@@ -89,13 +89,6 @@ public final class GuiceModuleServiceLoader implements GuiceModuleLoader {
         return moduleClasses;
     }
 
-    /**
-     * Checks to determine if the given class is annotated with the given annotation.
-     *
-     * @param clazz The class which should be annotated.
-     * @param moduleAnnotation The annotation the class should be annotated with.
-     * @return <code>true</code> if the class is annotated with the annotation, otherwise <code>false</code>.
-     */
     private boolean hasAnnotation(Class<? extends Module> clazz, Class<? extends Annotation> moduleAnnotation) {
         for (Annotation annotation : clazz.getDeclaredAnnotations()) {
             if (moduleAnnotation.equals(annotation.annotationType())) {

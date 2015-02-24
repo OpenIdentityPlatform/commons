@@ -24,7 +24,7 @@ import java.util.Iterator;
  *
  * @since 1.0.0
  */
-public class ServiceLoader {
+public class ServiceLoaderWrapper {
 
     /**
      * Creates a new Java ServiceLoader for the given service type, using the current thread's

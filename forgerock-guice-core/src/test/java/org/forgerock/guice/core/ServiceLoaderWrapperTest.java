@@ -26,13 +26,13 @@ import org.forgerock.guice.core.test.TestModule7;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-public class ServiceLoaderTest {
+public class ServiceLoaderWrapperTest {
 
-    private ServiceLoader serviceLoader;
+    private ServiceLoaderWrapper serviceLoader;
 
     @BeforeClass
     public void setUp() {
-        serviceLoader = new ServiceLoader();
+        serviceLoader = new ServiceLoaderWrapper();
     }
 
     @Test
