@@ -20,5 +20,7 @@
  * trade-off is that the set membership operation may report false positives (i.e., it may claim that an item is a
  * member of the set when it isn't). The probability of false positives can be tuned by increasing the amount of
  * memory used.
+ *
+ * @see <a href="http://en.wikipedia.org/wiki/Bloom_filter">Bloom Filter Wikipedia entry</a>
  */
 package org.forgerock.bloomfilter;

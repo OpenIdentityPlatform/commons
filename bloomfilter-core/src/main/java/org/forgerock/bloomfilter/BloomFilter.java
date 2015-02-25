@@ -16,17 +16,36 @@
 
 package org.forgerock.bloomfilter;
 
-import javax.annotation.concurrent.ThreadSafe;
 import java.util.Collection;
 
 /**
- * A type of set data structure for which the contains method may return false positives. Implementations typically
- * can store very large numbers of elements in memory at the cost of some loss of accuracy in determining set
- * membership.
+ * General interface contract for implementations of <a href="http://en.wikipedia.org/wiki/Bloom_filter">Bloom
+ * Filters</a>. A Bloom Filter is a Set-like data structure that uses only a few bits of memory per element stored.
+ * This allows very large numbers (billions) of elements to be stored in-memory, with the trade-off being that set
+ * containment can now return false positives. That is, the Bloom Filter can say for certain if a given element is
+ * definitely <em>not</em> in the set, but it cannot say for certain whether it is. Bloom Filters are therefore
+ * appropriate as a quick initial check to reduce load on a more expensive but more accurate storage mechanism (e.g.,
+ * a database) or where some level of false positives is tolerable. The expected usage pattern for the former case
+ * would be something like the following psuedo-code:
+ * <pre>
+ *     BloomFilter&lt;T&gt filter = ...;
+ *     Set&lt;T&gt; expensiveSet = ...; // e.g. database, web-service
+ *     if (filter.mightContain(element)) {
+ *         // Perform the more expensive check to be sure
+ *         return expensive.contains(element);
+ *     }
+ *     return false;
+ * </pre>
+ * Note: this assumes that the Bloom Filter is kept in-sync with the definitive set! How this is accomplished is
+ * outside of the scope of this package.
+ * <p/>
+ * All Bloom Filter implementations in this package allow the probability of false positives (FPP) to be specified,
+ * and the implementation will adjust the amount of memory used to ensure the given level of accuracy for the
+ * expected number of elements.
  *
- * @param <E> the type of elements contained in the set.
+ * @param <E> the type of elements contained in the bloom filter.
+ * @see <a href="http://en.wikipedia.org/wiki/Bloom_filter">Bloom Filter Wikipedia entry</a>.
  */
-@ThreadSafe
 public interface BloomFilter<E> {
 
     /**

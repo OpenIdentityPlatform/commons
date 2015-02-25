@@ -22,21 +22,22 @@ import org.forgerock.util.Reject;
 import org.forgerock.util.time.TimeService;
 
 import javax.annotation.concurrent.ThreadSafe;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * A chain of bloom filters that together acts as a bloom filter. The overall false positive probability of the chain
- * is the sum of the false positive probabilities of the elements in the chain. Subsequent filters ("buckets") in the
- * chain are acquired from a {@link BloomFilterPool} according to a geometric series, ensuring that the overall false
- * positive probability is maintained, while also accommodating massive underestimation of required capacity.
+ * A chain of bloom filters that together acts as a single bloom filter. The overall false positive probability of the
+ * chain is the sum of the false positive probabilities of the elements in the chain. Subsequent filters ("buckets")
+ * in the chain are acquired from a {@link GeometricSeriesBloomFilterPool} according to a geometric series, ensuring that the overall
+ * false positive probability is maintained, while also accommodating massive underestimation of required capacity.
  *
- * @see BloomFilterPool
+ * @param <T> the type of elements stored in the bloom filter.
+ * @see GeometricSeriesBloomFilterPool
  */
 @ThreadSafe
 final class BloomFilterChain<T> implements BloomFilter<T> {
@@ -80,8 +81,14 @@ final class BloomFilterChain<T> implements BloomFilter<T> {
     @Override
     public boolean addAll(final Collection<? extends T> elements) {
         boolean changed = false;
-        final List<T> queue = new ArrayList<T>(elements);
-        int i = 0, size = queue.size();
+        @SuppressWarnings("unchecked")
+        final List<T> queue = (elements instanceof List) ? (List<T>) elements : new ArrayList<T>(elements);
+        final int size = queue.size();
+        int i = 0;
+
+        // We cannot simply call lastBucket().addAll(...) because this might over-saturate that bucket. Instead we
+        // estimate how many more elements can be inserted into that bucket before it becomes saturated and only
+        // insert (some percentage of) that number at a time, creating a new bucket if it does actually overflow.
         while (i < size) {
             final BloomFilter<T> bucket = lastBucket();
             final long remainingCapacity =
@@ -94,6 +101,12 @@ final class BloomFilterChain<T> implements BloomFilter<T> {
         return changed;
     }
 
+    /**
+     * Checks each bloom filter in the chain to see if any of them might contain the given element.
+     *
+     * @param element the element to check for membership in this set.
+     * @return {@code true} if any of the filters in the chain might contain the given element.
+     */
     @Override
     public boolean mightContain(final T element) {
         for (BloomFilter<T> bucket : chain) {
@@ -104,6 +117,11 @@ final class BloomFilterChain<T> implements BloomFilter<T> {
         return false;
     }
 
+    /**
+     * Returns the aggregate statistics for all buckets in the chain as it currently stands. Note that this will
+     * underestimate the remaining capacity, as it does not take into account the capacity that is still available in
+     * the pool.
+     */
     @Override
     public BloomFilterStatistics statistics() {
         double configuredFpp = 0.0d;
@@ -126,6 +144,10 @@ final class BloomFilterChain<T> implements BloomFilter<T> {
         return new BloomFilterStatistics(configuredFpp, expectedFpp, capacity, bitSize, lastExpiryTime, remainingCapacity);
     }
 
+    /**
+     * Returns a reference to the last bucket in the chain, creating a new bucket if the chain is empty or if the
+     * last bucket is saturated. Additionally, this method will release any buckets that have expired.
+     */
     private BloomFilter<T> lastBucket() {
         BloomFilter<T> lastBucket = null;
         ListIterator<BloomFilter<T>> it = chain.listIterator(chain.size());
@@ -136,21 +158,25 @@ final class BloomFilterChain<T> implements BloomFilter<T> {
             // Synchronize to ensure atomicity (double-checked locking). Chain.listIterator().previous() is volatile
             // read.
             synchronized (chain) {
+                // Perform some initial cleanup to remove any expired buckets
+                Set<BloomFilter<T>> toRemove = new HashSet<BloomFilter<T>>();
+                for (BloomFilter<T> bucket : chain) {
+                    final long now = clock.now();
+                    final BloomFilterStatistics stats = bucket.statistics();
+                    if (stats.isSaturated() && stats.getExpiryTime() < now) {
+                        toRemove.add(bucket);
+                        pool.release(bucket);
+                    }
+                }
+                // CoWAL performance is better if we remove all at once.
+                if (!toRemove.isEmpty()) {
+                    chain.removeAll(toRemove);
+                }
+
                 lastBucket = null;
                 it = chain.listIterator(chain.size());
-                while (it.hasPrevious()) {
+                if (it.hasPrevious()) {
                     lastBucket = it.previous();
-
-                    final BloomFilterStatistics statistics = lastBucket.statistics();
-                    if (statistics.isSaturated() && statistics.getExpiryTime() < clock.now()) {
-                        // it.remove() is unsupported operation for CoWAL:
-                        if (chain.remove(lastBucket)) {
-                            pool.release(lastBucket);
-                        }
-                        lastBucket = null;
-                    } else {
-                        break;
-                    }
                 }
                 if (lastBucket == null || lastBucket.statistics().isSaturated()) {
                     lastBucket = pool.nextAvailable();

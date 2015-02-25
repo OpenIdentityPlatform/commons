@@ -17,8 +17,18 @@
 package org.forgerock.bloomfilter;
 
 /**
- * Created by neilmadden on 22/02/15.
+ * Abstract factory pattern for creating individual bloom filters with the given capacity and false positive
+ * probability.
+ *
+ * @param <T> the type of elements to be contained in the bloom filter.
  */
-public interface BloomFilterFactory<T> {
+interface BloomFilterFactory<T> {
+    /**
+     * Creates a new Bloom Filter with the given capacity and false positive probability.
+     *
+     * @param expectedInsertions the expected number of elements to be inserted into the bloom filter.
+     * @param falsePositiveProbability the desired probability of false positives.
+     * @return a new bloom filter satisfying the requirements.
+     */
     BloomFilter<T> create(long expectedInsertions, double falsePositiveProbability);
 }

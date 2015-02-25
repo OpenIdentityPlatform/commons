@@ -28,15 +28,15 @@ import java.util.concurrent.atomic.AtomicReference;
  * additions to the set.
  */
 @ThreadSafe
-public final class CopyOnWriteBloomFilter<T> implements BloomFilter<T> {
+final class CopyOnWriteBloomFilter<T> implements BloomFilter<T> {
     private final long capacity;
     private final double falsePositiveProbability;
 
     private final AtomicReference<org.forgerock.guava.common.hash.BloomFilter<T>> bloomFilterAtomicReference;
 
-    public CopyOnWriteBloomFilter(final Funnel<? super T> funnel,
-                                  final long capacity,
-                                  final double falsePositiveProbability) {
+    CopyOnWriteBloomFilter(final Funnel<? super T> funnel,
+                           final long capacity,
+                           final double falsePositiveProbability) {
         this.capacity = capacity;
         this.falsePositiveProbability = falsePositiveProbability;
 

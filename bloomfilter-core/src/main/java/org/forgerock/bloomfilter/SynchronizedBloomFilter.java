@@ -25,12 +25,12 @@ import java.util.Collection;
  * A fully synchronized bloom filter implementation.
  */
 @ThreadSafe
-public final class SynchronizedBloomFilter<T> implements BloomFilter<T> {
+final class SynchronizedBloomFilter<T> implements BloomFilter<T> {
     private final long capacity;
     private final double falsePositiveProbability;
     private final org.forgerock.guava.common.hash.BloomFilter<T> bloomFilter;
 
-    public SynchronizedBloomFilter(final Funnel<? super T> funnel,
+    SynchronizedBloomFilter(final Funnel<? super T> funnel,
                                    final long capacity,
                                    final double falsePositiveProbability) {
         this.falsePositiveProbability = falsePositiveProbability;

@@ -16,7 +16,6 @@
 
 package org.forgerock.bloomfilter;
 
-import org.forgerock.guava.common.hash.Funnel;
 import org.forgerock.util.Reject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,15 +39,17 @@ public final class ConcurrentRollingBloomFilter<T> implements BloomFilter<T> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConcurrentRollingBloomFilter.class);
 
     private final BloomFilterChain<T> bucketChain;
-    private final BloomFilterPool<T> bucketPool;
+    private final GeometricSeriesBloomFilterPool<T> bucketPool;
     private final ConcurrencyStrategy concurrencyStrategy;
 
     ConcurrentRollingBloomFilter(final BloomFilters.RollingBloomFilterBuilder<T> builder) {
         this.concurrencyStrategy = builder.concurrencyStrategy;
 
-        final BloomFilterFactory<T> factory = new ExpiringBloomFilterFactory<T>(
-                concurrencyStrategy.<T>getFactory(builder.funnel), builder.expiryStrategy);
-        this.bucketPool = new BloomFilterPool<T>(factory, builder.maxNumberOfBuckets,
+        BloomFilterFactory<T> factory = concurrencyStrategy.<T>getFactory(builder.funnel);
+        if (builder.expiryStrategy != BloomFilters.NeverExpires.strategy()) {
+            factory = new ExpiringBloomFilterFactory<T>(factory, builder.expiryStrategy);
+        }
+        this.bucketPool = new GeometricSeriesBloomFilterPool<T>(factory, builder.maxNumberOfBuckets,
                 builder.initialCapacity, builder.capacityGrowthFactor,
                 builder.falsePositiveProbability, builder.falsePositiveProbabilityScaleFactor);
         this.bucketChain = new BloomFilterChain<T>(bucketPool, builder.clock);

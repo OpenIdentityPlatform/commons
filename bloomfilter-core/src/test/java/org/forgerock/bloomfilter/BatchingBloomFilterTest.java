@@ -27,6 +27,7 @@ import org.mockito.MockitoAnnotations;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -43,7 +44,7 @@ public class BatchingBloomFilterTest {
     @BeforeMethod
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        testFilter = new BatchingBloomFilter<Integer>(mockDelegate, BATCH_SIZE);
+        testFilter = new BatchingBloomFilter<Integer>(new ArgumentCloningBloomFilter<Integer>(mockDelegate), BATCH_SIZE);
     }
 
     @Test
@@ -57,6 +58,7 @@ public class BatchingBloomFilterTest {
         }
 
         // Then
+        @SuppressWarnings("rawtypes")
         ArgumentCaptor<Collection> batch = ArgumentCaptor.forClass(Collection.class);
         verify(mockDelegate).addAll(batch.capture());
         assertThat(batch.getValue()).containsAll(expected);
@@ -91,5 +93,39 @@ public class BatchingBloomFilterTest {
         // Then
         assertThat(result).isTrue();
         verify(mockDelegate).mightContain(1);
+    }
+
+    /**
+     * Wrapper to ensure that arguments to the addAll method are copied before passing to the delegate. This is
+     * because Mockito only captures arguments by reference, so we can otherwise only verify the final state of the
+     * argument and not how it was at the time of the call.
+     */
+    static class ArgumentCloningBloomFilter<T> implements BloomFilter<T> {
+        private final BloomFilter<T> delegate;
+
+        ArgumentCloningBloomFilter(final BloomFilter<T> delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public boolean add(final T element) {
+            return delegate.add(element);
+        }
+
+        @Override
+        public boolean addAll(final Collection<? extends T> elements) {
+            // Create a copy so that we can capture in mockito
+            return delegate.addAll(new ArrayList<T>(elements));
+        }
+
+        @Override
+        public boolean mightContain(final T element) {
+            return delegate.mightContain(element);
+        }
+
+        @Override
+        public BloomFilterStatistics statistics() {
+            return delegate.statistics();
+        }
     }
 }

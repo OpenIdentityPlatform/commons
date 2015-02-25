@@ -29,6 +29,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * usage and a small additional overhead for reads, is that the result of the {@link #add(Object)} method is no
  * longer accurate for any write that does not trigger a buffer flush, and only returns an aggregate result for those
  * that do.
+ *
+ * @param <T> the type of elements stored in this bloom filter.
  */
 final class BatchingBloomFilter<T> implements BloomFilter<T> {
     private final BloomFilter<T> delegate;
@@ -66,7 +68,7 @@ final class BatchingBloomFilter<T> implements BloomFilter<T> {
         synchronized (buffer) {
             boolean changed = buffer.add(element);
             if (buffer.size() >= batchSize) {
-                changed |= delegate.addAll(buffer);
+                changed = delegate.addAll(buffer);
                 buffer.clear();
             }
             return changed;
