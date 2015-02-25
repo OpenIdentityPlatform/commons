@@ -16,11 +16,8 @@
 
 package org.forgerock.bloomfilter;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -36,7 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
 final class BatchingBloomFilter<T> implements BloomFilter<T> {
     private final BloomFilter<T> delegate;
     private final int batchSize;
-    private final Set<T> buffer;
+    private final Collection<T> buffer;
 
     /**
      * Constructs the batching decorator with the given delegate and batch size.
@@ -47,7 +44,7 @@ final class BatchingBloomFilter<T> implements BloomFilter<T> {
     BatchingBloomFilter(final BloomFilter<T> delegate, final int batchSize) {
         this.delegate = delegate;
         this.batchSize = batchSize;
-        this.buffer = newBuffer(batchSize);
+        this.buffer = Collections.newSetFromMap(new ConcurrentHashMap<T, Boolean>(batchSize));
     }
 
     /**
@@ -61,16 +58,19 @@ final class BatchingBloomFilter<T> implements BloomFilter<T> {
      */
     @Override
     public boolean add(final T element) {
-        boolean changed = buffer.add(element);
-        if (buffer.size() >= batchSize) {
-            final List<T> batch = new ArrayList<T>(buffer);
-            if (!batch.isEmpty()) {
-                changed |= delegate.addAll(batch);
-                // Only remove elements that we have actually processed, to avoid lost updates
-                buffer.removeAll(batch);
+        // Synchronize on the buffer to ensure mutual exclusion from other writes when draining the buffer. We don't
+        // care about concurrent reads while this is occurring because the ConcurrentHashMap will ensure they see
+        // some consistent state of affairs. I haven't discovered any clever lock-free algorithm that can ensure both
+        // (i) no lost updates, and (ii) that #mightContains never returns false negatives during a buffer flush. In
+        // practice, I would expect this lock to be uncontended in typical usage.
+        synchronized (buffer) {
+            boolean changed = buffer.add(element);
+            if (buffer.size() >= batchSize) {
+                changed |= delegate.addAll(buffer);
+                buffer.clear();
             }
+            return changed;
         }
-        return changed;
     }
 
     /**
@@ -89,6 +89,7 @@ final class BatchingBloomFilter<T> implements BloomFilter<T> {
 
     @Override
     public boolean mightContain(final T element) {
+        // Always check the buffer first to ensure no false negatives during a buffer flush
         return buffer.contains(element) || delegate.mightContain(element);
     }
 
@@ -104,9 +105,5 @@ final class BatchingBloomFilter<T> implements BloomFilter<T> {
     @Override
     public String toString() {
         return "BatchingBloomFilter{delegate=" + delegate + ", batchSize=" + batchSize + '}';
-    }
-
-    private Set<T> newBuffer(int batchSize) {
-        return Collections.newSetFromMap(new ConcurrentHashMap<T, Boolean>(batchSize));
     }
 }
