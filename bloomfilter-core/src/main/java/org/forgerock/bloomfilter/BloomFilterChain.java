@@ -16,6 +16,7 @@
 
 package org.forgerock.bloomfilter;
 
+import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 import org.forgerock.util.Reject;
@@ -95,9 +96,8 @@ final class BloomFilterChain<T> implements BloomFilter<T> {
         // insert (some percentage of) that number at a time, creating a new bucket if it does actually overflow.
         while (i < size) {
             final BloomFilter<T> bucket = lastBucket();
-            final long remainingCapacity =
-                    min((long) (bucket.statistics().getEstimatedRemainingCapacity() * FILL_FACTOR), MAX_ADD_SIZE);
-            final int batchSize = min(size - i, (int) remainingCapacity);
+            final long remainingCapacity = bucket.statistics().getEstimatedRemainingCapacity();
+            final int batchSize = min(size - i, min(max((int)(remainingCapacity * FILL_FACTOR), 1), MAX_ADD_SIZE));
 
             LOGGER.debug("Adding batch: remainingCapacity={}, batchSize={}", remainingCapacity, batchSize);
 
@@ -131,7 +131,7 @@ final class BloomFilterChain<T> implements BloomFilter<T> {
      */
     @Override
     public BloomFilterStatistics statistics() {
-        double configuredFpp = 0.0d;
+        final double configuredFpp = pool.getOverallFalsePositiveProbability();
         double expectedFpp = 0.0d;
         long capacity = 0L;
         long bitSize = 0L;
@@ -139,7 +139,6 @@ final class BloomFilterChain<T> implements BloomFilter<T> {
         long remainingCapacity = 0L;
         for (BloomFilter<T> bucket : chain) {
             final BloomFilterStatistics bucketStats = bucket.statistics();
-            configuredFpp += bucketStats.getConfiguredFalsePositiveProbability();
             expectedFpp += bucketStats.getExpectedFalsePositiveProbability();
             capacity += bucketStats.getCapacity();
             bitSize += bucketStats.getBitSize();

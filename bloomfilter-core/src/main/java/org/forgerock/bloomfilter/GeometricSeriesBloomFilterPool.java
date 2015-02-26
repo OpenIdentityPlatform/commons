@@ -157,6 +157,11 @@ final class GeometricSeriesBloomFilterPool<T> implements BloomFilterPool<T> {
     }
 
     @Override
+    public double getOverallFalsePositiveProbability() {
+        return initialFalsePositiveProbability / (1.0d - falsePositiveProbabilityScaleFactor);
+    }
+
+    @Override
     public String toString() {
         return "BloomFilterPool{" +
                 "maxBuckets=" + maxBuckets +

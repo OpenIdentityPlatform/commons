@@ -89,14 +89,11 @@ final class CopyOnWriteBloomFilter<T> implements BloomFilter<T> {
         final double expectedFpp = bloomFilterAtomicReference.get().expectedFpp();
         final long bitSize = BloomFilterStatistics.optimumBitSize(capacity, falsePositiveProbability);
         return new BloomFilterStatistics(falsePositiveProbability, expectedFpp, capacity, bitSize, Long.MAX_VALUE,
-                BloomFilterStatistics.optimumRemainingCapacity(bitSize, falsePositiveProbability, expectedFpp));
+                BloomFilterStatistics.optimumRemainingCapacity(bitSize, expectedFpp, capacity));
     }
 
     @Override
     public String toString() {
-        return "CopyOnWriteBloomFilter{" +
-                "capacity=" + capacity +
-                ", falsePositiveProbability=" + falsePositiveProbability +
-                '}';
+        return "CopyOnWriteBloomFilter" + statistics();
     }
 }

@@ -117,20 +117,26 @@ public final class BloomFilterStatistics {
         return estimatedRemainingCapacity;
     }
 
+    private static int getNumberOfHashFunctions(long bitSize, long capacity) {
+        return Math.max(1, (int) Math.round((double)bitSize / (double) capacity * Math.log(2.0d)));
+    }
+
     /**
      * Estimates the remaining capacity in an optimum Bloom Filter. This is
      * assuming that the Bloom Filter is close to optimal in space efficiency for the configured false positive
      * probability.
      *
      * @param bitSize the size of the Bloom Filter bit-vector in bits.
-     * @param configuredFalsePositiveProbability the configured false positive probability of the bloom filter.
      * @param expectedFalsePositiveProbability the expected current false positive probability of the bloom filter.
      * @return an estimate of the number of elements that could be inserted before the bloom filter becomes saturated.
      */
-    public static long optimumRemainingCapacity(final long bitSize, final double configuredFalsePositiveProbability,
-                                                final double expectedFalsePositiveProbability) {
-        return (long)(-(bitSize * Math.log(2.0D) * Math.log(2.0D)) / Math.log(configuredFalsePositiveProbability -
-                expectedFalsePositiveProbability));
+    public static long optimumRemainingCapacity(final long bitSize, final double expectedFalsePositiveProbability,
+                                                final long capacity) {
+
+        int h = getNumberOfHashFunctions(bitSize, capacity);
+        double oneBits = Math.pow(expectedFalsePositiveProbability, 1.0d/(double)h) * bitSize;
+        long cardinalityEstimate = (long) -((bitSize * Math.log(1.0d - oneBits/(double)bitSize)) / h);
+        return capacity - cardinalityEstimate;
     }
 
     /**
@@ -191,8 +197,8 @@ public final class BloomFilterStatistics {
     @Override
     public String toString() {
         return String.format(Locale.US,
-                "{ \"configuredFalsePositiveProbability\": %.4f" +
-                ", \"expectedFalsePositiveProbability\": %.4f" +
+                "{ \"configuredFalsePositiveProbability\": %.6f" +
+                ", \"expectedFalsePositiveProbability\": %.6f" +
                 ", \"capacity\": %d" +
                 ", \"estimatedRemainingCapacity\": %d" +
                 ", \"bitSize\": %d" +

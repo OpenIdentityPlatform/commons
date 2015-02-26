@@ -35,4 +35,9 @@ interface BloomFilterPool<T> {
      * @param released the bloom filter to release.
      */
     void release(BloomFilter<T> released);
+
+    /**
+     * The overall false positive probability that this pool is trying to achieve.
+     */
+    double getOverallFalsePositiveProbability();
 }

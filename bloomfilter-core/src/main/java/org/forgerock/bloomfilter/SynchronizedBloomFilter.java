@@ -68,7 +68,7 @@ final class SynchronizedBloomFilter<T> implements BloomFilter<T> {
         final double expectedFpp = bloomFilter.expectedFpp();
         final long bitSize = BloomFilterStatistics.optimumBitSize(capacity, falsePositiveProbability);
         return new BloomFilterStatistics(falsePositiveProbability, expectedFpp, capacity, bitSize, Long.MAX_VALUE,
-                BloomFilterStatistics.optimumRemainingCapacity(bitSize, falsePositiveProbability, expectedFpp));
+                BloomFilterStatistics.optimumRemainingCapacity(bitSize, expectedFpp, capacity));
     }
 
     @Override
