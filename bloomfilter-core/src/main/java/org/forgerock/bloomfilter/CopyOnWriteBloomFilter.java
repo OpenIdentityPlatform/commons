@@ -17,6 +17,8 @@
 package org.forgerock.bloomfilter;
 
 import org.forgerock.guava.common.hash.Funnel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.concurrent.ThreadSafe;
 import java.util.Collection;
@@ -29,6 +31,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 @ThreadSafe
 final class CopyOnWriteBloomFilter<T> implements BloomFilter<T> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CopyOnWriteBloomFilter.class);
     private final long capacity;
     private final double falsePositiveProbability;
 
@@ -52,11 +55,15 @@ final class CopyOnWriteBloomFilter<T> implements BloomFilter<T> {
 
     @Override
     public boolean addAll(final Collection<? extends T> elements) {
+        LOGGER.debug("Adding elements: {}", elements);
         boolean changed;
         org.forgerock.guava.common.hash.BloomFilter<T> prev;
         org.forgerock.guava.common.hash.BloomFilter<T> next;
 
+        int attempts = 0;
+
         do {
+            attempts++;
             changed = false;
             prev = bloomFilterAtomicReference.get();
             next = prev.copy();
@@ -66,6 +73,8 @@ final class CopyOnWriteBloomFilter<T> implements BloomFilter<T> {
             }
 
         } while (changed && !bloomFilterAtomicReference.compareAndSet(prev, next));
+
+        LOGGER.debug("Updated BloomFilter after {} attempts", attempts);
 
         return changed;
     }

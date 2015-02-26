@@ -16,6 +16,10 @@
 
 package org.forgerock.bloomfilter;
 
+import org.forgerock.util.Reject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,6 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @param <T> the type of elements stored in this bloom filter.
  */
 final class BatchingBloomFilter<T> implements BloomFilter<T> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BatchingBloomFilter.class);
     private final BloomFilter<T> delegate;
     private final int batchSize;
     private final Collection<T> buffer;
@@ -44,6 +49,8 @@ final class BatchingBloomFilter<T> implements BloomFilter<T> {
      * @param batchSize the number of writes to batch before sending to the delegate.
      */
     BatchingBloomFilter(final BloomFilter<T> delegate, final int batchSize) {
+        Reject.ifNull(delegate);
+        Reject.ifFalse(batchSize > 0, "Batch size must be > 0");
         this.delegate = delegate;
         this.batchSize = batchSize;
         this.buffer = Collections.newSetFromMap(new ConcurrentHashMap<T, Boolean>(batchSize));
@@ -67,7 +74,9 @@ final class BatchingBloomFilter<T> implements BloomFilter<T> {
         // practice, I would expect this lock to be uncontended in typical usage.
         synchronized (buffer) {
             boolean changed = buffer.add(element);
-            if (buffer.size() >= batchSize) {
+            int size = buffer.size();
+            if (size >= batchSize) {
+                LOGGER.debug("Flushing buffer: size={}", size);
                 changed = delegate.addAll(buffer);
                 buffer.clear();
             }

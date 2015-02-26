@@ -19,6 +19,7 @@ package org.forgerock.bloomfilter;
 import javax.annotation.concurrent.Immutable;
 import java.beans.ConstructorProperties;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Provides a snapshot of the current statistics and configuration of a Bloom Filter implementation.
@@ -151,7 +152,7 @@ public final class BloomFilterStatistics {
      * @return {@code true} if the expected false positive probability is greater than the configured probability.
      */
     public boolean isSaturated() {
-        return expectedFalsePositiveProbability > configuredFalsePositiveProbability;
+        return expectedFalsePositiveProbability >= configuredFalsePositiveProbability;
     }
 
     @Override
@@ -189,13 +190,14 @@ public final class BloomFilterStatistics {
 
     @Override
     public String toString() {
-        return "BloomFilterStatistics{" +
-                "configuredFalsePositiveProbability=" + configuredFalsePositiveProbability +
-                ", expectedFalsePositiveProbability=" + expectedFalsePositiveProbability +
-                ", capacity=" + capacity +
-                ", estimatedRemainingCapacity=" + estimatedRemainingCapacity +
-                ", bitSize=" + bitSize +
-                ", expiryTime=" + new Date(expiryTime).toString() +
-                '}';
+        return String.format(Locale.US,
+                "{ \"configuredFalsePositiveProbability\": %.4f" +
+                ", \"expectedFalsePositiveProbability\": %.4f" +
+                ", \"capacity\": %d" +
+                ", \"estimatedRemainingCapacity\": %d" +
+                ", \"bitSize\": %d" +
+                ", \"expiryTime\": \"%tFT%<tT.%<tLZ\" }",
+                configuredFalsePositiveProbability, expectedFalsePositiveProbability, capacity,
+                estimatedRemainingCapacity, bitSize, expiryTime);
     }
 }

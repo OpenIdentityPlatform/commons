@@ -20,6 +20,8 @@ import static java.lang.Math.min;
 
 import org.forgerock.util.Reject;
 import org.forgerock.util.time.TimeService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.concurrent.ThreadSafe;
 import java.util.ArrayList;
@@ -41,6 +43,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 @ThreadSafe
 final class BloomFilterChain<T> implements BloomFilter<T> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BloomFilterChain.class);
+
     private static final double FILL_FACTOR = 0.9d;
     private static final int MAX_ADD_SIZE = 1000;
     private final List<BloomFilter<T>> chain = new CopyOnWriteArrayList<BloomFilter<T>>();
@@ -94,6 +98,9 @@ final class BloomFilterChain<T> implements BloomFilter<T> {
             final long remainingCapacity =
                     min((long) (bucket.statistics().getEstimatedRemainingCapacity() * FILL_FACTOR), MAX_ADD_SIZE);
             final int batchSize = min(size - i, (int) remainingCapacity);
+
+            LOGGER.debug("Adding batch: remainingCapacity={}, batchSize={}", remainingCapacity, batchSize);
+
             final List<T> batch = (i == 0 && batchSize == size) ? queue : queue.subList(i, i + batchSize);
             changed |= bucket.addAll(batch);
             i += batchSize;
@@ -141,7 +148,8 @@ final class BloomFilterChain<T> implements BloomFilter<T> {
             remainingCapacity = bucketStats.getEstimatedRemainingCapacity();
         }
 
-        return new BloomFilterStatistics(configuredFpp, expectedFpp, capacity, bitSize, lastExpiryTime, remainingCapacity);
+        return new BloomFilterStatistics(configuredFpp, expectedFpp, capacity, bitSize, lastExpiryTime,
+                remainingCapacity);
     }
 
     /**
@@ -170,6 +178,7 @@ final class BloomFilterChain<T> implements BloomFilter<T> {
                 }
                 // CoWAL performance is better if we remove all at once.
                 if (!toRemove.isEmpty()) {
+                    LOGGER.debug("Removing expired buckets: {}", toRemove);
                     chain.removeAll(toRemove);
                 }
 
@@ -179,6 +188,7 @@ final class BloomFilterChain<T> implements BloomFilter<T> {
                     lastBucket = it.previous();
                 }
                 if (lastBucket == null || lastBucket.statistics().isSaturated()) {
+                    LOGGER.debug("Adding new bucket: {}", lastBucket);
                     lastBucket = pool.nextAvailable();
                     chain.add(lastBucket);
                 }

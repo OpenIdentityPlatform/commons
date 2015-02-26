@@ -20,6 +20,8 @@ import static java.lang.Math.pow;
 import static java.util.Collections.synchronizedMap;
 
 import org.forgerock.util.Reject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.concurrent.ThreadSafe;
 import java.util.BitSet;
@@ -55,6 +57,7 @@ import java.util.TreeSet;
  */
 @ThreadSafe
 final class GeometricSeriesBloomFilterPool<T> implements BloomFilterPool<T> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(GeometricSeriesBloomFilterPool.class);
     private final BloomFilterFactory<T> factory;
     private final BitSet bucketNumbers;
     private final int maxBuckets;
@@ -103,6 +106,8 @@ final class GeometricSeriesBloomFilterPool<T> implements BloomFilterPool<T> {
                 overallFalsePositiveProbability * (1.0d - falsePositiveProbabilityScaleFactor);
         this.falsePositiveProbabilityScaleFactor = falsePositiveProbabilityScaleFactor;
         this.takenBucketNumbers = synchronizedMap(new IdentityHashMap<BloomFilter<T>, Integer>(initialNumberOfBuckets));
+
+        LOGGER.debug("Constructed GeometricSeriesBloomFilterPool: {}", this);
     }
 
     /**
@@ -129,6 +134,8 @@ final class GeometricSeriesBloomFilterPool<T> implements BloomFilterPool<T> {
         final double fpp =
                 initialFalsePositiveProbability * pow(falsePositiveProbabilityScaleFactor, bucketNumber);
 
+        LOGGER.debug("Creating BloomFilter number {} with capacity={}, fpp={}", bucketNumber, capacity, fpp);
+
         final BloomFilter<T> bucket = factory.create(capacity, fpp);
         takenBucketNumbers.put(bucket, bucketNumber);
 
@@ -143,6 +150,7 @@ final class GeometricSeriesBloomFilterPool<T> implements BloomFilterPool<T> {
     @Override
     public void release(BloomFilter<T> released) {
         final int bucketNumber = takenBucketNumbers.get(released);
+        LOGGER.debug("Releasing bucket number {}", bucketNumber);
         synchronized (bucketNumbers) {
             bucketNumbers.clear(bucketNumber);
         }

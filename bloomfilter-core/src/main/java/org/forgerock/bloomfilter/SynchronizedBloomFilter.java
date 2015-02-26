@@ -17,6 +17,8 @@
 package org.forgerock.bloomfilter;
 
 import org.forgerock.guava.common.hash.Funnel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.concurrent.ThreadSafe;
 import java.util.Collection;
@@ -26,6 +28,7 @@ import java.util.Collection;
  */
 @ThreadSafe
 final class SynchronizedBloomFilter<T> implements BloomFilter<T> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SynchronizedBloomFilter.class);
     private final long capacity;
     private final double falsePositiveProbability;
     private final org.forgerock.guava.common.hash.BloomFilter<T> bloomFilter;
@@ -41,11 +44,13 @@ final class SynchronizedBloomFilter<T> implements BloomFilter<T> {
 
     @Override
     public synchronized boolean add(final T element) {
+        LOGGER.debug("Adding element: {}", element);
         return bloomFilter.put(element);
     }
 
     @Override
     public synchronized boolean addAll(final Collection<? extends T> elements) {
+        LOGGER.debug("Adding elements: {}", elements);
         boolean changed = false;
         for (T element : elements) {
             changed |= bloomFilter.put(element);

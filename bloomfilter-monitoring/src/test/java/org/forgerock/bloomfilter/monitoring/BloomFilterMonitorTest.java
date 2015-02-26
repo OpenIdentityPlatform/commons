@@ -69,9 +69,9 @@ public class BloomFilterMonitorTest {
                 @Override
                 public void run() {
                     final Random random = new Random();
-                    for (int i = 0; i < 50000; ++i) {
+                    for (int i = 0; i < 500000; ++i) {
                         final int r = random.nextInt();
-                        if (i % 50 == 0) {
+                        if (i % 10 == 0) {
                             testMonitor.add(r);
                             assertTrue(testMonitor.mightContain(r));
                         }

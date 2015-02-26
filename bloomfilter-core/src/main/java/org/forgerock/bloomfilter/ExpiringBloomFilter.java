@@ -17,6 +17,8 @@
 package org.forgerock.bloomfilter;
 
 import org.forgerock.util.Reject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.concurrent.ThreadSafe;
 import java.util.Collection;
@@ -27,6 +29,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 @ThreadSafe
 final class ExpiringBloomFilter<T> implements BloomFilter<T> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExpiringBloomFilter.class);
     private final BloomFilter<T> delegate;
     private final ExpiryStrategy<T> expiryStrategy;
 
@@ -73,12 +76,17 @@ final class ExpiringBloomFilter<T> implements BloomFilter<T> {
      * @return whether the new expiry time is now the latest.
      */
     private boolean updateExpiryTime(final long newExpiryTime) {
+        int attempts = 0;
         boolean changed;
         long oldExpiryTime;
         do {
+            attempts++;
             oldExpiryTime = latestExpiryTime.get();
             changed = newExpiryTime > oldExpiryTime;
         } while (changed && !latestExpiryTime.compareAndSet(oldExpiryTime, newExpiryTime));
+
+        LOGGER.debug("Updated expiry timestamp after {} attempts: new={}, old={}, changed?={}", attempts, newExpiryTime,
+                oldExpiryTime, changed);
 
         return changed;
     }

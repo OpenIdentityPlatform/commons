@@ -82,6 +82,7 @@ public final class ConcurrentRollingBloomFilter<T> implements BloomFilter<T> {
     @Override
     public boolean addAll(final Collection<? extends T> elements) {
         Reject.ifNull(elements);
+        LOGGER.debug("Adding collection: {}", elements);
         return bucketChain.addAll(elements);
     }
 
