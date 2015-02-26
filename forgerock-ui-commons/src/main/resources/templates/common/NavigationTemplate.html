@@ -4,7 +4,7 @@
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#mainNavBar" aria-expanded="false" aria-controls="navbar">
                 <i class="fa fa-bars fa-lg"></i>
             </button>
-            <a href="#" class="navbar-brand" title="{{theme.settings.logo.title}}"><img src="{{theme.settings.logo.src}}" alt="{{theme.settings.logo.alt}}" /> </a>
+            <a href="#" class="navbar-brand" title="{{theme.settings.logo.title}}"><img  style="{{#if theme.settings.logo.width}}width:{{theme.settings.logo.width}};{{/if}}{{#if theme.settings.logo.height}} height:{{theme.settings.logo.height}};{{/if}}"  src="{{theme.settings.logo.src}}" alt="{{theme.settings.logo.alt}}" /> </a>
         </div>
         <div id="mainNavBar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">

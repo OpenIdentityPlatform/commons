@@ -83,9 +83,7 @@ define("ThemeManager", [
                     "logo": {
                         "src": "images/logo.png",
                         "title": "ForgeRock",
-                        "alt": "ForgeRock",
-                        "height": "104px",
-                        "width": "156px"
+                        "alt": "ForgeRock"
                     },
                     "loginLogo": {
                         "src": "images/login-logo.png",
