@@ -18,7 +18,6 @@ package org.forgerock.bloomfilter;
 
 import javax.annotation.concurrent.Immutable;
 import java.beans.ConstructorProperties;
-import java.util.Date;
 import java.util.Locale;
 
 /**
@@ -117,9 +116,6 @@ public final class BloomFilterStatistics {
         return estimatedRemainingCapacity;
     }
 
-    private static int getNumberOfHashFunctions(long bitSize, long capacity) {
-        return Math.max(1, (int) Math.round((double)bitSize / (double) capacity * Math.log(2.0d)));
-    }
 
     /**
      * Estimates the remaining capacity in an optimum Bloom Filter. This is
@@ -128,16 +124,38 @@ public final class BloomFilterStatistics {
      *
      * @param bitSize the size of the Bloom Filter bit-vector in bits.
      * @param expectedFalsePositiveProbability the expected current false positive probability of the bloom filter.
+     * @param capacity the overall expected capacity of the bloom filter.
      * @return an estimate of the number of elements that could be inserted before the bloom filter becomes saturated.
      */
     public static long optimumRemainingCapacity(final long bitSize, final double expectedFalsePositiveProbability,
                                                 final long capacity) {
 
-        int h = getNumberOfHashFunctions(bitSize, capacity);
+        // Calculate the number of hash functions used by this bloom filter (assuming optimal).
+        int h = optimalNumberOfHashFunctions(bitSize, capacity);
+
+        // Reverse engineer the number of bits set to 1 in the underlying bit-vector:
         double oneBits = Math.pow(expectedFalsePositiveProbability, 1.0d/(double)h) * bitSize;
+
+        // Estimate the cardinality (number of elements) of the set represented by this bloom filter. See
+        // http://en.wikipedia.org/wiki/Bloom_filter#Approximating_the_number_of_items_in_a_Bloom_filter
         long cardinalityEstimate = (long) -((bitSize * Math.log(1.0d - oneBits/(double)bitSize)) / h);
+
+        // Estimated remaining capacity is then just the overall capacity minus the current cardinality
         return capacity - cardinalityEstimate;
     }
+
+    /**
+     * Calculates the optimal number of hash functions to use to represent a given number of elements in a given
+     * sized bit-vector.
+     *
+     * @param bitSize the size of the bit-vector.
+     * @param capacity the total number of elements to represent.
+     * @return the optimum number of hash functions to use per element.
+     */
+    private static int optimalNumberOfHashFunctions(long bitSize, long capacity) {
+        return Math.max(1, (int) Math.round((double)bitSize / (double) capacity * Math.log(2.0d)));
+    }
+
 
     /**
      * The time in milliseconds since the UTC epoch until the last element contained in this bloom filter expires.
