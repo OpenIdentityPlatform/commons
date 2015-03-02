@@ -96,7 +96,7 @@ final class BloomFilterChain<T> implements BloomFilter<T> {
         // insert (some percentage of) that number at a time, creating a new bucket if it does actually overflow.
         while (i < size) {
             final BloomFilter<T> bucket = lastBucket();
-            final long remainingCapacity = bucket.statistics().getEstimatedRemainingCapacity();
+            final long remainingCapacity = bucket.getStatistics().getEstimatedRemainingCapacity();
             final int batchSize = min(size - i, min(max((int)(remainingCapacity * FILL_FACTOR), 1), MAX_ADD_SIZE));
 
             LOGGER.debug("Adding batch: remainingCapacity={}, batchSize={}", remainingCapacity, batchSize);
@@ -130,7 +130,7 @@ final class BloomFilterChain<T> implements BloomFilter<T> {
      * the pool.
      */
     @Override
-    public BloomFilterStatistics statistics() {
+    public BloomFilterStatistics getStatistics() {
         final double configuredFpp = pool.getOverallFalsePositiveProbability();
         double expectedFpp = 0.0d;
         long capacity = 0L;
@@ -138,7 +138,7 @@ final class BloomFilterChain<T> implements BloomFilter<T> {
         long lastExpiryTime = Long.MIN_VALUE;
         long remainingCapacity = 0L;
         for (BloomFilter<T> bucket : chain) {
-            final BloomFilterStatistics bucketStats = bucket.statistics();
+            final BloomFilterStatistics bucketStats = bucket.getStatistics();
             expectedFpp += bucketStats.getExpectedFalsePositiveProbability();
             capacity += bucketStats.getCapacity();
             bitSize += bucketStats.getBitSize();
@@ -161,7 +161,7 @@ final class BloomFilterChain<T> implements BloomFilter<T> {
         if (it.hasPrevious()) {
             lastBucket = it.previous();
         }
-        if (lastBucket == null || lastBucket.statistics().isSaturated()) {
+        if (lastBucket == null || lastBucket.getStatistics().isSaturated()) {
             // Synchronize to ensure atomicity (double-checked locking). Chain.listIterator().previous() is volatile
             // read.
             synchronized (chain) {
@@ -169,7 +169,7 @@ final class BloomFilterChain<T> implements BloomFilter<T> {
                 Set<BloomFilter<T>> toRemove = new HashSet<BloomFilter<T>>();
                 for (BloomFilter<T> bucket : chain) {
                     final long now = clock.now();
-                    final BloomFilterStatistics stats = bucket.statistics();
+                    final BloomFilterStatistics stats = bucket.getStatistics();
                     if (stats.isSaturated() && stats.getExpiryTime() < now) {
                         toRemove.add(bucket);
                         pool.release(bucket);
@@ -186,7 +186,7 @@ final class BloomFilterChain<T> implements BloomFilter<T> {
                 if (it.hasPrevious()) {
                     lastBucket = it.previous();
                 }
-                if (lastBucket == null || lastBucket.statistics().isSaturated()) {
+                if (lastBucket == null || lastBucket.getStatistics().isSaturated()) {
                     LOGGER.debug("Adding new bucket: {}", lastBucket);
                     lastBucket = pool.nextAvailable();
                     chain.add(lastBucket);

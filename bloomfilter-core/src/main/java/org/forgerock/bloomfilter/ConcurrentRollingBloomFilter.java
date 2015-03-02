@@ -92,8 +92,8 @@ public final class ConcurrentRollingBloomFilter<T> implements BloomFilter<T> {
     }
 
     @Override
-    public BloomFilterStatistics statistics() {
-        return bucketChain.statistics();
+    public BloomFilterStatistics getStatistics() {
+        return bucketChain.getStatistics();
     }
 
 

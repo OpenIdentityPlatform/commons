@@ -82,5 +82,5 @@ public interface BloomFilter<E> {
     /**
      * Gets a snapshot of the current statistics of the set.
      */
-    BloomFilterStatistics statistics();
+    BloomFilterStatistics getStatistics();
 }

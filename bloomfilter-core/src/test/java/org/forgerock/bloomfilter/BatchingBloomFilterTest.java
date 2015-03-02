@@ -124,8 +124,8 @@ public class BatchingBloomFilterTest {
         }
 
         @Override
-        public BloomFilterStatistics statistics() {
-            return delegate.statistics();
+        public BloomFilterStatistics getStatistics() {
+            return delegate.getStatistics();
         }
     }
 }

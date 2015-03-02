@@ -85,7 +85,7 @@ final class CopyOnWriteBloomFilter<T> implements BloomFilter<T> {
     }
 
     @Override
-    public BloomFilterStatistics statistics() {
+    public BloomFilterStatistics getStatistics() {
         final double expectedFpp = bloomFilterAtomicReference.get().expectedFpp();
         final long bitSize = BloomFilterStatistics.optimumBitSize(capacity, falsePositiveProbability);
         return new BloomFilterStatistics(falsePositiveProbability, expectedFpp, capacity, bitSize, Long.MAX_VALUE,
@@ -94,6 +94,6 @@ final class CopyOnWriteBloomFilter<T> implements BloomFilter<T> {
 
     @Override
     public String toString() {
-        return "CopyOnWriteBloomFilter" + statistics();
+        return "CopyOnWriteBloomFilter" + getStatistics();
     }
 }

@@ -67,7 +67,7 @@ public class BloomFilterChainTest {
         BloomFilter<Integer> newBucket = mock(BloomFilter.class);
         int value = 42;
         given(mockPool.nextAvailable()).willReturn(mockBloomFilter);
-        given(mockBloomFilter.statistics()).willReturn(SATURATED);
+        given(mockBloomFilter.getStatistics()).willReturn(SATURATED);
         given(mockPool.nextAvailable()).willReturn(newBucket); // 2nd call
 
         // When
@@ -83,7 +83,7 @@ public class BloomFilterChainTest {
         int value = 42;
         given(mockPool.nextAvailable()).willReturn(mockBloomFilter);
         testChain.add(value);
-        given(mockBloomFilter.statistics()).willReturn(SATURATED);
+        given(mockBloomFilter.getStatistics()).willReturn(SATURATED);
         given(mockClock.now()).willReturn(Long.MAX_VALUE);
 
         // When

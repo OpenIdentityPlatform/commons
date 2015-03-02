@@ -105,9 +105,9 @@ final class BatchingBloomFilter<T> implements BloomFilter<T> {
     }
 
     @Override
-    public BloomFilterStatistics statistics() {
+    public BloomFilterStatistics getStatistics() {
         // Adjust estimated remaining capacity to take into account current buffer size
-        final BloomFilterStatistics stats = delegate.statistics();
+        final BloomFilterStatistics stats = delegate.getStatistics();
         return new BloomFilterStatistics(stats.getConfiguredFalsePositiveProbability(),
                 stats.getExpectedFalsePositiveProbability(), stats.getCapacity(), stats.getBitSize(),
                 stats.getExpiryTime(), stats.getEstimatedRemainingCapacity() - buffer.size());

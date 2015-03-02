@@ -109,13 +109,13 @@ public final class BloomFilterMonitor<T> implements BloomFilterMXBean, BloomFilt
     }
 
     @Override
-    public BloomFilterStatistics statistics() {
-        return delegate.statistics();
+    public BloomFilterStatistics getStatistics() {
+        return delegate.getStatistics();
     }
 
     @Override
     public BloomFilterStatistics getBloomFilterStatistics() {
-        return statistics();
+        return getStatistics();
     }
 
     @Override

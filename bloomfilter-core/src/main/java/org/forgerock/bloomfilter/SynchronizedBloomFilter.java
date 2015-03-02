@@ -64,7 +64,7 @@ final class SynchronizedBloomFilter<T> implements BloomFilter<T> {
     }
 
     @Override
-    public synchronized BloomFilterStatistics statistics() {
+    public synchronized BloomFilterStatistics getStatistics() {
         final double expectedFpp = bloomFilter.expectedFpp();
         final long bitSize = BloomFilterStatistics.optimumBitSize(capacity, falsePositiveProbability);
         return new BloomFilterStatistics(falsePositiveProbability, expectedFpp, capacity, bitSize, Long.MAX_VALUE,

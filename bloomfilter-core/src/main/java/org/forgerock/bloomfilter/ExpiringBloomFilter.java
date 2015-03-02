@@ -60,8 +60,8 @@ final class ExpiringBloomFilter<T> implements BloomFilter<T> {
     }
 
     @Override
-    public BloomFilterStatistics statistics() {
-        final BloomFilterStatistics stats = delegate.statistics();
+    public BloomFilterStatistics getStatistics() {
+        final BloomFilterStatistics stats = delegate.getStatistics();
         return new BloomFilterStatistics(stats.getConfiguredFalsePositiveProbability(),
                 stats.getExpectedFalsePositiveProbability(),
                 stats.getCapacity(),
