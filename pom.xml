@@ -26,7 +26,7 @@
     </parent>
     <groupId>org.forgerock.commons</groupId>
     <artifactId>forgerock-bloomfilter</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <name>ForgeRock Bloom Filters</name>
     <description>Thread-safe implementations of scalable and rolling Bloom Filters.</description>
     <packaging>pom</packaging>
