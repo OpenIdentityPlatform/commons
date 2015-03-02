@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/forgerock-audit.iml" filepath="$PROJECT_DIR$/forgerock-audit.iml" />
+      <module fileurl="file://$PROJECT_DIR$/forgerock-audit-core/forgerock-audit-core.iml" filepath="$PROJECT_DIR$/forgerock-audit-core/forgerock-audit-core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/forgerock-audit-servlet/forgerock-audit-servlet.iml" filepath="$PROJECT_DIR$/forgerock-audit-servlet/forgerock-audit-servlet.iml" />
+    </modules>
+  </component>
+</project>

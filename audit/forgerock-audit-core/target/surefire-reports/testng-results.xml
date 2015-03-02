@@ -1,0 +1,523 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testng-results skipped="0" failed="0" total="42" passed="42">
+  <reporter-output>
+  </reporter-output>
+  <suite name="Command line suite" duration-ms="673" started-at="2015-03-02T09:50:09Z" finished-at="2015-03-02T09:50:10Z">
+    <groups>
+    </groups>
+    <test name="Command line test" duration-ms="673" started-at="2015-03-02T09:50:09Z" finished-at="2015-03-02T09:50:10Z">
+      <class name="org.forgerock.audit.impl.RouterAuditLoggerTest">
+        <test-method status="PASS" signature="setUp()" name="setUp" is-config="true" duration-ms="1" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="testCreateEntry(java.lang.String)" name="testCreateEntry" duration-ms="15" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[sync]]>
+              </value>
+            </param>
+          </params>
+        </test-method>
+        <test-method status="PASS" signature="setUp()" name="setUp" is-config="true" duration-ms="1" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="tearDown()" name="tearDown" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="testCreateEntry(java.lang.String)" name="testCreateEntry" duration-ms="4" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[recon]]>
+              </value>
+            </param>
+          </params>
+        </test-method>
+        <test-method status="PASS" signature="tearDown()" name="tearDown" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="setUp()" name="setUp" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="testCreateEntry(java.lang.String)" name="testCreateEntry" duration-ms="12" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[activity]]>
+              </value>
+            </param>
+          </params>
+        </test-method>
+        <test-method status="PASS" signature="tearDown()" name="tearDown" is-config="true" duration-ms="1" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="testCreateEntry(java.lang.String)" name="testCreateEntry" duration-ms="6" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[access]]>
+              </value>
+            </param>
+          </params>
+        </test-method>
+        <test-method status="PASS" signature="setUp()" name="setUp" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="tearDown()" name="tearDown" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="setUp()" name="setUp" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="testReadMultipleEntries(java.lang.String)" name="testReadMultipleEntries" duration-ms="1" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[sync]]>
+              </value>
+            </param>
+          </params>
+        </test-method>
+        <test-method status="PASS" signature="setUp()" name="setUp" is-config="true" duration-ms="1" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="tearDown()" name="tearDown" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="tearDown()" name="tearDown" is-config="true" duration-ms="1" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="testReadMultipleEntries(java.lang.String)" name="testReadMultipleEntries" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[recon]]>
+              </value>
+            </param>
+          </params>
+        </test-method>
+        <test-method status="PASS" signature="testReadMultipleEntries(java.lang.String)" name="testReadMultipleEntries" duration-ms="1" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[activity]]>
+              </value>
+            </param>
+          </params>
+        </test-method>
+        <test-method status="PASS" signature="setUp()" name="setUp" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="tearDown()" name="tearDown" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="setUp()" name="setUp" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="testReadMultipleEntries(java.lang.String)" name="testReadMultipleEntries" duration-ms="1" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[access]]>
+              </value>
+            </param>
+          </params>
+        </test-method>
+        <test-method status="PASS" signature="tearDown()" name="tearDown" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="testReadSingleEntry(java.lang.String)" name="testReadSingleEntry" duration-ms="1" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[sync]]>
+              </value>
+            </param>
+          </params>
+        </test-method>
+        <test-method status="PASS" signature="setUp()" name="setUp" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="setUp()" name="setUp" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="tearDown()" name="tearDown" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="testReadSingleEntry(java.lang.String)" name="testReadSingleEntry" duration-ms="1" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[recon]]>
+              </value>
+            </param>
+          </params>
+        </test-method>
+        <test-method status="PASS" signature="tearDown()" name="tearDown" is-config="true" duration-ms="1" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="setUp()" name="setUp" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="testReadSingleEntry(java.lang.String)" name="testReadSingleEntry" duration-ms="1" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[activity]]>
+              </value>
+            </param>
+          </params>
+        </test-method>
+        <test-method status="PASS" signature="tearDown()" name="tearDown" is-config="true" duration-ms="1" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="testReadSingleEntry(java.lang.String)" name="testReadSingleEntry" duration-ms="1" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[access]]>
+              </value>
+            </param>
+          </params>
+        </test-method>
+        <test-method status="PASS" signature="setUp()" name="setUp" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="tearDown()" name="tearDown" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+      </class>
+      <class name="org.forgerock.audit.impl.AuditLogFilterBuilderTest">
+        <test-method status="PASS" signature="testActivityActionFilter()" name="testActivityActionFilter" duration-ms="254" started-at="2015-03-02T09:50:09Z" finished-at="2015-03-02T09:50:09Z">
+        </test-method>
+        <test-method status="PASS" signature="testActivityActionFilterWithNonRequestTypeAction()" name="testActivityActionFilterWithNonRequestTypeAction" duration-ms="1" started-at="2015-03-02T09:50:09Z" finished-at="2015-03-02T09:50:09Z">
+        </test-method>
+        <test-method status="PASS" signature="testCompositeIdentity([Lorg.forgerock.audit.impl.AuditLogFilter;, boolean, boolean)" name="testCompositeIdentity" duration-ms="26" started-at="2015-03-02T09:50:09Z" finished-at="2015-03-02T09:50:09Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[[Lorg.forgerock.audit.impl.AuditLogFilter;@2b71962a]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[true]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[true]]>
+              </value>
+            </param>
+          </params>
+        </test-method>
+        <test-method status="PASS" signature="testCompositeIdentity([Lorg.forgerock.audit.impl.AuditLogFilter;, boolean, boolean)" name="testCompositeIdentity" duration-ms="1" started-at="2015-03-02T09:50:09Z" finished-at="2015-03-02T09:50:09Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[[Lorg.forgerock.audit.impl.AuditLogFilter;@2e39b5ae]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[true]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[false]]>
+              </value>
+            </param>
+          </params>
+        </test-method>
+        <test-method status="PASS" signature="testCompositeIdentity([Lorg.forgerock.audit.impl.AuditLogFilter;, boolean, boolean)" name="testCompositeIdentity" duration-ms="1" started-at="2015-03-02T09:50:09Z" finished-at="2015-03-02T09:50:09Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[[Lorg.forgerock.audit.impl.AuditLogFilter;@4ec6ca37]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[true]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[false]]>
+              </value>
+            </param>
+          </params>
+        </test-method>
+        <test-method status="PASS" signature="testCompositeIdentity([Lorg.forgerock.audit.impl.AuditLogFilter;, boolean, boolean)" name="testCompositeIdentity" duration-ms="1" started-at="2015-03-02T09:50:09Z" finished-at="2015-03-02T09:50:09Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[[Lorg.forgerock.audit.impl.AuditLogFilter;@374b85ae]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[true]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[false]]>
+              </value>
+            </param>
+          </params>
+        </test-method>
+        <test-method status="PASS" signature="testCompositeIdentity([Lorg.forgerock.audit.impl.AuditLogFilter;, boolean, boolean)" name="testCompositeIdentity" duration-ms="0" started-at="2015-03-02T09:50:09Z" finished-at="2015-03-02T09:50:09Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[[Lorg.forgerock.audit.impl.AuditLogFilter;@5d060948]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[true]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[false]]>
+              </value>
+            </param>
+          </params>
+        </test-method>
+        <test-method status="PASS" signature="testCompositeIdentity([Lorg.forgerock.audit.impl.AuditLogFilter;, boolean, boolean)" name="testCompositeIdentity" duration-ms="1" started-at="2015-03-02T09:50:09Z" finished-at="2015-03-02T09:50:09Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[[Lorg.forgerock.audit.impl.AuditLogFilter;@3f357ede]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[true]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[false]]>
+              </value>
+            </param>
+          </params>
+        </test-method>
+        <test-method status="PASS" signature="testCompositeIdentity([Lorg.forgerock.audit.impl.AuditLogFilter;, boolean, boolean)" name="testCompositeIdentity" duration-ms="1" started-at="2015-03-02T09:50:09Z" finished-at="2015-03-02T09:50:09Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[[Lorg.forgerock.audit.impl.AuditLogFilter;@511c413d]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[true]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[false]]>
+              </value>
+            </param>
+          </params>
+        </test-method>
+        <test-method status="PASS" signature="testCompositeIdentity([Lorg.forgerock.audit.impl.AuditLogFilter;, boolean, boolean)" name="testCompositeIdentity" duration-ms="1" started-at="2015-03-02T09:50:09Z" finished-at="2015-03-02T09:50:09Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[[Lorg.forgerock.audit.impl.AuditLogFilter;@15ff3565]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[false]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[false]]>
+              </value>
+            </param>
+          </params>
+        </test-method>
+        <test-method status="PASS" signature="testFieldFilter()" name="testFieldFilter" duration-ms="3" started-at="2015-03-02T09:50:09Z" finished-at="2015-03-02T09:50:09Z">
+        </test-method>
+        <test-method status="PASS" signature="testFieldFilterDuplicate()" name="testFieldFilterDuplicate" duration-ms="1" started-at="2015-03-02T09:50:09Z" finished-at="2015-03-02T09:50:09Z">
+        </test-method>
+        <test-method status="PASS" signature="testGetByGlob()" name="testGetByGlob" duration-ms="4" started-at="2015-03-02T09:50:09Z" finished-at="2015-03-02T09:50:09Z">
+        </test-method>
+      </class>
+      <class name="org.forgerock.audit.impl.AuditServiceImplTest">
+        <test-method status="PASS" signature="setUp()" name="setUp" is-config="true" duration-ms="126" started-at="2015-03-02T09:50:09Z" finished-at="2015-03-02T09:50:09Z">
+        </test-method>
+        <test-method status="PASS" signature="testFilterActivityAllExcluded()" name="testFilterActivityAllExcluded" duration-ms="21" started-at="2015-03-02T09:50:09Z" finished-at="2015-03-02T09:50:09Z">
+        </test-method>
+        <test-method status="PASS" signature="reset()" name="reset" is-config="true" duration-ms="1" started-at="2015-03-02T09:50:09Z" finished-at="2015-03-02T09:50:09Z">
+        </test-method>
+        <test-method status="PASS" signature="setUp()" name="setUp" is-config="true" duration-ms="1" started-at="2015-03-02T09:50:09Z" finished-at="2015-03-02T09:50:09Z">
+        </test-method>
+        <test-method status="PASS" signature="testFilterActivityAuditContext()" name="testFilterActivityAuditContext" duration-ms="12" started-at="2015-03-02T09:50:09Z" finished-at="2015-03-02T09:50:09Z">
+        </test-method>
+        <test-method status="PASS" signature="setUp()" name="setUp" is-config="true" duration-ms="2" started-at="2015-03-02T09:50:09Z" finished-at="2015-03-02T09:50:09Z">
+        </test-method>
+        <test-method status="PASS" signature="reset()" name="reset" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:09Z" finished-at="2015-03-02T09:50:09Z">
+        </test-method>
+        <test-method status="PASS" signature="testFilterActivityExplicitlyIncluded()" name="testFilterActivityExplicitlyIncluded" duration-ms="89" started-at="2015-03-02T09:50:09Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="reset()" name="reset" is-config="true" duration-ms="1" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="setUp()" name="setUp" is-config="true" duration-ms="2" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="testFilterActivityNone()" name="testFilterActivityNone" duration-ms="2" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="reset()" name="reset" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="setUp()" name="setUp" is-config="true" duration-ms="2" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="testFilterActivityUnknownAction()" name="testFilterActivityUnknownAction" duration-ms="3" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="reset()" name="reset" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+      </class>
+      <class name="org.forgerock.audit.impl.RepoAuditLoggerTest">
+        <test-method status="PASS" signature="setUp()" name="setUp" is-config="true" duration-ms="5" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="testCreateEntry(java.lang.String)" name="testCreateEntry" duration-ms="8" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[sync]]>
+              </value>
+            </param>
+          </params>
+        </test-method>
+        <test-method status="PASS" signature="setUp()" name="setUp" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="testCreateEntry(java.lang.String)" name="testCreateEntry" duration-ms="1" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[recon]]>
+              </value>
+            </param>
+          </params>
+        </test-method>
+        <test-method status="PASS" signature="tearDown()" name="tearDown" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="tearDown()" name="tearDown" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="testCreateEntry(java.lang.String)" name="testCreateEntry" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[activity]]>
+              </value>
+            </param>
+          </params>
+        </test-method>
+        <test-method status="PASS" signature="setUp()" name="setUp" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="testCreateEntry(java.lang.String)" name="testCreateEntry" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[access]]>
+              </value>
+            </param>
+          </params>
+        </test-method>
+        <test-method status="PASS" signature="tearDown()" name="tearDown" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="tearDown()" name="tearDown" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="setUp()" name="setUp" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="setUp()" name="setUp" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="testReadMultipleEntries(java.lang.String)" name="testReadMultipleEntries" duration-ms="6" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[sync]]>
+              </value>
+            </param>
+          </params>
+        </test-method>
+        <test-method status="PASS" signature="testReadMultipleEntries(java.lang.String)" name="testReadMultipleEntries" duration-ms="1" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[recon]]>
+              </value>
+            </param>
+          </params>
+        </test-method>
+        <test-method status="PASS" signature="tearDown()" name="tearDown" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="setUp()" name="setUp" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="setUp()" name="setUp" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="testReadMultipleEntries(java.lang.String)" name="testReadMultipleEntries" duration-ms="9" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[activity]]>
+              </value>
+            </param>
+          </params>
+        </test-method>
+        <test-method status="PASS" signature="tearDown()" name="tearDown" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="testReadMultipleEntries(java.lang.String)" name="testReadMultipleEntries" duration-ms="1" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[access]]>
+              </value>
+            </param>
+          </params>
+        </test-method>
+        <test-method status="PASS" signature="setUp()" name="setUp" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="tearDown()" name="tearDown" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="tearDown()" name="tearDown" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="testReadSingleEntry(java.lang.String)" name="testReadSingleEntry" duration-ms="1" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[sync]]>
+              </value>
+            </param>
+          </params>
+        </test-method>
+        <test-method status="PASS" signature="setUp()" name="setUp" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="setUp()" name="setUp" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="testReadSingleEntry(java.lang.String)" name="testReadSingleEntry" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[recon]]>
+              </value>
+            </param>
+          </params>
+        </test-method>
+        <test-method status="PASS" signature="tearDown()" name="tearDown" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="tearDown()" name="tearDown" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="testReadSingleEntry(java.lang.String)" name="testReadSingleEntry" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[activity]]>
+              </value>
+            </param>
+          </params>
+        </test-method>
+        <test-method status="PASS" signature="setUp()" name="setUp" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="tearDown()" name="tearDown" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="testReadSingleEntry(java.lang.String)" name="testReadSingleEntry" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[access]]>
+              </value>
+            </param>
+          </params>
+        </test-method>
+        <test-method status="PASS" signature="setUp()" name="setUp" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+        <test-method status="PASS" signature="tearDown()" name="tearDown" is-config="true" duration-ms="0" started-at="2015-03-02T09:50:10Z" finished-at="2015-03-02T09:50:10Z">
+        </test-method>
+      </class>
+    </test>
+  </suite>
+</testng-results>
