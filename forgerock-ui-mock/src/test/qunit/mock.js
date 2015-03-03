@@ -206,6 +206,10 @@ define([
                     pwd.val('1122334455').trigger('change');
                     QUnit.equal($('input[name="password"]', changeDataView.$el).data('validation-status'), 'error', "Password doesn't pass validation");
 
+                    pwd.val('apple').trigger('change');
+                    pwdConfirm.val('apple').trigger('change');
+                    QUnit.equal($('input[name="passwordConfirm"]', changeDataView.$el).attr('data-validation-status'), 'error', 'Password not confirming with bad values');
+
                     pwd.val('Passw0rd').trigger('change');
                     pwdConfirm.val('Passw0rd').trigger('change');
                     QUnit.equal($('input[name="password"]', changeDataView.$el).attr('data-validation-status'), 'ok', 'Password passes validation');

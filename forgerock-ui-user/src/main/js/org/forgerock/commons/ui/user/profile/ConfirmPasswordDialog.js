@@ -44,7 +44,7 @@ define("org/forgerock/commons/ui/user/profile/ConfirmPasswordDialog", [
             "customValidate": "customValidate",
             "click .dialogCloseCross img": "close",
             "click input[name='close']": "close",
-            "click .dialogContainer": "stop"
+            "click .modal-content": "stop"
         },
         data: {},
         formSubmit: function(event) {

@@ -53,7 +53,7 @@ define("config/validators/CommonValidators", [
             "validator": function(el, input, callback, utils) {
                 var v = input.val();
 
-                if (v === "" || el.find("input[name=password]").val() !== el.find("input[name=passwordConfirm]").val()) {
+                if (v === "" || el.find("input[name=password]").val() !== el.find("input[name=passwordConfirm]").val() || el.find("input[name=password]").attr("data-validation-status") === "error") {
                     callback([$.t("common.form.validation.confirmationMatchesPassword")]);
                     return;
                 }
