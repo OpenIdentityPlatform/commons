@@ -38,7 +38,9 @@ import static org.forgerock.json.resource.TestUtils.ctx;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.util.query.QueryFilter;
 import org.testng.annotations.Test;
 
 /**
@@ -165,7 +167,7 @@ public final class MemoryBackendTest {
         connection.create(ctx(), newCreateRequest("users", userBob()));
         final Collection<Resource> results = new ArrayList<Resource>();
         connection.query(ctx(), newQueryRequest("users").setQueryFilter(
-                QueryFilter.equalTo("name", "alice")).addField("_id"), results);
+                QueryFilter.equalTo(new JsonPointer("name"), "alice")).addField("_id"), results);
         assertThat(results).hasSize(1);
         final Resource resource = results.iterator().next();
         assertThat(resource.getId()).isEqualTo("0");

@@ -29,7 +29,7 @@ import java.util.List;
  * <li>default query: when neither a filter, expression or query ID are
  * specified all resources will be returned
  * <li>query by filter: returns all resources which match the
- * {@link QueryFilter} specified using {@link #setQueryFilter(QueryFilter)}
+ * {@link QueryFilters} specified using {@link #setQueryFilter(org.forgerock.util.query.QueryFilter)}
  * <li>query by ID: returns all resources which match the named prepared query
  * specified using {@link #setQueryId(String)}
  * <li>query by expression: returns all resources which match a native
@@ -214,7 +214,7 @@ public interface QueryRequest extends Request {
      * @see QueryRequest#getQueryExpression()
      * @see QueryRequest#getQueryId()
      */
-    QueryFilter getQueryFilter();
+    org.forgerock.util.query.QueryFilter<JsonPointer> getQueryFilter();
 
     /**
      * Returns the query identifier for pre-defined queries.
@@ -338,7 +338,7 @@ public interface QueryRequest extends Request {
      * @throws UnsupportedOperationException
      *             If this query request does not permit changes to the query
      *             identifier.
-     * @see QueryRequest#setQueryFilter(QueryFilter)
+     * @see QueryRequest#setQueryFilter(org.forgerock.util.query.QueryFilter)
      * @see QueryRequest#setQueryId(String)
      */
     QueryRequest setQueryExpression(String expression);
@@ -361,7 +361,7 @@ public interface QueryRequest extends Request {
      * @see QueryRequest#setQueryExpression(String)
      * @see QueryRequest#setQueryId(String)
      */
-    QueryRequest setQueryFilter(QueryFilter filter);
+    QueryRequest setQueryFilter(org.forgerock.util.query.QueryFilter<JsonPointer> filter);
 
     /**
      * Sets the query identifier for pre-defined queries.
@@ -377,7 +377,7 @@ public interface QueryRequest extends Request {
      *             If this query request does not permit changes to the query
      *             identifier.
      * @see QueryRequest#setQueryExpression(String)
-     * @see QueryRequest#setQueryFilter(QueryFilter)
+     * @see QueryRequest#setQueryFilter(org.forgerock.util.query.QueryFilter)
      */
     QueryRequest setQueryId(String id);
 
