@@ -15,10 +15,10 @@
  */
 package org.forgerock.json.resource.servlet;
 
-import static org.forgerock.json.resource.ActionRequest.ACTION_ID_CREATE;
+import static org.forgerock.json.resource.ActionRequest.*;
+import static org.forgerock.json.resource.VersionConstants.*;
 import static org.forgerock.json.resource.servlet.HttpUtils.*;
-import static org.forgerock.util.Reject.checkNotNull;
-import static org.forgerock.json.resource.VersionConstants.ACCEPT_API_VERSION;
+import static org.forgerock.util.Reject.*;
 
 import java.io.IOException;
 import java.util.Map;
@@ -39,10 +39,10 @@ import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.QueryFilters;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.PreconditionFailedException;
-import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
@@ -282,7 +282,7 @@ public final class HttpServletAdapter {
                     } else if (name.equalsIgnoreCase(PARAM_QUERY_FILTER)) {
                         final String s = asSingleValue(name, values);
                         try {
-                            request.setQueryFilter(QueryFilter.valueOf(s));
+                            request.setQueryFilter(QueryFilters.parse(s));
                         } catch (final IllegalArgumentException e) {
                             // FIXME: i18n.
                             throw new BadRequestException("The value '" + s + "' for parameter '"

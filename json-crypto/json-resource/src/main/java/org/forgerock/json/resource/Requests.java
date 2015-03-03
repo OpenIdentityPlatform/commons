@@ -390,7 +390,7 @@ public final class Requests {
 
     private static final class QueryRequestImpl extends AbstractRequestImpl<QueryRequest> implements
             QueryRequest {
-        private QueryFilter filter;
+        private org.forgerock.util.query.QueryFilter<JsonPointer> filter;
         private final List<SortKey> keys = new LinkedList<SortKey>();
         private String pagedResultsCookie;
         private int pagedResultsOffset = 0;
@@ -450,7 +450,7 @@ public final class Requests {
         }
 
         @Override
-        public QueryFilter getQueryFilter() {
+        public org.forgerock.util.query.QueryFilter<JsonPointer> getQueryFilter() {
             return filter;
         }
 
@@ -494,7 +494,7 @@ public final class Requests {
         }
 
         @Override
-        public QueryRequest setQueryFilter(final QueryFilter filter) {
+        public QueryRequest setQueryFilter(final org.forgerock.util.query.QueryFilter<JsonPointer> filter) {
             this.filter = filter;
             return this;
         }
