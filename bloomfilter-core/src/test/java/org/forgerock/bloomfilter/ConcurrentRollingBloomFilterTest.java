@@ -58,8 +58,9 @@ public class ConcurrentRollingBloomFilterTest {
                 .unencodedCharsFunnel())
                 .withConcurrencyStrategy(strategy)
                 .withWriteBatchSize(25000)
-                .withInitialCapacity(10)
-                .withCapacityGrowthFactor(1.2d)
+                .withInitialCapacity(10000)
+                .withCapacityGrowthFactor(2.0d)
+                .withFalsePositiveProbabilityScaleFactor(0.5d)
                 .scalable()
                 .build();
 
@@ -110,8 +111,9 @@ public class ConcurrentRollingBloomFilterTest {
                 .unencodedCharsFunnel())
                 .withConcurrencyStrategy(strategy)
                 .withWriteBatchSize(25000)
-                .withInitialCapacity(10)
-                .withCapacityGrowthFactor(1.2d)
+                .withInitialCapacity(10000)
+                .withCapacityGrowthFactor(2.0d)
+                .withFalsePositiveProbabilityScaleFactor(0.5d)
                 .scalable()
                 .build();
 

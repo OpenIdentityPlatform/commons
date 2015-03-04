@@ -52,13 +52,6 @@ public class BloomFilterMonitorTest {
     @AfterMethod
     public void printStats() {
         threadPool.shutdownNow();
-        System.out.println("Add Stats:");
-        System.out.println(testMonitor.getAddStatistics());
-        System.out.println("MightContain Stats:");
-        System.out.println(testMonitor.getMightContainStatistics());
-        System.out.println("Bucket stats:");
-        System.out.println(testMonitor.getBloomFilterStatistics());
-        System.out.flush();
     }
 
     @Test

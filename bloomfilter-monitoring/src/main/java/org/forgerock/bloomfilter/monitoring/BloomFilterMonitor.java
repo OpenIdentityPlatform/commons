@@ -32,15 +32,22 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.management.ManagementFactory;
 import java.util.Collection;
+import java.util.Date;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Generic Bloom Filter JMX monitoring.
  */
 public final class BloomFilterMonitor<T> implements BloomFilterMXBean, BloomFilter<T> {
+    private static final String LOG_CHARSET = "UTF-8";
     // 100,000 microseconds largest expected timing (100ms)
     private static final long LONGEST_EXPECTED_RESPONSE_TIME_MICROS = 100000L;
     // 3 significant digits = approx. 65kB storage per histogram
     private static final int SIGNIFICANT_DIGITS = 3;
+
+    private static final String OBJECT_NAME_TEMPLATE = "%s:type=%s,name=%s";
+
     private final BloomFilter<T> delegate;
 
     private final AtomicHistogram addStats = new AtomicHistogram(LONGEST_EXPECTED_RESPONSE_TIME_MICROS,
@@ -54,21 +61,34 @@ public final class BloomFilterMonitor<T> implements BloomFilterMXBean, BloomFilt
         this.delegate = delegate;
     }
 
-    public ObjectInstance register(final MBeanServer mBeanServer, final String name)
+    public ObjectInstance register(final MBeanServer mBeanServer, final String packageName, final String instanceName)
             throws InstanceAlreadyExistsException, MBeanRegistrationException, MalformedObjectNameException {
-        final ObjectName objectName = new ObjectName(name);
+        final ObjectName objectName = objectName(packageName, "BloomFilterMonitor", instanceName);
         try {
+            // Register the method-call mbeans
+            mBeanServer.registerMBean(new LiveMethodCallStatistics(addStats), objectName(packageName,
+                    "BloomFilterMonitor.MethodCallStatistics", instanceName + ",method=add"));
+            mBeanServer.registerMBean(new LiveMethodCallStatistics(addAllStats), objectName(packageName,
+                    "BloomFilterMonitor.MethodCallStatistics", instanceName + ",method=addAll"));
+            mBeanServer.registerMBean(new LiveMethodCallStatistics(mightContainStats), objectName(packageName,
+                    "BloomFilterMonitor.MethodCallStatistics", instanceName + ",method=mightContain"));
+
             return mBeanServer.registerMBean(this, objectName);
         } catch (NotCompliantMBeanException ex) {
             throw new IllegalStateException(ex);
         }
     }
 
+    private ObjectName objectName(final String packageName, final String type, final String instanceName)
+            throws MalformedObjectNameException {
+        return new ObjectName(String.format(Locale.US, OBJECT_NAME_TEMPLATE, packageName, type, instanceName));
+    }
+
     public void register(final MBeanServer mBeanServer)
             throws InstanceAlreadyExistsException, MBeanRegistrationException{
         try {
             this.register(mBeanServer,
-                    delegate.getClass().getPackage().getName() + ":type=" + delegate.getClass().getSimpleName());
+                    delegate.getClass().getPackage().getName(), delegate.getClass().getSimpleName());
         } catch (MalformedObjectNameException ex) {
             throw new IllegalStateException(ex);
         }
@@ -114,38 +134,121 @@ public final class BloomFilterMonitor<T> implements BloomFilterMXBean, BloomFilt
     }
 
     @Override
-    public BloomFilterStatistics getBloomFilterStatistics() {
-        return getStatistics();
+    public double getConfiguredFalsePositiveProbability() {
+        return getStatistics().getConfiguredFalsePositiveProbability();
     }
 
     @Override
-    public MethodCallStatistics getAddStatistics() {
-        return summarize(addStats.copy());
+    public double getExpectedFalsePositiveProbability() {
+        return getStatistics().getExpectedFalsePositiveProbability();
     }
 
     @Override
-    public MethodCallStatistics getAllAllStatistics() {
-        return summarize(addAllStats.copy());
+    public long getCurrentCapacity() {
+        return getStatistics().getCapacity();
     }
 
     @Override
-    public MethodCallStatistics getMightContainStatistics() {
-        return summarize(mightContainStats.copy());
+    public long getEstimatedRemainingCapacity() {
+        return getStatistics().getEstimatedRemainingCapacity();
     }
 
-    private MethodCallStatistics summarize(final AtomicHistogram histogram) {
-        final ByteArrayOutputStream log = new ByteArrayOutputStream();
-        try {
-            histogram.outputPercentileDistribution(new PrintStream(log, true, "UTF-8"), 1.0d);
+    @Override
+    public long getMemorySizeKB() {
+        return getStatistics().getBitSize() / (8l * 1024l);
+    }
 
-            return new MethodCallStatistics(histogram.getTotalCount(),
-                    histogram.getMinValue(), histogram.getMaxValue(),
-                    histogram.getValueAtPercentile(50.0d), histogram.getValueAtPercentile(95.0d),
-                    histogram.getMean(), histogram.getStdDeviation(),
-                    log.toString("UTF-8"));
-        } catch (UnsupportedEncodingException ex) {
-            throw new IllegalStateException("Broken JVM: UTF-8 unknown encoding!");
+    @Override
+    public Date getExpiryTime() {
+        return new Date(getStatistics().getExpiryTime());
+    }
+
+    private static final class LiveMethodCallStatistics implements MethodCallStatisticsMXBean {
+        private final AtomicHistogram histogram;
+
+        public LiveMethodCallStatistics(final AtomicHistogram histogram) {
+            this.histogram = histogram;
+        }
+
+        @Override
+        public long getCallCount() {
+            return histogram.getTotalCount();
+        }
+
+        @Override
+        public TimeUnit getTimeUnit() {
+            return TimeUnit.MICROSECONDS;
+        }
+
+        @Override
+        public long getMinimumTime() {
+            return histogram.getMinValue();
+        }
+
+        @Override
+        public long getMaximumTime() {
+            return histogram.getMaxValue();
+        }
+
+        @Override
+        public double getMeanTime() {
+            return histogram.getMean();
+        }
+
+        @Override
+        public double getStdDeviation() {
+            return histogram.getStdDeviation();
+        }
+
+        @Override
+        public long getMedianTime() {
+            return histogram.getValueAtPercentile(50.0d);
+        }
+
+        @Override
+        public long get75thPercentileTime() {
+            return histogram.getValueAtPercentile(75.0d);
+        }
+
+        @Override
+        public long get90thPercentileTime() {
+            return histogram.getValueAtPercentile(90.0d);
+        }
+
+        @Override
+        public long get95thPercentileTime() {
+            return histogram.getValueAtPercentile(95.0d);
+        }
+
+        @Override
+        public long get98thPercentileTime() {
+            return histogram.getValueAtPercentile(98.0d);
+        }
+
+        @Override
+        public long get99thPercentileTime() {
+            return histogram.getValueAtPercentile(99.0d);
+        }
+
+        @Override
+        public long get99Point9thPercentileTime() {
+            return histogram.getValueAtPercentile(99.9d);
+        }
+
+        @Override
+        public long get99Point99thPercentileTime() {
+            return histogram.getValueAtPercentile(99.99d);
+        }
+
+        @Override
+        public String getPercentileDump() {
+            final ByteArrayOutputStream out = new ByteArrayOutputStream();
+            try {
+                histogram.copy().outputPercentileDistribution(new PrintStream(out, true, LOG_CHARSET), 1.0d);
+                return out.toString(LOG_CHARSET);
+            } catch (UnsupportedEncodingException ex) {
+                return "Unable to determine percentile log";
+            }
         }
     }
-
 }

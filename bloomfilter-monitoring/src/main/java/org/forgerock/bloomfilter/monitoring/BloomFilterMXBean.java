@@ -16,21 +16,18 @@
 
 package org.forgerock.bloomfilter.monitoring;
 
-import org.forgerock.bloomfilter.BloomFilterStatistics;
-
 import javax.management.MXBean;
+import java.util.Date;
 
 /**
  * Operations for monitoring and management of Bloom Filter implementations.
  */
 @MXBean
 public interface BloomFilterMXBean {
-    /**
-     * Basic statistics of the current state of the bloom filter.
-     */
-    BloomFilterStatistics getBloomFilterStatistics();
-
-    MethodCallStatistics getAddStatistics();
-    MethodCallStatistics getAllAllStatistics();
-    MethodCallStatistics getMightContainStatistics();
+    double getConfiguredFalsePositiveProbability();
+    double getExpectedFalsePositiveProbability();
+    long getCurrentCapacity();
+    long getEstimatedRemainingCapacity();
+    long getMemorySizeKB();
+    Date getExpiryTime();
 }
