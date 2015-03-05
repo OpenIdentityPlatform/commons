@@ -18,6 +18,7 @@ package org.forgerock.bloomfilter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
@@ -60,7 +61,7 @@ public class BatchingBloomFilterTest {
         // Then
         @SuppressWarnings("rawtypes")
         ArgumentCaptor<Collection> batch = ArgumentCaptor.forClass(Collection.class);
-        verify(mockDelegate).addAll(batch.capture());
+        verify(mockDelegate, atLeastOnce()).addAll(batch.capture());
         assertThat(batch.getValue()).containsAll(expected);
         verifyNoMoreInteractions(mockDelegate);
     }

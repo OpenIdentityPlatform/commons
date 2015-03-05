@@ -163,6 +163,8 @@ public final class BloomFilterMonitor<T> implements BloomFilterMXBean, BloomFilt
         return new Date(getStatistics().getExpiryTime());
     }
 
+
+
     private static final class LiveMethodCallStatistics implements MethodCallStatisticsMXBean {
         private final AtomicHistogram histogram;
 
@@ -250,5 +252,15 @@ public final class BloomFilterMonitor<T> implements BloomFilterMXBean, BloomFilt
                 return "Unable to determine percentile log";
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        return "BloomFilterMonitor{" +
+                "stats=" + delegate.getStatistics() +
+                ", add=" + addStats.getValueAtPercentile(99.0d) +
+                ", addAll=" + addAllStats.getValueAtPercentile(99.0d) +
+                ", mightContain=" + mightContainStats.getValueAtPercentile(99.0d) +
+                '}';
     }
 }

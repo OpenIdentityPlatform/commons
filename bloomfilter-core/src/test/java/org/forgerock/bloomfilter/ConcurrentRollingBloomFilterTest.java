@@ -57,7 +57,7 @@ public class ConcurrentRollingBloomFilterTest {
         final BloomFilter<String> impl = BloomFilters.<String>create(Funnels
                 .unencodedCharsFunnel())
                 .withConcurrencyStrategy(strategy)
-                .withWriteBatchSize(25000)
+                .withWriteBatchSize(500)
                 .withInitialCapacity(10000)
                 .withCapacityGrowthFactor(2.0d)
                 .withFalsePositiveProbabilityScaleFactor(0.5d)
@@ -110,7 +110,7 @@ public class ConcurrentRollingBloomFilterTest {
         final BloomFilter<String> impl = BloomFilters.<String>create(Funnels
                 .unencodedCharsFunnel())
                 .withConcurrencyStrategy(strategy)
-                .withWriteBatchSize(25000)
+                .withWriteBatchSize(500)
                 .withInitialCapacity(10000)
                 .withCapacityGrowthFactor(2.0d)
                 .withFalsePositiveProbabilityScaleFactor(0.5d)

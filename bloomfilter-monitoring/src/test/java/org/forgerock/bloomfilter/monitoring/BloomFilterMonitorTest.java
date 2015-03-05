@@ -16,7 +16,7 @@
 
 package org.forgerock.bloomfilter.monitoring;
 
-import static junit.framework.Assert.assertTrue;
+import static org.testng.Assert.assertTrue;
 
 import org.forgerock.bloomfilter.BloomFilter;
 import org.forgerock.bloomfilter.BloomFilters;
@@ -30,6 +30,7 @@ import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class BloomFilterMonitorTest {
 
@@ -52,28 +53,39 @@ public class BloomFilterMonitorTest {
     @AfterMethod
     public void printStats() {
         threadPool.shutdownNow();
+        System.out.println(testMonitor);
+        System.out.flush();
     }
 
     @Test
     public void testConcurrency() throws Exception {
         final CountDownLatch latch = new CountDownLatch(16);
+        final AtomicReference<RuntimeException> error = new AtomicReference<RuntimeException>();
         for (int i = 0; i < 16; ++i) {
             threadPool.execute(new Runnable() {
                 @Override
                 public void run() {
-                    final Random random = new Random();
-                    for (int i = 0; i < 500000; ++i) {
-                        final int r = random.nextInt();
-                        if (i % 10 == 0) {
-                            testMonitor.add(r);
-                            assertTrue(testMonitor.mightContain(r));
+                    try {
+                        final Random random = new Random();
+                        for (int i = 0; i < 500000; ++i) {
+                            final int r = random.nextInt();
+                            if (i % 10 == 0) {
+                                testMonitor.add(r);
+                                assertTrue(testMonitor.mightContain(r));
+                            }
+                            testMonitor.mightContain(r);
                         }
-                        testMonitor.mightContain(r);
+                    } catch (RuntimeException e) {
+                        error.set(e);
+                    } finally {
+                        latch.countDown();
                     }
-                    latch.countDown();
                 }
             });
         }
         latch.await();
+        if (error.get() != null) {
+            throw error.get();
+        }
     }
 }
