@@ -13,8 +13,8 @@
         "@brand-danger": "#d9534f",
         "@body-bg": "#fff",
         "@text-color": "#2a2f32",
-        "@link-color": "@brand-primary",
-        "@link-hover-color": "darken(@link-color, 15%)",
+        "@link-color": "#777777",
+        "@link-hover-color": "darken(#519387, 0%)",
         "@link-hover-decoration": "underline",
         "@font-family-sans-serif": "Roboto, \"proxima-nova\", \"Helvetica Neue\", Helvetica, Arial, sans-serif",
         "@font-family-serif": "Georgia, \"Times New Roman\", Times, serif",
@@ -175,13 +175,13 @@
         "@navbar-inverse-toggle-icon-bar-bg": "#fff",
         "@navbar-inverse-toggle-border-color": "#979797",
         "@nav-link-padding": "10px 15px",
-        "@nav-link-hover-bg": "@gray-lighter",
+        "@nav-link-hover-bg": "transparent",
         "@nav-disabled-link-color": "@gray-light",
         "@nav-disabled-link-hover-color": "@gray-light",
         "@nav-tabs-border-color": "#ddd",
-        "@nav-tabs-link-hover-border-color": "@gray-lighter",
+        "@nav-tabs-link-hover-border-color": "transparent",
         "@nav-tabs-active-link-hover-bg": "@body-bg",
-        "@nav-tabs-active-link-hover-color": "@gray",
+        "@nav-tabs-active-link-hover-color": "@brand-primary",
         "@nav-tabs-active-link-hover-border-color": "#ddd",
         "@nav-tabs-justified-link-border-color": "#ddd",
         "@nav-tabs-justified-active-link-border-color": "@body-bg",
@@ -425,5 +425,5 @@
         "scrollspy.js",
         "transition.js"
     ],
-    "customizerUrl": "http://getbootstrap.com/customize/?id=627eb4575fffee40b16e"
+    "customizerUrl": "http://getbootstrap.com/customize/?id=c8c3b9c7c035eab42eb4"
 }

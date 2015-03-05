@@ -29,6 +29,10 @@ table {
   font-size: 14px;
 }
 
+.light {
+  font-weight:normal;
+}
+
 
 .row.no-gutters .col-xs-1,
 .row.no-gutters .col-sm-1,
@@ -778,14 +782,23 @@ hr {
   }
 }
 
+.panel-collapse .panel-title>a {
+  color: @base-theme-color;
+}
+
+.panel-title a:focus {
+  color: @base-theme-color;
+  text-decoration: none;
+}
+
+.panel-title a:hover {
+  color: @panel-hover-color;
+  text-decoration: none;
+}
+
 .panel-title>a {
   position: relative;
   padding-left: 17px;
-}
-
-.panel-title a:hover,
-.panel-title a:focus {
-  color: @base-theme-color;
 }
 
 .panel .nav-list>li:last-child>a {
@@ -794,11 +807,6 @@ hr {
 
 .panel-footer {
   background-color: #fff;
-}
-
-.panel-title a:hover,
-.panel-title a:focus {
-  text-decoration: none;
 }
 
 .panel-title a:before {
