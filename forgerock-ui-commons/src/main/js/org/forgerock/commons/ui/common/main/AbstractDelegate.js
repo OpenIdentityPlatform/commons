@@ -22,16 +22,17 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, _ */
+/*global define */
 
 /**
  * @author yaromin
  */
 define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
+    "underscore",
     "org/forgerock/commons/ui/common/util/Constants", 
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/ServiceInvoker"
-], function(constants, configuration, serviceInvoker) {
+], function(_, constants, configuration, serviceInvoker) {
 
     var obj = function AbstractDelegate(serviceUrl) {
         var baseRegex = new RegExp("^/" + constants.context + "\/([\\w/]*)"),
@@ -190,7 +191,7 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
             if ( typeof (fieldContents) !== "function") {
                 newValue = newObject[field];
                 oldValue = oldObject[field];
-                if((newValue!=="" || oldValue) && newValue !== oldValue){
+                if ((newValue!=="" || oldValue) && !_.isEqual(newValue,oldValue)) {
                     patchCmd = {
                         operation: method,
                         field: field,

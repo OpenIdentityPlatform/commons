@@ -298,6 +298,22 @@ define([
 
             });
 
+
+            QUnit.test("AbstractDelegate - getDifferences (CUI-53)", function () {
+                var AbstractDelegate = require("org/forgerock/commons/ui/common/main/AbstractDelegate"),
+                    abTest = new AbstractDelegate(""),
+                    differences;
+
+                differences = abTest.getDifferences({"a": "b"}, {"a": "b"});
+                QUnit.equal(differences.length, 0, "No differences for equal, simple objects");
+
+                differences = abTest.getDifferences({"a": "b"}, {"a": "c"});
+                QUnit.ok(differences.length === 1 && differences[0].value === 'c', "One difference found for trivial change");
+
+                differences = abTest.getDifferences({"a": ["b"]}, {"a": ["b"]});
+                QUnit.equal(differences.length, 0, "No differences for equal complex objects");
+            });
+
         }
     };
 });
