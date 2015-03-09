@@ -446,13 +446,41 @@ hr {
 /*
 
 */
-.form-horizontal .has-feedback.no-right-padding .form-control-feedback {
-  right:0px;
-}
+.form-horizontal {
+  .has-feedback.no-right-padding .form-control-feedback {
+    right: 0px;
+  }
 
-.form-horizontal .form-group-large.has-feedback .form-control-feedback {
-  right:0px;
-  line-height:44px;
+  .form-group-large.has-feedback .form-control-feedback {
+    right:0px;
+    line-height:44px;
+  }
+
+  .form-group-header {
+    margin-left: 0;
+    margin-right: 0;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+
+    .control-label {
+      font-weight: 600;
+      display: inline-block;
+      margin-right: 5px;
+    }
+
+    .form-control {
+      display: inline-block;
+      margin-right: 5px;
+      max-width: 300px;
+      width: auto;
+    }
+
+    .help-block {
+      display: inline-block;
+      margin-right: 5px;
+    }
+  }
 }
 
 #userRegistration {
@@ -866,6 +894,10 @@ hr {
 
 .panel-default.panel-collapse:last-child {
   border-bottom: none;
+}
+
+.panel-description {
+  margin-bottom: 20px;
 }
 
 /*
