@@ -147,9 +147,11 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
         onValidate: function(event, input, msg, validatorType) {
             var button = this.$el.find("input[type=submit]"),
                 validationMessage = (msg && !_.isArray(msg)) ? msg.split("<br>") : [];
-            
-            //clean up existing popover
-            $(input, this.$el).popover('destroy');
+
+            //clean up existing popover if no message is present
+            if (!msg && $(input, this.$el).data()["bs.popover"]) {
+                $(input, this.$el).popover('destroy');
+            }
             $(input, this.$el).removeClass('field-error');
                 
             if(msg && _.isArray(msg)){
@@ -177,10 +179,14 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
                 return;
             } else {
                 validatorsUtils.showValidation(input, this.$el);
-                
                 if(validationMessage.length){
                     $(input, this.$el).addClass('field-error');
+                    //clean up existing popover if validation messsage is different
+                    if ($(input, this.$el).data()["bs.popover"] && !_.isEqual(validationMessage,$(input, this.$el).data()["bs.popover"].options.validationMessage)) {
+                        $(input, this.$el).popover('destroy');
+                    }
                     $(input, this.$el).popover({
+                        validationMessage: validationMessage,
                         content: '<i class="fa fa-exclamation-circle"></i> ' + validationMessage.join('<br><i class="fa fa-exclamation-circle"></i> '),
                         trigger:'hover',
                         placement:'top',
