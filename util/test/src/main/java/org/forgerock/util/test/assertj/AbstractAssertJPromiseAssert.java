@@ -21,7 +21,6 @@ import java.util.concurrent.ExecutionException;
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ThrowableAssert;
-import org.forgerock.util.Function;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -33,19 +32,22 @@ import org.forgerock.util.promise.Promise;
 public abstract class AbstractAssertJPromiseAssert<T, A extends AbstractAssertJPromiseAssert<T, A, S>, S extends AbstractAssert<S, T>>
         extends AbstractAssert<A, Promise<T, ?>> {
 
-    private final Function<T, S, RuntimeException> succeededFactory;
-
-    protected AbstractAssertJPromiseAssert(Promise<T, ?> promise, Class<A> type,
-            Function<T, S, RuntimeException> succeededFactory) {
+    protected AbstractAssertJPromiseAssert(Promise<T, ?> promise, Class<A> type) {
         super(promise, type);
-        this.succeededFactory = succeededFactory;
     }
+
+    /**
+     * Factory method for the succeeded assert class.
+     * @param actual The promised value.
+     * @return The {@link AbstractAssert} implementation.
+     */
+    protected abstract S createSucceededAssert(T actual);
 
     /**
      * Asserts that the promise succeeded.
      * @return An {@link AbstractAssert} for making assertions on the promise's completed value.
      */
-    public S succeeded() {
+    public final S succeeded() {
         isNotNull();
         if (!actual.isDone()) {
             failWithMessage("Promise is not completed");
@@ -58,7 +60,7 @@ public abstract class AbstractAssertJPromiseAssert<T, A extends AbstractAssertJP
         } catch (ExecutionException e) {
             failWithMessage("Promise failed: <%s>", e.getCause());
         }
-        return succeededFactory.apply(result);
+        return createSucceededAssert(result);
     }
 
     /**
@@ -66,7 +68,7 @@ public abstract class AbstractAssertJPromiseAssert<T, A extends AbstractAssertJP
      * @return A {@link org.assertj.core.api.ThrowableAssert} for making
      * assertions on the promise's failure cause.
      */
-    public ThrowableAssert failedWithException() {
+    public final ThrowableAssert failedWithException() {
         isNotNull();
         try {
             Object value = actual.get();

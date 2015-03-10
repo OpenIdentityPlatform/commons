@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.Assertions;
@@ -36,8 +35,6 @@ import org.assertj.core.api.MapAssert;
 import org.assertj.core.api.ObjectArrayAssert;
 import org.assertj.core.api.ObjectAssert;
 import org.assertj.core.api.StringAssert;
-import org.assertj.core.api.ThrowableAssert;
-import org.forgerock.util.Function;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -56,52 +53,12 @@ public final class AssertJPromiseAssert
     }
 
     private AssertJPromiseAssert(Promise<?, ?> promise) {
-        super((Promise<Object, ?>) promise, AssertJPromiseAssert.class,
-                new Function<Object, SuccessfulPromiseAssert, RuntimeException>() {
-                    @Override
-                    public SuccessfulPromiseAssert apply(Object value) throws RuntimeException {
-                        return new SuccessfulPromiseAssert(value);
-                    }
-                });
+        super((Promise<Object, ?>) promise, AssertJPromiseAssert.class);
     }
 
-    /**
-     * Asserts that the promise succeeded.
-     * @return A {@link org.forgerock.util.test.assertj.AssertJPromiseAssert.SuccessfulPromiseAssert} for making
-     * assertions on the promise's completed value.
-     */
-    public SuccessfulPromiseAssert succeeded() {
-        isNotNull();
-        if (!actual.isDone()) {
-            failWithMessage("Promise is not completed");
-        }
-        Object result = null;
-        try {
-            result = actual.get();
-        } catch (InterruptedException e) {
-            failWithMessage("Promise was interrupted");
-        } catch (ExecutionException e) {
-            failWithMessage("Promise failed: <%s>", e.getCause());
-        }
-        return new SuccessfulPromiseAssert(result);
-    }
-
-    /**
-     * Asserts that the promise failed.
-     * @return A {@link org.assertj.core.api.ThrowableAssert} for making
-     * assertions on the promise's failure cause.
-     */
-    public ThrowableAssert failedWithException() {
-        isNotNull();
-        try {
-            Object value = actual.get();
-            failWithMessage("Promise succeeded with value <%s>", value);
-        } catch (InterruptedException e) {
-            failWithMessage("Promise was interrupted");
-        } catch (ExecutionException e) {
-            return Assertions.assertThat(e.getCause());
-        }
-        throw new IllegalStateException("Shouldn't have reached here");
+    @Override
+    protected SuccessfulPromiseAssert createSucceededAssert(Object actual) {
+        return new SuccessfulPromiseAssert(actual);
     }
 
     /**

@@ -21,28 +21,30 @@ import java.util.concurrent.ExecutionException;
 import org.fest.assertions.Assertions;
 import org.fest.assertions.GenericAssert;
 import org.fest.assertions.ThrowableAssert;
-import org.forgerock.util.Function;
 import org.forgerock.util.promise.Promise;
 
 /**
  * Assertion class for a promise. Allows verification of the value that was completed with.
  */
-public class AbstractFestPromiseAssert<T, A extends AbstractFestPromiseAssert<T, A, S>, S extends GenericAssert<S, T>>
+public abstract class AbstractFestPromiseAssert<T, A extends AbstractFestPromiseAssert<T, A, S>, S extends GenericAssert<S, T>>
         extends GenericAssert<A, Promise<T, ?>> {
 
-    private final Function<T, S, RuntimeException> succeededFactory;
-
-    protected AbstractFestPromiseAssert(Promise<T, ?> promise, Class<A> type,
-            Function<T, S, RuntimeException> succeededFactory) {
+    protected AbstractFestPromiseAssert(Promise<T, ?> promise, Class<A> type) {
         super(type, promise);
-        this.succeededFactory = succeededFactory;
     }
+
+    /**
+     * Factory method for the succeeded assert class.
+     * @param actual The promised value.
+     * @return The {@link GenericAssert} implementation.
+     */
+    protected abstract S createSucceededAssert(T actual);
 
     /**
      * Asserts that the promise succeeded.
      * @return A {@link GenericAssert} for making assertions on the promise's completed value.
      */
-    public S succeeded() {
+    public final S succeeded() {
         isNotNull();
         if (!actual.isDone()) {
             fail("Promise is not completed");
@@ -55,7 +57,7 @@ public class AbstractFestPromiseAssert<T, A extends AbstractFestPromiseAssert<T,
         } catch (ExecutionException e) {
             fail("Promise failed", e.getCause());
         }
-        return succeededFactory.apply(result);
+        return createSucceededAssert(result);
     }
 
     /**
@@ -63,7 +65,7 @@ public class AbstractFestPromiseAssert<T, A extends AbstractFestPromiseAssert<T,
      * @return A {@link org.assertj.core.api.ThrowableAssert} for making
      * assertions on the promise's failure cause.
      */
-    public ThrowableAssert failedWithException() {
+    public final ThrowableAssert failedWithException() {
         isNotNull();
         try {
             Object value = actual.get();

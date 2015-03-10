@@ -34,7 +34,6 @@ import org.fest.assertions.MapAssert;
 import org.fest.assertions.ObjectArrayAssert;
 import org.fest.assertions.ObjectAssert;
 import org.fest.assertions.StringAssert;
-import org.forgerock.util.Function;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -53,13 +52,12 @@ public final class FestPromiseAssert
     }
 
     private FestPromiseAssert(Promise<?, ?> promise) {
-        super((Promise<Object, ?>) promise, FestPromiseAssert.class,
-                new Function<Object, SuccessfulPromiseAssert, RuntimeException>() {
-                    @Override
-                    public SuccessfulPromiseAssert apply(Object value) throws RuntimeException {
-                        return new SuccessfulPromiseAssert(value);
-                    }
-                });
+        super((Promise<Object, ?>) promise, FestPromiseAssert.class);
+    }
+
+    @Override
+    protected SuccessfulPromiseAssert createSucceededAssert(Object actual) {
+        return new SuccessfulPromiseAssert(actual);
     }
 
     /**
