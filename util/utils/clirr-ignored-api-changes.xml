@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ The contents of this file are subject to the terms of the Common Development and
+  ~ Distribution License (the License). You may not use this file except in compliance with the License.
+  ~
+  ~ You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  ~ specific language governing permission and limitations under the License.
+  ~
+  ~ When distributing Covered Software, include this CDDL Header Notice in each file and include
+  ~ the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  ~ Header, with the fields enclosed by brackets [] replaced by your own identifying
+  ~ information: "Portions copyright [year] [name of copyright owner]".
+  ~
+  ~ Copyright 2015 ForgeRock AS.
+  -->
+<differences>
+<!--
+For specifying ignored differences, see:
+  http://mojo.codehaus.org/clirr-maven-plugin/examples/ignored-differences.html
+
+path/methods/to/from matching can either use:
+- regex when surrounded with '%regex[]'
+- ant style path matching when surrounded with '%ant[]'
+- ant style path matching when not surrounded by anything
+
+For path/methods matching in maven-clirr-plugin see (change version numbers accordingly):
+  http://svn.codehaus.org/mojo/tags/clirr-maven-plugin-2.6.1/src/main/java/org/codehaus/mojo/clirr/Difference.java
+  http://grepcode.com/file/repo1.maven.org/maven2/org.codehaus.plexus/plexus-utils/3.0.7/org/codehaus/plexus/util/SelectorUtils.java
+For a description of ant style path expressions see:
+  http://ant.apache.org/manual/dirtasks.html#patterns
+
+Note: waiting on https://jira.codehaus.org/browse/MCLIRR-62 to be resolved to avoid the need to use \s* in the '<to>' tags.
+-->
+<!-- Here is an example
+  <difference>
+    <className>org/forgerock/opendj/ldap/Connections</className>
+    <differenceType>7005</differenceType>
+    <method>%regex[org\.forgerock\.opendj\.ldap\.ConnectionFactory newHeartBeatConnectionFactory\(org\.forgerock\.opendj\.ldap\.ConnectionFactory, long, java\.util\.concurrent\.TimeUnit, org\.forgerock\.opendj\.ldap\.requests\.SearchRequest(, java\.util\.concurrent\.ScheduledExecutorService)?\)]</method>
+    <to>%regex[org\.forgerock\.opendj\.ldap\.ConnectionFactory newHeartBeatConnectionFactory\(org\.forgerock\.opendj\.ldap\.ConnectionFactory,\s*long,\s*long,\s*java\.util\.concurrent\.TimeUnit(,\s*org\.forgerock\.opendj\.ldap\.requests\.SearchRequest(,\s*java\.util\.concurrent\.ScheduledExecutorService)?)?\)]</to>
+    <justification>OPENDJ-1058: Added a timeout parameter to actively shutdown dead connections</justification>
+  </difference>
+-->  
+	<difference>
+		<className>%regex[org/forgerock/util/promise/(Promise|PromiseImpl)]</className>
+		<differenceType>7002</differenceType>
+		<method>%regex[org.forgerock.util.promise.Promise then\(org.forgerock.util.promise.SuccessHandler(, org.forgerock.util.promise.FailureHandler)?\)]</method>
+		<justification>COMMONS-5 Promise API improvements</justification>
+	</difference>
+	<difference>
+		<className>%regex[org/forgerock/util/promise/(Promise|PromiseImpl)]</className>
+		<differenceType>7002</differenceType>
+		<method>%regex[org.forgerock.util.promise.Promise (onSuccess(OrFailure)?|onFailure)\((org.forgerock.util.promise.(Success|Failure)Handler|java.lang.Runnable)\)]</method>
+		<justification>COMMONS-5 Promise API improvements</justification>
+	</difference>
+	<difference>
+		<className>org/forgerock/util/promise/Promise</className>
+		<differenceType>7012</differenceType>
+		<method>%regex[org.forgerock.util.promise.Promise then(OnSuccess(OrFailure)?|OnFailure)\((org.forgerock.util.promise.(Success|Failure)Handler|java.lang.Runnable)\)]</method>
+		<justification>COMMONS-5 Promise API improvements</justification>
+	</difference>
+	<difference>
+		<className>org/forgerock/util/promise/Promise</className>
+		<differenceType>7012</differenceType>
+		<method>org.forgerock.util.promise.Promise thenOnSuccessOrFailure(org.forgerock.util.promise.SuccessHandler, org.forgerock.util.promise.FailureHandler)</method>
+		<justification>COMMONS-5 Promise API improvements</justification>
+	</difference>
+	<difference>
+		<className>org/forgerock/util/promise/Promise</className>
+		<differenceType>7012</differenceType>
+		<method>%regex[org.forgerock.util.promise.Promise thenCatch(Async)?\(org.forgerock.util.(Async)?Function\)]</method>
+		<justification>COMMONS-5 Promise API improvements</justification>
+	</difference>
+	<difference>
+		<className>org/forgerock/util/promise/Promise</className>
+		<differenceType>7012</differenceType>
+		<method>org.forgerock.util.promise.Promise thenFinally(java.lang.Runnable)</method>
+		<justification>COMMONS-5 Promise API improvements</justification>
+	</difference>    
+	<difference>
+	    <className>%regex[org/forgerock/util/promise/(Async)?Function]</className>
+	    <differenceType>8001</differenceType>
+	    <justification>COMMONS-5 Promise API improvements</justification>
+  </difference>
+  <difference>
+	    <className>%regex[org/forgerock/util/promise/Promise(Impl)?]</className>
+	    <differenceType>7005</differenceType>
+	    <method>%regex[org.forgerock.util.promise.Promise then(Async)?\((org.forgerock.util.promise.(Async)?Function(, )?)*\)]</method>
+	    <to>%regex[org.forgerock.util.promise.Promise then(Async)?\((org.forgerock.util.(Async)?Function(, )?)*\)]</to>
+	    <justification>COMMONS-5 Promise API improvements</justification>
+  </difference>
+</differences>
