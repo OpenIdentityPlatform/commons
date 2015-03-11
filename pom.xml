@@ -535,11 +535,13 @@
                         <failIfWarning>true</failIfWarning>
                         <excludedScopes>test</excludedScopes>
                         <licenseMerges>
-                            <licenseMerge>Apache Software License, Version 2.0|
+                            <licenseMerge>
+                                Apache Software License, Version 2.0|
                                 The Apache Software License, Version 2.0|
                                 Apache v2|Apache 2|ASL, version 2|
                                 Apache 2.0|
                                 Apache License|
+                                Apache license|
                                 Apache-2.0|
                                 ALv2|
                                 Apache 2.0 license|
@@ -547,26 +549,77 @@
                                 Apache License Version 2.0|
                                 Apache License, Version 2.0|
                                 Apache Software License - Version 2.0|
-                                Apache License 2.0</licenseMerge>
-                            <licenseMerge>Common Development and Distribution License 1.0|
+                                Apache License 2.0
+                            </licenseMerge>
+                            <licenseMerge>
+                                Common Development and Distribution License 1.0|
                                 CDDL 1.0|
                                 COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0|
                                 CDDL|
                                 CDDL-1.0|
                                 CDDL 1.0 license|
+                                CDDL 1.0 License|
                                 CDDL License, Version 1.0|
-                                Common Development and Distribution License (CDDL) v1.0</licenseMerge>
-                            <licenseMerge>The MIT License|
+                                Common Development and Distribution License (CDDL) v1.0|
+                                CDDL License
+                            </licenseMerge>
+                            <licenseMerge>
+                                Common Development and Distribution License 1.1|
+                                CDDL 1.1|
+                                CDDL-1.1|
+                                CDDL 1.1 license|
+                                CDDL 1.1 License|
+                                CDDL License, Version 1.1|
+                                Common Development and Distribution License (CDDL) v1.1
+                            </licenseMerge>
+                            <licenseMerge>
+                                The MIT License|
+                                The MIT license|
                                 MIT License|
-                                MIT</licenseMerge>
-                            <licenseMerge>The GNU Lesser General Public License, version 2.1|
+                                MIT license|
+                                MIT
+                            </licenseMerge>
+                            <licenseMerge>
+                                The GNU Lesser General Public License, version 2.1|
                                 LGPL 2.1 license|
+                                LGPL 2.1 License|
                                 LGPL, version 2.1|
-                                GNU Lesser General Public License, Version 2.1</licenseMerge>
-                            <licenseMerge>The GNU Lesser General Public License, version 3.0|
+                                LGPL version 2.1|
+                                GNU Lesser General Public License, Version 2.1
+                            </licenseMerge>
+                            <licenseMerge>
+                                The GNU Lesser General Public License, version 2.0 with Classpath Exception|
+                                GPL2 w/ CPE|
+                                GPLv2+CE|
+                                GPLv2 with classpath exception
+                            </licenseMerge>
+                            <licenseMerge>
+                                The GNU Lesser General Public License, version 3.0|
                                 LGPL 3.0 license|
+                                LGPL, 3.0 license|
                                 LGPL, version 3.0|
-                                GNU Lesser General Public License, Version 3.0</licenseMerge>
+                                LGPL version 3.0|
+                                GNU Lesser General Public License, Version 3.0
+                            </licenseMerge>
+                            <licenseMerge>
+                                BSD|
+                                BSD License|
+                                BSD license|
+                                BSD-style license|
+                                The BSD License|
+                                The BSD license
+                            </licenseMerge>
+                            <licenseMerge>
+                                Dual licensed (CDDL and GPL)|
+                                CDDL+GPL|
+                                CDDL+GPL License|
+                                CDDL+GPL license
+                            </licenseMerge>
+                            <licenseMerge>
+                                Dual licensed (CDDL and GPLv2+CE)|
+                                CDDL/GPLv2+CE|
+                                CDDL + GPLv2 with classpath exception
+                            </licenseMerge>
                         </licenseMerges>
                     </configuration>
                 </plugin>
