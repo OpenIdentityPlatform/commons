@@ -293,7 +293,7 @@ public class AuditServiceImpl implements AuditService {
         activate(config);
     }
 
-    void activate(JsonValue config) {
+    public void activate(JsonValue config) {
         logger.debug("Activating Service with configuration {}", config.toString());
         try {
             // Upon activation the ScriptRegistry is present so we can add script-based audit log filters for event types
@@ -327,7 +327,7 @@ public class AuditServiceImpl implements AuditService {
      * Ensures audit logging service stays registered
      * even whilst configuration changes
      */
-    void modified(JsonValue newConfig) throws Exception {
+    public void modified(JsonValue newConfig) throws Exception {
         logger.debug("Reconfiguring audit service with configuration {}", newConfig.toString());
         try {
             if (hasConfigChanged(config, newConfig)) {
@@ -358,7 +358,7 @@ public class AuditServiceImpl implements AuditService {
         //}
     }
 
-    void deactivate(JsonValue jsonConfig) {
+    public void deactivate(JsonValue jsonConfig) {
         logger.debug("Deactivating Service {}", jsonConfig.toString());
         for (AuditLogger auditLogger : globalAuditLoggers) {
             try {
