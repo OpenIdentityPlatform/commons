@@ -26,7 +26,7 @@
     </parent>
     <groupId>org.forgerock.commons</groupId>
     <artifactId>forgerock-audit</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <name>ForgeRock Commons Audit Framework</name>
     <description>Implements the commons audit framework.</description>
     <packaging>pom</packaging>
