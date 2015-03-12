@@ -74,13 +74,12 @@ public abstract class FestJsonValueAssert {
             extends AbstractFestPromiseAssert<JsonValue, FestJsonValuePromiseAssert, PromisedJsonValueAssert> {
 
         private FestJsonValuePromiseAssert(Promise<JsonValue, ?> promise) {
-            super(promise, FestJsonValuePromiseAssert.class,
-                    new Function<JsonValue, PromisedJsonValueAssert, RuntimeException>() {
-                        @Override
-                        public PromisedJsonValueAssert apply(JsonValue jsonValue) throws RuntimeException {
-                            return new PromisedJsonValueAssert(jsonValue);
-                        }
-                    });
+            super(promise, FestJsonValuePromiseAssert.class);
+        }
+
+        @Override
+        protected PromisedJsonValueAssert createSucceededAssert(JsonValue jsonValue) {
+            return new PromisedJsonValueAssert(jsonValue);
         }
     }
 

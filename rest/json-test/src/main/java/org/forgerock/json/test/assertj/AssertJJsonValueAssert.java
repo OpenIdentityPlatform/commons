@@ -29,7 +29,6 @@ import org.assertj.core.api.StringAssert;
 import org.assertj.core.data.MapEntry;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.util.promise.Function;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.test.assertj.AbstractAssertJPromiseAssert;
 
@@ -71,13 +70,12 @@ public class AssertJJsonValueAssert {
             extends AbstractAssertJPromiseAssert<JsonValue, AssertJJsonValuePromiseAssert, PromisedJsonValueAssert> {
 
         private AssertJJsonValuePromiseAssert(Promise<JsonValue, ?> promise) {
-            super(promise, AssertJJsonValuePromiseAssert.class,
-                    new Function<JsonValue, PromisedJsonValueAssert, RuntimeException>() {
-                        @Override
-                        public PromisedJsonValueAssert apply(JsonValue jsonValue) throws RuntimeException {
-                            return new PromisedJsonValueAssert(jsonValue);
-                        }
-                    });
+            super(promise, AssertJJsonValuePromiseAssert.class);
+        }
+
+        @Override
+        protected PromisedJsonValueAssert createSucceededAssert(JsonValue jsonValue) {
+            return new PromisedJsonValueAssert(jsonValue);
         }
     }
 
