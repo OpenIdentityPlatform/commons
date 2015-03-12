@@ -68,6 +68,14 @@ public class ResourceException extends IOException {
     public static final String FIELD_CODE = "code";
 
     /**
+     * The name of the JSON field used for the cause message.
+     *
+     * @see #getCause()
+     * @see #toJsonValue()
+     */
+    public static final String FIELD_CAUSE = "cause";
+
+    /**
      * Indicates that the request could not be understood by the resource due to
      * malformed syntax. Equivalent to HTTP status: 400 Bad Request.
      */
@@ -126,6 +134,21 @@ public class ResourceException extends IOException {
 
     /** Serializable class a version number. */
     private static final long serialVersionUID = 1L;
+
+    /** flag to indicate whether to include the cause. */
+    private boolean includeCause = false;
+
+    /**
+     * Returns this ResourceException with the includeCause flag set to true
+     * so that toJsonValue() method will include the cause if there is
+     * one supplied.
+     *
+     * @return  the exception where this flag has been set
+     */
+    public final ResourceException includeCauseInJsonValue() {
+        includeCause = true;
+        return this;
+    }
 
     /**
      * Returns an exception with the specified HTTP error code, but no detail
@@ -477,6 +500,7 @@ public class ResourceException extends IOException {
      *     "reason"  : "...",  // optional
      *     "message" : "...",  // required
      *     "detail"  : { ... } // optional
+     *     "cause"   : { ... } // optional iff includeCause is set to true
      * }
      * </pre>
      *
@@ -495,6 +519,11 @@ public class ResourceException extends IOException {
         }
         if (!detail.isNull()) {
             result.put(FIELD_DETAIL, detail.getObject());
+        }
+        if (includeCause && getCause() != null && getCause().getMessage() != null) {
+            final Map<String, Object> cause = new LinkedHashMap<String, Object>(2);
+            cause.put("message", getCause().getMessage());
+            result.put(FIELD_CAUSE, cause);
         }
         return new JsonValue(result);
     }
