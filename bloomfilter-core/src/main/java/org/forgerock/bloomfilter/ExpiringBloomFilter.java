@@ -43,15 +43,15 @@ final class ExpiringBloomFilter<T> implements BloomFilter<T> {
     }
 
     @Override
-    public boolean add(final T element) {
-        final boolean timestampChanged = updateExpiryTime(expiryStrategy.expiryTime(element));
-        return delegate.add(element) || timestampChanged;
+    public void add(final T element) {
+        updateExpiryTime(expiryStrategy.expiryTime(element));
+        delegate.add(element);
     }
 
     @Override
-    public boolean addAll(final Collection<? extends T> elements) {
-        final boolean timestampChanged = updateExpiryTime(maxExpiryTime(elements));
-        return delegate.addAll(elements) || timestampChanged;
+    public void addAll(final Collection<? extends T> elements) {
+        updateExpiryTime(maxExpiryTime(elements));
+        delegate.addAll(elements);
     }
 
     @Override
@@ -73,9 +73,8 @@ final class ExpiringBloomFilter<T> implements BloomFilter<T> {
     /**
      * Atomic update of the latest expiry time.
      * @param newExpiryTime the candidate new latest expiry time.
-     * @return whether the new expiry time is now the latest.
      */
-    private boolean updateExpiryTime(final long newExpiryTime) {
+    private void updateExpiryTime(final long newExpiryTime) {
         int attempts = 0;
         boolean changed;
         long oldExpiryTime;
@@ -87,8 +86,6 @@ final class ExpiringBloomFilter<T> implements BloomFilter<T> {
 
         LOGGER.debug("Updated expiry timestamp after {} attempts: new={}, old={}, changed?={}", attempts, newExpiryTime,
                 oldExpiryTime, changed);
-
-        return changed;
     }
 
     private long maxExpiryTime(final Collection<? extends T> elements) {

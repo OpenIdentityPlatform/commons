@@ -57,7 +57,7 @@ public class BloomFilterMonitorTest {
         System.out.flush();
     }
 
-    @Test
+    @Test(invocationCount = 3)
     public void testConcurrency() throws Exception {
         final CountDownLatch latch = new CountDownLatch(16);
         final AtomicReference<RuntimeException> error = new AtomicReference<RuntimeException>();
@@ -69,7 +69,7 @@ public class BloomFilterMonitorTest {
                         final Random random = new Random();
                         for (int i = 0; i < 500000; ++i) {
                             final int r = random.nextInt();
-                            if (i % 10 == 0) {
+                            if (i % 100 == 0) {
                                 testMonitor.add(r);
                                 assertTrue(testMonitor.mightContain(r));
                             }

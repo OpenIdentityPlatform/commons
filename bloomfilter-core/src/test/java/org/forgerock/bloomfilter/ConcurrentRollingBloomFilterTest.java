@@ -16,6 +16,7 @@
 
 package org.forgerock.bloomfilter;
 
+import junit.framework.Assert;
 import org.forgerock.guava.common.hash.Funnels;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -101,6 +102,10 @@ public class ConcurrentRollingBloomFilterTest {
 
         System.out.printf("Write Time: %s -> %dms%n", impl, (end -
                 start));
+
+        for (int i = 0; i < 50000; ++i) {
+            Assert.assertTrue(impl.mightContain("Test" + i));
+        }
     }
 
     @Test(dataProvider = "implementations", invocationCount = 3, invocationTimeOut = 60000)

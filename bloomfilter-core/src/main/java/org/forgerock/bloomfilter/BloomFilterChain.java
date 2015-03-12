@@ -69,11 +69,10 @@ final class BloomFilterChain<T> implements BloomFilter<T> {
      * existing buckets are saturated.
      *
      * @param element the element to add to this set.
-     * @return {@code true} if any filter in the chain changed as a result of adding this element.
      */
     @Override
-    public boolean add(final T element) {
-        return lastBucket().add(element);
+    public void add(final T element) {
+        lastBucket().add(element);
     }
 
     /**
@@ -81,11 +80,9 @@ final class BloomFilterChain<T> implements BloomFilter<T> {
      * maintain the correct false positive probability.
      *
      * @param elements the elements to add to the set.
-     * @return {@code true} if any element in the collection caused the filter chain to change.
      */
     @Override
-    public boolean addAll(final Collection<? extends T> elements) {
-        boolean changed = false;
+    public void addAll(final Collection<? extends T> elements) {
         @SuppressWarnings("unchecked")
         final List<T> queue = (elements instanceof List) ? (List<T>) elements : new ArrayList<T>(elements);
         final int size = queue.size();
@@ -102,10 +99,9 @@ final class BloomFilterChain<T> implements BloomFilter<T> {
             LOGGER.debug("Adding batch: remainingCapacity={}, batchSize={}", remainingCapacity, batchSize);
 
             final List<T> batch = (i == 0 && batchSize == size) ? queue : queue.subList(i, i + batchSize);
-            changed |= bucket.addAll(batch);
+            bucket.addAll(batch);
             i += batchSize;
         }
-        return changed;
     }
 
     /**

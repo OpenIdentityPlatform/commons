@@ -34,7 +34,12 @@ public enum ConcurrencyStrategy {
     COPY_ON_WRITE {
         @Override
         <T> BloomFilterFactory<T> getFactory(final Funnel<? super T> funnel) {
-            return new CopyOnWriteBloomFilterFactory<T>(funnel);
+            return new BloomFilterFactory<T>() {
+                @Override
+                public BloomFilter<T> create(final long expectedInsertions, final double falsePositiveProbability) {
+                    return new CopyOnWriteBloomFilter<T>(funnel, expectedInsertions, falsePositiveProbability);
+                }
+            };
         }
     },
     /**
@@ -47,7 +52,12 @@ public enum ConcurrencyStrategy {
     SYNCHRONIZED {
         @Override
         <T> BloomFilterFactory<T> getFactory(final Funnel<? super T> funnel) {
-            return new SynchronizedBloomFilterFactory<T>(funnel);
+            return new BloomFilterFactory<T>() {
+                @Override
+                public BloomFilter<T> create(final long expectedInsertions, final double falsePositiveProbability) {
+                    return new SynchronizedBloomFilter<T>(funnel, expectedInsertions, falsePositiveProbability);
+                }
+            };
         }
     }
     ;
@@ -61,30 +71,4 @@ public enum ConcurrencyStrategy {
      */
     abstract <T> BloomFilterFactory<T> getFactory(Funnel<? super T> funnel);
 
-    private static final class CopyOnWriteBloomFilterFactory<T> implements BloomFilterFactory<T> {
-        private final Funnel<? super T> funnel;
-
-        CopyOnWriteBloomFilterFactory(final Funnel<? super T> funnel) {
-            this.funnel = funnel;
-        }
-
-        @Override
-        public BloomFilter<T> create(final long expectedInsertions, final double falsePositiveProbability) {
-            return new CopyOnWriteBloomFilter<T>(funnel, expectedInsertions, falsePositiveProbability);
-        }
-
-    }
-
-    private static final class SynchronizedBloomFilterFactory<T> implements BloomFilterFactory<T> {
-        private final Funnel<? super T> funnel;
-
-        SynchronizedBloomFilterFactory(final Funnel<? super T> funnel) {
-            this.funnel = funnel;
-        }
-
-        @Override
-        public BloomFilter<T> create(final long expectedInsertions, final double falsePositiveProbability) {
-            return new SynchronizedBloomFilter<T>(funnel, expectedInsertions, falsePositiveProbability);
-        }
-    }
 }

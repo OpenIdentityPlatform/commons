@@ -16,9 +16,15 @@
 
 package org.forgerock.bloomfilter.monitoring;
 
+import static java.util.concurrent.TimeUnit.MICROSECONDS;
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 import org.HdrHistogram.AtomicHistogram;
 import org.forgerock.bloomfilter.BloomFilter;
 import org.forgerock.bloomfilter.BloomFilterStatistics;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanRegistrationException;
@@ -40,10 +46,12 @@ import java.util.concurrent.TimeUnit;
  * Generic Bloom Filter JMX monitoring.
  */
 public final class BloomFilterMonitor<T> implements BloomFilterMXBean, BloomFilter<T> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BloomFilterMonitor.class);
+
     private static final String LOG_CHARSET = "UTF-8";
-    // 100,000 microseconds largest expected timing (100ms)
-    private static final long LONGEST_EXPECTED_RESPONSE_TIME_MICROS = 100000L;
-    // 3 significant digits = approx. 65kB storage per histogram
+    // 1,000,000 microseconds largest expected timing (1 second)
+    private static final long LONGEST_EXPECTED_RESPONSE_TIME_MICROS = MICROSECONDS.convert(1, SECONDS);
+    // 3 significant digits = approx. 89kB storage per histogram
     private static final int SIGNIFICANT_DIGITS = 3;
 
     private static final String OBJECT_NAME_TEMPLATE = "%s:type=%s,name=%s";
@@ -99,22 +107,22 @@ public final class BloomFilterMonitor<T> implements BloomFilterMXBean, BloomFilt
     }
 
     @Override
-    public boolean add(final T element) {
+    public void add(final T element) {
         final long startTime = System.nanoTime();
         try {
-            return delegate.add(element);
+            delegate.add(element);
         } finally {
-            addStats.recordValue((System.nanoTime() - startTime) / 1000L);
+            recordTiming("add", addStats, startTime);
         }
     }
 
     @Override
-    public boolean addAll(final Collection<? extends T> elements) {
+    public void addAll(final Collection<? extends T> elements) {
         final long startTime = System.nanoTime();
         try {
-            return delegate.addAll(elements);
+            delegate.addAll(elements);
         } finally {
-            addAllStats.recordValue((System.nanoTime() - startTime) / 1000L);
+            recordTiming("addAll", addAllStats, startTime);
         }
     }
 
@@ -124,7 +132,17 @@ public final class BloomFilterMonitor<T> implements BloomFilterMXBean, BloomFilt
         try {
             return delegate.mightContain(element);
         } finally {
-            mightContainStats.recordValue((System.nanoTime() - startTime) / 1000L);
+            recordTiming("mightContain", mightContainStats, startTime);
+        }
+    }
+
+    private void recordTiming(final String method, final AtomicHistogram histogram, final long startTime) {
+        final long endTime = System.nanoTime();
+        try {
+            histogram.recordValue(MICROSECONDS.convert(endTime-startTime, NANOSECONDS));
+        } catch (IndexOutOfBoundsException ex) {
+            LOGGER.warn("Method call time out of bounds for histogram: method={}, timing={} (nanoseconds)", method,
+                    (endTime - startTime));
         }
     }
 
@@ -163,8 +181,6 @@ public final class BloomFilterMonitor<T> implements BloomFilterMXBean, BloomFilt
         return new Date(getStatistics().getExpiryTime());
     }
 
-
-
     private static final class LiveMethodCallStatistics implements MethodCallStatisticsMXBean {
         private final AtomicHistogram histogram;
 
@@ -179,7 +195,7 @@ public final class BloomFilterMonitor<T> implements BloomFilterMXBean, BloomFilt
 
         @Override
         public TimeUnit getTimeUnit() {
-            return TimeUnit.MICROSECONDS;
+            return MICROSECONDS;
         }
 
         @Override
@@ -252,15 +268,39 @@ public final class BloomFilterMonitor<T> implements BloomFilterMXBean, BloomFilt
                 return "Unable to determine percentile log";
             }
         }
+
+
+        @Override
+        public String toString() {
+            final long callCount = getCallCount();
+            final StringBuilder sb = new StringBuilder()
+                    .append("{ \"count\": ").append(callCount);
+            if (callCount > 0) {
+                sb.append(", \"units\": \"").append(getTimeUnit()).append('\"');
+                sb.append(", \"min\": ").append(getMinimumTime());
+                sb.append(", \"median\": ").append(getMedianTime());
+                sb.append(", \"75%\": ").append(get75thPercentileTime());
+                sb.append(", \"90%\": ").append(get90thPercentileTime());
+                sb.append(", \"95%\": ").append(get95thPercentileTime());
+                sb.append(", \"98%\": ").append(get98thPercentileTime());
+                sb.append(", \"99%\": ").append(get99thPercentileTime());
+                sb.append(", \"99.9%\": ").append(get99Point9thPercentileTime());
+                sb.append(", \"99.99%\": ").append(get99Point99thPercentileTime());
+                sb.append(", \"max\": ").append(getMaximumTime());
+                sb.append(", \"mean\": ").append(getMeanTime());
+                sb.append(", \"std.dev.\": ").append(getStdDeviation());
+            }
+            return sb.append(" }").toString();
+        }
     }
 
     @Override
     public String toString() {
-        return "BloomFilterMonitor{" +
-                "stats=" + delegate.getStatistics() +
-                ", add=" + addStats.getValueAtPercentile(99.0d) +
-                ", addAll=" + addAllStats.getValueAtPercentile(99.0d) +
-                ", mightContain=" + mightContainStats.getValueAtPercentile(99.0d) +
-                '}';
+        return "{ " +
+                "\"statistics\": " + delegate.getStatistics() +
+                ", \"add\": " + new LiveMethodCallStatistics(addStats) +
+                ", \"addAll\": " + new LiveMethodCallStatistics(addAllStats) +
+                ", \"mightContain\": " + new LiveMethodCallStatistics(mightContainStats) +
+                " }";
     }
 }

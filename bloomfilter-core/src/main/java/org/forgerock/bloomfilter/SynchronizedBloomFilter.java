@@ -43,19 +43,17 @@ final class SynchronizedBloomFilter<T> implements BloomFilter<T> {
     }
 
     @Override
-    public synchronized boolean add(final T element) {
+    public synchronized void add(final T element) {
         LOGGER.debug("Adding element: {}", element);
-        return bloomFilter.put(element);
+        bloomFilter.put(element);
     }
 
     @Override
-    public synchronized boolean addAll(final Collection<? extends T> elements) {
+    public synchronized void addAll(final Collection<? extends T> elements) {
         LOGGER.debug("Adding elements: {}", elements);
-        boolean changed = false;
         for (T element : elements) {
-            changed |= bloomFilter.put(element);
+            bloomFilter.put(element);
         }
-        return changed;
     }
 
     @Override

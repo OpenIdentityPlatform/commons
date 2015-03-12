@@ -20,30 +20,35 @@ import org.forgerock.util.Reject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.concurrent.ThreadSafe;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A bloom filter decorator that batches up writes in an internal buffer and applies them once the buffer is full via
  * the {@link BloomFilter#addAll(Collection)} method. This can be useful to mitigate the slow write performance (and
  * memory usage) of the {@link CopyOnWriteBloomFilter} by amortizing the cost of the array copy over a large number
  * of modifications. The implementation ensures that the buffer is also considered during any read requests,
- * eliminating the possibility of false negatives. The downside of this implementation, other than increased memory
- * usage and a small additional overhead for reads, is that the result of the {@link #add(Object)} method is no
- * longer accurate for any write that does not trigger a buffer flush, and only returns an aggregate result for those
- * that do.
+ * eliminating the possibility of false negatives.
  *
  * @param <T> the type of elements stored in this bloom filter.
  */
+@ThreadSafe
 final class BatchingBloomFilter<T> implements BloomFilter<T> {
     private static final Logger LOGGER = LoggerFactory.getLogger(BatchingBloomFilter.class);
     private final BloomFilter<T> delegate;
     private final int batchSize;
     private final Collection<T> buffer;
 
-    // Temporary buffer to use when performing a batched write to avoid locking the hot buffer.
-    private final Collection<T> tempBuffer;
+    /**
+     * Indicates that a buffer flush is in progress. Ensures mutual exclusion of other writer threads.
+     * This performs significantly better than a lock in most realistic scenarios.
+     */
+    private final AtomicBoolean bufferFlushInProgress = new AtomicBoolean(false);
 
     /**
      * Constructs the batching decorator with the given delegate and batch size.
@@ -57,7 +62,6 @@ final class BatchingBloomFilter<T> implements BloomFilter<T> {
         this.delegate = delegate;
         this.batchSize = batchSize;
         this.buffer = Collections.newSetFromMap(new ConcurrentHashMap<T, Boolean>(batchSize));
-        this.tempBuffer = Collections.newSetFromMap(new ConcurrentHashMap<T, Boolean>(batchSize));
     }
 
     /**
@@ -65,27 +69,28 @@ final class BatchingBloomFilter<T> implements BloomFilter<T> {
      * the buffer is flushed to the underlying bloom filter.
      *
      * @param element the element to add to this set.
-     * @return {@code false} if the addition causes the buffer to be flushed to the underlying bloom filter, but no
-     * changes were made as a result, otherwise {@code true}. As with all BloomFilters, a {@code true} result should
-     * be treated as "maybe".
      */
     @Override
-    public boolean add(final T element) {
+    public void add(final T element) {
         boolean changed = buffer.add(element);
-        int size = buffer.size();
-        if (size >= batchSize) {
-            LOGGER.debug("Flushing buffer: size={}", size);
-            synchronized (buffer) {
-                tempBuffer.addAll(buffer);
-                if (!tempBuffer.isEmpty()) {
-                    buffer.removeAll(tempBuffer);
-                    changed = delegate.addAll(tempBuffer);
-                    tempBuffer.clear();
+        if (changed) {
+            // Determine if the buffer needs to be flushed to the underlying bloom filter
+            if (buffer.size() >= batchSize && bufferFlushInProgress.compareAndSet(false, true)) {
+                try {
+                    // Copy the buffer into a temporary buffer so that we do not lose updates during the flush.
+                    // We use a Set here to speed up the buffer.removeAll method below, which is a hot-spot.
+                    final Set<T> tmp = new HashSet<T>(buffer);
+                    int size = tmp.size();
+                    if (size >= batchSize) {
+                        LOGGER.debug("Flushing buffer: size={}", size);
+                        delegate.addAll(tmp);
+                        buffer.removeAll(tmp);
+                    }
+                } finally {
+                    bufferFlushInProgress.set(false);
                 }
             }
         }
-
-        return changed;
     }
 
     /**
@@ -93,19 +98,17 @@ final class BatchingBloomFilter<T> implements BloomFilter<T> {
      * case.
      *
      * @param elements the elements to add to the set.
-     * @return {@code true} if changes were made to the underlying Bloom Filter as a result of adding any of the
-     * elements
      */
     @Override
-    public boolean addAll(final Collection<? extends T> elements) {
+    public void addAll(final Collection<? extends T> elements) {
         // Pass through directly
-        return delegate.addAll(elements);
+        delegate.addAll(elements);
     }
 
     @Override
     public boolean mightContain(final T element) {
         // Always check the buffer first to ensure no false negatives during a buffer flush
-        return buffer.contains(element) || tempBuffer.contains(element) || delegate.mightContain(element);
+        return buffer.contains(element) || delegate.mightContain(element);
     }
 
     @Override

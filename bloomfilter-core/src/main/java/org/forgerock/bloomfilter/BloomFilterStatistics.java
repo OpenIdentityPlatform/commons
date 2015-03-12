@@ -17,7 +17,6 @@
 package org.forgerock.bloomfilter;
 
 import javax.annotation.concurrent.Immutable;
-import java.beans.ConstructorProperties;
 import java.util.Locale;
 
 /**
@@ -42,8 +41,6 @@ public final class BloomFilterStatistics {
      *                 (exceeds the configured false positive probability).
      * @param bitSize the total memory size of the set in bits.
      */
-    @ConstructorProperties({"configuredFalsePositiveProbability", "expectedFalsePositiveProbability",
-                            "capacity", "bitSize", "expiryTime", "estimatedRemainingCapacity"})
     public BloomFilterStatistics(final double configuredFalsePositiveProbability,
                                  final double expectedFalsePositiveProbability,
                                  final long capacity,

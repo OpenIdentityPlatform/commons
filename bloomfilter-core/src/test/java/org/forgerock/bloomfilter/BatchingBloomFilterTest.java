@@ -109,14 +109,14 @@ public class BatchingBloomFilterTest {
         }
 
         @Override
-        public boolean add(final T element) {
-            return delegate.add(element);
+        public void add(final T element) {
+            delegate.add(element);
         }
 
         @Override
-        public boolean addAll(final Collection<? extends T> elements) {
+        public void addAll(final Collection<? extends T> elements) {
             // Create a copy so that we can capture in mockito
-            return delegate.addAll(new ArrayList<T>(elements));
+            delegate.addAll(new ArrayList<T>(elements));
         }
 
         @Override

@@ -53,21 +53,15 @@ public interface BloomFilter<E> {
      * subsequent calls to {@link #mightContain(Object)} will return {@code true} for the same object.
      *
      * @param element the element to add to this set.
-     * @return {@code true} if the set changed as a result of adding this element. A positive result indicates that
-     * the element was not previously in the set, while a negative result may or may not indicate that it was already
-     * in the set.
      */
-    boolean add(E element);
+    void add(E element);
 
     /**
      * Adds all of the specified elements to this set if they are not possibly already present.
      *
      * @param elements the elements to add to the set.
-     * @return {@code true} if the set changed as a result of adding these elements. A positive result indicates that
-     * at least one element of the collection was not present in the set. A negative result may or may not indicate
-     * that one of the elements was not present in the set previously.
      */
-    boolean addAll(Collection<? extends E> elements);
+    void addAll(Collection<? extends E> elements);
 
     /**
      * Checks if the given element <em>might</em> be a member of this set. If this method returns {@code false}, then

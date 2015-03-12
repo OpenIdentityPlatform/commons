@@ -49,12 +49,12 @@ final class CopyOnWriteBloomFilter<T> implements BloomFilter<T> {
     }
 
     @Override
-    public boolean add(final T element) {
-        return addAll(Collections.singleton(element));
+    public void add(final T element) {
+        addAll(Collections.singleton(element));
     }
 
     @Override
-    public boolean addAll(final Collection<? extends T> elements) {
+    public void addAll(final Collection<? extends T> elements) {
         LOGGER.debug("Adding elements: {}", elements);
         boolean changed;
         org.forgerock.guava.common.hash.BloomFilter<T> prev;
@@ -75,8 +75,6 @@ final class CopyOnWriteBloomFilter<T> implements BloomFilter<T> {
         } while (changed && !bloomFilterAtomicReference.compareAndSet(prev, next));
 
         LOGGER.debug("Updated BloomFilter after {} attempts", attempts);
-
-        return changed;
     }
 
     @Override
