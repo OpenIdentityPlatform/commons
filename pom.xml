@@ -70,26 +70,22 @@
             </dependency>
 
             <dependency>
-                <!-- License: legal/apache-v2.0.txt -->
                 <groupId>org.forgerock.commons.guava</groupId>
                 <artifactId>forgerock-guava-hash</artifactId>
                 <version>${forgerock.guava.version}</version>
             </dependency>
             <dependency>
-                <!-- License: legal/BSD-3-clause.txt -->
                 <groupId>com.google.code.findbugs</groupId>
                 <artifactId>jsr305</artifactId>
                 <version>${jsr.305.version}</version>
                 <optional>true</optional>
             </dependency>
             <dependency>
-                <!-- License: legal/mit.txt -->
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
                 <version>${slf4j.version}</version>
             </dependency>
             <dependency>
-                <!-- License: legal/CC-Public-Domain.txt -->
                 <groupId>org.hdrhistogram</groupId>
                 <artifactId>HdrHistogram</artifactId>
                 <version>${hdrhistogram.version}</version>
