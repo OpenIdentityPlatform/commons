@@ -48,7 +48,7 @@ define("org/forgerock/mock/ui/user/profile/ChangeSecurityDataDialog", [
             "customValidate": "customValidate",
             "click .dialogCloseCross": "close",
             "click input[name='close']": "close",
-            "click .dialogContainer": "stop",
+            "click .modal-content": "stop",
             "check_reauth": "reauth"
         },
         reauth: function (event, propertyName) {

@@ -42,7 +42,7 @@ define("org/forgerock/commons/ui/common/LoginDialog", [
             "click input[type=submit]": "login",
             "click .dialogCloseCross img": "loginClose",
             "click input[name='close']": "loginClose",
-            "click .dialogContainer": "stop",
+            "click .modal-content": "stop",
             "onValidate": "onValidate",
             "keypress input": "submitForm"
         },

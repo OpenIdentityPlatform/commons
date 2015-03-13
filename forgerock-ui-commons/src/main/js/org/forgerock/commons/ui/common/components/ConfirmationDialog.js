@@ -41,7 +41,7 @@ define("org/forgerock/commons/ui/common/components/ConfirmationDialog", [
             "click .dialogCloseCross img": "close",
             "click input[name='close']": "close",
             "click": "close",
-            "click .dialogContainer": "stop"
+            "click .modal-content": "stop"
         },
         
         data: { },
