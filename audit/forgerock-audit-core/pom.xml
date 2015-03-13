@@ -23,7 +23,7 @@
     </parent>
     <artifactId>forgerock-audit-core</artifactId>
     <packaging>bundle</packaging>
-    <name>ForgeRock Audit Core</name>
+    <name>Commons - ForgeRock Audit Framework Core</name>
     <description></description>
 
     <dependencies>

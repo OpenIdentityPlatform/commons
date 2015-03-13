@@ -23,7 +23,7 @@
     </parent>
     <artifactId>forgerock-audit-servlet</artifactId>
     <packaging>bundle</packaging>
-    <name>ForgeRock Audit Servlet</name>
+    <name>Commons - ForgeRock Audit Framework Servlet</name>
     <description></description>
 
     <dependencies>
