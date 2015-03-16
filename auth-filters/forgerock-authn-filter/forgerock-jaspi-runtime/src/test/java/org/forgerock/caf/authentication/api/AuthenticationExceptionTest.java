@@ -11,19 +11,19 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
-package org.forgerock.jaspi.exceptions;
-
-import org.testng.annotations.Test;
+package org.forgerock.caf.authentication.api;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-public class JaspiAuthExceptionTest {
+import org.testng.annotations.Test;
+
+public class AuthenticationExceptionTest {
 
     @Test
     public void shouldCreateJaspiAuthExceptionWithMessage() {
@@ -31,7 +31,7 @@ public class JaspiAuthExceptionTest {
         //Given
 
         //When
-        JaspiAuthException e = new JaspiAuthException("MESSAGE");
+        AuthenticationException e = new AuthenticationException("MESSAGE");
 
         //Then
         assertNotNull(e);
@@ -45,7 +45,7 @@ public class JaspiAuthExceptionTest {
         Exception cause = new Exception("MESSAGE");
 
         //When
-        JaspiAuthException e = new JaspiAuthException(cause);
+        AuthenticationException e = new AuthenticationException(cause);
 
         //Then
         assertNotNull(e);
@@ -59,7 +59,7 @@ public class JaspiAuthExceptionTest {
         Exception cause = new Exception("CAUSE_MESSAGE");
 
         //When
-        JaspiAuthException e = new JaspiAuthException("MESSAGE", cause);
+        AuthenticationException e = new AuthenticationException("MESSAGE", cause);
 
         //Then
         assertNotNull(e);
@@ -70,7 +70,7 @@ public class JaspiAuthExceptionTest {
     public void shouldGetDetailMessage() {
 
         //Given
-        JaspiAuthException e = new JaspiAuthException("MESSAGE");
+        AuthenticationException e = new AuthenticationException("MESSAGE");
 
         //When
         String message = e.getMessage();
@@ -86,7 +86,7 @@ public class JaspiAuthExceptionTest {
         Throwable cause = mock(Throwable.class);
         given(cause.getMessage()).willReturn("CAUSE");
 
-        JaspiAuthException e = new JaspiAuthException(cause);
+        AuthenticationException e = new AuthenticationException(cause);
 
         //When
         String message = e.getMessage();
@@ -100,7 +100,7 @@ public class JaspiAuthExceptionTest {
 
         //Given
         Throwable cause = mock(Throwable.class);
-        JaspiAuthException e = new JaspiAuthException("MESSAGE", cause);
+        AuthenticationException e = new AuthenticationException("MESSAGE", cause);
 
         given(cause.getMessage()).willReturn("CAUSE");
 

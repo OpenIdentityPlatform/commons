@@ -11,17 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.jaspi.runtime.context;
 
 import static org.forgerock.jaspi.runtime.JaspiRuntime.*;
-
-import org.forgerock.jaspi.exceptions.JaspiAuthException;
-import org.forgerock.jaspi.runtime.JaspiRuntime;
-import org.forgerock.jaspi.utils.MessageInfoUtils;
-import org.forgerock.json.resource.ResourceException;
 
 import javax.security.auth.Subject;
 import javax.security.auth.message.AuthException;
@@ -34,6 +29,11 @@ import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+
+import org.forgerock.caf.authentication.api.AuthenticationException;
+import org.forgerock.jaspi.runtime.JaspiRuntime;
+import org.forgerock.jaspi.utils.MessageInfoUtils;
+import org.forgerock.json.resource.ResourceException;
 
 /**
  * A handler for ServerAuthContext, which exposes helper methods that will be called at the varying end states
@@ -98,7 +98,7 @@ public class ContextHandler {
                 && supportedTypes.contains(HttpServletResponse.class))) {
             LOG.error("ServerAuthModule does not support the HttpServlet profile, "
                     + authModule.getClass().getName());
-            throw new JaspiAuthException("ServerAuthModule does not support the HttpServlet profile, "
+            throw new AuthenticationException("ServerAuthModule does not support the HttpServlet profile, "
                     + authModule.getClass().getName());
         }
     }
@@ -123,7 +123,7 @@ public class ContextHandler {
             LOG.debug("Authentication has failed.");
             ResourceException jre = ResourceException.getException(UNAUTHORIZED_HTTP_ERROR_CODE,
                     UNAUTHORIZED_ERROR_MESSAGE);
-            throw new JaspiAuthException(jre);
+            throw new AuthenticationException(jre);
         } else {
             setAuthenticationRequestAttributes(messageInfo, clientSubject);
         }

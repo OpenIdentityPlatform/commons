@@ -11,49 +11,49 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
-package org.forgerock.jaspi.exceptions;
+package org.forgerock.caf.authentication.api;
 
 import javax.security.auth.message.AuthException;
 
 /**
- * A sub-type of an AuthException which can accept a cause for this exception.
+ * A generic authentication exception which accepts a detail message and/or the cause.
  *
  * @since 1.3.0
  */
-public class JaspiAuthException extends AuthException {
+public class AuthenticationException extends AuthException {
 
-    private static final long serialVersionUID = -1L;
+    private static final long serialVersionUID = 8448867142875092521L;
 
     /**
-     * Constructs a new JaspiAuthException with the specified detail message.
+     * Creates an {@code AuthenticationException} with the specified detail message.
      *
      * @param message The detail message.
      */
-    public JaspiAuthException(final String message) {
+    public AuthenticationException(final String message) {
         super(message);
     }
 
     /**
-     * Constructs a new JaspiAuthException with the specified cause and a detail message of
-     * (cause==null ? null : cause.getMessage()).
+     * Creates an {@code AuthenticationException} with the specified cause and a detail message of
+     * {@code (cause==null ? null : cause.getMessage())}.
      *
      * @param cause The cause.
      */
-    public JaspiAuthException(final Throwable cause) {
+    public AuthenticationException(final Throwable cause) {
         super(cause.getMessage());
         initCause(cause);
     }
 
     /**
-     * Constructs a new JaspiAuthException with the specified detail message and cause.
+     * Creates an {@code AuthenticationException} with the specified detail message and cause.
      *
      * @param message The detail message.
      * @param cause The cause.
      */
-    public JaspiAuthException(final String message, final Throwable cause) {
+    public AuthenticationException(final String message, final Throwable cause) {
         super(message);
         initCause(cause);
     }

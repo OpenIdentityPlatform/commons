@@ -11,15 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.jaspi.modules.session.openam;
 
-import org.forgerock.jaspi.exceptions.JaspiAuthException;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.ResourceException;
-import org.forgerock.util.Reject;
+import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
@@ -39,7 +36,10 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.Map;
 
-import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
+import org.forgerock.caf.authentication.api.AuthenticationException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.util.Reject;
 
 /**
  * A JASPI Session Module which uses OpenAM to validate SSO Tokens issued by an OpenAM instance.
@@ -211,11 +211,11 @@ public class OpenAMSessionModule implements ServerAuthModule {
      * @param clientSubject {@inheritDoc}
      * @param serviceSubject {@inheritDoc}
      * @return {@inheritDoc}
-     * @throws JaspiAuthException If an error occurs when setting the authenticated principal on the client subject.
+     * @throws AuthenticationException If an error occurs when setting the authenticated principal on the client subject.
      */
     @Override
     public AuthStatus validateRequest(final MessageInfo messageInfo, final Subject clientSubject,
-            final Subject serviceSubject) throws JaspiAuthException {
+            final Subject serviceSubject) throws AuthenticationException {
 
         final String tokenId = getSsoTokenId((HttpServletRequest) messageInfo.getRequestMessage());
         LOG.debug("SSO Token found.");
@@ -256,9 +256,9 @@ public class OpenAMSessionModule implements ServerAuthModule {
             LOG.error("REST validation call returned non HTTP 200 response", e);
             return AuthStatus.SEND_FAILURE;
         } catch (UnsupportedCallbackException e) {
-            throw new JaspiAuthException(e.getMessage(), e);
+            throw new AuthenticationException(e.getMessage(), e);
         } catch (IOException e) {
-            throw new JaspiAuthException(e.getMessage(), e);
+            throw new AuthenticationException(e.getMessage(), e);
         }
     }
 

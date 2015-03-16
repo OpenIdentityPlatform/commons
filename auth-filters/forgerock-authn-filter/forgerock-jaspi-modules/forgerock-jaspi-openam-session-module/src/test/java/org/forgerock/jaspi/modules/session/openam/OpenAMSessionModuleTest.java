@@ -11,17 +11,19 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.jaspi.modules.session.openam;
 
-import org.forgerock.jaspi.exceptions.JaspiAuthException;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.ResourceException;
-import org.mockito.ArgumentCaptor;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import static org.forgerock.json.fluent.JsonValue.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.anyMapOf;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
@@ -35,20 +37,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.forgerock.json.fluent.JsonValue.array;
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anyMapOf;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import org.forgerock.caf.authentication.api.AuthenticationException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ResourceException;
+import org.mockito.ArgumentCaptor;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 public class OpenAMSessionModuleTest {
 
@@ -452,7 +446,7 @@ public class OpenAMSessionModuleTest {
     }
 
     @Test
-    public void validateRequestShouldReturnSendFailureWhenSsoTokenNotOnRequest() throws JaspiAuthException {
+    public void validateRequestShouldReturnSendFailureWhenSsoTokenNotOnRequest() throws AuthenticationException {
 
         //Given
         initialise();
@@ -473,7 +467,7 @@ public class OpenAMSessionModuleTest {
     }
 
     @Test
-    public void validateRequestShouldReturnSendFailureWhenSsoTokenNotInCookies() throws JaspiAuthException {
+    public void validateRequestShouldReturnSendFailureWhenSsoTokenNotInCookies() throws AuthenticationException {
 
         //Given
         initialise();
@@ -499,7 +493,7 @@ public class OpenAMSessionModuleTest {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
     public void validateRequestShouldReturnSendFailureWhenRestResponseIsEmpty() throws ResourceException,
-            JaspiAuthException {
+            AuthenticationException {
 
         //Given
         initialise();
@@ -527,7 +521,7 @@ public class OpenAMSessionModuleTest {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
     public void validateRequestShouldReturnSendFailureWhenRestResponseIsInvalidSession() throws ResourceException,
-            JaspiAuthException {
+            AuthenticationException {
 
         //Given
         initialise();
@@ -554,7 +548,7 @@ public class OpenAMSessionModuleTest {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
-    public void validateRequestShouldReturnSuccessWhenSsoTokenIsValid() throws ResourceException, JaspiAuthException {
+    public void validateRequestShouldReturnSuccessWhenSsoTokenIsValid() throws ResourceException, AuthenticationException {
 
         //Given
         initialise();
@@ -591,7 +585,7 @@ public class OpenAMSessionModuleTest {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
-    public void initialiseShouldAddTrailingSlashToOpenAMDeploymentURL() throws ResourceException, JaspiAuthException {
+    public void initialiseShouldAddTrailingSlashToOpenAMDeploymentURL() throws ResourceException, AuthenticationException {
 
         //Given
         initialise("https://OPENAM_DEPLOYMENT_URI");
@@ -627,7 +621,7 @@ public class OpenAMSessionModuleTest {
     }
 
     @Test
-    public void validateRequestShouldReturnSendFailureWhenRestCallFails() throws ResourceException, JaspiAuthException {
+    public void validateRequestShouldReturnSendFailureWhenRestCallFails() throws ResourceException, AuthenticationException {
 
         //Given
         initialise();
@@ -650,7 +644,7 @@ public class OpenAMSessionModuleTest {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
-    public void validateRequestShouldReturnSuccessWhenSsoTokenOnCookie() throws ResourceException, JaspiAuthException {
+    public void validateRequestShouldReturnSuccessWhenSsoTokenOnCookie() throws ResourceException, AuthenticationException {
 
         //Given
         initialise();
@@ -694,7 +688,7 @@ public class OpenAMSessionModuleTest {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
-    public void validateRequestShouldReturnSuccessWhenAccessingRootRealm() throws ResourceException, JaspiAuthException {
+    public void validateRequestShouldReturnSuccessWhenAccessingRootRealm() throws ResourceException, AuthenticationException {
 
         //Given
         initialise();

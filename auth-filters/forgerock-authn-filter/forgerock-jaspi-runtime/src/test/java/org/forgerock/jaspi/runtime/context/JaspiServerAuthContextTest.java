@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.jaspi.runtime.context;
@@ -22,12 +22,6 @@ import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
 
-import org.forgerock.jaspi.exceptions.JaspiAuthException;
-import org.forgerock.jaspi.runtime.AuditTrail;
-import org.forgerock.jaspi.utils.MessageInfoUtils;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
 import javax.security.auth.Subject;
 import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
@@ -37,6 +31,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.forgerock.caf.authentication.api.AuthenticationException;
+import org.forgerock.jaspi.runtime.AuditTrail;
+import org.forgerock.jaspi.utils.MessageInfoUtils;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 public class JaspiServerAuthContextTest {
 
@@ -284,7 +284,7 @@ public class JaspiServerAuthContextTest {
         assertEquals(authStatus, AuthStatus.SEND_CONTINUE);
     }
 
-    @Test (expectedExceptions = JaspiAuthException.class)
+    @Test (expectedExceptions = AuthenticationException.class)
     public void validateRequestShouldThrowJaspiAuthExceptionWhenSessionModuleReturnsInvalidAuthStatus()
             throws AuthException {
 
@@ -352,7 +352,7 @@ public class JaspiServerAuthContextTest {
         assertEquals(authStatus, AuthStatus.SEND_FAILURE);
     }
 
-    @Test (expectedExceptions = JaspiAuthException.class)
+    @Test (expectedExceptions = AuthenticationException.class)
     public void validateRequestShouldThrowJaspiAuthExceptionWhenAuthModulesReturnNull() throws AuthException {
 
         //Given
@@ -382,7 +382,7 @@ public class JaspiServerAuthContextTest {
         //Expected JaspiAuthException
     }
 
-    @Test (expectedExceptions = JaspiAuthException.class)
+    @Test (expectedExceptions = AuthenticationException.class)
     public void validateRequestShouldThrowJaspiAuthExceptionWhenAuthModulesReturnFailure() throws AuthException {
 
         //Given
@@ -575,7 +575,7 @@ public class JaspiServerAuthContextTest {
         assertEquals(authStatus, AuthStatus.SUCCESS);
     }
 
-    @Test (expectedExceptions = JaspiAuthException.class)
+    @Test (expectedExceptions = AuthenticationException.class)
     public void secureResponseShouldThrowJaspiAuthExceptionWhenAuthModulesReturnSuccess() throws AuthException {
 
         //Given
@@ -596,7 +596,7 @@ public class JaspiServerAuthContextTest {
         fail();
     }
 
-    @Test (expectedExceptions = JaspiAuthException.class)
+    @Test (expectedExceptions = AuthenticationException.class)
     public void secureResponseShouldThrowJaspiAuthExceptionWhenAuthModulesReturnFailure() throws AuthException {
 
         //Given

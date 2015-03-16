@@ -11,14 +11,14 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.jaspi.runtime.context;
 
-import org.forgerock.jaspi.exceptions.JaspiAuthException;
-import org.forgerock.jaspi.runtime.AuditTrail;
-import org.forgerock.jaspi.utils.MessageInfoUtils;
+import static org.forgerock.jaspi.runtime.AuditTrail.*;
+import static org.forgerock.jaspi.runtime.AuthStatusUtils.asString;
+import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
 
 import javax.security.auth.Subject;
 import javax.security.auth.message.AuthException;
@@ -28,13 +28,12 @@ import javax.security.auth.message.config.ServerAuthContext;
 import javax.security.auth.message.module.ServerAuthModule;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.forgerock.jaspi.runtime.AuditTrail.*;
-import static org.forgerock.jaspi.runtime.AuthStatusUtils.asString;
-import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
+import org.forgerock.caf.authentication.api.AuthenticationException;
+import org.forgerock.jaspi.runtime.AuditTrail;
+import org.forgerock.jaspi.utils.MessageInfoUtils;
 
 /**
  * Encapsulates ServerAuthModules that are used to validate service requests received from clients, and to secure any
@@ -201,7 +200,7 @@ public abstract class JaspiServerAuthContext<T extends ServerAuthModule> impleme
                     auditTrail.auditFailure(moduleId, Collections.<String, Object>singletonMap("message", message),
                             moduleAuditInfo);
                     LOG.error(message);
-                    throw new JaspiAuthException(message);
+                    throw new AuthenticationException(message);
                 }
             } finally {
                 messageInfo.getMap().remove(AUDIT_INFO_KEY);
@@ -216,7 +215,7 @@ public abstract class JaspiServerAuthContext<T extends ServerAuthModule> impleme
             final AuthStatus exceptionAuthStatus = authStatus;
             // Setting authStatus to null so auditing does not happen. As this exception is a configuration issue.
             LOG.error("Invalid AuthStatus returned from validateRequest, {}", asString(exceptionAuthStatus));
-            throw new JaspiAuthException("Invalid AuthStatus returned from validateRequest, "
+            throw new AuthenticationException("Invalid AuthStatus returned from validateRequest, "
                     + asString(exceptionAuthStatus));
             }
 
@@ -362,7 +361,7 @@ public abstract class JaspiServerAuthContext<T extends ServerAuthModule> impleme
         AuthStatus authStatus = secureResponse(authModules, messageInfo, serviceSubject);
         if (AuthStatus.SUCCESS.equals(authStatus) || AuthStatus.FAILURE.equals(authStatus)) {
             LOG.error("Invalid AuthStatus returned from validateRequest, {}", asString(authStatus));
-            throw new JaspiAuthException("Invalid AuthStatus returned from validateRequest, "
+            throw new AuthenticationException("Invalid AuthStatus returned from validateRequest, "
                     + asString(authStatus));
         }
 

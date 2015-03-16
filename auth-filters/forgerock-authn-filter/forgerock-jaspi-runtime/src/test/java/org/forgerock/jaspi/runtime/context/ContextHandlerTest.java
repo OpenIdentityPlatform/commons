@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.jaspi.runtime.context;
@@ -19,13 +19,6 @@ package org.forgerock.jaspi.runtime.context;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
-
-import org.forgerock.jaspi.exceptions.JaspiAuthException;
-import org.forgerock.jaspi.runtime.JaspiRuntime;
-import org.forgerock.jaspi.utils.MessageInfoUtils;
-import org.forgerock.json.resource.ResourceException;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 import javax.security.auth.Subject;
 import javax.security.auth.message.AuthException;
@@ -40,6 +33,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.forgerock.caf.authentication.api.AuthenticationException;
+import org.forgerock.jaspi.runtime.JaspiRuntime;
+import org.forgerock.jaspi.utils.MessageInfoUtils;
+import org.forgerock.json.resource.ResourceException;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 public class ContextHandlerTest {
 
@@ -68,7 +68,7 @@ public class ContextHandlerTest {
     }
 
     @SuppressWarnings("rawtypes")
-    @Test  (expectedExceptions = JaspiAuthException.class)
+    @Test  (expectedExceptions = AuthenticationException.class)
     public void validateServerAuthModulesShouldThrowJaspiAuthExceptionWhenDoesNotSupportEither() throws AuthException {
 
         //Given
@@ -86,7 +86,7 @@ public class ContextHandlerTest {
     }
 
     @SuppressWarnings("rawtypes")
-    @Test  (expectedExceptions = JaspiAuthException.class)
+    @Test  (expectedExceptions = AuthenticationException.class)
     public void validateServerAuthModulesShouldThrowJaspiAuthExceptionWhenOnlySupportsHttpServletRequest()
             throws AuthException {
 
@@ -105,7 +105,7 @@ public class ContextHandlerTest {
     }
 
     @SuppressWarnings("rawtypes")
-    @Test (expectedExceptions = JaspiAuthException.class)
+    @Test (expectedExceptions = AuthenticationException.class)
     public void validateServerAuthModulesShouldThrowJaspiAuthExceptionWhenOnlySupportsHttpServletResponse()
             throws AuthException {
 

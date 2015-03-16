@@ -11,16 +11,14 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.jaspi.context;
 
-import org.forgerock.jaspi.exceptions.JaspiAuthException;
-import org.forgerock.jaspi.runtime.AuditTrail;
-import org.forgerock.jaspi.runtime.context.ContextHandler;
-import org.forgerock.jaspi.runtime.context.JaspiServerAuthContext;
-import org.forgerock.jaspi.utils.MessageInfoUtils;
+import static org.forgerock.jaspi.runtime.AuditTrail.*;
+import static org.forgerock.jaspi.runtime.AuthStatusUtils.asString;
+import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
 
 import javax.security.auth.Subject;
 import javax.security.auth.message.AuthException;
@@ -28,13 +26,14 @@ import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.module.ServerAuthModule;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.forgerock.jaspi.runtime.AuditTrail.*;
-import static org.forgerock.jaspi.runtime.AuthStatusUtils.asString;
-import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
+import org.forgerock.caf.authentication.api.AuthenticationException;
+import org.forgerock.jaspi.runtime.AuditTrail;
+import org.forgerock.jaspi.runtime.context.ContextHandler;
+import org.forgerock.jaspi.runtime.context.JaspiServerAuthContext;
+import org.forgerock.jaspi.utils.MessageInfoUtils;
 
 /**
  * Encapsulates ServerAuthModules that are used to validate service requests received from clients, and to secure any
@@ -153,7 +152,7 @@ public class FallbackServerAuthContext extends JaspiServerAuthContext<ServerAuth
                     auditTrail.auditFailure(moduleId, Collections.<String, Object>singletonMap("message", message),
                             moduleAuditInfo);
                     LOG.error(message);
-                    throw new JaspiAuthException(message);
+                    throw new AuthenticationException(message);
                 }
                 /**
                  * In this implementation of the ServerAuthContext we are allowing a single "session" auth module to
