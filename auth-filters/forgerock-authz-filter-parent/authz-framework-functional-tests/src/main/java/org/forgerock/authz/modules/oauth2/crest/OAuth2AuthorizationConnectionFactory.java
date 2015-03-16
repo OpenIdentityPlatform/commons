@@ -11,13 +11,16 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.authz.modules.oauth2.crest;
 
+import static org.forgerock.http.RoutingMode.STARTS_WITH;
+
+import java.util.Collections;
+
 import org.forgerock.authz.basic.crest.SimpleResource;
-import org.forgerock.authz.filter.api.AuthorizationResult;
 import org.forgerock.authz.filter.crest.AuthorizationFilters;
 import org.forgerock.authz.modules.oauth2.AccessTokenValidationResponse;
 import org.forgerock.authz.modules.oauth2.OAuth2AccessTokenValidator;
@@ -25,11 +28,7 @@ import org.forgerock.authz.modules.oauth2.OAuth2Authorization;
 import org.forgerock.authz.modules.oauth2.OAuth2CrestAuthorizationModule;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Resources;
-import org.forgerock.json.resource.Router;
-
-import java.util.Collections;
-
-import static org.forgerock.json.resource.RoutingMode.STARTS_WITH;
+import org.forgerock.json.resource.UriRouter;
 
 /**
  * A factory class for creating an {@code ConnectionFactory} configured with an OAuth2 authorization filter.
@@ -70,7 +69,7 @@ public final class OAuth2AuthorizationConnectionFactory {
                     }
                 }, Collections.<String>emptySet(), false, 0);
 
-        final Router router = new Router();
+        final UriRouter router = new UriRouter();
 
         router.addRoute(STARTS_WITH, "/resource", AuthorizationFilters.createFilter(SIMPLE_RESOURCE,
                 authorizationModule));

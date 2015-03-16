@@ -11,11 +11,14 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.authz.basic.crest;
 
+import static org.forgerock.json.fluent.JsonValue.*;
+
+import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.CollectionResourceProvider;
@@ -28,12 +31,7 @@ import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
-
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
 
 /**
  * Simple {@link CollectionResourceProvider} that just echos back the operation performed.

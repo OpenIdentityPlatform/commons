@@ -11,7 +11,7 @@
   * Header, with the fields enclosed by brackets [] replaced by your own identifying
   * information: "Portions copyright [year] [name of copyright owner]".
   *
-  * Copyright 2014 ForgeRock AS.
+  * Copyright 2014-2015 ForgeRock AS.
 -->
 <web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
@@ -35,18 +35,12 @@
         <url-pattern>/protected/*</url-pattern>
     </filter-mapping>
 
-
     <servlet>
-        <servlet-name>ConfigureServlet</servlet-name>
-        <servlet-class>org.forgerock.json.resource.servlet.HttpServlet</servlet-class>
-        <init-param>
-            <param-name>connection-factory-class</param-name>
-            <param-value>org.forgerock.caf.authn.test.configuration.ConfigurationConnectionFactory</param-value>
-        </init-param>
+        <servlet-name>Jaspi HTTP</servlet-name>
+        <servlet-class>org.forgerock.http.servlet.HttpFrameworkServlet</servlet-class>
     </servlet>
-
     <servlet-mapping>
-        <servlet-name>ConfigureServlet</servlet-name>
+        <servlet-name>Jaspi HTTP</servlet-name>
         <url-pattern>/*</url-pattern>
     </servlet-mapping>
 

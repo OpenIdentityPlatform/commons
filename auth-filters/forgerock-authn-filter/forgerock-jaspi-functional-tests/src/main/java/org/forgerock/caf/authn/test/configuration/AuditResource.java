@@ -11,12 +11,18 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.caf.authn.test.configuration;
 
+import static org.forgerock.json.fluent.JsonValue.array;
+import static org.forgerock.json.fluent.JsonValue.json;
+
+import javax.inject.Inject;
+
 import org.forgerock.caf.authn.test.runtime.TestAuditApi;
+import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.PatchRequest;
@@ -24,14 +30,8 @@ import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
-
-import javax.inject.Inject;
-
-import static org.forgerock.json.fluent.JsonValue.array;
-import static org.forgerock.json.fluent.JsonValue.json;
 
 /**
  * <p>CREST resource responsible for exposing the audit records created by the JASPI runtime.</p>

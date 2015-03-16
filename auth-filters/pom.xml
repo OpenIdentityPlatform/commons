@@ -12,7 +12,7 @@
   * Header, with the fields enclosed by brackets [] replaced by your own identifying
   * information: "Portions copyright [year] [name of copyright owner]".
   *
-  * Copyright 2013-2014 ForgeRock AS.
+  * Copyright 2013-2015 ForgeRock AS.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.forgerock</groupId>
         <artifactId>forgerock-parent</artifactId>
-        <version>1.2.5</version>
+        <version>1.2.8</version>
     </parent>
 
     <groupId>org.forgerock.commons</groupId>
@@ -69,7 +69,8 @@
         <maven.compiler.source>1.6</maven.compiler.source>
 
         <slf4j.version>1.7.5</slf4j.version>
-        <forgerock-rest.version>2.4.0</forgerock-rest.version>
+        <forgerock-http.version>0.0.1-SNAPSHOT</forgerock-http.version>
+        <forgerock-rest.version>3.0.0-SNAPSHOT</forgerock-rest.version>
         <restlet.version>2.1.2</restlet.version>
         <jackson.version>2.1.5</jackson.version>
 
@@ -195,6 +196,12 @@
             </dependency>
 
             <dependency>
+                <groupId>org.forgerock.http</groupId>
+                <artifactId>chf-http-core</artifactId>
+                <version>${forgerock-http.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>json-fluent</artifactId>
                 <version>${forgerock-rest.version}</version>
@@ -206,7 +213,7 @@
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
-                <artifactId>json-resource-servlet</artifactId>
+                <artifactId>json-resource-http</artifactId>
                 <version>${forgerock-rest.version}</version>
             </dependency>
             <dependency>

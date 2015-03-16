@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.caf.authn.test.configuration;
@@ -19,7 +19,7 @@ package org.forgerock.caf.authn.test.configuration;
 import org.forgerock.guice.core.InjectorHolder;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Resources;
-import org.forgerock.json.resource.Router;
+import org.forgerock.json.resource.UriRouter;
 
 /**
  * CREST connection factory for all the test CREST resources.
@@ -41,7 +41,7 @@ public final class ConfigurationConnectionFactory {
      */
     public static ConnectionFactory getConnectionFactory() {
 
-        Router router = new Router();
+        UriRouter router = new UriRouter();
 
         router.addRoute("/configuration", InjectorHolder.getInstance(ConfigurationResource.class));
         router.addRoute("/auditrecords", InjectorHolder.getInstance(AuditResource.class));

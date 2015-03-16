@@ -11,13 +11,21 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.authz.filter.crest;
 
+import static org.forgerock.json.fluent.JsonValue.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.testng.Assert.*;
+
 import org.forgerock.authz.filter.api.AuthorizationResult;
 import org.forgerock.authz.filter.crest.api.CrestAuthorizationModule;
+import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.CollectionResourceProvider;
@@ -33,7 +41,6 @@ import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.util.promise.Promise;
@@ -41,17 +48,6 @@ import org.forgerock.util.promise.Promises;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.testng.annotations.Test;
-
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 public class AuthorizationFiltersTest {
 

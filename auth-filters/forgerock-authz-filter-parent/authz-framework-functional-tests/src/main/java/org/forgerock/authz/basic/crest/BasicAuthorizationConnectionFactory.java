@@ -11,18 +11,18 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.authz.basic.crest;
+
+import static org.forgerock.http.RoutingMode.STARTS_WITH;
 
 import org.forgerock.authz.filter.crest.AuthorizationFilters;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Resources;
-import org.forgerock.json.resource.Router;
-
-import static org.forgerock.json.resource.RoutingMode.STARTS_WITH;
+import org.forgerock.json.resource.UriRouter;
 
 /**
  * Factory class for getting the {@code ConnectionFactory} instance that has all of the CREST routes.
@@ -47,7 +47,7 @@ public final class BasicAuthorizationConnectionFactory {
      */
     public static ConnectionFactory getConnectionFactory() {
 
-        final Router router = new Router();
+        final UriRouter router = new UriRouter();
 
         router.addRoute(STARTS_WITH, "/simple", createEndpointCheckerHandler());
         router.addRoute(STARTS_WITH, "/notAction", createNotActionHandler());
@@ -64,7 +64,7 @@ public final class BasicAuthorizationConnectionFactory {
      * @return A {@code RequestHandler}.
      */
     private static RequestHandler createEndpointCheckerHandler() {
-        final Router router = new Router();
+        final UriRouter router = new UriRouter();
 
         router.addRoute(STARTS_WITH, "/users", AuthorizationFilters.createFilter(SIMPLE_RESOURCE,
                 new AlwaysAllowAuthorizationModule()));

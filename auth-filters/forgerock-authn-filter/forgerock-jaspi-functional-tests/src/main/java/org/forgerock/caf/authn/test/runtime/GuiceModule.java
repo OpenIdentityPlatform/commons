@@ -11,24 +11,14 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.caf.authn.test.runtime;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Injector;
-import com.google.inject.Provides;
-import org.forgerock.caf.authn.test.configuration.ConfigurationResource;
-import org.forgerock.jaspi.runtime.ContextFactory;
-import org.forgerock.jaspi.context.FallbackServerAuthContext;
-import org.forgerock.jaspi.runtime.AuditApi;
-import org.forgerock.jaspi.runtime.context.ContextHandler;
-import org.forgerock.jaspi.utils.MessageInfoUtils;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.Resource;
-import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.RootContext;
+import static org.forgerock.json.resource.Requests.newReadRequest;
+import static org.forgerock.json.resource.Resources.newInternalConnection;
+import static org.forgerock.json.resource.Resources.newSingleton;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -39,9 +29,19 @@ import javax.security.auth.message.module.ServerAuthModule;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.forgerock.json.resource.Requests.newReadRequest;
-import static org.forgerock.json.resource.Resources.newInternalConnection;
-import static org.forgerock.json.resource.Resources.newSingleton;
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+import com.google.inject.Provides;
+import org.forgerock.caf.authn.test.configuration.ConfigurationResource;
+import org.forgerock.http.RootContext;
+import org.forgerock.jaspi.context.FallbackServerAuthContext;
+import org.forgerock.jaspi.runtime.AuditApi;
+import org.forgerock.jaspi.runtime.ContextFactory;
+import org.forgerock.jaspi.runtime.context.ContextHandler;
+import org.forgerock.jaspi.utils.MessageInfoUtils;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceException;
 
 /**
  * Guice module for wiring the JASPI runtime.

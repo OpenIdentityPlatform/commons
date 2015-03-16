@@ -12,7 +12,7 @@
 * Header, with the fields enclosed by brackets [] replaced by your own identifying
 * information: "Portions copyright [year] [name of copyright owner]".
 *
-* Copyright 2014 ForgeRock AS.
+* Copyright 2014-2015 ForgeRock AS.
 -->
 <web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
@@ -37,17 +37,13 @@
     </filter-mapping>
 
     <servlet>
-        <servlet-name>BasicCrestAuthorizationFilter</servlet-name>
-        <servlet-class>org.forgerock.json.resource.servlet.HttpServlet</servlet-class>
-        <init-param>
-            <param-name>connection-factory-class</param-name>
-            <param-value>org.forgerock.authz.basic.crest.BasicAuthorizationConnectionFactory</param-value>
-        </init-param>
+        <servlet-name>Authz HTTP</servlet-name>
+        <servlet-class>org.forgerock.http.servlet.HttpFrameworkServlet</servlet-class>
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>BasicCrestAuthorizationFilter</servlet-name>
-        <url-pattern>/basic/crest/*</url-pattern>
+        <servlet-name>Authz HTTP</servlet-name>
+        <url-pattern>/*</url-pattern>
     </servlet-mapping>
 
     <servlet>
@@ -81,20 +77,6 @@
     <servlet-mapping>
         <servlet-name>AuthorizationContextServlet</servlet-name>
         <url-pattern>/modules/oauth2/servlet/*</url-pattern>
-    </servlet-mapping>
-
-    <servlet>
-        <servlet-name>OAuth2CrestAuthorizationFilter</servlet-name>
-        <servlet-class>org.forgerock.json.resource.servlet.HttpServlet</servlet-class>
-        <init-param>
-            <param-name>connection-factory-class</param-name>
-            <param-value>org.forgerock.authz.modules.oauth2.crest.OAuth2AuthorizationConnectionFactory</param-value>
-        </init-param>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>OAuth2CrestAuthorizationFilter</servlet-name>
-        <url-pattern>/modules/oauth2/crest/*</url-pattern>
     </servlet-mapping>
 
     <!-- ^^^^^^ - OAuth2 Test Cases - ^^^^^^-->

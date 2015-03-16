@@ -11,27 +11,10 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.caf.authn;
-
-import com.jayway.restassured.RestAssured;
-import com.jayway.restassured.config.EncoderConfig;
-import com.jayway.restassured.config.RestAssuredConfig;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.parsing.Parser;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.forgerock.json.fluent.JsonValue;
-import org.hamcrest.Matcher;
-
-import javax.security.auth.message.module.ServerAuthModule;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
@@ -40,6 +23,23 @@ import static org.forgerock.json.fluent.JsonValue.*;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
 import static org.testng.Assert.fail;
+
+import javax.security.auth.message.module.ServerAuthModule;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.restassured.RestAssured;
+import com.jayway.restassured.config.EncoderConfig;
+import com.jayway.restassured.config.RestAssuredConfig;
+import com.jayway.restassured.http.ContentType;
+import com.jayway.restassured.parsing.Parser;
+import com.jayway.restassured.specification.RequestSpecification;
+import com.jayway.restassured.specification.ResponseSpecification;
+import org.forgerock.json.fluent.JsonValue;
+import org.hamcrest.Matcher;
 
 /**
  * Test framework for running tests and verifing results against the JASPI runtime.

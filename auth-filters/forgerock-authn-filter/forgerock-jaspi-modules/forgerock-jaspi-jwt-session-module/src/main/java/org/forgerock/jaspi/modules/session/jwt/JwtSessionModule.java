@@ -20,18 +20,6 @@ import static org.forgerock.caf.http.Cookie.*;
 import static org.forgerock.jaspi.runtime.AuditTrail.AUDIT_SESSION_ID_KEY;
 import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
 
-import org.forgerock.caf.http.Cookie;
-import org.forgerock.jaspi.runtime.JaspiRuntime;
-import org.forgerock.json.jose.builders.JwtBuilderFactory;
-import org.forgerock.json.jose.exceptions.JweDecryptionException;
-import org.forgerock.json.jose.jwe.EncryptedJwt;
-import org.forgerock.json.jose.jwe.EncryptionMethod;
-import org.forgerock.json.jose.jwe.JweAlgorithm;
-import org.forgerock.json.jose.jwe.JweHeader;
-import org.forgerock.json.jose.jwt.Jwt;
-import org.forgerock.json.jose.jwt.JwtClaimsSet;
-import org.forgerock.json.jose.utils.KeystoreManager;
-
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
@@ -56,6 +44,18 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+
+import org.forgerock.caf.http.Cookie;
+import org.forgerock.jaspi.runtime.JaspiRuntime;
+import org.forgerock.json.jose.builders.JwtBuilderFactory;
+import org.forgerock.json.jose.exceptions.JweDecryptionException;
+import org.forgerock.json.jose.jwe.EncryptedJwt;
+import org.forgerock.json.jose.jwe.EncryptionMethod;
+import org.forgerock.json.jose.jwe.JweAlgorithm;
+import org.forgerock.json.jose.jwe.JweHeader;
+import org.forgerock.json.jose.jwt.Jwt;
+import org.forgerock.json.jose.jwt.JwtClaimsSet;
+import org.forgerock.json.jose.utils.KeystoreManager;
 
 /**
  * A JASPI Session Module which creates a JWT when securing the response from a successful authentication and sets it
@@ -342,10 +342,10 @@ public class JwtSessionModule implements ServerAuthModule {
      */
     private Jwt verifySessionJwt(String sessionJwt) {
 
-        KeystoreManager keystoreManager = new KeystoreManager(keystoreType,
+        KeystoreManager keystoreManager = new KeystoreManager(privateKeyPassword, keystoreType,
                 keystoreFile, keystorePassword);
 
-        RSAPrivateKey privateKey = (RSAPrivateKey) keystoreManager.getPrivateKey(keyAlias, privateKeyPassword);
+        RSAPrivateKey privateKey = (RSAPrivateKey) keystoreManager.getPrivateKey(keyAlias);
 
         EncryptedJwt jwt = jwtBuilderFactory.reconstruct(sessionJwt, EncryptedJwt.class);
         jwt.decrypt(privateKey);
@@ -403,7 +403,7 @@ public class JwtSessionModule implements ServerAuthModule {
         jwt.getClaimsSet().setNotBeforeTime(nbf);
         jwt.getClaimsSet().setClaim(TOKEN_IDLE_TIME_IN_SECONDS_CLAIM_KEY, tokenIdleTime.getTime() / 1000L);
 
-        KeystoreManager keystoreManager = new KeystoreManager(keystoreType,
+        KeystoreManager keystoreManager = new KeystoreManager(privateKeyPassword, keystoreType,
                 keystoreFile, keystorePassword);
 
         RSAPublicKey publicKey = (RSAPublicKey) keystoreManager.getPublicKey(keyAlias);
@@ -477,7 +477,7 @@ public class JwtSessionModule implements ServerAuthModule {
      */
     private Collection<Cookie> createSessionJwtCookies(Map<String, Object> jwtParameters) throws AuthException {
 
-        KeystoreManager keystoreManager = new KeystoreManager(keystoreType,
+        KeystoreManager keystoreManager = new KeystoreManager(privateKeyPassword, keystoreType,
                 keystoreFile, keystorePassword);
 
         RSAPublicKey publicKey = (RSAPublicKey) keystoreManager.getPublicKey(keyAlias);
