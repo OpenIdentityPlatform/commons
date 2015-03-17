@@ -36,8 +36,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * A chain of bloom filters that together acts as a single bloom filter. The overall false positive probability of the
  * chain is the sum of the false positive probabilities of the elements in the chain. Subsequent filters ("buckets")
- * in the chain are acquired from a {@link GeometricSeriesBloomFilterPool} according to a geometric series, ensuring that the overall
+ * in the chain are acquired from a {@link BloomFilterPool} according to a geometric series, ensuring that the overall
  * false positive probability is maintained, while also accommodating massive underestimation of required capacity.
+ * <p/>
+ * The chain supports removal of bloom filters from the chain if all elements contained within that Bloom Filter have
+ * expired. This forms the basis of <em>Rolling Bloom Filters</em>, which provide a time-limited view of some set.
+ * Use-cases include blacklisting user security tokens that will naturally expire after a certain interval anyway and so
+ * only need to be blacklisted until that expiry time.
  *
  * @param <T> the type of elements stored in the bloom filter.
  * @see GeometricSeriesBloomFilterPool

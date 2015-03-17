@@ -27,6 +27,7 @@ import javax.annotation.concurrent.ThreadSafe;
 import java.util.BitSet;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.TreeSet;
 
 /**
@@ -117,7 +118,7 @@ final class GeometricSeriesBloomFilterPool<T> implements BloomFilterPool<T> {
      * and false positive probability of the released pool in preference to any higher values.
      *
      * @return the next available bloom filter according to the geometric series.
-     * @throws IllegalStateException if the maximum number of buckets has been exceeded.
+     * @throws NoSuchElementException if the maximum number of buckets has been exceeded.
      */
     @Override
     public BloomFilter<T> nextAvailable() {
@@ -125,7 +126,7 @@ final class GeometricSeriesBloomFilterPool<T> implements BloomFilterPool<T> {
         synchronized (bucketNumbers) {
             bucketNumber = bucketNumbers.nextClearBit(0);
             if (bucketNumber >= maxBuckets) {
-                throw new IllegalStateException("Maximum number of buckets exceeded: " + maxBuckets);
+                throw new NoSuchElementException("Maximum number of buckets exceeded: " + maxBuckets);
             }
             bucketNumbers.set(bucketNumber);
         }

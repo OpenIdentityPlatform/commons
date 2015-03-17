@@ -16,6 +16,8 @@
 
 package org.forgerock.bloomfilter;
 
+import java.util.NoSuchElementException;
+
 /**
  * A pool of available bloom filters for use in a {@link BloomFilterChain}.
  *
@@ -25,7 +27,7 @@ package org.forgerock.bloomfilter;
 interface BloomFilterPool<T> {
     /**
      * Returns the next available bloom filter from the pool.
-     * @throws IllegalStateException if the pool has been exhausted.
+     * @throws NoSuchElementException if the pool has been exhausted.
      */
     BloomFilter<T> nextAvailable();
 
