@@ -107,6 +107,10 @@ public final class DateUtil {
         return new DateTime(chrono).toString();
     }
 
+    /**
+     * Get current time.
+     * @return get current time as a DateTime object
+     */
     public DateTime currentDateTime() {
         return new DateTime(chrono);
     }
@@ -160,7 +164,7 @@ public final class DateUtil {
      *
      * @param timestamp
      *            timestamp to parse
-     * @return
+     * @return the timestamp as a DateTime object
      */
     public DateTime parseIfDate(String timestamp) {
         DateTime d = null;
@@ -198,6 +202,10 @@ public final class DateUtil {
         return result;
     }
 
+    /**
+     * Main test method.
+     * @param args args for the main method
+     */
     public static void main(String[] args) {
         System.out.println(new DateUtil("UTC").now());
     }

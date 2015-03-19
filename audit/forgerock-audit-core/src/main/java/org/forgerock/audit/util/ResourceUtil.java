@@ -21,8 +21,12 @@ import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.ResourceException;
 
-public class ResourceUtil {
+/**
+ * Utility class to use on ResourceExceptions.
+ */
+public final class ResourceUtil {
 
+    private ResourceUtil() { }
     /**
      * Adapts a {@code Throwable} to a {@code ResourceException}. If the
      * {@code Throwable} is an JSON {@code JsonValueException} then an
@@ -47,18 +51,33 @@ public class ResourceUtil {
         return ResourceException.getException(resourceResultCode, t.getMessage(), t);
     }
 
+    /**
+     * Creates a NotSupportedException.
+     * @param request the crest request
+     * @return a NotSupportedException
+     */
     public static ResourceException notSupported(final Request request) {
-        return new NotSupportedException("The " + request.getRequestType().name() +
-                " operations are not supported");
+        return new NotSupportedException("The " + request.getRequestType().name()
+                + " operations are not supported");
     }
 
+    /**
+     * Creates a NotSupportedException.
+     * @param request the crest request
+     * @return a NotSupportedException
+     */
     public static ResourceException notSupportedOnCollection(final Request request) {
-        return new NotSupportedException("The " + request.getRequestType().name() +
-                " operations are not supported");
+        return new NotSupportedException("The " + request.getRequestType().name()
+                + " operations are not supported");
     }
 
+    /**
+     * Creates a NotSupportedException.
+     * @param request the crest request
+     * @return a NotSupportedException
+     */
     public static ResourceException notSupportedOnInstance(final Request request) {
-        return new NotSupportedException("The " + request.getRequestType().name() +
-                " operations are not supported");
+        return new NotSupportedException("The " + request.getRequestType().name()
+                + " operations are not supported");
     }
 }

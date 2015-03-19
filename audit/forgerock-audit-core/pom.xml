@@ -47,6 +47,10 @@
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
 
         <!-- ForgeRock Commons Dependencies -->
         <dependency>
@@ -56,6 +60,10 @@
         <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>json-patch</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons.guava</groupId>
+            <artifactId>forgerock-guava-collect</artifactId>
         </dependency>
 
         <!-- Test Dependencies -->
@@ -84,7 +92,9 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            org.forgerock.audit.impl;version=${project.version}
+                            org.forgerock.audit;version=${project.version},
+                            org.forgerock.audit.events;version=${project.version}
+                            org.forgerock.audit.events.handlers;version=${project.version}
                         </Export-Package>
                     </instructions>
                 </configuration>

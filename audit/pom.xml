@@ -48,6 +48,7 @@
 
         <commons.forgerock-rest.version>2.4.2</commons.forgerock-rest.version>
         <commons.forgerock-script.version>1.4.0</commons.forgerock-script.version>
+        <commons.forgerock-guava.version>18.0.1</commons.forgerock-guava.version>
 
 		<supercsv.version>2.1.0</supercsv.version>
         <slf4j.version>1.7.5</slf4j.version>
@@ -95,6 +96,11 @@
                 <artifactId>joda-time</artifactId>
                 <version>${jodaTime.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>3.3.2</version>
+            </dependency>
 
             <dependency>
                 <groupId>javax.servlet</groupId>
@@ -118,6 +124,11 @@
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>json-resource-servlet</artifactId>
                 <version>${commons.forgerock-rest.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons.guava</groupId>
+                <artifactId>forgerock-guava-collect</artifactId>
+                <version>${commons.forgerock-guava.version}</version>
             </dependency>
 
 	        <!-- Test Dependencies -->

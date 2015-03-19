@@ -9,14 +9,12 @@
  * When distributing Covered Software, include this CDDL Header Notice in each file and include
  * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
- * information: "Portions Copyrighted [year] [name of copyright owner]".
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright © 2012-2015 ForgeRock AS. All rights reserved.
+ * Copyright 2015 ForgeRock AS.
  */
 
 /**
- * OpenIDM audit module implementation classes.
- * <p>
- * This package defines the implementation of the OpenIDM Audit module
+ * Package contains audit events.
  */
-package org.forgerock.audit.impl;
+package org.forgerock.audit.events;

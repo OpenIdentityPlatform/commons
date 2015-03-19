@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2014-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -21,19 +21,27 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
+package org.forgerock.audit;
 
-package org.forgerock.audit.util;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.Context;
+import org.forgerock.json.resource.PersistenceConfig;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ServerContext;
 
-public enum Status {
-    SUCCESS(1), FAILURE(2);
-
-    private final int value;
-
-    private Status(int value) {
-        this.value = value;
+/**
+ * A ServerContext used when auditing over the router.
+ */
+class AuditContext extends ServerContext {
+    public AuditContext(Context parent) {
+        super(parent);
     }
 
-    public int getValue() {
-        return value;
+    public AuditContext(String id, Context parent) {
+        super(id, parent);
+    }
+
+    public AuditContext(JsonValue savedContext, PersistenceConfig config) throws ResourceException {
+        super(savedContext, config);
     }
 }
