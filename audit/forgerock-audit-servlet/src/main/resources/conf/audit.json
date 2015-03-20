@@ -159,7 +159,7 @@
         "location" : "/tmp/audit",
         "recordDelimiter" : "\n"
       },
-      "userForQueries" : true
+      "useForQueries" : true
     }
   }
 }
