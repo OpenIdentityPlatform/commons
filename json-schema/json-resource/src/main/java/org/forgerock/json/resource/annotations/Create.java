@@ -25,10 +25,13 @@ import java.lang.annotation.Target;
  * Indicates an CREST create method on a {@link RequestHandler}-annotated POJO. This annotation can only be used on
  * collection resource request handlers.
  * <p>
- * The annotated method should take the following parameters:
+ * The annotated method's return type must be:
  * <ul>
- *     <li>A {@code ResultHandler<JsonValue>} handler.</li>
- *     <li>A {@link org.forgerock.json.resource.ActionRequest} for the request.</li>
+ *     <li>A {@code Promise<JsonValue, ? extends ResourceException>} promise.</li>
+ * </ul>
+ * The method must take the following parameters:
+ * <ul>
+ *     <li>A {@link org.forgerock.json.resource.CreateRequest} for the request.</li>
  * </ul>
  * The method may also take the following parameters:
  * <ul>

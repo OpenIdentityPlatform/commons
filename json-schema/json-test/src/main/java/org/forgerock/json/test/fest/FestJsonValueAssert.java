@@ -28,9 +28,7 @@ import org.fest.assertions.MapAssert;
 import org.fest.assertions.StringAssert;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.util.promise.Function;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.test.assertj.AbstractAssertJPromiseAssert;
 import org.forgerock.util.test.fest.AbstractFestPromiseAssert;
 
 /**
@@ -65,6 +63,14 @@ public abstract class FestJsonValueAssert {
      */
     public static FestJsonValuePromiseAssert assertThat(Promise<JsonValue, ?> promise) {
         return new FestJsonValuePromiseAssert(promise);
+    }
+
+    /**
+     * An alias for {@link #assertThat(Promise)} for the case where different Promise assertThat methods
+     * are statically imported and would clash.
+     */
+    public static FestJsonValuePromiseAssert assertThatJsonValue(Promise<JsonValue, ?> promise) {
+        return assertThat(promise);
     }
 
     /**
