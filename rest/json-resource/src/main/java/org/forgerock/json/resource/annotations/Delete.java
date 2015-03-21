@@ -25,14 +25,17 @@ import java.lang.annotation.Target;
  * Indicates an CREST delete method on a {@link RequestHandler}-annotated POJO. This annotation can only be used on
  * collection resource request handlers.
  * <p>
- * The annotated method should take the following parameters:
+ * The annotated method's return type must be:
+ * <ul>
+ *     <li>A {@code Promise<Resource, ? extends ResourceException>} promise.</li>
+ * </ul>
+ * The method should take the following parameters:
  * <ul>
  *     <li>A string parameter for the instance identifier.</li>
- *     <li>A {@code ResultHandler<JsonValue>} handler.</li>
- *     <li>A {@link org.forgerock.json.resource.DeleteRequest} for the request.</li>
  * </ul>
  * The method may also take the following parameters:
  * <ul>
+ *     <li>A {@link org.forgerock.json.resource.DeleteRequest} for the request.</li>
  *     <li>A {@link org.forgerock.json.resource.ServerContext} to be given the context.</li>
  * </ul>
  */

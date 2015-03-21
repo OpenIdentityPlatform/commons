@@ -25,9 +25,13 @@ import java.lang.annotation.Target;
  * Indicates an CREST query method on a {@link RequestHandler}-annotated POJO. This annotation can only be used on
  * collection resource request handlers.
  * <p>
- * The annotated method should take the following parameters:
+ * The annotated method's return type must be:
  * <ul>
- *     <li>A {@code ResultHandler<JsonValue>} handler.</li>
+ *     <li>A {@code Promise<QueryResult, ? extends ResourceException>} promise.</li>
+ * </ul>
+ * The method must take the following parameters:
+ * <ul>
+ *     <li>A {@link org.forgerock.json.resource.QueryResultHandler} for the results of the query.</li>
  *     <li>A {@link org.forgerock.json.resource.QueryRequest} for the request.</li>
  * </ul>
  * The method may also take the following parameters:

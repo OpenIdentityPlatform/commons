@@ -25,9 +25,12 @@ import java.lang.annotation.Target;
  * Indicates an CREST patch method on a {@link RequestHandler}-annotated POJO. This annotation can be used on
  * methods in both singleton and collection resource request handlers.
  * <p>
- * The annotated method must take the following parameters:
+ * The annotated method's return type must be:
  * <ul>
- *     <li>A {@code ResultHandler<Resource>} handler.</li>
+ *     <li>A {@code Promise<Resource, ? extends ResourceException>} promise.</li>
+ * </ul>
+ * The method must take the following parameters:
+ * <ul>
  *     <li>A {@link org.forgerock.json.resource.PatchRequest} to be given the request.</li>
  * </ul>
  * If the annotated method is on a collection handler, it must also take the following parameters:
