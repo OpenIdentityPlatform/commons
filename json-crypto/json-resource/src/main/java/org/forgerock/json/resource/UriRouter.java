@@ -78,7 +78,7 @@ import org.forgerock.json.resource.UriRoute.RouteMatcher;
  * @see <a href="http://tools.ietf.org/html/rfc6570">RFC 6570 - URI Template
  *      </a>
  */
-final class UriRouter implements RequestHandler {
+public final class UriRouter implements RequestHandler {
 
     private volatile RequestHandler defaultRoute = null;
     private final Set<UriRoute> routes = new CopyOnWriteArraySet<UriRoute>();
@@ -151,7 +151,7 @@ final class UriRouter implements RequestHandler {
      * @return An opaque handle for the route which may be used for removing the
      *         route later.
      */
-    UriRoute addRoute(final RoutingMode mode, final String uriTemplate,
+    public UriRoute addRoute(final RoutingMode mode, final String uriTemplate,
             final RequestHandler handler) {
         return addRoute(new UriRoute(mode, uriTemplate, handler));
     }

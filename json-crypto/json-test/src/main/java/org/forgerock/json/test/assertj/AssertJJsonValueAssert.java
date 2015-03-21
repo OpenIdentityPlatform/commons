@@ -64,6 +64,14 @@ public class AssertJJsonValueAssert {
     }
 
     /**
+     * An alias for {@link #assertThat(Promise)} for the case where different Promise assertThat methods
+     * are statically imported and would clash.
+     */
+    public static AssertJJsonValuePromiseAssert assertThatJsonValue(Promise<JsonValue, ?> promise) {
+        return assertThat(promise);
+    }
+
+    /**
      * An assertion class for promises that return {@code JsonValue}s.
      */
     public static class AssertJJsonValuePromiseAssert

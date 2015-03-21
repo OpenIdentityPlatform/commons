@@ -25,11 +25,11 @@ import java.lang.annotation.Target;
  * Indicates an CREST action method on a {@link RequestHandler}-annotated POJO. This annotation can be used on
  * methods in both singleton and collection resource request handlers.
  * <p>
- * The annotated method must take the following parameters:
+ * The annotated method's return type must be:
  * <ul>
- *     <li>A {@code ResultHandler<JsonValue>} handler.</li>
+ *     <li>A {@code Promise<JsonValue, ? extends ResourceException>} promise.</li>
  * </ul>
- * If the annotated method is an instance action on a collection handler, it must also take the following parameters:
+ * If the method is an instance action on a collection handler, it must take the following parameters:
  * <ul>
  *     <li>A string parameter for the instance identifier.</li>
  * </ul>
@@ -43,7 +43,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface Action {
     /**
-     * The name of the action being exposed.
+     * The name of the action being exposed. If not supplied, the name of the method is assumed to be the name
+     * of the action.
      */
-    String value();
+    String value() default "";
 }
