@@ -11,18 +11,19 @@
 * Header, with the fields enclosed by brackets [] replaced by your own identifying
 * information: "Portions copyright [year] [name of copyright owner]".
 *
-* Copyright 2014 ForgeRock AS.
+* Copyright 2014-2015 ForgeRock AS.
 */
+
 package org.forgerock.jaspi.modules.openid.resolvers.service;
 
-import org.forgerock.jaspi.modules.openid.resolvers.OpenIdResolver;
+import static org.forgerock.caf.authentication.framework.JaspiRuntime.LOG;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
-import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
+import org.forgerock.jaspi.modules.openid.resolvers.OpenIdResolver;
 
 /**
  * Implementation of the {@link OpenIdResolverServiceConfigurator} interface which

@@ -11,18 +11,18 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.caf.authn.test.runtime;
 
-import com.google.inject.Key;
-import com.google.inject.name.Names;
-import org.forgerock.guice.core.InjectorHolder;
-import org.forgerock.jaspi.runtime.ContextFactory;
-
 import javax.inject.Singleton;
 import javax.security.auth.message.config.ServerAuthContext;
+
+import com.google.inject.Key;
+import com.google.inject.name.Names;
+import org.forgerock.caf.authentication.framework.ContextFactory;
+import org.forgerock.guice.core.InjectorHolder;
 
 /**
  * <p>Test implementation of the Jaspi runtime's {@code ContextFactory} interface.</p>

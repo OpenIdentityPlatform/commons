@@ -16,9 +16,9 @@
 
 package org.forgerock.jaspi.modules.session.jwt;
 
+import static org.forgerock.caf.authentication.framework.AuditTrail.AUDIT_SESSION_ID_KEY;
+import static org.forgerock.caf.authentication.framework.JaspiRuntime.LOG;
 import static org.forgerock.caf.http.Cookie.*;
-import static org.forgerock.jaspi.runtime.AuditTrail.AUDIT_SESSION_ID_KEY;
-import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
@@ -45,8 +45,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.forgerock.caf.authentication.framework.JaspiRuntime;
 import org.forgerock.caf.http.Cookie;
-import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.json.jose.builders.JwtBuilderFactory;
 import org.forgerock.json.jose.exceptions.JweDecryptionException;
 import org.forgerock.json.jose.jwe.EncryptedJwt;

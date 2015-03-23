@@ -11,21 +11,22 @@
 * Header, with the fields enclosed by brackets [] replaced by your own identifying
 * information: "Portions copyright [year] [name of copyright owner]".
 *
-* Copyright 2014 ForgeRock AS.
+* Copyright 2014-2015 ForgeRock AS.
 */
+
 package org.forgerock.jaspi.modules.openid.resolvers;
 
-import org.forgerock.jaspi.modules.openid.exceptions.FailedToLoadJWKException;
-import org.forgerock.jaspi.modules.openid.helpers.SimpleHTTPClient;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.jose.utils.Utils;
+import static org.forgerock.caf.authentication.framework.JaspiRuntime.LOG;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
 
-import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
+import org.forgerock.jaspi.modules.openid.exceptions.FailedToLoadJWKException;
+import org.forgerock.jaspi.modules.openid.helpers.SimpleHTTPClient;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.jose.utils.Utils;
 
 /**
  * This class creates JWKOpenIdResolverImpl's from a supplied

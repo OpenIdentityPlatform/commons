@@ -16,22 +16,11 @@
 
 package org.forgerock.jaspi.modules.session.jwt;
 
-import org.forgerock.jaspi.runtime.JaspiRuntime;
-import org.forgerock.json.jose.builders.EncryptedJwtBuilder;
-import org.forgerock.json.jose.builders.JweHeaderBuilder;
-import org.forgerock.json.jose.builders.JwtBuilderFactory;
-import org.forgerock.json.jose.builders.JwtClaimsSetBuilder;
-import org.forgerock.json.jose.exceptions.JweDecryptionException;
-import org.forgerock.json.jose.jwe.EncryptedJwt;
-import org.forgerock.json.jose.jwe.EncryptionMethod;
-import org.forgerock.json.jose.jwe.JweAlgorithm;
-import org.forgerock.json.jose.jwt.Algorithm;
-import org.forgerock.json.jose.jwt.Jwt;
-import org.forgerock.json.jose.jwt.JwtClaimsSet;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Matchers;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.json.fluent.JsonValue.json;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.*;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
@@ -55,11 +44,22 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
-import static org.testng.Assert.*;
+import org.forgerock.caf.authentication.framework.JaspiRuntime;
+import org.forgerock.json.jose.builders.EncryptedJwtBuilder;
+import org.forgerock.json.jose.builders.JweHeaderBuilder;
+import org.forgerock.json.jose.builders.JwtBuilderFactory;
+import org.forgerock.json.jose.builders.JwtClaimsSetBuilder;
+import org.forgerock.json.jose.exceptions.JweDecryptionException;
+import org.forgerock.json.jose.jwe.EncryptedJwt;
+import org.forgerock.json.jose.jwe.EncryptionMethod;
+import org.forgerock.json.jose.jwe.JweAlgorithm;
+import org.forgerock.json.jose.jwt.Algorithm;
+import org.forgerock.json.jose.jwt.Jwt;
+import org.forgerock.json.jose.jwt.JwtClaimsSet;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Matchers;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 public class JwtSessionModuleTest {
 

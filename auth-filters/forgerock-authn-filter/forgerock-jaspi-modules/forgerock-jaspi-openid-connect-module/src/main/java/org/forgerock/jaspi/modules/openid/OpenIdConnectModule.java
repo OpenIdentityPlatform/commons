@@ -11,21 +11,12 @@
 * Header, with the fields enclosed by brackets [] replaced by your own identifying
 * information: "Portions copyright [year] [name of copyright owner]".
 *
-* Copyright 2014 ForgeRock AS.
+* Copyright 2014-2015 ForgeRock AS.
 */
+
 package org.forgerock.jaspi.modules.openid;
 
-import org.forgerock.jaspi.modules.openid.exceptions.OpenIdConnectVerificationException;
-import org.forgerock.jaspi.modules.openid.resolvers.OpenIdResolver;
-import org.forgerock.jaspi.modules.openid.resolvers.service.OpenIdResolverService;
-import org.forgerock.jaspi.modules.openid.resolvers.service.OpenIdResolverServiceConfigurator;
-import org.forgerock.jaspi.modules.openid.resolvers.service.OpenIdResolverServiceConfiguratorImpl;
-import org.forgerock.jaspi.modules.openid.resolvers.service.OpenIdResolverServiceImpl;
-import org.forgerock.json.jose.common.JwtReconstruction;
-import org.forgerock.json.jose.exceptions.InvalidJwtException;
-import org.forgerock.json.jose.exceptions.JwtReconstructionException;
-import org.forgerock.json.jose.jws.SignedJwt;
-import org.forgerock.json.jose.jwt.JwtClaimsSet;
+import static org.forgerock.caf.authentication.framework.JaspiRuntime.LOG;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
@@ -43,7 +34,17 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
+import org.forgerock.jaspi.modules.openid.exceptions.OpenIdConnectVerificationException;
+import org.forgerock.jaspi.modules.openid.resolvers.OpenIdResolver;
+import org.forgerock.jaspi.modules.openid.resolvers.service.OpenIdResolverService;
+import org.forgerock.jaspi.modules.openid.resolvers.service.OpenIdResolverServiceConfigurator;
+import org.forgerock.jaspi.modules.openid.resolvers.service.OpenIdResolverServiceConfiguratorImpl;
+import org.forgerock.jaspi.modules.openid.resolvers.service.OpenIdResolverServiceImpl;
+import org.forgerock.json.jose.common.JwtReconstruction;
+import org.forgerock.json.jose.exceptions.InvalidJwtException;
+import org.forgerock.json.jose.exceptions.JwtReconstructionException;
+import org.forgerock.json.jose.jws.SignedJwt;
+import org.forgerock.json.jose.jwt.JwtClaimsSet;
 
 /**
  * OpenID Connect module that allows access when a valid OpenID Connect JWT which

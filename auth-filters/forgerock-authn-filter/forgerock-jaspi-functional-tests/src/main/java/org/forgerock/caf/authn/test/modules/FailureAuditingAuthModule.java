@@ -11,10 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.caf.authn.test.modules;
+
+import static org.forgerock.caf.authentication.framework.AuditTrail.AUDIT_FAILURE_REASON_KEY;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
@@ -27,8 +29,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Collections;
 import java.util.Map;
-
-import static org.forgerock.jaspi.runtime.AuditTrail.AUDIT_FAILURE_REASON_KEY;
 
 /**
  * A test auth module in which the {@link #validateRequest(MessageInfo, Subject, Subject)} adds additional audit

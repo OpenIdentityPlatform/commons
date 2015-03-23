@@ -11,12 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.jaspi.modules.iwa;
 
-import org.forgerock.jaspi.modules.iwa.wdsso.WDSSO;
+import static org.forgerock.caf.authentication.framework.JaspiRuntime.LOG;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
@@ -31,7 +31,7 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.Map;
 
-import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
+import org.forgerock.jaspi.modules.iwa.wdsso.WDSSO;
 
 /**
  * Authentication module that uses IWA for authentication.

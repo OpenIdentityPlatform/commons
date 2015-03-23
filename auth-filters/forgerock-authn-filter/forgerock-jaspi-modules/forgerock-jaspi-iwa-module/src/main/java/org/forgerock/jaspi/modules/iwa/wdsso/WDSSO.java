@@ -27,16 +27,12 @@
  */
 
 /**
- * Portions Copyrighted 2011-2014 ForgeRock AS.
+ * Portions Copyrighted 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.jaspi.modules.iwa.wdsso;
 
-import org.ietf.jgss.GSSContext;
-import org.ietf.jgss.GSSCredential;
-import org.ietf.jgss.GSSException;
-import org.ietf.jgss.GSSManager;
-import org.ietf.jgss.GSSName;
+import static org.forgerock.caf.authentication.framework.JaspiRuntime.LOG;
 
 import javax.security.auth.Subject;
 import javax.security.auth.login.Configuration;
@@ -52,7 +48,11 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 
-import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
+import org.ietf.jgss.GSSContext;
+import org.ietf.jgss.GSSCredential;
+import org.ietf.jgss.GSSException;
+import org.ietf.jgss.GSSManager;
+import org.ietf.jgss.GSSName;
 
 public class WDSSO /*extends AMLoginModule*/ {
 

@@ -11,19 +11,19 @@
 * Header, with the fields enclosed by brackets [] replaced by your own identifying
 * information: "Portions copyright [year] [name of copyright owner]".
 *
-* Copyright 2014 ForgeRock AS.
+* Copyright 2014-2015 ForgeRock AS.
 */
+
 package org.forgerock.jaspi.modules.openid.resolvers;
+
+import static org.forgerock.caf.authentication.framework.JaspiRuntime.LOG;
+
+import java.security.PublicKey;
 
 import org.forgerock.jaspi.modules.openid.exceptions.InvalidSignatureException;
 import org.forgerock.jaspi.modules.openid.exceptions.OpenIdConnectVerificationException;
 import org.forgerock.json.jose.jws.SignedJwt;
 import org.forgerock.json.jose.jws.SigningManager;
-
-import java.security.PublicKey;
-
-import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
-
 
 /**
  * This class exists to allow functionality for those Open ID Connect providers which

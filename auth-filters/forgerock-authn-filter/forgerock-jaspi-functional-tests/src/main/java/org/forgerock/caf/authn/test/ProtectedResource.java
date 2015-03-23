@@ -11,13 +11,13 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.caf.authn.test;
 
-import org.forgerock.jaspi.runtime.JaspiRuntime;
-import org.forgerock.json.fluent.JsonValue;
+import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.fluent.JsonValue.object;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -26,8 +26,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
 
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
+import org.forgerock.caf.authentication.framework.JaspiRuntime;
+import org.forgerock.json.fluent.JsonValue;
 
 /**
  * A protected resource which will set a header on the response to signify that it has been called and write a JSON

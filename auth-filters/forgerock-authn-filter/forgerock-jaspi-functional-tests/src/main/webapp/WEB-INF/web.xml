@@ -19,7 +19,7 @@
 
     <filter>
         <filter-name>JaspiFilter</filter-name>
-        <filter-class>org.forgerock.jaspi.JaspiRuntimeFilter</filter-class>
+        <filter-class>org.forgerock.caf.authentication.framework.JaspiRuntimeFilter</filter-class>
         <init-param>
             <param-name>context-factory-class</param-name>
             <param-value>org.forgerock.caf.authn.test.runtime.TestContextFactory</param-value>

@@ -11,10 +11,17 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.jaspi.modules.session.openam;
+
+import static org.forgerock.caf.authentication.framework.JaspiRuntime.LOG;
+import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.fluent.JsonValue.object;
+
+import java.io.IOException;
+import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
@@ -27,13 +34,6 @@ import org.restlet.ext.ssl.DefaultSslContextFactory;
 import org.restlet.ext.ssl.SslContextFactory;
 import org.restlet.resource.ClientResource;
 import org.restlet.util.Series;
-
-import java.io.IOException;
-import java.util.Map;
-
-import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
 
 /**
  * Simple REST client implemented using Restlet.

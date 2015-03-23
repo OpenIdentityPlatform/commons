@@ -16,7 +16,7 @@
 
 package org.forgerock.jaspi.modules.session.openam;
 
-import static org.forgerock.jaspi.runtime.JaspiRuntime.LOG;
+import static org.forgerock.caf.authentication.framework.JaspiRuntime.LOG;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
