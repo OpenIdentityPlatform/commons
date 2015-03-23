@@ -41,7 +41,7 @@ public class BloomFilterMonitorTest {
     @BeforeMethod
     public void createTestObject() {
         final BloomFilter<Integer> bf = BloomFilters.<Integer>create(Funnels.integerFunnel())
-                .withConcurrencyStrategy(ConcurrencyStrategy.COPY_ON_WRITE)
+                .withConcurrencyStrategy(ConcurrencyStrategy.ATOMIC)
                 .withCapacityGrowthFactor(2.0D)
                 .withWriteBatchSize(100)
                 .build();

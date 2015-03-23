@@ -59,6 +59,18 @@ public enum ConcurrencyStrategy {
                 }
             };
         }
+    },
+
+    ATOMIC {
+        @Override
+        <T> BloomFilterFactory<T> getFactory(final Funnel<? super T> funnel) {
+            return new BloomFilterFactory<T>() {
+                @Override
+                public BloomFilter<T> create(final long expectedInsertions, final double falsePositiveProbability) {
+                    return new AtomicBloomFilter<T>(funnel, expectedInsertions, falsePositiveProbability);
+                }
+            };
+        }
     }
     ;
 

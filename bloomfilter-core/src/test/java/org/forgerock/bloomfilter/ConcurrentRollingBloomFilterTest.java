@@ -48,7 +48,8 @@ public class ConcurrentRollingBloomFilterTest {
     public static Object[][] implementations() {
         return new Object[][] {
                 {ConcurrencyStrategy.COPY_ON_WRITE},
-                {ConcurrencyStrategy.SYNCHRONIZED}
+                {ConcurrencyStrategy.SYNCHRONIZED},
+                {ConcurrencyStrategy.ATOMIC}
         };
     }
 

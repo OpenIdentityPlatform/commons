@@ -149,7 +149,7 @@ public final class BloomFilterStatistics {
      * @param capacity the total number of elements to represent.
      * @return the optimum number of hash functions to use per element.
      */
-    private static int optimalNumberOfHashFunctions(long bitSize, long capacity) {
+    static int optimalNumberOfHashFunctions(long bitSize, long capacity) {
         return Math.max(1, (int) Math.round((double)bitSize / (double) capacity * Math.log(2.0d)));
     }
 
