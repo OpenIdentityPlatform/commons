@@ -20,7 +20,8 @@ import static java.util.concurrent.TimeUnit.MICROSECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
-import org.HdrHistogram.AtomicHistogram;
+import org.HdrHistogram.Histogram;
+import org.HdrHistogram.Recorder;
 import org.forgerock.bloomfilter.BloomFilter;
 import org.forgerock.bloomfilter.BloomFilterStatistics;
 import org.slf4j.Logger;
@@ -41,6 +42,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Generic Bloom Filter JMX monitoring.
@@ -58,12 +60,9 @@ public final class BloomFilterMonitor<T> implements BloomFilterMXBean, BloomFilt
 
     private final BloomFilter<T> delegate;
 
-    private final AtomicHistogram addStats = new AtomicHistogram(LONGEST_EXPECTED_RESPONSE_TIME_MICROS,
-            SIGNIFICANT_DIGITS);
-    private final AtomicHistogram addAllStats = new AtomicHistogram(LONGEST_EXPECTED_RESPONSE_TIME_MICROS,
-            SIGNIFICANT_DIGITS);
-    private final AtomicHistogram mightContainStats = new AtomicHistogram(LONGEST_EXPECTED_RESPONSE_TIME_MICROS,
-            SIGNIFICANT_DIGITS);
+    private final LiveMethodCallStatistics addStats = new LiveMethodCallStatistics("add");
+    private final LiveMethodCallStatistics addAllStats = new LiveMethodCallStatistics("addAll");
+    private final LiveMethodCallStatistics mightContainStats = new LiveMethodCallStatistics("mightContain");
 
     public BloomFilterMonitor(final BloomFilter<T> delegate) {
         this.delegate = delegate;
@@ -74,11 +73,11 @@ public final class BloomFilterMonitor<T> implements BloomFilterMXBean, BloomFilt
         final ObjectName objectName = objectName(packageName, "BloomFilterMonitor", instanceName);
         try {
             // Register the method-call mbeans
-            mBeanServer.registerMBean(new LiveMethodCallStatistics(addStats), objectName(packageName,
+            mBeanServer.registerMBean(addStats, objectName(packageName,
                     "BloomFilterMonitor.MethodCallStatistics", instanceName + ",method=add"));
-            mBeanServer.registerMBean(new LiveMethodCallStatistics(addAllStats), objectName(packageName,
+            mBeanServer.registerMBean(addAllStats, objectName(packageName,
                     "BloomFilterMonitor.MethodCallStatistics", instanceName + ",method=addAll"));
-            mBeanServer.registerMBean(new LiveMethodCallStatistics(mightContainStats), objectName(packageName,
+            mBeanServer.registerMBean(mightContainStats, objectName(packageName,
                     "BloomFilterMonitor.MethodCallStatistics", instanceName + ",method=mightContain"));
 
             return mBeanServer.registerMBean(this, objectName);
@@ -112,7 +111,7 @@ public final class BloomFilterMonitor<T> implements BloomFilterMXBean, BloomFilt
         try {
             delegate.add(element);
         } finally {
-            recordTiming("add", addStats, startTime);
+            addStats.recordValue(System.nanoTime() - startTime, NANOSECONDS);
         }
     }
 
@@ -122,7 +121,7 @@ public final class BloomFilterMonitor<T> implements BloomFilterMXBean, BloomFilt
         try {
             delegate.addAll(elements);
         } finally {
-            recordTiming("addAll", addAllStats, startTime);
+            addAllStats.recordValue(System.nanoTime() - startTime, NANOSECONDS);
         }
     }
 
@@ -132,17 +131,7 @@ public final class BloomFilterMonitor<T> implements BloomFilterMXBean, BloomFilt
         try {
             return delegate.mightContain(element);
         } finally {
-            recordTiming("mightContain", mightContainStats, startTime);
-        }
-    }
-
-    private void recordTiming(final String method, final AtomicHistogram histogram, final long startTime) {
-        final long endTime = System.nanoTime();
-        try {
-            histogram.recordValue(MICROSECONDS.convert(endTime-startTime, NANOSECONDS));
-        } catch (IndexOutOfBoundsException ex) {
-            LOGGER.warn("Method call time out of bounds for histogram: method={}, timing={} (nanoseconds)", method,
-                    (endTime - startTime));
+            mightContainStats.recordValue(System.nanoTime() - startTime, NANOSECONDS);
         }
     }
 
@@ -181,16 +170,48 @@ public final class BloomFilterMonitor<T> implements BloomFilterMXBean, BloomFilt
         return new Date(getStatistics().getExpiryTime());
     }
 
+    /**
+     * Maintains live on-going statistics on method call timing latencies. An HdrHistogram {@link Recorder} is used
+     * to keep track of live performance data. A snapshot is taken periodically according to the update interval and
+     * copied into an ongoing histogram.
+     * <p/>
+     * No attempt is currently made to compensate for coordinated omission, so the worst case latencies may be
+     * over-optimistic under heavy load (i.e., when the latency exceeds the expected interval between operations).
+     */
     private static final class LiveMethodCallStatistics implements MethodCallStatisticsMXBean {
-        private final AtomicHistogram histogram;
 
-        public LiveMethodCallStatistics(final AtomicHistogram histogram) {
-            this.histogram = histogram;
+        private final String name;
+        private final Recorder recorder;
+        private final AtomicLong lastSnapshotTime;
+
+        private volatile long updateIntervalMillis = TimeUnit.SECONDS.toMillis(30);
+        private volatile Histogram snapshot;
+        private volatile long lastResetTime;
+
+        private final Histogram overallHistogram = new Histogram(LONGEST_EXPECTED_RESPONSE_TIME_MICROS,
+                SIGNIFICANT_DIGITS);
+
+        public LiveMethodCallStatistics(final String name) {
+            this.name = name;
+            this.recorder = new Recorder(LONGEST_EXPECTED_RESPONSE_TIME_MICROS, SIGNIFICANT_DIGITS);
+            this.snapshot = recorder.getIntervalHistogram();
+            this.lastSnapshotTime = new AtomicLong(System.currentTimeMillis());
+            this.lastResetTime = lastSnapshotTime.get();
+        }
+
+        void recordValue(long timing, TimeUnit unit) {
+            try {
+                recorder.recordValue(getTimeUnit().convert(timing, unit));
+            } catch (IndexOutOfBoundsException ex) {
+                LOGGER.warn("Method call time out of bounds for histogram: method={}, timing={} ({})", name,
+                        timing, unit);
+
+            }
         }
 
         @Override
         public long getCallCount() {
-            return histogram.getTotalCount();
+            return getSnapshot().getTotalCount();
         }
 
         @Override
@@ -200,79 +221,123 @@ public final class BloomFilterMonitor<T> implements BloomFilterMXBean, BloomFilt
 
         @Override
         public long getMinimumTime() {
-            return histogram.getMinValue();
+            return getSnapshot().getMinValue();
         }
 
         @Override
         public long getMaximumTime() {
-            return histogram.getMaxValue();
+            return getSnapshot().getMaxValue();
         }
 
         @Override
         public double getMeanTime() {
-            return histogram.getMean();
+            return getSnapshot().getMean();
         }
 
         @Override
         public double getStdDeviation() {
-            return histogram.getStdDeviation();
+            return getSnapshot().getStdDeviation();
         }
 
         @Override
         public long getMedianTime() {
-            return histogram.getValueAtPercentile(50.0d);
+            return getSnapshot().getValueAtPercentile(50.0d);
         }
 
         @Override
         public long get75thPercentileTime() {
-            return histogram.getValueAtPercentile(75.0d);
+            return getSnapshot().getValueAtPercentile(75.0d);
         }
 
         @Override
         public long get90thPercentileTime() {
-            return histogram.getValueAtPercentile(90.0d);
+            return getSnapshot().getValueAtPercentile(90.0d);
         }
 
         @Override
         public long get95thPercentileTime() {
-            return histogram.getValueAtPercentile(95.0d);
+            return getSnapshot().getValueAtPercentile(95.0d);
         }
 
         @Override
         public long get98thPercentileTime() {
-            return histogram.getValueAtPercentile(98.0d);
+            return getSnapshot().getValueAtPercentile(98.0d);
         }
 
         @Override
         public long get99thPercentileTime() {
-            return histogram.getValueAtPercentile(99.0d);
+            return getSnapshot().getValueAtPercentile(99.0d);
         }
 
         @Override
         public long get99Point9thPercentileTime() {
-            return histogram.getValueAtPercentile(99.9d);
+            return getSnapshot().getValueAtPercentile(99.9d);
         }
 
         @Override
         public long get99Point99thPercentileTime() {
-            return histogram.getValueAtPercentile(99.99d);
+            return getSnapshot().getValueAtPercentile(99.99d);
         }
 
         @Override
         public String getPercentileDump() {
             final ByteArrayOutputStream out = new ByteArrayOutputStream();
             try {
-                histogram.copy().outputPercentileDistribution(new PrintStream(out, true, LOG_CHARSET), 1.0d);
+                getSnapshot().outputPercentileDistribution(new PrintStream(out, true, LOG_CHARSET), 1.0d);
                 return out.toString(LOG_CHARSET);
             } catch (UnsupportedEncodingException ex) {
                 return "Unable to determine percentile log";
             }
         }
 
+        private Histogram getSnapshot() {
+            return getSnapshot(false);
+        }
+
+        private Histogram getSnapshot(boolean forceUpdate) {
+            long lastSnapshot = lastSnapshotTime.get();
+            if (forceUpdate || System.currentTimeMillis() - updateIntervalMillis > lastSnapshot) {
+                if (lastSnapshotTime.compareAndSet(lastSnapshot, System.currentTimeMillis())) {
+                    snapshot = recorder.getIntervalHistogram(snapshot);
+                    synchronized (overallHistogram) {
+                        overallHistogram.add(snapshot);
+                    }
+                }
+            }
+            return overallHistogram;
+        }
+
+        @Override
+        public long getUpdateIntervalMillis() {
+            return updateIntervalMillis;
+        }
+
+        @Override
+        public void setUpdateIntervalMillis(final long intervalMillis) {
+            this.updateIntervalMillis = intervalMillis;
+        }
+
+        @Override
+        public void reset() {
+            synchronized (overallHistogram) {
+                overallHistogram.reset();
+                lastResetTime = System.currentTimeMillis();
+            }
+        }
+
+        @Override
+        public Date getMonitoringStartTime() {
+            return new Date(lastResetTime);
+        }
+
+        @Override
+        public Date getLastUpdateTime() {
+            return new Date(lastSnapshotTime.get());
+        }
 
         @Override
         public String toString() {
-            final long callCount = getCallCount();
+            final long callCount = getSnapshot(true).getTotalCount();
             final StringBuilder sb = new StringBuilder()
                     .append("{ \"count\": ").append(callCount);
             if (callCount > 0) {
@@ -298,9 +363,9 @@ public final class BloomFilterMonitor<T> implements BloomFilterMXBean, BloomFilt
     public String toString() {
         return "{ " +
                 "\"statistics\": " + delegate.getStatistics() +
-                ", \"add\": " + new LiveMethodCallStatistics(addStats) +
-                ", \"addAll\": " + new LiveMethodCallStatistics(addAllStats) +
-                ", \"mightContain\": " + new LiveMethodCallStatistics(mightContainStats) +
+                ", \"add\": " + addStats +
+                ", \"addAll\": " + addAllStats +
+                ", \"mightContain\": " + mightContainStats +
                 " }";
     }
 }

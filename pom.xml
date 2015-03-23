@@ -48,7 +48,7 @@
 
         <forgerock.guava.version>18.0.1</forgerock.guava.version>
         <forgerock.util.version>1.3.5</forgerock.util.version>
-        <hdrhistogram.version>2.0.3</hdrhistogram.version>
+        <hdrhistogram.version>2.1.4</hdrhistogram.version>
         <jsr.305.version>3.0.0</jsr.305.version>
         <slf4j.version>1.7.5</slf4j.version>
         <assertj.version>1.6.1</assertj.version>

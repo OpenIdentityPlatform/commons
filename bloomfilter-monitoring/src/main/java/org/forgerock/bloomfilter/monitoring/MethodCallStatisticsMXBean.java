@@ -17,6 +17,7 @@
 package org.forgerock.bloomfilter.monitoring;
 
 import javax.management.MXBean;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -101,4 +102,32 @@ public interface MethodCallStatisticsMXBean {
      * Gets a raw summary dump of call time percentile distribution data, suitable for plotting.
      */
     String getPercentileDump();
+
+    /**
+     * The interval at which the implementation polls for updates from the underlying performance monitoring code, in
+     * milliseconds. A value of -1 indicates continuous monitoring.
+     */
+    long getUpdateIntervalMillis();
+
+    /**
+     * Sets the interval at which to poll for updates from the underlying performance monitoring framework.
+     *
+     * @param intervalMillis the update interval in milliseconds. Must be greater than 0.
+     */
+    void setUpdateIntervalMillis(long intervalMillis);
+
+    /**
+     * Resets all statistics to zero.
+     */
+    void reset();
+
+    /**
+     * The timestamp at which monitoring began or the most recent call to {@link #reset()}.
+     */
+    Date getMonitoringStartTime();
+
+    /**
+     * The timestamp at which the statistics were last updated.
+     */
+    Date getLastUpdateTime();
 }
