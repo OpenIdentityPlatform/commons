@@ -73,7 +73,7 @@ class AnnotationCollectionInstance extends InterfaceCollectionInstance {
 
     @Override
     public void handleAction(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
-        RequestHandlerUtils.handle(actionMethods.<JsonValue>invoke(context, request, Resources.idOf(context)), handler);
+        RequestHandlerUtils.handle(actionMethods.invoke(context, request, Resources.idOf(context)), handler);
     }
 
 }

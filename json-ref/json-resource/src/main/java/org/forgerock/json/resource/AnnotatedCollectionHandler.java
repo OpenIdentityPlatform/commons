@@ -63,7 +63,7 @@ class AnnotatedCollectionHandler extends InterfaceCollectionHandler {
 
     @Override
     public void handleAction(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
-        handle(actionMethods.<JsonValue>invoke(context, request, null), handler);
+        handle(actionMethods.invoke(context, request, null), handler);
     }
 
     private <T> void handle(Promise<T, ? extends ResourceException> promise, final ResultHandler<T> handler) {
