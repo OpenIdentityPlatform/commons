@@ -39,7 +39,7 @@ public final class ConcurrentRollingBloomFilter<T> implements BloomFilter<T> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConcurrentRollingBloomFilter.class);
 
     private final BloomFilterChain<T> bucketChain;
-    private final GeometricSeriesBloomFilterPool<T> bucketPool;
+    private final BloomFilterPool<T> bucketPool;
     private final ConcurrencyStrategy concurrencyStrategy;
 
     ConcurrentRollingBloomFilter(final BloomFilters.RollingBloomFilterBuilder<T> builder) {

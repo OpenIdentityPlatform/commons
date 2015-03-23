@@ -17,6 +17,7 @@
 package org.forgerock.bloomfilter;
 
 import org.forgerock.util.Reject;
+import org.forgerock.util.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +42,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 final class BatchingBloomFilter<T> implements BloomFilter<T> {
     private static final Logger LOGGER = LoggerFactory.getLogger(BatchingBloomFilter.class);
     private final BloomFilter<T> delegate;
-    private final int batchSize;
+    @VisibleForTesting
+    final int batchSize;
     private final Collection<T> buffer;
 
     /**

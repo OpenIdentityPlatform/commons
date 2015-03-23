@@ -312,7 +312,7 @@ public final class BloomFilters {
 
         @Override
         BloomFilter<T> buildBloomFilter() {
-            Reject.ifNull(expiryStrategy);
+            Reject.ifNull(expiryStrategy, "No expiry strategy specified");
             return new ConcurrentRollingBloomFilter<T>(this);
         }
     }
