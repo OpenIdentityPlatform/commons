@@ -100,8 +100,7 @@ public class ConcurrentRollingBloomFilterTest {
 
         Thread.sleep(50);
 
-        System.out.printf("Write Time: %s -> %dms%n", impl, (end -
-                start));
+        System.out.printf("Write Time: %s -> %dms%n", impl, (end - start));
 
         for (int i = 0; i < 50000; ++i) {
             Assert.assertTrue(impl.mightContain("Test" + i));
@@ -160,9 +159,7 @@ public class ConcurrentRollingBloomFilterTest {
         barrier.await();
         final long end = System.currentTimeMillis();
 
-        System.out.printf("Read Time: %s -> %dms%n", impl, (end -
-                start));
-
+        System.out.printf("Read Time: %s -> %dms%n", impl, (end - start));
     }
 
 
