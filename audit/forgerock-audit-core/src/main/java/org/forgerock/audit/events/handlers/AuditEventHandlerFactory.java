@@ -35,7 +35,6 @@ public final class AuditEventHandlerFactory {
     private static final String CONFIG_LOG_TYPE_ROUTER = "router";
 
     private static final String CONFIG = "config";
-    private static final String USE_FOR_QUERIES = "userForQueries";
 
     private AuditEventHandlerFactory() { }
 
@@ -47,9 +46,10 @@ public final class AuditEventHandlerFactory {
      * @param connectionFactory the internal crest connection factory.
      * @return an audit event handler.
      */
-    public static AuditEventHandler createAuditEventHandler(final String name, final JsonValue auditEventHandler,
-                                                      final Map<String, JsonValue> auditEvents,
-                                                      final ConnectionFactory connectionFactory) {
+    public static AuditEventHandler createAuditEventHandler(
+            final String name, final JsonValue auditEventHandler,
+            final Map<String, JsonValue> auditEvents,
+            final ConnectionFactory connectionFactory) {
         AuditEventHandler handler = null;
         if (CONFIG_LOG_TYPE_CSV.equalsIgnoreCase(name)) {
             handler = new CSVAuditEventHandler(auditEvents);

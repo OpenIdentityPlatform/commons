@@ -15,6 +15,6 @@
  */
 
 /**
- * This package contains the default {@link org.forgerock.audit.events.handlers.AuditEventHandlerBase AuditEventHandlers}.
+ * This package contains the default {@link org.forgerock.audit.events.handlers.AuditEventHandler AuditEventHandlers}.
  */
 package org.forgerock.audit.events.handlers;

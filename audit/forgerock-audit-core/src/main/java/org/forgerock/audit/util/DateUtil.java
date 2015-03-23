@@ -52,7 +52,7 @@ public final class DateUtil {
      *            string representation of a timezone i.e. "UTC" or "Asia/Tokyo"
      * @return DateUtil set with the supplied timezone
      */
-    public static DateUtil getDateUtil(String zone) {
+    public static DateUtil getDateUtil(final String zone) {
         return new DateUtil(zone);
     }
 
@@ -63,7 +63,7 @@ public final class DateUtil {
      *            DateTimeZone object
      * @return DateUtil set with the supplied timezone
      */
-    public static DateUtil getDateUtil(DateTimeZone zone) {
+    public static DateUtil getDateUtil(final DateTimeZone zone) {
         return new DateUtil(zone);
     }
 
@@ -83,7 +83,7 @@ public final class DateUtil {
      *            string representation of a timezone. i.e. "UTC" or
      *            "Asia/Tokyo"
      */
-    private DateUtil(String zone) {
+    private DateUtil(final String zone) {
         this(DateTimeZone.forID(zone));
     }
 
@@ -94,7 +94,7 @@ public final class DateUtil {
      * @param zone
      *            timezone object
      */
-    private DateUtil(DateTimeZone zone) {
+    private DateUtil(final DateTimeZone zone) {
         chrono = ISOChronology.getInstance(zone);
     }
 
@@ -122,7 +122,7 @@ public final class DateUtil {
      *            DateTime object to convert
      * @return String containing the formatted timestamp
      */
-    public String formatDateTime(DateTime date) {
+    public String formatDateTime(final DateTime date) {
         return date.withChronology(chrono).toString();
     }
 
@@ -133,8 +133,8 @@ public final class DateUtil {
      *            date object to convert
      * @return String containing the formatted timestamp
      */
-    public String formatDateTime(Date date) {
-        DateTime dt = new DateTime(date, chrono);
+    public String formatDateTime(final Date date) {
+        final DateTime dt = new DateTime(date, chrono);
         return dt.toString();
     }
 
@@ -145,8 +145,8 @@ public final class DateUtil {
      *            timestamp to parse
      * @return DateTime using the zone and chronology indicated by the timestamp
      */
-    public DateTime parseTimestamp(String timestamp) {
-        DateTimeFormatter parser = ISODateTimeFormat.dateTime();
+    public DateTime parseTimestamp(final String timestamp) {
+        final DateTimeFormatter parser = ISODateTimeFormat.dateTime();
         return parser.withOffsetParsed().parseDateTime(timestamp);
     }
 
@@ -166,7 +166,7 @@ public final class DateUtil {
      *            timestamp to parse
      * @return the timestamp as a DateTime object
      */
-    public DateTime parseIfDate(String timestamp) {
+    public DateTime parseIfDate(final String timestamp) {
         DateTime d = null;
         if (timestamp.length() > 23 && timestamp.length() < 30) {
             try {
@@ -189,11 +189,11 @@ public final class DateUtil {
      *            include both Days (increase the result with one)
      * @return number of days
      */
-    public static int getDateDifferenceInDays(Date start, Date end, Boolean includeDay) {
+    public static int getDateDifferenceInDays(final Date start, final Date end, final Boolean includeDay) {
         Integer result = null;
         if (start != null && end != null) {
-            Long l = 86400000L;
-            Long r = (end.getTime() - start.getTime()) / l;
+            final Long l = 86400000L;
+            final Long r = (end.getTime() - start.getTime()) / l;
             result = r.intValue();
             if (includeDay) {
                 result++;

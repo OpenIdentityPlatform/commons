@@ -157,8 +157,7 @@
     "csv" : {
       "config" : {
         "location" : "/tmp/audit"
-      },
-      "useForQueries" : true
+      }
     }
   },
   "useForQueries" : "csv"

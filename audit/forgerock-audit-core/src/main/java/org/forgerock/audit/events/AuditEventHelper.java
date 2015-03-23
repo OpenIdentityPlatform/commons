@@ -52,11 +52,9 @@ public final class AuditEventHelper {
     private static ObjectMapper mapper;
 
     static {
-
         JsonFactory jsonFactory = new JsonFactory();
         jsonFactory.configure(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS, true);
         mapper = new ObjectMapper(jsonFactory);
-
     }
 
     private AuditEventHelper() {
@@ -70,7 +68,7 @@ public final class AuditEventHelper {
      * @return true if the property is required; false otherwise.
      */
     public static boolean isPropertyRequired(final JsonValue auditEvent, final JsonPointer property) {
-            return auditEvent.get(SCHEMA).get(PROPERTIES).get(property).get(REQUIRED).defaultTo(false).asBoolean();
+        return auditEvent.get(SCHEMA).get(PROPERTIES).get(property).get(REQUIRED).defaultTo(false).asBoolean();
     }
 
     /**

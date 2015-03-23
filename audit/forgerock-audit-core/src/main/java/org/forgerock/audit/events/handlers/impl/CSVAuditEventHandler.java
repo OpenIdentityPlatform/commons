@@ -74,12 +74,12 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
     private static final String CONFIG_LOG_RECORD_DELIM = "recordDelimiter";
 
     private final Map<String, FileWriter> fileWriters = new HashMap<String, FileWriter>();
-    private static final ObjectMapper mapper;
+    private static final ObjectMapper MAPPER;
 
     static {
         JsonFactory jsonFactory = new JsonFactory();
         jsonFactory.configure(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS, true);
-        mapper = new ObjectMapper(jsonFactory);
+        MAPPER = new ObjectMapper(jsonFactory);
     }
 
 
@@ -108,7 +108,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
         logger.info("Audit logging to: {}", auditLogDirectory);
 
         File file = new File(auditLogDirectory);
-        if (!file.mkdirs()){
+        if (!file.mkdirs()) {
             logger.warn("Unable to create the directories in the path: " + auditLogDirectory);
         }
 
@@ -123,8 +123,10 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
      * @{inheritDoc}
      */
     @Override
-    public void actionCollection(final ServerContext context, final ActionRequest request,
-                                 final ResultHandler<JsonValue> handler) {
+    public void actionCollection(
+            final ServerContext context,
+            final ActionRequest request,
+            final ResultHandler<JsonValue> handler) {
         handler.handleError(ResourceExceptionsUtil.notSupported(request));
     }
 
@@ -133,8 +135,11 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
      * @{inheritDoc}
      */
     @Override
-    public void actionInstance(final ServerContext context, final String resourceId, final ActionRequest request,
-                               final ResultHandler<JsonValue> handler) {
+    public void actionInstance(
+            final ServerContext context,
+            final String resourceId,
+            final ActionRequest request,
+            final ResultHandler<JsonValue> handler) {
         handler.handleError(ResourceExceptionsUtil.notSupported(request));
     }
 
@@ -143,8 +148,10 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
      * @{inheritDoc}
      */
     @Override
-    public void createInstance(final ServerContext context, final CreateRequest request,
-                               final ResultHandler<Resource> handler) {
+    public void createInstance(
+            final ServerContext context,
+            final CreateRequest request,
+            final ResultHandler<Resource> handler) {
 
         try {
             // Re-try once in case the writer stream became closed for some reason
@@ -208,8 +215,10 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
      * @{inheritDoc}
      */
     @Override
-    public void queryCollection(final ServerContext context, final QueryRequest request,
-                                final QueryResultHandler handler) {
+    public void queryCollection(
+            final ServerContext context,
+            final QueryRequest request,
+            final QueryResultHandler handler) {
         handler.handleError(ResourceExceptionsUtil.notSupported(request));
     }
 
@@ -218,8 +227,11 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
      * @{inheritDoc}
      */
     @Override
-    public void readInstance(final ServerContext context, final String resourceId, final ReadRequest request,
-                             final ResultHandler<Resource> handler) {
+    public void readInstance(
+            final ServerContext context,
+            final String resourceId,
+            final ReadRequest request,
+            final ResultHandler<Resource> handler) {
         try {
             final String auditEventType = (new JsonPointer(request.getResourceName())).get(0);
             final Map<String, Object> entry = getEntry(auditEventType, resourceId);
@@ -249,8 +261,10 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
         }
     }
 
-    private void writeEntry(final FileWriter fileWriter, final Map<String, Object> obj,
-                            final Collection<String> fieldOrder) throws IOException {
+    private void writeEntry(
+            final FileWriter fileWriter,
+            final Map<String, Object> obj,
+            final Collection<String> fieldOrder) throws IOException {
 
         final Iterator<String> iter = fieldOrder.iterator();
         while (iter.hasNext()) {
@@ -381,13 +395,13 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
             // Check if value is JSON object
             if (((String) value).startsWith("{") && ((String) value).endsWith("}")) {
                 try {
-                    jv = new JsonValue(mapper.readValue((String) value, Map.class));
+                    jv = new JsonValue(MAPPER.readValue((String) value, Map.class));
                 } catch (Exception e) {
                     logger.debug("Error parsing JSON string: " + e.getMessage());
                 }
             } else if (((String) value).startsWith("[") && ((String) value).endsWith("]")) {
                 try {
-                    jv = new JsonValue(mapper.readValue((String) value, List.class));
+                    jv = new JsonValue(MAPPER.readValue((String) value, List.class));
                 } catch (Exception e) {
                     logger.debug("Error parsing JSON string: " + e.getMessage());
                 }

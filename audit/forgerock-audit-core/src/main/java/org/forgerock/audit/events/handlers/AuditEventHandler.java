@@ -19,6 +19,9 @@ package org.forgerock.audit.events.handlers;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.CollectionResourceProvider;
 
+/**
+ * The interface for an AuditEventHandler.
+ */
 public interface AuditEventHandler extends CollectionResourceProvider {
 
     /**

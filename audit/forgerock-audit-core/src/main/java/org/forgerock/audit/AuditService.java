@@ -94,7 +94,7 @@ public class AuditService implements RequestHandler {
     /**
      * Configure the AuditService.
      * @param jsonConfig the config of the audit service.
-     * @throws InternalServerErrorException if unable to configure audit service.
+     * @throws ResourceException if unable to configure audit service.
      */
     public void configure(final JsonValue jsonConfig) throws ResourceException {
         cleanupPreviousConfig();
