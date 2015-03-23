@@ -16,6 +16,7 @@
 
 package org.forgerock.audit.events.handlers;
 
+import org.forgerock.audit.events.handlers.impl.CSVAuditEventHandler;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.slf4j.Logger;
@@ -24,10 +25,10 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 
 /**
- * Creates and AuditEventHandler.
+ * Creates an AuditEventHandler.
  */
 public final class AuditEventHandlerFactory {
-    private final static Logger logger = LoggerFactory.getLogger(CSVAuditEventHandler.class);
+    private final static Logger logger = LoggerFactory.getLogger(AuditEventHandlerFactory.class);
 
     private static final String CONFIG_LOG_TYPE_CSV = "csv";
     private static final String CONFIG_LOG_TYPE_REPO = "repo";
@@ -58,15 +59,11 @@ public final class AuditEventHandlerFactory {
             //TODO add router audit event logger
         } else {
             //TODO add custom audit event logger
-        }
-
-        if (auditEventHandler == null) {
             logger.error("Configured audit event handler is unknown: {}", name);
             return null;
         }
 
         handler.configure(auditEventHandler.get(CONFIG));
-        handler.useForQueries(auditEventHandler.get(USE_FOR_QUERIES).asBoolean());
         return handler;
     }
 }

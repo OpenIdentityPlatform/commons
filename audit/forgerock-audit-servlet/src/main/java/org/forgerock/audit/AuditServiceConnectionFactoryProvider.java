@@ -22,6 +22,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.RoutingMode;
@@ -41,7 +42,7 @@ public final class AuditServiceConnectionFactoryProvider {
     private static final String INIT_PARAM_URI_TEMPLATE = "uri-template";
 
     private static final Logger logger = LoggerFactory.getLogger(AuditServiceConnectionFactoryProvider.class);
-    private static ObjectMapper mapper;
+    private static final ObjectMapper mapper;
 
     static {
         final JsonFactory jsonFactory = new JsonFactory();
@@ -75,7 +76,7 @@ public final class AuditServiceConnectionFactoryProvider {
             auditService.configure(jsonConfig);
         } catch (IOException e) {
             throw new RuntimeException("Unable to parse audit.json config", e);
-        } catch (InternalServerErrorException e) {
+        } catch (ResourceException e) {
             throw new RuntimeException("Unable to parse audit.json config", e);
         }
 

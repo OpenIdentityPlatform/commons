@@ -156,10 +156,10 @@
   "eventHandlers" : {
     "csv" : {
       "config" : {
-        "location" : "/tmp/audit",
-        "recordDelimiter" : "\n"
+        "location" : "/tmp/audit"
       },
       "useForQueries" : true
     }
-  }
+  },
+  "useForQueries" : "csv"
 }

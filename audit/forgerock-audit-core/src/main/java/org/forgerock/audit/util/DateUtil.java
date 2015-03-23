@@ -201,13 +201,5 @@ public final class DateUtil {
         }
         return result;
     }
-
-    /**
-     * Main test method.
-     * @param args args for the main method
-     */
-    public static void main(String[] args) {
-        System.out.println(new DateUtil("UTC").now());
-    }
 }
 

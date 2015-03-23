@@ -14,14 +14,15 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.audit.events.handlers;
+package org.forgerock.audit.events.handlers.impl;
 
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.audit.events.AuditEventHelper;
-import org.forgerock.audit.util.ResourceUtil;
+import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
+import org.forgerock.audit.util.ResourceExceptionsUtil;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -62,24 +63,30 @@ import java.util.TreeSet;
 /**
  * Handles AuditEvents by writing them to a CSV file.
  */
-public class CSVAuditEventHandler extends AuditEventHandler {
+public class CSVAuditEventHandler extends AuditEventHandlerBase {
     final static Logger logger = LoggerFactory.getLogger(CSVAuditEventHandler.class);
 
-    private Map<String, JsonValue> auditEvents;
+    private final Map<String, JsonValue> auditEvents;
     private String auditLogDirectory;
     private String recordDelim;
 
-    private final static String CONFIG_LOG_LOCATION = "location";
-    private final static String CONFIG_LOG_RECORD_DELIM = "recordDelimiter";
+    private static final String CONFIG_LOG_LOCATION = "location";
+    private static final String CONFIG_LOG_RECORD_DELIM = "recordDelimiter";
 
-    final private Map<String, FileWriter> fileWriters = new HashMap<String, FileWriter>();
-    private ObjectMapper mapper;
+    private final Map<String, FileWriter> fileWriters = new HashMap<String, FileWriter>();
+    private static final ObjectMapper mapper;
+
+    static {
+        JsonFactory jsonFactory = new JsonFactory();
+        jsonFactory.configure(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS, true);
+        mapper = new ObjectMapper(jsonFactory);
+    }
 
 
     /**
      * Constructs and CSVAuditEventHandler with a list of auditEvents to handle.
      */
-    CSVAuditEventHandler() {
+    public CSVAuditEventHandler() {
         this(new HashMap<String, JsonValue>());
     }
 
@@ -87,11 +94,8 @@ public class CSVAuditEventHandler extends AuditEventHandler {
      * Constructs and CSVAuditEventHandler with a list of auditEvents to handle.
      * @param auditEvents List of AuditEvents to handle.
      */
-    CSVAuditEventHandler(final Map<String, JsonValue> auditEvents) {
+    public CSVAuditEventHandler(final Map<String, JsonValue> auditEvents) {
         this.auditEvents = auditEvents;
-        JsonFactory jsonFactory = new JsonFactory();
-        jsonFactory.configure(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS, true);
-        this.mapper = new ObjectMapper(jsonFactory);
     }
 
     /**
@@ -104,7 +108,9 @@ public class CSVAuditEventHandler extends AuditEventHandler {
         logger.info("Audit logging to: {}", auditLogDirectory);
 
         File file = new File(auditLogDirectory);
-        file.mkdirs();
+        if (!file.mkdirs()){
+            logger.warn("Unable to create the directories in the path: " + auditLogDirectory);
+        }
 
         recordDelim = config.get(CONFIG_LOG_RECORD_DELIM).asString();
         if (StringUtils.isBlank(recordDelim)) {
@@ -119,7 +125,7 @@ public class CSVAuditEventHandler extends AuditEventHandler {
     @Override
     public void actionCollection(final ServerContext context, final ActionRequest request,
                                  final ResultHandler<JsonValue> handler) {
-        handler.handleError(ResourceUtil.notSupported(request));
+        handler.handleError(ResourceExceptionsUtil.notSupported(request));
     }
 
     /**
@@ -129,7 +135,7 @@ public class CSVAuditEventHandler extends AuditEventHandler {
     @Override
     public void actionInstance(final ServerContext context, final String resourceId, final ActionRequest request,
                                final ResultHandler<JsonValue> handler) {
-        handler.handleError(ResourceUtil.notSupported(request));
+        handler.handleError(ResourceExceptionsUtil.notSupported(request));
     }
 
     /**
@@ -204,7 +210,7 @@ public class CSVAuditEventHandler extends AuditEventHandler {
     @Override
     public void queryCollection(final ServerContext context, final QueryRequest request,
                                 final QueryResultHandler handler) {
-
+        handler.handleError(ResourceExceptionsUtil.notSupported(request));
     }
 
     /**

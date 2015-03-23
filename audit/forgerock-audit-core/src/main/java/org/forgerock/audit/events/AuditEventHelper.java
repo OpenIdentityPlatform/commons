@@ -70,11 +70,7 @@ public final class AuditEventHelper {
      * @return true if the property is required; false otherwise.
      */
     public static boolean isPropertyRequired(final JsonValue auditEvent, final JsonPointer property) {
-        if (auditEvent.get(SCHEMA).get(PROPERTIES).get(property).get(REQUIRED) != null) {
             return auditEvent.get(SCHEMA).get(PROPERTIES).get(property).get(REQUIRED).defaultTo(false).asBoolean();
-        } else {
-            return false;
-        }
     }
 
     /**

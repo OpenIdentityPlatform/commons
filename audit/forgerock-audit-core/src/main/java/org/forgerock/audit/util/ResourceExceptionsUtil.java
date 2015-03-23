@@ -24,9 +24,9 @@ import org.forgerock.json.resource.ResourceException;
 /**
  * Utility class to use on ResourceExceptions.
  */
-public final class ResourceUtil {
+public final class ResourceExceptionsUtil {
 
-    private ResourceUtil() { }
+    private ResourceExceptionsUtil() { }
     /**
      * Adapts a {@code Throwable} to a {@code ResourceException}. If the
      * {@code Throwable} is an JSON {@code JsonValueException} then an
