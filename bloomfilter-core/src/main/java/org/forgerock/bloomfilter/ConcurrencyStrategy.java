@@ -61,6 +61,11 @@ public enum ConcurrencyStrategy {
         }
     },
 
+    /**
+     * Uses atomic compare-and-set (CAS) instructions to implement BloomFilter operations over AtomicLongArrays. This
+     * strategy offers excellent performance for reads and writes with less garbage collection pressure than the Copy
+     * on Write strategy and comparable performance to that strategy even with write batching.
+     */
     ATOMIC {
         @Override
         <T> BloomFilterFactory<T> getFactory(final Funnel<? super T> funnel) {

@@ -21,7 +21,6 @@ import static org.forgerock.guava.common.hash.Funnels.integerFunnel;
 import static org.mockito.Mockito.mock;
 
 import org.forgerock.guava.common.hash.Funnel;
-import org.forgerock.guava.common.hash.Funnels;
 import org.forgerock.util.time.TimeService;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -46,7 +45,8 @@ public class BloomFiltersTest {
         Funnel<Integer> funnel = integerFunnel();
 
         // When
-        final BloomFilters.ScalableBloomFilterBuilder<Integer> builder = BloomFilters.create(funnel).scalable();
+        final BloomFilters.ScalableBloomFilterBuilder<Integer> builder = BloomFilters.<Integer>create(funnel)
+                .scalable();
 
         // Then
         checkCommonDefaults(builder, funnel);
@@ -63,7 +63,7 @@ public class BloomFiltersTest {
         Funnel<Integer> funnel = integerFunnel();
 
         // When
-        final BloomFilters.RollingBloomFilterBuilder<Integer> builder = BloomFilters.create(funnel).rolling();
+        final BloomFilters.RollingBloomFilterBuilder<Integer> builder = BloomFilters.<Integer>create(funnel).rolling();
 
         // Then
         checkCommonDefaults(builder, funnel);
@@ -86,7 +86,7 @@ public class BloomFiltersTest {
         int initialCapacity = 42;
 
         // When
-        BloomFilter<Integer> bf = BloomFilters.create(integerFunnel()).withInitialCapacity(initialCapacity)
+        BloomFilter<Integer> bf = BloomFilters.<Integer>create(integerFunnel()).withInitialCapacity(initialCapacity)
                 .build();
 
         // Then
@@ -99,7 +99,7 @@ public class BloomFiltersTest {
         double falsePositiveProbability = 0.42d;
 
         // When
-        BloomFilter<Integer> bf = BloomFilters.create(integerFunnel())
+        BloomFilter<Integer> bf = BloomFilters.<Integer>create(integerFunnel())
                 .withFalsePositiveProbability(falsePositiveProbability).build();
 
         // Then
@@ -112,7 +112,7 @@ public class BloomFiltersTest {
         double growthFactor = 4.2d;
 
         // When
-        BloomFilters.ScalableBloomFilterBuilder<Integer> builder = BloomFilters.create(integerFunnel())
+        BloomFilters.ScalableBloomFilterBuilder<Integer> builder = BloomFilters.<Integer>create(integerFunnel())
                 .withCapacityGrowthFactor(growthFactor);
 
         // Then
@@ -125,7 +125,7 @@ public class BloomFiltersTest {
         double fppScaleFactor = 0.3d;
 
         // When
-        BloomFilters.ScalableBloomFilterBuilder<Integer> builder = BloomFilters.create(integerFunnel())
+        BloomFilters.ScalableBloomFilterBuilder<Integer> builder = BloomFilters.<Integer>create(integerFunnel())
                 .withFalsePositiveProbabilityScaleFactor(fppScaleFactor);
 
         // Then
@@ -138,7 +138,7 @@ public class BloomFiltersTest {
         int batchSize = 42;
 
         // When
-        BloomFilter<Integer> bf = BloomFilters.create(integerFunnel())
+        BloomFilter<Integer> bf = BloomFilters.<Integer>create(integerFunnel())
                 .withWriteBatchSize(batchSize).build();
 
         // Then
@@ -152,7 +152,7 @@ public class BloomFiltersTest {
         int max = 31;
 
         // When
-        BloomFilters.ScalableBloomFilterBuilder<Integer> builder = BloomFilters.create(integerFunnel())
+        BloomFilters.ScalableBloomFilterBuilder<Integer> builder = BloomFilters.<Integer>create(integerFunnel())
                 .withMaximumNumberOfBuckets(max);
 
         // Then
@@ -166,7 +166,7 @@ public class BloomFiltersTest {
         ExpiryStrategy<Integer> strategy = mock(ExpiryStrategy.class);
 
         // When
-        BloomFilters.RollingBloomFilterBuilder<Integer> builder = BloomFilters.create(integerFunnel())
+        BloomFilters.RollingBloomFilterBuilder<Integer> builder = BloomFilters.<Integer>create(integerFunnel())
                 .withExpiryStrategy(strategy);
 
         // Then
@@ -175,7 +175,7 @@ public class BloomFiltersTest {
 
     @Test(dataProvider = "concurrencyStrategies")
     public void shouldUseSpecifiedConcurrencyStrategy(ConcurrencyStrategy strategy) {
-        BloomFilter<Integer> bf = BloomFilters.create(integerFunnel())
+        BloomFilter<Integer> bf = BloomFilters.<Integer>create(integerFunnel())
                 .withConcurrencyStrategy(strategy).build();
 
         // Is there a better way of testing this?
@@ -185,6 +185,9 @@ public class BloomFiltersTest {
                 break;
             case COPY_ON_WRITE:
                 assertThat(bf).isInstanceOf(CopyOnWriteBloomFilter.class);
+                break;
+            case ATOMIC:
+                assertThat(bf).isInstanceOf(AtomicBloomFilter.class);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown strategy: " + strategy);
@@ -280,7 +283,8 @@ public class BloomFiltersTest {
     public Object[][] concurrencyStrategies() {
         return new Object[][] {
                 { ConcurrencyStrategy.COPY_ON_WRITE },
-                { ConcurrencyStrategy.SYNCHRONIZED }
+                { ConcurrencyStrategy.SYNCHRONIZED },
+                { ConcurrencyStrategy.ATOMIC }
         };
     }
 

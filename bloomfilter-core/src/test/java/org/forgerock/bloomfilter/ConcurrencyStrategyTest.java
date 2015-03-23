@@ -33,12 +33,17 @@ public class ConcurrencyStrategyTest {
         double fpp = 0.01d;
 
         // When
-        BloomFilter<Integer> cowBf = ConcurrencyStrategy.COPY_ON_WRITE.getFactory(funnel).create(capacity, fpp);
-        BloomFilter<Integer> syncBf = ConcurrencyStrategy.SYNCHRONIZED.getFactory(funnel).create(capacity, fpp);
+        BloomFilter<Integer> cowBf = ConcurrencyStrategy.COPY_ON_WRITE.<Integer>getFactory(funnel)
+                .create(capacity, fpp);
+        BloomFilter<Integer> syncBf = ConcurrencyStrategy.SYNCHRONIZED.<Integer>getFactory(funnel)
+                .create(capacity, fpp);
+        BloomFilter<Integer> atomicBf = ConcurrencyStrategy.ATOMIC.<Integer>getFactory(funnel)
+                .create(capacity, fpp);
 
         // Then
         assertThat(cowBf).isInstanceOf(CopyOnWriteBloomFilter.class);
         assertThat(syncBf).isInstanceOf(SynchronizedBloomFilter.class);
+        assertThat(atomicBf).isInstanceOf(AtomicBloomFilter.class);
     }
 
     @Test(dataProvider = "strategies")
@@ -50,7 +55,7 @@ public class ConcurrencyStrategyTest {
 
 
         // When
-        BloomFilter<Integer> result = strategy.getFactory(funnel).create(capacity, fpp);
+        BloomFilter<Integer> result = strategy.<Integer>getFactory(funnel).create(capacity, fpp);
 
         // Then
         assertThat(result.getStatistics().getCapacity()).as("capacity").isEqualTo(capacity);
@@ -62,7 +67,8 @@ public class ConcurrencyStrategyTest {
     public Object[][] strategies() {
         return new Object[][] {
                 { ConcurrencyStrategy.COPY_ON_WRITE },
-                { ConcurrencyStrategy.SYNCHRONIZED }
+                { ConcurrencyStrategy.SYNCHRONIZED },
+                { ConcurrencyStrategy.ATOMIC }
         };
     }
 }
