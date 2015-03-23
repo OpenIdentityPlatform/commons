@@ -11,47 +11,24 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.exceptions;
 
 /**
- * Represents an exception for when decryption of the JWE fails.
+ * Represents an exception for when decryption of the JWE fails. This class deliberately provides no information
+ * about why decryption failed as such information leakage is a potential attack vector (e.g., padding oracle attacks).
+ * The root cause of exceptions should be logged before this exception is thrown.
  *
- * @author Phill Cunnington
  * @since 2.0.0
  */
-public class JweDecryptionException extends JweException {
+public final class JweDecryptionException extends JweException {
 
     /** Serializable class version number. */
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
-    /**
-     * Constructs a new JweDecryptionException with the provided exception message.
-     *
-     * @param message The exception message.
-     */
-    public JweDecryptionException(String message) {
-        super(message);
-    }
-
-    /**
-     * Constructs a new JweDecryptionException with the provided exception message and underlying throwable.
-     *
-     * @param message The exception message.
-     * @param throwable The underlying throwable.
-     */
-    public JweDecryptionException(String message, Throwable throwable) {
-        super(message, throwable);
-    }
-
-    /**
-     * Constructs a new JweDecryptionException with the provided underlying throwable.
-     *
-     * @param throwable The underlying throwable.
-     */
-    public JweDecryptionException(Throwable throwable) {
-        super(throwable);
+    public JweDecryptionException() {
+        super("Decryption failed");
     }
 }

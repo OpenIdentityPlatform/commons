@@ -11,15 +11,18 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwe.handlers.encryption;
 
+import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -35,10 +38,10 @@ import org.forgerock.json.jose.exceptions.JweEncryptionException;
  * A base implementation of an EncryptionHandler that provides common encryption and decryption methods for all
  * concrete EncryptionHandler implementations.
  *
- * @author Phill Cunnington
  * @since 2.0.0
  */
 public abstract class AbstractEncryptionHandler implements EncryptionHandler {
+    private static final Logger LOGGER = Logger.getLogger(AbstractEncryptionHandler.class.getName());
 
     /**
      * Encrypts the given plaintext using the specified key with the specified encryption algorithm.
@@ -114,16 +117,9 @@ public abstract class AbstractEncryptionHandler implements EncryptionHandler {
             Cipher cipher = Cipher.getInstance(algorithm);
             cipher.init(Cipher.DECRYPT_MODE, privateKey);
             return cipher.doFinal(data);
-        } catch (NoSuchAlgorithmException e) {
-            throw new JweDecryptionException("Unsupported Encryption Algorithm, " + algorithm, e);
-        } catch (IllegalBlockSizeException e) {
-            throw new JweDecryptionException(e);
-        } catch (InvalidKeyException e) {
-            throw new JweDecryptionException(e);
-        } catch (BadPaddingException e) {
-            throw new JweDecryptionException(e);
-        } catch (NoSuchPaddingException e) {
-            throw new JweDecryptionException(e);
+        } catch (GeneralSecurityException e) {
+            logDecryptionFailure(e);
+            throw new JweDecryptionException();
         }
     }
 
@@ -145,18 +141,18 @@ public abstract class AbstractEncryptionHandler implements EncryptionHandler {
             IvParameterSpec ivParameterSpec = new IvParameterSpec(initialisationVector);
             cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, ivParameterSpec);
             return cipher.doFinal(data);
-        } catch (NoSuchAlgorithmException e) {
-            throw new JweDecryptionException("Unsupported Encryption Algorithm, " + algorithm, e);
-        } catch (IllegalBlockSizeException e) {
-            throw new JweDecryptionException(e);
-        } catch (InvalidKeyException e) {
-            throw new JweDecryptionException(e);
-        } catch (BadPaddingException e) {
-            throw new JweDecryptionException(e);
-        } catch (NoSuchPaddingException e) {
-            throw new JweDecryptionException(e);
-        } catch (InvalidAlgorithmParameterException e) {
-            throw new JweDecryptionException(e);
+        } catch (GeneralSecurityException e) {
+            logDecryptionFailure(e);
+            throw new JweDecryptionException();
+        }
+    }
+
+    /**
+     * Log the root cause of any decryption error before throwing a generic exception.
+     */
+    private void logDecryptionFailure(Throwable cause) {
+        if (LOGGER.isLoggable(Level.FINE)) {
+            LOGGER.log(Level.FINE, "Decryption failed: " + cause, cause);
         }
     }
 }
