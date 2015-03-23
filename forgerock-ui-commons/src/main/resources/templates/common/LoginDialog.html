@@ -8,11 +8,16 @@
             <input type="password" name="password" id="password" class="form-control input-lg" placeholder='{{t "common.user.password"}}' required>
         </div>
         <div class="remember-forgot">
-            <div class="checkbox">
-                <label>
-                    <input type="checkbox" type="checkbox" name="refreshOnLogin" value="yes" checked> {{t "templates.user.LoginDialog.refreshOnLogin"}}
-                </label>
+            <div role="alert" class="alert alert-warning" style="">
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" type="checkbox" name="refreshOnLogin" value="yes">
+                        <i class="fa fa-exclamation-circle"></i>
+                        {{t "templates.user.LoginDialog.refreshOnLogin"}}
+                    </label>
+                </div>
             </div>
+
         </div>
     </form>
 </div>
