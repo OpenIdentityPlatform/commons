@@ -67,7 +67,7 @@ class AnnotatedSingletonHandler extends InterfaceSingletonHandler {
 
     @Override
     public void handleAction(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
-        RequestHandlerUtils.handle(actionMethods.<JsonValue>invoke(context, request, null), handler);
+        RequestHandlerUtils.handle(actionMethods.invoke(context, request, null), handler);
     }
 
 }
