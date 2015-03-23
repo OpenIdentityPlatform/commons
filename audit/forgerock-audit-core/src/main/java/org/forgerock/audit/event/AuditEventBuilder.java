@@ -30,8 +30,8 @@ import static org.forgerock.json.fluent.JsonValue.*;
 
 import java.util.Arrays;
 
-import org.forgerock.audit.event.AuditEventBuilderTest.OpenProductAccessAuditEventBuilder;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.audit.event.AuditEvent;
 
 /**
  * Root builder for all audit events.
@@ -133,7 +133,7 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
      * </code>
      * </pre>
      */
-    static class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> extends AuditEventBuilder<T> {
+    public static class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> extends AuditEventBuilder<T> {
 
         protected AccessAuditEventBuilder() {
             // reduced visibility

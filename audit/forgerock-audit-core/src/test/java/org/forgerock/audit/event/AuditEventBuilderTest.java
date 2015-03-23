@@ -18,7 +18,8 @@ package org.forgerock.audit.event;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.forgerock.audit.event.AuditEventBuilderTest.OpenProductAccessAuditEventBuilder.productAccessEvent;
 
-import org.forgerock.audit.event.AuditEventBuilder.AccessAuditEventBuilder;
+import org.forgerock.audit.event.AuditEvent;
+import org.forgerock.audit.event.AuditEventBuilder;
 import org.forgerock.json.fluent.JsonValue;
 import org.testng.annotations.Test;
 
@@ -30,7 +31,7 @@ public class AuditEventBuilderTest {
      */
     @SuppressWarnings("rawtypes")
     static class OpenProductAccessAuditEventBuilder<T extends OpenProductAccessAuditEventBuilder<T>>
-        extends AccessAuditEventBuilder<T> {
+        extends AuditEventBuilder.AccessAuditEventBuilder<T> {
 
         private OpenProductAccessAuditEventBuilder() {
             super();
