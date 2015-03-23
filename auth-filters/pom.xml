@@ -71,6 +71,7 @@
         <slf4j.version>1.7.5</slf4j.version>
         <forgerock-http.version>0.0.1-SNAPSHOT</forgerock-http.version>
         <forgerock-rest.version>3.0.0-SNAPSHOT</forgerock-rest.version>
+        <forgerock-util.version>1.4.0-SNAPSHOT</forgerock-util.version>
         <restlet.version>2.1.2</restlet.version>
         <jackson.version>2.1.5</jackson.version>
 
@@ -312,6 +313,12 @@
                 <version>2.3.0</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons</groupId>
+                <artifactId>forgerock-test-utils</artifactId>
+                <version>${forgerock-util.version}</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -327,6 +334,10 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>forgerock-test-utils</artifactId>
         </dependency>
     </dependencies>
 

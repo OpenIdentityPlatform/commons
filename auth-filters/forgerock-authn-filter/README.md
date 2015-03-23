@@ -20,7 +20,7 @@ process, which will be passed to the configured **AsyncServerAuthContext**.
 
 ---
 
-### Example implementation of a AsyncServerAuthContext
+### Example implementation of an AsyncServerAuthContext
 ```java
 new AsyncServerAuthContext() {
 
@@ -45,7 +45,7 @@ new AsyncServerAuthContext() {
 };
 ```
 
-### Example implementation of a AsyncServerAuthModule
+### Example implementation of an AsyncServerAuthModule
 ```java
 new AsyncServerAuthModule() {
 
@@ -139,4 +139,39 @@ new AsyncServerAuthModule() {
     }
 };
 ```
+
+---
+---
+
+## JASPI Wrapper Usage
+
+The **JaspiAdapter** class is intended to be used internally by the authentication framework for 
+adapting JASPI auth contexts and modules. The authentication framework will offer utility methods 
+for creating and configuring an instance of the authentication framework and these utility methods
+will be overloaded so as they can accept either asynchronous and synchronous auth contexts/modules.
+
+---
+
+### Example of adapting a JASPI **ServerAuthContext** to a **AsyncServerAuthContext**
+```java
+ServerAuthContext authContext = ...;
+AsyncServerAuthContext asyncAuthContext = JaspiAdapter.adapt(authContext);
+```
+
+### Example of adapting a JASPI **ServerAuthModule** to a **AsyncServerAuthModule**
+```java
+ServerAuthModule authModule = ...;
+AsyncServerAuthModule asyncAuthModule = JaspiAdapter.adapt(authModule);
+```
+
+### Example of adapting a JASPI **AuthException** to a **AuthenticationException**
+```java
+AuthException authException = ...;
+AuthenticationException authenticationException = JaspiAdapter.adapt(authException);
+```
+
+### Example of adapting a **MessageContextInfo** to a JASPI **MessageInfo**
+```java
+MessageContextInfo messageContextInfo = ...;
+MessageInfo messageInfo = JaspiAdapter.adapt(messageContextInfo);
 ```
