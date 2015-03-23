@@ -89,27 +89,30 @@ define("org/forgerock/commons/ui/common/LoginDialog", [
         
         login: function (e) {
             e.preventDefault();
-            
-            if(validatorsManager.formValidated(this.$el)) {
-                var userName, password, refreshOnLogin, _this = this;
-                userName = this.$el.find("input[name=login]").val();
-                password = this.$el.find("input[name=password]").val();
-                refreshOnLogin = this.$el.find("input[name=refreshOnLogin]:checked").val();
-                
-                sessionManager.login({"userName":userName, "password":password}, function(user) {
-                    conf.setProperty('loggedUser', user);
-                    eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: false});
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "loggedIn");
-                    _this.loginClose();
-                    
-                    if (refreshOnLogin) {
-                        viewManager.refresh();
-                    }
-                    
-                }, function() {
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "authenticationFailed");
-                });
-            }
+
+            var userName,
+                password,
+                refreshOnLogin,
+                _this = this;
+
+            userName = this.$el.find("input[name=login]").val();
+            password = this.$el.find("input[name=password]").val();
+            refreshOnLogin = this.$el.find("input[name=refreshOnLogin]:checked").val();
+
+            sessionManager.login({"userName":userName, "password":password}, function(user) {
+                conf.setProperty('loggedUser', user);
+                eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: false});
+                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "loggedIn");
+                _this.loginClose();
+
+                if (refreshOnLogin) {
+                    viewManager.refresh();
+                }
+
+            }, function() {
+                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "authenticationFailed");
+            });
+
         },
         data : {
             height: 200,
