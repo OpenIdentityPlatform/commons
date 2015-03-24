@@ -1,11 +1,15 @@
 <nav id="mainNavHolder" class="navbar navbar-default navbar-static-top navbar-inverse" role="navigation">
     <div class="container">
         <div class="navbar-header">
+            {{#if username}}
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#mainNavBar" aria-expanded="false" aria-controls="navbar">
                 <i class="fa fa-bars fa-lg"></i>
             </button>
+            {{/if}}
             <a href="#" class="navbar-brand" title="{{theme.settings.logo.title}}"><img  style="{{#if theme.settings.logo.width}}width:{{theme.settings.logo.width}};{{/if}}{{#if theme.settings.logo.height}} height:{{theme.settings.logo.height}};{{/if}}"  src="{{theme.settings.logo.src}}" alt="{{theme.settings.logo.alt}}" /> </a>
         </div>
+
+        {{#if username}}
         <div id="mainNavBar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
                 {{#each topNav}}
@@ -36,7 +40,7 @@
                         <span class="user-avatar">
                             <i class="fa fa-user"></i>
                         </span>
-                        <span id="user_name">{{#if username}}{{username}}{{/if}}</span><span class="caret"></span>
+                        <span id="user_name">{{username}}</span><span class="caret"></span>
                     </a>
                     {{#if userBar.length}}
                     <ul class="dropdown-menu" role="menu">
@@ -55,6 +59,7 @@
 
             </ul>
         </div>
+        {{/if}}
     </div>
 </nav>
 {{#if subNav.length}}

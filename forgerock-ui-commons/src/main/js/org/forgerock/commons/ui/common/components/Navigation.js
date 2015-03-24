@@ -58,12 +58,7 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
             },
             render: function(args, callback) {
 
-                this.data.userBar = _.map(obj.configuration.userBar, function (link) {
-                    if (_.has(link, "i18nKey")) {
-                        link.label = $.t(link.i18nKey);
-                    }
-                    return link;
-                });
+
 
                 // The user information is shown at the top of the userBar widget,
                 // but it is stored in different ways for different products.
@@ -75,6 +70,13 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                     } else {
                         this.data.username = conf.loggedUser._id; //fallback option
                     }
+
+                    this.data.userBar = _.map(obj.configuration.userBar, function (link) {
+                        if (_.has(link, "i18nKey")) {
+                            link.label = $.t(link.i18nKey);
+                        }
+                        return link;
+                    });
                 }
 
                 this.reload();
