@@ -47,6 +47,10 @@
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
 
         <!-- ForgeRock Commons Dependencies -->
         <dependency>
@@ -84,7 +88,9 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            org.forgerock.audit.impl;version=${project.version}
+                            org.forgerock.audit;version=${project.version},
+                            org.forgerock.audit.events;version=${project.version}
+                            org.forgerock.audit.events.handlers;version=${project.version}
                         </Export-Package>
                     </instructions>
                 </configuration>
