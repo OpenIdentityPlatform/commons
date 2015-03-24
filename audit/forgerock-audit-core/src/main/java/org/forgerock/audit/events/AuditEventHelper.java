@@ -22,8 +22,11 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceException;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Helper methods for AuditEvents.
@@ -49,12 +52,12 @@ public final class AuditEventHelper {
     private static final String CONFIG = "config";
     private static final String LOG_TO = "logTo";
 
-    private static ObjectMapper mapper;
+    private static final ObjectMapper MAPPER;
 
     static {
         JsonFactory jsonFactory = new JsonFactory();
         jsonFactory.configure(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS, true);
-        mapper = new ObjectMapper(jsonFactory);
+        MAPPER = new ObjectMapper(jsonFactory);
     }
 
     private AuditEventHelper() {
@@ -79,7 +82,7 @@ public final class AuditEventHelper {
      * @throws org.forgerock.json.resource.InternalServerErrorException if the property is unknown
      */
     public static String getPropertyType(final JsonValue auditEvent, final JsonPointer property)
-            throws InternalServerErrorException {
+            throws ResourceException {
         if (auditEvent.get(SCHEMA).get(PROPERTIES).get(property) == null) {
             throw new InternalServerErrorException("Unknown audit event property: " + property.toString());
         }
@@ -92,6 +95,18 @@ public final class AuditEventHelper {
      * @return List of audit event handler names to log to.
      */
     public static List<String> getConfiguredAuditEventHandlers(final JsonValue auditEvent) {
-        return auditEvent.get(CONFIG).get(LOG_TO).asList(String.class);
+        return auditEvent.get(LOG_TO).asList(String.class);
+    }
+
+    /**
+     * Gets the Audit Event schema properties.
+     * @param auditEvent the audit event JsonValue definition.
+     * @return JsonValue containing all the properties for the audit event.
+     */
+    public static JsonValue getAuditEventProperties(final JsonValue auditEvent) throws ResourceException {
+        if (auditEvent == null || auditEvent.isNull()) {
+            throw new InternalServerErrorException("Can't get properties for a null audit event: ");
+        }
+        return auditEvent.get(SCHEMA).get(PROPERTIES);
     }
 }

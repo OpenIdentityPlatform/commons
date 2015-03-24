@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 import org.forgerock.audit.events.AuditEventHelper;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
@@ -60,11 +59,8 @@ public class AuditService implements RequestHandler {
 
     private JsonValue config; // Existing active configuration
 
-    // TODO make dateUtil configurable (needs to be done in all locations)
-    private DateUtil dateUtil = DateUtil.getDateUtil("UTC");
-
     /** All the AuditEventHandlers configured. */
-    private Map<String, AuditEventHandler> globalAuditEventHandlers;
+    private Map<String, AuditEventHandler> defaultAuditEventHandlers;
     /** All the AuditEventHandlers configured for each event type. */
     private Map<String, List<AuditEventHandler>> eventTypeAuditEventHandlers;
     /** All the audit event types configured. */
@@ -100,7 +96,7 @@ public class AuditService implements RequestHandler {
         cleanupPreviousConfig();
 
         auditEvents = getEventTypes(jsonConfig);
-        globalAuditEventHandlers = getAuditEventHandlers(jsonConfig);
+        defaultAuditEventHandlers = getAuditEventHandlers(jsonConfig);
         eventTypeAuditEventHandlers = getEventTypeAuditEventHandlers(jsonConfig);
         queryAuditEventHandler = getQueryAuditEventHandler(jsonConfig.get(USE_FOR_QUERIES).asString());
 
@@ -108,15 +104,22 @@ public class AuditService implements RequestHandler {
         config = jsonConfig;
     }
 
-    private void cleanupPreviousConfig() {
+    private void cleanupPreviousConfig() throws ResourceException {
         if (auditEvents != null) {
             auditEvents.clear();
             auditEvents = null;
         }
-        if (globalAuditEventHandlers != null) {
-            globalAuditEventHandlers.clear();
-            globalAuditEventHandlers = null;
+        // drop audit event handlers
+        if (defaultAuditEventHandlers != null) {
+            // notify the audit event handlers to close
+            for (AuditEventHandler auditEventHandler : defaultAuditEventHandlers.values()) {
+                auditEventHandler.close();
+            }
+            defaultAuditEventHandlers.clear();
+            defaultAuditEventHandlers = null;
         }
+        // event type audit event handlers are made up of the default event handlers,
+        // so they are already notified of close. Drop event type audi event handlers
         if (eventTypeAuditEventHandlers != null) {
             eventTypeAuditEventHandlers.clear();
             eventTypeAuditEventHandlers = null;
@@ -164,33 +167,27 @@ public class AuditService implements RequestHandler {
                 throw new BadRequestException(
                         "Audit service called without specifying which audit log in the identifier");
             }
-
-            final Map<String, Object> obj = request.getContent().asMap();
-
-            // Don't audit the audit log
-            if (context.containsContext(AuditContext.class)) {
-                handler.handleResult(new Resource(null, null, new JsonValue(obj)));
-                return;
-            }
             // Audit create called for /access with {timestamp=2013-07-30T18:10:03.773Z, principal=openidm-admin,
             // status=SUCCESS, roles=[openidm-admin, openidm-authorized], action=authenticate, userid=openidm-admin,
             // ip=127.0.0.1}
-            logger.debug("Audit create called for {} with {}", request.getResourceName(), obj);
+            logger.debug(
+                    "Audit create called for {} with {}",
+                    request.getResourceName(),
+                    request.getContent().asMap());
 
-            final String auditEventType = request.getResourceNameObject().head(1).toString();
-
-            // Generate an ID for the object
-            final String localId = (request.getNewResourceId() == null || request.getNewResourceId().isEmpty())
-                    ? UUID.randomUUID().toString()
-                    : request.getNewResourceId();
-            obj.put(Resource.FIELD_CONTENT_ID, localId);
-
-            // Generate unified timestamp
-            if (null == obj.get("timestamp")) {
-                obj.put("timestamp", dateUtil.now());
+            if (!request.getContent().isDefined(Resource.FIELD_CONTENT_ID)
+                    || !request.getContent().isDefined("timestamp")) {
+                logger.error("The request requires a timestamp and _id field");
+                throw new BadRequestException("The request requires a timestamp and _id field");
             }
 
-            logger.debug("Create audit entry for {}/{} with {}", auditEventType, localId, obj);
+            // Don't audit the audit log
+            if (context.containsContext(AuditContext.class)) {
+                handler.handleResult(new Resource(null, null, request.getContent().copy()));
+                return;
+            }
+
+            final String auditEventType = request.getResourceNameObject().head(1).toString();
             for (AuditEventHandler auditEventHandler : getAuditEventHandlersForEvent(auditEventType)) {
                 auditEventHandler.createInstance(context, request, handler);
             }
@@ -272,12 +269,12 @@ public class AuditService implements RequestHandler {
 
     private Collection<AuditEventHandler> getAuditEventHandlersForEvent(final String auditEvent)
             throws InternalServerErrorException {
-        if (eventTypeAuditEventHandlers == null && globalAuditEventHandlers == null) {
+        if (eventTypeAuditEventHandlers == null && defaultAuditEventHandlers == null) {
             throw new InternalServerErrorException("No audit event type handlers were configured");
         }
 
         if (eventTypeAuditEventHandlers == null || eventTypeAuditEventHandlers.get(auditEvent) == null) {
-            return globalAuditEventHandlers.values();
+            return defaultAuditEventHandlers.values();
         } else {
             return eventTypeAuditEventHandlers.get(auditEvent);
         }
@@ -293,7 +290,7 @@ public class AuditService implements RequestHandler {
     private AuditEventHandler getQueryAuditEventHandler(final String auditEventName) throws ResourceException {
         //return configured audit event handler
         if (auditEventName != null) {
-            final AuditEventHandler auditEventHandler = globalAuditEventHandlers.get(auditEventName);
+            final AuditEventHandler auditEventHandler = defaultAuditEventHandlers.get(auditEventName);
             if (auditEventHandler != null) {
                 return auditEventHandler;
             } else {
@@ -301,44 +298,14 @@ public class AuditService implements RequestHandler {
             }
         }
 
-        if (globalAuditEventHandlers != null
-                && globalAuditEventHandlers.size() > 0) {
+        if (defaultAuditEventHandlers != null
+                && !defaultAuditEventHandlers.isEmpty()) {
             //return first global audit event handler
-            return globalAuditEventHandlers.values().iterator().next();
+            return defaultAuditEventHandlers.values().iterator().next();
         } else {
             throw new InternalServerErrorException("No audit event handlers configured to be queried.");
         }
     }
-
-    /**
-     * Fetches a list of JsonPointers from the config file under a specified event and field name.
-     * Expects it to look similar to:
-     *
-     *<PRE>
-     * {
-     *    "eventTypes": {
-     *      "activity" : {
-     *        "watchedFields": [ "email" ],
-     *        "passwordFields": [ "password1", "password2" ]
-     *      }
-     *    }
-     * }
-     * </PRE>
-     *
-     * @param config the config object to draw from
-     * @param event which event to draw from. ie "activity"
-     * @param fieldName which fieldName to draw from. ie "watchedFields"
-     * @return list containing the JsonPointers generated by the strings in the field
-     */
-    List<JsonPointer> getEventJsonPointerList(JsonValue config, String event, String fieldName) {
-        ArrayList<JsonPointer> fieldList = new ArrayList<JsonPointer>();
-        JsonValue fields = config.get(EVENT_TYPES).get(event).get(fieldName);
-        for (JsonValue field : fields) {
-            fieldList.add(field.asPointer());
-        }
-        return fieldList;
-    }
-
 
     private Map<String, JsonValue> getEventTypes(JsonValue config) {
         Map<String, JsonValue> listOfEventTypes = new HashMap<String, JsonValue>();
@@ -360,7 +327,7 @@ public class AuditService implements RequestHandler {
         JsonValue eventHandlers = config.get(EVENT_HANDLERS);
         if (!eventHandlers.isNull()) {
             Set<String> eventHandlersKeys = eventHandlers.keys();
-            if (eventHandlersKeys.size() == 0) {
+            if (eventHandlersKeys.isEmpty()) {
                 logger.error("No audit event handlers configured");
                 throw new InternalServerErrorException("No audit event handlers configured");
             }
@@ -389,12 +356,12 @@ public class AuditService implements RequestHandler {
             for (String eventTypeKey : eventTypesKeys) {
                 final List<String> auditEventHandlersToLogTo =
                         AuditEventHelper.getConfiguredAuditEventHandlers(eventTypes.get(eventTypeKey));
-                if (auditEventHandlersToLogTo == null || auditEventHandlersToLogTo.size() == 0) {
+                if (auditEventHandlersToLogTo == null || auditEventHandlersToLogTo.isEmpty()) {
                     continue;
                 }
                 final List<AuditEventHandler> auditEventHandlers = new ArrayList<AuditEventHandler>();
                 for (String auditEventHandlerName : auditEventHandlersToLogTo) {
-                    auditEventHandlers.add(this.globalAuditEventHandlers.get(auditEventHandlerName));
+                    auditEventHandlers.add(this.defaultAuditEventHandlers.get(auditEventHandlerName));
                 }
                 configuredAuditEventHandlers.put(eventTypeKey, auditEventHandlers);
             }

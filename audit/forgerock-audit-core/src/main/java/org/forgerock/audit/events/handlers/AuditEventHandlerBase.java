@@ -26,6 +26,7 @@ import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
@@ -36,10 +37,14 @@ import org.forgerock.json.resource.UpdateRequest;
 public abstract class AuditEventHandlerBase implements AuditEventHandler {
 
     /**
-     * Configures the Audit Event Handler with a config.
-     * @param config the configuration of the Audit Event Handler
+     * {@inheritDoc}
      */
-    public abstract void configure(final JsonValue config);
+    public abstract void configure(final JsonValue config) throws ResourceException;
+
+    /**
+     * {@inheritDoc}
+     */
+    public abstract void close() throws ResourceException;
 
     /**
      * {@inheritDoc}

@@ -1,17 +1,7 @@
 {
   "eventTypes" : {
     "access": {
-      "filter": {
-        "actions": [
-          "create",
-          "update",
-          "delete",
-          "patch",
-          "action"
-        ]
-      },
-      "watchedFields": [],
-      "passwordFields": [],
+      "logTo" : ["csv"],
       "schema": {
         "$schema": "http://json-schema.org/draft-04/schema#",
         "id": "/",
@@ -148,10 +138,6 @@
         }
       }
     }
-  },
-  "exceptionFormatter" : {
-    "type" : "text/javascript",
-    "file" : "bin/defaults/script/audit/stacktraceFormatter.js"
   },
   "eventHandlers" : {
     "csv" : {

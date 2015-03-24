@@ -58,13 +58,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 
 /**
  * Handles AuditEvents by writing them to a CSV file.
  */
 public class CSVAuditEventHandler extends AuditEventHandlerBase {
-    final static Logger logger = LoggerFactory.getLogger(CSVAuditEventHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(CSVAuditEventHandler.class);
 
     private final Map<String, JsonValue> auditEvents;
     private String auditLogDirectory;
@@ -84,14 +85,14 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
 
 
     /**
-     * Constructs and CSVAuditEventHandler with a list of auditEvents to handle.
+     * Constructs a CSVAuditEventHandler with a list of auditEvents to handle.
      */
     public CSVAuditEventHandler() {
         this(new HashMap<String, JsonValue>());
     }
 
     /**
-     * Constructs and CSVAuditEventHandler with a list of auditEvents to handle.
+     * Constructs a CSVAuditEventHandler with a list of auditEvents to handle.
      * @param auditEvents List of AuditEvents to handle.
      */
     public CSVAuditEventHandler(final Map<String, JsonValue> auditEvents) {
@@ -103,19 +104,28 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
      * @{inheritDoc}
      */
     @Override
-    public void configure(final JsonValue config) {
-        auditLogDirectory = config.get(CONFIG_LOG_LOCATION).asString();
-        logger.info("Audit logging to: {}", auditLogDirectory);
+    public void configure(final JsonValue config) throws ResourceException {
+        synchronized (this) {
+            cleanup();
 
-        File file = new File(auditLogDirectory);
-        if (!file.mkdirs()) {
-            logger.warn("Unable to create the directories in the path: " + auditLogDirectory);
-        }
+            auditLogDirectory = config.get(CONFIG_LOG_LOCATION).asString();
+            logger.info("Audit logging to: {}", auditLogDirectory);
 
-        recordDelim = config.get(CONFIG_LOG_RECORD_DELIM).asString();
-        if (StringUtils.isBlank(recordDelim)) {
-            recordDelim = System.getProperty("line.separator");
+            File file = new File(auditLogDirectory);
+            if (!file.mkdirs()) {
+                logger.warn("Unable to create the directories in the path: " + auditLogDirectory);
+            }
+
+            recordDelim = config.get(CONFIG_LOG_RECORD_DELIM).asString();
+            if (StringUtils.isBlank(recordDelim)) {
+                recordDelim = System.getProperty("line.separator");
+            }
         }
+    }
+
+    @Override
+    public void close() throws ResourceException {
+        cleanup();
     }
 
     /**
@@ -162,23 +172,32 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
                 retry = false;
                 FileWriter fileWriter = null;
                 try {
-                    Collection<String> fieldOrder =
+                    final Set<String> auditEventProperties =
+                            AuditEventHelper.getAuditEventProperties(auditEvents.get(auditEventType)).keys();
+                    if (auditEventProperties == null || auditEventProperties.isEmpty()) {
+                        throw new InternalServerErrorException("No audit event properties defined for audit event: "
+                                + auditEventType);
+                    }
+                    final Collection<String> fieldOrder =
                             new TreeSet<String>(Collator.getInstance());
-                    fieldOrder.addAll(request.getContent().keys());
+                    fieldOrder.addAll(auditEventProperties);
 
                     File auditFile = getAuditLogFile(auditEventType);
                     // Create header if creating a new file
                     if (!auditFile.exists()) {
                         synchronized (this) {
                             final FileWriter existingFileWriter = getWriter(auditEventType, auditFile, false);
-                            final File auditTmpFile = new File(auditLogDirectory, auditEventType + ".tmp");
+                            final File auditTmpFile = new File(auditFile.getParent(), auditEventType + ".tmp");
                             // This is atomic, so only one caller will succeed with created
                             final boolean created = auditTmpFile.createNewFile();
                             if (created) {
                                 final FileWriter tmpFileWriter = new FileWriter(auditTmpFile, true);
                                 writeHeaders(fieldOrder, tmpFileWriter);
                                 tmpFileWriter.close();
-                                auditTmpFile.renameTo(auditFile);
+                                if (!auditTmpFile.renameTo(auditFile)) {
+                                    logger.error("Unable to rename audit temp file");
+                                    throw new InternalServerErrorException("Unable to rename audit temp file");
+                                }
                                 resetWriter(auditEventType, existingFileWriter);
                             }
                         }
@@ -267,10 +286,11 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
             final Collection<String> fieldOrder) throws IOException {
 
         final Iterator<String> iter = fieldOrder.iterator();
+        final StringBuilder entry = new StringBuilder();
         while (iter.hasNext()) {
             final String key = iter.next();
             Object value = obj.get(key);
-            fileWriter.append("\"");
+            entry.append("\"");
             if (value != null) {
                 if (value instanceof Map) {
                     value = new JsonValue(value).toString();
@@ -280,31 +300,34 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
                 final String rawStr = value.toString();
                 // Escape quotes with double quotes
                 final String escapedStr = rawStr.replaceAll("\"", "\"\"");
-                fileWriter.append(escapedStr);
+                entry.append(escapedStr);
             }
-            fileWriter.append("\"");
+            entry.append("\"");
             if (iter.hasNext()) {
-                fileWriter.append(",");
+                entry.append(",");
             }
         }
-        fileWriter.append(recordDelim);
+        entry.append(recordDelim);
+        fileWriter.append(entry.toString());
         fileWriter.flush();
     }
 
     private void writeHeaders(final Collection<String> fieldOrder, final FileWriter fileWriter)
             throws IOException {
         final Iterator<String> iter = fieldOrder.iterator();
+        final StringBuilder header = new StringBuilder();
         while (iter.hasNext()) {
             final String key = iter.next();
-            fileWriter.append("\"");
+            header.append("\"");
             final String escapedStr = key.replaceAll("\"", "\"\"");
-            fileWriter.append(escapedStr);
-            fileWriter.append("\"");
+            header.append(escapedStr);
+            header.append("\"");
             if (iter.hasNext()) {
-                fileWriter.append(",");
+                header.append(",");
             }
         }
-        fileWriter.append(recordDelim);
+        header.append(recordDelim);
+        fileWriter.append(header.toString());
     }
 
     private void resetWriter(final String auditEventType, final FileWriter writerToReset) {
@@ -361,7 +384,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
     }
 
     private CellProcessor[] createCellProcessors(final String auditEntryType, final String[] headers)
-            throws InternalServerErrorException {
+            throws ResourceException {
         final List<CellProcessor> cellProcessors = new ArrayList<CellProcessor>();
         final JsonValue auditEvent = auditEvents.get(auditEntryType);
 
@@ -412,5 +435,22 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
             return jv.getObject();
         }
 
+    }
+
+    private void cleanup() throws ResourceException {
+        auditLogDirectory = null;
+        recordDelim = null;
+        try {
+            for (FileWriter fileWriter : fileWriters.values()) {
+                if (fileWriter != null) {
+                    fileWriter.flush();
+                    fileWriter.close();
+                }
+            }
+        } catch (IOException e) {
+            logger.error("Unable to close filewriters during {} cleanup", this.getClass().getName(), e);
+            throw new InternalServerErrorException(
+                    "Unable to close filewriters during " + this.getClass().getName() + " cleanup", e);
+        }
     }
 }

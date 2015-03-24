@@ -18,6 +18,7 @@ package org.forgerock.audit.events.handlers;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.CollectionResourceProvider;
+import org.forgerock.json.resource.ResourceException;
 
 /**
  * The interface for an AuditEventHandler.
@@ -27,6 +28,13 @@ public interface AuditEventHandler extends CollectionResourceProvider {
     /**
      * Configures the Audit Event Handler with a config.
      * @param config the configuration of the Audit Event Handler
+     * @throws ResourceException if configuration fails
      */
-    public void configure(final JsonValue config);
+    public void configure(final JsonValue config) throws ResourceException;
+
+    /**
+     * Configures the Audit Event Handler with a config.
+     * @throws ResourceException if closing the AuditEventHandler fails
+     */
+    public void close() throws ResourceException;
 }

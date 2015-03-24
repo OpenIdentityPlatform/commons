@@ -19,6 +19,7 @@ package org.forgerock.audit.events.handlers;
 import org.forgerock.audit.events.handlers.impl.CSVAuditEventHandler;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.ResourceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,11 +46,12 @@ public final class AuditEventHandlerFactory {
      * @param auditEvents the audit events supported in the audit service.
      * @param connectionFactory the internal crest connection factory.
      * @return an audit event handler.
+     * @throws ResourceException if unable to create a AuditEventHandler
      */
     public static AuditEventHandler createAuditEventHandler(
             final String name, final JsonValue auditEventHandler,
             final Map<String, JsonValue> auditEvents,
-            final ConnectionFactory connectionFactory) {
+            final ConnectionFactory connectionFactory) throws ResourceException {
         AuditEventHandler handler = null;
         if (CONFIG_LOG_TYPE_CSV.equalsIgnoreCase(name)) {
             handler = new CSVAuditEventHandler(auditEvents);
