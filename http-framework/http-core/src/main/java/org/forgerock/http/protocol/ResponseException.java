@@ -35,6 +35,14 @@ public class ResponseException extends IOException {
         this(new Response().setStatusAndReason(status), message);
     }
 
+    public ResponseException(String message) {
+        this(message, null);
+    }
+
+    public ResponseException(String message, Throwable cause) {
+        this(new Response().setStatusAndReason(500), message, cause);
+    }
+
     public ResponseException(final Response response) {
         this(response, response.getReason());
     }
