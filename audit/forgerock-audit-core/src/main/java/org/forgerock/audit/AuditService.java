@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import org.forgerock.audit.events.AuditEventHelper;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
@@ -175,10 +176,15 @@ public class AuditService implements RequestHandler {
                     request.getResourceName(),
                     request.getContent().asMap());
 
-            if (!request.getContent().isDefined(Resource.FIELD_CONTENT_ID)
-                    || !request.getContent().isDefined("timestamp")) {
-                logger.error("The request requires a timestamp and _id field");
-                throw new BadRequestException("The request requires a timestamp and _id field");
+            // Generate an ID for the object
+            final String localId = (request.getNewResourceId() == null || request.getNewResourceId().isEmpty())
+                    ? UUID.randomUUID().toString()
+                    : request.getNewResourceId();
+            request.getContent().put(Resource.FIELD_CONTENT_ID, localId);
+
+            if (!request.getContent().isDefined("timestamp")) {
+                logger.error("The request requires a timestamp");
+                throw new BadRequestException("The request requires a timestamp");
             }
 
             // Don't audit the audit log
