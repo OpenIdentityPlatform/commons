@@ -30,6 +30,7 @@ import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.util.query.QueryFilterVisitor;
 
 /**
  * A simple in-memory collection resource provider which uses a {@code Map} to
@@ -103,14 +104,14 @@ public final class MemoryBackend implements CollectionResourceProvider {
         }
     }
 
-    private static final QueryFilterVisitor<FilterResult, Resource> RESOURCE_FILTER =
-            new QueryFilterVisitor<FilterResult, Resource>() {
+    private static final QueryFilterVisitor<FilterResult, Resource, JsonPointer> RESOURCE_FILTER =
+            new QueryFilterVisitor<FilterResult, Resource, JsonPointer>() {
 
                 @Override
                 public FilterResult visitAndFilter(final Resource p,
-                        final List<QueryFilter> subFilters) {
+                        final List<org.forgerock.util.query.QueryFilter<JsonPointer>> subFilters) {
                     FilterResult result = FilterResult.TRUE;
-                    for (final QueryFilter subFilter : subFilters) {
+                    for (final org.forgerock.util.query.QueryFilter<JsonPointer> subFilter : subFilters) {
                         final FilterResult r = subFilter.accept(this, p);
                         if (r.ordinal() < result.ordinal()) {
                             result = r;
@@ -219,7 +220,8 @@ public final class MemoryBackend implements CollectionResourceProvider {
                 }
 
                 @Override
-                public FilterResult visitNotFilter(final Resource p, final QueryFilter subFilter) {
+                public FilterResult visitNotFilter(final Resource p,
+                        final org.forgerock.util.query.QueryFilter<JsonPointer> subFilter) {
                     switch (subFilter.accept(this, p)) {
                     case FALSE:
                         return FilterResult.TRUE;
@@ -232,9 +234,9 @@ public final class MemoryBackend implements CollectionResourceProvider {
 
                 @Override
                 public FilterResult visitOrFilter(final Resource p,
-                        final List<QueryFilter> subFilters) {
+                        final List<org.forgerock.util.query.QueryFilter<JsonPointer>> subFilters) {
                     FilterResult result = FilterResult.FALSE;
-                    for (final QueryFilter subFilter : subFilters) {
+                    for (final org.forgerock.util.query.QueryFilter<JsonPointer> subFilter : subFilters) {
                         final FilterResult r = subFilter.accept(this, p);
                         if (r.ordinal() > result.ordinal()) {
                             result = r;
@@ -530,7 +532,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
             return;
         } else {
             // No filtering or query by filter.
-            final QueryFilter filter = request.getQueryFilter();
+            final org.forgerock.util.query.QueryFilter<JsonPointer> filter = request.getQueryFilter();
 
             // If paged results are requested then decode the cookie in order to determine
             // the index of the first result to be returned.

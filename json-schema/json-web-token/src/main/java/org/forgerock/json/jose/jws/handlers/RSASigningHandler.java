@@ -75,7 +75,7 @@ public class RSASigningHandler implements SigningHandler {
     public boolean verify(JwsAlgorithm algorithm, byte[] data, byte[] signature) {
         try {
             Reject.ifFalse(key instanceof PublicKey, "RSA requires public key for signature verification.");
-            return signatureUtil.verify((X509Certificate) null, algorithm.getAlgorithm(),
+            return signatureUtil.verify((PublicKey) key, algorithm.getAlgorithm(),
                     new String(data, Utils.CHARSET), signature);
         } catch (SignatureException e) {
             if (e.getCause().getClass().isAssignableFrom(NoSuchAlgorithmException.class)) {
