@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwt;
@@ -21,6 +21,7 @@ import org.forgerock.json.jose.exceptions.JwtRuntimeException;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -134,6 +135,15 @@ public abstract class JWObject {
      */
     public Set<String> keys() {
         return jsonValue.keys();
+    }
+
+    /**
+     * Returns the {@code Map} of keys and values stored by {@link #put}.
+     *
+     * @return {@code Map} of this JWObject's keys and values.
+     */
+    Map<String, Object> getAll() {
+        return jsonValue.asMap();
     }
 
     /**
