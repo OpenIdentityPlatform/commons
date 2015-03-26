@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwe.handlers.encryption;
@@ -39,7 +39,6 @@ import org.forgerock.json.jose.utils.Utils;
  * An implementation of an EncryptionHandler that provides encryption and decryption methods using the JweAlgorithm
  * RSAES_PCKS1_V1_5 and EncryptionMethod A128CBC_HS256.
  *
- * @author Phill Cunnington
  * @since 2.0.0
  */
 public class RSA15AES128CBCHS256EncryptionHandler extends AbstractEncryptionHandler {
@@ -205,13 +204,20 @@ public class RSA15AES128CBCHS256EncryptionHandler extends AbstractEncryptionHand
             macValid = true;
         }
 
-        byte[] plaintext = decrypt(ENCRYPTION_METHOD.getTransformation(), encryptionKey, initialisationVector,
-                ciphertext);
+        try {
+            byte[] plaintext = decrypt(ENCRYPTION_METHOD.getTransformation(), encryptionKey, initialisationVector,
+                    ciphertext);
 
-        if (!macValid) {
-            throw new JweDecryptionException("MAC check of ciphertext invalid");
+            if (!macValid) {
+                throw new JweDecryptionException();
+            }
+
+            return plaintext;
+
+        } catch (JweDecryptionException ex) {
+            // Catch and re-throw any exception so that even the stack trace reveals no information about how
+            // decryption failed.
+            throw new JweDecryptionException();
         }
-
-        return plaintext;
     }
 }

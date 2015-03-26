@@ -11,24 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2015 ForgeRock AS.
  */
-
-package org.forgerock.json.jose.exceptions;
 
 /**
- * Represents an exception for when decryption of the JWE fails. This class deliberately provides no information
- * about why decryption failed as such information leakage is a potential attack vector (e.g., padding oracle attacks).
- * The root cause of exceptions should be logged before this exception is thrown.
- *
- * @since 2.0.0
+ * The annotations are made available to allow a POJO annotated with {@link RequestHandler} to be used
+ * as a CREST resource, with the necessary methods then being annotated to indicate which operations
+ * are available, and the method that handles them.
  */
-public final class JweDecryptionException extends JweException {
-
-    /** Serializable class version number. */
-    private static final long serialVersionUID = 2L;
-
-    public JweDecryptionException() {
-        super("Decryption failed");
-    }
-}
+package org.forgerock.json.resource.annotations;

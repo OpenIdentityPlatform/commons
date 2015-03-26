@@ -610,6 +610,9 @@ public final class HttpUtils {
 
     static boolean isMultiPartRequest(final String unknownContentType) throws BadRequestException {
         try {
+            if (unknownContentType == null) {
+                return false;
+            }
             ContentType contentType = new ContentType(unknownContentType);
             return contentType.match(MIME_TYPE_MULTIPART_FORM_DATA);
         } catch (final ParseException e) {

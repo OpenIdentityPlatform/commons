@@ -47,7 +47,7 @@ import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.PreconditionFailedException;
-import org.forgerock.json.resource.QueryFilter;
+import org.forgerock.json.resource.QueryFilters;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
@@ -257,7 +257,7 @@ public final class HttpAdapter implements Handler {
                     } else if (name.equalsIgnoreCase(PARAM_QUERY_FILTER)) {
                         final String s = asSingleValue(name, values);
                         try {
-                            request.setQueryFilter(QueryFilter.valueOf(s));
+                            request.setQueryFilter(QueryFilters.parse(s));
                         } catch (final IllegalArgumentException e) {
                             // FIXME: i18n.
                             throw new BadRequestException("The value '" + s + "' for parameter '"

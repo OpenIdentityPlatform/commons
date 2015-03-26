@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2014 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -20,7 +20,6 @@ import static org.forgerock.http.RoutingMode.EQUALS;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.Map;
 
 import org.forgerock.http.Context;
@@ -29,7 +28,6 @@ import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.promise.PromiseImpl;
 import org.forgerock.util.promise.Promises;
 
 /**
@@ -38,353 +36,6 @@ import org.forgerock.util.promise.Promises;
  */
 public final class Resources {
 
-    /**
-     * Implementation class for {@link #asRequestHandler}.
-     */
-    private static final class SynchronousRequestHandlerAdapter implements RequestHandler {
-        private final SynchronousRequestHandler syncHandler;
-
-        private SynchronousRequestHandlerAdapter(final SynchronousRequestHandler syncHandler) {
-            this.syncHandler = syncHandler;
-        }
-
-        @Override
-        public void handleUpdate(final ServerContext context, final UpdateRequest request,
-                final ResultHandler<Resource> handler) {
-            try {
-                handler.handleResult(syncHandler.handleUpdate(context, request));
-            } catch (final ResourceException e) {
-                handler.handleError(e);
-            }
-        }
-
-        @Override
-        public void handleRead(final ServerContext context, final ReadRequest request,
-                final ResultHandler<Resource> handler) {
-            try {
-                handler.handleResult(syncHandler.handleRead(context, request));
-            } catch (final ResourceException e) {
-                handler.handleError(e);
-            }
-        }
-
-        @Override
-        public void handleQuery(final ServerContext context, final QueryRequest request,
-                final QueryResultHandler handler) {
-            try {
-                final Collection<Resource> resources = new LinkedList<Resource>();
-                final QueryResult result = syncHandler.handleQuery(context, request, resources);
-                for (final Resource resource : resources) {
-                    handler.handleResource(resource);
-                }
-                handler.handleResult(result);
-            } catch (final ResourceException e) {
-                handler.handleError(e);
-            }
-        }
-
-        @Override
-        public void handlePatch(final ServerContext context, final PatchRequest request,
-                final ResultHandler<Resource> handler) {
-            try {
-                handler.handleResult(syncHandler.handlePatch(context, request));
-            } catch (final ResourceException e) {
-                handler.handleError(e);
-            }
-        }
-
-        @Override
-        public void handleDelete(final ServerContext context, final DeleteRequest request,
-                final ResultHandler<Resource> handler) {
-            try {
-                handler.handleResult(syncHandler.handleDelete(context, request));
-            } catch (final ResourceException e) {
-                handler.handleError(e);
-            }
-        }
-
-        @Override
-        public void handleCreate(final ServerContext context, final CreateRequest request,
-                final ResultHandler<Resource> handler) {
-            try {
-                handler.handleResult(syncHandler.handleCreate(context, request));
-            } catch (final ResourceException e) {
-                handler.handleError(e);
-            }
-        }
-
-        @Override
-        public void handleAction(final ServerContext context, final ActionRequest request,
-                final ResultHandler<JsonValue> handler) {
-            try {
-                handler.handleResult(syncHandler.handleAction(context, request));
-            } catch (final ResourceException e) {
-                handler.handleError(e);
-            }
-        }
-    }
-
-    private static final class CollectionHandler implements RequestHandler {
-        private final CollectionResourceProvider provider;
-
-        private CollectionHandler(final CollectionResourceProvider provider) {
-            this.provider = provider;
-        }
-
-        @Override
-        public void handleAction(final ServerContext context, final ActionRequest request,
-                final ResultHandler<JsonValue> handler) {
-            provider.actionCollection(parentOf(context), request, handler);
-        }
-
-        @Override
-        public void handleCreate(final ServerContext context, final CreateRequest request,
-                final ResultHandler<Resource> handler) {
-            provider.createInstance(parentOf(context), request, handler);
-        }
-
-        @Override
-        public void handleDelete(final ServerContext context, final DeleteRequest request,
-                final ResultHandler<Resource> handler) {
-            // TODO: i18n
-            handler.handleError(newBadRequestException(
-                    "The resource collection %s cannot be deleted", request.getResourceName()));
-        }
-
-        @Override
-        public void handlePatch(final ServerContext context, final PatchRequest request,
-                final ResultHandler<Resource> handler) {
-            // TODO: i18n
-            handler.handleError(newBadRequestException(
-                    "The resource collection %s cannot be patched", request.getResourceName()));
-        }
-
-        @Override
-        public void handleQuery(final ServerContext context, final QueryRequest request,
-                final QueryResultHandler handler) {
-            provider.queryCollection(parentOf(context), request, handler);
-        }
-
-        @Override
-        public void handleRead(final ServerContext context, final ReadRequest request,
-                final ResultHandler<Resource> handler) {
-            // TODO: i18n
-            handler.handleError(newBadRequestException("The resource collection %s cannot be read",
-                    request.getResourceName()));
-        }
-
-        @Override
-        public void handleUpdate(final ServerContext context, final UpdateRequest request,
-                final ResultHandler<Resource> handler) {
-            // TODO: i18n
-            handler.handleError(newBadRequestException(
-                    "The resource collection %s cannot be updated", request.getResourceName()));
-        }
-    }
-
-    private static final class CollectionInstance implements RequestHandler {
-        private final CollectionResourceProvider provider;
-
-        private CollectionInstance(final CollectionResourceProvider provider) {
-            this.provider = provider;
-        }
-
-        @Override
-        public void handleAction(final ServerContext context, final ActionRequest request,
-                final ResultHandler<JsonValue> handler) {
-            provider.actionInstance(parentOf(context), idOf(context), request, handler);
-        }
-
-        @Override
-        public void handleCreate(final ServerContext context, final CreateRequest request,
-                final ResultHandler<Resource> handler) {
-            // TODO: i18n
-            handler.handleError(newBadRequestException(
-                    "The resource instance %s cannot be created", request.getResourceName()));
-        }
-
-        @Override
-        public void handleDelete(final ServerContext context, final DeleteRequest request,
-                final ResultHandler<Resource> handler) {
-            provider.deleteInstance(parentOf(context), idOf(context), request, handler);
-        }
-
-        @Override
-        public void handlePatch(final ServerContext context, final PatchRequest request,
-                final ResultHandler<Resource> handler) {
-            provider.patchInstance(parentOf(context), idOf(context), request, handler);
-        }
-
-        @Override
-        public void handleQuery(final ServerContext context, final QueryRequest request,
-                final QueryResultHandler handler) {
-            // TODO: i18n
-            handler.handleError(newBadRequestException(
-                    "The resource instance %s cannot be queried", request.getResourceName()));
-        }
-
-        @Override
-        public void handleRead(final ServerContext context, final ReadRequest request,
-                final ResultHandler<Resource> handler) {
-            provider.readInstance(parentOf(context), idOf(context), request, handler);
-        }
-
-        @Override
-        public void handleUpdate(final ServerContext context, final UpdateRequest request,
-                final ResultHandler<Resource> handler) {
-            provider.updateInstance(parentOf(context), idOf(context), request, handler);
-        }
-    }
-
-    // Internal connection implementation.
-    private static final class InternalConnection extends AbstractAsynchronousConnection {
-        private final RequestHandler requestHandler;
-
-        private InternalConnection(final RequestHandler handler) {
-            this.requestHandler = handler;
-        }
-
-        @Override
-        public Promise<JsonValue, ResourceException> actionAsync(final Context context,
-                final ActionRequest request) {
-            final PromiseImpl<JsonValue, ResourceException> promise = PromiseImpl.create();
-            requestHandler.handleAction(getServerContext(context), request,
-                    new ResultHandler<JsonValue>() {
-                        @Override
-                        public void handleResult(JsonValue result) {
-                            promise.handleResult(result);
-                        }
-
-                        @Override
-                        public void handleError(ResourceException error) {
-                            promise.handleError(error);
-                        }
-                    });
-            return promise;
-        }
-
-        @Override
-        public void close() {
-            // Do nothing.
-        }
-
-        @Override
-        public Promise<Resource, ResourceException> createAsync(final Context context,
-                final CreateRequest request) {
-            final PromiseImpl<Resource, ResourceException> promise = PromiseImpl.create();
-            requestHandler
-                    .handleCreate(getServerContext(context), request, adapt(request, promise));
-            return promise;
-        }
-
-        private ResultHandler<Resource> adapt(final Request request,
-                final PromiseImpl<Resource, ResourceException> promise) {
-            return new ResultHandler<Resource>() {
-                @Override
-                public void handleResult(Resource result) {
-                    promise.handleResult(filterResource(result, request.getFields()));
-                }
-
-                @Override
-                public void handleError(ResourceException error) {
-                    promise.handleError(error);
-                }
-            };
-        }
-
-        @Override
-        public Promise<Resource, ResourceException> deleteAsync(final Context context,
-                final DeleteRequest request) {
-            final PromiseImpl<Resource, ResourceException> promise = PromiseImpl.create();
-            requestHandler
-                    .handleDelete(getServerContext(context), request, adapt(request, promise));
-            return promise;
-        }
-
-        @Override
-        public boolean isClosed() {
-            // Always open.
-            return false;
-        }
-
-        @Override
-        public boolean isValid() {
-            // Always valid.
-            return true;
-        }
-
-        @Override
-        public Promise<Resource, ResourceException> patchAsync(final Context context,
-                final PatchRequest request) {
-            final PromiseImpl<Resource, ResourceException> promise = PromiseImpl.create();
-            requestHandler.handlePatch(getServerContext(context), request, adapt(request, promise));
-            return promise;
-        }
-
-        @Override
-        public Promise<QueryResult, ResourceException> queryAsync(final Context context,
-                final QueryRequest request, final QueryResultHandler handler) {
-            final PromiseImpl<QueryResult, ResourceException> promise = PromiseImpl.create();
-            requestHandler.handleQuery(getServerContext(context), request,
-                    new QueryResultHandler() {
-
-                        @Override
-                        public void handleResult(QueryResult result) {
-                            promise.handleResult(result);
-                            if (handler != null) {
-                                handler.handleResult(result);
-                            }
-                        }
-
-                        @Override
-                        public boolean handleResource(Resource resource) {
-                            if (handler != null) {
-                                return handler.handleResource(filterResource(resource, request
-                                        .getFields()));
-                            } else {
-                                return true;
-                            }
-                        }
-
-                        @Override
-                        public void handleError(ResourceException error) {
-                            promise.handleError(error);
-                            if (handler != null) {
-                                handler.handleError(error);
-                            }
-                        }
-                    });
-            return promise;
-        }
-
-        @Override
-        public Promise<Resource, ResourceException> readAsync(final Context context,
-                final ReadRequest request) {
-            final PromiseImpl<Resource, ResourceException> promise = PromiseImpl.create();
-            requestHandler.handleRead(getServerContext(context), request, adapt(request, promise));
-            return promise;
-        }
-
-        @Override
-        public Promise<Resource, ResourceException> updateAsync(final Context context,
-                final UpdateRequest request) {
-            final PromiseImpl<Resource, ResourceException> promise = PromiseImpl.create();
-            requestHandler
-                    .handleUpdate(getServerContext(context), request, adapt(request, promise));
-            return promise;
-        }
-
-        private ServerContext getServerContext(final Context context) {
-            if (context instanceof ServerContext) {
-                return (ServerContext) context;
-            } else {
-                return new ServerContext(context);
-            }
-        }
-
-    }
-
-    // Internal connection factory implementation.
     private static final class InternalConnectionFactory implements ConnectionFactory {
         private final RequestHandler handler;
 
@@ -404,62 +55,6 @@ public final class Resources {
 
         public Promise<Connection, ResourceException> getConnectionAsync() {
             return newSuccessfulPromise(getConnection());
-        }
-    }
-
-    private static final class SingletonHandler implements RequestHandler {
-        private final SingletonResourceProvider provider;
-
-        private SingletonHandler(final SingletonResourceProvider provider) {
-            this.provider = provider;
-        }
-
-        @Override
-        public void handleAction(final ServerContext context, final ActionRequest request,
-                final ResultHandler<JsonValue> handler) {
-            provider.actionInstance(context, request, handler);
-        }
-
-        @Override
-        public void handleCreate(final ServerContext context, final CreateRequest request,
-                final ResultHandler<Resource> handler) {
-            // TODO: i18n
-            handler.handleError(newBadRequestException(
-                    "The singleton resource %s cannot be created", request.getResourceName()));
-        }
-
-        @Override
-        public void handleDelete(final ServerContext context, final DeleteRequest request,
-                final ResultHandler<Resource> handler) {
-            // TODO: i18n
-            handler.handleError(newBadRequestException(
-                    "The singleton resource %s cannot be deleted", request.getResourceName()));
-        }
-
-        @Override
-        public void handlePatch(final ServerContext context, final PatchRequest request,
-                final ResultHandler<Resource> handler) {
-            provider.patchInstance(context, request, handler);
-        }
-
-        @Override
-        public void handleQuery(final ServerContext context, final QueryRequest request,
-                final QueryResultHandler handler) {
-            // TODO: i18n
-            handler.handleError(newBadRequestException(
-                    "The singleton resource %s cannot be queried", request.getResourceName()));
-        }
-
-        @Override
-        public void handleRead(final ServerContext context, final ReadRequest request,
-                final ResultHandler<Resource> handler) {
-            provider.readInstance(context, request, handler);
-        }
-
-        @Override
-        public void handleUpdate(final ServerContext context, final UpdateRequest request,
-                final ResultHandler<Resource> handler) {
-            provider.updateInstance(context, request, handler);
         }
     }
 
@@ -546,20 +141,26 @@ public final class Resources {
      * a bad request error being returned to the client.
      *
      * @param provider
-     *            The collection resource provider.
+     *            The collection resource provider. Either an implementation of {@link CollectionResourceProvider} or
+     *            a POJO annotated with annotations from {@link org.forgerock.json.resource.annotations}.
      * @return A new request handler which will forward requests on to the
      *         provided collection resource provider.
      */
-    public static RequestHandler newCollection(final CollectionResourceProvider provider) {
+    public static RequestHandler newCollection(final Object provider) {
+        boolean fromInterface = provider instanceof CollectionResourceProvider;
         // Route requests to the collection/instance using a router.
         final UriRouter router = new UriRouter();
 
         // Create a route for the collection.
-        final RequestHandler collectionHandler = new CollectionHandler(provider);
+        final RequestHandler collectionHandler = fromInterface ?
+                new InterfaceCollectionHandler((CollectionResourceProvider) provider) :
+                new AnnotatedCollectionHandler(provider);
         router.addRoute(EQUALS, "", collectionHandler);
 
         // Create a route for the instances within the collection.
-        final RequestHandler instanceHandler = new CollectionInstance(provider);
+        final RequestHandler instanceHandler = fromInterface ?
+                new InterfaceCollectionInstance((CollectionResourceProvider) provider) :
+                new AnnotationCollectionInstance(provider);
         router.addRoute(EQUALS, "{id}", instanceHandler);
 
         return router;
@@ -601,12 +202,17 @@ public final class Resources {
      * request error being returned to the client.
      *
      * @param provider
-     *            The singleton resource provider.
+     *            The singleton resource provider. Either an implementation of {@link SingletonResourceProvider} or
+     *            a POJO annotated with annotations from {@link org.forgerock.json.resource.annotations}.
      * @return A new request handler which will forward requests on to the
      *         provided singleton resource provider.
      */
-    public static RequestHandler newSingleton(final SingletonResourceProvider provider) {
-        return new SingletonHandler(provider);
+    public static RequestHandler newSingleton(final Object provider) {
+        if (provider instanceof SingletonResourceProvider) {
+            return new InterfaceSingletonHandler((SingletonResourceProvider) provider);
+        } else {
+            return new AnnotatedSingletonHandler(provider);
+        }
     }
 
     /**
@@ -655,11 +261,11 @@ public final class Resources {
         };
     }
 
-    private static String idOf(final ServerContext context) {
+    static String idOf(final ServerContext context) {
         return context.asContext(RouterContext.class).getUriTemplateVariables().get("id");
     }
 
-    private static ResourceException newBadRequestException(final String fs, final Object... args) {
+    static ResourceException newBadRequestException(final String fs, final Object... args) {
         final String msg = String.format(fs, args);
         return new BadRequestException(msg);
     }
@@ -670,7 +276,7 @@ public final class Resources {
 
     // Strips off the unwanted leaf routing context which was added when routing
     // requests to a collection.
-    private static ServerContext parentOf(final ServerContext context) {
+    static ServerContext parentOf(final ServerContext context) {
         assert context instanceof RouterContext;
         return (ServerContext) context.getParent();
     }

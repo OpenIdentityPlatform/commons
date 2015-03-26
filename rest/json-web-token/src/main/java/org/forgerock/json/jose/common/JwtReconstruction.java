@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.common;
@@ -29,6 +29,9 @@ import org.forgerock.json.jose.jwt.JwtClaimsSet;
 import org.forgerock.json.jose.jwt.JwtType;
 import org.forgerock.json.jose.utils.Utils;
 import org.forgerock.util.encode.Base64url;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A service that provides a method for reconstruct a JWT string back into its relevant JWT object,
@@ -66,7 +69,7 @@ public class JwtReconstruction {
         //turn into json value
         JsonValue headerJson = new JsonValue(Utils.parseJson(Utils.base64urlDecode(jwtParts[0])));
         JwtType jwtType = JwtType.JWT;
-        if (headerJson.isDefined("jwt")) {
+        if (headerJson.isDefined("typ")) {
             jwtType = JwtType.valueOf(headerJson.get("typ").asString().toUpperCase());
         }
 
@@ -184,12 +187,15 @@ public class JwtReconstruction {
         String payloadString = Utils.base64urlDecode(encodedPayload);
         byte[] signature = Base64url.decode(encodedSignature);
 
-        JwsHeader jwsHeader = new JwsHeader(Utils.parseJson(header));
-
         //split into parts
         String[] encryptedJwtParts = payloadString.split("\\.", -1);
         verifyNumberOfParts(encryptedJwtParts, JWE_NUM_PARTS);
         EncryptedJwt encryptedJwt = reconstructEncryptedJwt(encryptedJwtParts);
+
+        Map<String, Object> combinedHeader = new HashMap<String, Object>(encryptedJwt.getHeader().getParameters());
+        combinedHeader.putAll(Utils.parseJson(header));
+
+        JwsHeader jwsHeader = new JwsHeader(combinedHeader);
 
         return new SignedEncryptedJwt(jwsHeader, encryptedJwt,
                 (encodedHeader + "." + encodedPayload).getBytes(Utils.CHARSET), signature);
