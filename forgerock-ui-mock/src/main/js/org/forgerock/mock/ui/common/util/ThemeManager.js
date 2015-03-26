@@ -98,8 +98,6 @@ define("ThemeManager", [
                         "column-padding": "0px",
                         "login-container-label-align": "left",
                         "highlight-color": "#eeea07",
-                        "login-container-width": "430px",
-                        "medium-container-width": "850px",
                         "content-background": "#f9f9f9",
                         "href-color-hover": "#5e887f",
                         "color-error": "#d97986",
