@@ -69,16 +69,16 @@ public class AuditEventBuilderTest {
                 .toEvent();
 
         JsonValue value = event.getValue();
-        assertThat(value.get("transactionId").getObject()).isEqualTo("transactionId");
-        assertThat(value.get("messageId").getObject()).isEqualTo("IDM-sync-10");
-        assertThat(value.get("server").get("ip").getObject()).isEqualTo("sip");
-        assertThat(value.get("server").get("port").getObject()).isEqualTo("sport");
-        assertThat(value.get("http").get("method").getObject()).isEqualTo("GET");
-        assertThat(value.get("authorizationId").get("id").getObject()).isEqualTo("aegloff");
-        assertThat(value.get("resourceOperation").get("method").getObject()).isEqualTo("action");
-        assertThat(value.get("response").get("status").getObject()).isEqualTo("200");
-        assertThat(value.get("open").getObject()).isEqualTo("value");
-        assertThat(value.get("field").getObject()).isEqualTo("fieldValue");
+        assertThat(value.get("transactionId").asString()).isEqualTo("transactionId");
+        assertThat(value.get("messageId").asString()).isEqualTo("IDM-sync-10");
+        assertThat(value.get("server").get("ip").asString()).isEqualTo("sip");
+        assertThat(value.get("server").get("port").asString()).isEqualTo("sport");
+        assertThat(value.get("http").get("method").asString()).isEqualTo("GET");
+        assertThat(value.get("authorizationId").get("id").asString()).isEqualTo("aegloff");
+        assertThat(value.get("resourceOperation").get("method").asString()).isEqualTo("action");
+        assertThat(value.get("response").get("status").asString()).isEqualTo("200");
+        assertThat(value.get("open").asString()).isEqualTo("value");
+        assertThat(value.get("field").asString()).isEqualTo("fieldValue");
     }
 
 
@@ -117,10 +117,10 @@ public class AuditEventBuilderTest {
     private void assertEvent(AuditEvent event) {
         JsonValue value = event.getValue();
         assertThat(value.get("open").getObject()).isEqualTo("value");
-        assertThat(value.get("server").get("ip").getObject()).isEqualTo("ip");
-        assertThat(value.get("server").get("port").getObject()).isEqualTo("port");
-        assertThat(value.get("client").get("ip").getObject()).isEqualTo("cip");
-        assertThat(value.get("client").get("port").getObject()).isEqualTo("cport");
-        assertThat(value.get("transactionId").getObject()).isEqualTo("transactionId");
+        assertThat(value.get("server").get("ip").asString()).isEqualTo("ip");
+        assertThat(value.get("server").get("port").asString()).isEqualTo("port");
+        assertThat(value.get("client").get("ip").asString()).isEqualTo("cip");
+        assertThat(value.get("client").get("port").asString()).isEqualTo("cport");
+        assertThat(value.get("transactionId").asString()).isEqualTo("transactionId");
     }
 }

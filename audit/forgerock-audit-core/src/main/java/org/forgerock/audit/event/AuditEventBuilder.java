@@ -45,13 +45,13 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
     protected final JsonValue jsonValue = json(object());
 
     /** A reference to this object with its actual type. */
-    //private T self;
+    private T self;
 
     /**
      * Creates the builder.
      */
     protected AuditEventBuilder() {
-        //self = self();
+        self = self();
     }
 
     /**
@@ -303,6 +303,23 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
             JsonValue object = json(object(
                     field("status", status),
                     field("elapsedTime", elapsedTime)));
+            jsonValue.put("response", object);
+            return self();
+        }
+
+        /**
+         * Sets the provided response for the event, with an additional message.
+         *
+         * @param status the status of the operation.
+         * @param elapsedTime the execution time of the action.
+         * @param message the message associated to the status.
+         * @return this builder
+         */
+        public T responseWithMessage(String status, String elapsedTime, String message) {
+            JsonValue object = json(object(
+                    field("status", status),
+                    field("elapsedTime", elapsedTime),
+                    field("message", message)));
             jsonValue.put("response", object);
             return self();
         }
