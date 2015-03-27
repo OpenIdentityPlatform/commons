@@ -213,11 +213,7 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
          * @return this builder
          */
         public T client(String ip, int port) {
-            JsonValue object = json(object(
-                    field("ip", ip),
-                    field("port", port)));
-            jsonValue.put("client", object);
-            return self();
+            return client(ip, port, null);
         }
 
         /**
