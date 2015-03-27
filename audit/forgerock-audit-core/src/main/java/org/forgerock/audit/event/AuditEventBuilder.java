@@ -31,7 +31,6 @@ import static org.forgerock.json.fluent.JsonValue.*;
 import java.util.Arrays;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.audit.event.AuditEvent;
 
 /**
  * Root builder for all audit events.
@@ -44,14 +43,11 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
     /** Represents the event as a JSON value. */
     protected final JsonValue jsonValue = json(object());
 
-    /** A reference to this object with its actual type. */
-    private T self;
-
     /**
      * Creates the builder.
      */
     protected AuditEventBuilder() {
-        self = self();
+        // Reduce visibility of the default constructor
     }
 
     /**
