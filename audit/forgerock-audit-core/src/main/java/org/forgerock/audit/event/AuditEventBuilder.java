@@ -30,6 +30,7 @@ import static org.forgerock.json.fluent.JsonValue.*;
 
 import java.util.Arrays;
 
+import org.forgerock.audit.util.DateUtil;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.util.Reject;
 
@@ -82,13 +83,13 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
     /**
      * Sets the provided time stamp for the event.
      *
-     * @param t the time stamp.
+     * @param timestamp the time stamp.
      * @return this builder
      */
-    public final T timestamp(String t) {
-        Reject.ifNull(t);
-        jsonValue.put("timestamp", t);
-        timestamp = true;
+    public final T timestamp(long timestamp) {
+        Reject.ifTrue(timestamp <= 0, "The timestamp has to be greater than 0.");
+        jsonValue.put("timestamp", DateUtil.getDateUtil().formatDateTime(timestamp));
+        this.timestamp = true;
         return self();
     }
 

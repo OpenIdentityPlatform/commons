@@ -41,7 +41,7 @@ public class AuditEventBuilderTest {
     @Test(expectedExceptions= { IllegalStateException.class })
     public void ensureAuditEventContainsTransactionId() throws Exception {
         productAccessEvent()
-                .timestamp("timestamp")
+                .timestamp(System.currentTimeMillis())
                 .toEvent();
     }
 
@@ -75,7 +75,7 @@ public class AuditEventBuilderTest {
     public void ensureEventIsCorrectlyBuilt() {
         AuditEvent event = productAccessEvent()
                 .transactionId("transactionId")
-                .timestamp("timestamp")
+                .timestamp(1427293286239l)
                 .messageId("IDM-sync-10")
                 .client("cip", 1203)
                 .server("sip", 80)
@@ -90,6 +90,7 @@ public class AuditEventBuilderTest {
 
         JsonValue value = event.getValue();
         assertThat(value.get("transactionId").asString()).isEqualTo("transactionId");
+        assertThat(value.get("timestamp").asString()).isEqualTo("2015-03-25T15:21:26.239+01:00");
         assertThat(value.get("messageId").asString()).isEqualTo("IDM-sync-10");
         assertThat(value.get("server").get("ip").asString()).isEqualTo("sip");
         assertThat(value.get("server").get("port").asLong()).isEqualTo(80);
@@ -110,7 +111,7 @@ public class AuditEventBuilderTest {
                 .client("cip", 1203)
                 .openField("value")
                 .transactionId("transactionId")
-                .timestamp("timestamp")
+                .timestamp(1427293286239l)
                 .toEvent();
         assertEvent(event1);
 
@@ -119,7 +120,7 @@ public class AuditEventBuilderTest {
                 .openField("value")
                 .server("ip", 80)
                 .transactionId("transactionId")
-                .timestamp("timestamp")
+                .timestamp(1427293286239l)
                 .toEvent();
         assertEvent(event2);
 
@@ -129,7 +130,7 @@ public class AuditEventBuilderTest {
                 .client("cip", 1203)
                 .server("ip", 80)
                 .transactionId("transactionId")
-                .timestamp("timestamp")
+                .timestamp(1427293286239l)
                 .toEvent();
         assertEvent(event3);
 
@@ -139,7 +140,7 @@ public class AuditEventBuilderTest {
                 .openField("value")
                 .server("ip", 80)
                 .transactionId("transactionId")
-                .timestamp("timestamp")
+                .timestamp(1427293286239l)
                 .toEvent();
 
         assertEvent(event4);
@@ -153,6 +154,7 @@ public class AuditEventBuilderTest {
         assertThat(value.get("server").get("port").asLong()).isEqualTo(80);
         assertThat(value.get("client").get("ip").asString()).isEqualTo("cip");
         assertThat(value.get("client").get("port").asLong()).isEqualTo(1203);
-        assertThat(value.get("transactionId").getObject()).isEqualTo("transactionId");
+        assertThat(value.get("transactionId").asString()).isEqualTo("transactionId");
+        assertThat(value.get("timestamp").asString()).isEqualTo("2015-03-25T15:21:26.239+01:00");
     }
 }
