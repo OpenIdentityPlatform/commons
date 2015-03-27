@@ -94,7 +94,7 @@ public class AuditServiceTest {
         auditService.handleCreate(new ServerContext(new RootContext()), createRequest, resultHandler);
 
         //then
-        verify(resultHandler, times(0)).handleError(any(ResourceException.class));
+        verify(resultHandler, never()).handleError(any(ResourceException.class));
         verify(resultHandler).handleResult(resourceCaptor.capture());
 
         final Resource resource = resourceCaptor.getValue();
@@ -114,7 +114,7 @@ public class AuditServiceTest {
 
         auditService.handleCreate(new ServerContext(new RootContext()), createRequest, resultHandler);
 
-        verify(resultHandler, times(0)).handleError(any(ResourceException.class));
+        verify(resultHandler, never()).handleError(any(ResourceException.class));
         verify(resultHandler).handleResult(resourceCaptor.capture());
 
         final ReadRequest readRequest = Requests.newReadRequest("access", resourceCaptor.getValue().getId());
@@ -124,7 +124,7 @@ public class AuditServiceTest {
 
         //then
         verify(resultHandler, times(2)).handleResult(resourceCaptor.capture());
-        verify(resultHandler, times(0)).handleError(any(ResourceException.class));
+        verify(resultHandler, never()).handleError(any(ResourceException.class));
 
         final Resource resource = resourceCaptor.getValue();
         assertThat(resource != null);
@@ -149,8 +149,8 @@ public class AuditServiceTest {
         );
 
         //then
-        verify(resultHandler, times(0)).handleResult(resourceCaptor.capture());
-        verify(resultHandler, times(1)).handleError(resourceExceptionCaptor.capture());
+        verify(resultHandler, never()).handleResult(resourceCaptor.capture());
+        verify(resultHandler).handleError(resourceExceptionCaptor.capture());
 
         assertThat(resourceExceptionCaptor.getValue() instanceof NotSupportedException);
     }
@@ -173,8 +173,8 @@ public class AuditServiceTest {
         );
 
         //then
-        verify(resultHandler, times(0)).handleResult(resourceCaptor.capture());
-        verify(resultHandler, times(1)).handleError(resourceExceptionCaptor.capture());
+        verify(resultHandler, never()).handleResult(resourceCaptor.capture());
+        verify(resultHandler).handleError(resourceExceptionCaptor.capture());
 
         assertThat(resourceExceptionCaptor.getValue() instanceof NotSupportedException);
     }
@@ -197,8 +197,8 @@ public class AuditServiceTest {
         );
 
         //then
-        verify(resultHandler, times(0)).handleResult(resourceCaptor.capture());
-        verify(resultHandler, times(1)).handleError(resourceExceptionCaptor.capture());
+        verify(resultHandler, never()).handleResult(resourceCaptor.capture());
+        verify(resultHandler).handleError(resourceExceptionCaptor.capture());
 
         assertThat(resourceExceptionCaptor.getValue() instanceof NotSupportedException);
     }
@@ -221,8 +221,8 @@ public class AuditServiceTest {
         );
 
         //then
-        verify(resultHandler, times(0)).handleResult(resourceCaptor.capture());
-        verify(resultHandler, times(1)).handleError(resourceExceptionCaptor.capture());
+        verify(resultHandler, never()).handleResult(resourceCaptor.capture());
+        verify(resultHandler).handleError(resourceExceptionCaptor.capture());
 
         assertThat(resourceExceptionCaptor.getValue() instanceof NotSupportedException);
     }
@@ -245,8 +245,8 @@ public class AuditServiceTest {
         );
 
         //then
-        verify(resultHandler, times(0)).handleResult(resourceCaptor.capture());
-        verify(resultHandler, times(1)).handleError(resourceExceptionCaptor.capture());
+        verify(resultHandler, never()).handleResult(resourceCaptor.capture());
+        verify(resultHandler).handleError(resourceExceptionCaptor.capture());
 
         assertThat(resourceExceptionCaptor.getValue() instanceof NotSupportedException);
     }
