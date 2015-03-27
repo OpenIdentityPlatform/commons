@@ -139,6 +139,18 @@ public final class DateUtil {
     }
 
     /**
+     * Formats a given timestamp into a ISO8601 timestamp.
+     *
+     * @param timestamp
+     *            the timestamp to convert
+     * @return String containing the formatted timestamp
+     */
+    public String formatDateTime(final long timestamp) {
+        final DateTime dt = new DateTime(timestamp, chrono);
+        return dt.toString();
+    }
+
+    /**
      * Parses an ISO8601 compliant timestamp into a DateTime object.
      *
      * @param timestamp
