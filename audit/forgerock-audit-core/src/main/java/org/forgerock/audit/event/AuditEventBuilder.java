@@ -29,6 +29,8 @@ package org.forgerock.audit.event;
 import static org.forgerock.json.fluent.JsonValue.*;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import org.forgerock.audit.util.DateUtil;
 import org.forgerock.json.fluent.JsonValue;
@@ -293,15 +295,12 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
          * @param headers the list of headers of HTTP request. The headers are optional.
          * @return this builder
          */
-        public T http(String method, String path, String queryString, String...headers) {
+        public T http(String method, String path, String queryString, Map<String, List<String>> headers) {
             JsonValue object = json(object(
                     field("method", method),
                     field("path", path),
-                    field("queryString", queryString)));
-            if (headers != null && headers.length > 0) {
-                Object headersList = json(array(Arrays.copyOf(headers, headers.length, Object[].class)));
-                object.put("headers", headersList);
-            }
+                    field("queryString", queryString),
+                    field("headers", headers)));
             jsonValue.put("http", object);
             return self();
         }

@@ -15,8 +15,14 @@
  */
 package org.forgerock.audit.event;
 
+import static java.util.Arrays.*;
 import static org.fest.assertions.api.Assertions.*;
 import static org.forgerock.audit.event.AuditEventBuilderTest.OpenProductAccessAuditEventBuilder.*;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.testng.annotations.Test;
@@ -73,6 +79,10 @@ public class AuditEventBuilderTest {
 
     @Test
     public void ensureEventIsCorrectlyBuilt() {
+        Map<String, List<String>> headers = new HashMap<String, List<String>>();
+        headers.put("Content-Length", asList("200"));
+        headers.put("Content-Type", asList("application/json"));
+
         AuditEvent event = productAccessEvent()
                 .transactionId("transactionId")
                 .timestamp(1427293286239l)
@@ -82,7 +92,7 @@ public class AuditEventBuilderTest {
                 .authorizationId("managed/user", "aegloff", "openidm-admin", "openidm-authorized")
                 .authenticationId("someone@forgerock.com")
                 .resourceOperation("action", "reconcile")
-                .http("GET", "/some/path", "p1=v1&p2=v2", "Content-Length: 200", "Content-Type: application/json")
+                .http("GET", "/some/path", "p1=v1&p2=v2", headers)
                 .response("200", 12)
                 .openField("value")
                 .aField("field", "fieldValue")
@@ -95,6 +105,7 @@ public class AuditEventBuilderTest {
         assertThat(value.get("server").get("ip").asString()).isEqualTo("sip");
         assertThat(value.get("server").get("port").asLong()).isEqualTo(80);
         assertThat(value.get("http").get("method").asString()).isEqualTo("GET");
+        assertThat(value.get("http").get("headers").asMapOfList(String.class)).isEqualTo(headers);
         assertThat(value.get("authorizationId").get("id").asString()).isEqualTo("aegloff");
         assertThat(value.get("resourceOperation").get("method").asString()).isEqualTo("action");
         assertThat(value.get("response").get("status").asString()).isEqualTo("200");
@@ -146,6 +157,25 @@ public class AuditEventBuilderTest {
         assertEvent(event4);
 
     }
+
+
+    @Test
+    public void eventWithNoHeader() {
+        Map<String, List<String>> headers = Collections.<String, List<String>>emptyMap();
+
+        AuditEvent event = productAccessEvent()
+                .transactionId("transactionId")
+                .timestamp(1427293286239l)
+                .http("GET", "/some/path", "p1=v1&p2=v2", headers)
+                .toEvent();
+
+        JsonValue value = event.getValue();
+        assertThat(value.get("transactionId").asString()).isEqualTo("transactionId");
+        assertThat(value.get("timestamp").asString()).isEqualTo("2015-03-25T15:21:26.239+01:00");
+        assertThat(value.get("http").get("headers").asMapOfList(String.class)).isEqualTo(headers);
+    }
+
+
 
     private void assertEvent(AuditEvent event) {
         JsonValue value = event.getValue();
