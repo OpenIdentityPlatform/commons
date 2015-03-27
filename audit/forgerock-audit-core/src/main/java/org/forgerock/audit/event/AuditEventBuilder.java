@@ -312,7 +312,7 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
          * @param elapsedTime the execution time of the action.
          * @return this builder
          */
-        public T response(String status, String elapsedTime) {
+        public T response(String status, long elapsedTime) {
             JsonValue object = json(object(
                     field("status", status),
                     field("elapsedTime", elapsedTime)));

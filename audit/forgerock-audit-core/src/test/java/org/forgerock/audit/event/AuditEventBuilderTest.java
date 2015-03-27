@@ -83,7 +83,7 @@ public class AuditEventBuilderTest {
                 .authenticationId("someone@forgerock.com")
                 .resourceOperation("action", "reconcile")
                 .http("GET", "/some/path", "p1=v1&p2=v2", "Content-Length: 200", "Content-Type: application/json")
-                .response("200", "12")
+                .response("200", 12)
                 .openField("value")
                 .aField("field", "fieldValue")
                 .toEvent();
