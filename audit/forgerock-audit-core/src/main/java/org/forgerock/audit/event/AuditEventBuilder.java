@@ -31,6 +31,7 @@ import static org.forgerock.json.fluent.JsonValue.*;
 import java.util.Arrays;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.util.Reject;
 
 /**
  * Root builder for all audit events.
@@ -42,6 +43,12 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
 
     /** Represents the event as a JSON value. */
     protected final JsonValue jsonValue = json(object());
+
+    /** Flag to track if the timestamp was set */
+    private boolean timestamp = false;
+
+    /** Flag to track if the transactionId was set */
+    private boolean transactionId = false;
 
     /**
      * Creates the builder.
@@ -63,6 +70,9 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
      * @return the audit event
      */
     public AuditEvent toEvent() {
+        if (!transactionId || !timestamp) {
+            throw new IllegalStateException("The fields transactionId or timestamp are mandatory.");
+        }
         return new AuditEvent(jsonValue);
     }
 
@@ -72,8 +82,10 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
      * @param t the time stamp.
      * @return this builder
      */
-    public T timestamp(String t) {
+    public final T timestamp(String t) {
+        Reject.ifNull(t);
         jsonValue.put("timestamp", t);
+        timestamp = true;
         return self();
     }
 
@@ -83,8 +95,10 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
      * @param id the transaction id.
      * @return this builder
      */
-    public T transactionId(String id) {
+    public final T transactionId(String id) {
+        Reject.ifNull(id);
         jsonValue.put("transactionId", id);
+        transactionId = true;
         return self();
     }
 

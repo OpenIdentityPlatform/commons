@@ -15,16 +15,33 @@
  */
 package org.forgerock.audit.event;
 
-import static org.fest.assertions.api.Assertions.assertThat;
-import static org.forgerock.audit.event.AuditEventBuilderTest.OpenProductAccessAuditEventBuilder.productAccessEvent;
+import static org.fest.assertions.api.Assertions.*;
+import static org.forgerock.audit.event.AuditEventBuilderTest.OpenProductAccessAuditEventBuilder.*;
 
-import org.forgerock.audit.event.AuditEvent;
-import org.forgerock.audit.event.AuditEventBuilder;
 import org.forgerock.json.fluent.JsonValue;
 import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")
 public class AuditEventBuilderTest {
+
+    @Test(expectedExceptions= { IllegalStateException.class })
+    public void ensureAuditEventContainsMandatoryAttributes() throws Exception {
+        productAccessEvent().toEvent();
+    }
+
+    @Test(expectedExceptions= { IllegalStateException.class })
+    public void ensureAuditEventContainsTimestamp() throws Exception {
+        productAccessEvent()
+                .transactionId("transactionId")
+                .toEvent();
+    }
+
+    @Test(expectedExceptions= { IllegalStateException.class })
+    public void ensureAuditEventContainsTransactionId() throws Exception {
+        productAccessEvent()
+                .timestamp("timestamp")
+                .toEvent();
+    }
 
     /**
      * Example builder of audit access events for some imaginary product "OpenProduct".
@@ -56,6 +73,7 @@ public class AuditEventBuilderTest {
     public void ensureEventIsCorrectlyBuilt() {
         AuditEvent event = productAccessEvent()
                 .transactionId("transactionId")
+                .timestamp("timestamp")
                 .messageId("IDM-sync-10")
                 .client("cip", "cport")
                 .server("sip", "sport")
@@ -88,28 +106,39 @@ public class AuditEventBuilderTest {
                 .server("ip", "port")
                 .client("cip", "cport")
                 .openField("value")
-                .transactionId("transactionId").toEvent();
+                .transactionId("transactionId")
+                .timestamp("timestamp")
+                .toEvent();
         assertEvent(event1);
 
         AuditEvent event2 = productAccessEvent()
                 .client("cip", "cport")
                 .openField("value")
                 .server("ip", "port")
-                .transactionId("transactionId").toEvent();
+                .transactionId("transactionId")
+                .timestamp("timestamp")
+                .toEvent();
         assertEvent(event2);
 
         AuditEvent event3 = productAccessEvent()
                 .openField("value")
                 .transactionId("transactionId")
                 .client("cip", "cport")
-                .server("ip", "port").toEvent();
+                .server("ip", "port")
+                .transactionId("transactionId")
+                .timestamp("timestamp")
+                .toEvent();
         assertEvent(event3);
 
         AuditEvent event4 = productAccessEvent()
                 .transactionId("transactionId")
                 .client("cip", "cport")
                 .openField("value")
-                .server("ip", "port").toEvent();
+                .server("ip", "port")
+                .transactionId("transactionId")
+                .timestamp("timestamp")
+                .toEvent();
+
         assertEvent(event4);
 
     }
