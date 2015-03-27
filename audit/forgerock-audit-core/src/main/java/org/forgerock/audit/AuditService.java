@@ -26,7 +26,7 @@ import java.util.UUID;
 import org.forgerock.audit.events.AuditEventHelper;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.audit.events.handlers.AuditEventHandlerFactory;
-import org.forgerock.json.fluent.JsonPointer;
+import org.forgerock.audit.util.ResourceExceptionsUtil;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
@@ -44,8 +44,6 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.audit.util.DateUtil;
-import org.forgerock.audit.util.ResourceExceptionsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -182,9 +180,11 @@ public class AuditService implements RequestHandler {
                     : request.getNewResourceId();
             request.getContent().put(Resource.FIELD_CONTENT_ID, localId);
 
-            if (!request.getContent().isDefined("timestamp")) {
-                logger.error("The request requires a timestamp");
-                throw new BadRequestException("The request requires a timestamp");
+            if (!request.getContent().isDefined("transactionId")
+                    || !request.getContent().isDefined("timestamp")) {
+                String message = "The request requires a transactionId and a timestamp";
+                logger.error(message);
+                throw new BadRequestException(message);
             }
 
             // Don't audit the audit log

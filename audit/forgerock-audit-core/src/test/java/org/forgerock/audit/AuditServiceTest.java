@@ -16,21 +16,22 @@
 
 package org.forgerock.audit;
 
-import static org.fest.assertions.api.Assertions.assertThat;
-import static org.forgerock.json.fluent.JsonValue.array;
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.fest.assertions.api.Assertions.*;
+import static org.forgerock.json.fluent.JsonValue.*;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.fest.util.Files;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.QueryResult;
@@ -46,12 +47,6 @@ import org.mockito.ArgumentCaptor;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
 
 public class AuditServiceTest {
 
@@ -99,8 +94,8 @@ public class AuditServiceTest {
         auditService.handleCreate(new ServerContext(new RootContext()), createRequest, resultHandler);
 
         //then
-        verify(resultHandler).handleResult(resourceCaptor.capture());
         verify(resultHandler, times(0)).handleError(any(ResourceException.class));
+        verify(resultHandler).handleResult(resourceCaptor.capture());
 
         final Resource resource = resourceCaptor.getValue();
         assertThat(resource != null);
@@ -119,8 +114,8 @@ public class AuditServiceTest {
 
         auditService.handleCreate(new ServerContext(new RootContext()), createRequest, resultHandler);
 
-        verify(resultHandler).handleResult(resourceCaptor.capture());
         verify(resultHandler, times(0)).handleError(any(ResourceException.class));
+        verify(resultHandler).handleResult(resourceCaptor.capture());
 
         final ReadRequest readRequest = Requests.newReadRequest("access", resourceCaptor.getValue().getId());
 
@@ -268,12 +263,60 @@ public class AuditServiceTest {
         assertThat(auditService.getConfig().asMap().equals(config.asMap()));
     }
 
+    @Test
+    public void testMandatoryFieldTransactionId() throws ResourceException {
+        //given
+        final AuditService auditService = new AuditService();
+        auditService.configure(config);
+
+        // No transactionId in the JSON content
+        final JsonValue content = json(object(field("_id", "_id"),
+                                              field("timestamp", "timestamp")));
+
+        final CreateRequest createRequest = Requests.newCreateRequest("access", content);
+        final ResultHandler<Resource> resultHandler = mock(ResultHandler.class);
+
+        final ArgumentCaptor<ResourceException> resourceExceptionCaptor =
+                ArgumentCaptor.forClass(ResourceException.class);
+
+        //when
+        auditService.handleCreate(new ServerContext(new RootContext()), createRequest, resultHandler);
+
+        //then
+        verify(resultHandler).handleError(resourceExceptionCaptor.capture());
+        assertThat(resourceExceptionCaptor.getValue() instanceof BadRequestException);
+    }
+
+    @Test
+    public void testMandatoryFieldTimestamp() throws ResourceException {
+        //given
+        final AuditService auditService = new AuditService();
+        auditService.configure(config);
+
+        // No timestamp in the JSON content
+        final JsonValue content = json(object(field("_id", "_id"),
+                                              field("transactionId", "transactionId")));
+
+        final CreateRequest createRequest = Requests.newCreateRequest("access", content);
+        final ResultHandler<Resource> resultHandler = mock(ResultHandler.class);
+
+        final ArgumentCaptor<ResourceException> resourceExceptionCaptor =
+                ArgumentCaptor.forClass(ResourceException.class);
+
+        //when
+        auditService.handleCreate(new ServerContext(new RootContext()), createRequest, resultHandler);
+
+        //then
+        verify(resultHandler).handleError(resourceExceptionCaptor.capture());
+        assertThat(resourceExceptionCaptor.getValue() instanceof BadRequestException);
+    }
+
     private CreateRequest makeCreateRequest() {
         final JsonValue content = json(
                 object(
                         field("_id", "_id"),
                         field("timestamp", "timestamp"),
-                        field("transactionIds", array("transactionId1", "transactionId2"))
+                        field("transactionId", "transactionId")
                 )
         );
         return Requests.newCreateRequest("access", content);
