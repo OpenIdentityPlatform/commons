@@ -87,7 +87,7 @@ public class AuditServiceTest {
         auditService.configure(config);
 
         final CreateRequest createRequest = makeCreateRequest();
-        final ResultHandler<Resource> resultHandler = mock(ResultHandler.class);
+        final ResultHandler<Resource> resultHandler = mockResultHandler(Resource.class);
         final ArgumentCaptor<Resource> resourceCaptor = ArgumentCaptor.forClass(Resource.class);
 
         //when
@@ -109,7 +109,7 @@ public class AuditServiceTest {
         auditService.configure(config);
 
         final CreateRequest createRequest = makeCreateRequest();
-        final ResultHandler<Resource> resultHandler = mock(ResultHandler.class);
+        final ResultHandler<Resource> resultHandler = mockResultHandler(Resource.class);
         final ArgumentCaptor<Resource> resourceCaptor = ArgumentCaptor.forClass(Resource.class);
 
         auditService.handleCreate(new ServerContext(new RootContext()), createRequest, resultHandler);
@@ -136,7 +136,7 @@ public class AuditServiceTest {
         //given
         final AuditService auditService = new AuditService();
         auditService.configure(config);
-        final ResultHandler<Resource> resultHandler = mock(ResultHandler.class);
+        final ResultHandler<Resource> resultHandler = mockResultHandler(Resource.class);
         final ArgumentCaptor<Resource> resourceCaptor = ArgumentCaptor.forClass(Resource.class);
         final ArgumentCaptor<ResourceException> resourceExceptionCaptor =
                 ArgumentCaptor.forClass(ResourceException.class);
@@ -160,7 +160,7 @@ public class AuditServiceTest {
         //given
         final AuditService auditService = new AuditService();
         auditService.configure(config);
-        final ResultHandler<Resource> resultHandler = mock(ResultHandler.class);
+        final ResultHandler<Resource> resultHandler = mockResultHandler(Resource.class);
         final ArgumentCaptor<Resource> resourceCaptor = ArgumentCaptor.forClass(Resource.class);
         final ArgumentCaptor<ResourceException> resourceExceptionCaptor =
                 ArgumentCaptor.forClass(ResourceException.class);
@@ -184,7 +184,7 @@ public class AuditServiceTest {
         //given
         final AuditService auditService = new AuditService();
         auditService.configure(config);
-        final ResultHandler<Resource> resultHandler = mock(ResultHandler.class);
+        final ResultHandler<Resource> resultHandler = mockResultHandler(Resource.class);
         final ArgumentCaptor<Resource> resourceCaptor = ArgumentCaptor.forClass(Resource.class);
         final ArgumentCaptor<ResourceException> resourceExceptionCaptor =
                 ArgumentCaptor.forClass(ResourceException.class);
@@ -208,7 +208,7 @@ public class AuditServiceTest {
         //given
         final AuditService auditService = new AuditService();
         auditService.configure(config);
-        final ResultHandler<JsonValue> resultHandler = mock(ResultHandler.class);
+        final ResultHandler<JsonValue> resultHandler = mockResultHandler(JsonValue.class);
         final ArgumentCaptor<JsonValue> resourceCaptor = ArgumentCaptor.forClass(JsonValue.class);
         final ArgumentCaptor<ResourceException> resourceExceptionCaptor =
                 ArgumentCaptor.forClass(ResourceException.class);
@@ -274,7 +274,7 @@ public class AuditServiceTest {
                                               field("timestamp", "timestamp")));
 
         final CreateRequest createRequest = Requests.newCreateRequest("access", content);
-        final ResultHandler<Resource> resultHandler = mock(ResultHandler.class);
+        final ResultHandler<Resource> resultHandler = mockResultHandler(Resource.class);
 
         final ArgumentCaptor<ResourceException> resourceExceptionCaptor =
                 ArgumentCaptor.forClass(ResourceException.class);
@@ -298,7 +298,7 @@ public class AuditServiceTest {
                                               field("transactionId", "transactionId")));
 
         final CreateRequest createRequest = Requests.newCreateRequest("access", content);
-        final ResultHandler<Resource> resultHandler = mock(ResultHandler.class);
+        final ResultHandler<Resource> resultHandler = mockResultHandler(Resource.class);
 
         final ArgumentCaptor<ResourceException> resourceExceptionCaptor =
                 ArgumentCaptor.forClass(ResourceException.class);
@@ -321,4 +321,10 @@ public class AuditServiceTest {
         );
         return Requests.newCreateRequest("access", content);
     }
-}
+
+    @SuppressWarnings("unchecked")
+    private static <T> ResultHandler<T> mockResultHandler(Class<T> type) {
+        return mock(ResultHandler.class);
+
+    }
+ }
