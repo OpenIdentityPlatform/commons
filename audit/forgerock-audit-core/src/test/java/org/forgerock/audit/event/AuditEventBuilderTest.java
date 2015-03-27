@@ -29,11 +29,13 @@ public class AuditEventBuilderTest {
         productAccessEvent().toEvent();
     }
 
-    @Test(expectedExceptions= { IllegalStateException.class })
-    public void ensureAuditEventContainsTimestamp() throws Exception {
-        productAccessEvent()
+    @Test
+    public void ensureAuditEventContainsTimestampEvenIfNotAdded() throws Exception {
+        AuditEvent event = productAccessEvent()
                 .transactionId("transactionId")
                 .toEvent();
+        JsonValue value = event.getValue();
+        assertThat(value.get("timestamp").asString()).isNotNull().isNotEmpty();
     }
 
     @Test(expectedExceptions= { IllegalStateException.class })

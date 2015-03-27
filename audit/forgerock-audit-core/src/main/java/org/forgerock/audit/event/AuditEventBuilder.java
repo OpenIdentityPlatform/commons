@@ -70,8 +70,11 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
      * @return the audit event
      */
     public AuditEvent toEvent() {
-        if (!transactionId || !timestamp) {
-            throw new IllegalStateException("The fields transactionId or timestamp are mandatory.");
+        if (!transactionId) {
+            throw new IllegalStateException("The field transactionId is mandatory.");
+        }
+        if (!timestamp) {
+            timestamp(System.currentTimeMillis());
         }
         return new AuditEvent(jsonValue);
     }
