@@ -194,7 +194,7 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
          * @param port the port of the server.
          * @return this builder
          */
-        public T server(String ip, String port) {
+        public T server(String ip, int port) {
             JsonValue object = json(object(
                     field("ip", ip),
                     field("port", port)));
@@ -209,7 +209,7 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
          * @param port the port of the client.
          * @return this builder
          */
-        public T client(String ip, String port) {
+        public T client(String ip, int port) {
             JsonValue object = json(object(
                     field("ip", ip),
                     field("port", port)));
@@ -219,13 +219,13 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
 
         /**
          * Sets the provided client hostname, ip and port for the event.
-         *
-         * @param host the hostname of the client.
          * @param ip the ip of the client.
          * @param port the port of the client.
+         * @param host the hostname of the client.
+         *
          * @return this builder
          */
-        public T client(String host, String ip, String port) {
+        public T client(String ip, int port, String host) {
             JsonValue object = json(object(
                     field("host", host),
                     field("ip", ip),

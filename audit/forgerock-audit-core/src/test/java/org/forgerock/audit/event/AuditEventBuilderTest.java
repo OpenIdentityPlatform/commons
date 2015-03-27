@@ -77,8 +77,8 @@ public class AuditEventBuilderTest {
                 .transactionId("transactionId")
                 .timestamp("timestamp")
                 .messageId("IDM-sync-10")
-                .client("cip", "cport")
-                .server("sip", "sport")
+                .client("cip", 1203)
+                .server("sip", 80)
                 .authorizationId("managed/user", "aegloff", "openidm-admin", "openidm-authorized")
                 .authenticationId("someone@forgerock.com")
                 .resourceOperation("action", "reconcile")
@@ -92,21 +92,22 @@ public class AuditEventBuilderTest {
         assertThat(value.get("transactionId").asString()).isEqualTo("transactionId");
         assertThat(value.get("messageId").asString()).isEqualTo("IDM-sync-10");
         assertThat(value.get("server").get("ip").asString()).isEqualTo("sip");
-        assertThat(value.get("server").get("port").asString()).isEqualTo("sport");
+        assertThat(value.get("server").get("port").asLong()).isEqualTo(80);
         assertThat(value.get("http").get("method").asString()).isEqualTo("GET");
         assertThat(value.get("authorizationId").get("id").asString()).isEqualTo("aegloff");
         assertThat(value.get("resourceOperation").get("method").asString()).isEqualTo("action");
         assertThat(value.get("response").get("status").asString()).isEqualTo("200");
-        assertThat(value.get("open").asString()).isEqualTo("value");
-        assertThat(value.get("field").asString()).isEqualTo("fieldValue");
+        assertThat(value.get("response").get("elapsedTime").asLong()).isEqualTo(12);
+        assertThat(value.get("open").getObject()).isEqualTo("value");
+        assertThat(value.get("field").getObject()).isEqualTo("fieldValue");
     }
 
 
     @Test
     public void ensureBuilderMethodsCanBeCalledInAnyOrder() {
         AuditEvent event1 = productAccessEvent()
-                .server("ip", "port")
-                .client("cip", "cport")
+                .server("ip", 80)
+                .client("cip", 1203)
                 .openField("value")
                 .transactionId("transactionId")
                 .timestamp("timestamp")
@@ -114,9 +115,9 @@ public class AuditEventBuilderTest {
         assertEvent(event1);
 
         AuditEvent event2 = productAccessEvent()
-                .client("cip", "cport")
+                .client("cip", 1203)
                 .openField("value")
-                .server("ip", "port")
+                .server("ip", 80)
                 .transactionId("transactionId")
                 .timestamp("timestamp")
                 .toEvent();
@@ -125,8 +126,8 @@ public class AuditEventBuilderTest {
         AuditEvent event3 = productAccessEvent()
                 .openField("value")
                 .transactionId("transactionId")
-                .client("cip", "cport")
-                .server("ip", "port")
+                .client("cip", 1203)
+                .server("ip", 80)
                 .transactionId("transactionId")
                 .timestamp("timestamp")
                 .toEvent();
@@ -134,9 +135,9 @@ public class AuditEventBuilderTest {
 
         AuditEvent event4 = productAccessEvent()
                 .transactionId("transactionId")
-                .client("cip", "cport")
+                .client("cip", 1203)
                 .openField("value")
-                .server("ip", "port")
+                .server("ip", 80)
                 .transactionId("transactionId")
                 .timestamp("timestamp")
                 .toEvent();
@@ -149,9 +150,9 @@ public class AuditEventBuilderTest {
         JsonValue value = event.getValue();
         assertThat(value.get("open").getObject()).isEqualTo("value");
         assertThat(value.get("server").get("ip").asString()).isEqualTo("ip");
-        assertThat(value.get("server").get("port").asString()).isEqualTo("port");
+        assertThat(value.get("server").get("port").asLong()).isEqualTo(80);
         assertThat(value.get("client").get("ip").asString()).isEqualTo("cip");
-        assertThat(value.get("client").get("port").asString()).isEqualTo("cport");
-        assertThat(value.get("transactionId").asString()).isEqualTo("transactionId");
+        assertThat(value.get("client").get("port").asLong()).isEqualTo(1203);
+        assertThat(value.get("transactionId").getObject()).isEqualTo("transactionId");
     }
 }
