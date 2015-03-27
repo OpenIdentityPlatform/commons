@@ -198,7 +198,20 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
          * @return this builder
          */
         public T server(String ip, int port) {
+            return server(ip, port, null);
+        }
+
+        /**
+         * Sets the provided server hostname, ip and port for the event.
+         * @param ip the ip of the server.
+         * @param port the port of the server.
+         * @param host the hostname of the server.
+         *
+         * @return this builder
+         */
+        public T server(String ip, int port, String host) {
             JsonValue object = json(object(
+                    field("host", host),
                     field("ip", ip),
                     field("port", port)));
             jsonValue.put("server", object);
