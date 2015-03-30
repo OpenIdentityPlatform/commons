@@ -100,7 +100,7 @@ public class AuditEventBuilderTest {
 
         JsonValue value = event.getValue();
         assertThat(value.get("transactionId").asString()).isEqualTo("transactionId");
-        assertThat(value.get("timestamp").asString()).isEqualTo("2015-03-25T15:21:26.239+01:00");
+        assertThat(value.get("timestamp").asString()).isEqualTo("2015-03-25T14:21:26.239Z");
         assertThat(value.get("messageId").asString()).isEqualTo("IDM-sync-10");
         assertThat(value.get("server").get("ip").asString()).isEqualTo("sip");
         assertThat(value.get("server").get("port").asLong()).isEqualTo(80);
@@ -171,7 +171,7 @@ public class AuditEventBuilderTest {
 
         JsonValue value = event.getValue();
         assertThat(value.get("transactionId").asString()).isEqualTo("transactionId");
-        assertThat(value.get("timestamp").asString()).isEqualTo("2015-03-25T15:21:26.239+01:00");
+        assertThat(value.get("timestamp").asString()).isEqualTo("2015-03-25T14:21:26.239Z");
         assertThat(value.get("http").get("headers").asMapOfList(String.class)).isEqualTo(headers);
     }
 
@@ -185,6 +185,6 @@ public class AuditEventBuilderTest {
         assertThat(value.get("client").get("ip").asString()).isEqualTo("cip");
         assertThat(value.get("client").get("port").asLong()).isEqualTo(1203);
         assertThat(value.get("transactionId").asString()).isEqualTo("transactionId");
-        assertThat(value.get("timestamp").asString()).isEqualTo("2015-03-25T15:21:26.239+01:00");
+        assertThat(value.get("timestamp").asString()).isEqualTo("2015-03-25T14:21:26.239Z");
     }
 }

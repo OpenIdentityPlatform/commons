@@ -90,7 +90,7 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
      */
     public final T timestamp(long timestamp) {
         Reject.ifTrue(timestamp <= 0, "The timestamp has to be greater than 0.");
-        jsonValue.put("timestamp", DateUtil.getDateUtil().formatDateTime(timestamp));
+        jsonValue.put("timestamp", DateUtil.getDateUtil("UTC").formatDateTime(timestamp));
         this.timestamp = true;
         return self();
     }
