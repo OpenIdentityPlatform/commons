@@ -346,6 +346,9 @@ public final class Promises {
                 }
             });
         }
+        if (promises.isEmpty()) {
+            composite.handleResult(results);
+        }
         return composite;
     }
 
