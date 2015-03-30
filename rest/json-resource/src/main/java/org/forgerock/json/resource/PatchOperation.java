@@ -433,7 +433,7 @@ public final class PatchOperation {
     private PatchOperation(final String operation, final JsonPointer field, final JsonValue value) {
         this.operation = checkNotNull(operation, "Cannot instantiate PatchOperation with null operation value");
         this.field = checkNotNull(field, "Cannot instantiate PatchOperation with null field value");
-        this.value = value != null ? value : new JsonValue(null);
+        this.value = value;
         checkOperationType();
         checkOperationValue();
     }
@@ -457,10 +457,10 @@ public final class PatchOperation {
     }
 
     /**
-     * Returns the value for the patch operation. The return value is never
-     * {@code null}, but may be a JSON value whose value is {@code null}.
+     * Returns the value for the patch operation. The return value may be
+     * {@code null}, and may also be a JSON value whose value is {@code null}.
      *
-     * @return The non-{@code null} value for the patch operation.
+     * @return The nullable value for the patch operation.
      */
     public JsonValue getValue() {
         return value;
@@ -511,7 +511,7 @@ public final class PatchOperation {
         final JsonValue json = new JsonValue(new LinkedHashMap<String, Object>(3));
         json.put(FIELD_OPERATION, operation);
         json.put(FIELD_FIELD, field.toString());
-        if (!value.isNull()) {
+        if (value != null) {
             json.put(FIELD_VALUE, value.getObject());
         }
         return json;
@@ -523,10 +523,10 @@ public final class PatchOperation {
     }
 
     private void checkOperationValue() {
-        if (isAdd() && value.isNull()) {
+        if (isAdd() && value == null) {
             throw new NullPointerException("No value provided for add patch operation");
         } else if (isIncrement()) {
-            if (value.isNull()) {
+            if (value == null || value.isNull()) {
                 throw new NullPointerException("No value provided for increment patch operation");
             } else if (!value.isNumber()) {
                 throw new IllegalArgumentException(
