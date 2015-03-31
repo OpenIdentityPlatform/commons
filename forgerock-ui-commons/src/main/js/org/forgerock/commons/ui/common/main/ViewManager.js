@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2012-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -61,7 +61,7 @@ define("org/forgerock/commons/ui/common/main/ViewManager", [
             if(view.init) {
                 view.init();
             } else {
-                view.render(args, callback);
+                view.render(_.map(args, decodeURIComponent), callback);
             }
 
 
@@ -80,7 +80,7 @@ define("org/forgerock/commons/ui/common/main/ViewManager", [
 
     obj.showDialog = function(dialogPath, args, callback) {
         if(obj.currentDialog !== dialogPath || !_.isEqual(obj.currentDialogArgs, args)) {
-            require(dialogPath).render(args, callback);
+            require(dialogPath).render(_.map(args, decodeURIComponent), callback);
             msg.messages.hideMessages();
         }
 

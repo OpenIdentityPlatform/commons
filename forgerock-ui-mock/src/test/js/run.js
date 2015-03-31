@@ -31,8 +31,8 @@ require([
     "../test/tests/user",
     "../test/tests/mock",
     "../test/tests/getLoggedUser",
-    "../test/tests/utils"
-], function (constants, eventManager, commonsTests, userTests, mockTests, getLoggedUser, utilsTests) {
+    "../test/tests/router"
+], function (constants, eventManager, commonsTests, userTests, mockTests, getLoggedUser, routerTests) {
 
     $.doTimeout = function (name, time, func) {
         func(); // run the function immediately rather than delayed.
@@ -60,7 +60,7 @@ require([
                 commonsTests.executeAll(server, userParams);
                 userTests.executeAll(server, getLoggedUser());
                 mockTests.executeAll(server, userParams);
-                utilsTests.executeAll();
+                routerTests.executeAll();
 
                 QUnit.done(function () {
                     localStorage.clear();

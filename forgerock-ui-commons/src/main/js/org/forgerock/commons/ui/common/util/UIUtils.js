@@ -23,7 +23,6 @@
  */
 
 /*global define, window, Handlebars, i18n, sessionStorage */
-/*jslint regexp: false*/
 
 define("org/forgerock/commons/ui/common/util/UIUtils", [
     "jquery",
@@ -41,134 +40,30 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
      */
     var obj = new AbstractConfigurationAware();
 
-    obj.getUrl = function() {
-        return window.location.href;
-    };
-
-    obj.getCurrentUrlBasePart = function() {
-        return window.location.protocol + "//" + window.location.host;
-    };
-
-    /**
-     * Returns the query string from the fragment component
-     * @returns {String} Unescaped query string or empty string if no query string was found
-     */
-    obj.getURIFragmentQueryString = function() {
-      var fragment = obj.getURIFragment(),
-          queryString = '';
-
-      if(fragment.indexOf('&') > -1) {
-        queryString = fragment.substring(fragment.indexOf('&') + 1);
-      }
-
-      return queryString;
-    };
-
-    /**
-     * Returns the query string from the URI
-     * @returns {String} Unescaped query string or empty string if no query string was found
-     */
-    obj.getURIQueryString = function() {
-      var queryString = window.location.search;
-
-      return queryString.substr(1, queryString.length);
-    };
-
-    /**
-     * @deprecated
-     * @see Use {@link module:org/forgerock/commons/ui/common/util/UIUtils.getURIFragment}
-     */
-    obj.getCurrentHash = function() {
-        if (obj.getUrl().indexOf('#') === -1) {
-            return "";
-        } else {
-            // cannot use window.location.hash due to FF which de-encodes this parameter.
-            return obj.getUrl().substring(obj.getUrl().indexOf('#') + 1);
-        }
-    };
-
-    /**
-     * Returns the fragment component of the current URI
-     *
-     * Use instead of the inconsistent window.location.hash as Firefox unescapes this parameter incorrectly
-     * @see {@link https://bugzilla.mozilla.org/show_bug.cgi?id=135309}
-     * @returns {String} Unescaped fragment or empty string if no fragment was found
-     */
-    obj.getURIFragment = function() {
-        return obj.getUrl().split('#')[1] || '';
-    };
-
-    /**
-     * @deprecated
-     * @see Use {@link module:org/forgerock/commons/ui/common/util/UIUtils.getCompositeQueryString}
-     */
-    obj.getCurrentUrlQueryParameters = function() {
-        var hash = obj.getCurrentHash(),
-            queries = obj.getURIQueryString();
-            // location.search will only return a value if there are queries before the hash.
-        if (hash && hash.indexOf('&') > -1) {
-            queries = hash.substring(hash.indexOf('&') + 1);
-        }
-        return queries;
-    };
-
-    /**
-     * Returns an unescaped composite query string constructed from:<br>
-     * <ul><li>Fragment query string</li>
-     * <li>URL query string</li></ul>
-     * <p>
-     * If a fragment query string is present it overrides the URL query string entirely
-     * @returns {String} Unescaped query string
-     */
-    obj.getCompositeQueryString = function() {
-      var urlQueryString = obj.getURIQueryString(),
-          fragmentQueryString = obj.getURIFragmentQueryString();
-
-      return fragmentQueryString.length ? fragmentQueryString : urlQueryString;
-    };
-
-    obj.getCurrentPathName = function() {
-        return window.location.pathname;
-    };
-
-    obj.setUrl = function(url) {
-        window.location.href = url;
-    };
-
-    obj.normalizeSubPath = function(subPath) {
-        if(subPath.endsWith('/')) {
-            return subPath.removeLastChars();
-        }
-        return subPath;
-    };
-
-    obj.convertCurrentUrlToJSON = function() {
-        var result = {}, parsedQueryParams;
-
-        result.url = obj.getCurrentUrlBasePart();
-        result.pathName = obj.normalizeSubPath(obj.getCurrentPathName());
-
-        result.params = obj.convertQueryParametersToJSON(obj.getCurrentUrlQueryParameters());
-        return result;
-    };
-
-    obj.convertQueryParametersToJSON = function(queryParameters) {
-        if(queryParameters) {
-            //create a json object from a query string
-            //by taking a query string and splitting it up into individual key=value strings
-            return _.object(
-                //queryParameters.match(/([^&]+)/g) returns an array of key value pair strings
-                _.map(queryParameters.match(/([^&]+)/g), function (pair) {
-                   //convert each string into a an array 0 index being the key and 1 index being the value
-                   var keyAndValue = pair.match(/([^=]+)=?(.*)/).slice(1);
-                       //decode the value
-                       keyAndValue[1] = decodeURIComponent(keyAndValue[1]);
-                       return keyAndValue;
-                })
-            );
-        }
-        return {};
-    };
+    // these functions used to exist in this module, but they were moved to the 
+    // router module (they are all route-related, rather than UI)
+    // this remains so that old code doesn't just break;
+    _.each([
+        "getUrl",
+        "getCurrentUrlBasePart",
+        "getURIFragmentQueryString",
+        "getURIQueryString",
+        "getCurrentHash",
+        "getURIFragment",
+        "getCurrentUrlQueryParameters",
+        "getCompositeQueryString",
+        "getCurrentPathName",
+        "setUrl",
+        "normalizeSubPath",
+        "convertCurrentUrlToJSON",
+        "convertQueryParametersToJSON",
+        "getParamByName"
+    ], function (f) {
+        obj[f] = function () {
+            console.warn("Deprecated use of UIUtils." + f + "; Update code to use Router." + f);
+            return router[f].apply(this, arguments);
+        };
+    });
 
     obj.commonJQGridFormatters = {
         objectFormatter: function (cellvalue, options, rowObject) {
@@ -829,19 +724,6 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     obj.responseMessageMatch = function(error, string){
         var responseMessage = JSON.parse(error).message;
         return responseMessage.indexOf(string) > -1;
-    };
-
-    /**
-    * Takes a string and checks if there is a matching url parameter.
-    * @returns {String} parameter or null
-    */
-    obj.getParamByName = function(string){
-        var urlParams = obj.convertCurrentUrlToJSON().params;
-        if (urlParams && urlParams.hasOwnProperty(string)) {
-            return urlParams[string];
-        } else {
-            return null;
-        }
     };
 
     // Registering global mixins

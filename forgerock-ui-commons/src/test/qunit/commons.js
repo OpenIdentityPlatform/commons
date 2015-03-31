@@ -254,9 +254,6 @@ define([
                     renderPromise = $.Deferred(),
                     stub;
 
-                QUnit.equal(router.getFragmentParameters("login/foo&bar=abc")[0], "/foo", "Correctly able to parse regexp URL parameter");
-                QUnit.strictEqual(router.getFragmentParameters("enableCookies/")[0], null, "Plain URL arguments returned as null first value");
-
                 stub = sinon.stub(testView, "render", function (args, callback) {
                     renderPromise.resolve();
                 });
@@ -275,16 +272,18 @@ define([
 
             QUnit.asyncTest("Routes with special characters in parameter values (CUI-51)", function () {
                 var manySpecialCharacters = "/!@?#$%",
-                    additionalSpecialCharacters = "a%?b",
+                    additionalSpecialCharacters = "a%?b&c",
                     loginView = require("org/forgerock/commons/ui/common/LoginView"),
                     stub = sinon.stub(loginView, "render", function (args, callback) {
+                        var currentParams = router.convertCurrentUrlToJSON().params;
                         QUnit.equal(args[0], manySpecialCharacters, "Characters properly passed to first arg of render function");
-                        QUnit.equal(args[1], '&' + additionalSpecialCharacters, "Characters properly passed to last arg of render function");
+                        QUnit.equal(args[1], '&name1=' + additionalSpecialCharacters, "Characters properly passed to last arg of render function");
+                        QUnit.equal(currentParams.name1, additionalSpecialCharacters, "Characters accurately parsed out of url params");
                         stub.restore();
                         QUnit.start();
                     });
 
-                window.location.hash = "login" + encodeURIComponent(manySpecialCharacters) + '&' + encodeURIComponent(additionalSpecialCharacters);
+                window.location.hash = "login" + encodeURIComponent(manySpecialCharacters) + '&name1=' + encodeURIComponent(additionalSpecialCharacters);
             });
 
             QUnit.asyncTest("Parameters passed to logout event", function () {

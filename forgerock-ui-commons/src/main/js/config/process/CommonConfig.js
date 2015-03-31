@@ -126,12 +126,11 @@ define("config/process/CommonConfig", [
                 "org/forgerock/commons/ui/common/main/Router",
                 "org/forgerock/commons/ui/common/main/Configuration",
                 "org/forgerock/commons/ui/common/main/SessionManager",
-                "org/forgerock/commons/ui/common/util/UIUtils",
                 "LoginDialog"
             ],
-            processDescription: function(error, viewManager, router, conf, sessionManager, uiUtils, loginDialog) {
+            processDescription: function(error, viewManager, router, conf, sessionManager, loginDialog) {
                 var saveGotoURL = function () {
-                    var hash = uiUtils.getCurrentHash();
+                    var hash = router.getCurrentHash();
                     if(!conf.gotoURL && !hash.match(router.configuration.routes.login.url)) {
                         conf.setProperty("gotoURL", "#" + hash);
                     }
@@ -244,7 +243,7 @@ define("config/process/CommonConfig", [
                 siteConfigurator.configurePage(route, params).then(function () {
                     spinner.hideSpinner(10);
                     router.routeTo(route, {trigger: true, args: params});
-                    viewManager.changeView(route.view, router.translateParameters(route, params), callback, route.forceUpdate);
+                    viewManager.changeView(route.view, params, callback, route.forceUpdate);
                     navigation.reload();
                 });
             }

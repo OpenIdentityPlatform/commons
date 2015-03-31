@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2014-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -31,8 +31,8 @@
 define( "org/forgerock/commons/ui/common/main/i18nManager", [
     "jquery",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/util/UIUtils"
-], function($, consts, uiUtils) {
+    "org/forgerock/commons/ui/common/main/Router"
+], function($, consts, Router) {
 
     /*
      * i18nManger with i18next try to detect the user language and load the corresponding translation in the following order:
@@ -45,7 +45,7 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
 
     obj.init = function(lang) {
 
-        var locales = [], opts = { }, params = uiUtils.convertCurrentUrlToJSON().params;
+        var locales = [], opts = { }, params = Router.convertCurrentUrlToJSON().params;
 
         if (params && params.locale) {
             lang = params.locale;

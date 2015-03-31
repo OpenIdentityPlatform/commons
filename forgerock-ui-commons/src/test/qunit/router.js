@@ -22,10 +22,10 @@
 * "Portions Copyrighted [year] [name of copyright owner]"
 */
 
-define(['org/forgerock/commons/ui/common/util/UIUtils'], function(subject) {
+define(["org/forgerock/commons/ui/common/main/Router"], function(subject) {
     return {
         executeAll: function (server, parameters) {
-            module('org/forgerock/commons/ui/common/util/UIUtils');
+            module("org/forgerock/commons/ui/common/main/Router");
             ['getCurrentHash', 'getURIFragment'].forEach(function(func) {
                 test('#' + func, sinon.test(function() {
                     this.stub(subject, 'getUrl').returns('http://www.example.com/XUI#login');
