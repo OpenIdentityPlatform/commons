@@ -112,8 +112,14 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
             logger.info("Audit logging to: {}", auditLogDirectory);
 
             File file = new File(auditLogDirectory);
-            if (!file.mkdirs()) {
-                logger.warn("Unable to create the directories in the path: " + auditLogDirectory);
+            if (!file.isDirectory()) {
+                if (file.exists()) {
+                    logger.warn("Specified path is file but should be a directory: " + auditLogDirectory);
+                } else {
+                    if (!file.mkdirs()) {
+                        logger.warn("Unable to create the directories in the path: " + auditLogDirectory);
+                    }
+                }
             }
 
             recordDelim = config.get(CONFIG_LOG_RECORD_DELIM).asString();
