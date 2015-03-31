@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -33,7 +33,7 @@ define("mock/Data", [
     "text!libs/less-1.5.1-min.js",
     "text!css/styles.less",
     "text!css/common/common.less",
-    "text!css/common/variables.less",
+    "text!css/common/forgerock-variables.less",
     "text!css/fontawesome/css/font-awesome.min.css",
     "text!css/fontawesome/less/variables.less",
     "text!locales/en/translation.json",
