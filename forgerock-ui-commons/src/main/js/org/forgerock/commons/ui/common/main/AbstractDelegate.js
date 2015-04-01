@@ -155,7 +155,7 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
         //simple transformation
         var i;
         for(i = 0; i < patchDefinition.length; i++) {
-            if (typeof(patchDefinition[i].field) !== "undefined") {
+            if (typeof patchDefinition[i].field === "string" && _.indexOf(patchDefinition[i].field, "/") !== 0) {
                 patchDefinition[i].field = "/" + patchDefinition[i].field;
             }
         }

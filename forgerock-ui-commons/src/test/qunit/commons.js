@@ -313,6 +313,28 @@ define([
                 QUnit.equal(differences.length, 0, "No differences for equal complex objects");
             });
 
+            QUnit.test("AbstractDelegate - patchEntity (CUI-54)", function () {
+                var AbstractDelegate = require("org/forgerock/commons/ui/common/main/AbstractDelegate"),
+                    abTest = new AbstractDelegate(""),
+                    stub = sinon.stub(abTest, "serviceCall", function (params) {
+                        return JSON.parse(params.data);
+                    }),
+                    patchDef = [{"field": "/abc", "operation": "replace", "value": "test"}],
+                    response = abTest.patchEntity({"id": 1, "rev": 1}, patchDef);
+
+                QUnit.equal(response[0].field, "/abc", "Field not changed when using proper JSON Pointer");
+
+                patchDef = [{"field": "abc", "operation": "replace", "value": "test"}];
+                response = abTest.patchEntity({"id": 1, "rev": 1}, patchDef);
+                QUnit.equal(response[0].field, "/abc", "Field changed to proper JSON Pointer");
+
+                patchDef = [{"field": "ab/c", "operation": "replace", "value": "test"}];
+                response = abTest.patchEntity({"id": 1, "rev": 1}, patchDef);
+                QUnit.equal(response[0].field, "/ab/c", "Field changed to proper JSON Pointer");
+
+                stub.restore();
+            });
+
         }
     };
 });
