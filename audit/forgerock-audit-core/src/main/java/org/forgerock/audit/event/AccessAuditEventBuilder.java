@@ -1,7 +1,6 @@
 package org.forgerock.audit.event;
 
 import static org.forgerock.json.fluent.JsonValue.*;
-import static org.forgerock.json.fluent.JsonValue.field;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
