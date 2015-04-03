@@ -117,7 +117,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
                     logger.warn("Specified path is file but should be a directory: " + auditLogDirectory);
                 } else {
                     if (!file.mkdirs()) {
-                        logger.warn("Unable to create the directories in the path: " + auditLogDirectory);
+                        logger.warn("Unable to create audit directory in the path: " + auditLogDirectory);
                     }
                 }
             }
