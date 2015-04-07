@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2014 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -27,13 +27,14 @@
 /**
  * @author jkigwana
  */
-
 define("org/forgerock/commons/ui/common/components/Messages", [
     "jquery",
     "underscore",
     "backbone",
-    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware"
-], function($, _, Backbone, AbstractConfigurationAware) {
+    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
+    "org/forgerock/commons/ui/common/main/Configuration"
+
+], function($, _, Backbone, AbstractConfigurationAware, conf) {
     var obj = new AbstractConfigurationAware(), Messages;
 
     Messages = Backbone.View.extend({
@@ -61,7 +62,6 @@ define("org/forgerock/commons/ui/common/components/Messages", [
                     type: obj.configuration.messages[event].type
                 });
             }
-
         },
 
         addMessage: function(msg) {
@@ -100,7 +100,14 @@ define("org/forgerock/commons/ui/common/components/Messages", [
             var _this = this,
                 errorType = this.list[0].type === "error" ? "alert-danger" : "alert-info",
                 delay = _this.delay + (this.list[0].message.length * 20);
-            this.$el.append("<div role='alert' class='alert-system alert-message alert "+errorType+"'><i class='fa alert-message-icon'></i><span class='message'>" +this.list[0].message +"</span></div>");
+
+            if (this.hasNavigation()) {
+                _this.$el.addClass('logged-user');
+            } else {
+                _this.$el.removeClass('logged-user');
+            }
+
+            this.$el.append("<div role='alert' class='alert-system alert-message alert " + errorType + "'><i class='fa alert-message-icon'></i><span class='message'>" + this.list[0].message + "</span></div>");
             this.$el.find("div:last").fadeIn(300, function () {
                 _this.timer = window.setTimeout(_this.removeAndNext, delay);
             });
@@ -111,6 +118,10 @@ define("org/forgerock/commons/ui/common/components/Messages", [
             if (_this.list.length > 1) {
                 _this.list = [_this.list[1]];
             }
+        },
+
+        hasNavigation: function() {
+            return $('#mainNavHolder').length > 0;
         }
 
     });
