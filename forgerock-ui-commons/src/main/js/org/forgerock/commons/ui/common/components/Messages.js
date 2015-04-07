@@ -32,9 +32,8 @@ define("org/forgerock/commons/ui/common/components/Messages", [
     "jquery",
     "underscore",
     "backbone",
-    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
-    "org/forgerock/commons/ui/common/main/Configuration",
-], function($, _, Backbone, AbstractConfigurationAware, conf) {
+    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware"
+], function($, _, Backbone, AbstractConfigurationAware) {
     var obj = new AbstractConfigurationAware(), Messages;
 
     Messages = Backbone.View.extend({
@@ -101,14 +100,6 @@ define("org/forgerock/commons/ui/common/components/Messages", [
             var _this = this,
                 errorType = this.list[0].type === "error" ? "alert-danger" : "alert-info",
                 delay = _this.delay + (this.list[0].message.length * 20);
-
-            if (conf.loggedUser) {
-                _this.$el.addClass('logged-user');
-            } else {
-                _this.$el.removeClass('logged-user');
-            }
-
-
             this.$el.append("<div role='alert' class='alert-system alert-message alert "+errorType+"'><i class='fa alert-message-icon'></i><span class='message'>" +this.list[0].message +"</span></div>");
             this.$el.find("div:last").fadeIn(300, function () {
                 _this.timer = window.setTimeout(_this.removeAndNext, delay);
