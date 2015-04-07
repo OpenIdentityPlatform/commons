@@ -173,6 +173,10 @@ hr {
   border-top: none;
 }
 
+.bootstrap-dialog.type-primary .modal-header{
+    background-color: @base-theme-color;
+}
+
 /*
   Sortable List
  */
@@ -217,13 +221,13 @@ hr {
   padding-top: 10px;
   padding-right: 15px;
 }
-.ui-state-default  a.btn-info,
+.ui-state-default a.btn-info,
 .ui-state-default a.btn-info:link,
 .ui-state-default a.btn-info:visited,
-.ui-state-default  a.btn-warning,
+.ui-state-default a.btn-warning,
 .ui-state-default a.btn-warning:link,
 .ui-state-default a.btn-warning:visited,
-.ui-state-default  a.btn-success,
+.ui-state-default a.btn-success,
 .ui-state-default a.btn-success:link,
 .ui-state-default a.btn-success:visited,
 .ui-state-default a.btn-primary,
@@ -414,6 +418,12 @@ hr {
     }
   }
 }
+
+.validationRules .ok .validation-icon:before {
+  content:@fa-var-check;
+}
+
+
 
 .form-group {
   input[type='password'],
@@ -698,6 +708,8 @@ hr {
 .modal-header {
   margin-bottom:15px;
 }
+
+
 
 /* Buttons */
 

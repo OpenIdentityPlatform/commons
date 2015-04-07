@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -23,10 +23,6 @@
  */
 
 /*global define, window */
-
-/**
- * @author mbilski
- */
 
 define("org/forgerock/commons/ui/common/components/Navigation", [
     "jquery",
@@ -51,13 +47,20 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
             data: {},
 
             events: {
-                "click a.inactive": "disableLink"
+                "click a.inactive": "disableLink",
+                "click .event-link:not(.inactive)": "fireEvent"
             },
             disableLink: function(e){
                 e.preventDefault();
             },
-            render: function(args, callback) {
 
+            fireEvent: function(e){
+                e.preventDefault();
+                if (e.currentTarget.dataset.event){
+                    eventManager.sendEvent(e.currentTarget.dataset.event);
+                }
+            },
+            render: function(args, callback) {
                 // The user information is shown at the top of the userBar widget,
                 // but it is stored in different ways for different products.
                 if (conf.loggedUser) {
@@ -80,6 +83,7 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                 this.reload();
                 this.parentRender(callback);
             },
+
 
             addLinks: function(linkName) {
                 var url, urlName, subUrl, subUrlName,icon;

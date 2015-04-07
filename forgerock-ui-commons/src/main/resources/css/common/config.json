@@ -13,8 +13,8 @@
         "@brand-danger": "#d9534f",
         "@body-bg": "#fff",
         "@text-color": "#2a2f32",
-        "@link-color": "#777777",
-        "@link-hover-color": "darken(#519387, 0%)",
+        "@link-color": "#519387",
+        "@link-hover-color": "#777777",
         "@link-hover-decoration": "underline",
         "@font-family-sans-serif": "Roboto, \"proxima-nova\", \"Helvetica Neue\", Helvetica, Arial, sans-serif",
         "@font-family-serif": "Georgia, \"Times New Roman\", Times, serif",
@@ -94,6 +94,7 @@
         "@input-height-base": "(@line-height-computed + (@padding-base-vertical * 2) + 2)",
         "@input-height-large": "(ceil(@font-size-large * @line-height-large) + (@padding-large-vertical * 2) + 2)",
         "@input-height-small": "(floor(@font-size-small * @line-height-small) + (@padding-small-vertical * 2) + 2)",
+        "@form-group-margin-bottom": "15px",
         "@legend-color": "@gray-dark",
         "@legend-border-color": "#e5e5e5",
         "@input-group-addon-bg": "@gray-lighter",
@@ -425,5 +426,5 @@
         "scrollspy.js",
         "transition.js"
     ],
-    "customizerUrl": "http://getbootstrap.com/customize/?id=c8c3b9c7c035eab42eb4"
+    "customizerUrl": "http://getbootstrap.com/customize/?id=f3e827ff19e4c36b2793"
 }

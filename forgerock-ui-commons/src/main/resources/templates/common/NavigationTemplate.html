@@ -49,7 +49,11 @@
                             {{#if href}}
                                 <a href="{{href}}" id="{{id}}">{{label}}</a>
                             {{else}}
+                            {{#if event}}
+                                <a href="#" id="{{id}}" class="event-link" data-event="{{event}}">{{label}}</a>
+                            {{else}}
                                 <span id="{{id}}">{{label}}</span>
+                            {{/if}}
                             {{/if}}
                         </li>
                         {{/each}}
