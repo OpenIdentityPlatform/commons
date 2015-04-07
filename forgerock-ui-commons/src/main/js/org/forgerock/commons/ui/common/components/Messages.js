@@ -32,8 +32,9 @@ define("org/forgerock/commons/ui/common/components/Messages", [
     "jquery",
     "underscore",
     "backbone",
-    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware"
-], function($, _, Backbone, AbstractConfigurationAware) {
+    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
+    "org/forgerock/commons/ui/common/main/Configuration",
+], function($, _, Backbone, AbstractConfigurationAware, conf) {
     var obj = new AbstractConfigurationAware(), Messages;
 
     Messages = Backbone.View.extend({
@@ -45,19 +46,19 @@ define("org/forgerock/commons/ui/common/components/Messages", [
         },
         delay:2500,
         timer:null,
-        
+
         displayMessageFromConfig: function(event) {
             var _this = obj.messages;
             if (typeof event === "object") {
                 if (typeof event.key === "string") {
                     _this.addMessage({
-                        message: $.t(obj.configuration.messages[event.key].msg, event), 
+                        message: $.t(obj.configuration.messages[event.key].msg, event),
                         type: obj.configuration.messages[event.key].type
                     });
                 }
             } else if (typeof event === "string") {
                 _this.addMessage({
-                    message: $.t(obj.configuration.messages[event].msg), 
+                    message: $.t(obj.configuration.messages[event].msg),
                     type: obj.configuration.messages[event].type
                 });
             }
@@ -73,13 +74,13 @@ define("org/forgerock/commons/ui/common/components/Messages", [
                 }
             }
             console.info(msg.type + ":", msg.message, msg);
-            _this.list.push(msg); 
+            _this.list.push(msg);
             if (_this.list.length <= 1) {
                 _this.showMessage(msg);
             }
         },
-    
-        nextMessage: function() {   
+
+        nextMessage: function() {
             var _this = obj.messages;
             _this.list.shift();
             if (_this.list.length > 0) {
@@ -93,13 +94,21 @@ define("org/forgerock/commons/ui/common/components/Messages", [
             _this.$el.find("div").fadeOut(300, function(){
                 $(this).remove();
                 _this.nextMessage();
-            }); 
+            });
         },
 
         showMessage: function() {
-            var _this = this, 
+            var _this = this,
                 errorType = this.list[0].type === "error" ? "alert-danger" : "alert-info",
                 delay = _this.delay + (this.list[0].message.length * 20);
+
+            if (conf.loggedUser) {
+                _this.$el.addClass('logged-user');
+            } else {
+                _this.$el.removeClass('logged-user');
+            }
+
+
             this.$el.append("<div role='alert' class='alert-system alert-message alert "+errorType+"'><i class='fa alert-message-icon'></i><span class='message'>" +this.list[0].message +"</span></div>");
             this.$el.find("div:last").fadeIn(300, function () {
                 _this.timer = window.setTimeout(_this.removeAndNext, delay);
@@ -114,7 +123,7 @@ define("org/forgerock/commons/ui/common/components/Messages", [
         }
 
     });
-    
+
     obj.messages = new Messages();
 
     return obj;
