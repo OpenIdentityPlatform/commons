@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -22,60 +22,62 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, form2js */
+/*global define, $, _*/
 
-/**
- * @author mbilski
- */
 define("org/forgerock/commons/ui/user/profile/ConfirmPasswordDialog", [
-    "org/forgerock/commons/ui/common/components/Dialog",
+    "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
-    "org/forgerock/commons/ui/common/main/Configuration",
-    "UserDelegate",
-    "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/user/profile/UserProfileView"
-], function(Dialog, validatorsManager, conf, userDelegate, eventManager, constants, userProfileView) {
-    var ConfirmPasswordDialog = Dialog.extend({    
-        contentTemplate: "templates/user/ConfirmPasswordDialogTemplate.html",
+    "org/forgerock/commons/ui/user/profile/UserProfileView",
+    "org/forgerock/commons/ui/common/util/UIUtils",
+    "bootstrap-dialog"
+], function(AbstractView, ValidatorsManager, UserProfileView, UIUtils, BootstrapDialog) {
+    var ConfirmPasswordDialog = AbstractView.extend({
+        template: "templates/user/ConfirmPasswordDialogTemplate.html",
         events: {
-            "click .dialogActions input[type=submit]": "formSubmit",
             "onValidate": "onValidate",
-            "customValidate": "customValidate",
-            "click .dialogCloseCross img": "close",
-            "click input[name='close']": "close",
-            "click .modal-content": "stop"
+            "customValidate": "customValidate"
         },
-        data: {},
-        formSubmit: function(event) {
-            userProfileView.data.currentpassword = this.$el.find("#currentPassword").val();
-            userProfileView.submit();
-            this.close();
-                   
+        errorsHandlers: {
+            "Bad Request": { status: "400" }
         },
         customValidate: function () {
-            if(validatorsManager.formValidated(this.$el.find("#confirmPasswordForm"))) {
-                this.$el.find("input[type=submit]").prop('disabled', false); 
+            if(ValidatorsManager.formValidated(this.$el.find("#confirmPasswordForm"))) {
+                this.$el.find("#btnUpdate").prop('disabled', false);
             }
             else {
-                this.$el.find("input[type=submit]").prop('disabled', true);
-            } 
+                this.$el.find("#btnUpdate").prop('disabled', true);
+            }
         },
-        render: function() {
-            var _this = this;
-            this.actions = [];
-            this.addAction($.t("common.form.update"), "submit");
-            this.data.changedProtected = userProfileView.data.changedProtected;
-  
-            $("#dialogs").hide();
-            this.show(_.bind(function() {
-                validatorsManager.bindValidators(this.$el);
-                $("#dialogs").show();
-                this.$el.find("input[type=submit]").prop('disabled', true); 
-            }, this)); 
+        show: function() {
+            var self = this,
+                dialog;
+
+            this.data.changedProtected = UserProfileView.data.changedProtected;
+            dialog = new BootstrapDialog({
+                type: BootstrapDialog.TYPE_PRIMARY,
+                title: $.t("common.user.confirmPassword"),
+                buttons: [{
+                    id: "btnUpdate",
+                    label: $.t("common.form.update"),
+                    cssClass: "btn-primary",
+                    disabled: true,
+                    action: function(dialog) {
+                        UserProfileView.data.currentpassword = dialog.$modal.find("#currentPassword").val();
+                        UserProfileView.submit();
+                        dialog.close();
+                    }
+                }],
+                message: $(UIUtils.fillTemplateWithData(self.template, self.data)),
+                onshown: function(dialog){
+                    self.element = dialog.$modal;
+                    self.rebind();
+                    ValidatorsManager.bindValidators(dialog.$modal);
+                    self.customValidate();
+                }
+            });
+            dialog.open();
         }
-  
-    }); 
-    
+    });
+
     return new ConfirmPasswordDialog();
 });

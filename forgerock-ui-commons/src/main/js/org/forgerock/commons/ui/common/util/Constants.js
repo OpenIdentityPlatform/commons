@@ -43,10 +43,10 @@ define("org/forgerock/commons/ui/common/util/Constants", [
 
     //dialog
     obj.EVENT_DIALOG_CLOSE = "dialog.EVENT_DIALOG_CLOSE";
-
     obj.EVENT_SHOW_DIALOG = "dialog.EVENT_SHOW_DIALOG";
     obj.EVENT_CHANGE_VIEW = "view.EVENT_CHANGE_VIEW";
     obj.EVENT_UNAUTHORIZED = "view.EVENT_UNAUTHORIZED";
+    obj.EVENT_SHOW_CONFIRM_PASSWORD_DIALOG = "dialog.EVENT_SHOW_CONFIRM_PASSWORD_DIALOG";
 
     //login
     obj.EVENT_SUCCESFULY_LOGGGED_IN = "user.login.EVENT_SUCCESFULY_LOGGGED_IN";

@@ -61,6 +61,7 @@ define("config/AppConfiguration", function () {
                 moduleClass: "org/forgerock/commons/ui/common/main/ProcessConfiguration",
                 configuration: {
                     processConfigurationFiles: [
+                        "config/process/MockConfig",
                         "config/process/UserConfig",
                         "config/process/CommonConfig"
                     ]
@@ -133,6 +134,7 @@ define("config/AppConfiguration", function () {
                 moduleClass: "org/forgerock/commons/ui/common/util/UIUtils",
                 configuration: {
                     templateUrls: [
+                        "templates/user/ConfirmPasswordDialogTemplate.html"
                     ]
                 }
             },

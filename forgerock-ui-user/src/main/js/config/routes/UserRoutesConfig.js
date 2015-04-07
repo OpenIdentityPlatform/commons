@@ -53,12 +53,6 @@ define("config/routes/UserRoutesConfig", [
             dialog: "ChangeSecurityDataDialog",
             role: "ui-user,ui-admin",
             url: "profile/change_security_data/"
-        },
-        "confirmPassword": {
-            base: "profile",
-            dialog: "ConfirmPasswordDialog",
-            role: "ui-user",
-            url: "profile/confirm_password_dialog/"
         }
     };
     

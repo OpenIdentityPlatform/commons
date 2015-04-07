@@ -94,7 +94,8 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
                 if (changedProtected.length === 0) {
                     this.submit();
                 } else {
-                    location.hash = router.configuration.routes.confirmPassword.url;
+                    this.data.changedProtected = changedProtected;
+                    eventManager.sendEvent(constants.EVENT_SHOW_CONFIRM_PASSWORD_DIALOG, "ConfirmPasswordDialog");
                 }
 
             } else {
