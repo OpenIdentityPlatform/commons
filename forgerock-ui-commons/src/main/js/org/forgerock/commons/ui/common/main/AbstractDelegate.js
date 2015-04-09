@@ -96,14 +96,14 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
     obj.prototype.deleteEntity = function(id, successCallback, errorCallback) {
         console.debug("delete entity");
         var current = this;
-        return this.readEntity(id, function(data) {
+        return this.readEntity(id, null, errorCallback).then(function(data) {
             var callParams = {url: "/" + id, type: "DELETE", success: successCallback, error: errorCallback };
             if(data._rev) {
                 callParams.headers = [];
                 callParams.headers["If-Match"] = '"' + data._rev + '"';
             }
-            current.serviceCall(callParams);
-        }, errorCallback);
+            return current.serviceCall(callParams);
+        });
 
     };
 
