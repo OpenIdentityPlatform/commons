@@ -12,21 +12,51 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
+
 package org.forgerock.util.xml;
 
-import org.xml.sax.SAXException;
-
+import java.lang.reflect.Method;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import org.xml.sax.SAXException;
 
 /**
  * Utility classes for handling XML.
  */
 public final class XMLUtils {
+
+    private static final Logger LOGGER = Logger.getLogger(XMLUtils.class.getName());
+    private static final Object SECURITY_MANAGER;
+
+    /**
+     * When Xerces is used for XML parsing, the only way to control entityExpansionLimit is to override the default
+     * SecurityManager. The following block will ensure that a Xerces SecurityManager is created and configured to have
+     * a less permissive entityExpansionLimit.
+     * In case Xerces is not used, but the JDK's XML parser implementation is leveraged, applications should enforce
+     * entity expansion limits by following the <a href="JAXP.java.net/1.4/JAXP-Compatibility.html#JAXP_security">
+     * JAXP configuration guide</a>.
+     */
+    static {
+        Object securityManager;
+        try {
+            Class<?> securityManagerClass = Class.forName("org.apache.xerces.util.SecurityManager");
+            securityManager = securityManagerClass.newInstance();
+            Integer limit = Integer.getInteger("org.forgerock.util.xml.entity.expansion.limit", 5000);
+            Method setEntityExpansionLimit = securityManagerClass.getMethod("setEntityExpansionLimit", int.class);
+            setEntityExpansionLimit.invoke(securityManager, limit);
+        } catch (Exception ex) {
+            LOGGER.log(Level.WARNING, "Unable to set expansion limit for Xerces, using default settings", ex);
+            securityManager = null;
+        }
+        SECURITY_MANAGER = securityManager;
+    }
+
     private XMLUtils() {
         // No impl.
     }
@@ -48,6 +78,10 @@ public final class XMLUtils {
         dbf.setFeature("http://xml.org/sax/features/external-general-entities", false);
         dbf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
         dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        dbf.setExpandEntityReferences(false);
+        if (SECURITY_MANAGER != null) {
+            dbf.setAttribute("http://apache.org/xml/properties/security-manager", SECURITY_MANAGER);
+        }
         DocumentBuilder db = dbf.newDocumentBuilder();
         db.setEntityResolver(new XMLHandler());
         return db;
@@ -73,6 +107,9 @@ public final class XMLUtils {
         saxFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
         saxFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
         SAXParser sp = saxFactory.newSAXParser();
+        if (SECURITY_MANAGER != null) {
+            sp.setProperty("http://apache.org/xml/properties/security-manager", SECURITY_MANAGER);
+        }
         sp.getXMLReader().setEntityResolver(new XMLHandler());
         return sp;
     }
