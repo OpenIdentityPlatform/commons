@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -29,7 +29,9 @@
  * @author Eugenia Sergueeva
  */
 
-define("config/AppConfiguration", function () {
+define("config/AppConfiguration", [
+    "org/forgerock/commons/ui/common/util/Constants"
+], function (Constants) {
     return {
         moduleDefinition: [
             {
@@ -119,7 +121,7 @@ define("config/AppConfiguration", function () {
                          },
                          {
                              "id": "security_link",
-                             "href": "#profile/change_security_data/",
+                             "event": Constants.EVENT_SHOW_CHANGE_SECURITY_DIALOG,
                              "i18nKey": "templates.user.UserProfileTemplate.changeSecurityData"
                          },
                          {

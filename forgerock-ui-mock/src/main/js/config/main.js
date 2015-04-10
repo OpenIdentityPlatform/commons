@@ -39,5 +39,6 @@ define("config/main", [
     "./AppConfiguration",
     "./process/CommonConfig",
     "./process/UserConfig",
+    "./process/MockConfig",
     "./errorhandlers/CommonErrorHandlers"
 ]);

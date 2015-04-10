@@ -49,39 +49,39 @@ define([
                 sinon.stub(loginView, "render", function (args, callback) {
                     loginView.render.restore();
                     loginView.render(args, function () {
-  
+
                         QUnit.ok(!_.has(conf.globalData, 'hasOptionalUIFeatures'), "There should be no hasOptionalUIFeatures within conf.globalData (CUI-24)");
-  
+
                         QUnit.ok($("#login", loginView.$el).length                                  , "Username field available");
                         QUnit.ok($("#password", loginView.$el).length                               , "Password field available");
                         QUnit.ok($("[name=loginButton]", loginView.$el).length                      , "Login button available");
-  
+
                         $("#login", loginView.$el).val(parameters.username).trigger('keyup');
                         $("#password", loginView.$el).val(parameters.password).trigger('keyup');
-  
+
                         $("[name=loginButton]", loginView.$el).trigger("click");
-  
+
                         QUnit.ok(conf.loggedUser !== undefined && conf.loggedUser !== null          , "User should be logged in");
-  
+
                         delete router.configuration.routes.login.forceUpdate;
                         QUnit.start();
-  
+
                     });
-  
-  
+
+
                 });
-                
+
                 router.configuration.routes.login.forceUpdate=true;
                 eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login});
-  
+
             });
-  
+
             QUnit.asyncTest("Logout", function () {
                 var nav = require("org/forgerock/commons/ui/common/components/Navigation"),
                     sessionManager = require("org/forgerock/commons/ui/common/main/SessionManager");
 
                 $("#qunit-fixture").append("<div id='menu'></div>");
-  
+
                 conf.loggedUser = {
                     "userName": "test"
                 };
@@ -151,12 +151,12 @@ define([
             QUnit.asyncTest("Add Actions to Dialog", function () {
                 var testDialog = new Dialog();
 
-                QUnit.ok(testDialog.actions.length === 1 && testDialog.actions[0].name === "close", "Cancel Button is Available"); 
+                QUnit.ok(testDialog.actions.length === 1 && testDialog.actions[0].name === "close", "Cancel Button is Available");
 
                 testDialog.addAction("Test", "TestValue");
                 testDialog.addAction("Test", "TestValue");
 
-                QUnit.ok(testDialog.actions.length === 2 && testDialog.actions[0].name === "close" && testDialog.actions[1].name === "Test", "Cancel and Test Buttons are Available"); 
+                QUnit.ok(testDialog.actions.length === 2 && testDialog.actions[0].name === "close" && testDialog.actions[1].name === "Test", "Cancel and Test Buttons are Available");
 
                 QUnit.start();
             });
@@ -287,7 +287,7 @@ define([
             });
 
             QUnit.asyncTest("Parameters passed to logout event", function () {
-                
+
                 eventManager.registerListener(constants.EVENT_LOGOUT, function (event) {
                     QUnit.equal(event.args[0], "foo/bar", "Logout event called with expected arguments");
                     QUnit.start();

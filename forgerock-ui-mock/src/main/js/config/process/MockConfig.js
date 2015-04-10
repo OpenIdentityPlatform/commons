@@ -37,6 +37,16 @@ define("config/process/MockConfig", [
             processDescription: function(event, ConfirmPasswordDialog) {
                 ConfirmPasswordDialog.show();
             }
+        },
+        {
+            startEvent: Constants.EVENT_SHOW_CHANGE_SECURITY_DIALOG,
+            override: true,
+            dependencies: [
+                "org/forgerock/mock/ui/user/profile/ChangeSecurityDataDialog"
+            ],
+            processDescription: function(event, ChangeSecurityDataDialog) {
+                ChangeSecurityDataDialog.show(event);
+            }
         }
     ];
     return obj;

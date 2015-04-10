@@ -38,7 +38,7 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
 ], function($, _, Backbone, AbstractConfigurationAware, AbstractView, conf, constants, eventManager, viewManager, router) {
     var obj = new AbstractConfigurationAware();
 
-    obj.init = function() {
+    obj.init = function(callback) {
         var Navigation = AbstractView.extend({
 
             element: "#menu",
@@ -177,7 +177,7 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
         });
 
         obj.navigation = new Navigation();
-        obj.navigation.render();
+        obj.navigation.render(null, callback);
     };
 
     obj.reload = function() {

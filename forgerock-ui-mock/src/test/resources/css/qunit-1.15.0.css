@@ -235,3 +235,8 @@
 	width: 1000px;
 	height: 1000px;
 }
+
+/* Hide Bootstrap Dialog*/
+body .modal, body .modal-backdrop {
+	height:0;
+}
