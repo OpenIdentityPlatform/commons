@@ -36,16 +36,16 @@
 
     <groupId>org.forgerock.commons.ui</groupId>
     <artifactId>forgerock-ui</artifactId>
-    <version>2.0.2-SNAPSHOT</version>
+    <version>2.0.3-SNAPSHOT</version>
     <name>Forgerock Web UI</name>
     <description>Common modern ForgeRock Web UI</description>
     <packaging>pom</packaging>
 
     <inceptionYear>2012</inceptionYear>
     <scm>
-        <connection>scm:svn:https://svn.forgerock.org/commons/forgerock-ui/branches/2.0.2</connection>
-        <developerConnection>scm:svn:https://svn.forgerock.org/commons/forgerock-ui/branches/2.0.2</developerConnection>
-        <url>http://sources.forgerock.org/browse/commons/forgerock-ui/branches/2.0.2</url>
+        <connection>scm:svn:https://svn.forgerock.org/commons/forgerock-ui/trunk</connection>
+        <developerConnection>scm:svn:https://svn.forgerock.org/commons/forgerock-ui/trunk</developerConnection>
+        <url>http://sources.forgerock.org/browse/commons/forgerock-ui/trunk</url>
     </scm>
     <distributionManagement>
         <site>
