@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2015 ForgeRock AS.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -28,7 +28,7 @@
  * @author yaromin
  */
 define("org/forgerock/commons/ui/common/main/Configuration", [
-	"org/forgerock/commons/ui/common/main/EventManager",
+    "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "config/AppConfiguration"
 ], function(eventManager, constants, appConfiguration) {

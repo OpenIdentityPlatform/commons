@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2015 ForgeRock AS.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -60,7 +60,9 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
 
         formLock: false,
 
-        data: {},
+        initialize: function () {
+            this.data = {};
+        },
 
         /**
          * Change content of 'el' element with 'viewTpl',

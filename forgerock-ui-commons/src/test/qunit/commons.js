@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014-2015 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2014-2015 ForgeRock AS.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -111,7 +111,6 @@ define([
 
                 conf.loggedUser = null;
                 var loginView = require("LoginView");
-                //loginView.element = $("<div>")[0];
 
                 delete loginView.route;
 
@@ -333,6 +332,17 @@ define([
                 QUnit.equal(response[0].field, "/ab/c", "Field changed to proper JSON Pointer");
 
                 stub.restore();
+            });
+
+            QUnit.test("Data scope not shared between views (CUI-57)", function () {
+                var notFound = require("org/forgerock/commons/ui/common/NotFoundView"),
+                    enableCookies = require("org/forgerock/commons/ui/common/EnableCookiesView");
+
+                notFound.data.testVar = "foo";
+                enableCookies.data.testVar = "bar";
+
+                QUnit.ok(notFound.data.testVar === "foo", "View still has original value in data scope after other view sets same name.");
+
             });
 
         }
