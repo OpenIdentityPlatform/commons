@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,44 +24,37 @@
 
 /*global define */
 
-/**
- * @author mbilski
- */
-
 define("org/forgerock/commons/ui/common/components/ConfirmationDialog", [
+    "jquery",
     "org/forgerock/commons/ui/common/components/Dialog",
-    "underscore"
-], function(Dialog, _) {
+    "bootstrap-dialog"
+], function($, Dialog, BootstrapDialog) {
     var ConfirmationDialog = Dialog.extend({
-        template: "templates/common/DialogTemplate.html",
-        contentTemplate: "templates/common/ConfirmationDialogTemplate.html",
-        
-        events: {
-            "click input[type=submit]": "formSubmit",
-            "click .dialogCloseCross img": "close",
-            "click input[name='close']": "close",
-            "click": "close",
-            "click .modal-content": "stop"
-        },
-        
-        data: { },
-        
-        formSubmit: function() {
-            this.okCallback();
-            this.close();
-        },
-        
         render: function(title, msg, actionName, okCallback) {
-            this.actions = [];
-            this.addAction(actionName, "submit");
-            
-            this.data.msg = msg;
-            this.data.title = title;
-            this.okCallback = okCallback;
-            
-            this.show(_.bind(function() {
-                this.$el.find("input[type=submit]").prop('disabled', false);
-            }, this));
+            this.setElement($('<div id="CommonConfirmationDialog"></div>'));
+            BootstrapDialog.show({
+                title: title,
+                type: BootstrapDialog.TYPE_DEFAULT,
+                message: msg,
+                buttons: [
+                    {
+                        label: $.t("common.form.cancel"),
+                        action: function (dialogRef) {
+                            dialogRef.close();
+                        }
+                    },
+                    {
+                        label: actionName,
+                        cssClass: "btn-primary",
+                        action: function (dialogRef) {
+                            if (okCallback) {
+                                okCallback();
+                            }
+                            dialogRef.close();
+                        }
+                    }
+                ]
+            });
         }
     });
 
