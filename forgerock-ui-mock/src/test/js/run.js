@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014-2015 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2014-2015 ForgeRock AS.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,7 +24,8 @@
 
 /*global require, QUnit, localStorage */
 
-require([
+define([
+    "jquery",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
     "../test/tests/commons",
@@ -32,28 +33,24 @@ require([
     "../test/tests/mock",
     "../test/tests/getLoggedUser",
     "../test/tests/router"
-], function (constants, eventManager, commonsTests, userTests, mockTests, getLoggedUser, routerTests) {
+], function ($, constants, eventManager, commonsTests, userTests, mockTests, getLoggedUser, routerTests) {
 
     $.doTimeout = function (name, time, func) {
         func(); // run the function immediately rather than delayed.
-    }
+    };
 
-    sinon.stub(eventManager, "sendEvent", function (eventId, event) {
-
-        // the normal behavior for sendEvent:
-        $(document).trigger(eventId, event);
-
-        // special extended behavior for our stub:
-        if (eventId === constants.EVENT_APP_INTIALIZED) {
-            eventManager.sendEvent.restore();
-            // delayed testing start gives the app time to stablize during startup
-            _.delay(function () {
-
+    return function (server) {
+        eventManager.registerListener(constants.EVENT_APP_INTIALIZED, function () {
+            require("ThemeManager").getTheme().then(function () {
                 var server = require("org/forgerock/mock/ui/common/main/MockServer").instance,
                     userParams = {
                         "username": "test",
                         "password": "test"
                     };
+
+                QUnit.testStart(function () {
+                    require("org/forgerock/commons/ui/common/main/Configuration").baseTemplate = null;
+                });
 
                 QUnit.start();
 
@@ -67,8 +64,8 @@ require([
                     Backbone.history.stop();
                     window.location.hash = "";
                 });
+            });
+        });
+    };
 
-            }, 100);
-        }
-    });
 });
