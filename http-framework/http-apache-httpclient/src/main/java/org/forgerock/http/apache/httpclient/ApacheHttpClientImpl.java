@@ -156,8 +156,7 @@ final class ApacheHttpClientImpl implements ClientImpl {
             }
         } catch (final IOException e) {
             response.setStatusAndReason(500);
-            final ResponseException re = new ResponseException(response);
-            re.initCause(e);
+            final ResponseException re = new ResponseException(response, "Cannot obtain a Response from server", e);
             return Promises.newFailedPromise(re);
         }
 
