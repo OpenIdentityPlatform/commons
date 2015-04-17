@@ -26,7 +26,7 @@ import org.forgerock.http.io.BranchingInputStream;
  * @param <T>
  *            The sub-type of this message.
  */
-abstract class MessageImpl<T extends MessageImpl<T>> implements Message {
+public abstract class MessageImpl<T extends MessageImpl<T>> implements Message {
 
     /** Message entity body. */
     private final Entity entity = new Entity(this);
