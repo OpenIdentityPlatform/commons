@@ -32,27 +32,33 @@ define("org/forgerock/commons/ui/common/main/ViewManager", [
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/components/Messages"
 ], function(_, uiUtils, msg) {
-    var obj = {};
+    var obj = {},
+        decodeArgs = function (args) {
+            return _.map(args, function (a) {
+                return (a && decodeURIComponent(a)) || "";
+            });
+        };
 
-    obj.currentView = "null";
-    obj.currentDialog = "null";
-    obj.currentViewArgs = "null";
-    obj.currentDialogArgs = "null";
+    obj.currentView = null;
+    obj.currentDialog = null;
+    obj.currentViewArgs = null;
+    obj.currentDialogArgs = null;
 
     /**
      * Initializes view if it is not equal to current view.
      * Changes URL without triggering event.
      */
     obj.changeView = function(viewPath, args, callback, forceUpdate) {
-        var view;
+        var view,
+            decodedArgs = decodeArgs(args);
 
 
-        if(obj.currentView !== viewPath || forceUpdate || !_.isEqual(obj.currentViewArgs, args)) {
-            if(obj.currentDialog !== "null") {
+        if(obj.currentView !== viewPath || forceUpdate || !_.isEqual(obj.currentViewArgs, decodedArgs)) {
+            if(obj.currentDialog !== null) {
                 require(obj.currentDialog).close();
             }
 
-            obj.currentDialog = "null";
+            obj.currentDialog = null;
 
             msg.messages.hideMessages();
 
@@ -61,7 +67,7 @@ define("org/forgerock/commons/ui/common/main/ViewManager", [
             if(view.init) {
                 view.init();
             } else {
-                view.render(_.map(args, decodeURIComponent), callback);
+                view.render(decodedArgs, callback);
             }
 
 
@@ -74,29 +80,31 @@ define("org/forgerock/commons/ui/common/main/ViewManager", [
             }
         }
 
-        obj.currentViewArgs = args;
+        obj.currentViewArgs = decodedArgs;
         obj.currentView = viewPath;
     };
 
     obj.showDialog = function(dialogPath, args, callback) {
-        if(obj.currentDialog !== dialogPath || !_.isEqual(obj.currentDialogArgs, args)) {
-            require(dialogPath).render(_.map(args, decodeURIComponent), callback);
+        var decodedArgs = decodeArgs(args);
+
+        if(obj.currentDialog !== dialogPath || !_.isEqual(obj.currentDialogArgs, decodedArgs)) {
+            require(dialogPath).render(decodedArgs, callback);
             msg.messages.hideMessages();
         }
 
-        if(obj.currentDialog !== "null") {
+        if(obj.currentDialog !== null) {
             require(obj.currentDialog).close();
         }
 
         obj.currentDialog = dialogPath;
-        obj.currentDialogArgs = args;
+        obj.currentDialogArgs = decodedArgs;
     };
 
     obj.refresh = function() {
         var cDialog = obj.currentDialog, cDialogArgs = obj.currentDialogArgs;
 
         obj.changeView(obj.currentView, obj.currentViewArgs, function() {}, true);
-        if (cDialog && cDialog !== 'null') {
+        if (cDialog && cDialog !== null) {
             obj.showDialog(cDialog, cDialogArgs);
         }
     };

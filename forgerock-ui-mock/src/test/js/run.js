@@ -49,6 +49,13 @@ define([
                     };
 
                 QUnit.testStart(function () {
+                    var vm = require("org/forgerock/commons/ui/common/main/ViewManager");
+
+                    vm.currentView = null;
+                    vm.currentDialog = null;
+                    vm.currentViewArgs = null;
+                    vm.currentDialogArgs = null;
+
                     require("org/forgerock/commons/ui/common/main/Configuration").baseTemplate = null;
                 });
 

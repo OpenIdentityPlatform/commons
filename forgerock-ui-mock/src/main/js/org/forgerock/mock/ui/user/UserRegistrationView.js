@@ -88,6 +88,8 @@ define("org/forgerock/mock/ui/user/UserRegistrationView", [
         render: function (args, callback) {
             conf.setProperty("gotoURL", null);
 
+            this.data.baseParams = args;
+
             this.parentRender(function () {
                 this.$el.find("input").placeholder();
 

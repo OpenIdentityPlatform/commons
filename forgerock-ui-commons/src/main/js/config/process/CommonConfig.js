@@ -173,7 +173,7 @@ define("config/process/CommonConfig", [
                 "org/forgerock/commons/ui/common/components/Navigation"
             ],
             processDescription: function(event, router, conf, viewManager, navigation) {
-                viewManager.currentDialog = "null";
+                viewManager.currentDialog = null;
                 if(conf.baseView) {
                     require(router.configuration.routes[conf.baseView].view).rebind();
                     router.navigate(router.getLink(router.configuration.routes[conf.baseView], conf.baseViewArgs));
@@ -258,26 +258,51 @@ define("config/process/CommonConfig", [
                 "org/forgerock/commons/ui/common/components/Navigation"
             ],
             processDescription: function(args, viewManager, router, conf, navigation) {
-                var route = args.route, params = args.args, callback = args.callback;
+                var route = args.route,
+                    params = args.args,
+                    callback = args.callback,
+                    baseViewArgs;
 
                 if (!router.checkRole(route)) {
                     return;
                 }
 
+                if (viewManager.currentViewArgs === null) {
+                    baseViewArgs = params;
+                } else {
+                    baseViewArgs = viewManager.currentViewArgs;
+                }
+
                 conf.setProperty("baseView", args.base);
-                conf.setProperty("baseViewArgs", params);
+                conf.setProperty("baseViewArgs", baseViewArgs);
                 
                 navigation.init();
 
                 if (!_.has(route, "baseView") && _.has(route, "base")) {
-                    viewManager.changeView(router.configuration.routes[route.base].view, viewManager.currentViewArgs, function() {
-                        viewManager.showDialog(route.dialog, params, callback);
+                    viewManager.changeView(router.configuration.routes[route.base].view, baseViewArgs, function() {
+                        viewManager.showDialog(route.dialog, params);
                         router.navigate(router.getLink(route, params));
+                        if (callback) {
+                            callback();
+                        }
                     });
                 } else {
-                    viewManager.changeView(route.baseView.view, viewManager.currentViewArgs, function() {
-                        viewManager.showDialog(route.dialog, params, callback);
+                    /*
+                     * There is an expectation that the base view uses some subset of the same 
+                     * params that the dialog uses, and that they are in the same order.
+                     * The base might have a url like myView/foo, where '/foo' is the first param.
+                     * The dialog should be constructed so that its own arguments follow, like so:
+                     * myViewDialog/foo/bar - the params being '/foo' and '/bar'. Because '/foo' 
+                     * is still in the first position, it is reasonable to pass to the base view 
+                     * (along with '/bar', which will presumably be ignored)
+                     */
+
+                    viewManager.changeView(route.baseView.view, baseViewArgs, function() {
+                        viewManager.showDialog(route.dialog, params);
                         router.navigate(router.getLink(route, params));
+                        if (callback) {
+                            callback();
+                        }
                     });
                 }
             }
@@ -350,7 +375,7 @@ define("config/process/CommonConfig", [
                                 return;
                             }
                         }
-                    } else if (viewManager.currentDialog !== "null") {
+                    } else if (viewManager.currentDialog !== null) {
                         require(viewManager.currentDialog).close();
                     }
 

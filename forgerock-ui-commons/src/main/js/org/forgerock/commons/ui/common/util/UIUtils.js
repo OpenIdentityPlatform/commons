@@ -472,8 +472,13 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
      });
 
     Handlebars.registerHelper('url', function(routeKey) {
-        var result = "#" + router.getLink(router.configuration.routes[routeKey], _.toArray([arguments[1]]));
-
+        var result;
+        if (_.isArray(arguments[1])) {
+            result = "#" + router.getLink(router.configuration.routes[routeKey], arguments[1]);
+        } else {
+            result = "#" + router.getLink(router.configuration.routes[routeKey], _.toArray([arguments[1]]));
+        }
+        
         //Don't return a safe string to prevent XSS.
         return result;
     });

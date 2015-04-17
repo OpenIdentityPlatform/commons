@@ -107,7 +107,9 @@ define("org/forgerock/mock/ui/user/profile/ChangeSecurityDataDialog", [
             });
 
         },
-
+        close: function () {
+            $(".bootstrap-dialog").modal("hide");
+        },
         customValidate: function () {
             if (ValidatorsManager.formValidated(this.$el.find("#passwordChange"))) {
                 this.$el.find("#btnOk").prop('disabled', false);

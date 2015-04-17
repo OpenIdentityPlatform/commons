@@ -58,9 +58,9 @@
                 <div class="checkbox pull-left">
                     <input type="checkbox" name="terms" value="yes" data-validator="termsOfUse"
                            data-validator-event="click" data-validation-status="error">{{t
-                    "templates.user.UserRegistrationTemplate.agreeToTerms"}} <a href="#register/terms_of_use/"
-                                                                                id="termOfUseLink" class="ice"
-                                                                                title="terms">{{t
+                    "templates.user.UserRegistrationTemplate.agreeToTerms"}} 
+
+                    <a href="{{url "termsOfUse" baseParams }}" id="termOfUseLink" class="ice" title="terms">{{t
                     "templates.user.TermsOfUseTemplate.termsOfUse"}}</a>
                 </div>
             </div>

@@ -23,6 +23,7 @@
  */
 
 /*global define*/
+/*jslint regexp:false */
 
 /**
  * @author Eugenia Sergueeva
@@ -33,7 +34,10 @@ define("config/routes/MockRoutesConfig", function () {
         "termsOfUse": {
             base: "selfRegistration",
             dialog: "org/forgerock/mock/ui/user/TermsOfUseDialog",
-            url: "register/terms_of_use/"
+            url: /registerTerms(\/[^\&]*)(\&.+)?$/,
+            pattern: "registerTerms??",
+            argumentNames: ["realm", "additionalParameters"],
+            defaults: ["/",""]
         }
     };
 });

@@ -345,6 +345,16 @@ define([
 
             });
 
+            QUnit.test("url helper for handlebars", function () {
+                var template = Handlebars.compile("{{url 'selfRegistration' input}}");
+
+                QUnit.ok(template({input: ["/foo", ""]}) === "#register/foo", "url helper properly handles array value as second argument.");
+
+                template = Handlebars.compile("{{url 'selfRegistration' '/bar'}}");
+
+                QUnit.ok(template() === "#register/bar", "url helper properly handles simple string value as second argument.");
+            });
+
         }
     };
 });

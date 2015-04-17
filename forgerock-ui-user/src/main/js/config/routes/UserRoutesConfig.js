@@ -42,7 +42,7 @@ define("config/routes/UserRoutesConfig", [
         },
         "selfRegistration": {
             view: "RegisterView",
-            url: /register(\/[^\&]*)(\&.+)?/, 
+            url: /register(\/[^\&]*)(\&.+)?/,
             pattern: "register??",
             forceUpdate: true,
             argumentNames: ["realm", "additionalParameters"],

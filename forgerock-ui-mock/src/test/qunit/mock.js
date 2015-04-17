@@ -260,9 +260,10 @@ define([
                 });
             });
 
-            // TODO : Tests are failing
-            /*QUnit.asyncTest("Unauthorized GET Request", function () {
+            QUnit.asyncTest("Unauthorized GET Request", function () {
                 conf.loggedUser = getLoggedUser();
+                delete conf.globalData.authorizationFailurePending;
+                delete conf.gotoURL;
                 eventManager.sendEvent(constants.EVENT_SHOW_DIALOG, {
                     route: router.configuration.routes.changeSecurityData,
                     callback: function () {
@@ -272,7 +273,7 @@ define([
                         QUnit.start();
                     }
                 });
-            });*/
+            });
 
             QUnit.asyncTest("Unauthorized non-GET Request", function () {
                 var loginDialog = require("LoginDialog"),
@@ -290,6 +291,17 @@ define([
                         QUnit.start();
                     }
                 });
+            });
+
+            QUnit.asyncTest("Opening a dialog with a parameterized base view (CUI-58)", function () {
+                var selfReg = require("RegisterView"),
+                    stub = sinon.stub(selfReg, "render", function (args, callback) {
+                        selfReg.render.restore();
+                        QUnit.ok(args[0] === "/foo" && args[1] === "&bar=blah", "Dialog route triggers base view to render with expected arg value");
+                        QUnit.start();
+                    });
+
+                window.location.hash = "registerTerms/foo&bar=blah";
             });
 
         }
