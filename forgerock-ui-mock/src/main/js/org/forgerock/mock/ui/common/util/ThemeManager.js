@@ -90,7 +90,7 @@ define("ThemeManager", [
                         "title": "ForgeRock",
                         "alt": "ForgeRock",
                         "height": "104px",
-                        "width": "156px"
+                        "width": "210px"
                     },
                     "lessVars": {
                         "background-image": "url('../images/box-bg.png')",
