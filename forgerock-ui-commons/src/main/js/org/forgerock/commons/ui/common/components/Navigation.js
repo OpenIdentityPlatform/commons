@@ -86,50 +86,44 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
 
 
             addLinks: function(linkName) {
-                var url, urlName, subUrl, subUrlName,icon;
+                var url,
+                    urlName,
+                    subUrl,
+                    subUrlName,
+                    baseActive;
 
-                for(urlName in obj.configuration.links[linkName].urls) {
+                for (urlName in obj.configuration.links[linkName].urls) {
                     url = obj.configuration.links[linkName].urls[urlName];
+                    baseActive = this.isCurrent(url.url) || this.isCurrent(url.baseUrl) || this.childIsCurrent(url.urls);
 
-                    if (this.isCurrent(url.url) || this.isCurrent(url.baseUrl) || this.childIsCurrent(url.urls)) {
-                        this.addLink(url.name, url.url, true, url.icon, url.inactive);
+                    this.data.topNav.push(this.buildNavElement(url, baseActive));
 
-                        if (url.urls) {
-                            for(subUrlName in url.urls) {
-                                subUrl = url.urls[subUrlName];
-                                this.addSubLink(subUrl.name, subUrl.url, this.isCurrent(subUrl.url), subUrl.icon, subUrl.inactive);
-                            }
-
-                            //Added to provide reference for responsive design submenus to appear in the correct location.
-                            this.data.topNav[this.data.topNav.length - 1].subNav = this.data.subNav;
+                    if (baseActive && url.urls) {
+                        for (subUrlName in url.urls) {
+                            subUrl = url.urls[subUrlName];
+                            this.data.subNav.push(this.buildNavElement(subUrl, this.isCurrent(subUrl.url)));
                         }
 
-                    } else {
-                        this.addLink(url.name, url.url, false,url.icon, url.inactive);
+                        //Added to provide reference for responsive design submenus to appear in the correct location.
+                        this.data.topNav[this.data.topNav.length - 1].subNav = this.data.subNav;
                     }
                 }
             },
 
-            addLink: function(name, url, isActive, icon, isInactive) {
-                this.data.topNav.push({
-                    key: name,
-                    hashurl: url,
-                    title: $.t(name),
-                    isActive: isActive,
-                    isInactive: isInactive,
-                    icon: icon
-                });
-            },
+            buildNavElement: function (link, active) {
+                var navElement = {
+                    key: link.name,
+                    title: $.t(link.name),
+                    active: active,
+                    icon: link.icon
+                };
+                if (link.url) {
+                    navElement.hashurl = link.url;
+                } else if (link.event) {
+                    navElement.event = link.event;
+                }
 
-            addSubLink: function(name, url, isActive, icon, isInactive) {
-                this.data.subNav.push({
-                    key: name,
-                    hashurl: url,
-                    title: $.t(name),
-                    isActive: isActive,
-                    isInactive: isInactive,
-                    icon: icon
-                });
+                return navElement;
             },
 
             childIsCurrent: function(urls) {
