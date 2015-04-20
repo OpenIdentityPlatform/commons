@@ -22,7 +22,7 @@ import static org.assertj.core.data.MapEntry.entry;
 import static org.forgerock.json.fluent.JsonValue.*;
 import static org.testng.Assert.fail;
 
-import org.forgerock.util.promise.Function;
+import org.forgerock.util.Function;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;

@@ -68,12 +68,12 @@ class AnnotatedCollectionHandler extends InterfaceCollectionHandler {
     }
 
     private <T> void handle(Promise<T, ? extends ResourceException> promise, final ResultHandler<T> handler) {
-        promise.onSuccess(new SuccessHandler<T>() {
+        promise.thenOnSuccess(new SuccessHandler<T>() {
             @Override
             public void handleResult(T result) {
                 handler.handleResult(result);
             }
-        }).onFailure(new FailureHandler<ResourceException>() {
+        }).thenOnFailure(new FailureHandler<ResourceException>() {
             @Override
             public void handleError(ResourceException error) {
                 handler.handleError(error);

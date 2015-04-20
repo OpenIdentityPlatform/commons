@@ -64,6 +64,7 @@
         <maven.compiler.source>1.6</maven.compiler.source>
         <i18nFrameworkVersion>1.4.1</i18nFrameworkVersion>
         <jacksonVersion>2.4.3</jacksonVersion>
+        <forgerockUtilVersion>2.0.0-SNAPSHOT</forgerockUtilVersion>
     </properties>
     <modules>
         <module>json-fluent</module>
@@ -142,12 +143,12 @@
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>forgerock-util</artifactId>
-                <version>1.4.0-SNAPSHOT</version>
+                <version>${forgerockUtilVersion}</version>
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>forgerock-test-utils</artifactId>
-                <version>1.4.0-SNAPSHOT</version>
+                <version>${forgerockUtilVersion}</version>
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
