@@ -15,19 +15,18 @@
 package org.forgerock.util.promise;
 
 /**
- * A completion handler for consuming errors which occur during the execution of
- * asynchronous tasks.
+ * A completion handler for consuming the results of asynchronous tasks.
  *
- * @param <E>
- *            The type of error consumed by the handler.
+ * @param <V>
+ *            The type of result consumed by the handler.
  */
 // @FunctionalInterface
-public interface FailureHandler<E> {
+public interface ResultHandler<V> {
     /**
-     * Invoked when the asynchronous task has failed.
+     * Invoked when the asynchronous task has completed successfully.
      *
-     * @param error
-     *            The error indicating why the asynchronous task has failed.
+     * @param result
+     *            The result of the asynchronous task.
      */
-    void handleError(E error);
+    void handleResult(V result);
 }

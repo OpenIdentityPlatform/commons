@@ -38,10 +38,10 @@ public final class Promises {
 
         @Override
         public final V get() throws ExecutionException {
-            if (isSuccess()) {
-                return getValue();
+            if (hasResult()) {
+                return getResult();
             } else {
-                throw new ExecutionException(getError());
+                throw new ExecutionException(getException());
             }
         }
 
@@ -52,10 +52,10 @@ public final class Promises {
 
         @Override
         public final V getOrThrow() throws E {
-            if (isSuccess()) {
-                return getValue();
+            if (hasResult()) {
+                return getResult();
             } else {
-                throw getError();
+                throw getException();
             }
         }
 
@@ -85,177 +85,177 @@ public final class Promises {
         }
 
         @Override
-        public final Promise<V, E> thenOnFailure(final FailureHandler<? super E> onFail) {
-            if (!isSuccess()) {
-                onFail.handleError(getError());
+        public final Promise<V, E> thenOnException(final ExceptionHandler<? super E> onException) {
+            if (!hasResult()) {
+                onException.handleException(getException());
             }
             return this;
         }
 
         @Override
-        public final Promise<V, E> thenOnSuccess(final SuccessHandler<? super V> onSuccess) {
-            if (isSuccess()) {
-                onSuccess.handleResult(getValue());
+        public final Promise<V, E> thenOnResult(final ResultHandler<? super V> onResult) {
+            if (hasResult()) {
+                onResult.handleResult(getResult());
             }
             return this;
         }
 
         @Override
-        public final Promise<V, E> thenOnSuccessOrFailure(final SuccessHandler<? super V> onSuccess,
-            final FailureHandler<? super E> onFail) {
-            return thenOnSuccess(onSuccess).thenOnFailure(onFail);
+        public final Promise<V, E> thenOnResultOrException(final ResultHandler<? super V> onResult,
+                                                       final ExceptionHandler<? super E> onException) {
+            return thenOnResult(onResult).thenOnException(onException);
         }
 
         @Override
-        public final Promise<V, E> thenOnSuccessOrFailure(final Runnable onSuccessOrFail) {
-            onSuccessOrFail.run();
+        public final Promise<V, E> thenOnResultOrException(final Runnable onResultOrException) {
+            onResultOrException.run();
             return this;
         }
 
         @Override
-        public final <VOUT> Promise<VOUT, E> then(final Function<? super V, VOUT, E> onSuccess) {
-            return then(onSuccess, Promises.<VOUT, E> failIdempotentFunction());
+        public final <VOUT> Promise<VOUT, E> then(final Function<? super V, VOUT, E> onResult) {
+            return then(onResult, Promises.<VOUT, E>exceptionIdempotentFunction());
         }
 
         @Override
-        public <EOUT extends Exception> Promise<V, EOUT> thenCatch(Function<? super E, V, EOUT> onFailure) {
-            return then(Promises.<V, EOUT> successIdempotentFunction(), onFailure);
+        public <EOUT extends Exception> Promise<V, EOUT> thenCatch(Function<? super E, V, EOUT> onException) {
+            return then(Promises.<V, EOUT>resultIdempotentFunction(), onException);
         }
 
         @Override
         @SuppressWarnings("unchecked")
         public final <VOUT, EOUT extends Exception> Promise<VOUT, EOUT> then(
-                final Function<? super V, VOUT, EOUT> onSuccess,
-                final Function<? super E, VOUT, EOUT> onFail) {
+                final Function<? super V, VOUT, EOUT> onResult,
+                final Function<? super E, VOUT, EOUT> onException) {
             try {
-                if (isSuccess()) {
-                    return newSuccessfulPromise(onSuccess.apply(getValue()));
+                if (hasResult()) {
+                    return newResultPromise(onResult.apply(getResult()));
                 } else {
-                    return newSuccessfulPromise(onFail.apply(getError()));
+                    return newResultPromise(onException.apply(getException()));
                 }
             } catch (final Exception e) {
-                return newFailedPromise((EOUT) e);
+                return newExceptionPromise((EOUT) e);
             }
         }
 
 
         @Override
-        public final Promise<V, E> thenAlways(final Runnable onSuccessOrFail) {
-            return thenOnSuccessOrFailure(onSuccessOrFail);
+        public final Promise<V, E> thenAlways(final Runnable onResultOrException) {
+            return thenOnResultOrException(onResultOrException);
         }
 
         @Override
-        public Promise<V, E> thenFinally(Runnable onSuccessOrFailure) {
-            return thenOnSuccessOrFailure(onSuccessOrFailure);
+        public Promise<V, E> thenFinally(Runnable onResultOrException) {
+            return thenOnResultOrException(onResultOrException);
         }
 
         @Override
         public final <VOUT> Promise<VOUT, E> thenAsync(
-                final AsyncFunction<? super V, VOUT, E> onSuccess) {
-            return thenAsync(onSuccess, Promises.<VOUT, E> failIdempotentAsyncFunction());
+                final AsyncFunction<? super V, VOUT, E> onResult) {
+            return thenAsync(onResult, Promises.<VOUT, E>exceptionIdempotentAsyncFunction());
         }
 
         @Override
         public final <EOUT extends Exception> Promise<V, EOUT> thenCatchAsync(
-                final AsyncFunction<? super E, V, EOUT> onFailure) {
-            return thenAsync(Promises.<V, EOUT> successIdempotentAsyncFunction(), onFailure);
+                final AsyncFunction<? super E, V, EOUT> onException) {
+            return thenAsync(Promises.<V, EOUT>resultIdempotentAsyncFunction(), onException);
         }
 
         @Override
         @SuppressWarnings("unchecked")
         public final <VOUT, EOUT extends Exception> Promise<VOUT, EOUT> thenAsync(
-                final AsyncFunction<? super V, VOUT, EOUT> onSuccess,
-                final AsyncFunction<? super E, VOUT, EOUT> onFail) {
+                final AsyncFunction<? super V, VOUT, EOUT> onResult,
+                final AsyncFunction<? super E, VOUT, EOUT> onException) {
             try {
-                if (isSuccess()) {
-                    return onSuccess.apply(getValue());
+                if (hasResult()) {
+                    return onResult.apply(getResult());
                 } else {
-                    return onFail.apply(getError());
+                    return onException.apply(getException());
                 }
             } catch (final Exception e) {
-                return newFailedPromise((EOUT) e);
+                return newExceptionPromise((EOUT) e);
             }
         }
 
-        abstract E getError();
+        abstract E getException();
 
-        abstract V getValue();
+        abstract V getResult();
 
-        abstract boolean isSuccess();
+        abstract boolean hasResult();
     }
 
-    private static final class FailedPromise<V, E extends Exception> extends CompletedPromise<V, E> {
-        private final E error;
+    private static final class ExceptionPromise<V, E extends Exception> extends CompletedPromise<V, E> {
+        private final E exception;
 
-        private FailedPromise(final E error) {
-            this.error = error;
+        private ExceptionPromise(final E exception) {
+            this.exception = exception;
         }
 
         @Override
-        E getError() {
-            return error;
+        E getException() {
+            return exception;
         }
 
         @Override
-        V getValue() {
+        V getResult() {
             throw new IllegalStateException();
         }
 
         @Override
-        boolean isSuccess() {
+        boolean hasResult() {
             return false;
         }
     }
 
-    private static final class SuccessfulPromise<V, E extends Exception> extends
+    private static final class ResultPromise<V, E extends Exception> extends
             CompletedPromise<V, E> {
         private final V value;
 
-        private SuccessfulPromise(final V value) {
+        private ResultPromise(final V value) {
             this.value = value;
         }
 
         @Override
-        E getError() {
+        E getException() {
             throw new IllegalStateException();
         }
 
         @Override
-        V getValue() {
+        V getResult() {
             return value;
         }
 
         @Override
-        boolean isSuccess() {
+        boolean hasResult() {
             return true;
         }
     }
 
-    private static final AsyncFunction<Exception, Object, Exception> FAIL_IDEM_ASYNC_FUNC =
+    private static final AsyncFunction<Exception, Object, Exception> EXCEPTION_IDEM_ASYNC_FUNC =
             new AsyncFunction<Exception, Object, Exception>() {
                 @Override
-                public Promise<Object, Exception> apply(final Exception error) throws Exception {
-                    throw error;
+                public Promise<Object, Exception> apply(final Exception exception) throws Exception {
+                    throw exception;
                 }
             };
 
-    private static final Function<Exception, Object, Exception> FAIL_IDEM_FUNC =
+    private static final Function<Exception, Object, Exception> EXCEPTION_IDEM_FUNC =
             new Function<Exception, Object, Exception>() {
                 @Override
-                public Object apply(final Exception error) throws Exception {
-                    throw error;
+                public Object apply(final Exception exception) throws Exception {
+                    throw exception;
                 }
             };
 
-    private static final AsyncFunction<Exception, Object, Exception> SUCCESS_IDEM_ASYNC_FUNC =
+    private static final AsyncFunction<Exception, Object, Exception> RESULT_IDEM_ASYNC_FUNC =
             new AsyncFunction<Exception, Object, Exception>() {
                 @Override
-                public Promise<Object, Exception> apply(final Exception error) throws Exception {
-                    throw error;
+                public Promise<Object, Exception> apply(final Exception exception) throws Exception {
+                    throw exception;
                 }
             };
 
-    private static final Function<Object, Object, Exception> SUCCESS_IDEM_FUNC =
+    private static final Function<Object, Object, Exception> RESULT_IDEM_FUNC =
             new Function<Object, Object, Exception>() {
                 @Override
                 public Object apply(final Object value) throws Exception {
@@ -265,7 +265,7 @@ public final class Promises {
 
     /**
      * Returns a {@link Promise} representing an asynchronous task which has
-     * already failed with the provided error. Attempts to get the result will
+     * already failed with the provided exception. Attempts to get the result will
      * immediately fail, and any listeners registered against the returned
      * promise will be immediately invoked in the same thread as the caller.
      *
@@ -275,13 +275,13 @@ public final class Promises {
      * @param <E>
      *            The type of the exception thrown by the task if it fails, or
      *            {@link NeverThrowsException} if the task cannot fail.
-     * @param error
+     * @param exception
      *            The exception indicating why the asynchronous task has failed.
      * @return A {@link Promise} representing an asynchronous task which has
-     *         already failed with the provided error.
+     *         already failed with the provided exception.
      */
-    public static final <V, E extends Exception> Promise<V, E> newFailedPromise(final E error) {
-        return new FailedPromise<V, E>(error);
+    public static final <V, E extends Exception> Promise<V, E> newExceptionPromise(final E exception) {
+        return new ExceptionPromise<V, E>(exception);
     }
 
     /**
@@ -302,8 +302,8 @@ public final class Promises {
      * @return A {@link Promise} representing an asynchronous task which has
      *         already succeeded with the provided result.
      */
-    public static final <V, E extends Exception> Promise<V, E> newSuccessfulPromise(final V result) {
-        return new SuccessfulPromise<V, E>(result);
+    public static final <V, E extends Exception> Promise<V, E> newResultPromise(final V result) {
+        return new ResultPromise<V, E>(result);
     }
 
     /**
@@ -329,7 +329,7 @@ public final class Promises {
         final List<V> results = new ArrayList<V>(size);
         final PromiseImpl<List<V>, E> composite = PromiseImpl.create();
         for (final Promise<V, E> promise : promises) {
-            promise.thenOnSuccess(new SuccessHandler<V>() {
+            promise.thenOnResult(new ResultHandler<V>() {
                 @Override
                 public void handleResult(final V value) {
                     synchronized (results) {
@@ -339,10 +339,10 @@ public final class Promises {
                         composite.handleResult(results);
                     }
                 }
-            }).thenOnFailure(new FailureHandler<E>() {
+            }).thenOnException(new ExceptionHandler<E>() {
                 @Override
-                public void handleError(final E error) {
-                    composite.handleError(error);
+                public void handleException(final E exception) {
+                    composite.handleException(exception);
                 }
             });
         }
@@ -366,7 +366,7 @@ public final class Promises {
      *            The list of tasks to be combined.
      * @return A {@link Promise} which will be completed once all of the
      *         provided promises have succeeded, or as soon as one of them
-     *         fails.
+     *         has thrown an exception.
      */
     public static final <V, E extends Exception> Promise<List<V>, E> when(
             final Promise<V, E>... promises) {
@@ -374,23 +374,23 @@ public final class Promises {
     }
 
     @SuppressWarnings("unchecked")
-    static <VOUT, E extends Exception> AsyncFunction<E, VOUT, E> failIdempotentAsyncFunction() {
-        return (AsyncFunction<E, VOUT, E>) FAIL_IDEM_ASYNC_FUNC;
+    static <VOUT, E extends Exception> AsyncFunction<E, VOUT, E> exceptionIdempotentAsyncFunction() {
+        return (AsyncFunction<E, VOUT, E>) EXCEPTION_IDEM_ASYNC_FUNC;
     }
 
     @SuppressWarnings("unchecked")
-    static <VOUT, E extends Exception> Function<E, VOUT, E> failIdempotentFunction() {
-        return (Function<E, VOUT, E>) FAIL_IDEM_FUNC;
+    static <VOUT, E extends Exception> Function<E, VOUT, E> exceptionIdempotentFunction() {
+        return (Function<E, VOUT, E>) EXCEPTION_IDEM_FUNC;
     }
 
     @SuppressWarnings("unchecked")
-    static <V, E extends Exception> AsyncFunction<V, V, E> successIdempotentAsyncFunction() {
-        return (AsyncFunction<V, V, E>) SUCCESS_IDEM_ASYNC_FUNC;
+    static <V, E extends Exception> AsyncFunction<V, V, E> resultIdempotentAsyncFunction() {
+        return (AsyncFunction<V, V, E>) RESULT_IDEM_ASYNC_FUNC;
     }
 
     @SuppressWarnings("unchecked")
-    static <V, E extends Exception> Function<V, V, E> successIdempotentFunction() {
-        return (Function<V, V, E>) SUCCESS_IDEM_FUNC;
+    static <V, E extends Exception> Function<V, V, E> resultIdempotentFunction() {
+        return (Function<V, V, E>) RESULT_IDEM_FUNC;
     }
 
     private Promises() {

@@ -42,7 +42,7 @@ import org.forgerock.util.promise.Promise;
  *
  *         // Parse the parameter now and potentially immediately throw an
  *         // exception. Parsing could be deferred to the executor in which
- *         // case the exception should be trapped and promise.handleError()
+ *         // case the exception should be trapped and promise.handleException()
  *         // invoked.
  *         final BigInteger possiblePrime = new BigInteger(value);
  *

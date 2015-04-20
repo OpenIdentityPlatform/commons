@@ -88,4 +88,63 @@ Note: waiting on https://jira.codehaus.org/browse/MCLIRR-62 to be resolved to av
 	    <to>%regex[org.forgerock.util.promise.Promise then(Async)?\((org.forgerock.util.(Async)?Function(, )?)*\)]</to>
 	    <justification>COMMONS-5 Promise API improvements</justification>
   </difference>
+	<difference>
+		<className>%regex[org/forgerock/util/promise/(Success|Failure)Handler]</className>
+		<differenceType>8001</differenceType>
+		<justification>Disambiguate success/failure methods with result/exception</justification>
+	</difference>
+	<difference>
+		<className>org/forgerock/util/promise/PromiseImpl</className>
+		<differenceType>4001</differenceType>
+		<to>%regex[org/forgerock/util/promise/(Success|Failure)Handler]</to>
+		<justification>Disambiguate success/failure methods with result/exception</justification>
+	</difference>
+	<difference>
+		<className>org/forgerock/util/promise/Promises</className>
+		<differenceType>7002</differenceType>
+		<method>org.forgerock.util.promise.Promise newFailedPromise(java.lang.Exception)</method>
+		<justification>Disambiguate success/failure methods with result/exception</justification>
+	</difference>
+	<difference>
+		<className>org/forgerock/util/promise/Promises</className>
+		<differenceType>7002</differenceType>
+		<method>org.forgerock.util.promise.Promise newSuccessfulPromise(java.lang.Object)</method>
+		<justification>Disambiguate success/failure methods with result/exception</justification>
+	</difference>
+	<difference>
+		<className>org/forgerock/util/promise/PromiseImpl</className>
+		<differenceType>7002</differenceType>
+		<method>void handleError(java.lang.Exception)</method>
+		<justification>Disambiguate success/failure methods with result/exception</justification>
+	</difference>
+	<difference>
+		<className>org/forgerock/util/promise/PromiseImpl</className>
+		<differenceType>7002</differenceType>
+		<method>void handleError(java.lang.Object)</method>
+		<justification>Disambiguate success/failure methods with result/exception</justification>
+	</difference>
+	<difference>
+		<className>org/forgerock/util/promise/Promise</className>
+		<differenceType>7012</differenceType>
+		<method>org.forgerock.util.promise.Promise thenOnException(org.forgerock.util.promise.ExceptionHandler)</method>
+		<justification>Disambiguate success/failure methods with result/exception</justification>
+	</difference>
+	<difference>
+		<className>org/forgerock/util/promise/Promise</className>
+		<differenceType>7012</differenceType>
+		<method>org.forgerock.util.promise.Promise thenOnResult(org.forgerock.util.promise.ResultHandler)</method>
+		<justification>Disambiguate success/failure methods with result/exception</justification>
+	</difference>
+	<difference>
+		<className>org/forgerock/util/promise/Promise</className>
+		<differenceType>7012</differenceType>
+		<method>org.forgerock.util.promise.Promise thenOnResultOrException(org.forgerock.util.promise.ResultHandler, org.forgerock.util.promise.ExceptionHandler)</method>
+		<justification>Disambiguate success/failure methods with result/exception</justification>
+	</difference>
+	<difference>
+		<className>org/forgerock/util/promise/Promise</className>
+		<differenceType>7012</differenceType>
+		<method>org.forgerock.util.promise.Promise thenOnResultOrException(java.lang.Runnable)</method>
+		<justification>Disambiguate success/failure methods with result/exception</justification>
+	</difference>
 </differences>

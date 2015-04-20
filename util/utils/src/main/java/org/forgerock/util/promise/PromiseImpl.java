@@ -30,8 +30,8 @@ import org.forgerock.util.Function;
  * <ul>
  * <li>{@link #handleResult} - marks the promise as having succeeded with the
  * provide result
- * <li>{@link #handleError} - marks the promise as having failed with the
- * provide exception
+ * <li>{@link #handleException} - marks the promise as having failed with the
+ * provided exception
  * <li>{@link #cancel} - requests cancellation of the asynchronous task
  * represented by the promise. Cancellation is only supported if the
  * {@link #tryCancel(boolean)} is overridden and returns an exception.
@@ -46,12 +46,12 @@ import org.forgerock.util.Function;
  * @see Promise
  * @see Promises
  */
-public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, SuccessHandler<V>,
-        FailureHandler<E> {
+public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, ResultHandler<V>,
+        ExceptionHandler<E> {
     // TODO: Is using monitor based sync better than AQS?
 
     private static interface StateListener<V, E extends Exception> {
-        void handleStateChange(int newState, V result, E error);
+        void handleStateChange(int newState, V result, E exception);
     }
 
     /**
@@ -63,15 +63,15 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Succe
      * State value indicating that this promise has completed successfully
      * (result set).
      */
-    private static final int SUCCEEDED = 1;
+    private static final int HAS_RESULT = 1;
 
     /**
-     * State value indicating that this promise has failed (error set).
+     * State value indicating that this promise has failed (exception set).
      */
-    private static final int FAILED = 2;
+    private static final int HAS_EXCEPTION = 2;
 
     /**
-     * State value indicating that this promise has been cancelled (error set).
+     * State value indicating that this promise has been cancelled (exception set).
      */
     private static final int CANCELLED = 3;
 
@@ -92,7 +92,7 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Succe
 
     private volatile int state = PENDING;
     private V result = null;
-    private E error = null;
+    private E exception = null;
 
     private final Queue<StateListener<V, E>> listeners =
             new ConcurrentLinkedQueue<StateListener<V, E>>();
@@ -111,8 +111,8 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Succe
             // Fail-fast.
             return false;
         }
-        final E error = tryCancel(mayInterruptIfRunning);
-        return error != null && setState(CANCELLED, null, error);
+        final E exception = tryCancel(mayInterruptIfRunning);
+        return exception != null && setState(CANCELLED, null, exception);
     }
 
     @Override
@@ -176,13 +176,13 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Succe
      * then calling this method has no effect and the provided result will be
      * discarded.
      *
-     * @param error
+     * @param exception
      *            The exception indicating why the task failed.
-     * @see #tryHandleError(Exception)
+     * @see #tryHandleException(Exception)
      */
     @Override
-    public final void handleError(final E error) {
-        tryHandleError(error);
+    public final void handleException(final E exception) {
+        tryHandleException(exception);
     }
 
     /**
@@ -213,16 +213,16 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Succe
      * connection should be immediately closed because it is never going to be
      * used.
      *
-     * @param error
+     * @param exception
      *            The exception indicating why the task failed.
      * @return {@code false} if this promise has already been completed, either
      *         due to normal termination, an exception, or cancellation (i.e.
      *         {@code isDone() == true}).
-     * @see #handleError(Exception)
+     * @see #handleException(Exception)
      * @see #isDone()
      */
-    public final boolean tryHandleError(final E error) {
-        return setState(FAILED, null, error);
+    public final boolean tryHandleException(final E exception) {
+        return setState(HAS_EXCEPTION, null, exception);
     }
 
     /**
@@ -247,7 +247,7 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Succe
      * @see #isDone()
      */
     public final boolean tryHandleResult(final V result) {
-        return setState(SUCCEEDED, result, null);
+        return setState(HAS_RESULT, result, null);
     }
 
     @Override
@@ -261,12 +261,12 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Succe
     }
 
     @Override
-    public final Promise<V, E> thenOnFailure(final FailureHandler<? super E> onFail) {
+    public final Promise<V, E> thenOnException(final ExceptionHandler<? super E> onException) {
         addOrFireListener(new StateListener<V, E>() {
             @Override
-            public void handleStateChange(final int newState, final V result, final E error) {
-                if (newState != SUCCEEDED) {
-                    onFail.handleError(error);
+            public void handleStateChange(final int newState, final V result, final E exception) {
+                if (newState != HAS_RESULT) {
+                    onException.handleException(exception);
                 }
             }
         });
@@ -274,12 +274,12 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Succe
     }
 
     @Override
-    public final Promise<V, E> thenOnSuccess(final SuccessHandler<? super V> onSuccess) {
+    public final Promise<V, E> thenOnResult(final ResultHandler<? super V> onResult) {
         addOrFireListener(new StateListener<V, E>() {
             @Override
-            public void handleStateChange(final int newState, final V result, final E error) {
-                if (newState == SUCCEEDED) {
-                    onSuccess.handleResult(result);
+            public void handleStateChange(final int newState, final V result, final E exception) {
+                if (newState == HAS_RESULT) {
+                    onResult.handleResult(result);
                 }
             }
         });
@@ -287,15 +287,15 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Succe
     }
 
     @Override
-    public final Promise<V, E> thenOnSuccessOrFailure(final SuccessHandler<? super V> onSuccess,
-        final FailureHandler<? super E> onFailure) {
+    public final Promise<V, E> thenOnResultOrException(final ResultHandler<? super V> onResult,
+                                                   final ExceptionHandler<? super E> onException) {
         addOrFireListener(new StateListener<V, E>() {
             @Override
-            public void handleStateChange(final int newState, final V result, final E error) {
-                if (newState == SUCCEEDED) {
-                    onSuccess.handleResult(result);
+            public void handleStateChange(final int newState, final V result, final E exception) {
+                if (newState == HAS_RESULT) {
+                    onResult.handleResult(result);
                 } else {
-                    onFailure.handleError(error);
+                    onException.handleException(exception);
                 }
             }
         });
@@ -303,42 +303,42 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Succe
     }
 
     @Override
-    public final Promise<V, E> thenOnSuccessOrFailure(final Runnable onSuccessOrFail) {
+    public final Promise<V, E> thenOnResultOrException(final Runnable onResultOrException) {
         addOrFireListener(new StateListener<V, E>() {
             @Override
-            public void handleStateChange(final int newState, final V result, final E error) {
-                onSuccessOrFail.run();
+            public void handleStateChange(final int newState, final V result, final E exception) {
+                onResultOrException.run();
             }
         });
         return this;
     }
 
     @Override
-    public final <VOUT> Promise<VOUT, E> then(final Function<? super V, VOUT, E> onSuccess) {
-        return then(onSuccess, Promises.<VOUT, E> failIdempotentFunction());
+    public final <VOUT> Promise<VOUT, E> then(final Function<? super V, VOUT, E> onResult) {
+        return then(onResult, Promises.<VOUT, E>exceptionIdempotentFunction());
     }
 
     @Override
-    public <EOUT extends Exception> Promise<V, EOUT> thenCatch(final Function<? super E, V, EOUT> onFailure) {
-        return then(Promises.<V, EOUT> successIdempotentFunction(), onFailure);
+    public <EOUT extends Exception> Promise<V, EOUT> thenCatch(final Function<? super E, V, EOUT> onException) {
+        return then(Promises.<V, EOUT>resultIdempotentFunction(), onException);
     }
 
     @Override
     public final <VOUT, EOUT extends Exception> Promise<VOUT, EOUT> then(
-        final Function<? super V, VOUT, EOUT> onSuccess, final Function<? super E, VOUT, EOUT> onFailure) {
+        final Function<? super V, VOUT, EOUT> onResult, final Function<? super E, VOUT, EOUT> onException) {
         final PromiseImpl<VOUT, EOUT> chained = new PromiseImpl<VOUT, EOUT>();
         addOrFireListener(new StateListener<V, E>() {
             @Override
             @SuppressWarnings("unchecked")
-            public void handleStateChange(final int newState, final V result, final E error) {
+            public void handleStateChange(final int newState, final V result, final E exception) {
                 try {
-                    if (newState == SUCCEEDED) {
-                        chained.handleResult(onSuccess.apply(result));
+                    if (newState == HAS_RESULT) {
+                        chained.handleResult(onResult.apply(result));
                     } else {
-                        chained.handleResult(onFailure.apply(error));
+                        chained.handleResult(onException.apply(exception));
                     }
                 } catch (final Exception e) {
-                    chained.handleError((EOUT) e);
+                    chained.handleException((EOUT) e);
                 }
             }
         });
@@ -346,54 +346,56 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Succe
     }
 
     @Override
-    public final Promise<V, E> thenAlways(final Runnable onSuccessOrFailure) {
-        return thenOnSuccessOrFailure(onSuccessOrFailure);
+    public final Promise<V, E> thenAlways(final Runnable onResultOrException) {
+        return thenOnResultOrException(onResultOrException);
     }
 
     @Override
-    public final Promise<V, E> thenFinally(final Runnable onSuccessOrFailure) {
-        return thenOnSuccessOrFailure(onSuccessOrFailure);
+    public final Promise<V, E> thenFinally(final Runnable onResultOrException) {
+        return thenOnResultOrException(onResultOrException);
     }
 
     @Override
-    public final <VOUT> Promise<VOUT, E> thenAsync(final AsyncFunction<? super V, VOUT, E> onSuccess) {
-        return thenAsync(onSuccess, Promises.<VOUT, E> failIdempotentAsyncFunction());
+    public final <VOUT> Promise<VOUT, E> thenAsync(final AsyncFunction<? super V, VOUT, E> onResult) {
+        return thenAsync(onResult, Promises.<VOUT, E>exceptionIdempotentAsyncFunction());
     }
 
     @Override
-    public final <EOUT extends Exception> Promise<V, EOUT> thenCatchAsync(AsyncFunction<? super E, V, EOUT> onFailure) {
-        return thenAsync(Promises.<V, EOUT> successIdempotentAsyncFunction(), onFailure);
+    public final <EOUT extends Exception> Promise<V, EOUT> thenCatchAsync(AsyncFunction<? super E, V, EOUT> onException) {
+        return thenAsync(Promises.<V, EOUT>resultIdempotentAsyncFunction(), onException);
     }
 
     @Override
     public final <VOUT, EOUT extends Exception> Promise<VOUT, EOUT> thenAsync(
-            final AsyncFunction<? super V, VOUT, EOUT> onSuccess,
-            final AsyncFunction<? super E, VOUT, EOUT> onFailure) {
+            final AsyncFunction<? super V, VOUT, EOUT> onResult,
+            final AsyncFunction<? super E, VOUT, EOUT> onException) {
         final PromiseImpl<VOUT, EOUT> chained = new PromiseImpl<VOUT, EOUT>();
         addOrFireListener(new StateListener<V, E>() {
             @Override
             @SuppressWarnings("unchecked")
-            public void handleStateChange(final int newState, final V result, final E error) {
+            public void handleStateChange(final int newState, final V result, final E exception) {
                 try {
                     final Promise<VOUT, EOUT> nestedPromise;
-                    if (newState == SUCCEEDED) {
-                        nestedPromise = onSuccess.apply(result);
+                    if (newState == HAS_RESULT) {
+                        nestedPromise = onResult.apply(result);
                     } else {
-                        nestedPromise = onFailure.apply(error);
+                        nestedPromise = onException.apply(exception);
                     }
-                    nestedPromise.thenOnSuccess(new SuccessHandler<VOUT>() {
+                    nestedPromise.thenOnResult(new ResultHandler<VOUT>() {
                         @Override
                         public void handleResult(final VOUT value) {
                             chained.handleResult(value);
                         }
-                    }).thenOnFailure(new FailureHandler<EOUT>() {
+                    }).thenOnException(new ExceptionHandler<EOUT>() {
                         @Override
-                        public void handleError(final EOUT error) {
-                            chained.handleError(error);
-                        };
+                        public void handleException(final EOUT exception) {
+                            chained.handleException(exception);
+                        }
+
+                        ;
                     });
                 } catch (final Exception e) {
-                    chained.handleError((EOUT) e);
+                    chained.handleException((EOUT) e);
                 }
             }
         });
@@ -424,46 +426,46 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Succe
     private void addOrFireListener(final StateListener<V, E> listener) {
         final int stateBefore = state;
         if (stateBefore != PENDING) {
-            listener.handleStateChange(stateBefore, result, error);
+            listener.handleStateChange(stateBefore, result, exception);
         } else {
             listeners.add(listener);
             final int stateAfter = state;
             if (stateAfter != PENDING && listeners.remove(listener)) {
-                listener.handleStateChange(stateAfter, result, error);
+                listener.handleStateChange(stateAfter, result, exception);
             }
         }
     }
 
     private V get0() throws ExecutionException {
-        if (error != null) {
-            throw new ExecutionException(error);
+        if (exception != null) {
+            throw new ExecutionException(exception);
         } else {
             return result;
         }
     }
 
     private V getOrThrow0() throws E {
-        if (error != null) {
-            throw error;
+        if (exception != null) {
+            throw exception;
         } else {
             return result;
         }
     }
 
-    private boolean setState(final int newState, final V result, final E error) {
+    private boolean setState(final int newState, final V result, final E exception) {
         synchronized (this) {
             if (state != PENDING) {
                 // Already completed.
                 return false;
             }
             this.result = result;
-            this.error = error;
+            this.exception = exception;
             state = newState; // Publishes.
             notifyAll(); // Wake up any blocked threads.
         }
         StateListener<V, E> listener;
         while ((listener = listeners.poll()) != null) {
-            listener.handleStateChange(newState, result, error);
+            listener.handleStateChange(newState, result, exception);
         }
         return true;
     }

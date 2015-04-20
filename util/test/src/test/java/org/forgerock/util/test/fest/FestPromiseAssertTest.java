@@ -33,7 +33,7 @@ public class FestPromiseAssertTest {
     @Test(expectedExceptions = AssertionError.class)
     public void testIncorrectFailed() throws Exception {
         // Given
-        Promise<String, Exception> promise = Promises.newSuccessfulPromise("fred");
+        Promise<String, Exception> promise = Promises.newResultPromise("fred");
 
         // When/Then
         assertThat(promise).failedWithException();
@@ -42,7 +42,7 @@ public class FestPromiseAssertTest {
     @Test
     public void testFailed() throws Exception {
         // Given
-        Promise<String, ? extends Exception> promise = Promises.newFailedPromise(new RuntimeException("bleugh"));
+        Promise<String, ? extends Exception> promise = Promises.newExceptionPromise(new RuntimeException("bleugh"));
 
         // When/Then
         assertThat(promise).failedWithException().hasMessage("bleugh");
@@ -51,7 +51,7 @@ public class FestPromiseAssertTest {
     @Test
     public void testSuccessString() throws Exception {
         // Given
-        Promise<String, Exception> promise = Promises.newSuccessfulPromise("fred");
+        Promise<String, Exception> promise = Promises.newResultPromise("fred");
 
         // When/Then
         assertThat(promise).succeeded().withString().isEqualTo("fred");
@@ -60,7 +60,7 @@ public class FestPromiseAssertTest {
     @Test(expectedExceptions = AssertionError.class)
     public void testIncorrectSuccess() throws Exception {
         // Given
-        Promise<String, Exception> promise = Promises.newFailedPromise(new Exception());
+        Promise<String, Exception> promise = Promises.newExceptionPromise(new Exception());
 
         // When/Then
         assertThat(promise).succeeded();
@@ -69,7 +69,7 @@ public class FestPromiseAssertTest {
     @Test
     public void testSuccessList() throws Exception {
         // Given
-        Promise<List<String>, Exception> promise = Promises.newSuccessfulPromise(Arrays.asList("abc", "def"));
+        Promise<List<String>, Exception> promise = Promises.newResultPromise(Arrays.asList("abc", "def"));
 
         // When/Then
         assertThat(promise).succeeded().withList().containsExactly("abc", "def");
@@ -78,7 +78,7 @@ public class FestPromiseAssertTest {
     @Test
     public void testSuccessCollection() throws Exception {
         // Given
-        Promise<List<String>, Exception> promise = Promises.newSuccessfulPromise(Arrays.asList("abc", "def"));
+        Promise<List<String>, Exception> promise = Promises.newResultPromise(Arrays.asList("abc", "def"));
 
         // When/Then
         assertThat(promise).succeeded().withCollection().contains("abc");
@@ -87,7 +87,7 @@ public class FestPromiseAssertTest {
     @Test
     public void testSuccessInteger() throws Exception {
         // Given
-        Promise<Integer, Exception> promise = Promises.newSuccessfulPromise(5);
+        Promise<Integer, Exception> promise = Promises.newResultPromise(5);
 
         // When/Then
         assertThat(promise).succeeded().withInteger().isEqualTo(5);
@@ -96,7 +96,7 @@ public class FestPromiseAssertTest {
     @Test
     public void testSuccessLong() throws Exception {
         // Given
-        Promise<Long, Exception> promise = Promises.newSuccessfulPromise(5L);
+        Promise<Long, Exception> promise = Promises.newResultPromise(5L);
 
         // When/Then
         assertThat(promise).succeeded().withLong().isEqualTo(5L);
@@ -105,7 +105,7 @@ public class FestPromiseAssertTest {
     @Test
     public void testSuccessDouble() throws Exception {
         // Given
-        Promise<Double, Exception> promise = Promises.newSuccessfulPromise(5.0D);
+        Promise<Double, Exception> promise = Promises.newResultPromise(5.0D);
 
         // When/Then
         assertThat(promise).succeeded().withDouble().isEqualTo(5.0D);
@@ -114,7 +114,7 @@ public class FestPromiseAssertTest {
     @Test
     public void testSuccessBoolean() throws Exception {
         // Given
-        Promise<Boolean, Exception> promise = Promises.newSuccessfulPromise(true);
+        Promise<Boolean, Exception> promise = Promises.newResultPromise(true);
 
         // When/Then
         assertThat(promise).succeeded().withBoolean().isTrue();
@@ -123,7 +123,7 @@ public class FestPromiseAssertTest {
     @Test
     public void testSuccessObject() throws Exception {
         // Given
-        Promise<Boolean, Exception> promise = Promises.newSuccessfulPromise(true);
+        Promise<Boolean, Exception> promise = Promises.newResultPromise(true);
 
         // When/Then
         assertThat(promise).succeeded().withObject().isNotNull();
@@ -132,7 +132,7 @@ public class FestPromiseAssertTest {
     @Test
     public void testSuccessObjectArray() throws Exception {
         // Given
-        Promise<Object[], Exception> promise = Promises.newSuccessfulPromise(new Object[5]);
+        Promise<Object[], Exception> promise = Promises.newResultPromise(new Object[5]);
 
         // When/Then
         assertThat(promise).succeeded().withObjectArray().hasSize(5);
@@ -143,7 +143,7 @@ public class FestPromiseAssertTest {
         // Given
         Map<String, String> value = new HashMap<String, String>();
         value.put("test", "fred");
-        Promise<Map<String, String>, Exception> promise = Promises.newSuccessfulPromise(value);
+        Promise<Map<String, String>, Exception> promise = Promises.newResultPromise(value);
 
         // When/Then
         assertThat(promise).succeeded().withMap().includes(MapAssert.entry("test", "fred"));
@@ -152,7 +152,7 @@ public class FestPromiseAssertTest {
     @Test
     public void testSuccessFile() throws Exception {
         // Given
-        Promise<File, Exception> promise = Promises.newSuccessfulPromise(new File("fred"));
+        Promise<File, Exception> promise = Promises.newResultPromise(new File("fred"));
 
         // When/Then
         assertThat(promise).succeeded().withFile().isRelative().doesNotExist();
