@@ -27,7 +27,7 @@ import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.util.promise.AsyncFunction;
+import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.SuccessHandler;
 
@@ -79,7 +79,7 @@ public final class AsyncReadModifyWriteDemo {
                     return connectionHolder.get().updateAsync(ctx(),
                             Requests.newUpdateRequest("users/1", userAliceWithIdAndRev(1, 1)));
                 }
-            }).then(new SuccessHandler<Resource>() {
+            }).thenOnSuccess(new SuccessHandler<Resource>() {
                 /*
                  * Check updated resource.
                  */
@@ -88,18 +88,18 @@ public final class AsyncReadModifyWriteDemo {
                     log("Updated resource now has revision " + user.getRevision());
                 }
             }).thenAlways(new Runnable() {
-                /*
-                 * Close the connection.
-                 */
-                @Override
-                public void run() {
-                    log("Closing connection");
-                    final Connection connection = connectionHolder.get();
-                    if (connection != null) {
-                        connection.close();
-                    }
+            /*
+             * Close the connection.
+             */
+            @Override
+            public void run() {
+                log("Closing connection");
+                final Connection connection = connectionHolder.get();
+                if (connection != null) {
+                    connection.close();
                 }
-            });
+            }
+        });
         // @formatter:on
 
         // Wait for update to complete/fail.
