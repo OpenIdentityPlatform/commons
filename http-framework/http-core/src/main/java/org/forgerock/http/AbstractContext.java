@@ -11,14 +11,15 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2014 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.http;
 
-import org.forgerock.util.Reject;
-
+import java.util.Collections;
 import java.util.Iterator;
+
+import org.forgerock.util.Reject;
 
 /**
  * A base implementation of the context associated with a request currently
@@ -134,19 +135,16 @@ public abstract class AbstractContext implements Context {
     }
 
     @Override
-    public Iterator<Context> iterator() { //TODO to implement
-        return null;
-//        return new Iterator<Context>() {
-//            @Override
-//            public boolean hasNext() {
-//                return false;
-//            }
-//
-//            @Override
-//            public Context next() {
-//                return null;
-//            }
-//        };
+    public Iterator<Context> iterator() {
+        // TODO Having a real implementation makes IG crash with a StackOverflowException when capturing the Context
+        /*
+        List<Context> contexts = new ArrayList<Context>();
+        for (Context context = this; context != null; context = context.getParent()) {
+            contexts.add(context);
+        }
+        return contexts.iterator();
+        */
+        return Collections.<Context>emptySet().iterator();
     }
 
     @Override
