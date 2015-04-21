@@ -1222,3 +1222,77 @@ Button Toolbar
 .nav-pills {
   position: relative;
 }
+
+
+/* Helper classes for rendering arrows and triangles*/
+.arrow-down(@color: #fff, @arrowWidth: 10px, @armWidth: 0, @armLength: 0) {
+    width: 0;
+    height: 0;
+    border-left: (@arrowWidth/2) solid transparent;
+    border-right: (@arrowWidth/2) solid transparent;
+    border-top: (@arrowWidth/2) solid @color;
+    margin-top:@armLength;
+    &:after{
+        width: @armWidth;
+        height: @armLength;
+        background:@color;
+        margin: -((@arrowWidth/2) + @armLength) 0 0 -(@armWidth/2);
+        content: "";
+        display: block;
+    }
+}
+
+.arrow-right(@color: #fff, @arrowWidth: 10px, @armWidth: 0, @armLength: 0) {
+    width: 0;
+    height: 0;
+    border-top: (@arrowWidth/2) solid transparent;
+    border-bottom: (@arrowWidth/2) solid transparent;
+    border-left: (@arrowWidth/2) solid @color;
+    &:after{
+        width: @armLength;
+        height: @armWidth;
+        background: @color;
+        margin: -(@armWidth/2) 0 0 -(@armLength+@armWidth);
+        content: "";
+        display: block;
+    }
+}
+
+.arrow-left(@color: #fff, @arrowWidth: 10px, @armWidth: 0, @armLength: 0) {
+    width: 0;
+    height: 0;
+    border-top: (@arrowWidth/2) solid transparent;
+    border-bottom: (@arrowWidth/2) solid transparent;
+    border-right: (@arrowWidth/2) solid @color;
+    &:after{
+        width: @armLength;
+        height: @armWidth;
+        background: @color;
+        margin: -(@armWidth/2) 0 0 (@arrowWidth/2);
+        content: "";
+        display: block;
+    }
+}
+
+.arrow-up(@color: #fff, @arrowWidth: 10px, @armWidth: 0, @armLength: 0) {
+    width: @armWidth*2;
+    height: @armLength + (@arrowWidth/2);
+    &:after{
+        width: @armWidth;
+        height: @armLength;
+        background: @color;
+        margin: 0 0 0 (@armWidth/2);
+        content: "";
+        display: block;
+    }
+
+    &:before{
+        content: "";
+        display: block;
+        width: 0;
+    	height: 0;
+        border-left: (@arrowWidth/2)  solid transparent;
+    	border-right: (@arrowWidth/2)  solid transparent;
+    	border-bottom: (@arrowWidth/2)  solid @color;
+    }
+}
