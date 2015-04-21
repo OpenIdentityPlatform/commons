@@ -124,7 +124,7 @@
 
         <!-- findbugs-maven-plugin -->
         <findbugsPluginVersion>2.5.2</findbugsPluginVersion>
-        
+
         <!-- maven-javadoc-plugin -->
         <javadocPluginVersion>2.9</javadocPluginVersion>
         <!-- forgerock-build-tools stylesheet org/forgerock/javadoc/javadoc.css
@@ -160,7 +160,7 @@
 
         <!-- this property makes sure NetBeans 6.8+ picks up some formatting rules from checkstyle -->
         <netbeans.checkstyle.format>true</netbeans.checkstyle.format>
-        
+
         <!--  ForgeRock build tools version -->
         <forgerockBuildToolsVersion>1.0.2</forgerockBuildToolsVersion>
 
@@ -405,11 +405,11 @@
                         </dependency>
                     </dependencies>
                 </plugin>
-		<plugin>
-		    <groupId>org.apache.maven.plugins</groupId>
-		    <artifactId>maven-failsafe-plugin</artifactId>
-		    <version>2.12.4</version>
-		</plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>2.12.4</version>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-war-plugin</artifactId>
@@ -697,7 +697,7 @@
                 <plugins>
                     <plugin>
                         <!-- Enforce Checkstyle during compilation -->
-                
+
                         <!-- Strictly speaking Checkstyle should be invoked as a
                              report during site generation. However, we want
                              to fail the build if source code does not comply with
@@ -854,7 +854,7 @@
                                 </goals>
                             </execution>
                         </executions>
-                    </plugin>                    
+                    </plugin>
                 </plugins>
             </build>
         </profile>
@@ -987,7 +987,7 @@
             <!--  This profile will automatically generate Javadoc reports for
                   modules containing src/main/java and avoids modules from
                   having to repeat a lot of boilerplate in their pom files.
-                  
+
                   Since it is not possible for reports to inherit from
                   pluginManagement, we have to duplicate the configuration here
                   (there are several major issues opened against Maven for this
