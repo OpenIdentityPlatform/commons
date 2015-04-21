@@ -11,37 +11,52 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2014 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.http;
 
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * A {@link Context} which has an an ID but no parent. All request context
- * chains are terminated by a root context as the top-most context.
+ * A {@link Context} which has an a globally unique ID but no parent. All request context
+ * chains are terminated by a {@link RootContext} as the top-most context.
+ *
+ * We're assuming here that we only have requirement for IDs to be globally unique and non-repeating but not "secure"
+ * (unguessable).
  *
  * @since 1.0.0
  */
 public final class RootContext extends AbstractContext {
 
-    private static final ThreadLocal<String> ID_CACHE = new ThreadLocal<String>() {
+    /**
+     * This ensures a globally unique key (even in a clustered environment).
+     * The UUID is a JVM-wide prefix for the context ID, suffixed with an {@link AtomicLong}.
+     */
+    private static final String BASE = UUID.randomUUID().toString();
+    private static final AtomicLong SEQUENCE = new AtomicLong();
 
-        private final String baseId = UUID.randomUUID().toString();
-        private long count = 0;
-
-        @Override
-        protected String initialValue() {
-            return baseId + count;
-        }
-    };
-
-    public RootContext() {
-        this(ID_CACHE.get());
+    /**
+     * Returns a new globally unique identifier.
+     */
+    private static String getNextID() {
+        return BASE + SEQUENCE.getAndIncrement();
     }
 
+    /**
+     * Construct a new {@link RootContext} with a generated (unique) identifier.
+     */
+    public RootContext() {
+        this(getNextID());
+    }
+
+    /**
+     * Construct a new {@link RootContext} with the given {@code id} (uniqueness is not verified).
+     * @param id context identifier (uniqueness is not verified)
+     */
     public RootContext(String id) {
-        super(id, "root", null); // No parent
+        // No parent
+        super(id, "root", null);
     }
 }
