@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.http.util;
@@ -45,12 +45,15 @@ public final class Option<T> {
     /**
      * Defines a boolean option with the provided default value.
      *
+     * @param <T>
+     *            The type of value associated with the option.
      * @param defaultValue
      *            The default value for the option.
      * @return A boolean option with the provided default value.
      */
-    public static Option<Boolean> withDefault(final boolean defaultValue) {
-        return of(Boolean.class, defaultValue);
+    @SuppressWarnings("unchecked")
+    public static <T> Option<T> withDefault(final T defaultValue) {
+        return new Option<T>((Class<T>) defaultValue.getClass(), defaultValue);
     }
 
     private final T defaultValue;

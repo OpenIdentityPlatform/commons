@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.http;
@@ -48,15 +48,13 @@ public final class Client implements Closeable {
      * The TCP connect timeout for new HTTP connections. The default timeout is
      * 10 seconds.
      */
-    public static final Option<Duration> OPTION_CONNECT_TIMEOUT = Option.of(Duration.class,
-            duration("10 seconds"));
+    public static final Option<Duration> OPTION_CONNECT_TIMEOUT = Option.withDefault(duration("10 seconds"));
 
     /**
      * The TCP socket timeout when waiting for HTTP responses. The default
      * timeout is 10 seconds.
      */
-    public static final Option<Duration> OPTION_SO_TIMEOUT = Option.of(Duration.class,
-            duration("10 seconds"));
+    public static final Option<Duration> OPTION_SO_TIMEOUT = Option.withDefault(duration("10 seconds"));
 
     /**
      * Specifies whether HTTP connections should be kept alive an reused for
@@ -84,14 +82,13 @@ public final class Client implements Closeable {
      *
      * @see Loader#SERVICE_LOADER
      */
-    public static final Option<Loader> OPTION_LOADER = Option.of(Loader.class,
-            Loader.SERVICE_LOADER);
+    public static final Option<Loader> OPTION_LOADER = Option.withDefault(Loader.SERVICE_LOADER);
 
     /**
      * Specifies the maximum number of connections that should be pooled by the
      * HTTP client. At most 64 connections will be cached by default.
      */
-    public static final Option<Integer> OPTION_MAX_CONNECTIONS = Option.of(Integer.class, 64);
+    public static final Option<Integer> OPTION_MAX_CONNECTIONS = Option.withDefault(64);
 
     /**
      * Specifies the temporary storage that should be used for storing HTTP
