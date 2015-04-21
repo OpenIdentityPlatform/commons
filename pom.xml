@@ -152,6 +152,9 @@
         <!-- clirr-maven-plugin -->
         <clirrPluginVersion>2.6.1</clirrPluginVersion>
 
+        <!-- cobertura-maven-plugin http://mojo.codehaus.org/cobertura-maven-plugin -->
+        <coberturaPluginVersion>2.7</coberturaPluginVersion>
+
         <!-- ***************** -->
         <!-- Repository Deployment URLs -->
         <!-- ***************** -->
@@ -183,7 +186,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>cobertura-maven-plugin</artifactId>
-                    <version>2.5.2</version>
+                    <version>${coberturaPluginVersion}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
