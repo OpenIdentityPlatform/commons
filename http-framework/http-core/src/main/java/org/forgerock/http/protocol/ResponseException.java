@@ -32,7 +32,9 @@ public class ResponseException extends IOException {
     }
 
     public ResponseException(int status, String message) {
-        this(new Response().setStatusAndReason(status), message);
+        this(new Response().setStatusAndReason(status)
+                           .setEntity(message),
+             message);
     }
 
     public ResponseException(String message) {
@@ -40,7 +42,10 @@ public class ResponseException extends IOException {
     }
 
     public ResponseException(String message, Throwable cause) {
-        this(new Response().setStatusAndReason(500), message, cause);
+        this(new Response().setStatusAndReason(500)
+                           .setEntity(message),
+             message,
+             cause);
     }
 
     public ResponseException(final Response response) {
