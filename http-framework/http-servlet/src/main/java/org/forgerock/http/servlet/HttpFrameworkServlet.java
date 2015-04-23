@@ -192,6 +192,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
                 }).onFailure(new FailureHandler<ResponseException>() {
                     @Override
                     public void handleError(ResponseException error) {
+                        log("Unexpected error", error);
                         try {
                             writeResponse(httpContext, resp, error.getResponse());
                         } catch (IOException e) {
