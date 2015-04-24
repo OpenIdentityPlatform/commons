@@ -162,6 +162,9 @@
         <!-- maven-clean-plugin http://maven.apache.org/components/plugins/maven-clean-plugin -->
         <mavenCleanPluginVersion>2.6.1</mavenCleanPluginVersion>
 
+        <!-- maven-jar-plugin http://maven.apache.org/plugins/maven-jar-plugin/ -->
+        <mavenJarPluginVersion>2.6</mavenJarPluginVersion>
+
         <!-- ***************** -->
         <!-- Repository Deployment URLs -->
         <!-- ***************** -->
@@ -294,7 +297,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>2.4</version>
+                    <version>${mavenJarPluginVersion}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
