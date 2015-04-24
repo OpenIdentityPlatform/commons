@@ -192,6 +192,9 @@
         <!-- maven-scm-plugin http://maven.apache.org/plugins/maven-scm-plugin/ -->
         <mavenSCMPluginVersion>1.9.4</mavenSCMPluginVersion>
 
+        <!-- license-maven-plugin http://mojo.codehaus.org/license-maven-plugin/ -->
+        <licenseMavenPluginVersion>1.8</licenseMavenPluginVersion>
+
         <!-- ***************** -->
         <!-- Repository Deployment URLs -->
         <!-- ***************** -->
@@ -568,7 +571,7 @@
                     <!-- Check Open Source licenses for all the dependencies -->
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>license-maven-plugin</artifactId>
-                    <version>1.7</version>
+                    <version>${licenseMavenPluginVersion}</version>
                     <configuration>
                         <useMissingFile>true</useMissingFile>
                         <fileTemplate>/org/codehaus/mojo/license/third-party-file-groupByLicense.ftl</fileTemplate>
