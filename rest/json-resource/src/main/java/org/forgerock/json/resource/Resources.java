@@ -13,14 +13,17 @@
  *
  * Copyright 2012-2015 ForgeRock AS.
  */
+
 package org.forgerock.json.resource;
 
-import static org.forgerock.json.resource.RoutingMode.EQUALS;
+import static org.forgerock.http.RoutingMode.EQUALS;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.forgerock.http.RouterContext;
+import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.util.promise.Promise;
@@ -266,8 +269,8 @@ public final class Resources {
         return new BadRequestException(msg);
     }
 
-    private static final <V> Promise<V, ResourceException> newSuccessfulPromise(V result) {
-        return Promises.<V, ResourceException> newSuccessfulPromise(result);
+    private static <V> Promise<V, ResourceException> newSuccessfulPromise(V result) {
+        return Promises.newResultPromise(result);
     }
 
     // Strips off the unwanted leaf routing context which was added when routing

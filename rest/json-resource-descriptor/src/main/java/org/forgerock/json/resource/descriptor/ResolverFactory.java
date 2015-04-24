@@ -15,8 +15,8 @@
  */
 package org.forgerock.json.resource.descriptor;
 
+import org.forgerock.http.ServerContext;
 import org.forgerock.json.resource.Request;
-import org.forgerock.json.resource.ServerContext;
 
 public interface ResolverFactory {
 

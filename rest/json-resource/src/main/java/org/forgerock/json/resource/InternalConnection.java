@@ -16,6 +16,8 @@
 
 package org.forgerock.json.resource;
 
+import org.forgerock.http.Context;
+import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.PromiseImpl;
@@ -39,8 +41,8 @@ final class InternalConnection extends AbstractAsynchronousConnection {
                     }
 
                     @Override
-                    public void handleError(ResourceException error) {
-                        promise.handleError(error);
+                    public void handleException(ResourceException error) {
+                        promise.handleException(error);
                     }
                 });
         return promise;
@@ -69,8 +71,8 @@ final class InternalConnection extends AbstractAsynchronousConnection {
             }
 
             @Override
-            public void handleError(ResourceException error) {
-                promise.handleError(error);
+            public void handleException(ResourceException error) {
+                promise.handleException(error);
             }
         };
     }
@@ -130,10 +132,10 @@ final class InternalConnection extends AbstractAsynchronousConnection {
                     }
 
                     @Override
-                    public void handleError(ResourceException error) {
-                        promise.handleError(error);
+                    public void handleException(ResourceException error) {
+                        promise.handleException(error);
                         if (handler != null) {
-                            handler.handleError(error);
+                            handler.handleException(error);
                         }
                     }
                 });

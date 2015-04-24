@@ -13,6 +13,7 @@
  *
  * Copyright 2014 ForgeRock AS.
  */
+
 package org.forgerock.json.resource.examples;
 
 import static org.forgerock.json.resource.examples.DemoUtils.ctx;
@@ -20,6 +21,7 @@ import static org.forgerock.json.resource.examples.DemoUtils.log;
 
 import java.util.Collections;
 
+import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.AbstractRequestHandler;
 import org.forgerock.json.resource.Connection;
@@ -31,7 +33,6 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceName;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.ServerContext;
 
 /**
  * An example illustrating how you can route realms / sub-realm requests using

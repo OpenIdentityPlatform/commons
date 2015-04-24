@@ -13,10 +13,12 @@
  *
  * Copyright 2013-2014 ForgeRock AS.
  */
+
 package org.forgerock.json.resource;
 
 import java.util.Collection;
 
+import org.forgerock.http.Context;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.util.promise.Promise;
 

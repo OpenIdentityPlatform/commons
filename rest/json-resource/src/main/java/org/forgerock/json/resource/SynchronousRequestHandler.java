@@ -18,6 +18,7 @@ package org.forgerock.json.resource;
 
 import java.util.Collection;
 
+import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
 
 /**

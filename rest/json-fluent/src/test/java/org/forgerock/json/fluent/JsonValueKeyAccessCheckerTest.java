@@ -11,11 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2013 ForgeRock AS.
+ * Copyright 2013-2014 ForgeRock AS.
  */
+
 package org.forgerock.json.fluent;
 
-import static org.fest.assertions.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.testng.Assert.*;
 
 import java.util.Arrays;
