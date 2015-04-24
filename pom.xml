@@ -195,6 +195,9 @@
         <!-- license-maven-plugin http://mojo.codehaus.org/license-maven-plugin/ -->
         <licenseMavenPluginVersion>1.8</licenseMavenPluginVersion>
 
+        <!-- maven-enforcer-plugin http://maven.apache.org/plugins/maven-enforcer-plugin/ -->
+        <mavenEnforcerPluginVersion>1.4</mavenEnforcerPluginVersion>
+
         <!-- ***************** -->
         <!-- Repository Deployment URLs -->
         <!-- ***************** -->
@@ -307,7 +310,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>1.1.1</version>
+                    <version>${mavenEnforcerPluginVersion}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
