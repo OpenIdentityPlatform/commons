@@ -11,14 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
+
 package org.forgerock.json.resource.examples;
 
-import static org.forgerock.json.resource.examples.DemoUtils.ctx;
-import static org.forgerock.json.resource.examples.DemoUtils.getConnectionFactory;
-import static org.forgerock.json.resource.examples.DemoUtils.log;
-import static org.forgerock.json.resource.examples.DemoUtils.userAliceWithIdAndRev;
+import static org.forgerock.json.resource.examples.DemoUtils.*;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -29,7 +27,7 @@ import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.promise.SuccessHandler;
+import org.forgerock.util.promise.ResultHandler;
 
 /**
  * An example client application which performs an asynchronous read, modify,
@@ -79,7 +77,7 @@ public final class AsyncReadModifyWriteDemo {
                     return connectionHolder.get().updateAsync(ctx(),
                             Requests.newUpdateRequest("users/1", userAliceWithIdAndRev(1, 1)));
                 }
-            }).thenOnSuccess(new SuccessHandler<Resource>() {
+            }).thenOnResult(new ResultHandler<Resource>() {
                 /*
                  * Check updated resource.
                  */

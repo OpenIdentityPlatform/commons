@@ -11,8 +11,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
+
 package org.forgerock.json.resource.descriptor;
 
 import static java.util.Collections.unmodifiableSet;
@@ -73,9 +74,9 @@ public final class Api {
         }
 
         @Override
-        public final void handleError(final ResourceException error) {
+        public final void handleException(final ResourceException error) {
             resolver.close();
-            handler.handleError(error);
+            handler.handleException(error);
         }
 
         @Override
@@ -95,7 +96,7 @@ public final class Api {
                 if (request.getResourceNameObject().isEmpty()) {
                     handler.handleResult(new Resource(null, null, json(apiToJson(api))));
                 } else {
-                    handler.handleError(new NotSupportedException());
+                    handler.handleException(new NotSupportedException());
                 }
             }
         };
@@ -113,7 +114,7 @@ public final class Api {
                     }
                     handler.handleResult(new Resource(null, null, json(values)));
                 } else {
-                    handler.handleError(new NotSupportedException());
+                    handler.handleException(new NotSupportedException());
                 }
             }
         };
@@ -293,7 +294,7 @@ public final class Api {
                         }
                         handler.handleResult(resolvedRequestHandler);
                     } catch (final ResourceException e) {
-                        handler.handleError(e);
+                        handler.handleException(e);
                     }
                 } else if (subMatch != null) {
                     final String childId;
@@ -310,8 +311,8 @@ public final class Api {
                     resolver.getRelationsForResource(subMatch, childId,
                             new ResultHandler<Collection<RelationDescriptor>>() {
                                 @Override
-                                public void handleError(final ResourceException error) {
-                                    handler.handleError(error);
+                                public void handleException(final ResourceException error) {
+                                    handler.handleException(error);
                                 }
 
                                 @Override
@@ -320,7 +321,7 @@ public final class Api {
                                 }
                             });
                 } else {
-                    handler.handleError(new NotFoundException(String.format(
+                    handler.handleException(new NotFoundException(String.format(
                             "Resource '%s' not found", name)));
                 }
             }

@@ -102,7 +102,7 @@ public class AssertJJsonValueAssertTest {
     @Test
     public void testPromisedAssertion() throws Exception {
         // Given
-        Promise<JsonValue, Exception> value = Promises.newSuccessfulPromise(json(object(field("bool", true))));
+        Promise<JsonValue, Exception> value = Promises.newResultPromise(json(object(field("bool", true))));
 
         // When
         AssertJJsonValueAssert.AssertJJsonValuePromiseAssert asserter = AssertJJsonValueAssert.assertThat(value);

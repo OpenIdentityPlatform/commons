@@ -68,7 +68,7 @@ final class AnnotatedMethod {
     <T> Promise<T, ? extends ResourceException> invoke(ServerContext context, Request request,
             QueryResultHandler queryHandler, String id) {
         if (method == null) {
-            return Promises.newFailedPromise(new NotSupportedException(operation + " not supported"));
+            return Promises.newExceptionPromise(new NotSupportedException(operation + " not supported"));
         }
         Object[] args = new Object[numberOfParameters];
         if (idParameter > -1) {

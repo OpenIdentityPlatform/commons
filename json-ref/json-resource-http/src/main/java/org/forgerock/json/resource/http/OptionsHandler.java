@@ -47,7 +47,7 @@ public class OptionsHandler implements Filter {
             response.getHeaders().put("Allow",
                     Arrays.asList(METHOD_DELETE, METHOD_GET, METHOD_HEAD, METHOD_PATCH, METHOD_POST, METHOD_PUT,
                             METHOD_OPTIONS, METHOD_TRACE));
-            return Promises.newSuccessfulPromise(response);
+            return Promises.newResultPromise(response);
         } else {
             return next.handle(context, request);
         }

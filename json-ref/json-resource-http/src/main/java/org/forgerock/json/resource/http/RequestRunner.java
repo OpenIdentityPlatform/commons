@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2014 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource.http;
@@ -112,7 +112,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, ResponseEx
                             onError(e);
                         }
 
-                        return Promises.newSuccessfulPromise(httpResponse);
+                        return Promises.newResultPromise(httpResponse);
                     }
                 }, new AsyncFunction<ResourceException, Response, ResponseException>() {
                     @Override
@@ -143,7 +143,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, ResponseEx
                         } catch (final Exception e) {
                             onError(e);
                         }
-                        return Promises.newSuccessfulPromise(httpResponse);
+                        return Promises.newResultPromise(httpResponse);
                     }
                 }, new AsyncFunction<ResourceException, Response, ResponseException>() {
                     @Override
@@ -193,7 +193,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, ResponseEx
             private int resultCount = 0;
 
             @Override
-            public void handleError(final ResourceException error) {
+            public void handleException(final ResourceException error) {
                 if (isFirstResult) {
                     onError(error);
                 } else {
@@ -251,7 +251,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, ResponseEx
         }).thenAsync(new AsyncFunction<QueryResult, Response, ResponseException>() {
             @Override
             public Promise<Response, ResponseException> apply(QueryResult queryResult) throws ResponseException {
-                return Promises.newSuccessfulPromise(httpResponse);
+                return Promises.newResultPromise(httpResponse);
             }
         }, new AsyncFunction<ResourceException, Response, ResponseException>() {
             @Override
@@ -337,7 +337,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, ResponseEx
                             // No change so 304.
                             Map<String, Object> responseBody = ResourceException.getException(304)
                                     .setReason("Not Modified").toJsonValue().asMap();
-                            return Promises.newSuccessfulPromise(new Response().setStatusAndReason(304)
+                            return Promises.newResultPromise(new Response().setStatusAndReason(304)
                                     .setEntity(responseBody));
                         }
                     }
@@ -346,7 +346,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, ResponseEx
                 } catch (final Exception e) {
                     onError(e);
                 }
-                return Promises.newSuccessfulPromise(httpResponse);
+                return Promises.newResultPromise(httpResponse);
             }
         };
     }

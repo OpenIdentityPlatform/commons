@@ -38,7 +38,7 @@ class AnnotatedActionMethods {
     Promise<JsonValue, ? extends ResourceException> invoke(ServerContext context, ActionRequest request, String id) {
         AnnotatedMethod method = methods.get(request.getAction());
         if (method == null) {
-            return Promises.newFailedPromise(new NotSupportedException(request.getAction() + "not supported"));
+            return Promises.newExceptionPromise(new NotSupportedException(request.getAction() + "not supported"));
         }
         return method.invoke(context, request, id);
     }
