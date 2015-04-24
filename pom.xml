@@ -120,11 +120,11 @@
         <maven.compiler.source>1.7</maven.compiler.source>
 
         <!-- maven-enforcer-plugin -->
-        <maven.min.version>3.0</maven.min.version>
+        <maven.min.version>3.0.1</maven.min.version>
         <jdk.min.version>${maven.compiler.source}</jdk.min.version>
 
         <!-- findbugs-maven-plugin -->
-        <findbugsPluginVersion>2.5.2</findbugsPluginVersion>
+        <findbugsPluginVersion>3.0.1</findbugsPluginVersion>
 
         <!-- maven-javadoc-plugin -->
         <javadocPluginVersion>2.9</javadocPluginVersion>
