@@ -186,6 +186,9 @@
         <!-- maven-deploy-plugin http://maven.apache.org/plugins/maven-deploy-plugin/ -->
         <mavenDeployPluginVersion>2.8.2</mavenDeployPluginVersion>
 
+        <!-- maven-install-plugin http://maven.apache.org/plugins/maven-install-plugin/ -->
+        <mavenInstallPluginVersion>2.5.2</mavenInstallPluginVersion>
+
         <!-- ***************** -->
         <!-- Repository Deployment URLs -->
         <!-- ***************** -->
@@ -308,7 +311,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-install-plugin</artifactId>
-                    <version>2.4</version>
+                    <version>${mavenInstallPluginVersion}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
