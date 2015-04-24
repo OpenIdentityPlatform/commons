@@ -165,6 +165,9 @@
         <!-- maven-jar-plugin http://maven.apache.org/plugins/maven-jar-plugin/ -->
         <mavenJarPluginVersion>2.6</mavenJarPluginVersion>
 
+        <!-- maven-war-plugin http://maven.apache.org/plugins/maven-war-plugin/ -->
+        <mavenWarPluginVersion>2.6</mavenWarPluginVersion>
+
         <!-- ***************** -->
         <!-- Repository Deployment URLs -->
         <!-- ***************** -->
@@ -426,7 +429,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-war-plugin</artifactId>
-                    <version>2.3</version>
+                    <version>2.6</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.plexus</groupId>
