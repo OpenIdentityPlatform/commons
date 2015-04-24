@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.http;
@@ -40,7 +40,6 @@ public final class HttpContext extends AbstractContext {
 
     private final Map<String, Object> attributes = new HashMap<String, Object>();
 
-    //TODO this should be default visibility
     public HttpContext(Context parent, Session session) {
         super(parent, "httpRequest");
         Reject.ifNull(session, "Session cannot be null.");

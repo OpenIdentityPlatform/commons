@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2014 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.http;
@@ -67,7 +67,7 @@ public final class RouteMatcher<H> {
         return handler;
     }
 
-    boolean isBetterMatchThan(RouteMatcher matcher) {
+    boolean isBetterMatchThan(RouteMatcher<H> matcher) {
         if (matcher == null) {
             return true;
         } else if (!match.equals(matcher.match)) {

@@ -42,8 +42,7 @@ public interface Filter {
      * @param request
      *            The request.
      * @param next
-     *            The next filter or handler in the chain to handle the
-     *            exchange.
+     *            The next filter or handler in the chain to handle the request.
      * @return A {@code Promise} representing the response to be returned to the
      *         client.
      */

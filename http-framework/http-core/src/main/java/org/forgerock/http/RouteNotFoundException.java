@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2014 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.http;
@@ -24,6 +24,8 @@ import java.io.IOException;
  * @since 1.0.0
  */
 public class RouteNotFoundException extends IOException {
+
+    private static final long serialVersionUID = -1129924053288625909L;
 
     /**
      * Constructs a new exception with the specified detail message.

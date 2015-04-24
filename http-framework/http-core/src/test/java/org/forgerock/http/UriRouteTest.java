@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.http;
@@ -68,7 +68,7 @@ public final class UriRouteTest {
     public void testGetRouteMatcher(final RoutingMode mode, final String template,
             final String resourceName, final String expectedRemaining) {
         UriRoute<Void> uriRoute = new UriRoute<Void>(mode, template, null);
-        RouteMatcher matcher = uriRoute.getRouteMatcher(mock(Context.class), resourceName);
+        RouteMatcher<Void> matcher = uriRoute.getRouteMatcher(mock(Context.class), resourceName);
         if (expectedRemaining != null) {
             assertThat(matcher).isNotNull();
             assertThat(matcher.getRemaining()).isEqualTo(expectedRemaining);
