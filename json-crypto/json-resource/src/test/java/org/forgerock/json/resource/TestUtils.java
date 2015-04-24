@@ -11,8 +11,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013-2014 ForgeRock AS.
  */
+
 package org.forgerock.json.resource;
 
 import static org.forgerock.json.fluent.JsonValue.json;
@@ -20,6 +21,8 @@ import static org.forgerock.json.fluent.JsonValue.json;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.forgerock.http.Context;
+import org.forgerock.http.RootContext;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 

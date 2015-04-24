@@ -16,13 +16,19 @@
 
 package org.forgerock.json.resource.examples;
 
+import static org.forgerock.json.resource.Requests.newCreateRequest;
+import static org.forgerock.json.resource.Resources.newInternalConnection;
+import static org.forgerock.json.resource.examples.DemoUtils.*;
+
+import org.forgerock.http.Context;
+import org.forgerock.http.RoutingMode;
+import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.AcceptAPIVersion;
 import org.forgerock.json.resource.AcceptAPIVersionContext;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.MemoryBackend;
@@ -36,15 +42,10 @@ import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.Router;
-import org.forgerock.json.resource.RoutingMode;
-import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
-
-import static org.forgerock.json.resource.Requests.newCreateRequest;
-import static org.forgerock.json.resource.Resources.newInternalConnection;
-import static org.forgerock.json.resource.examples.DemoUtils.*;
+import org.forgerock.json.resource.UriRouter;
+import org.forgerock.json.resource.VersionRouter;
 
 /**
  * An example client application which performs asynchronous reads against different versions of the same resource.
@@ -110,21 +111,21 @@ public final class VersionedResourcesDemo {
 
         MemoryBackend groups = new MemoryBackend();
 
-        Router router = new Router();
-        router.addRoute("/users")
+        UriRouter router = new UriRouter();
+        router.addRoute(RoutingMode.STARTS_WITH, "/users", new VersionRouter()
                 .addVersion("1", usersV1Dot0)
                 .addVersion("1.5", usersV1Dot5)
-                .addVersion("2.0", usersV2Dot0);
+                .addVersion("2.0", usersV2Dot0));
 
-        router.addRoute(RoutingMode.EQUALS, "/roles")
+        router.addRoute(RoutingMode.EQUALS, "/roles", new VersionRouter()
                 .addVersion("1.0", rolesV1Dot0)
                 .addVersion("1.5", rolesV1Dot5)
-                .addVersion("2.0", rolesV2Dot0);
+                .addVersion("2.0", rolesV2Dot0));
 
-        router.addRoute("/config")
+        router.addRoute(RoutingMode.STARTS_WITH, "/config", new VersionRouter()
                 .addVersion("1.0", configV1Dot0)
                 .addVersion("1.5", configV1Dot5)
-                .addVersion("2.0", configV2Dot0);
+                .addVersion("2.0", configV2Dot0));
 
         // Ignores any version information.
         router.addRoute("groups", groups);

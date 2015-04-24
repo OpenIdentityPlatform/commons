@@ -16,17 +16,13 @@
 
 package org.forgerock.json.resource;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.http.Context;
+import org.forgerock.http.ServerContext;
 
 /**
  * A {@link ServerContext} from an internal source.
  */
 public class InternalServerContext extends ServerContext implements ClientContext {
-
-    /**
-     * The client-friendly name of this context.
-     */
-    private static final String CONTEXT_NAME = "internalServer";
 
     /**
      * See {@link ServerContext#ServerContext(Context)}.
@@ -35,32 +31,7 @@ public class InternalServerContext extends ServerContext implements ClientContex
      *         The parent context.
      */
     public InternalServerContext(Context parent) {
-        super(parent);
-    }
-
-    /**
-     * See {@link ServerContext#ServerContext(JsonValue, PersistenceConfig)}.
-     *
-     * @param savedContext
-     *         The JSON representation from which this context's attributes
-     *         should be parsed.
-     * @param config
-     *         The persistence configuration.
-     *
-     * @throws ResourceException
-     *         If the JSON representation could not be parsed.
-     */
-    public InternalServerContext(JsonValue savedContext, PersistenceConfig config) throws ResourceException {
-        super(savedContext, config);
-    }
-
-    /**
-     * Get this Context's name.
-     *
-     * @return this object's name
-     */
-    public String getContextName() {
-        return CONTEXT_NAME;
+        super(parent, "internalServer");
     }
 
     /**

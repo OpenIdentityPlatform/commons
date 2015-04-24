@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
+import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
 
 /**
@@ -124,7 +125,7 @@ public final class Filters {
 
             @Override
             public void handleError(final ResourceException error) {
-                handler.handleError(error);
+                handler.handleException(error);
             }
 
             @Override
@@ -220,7 +221,7 @@ public final class Filters {
                 final ResultHandler<JsonValue> handler) {
             return new ResultHandler<JsonValue>() {
                 @Override
-                public void handleError(final ResourceException error) {
+                public void handleException(final ResourceException error) {
                     filter.filterActionError(context, state, error, handler);
                 }
 
@@ -235,7 +236,7 @@ public final class Filters {
                 final ResultHandler<Resource> handler) {
             return new ResultHandler<Resource>() {
                 @Override
-                public void handleError(final ResourceException error) {
+                public void handleException(final ResourceException error) {
                     filter.filterGenericError(context, state, error, handler);
                 }
 
@@ -260,9 +261,9 @@ public final class Filters {
                 private final QueryResultHandler innerHandler = new QueryResultHandler() {
 
                     @Override
-                    public void handleError(final ResourceException error) {
+                    public void handleException(final ResourceException error) {
                         if (hasCompleted.compareAndSet(false, true)) {
-                            handler.handleError(error);
+                            handler.handleException(error);
                         }
                     }
 
@@ -280,7 +281,7 @@ public final class Filters {
                 };
 
                 @Override
-                public void handleError(final ResourceException error) {
+                public void handleException(final ResourceException error) {
                     if (!hasCompleted.get()) {
                         filter.filterQueryError(context, state, error, innerHandler);
                     }
@@ -400,8 +401,8 @@ public final class Filters {
                 final Class<R> clazz) {
             return new ResultHandler<Object>() {
                 @Override
-                public void handleError(final ResourceException error) {
-                    handler.handleError(error);
+                public void handleException(final ResourceException error) {
+                    handler.handleException(error);
                 }
 
                 @Override
@@ -409,7 +410,7 @@ public final class Filters {
                     try {
                         handler.handleResult(clazz.cast(response));
                     } catch (final ClassCastException e) {
-                        handler.handleError(new InternalServerErrorException(e));
+                        handler.handleException(new InternalServerErrorException(e));
                     }
                 }
             };

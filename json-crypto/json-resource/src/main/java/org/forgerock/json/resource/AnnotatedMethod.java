@@ -21,6 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+import org.forgerock.http.ServerContext;
 import org.forgerock.json.resource.annotations.Create;
 import org.forgerock.json.resource.annotations.Patch;
 import org.forgerock.json.resource.annotations.Query;
@@ -67,7 +68,7 @@ final class AnnotatedMethod {
     <T> Promise<T, ? extends ResourceException> invoke(ServerContext context, Request request,
             QueryResultHandler queryHandler, String id) {
         if (method == null) {
-            return Promises.newFailedPromise(new NotSupportedException(operation + " not supported"));
+            return Promises.newExceptionPromise(new NotSupportedException(operation + " not supported"));
         }
         Object[] args = new Object[numberOfParameters];
         if (idParameter > -1) {

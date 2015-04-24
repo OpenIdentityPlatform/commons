@@ -16,6 +16,7 @@
 
 package org.forgerock.json.resource;
 
+import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
 
 class InterfaceSingletonHandler implements RequestHandler {
@@ -35,7 +36,7 @@ class InterfaceSingletonHandler implements RequestHandler {
     public final void handleCreate(final ServerContext context, final CreateRequest request,
             final ResultHandler<Resource> handler) {
         // TODO: i18n
-        handler.handleError(Resources.newBadRequestException(
+        handler.handleException(Resources.newBadRequestException(
                 "The singleton resource %s cannot be created", request.getResourceName()));
     }
 
@@ -43,7 +44,7 @@ class InterfaceSingletonHandler implements RequestHandler {
     public final void handleDelete(final ServerContext context, final DeleteRequest request,
             final ResultHandler<Resource> handler) {
         // TODO: i18n
-        handler.handleError(Resources.newBadRequestException(
+        handler.handleException(Resources.newBadRequestException(
                 "The singleton resource %s cannot be deleted", request.getResourceName()));
     }
 
@@ -57,7 +58,7 @@ class InterfaceSingletonHandler implements RequestHandler {
     public final void handleQuery(final ServerContext context, final QueryRequest request,
             final QueryResultHandler handler) {
         // TODO: i18n
-        handler.handleError(Resources.newBadRequestException(
+        handler.handleException(Resources.newBadRequestException(
                 "The singleton resource %s cannot be queried", request.getResourceName()));
     }
 

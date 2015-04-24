@@ -13,9 +13,10 @@
  *
  * Copyright 2013-2014 ForgeRock AS.
  */
+
 package org.forgerock.json.resource;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.resource.Requests.newReadRequest;
 
 import org.forgerock.json.fluent.JsonValue;

@@ -17,10 +17,12 @@
 package org.forgerock.json.resource;
 
 /**
- * An opaque handle for a route which has been registered in a {@link Router router}. A reference to a route should be
- * maintained if there is a chance that the route will need to be removed from the router at a later time.
+ * An opaque handle for a route which has been registered in a {@link UriRouter uriRouter} or
+ * {@link VersionRouter versionRouter}. A reference to a route should be maintained if there is a chance that the route
+ * will need to be removed from the router at a later time.
  *
- * @see Router
+ * @see UriRouter
+ * @see VersionRouter
  */
 public interface Route {
 }

@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.forgerock</groupId>
         <artifactId>forgerock-parent</artifactId>
-        <version>1.2.1</version>
+        <version>1.2.9-SNAPSHOT</version>
     </parent>
     <groupId>org.forgerock.commons</groupId>
     <artifactId>forgerock-rest</artifactId>
@@ -64,6 +64,7 @@
         <maven.compiler.source>1.6</maven.compiler.source>
         <i18nFrameworkVersion>1.4.1</i18nFrameworkVersion>
         <jacksonVersion>2.4.3</jacksonVersion>
+        <forgerockUtilVersion>2.0.0-SNAPSHOT</forgerockUtilVersion>
     </properties>
     <modules>
         <module>json-fluent</module>
@@ -77,17 +78,11 @@
         <module>json-resource</module>
         <module>json-resource-descriptor</module>
         <module>json-resource-examples</module>
-        <module>json-resource-servlet</module>
+        <module>json-resource-http</module>
         <module>json-web-token</module>
         <module>json-test</module>
     </modules>
     <dependencies>
-        <dependency>
-            <groupId>org.easytesting</groupId>
-            <artifactId>fest-assert</artifactId>
-            <version>1.4</version>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
@@ -148,12 +143,12 @@
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>forgerock-util</artifactId>
-                <version>1.4.0-SNAPSHOT</version>
+                <version>${forgerockUtilVersion}</version>
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>forgerock-test-utils</artifactId>
-                <version>1.4.0-SNAPSHOT</version>
+                <version>${forgerockUtilVersion}</version>
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
@@ -187,7 +182,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>2.4</version>
                 <reportSets>
                     <reportSet>
                         <reports>

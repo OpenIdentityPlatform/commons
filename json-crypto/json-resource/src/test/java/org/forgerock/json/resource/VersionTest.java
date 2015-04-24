@@ -16,10 +16,10 @@
 
 package org.forgerock.json.resource;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import static org.fest.assertions.Assertions.assertThat;
 
 /**
  * @since 2.4.0

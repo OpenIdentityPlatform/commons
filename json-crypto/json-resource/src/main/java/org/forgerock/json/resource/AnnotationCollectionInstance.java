@@ -18,6 +18,7 @@ package org.forgerock.json.resource;
 
 import static org.forgerock.json.resource.RequestHandlerUtils.handle;
 
+import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.annotations.Delete;
 import org.forgerock.json.resource.annotations.Patch;

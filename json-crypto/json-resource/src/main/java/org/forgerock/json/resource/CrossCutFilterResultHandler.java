@@ -16,6 +16,8 @@
 
 package org.forgerock.json.resource;
 
+import org.forgerock.http.ServerContext;
+
 /**
  * A call-back which must be invoked by cross-cutting filters once a request has
  * been filtered.

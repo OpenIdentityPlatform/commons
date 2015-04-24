@@ -11,12 +11,14 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
+
 package org.forgerock.json.resource;
 
 import java.util.Collection;
 
+import org.forgerock.http.Context;
 import org.forgerock.json.fluent.JsonValue;
 
 /**
@@ -67,7 +69,7 @@ public abstract class AbstractAsynchronousConnection implements Connection {
         return query(context, request, new QueryResultHandler() {
 
             @Override
-            public void handleError(final ResourceException error) {
+            public void handleException(final ResourceException error) {
                 // Ignore - handled by future.
             }
 

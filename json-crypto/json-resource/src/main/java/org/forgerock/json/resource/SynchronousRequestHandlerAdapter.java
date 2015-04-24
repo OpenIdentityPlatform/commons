@@ -19,6 +19,7 @@ package org.forgerock.json.resource;
 import java.util.Collection;
 import java.util.LinkedList;
 
+import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
 
 /**
@@ -37,7 +38,7 @@ final class SynchronousRequestHandlerAdapter implements RequestHandler {
         try {
             handler.handleResult(syncHandler.handleUpdate(context, request));
         } catch (final ResourceException e) {
-            handler.handleError(e);
+            handler.handleException(e);
         }
     }
 
@@ -47,7 +48,7 @@ final class SynchronousRequestHandlerAdapter implements RequestHandler {
         try {
             handler.handleResult(syncHandler.handleRead(context, request));
         } catch (final ResourceException e) {
-            handler.handleError(e);
+            handler.handleException(e);
         }
     }
 
@@ -62,7 +63,7 @@ final class SynchronousRequestHandlerAdapter implements RequestHandler {
             }
             handler.handleResult(result);
         } catch (final ResourceException e) {
-            handler.handleError(e);
+            handler.handleException(e);
         }
     }
 
@@ -72,7 +73,7 @@ final class SynchronousRequestHandlerAdapter implements RequestHandler {
         try {
             handler.handleResult(syncHandler.handlePatch(context, request));
         } catch (final ResourceException e) {
-            handler.handleError(e);
+            handler.handleException(e);
         }
     }
 
@@ -82,7 +83,7 @@ final class SynchronousRequestHandlerAdapter implements RequestHandler {
         try {
             handler.handleResult(syncHandler.handleDelete(context, request));
         } catch (final ResourceException e) {
-            handler.handleError(e);
+            handler.handleException(e);
         }
     }
 
@@ -92,7 +93,7 @@ final class SynchronousRequestHandlerAdapter implements RequestHandler {
         try {
             handler.handleResult(syncHandler.handleCreate(context, request));
         } catch (final ResourceException e) {
-            handler.handleError(e);
+            handler.handleException(e);
         }
     }
 
@@ -102,7 +103,7 @@ final class SynchronousRequestHandlerAdapter implements RequestHandler {
         try {
             handler.handleResult(syncHandler.handleAction(context, request));
         } catch (final ResourceException e) {
-            handler.handleError(e);
+            handler.handleException(e);
         }
     }
 }
