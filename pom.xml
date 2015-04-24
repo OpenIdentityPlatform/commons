@@ -189,6 +189,9 @@
         <!-- maven-install-plugin http://maven.apache.org/plugins/maven-install-plugin/ -->
         <mavenInstallPluginVersion>2.5.2</mavenInstallPluginVersion>
 
+        <!-- maven-scm-plugin http://maven.apache.org/plugins/maven-scm-plugin/ -->
+        <mavenSCMPluginVersion>1.9.4</mavenSCMPluginVersion>
+
         <!-- ***************** -->
         <!-- Repository Deployment URLs -->
         <!-- ***************** -->
@@ -400,7 +403,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-scm-plugin</artifactId>
-                    <version>1.8.1</version>
+                    <version>${mavenSCMPluginVersion}</version>
                     <configuration>
                         <tag>${project.artifactId}-${project.version}</tag>
                     </configuration>
