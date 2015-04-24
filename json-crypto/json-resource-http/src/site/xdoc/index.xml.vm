@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2012-2013 ForgeRock AS
+  !      Copyright 2012-2015 ForgeRock AS.
   !    
 -->
 <document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -32,33 +32,23 @@
     <body>
         <section name="About ${project.name}">
             <p>
-                JSON Resource Servlet provides J2EE 6 Servlet integration and
-                defines a common HTTP based REST API for interacting with JSON
-                Resources.
+                JSON Resource HTTP provides HTTP integration and defines a
+                common HTTP based REST API for interacting with JSON Resources.
             </p>
             <p>
-                The module provides a standalone <a href="apidocs/org/forgerock/json/resource/servlet/HttpServlet.html"><tt>HttpServlet</tt></a>
-                implementation as part of its WAR artifact. The Servlet can
-                be deployed and configured with a custom
-                <a href="../json-resource/apidocs/org/forgerock/json/resource/ConnectionFactory.html"><tt>ConnectionFactory</tt></a>
-                and <a href="apidocs/org/forgerock/json/resource/servlet/HttpServletContextFactory.html"><tt>HttpServletContextFactory</tt></a>.
-                By default the Servlet will use an in memory back-end exposing a
-                "/users" and a "/groups" end-point.
+                See the JSON Resource Examples project
+                <a href="../json-resource/index.html">json-resource-examples</a>
+                for an example standalone WAR artifact which demonstrates the
+                integration of JSON Resource with the Common HTTP Framework.
             </p>
             <p>
-                In addition, the module provides a JAR artifact which can be
-                used for building more complex JSON Resource Servlets. As well
-                as extending the <tt>HttpServlet</tt> implementation you can
-                also use the <a href="apidocs/org/forgerock/json/resource/servlet/HttpServletAdapter.html"><tt>HttpServletAdapter</tt></a>
-                which adapts Servlet calls to JSON resource calls. An adapter
-                can be used in any Servlet, just create a new instance and
-                override the <tt>service()</tt> method in your Servlet to delegate all
-                those calls to the adapter's <tt>service()</tt> method.
+                The module provides a JAR artifact which can be used for
+                building complex JSON Resource HTTP applications.
             </p>
         </section>
         <section name="Get ${project.name}">
             <p>
-                JSON Resource Servlet is built and made available using Maven.
+                JSON Resource HTTP is built and made available using Maven.
                 Your project can use JSON Resource by declaring the
                 following Maven dependencies:
             </p>
@@ -103,28 +93,19 @@
         </section>
         <section name="Getting started">
             <p>
-                The simplest way to get started is to deploy the WAR and
-                configure its <tt>web.xml</tt> configuration file as needed. By
-                default it has the following key properties:
+                The simplest way to get started is to checkout the
+                json-resource-examples module and to deploy the WAR and
+                configure its <tt>web.xml</tt> configuration file as needed.
+                By default it has the following key properties:
             </p>
             <source>&lt;servlet>
-    &lt;servlet-name>Users&lt;/servlet-name>
-    &lt;servlet-class>org.forgerock.json.resource.servlet.HttpServlet&lt;/servlet-class>
-
-    &lt;init-param>
-        &lt;param-name>connection-factory-class&lt;/param-name>
-        &lt;param-value>org.forgerock.json.resource.servlet.MemoryBackendConnectionFactoryProvider&lt;/param-value>
-    &lt;/init-param>
-
-    &lt;init-param>
-        &lt;param-name>uri-template&lt;/param-name>
-        &lt;param-value>&lt;/param-value>
-    &lt;/init-param>
+    &lt;servlet-name>CREST HTTP Application&lt;/servlet-name>
+    &lt;servlet-class>org.forgerock.json.resource.http.examples.CrestHttpApplication&lt;/servlet-class>
 &lt;/servlet>
 
 &lt;servlet-mapping>
-    &lt;servlet-name>Users&lt;/servlet-name>
-    &lt;url-pattern>/users/*&lt;/url-pattern>
+    &lt;servlet-name>HTTP Application&lt;/servlet-name>
+    &lt;url-pattern>/*&lt;/url-pattern>
 &lt;/servlet-mapping></source>
             <p>
                 You can even check out the source code for this Maven module
@@ -134,18 +115,16 @@
         </section>
         <section name="Overview of the REST API">
             <p>
-                JSON Resource Servlet is a library and as such provides a common
+                JSON Resource HTTP is a library and as such provides a common
                 framework for developing ForgeRock REST APIs. It does not expose
-                any end-points itself, e.g. <tt>users</tt>, apart from the
-                example Servlet configuration. More specifically, this library
-                defines the types of operations and their parameters, but it
-                is left to the application to define the following:
+                any end-points itself, e.g. <tt>users</tt>. More specifically,
+                this library defines the types of operations and their
+                parameters, but it is left to the application to define the
+                following:
             </p>
             <ul>
                 <li>
-                    The end-points - top-level end-points may be defined in the
-                    Servlet configuration using the <tt>servlet-mapping</tt>
-                    properties, or they may be defined using a
+                    The end-points - top-level end-points may be defined using a
                     <a href="../json-resource/apidocs/org/forgerock/json/resource/Router.html"><tt>Router</tt></a>.
                 </li>
                 <li>
