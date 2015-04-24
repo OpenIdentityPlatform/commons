@@ -114,7 +114,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <!-- maven-compiler-plugin -->
+        <!-- maven-compiler-plugin http://maven.apache.org/plugins/maven-compiler-plugin -->
+        <mavenCompilerPluginVersion>3.3</mavenCompilerPluginVersion>
         <maven.compiler.target>1.7</maven.compiler.target>
         <maven.compiler.source>1.7</maven.compiler.source>
 
@@ -157,6 +158,9 @@
 
         <!-- maven-dependency-plugin -->
         <mavenDependencyPluginVersion>2.10</mavenDependencyPluginVersion>
+
+        <!-- maven-compiler-plugin http://maven.apache.org/plugins/maven-compiler-plugin -->
+        <mavenCompilerPluginVersion>3.3</mavenCompilerPluginVersion>
 
         <!-- ***************** -->
         <!-- Repository Deployment URLs -->
@@ -237,7 +241,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.0</version>
+                    <version>${mavenCompilerPluginVersion}</version>
                     <configuration>
                         <source>${maven.compiler.source}</source>
                         <target>${maven.compiler.target}</target>
