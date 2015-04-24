@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2014 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -158,7 +158,7 @@ public final class UriRouter extends AbstractUriRouter<UriRouter, RequestHandler
                     : request;
             bestMatch.getHandler().handleAction(bestMatch.getContext(), routedRequest, handler);
         } catch (final ResourceException e) {
-            handler.handleError(e);
+            handler.handleException(e);
         }
     }
 
@@ -172,7 +172,7 @@ public final class UriRouter extends AbstractUriRouter<UriRouter, RequestHandler
                     : request;
             bestMatch.getHandler().handleCreate(bestMatch.getContext(), routedRequest, handler);
         } catch (final ResourceException e) {
-            handler.handleError(e);
+            handler.handleException(e);
         }
     }
 
@@ -186,7 +186,7 @@ public final class UriRouter extends AbstractUriRouter<UriRouter, RequestHandler
                     : request;
             bestMatch.getHandler().handleDelete(bestMatch.getContext(), routedRequest, handler);
         } catch (final ResourceException e) {
-            handler.handleError(e);
+            handler.handleException(e);
         }
     }
 
@@ -200,7 +200,7 @@ public final class UriRouter extends AbstractUriRouter<UriRouter, RequestHandler
                     : request;
             bestMatch.getHandler().handlePatch(bestMatch.getContext(), routedRequest, handler);
         } catch (final ResourceException e) {
-            handler.handleError(e);
+            handler.handleException(e);
         }
     }
 
@@ -214,7 +214,7 @@ public final class UriRouter extends AbstractUriRouter<UriRouter, RequestHandler
                     : request;
             bestMatch.getHandler().handleQuery(bestMatch.getContext(), routedRequest, handler);
         } catch (final ResourceException e) {
-            handler.handleError(e);
+            handler.handleException(e);
         }
     }
 
@@ -228,7 +228,7 @@ public final class UriRouter extends AbstractUriRouter<UriRouter, RequestHandler
                     : request;
             bestMatch.getHandler().handleRead(bestMatch.getContext(), routedRequest, handler);
         } catch (final ResourceException e) {
-            handler.handleError(e);
+            handler.handleException(e);
         }
     }
 
@@ -242,7 +242,7 @@ public final class UriRouter extends AbstractUriRouter<UriRouter, RequestHandler
                     : request;
             bestMatch.getHandler().handleUpdate(bestMatch.getContext(), routedRequest, handler);
         } catch (final ResourceException e) {
-            handler.handleError(e);
+            handler.handleException(e);
         }
     }
 

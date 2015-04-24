@@ -36,7 +36,7 @@ class InterfaceCollectionInstance implements RequestHandler {
     public final void handleCreate(final ServerContext context, final CreateRequest request,
             final ResultHandler<Resource> handler) {
         // TODO: i18n
-        handler.handleError(Resources.newBadRequestException(
+        handler.handleException(Resources.newBadRequestException(
                 "The resource instance %s cannot be created", request.getResourceName()));
     }
 
@@ -56,7 +56,7 @@ class InterfaceCollectionInstance implements RequestHandler {
     public final void handleQuery(final ServerContext context, final QueryRequest request,
             final QueryResultHandler handler) {
         // TODO: i18n
-        handler.handleError(Resources.newBadRequestException(
+        handler.handleException(Resources.newBadRequestException(
                 "The resource instance %s cannot be queried", request.getResourceName()));
     }
 

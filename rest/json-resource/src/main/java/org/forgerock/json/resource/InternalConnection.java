@@ -41,8 +41,8 @@ final class InternalConnection extends AbstractAsynchronousConnection {
                     }
 
                     @Override
-                    public void handleError(ResourceException error) {
-                        promise.handleError(error);
+                    public void handleException(ResourceException error) {
+                        promise.handleException(error);
                     }
                 });
         return promise;
@@ -71,8 +71,8 @@ final class InternalConnection extends AbstractAsynchronousConnection {
             }
 
             @Override
-            public void handleError(ResourceException error) {
-                promise.handleError(error);
+            public void handleException(ResourceException error) {
+                promise.handleException(error);
             }
         };
     }
@@ -132,10 +132,10 @@ final class InternalConnection extends AbstractAsynchronousConnection {
                     }
 
                     @Override
-                    public void handleError(ResourceException error) {
-                        promise.handleError(error);
+                    public void handleException(ResourceException error) {
+                        promise.handleException(error);
                         if (handler != null) {
-                            handler.handleError(error);
+                            handler.handleException(error);
                         }
                     }
                 });

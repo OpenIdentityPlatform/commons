@@ -42,7 +42,7 @@ class InterfaceCollectionHandler implements RequestHandler {
     public final void handleDelete(final ServerContext context, final DeleteRequest request,
             final ResultHandler<Resource> handler) {
         // TODO: i18n
-        handler.handleError(Resources.newBadRequestException(
+        handler.handleException(Resources.newBadRequestException(
                 "The resource collection %s cannot be deleted", request.getResourceName()));
     }
 
@@ -50,7 +50,7 @@ class InterfaceCollectionHandler implements RequestHandler {
     public final void handlePatch(final ServerContext context, final PatchRequest request,
             final ResultHandler<Resource> handler) {
         // TODO: i18n
-        handler.handleError(Resources.newBadRequestException(
+        handler.handleException(Resources.newBadRequestException(
                 "The resource collection %s cannot be patched", request.getResourceName()));
     }
 
@@ -64,7 +64,7 @@ class InterfaceCollectionHandler implements RequestHandler {
     public final void handleRead(final ServerContext context, final ReadRequest request,
             final ResultHandler<Resource> handler) {
         // TODO: i18n
-        handler.handleError(Resources.newBadRequestException("The resource collection %s cannot be read",
+        handler.handleException(Resources.newBadRequestException("The resource collection %s cannot be read",
                 request.getResourceName()));
     }
 
@@ -72,7 +72,7 @@ class InterfaceCollectionHandler implements RequestHandler {
     public final void handleUpdate(final ServerContext context, final UpdateRequest request,
             final ResultHandler<Resource> handler) {
         // TODO: i18n
-        handler.handleError(Resources.newBadRequestException(
+        handler.handleException(Resources.newBadRequestException(
                 "The resource collection %s cannot be updated", request.getResourceName()));
     }
 }

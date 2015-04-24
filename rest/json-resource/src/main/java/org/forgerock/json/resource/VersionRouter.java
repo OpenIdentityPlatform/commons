@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -176,7 +176,7 @@ public final class VersionRouter implements RequestHandler {
         try {
             getBestRoute(context).handleAction(context, request, handler);
         } catch (ResourceException e) {
-            handler.handleError(e);
+            handler.handleException(e);
         }
     }
 
@@ -188,7 +188,7 @@ public final class VersionRouter implements RequestHandler {
         try {
             getBestRoute(context).handleCreate(context, request, handler);
         } catch (ResourceException e) {
-            handler.handleError(e);
+            handler.handleException(e);
         }
     }
 
@@ -200,7 +200,7 @@ public final class VersionRouter implements RequestHandler {
         try {
             getBestRoute(context).handleDelete(context, request, handler);
         } catch (ResourceException e) {
-            handler.handleError(e);
+            handler.handleException(e);
         }
     }
 
@@ -212,7 +212,7 @@ public final class VersionRouter implements RequestHandler {
         try {
             getBestRoute(context).handlePatch(context, request, handler);
         } catch (ResourceException e) {
-            handler.handleError(e);
+            handler.handleException(e);
         }
     }
 
@@ -224,7 +224,7 @@ public final class VersionRouter implements RequestHandler {
         try {
             getBestRoute(context).handleQuery(context, request, handler);
         } catch (ResourceException e) {
-            handler.handleError(e);
+            handler.handleException(e);
         }
     }
 
@@ -236,7 +236,7 @@ public final class VersionRouter implements RequestHandler {
         try {
             getBestRoute(context).handleRead(context, request, handler);
         } catch (ResourceException e) {
-            handler.handleError(e);
+            handler.handleException(e);
         }
     }
 
@@ -248,7 +248,7 @@ public final class VersionRouter implements RequestHandler {
         try {
             getBestRoute(context).handleUpdate(context, request, handler);
         } catch (ResourceException e) {
-            handler.handleError(e);
+            handler.handleException(e);
         }
     }
 
