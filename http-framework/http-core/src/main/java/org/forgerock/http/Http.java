@@ -56,6 +56,10 @@ public class Http {
         return null;
     }
 
+    public static Filter newOptionsFilter(String... allowedMethods) {
+        return new OptionsFilter(allowedMethods);
+    }
+
     private static final class Chain implements Handler {
         private final Handler handler;
         private final List<Filter> filters;
