@@ -25,7 +25,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.http.AbstractContext;
+import org.forgerock.http.Context;
 import org.forgerock.util.Reject;
 
 /**
@@ -36,15 +37,6 @@ import org.forgerock.util.Reject;
  * @since 2.4.0
  */
 public class AdviceContext extends AbstractContext {
-
-    /** a client-friendly name for this context. */
-    private static final String CONTEXT_NAME = "advice";
-
-    /** the persisted attribute name for the advices */
-    private static final String ADVICE_ATTR = "advice";
-
-    /** The persisted attribute name for the restricted advice names. */
-    private static final String RESTRICTED_ADVICE_NAMES_ATTR = "restrictedAdviceNames";
 
     private static final Pattern ALLOWED_RFC_CHARACTERS = Pattern.compile("^[\\x20-\\x7E]*$");
 
@@ -60,28 +52,8 @@ public class AdviceContext extends AbstractContext {
      *            The parent context.
      */
     public AdviceContext(Context parent, Collection<String> restrictedAdviceNames) {
-        super(parent);
+        super(parent, "advice");
         this.restrictedAdviceNames.addAll(restrictedAdviceNames);
-        data.put(RESTRICTED_ADVICE_NAMES_ATTR, restrictedAdviceNames);
-        data.put(ADVICE_ATTR, advice);
-    }
-
-    /**
-     * Restore from JSON representation.
-     *
-     * @param savedContext
-     *            The JSON representation from which this context's attributes
-     *            should be parsed.
-     * @param config
-     *            The persistence configuration.
-     *
-     * @throws ResourceException
-     *             If the JSON representation could not be parsed.
-     */
-    AdviceContext(final JsonValue savedContext, final PersistenceConfig config) throws ResourceException {
-        super(savedContext, config);
-        restrictedAdviceNames.addAll(data.get(RESTRICTED_ADVICE_NAMES_ATTR).asSet(String.class));
-        advice.putAll(data.get(ADVICE_ATTR).asMapOfList(String.class));
     }
 
     /**
@@ -91,11 +63,6 @@ public class AdviceContext extends AbstractContext {
      */
     public Map<String, List<String>> getAdvices() {
         return advice;
-    }
-
-    @Override
-    public String getContextName() {
-        return CONTEXT_NAME;
     }
 
     /**

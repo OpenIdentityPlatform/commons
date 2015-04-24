@@ -44,7 +44,7 @@ import java.util.regex.PatternSyntaxException;
 
 import org.forgerock.util.RangeSet;
 import org.forgerock.util.Utils;
-import org.forgerock.util.promise.Function;
+import org.forgerock.util.Function;
 
 /**
  * Represents a value in a JSON object model structure. JSON values are

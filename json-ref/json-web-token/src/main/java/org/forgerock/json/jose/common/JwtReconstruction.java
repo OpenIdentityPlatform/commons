@@ -40,7 +40,7 @@ import java.util.Map;
  * @author Phill Cunnington
  * @since 2.0.0
  */
-public final class JwtReconstruction {
+public class JwtReconstruction {
 
     private static final int JWS_NUM_PARTS = 3;
     private static final int JWE_NUM_PARTS = 5;

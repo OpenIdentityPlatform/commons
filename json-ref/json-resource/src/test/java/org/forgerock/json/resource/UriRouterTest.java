@@ -16,21 +16,24 @@
 
 package org.forgerock.json.resource;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.resource.Requests.newReadRequest;
 import static org.forgerock.json.resource.Resources.newInternalConnection;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.*;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
+import org.forgerock.http.Context;
+import org.forgerock.http.RootContext;
+import org.forgerock.http.RouterContext;
+import org.forgerock.http.RoutingMode;
+import org.forgerock.http.ServerContext;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Tests {@code Router}.

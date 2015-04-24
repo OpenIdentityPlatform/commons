@@ -1,0 +1,675 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2012-2015 ForgeRock AS.
+  !    
+-->
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+  <properties>
+    <title>About ${project.name}</title>
+    <author>ForgeRock AS</author>
+  </properties>
+    <body>
+        <section name="About ${project.name}">
+            <p>
+                JSON Resource HTTP provides HTTP integration and defines a
+                common HTTP based REST API for interacting with JSON Resources.
+            </p>
+            <p>
+                See the JSON Resource Examples project
+                <a href="../json-resource/index.html">json-resource-examples</a>
+                for an example standalone WAR artifact which demonstrates the
+                integration of JSON Resource with the Common HTTP Framework.
+            </p>
+            <p>
+                The module provides a JAR artifact which can be used for
+                building complex JSON Resource HTTP applications.
+            </p>
+        </section>
+        <section name="Get ${project.name}">
+            <p>
+                JSON Resource HTTP is built and made available using Maven.
+                Your project can use JSON Resource by declaring the
+                following Maven dependencies:
+            </p>
+            <source>&lt;repositories>
+    &lt;repository>
+        &lt;id>forgerock-staging-repository&lt;/id>
+        &lt;name>ForgeRock Release Repository&lt;/name>
+        &lt;url>http://maven.forgerock.org/repo/releases&lt;/url>
+        &lt;snapshots>
+            &lt;enabled>false&lt;/enabled>
+        &lt;/snapshots>
+    &lt;/repository>
+    &lt;repository>
+        &lt;id>forgerock-snapshots-repository&lt;/id>
+        &lt;name>ForgeRock Snapshot Repository&lt;/name>
+        &lt;url>http://maven.forgerock.org/repo/snapshots&lt;/url>
+        &lt;releases>
+            &lt;enabled>false&lt;/enabled>
+        &lt;/releases>
+    &lt;/repository>
+&lt;/repositories>
+
+...
+
+&lt;dependencies>
+    &lt;dependency>
+        &lt;groupId>${project.groupId}&lt;/groupId>
+        &lt;artifactId>json-resource&lt;/artifactId>
+        &lt;version>${project.version}&lt;/version>
+    &lt;/dependency>
+    &lt;dependency>
+        &lt;groupId>${project.groupId}&lt;/groupId>
+        &lt;artifactId>${project.artifactId}&lt;/artifactId>
+        &lt;version>${project.version}&lt;/version>
+    &lt;/dependency>
+&lt;/dependencies></source>
+            <p>
+                See the documentation for
+                <a href="../json-resource/index.html">json-resource</a>
+                for instructions on building your own JSON Resources.
+            </p>
+        </section>
+        <section name="Getting started">
+            <p>
+                The simplest way to get started is to checkout the
+                json-resource-examples module and to deploy the WAR and
+                configure its <tt>web.xml</tt> configuration file as needed.
+                By default it has the following key properties:
+            </p>
+            <source>&lt;servlet>
+    &lt;servlet-name>CREST HTTP Application&lt;/servlet-name>
+    &lt;servlet-class>org.forgerock.json.resource.http.examples.CrestHttpApplication&lt;/servlet-class>
+&lt;/servlet>
+
+&lt;servlet-mapping>
+    &lt;servlet-name>HTTP Application&lt;/servlet-name>
+    &lt;url-pattern>/*&lt;/url-pattern>
+&lt;/servlet-mapping></source>
+            <p>
+                You can even check out the source code for this Maven module
+                and run the default Servlet directly as follows: 
+            </p>
+            <source>mvn jetty:run</source>
+        </section>
+        <section name="Overview of the REST API">
+            <p>
+                JSON Resource HTTP is a library and as such provides a common
+                framework for developing ForgeRock REST APIs. It does not expose
+                any end-points itself, e.g. <tt>users</tt>. More specifically,
+                this library defines the types of operations and their
+                parameters, but it is left to the application to define the
+                following:
+            </p>
+            <ul>
+                <li>
+                    The end-points - top-level end-points may be defined using a
+                    <a href="../json-resource/apidocs/org/forgerock/json/resource/Router.html"><tt>Router</tt></a>.
+                </li>
+                <li>
+                    The schema used for resources passed to and from the JSON
+                    Resources. At some point we do expect to define a common
+                    schema for common types of resource, such as users and
+                    groups.
+                </li>
+                <li>
+                    The set of extended "actions" which may be performed against
+                    a resource. Only the core operations of "create", "delete",
+                    "patch", "query", "read", and "update" are specified.
+                </li>                     
+            </ul>
+            <p>
+                The following sub-sections describe each of the core operations
+                in more detail:
+            </p>
+            <subsection name="Creating resources using POST">
+                <p>
+                    A POST create request should be used when the resource to be
+                    created will have a server provided resource ID (e.g. a
+                    UUID). It may also be used in cases where the resource ID
+                    is client provided, but only as long as the resource ID is
+                    included as a field within the new resource.
+                </p>
+                <p>
+                    POST create requests should target the resource container
+                    and must include the parameter <tt>_action=create</tt>.
+                </p>
+                <table>
+                    <tr>
+                        <th>Method</th>
+                        <td><tt>POST</tt></td>
+                    </tr>
+                    <tr>
+                        <th>Parameter</th>
+                        <td><p><i>See common parameters</i></p></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <tt>_action=create</tt>
+                        </td>
+                        <td>
+                            <p>
+                                Mandatory parameter which must be equal
+                                to the value "create" indicating that this is a
+                                request to create a new resource.
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Content</th>
+                        <td>
+                            <p>The JSON representation of the resource to be created.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Returns</th>
+                        <td>
+                            <p>The JSON representation of the resource that was created.</p>
+                        </td>
+                    </tr>
+                </table>
+                <p>
+                    Example:
+                </p>
+                <source>POST /users?_action=create  HTTP/1.1
+Host: example.com
+Accept: application/json
+Content-Type: application/json
+Content-Length: ...
+{
+  "uid" : "alice",
+  "email" : "alice@example.com"
+}</source>
+            </subsection>
+            <subsection name="Creating resources using PUT">
+                <p>
+                    A PUT create request should be used when the resource to be
+                    created has a known resource ID. The resource ID is 
+                    specified as part of the target resource name, and may also
+                    be included as a field within the new resource, in which
+                    case the two must be equivalent.
+                </p>
+                <p>
+                    PUT create requests should target the new resource and
+                    include the HTTP header <tt>If-None-Match: *</tt>.
+                </p>
+                <table>
+                    <tr>
+                        <th>Method</th>
+                        <td><tt>PUT</tt></td>
+                    </tr>
+                    <tr>
+                        <th>Parameter</th>
+                        <td><p><i>See common parameters</i></p></td>
+                    </tr>
+                    <tr>
+                        <th>Content</th>
+                        <td>
+                            <p>The JSON representation of the resource to be created.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Returns</th>
+                        <td>
+                            <p>The JSON representation of the resource that was created.</p>
+                        </td>
+                    </tr>
+                </table>
+                <p>
+                    Example:
+                </p>
+                <source>PUT /users/1  HTTP/1.1
+Host: example.com
+Accept: application/json
+Content-Type: application/json
+Content-Length: ...
+If-None-Match: *
+{
+  "uid" : "alice",
+  "email" : "alice@example.com"
+}</source>
+            </subsection>
+            <subsection name="Reading resources">
+                <p>
+                    To read an existing resource send a GET request targeting
+                    the resource to be read.
+                </p>
+                <table>
+                    <tr>
+                        <th>Method</th>
+                        <td><tt>GET</tt></td>
+                    </tr>
+                    <tr>
+                        <th>Parameter</th>
+                        <td><p><i>See common parameters</i></p></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <tt>_mimeType=<i>mimeType</i></tt>
+                        </td>
+                        <td>
+                            <p>A string that identifies the media type for the response content.
+                            When this parameter is used only 1 field value may be returned using the <tt>_fields</tt>
+                            parameter.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Content</th>
+                        <td>
+                            <p>N/A</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Returns</th>
+                        <td>
+                            <p>The JSON representation of the resource that was read if the <tt>_mimeType</tt> parameter
+                            is not used. Otherwise the requested resource field is returned with the content type specified in the
+                                <tt>_mimeType</tt> parameter</p>
+                        </td>
+                    </tr>
+                </table>
+                <p>
+                    Example:
+                </p>
+                <source>GET /users/1  HTTP/1.1
+Host: example.com
+Accept: application/json</source>
+            </subsection>
+            <subsection name="Querying/listing resources">
+                <p>
+                    To search or list the resources contained within a resource
+                    container send a GET request targeting the resource
+                    container and including either a <tt>_queryId</tt> or
+                    <tt>_queryFilter</tt> parameter.
+                </p>
+                <table>
+                    <tr>
+                        <th>Method</th>
+                        <td><tt>GET</tt></td>
+                    </tr>
+                    <tr>
+                        <th>Parameter</th>
+                        <td><p><i>See common parameters</i></p></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <tt>_queryId=<i>ID</i></tt>
+                        </td>
+                        <td>
+                            <p>A string identifying a server side "stored" query.
+                            This parameter is mandatory if <tt>_queryFilter</tt>
+                            is not specified.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <tt>_queryFilter=<i>FILTER</i></tt>
+                        </td>
+                        <td>
+                            <p>A filter expression which will be used to determine
+                            whether or not a resource should be included in the
+                            returned results. The filter format is described in the
+                            Javadoc for the <a
+                            href="http://commons.forgerock.org/forgerock-rest/json-resource/apidocs/org/forgerock/json/resource/QueryFilter.html"><tt>QueryFilter</tt></a>
+                            class. This parameter is mandatory if
+                            <tt>_queryId</tt> is not specified.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <tt>_sortKeys=<i>[+-]FIELD,...</i></tt>
+                        </td>
+                        <td>
+                            <p>Optional parameter containing a comma separated
+                            list of field references specifying which fields
+                            of the targeted JSON resources should be used as
+                            sort keys. A sort key is a JSON pointer optionally
+                            prefixed with a "+" or "-" character indicating
+                            whether the key is to be sorted in ascending or
+                            descending order. Default is to not sort results.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <tt>_pagedResultsCookie=<i>STRING</i></tt>
+                        </td>
+                        <td>
+                            <p>
+                                Optional opaque cookie which is used by the
+                                server to track its position in the
+                                set of query results. Paged results will be
+                                enabled if and only if the <tt>_pageSize</tt> is
+                                non-zero.
+                            </p>
+                            <p>
+                                The cookie must be not be specified in the
+                                initial query request. Subsequent query
+                                requests must include the cookie returned with
+                                the previous query result
+                                <tt>pagedResultsCookie</tt> field, until the
+                                server returns a <tt>null</tt> cookie indicating
+                                that the final page of results has been returned.
+                            </p>
+                            <p>
+                                Default behavior is to not return paged query
+                                results.
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <tt>_pagedResultsOffset=<i>INTEGER</i></tt>
+                        </td>
+                        <td>
+                            <p>
+                                Optional parameter specifying the index within
+                                the result set of the first result which should
+                                be returned. Paged results will be enabled if
+                                and only if the page size is non-zero. If the
+                                parameter is not present or a value less than 1
+                                is specified then the page following the last
+                                page returned will be returned. A value equal
+                                to or greater than 1 indicates that a specific
+                                page should be returned starting from the position
+                                specified.
+                            </p>
+                            <p>
+                                Default behavior is to return the page following the
+                                previous returned page.
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <tt>_pageSize=<i>INTEGER</i></tt>
+                        </td>
+                        <td>
+                            <p>
+                                Optional parameter indicating that query results are
+                                returned in pages of the specified size. For all
+                                paged result requests other than the initial
+                                request, a cookie should be provided with the query
+                                request.
+                            </p>
+                            <p>
+                                Default behavior is to not return paged
+                                query results.
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <tt><i>arg1</i>=<i>value1</i>&amp;<i>arg2</i>=<i>value2</i>&amp;...&amp;<i>argn</i>=<i>valuen</i></tt>
+                        </td>
+                        <td>
+                            <p>Additional parameters supported by the stored query.
+                            By convention argument names should not begin with
+                            an underscore. It is an error to include additional
+                            parameters if a <tt>_filter</tt> is specified.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Content</th>
+                        <td>
+                            <p>N/A</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Returns</th>
+                        <td>
+                            <p>
+                                A JSON object containing the following three fields:
+                            </p>
+                            <ul>
+                                <li>
+                                    <b>results</b> - an array containing the
+                                    matching resources, or next page of matching
+                                    resources if paged results have been
+                                    requested.
+                                </li>
+                                <li>
+                                    <b>pagedResultsCookie</b> - the opaque
+                                    cookie which should be included with the
+                                    next paged results query if paged results
+                                    have been requested, otherwise <tt>null</tt>. 
+                                </li>
+                                <li>
+                                    <b>remainingPagedResults</b> - an estimate
+                                    of the number of remaining paged results, or
+                                    <tt>-1</tt> if the number is not known, or
+                                    if paged results have not been requested.
+                                </li>
+                            </ul>
+                        </td>
+                    </tr>
+                </table>
+                <p>
+                    Example:
+                </p>
+                <source>GET /users?_queryId=all  HTTP/1.1
+Host: example.com
+Accept: application/json</source>
+            </subsection>
+            <subsection name="Updating resources">
+                <p>
+                    To replace the contents of an existing resource send a PUT
+                    request targeting the new resource and optionally include
+                    the HTTP header "If-Match" specifying the version if
+                    MVCC is needed.
+                </p>
+                <table>
+                    <tr>
+                        <th>Method</th>
+                        <td><p><tt>PUT</tt></p></td>
+                    </tr>
+                    <tr>
+                        <th>Parameter</th>
+                        <td><p><i>See common parameters</i></p></td>
+                    </tr>
+                    <tr>
+                        <th>Content</th>
+                        <td>
+                            <p>The JSON representation of the resource to be
+                            updated.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Returns</th>
+                        <td>
+                            <p>The JSON representation of the resource that was
+                            updated.</p>
+                        </td>
+                    </tr>
+                </table>
+                <p>
+                    Example:
+                </p>
+                <source>PUT /users/1  HTTP/1.1
+Host: example.com
+Accept: application/json
+Content-Type: application/json
+Content-Length: ...
+If-Match: "1"
+{
+  "uid" : "alice",
+  "email" : "alice@example.com"
+}</source>
+            </subsection>
+            <subsection name="Patching resources">
+                <p>
+                    Patch operations are not yet supported.
+                </p>
+            </subsection>
+            <subsection name="Deleting resources">
+                <p>
+                    To delete an existing resource send a DELETE request targeting
+                    the resource to be deleted and optionally include
+                    the HTTP header "If-Match" specifying the version if
+                    MVCC is needed.
+                </p>
+                <table>
+                    <tr>
+                        <th>Method</th>
+                        <td><tt>DELETE</tt></td>
+                    </tr>
+                    <tr>
+                        <th>Parameter</th>
+                        <td><p><i>See common parameters</i></p></td>
+                    </tr>
+                    <tr>
+                        <th>Content</th>
+                        <td>
+                            <p>N/A</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Returns</th>
+                        <td>
+                            <p>The JSON representation of the resource that was deleted.</p>
+                        </td>
+                    </tr>
+                </table>
+                <p>
+                    Example:
+                </p>
+                <source>DELETE /users/1  HTTP/1.1
+Host: example.com
+Accept: application/json
+If-Match: "1"</source>
+            </subsection>
+            <subsection name="Performing extended actions against resources">
+                <p>
+                    Some resources may support additional operations which can
+                    performed against them. These operations are performed by
+                    sending a POST request specifying the type of action to be
+                    performed using the <tt>_action</tt> parameter. The
+                    request may include zero or more implementation specific
+                    parameters.
+                </p>
+                <p>
+                    Note that the action identifier "create" is reserved
+                    exclusively for resource creation.
+                </p>
+                <table>
+                    <tr>
+                        <th>Method</th>
+                        <td><tt>POST</tt></td>
+                    </tr>
+                    <tr>
+                        <th>Parameter</th>
+                        <td><p><i>See common parameters</i></p></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <tt>_action=<i>ID</i></tt>
+                        </td>
+                        <td>
+                            <p>Mandatory parameter which identifying the type of
+                            action to be performed against the resource.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <tt><i>arg1</i>=<i>value1</i>&amp;<i>arg2</i>=<i>value2</i>&amp;...&amp;<i>argn</i>=<i>valuen</i></tt>
+                        </td>
+                        <td>
+                            <p>Additional parameters supported by the action. By
+                            convention argument names should not begin with an
+                            underscore.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Content</th>
+                        <td>
+                            <p>The action specified JSON request content if
+                            applicable.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Returns</th>
+                        <td>
+                            <p>The action specified JSON response content if
+                            applicable.</p>
+                        </td>
+                    </tr>
+                </table>
+                <p>
+                    Example:
+                </p>
+                <source>POST /tasks/1?_action=cancel  HTTP/1.1
+Host: example.com
+Accept: application/json</source>
+            </subsection>
+            <subsection name="Common request parameters">
+                <p>
+                    The following table lists the common HTTP request parameters
+                    which may be used with any type of request.
+                </p>
+                <table>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td>
+                            <tt>_fields=FIELD,...</tt>
+                        </td>
+                        <td>
+                            <p>
+                                Optional parameter containing a comma separated
+                                list of field references specifying which fields
+                                of the targeted JSON resource should be returned.
+                            </p>
+                            <p>
+                                Default is to return all fields.
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <tt>_prettyPrint=true|false</tt>
+                        </td>
+                        <td>
+                            <p>
+                                Optional parameter requesting that the returned
+                                JSON resource content should be formatted to be
+                                more human readable.
+                            </p>
+                            <p>
+                                Default is false.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </subsection>
+        </section>
+        <section name="Known Issues">
+            <p>
+                See the documentation for
+                <a href="../json-resource/index.html">json-resource</a>
+                for a list of known issues.
+            </p>
+        </section>
+    </body>
+</document>

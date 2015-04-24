@@ -11,8 +11,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2013 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
+
 package org.forgerock.json.resource;
 
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
@@ -360,7 +362,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
                         + "'. Supported action IDs: clear");
             }
         } catch (final ResourceException e) {
-            handler.handleError(e);
+            handler.handleException(e);
         }
     }
 
@@ -372,7 +374,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
             final ActionRequest request, final ResultHandler<JsonValue> handler) {
         final ResourceException e =
                 new NotSupportedException("Actions are not supported for resource instances");
-        handler.handleError(e);
+        handler.handleException(e);
     }
 
     /**
@@ -412,7 +414,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
             }
             handler.handleResult(resource);
         } catch (final ResourceException e) {
-            handler.handleError(e);
+            handler.handleException(e);
         }
     }
 
@@ -431,7 +433,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
             }
             handler.handleResult(resource);
         } catch (final ResourceException e) {
-            handler.handleError(e);
+            handler.handleException(e);
         }
     }
 
@@ -513,7 +515,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
             }
             handler.handleResult(resource);
         } catch (final ResourceException e) {
-            handler.handleError(e);
+            handler.handleException(e);
         }
     }
 
@@ -524,10 +526,10 @@ public final class MemoryBackend implements CollectionResourceProvider {
     public void queryCollection(final ServerContext context, final QueryRequest request,
             final QueryResultHandler handler) {
         if (request.getQueryId() != null) {
-            handler.handleError(new NotSupportedException("Query by ID not supported"));
+            handler.handleException(new NotSupportedException("Query by ID not supported"));
             return;
         } else if (request.getQueryExpression() != null) {
-            handler.handleError(new NotSupportedException("Query by expression not supported"));
+            handler.handleException(new NotSupportedException("Query by expression not supported"));
             return;
         } else {
             // No filtering or query by filter.
@@ -546,7 +548,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
                 try {
                     firstResultIndex = Integer.parseInt(pagedResultsCookie);
                 } catch (final NumberFormatException e) {
-                    handler.handleError(new BadRequestException("Invalid paged results cookie"));
+                    handler.handleException(new BadRequestException("Invalid paged results cookie"));
                     return;
                 }
             }
@@ -609,7 +611,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
             }
             handler.handleResult(resource);
         } catch (final ResourceException e) {
-            handler.handleError(e);
+            handler.handleException(e);
         }
     }
 
@@ -631,7 +633,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
             }
             handler.handleResult(resource);
         } catch (final ResourceException e) {
-            handler.handleError(e);
+            handler.handleException(e);
         }
     }
 

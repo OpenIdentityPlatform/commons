@@ -11,11 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
+
 package org.forgerock.json.resource;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -28,6 +29,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -79,7 +81,7 @@ public final class FiltersTest {
 
             // Update state and notify caller:
             this.error = error;
-            handler.handleError(error);
+            handler.handleException(error);
         }
 
         @Override
@@ -163,7 +165,7 @@ public final class FiltersTest {
                 final ResultHandler<JsonValue> handler) {
             checkState(context, request);
             if (returnError) {
-                handler.handleError(ERROR);
+                handler.handleException(ERROR);
             } else {
                 handler.handleResult(JSON);
             }
@@ -192,7 +194,7 @@ public final class FiltersTest {
                 final QueryResultHandler handler) {
             checkState(context, request);
             if (returnError) {
-                handler.handleError(ERROR);
+                handler.handleException(ERROR);
             } else {
                 handler.handleResource(RESOURCE1);
                 handler.handleResource(RESOURCE2);
@@ -223,7 +225,7 @@ public final class FiltersTest {
                 final ResultHandler<Resource> handler) {
             checkState(context, request);
             if (returnError) {
-                handler.handleError(ERROR);
+                handler.handleException(ERROR);
             } else {
                 handler.handleResult(RESOURCE1);
             }
@@ -297,7 +299,7 @@ public final class FiltersTest {
         assertThat(filter.error).isSameAs(ERROR);
         assertThat(filter.result).isNull();
         assertThat(filter.queryResources).isEmpty();
-        verify(handler).handleError(ERROR);
+        verify(handler).handleException(ERROR);
         verifyNoMoreInteractions(handler);
     }
 
@@ -328,7 +330,7 @@ public final class FiltersTest {
         assertThat(filter.result).isNull();
         assertThat(filter.queryResources).isEmpty();
         verify(handler, never()).handleResult(any(Object.class));
-        verify(handler).handleError(ERROR);
+        verify(handler).handleException(ERROR);
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -349,7 +351,7 @@ public final class FiltersTest {
         assertThat(filter.error).isNull();
         assertThat(filter.queryResources).isEmpty();
         verify(handler).handleResult(result);
-        verify(handler, never()).handleError(any(ResourceException.class));
+        verify(handler, never()).handleException(any(ResourceException.class));
     }
 
     @Test(dataProvider = "requestTypes")

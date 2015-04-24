@@ -11,37 +11,28 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013-2014 ForgeRock AS.
  */
+
 package org.forgerock.json.resource;
 
-import static org.fest.assertions.Assertions.assertThat;
-import static org.fest.assertions.Fail.fail;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.fluent.JsonValue.field;
 import static org.forgerock.json.fluent.JsonValue.object;
-import static org.forgerock.json.resource.PatchOperation.add;
-import static org.forgerock.json.resource.PatchOperation.increment;
-import static org.forgerock.json.resource.PatchOperation.remove;
-import static org.forgerock.json.resource.PatchOperation.replace;
-import static org.forgerock.json.resource.Requests.newActionRequest;
-import static org.forgerock.json.resource.Requests.newCreateRequest;
-import static org.forgerock.json.resource.Requests.newDeleteRequest;
-import static org.forgerock.json.resource.Requests.newPatchRequest;
-import static org.forgerock.json.resource.Requests.newQueryRequest;
-import static org.forgerock.json.resource.Requests.newReadRequest;
-import static org.forgerock.json.resource.Requests.newUpdateRequest;
+import static org.forgerock.json.resource.PatchOperation.*;
+import static org.forgerock.json.resource.Requests.*;
 import static org.forgerock.json.resource.Resources.newInternalConnection;
-import static org.forgerock.json.resource.TestUtils.asResource;
-import static org.forgerock.json.resource.TestUtils.content;
-import static org.forgerock.json.resource.TestUtils.ctx;
+import static org.forgerock.json.resource.TestUtils.*;
+import static org.testng.Assert.fail;
+
+import org.forgerock.json.fluent.JsonValue;
+import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
 import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.util.query.QueryFilter;
-import org.testng.annotations.Test;
 
 /**
  * Tests for {@link MemoryBackend}.

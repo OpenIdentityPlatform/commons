@@ -11,10 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
+
 package org.forgerock.json.resource;
 
+import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
 
 /**
@@ -38,7 +40,7 @@ public abstract class AbstractRequestHandler implements RequestHandler {
     @Override
     public void handleAction(final ServerContext context, final ActionRequest request,
             final ResultHandler<JsonValue> handler) {
-        handler.handleError(new NotSupportedException());
+        handler.handleException(new NotSupportedException());
     }
 
     /**
@@ -49,7 +51,7 @@ public abstract class AbstractRequestHandler implements RequestHandler {
     @Override
     public void handleCreate(final ServerContext context, final CreateRequest request,
             final ResultHandler<Resource> handler) {
-        handler.handleError(new NotSupportedException());
+        handler.handleException(new NotSupportedException());
     }
 
     /**
@@ -60,7 +62,7 @@ public abstract class AbstractRequestHandler implements RequestHandler {
     @Override
     public void handleDelete(final ServerContext context, final DeleteRequest request,
             final ResultHandler<Resource> handler) {
-        handler.handleError(new NotSupportedException());
+        handler.handleException(new NotSupportedException());
     }
 
     /**
@@ -71,7 +73,7 @@ public abstract class AbstractRequestHandler implements RequestHandler {
     @Override
     public void handlePatch(final ServerContext context, final PatchRequest request,
             final ResultHandler<Resource> handler) {
-        handler.handleError(new NotSupportedException());
+        handler.handleException(new NotSupportedException());
     }
 
     /**
@@ -82,7 +84,7 @@ public abstract class AbstractRequestHandler implements RequestHandler {
     @Override
     public void handleQuery(final ServerContext context, final QueryRequest request,
             final QueryResultHandler handler) {
-        handler.handleError(new NotSupportedException());
+        handler.handleException(new NotSupportedException());
     }
 
     /**
@@ -93,7 +95,7 @@ public abstract class AbstractRequestHandler implements RequestHandler {
     @Override
     public void handleRead(final ServerContext context, final ReadRequest request,
             final ResultHandler<Resource> handler) {
-        handler.handleError(new NotSupportedException());
+        handler.handleException(new NotSupportedException());
     }
 
     /**
@@ -104,7 +106,7 @@ public abstract class AbstractRequestHandler implements RequestHandler {
     @Override
     public void handleUpdate(final ServerContext context, final UpdateRequest request,
             final ResultHandler<Resource> handler) {
-        handler.handleError(new NotSupportedException());
+        handler.handleException(new NotSupportedException());
     }
 
 }

@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.annotations.Action;
 import org.forgerock.util.promise.Promise;
@@ -37,7 +38,7 @@ class AnnotatedActionMethods {
     Promise<JsonValue, ? extends ResourceException> invoke(ServerContext context, ActionRequest request, String id) {
         AnnotatedMethod method = methods.get(request.getAction());
         if (method == null) {
-            return Promises.newFailedPromise(new NotSupportedException(request.getAction() + "not supported"));
+            return Promises.newExceptionPromise(new NotSupportedException(request.getAction() + "not supported"));
         }
         return method.invoke(context, request, id);
     }

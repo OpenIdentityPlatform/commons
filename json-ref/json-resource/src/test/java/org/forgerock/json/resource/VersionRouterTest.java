@@ -11,11 +11,19 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.fluent.JsonValue.object;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
+
+import org.forgerock.http.RootContext;
+import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
@@ -23,15 +31,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import static org.fest.assertions.Assertions.assertThat;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
-import static org.forgerock.json.resource.RoutingMode.EQUALS;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 
 @SuppressWarnings("javadoc")
 public class VersionRouterTest {
@@ -51,107 +50,7 @@ public class VersionRouterTest {
 
     @BeforeMethod
     public void setUp() {
-
-        Router router = new Router();
-        String uriTemplate = "URI_TEMPLATE";
-
-        versionRouter = new VersionRouter(router, EQUALS, uriTemplate);
-    }
-
-    @Test (expectedExceptions = IllegalArgumentException.class)
-    public void addVersionWithRequestHandlerThenCollectionHandlerShouldThrowIllegalArgumentException() {
-
-        //Given
-        RequestHandler handler = mock(RequestHandler.class);
-        CollectionResourceProvider otherHandler = mock(CollectionResourceProvider.class);
-
-        versionRouter.addVersion("1.0", handler);
-
-        //When
-        versionRouter.addVersion("2.0", otherHandler);
-
-        //Then
-        //Expected IllegalArgumentException
-    }
-
-    @Test (expectedExceptions = IllegalArgumentException.class)
-    public void addVersionWithRequestHandlerThenSingletonHandlerShouldThrowIllegalArgumentException() {
-
-        //Given
-        RequestHandler handler = mock(RequestHandler.class);
-        SingletonResourceProvider otherHandler = mock(SingletonResourceProvider.class);
-
-        versionRouter.addVersion("1.0", handler);
-
-        //When
-        versionRouter.addVersion("2.0", otherHandler);
-
-        //Then
-        //Expected IllegalArgumentException
-    }
-
-    @Test (expectedExceptions = IllegalArgumentException.class)
-    public void addVersionWithCollectionHandlerThenRequestHandlerShouldThrowIllegalArgumentException() {
-
-        //Given
-        CollectionResourceProvider handler = mock(CollectionResourceProvider.class);
-        RequestHandler otherHandler = mock(RequestHandler.class);
-
-        versionRouter.addVersion("1.0", handler);
-
-        //When
-        versionRouter.addVersion("2.0", otherHandler);
-
-        //Then
-        //Expected IllegalArgumentException
-    }
-
-    @Test (expectedExceptions = IllegalArgumentException.class)
-    public void addVersionWithCollectionHandlerThenSingletonHandlerShouldThrowIllegalArgumentException() {
-
-        //Given
-        CollectionResourceProvider handler = mock(CollectionResourceProvider.class);
-        SingletonResourceProvider otherHandler = mock(SingletonResourceProvider.class);
-
-        versionRouter.addVersion("1.0", handler);
-
-        //When
-        versionRouter.addVersion("2.0", otherHandler);
-
-        //Then
-        //Expected IllegalArgumentException
-    }
-
-    @Test (expectedExceptions = IllegalArgumentException.class)
-    public void addVersionWithSingletonHandlerThenRequestHandlerShouldThrowIllegalArgumentException() {
-
-        //Given
-        SingletonResourceProvider handler = mock(SingletonResourceProvider.class);
-        RequestHandler otherHandler = mock(RequestHandler.class);
-
-        versionRouter.addVersion("1.0", handler);
-
-        //When
-        versionRouter.addVersion("2.0", otherHandler);
-
-        //Then
-        //Expected IllegalArgumentException
-    }
-
-    @Test (expectedExceptions = IllegalArgumentException.class)
-    public void addVersionWithSingletonHandlerThenCollectionHandlerShouldThrowIllegalArgumentException() {
-
-        //Given
-        SingletonResourceProvider handler = mock(SingletonResourceProvider.class);
-        CollectionResourceProvider otherHandler = mock(CollectionResourceProvider.class);
-
-        versionRouter.addVersion("1.0", handler);
-
-        //When
-        versionRouter.addVersion("2.0", otherHandler);
-
-        //Then
-        //Expected IllegalArgumentException
+        versionRouter = new VersionRouter();
     }
 
     @DataProvider(name = "data")
@@ -192,7 +91,7 @@ public class VersionRouterTest {
         //Then
         if (expectException) {
             ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-            verify(handler).handleError(exceptionCaptor.capture());
+            verify(handler).handleException(exceptionCaptor.capture());
             assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
             verifyZeroInteractions(handlerOne, handlerTwo, handlerThree);
         } else {
@@ -221,7 +120,7 @@ public class VersionRouterTest {
         //Then
         if (expectException) {
             ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-            verify(handler).handleError(exceptionCaptor.capture());
+            verify(handler).handleException(exceptionCaptor.capture());
             assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
             verifyZeroInteractions(handlerOne, handlerTwo, handlerThree);
         } else {
@@ -251,7 +150,7 @@ public class VersionRouterTest {
         //Then
         if (expectException) {
             ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-            verify(handler).handleError(exceptionCaptor.capture());
+            verify(handler).handleException(exceptionCaptor.capture());
             assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
             verifyZeroInteractions(handlerOne, handlerTwo, handlerThree);
         } else {
@@ -281,7 +180,7 @@ public class VersionRouterTest {
         //Then
         if (expectException) {
             ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-            verify(handler).handleError(exceptionCaptor.capture());
+            verify(handler).handleException(exceptionCaptor.capture());
             assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
             verifyZeroInteractions(handlerOne, handlerTwo, handlerThree);
         } else {
@@ -311,7 +210,7 @@ public class VersionRouterTest {
         //Then
         if (expectException) {
             ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-            verify(handler).handleError(exceptionCaptor.capture());
+            verify(handler).handleException(exceptionCaptor.capture());
             assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
             verifyZeroInteractions(handlerOne, handlerTwo, handlerThree);
         } else {
@@ -341,7 +240,7 @@ public class VersionRouterTest {
         //Then
         if (expectException) {
             ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-            verify(handler).handleError(exceptionCaptor.capture());
+            verify(handler).handleException(exceptionCaptor.capture());
             assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
             verifyZeroInteractions(handlerOne, handlerTwo, handlerThree);
         } else {
@@ -370,7 +269,7 @@ public class VersionRouterTest {
         //Then
         if (expectException) {
             ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-            verify(handler).handleError(exceptionCaptor.capture());
+            verify(handler).handleException(exceptionCaptor.capture());
             assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
             verifyZeroInteractions(handlerOne, handlerTwo, handlerThree);
         } else {
