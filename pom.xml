@@ -177,6 +177,9 @@
         <!-- maven-source-plugin http://maven.apache.org/plugins/maven-source-plugin/ -->
         <mavenSourcePluginVersion>2.4</mavenSourcePluginVersion>
 
+        <!-- maven-resources-plugin http://maven.apache.org/plugins/maven-resources-plugin/ -->
+        <mavenResourcesPluginVersion>2.7</mavenResourcesPluginVersion>
+
         <!-- ***************** -->
         <!-- Repository Deployment URLs -->
         <!-- ***************** -->
@@ -380,7 +383,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-resources-plugin</artifactId>
-                    <version>2.6</version>
+                    <version>${mavenResourcesPluginVersion}</version>
                     <configuration>
                         <encoding>${project.build.sourceEncoding}</encoding>
                     </configuration>
