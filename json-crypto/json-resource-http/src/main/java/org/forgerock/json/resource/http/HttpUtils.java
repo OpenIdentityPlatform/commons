@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2014 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource.http;
@@ -252,10 +252,10 @@ public final class HttpUtils {
             final JsonGenerator writer = getJsonGenerator(req, resp);
             writer.writeObject(re.toJsonValue().getObject());
             closeSilently(writer);
-            return Promises.newSuccessfulPromise(resp);
+            return Promises.newResultPromise(resp);
         } catch (final IOException ignored) {
             // Ignore the error since this was probably the cause.
-            return Promises.newFailedPromise(
+            return Promises.newExceptionPromise(
                     new ResponseException(new Response().setStatusAndReason(500), ignored.getMessage(), ignored));
         }
     }

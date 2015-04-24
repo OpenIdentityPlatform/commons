@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource.http;
@@ -88,7 +88,7 @@ public class RequestRunnerTest {
     public void testHandleErrorAnonymousQueryResultHandlerInVisitQueryAsync() throws Exception {
         Response response = new Response();
         QueryResultHandler resultHandler = getAnonymousQueryResultHandler(response);
-        resultHandler.handleError(EXCEPTION);
+        resultHandler.handleException(EXCEPTION);
         assertEquals(getResponseContent(response), "");
     }
 
@@ -99,7 +99,7 @@ public class RequestRunnerTest {
         QueryResultHandler resultHandler = getAnonymousQueryResultHandler(response);
         resultHandler.handleResource(new Resource("id", "revision", json(object(field("intField",
                 42), field("stringField", "stringValue")))));
-        resultHandler.handleError(EXCEPTION);
+        resultHandler.handleException(EXCEPTION);
         assertEquals(getResponseContent(response), "{" + "\"result\":["
                 + "{\"intField\":42,\"stringField\":\"stringValue\"}" + "]," + "\"resultCount\":1,"
                 + "\"error\":{\"code\":404,\"reason\":\"Not Found\",\"message\":\"Not Found\"}"
@@ -121,7 +121,7 @@ public class RequestRunnerTest {
 
         // set the expectations
         when(connection.queryAsync(eq(context), eq(request), Matchers.<QueryResultHandler>anyObject()))
-                .thenReturn(Promises.<QueryResult, ResourceException>newSuccessfulPromise(null));
+                .thenReturn(Promises.<QueryResult, ResourceException>newResultPromise(null));
 
         // run the code to access the anonymous class
         RequestRunner requestRunner = new RequestRunner(context, request, httpRequest, httpResponse);

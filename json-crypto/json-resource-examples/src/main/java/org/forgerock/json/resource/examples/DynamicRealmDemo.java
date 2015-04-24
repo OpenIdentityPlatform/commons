@@ -11,8 +11,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
+
 package org.forgerock.json.resource.examples;
 
 import static org.forgerock.json.resource.examples.DemoUtils.ctx;
@@ -96,37 +97,37 @@ public final class DynamicRealmDemo {
             @Override
             public void actionCollection(final ServerContext context, final ActionRequest request,
                     final ResultHandler<JsonValue> handler) {
-                handler.handleError(new NotSupportedException());
+                handler.handleException(new NotSupportedException());
             }
 
             @Override
             public void actionInstance(final ServerContext context, final String resourceId,
                     final ActionRequest request, final ResultHandler<JsonValue> handler) {
-                handler.handleError(new NotSupportedException());
+                handler.handleException(new NotSupportedException());
             }
 
             @Override
             public void createInstance(final ServerContext context, final CreateRequest request,
                     final ResultHandler<Resource> handler) {
-                handler.handleError(new NotSupportedException());
+                handler.handleException(new NotSupportedException());
             }
 
             @Override
             public void deleteInstance(final ServerContext context, final String resourceId,
                     final DeleteRequest request, final ResultHandler<Resource> handler) {
-                handler.handleError(new NotSupportedException());
+                handler.handleException(new NotSupportedException());
             }
 
             @Override
             public void patchInstance(final ServerContext context, final String resourceId,
                     final PatchRequest request, final ResultHandler<Resource> handler) {
-                handler.handleError(new NotSupportedException());
+                handler.handleException(new NotSupportedException());
             }
 
             @Override
             public void queryCollection(final ServerContext context, final QueryRequest request,
                     final QueryResultHandler handler) {
-                handler.handleError(new NotSupportedException());
+                handler.handleException(new NotSupportedException());
             }
 
             @Override
@@ -143,7 +144,7 @@ public final class DynamicRealmDemo {
             @Override
             public void updateInstance(final ServerContext context, final String resourceId,
                     final UpdateRequest request, final ResultHandler<Resource> handler) {
-                handler.handleError(new NotSupportedException());
+                handler.handleException(new NotSupportedException());
             }
         };
     }

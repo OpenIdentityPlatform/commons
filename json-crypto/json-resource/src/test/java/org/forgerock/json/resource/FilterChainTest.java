@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -92,7 +92,7 @@ public final class FilterChainTest {
             public Void answer(final InvocationOnMock invocation) throws Throwable {
                 final Object[] args = invocation.getArguments();
                 final ResultHandler<Resource> handler = (ResultHandler<Resource>) args[2];
-                handler.handleError(expectedError);
+                handler.handleException(expectedError);
                 return null;
             }
         }).when(filter1).filterRead(any(ServerContext.class), any(ReadRequest.class),
@@ -108,7 +108,7 @@ public final class FilterChainTest {
         final InOrder inOrder = inOrder(filter1, filter2, target, handler);
         inOrder.verify(filter1).filterRead(same(context), same(request), same(handler),
                 any(RequestHandler.class));
-        inOrder.verify(handler).handleError(same(expectedError));
+        inOrder.verify(handler).handleException(same(expectedError));
         verifyZeroInteractions(filter2, target);
     }
 

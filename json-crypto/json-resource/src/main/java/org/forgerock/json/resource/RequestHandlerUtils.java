@@ -17,9 +17,8 @@
 package org.forgerock.json.resource;
 
 import org.forgerock.http.ServerContext;
-import org.forgerock.util.promise.FailureHandler;
+import org.forgerock.util.promise.ExceptionHandler;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.promise.SuccessHandler;
 
 /**
  * Assorted utility methods useful to request handlers.
@@ -42,15 +41,15 @@ class RequestHandlerUtils {
     }
 
     static <T> void handle(Promise<T, ? extends ResourceException> promise, final ResultHandler<T> handler) {
-        promise.thenOnSuccess(new SuccessHandler<T>() {
+        promise.thenOnResult(new org.forgerock.util.promise.ResultHandler<T>() {
             @Override
             public void handleResult(T result) {
                 handler.handleResult(result);
             }
-        }).thenOnFailure(new FailureHandler<ResourceException>() {
+        }).thenOnException(new ExceptionHandler<ResourceException>() {
             @Override
-            public void handleError(ResourceException error) {
-                handler.handleError(error);
+            public void handleException(ResourceException error) {
+                handler.handleException(error);
             }
         });
     }
