@@ -159,8 +159,8 @@
         <!-- maven-dependency-plugin -->
         <mavenDependencyPluginVersion>2.10</mavenDependencyPluginVersion>
 
-        <!-- maven-compiler-plugin http://maven.apache.org/plugins/maven-compiler-plugin -->
-        <mavenCompilerPluginVersion>3.3</mavenCompilerPluginVersion>
+        <!-- maven-clean-plugin http://maven.apache.org/components/plugins/maven-clean-plugin -->
+        <mavenCleanPluginVersion>2.6.1</mavenCleanPluginVersion>
 
         <!-- ***************** -->
         <!-- Repository Deployment URLs -->
@@ -236,7 +236,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-clean-plugin</artifactId>
-                    <version>2.5</version>
+                    <version>${mavenCleanPluginVersion}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
