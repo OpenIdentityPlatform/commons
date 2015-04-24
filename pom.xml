@@ -180,6 +180,9 @@
         <!-- maven-resources-plugin http://maven.apache.org/plugins/maven-resources-plugin/ -->
         <mavenResourcesPluginVersion>2.7</mavenResourcesPluginVersion>
 
+        <!-- maven-remote-resources-plugin http://maven.apache.org/plugins/maven-remote-resources-plugin/ -->
+        <mavenRemoteResourcesPluginVersion>1.5</mavenRemoteResourcesPluginVersion>
+
         <!-- ***************** -->
         <!-- Repository Deployment URLs -->
         <!-- ***************** -->
@@ -378,7 +381,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-remote-resources-plugin</artifactId>
-                    <version>1.4</version>
+                    <version>${mavenRemoteResourcesPluginVersion}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
