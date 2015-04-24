@@ -155,6 +155,9 @@
         <!-- cobertura-maven-plugin http://mojo.codehaus.org/cobertura-maven-plugin -->
         <coberturaPluginVersion>2.7</coberturaPluginVersion>
 
+        <!-- maven-dependency-plugin -->
+        <mavenDependencyPluginVersion>2.10</mavenDependencyPluginVersion>
+
         <!-- ***************** -->
         <!-- Repository Deployment URLs -->
         <!-- ***************** -->
@@ -247,7 +250,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>2.6</version>
+                    <version>${mavenDependencyPluginVersion}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
