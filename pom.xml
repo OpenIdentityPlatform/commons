@@ -139,7 +139,7 @@
         <downloadJavadocs>true</downloadJavadocs>
 
         <!-- maven-pmd-plugin -->
-        <pmdPluginVersion>2.7.1</pmdPluginVersion>
+        <pmdPluginVersion>3.4</pmdPluginVersion>
         <targetJdk>${maven.compiler.target}</targetJdk>
 
         <!-- maven-checkstyle-plugin -->
