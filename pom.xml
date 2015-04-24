@@ -174,6 +174,9 @@
         <!-- maven-surefire-plugin http://maven.apache.org/surefire/maven-surefire-plugin/ -->
         <mavenSurefirePluginVersion>2.18.1</mavenSurefirePluginVersion>
 
+        <!-- maven-source-plugin http://maven.apache.org/plugins/maven-source-plugin/ -->
+        <mavenSourcePluginVersion>2.4</mavenSourcePluginVersion>
+
         <!-- ***************** -->
         <!-- Repository Deployment URLs -->
         <!-- ***************** -->
@@ -413,7 +416,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-source-plugin</artifactId>
-                    <version>2.2.1</version>
+                    <version>${mavenSourcePluginVersion}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
