@@ -150,6 +150,9 @@
         <checkstyleHeaderLocation>org/forgerock/checkstyle/default-java-header</checkstyleHeaderLocation>
         <checkstyleFailOnError>true</checkstyleFailOnError>
 
+        <!-- Thanks to the usage of properties, each project using this POM as parent-pom can easily use its own plugin version 
+             (useful when you have some constraints on a given version and if the parent doesn't give you the one you need ...) -->
+
         <!-- clirr-maven-plugin -->
         <clirrPluginVersion>2.6.1</clirrPluginVersion>
 
