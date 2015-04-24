@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -91,7 +91,7 @@ public class VersionRouterTest {
         //Then
         if (expectException) {
             ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-            verify(handler).handleError(exceptionCaptor.capture());
+            verify(handler).handleException(exceptionCaptor.capture());
             assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
             verifyZeroInteractions(handlerOne, handlerTwo, handlerThree);
         } else {
@@ -120,7 +120,7 @@ public class VersionRouterTest {
         //Then
         if (expectException) {
             ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-            verify(handler).handleError(exceptionCaptor.capture());
+            verify(handler).handleException(exceptionCaptor.capture());
             assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
             verifyZeroInteractions(handlerOne, handlerTwo, handlerThree);
         } else {
@@ -150,7 +150,7 @@ public class VersionRouterTest {
         //Then
         if (expectException) {
             ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-            verify(handler).handleError(exceptionCaptor.capture());
+            verify(handler).handleException(exceptionCaptor.capture());
             assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
             verifyZeroInteractions(handlerOne, handlerTwo, handlerThree);
         } else {
@@ -180,7 +180,7 @@ public class VersionRouterTest {
         //Then
         if (expectException) {
             ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-            verify(handler).handleError(exceptionCaptor.capture());
+            verify(handler).handleException(exceptionCaptor.capture());
             assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
             verifyZeroInteractions(handlerOne, handlerTwo, handlerThree);
         } else {
@@ -210,7 +210,7 @@ public class VersionRouterTest {
         //Then
         if (expectException) {
             ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-            verify(handler).handleError(exceptionCaptor.capture());
+            verify(handler).handleException(exceptionCaptor.capture());
             assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
             verifyZeroInteractions(handlerOne, handlerTwo, handlerThree);
         } else {
@@ -240,7 +240,7 @@ public class VersionRouterTest {
         //Then
         if (expectException) {
             ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-            verify(handler).handleError(exceptionCaptor.capture());
+            verify(handler).handleException(exceptionCaptor.capture());
             assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
             verifyZeroInteractions(handlerOne, handlerTwo, handlerThree);
         } else {
@@ -269,7 +269,7 @@ public class VersionRouterTest {
         //Then
         if (expectException) {
             ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-            verify(handler).handleError(exceptionCaptor.capture());
+            verify(handler).handleException(exceptionCaptor.capture());
             assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
             verifyZeroInteractions(handlerOne, handlerTwo, handlerThree);
         } else {

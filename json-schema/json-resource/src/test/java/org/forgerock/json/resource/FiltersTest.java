@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -81,7 +81,7 @@ public final class FiltersTest {
 
             // Update state and notify caller:
             this.error = error;
-            handler.handleError(error);
+            handler.handleException(error);
         }
 
         @Override
@@ -165,7 +165,7 @@ public final class FiltersTest {
                 final ResultHandler<JsonValue> handler) {
             checkState(context, request);
             if (returnError) {
-                handler.handleError(ERROR);
+                handler.handleException(ERROR);
             } else {
                 handler.handleResult(JSON);
             }
@@ -194,7 +194,7 @@ public final class FiltersTest {
                 final QueryResultHandler handler) {
             checkState(context, request);
             if (returnError) {
-                handler.handleError(ERROR);
+                handler.handleException(ERROR);
             } else {
                 handler.handleResource(RESOURCE1);
                 handler.handleResource(RESOURCE2);
@@ -225,7 +225,7 @@ public final class FiltersTest {
                 final ResultHandler<Resource> handler) {
             checkState(context, request);
             if (returnError) {
-                handler.handleError(ERROR);
+                handler.handleException(ERROR);
             } else {
                 handler.handleResult(RESOURCE1);
             }
@@ -299,7 +299,7 @@ public final class FiltersTest {
         assertThat(filter.error).isSameAs(ERROR);
         assertThat(filter.result).isNull();
         assertThat(filter.queryResources).isEmpty();
-        verify(handler).handleError(ERROR);
+        verify(handler).handleException(ERROR);
         verifyNoMoreInteractions(handler);
     }
 
@@ -330,7 +330,7 @@ public final class FiltersTest {
         assertThat(filter.result).isNull();
         assertThat(filter.queryResources).isEmpty();
         verify(handler, never()).handleResult(any(Object.class));
-        verify(handler).handleError(ERROR);
+        verify(handler).handleException(ERROR);
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -351,7 +351,7 @@ public final class FiltersTest {
         assertThat(filter.error).isNull();
         assertThat(filter.queryResources).isEmpty();
         verify(handler).handleResult(result);
-        verify(handler, never()).handleError(any(ResourceException.class));
+        verify(handler, never()).handleException(any(ResourceException.class));
     }
 
     @Test(dataProvider = "requestTypes")

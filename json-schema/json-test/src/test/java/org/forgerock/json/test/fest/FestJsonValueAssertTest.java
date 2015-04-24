@@ -16,9 +16,7 @@
 
 package org.forgerock.json.test.fest;
 
-import static org.fest.assertions.Assertions.*;
 import static org.forgerock.json.fluent.JsonValue.*;
-import static org.mockito.Mockito.*;
 
 import org.fest.assertions.Condition;
 import org.fest.assertions.MapAssert;
@@ -100,7 +98,7 @@ public class FestJsonValueAssertTest {
     @Test
     public void testPromisedAssertion() throws Exception {
         // Given
-        Promise<JsonValue, Exception> value = Promises.newSuccessfulPromise(json(object(field("bool", true))));
+        Promise<JsonValue, Exception> value = Promises.newResultPromise(json(object(field("bool", true))));
 
         // When
         FestJsonValueAssert.FestJsonValuePromiseAssert asserter = FestJsonValueAssert.assertThat(value);

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright 2012-2014 ForgeRock AS. All rights reserved.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -22,7 +22,7 @@ package org.forgerock.json.resource;
  * A query result completion handler may be specified when performing query
  * requests using a {@link Connection} object. The {@link #handleResource}
  * method is invoked for each resource which matches the query criteria,
- * followed by {@link #handleResult} or {@link #handleError} indicating that no
+ * followed by {@link #handleResult} or {@link #handleException} indicating that no
  * more JSON resources will be returned.
  * <p>
  * Implementations of these methods should complete in a timely manner so as to
@@ -35,7 +35,7 @@ package org.forgerock.json.resource;
  * >happens-before</a></i> the invocation of {@code handleResource} for the next
  * resource. Invocation of {@code handleResource} for the final resource
  * <i>happens-before</i> either {@link #handleResult(QueryResult) handleResult}
- * or {@link #handleError(ResourceException) handleError} are invoked with the
+ * or {@link #handleException(ResourceException) handleError} are invoked with the
  * final query status. In other words, query result handler method invocations
  * will occur sequentially and one at a time.
  */
@@ -49,7 +49,7 @@ public interface QueryResultHandler extends ResultHandler<QueryResult> {
      *            {@inheritDoc}
      */
     @Override
-    void handleError(ResourceException error);
+    void handleException(ResourceException error);
 
     /**
      * Invoked each time a matching JSON resource is returned from a query
@@ -58,7 +58,7 @@ public interface QueryResultHandler extends ResultHandler<QueryResult> {
      * Once all matching resources have been returned, either
      * {@link QueryResultHandler#handleResult(QueryResult)} will be invoked if
      * the query has completed successfully, or
-     * {@link QueryResultHandler#handleError(ResourceException)} will be invoked
+     * {@link QueryResultHandler#handleException(ResourceException)} will be invoked
      * if the query did not complete successfully (even if some matching
      * resources were returned).
      *

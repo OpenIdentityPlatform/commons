@@ -11,13 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright 2012 ForgeRock AS. All rights reserved.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
 
-import org.forgerock.util.promise.FailureHandler;
-import org.forgerock.util.promise.SuccessHandler;
+import org.forgerock.util.promise.ExceptionHandler;
 
 
 /**
@@ -28,7 +27,7 @@ import org.forgerock.util.promise.SuccessHandler;
  * requests using a {@link Connection} object or when connecting asynchronously
  * to a JSON resource provider using a {@link ConnectionFactory}. The
  * {@link #handleResult} method is invoked when the request or connection
- * attempt completes successfully. The {@link #handleError} method is invoked if
+ * attempt completes successfully. The {@link #handleException} method is invoked if
  * the request or connection attempt fails.
  * <p>
  * Implementations of these methods should complete in a timely manner so as to
@@ -38,7 +37,8 @@ import org.forgerock.util.promise.SuccessHandler;
  * @param <V>
  *            The type of result handled by this result handler.
  */
-public interface ResultHandler<V> extends SuccessHandler<V>, FailureHandler<ResourceException> {
+public interface ResultHandler<V> extends org.forgerock.util.promise.ResultHandler<V>,
+        ExceptionHandler<ResourceException> {
 
     /**
      * Invoked when the asynchronous request has failed.
@@ -47,7 +47,7 @@ public interface ResultHandler<V> extends SuccessHandler<V>, FailureHandler<Reso
      *            The resource exception indicating why the asynchronous request
      *            has failed.
      */
-    void handleError(ResourceException error);
+    void handleException(ResourceException error);
 
     /**
      * Invoked when the asynchronous request has completed successfully.
