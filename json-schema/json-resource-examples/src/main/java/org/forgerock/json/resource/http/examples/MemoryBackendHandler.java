@@ -11,31 +11,28 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2014 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
-package org.forgerock.json.resource.http;
+package org.forgerock.json.resource.http.examples;
 
 import org.forgerock.http.Handler;
 import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.UriRouter;
+import org.forgerock.json.resource.http.CrestHttp;
 import org.forgerock.util.Reject;
 
 /**
- * Default connection factory provider.
+ * Default in-memory {@link Handler}.
  */
-final class MemoryBackendConnectionFactoryProvider {
+final class MemoryBackendHandler {
 
-    // Prevent instantiation.
-    private MemoryBackendConnectionFactoryProvider() {
-        // Nothing to do.
+    private MemoryBackendHandler() {
     }
 
-    static Handler getConnectionFactory(String uriTemplate) {
-        Reject.ifNull(uriTemplate, "uriTemplate cannot be null");
-        final UriRouter router = new UriRouter();
-        router.addRoute(uriTemplate, new MemoryBackend());
-        return CrestHandler.newHandler(Resources.newInternalConnectionFactory(router));
+    static Handler getHandler() {
+        return CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(
+                Resources.newCollection(new MemoryBackend())));
     }
 }
