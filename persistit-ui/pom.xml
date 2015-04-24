@@ -16,7 +16,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.forgerock.persistit</groupId>
+       <groupId>org.forgerock.commons</groupId>
       <artifactId>forgerock-persistit-core</artifactId>
       <version>${project.version}</version>
     </dependency>
