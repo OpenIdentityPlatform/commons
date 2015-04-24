@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2012 ForgeRock AS
+  !      Copyright 2012-2015 ForgeRock AS.
   !    
 -->
 <document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -32,13 +32,25 @@
   <body>
     <section name="About ${project.name}">
       <p>
-        ${project.description}
+          JSON Resource Examples provides examples of using the JSON Resource APIs
+          and provides an example HTTP application which demonstrates the integration
+          of JSON Resources with the Commons HTTP Framework.
       </p>
-    </section>
-    <section name="Usage">
       <p>
-        TODO
+          The module provides a standalone WAR artifact. The WAR can be deployed
+          and will use an in memory back-end exposing a "/users" and a "/groups"
+          end-point.
       </p>
-    </section>
+  </section>
+  <section name="Getting started">
+      <p>
+          The simplest way to get started is to deploy the WAR
+      </p>
+      <p>
+          You can even check out the source code for this Maven module
+          and run the default Servlet directly as follows:
+      </p>
+      <source>mvn jetty:run</source>
+  </section>
   </body>
 </document>

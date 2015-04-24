@@ -213,7 +213,6 @@ final class RequestRunner implements RequestVisitor<Promise<Response, ResponseEx
             @Override
             public boolean handleResource(final Resource resource) {
                 try {
-                    writeAdvice();
                     writeHeader();
                     writeJsonValue(resource.getContent());
                     resultCount++;
@@ -243,6 +242,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, ResponseEx
 
             private void writeHeader() throws IOException {
                 if (isFirstResult) {
+                    writeAdvice();
                     writer.writeStartObject();
                     writer.writeArrayFieldStart(FIELD_RESULT);
                     isFirstResult = false;

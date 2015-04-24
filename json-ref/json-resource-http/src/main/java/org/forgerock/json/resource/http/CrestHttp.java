@@ -11,15 +11,20 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2014 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource.http;
 
+import static org.forgerock.json.resource.http.HttpUtils.*;
+
 import org.forgerock.http.Context;
+import org.forgerock.http.Filter;
 import org.forgerock.http.Handler;
 import org.forgerock.http.Http;
 import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.RequestHandler;
+import org.forgerock.json.resource.Resources;
 import org.forgerock.util.Reject;
 
 /**
@@ -31,10 +36,9 @@ import org.forgerock.util.Reject;
  *
  * @since 3.0.0
  */
-public class CrestHandler {
+public class CrestHttp {
 
-    private CrestHandler() {
-        // Private utility constructor.
+    private CrestHttp() {
     }
 
     /**
@@ -44,9 +48,9 @@ public class CrestHandler {
      * @param connectionFactory
      *            The connection factory.
      */
-    public static Handler newHandler(ConnectionFactory connectionFactory) {
+    public static Handler newHttpHandler(ConnectionFactory connectionFactory) {
         Reject.ifNull(connectionFactory);
-        return Http.chainOf(new HttpAdapter(connectionFactory), new OptionsHandler());
+        return Http.chainOf(new HttpAdapter(connectionFactory), newOptionsFilter());
     }
 
     /**
@@ -59,11 +63,12 @@ public class CrestHandler {
      * @param parentContext
      *            The parent request context which should be used as the parent
      *            context of each request context.
+     * @return A HTTP Handler.
      */
-    public static Handler newHandler(ConnectionFactory connectionFactory, Context parentContext) {
+    public static Handler newHttpHandler(ConnectionFactory connectionFactory, Context parentContext) {
         Reject.ifNull(connectionFactory);
         Reject.ifNull(parentContext);
-        return Http.chainOf(new HttpAdapter(connectionFactory, parentContext), new OptionsHandler());
+        return Http.chainOf(new HttpAdapter(connectionFactory, parentContext), newOptionsFilter());
     }
 
     /**
@@ -75,16 +80,27 @@ public class CrestHandler {
      * @param contextFactory
      *            The context factory which will be used to obtain the parent
      *            context of each request context.
+     * @return A HTTP Handler.
      */
-    public static Handler newHandler(ConnectionFactory connectionFactory, HttpContextFactory contextFactory) {
+    public static Handler newHttpHandler(ConnectionFactory connectionFactory, HttpContextFactory contextFactory) {
         Reject.ifNull(connectionFactory);
         Reject.ifNull(contextFactory);
-        return Http.chainOf(new HttpAdapter(connectionFactory, contextFactory), new OptionsHandler());
+        return Http.chainOf(new HttpAdapter(connectionFactory, contextFactory), newOptionsFilter());
     }
 
-//    public void destroy() { //TODO how to hook this into the shutdown of the application? Maybe its the HttpApplications job?
-//        if (connectionFactory != null) {
-//            connectionFactory.close();
-//        }
-//    }
+    /**
+     * Creates a new JSON resource HTTP handler with the provided CREST request handler.
+     *
+     * @param handler The {@link RequestHandler}.
+     * @return A HTTP Handler.
+     */
+    public static Handler newHttpHandler(RequestHandler handler) {
+        Reject.ifNull(handler);
+        return Http.chainOf(new HttpAdapter(Resources.newInternalConnectionFactory(handler)), newOptionsFilter());
+    }
+
+    private static Filter newOptionsFilter() {
+        return Http.newOptionsFilter(METHOD_DELETE, METHOD_GET, METHOD_HEAD, METHOD_PATCH, METHOD_PUT, METHOD_OPTIONS,
+                METHOD_TRACE);
+    }
 }

@@ -11,11 +11,11 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2012 ForgeRock AS. All rights reserved.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 /**
- * JSON resource J2EE Servlet integration providing support for Servlet API 2.5 and beyond.
+ * JSON resource Commons HTTP Framework integration.
  */
 package org.forgerock.json.resource.http;
 
