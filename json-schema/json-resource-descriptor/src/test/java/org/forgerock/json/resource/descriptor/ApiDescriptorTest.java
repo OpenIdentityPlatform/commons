@@ -11,8 +11,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2014 ForgeRock AS.
  */
+
 package org.forgerock.json.resource.descriptor;
 
 import static org.forgerock.json.fluent.JsonValue.field;
@@ -26,6 +27,8 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.forgerock.http.RootContext;
+import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.AbstractRequestHandler;
 import org.forgerock.json.resource.Connection;
@@ -37,8 +40,6 @@ import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.RootContext;
-import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.descriptor.RelationDescriptor.Multiplicity;
 import org.testng.annotations.Test;
 

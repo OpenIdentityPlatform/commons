@@ -16,13 +16,13 @@
 
 package org.forgerock.json.resource;
 
+import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.annotations.Create;
 import org.forgerock.json.resource.annotations.Query;
 import org.forgerock.json.resource.annotations.RequestHandler;
-import org.forgerock.util.promise.FailureHandler;
+import org.forgerock.util.promise.ExceptionHandler;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.promise.SuccessHandler;
 
 /**
  * Exposes an annotated POJO as collection methods {@link org.forgerock.json.resource.RequestHandler} by
@@ -67,15 +67,15 @@ class AnnotatedCollectionHandler extends InterfaceCollectionHandler {
     }
 
     private <T> void handle(Promise<T, ? extends ResourceException> promise, final ResultHandler<T> handler) {
-        promise.onSuccess(new SuccessHandler<T>() {
+        promise.thenOnResult(new org.forgerock.util.promise.ResultHandler<T>() {
             @Override
             public void handleResult(T result) {
                 handler.handleResult(result);
             }
-        }).onFailure(new FailureHandler<ResourceException>() {
+        }).thenOnException(new ExceptionHandler<ResourceException>() {
             @Override
-            public void handleError(ResourceException error) {
-                handler.handleError(error);
+            public void handleException(ResourceException error) {
+                handler.handleException(error);
             }
         });
     }

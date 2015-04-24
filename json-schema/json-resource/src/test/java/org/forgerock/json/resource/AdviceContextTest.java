@@ -13,18 +13,17 @@
  *
  * Copyright 2014 ForgeRock AS.
  */
+
 package org.forgerock.json.resource;
 
-import org.forgerock.json.fluent.JsonValue;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 
 import java.util.Arrays;
 import java.util.Collections;
+
+import org.forgerock.http.RootContext;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
 /**
  * Unit test for {@link org.forgerock.json.resource.AdviceContext}.
@@ -33,24 +32,6 @@ import java.util.Collections;
  */
 @SuppressWarnings("javadoc")
 public class AdviceContextTest {
-
-    @Test
-    public void deserializes() throws ResourceException {
-        // Given
-        RootContext root = new RootContext();
-        AdviceContext advice = new AdviceContext(root, Collections.<String>emptyList());
-        advice.putAdvice("Warning", "version_is_not_supported");
-        ServerContext context = new ServerContext(advice);
-        PersistenceConfig config = PersistenceConfig.builder().build();
-
-        JsonValue savedContext = context.toJsonValue();
-        ServerContext restoredContext = new ServerContext(savedContext, config);
-        AdviceContext restored = restoredContext.asContext(AdviceContext.class);
-
-        // Then
-        assertNotNull(restored.getAdvices());
-        assertEquals(advice.getAdvices(), restored.getAdvices());
-    }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void shouldNotAllowAdviceForRestrictedAdviceName() {
