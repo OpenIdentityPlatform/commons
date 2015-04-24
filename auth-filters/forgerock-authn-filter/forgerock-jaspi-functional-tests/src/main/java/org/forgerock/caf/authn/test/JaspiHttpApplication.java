@@ -21,7 +21,7 @@ import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.io.Buffer;
-import org.forgerock.json.resource.http.CrestHandler;
+import org.forgerock.json.resource.http.CrestHttp;
 import org.forgerock.util.Factory;
 
 /**
@@ -33,7 +33,7 @@ public class JaspiHttpApplication implements HttpApplication {
 
     @Override
     public Handler start() throws HttpApplicationException {
-        return CrestHandler.newHandler(ConfigurationConnectionFactory.getConnectionFactory());
+        return CrestHttp.newHttpHandler(ConfigurationConnectionFactory.getConnectionFactory());
     }
 
     @Override

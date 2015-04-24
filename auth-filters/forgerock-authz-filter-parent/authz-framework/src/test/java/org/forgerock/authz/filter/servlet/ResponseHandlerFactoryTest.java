@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.authz.filter.servlet;
@@ -26,13 +26,13 @@ import javax.servlet.http.HttpServletResponse;
 import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertNotNull;
 
-public class ResultHandlerFactoryTest {
+public class ResponseHandlerFactoryTest {
 
-    private ResultHandlerFactory resultHandlerFactory;
+    private ResponseHandlerFactory responseHandlerFactory;
 
     @BeforeMethod
     public void setUp() {
-        resultHandlerFactory = new ResultHandlerFactory();
+        responseHandlerFactory = new ResponseHandlerFactory();
     }
 
     @Test
@@ -44,10 +44,10 @@ public class ResultHandlerFactoryTest {
         FilterChain chain = mock(FilterChain.class);
 
         //When
-        SuccessHandler successHandler = resultHandlerFactory.newSuccessHandler(req, resp, chain);
+        ResultHandler resultHandler = responseHandlerFactory.newSuccessHandler(req, resp, chain);
 
         //Then
-        assertNotNull(successHandler);
+        assertNotNull(resultHandler);
     }
 
     @Test
@@ -57,9 +57,9 @@ public class ResultHandlerFactoryTest {
         HttpServletResponse resp = mock(HttpServletResponse.class);
 
         //When
-        FailureHandler failureHandler = resultHandlerFactory.newFailureHandler(resp);
+        ExceptionHandler exceptionHandler = responseHandlerFactory.newFailureHandler(resp);
 
         //Then
-        assertNotNull(failureHandler);
+        assertNotNull(exceptionHandler);
     }
 }

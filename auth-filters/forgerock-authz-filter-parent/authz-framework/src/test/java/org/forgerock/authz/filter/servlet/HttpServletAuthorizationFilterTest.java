@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.authz.filter.servlet;
@@ -46,21 +46,21 @@ public class HttpServletAuthorizationFilterTest {
 
     private InitParamClassConstructor initParamClassConstructor;
 
-    private SuccessHandler successHandler;
+    private ResultHandler resultHandler;
 
     @BeforeMethod
     public void setUp() {
 
         initParamClassConstructor = mock(InitParamClassConstructor.class);
-        ResultHandlerFactory resultHandlerFactory = mock(ResultHandlerFactory.class);
+        ResponseHandlerFactory responseHandlerFactory = mock(ResponseHandlerFactory.class);
 
         authorizationFilter = new HttpServletAuthorizationFilter(initParamClassConstructor,
-                resultHandlerFactory);
+                responseHandlerFactory);
 
-        successHandler = mock(SuccessHandler.class);
-        given(resultHandlerFactory.newSuccessHandler(Matchers.<HttpServletRequest>anyObject(),
+        resultHandler = mock(ResultHandler.class);
+        given(responseHandlerFactory.newSuccessHandler(Matchers.<HttpServletRequest>anyObject(),
                 Matchers.<HttpServletResponse>anyObject(), Matchers.<FilterChain>anyObject()))
-                .willReturn(successHandler);
+                .willReturn(resultHandler);
     }
 
     @Test
@@ -221,13 +221,13 @@ public class HttpServletAuthorizationFilterTest {
         FilterChain chain = mock(FilterChain.class);
         HttpServletAuthorizationModule module = mock(HttpServletAuthorizationModule.class);
         Promise<AuthorizationResult, AuthorizationException> authorizePromise =
-                Promises.newSuccessfulPromise(AuthorizationResult.accessPermitted());
-        Promise<Void, ServletException> resultHandlerPromise = Promises.newSuccessfulPromise(null);
+                Promises.newResultPromise(AuthorizationResult.accessPermitted());
+        Promise<Void, ServletException> resultHandlerPromise = Promises.newResultPromise(null);
 
         initialiseFilter(module);
 
         given(module.authorize(eq(req), Matchers.<AuthorizationContext>anyObject())).willReturn(authorizePromise);
-        given(successHandler.apply(Matchers.<AuthorizationResult>anyObject())).willReturn(resultHandlerPromise);
+        given(resultHandler.apply(Matchers.<AuthorizationResult>anyObject())).willReturn(resultHandlerPromise);
 
         //When
         authorizationFilter.doFilter(req, resp, chain);
@@ -245,14 +245,14 @@ public class HttpServletAuthorizationFilterTest {
         FilterChain chain = mock(FilterChain.class);
         HttpServletAuthorizationModule module = mock(HttpServletAuthorizationModule.class);
         AuthorizationException exception = mock(AuthorizationException.class);
-        Promise<AuthorizationResult, AuthorizationException> authorizePromise = Promises.newFailedPromise(exception);
+        Promise<AuthorizationResult, AuthorizationException> authorizePromise = Promises.newExceptionPromise(exception);
 
         initialiseFilter(module);
 
         given(module.authorize(eq(req), Matchers.<AuthorizationContext>anyObject())).willReturn(authorizePromise);
 
         // Will force NPE if called
-        given(successHandler.apply(Matchers.<AuthorizationResult>anyObject())).willReturn(null);
+        given(resultHandler.apply(Matchers.<AuthorizationResult>anyObject())).willReturn(null);
 
         //When
         authorizationFilter.doFilter(req, resp, chain);
@@ -269,14 +269,14 @@ public class HttpServletAuthorizationFilterTest {
         FilterChain chain = mock(FilterChain.class);
         HttpServletAuthorizationModule module = mock(HttpServletAuthorizationModule.class);
         Promise<AuthorizationResult, AuthorizationException> authorizePromise =
-                Promises.newSuccessfulPromise(AuthorizationResult.accessPermitted());
+                Promises.newResultPromise(AuthorizationResult.accessPermitted());
         ServletException exception = mock(ServletException.class);
-        Promise<Void, ServletException> resultHandlerPromise = Promises.newFailedPromise(exception);
+        Promise<Void, ServletException> resultHandlerPromise = Promises.newExceptionPromise(exception);
 
         initialiseFilter(module);
 
         given(module.authorize(eq(req), Matchers.<AuthorizationContext>anyObject())).willReturn(authorizePromise);
-        given(successHandler.apply(Matchers.<AuthorizationResult>anyObject())).willReturn(resultHandlerPromise);
+        given(resultHandler.apply(Matchers.<AuthorizationResult>anyObject())).willReturn(resultHandlerPromise);
 
         //When
         authorizationFilter.doFilter(req, resp, chain);

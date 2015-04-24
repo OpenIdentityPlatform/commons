@@ -11,12 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.authz.filter.servlet;
 
-import org.forgerock.util.promise.AsyncFunction;
+import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 import org.slf4j.Logger;
@@ -34,20 +34,20 @@ import java.io.PrintWriter;
  *
  * @since 1.5.0
  */
-class FailureHandler implements AsyncFunction<Exception, Void, ServletException> {
+class ExceptionHandler implements AsyncFunction<Exception, Void, ServletException> {
 
-    private final Logger logger = LoggerFactory.getLogger(FailureHandler.class);
-    private final ResultHandler resultHandler;
+    private final Logger logger = LoggerFactory.getLogger(ExceptionHandler.class);
+    private final ResponseHandler responseHandler;
     private final HttpServletResponse resp;
 
     /**
      * Creates a new {@code FailureHandler} instance.
      *
-     * @param resultHandler A {@code ResultHandler} instance.
+     * @param responseHandler A {@code ResultHandler} instance.
      * @param resp The {@code HttpServletResponse} instance.
      */
-    FailureHandler(ResultHandler resultHandler, HttpServletResponse resp) {
-        this.resultHandler = resultHandler;
+    ExceptionHandler(ResponseHandler responseHandler, HttpServletResponse resp) {
+        this.responseHandler = responseHandler;
         this.resp = resp;
     }
 
@@ -68,19 +68,19 @@ class FailureHandler implements AsyncFunction<Exception, Void, ServletException>
 
         try {
             logger.error("Authorization failed", e);
-            PrintWriter writer = resultHandler.getWriter(resp);
+            PrintWriter writer = responseHandler.getWriter(resp);
             // If writer is null then response has already been committed!
             if (writer != null) {
                 resp.reset();
                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                String message = resultHandler.getJsonErrorResponse(e.getMessage(), null).toString();
+                String message = responseHandler.getJsonErrorResponse(e.getMessage(), null).toString();
                 writer.write(message);
             }
 
-            return Promises.newSuccessfulPromise(null);
+            return Promises.newResultPromise(null);
         } catch (IOException ex) {
             logger.error("Writing authorization failure response failed.", ex);
-            return Promises.newFailedPromise(new ServletException(ex));
+            return Promises.newExceptionPromise(new ServletException(ex));
         }
     }
 }

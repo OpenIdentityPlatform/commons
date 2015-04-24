@@ -11,151 +11,149 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.authz.filter.servlet;
 
+import static org.forgerock.authz.filter.api.AuthorizationResult.*;
+import static org.forgerock.json.fluent.JsonValue.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.*;
+
+import org.forgerock.authz.filter.api.AuthorizationResult;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.util.promise.Promise;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
 
 public class ResultHandlerTest {
 
     private ResultHandler resultHandler;
 
+    private ResponseHandler responseHandler;
+    private HttpServletRequest req;
+    private HttpServletResponse res;
+    private FilterChain chain;
+
     @BeforeMethod
     public void setUp() {
-        resultHandler = new ResultHandler();
+
+        responseHandler = mock(ResponseHandler.class);
+        req = mock(HttpServletRequest.class);
+        res = mock(HttpServletResponse.class);
+        chain = mock(FilterChain.class);
+
+        resultHandler = new ResultHandler(responseHandler, req, res, chain);
     }
 
     @Test
-    public void shouldGetJsonForbiddenResponseWithMessage() {
+    public void shouldCallDoFilter() throws ServletException, IOException {
 
         //Given
+        AuthorizationResult result = accessPermitted();
 
         //When
-        JsonValue response = resultHandler.getJsonForbiddenResponse("MESSAGE", null);
+        Promise<Void, ServletException> promise = resultHandler.apply(result);
 
         //Then
-        assertEquals((int) response.get("code").asInteger(), 403);
-        assertEquals(response.get("reason").asString(), "Forbidden");
-        assertEquals(response.get("message").asString(), "MESSAGE");
-        assertFalse(response.isDefined("detail"));
+        verify(chain).doFilter(req, res);
+        assertTrue(promise.isDone());
+        assertNull(promise.getOrThrowUninterruptibly());
     }
 
     @Test
-    public void shouldGetJsonForbiddenResponseWithMessageAndDetail() {
+    public void shouldReturnServletExceptionWhenDoFilterThrowsIOException() throws ServletException, IOException {
 
         //Given
+        AuthorizationResult result = accessPermitted();
+
+        doThrow(IOException.class).when(chain).doFilter(req, res);
 
         //When
-        JsonValue response = resultHandler.getJsonForbiddenResponse("MESSAGE",
-                json(object(field("INTERNAL", "VALUE"))));
+        Promise<Void, ServletException> promise = resultHandler.apply(result);
 
         //Then
-        assertEquals((int) response.get("code").asInteger(), 403);
-        assertEquals(response.get("reason").asString(), "Forbidden");
-        assertEquals(response.get("message").asString(), "MESSAGE");
-        assertEquals(response.get("detail").get("INTERNAL").asString(), "VALUE");
+        assertTrue(promise.isDone());
+        try {
+            promise.getOrThrowUninterruptibly();
+            fail();
+        } catch (ServletException e) {
+            assertTrue(e.getCause() instanceof IOException);
+        }
     }
 
     @Test
-    public void shouldGetJsonErrorResponseWithMessage() {
+    public void shouldReturnServletExceptionWhenDoFilterThrowsServletException() throws ServletException, IOException {
 
         //Given
+        AuthorizationResult result = accessPermitted();
+
+        doThrow(ServletException.class).when(chain).doFilter(req, res);
 
         //When
-        JsonValue response = resultHandler.getJsonErrorResponse("MESSAGE", null);
+        Promise<Void, ServletException> promise = resultHandler.apply(result);
 
         //Then
-        assertEquals((int) response.get("code").asInteger(), 500);
-        assertEquals(response.get("reason").asString(), "Internal Error");
-        assertEquals(response.get("message").asString(), "MESSAGE");
-        assertFalse(response.isDefined("detail"));
+        assertTrue(promise.isDone());
+        try {
+            promise.getOrThrowUninterruptibly();
+            fail();
+        } catch (ServletException e) {
+            //Expected exception
+        }
     }
 
     @Test
-    public void shouldGetJsonErrorResponseWithMessageAndDetail() {
-
-        //Given
-
-        //When
-        JsonValue response = resultHandler.getJsonErrorResponse("MESSAGE",
-                json(object(field("INTERNAL", "VALUE"))));
-
-        //Then
-        assertEquals((int) response.get("code").asInteger(), 500);
-        assertEquals(response.get("reason").asString(), "Internal Error");
-        assertEquals(response.get("message").asString(), "MESSAGE");
-        assertEquals(response.get("detail").get("INTERNAL").asString(), "VALUE");
-    }
-
-    @Test
-    public void shouldGetWriterIfResponseNotCommitted() throws ServletException, IOException {
-
-        //Given
-        HttpServletResponse resp = mock(HttpServletResponse.class);
-        PrintWriter writer = mock(PrintWriter.class);
-
-        given(resp.isCommitted()).willReturn(false);
-        given(resp.getWriter()).willReturn(writer);
-
-        //When
-        PrintWriter printWriter = resultHandler.getWriter(resp);
-
-        //Then
-        assertEquals(printWriter, writer);
-    }
-
-    @Test
-    public void getWriterShouldReturnNullIfResponseCommitted() throws ServletException,
+    public void shouldNotCallDoFilterIfNotAuthorizedAndRespondWithReasonAndDetail() throws ServletException,
             IOException {
 
         //Given
-        HttpServletResponse resp = mock(HttpServletResponse.class);
+        JsonValue detail = json(object(field("INTERNAL", "VALUE")));
+        AuthorizationResult result = accessDenied("REASON", detail);
+        PrintWriter writer = mock(PrintWriter.class);
+        JsonValue jsonResponse = json(object());
 
-        given(resp.isCommitted()).willReturn(true);
+        given(responseHandler.getWriter(res)).willReturn(writer);
+        given(responseHandler.getJsonForbiddenResponse("REASON", detail)).willReturn(jsonResponse);
 
         //When
-        PrintWriter writer = resultHandler.getWriter(resp);
+        Promise<Void, ServletException> promise = resultHandler.apply(result);
 
         //Then
-        assertNull(writer);
+        verify(chain, never()).doFilter(req, res);
+        verify(res).reset();
+        verify(res).setStatus(HttpServletResponse.SC_FORBIDDEN);
+        verify(writer).write(jsonResponse.toString());
+        assertTrue(promise.isDone());
+        assertNull(promise.getOrThrowUninterruptibly());
     }
 
     @Test
-    public void getWriterShouldReturnOutputStream() throws ServletException, IOException {
+    public void shouldNotCallDoFilterIfNotAuthorizedAndNotWriteToResponseIfCommitted() throws ServletException,
+            IOException {
 
         //Given
-        HttpServletResponse resp = mock(HttpServletResponse.class);
-        ServletOutputStream outputStream = mock(ServletOutputStream.class);
+        AuthorizationResult result = accessDenied("REASON");
 
-        given(resp.isCommitted()).willReturn(false);
-        doThrow(IllegalStateException.class).when(resp).getWriter();
-        given(resp.getOutputStream()).willReturn(outputStream);
+        given(res.isCommitted()).willReturn(true);
 
         //When
-        PrintWriter writer = resultHandler.getWriter(resp);
+        Promise<Void, ServletException> promise = resultHandler.apply(result);
 
         //Then
-        assertNotNull(writer);
+        verify(chain, never()).doFilter(req, res);
+        verify(res, never()).reset();
+        verify(res, never()).setStatus(HttpServletResponse.SC_FORBIDDEN);
+        assertTrue(promise.isDone());
+        assertNull(promise.getOrThrowUninterruptibly());
     }
 }

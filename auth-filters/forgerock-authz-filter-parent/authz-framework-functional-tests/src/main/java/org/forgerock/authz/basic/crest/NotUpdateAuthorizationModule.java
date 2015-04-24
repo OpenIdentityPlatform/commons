@@ -47,7 +47,7 @@ public class NotUpdateAuthorizationModule implements CrestAuthorizationModule {
     @Override
     public Promise<AuthorizationResult, ResourceException> authorizeCreate(ServerContext context,
             CreateRequest request) {
-        return Promises.newSuccessfulPromise(accessPermitted());
+        return Promises.newResultPromise(accessPermitted());
     }
 
     /**
@@ -55,7 +55,7 @@ public class NotUpdateAuthorizationModule implements CrestAuthorizationModule {
      */
     @Override
     public Promise<AuthorizationResult, ResourceException> authorizeRead(ServerContext context, ReadRequest request) {
-        return Promises.newSuccessfulPromise(accessPermitted());
+        return Promises.newResultPromise(accessPermitted());
     }
 
     /**
@@ -64,7 +64,7 @@ public class NotUpdateAuthorizationModule implements CrestAuthorizationModule {
     @Override
     public Promise<AuthorizationResult, ResourceException> authorizeUpdate(ServerContext context,
             UpdateRequest request) {
-        return Promises.newSuccessfulPromise(accessDenied("Update is not allowed",
+        return Promises.newResultPromise(accessDenied("Update is not allowed",
                 json(object(field("internalCode", 123)))));
     }
 
@@ -74,7 +74,7 @@ public class NotUpdateAuthorizationModule implements CrestAuthorizationModule {
     @Override
     public Promise<AuthorizationResult, ResourceException> authorizeDelete(ServerContext context,
             DeleteRequest request) {
-        return Promises.newSuccessfulPromise(accessPermitted());
+        return Promises.newResultPromise(accessPermitted());
     }
 
     /**
@@ -82,7 +82,7 @@ public class NotUpdateAuthorizationModule implements CrestAuthorizationModule {
      */
     @Override
     public Promise<AuthorizationResult, ResourceException> authorizePatch(ServerContext context, PatchRequest request) {
-        return Promises.newSuccessfulPromise(accessPermitted());
+        return Promises.newResultPromise(accessPermitted());
     }
 
     /**
@@ -91,7 +91,7 @@ public class NotUpdateAuthorizationModule implements CrestAuthorizationModule {
     @Override
     public Promise<AuthorizationResult, ResourceException> authorizeAction(ServerContext context,
             ActionRequest request) {
-        return Promises.newSuccessfulPromise(accessPermitted());
+        return Promises.newResultPromise(accessPermitted());
     }
 
     /**
@@ -99,6 +99,6 @@ public class NotUpdateAuthorizationModule implements CrestAuthorizationModule {
      */
     @Override
     public Promise<AuthorizationResult, ResourceException> authorizeQuery(ServerContext context, QueryRequest request) {
-        return Promises.newSuccessfulPromise(accessPermitted());
+        return Promises.newResultPromise(accessPermitted());
     }
 }

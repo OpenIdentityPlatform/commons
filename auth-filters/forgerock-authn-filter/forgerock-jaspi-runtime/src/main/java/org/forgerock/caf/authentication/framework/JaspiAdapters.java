@@ -105,9 +105,9 @@ final class JaspiAdapters {
                 Subject clientSubject, Subject serviceSubject) {
             try {
                 AuthStatus authStatus = authContext.validateRequest(adapt(context), clientSubject, serviceSubject);
-                return Promises.newSuccessfulPromise(authStatus);
+                return Promises.newResultPromise(authStatus);
             } catch (AuthException e) {
-                return Promises.newFailedPromise(adapt(e));
+                return Promises.newExceptionPromise(adapt(e));
             }
         }
 
@@ -116,9 +116,9 @@ final class JaspiAdapters {
                 Subject serviceSubject) {
             try {
                 AuthStatus authStatus = authContext.secureResponse(adapt(context), serviceSubject);
-                return Promises.newSuccessfulPromise(authStatus);
+                return Promises.newResultPromise(authStatus);
             } catch (AuthException e) {
-                return Promises.newFailedPromise(adapt(e));
+                return Promises.newExceptionPromise(adapt(e));
             }
         }
 
@@ -126,9 +126,9 @@ final class JaspiAdapters {
         public Promise<Void, AuthenticationException> cleanSubject(MessageContext context, Subject clientSubject) {
             try {
                 authContext.cleanSubject(adapt(context), clientSubject);
-                return Promises.newSuccessfulPromise(null);
+                return Promises.newResultPromise(null);
             } catch (AuthException e) {
-                return Promises.newFailedPromise(adapt(e));
+                return Promises.newExceptionPromise(adapt(e));
             }
         }
     }
@@ -151,9 +151,9 @@ final class JaspiAdapters {
                 MessagePolicy responsePolicy, CallbackHandler handler, Map<String, Object> options) {
             try {
                 authModule.initialize(requestPolicy, responsePolicy, handler, options);
-                return Promises.newSuccessfulPromise(null);
+                return Promises.newResultPromise(null);
             } catch (AuthException e) {
-                return Promises.newFailedPromise(adapt(e));
+                return Promises.newExceptionPromise(adapt(e));
             }
         }
 
@@ -169,9 +169,9 @@ final class JaspiAdapters {
             try {
                 AuthStatus authStatus = authModule.validateRequest(adapt(messageInfo), clientSubject,
                         serviceSubject);
-                return Promises.newSuccessfulPromise(authStatus);
+                return Promises.newResultPromise(authStatus);
             } catch (AuthException e) {
-                return Promises.newFailedPromise(adapt(e));
+                return Promises.newExceptionPromise(adapt(e));
             }
         }
 
@@ -180,9 +180,9 @@ final class JaspiAdapters {
                 Subject serviceSubject) {
             try {
                 AuthStatus authStatus = authModule.secureResponse(adapt(messageInfo), serviceSubject);
-                return Promises.newSuccessfulPromise(authStatus);
+                return Promises.newResultPromise(authStatus);
             } catch (AuthException e) {
-                return Promises.newFailedPromise(adapt(e));
+                return Promises.newExceptionPromise(adapt(e));
             }
         }
 
@@ -191,9 +191,9 @@ final class JaspiAdapters {
                 Subject clientSubject) {
             try {
                 authModule.cleanSubject(adapt(messageInfo), clientSubject);
-                return Promises.newSuccessfulPromise(null);
+                return Promises.newResultPromise(null);
             } catch (AuthException e) {
-                return Promises.newFailedPromise(adapt(e));
+                return Promises.newExceptionPromise(adapt(e));
             }
         }
     }

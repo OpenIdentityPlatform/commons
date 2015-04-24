@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.authz.filter.servlet;
@@ -37,20 +37,20 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
-public class FailureHandlerTest {
+public class ExceptionHandlerTest {
 
-    private FailureHandler failureHandler;
+    private ExceptionHandler exceptionHandler;
 
-    private ResultHandler resultHandler;
+    private ResponseHandler responseHandler;
     private HttpServletResponse res;
 
     @BeforeMethod
     public void setUp() {
 
-        resultHandler = mock(ResultHandler.class);
+        responseHandler = mock(ResponseHandler.class);
         res = mock(HttpServletResponse.class);
 
-        failureHandler = new FailureHandler(resultHandler, res);
+        exceptionHandler = new ExceptionHandler(responseHandler, res);
     }
 
     @Test
@@ -62,11 +62,11 @@ public class FailureHandlerTest {
         JsonValue jsonResponse = json(object());
 
         given(exception.getMessage()).willReturn("EXCEPTION_MESSAGE");
-        given(resultHandler.getWriter(res)).willReturn(writer);
-        given(resultHandler.getJsonErrorResponse("EXCEPTION_MESSAGE", null)).willReturn(jsonResponse);
+        given(responseHandler.getWriter(res)).willReturn(writer);
+        given(responseHandler.getJsonErrorResponse("EXCEPTION_MESSAGE", null)).willReturn(jsonResponse);
 
         //When
-        Promise<Void, ServletException> promise = failureHandler.apply(exception);
+        Promise<Void, ServletException> promise = exceptionHandler.apply(exception);
 
         //Then
         verify(res).reset();
@@ -85,7 +85,7 @@ public class FailureHandlerTest {
         given(res.isCommitted()).willReturn(true);
 
         //When
-        Promise<Void, ServletException> promise = failureHandler.apply(exception);
+        Promise<Void, ServletException> promise = exceptionHandler.apply(exception);
 
         //Then
         verify(res, never()).reset();
@@ -100,10 +100,10 @@ public class FailureHandlerTest {
         //Given
         Exception exception = mock(Exception.class);
 
-        doThrow(IOException.class).when(resultHandler).getWriter(res);
+        doThrow(IOException.class).when(responseHandler).getWriter(res);
 
         //When
-        Promise<Void, ServletException> promise = failureHandler.apply(exception);
+        Promise<Void, ServletException> promise = exceptionHandler.apply(exception);
 
         //Then
         assertTrue(promise.isDone());

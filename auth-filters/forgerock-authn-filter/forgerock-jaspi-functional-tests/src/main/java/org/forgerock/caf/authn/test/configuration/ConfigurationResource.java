@@ -53,7 +53,7 @@ public class ConfigurationResource implements SingletonResourceProvider {
      */
     @Override
     public void actionInstance(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
-        handler.handleError(ResourceException.getException(ResourceException.NOT_SUPPORTED));
+        handler.handleException(ResourceException.getException(ResourceException.NOT_SUPPORTED));
     }
 
     /**
@@ -65,7 +65,7 @@ public class ConfigurationResource implements SingletonResourceProvider {
      */
     @Override
     public void patchInstance(ServerContext context, PatchRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(ResourceException.getException(ResourceException.NOT_SUPPORTED));
+        handler.handleException(ResourceException.getException(ResourceException.NOT_SUPPORTED));
     }
 
     /**

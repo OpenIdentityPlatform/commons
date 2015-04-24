@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.authz.filter.servlet;
@@ -49,7 +49,7 @@ public class HttpServletAuthorizationFilter implements Filter {
 
     private final Logger logger = LoggerFactory.getLogger(HttpServletAuthorizationFilter.class);
     private final InitParamClassConstructor initParamClassConstructor;
-    private final ResultHandlerFactory resultHandlerFactory;
+    private final ResponseHandlerFactory responseHandlerFactory;
 
     private HttpServletAuthorizationModule module;
 
@@ -58,7 +58,7 @@ public class HttpServletAuthorizationFilter implements Filter {
      */
     public HttpServletAuthorizationFilter() {
         this.initParamClassConstructor = new InitParamClassConstructor();
-        this.resultHandlerFactory = new ResultHandlerFactory();
+        this.responseHandlerFactory = new ResponseHandlerFactory();
     }
 
     /**
@@ -67,12 +67,12 @@ public class HttpServletAuthorizationFilter implements Filter {
      * <p>Used for test purposes. Do not use in production code.</p>
      *
      * @param initParamClassConstructor An instance of the {@link InitParamClassConstructor}.
-     * @param resultHandlerFactory An instance of the {@link ResultHandlerFactory}.
+     * @param responseHandlerFactory An instance of the {@link ResponseHandlerFactory}.
      */
     HttpServletAuthorizationFilter(InitParamClassConstructor initParamClassConstructor,
-            ResultHandlerFactory resultHandlerFactory) {
+            ResponseHandlerFactory responseHandlerFactory) {
         this.initParamClassConstructor = initParamClassConstructor;
-        this.resultHandlerFactory = resultHandlerFactory;
+        this.responseHandlerFactory = responseHandlerFactory;
     }
 
     /**
@@ -128,11 +128,11 @@ public class HttpServletAuthorizationFilter implements Filter {
 
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse resp = (HttpServletResponse) response;
-        SuccessHandler successHandler = resultHandlerFactory.newSuccessHandler(req, resp, chain);
-        FailureHandler failureHandler = resultHandlerFactory.newFailureHandler(resp);
+        ResultHandler resultHandler = responseHandlerFactory.newSuccessHandler(req, resp, chain);
+        ExceptionHandler exceptionHandler = responseHandlerFactory.newFailureHandler(resp);
 
         final Promise<Void, ServletException> promise = module.authorize(req, HttpAuthorizationContext.forRequest(req))
-            .thenAsync(successHandler, failureHandler);
+            .thenAsync(resultHandler, exceptionHandler);
 
         try {
             promise.getOrThrowUninterruptibly();       //TODO need to make async supported?...

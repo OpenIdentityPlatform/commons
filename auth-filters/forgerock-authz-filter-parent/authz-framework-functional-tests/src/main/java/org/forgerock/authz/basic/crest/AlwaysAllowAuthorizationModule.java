@@ -43,7 +43,7 @@ public class AlwaysAllowAuthorizationModule implements CrestAuthorizationModule 
     @Override
     public Promise<AuthorizationResult, ResourceException> authorizeCreate(ServerContext context,
             CreateRequest request) {
-        return Promises.newSuccessfulPromise(AuthorizationResult.accessPermitted());
+        return Promises.newResultPromise(AuthorizationResult.accessPermitted());
     }
 
     /**
@@ -51,7 +51,7 @@ public class AlwaysAllowAuthorizationModule implements CrestAuthorizationModule 
      */
     @Override
     public Promise<AuthorizationResult, ResourceException> authorizeRead(ServerContext context, ReadRequest request) {
-        return Promises.newSuccessfulPromise(AuthorizationResult.accessPermitted());
+        return Promises.newResultPromise(AuthorizationResult.accessPermitted());
     }
 
     /**
@@ -60,7 +60,7 @@ public class AlwaysAllowAuthorizationModule implements CrestAuthorizationModule 
     @Override
     public Promise<AuthorizationResult, ResourceException> authorizeUpdate(ServerContext context,
             UpdateRequest request) {
-        return Promises.newSuccessfulPromise(AuthorizationResult.accessPermitted());
+        return Promises.newResultPromise(AuthorizationResult.accessPermitted());
     }
 
     /**
@@ -69,7 +69,7 @@ public class AlwaysAllowAuthorizationModule implements CrestAuthorizationModule 
     @Override
     public Promise<AuthorizationResult, ResourceException> authorizeDelete(ServerContext context,
             DeleteRequest request) {
-        return Promises.newSuccessfulPromise(AuthorizationResult.accessPermitted());
+        return Promises.newResultPromise(AuthorizationResult.accessPermitted());
     }
 
     /**
@@ -77,7 +77,7 @@ public class AlwaysAllowAuthorizationModule implements CrestAuthorizationModule 
      */
     @Override
     public Promise<AuthorizationResult, ResourceException> authorizePatch(ServerContext context, PatchRequest request) {
-        return Promises.newSuccessfulPromise(AuthorizationResult.accessPermitted());
+        return Promises.newResultPromise(AuthorizationResult.accessPermitted());
     }
 
     /**
@@ -86,7 +86,7 @@ public class AlwaysAllowAuthorizationModule implements CrestAuthorizationModule 
     @Override
     public Promise<AuthorizationResult, ResourceException> authorizeAction(ServerContext context,
             ActionRequest request) {
-        return Promises.newSuccessfulPromise(AuthorizationResult.accessPermitted());
+        return Promises.newResultPromise(AuthorizationResult.accessPermitted());
     }
 
     /**
@@ -94,6 +94,6 @@ public class AlwaysAllowAuthorizationModule implements CrestAuthorizationModule 
      */
     @Override
     public Promise<AuthorizationResult, ResourceException> authorizeQuery(ServerContext context, QueryRequest request) {
-        return Promises.newSuccessfulPromise(AuthorizationResult.accessPermitted());
+        return Promises.newResultPromise(AuthorizationResult.accessPermitted());
     }
 }

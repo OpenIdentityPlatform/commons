@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.authz.basic.servlet;
@@ -60,9 +60,9 @@ public class HttpServletEndpointCheckerAuthorizationModule implements HttpServle
         final String endpoint = getResourceName(req);
         if (endpointChecker.check(endpoint)) {
             context.setAttribute("AuthorizationResult", "success");
-            return Promises.newSuccessfulPromise(AuthorizationResult.accessPermitted());
+            return Promises.newResultPromise(AuthorizationResult.accessPermitted());
         }
-        return Promises.newSuccessfulPromise(AuthorizationResult.accessDenied("Not authorized for endpoint: " + endpoint,
+        return Promises.newResultPromise(AuthorizationResult.accessDenied("Not authorized for endpoint: " + endpoint,
                 json(object(field("internalCode", 123)))));
     }
 

@@ -31,7 +31,7 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.json.resource.http.HttpContext;
-import org.forgerock.util.promise.AsyncFunction;
+import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 
@@ -213,12 +213,12 @@ public class OAuth2CrestAuthorizationModule implements CrestAuthorizationModule 
                         public Promise<AuthorizationResult, ResourceException> apply(AuthorizationResult result) {
 //                            securityContext.getAuthorizationId().putAll(authorizationContext.getAttributes());
 // TODO cannot add to the authzId as SecurityContext ensures this....
-                            return Promises.newSuccessfulPromise(result);
+                            return Promises.newResultPromise(result);
                         }
                     }, new AsyncFunction<AuthorizationException, AuthorizationResult, ResourceException>() {
                         @Override
                         public Promise<AuthorizationResult, ResourceException> apply(AuthorizationException e) {
-                            return Promises.newFailedPromise(ResourceException.getException(
+                            return Promises.newExceptionPromise(ResourceException.getException(
                                     ResourceException.INTERNAL_ERROR, e.getMessage(), e));
                         }
                     }

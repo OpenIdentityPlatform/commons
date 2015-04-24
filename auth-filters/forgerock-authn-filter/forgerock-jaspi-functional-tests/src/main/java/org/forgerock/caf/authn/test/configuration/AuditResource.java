@@ -74,7 +74,7 @@ public class AuditResource implements SingletonResourceProvider {
             auditApi.clear();
 
         } else {
-            handler.handleError(ResourceException.getException(ResourceException.NOT_SUPPORTED));
+            handler.handleException(ResourceException.getException(ResourceException.NOT_SUPPORTED));
         }
     }
 
@@ -87,7 +87,7 @@ public class AuditResource implements SingletonResourceProvider {
      */
     @Override
     public void patchInstance(ServerContext context, PatchRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(ResourceException.getException(ResourceException.NOT_SUPPORTED));
+        handler.handleException(ResourceException.getException(ResourceException.NOT_SUPPORTED));
     }
 
     /**
@@ -114,7 +114,7 @@ public class AuditResource implements SingletonResourceProvider {
      */
     @Override
     public void updateInstance(ServerContext context, UpdateRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(ResourceException.getException(ResourceException.NOT_SUPPORTED));
+        handler.handleException(ResourceException.getException(ResourceException.NOT_SUPPORTED));
     }
 
     /**

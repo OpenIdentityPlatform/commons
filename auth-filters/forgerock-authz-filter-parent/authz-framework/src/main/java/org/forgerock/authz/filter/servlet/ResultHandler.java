@@ -11,124 +11,95 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.authz.filter.servlet;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.authz.filter.api.AuthorizationResult;
+import org.forgerock.util.AsyncFunction;
+import org.forgerock.util.promise.Promise;
+import org.forgerock.util.promise.Promises;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
- * Class offering methods for getting {@link PrintWriter} or {@link javax.servlet.ServletOutputStream} from a
- * {@link HttpServletResponse} and for creating a valid JSON object response for error cases.
+ * Handles the success result of the call to
+ * {@link org.forgerock.authz.filter.servlet.api.HttpServletAuthorizationModule#authorize(HttpServletRequest,
+ * org.forgerock.authz.filter.api.AuthorizationContext)} asynchronously.
  *
  * @since 1.5.0
  */
-class ResultHandler {
+class ResultHandler implements AsyncFunction<AuthorizationResult, Void, ServletException> {
+
+    private final Logger logger = LoggerFactory.getLogger(ResultHandler.class);
+    private final ResponseHandler responseHandler;
+    private final HttpServletRequest req;
+    private final HttpServletResponse resp;
+    private final FilterChain chain;
 
     /**
-     * Returns the exception in a JSON object structure, suitable for inclusion in the entity of an HTTP error response.
-     * The JSON representation looks like this:
+     * Creates a new {@code SuccessHandler} instance.
      *
-     * <pre>
-     * {
-     *     "code"    : 403,
-     *     "reason"  : "Forbidden",
-     *     "message" : "...",
-     *     "detail"  : { ... } // optional
-     * }
-     * </pre>
-     *
-     * @param message The detail message.
-     * @param detail Additional detail which can be evaluated by applications.
-     * @return The exception in a JSON object structure, suitable for inclusion in the entity of an HTTP error response.
+     * @param responseHandler A {@code ResultHandler} instance.
+     * @param req The {@code HttpServletRequest} instance.
+     * @param resp The {@code HttpServletResponse} instance.
+     * @param chain The {@code FilterChain} instance.
      */
-    JsonValue getJsonForbiddenResponse(String message, JsonValue detail) {
-        return getJsonExceptionResponse(403, "Forbidden", message, detail);
+    ResultHandler(ResponseHandler responseHandler, HttpServletRequest req, HttpServletResponse resp, FilterChain chain) {
+        this.responseHandler = responseHandler;
+        this.req = req;
+        this.resp = resp;
+        this.chain = chain;
     }
 
     /**
-     * Returns the exception in a JSON object structure, suitable for inclusion in the entity of an HTTP error response.
-     * The JSON representation looks like this:
+     * <p>Asynchronously applies this function to the {@code result} parameter and returns a {@link Promise} for the
+     * result.</p>
      *
-     * <pre>
-     * {
-     *     "code"    : 500,
-     *     "reason"  : "Internal Error",
-     *     "message" : "...",
-     *     "detail"  : { ... } // optional
-     * }
-     * </pre>
+     * <p>If the {@code AuthorizationResult} is successful, i.e. the request is authorized to access the requested
+     * resource, the {@link FilterChain#doFilter(javax.servlet.ServletRequest, javax.servlet.ServletResponse)}
+     * is called to allow the request access to the resource.
+     * If the {@code AuthorizationResult} is not successful, i.e. the request is not authorized to access the requested
+     * resource, the {@code HttpServletResponse} will have a status of 403 set and the output of the reason for not
+     * being authorized written to the response as JSON.</p>
      *
-     * @param message The detail message.
-     * @param detail Additional detail which can be evaluated by applications.
-     * @return The exception in a JSON object structure, suitable for inclusion in the entity of an HTTP error response.
+     * @param result The result of the authorization of the request.
+     * @return The {@code Promise} representing the result of applying this function to {@code result}.
      */
-    JsonValue getJsonErrorResponse(String message, JsonValue detail) {
-        return getJsonExceptionResponse(500, "Internal Error", message, detail);
-    }
-
-    /**
-     * Returns the exception in a JSON object structure, suitable for inclusion in the entity of an HTTP error response.
-     * The JSON representation looks like this:
-     *
-     * <pre>
-     * {
-     *     "code"    : 404,
-     *     "reason"  : "...",  // optional
-     *     "message" : "...",
-     *     "detail"  : { ... } // optional
-     * }
-     * </pre>
-     *
-     * @param code The numeric code of the exception.
-     * @param reason The short reason phrase of the exception.
-     * @param message The detail message.
-     * @param detail Additional detail which can be evaluated by applications.
-     * @return The exception in a JSON object structure, suitable for inclusion in the entity of an HTTP error response.
-     */
-    private JsonValue getJsonExceptionResponse(int code, String reason, String message, JsonValue detail) {
-
-        final Map<String, Object> result = new LinkedHashMap<String, Object>(4);
-        result.put("code", code); // required
-        result.put("reason", reason); // required
-        if (message != null) { // should always be present
-            result.put("message", message);
-        }
-        if (detail != null) {
-            result.put("detail", detail.getObject());
-        }
-        return new JsonValue(result);
-    }
-
-    /**
-     * <p>Gets the {@code PrintWriter} from the {@code HttpServletResponse}.</p>
-     *
-     * <p>If the response has already been committed {@code null} will be returned. Not having a better way of telling
-     * which output mechanism has been used on the response, the approach taken is to try and get the
-     * {@code PrintWriter} instance and if that fails then wrap the response's {@code ServletOutputStream} in a
-     * {@code PrintWriter} instance.</p>
-     *
-     * @param res The {@code HttpServletResponse} instance.
-     * @return The {@code HttpServletResponse} {@code PrintWriter} instance, or {@code null} if the response has already
-     * been committed.
-     * @throws IOException If there is a problem getting the {@code PrintWriter} instance.
-     */
-    PrintWriter getWriter(HttpServletResponse res) throws IOException {
-        if (res.isCommitted()) {
-            return null;
-        }
-
+    @Override
+    public Promise<Void, ServletException> apply(AuthorizationResult result) {
         try {
-            return res.getWriter();
-        } catch (IllegalStateException e) {
-            return new PrintWriter(res.getOutputStream());
+            if (result.isAuthorized()) {
+                logger.debug("Request authorized.");
+                chain.doFilter(req, resp);
+                return Promises.newResultPromise(null);
+            } else {
+                logger.debug("Request unauthorized.");
+                final PrintWriter writer = responseHandler.getWriter(resp);
+                // If writer is null then response has already been committed!
+                if (writer != null) {
+                    resp.reset();
+                    resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    String message = responseHandler.getJsonForbiddenResponse(result.getReason(), result.getDetail())
+                            .toString();
+                    writer.write(message);
+                }
+                return Promises.newResultPromise(null);
+            }
+        } catch (IOException e) {
+            logger.debug("Exception whilst authorizing: {}", e.getMessage());
+            return Promises.newExceptionPromise(new ServletException(e));
+        } catch (ServletException e) {
+            logger.debug("Exception whilst authorizing: {}", e.getMessage());
+            return Promises.newExceptionPromise(e);
         }
     }
 }
