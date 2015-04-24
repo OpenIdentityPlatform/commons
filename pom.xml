@@ -168,6 +168,9 @@
         <!-- maven-war-plugin http://maven.apache.org/plugins/maven-war-plugin/ -->
         <mavenWarPluginVersion>2.6</mavenWarPluginVersion>
 
+        <!-- maven-assembly-plugin http://maven.apache.org/plugins/maven-assembly-plugin/ -->
+        <mavenAssemblyPluginVersion>2.5.3</mavenAssemblyPluginVersion>
+
         <!-- ***************** -->
         <!-- Repository Deployment URLs -->
         <!-- ***************** -->
@@ -214,7 +217,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-assembly-plugin</artifactId>
-                    <version>2.4</version>
+                    <version>${mavenAssemblyPluginVersion}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.felix</groupId>
