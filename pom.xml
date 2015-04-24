@@ -198,6 +198,9 @@
         <!-- maven-enforcer-plugin http://maven.apache.org/plugins/maven-enforcer-plugin/ -->
         <mavenEnforcerPluginVersion>1.4</mavenEnforcerPluginVersion>
 
+        <!-- maven-release-plugin http://maven.apache.org/plugins/maven-release-plugin/ -->
+        <mavenReleasePluginVersion>2.5.1</mavenReleasePluginVersion>
+
         <!-- ***************** -->
         <!-- Repository Deployment URLs -->
         <!-- ***************** -->
@@ -382,7 +385,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
-                    <version>2.4.2</version>
+                    <version>${mavenReleasePluginVersion}</version>
                     <inherited>true</inherited>
                     <configuration>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
