@@ -11,8 +11,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
+
 package org.forgerock.http;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,7 +27,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.ResponseException;
-import org.forgerock.util.promise.AsyncFunction;
+import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 import org.mockito.InOrder;
@@ -103,7 +104,7 @@ public final class HandlersTest {
         doAnswer(new Answer<Promise<Response, ResponseException>>() {
             @Override
             public Promise<Response, ResponseException> answer(final InvocationOnMock invocation) throws Throwable {
-                return Promises.newFailedPromise(new ResponseException(RESPONSE));
+                return Promises.newExceptionPromise(new ResponseException(RESPONSE));
             }
         }).when(filter1).filter(any(Context.class), any(Request.class), any(Handler.class));
         Filter filter2 = filter();
@@ -131,7 +132,7 @@ public final class HandlersTest {
         doAnswer(new Answer<Promise<Response, ResponseException>>() {
             @Override
             public Promise<Response, ResponseException> answer(final InvocationOnMock invocation) throws Throwable {
-                return Promises.newSuccessfulPromise(RESPONSE);
+                return Promises.newResultPromise(RESPONSE);
             }
         }).when(filter1).filter(any(Context.class), any(Request.class), any(Handler.class));
         Filter filter2 = filter();
@@ -170,12 +171,12 @@ public final class HandlersTest {
                 final Context context = (Context) args[0];
                 final Request request = (Request) args[1];
                 final Handler next = (Handler) args[2];
-                Promise<Response, ResponseException> promise = Promises.newSuccessfulPromise(new Response());
+                Promise<Response, ResponseException> promise = Promises.newResultPromise(new Response());
                 for (int i = 0; i < count; i++) {
                     promise.thenAsync(
                             new AsyncFunction<Response, Response, ResponseException>() {
                                 @Override
-                                public Promise<Response, ResponseException> apply(Response o) throws ResponseException {
+                                public Promise<Response, ResponseException> apply(Response o) {
                                     return next.handle(context, request);
                                 }
                             }

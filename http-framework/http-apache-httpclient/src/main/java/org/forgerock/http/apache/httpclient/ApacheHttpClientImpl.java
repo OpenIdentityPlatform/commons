@@ -157,7 +157,7 @@ final class ApacheHttpClientImpl implements ClientImpl {
         } catch (final IOException e) {
             response.setStatusAndReason(500);
             final ResponseException re = new ResponseException(response, "Cannot obtain a Response from server", e);
-            return Promises.newFailedPromise(re);
+            return Promises.newExceptionPromise(re);
         }
 
         // response status line
@@ -178,9 +178,9 @@ final class ApacheHttpClientImpl implements ClientImpl {
         }
         // TODO: decide if need to try-finally to call httpRequest.abort?
         if (response.getStatus() >= 200 && response.getStatus() < 300) {
-            return Promises.newSuccessfulPromise(response);
+            return Promises.newResultPromise(response);
         } else {
-            return Promises.newFailedPromise(new ResponseException(response));
+            return Promises.newExceptionPromise(new ResponseException(response));
         }
     }
 

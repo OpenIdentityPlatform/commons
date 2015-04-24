@@ -114,15 +114,15 @@ final class DefaultRouteHandler implements Handler {
         try {
             dispatcher.forward(req, resp);
         } catch (ServletException e) {
-            return Promises.newFailedPromise(
+            return Promises.newExceptionPromise(
                     new ResponseException(new Response().setStatusAndReason(500), e.getMessage(), e));
         } catch (IOException e) {
-            return Promises.newFailedPromise(
+            return Promises.newExceptionPromise(
                     new ResponseException(new Response().setStatusAndReason(500), e.getMessage(), e));
         }
 
         // Returns null as the container has already handled the response.
-        return Promises.newSuccessfulPromise(null);
+        return Promises.newResultPromise(null);
     }
 
     private String getServletName(Request request) {

@@ -26,7 +26,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -56,9 +55,9 @@ import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.ResponseException;
 import org.forgerock.http.util.CaseInsensitiveSet;
 import org.forgerock.util.Factory;
-import org.forgerock.util.promise.FailureHandler;
+import org.forgerock.util.promise.ExceptionHandler;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.promise.SuccessHandler;
+import org.forgerock.util.promise.ResultHandler;
 
 /**
  * <p>
@@ -177,7 +176,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
         // handle request
         final ServletSynchronizer sync = adapter.createServletSynchronizer(req, resp);
         final Promise<Response, ResponseException> promise =
-                handler.handle(context, request).onSuccess(new SuccessHandler<Response>() {
+                handler.handle(context, request).thenOnResult(new ResultHandler<Response>() {
                     @Override
                     public void handleResult(Response response) {
                         try {
@@ -189,9 +188,9 @@ public final class HttpFrameworkServlet extends HttpServlet {
                             sync.signalAndComplete();
                         }
                     }
-                }).onFailure(new FailureHandler<ResponseException>() {
+                }).thenOnException(new ExceptionHandler<ResponseException>() {
                     @Override
-                    public void handleError(ResponseException error) {
+                    public void handleException(ResponseException error) {
                         log("Unexpected error", error);
                         try {
                             writeResponse(httpContext, resp, error.getResponse());

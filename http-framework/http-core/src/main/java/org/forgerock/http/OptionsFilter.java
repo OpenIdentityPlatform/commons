@@ -64,7 +64,7 @@ public final class OptionsFilter implements Filter {
         if ("OPTIONS".equals(request.getMethod())) {
             Response response = new Response().setStatusAndReason(200);
             response.getHeaders().put("Allow", allowedMethods);
-            return Promises.newSuccessfulPromise(response);
+            return Promises.newResultPromise(response);
         } else {
             return next.handle(context, request);
         }

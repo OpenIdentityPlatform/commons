@@ -18,15 +18,15 @@ package org.forgerock.http;
 
 import static org.forgerock.http.HttpApplication.LOGGER;
 
+import java.io.IOException;
+
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.ResponseException;
 import org.forgerock.util.Reject;
-import org.forgerock.util.promise.FailureHandler;
+import org.forgerock.util.promise.ExceptionHandler;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.promise.SuccessHandler;
-
-import java.io.IOException;
+import org.forgerock.util.promise.ResultHandler;
 
 /**
  * Filter implementation that uses a {@link SessionManager} to set the {@link Session} in the {@link HttpContext}.
@@ -50,14 +50,15 @@ class SessionFilter implements Filter {
         final Session oldSession = httpContext.getSession();
         httpContext.setSession(sessionManager.load(request));
         return next.handle(context, request)
-                .then(new SuccessHandler<Response>() {
+                .thenOnResult(new ResultHandler<Response>() {
                     @Override
                     public void handleResult(Response response) {
                         saveSession(httpContext.getSession(), response);
                     }
-                }, new FailureHandler<ResponseException>() {
+                })
+                .thenOnException(new ExceptionHandler<ResponseException>() {
                     @Override
-                    public void handleError(ResponseException error) {
+                    public void handleException(ResponseException error) {
                         saveSession(httpContext.getSession(), error.getResponse());
                     }
                 })

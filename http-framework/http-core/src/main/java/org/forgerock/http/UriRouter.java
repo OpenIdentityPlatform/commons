@@ -63,7 +63,7 @@ public final class UriRouter extends AbstractUriRouter<UriRouter, Handler> imple
             RouteMatcher<Handler> bestMatch = getBestRoute(context, request);
             return bestMatch.getHandler().handle(bestMatch.getContext(), request);
         } catch (ResponseException e) {
-            return Promises.newFailedPromise(e);
+            return Promises.newExceptionPromise(e);
         }
     }
 
