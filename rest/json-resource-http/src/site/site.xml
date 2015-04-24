@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2012 ForgeRock AS
+  !      Copyright 2012-2015 ForgeRock AS.
   !    
 -->
 <project name="${project.name}" xmlns="http://maven.apache.org/DECORATION/1.0.1"
@@ -37,7 +37,7 @@
             <item name="JSON Crypto" href="../json-crypto/index.html" />
             <item name="JSON Crypto CLI" href="../json-crypto-cli/index.html" />
             <item name="JSON Resource" href="../json-resource/index.html" />
-            <item name="JSON Resource Servlet" href="../json-resource-servlet/index.html" />
+            <item name="JSON Resource HTTP" href="../json-resource-http/index.html" />
         </menu>
         <menu name="Documentation">
             <item name="Introduction" href="index.html" />

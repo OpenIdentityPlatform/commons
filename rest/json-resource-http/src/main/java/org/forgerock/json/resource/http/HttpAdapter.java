@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2014 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource.http;
@@ -88,10 +88,10 @@ import org.forgerock.util.promise.Promise;
  *
  * Note that this adapter does not provide implementations for the HTTP HEAD,
  * OPTIONS, or TRACE methods. A simpler approach is to use the
- * {@link CrestHandler} class contained within this package to build HTTP
+ * {@link CrestHttp} class contained within this package to build HTTP
  * Handlers since it provides support for these HTTP methods.
  */
-public final class HttpAdapter implements Handler {
+final class HttpAdapter implements Handler {
 
     private static final String FIELDS_DELIMITER = ",";
     private static final String SORT_KEYS_DELIMITER = ",";
