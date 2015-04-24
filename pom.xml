@@ -3,16 +3,22 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
+  <parent>
+    <groupId>org.forgerock</groupId>
+    <artifactId>forgerock-parent</artifactId>
+    <version>2.0.0</version>
+  </parent>
+
   <groupId>org.forgerock.persistit</groupId>
   <artifactId>forgerock-persistit</artifactId>
   <version>4.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>forgerock-persistit</name>
+  <name>ForgeRock Persistit</name>
   <description>Java B+Tree Key-Value Store Library</description>
   <inceptionYear>2005</inceptionYear>
-  <!-- Temporary -->
-  <url>https://github.com/matthew-swift/forgerock-persistit</url>
+  <url>https://stash.forgerock.org/projects/COMMONS/repos/forgerock-persistit/browse</url>
+
   <organization>
     <name>ForgeRock</name>
     <url>http://www.forgerock.com</url>
@@ -32,8 +38,8 @@
   </licenses>
 
   <scm>
-    <connection>scm:git:https://github.com/matthew-swift/forgerock-persistit</connection>
-    <url>https://github.com/matthew-swift/forgerock-persistit</url>
+    <connection>scm:git:https://stash.forgerock.org/scm/commons/forgerock-persistit.git</connection>
+    <url>https://stash.forgerock.org/projects/COMMONS/repos/forgerock-persistit/browse</url>
   </scm>
 
   <distributionManagement>
@@ -48,27 +54,30 @@
       <url>${forgerockDistMgmtReleasesUrl}</url>
     </repository>
   </distributionManagement>
-
+  
+  <repositories>
+    <repository>
+      <id>forgerock-staging-repository</id>
+      <name>ForgeRock Release Repository</name>
+      <url>${forgerockDistMgmtReleasesUrl}</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+  
   <prerequisites>
-    <!-- Note that "prerequisites" not inherited, but used by versions-maven-plugin 
-      1.3.1 -->
+    <!-- Note that "prerequisites" not inherited, but used by versions-maven-plugin 1.3.1 -->
     <maven>${maven.min.version}</maven>
   </prerequisites>
 
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-    <maven.min.version>3.0.5</maven.min.version>
-    <jdk.min.version>1.6</jdk.min.version>
-
     <!-- To configure animal-sniffer to check API compat -->
     <animal-sniffer.signature.groupId>org.codehaus.mojo.signature</animal-sniffer.signature.groupId>
     <animal-sniffer.signature.artifactId>java16</animal-sniffer.signature.artifactId>
     <animal-sniffer.signature.version>1.1</animal-sniffer.signature.version>
     <version.animal-sniffer.plugin>1.11</version.animal-sniffer.plugin>
-
     <version.maven-license.plugin>2.6</version.maven-license.plugin>
-    
     <forgerockDistMgmtSnapshotsUrl>http://maven.forgerock.org/repo/snapshots</forgerockDistMgmtSnapshotsUrl>
     <forgerockDistMgmtReleasesUrl>http://maven.forgerock.org/repo/releases</forgerockDistMgmtReleasesUrl>
   </properties>
@@ -80,12 +89,14 @@
         <artifactId>slf4j-api</artifactId>
         <version>1.7.7</version>
       </dependency>
+      
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
         <version>4.11</version>
         <scope>test</scope>
       </dependency>
+      
       <dependency>
         <groupId>org.assertj</groupId>
         <artifactId>assertj-core</artifactId>
@@ -121,36 +132,7 @@
             </execution>
           </executions>
         </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-clean-plugin</artifactId>
-          <version>2.5</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-deploy-plugin</artifactId>
-          <version>2.8.1</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-install-plugin</artifactId>
-          <version>2.5.1</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-jar-plugin</artifactId>
-          <version>2.4</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-resources-plugin</artifactId>
-          <version>2.6</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-gpg-plugin</artifactId>
-          <version>1.4</version>
-        </plugin>
+        
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>build-helper-maven-plugin</artifactId>
@@ -170,28 +152,7 @@
             </execution>
           </executions>
         </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.1</version>
-          <configuration>
-            <source>${jdk.min.version}</source>
-            <target>${jdk.min.version}</target>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-source-plugin</artifactId>
-          <version>2.2.1</version>
-          <executions>
-            <execution>
-              <id>attach-sources</id>
-              <goals>
-                <goal>jar</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
+        
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
@@ -207,6 +168,7 @@
             </includes>
           </configuration>
         </plugin>
+        
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>rmic-maven-plugin</artifactId>
@@ -223,6 +185,7 @@
             </execution>
           </executions>
         </plugin>
+        
         <!-- check copyright/license headers -->
         <plugin>
           <groupId>com.mycila</groupId>
@@ -282,74 +245,4 @@
       </plugins>
     </pluginManagement>
   </build>
-
-  <developers>
-    <developer>
-      <id>peter</id>
-      <name>Peter Beaman</name>
-      <email>pbeaman@akiban.com</email>
-      <organization>Akiban Technologies, Inc.</organization>
-      <organizationUrl>http://akiban.com</organizationUrl>
-      <roles>
-        <role>architect</role>
-        <role>developer</role>
-      </roles>
-      <timezone>-5</timezone>
-    </developer>
-    <developer>
-      <id>nathan</id>
-      <name>Nathan Williams</name>
-      <email>nwilliams@akiban.com</email>
-      <organization>Akiban Technologies, Inc.</organization>
-      <organizationUrl>http://akiban.com</organizationUrl>
-      <roles>
-        <role>architect</role>
-        <role>developer</role>
-      </roles>
-      <timezone>-5</timezone>
-    </developer>
-    <developer>
-      <id>henryju</id>
-      <name>Julien Henry</name>
-      <email>julien.henry@sonarsource.com</email>
-      <organization>SonarSource</organization>
-      <timezone>+1</timezone>
-    </developer>
-  </developers>
-
-  <profiles>
-    <profile>
-      <id>release</id>
-      <build>
-        <plugins>
-          <!-- Generates Javadoc -->
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>attach-javadocs</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-gpg-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>sign-artifacts</id>
-                <phase>verify</phase>
-                <goals>
-                  <goal>sign</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 </project>
