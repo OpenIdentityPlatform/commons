@@ -16,7 +16,7 @@
         "@link-color": "#519387",
         "@link-hover-color": "#777777",
         "@link-hover-decoration": "underline",
-        "@font-family-sans-serif": "Roboto, \"proxima-nova\", \"Helvetica Neue\", Helvetica, Arial, sans-serif",
+        "@font-family-sans-serif": "\"Helvetica Neue\", Helvetica, Arial, sans-serif",
         "@font-family-serif": "Georgia, \"Times New Roman\", Times, serif",
         "@font-family-monospace": "Menlo, Monaco, Consolas, \"Courier New\", monospace",
         "@font-family-base": "@font-family-sans-serif",
@@ -426,5 +426,5 @@
         "scrollspy.js",
         "transition.js"
     ],
-    "customizerUrl": "http://getbootstrap.com/customize/?id=744b00a3f49a2838bd56"
+    "customizerUrl": "http://getbootstrap.com/customize/?id=f86aa4813e4701f1f7a0"
 }
