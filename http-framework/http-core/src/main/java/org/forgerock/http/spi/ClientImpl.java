@@ -48,6 +48,8 @@ public interface ClientImpl extends Closeable {
     /**
      * Completes all pending requests and release resources associated with
      * underlying implementation.
+     *
+     * @throws IOException if an I/O error occurs
      */
     @Override
     public void close() throws IOException;

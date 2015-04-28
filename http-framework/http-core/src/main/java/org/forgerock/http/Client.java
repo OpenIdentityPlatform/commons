@@ -16,7 +16,7 @@
 
 package org.forgerock.http;
 
-import static org.forgerock.http.util.Duration.duration;
+import static org.forgerock.http.util.Duration.*;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -174,6 +174,8 @@ public final class Client implements Closeable {
     /**
      * Completes all pending requests and release resources associated with
      * underlying implementation.
+     *
+     * @throws IOException if an I/O error occurs
      */
     @Override
     public void close() throws IOException {

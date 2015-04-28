@@ -16,7 +16,7 @@
 
 package org.forgerock.http;
 
-import static org.forgerock.util.Reject.checkNotNull;
+import static org.forgerock.util.Reject.*;
 
 import java.util.Collections;
 import java.util.Map;
@@ -47,6 +47,8 @@ public final class RouterContext extends ServerContext {
      *
      * @param parent
      *            The parent server context.
+     * @param matchedUri
+     *            The matched URI
      * @param uriTemplateVariables
      *            A {@code Map} containing the parsed URI template variables,
      *            keyed on the URI template variable name.
