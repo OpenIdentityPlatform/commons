@@ -21,14 +21,13 @@ import java.io.IOException;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.ResponseException;
-import org.forgerock.http.util.Options;
 import org.forgerock.util.promise.Promise;
 
 /**
  * An SPI interface for HTTP {@code Client} implementations. A
  * {@link ClientImplProvider} is loaded during construction of a new HTTP
  * {@link org.forgerock.http.Client Client}. The first available provider is
- * selected and its {@link ClientImplProvider#newClientImpl(Options)} method
+ * selected and its {@link ClientImplProvider#newClientImpl(org.forgerock.http.util.Options)} method
  * invoked in order to construct and configure a new {@link ClientImpl}.
  */
 public interface ClientImpl extends Closeable {

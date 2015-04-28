@@ -18,7 +18,6 @@ package org.forgerock.http.protocol;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.forgerock.http.protocol.Response;
 import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")

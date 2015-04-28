@@ -16,10 +16,7 @@
 
 package org.forgerock.http;
 
-import static org.forgerock.util.Reject.checkNotNull;
-
-import org.forgerock.http.AbstractContext;
-import org.forgerock.http.Context;
+import static org.forgerock.util.Reject.*;
 
 /**
  * The context associated with a request currently being processed by a {@code Handler}
