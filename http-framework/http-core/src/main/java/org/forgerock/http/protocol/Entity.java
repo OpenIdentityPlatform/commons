@@ -418,10 +418,6 @@ public final class Entity implements Closeable {
      * @param value
      *            The object whose JSON representation is to be store in this
      *            entity.
-     * @throws IOException
-     *            If an IO error occurred while writing JSON, such as trying to
-     *            output content in wrong context (non-matching end-array or
-     *            end-object, for example).
      */
     public void setJson(final Object value) {
         message.getHeaders().putSingle(ContentTypeHeader.NAME, APPLICATION_JSON_CHARSET_UTF_8);
