@@ -27,6 +27,8 @@ public class RouteNotFoundException extends IOException {
 
     private static final long serialVersionUID = -1129924053288625909L;
 
+    private static final long serialVersionUID = 1L;
+
     /**
      * Constructs a new exception with the specified detail message.
      *
