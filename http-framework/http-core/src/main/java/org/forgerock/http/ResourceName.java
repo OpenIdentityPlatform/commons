@@ -236,10 +236,10 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
     /**
      * Fast lookup for encoding octets as hex.
      */
-    private static final String[] byteToHex = new String[256];
+    private static final String[] BYTE_TO_HEX = new String[256];
     static {
-        for (int i = 0; i < byteToHex.length; i++) {
-            byteToHex[i] = String.format(Locale.ENGLISH, "%02X", i);
+        for (int i = 0; i < BYTE_TO_HEX.length; i++) {
+            BYTE_TO_HEX[i] = String.format(Locale.ENGLISH, "%02X", i);
         }
     }
 
@@ -253,7 +253,7 @@ public final class ResourceName implements Comparable<ResourceName>, Iterable<St
                 builder.append((char) octet);
             } else {
                 builder.append(URL_ESCAPE_CHAR);
-                builder.append(byteToHex[octet]);
+                builder.append(BYTE_TO_HEX[octet]);
             }
         }
         return builder.toString();
