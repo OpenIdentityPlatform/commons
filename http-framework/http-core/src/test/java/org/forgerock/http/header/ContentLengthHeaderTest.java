@@ -122,7 +122,7 @@ public class ContentLengthHeaderTest {
         assertThat(clh.toString()).isEqualTo(String.valueOf(cth));
     }
 
-    @Test( dataProvider = "invalidDataProvider")
+    @Test(dataProvider = "invalidDataProvider")
     public void testContentLengthHeaderToStringIsNullWithInvalidValues(final Object cth) {
         final ContentLengthHeader clh = ContentLengthHeader.valueOf(String.valueOf(cth));
         assertThat(clh.getLength()).isEqualTo(-1);
