@@ -26,8 +26,6 @@ import org.forgerock.http.header.ContentLengthHeader;
 import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.io.BranchingInputStream;
 import org.forgerock.http.io.IO;
-import org.forgerock.http.protocol.Entity;
-import org.forgerock.http.protocol.Request;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

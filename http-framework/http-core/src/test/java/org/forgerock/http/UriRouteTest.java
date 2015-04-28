@@ -21,10 +21,6 @@ import static org.forgerock.http.RoutingMode.EQUALS;
 import static org.forgerock.http.RoutingMode.STARTS_WITH;
 import static org.mockito.Mockito.mock;
 
-import org.forgerock.http.Context;
-import org.forgerock.http.RouteMatcher;
-import org.forgerock.http.RoutingMode;
-import org.forgerock.http.UriRoute;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 

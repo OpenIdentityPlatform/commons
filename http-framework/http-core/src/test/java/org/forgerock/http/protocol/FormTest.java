@@ -12,7 +12,7 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2014 ForgeRock AS.
+ * Portions Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.http.protocol;
@@ -21,8 +21,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.URISyntaxException;
 
-import org.forgerock.http.protocol.Form;
-import org.forgerock.http.protocol.Request;
 import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")
