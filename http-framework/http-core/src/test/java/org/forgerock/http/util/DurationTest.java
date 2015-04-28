@@ -16,14 +16,13 @@
 
 package org.forgerock.http.util;
 
-import static org.forgerock.http.util.Duration.duration;
+import static org.forgerock.http.util.Duration.*;
+
+import java.util.concurrent.TimeUnit;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ObjectAssert;
-import org.forgerock.http.util.Duration;
 import org.testng.annotations.Test;
-
-import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("javadoc")
 public class DurationTest {
