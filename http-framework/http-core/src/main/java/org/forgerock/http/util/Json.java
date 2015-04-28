@@ -209,27 +209,27 @@ public final class Json {
         final JsonToken jToken = jp.nextToken();
         if (jToken != null) {
             switch (jToken) {
-                case START_ARRAY:
-                    return mapper.readValue(jp, new TypeReference<LinkedList<?>>() {
-                    });
-                case START_OBJECT:
-                    return mapper.readValue(jp, new TypeReference<LinkedHashMap<String, ?>>() {
-                    });
-                case VALUE_FALSE:
-                case VALUE_TRUE:
-                    return mapper.readValue(jp, new TypeReference<Boolean>() {
-                    });
-                case VALUE_NUMBER_INT:
-                    return mapper.readValue(jp, new TypeReference<Integer>() {
-                    });
-                case VALUE_NUMBER_FLOAT:
-                    return mapper.readValue(jp, new TypeReference<Float>() {
-                    });
-                case VALUE_NULL:
-                    return null;
-                default:
-                    // This is very unlikely to happen.
-                    throw new IOException("Invalid JSON content");
+            case START_ARRAY:
+                return mapper.readValue(jp, new TypeReference<LinkedList<?>>() {
+                });
+            case START_OBJECT:
+                return mapper.readValue(jp, new TypeReference<LinkedHashMap<String, ?>>() {
+                });
+            case VALUE_FALSE:
+            case VALUE_TRUE:
+                return mapper.readValue(jp, new TypeReference<Boolean>() {
+                });
+            case VALUE_NUMBER_INT:
+                return mapper.readValue(jp, new TypeReference<Integer>() {
+                });
+            case VALUE_NUMBER_FLOAT:
+                return mapper.readValue(jp, new TypeReference<Float>() {
+                });
+            case VALUE_NULL:
+                return null;
+            default:
+                // This is very unlikely to happen.
+                throw new IOException("Invalid JSON content");
             }
         }
         return null;

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2014 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.http;
@@ -131,20 +131,20 @@ public final class UriRoute<H> {
         }
         Map<String, String> variableMap;
         switch (variables.size()) {
-            case 0:
-                variableMap = Collections.emptyMap();
-                break;
-            case 1:
+        case 0:
+            variableMap = Collections.emptyMap();
+            break;
+        case 1:
+            // Group 0 matches entire URL, group 1 matches entire template.
+            variableMap = Collections.singletonMap(variables.get(0), urlDecode(matcher.group(2)));
+            break;
+        default:
+            variableMap = new LinkedHashMap<String, String>(variables.size());
+            for (int i = 0; i < variables.size(); i++) {
                 // Group 0 matches entire URL, group 1 matches entire template.
-                variableMap = Collections.singletonMap(variables.get(0), urlDecode(matcher.group(2)));
-                break;
-            default:
-                variableMap = new LinkedHashMap<String, String>(variables.size());
-                for (int i = 0; i < variables.size(); i++) {
-                    // Group 0 matches entire URL, group 1 matches entire template.
-                    variableMap.put(variables.get(i), urlDecode(matcher.group(i + 2)));
-                }
-                break;
+                variableMap.put(variables.get(i), urlDecode(matcher.group(i + 2)));
+            }
+            break;
         }
         String remaining = removeLeadingSlash(uri.substring(matcher.end(1)));
         String matched = matcher.group(1);
