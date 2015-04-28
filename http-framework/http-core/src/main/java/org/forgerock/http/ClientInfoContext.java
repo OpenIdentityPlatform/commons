@@ -42,8 +42,13 @@ public class ClientInfoContext extends ServerContext implements ClientInfo {
     private final List<X509Certificate> certificates;
     private final String userAgent;
 
-    private ClientInfoContext(Context parent, String remoteUser, String remoteAddress, String remoteHost, int remotePort,
-            List<X509Certificate> certificates, String userAgent) {
+    private ClientInfoContext(Context parent,
+                              String remoteUser,
+                              String remoteAddress,
+                              String remoteHost,
+                              int remotePort,
+                              List<X509Certificate> certificates,
+                              String userAgent) {
         super(parent, "clientInfo");
         this.remoteUser = remoteUser;
         this.remoteAddress = remoteAddress;

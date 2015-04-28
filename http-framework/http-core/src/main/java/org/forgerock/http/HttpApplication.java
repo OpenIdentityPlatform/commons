@@ -45,9 +45,12 @@ public interface HttpApplication {
     Handler start() throws HttpApplicationException;
 
     /**
-     * <p>Gets the {@link Factory} that will create temporary storage {@link Buffer}s to handle the processing of requests.</p>
-     *
-     * <p>May return {@code null} indicating that the container should provide a default buffer factory.</p>
+     * <p>
+     * Gets the {@link Factory} that will create temporary storage {@link Buffer}s to handle the processing of requests.
+     * </p>
+     * <p>
+     * May return {@code null} indicating that the container should provide a default buffer factory.
+     * </p>
      *
      * @return A {@code Buffer} {@code Factory} or {@code null}.
      */
