@@ -29,7 +29,7 @@ import org.forgerock.util.promise.Promise;
 /**
  * Utility methods for creating common types of handler and filters.
  */
-public class Http {
+public final class Http {
     /*
      * FIXME: handlers and filters should always return responses regardless of
      * the status code. Exceptions should be reserved for internal failures.
