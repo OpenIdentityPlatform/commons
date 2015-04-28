@@ -53,7 +53,7 @@
                     <span class="error"><i class="fa validation-icon"></i></span><span data-for-validator="passwordConfirm">{{t "common.form.validation.confirmationMatchesPassword"}}</span>
                 </div>
             </div>
-
+            {{#if showTermsOfUse}}
             <div class="remember-forgot">
                 <div class="checkbox pull-left">
                     <input type="checkbox" name="terms" value="yes" data-validator="termsOfUse"
@@ -64,6 +64,7 @@
                     "templates.user.TermsOfUseTemplate.termsOfUse"}}</a>
                 </div>
             </div>
+            {{/if}}
 
             <input type="submit" name="register" class="btn btn-lg btn-primary btn-block btn-uppercase" value="{{t "common.form.register"}}"
             disabled/>

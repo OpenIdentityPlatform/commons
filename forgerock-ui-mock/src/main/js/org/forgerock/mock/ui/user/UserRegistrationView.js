@@ -47,7 +47,9 @@ define("org/forgerock/mock/ui/user/UserRegistrationView", [
             "onValidate": "onValidate",
             "click #frgtPasswrdSelfReg": "showForgottenPassword"
         },
-
+        data : {
+            showTermsOfUse: true
+        },
         showForgottenPassword: function (event) {
             event.preventDefault();
             conf.forgottenPasswordUserName = this.$el.find("input[name=email]").val();

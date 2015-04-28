@@ -61,7 +61,7 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
         formLock: false,
 
         initialize: function () {
-            this.data = {};
+            this.data = this.data || {};
         },
 
         /**
