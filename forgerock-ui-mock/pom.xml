@@ -90,14 +90,30 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>copy-dependencies</id>
+                        <id>copy-dependencies-js</id>
                         <phase>package</phase>
                         <goals>
                             <goal>copy-dependencies</goal>
                         </goals>
                         <configuration>
                             <includeGroupIds>org.forgerock.commons.ui.libs</includeGroupIds>
+                            <includeTypes>js</includeTypes>
                             <outputDirectory>${project.build.directory}/www/libs</outputDirectory>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>false</overWriteSnapshots>
+                            <overWriteIfNewer>true</overWriteIfNewer>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-dependencies-css</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeGroupIds>org.forgerock.commons.ui.libs</includeGroupIds>
+                            <includeTypes>css</includeTypes>
+                            <outputDirectory>${project.build.directory}/www/css</outputDirectory>
                             <overWriteReleases>false</overWriteReleases>
                             <overWriteSnapshots>false</overWriteSnapshots>
                             <overWriteIfNewer>true</overWriteIfNewer>

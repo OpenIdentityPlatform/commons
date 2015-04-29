@@ -179,6 +179,18 @@
             <artifactId>form2js</artifactId>
             <type>js</type>
         </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <artifactId>selectize</artifactId>
+            <classifier>min</classifier>
+            <type>js</type>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <artifactId>selectize</artifactId>
+            <classifier>bootstrap3</classifier>
+            <type>css</type>
+        </dependency>
     </dependencies>
 </project>
 
