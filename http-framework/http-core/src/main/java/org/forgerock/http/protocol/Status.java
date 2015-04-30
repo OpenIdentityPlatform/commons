@@ -901,6 +901,16 @@ public final class Status {
     public static final Status EXPECTATION_FAILED = newStatus(417, "Expectation Failed");
 
     /**
+     * Any attempt to brew coffee with a teapot should result in the error code "418 I'm a teapot". The resulting entity
+     * body MAY be short and stout. This code was defined in 1998 as one of the traditional IETF April Fools' jokes, in
+     * RFC 2324, Hyper Text Coffee Pot Control Protocol, and is not expected to be implemented by actual HTTP servers.
+     * The RFC specifies this code should be returned by tea pots requested to brew coffee.
+     *
+     * @see http://tools.ietf.org/html/rfc2324
+     */
+    public static final Status TEAPOT = newStatus(418, "I'm a teapot");
+
+    /**
      * The 426 (Upgrade Required) status code indicates that the server
      * refuses to perform the request using the current protocol but might
      * be willing to do so after the client upgrades to a different
