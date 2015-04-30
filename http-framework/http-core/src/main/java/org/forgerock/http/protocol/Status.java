@@ -109,6 +109,46 @@ public final class Status {
     }
 
     /**
+     * Is the family of this status a {@link Family#INFORMATIONAL} one ?
+     * @return true if the family of this status is a {@link Family#INFORMATIONAL} one.
+     */
+    public boolean isInformational() {
+        return Family.INFORMATIONAL.equals(getFamily());
+    }
+
+    /**
+     * Is the family of this status a {@link Family#SUCCESSFUL} one ?
+     * @return true if the family of this status is a {@link Family#SUCCESSFUL} one.
+     */
+    public boolean isSuccessful() {
+        return Family.SUCCESSFUL.equals(getFamily());
+    }
+
+    /**
+     * Is the family of this status a {@link Family#REDIRECTION} one ?
+     * @return true if the family of this status is a {@link Family#REDIRECTION} one.
+     */
+    public boolean isRedirection() {
+        return Family.REDIRECTION.equals(getFamily());
+    }
+
+    /**
+     * Is the family of this status a {@link Family#CLIENT_ERROR} one ?
+     * @return true if the family of this status is a {@link Family#CLIENT_ERROR} one.
+     */
+    public boolean isClientError() {
+        return Family.CLIENT_ERROR.equals(getFamily());
+    }
+
+    /**
+     * Is the family of this status a {@link Family#SERVER_ERROR} one ?
+     * @return true if the family of this status is a {@link Family#SERVER_ERROR} one.
+     */
+    public boolean isServerError() {
+        return Family.SERVER_ERROR.equals(getFamily());
+    }
+
+    /**
      * The first digit of the status-code defines the class of response.
      * The last two digits do not have any categorization role.  There are
      * five values for the first digit:

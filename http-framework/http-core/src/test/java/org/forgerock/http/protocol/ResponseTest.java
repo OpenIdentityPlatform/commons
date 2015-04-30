@@ -28,14 +28,4 @@ public class ResponseTest {
         assertThat(response.getVersion()).isEqualTo("123");
         assertThat(response.getStatus()).isEqualTo(Status.OK);
     }
-
-    @Test
-    public void testIsError() throws Exception {
-        Response response;
-        response = new Response().setStatus(Status.OK);
-        assertThat(response.isError()).isFalse();
-
-        response = new Response().setStatus(Status.FOUND);
-        assertThat(response.isError()).isTrue();
-    }
 }

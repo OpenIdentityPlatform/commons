@@ -18,7 +18,6 @@
 
 package org.forgerock.http.protocol;
 
-import org.forgerock.http.protocol.Status.Family;
 
 /**
  * A response message.
@@ -66,13 +65,4 @@ public final class Response extends MessageImpl<Response> {
         setVersion0(version);
         return this;
     };
-
-    /**
-     * Returns {@code true} if this response represents an HTTP error.
-     *
-     * @return {@code true} if this response represents an HTTP error.
-     */
-    public boolean isError() {
-        return getStatus().getFamily() != Family.SUCCESSFUL;
-    }
 }

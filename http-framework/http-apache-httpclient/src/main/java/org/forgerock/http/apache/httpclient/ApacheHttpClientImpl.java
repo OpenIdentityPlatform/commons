@@ -177,7 +177,7 @@ final class ApacheHttpClientImpl implements ClientImpl {
             }
         }
         // TODO: decide if need to try-finally to call httpRequest.abort?
-        if (Status.Family.SUCCESSFUL == response.getStatus().getFamily()) {
+        if (response.getStatus().isSuccessful()) {
             return Promises.newResultPromise(response);
         } else {
             return Promises.newExceptionPromise(new ResponseException(response));
