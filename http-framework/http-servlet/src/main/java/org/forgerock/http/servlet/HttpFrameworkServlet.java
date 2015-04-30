@@ -17,15 +17,8 @@
 
 package org.forgerock.http.servlet;
 
-import static org.forgerock.http.io.IO.newBranchingInputStream;
-import static org.forgerock.http.io.IO.newTemporaryStorage;
-import static org.forgerock.util.Utils.closeSilently;
-
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import static org.forgerock.http.io.IO.*;
+import static org.forgerock.util.Utils.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -37,6 +30,12 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ServiceLoader;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.forgerock.http.ClientInfoContext;
 import org.forgerock.http.Context;
@@ -280,7 +279,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
          */
         if (response != null) {
             // response status-code (reason-phrase deprecated in Servlet API)
-            resp.setStatus(response.getStatus());
+            resp.setStatus(response.getStatus().getCode());
 
             // ensure that the session has been written back to the response
             context.getSession().save(response);

@@ -29,6 +29,7 @@ import org.forgerock.http.io.IO;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.ResponseException;
+import org.forgerock.http.protocol.Status;
 import org.forgerock.http.spi.ClientImpl;
 import org.forgerock.http.spi.ClientImplProvider;
 import org.forgerock.http.spi.Loader;
@@ -197,7 +198,7 @@ public final class Client implements Closeable {
             return sendAsync(request).getOrThrow();
         } catch (final InterruptedException e) {
             // FIXME: is a 408 time out the best status code?
-            throw new ResponseException(408);
+            throw new ResponseException(Status.REQUEST_TIMEOUT);
         }
     }
 

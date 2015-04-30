@@ -27,12 +27,12 @@ public class ResponseException extends IOException {
 
     private final Response response;
 
-    public ResponseException(int status) {
-        this(new Response().setStatusAndReason(status));
+    public ResponseException(Status status) {
+        this(new Response().setStatus(status));
     }
 
-    public ResponseException(int status, String message) {
-        this(new Response().setStatusAndReason(status)
+    public ResponseException(Status status, String message) {
+        this(new Response().setStatus(status)
                            .setEntity(message),
              message);
     }
@@ -42,14 +42,14 @@ public class ResponseException extends IOException {
     }
 
     public ResponseException(String message, Throwable cause) {
-        this(new Response().setStatusAndReason(500)
+        this(new Response().setStatus(Status.INTERNAL_SERVER_ERROR)
                            .setEntity(message),
              message,
              cause);
     }
 
     public ResponseException(final Response response) {
-        this(response, response.getReason());
+        this(response, response.getStatus() != null ?response.getStatus().getReasonPhrase() :"");
     }
 
     public ResponseException(final Response response, String message) {

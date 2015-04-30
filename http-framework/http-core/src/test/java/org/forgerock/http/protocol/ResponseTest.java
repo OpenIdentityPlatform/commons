@@ -24,8 +24,18 @@ import org.testng.annotations.Test;
 public class ResponseTest {
     @Test
     public void testMethodChaining() {
-        Response response = new Response().setVersion("123").setStatus(200);
+        Response response = new Response().setVersion("123").setStatus(Status.OK);
         assertThat(response.getVersion()).isEqualTo("123");
-        assertThat(response.getStatus()).isEqualTo(200);
+        assertThat(response.getStatus()).isEqualTo(Status.OK);
+    }
+
+    @Test
+    public void testIsError() throws Exception {
+        Response response;
+        response = new Response().setStatus(Status.OK);
+        assertThat(response.isError()).isFalse();
+
+        response = new Response().setStatus(Status.FOUND);
+        assertThat(response.isError()).isTrue();
     }
 }

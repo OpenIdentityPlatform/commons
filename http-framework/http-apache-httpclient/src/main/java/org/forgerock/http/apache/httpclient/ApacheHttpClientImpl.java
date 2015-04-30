@@ -39,6 +39,7 @@ import org.forgerock.http.io.IO;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.ResponseException;
+import org.forgerock.http.protocol.Status;
 import org.forgerock.http.spi.ClientImpl;
 import org.forgerock.http.util.CaseInsensitiveSet;
 import org.forgerock.util.Factory;
@@ -155,7 +156,7 @@ final class ApacheHttpClientImpl implements ClientImpl {
                         storage));
             }
         } catch (final IOException e) {
-            response.setStatusAndReason(500);
+            response.setStatus(Status.INTERNAL_SERVER_ERROR);
             final ResponseException re = new ResponseException(response, "Cannot obtain a Response from server", e);
             return Promises.newExceptionPromise(re);
         }
@@ -163,8 +164,7 @@ final class ApacheHttpClientImpl implements ClientImpl {
         // response status line
         final StatusLine statusLine = clientResponse.getStatusLine();
         response.setVersion(statusLine.getProtocolVersion().toString());
-        response.setStatus(statusLine.getStatusCode());
-        response.setReason(statusLine.getReasonPhrase());
+        response.setStatus(Status.valueOf(statusLine.getStatusCode()));
         // parse response connection headers to be suppressed in response
         suppressConnection.clear();
         suppressConnection.addAll(ConnectionHeader.valueOf(response).getTokens());
@@ -177,7 +177,7 @@ final class ApacheHttpClientImpl implements ClientImpl {
             }
         }
         // TODO: decide if need to try-finally to call httpRequest.abort?
-        if (response.getStatus() >= 200 && response.getStatus() < 300) {
+        if (Status.Family.SUCCESSFUL == response.getStatus().getFamily()) {
             return Promises.newResultPromise(response);
         } else {
             return Promises.newExceptionPromise(new ResponseException(response));

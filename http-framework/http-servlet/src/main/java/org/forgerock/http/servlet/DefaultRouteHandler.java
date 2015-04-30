@@ -17,15 +17,15 @@
 
 package org.forgerock.http.servlet;
 
+import java.io.IOException;
+import java.util.Map;
+import java.util.regex.Pattern;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import java.io.IOException;
-import java.util.Map;
-import java.util.regex.Pattern;
 
 import org.forgerock.http.Context;
 import org.forgerock.http.Handler;
@@ -33,6 +33,7 @@ import org.forgerock.http.HttpContext;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.ResponseException;
+import org.forgerock.http.protocol.Status;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 
@@ -115,10 +116,14 @@ final class DefaultRouteHandler implements Handler {
             dispatcher.forward(req, resp);
         } catch (ServletException e) {
             return Promises.newExceptionPromise(
-                    new ResponseException(new Response().setStatusAndReason(500), e.getMessage(), e));
+                    new ResponseException(new Response().setStatus(Status.INTERNAL_SERVER_ERROR),
+                                          e.getMessage(),
+                                          e));
         } catch (IOException e) {
             return Promises.newExceptionPromise(
-                    new ResponseException(new Response().setStatusAndReason(500), e.getMessage(), e));
+                    new ResponseException(new Response().setStatus(Status.INTERNAL_SERVER_ERROR),
+                                          e.getMessage(),
+                                          e));
         }
 
         // Returns null as the container has already handled the response.

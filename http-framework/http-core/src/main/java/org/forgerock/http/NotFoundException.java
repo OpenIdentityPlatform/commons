@@ -18,6 +18,7 @@ package org.forgerock.http;
 
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.ResponseException;
+import org.forgerock.http.protocol.Status;
 
 /**
  * An exception that is thrown when a specified resource cannot be found.
@@ -30,7 +31,7 @@ public class NotFoundException extends ResponseException {
      * Constructs a new exception with {@code null} as its detail message.
      */
     public NotFoundException() {
-        super(400);
+        super(Status.BAD_REQUEST);
     }
 
     /**
@@ -40,7 +41,7 @@ public class NotFoundException extends ResponseException {
      *            The detail message.
      */
     public NotFoundException(final String message) {
-        super(400, message);
+        super(Status.BAD_REQUEST, message);
     }
 
     /**
@@ -52,6 +53,6 @@ public class NotFoundException extends ResponseException {
      *            The exception which caused this exception to be thrown.
      */
     public NotFoundException(String message, Throwable cause) {
-        super(new Response().setStatusAndReason(400), message, cause);
+        super(new Response().setStatus(Status.BAD_REQUEST), message, cause);
     }
 }

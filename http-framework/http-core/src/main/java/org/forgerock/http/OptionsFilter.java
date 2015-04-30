@@ -22,6 +22,7 @@ import java.util.List;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.ResponseException;
+import org.forgerock.http.protocol.Status;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 
@@ -62,7 +63,7 @@ public final class OptionsFilter implements Filter {
     public Promise<Response, ResponseException> filter(Context context, Request request,
             Handler next) {
         if ("OPTIONS".equals(request.getMethod())) {
-            Response response = new Response().setStatusAndReason(200);
+            Response response = new Response().setStatus(Status.OK);
             response.getHeaders().put("Allow", allowedMethods);
             return Promises.newResultPromise(response);
         } else {
