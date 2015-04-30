@@ -83,6 +83,11 @@ public final class Status {
         this.family = Status.Family.valueOf(code);
     }
 
+    @Override
+    public String toString() {
+        return "[Status: " + code + " " + (reasonPhrase == null ?"No reason given" :reasonPhrase) + "]";
+    }
+
     /**
      * Returns the three-digit integer code giving the result of the attempt to understand and satisfy the request.
      * @return the three-digit integer code giving the result of the attempt to understand and satisfy the request.
