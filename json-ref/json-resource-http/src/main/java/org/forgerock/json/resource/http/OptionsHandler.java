@@ -24,6 +24,7 @@ import org.forgerock.http.Handler;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.ResponseException;
+import org.forgerock.http.protocol.Status;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 
@@ -43,7 +44,7 @@ public class OptionsHandler implements Filter {
     public Promise<Response, ResponseException> filter(Context context, Request request,
             Handler next) {
         if ("OPTIONS".equals(request.getMethod())) {
-            Response response = new Response().setStatusAndReason(200);
+            Response response = new Response().setStatus(Status.OK);
             response.getHeaders().put("Allow",
                     Arrays.asList(METHOD_DELETE, METHOD_GET, METHOD_HEAD, METHOD_PATCH, METHOD_POST, METHOD_PUT,
                             METHOD_OPTIONS, METHOD_TRACE));
