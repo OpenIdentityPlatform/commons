@@ -11,14 +11,15 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.caf.authn;
 
-import javax.security.auth.message.module.ServerAuthModule;
 import java.util.Arrays;
 import java.util.List;
+
+import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
 
 /**
  * Object containing auth module configuration parameters.
@@ -27,12 +28,12 @@ import java.util.List;
  */
 final class AuthModuleParameters {
 
-    private final Class<? extends ServerAuthModule> moduleClass;
+    private final Class<? extends AsyncServerAuthModule> moduleClass;
     private final String moduleName;
     private final String validateRequestReturnValue;
     private final String secureResponseReturnValue;
 
-    private AuthModuleParameters(Class<? extends ServerAuthModule> moduleClass, String moduleName,
+    private AuthModuleParameters(Class<? extends AsyncServerAuthModule> moduleClass, String moduleName,
             String validateRequestReturnValue, String secureResponseReturnValue) {
         this.moduleClass = moduleClass;
         this.moduleName = moduleName;
@@ -59,12 +60,12 @@ final class AuthModuleParameters {
      * @param secureResponseReturnValue The requested return value for the #secureResponse method.
      * @return A {@code AuthModuleParameters} object.
      */
-    static AuthModuleParameters moduleParams(Class<? extends ServerAuthModule> moduleClass, String moduleName,
+    static AuthModuleParameters moduleParams(Class<? extends AsyncServerAuthModule> moduleClass, String moduleName,
             String validateRequestReturnValue, String secureResponseReturnValue) {
         return new AuthModuleParameters(moduleClass, moduleName, validateRequestReturnValue, secureResponseReturnValue);
     }
 
-    Class<? extends ServerAuthModule> getModuleClass() {
+    Class<? extends AsyncServerAuthModule> getModuleClass() {
         return moduleClass;
     }
 

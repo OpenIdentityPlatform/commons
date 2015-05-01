@@ -20,14 +20,19 @@ import static org.forgerock.json.fluent.JsonValue.json;
 import static org.forgerock.json.fluent.JsonValue.object;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
 
-import org.forgerock.caf.authentication.framework.JaspiRuntime;
+import org.forgerock.caf.authentication.framework.AuthenticationFramework;
+import org.forgerock.http.Context;
+import org.forgerock.http.Handler;
+import org.forgerock.http.HttpContext;
+import org.forgerock.http.protocol.Request;
+import org.forgerock.http.protocol.Response;
+import org.forgerock.http.protocol.ResponseException;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.util.promise.Promise;
+import org.forgerock.util.promise.Promises;
 
 /**
  * A protected resource which will set a header on the response to signify that it has been called and write a JSON
@@ -35,7 +40,7 @@ import org.forgerock.json.fluent.JsonValue;
  *
  * @since 1.5.0
  */
-public class ProtectedResource extends HttpServlet {
+public class ProtectedResource implements Handler {
 
     private static final long serialVersionUID = 1L;
 
@@ -53,23 +58,25 @@ public class ProtectedResource extends HttpServlet {
      * @throws ServletException {@inheritDoc}
      * @throws IOException {@inheritDoc}
      */
-    @SuppressWarnings("unchecked")
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        resp.setHeader(RESOURCE_CALLED_HEADER, "true");
+    public Promise<Response, ResponseException> handle(Context context, Request request) {
 
-        String principal = (String) req.getAttribute(JaspiRuntime.ATTRIBUTE_AUTH_PRINCIPAL);
-        Map<String, Object> context = (Map<String, Object>) req.getAttribute(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT);
+        Response response = new Response().setStatusAndReason(200);
+
+        response.getHeaders().putSingle(RESOURCE_CALLED_HEADER, "true");
+
+        String principal = (String) context.asContext(HttpContext.class).getAttributes().get(AuthenticationFramework.ATTRIBUTE_AUTH_PRINCIPAL);
+        Map<String, Object> requestContextMap = (Map<String, Object>) context.asContext(HttpContext.class).getAttributes().get(AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT);
 
         JsonValue json = json(object());
         json.put("data", "RESOURCE_DATA");
         if (principal != null) {
             json.add("principal", principal);
         }
-        if (context != null) {
-            json.add("context", context);
+        if (requestContextMap != null) {
+            json.add("context", requestContextMap);
         }
-
-        resp.getWriter().write(json.toString());
+        response.setEntity(json.getObject());
+        return Promises.newSuccessfulPromise(response);
     }
 }

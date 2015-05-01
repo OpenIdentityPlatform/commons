@@ -60,8 +60,8 @@ public class JaspiAdaptersTest {
 
         //When
         AsyncServerAuthContext asyncAuthContext = JaspiAdapters.adapt(authContext);
-        Promise<AuthStatus, AuthenticationException> promise
-                = asyncAuthContext.validateRequest(messageContext, clientSubject, serviceSubject);
+        Promise<AuthStatus, AuthenticationException> promise =
+                asyncAuthContext.validateRequest(messageContext, clientSubject, serviceSubject);
 
         //Then
         assertThat(promise).succeeded().withObject().isEqualTo(AuthStatus.SUCCESS);
@@ -81,8 +81,8 @@ public class JaspiAdaptersTest {
 
         //When
         AsyncServerAuthContext asyncAuthContext = JaspiAdapters.adapt(authContext);
-        Promise<AuthStatus, AuthenticationException> promise
-                = asyncAuthContext.validateRequest(messageContext, clientSubject, serviceSubject);
+        Promise<AuthStatus, AuthenticationException> promise =
+                asyncAuthContext.validateRequest(messageContext, clientSubject, serviceSubject);
 
         //Then
         assertThat(promise).failedWithException().isInstanceOf(AuthenticationException.class);
@@ -101,8 +101,8 @@ public class JaspiAdaptersTest {
 
         //When
         AsyncServerAuthContext asyncAuthContext = JaspiAdapters.adapt(authContext);
-        Promise<AuthStatus, AuthenticationException> promise
-                = asyncAuthContext.secureResponse(messageContext, serviceSubject);
+        Promise<AuthStatus, AuthenticationException> promise =
+                asyncAuthContext.secureResponse(messageContext, serviceSubject);
 
         //Then
         assertThat(promise).succeeded().withObject().isEqualTo(AuthStatus.SEND_SUCCESS);
@@ -121,8 +121,8 @@ public class JaspiAdaptersTest {
 
         //When
         AsyncServerAuthContext asyncAuthContext = JaspiAdapters.adapt(authContext);
-        Promise<AuthStatus, AuthenticationException> promise
-                = asyncAuthContext.secureResponse(messageContext, serviceSubject);
+        Promise<AuthStatus, AuthenticationException> promise =
+                asyncAuthContext.secureResponse(messageContext, serviceSubject);
 
         //Then
         assertThat(promise).failedWithException().isInstanceOf(AuthenticationException.class);
@@ -190,8 +190,8 @@ public class JaspiAdaptersTest {
 
         //When
         AsyncServerAuthModule asyncAuthModule = JaspiAdapters.adapt(authModule);
-        Promise<Void, AuthenticationException> promise
-                = asyncAuthModule.initialize(requestPolicy, responsePolicy, handler, options);
+        Promise<Void, AuthenticationException> promise =
+                asyncAuthModule.initialize(requestPolicy, responsePolicy, handler, options);
 
         //Then
         assertThat(promise).succeeded().withObject().isNull();
@@ -212,8 +212,8 @@ public class JaspiAdaptersTest {
 
         //When
         AsyncServerAuthModule asyncAuthModule = JaspiAdapters.adapt(authModule);
-        Promise<Void, AuthenticationException> promise
-                = asyncAuthModule.initialize(requestPolicy, responsePolicy, handler, options);
+        Promise<Void, AuthenticationException> promise =
+                asyncAuthModule.initialize(requestPolicy, responsePolicy, handler, options);
 
         //Then
         assertThat(promise).failedWithException().isInstanceOf(AuthenticationException.class);
@@ -249,8 +249,8 @@ public class JaspiAdaptersTest {
 
         //When
         AsyncServerAuthModule asyncAuthModule = JaspiAdapters.adapt(authModule);
-        Promise<AuthStatus, AuthenticationException> promise
-                = asyncAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject);
+        Promise<AuthStatus, AuthenticationException> promise =
+                asyncAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject);
 
         //Then
         assertThat(promise).succeeded().withObject().isEqualTo(AuthStatus.SUCCESS);
@@ -270,8 +270,8 @@ public class JaspiAdaptersTest {
 
         //When
         AsyncServerAuthModule asyncAuthModule = JaspiAdapters.adapt(authModule);
-        Promise<AuthStatus, AuthenticationException> promise
-                = asyncAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject);
+        Promise<AuthStatus, AuthenticationException> promise =
+                asyncAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject);
 
         //Then
         assertThat(promise).failedWithException().isInstanceOf(AuthenticationException.class);
@@ -290,8 +290,8 @@ public class JaspiAdaptersTest {
 
         //When
         AsyncServerAuthModule asyncAuthModule = JaspiAdapters.adapt(authModule);
-        Promise<AuthStatus, AuthenticationException> promise
-                = asyncAuthModule.secureResponse(messageInfo, serviceSubject);
+        Promise<AuthStatus, AuthenticationException> promise =
+                asyncAuthModule.secureResponse(messageInfo, serviceSubject);
 
         //Then
         assertThat(promise).succeeded().withObject().isEqualTo(AuthStatus.SEND_SUCCESS);
@@ -310,8 +310,8 @@ public class JaspiAdaptersTest {
 
         //When
         AsyncServerAuthModule asyncAuthModule = JaspiAdapters.adapt(authModule);
-        Promise<AuthStatus, AuthenticationException> promise
-                = asyncAuthModule.secureResponse(messageInfo, serviceSubject);
+        Promise<AuthStatus, AuthenticationException> promise =
+                asyncAuthModule.secureResponse(messageInfo, serviceSubject);
 
         //Then
         assertThat(promise).failedWithException().isInstanceOf(AuthenticationException.class);

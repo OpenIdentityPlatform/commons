@@ -32,7 +32,7 @@
 
 package org.forgerock.jaspi.modules.iwa.wdsso;
 
-import static org.forgerock.caf.authentication.framework.JaspiRuntime.LOG;
+import static org.forgerock.caf.authentication.framework.AuthenticationFramework.LOG;
 
 import javax.security.auth.Subject;
 import javax.security.auth.login.Configuration;

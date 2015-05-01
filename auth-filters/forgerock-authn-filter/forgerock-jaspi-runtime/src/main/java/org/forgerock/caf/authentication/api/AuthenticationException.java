@@ -21,7 +21,7 @@ import javax.security.auth.message.AuthException;
 /**
  * A generic authentication exception which accepts a detail message and/or the cause.
  *
- * @since 1.3.0
+ * @since 2.0.0
  */
 public class AuthenticationException extends AuthException {
 

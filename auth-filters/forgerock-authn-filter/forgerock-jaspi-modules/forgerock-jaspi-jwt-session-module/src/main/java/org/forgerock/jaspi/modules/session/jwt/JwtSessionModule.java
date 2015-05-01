@@ -17,7 +17,7 @@
 package org.forgerock.jaspi.modules.session.jwt;
 
 import static org.forgerock.caf.authentication.framework.AuditTrail.AUDIT_SESSION_ID_KEY;
-import static org.forgerock.caf.authentication.framework.JaspiRuntime.LOG;
+import static org.forgerock.caf.authentication.framework.AuthenticationFramework.LOG;
 import static org.forgerock.caf.http.Cookie.*;
 
 import javax.security.auth.Subject;
@@ -45,7 +45,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.forgerock.caf.authentication.framework.JaspiRuntime;
+import org.forgerock.caf.authentication.framework.AuthenticationFramework;
 import org.forgerock.caf.http.Cookie;
 import org.forgerock.json.jose.builders.JwtBuilderFactory;
 import org.forgerock.json.jose.exceptions.JweDecryptionException;
@@ -228,7 +228,7 @@ public class JwtSessionModule implements ServerAuthModule {
                 });
                 //TODO also include ATTRIBUTE_AUTHCID!
                 Map<String, Object> context = getContextMap(messageInfo);
-                Map<String, Object> claimsSetContext = jwt.getClaimsSet().getClaim(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT, Map.class);
+                Map<String, Object> claimsSetContext = jwt.getClaimsSet().getClaim(AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT, Map.class);
                 if (claimsSetContext != null) {
                     context.putAll(claimsSetContext);
                 }
@@ -287,7 +287,7 @@ public class JwtSessionModule implements ServerAuthModule {
             }
             if (jwt != null) {
                 //if all goes well!
-                Map<String, Object> claimsSetContext = jwt.getClaimsSet().getClaim(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT, Map.class);
+                Map<String, Object> claimsSetContext = jwt.getClaimsSet().getClaim(AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT, Map.class);
 
                 if (claimsSetContext != null) {
                     for (String key : claimsSetContext.keySet()) {
@@ -321,11 +321,11 @@ public class JwtSessionModule implements ServerAuthModule {
      * @return The context map internal to the messageInfo's map.
      */
     public Map<String, Object> getContextMap(MessageInfo messageInfo) {
-        Map<String, Object> internalMap = (Map<String, Object>) messageInfo.getMap().get(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT);
+        Map<String, Object> internalMap = (Map<String, Object>) messageInfo.getMap().get(AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT);
 
         if (internalMap == null) {
             internalMap = new HashMap<String, Object>();
-            messageInfo.getMap().put(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT, internalMap);
+            messageInfo.getMap().put(AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT, internalMap);
         }
 
         return internalMap;
@@ -440,14 +440,14 @@ public class JwtSessionModule implements ServerAuthModule {
 
         Map<String, Object> map = messageInfo.getMap();
         HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
-        Object principal = request.getAttribute(JaspiRuntime.ATTRIBUTE_AUTH_PRINCIPAL);
+        Object principal = request.getAttribute(AuthenticationFramework.ATTRIBUTE_AUTH_PRINCIPAL);
 
         if (principal != null) {
             jwtParameters.put("prn", principal);
         }
 
-        if (map.containsKey(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT)) {
-            jwtParameters.put(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT, getContextMap(messageInfo));
+        if (map.containsKey(AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT)) {
+            jwtParameters.put(AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT, getContextMap(messageInfo));
         }
 
         if (map.containsKey(SKIP_SESSION_PARAMETER_NAME) && ((Boolean) map.get(SKIP_SESSION_PARAMETER_NAME))) {

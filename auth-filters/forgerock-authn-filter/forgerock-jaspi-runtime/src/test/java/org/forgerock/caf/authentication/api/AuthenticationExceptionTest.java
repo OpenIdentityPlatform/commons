@@ -26,7 +26,7 @@ import org.testng.annotations.Test;
 public class AuthenticationExceptionTest {
 
     @Test
-    public void shouldCreateJaspiAuthExceptionWithMessage() {
+    public void shouldCreateAuthenticationExceptionWithMessage() {
 
         //Given
 
@@ -39,7 +39,7 @@ public class AuthenticationExceptionTest {
     }
 
     @Test
-    public void shouldCreateJaspiAuthExceptionWithThrowable() {
+    public void shouldCreateAuthenticationExceptionWithThrowable() {
 
         //Given
         Exception cause = new Exception("MESSAGE");
@@ -53,7 +53,7 @@ public class AuthenticationExceptionTest {
     }
 
     @Test
-    public void shouldCreateJaspiAuthExceptionWithMessageAndCause() {
+    public void shouldCreateAuthenticationExceptionWithMessageAndCause() {
 
         //Given
         Exception cause = new Exception("CAUSE_MESSAGE");

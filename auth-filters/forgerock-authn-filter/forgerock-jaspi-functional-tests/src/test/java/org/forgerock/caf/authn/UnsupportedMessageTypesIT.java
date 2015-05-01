@@ -11,10 +11,20 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.caf.authn;
+
+import static org.forgerock.caf.authn.AuditParameters.auditParams;
+import static org.forgerock.caf.authn.AuthModuleParameters.moduleArray;
+import static org.forgerock.caf.authn.AuthModuleParameters.moduleParams;
+import static org.forgerock.caf.authn.BodyMatcher.exceptionMatcher;
+import static org.forgerock.caf.authn.TestFramework.runTest;
+import static org.forgerock.caf.authn.TestFramework.setUpConnection;
+
+import java.util.List;
+import java.util.Map;
 
 import org.forgerock.caf.authn.test.modules.AuthModuleUnsupportedMessageTypes;
 import org.hamcrest.Matcher;
@@ -23,16 +33,6 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import java.util.List;
-import java.util.Map;
-
-import static org.forgerock.caf.authn.AuditParameters.auditParams;
-import static org.forgerock.caf.authn.AuthModuleParameters.moduleArray;
-import static org.forgerock.caf.authn.AuthModuleParameters.moduleParams;
-import static org.forgerock.caf.authn.BodyMatcher.exceptionMatcher;
-import static org.forgerock.caf.authn.TestFramework.runTest;
-import static org.forgerock.caf.authn.TestFramework.setUpConnection;
 
 /**
  * Functional tests for the JASPI runtime when the configured auth modules do not support the required message types.
@@ -109,7 +109,7 @@ public class UnsupportedMessageTypesIT {
         };
     }
 
-    @Test (dataProvider = "unsupportedMessageTypesData")
+    @Test (enabled = false, dataProvider = "unsupportedMessageTypesData")
     public void unsupportedMessageTypes(String dataName,
             AuthModuleParameters sessionModuleParams, List<AuthModuleParameters> authModuleParametersList,
             int expectedResponseStatus, boolean expectResourceToBeCalled, Map<String, Matcher<?>> expectedBody,

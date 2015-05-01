@@ -16,7 +16,7 @@
 
 package org.forgerock.jaspi.modules.openid.resolvers.service;
 
-import static org.forgerock.caf.authentication.framework.JaspiRuntime.LOG;
+import static org.forgerock.caf.authentication.framework.AuthenticationFramework.LOG;
 
 import java.net.URL;
 import java.security.PublicKey;

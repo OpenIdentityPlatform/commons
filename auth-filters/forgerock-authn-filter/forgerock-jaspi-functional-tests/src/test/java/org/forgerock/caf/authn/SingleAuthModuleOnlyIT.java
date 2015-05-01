@@ -11,22 +11,10 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.caf.authn;
-
-import org.assertj.core.data.MapEntry;
-import org.forgerock.caf.authn.test.modules.AuthModuleOne;
-import org.hamcrest.Matcher;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
-import java.util.List;
-import java.util.Map;
 
 import static org.forgerock.caf.authn.AuditParameters.Entry.entry;
 import static org.forgerock.caf.authn.AuditParameters.auditParams;
@@ -38,7 +26,18 @@ import static org.forgerock.caf.authn.TestFramework.setUpConnection;
 import static org.forgerock.caf.authn.test.modules.AuthModuleOne.*;
 import static org.forgerock.caf.authn.test.modules.SessionAuthModule.*;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
+
+import java.util.List;
+import java.util.Map;
+
+import org.assertj.core.data.MapEntry;
+import org.forgerock.caf.authn.test.modules.AuthModuleOne;
+import org.hamcrest.Matcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
 /**
  * Functional tests for the JASPI runtime when configured with just a single auth module.
@@ -83,7 +82,7 @@ public class SingleAuthModuleOnlyIT {
                     moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", SEND_SUCCESS_AUTH_STATUS, null)),
                 200, false, noData(),
                 auditParams("SUCCESSFUL", AUTH_MODULE_ONE_PRINCIPAL, false,
-                        entry("AuthModule-AuthModuleOne-0", "SUCCESSFUL"))
+                        entry("AuthModuleOne", "SUCCESSFUL"))
             },
             /**
              * Single Auth Module Only - SEND_FAILURE:AuthException
@@ -109,7 +108,7 @@ public class SingleAuthModuleOnlyIT {
                 null, moduleArray(
                     moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", SEND_FAILURE_AUTH_STATUS, null)),
                 401, false, exceptionMatcher(401),
-                auditParams("FAILED", "", false, entry("AuthModule-AuthModuleOne-0", "FAILED"))
+                auditParams("FAILED", "", false, entry("AuthModuleOne", "FAILED"))
             },
             /**
              * Single Auth Module Only - SEND_CONTINUE:AuthException
@@ -159,7 +158,7 @@ public class SingleAuthModuleOnlyIT {
                 null, moduleArray(
                     moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", null, SEND_SUCCESS_AUTH_STATUS)),
                 500, false, exceptionMatcher(500),
-                auditParams("FAILED", "", false, entry("AuthModule-AuthModuleOne-0", "FAILED",
+                auditParams("FAILED", "", false, entry("AuthModuleOne", "FAILED",
                         MapEntry.entry("exception", AUTH_MODULE_ONE_VALIDATE_REQUEST_HEADER_NAME
                                 + " header not set, so throwing AuthException.")))
             },
@@ -191,7 +190,7 @@ public class SingleAuthModuleOnlyIT {
                         SEND_SUCCESS_AUTH_STATUS)),
                 200, true, resourceMatcher(AUTH_MODULE_ONE_PRINCIPAL, AUTH_MODULE_ONE_CONTEXT_ENTRY),
                 auditParams("SUCCESSFUL", AUTH_MODULE_ONE_PRINCIPAL, false,
-                        entry("AuthModule-AuthModuleOne-0", "SUCCESSFUL"))
+                        entry("AuthModuleOne", "SUCCESSFUL"))
             },
             /**
              * Single Auth Module Only - SUCCESS:SEND_FAILURE
@@ -222,7 +221,7 @@ public class SingleAuthModuleOnlyIT {
                 500, true,
                 resourceMatcher(AUTH_MODULE_ONE_PRINCIPAL, AUTH_MODULE_ONE_CONTEXT_ENTRY),
                 auditParams("SUCCESSFUL", AUTH_MODULE_ONE_PRINCIPAL, false,
-                        entry("AuthModule-AuthModuleOne-0", "SUCCESSFUL"))
+                        entry("AuthModuleOne", "SUCCESSFUL"))
             },
             /**
              * Single Auth Module Only - SUCCESS:AuthException
@@ -237,7 +236,7 @@ public class SingleAuthModuleOnlyIT {
              *
              * Expected Result:
              * * HTTP 500 status
-             * * HTTP response from resource
+             * * HTTP response detailing the cause of the failure
              * * Audit Auth Module success
              * * Audit overall result as success
              * * Audit record contains principal
@@ -249,9 +248,9 @@ public class SingleAuthModuleOnlyIT {
             {"Single Auth Module Only - SUCCESS:AuthException",
                 null, moduleArray(
                     moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", SUCCESS_AUTH_STATUS, null)), 500, true,
-                resourceMatcher(AUTH_MODULE_ONE_PRINCIPAL, AUTH_MODULE_ONE_CONTEXT_ENTRY),
+                exceptionMatcher(500, containsString("X-JASPI-AUTH-MODULE-ONE-SECURE-RESPONSE header not set, so throwing AuthException.")),
                 auditParams("SUCCESSFUL", AUTH_MODULE_ONE_PRINCIPAL, false,
-                        entry("AuthModule-AuthModuleOne-0", "SUCCESSFUL"))
+                        entry("AuthModuleOne", "SUCCESSFUL"))
             },
         };
     }
@@ -285,7 +284,7 @@ public class SingleAuthModuleOnlyIT {
                     moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", FAILURE_AUTH_STATUS,
                         SEND_SUCCESS_AUTH_STATUS)), 500, false,
                 exceptionMatcher(500, containsString("Invalid AuthStatus returned from validateRequest, FAILURE")),
-                auditParams("FAILED", "", false, entry("AuthModule-AuthModuleOne-0", "FAILED",
+                auditParams("FAILED", "", false, entry("AuthModuleOne", "FAILED",
                         MapEntry.entry("message", "Invalid AuthStatus returned from validateRequest, FAILURE")))
             },
             /**
@@ -314,7 +313,7 @@ public class SingleAuthModuleOnlyIT {
                     moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", NULL_AUTH_STATUS,
                         SEND_SUCCESS_AUTH_STATUS)), 500, false,
                 exceptionMatcher(500, containsString("Invalid AuthStatus returned from validateRequest, null")),
-                auditParams("FAILED", "", false, entry("AuthModule-AuthModuleOne-0", "FAILED",
+                auditParams("FAILED", "", false, entry("AuthModuleOne", "FAILED",
                         MapEntry.entry("message", "Invalid AuthStatus returned from validateRequest, null")))
             },
             /**
@@ -346,7 +345,7 @@ public class SingleAuthModuleOnlyIT {
                         SEND_CONTINUE_AUTH_STATUS)),
                 200, true, resourceMatcher(AUTH_MODULE_ONE_PRINCIPAL, AUTH_MODULE_ONE_CONTEXT_ENTRY),
                 auditParams("SUCCESSFUL", AUTH_MODULE_ONE_PRINCIPAL, false,
-                        entry("AuthModule-AuthModuleOne-0", "SUCCESSFUL"))
+                        entry("AuthModuleOne", "SUCCESSFUL"))
             },
             /**
              * Single Auth Module Only - SUCCESS:SUCCESS
@@ -361,7 +360,7 @@ public class SingleAuthModuleOnlyIT {
              *
              * Expected Result:
              * * HTTP 500 status
-             * * HTTP response from resource
+             * * HTTP response detailing the cause of the failure
              * * Audit Auth Module success
              * * Audit overall result as success
              * * Audit record contains principal
@@ -374,9 +373,9 @@ public class SingleAuthModuleOnlyIT {
                 null, moduleArray(
                     moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", SUCCESS_AUTH_STATUS, SUCCESS_AUTH_STATUS)),
                 500, true,
-                resourceMatcher(AUTH_MODULE_ONE_PRINCIPAL, AUTH_MODULE_ONE_CONTEXT_ENTRY),
+                exceptionMatcher(500, containsString("Invalid AuthStatus returned from secureResponse, SUCCESS")),
                 auditParams("SUCCESSFUL", AUTH_MODULE_ONE_PRINCIPAL, false,
-                        entry("AuthModule-AuthModuleOne-0", "SUCCESSFUL"))
+                        entry("AuthModuleOne", "SUCCESSFUL"))
             },
             /**
              * Single Auth Module Only - SUCCESS:FAILURE
@@ -390,7 +389,7 @@ public class SingleAuthModuleOnlyIT {
              *
              * Expected Result:
              * * HTTP 500 status
-             * * HTTP response from resource
+             * * HTTP response detailing the cause of the failure
              * * Audit Auth Module success
              * * Audit overall result as success
              * * Audit record contains principal
@@ -403,9 +402,9 @@ public class SingleAuthModuleOnlyIT {
                 null, moduleArray(
                     moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", SUCCESS_AUTH_STATUS, FAILURE_AUTH_STATUS)),
                 500, true,
-                resourceMatcher(AUTH_MODULE_ONE_PRINCIPAL, AUTH_MODULE_ONE_CONTEXT_ENTRY),
+                exceptionMatcher(500, containsString("Invalid AuthStatus returned from secureResponse, FAILURE")),
                 auditParams("SUCCESSFUL", AUTH_MODULE_ONE_PRINCIPAL, false,
-                        entry("AuthModule-AuthModuleOne-0", "SUCCESSFUL"))
+                        entry("AuthModuleOne", "SUCCESSFUL"))
             },
             /**
              * Single Auth Module Only - SUCCESS:null
@@ -420,7 +419,7 @@ public class SingleAuthModuleOnlyIT {
              *
              * Expected Result:
              * * HTTP 500 status
-             * * HTTP response from resource
+             * * HTTP response detailing the cause of the failure
              * * Audit Auth Module success
              * * Audit overall result as success
              * * Audit record contains principal
@@ -433,9 +432,9 @@ public class SingleAuthModuleOnlyIT {
                 null, moduleArray(
                     moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", SUCCESS_AUTH_STATUS, NULL_AUTH_STATUS)),
                 500, true,
-                resourceMatcher(AUTH_MODULE_ONE_PRINCIPAL, AUTH_MODULE_ONE_CONTEXT_ENTRY),
+                exceptionMatcher(500, containsString("Invalid AuthStatus returned from secureResponse, null")),
                 auditParams("SUCCESSFUL", AUTH_MODULE_ONE_PRINCIPAL, false,
-                        entry("AuthModule-AuthModuleOne-0", "SUCCESSFUL"))
+                        entry("AuthModuleOne", "SUCCESSFUL"))
             },
         };
     }

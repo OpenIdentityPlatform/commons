@@ -111,4 +111,11 @@ public interface AsyncServerAuthContext {
      * javax.security.auth.message.MessageInfo, Subject)
      */
     Promise<Void, AuthenticationException> cleanSubject(MessageContext context, Subject clientSubject);
+
+    /**
+     * A short but useful description of this authentication context. Description should include
+     * at least the IDs of the module this context manages.
+     */
+    @Override
+    String toString();
 }

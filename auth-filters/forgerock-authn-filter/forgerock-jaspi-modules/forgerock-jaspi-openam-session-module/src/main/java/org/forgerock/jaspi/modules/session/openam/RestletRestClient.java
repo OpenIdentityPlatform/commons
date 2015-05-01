@@ -16,7 +16,7 @@
 
 package org.forgerock.jaspi.modules.session.openam;
 
-import static org.forgerock.caf.authentication.framework.JaspiRuntime.LOG;
+import static org.forgerock.caf.authentication.framework.AuthenticationFramework.LOG;
 import static org.forgerock.json.fluent.JsonValue.json;
 import static org.forgerock.json.fluent.JsonValue.object;
 

@@ -18,6 +18,7 @@ package org.forgerock.caf.authentication.api;
 
 import java.util.Map;
 
+import org.forgerock.http.Context;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 
@@ -33,7 +34,7 @@ import org.forgerock.http.protocol.Response;
  *
  * @since 2.0.0
  */
-public interface MessageContextInfo {
+public interface MessageContextInfo extends Context {
 
     /**
      * Gets the request object from this {@code MessageContextInfo}.

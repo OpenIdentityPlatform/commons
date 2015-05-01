@@ -16,13 +16,23 @@
 
 package org.forgerock.caf.authn.test;
 
+import org.forgerock.caf.authentication.framework.AuthenticationFilter;
 import org.forgerock.caf.authn.test.configuration.ConfigurationConnectionFactory;
+import org.forgerock.guice.core.InjectorHolder;
+import org.forgerock.http.Context;
 import org.forgerock.http.Handler;
+import org.forgerock.http.Http;
 import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
+import org.forgerock.http.RoutingMode;
+import org.forgerock.http.UriRouter;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.json.resource.http.CrestHttp;
+import org.forgerock.http.protocol.Request;
+import org.forgerock.http.protocol.Response;
+import org.forgerock.http.protocol.ResponseException;
 import org.forgerock.util.Factory;
+import org.forgerock.util.promise.Promise;
 
 /**
  * HTTP Application for JASPI authentication framework functional tests.
@@ -33,7 +43,23 @@ public class JaspiHttpApplication implements HttpApplication {
 
     @Override
     public Handler start() throws HttpApplicationException {
-        return CrestHttp.newHttpHandler(ConfigurationConnectionFactory.getConnectionFactory());
+        UriRouter router = new UriRouter();
+
+        router.addRoute(RoutingMode.EQUALS, "/protected/resource", new ConfigurableAuthenticationFilterHandler());
+
+        router.setDefaultRoute(CrestHttp.newHttpHandler(ConfigurationConnectionFactory.getConnectionFactory()));
+
+        return router;
+    }
+
+    private static final class ConfigurableAuthenticationFilterHandler implements Handler {
+
+        @Override
+        public Promise<Response, ResponseException> handle(Context context, Request request) {
+            ProtectedResource protectedResource = InjectorHolder.getInstance(ProtectedResource.class);
+            AuthenticationFilter authenticationFilter = InjectorHolder.getInstance(AuthenticationFilter.class);
+            return Http.chainOf(protectedResource, authenticationFilter).handle(context, request);
+        }
     }
 
     @Override

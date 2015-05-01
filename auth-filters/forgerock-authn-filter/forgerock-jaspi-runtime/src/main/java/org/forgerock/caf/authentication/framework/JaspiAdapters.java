@@ -234,5 +234,4 @@ final class JaspiAdapters {
             return messageContextInfo.getRequestContextMap();
         }
     }
-
 }

@@ -22,36 +22,52 @@ import static org.forgerock.caf.authn.test.modules.AuthModuleOne.AUTH_MODULE_ONE
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
-import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.MessagePolicy;
-import javax.security.auth.message.module.ServerAuthModule;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.security.Principal;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 
+import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
+import org.forgerock.caf.authentication.api.AuthenticationException;
+import org.forgerock.caf.authentication.api.MessageContextInfo;
+import org.forgerock.http.protocol.Request;
+import org.forgerock.http.protocol.Response;
+import org.forgerock.util.promise.Promise;
+import org.forgerock.util.promise.Promises;
+
 /**
- * A test auth module in which the {@link #validateRequest(MessageInfo, Subject, Subject)} adds additional audit
- * information and the {@link #secureResponse(MessageInfo, Subject)} attempts to audit a session id.
+ * A test auth module in which the {@link #validateRequest(MessageContextInfo, Subject, Subject)} adds additional audit
+ * information and the {@link #secureResponse(MessageContextInfo, Subject)} attempts to audit a session id.
  *
  * @since 1.5.0
  */
-public class AuditingAuthModule implements ServerAuthModule {
+public class AuditingAuthModule implements AsyncServerAuthModule {
+
+    /**
+     * Returns the class's short name.
+     *
+     * @return {@inheritDoc}
+     */
+    @Override
+    public String getModuleId() {
+        return getClass().getSimpleName();
+    }
 
     /**
      * Does nothing.
      *
-     * @param requestMessagePolicy {@inheritDoc}
-     * @param responseMessagePolicy {@inheritDoc}
+     * @param requestPolicy {@inheritDoc}
+     * @param responsePolicy {@inheritDoc}
      * @param callbackHandler {@inheritDoc}
      * @param config {@inheritDoc}
      */
     @SuppressWarnings("rawtypes")
     @Override
-    public void initialize(MessagePolicy requestMessagePolicy, MessagePolicy responseMessagePolicy,
+    public Promise<Void, AuthenticationException> initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy,
             CallbackHandler callbackHandler, Map config) {
+        return Promises.newSuccessfulPromise(null);
     }
 
     /**
@@ -61,8 +77,11 @@ public class AuditingAuthModule implements ServerAuthModule {
      */
     @SuppressWarnings("rawtypes")
     @Override
-    public Class[] getSupportedMessageTypes() {
-        return new Class[]{HttpServletRequest.class, HttpServletResponse.class};
+    public Collection<Class<?>> getSupportedMessageTypes() {
+        Collection<Class<?>> supportedMessageTypes = new HashSet<Class<?>>();
+        supportedMessageTypes.add(Request.class);
+        supportedMessageTypes.add(Response.class);
+        return supportedMessageTypes;
     }
 
     /**
@@ -72,14 +91,13 @@ public class AuditingAuthModule implements ServerAuthModule {
      * @param clientSubject {@inheritDoc}
      * @param serviceSubject {@inheritDoc}
      * @return {@inheritDoc}
-     * @throws javax.security.auth.message.AuthException {@inheritDoc}
      */
     @SuppressWarnings("unchecked")
     @Override
-    public AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject)
-            throws AuthException {
+    public Promise<AuthStatus, AuthenticationException> validateRequest(MessageContextInfo messageInfo,
+            Subject clientSubject, Subject serviceSubject) {
 
-        Map<String, Object> auditInfo = (Map<String, Object>) messageInfo.getMap().get(AUDIT_INFO_KEY);
+        Map<String, Object> auditInfo = (Map<String, Object>) messageInfo.getRequestContextMap().get(AUDIT_INFO_KEY);
         auditInfo.put("AUDITING_AUTH_MODULE_AUDIT_INFO", "AUDIT_INFO");
 
         clientSubject.getPrincipals().clear();
@@ -90,7 +108,7 @@ public class AuditingAuthModule implements ServerAuthModule {
             }
         });
 
-        return AuthStatus.SUCCESS;
+        return Promises.newSuccessfulPromise(AuthStatus.SUCCESS);
     }
 
     /**
@@ -100,19 +118,19 @@ public class AuditingAuthModule implements ServerAuthModule {
      * @param messageInfo {@inheritDoc}
      * @param serviceSubject {@inheritDoc}
      * @return {@inheritDoc}
-     * @throws AuthException {@inheritDoc}
      */
     @Override
-    public AuthStatus secureResponse(MessageInfo messageInfo, Subject serviceSubject) throws AuthException {
+    public Promise<AuthStatus, AuthenticationException> secureResponse(MessageContextInfo messageInfo,
+            Subject serviceSubject) {
 
-        Map<String, Object> auditInfo = (Map<String, Object>) messageInfo.getMap().get(AUDIT_INFO_KEY);
+        Map<String, Object> auditInfo = (Map<String, Object>) messageInfo.getRequestContextMap().get(AUDIT_INFO_KEY);
         if (auditInfo != null) {
             auditInfo.put("MORE_AUDITING_AUTH_MODULE_AUDIT_INFO", "AUDIT_INFO");
         }
 
-        messageInfo.getMap().put(AUDIT_SESSION_ID_KEY, "AUDITING_AUTH_MODULE_SESSION_ID");
+        messageInfo.getRequestContextMap().put(AUDIT_SESSION_ID_KEY, "AUDITING_AUTH_MODULE_SESSION_ID");
 
-        return AuthStatus.SEND_SUCCESS;
+        return Promises.newSuccessfulPromise(AuthStatus.SEND_SUCCESS);
     }
 
     /**
@@ -122,6 +140,7 @@ public class AuditingAuthModule implements ServerAuthModule {
      * @param clientSubject {@inheritDoc}
      */
     @Override
-    public void cleanSubject(MessageInfo messageInfo, Subject clientSubject) {
+    public Promise<Void, AuthenticationException> cleanSubject(MessageContextInfo messageInfo, Subject clientSubject) {
+        return Promises.newSuccessfulPromise(null);
     }
 }

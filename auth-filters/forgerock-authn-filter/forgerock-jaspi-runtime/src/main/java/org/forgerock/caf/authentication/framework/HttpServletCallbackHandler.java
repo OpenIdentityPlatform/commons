@@ -70,10 +70,10 @@ public class HttpServletCallbackHandler implements CallbackHandler {
                 Principal principal = callerPrincipalCallback.getPrincipal();
 
                 if (principal != null) {
-                    JaspiRuntime.LOG.trace("Adding principal, {}, to Subject", principal.getName());
+                    AuthenticationFramework.LOG.trace("Adding principal, {}, to Subject", principal.getName());
                     subject.getPrincipals().add(principal);
                 } else if (name != null) {
-                    JaspiRuntime.LOG.trace("Adding principal, {}, to Subject", name);
+                    AuthenticationFramework.LOG.trace("Adding principal, {}, to Subject", name);
                     subject.getPrincipals().add(new Principal() {
                         @Override
                         public String getName() {
@@ -82,7 +82,7 @@ public class HttpServletCallbackHandler implements CallbackHandler {
                     });
                 } else {
                     //Both name and principal are null so not adding either.
-                    JaspiRuntime.LOG.trace("Not adding principal as no name or principal set on callback");
+                    AuthenticationFramework.LOG.trace("Not adding principal as no name or principal set on callback");
                 }
 
             } else if (GroupPrincipalCallback.class.isAssignableFrom(callback.getClass())) {
@@ -98,7 +98,7 @@ public class HttpServletCallbackHandler implements CallbackHandler {
                 Set<Principal> principals = subject.getPrincipals();
 
                 for (final String group : groups) {
-                    JaspiRuntime.LOG.trace("Adding principal, {}, to Subject", group);
+                    AuthenticationFramework.LOG.trace("Adding principal, {}, to Subject", group);
                     principals.add(new Principal() {
                         @Override
                         public String getName() {
@@ -110,23 +110,23 @@ public class HttpServletCallbackHandler implements CallbackHandler {
             } else if (PasswordValidationCallback.class.isAssignableFrom(callback.getClass())) {
                 // JSR-196 Spec states this MUST be implemented but as this is not actually a "real" container
                 // we don't need to do this here.
-                JaspiRuntime.LOG.error("PasswordValidationCallback not supported");
+                AuthenticationFramework.LOG.error("PasswordValidationCallback not supported");
                 throw new UnsupportedCallbackException(callback);
             } else if (CertStoreCallback.class.isAssignableFrom(callback.getClass())) {
                 //SHOULD implement
-                JaspiRuntime.LOG.error("CertStoreCallback not supported");
+                AuthenticationFramework.LOG.error("CertStoreCallback not supported");
                 throw new UnsupportedCallbackException(callback);
             } else if (PrivateKeyCallback.class.isAssignableFrom(callback.getClass())) {
                 //SHOULD implement
-                JaspiRuntime.LOG.error("PrivateKeyCallback not supported");
+                AuthenticationFramework.LOG.error("PrivateKeyCallback not supported");
                 throw new UnsupportedCallbackException(callback);
             } else if (SecretKeyCallback.class.isAssignableFrom(callback.getClass())) {
                 //SHOULD implement
-                JaspiRuntime.LOG.error("SecretKeyCallback not supported");
+                AuthenticationFramework.LOG.error("SecretKeyCallback not supported");
                 throw new UnsupportedCallbackException(callback);
             } else if (TrustStoreCallback.class.isAssignableFrom(callback.getClass())) {
                 //SHOULD implement
-                JaspiRuntime.LOG.error("TrustStoreCallback not supported");
+                AuthenticationFramework.LOG.error("TrustStoreCallback not supported");
                 throw new UnsupportedCallbackException(callback);
 //            } else if (HttpCallback.class.isAssignableFrom(callback.getClass())) {
 //                //SHOULD implement

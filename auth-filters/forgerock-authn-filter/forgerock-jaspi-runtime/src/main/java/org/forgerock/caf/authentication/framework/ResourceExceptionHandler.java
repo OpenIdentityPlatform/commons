@@ -16,11 +16,10 @@
 
 package org.forgerock.caf.authentication.framework;
 
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.Collection;
 
 import org.forgerock.guava.common.net.MediaType;
+import org.forgerock.http.protocol.Response;
 import org.forgerock.json.resource.ResourceException;
 
 /**
@@ -29,17 +28,24 @@ import org.forgerock.json.resource.ResourceException;
 public interface ResourceExceptionHandler {
 
     /**
-     * Which media types can this handler handle
+     * Which media types can this handler handle.
+     *
      * @return A list of media types.
      */
     Collection<MediaType> handles();
 
     /**
      * Write the details of the exception out, and set the content type of the response.
+     *
      * @param exception The exception to be written.
      * @param response The response to write the details to.
-     * @throws java.io.IOException In the event of writing failure.
      */
-    void write(ResourceException exception, HttpServletResponse response) throws IOException;
+    void write(ResourceException exception, Response response);
 
+    /**
+     * A short but useful description of this response handler. Description should include the
+     * media type this response handler handles.
+     */
+    @Override
+    String toString();
 }

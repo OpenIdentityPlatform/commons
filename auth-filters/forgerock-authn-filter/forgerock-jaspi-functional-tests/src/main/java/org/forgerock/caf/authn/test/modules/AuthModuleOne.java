@@ -20,35 +20,41 @@ import static org.forgerock.caf.authn.test.modules.SessionAuthModule.*;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
-import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.MessagePolicy;
-import javax.security.auth.message.module.ServerAuthModule;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.security.Principal;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 
-import org.forgerock.caf.authentication.framework.JaspiRuntime;
+import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
+import org.forgerock.caf.authentication.api.AuthenticationException;
+import org.forgerock.caf.authentication.api.MessageContextInfo;
+import org.forgerock.caf.authentication.framework.AuthenticationFramework;
+import org.forgerock.http.HttpContext;
+import org.forgerock.http.protocol.Request;
+import org.forgerock.http.protocol.Response;
+import org.forgerock.util.promise.Promise;
+import org.forgerock.util.promise.Promises;
 
 /**
- * A test auth module in which the {@link #validateRequest(MessageInfo, Subject, Subject)} and
- * {@link #secureResponse(MessageInfo, Subject)} methods return values can be decided based on the value of two request
- * headers.
+ * A test auth module in which the {@link #validateRequest(MessageContextInfo, Subject, Subject)}
+ * and {@link #secureResponse(MessageContextInfo, Subject)} methods return values can be decided
+ * based on the value of two request headers.
  *
  * @since 1.5.0
  */
-public class AuthModuleOne implements ServerAuthModule {
+public class AuthModuleOne implements AsyncServerAuthModule {
 
     /**
-     * The request header for deciding the return value from {@link #validateRequest(MessageInfo, Subject, Subject)}.
+     * The request header for deciding the return value from {@link #validateRequest(MessageContextInfo, Subject, Subject)}.
      */
     public final static String AUTH_MODULE_ONE_VALIDATE_REQUEST_HEADER_NAME =
             "X-JASPI-AUTH-MODULE-ONE-VALIDATE-REQUEST";
 
     /**
-     * The request header for deciding the return value from {@link #secureResponse(MessageInfo, Subject)}.
+     * The request header for deciding the return value from {@link #secureResponse(MessageContextInfo, Subject)}.
      */
     public final static String AUTH_MODULE_ONE_SECURE_RESPONSE_HEADER_NAME = "X-JASPI-AUTH-MODULE-ONE-SECURE-RESPONSE";
 
@@ -63,17 +69,28 @@ public class AuthModuleOne implements ServerAuthModule {
     public final static String AUTH_MODULE_ONE_CONTEXT_ENTRY = "AUTH_MODULE_ONE_CONTEXT_ENTRY";
 
     /**
+     * Returns the class's short name.
+     *
+     * @return {@inheritDoc}
+     */
+    @Override
+    public String getModuleId() {
+        return getClass().getSimpleName();
+    }
+
+    /**
      * Does nothing.
      *
-     * @param requestMessagePolicy {@inheritDoc}
-     * @param responseMessagePolicy {@inheritDoc}
+     * @param requestPolicy {@inheritDoc}
+     * @param responsePolicy {@inheritDoc}
      * @param callbackHandler {@inheritDoc}
      * @param config {@inheritDoc}
      */
     @SuppressWarnings("rawtypes")
     @Override
-    public void initialize(MessagePolicy requestMessagePolicy, MessagePolicy responseMessagePolicy,
+    public Promise<Void, AuthenticationException> initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy,
             CallbackHandler callbackHandler, Map config) {
+        return Promises.newSuccessfulPromise(null);
     }
 
     /**
@@ -83,8 +100,11 @@ public class AuthModuleOne implements ServerAuthModule {
      */
     @SuppressWarnings("rawtypes")
     @Override
-    public Class[] getSupportedMessageTypes() {
-        return new Class[]{HttpServletRequest.class, HttpServletResponse.class};
+    public Collection<Class<?>> getSupportedMessageTypes() {
+        Collection<Class<?>> supportedMessageTypes = new HashSet<Class<?>>();
+        supportedMessageTypes.add(Request.class);
+        supportedMessageTypes.add(Response.class);
+        return supportedMessageTypes;
     }
 
     /**
@@ -95,19 +115,19 @@ public class AuthModuleOne implements ServerAuthModule {
      * @param clientSubject {@inheritDoc}
      * @param serviceSubject {@inheritDoc}
      * @return {@inheritDoc}
-     * @throws AuthException {@inheritDoc}
      */
     @SuppressWarnings("unchecked")
     @Override
-    public AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject)
-            throws AuthException {
+    public Promise<AuthStatus, AuthenticationException> validateRequest(MessageContextInfo messageInfo,
+            Subject clientSubject, Subject serviceSubject) {
 
-        HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
+        HttpContext httpContext = messageInfo.asContext(HttpContext.class);
+        HttpServletRequest request = (HttpServletRequest) httpContext.getAttributes().get(HttpServletRequest.class.getName());
 
         String header = request.getHeader(AUTH_MODULE_ONE_VALIDATE_REQUEST_HEADER_NAME.toLowerCase());
 
         Map<String, Object> context =
-                (Map<String, Object>) messageInfo.getMap().get(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT);
+                (Map<String, Object>) messageInfo.getRequestContextMap().get(AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT);
         context.put(AUTH_MODULE_ONE_CONTEXT_ENTRY, true);
 
         if (SUCCESS_AUTH_STATUS.equalsIgnoreCase(header)) {
@@ -118,7 +138,7 @@ public class AuthModuleOne implements ServerAuthModule {
                     return AUTH_MODULE_ONE_PRINCIPAL;
                 }
             });
-            return AuthStatus.SUCCESS;
+            return Promises.newSuccessfulPromise(AuthStatus.SUCCESS);
         }
 
         if (SEND_SUCCESS_AUTH_STATUS.equalsIgnoreCase(header)) {
@@ -129,27 +149,27 @@ public class AuthModuleOne implements ServerAuthModule {
                     return AUTH_MODULE_ONE_PRINCIPAL;
                 }
             });
-            return AuthStatus.SEND_SUCCESS;
+            return Promises.newSuccessfulPromise(AuthStatus.SEND_SUCCESS);
         }
 
         if (SEND_FAILURE_AUTH_STATUS.equalsIgnoreCase(header)) {
-            return AuthStatus.SEND_FAILURE;
+            return Promises.newSuccessfulPromise(AuthStatus.SEND_FAILURE);
         }
 
         if (SEND_CONTINUE_AUTH_STATUS.equalsIgnoreCase(header)) {
-            return AuthStatus.SEND_CONTINUE;
+            return Promises.newSuccessfulPromise(AuthStatus.SEND_CONTINUE);
         }
 
         if (FAILURE_AUTH_STATUS.equalsIgnoreCase(header)) {
-            return AuthStatus.FAILURE;
+            return Promises.newSuccessfulPromise(AuthStatus.FAILURE);
         }
 
         if (NULL_AUTH_STATUS.equalsIgnoreCase(header)) {
-            return null;
+            return Promises.newSuccessfulPromise(null);
         }
 
-        throw new AuthException(AUTH_MODULE_ONE_VALIDATE_REQUEST_HEADER_NAME
-                + " header not set, so throwing AuthException.");
+        return Promises.newFailedPromise(new AuthenticationException(AUTH_MODULE_ONE_VALIDATE_REQUEST_HEADER_NAME
+                + " header not set, so throwing AuthException."));
     }
 
     /**
@@ -159,41 +179,42 @@ public class AuthModuleOne implements ServerAuthModule {
      * @param messageInfo {@inheritDoc}
      * @param serviceSubject {@inheritDoc}
      * @return {@inheritDoc}
-     * @throws AuthException {@inheritDoc}
      */
     @Override
-    public AuthStatus secureResponse(MessageInfo messageInfo, Subject serviceSubject) throws AuthException {
+    public Promise<AuthStatus, AuthenticationException> secureResponse(MessageContextInfo messageInfo,
+            Subject serviceSubject) {
 
-        HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
+        HttpContext httpContext = messageInfo.asContext(HttpContext.class);
+        HttpServletRequest request = (HttpServletRequest) httpContext.getAttributes().get(HttpServletRequest.class.getName());
 
         String header = request.getHeader(AUTH_MODULE_ONE_SECURE_RESPONSE_HEADER_NAME.toLowerCase());
 
         if (SUCCESS_AUTH_STATUS.equalsIgnoreCase(header)) {
-            return AuthStatus.SUCCESS;
+            return Promises.newSuccessfulPromise(AuthStatus.SUCCESS);
         }
 
         if (SEND_SUCCESS_AUTH_STATUS.equalsIgnoreCase(header)) {
-            return AuthStatus.SEND_SUCCESS;
+            return Promises.newSuccessfulPromise(AuthStatus.SEND_SUCCESS);
         }
 
         if (SEND_FAILURE_AUTH_STATUS.equalsIgnoreCase(header)) {
-            return AuthStatus.SEND_FAILURE;
+            return Promises.newSuccessfulPromise(AuthStatus.SEND_FAILURE);
         }
 
         if (SEND_CONTINUE_AUTH_STATUS.equalsIgnoreCase(header)) {
-            return AuthStatus.SEND_CONTINUE;
+            return Promises.newSuccessfulPromise(AuthStatus.SEND_CONTINUE);
         }
 
         if (FAILURE_AUTH_STATUS.equalsIgnoreCase(header)) {
-            return AuthStatus.FAILURE;
+            return Promises.newSuccessfulPromise(AuthStatus.FAILURE);
         }
 
         if (NULL_AUTH_STATUS.equalsIgnoreCase(header)) {
-            return null;
+            return Promises.newSuccessfulPromise(null);
         }
 
-        throw new AuthException(AUTH_MODULE_ONE_SECURE_RESPONSE_HEADER_NAME
-                + " header not set, so throwing AuthException.");
+        return Promises.newFailedPromise(new AuthenticationException(AUTH_MODULE_ONE_SECURE_RESPONSE_HEADER_NAME
+                + " header not set, so throwing AuthException."));
     }
 
     /**
@@ -203,6 +224,7 @@ public class AuthModuleOne implements ServerAuthModule {
      * @param clientSubject {@inheritDoc}
      */
     @Override
-    public void cleanSubject(MessageInfo messageInfo, Subject clientSubject) {
+    public Promise<Void, AuthenticationException> cleanSubject(MessageContextInfo messageInfo, Subject clientSubject) {
+        return Promises.newSuccessfulPromise(null);
     }
 }

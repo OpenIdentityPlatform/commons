@@ -16,19 +16,21 @@
 
 package org.forgerock.caf.authentication.framework;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
 import static org.forgerock.json.fluent.JsonValue.*;
-import static org.mockito.Mockito.*;
-import static org.testng.Assert.assertTrue;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
+import org.forgerock.caf.authentication.api.MessageContext;
 import org.forgerock.guava.common.net.MediaType;
+import org.forgerock.http.header.ContentTypeHeader;
+import org.forgerock.http.protocol.Request;
+import org.forgerock.http.protocol.Response;
 import org.forgerock.json.resource.ResourceException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -37,7 +39,7 @@ import org.testng.annotations.Test;
 public class FailureResponseHandlerTest {
 
     private static final String APPLICATION_XML = "application/xml";
-    private static final String APPLICATION_JSON = "application/json";
+    private static final String APPLICATION_JSON = "application/json; charset=UTF-8";
     private static final String TEXT_XML = "text/xml";
     private static final String TEXT_PLAIN = "text/plain";
 
@@ -48,12 +50,11 @@ public class FailureResponseHandlerTest {
         this.handler = new FailureResponseHandler();
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void jsonHandlerShouldRenderException() throws Exception {
         //Given
-        HttpServletResponse response = mock(HttpServletResponse.class);
-        StringWriter sw = new StringWriter();
-        doReturn(new PrintWriter(sw)).when(response).getWriter();
+        Response response = new Response();
         ResourceException jre = ResourceException.getException(ResourceException.BAD_REQUEST, "BAD_REQUEST");
         jre.setDetail(json(object(field("DETAIL_KEY", "DETAIL_VALUE"))));
 
@@ -61,28 +62,29 @@ public class FailureResponseHandlerTest {
         new FailureResponseHandler.JsonResourceExceptionHandler().write(jre, response);
 
         //Then
-        String responseText = sw.toString();
-        assertTrue(responseText.contains("400"));
-        assertTrue(responseText.contains("BAD_REQUEST"));
-        assertTrue(responseText.contains("DETAIL_KEY"));
-        assertTrue(responseText.contains("DETAIL_VALUE"));
-        verify(response).setContentType("application/json");
+        Map<String, Object> responseBody = (Map<String, Object>) response.getEntity().getJson();
+        assertThat(response.getHeaders().getFirst(ContentTypeHeader.NAME)).isEqualTo("application/json; charset=UTF-8");
+        assertThat(responseBody).containsKey("detail").contains(
+                entry("code", 400),
+                entry("reason", "Bad Request"),
+                entry("message", "BAD_REQUEST"));
+        assertThat((Map<String, Object>) responseBody.get("detail")).containsEntry("DETAIL_KEY", "DETAIL_VALUE");
 
     }
 
     @DataProvider(name = "content-types")
     public static Object[][] contentTypes() {
         return new Object[][] {
-                { APPLICATION_XML, APPLICATION_XML },
-                { "application/svg+xml", APPLICATION_JSON },
-                { TEXT_XML, APPLICATION_XML },
-                { TEXT_PLAIN, APPLICATION_JSON },
-                { "application/json; q=0.8, application/xml", APPLICATION_XML },
-                { "application/json; q=0.6, application/xml; q=0.8", APPLICATION_XML },
-                { "application/json; q=0.9, application/xml; q=0.8", APPLICATION_JSON },
-                { "*/*; q=1.0, application/json; q=0.6, application/xml; q=0.8", APPLICATION_JSON },
-                { "*/*; q=1.0, application/json; q=0.6, application/xml; q=1.0", APPLICATION_XML },
-                { null, APPLICATION_JSON }
+            { APPLICATION_XML, APPLICATION_XML },
+            { "application/svg+xml", APPLICATION_JSON },
+            { TEXT_XML, APPLICATION_XML },
+            { TEXT_PLAIN, APPLICATION_JSON },
+            { "application/json; q=0.8, application/xml", APPLICATION_XML },
+            { "application/json; q=0.6, application/xml; q=0.8", APPLICATION_XML },
+            { "application/json; q=0.9, application/xml; q=0.8", APPLICATION_JSON },
+            { "*/*; q=1.0, application/json; q=0.6, application/xml; q=0.8", APPLICATION_JSON },
+            { "*/*; q=1.0, application/json; q=0.6, application/xml; q=1.0", APPLICATION_XML },
+            { null, APPLICATION_JSON }
         };
     }
 
@@ -90,24 +92,24 @@ public class FailureResponseHandlerTest {
     public void shouldUseExceptionHandlerIfAvailable(String accept, String expected) throws Exception {
 
         //Given
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        HttpServletResponse response = mock(HttpServletResponse.class);
-        StringWriter sw = new StringWriter();
-        doReturn(new PrintWriter(sw)).when(response).getWriter();
+        Request request = new Request();
+        Response response = new Response();
+        MessageContext messageContext = mock(MessageContext.class);
 
-        doReturn(accept).when(request).getHeader("Accept");
+        request.getHeaders().putSingle("Accept", accept);
+        given(messageContext.getRequest()).willReturn(request);
+        given(messageContext.getResponse()).willReturn(response);
 
-        handler.registerExceptionHandler(TestExceptionHandler.class);
+        handler.registerExceptionHandler(new TestExceptionHandler());
 
         ResourceException jre = ResourceException.getException(ResourceException.BAD_REQUEST, "BAD_REQUEST");
         jre.setDetail(json(object(field("DETAIL_KEY", "DETAIL_VALUE"))));
 
         //When
-        handler.handle(jre, new HttpServletMessageInfo(request, response));
+        handler.handle(jre, messageContext);
 
         //Then
-        verify(response).setStatus(400);
-        verify(response).setContentType(expected);
+        assertThat(response.getHeaders().getFirst(ContentTypeHeader.NAME)).isEqualTo(expected);
     }
 
     public static final class TestExceptionHandler implements ResourceExceptionHandler {
@@ -116,10 +118,9 @@ public class FailureResponseHandlerTest {
             return Arrays.asList(MediaType.parse(APPLICATION_XML), MediaType.parse(TEXT_XML));
         }
 
-        public void write(ResourceException exception, HttpServletResponse response) throws IOException {
-            response.setContentType(APPLICATION_XML);
-            response.getWriter().write("Hello "+exception.getCode());
+        public void write(ResourceException exception, Response response) {
+            response.getHeaders().putSingle(ContentTypeHeader.valueOf(APPLICATION_XML));
+            response.setEntity("Hello " + exception.getCode());
         }
-
     }
 }

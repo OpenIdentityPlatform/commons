@@ -24,7 +24,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
 import static org.testng.Assert.fail;
 
-import javax.security.auth.message.module.ServerAuthModule;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +37,7 @@ import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.parsing.Parser;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
 import org.forgerock.json.fluent.JsonValue;
 import org.hamcrest.Matcher;
 
@@ -57,7 +57,7 @@ class TestFramework {
         RestAssured.port = Integer.parseInt(System.getProperty("HTTP_PORT"));
         RestAssured.baseURI = "http://" + System.getProperty("HOSTNAME");
         RestAssured.basePath = System.getProperty("CONTEXT_URI");
-//        RestAssured.port = 8080;
+//        RestAssured.port = 8081;
 //        RestAssured.baseURI = "http://localhost";
 //        RestAssured.basePath = "jaspi";
 
@@ -74,8 +74,8 @@ class TestFramework {
      * @param sessionModule The "Session" auth module class.
      * @param authModules An array of auth module classes.
      */
-    private static void configureRuntime(Class<? extends ServerAuthModule> sessionModule,
-            List<Class<? extends ServerAuthModule>> authModules) {
+    private static void configureRuntime(Class<? extends AsyncServerAuthModule> sessionModule,
+            List<Class<? extends AsyncServerAuthModule>> authModules) {
 
         JsonValue config = json(object());
         JsonValue configuration = json(object(field("serverAuthContext", config)));
@@ -86,7 +86,7 @@ class TestFramework {
 
         if (authModules != null) {
             config.put("authModules", array());
-            for (Class<? extends ServerAuthModule> authModule : authModules) {
+            for (Class<? extends AsyncServerAuthModule> authModule : authModules) {
                 config.get("authModules").add(object(field("className", authModule.getName())));
             }
         }
@@ -137,8 +137,8 @@ class TestFramework {
      */
     static RequestSpecification given(AuthModuleParameters sessionModuleParams,
             List<AuthModuleParameters> authModuleParametersList) {
-        Class<? extends ServerAuthModule> sessionModuleClass = null;
-        List<Class<? extends ServerAuthModule>> authModuleClasses = new ArrayList<Class<? extends ServerAuthModule>>();
+        Class<? extends AsyncServerAuthModule> sessionModuleClass = null;
+        List<Class<? extends AsyncServerAuthModule>> authModuleClasses = new ArrayList<Class<? extends AsyncServerAuthModule>>();
 
         RequestSpecification given = com.jayway.restassured.RestAssured.given();
         if (sessionModuleParams != null) {

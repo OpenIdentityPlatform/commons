@@ -16,10 +16,6 @@
 
 package org.forgerock.caf.authentication.framework;
 
-import javax.security.auth.message.MessageInfo;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,16 +26,17 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.forgerock.caf.authentication.api.MessageContext;
 import org.forgerock.guava.common.net.MediaType;
+import org.forgerock.http.header.ContentTypeHeader;
+import org.forgerock.http.protocol.Request;
+import org.forgerock.http.protocol.Response;
 import org.forgerock.json.resource.ResourceException;
 
 /**
  * A handler class for rendering failures in the most acceptable supported content type.
  */
-public class FailureResponseHandler {
-
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+class FailureResponseHandler {
 
     private static final Pattern ACCEPT_HEADER = Pattern.compile("(?:(?:[^\",]*|(?:.*[^\\\\]\".*[^\\\\]\".*)))( *, *)");
     private static final MediaType WILDCARD = MediaType.parse("*/*");
@@ -64,7 +61,7 @@ public class FailureResponseHandler {
     private final List<ResourceExceptionHandler> handlers = new ArrayList<ResourceExceptionHandler>();
     private final JsonResourceExceptionHandler defaultHandler;
 
-    public FailureResponseHandler() {
+    FailureResponseHandler() {
         defaultHandler = new JsonResourceExceptionHandler();
         handlers.add(defaultHandler);
     }
@@ -74,16 +71,15 @@ public class FailureResponseHandler {
      * handler is selected. If no specific handler is found, or if the highest quality accepted content type is
      * {@code \*\/\*}, then the {@code JsonResourceExceptionHandler} is used.
      * @param jre
-     * @param messageInfo
-     * @throws IOException
+     * @param context
      */
-    public void handle(ResourceException jre, MessageInfo messageInfo) throws IOException {
-        HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
-        HttpServletResponse response = (HttpServletResponse) messageInfo.getResponseMessage();
+    void handle(ResourceException jre, MessageContext context)  {
+        Request request = context.getRequest();
+        Response response = context.getResponse();
 
-        response.setStatus(jre.getCode());
+        response.setStatusAndReason(jre.getCode());
 
-        String acceptHeader = request.getHeader("Accept");
+        String acceptHeader = request.getHeaders().getFirst("Accept");
         if (acceptHeader != null) {
             SortedSet<MediaType> acceptedTypes = new TreeSet<MediaType>(ACCEPT_QUALITY_COMPARATOR);
             Matcher m = ACCEPT_HEADER.matcher(acceptHeader);
@@ -114,22 +110,17 @@ public class FailureResponseHandler {
 
     /**
      * Register a class to handle {@code ResourceException}s.
-     * @param handlerClass The implementation class.
+
+     * @param handler The {@code ResourceExceptionHandler}.
      */
-    public void registerExceptionHandler(Class<? extends ResourceExceptionHandler> handlerClass) {
-        try {
-            this.handlers.add(handlerClass.newInstance());
-        } catch (InstantiationException e) {
-            throw new IllegalArgumentException("Cannot instantiate " + handlerClass.getName(), e);
-        } catch (IllegalAccessException e) {
-            throw new IllegalArgumentException("Cannot access " + handlerClass.getName(), e);
-        }
+    void registerExceptionHandler(ResourceExceptionHandler handler) {
+        this.handlers.add(handler);
     }
 
     /**
      * A default implementation of {@code ResourceExceptionHandler} that renders the exception to JSON.
      */
-    static class JsonResourceExceptionHandler implements ResourceExceptionHandler {
+    static final class JsonResourceExceptionHandler implements ResourceExceptionHandler {
 
         private static final List<MediaType> MEDIA_TYPES = Arrays.asList(
                 MediaType.JSON_UTF_8,
@@ -139,10 +130,19 @@ public class FailureResponseHandler {
             return MEDIA_TYPES;
         }
 
-        public void write(ResourceException jre, HttpServletResponse response) throws IOException {
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            OBJECT_MAPPER.writeValue(response.getWriter(), jre.includeCauseInJsonValue().toJsonValue().asMap());
+        public void write(ResourceException jre, Response response)  {
+            response.getHeaders().putSingle(ContentTypeHeader.valueOf("application/json; charset=UTF-8"));
+            response.setEntity(jre.includeCauseInJsonValue().toJsonValue().asMap());
         }
+
+        @Override
+        public String toString() {
+            return MEDIA_TYPES.toString();
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "Registered Handlers: " + handlers.toString() + ", Default Handler: " + defaultHandler.toString();
     }
 }

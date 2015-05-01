@@ -11,26 +11,29 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.caf.authentication.framework;
+package org.forgerock.caf.authentication.api;
 
-import javax.security.auth.message.config.ServerAuthContext;
+import org.forgerock.json.fluent.JsonValueException;
 
 /**
- * A factory which is responsible for creating {@code ServerAuthContext}s for authenticating requests.
+ * An exception that is thrown during
+ * {@link org.forgerock.caf.authentication.api.AuthenticationState} operations.
+ *
+ * @since 2.0.0
  */
-public interface ContextFactory {
+public class AuthenticationStateException extends RuntimeException {
+
+    private static final long serialVersionUID = -8084970886710807796L;
 
     /**
-     * <p>Returns the context which should be used to authenticate requests.</p>
+     * Constructs a new {@code AuthenticationStateException} with the specified cause.
      *
-     * <p>This method is called for each request. This means that the {@code ServerAuthContext} instance can be
-     * changed/updated with new ServerAuthModules and any changes will be picked up by the runtime for subsequent
-     * authentication requests.</p>
-     *
-     * @return The context which should be used for authenticating requests.
+     * @param cause The cause.
      */
-    ServerAuthContext getContext();
+    AuthenticationStateException(JsonValueException cause) {
+        super(cause);
+    }
 }

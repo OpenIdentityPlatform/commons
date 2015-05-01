@@ -17,24 +17,6 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
          version="3.0">
 
-    <filter>
-        <filter-name>JaspiFilter</filter-name>
-        <filter-class>org.forgerock.caf.authentication.framework.JaspiRuntimeFilter</filter-class>
-        <init-param>
-            <param-name>context-factory-class</param-name>
-            <param-value>org.forgerock.caf.authn.test.runtime.TestContextFactory</param-value>
-        </init-param>
-        <init-param>
-            <param-name>audit-api-factory-class</param-name>
-            <param-value>org.forgerock.caf.authn.test.runtime.TestAuditApi</param-value>
-        </init-param>
-    </filter>
-
-    <filter-mapping>
-        <filter-name>JaspiFilter</filter-name>
-        <url-pattern>/protected/*</url-pattern>
-    </filter-mapping>
-
     <servlet>
         <servlet-name>Jaspi HTTP</servlet-name>
         <servlet-class>org.forgerock.http.servlet.HttpFrameworkServlet</servlet-class>
@@ -42,26 +24,5 @@
     <servlet-mapping>
         <servlet-name>Jaspi HTTP</servlet-name>
         <url-pattern>/*</url-pattern>
-    </servlet-mapping>
-
-
-    <servlet>
-        <servlet-name>ProtectedResource</servlet-name>
-        <servlet-class>org.forgerock.caf.authn.test.ProtectedResource</servlet-class>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>ProtectedResource</servlet-name>
-        <url-pattern>/protected/resource</url-pattern>
-    </servlet-mapping>
-
-    <servlet>
-        <servlet-name>ProtectedResponseCommittingResource</servlet-name>
-        <servlet-class>org.forgerock.caf.authn.test.ProtectedResponseCommittingResource</servlet-class>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>ProtectedResponseCommittingResource</servlet-name>
-        <url-pattern>/protected/resource/committing</url-pattern>
     </servlet-mapping>
 </web-app>

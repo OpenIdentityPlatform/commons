@@ -61,7 +61,7 @@ public final class AuthStatusUtils {
      * @param authStatus The {@code AuthStatus} value.
      * @return {@code true} if the given {@code AuthStatus} value is {@link AuthStatus#SUCCESS}.
      */
-    private static boolean isSuccess(AuthStatus authStatus) {
+    public static boolean isSuccess(AuthStatus authStatus) {
         return SUCCESS.equals(authStatus);
     }
 
@@ -71,7 +71,7 @@ public final class AuthStatusUtils {
      * @param authStatus The {@code AuthStatus} value.
      * @return {@code true} if the given {@code AuthStatus} value is {@link AuthStatus#SEND_SUCCESS}.
      */
-    private static boolean isSendSuccess(AuthStatus authStatus) {
+    public static boolean isSendSuccess(AuthStatus authStatus) {
         return SEND_SUCCESS.equals(authStatus);
     }
 
@@ -81,7 +81,7 @@ public final class AuthStatusUtils {
      * @param authStatus The {@code AuthStatus} value.
      * @return {@code true} if the given {@code AuthStatus} value is {@link AuthStatus#SEND_CONTINUE}.
      */
-    static boolean isSendContinue(AuthStatus authStatus) {
+    public static boolean isSendContinue(AuthStatus authStatus) {
         return SEND_CONTINUE.equals(authStatus);
     }
 
@@ -91,7 +91,7 @@ public final class AuthStatusUtils {
      * @param authStatus The {@code AuthStatus} value.
      * @return {@code true} if the given {@code AuthStatus} value is {@link AuthStatus#SEND_FAILURE}.
      */
-    private static boolean isSendFailure(AuthStatus authStatus) {
+    public static boolean isSendFailure(AuthStatus authStatus) {
         return SEND_FAILURE.equals(authStatus);
     }
 
@@ -101,7 +101,18 @@ public final class AuthStatusUtils {
      * @param authStatus The {@code AuthStatus} value.
      * @return {@code true} if the given {@code AuthStatus} value is {@link AuthStatus#FAILURE}.
      */
-    private static boolean isFailure(AuthStatus authStatus) {
+    public static boolean isFailure(AuthStatus authStatus) {
         return FAILURE.equals(authStatus);
     }
+
+    /**
+     * Returns {@code true} if the given {@code AuthStatus} value is {@code null}.
+     *
+     * @param authStatus The {@code AuthStatus} value.
+     * @return {@code true} if the given {@code AuthStatus} value is {@code null}.
+     */
+    public static boolean isNull(AuthStatus authStatus) {
+        return authStatus == null;
+    }
+
 }

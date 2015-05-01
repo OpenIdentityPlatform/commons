@@ -16,32 +16,30 @@
 
 package org.forgerock.caf.authn.test.runtime;
 
+import static org.forgerock.caf.authentication.framework.AuthenticationFilter.AuthenticationModuleBuilder.configureModule;
+import static org.forgerock.caf.authentication.framework.AuthenticationFilter.AuthenticationModuleBuilder;
 import static org.forgerock.json.resource.Requests.newReadRequest;
 import static org.forgerock.json.resource.Resources.newInternalConnection;
 import static org.forgerock.json.resource.Resources.newSingleton;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.inject.Singleton;
-import javax.security.auth.message.AuthException;
-import javax.security.auth.message.config.ServerAuthContext;
-import javax.security.auth.message.module.ServerAuthModule;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
+import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
 import org.forgerock.caf.authentication.framework.AuditApi;
-import org.forgerock.caf.authentication.framework.ContextFactory;
-import org.forgerock.caf.authentication.framework.ContextHandler;
-import org.forgerock.caf.authentication.framework.FallbackServerAuthContext;
-import org.forgerock.caf.authentication.framework.MessageInfoUtils;
+import org.forgerock.caf.authentication.framework.AuthenticationFilter;
 import org.forgerock.caf.authn.test.configuration.ConfigurationResource;
 import org.forgerock.http.RootContext;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Guice module for wiring the JASPI runtime.
@@ -56,42 +54,28 @@ public class GuiceModule extends AbstractModule {
      */
     @Override
     protected void configure() {
-        bind(MessageInfoUtils.class).in(Singleton.class);
-        bind(ContextFactory.class).to(TestContextFactory.class);
         bind(AuditApi.class).to(TestAuditApi.class);
     }
 
-    /**
-     * Provider for the {@code ContextHandler} instance.
-     *
-     * @param messageInfoUtils An instance of the {@code MessageInfoUtils}.
-     * @return The {@code ContextHandler} instance.
-     */
     @Provides
-    @Inject
-    @Singleton
-    public ContextHandler getContextHandler(MessageInfoUtils messageInfoUtils) {
-        return new ContextHandler(messageInfoUtils);
+    Logger getLogger() {
+        return LoggerFactory.getLogger("AuthenticationFramework");
     }
 
-    /**
-     * Provider for the JASPI runtime's {@code ServerAuthContext}.
-     *
-     * @param messageInfoUtils An instance of the {@code MessageInfoUtils}.
-     * @param contextHandler An instance of the {@code ContextHandler}.
-     * @param sessionAuthModule The configured "Session" auth module.
-     * @param authModules The configured auth modules.
-     * @return A {@code ServerAuthContext} instance.
-     * @throws AuthException If any of the configured {@code ServerAuthModule} instance do not support the
-     * request/response message type.
-     */
     @Provides
-    @Named("ServerAuthContext")
-    @Inject
-    public ServerAuthContext getServerAuthContext(MessageInfoUtils messageInfoUtils, ContextHandler contextHandler,
-            @Named("SessionAuthModule") ServerAuthModule sessionAuthModule,
-            @Named("AuthModules") List<ServerAuthModule> authModules) throws AuthException {
-        return new FallbackServerAuthContext(messageInfoUtils, contextHandler, sessionAuthModule, authModules);
+    AuthenticationFilter getAuthenticationFilter(Logger logger, AuditApi auditApi,
+            @Named("SessionAuthModule") AsyncServerAuthModule sessionAuthModule,
+            @Named("AuthModules") List<AsyncServerAuthModule> authModules) {
+        List<AuthenticationModuleBuilder> authModuleBuilders = new ArrayList<AuthenticationModuleBuilder>();
+        for (AsyncServerAuthModule authModule : authModules) {
+            authModuleBuilders.add(configureModule(authModule));
+        }
+        return AuthenticationFilter.builder()
+                .logger(logger)
+                .auditApi(auditApi)
+                .sessionModule(configureModule(sessionAuthModule))
+                .authModules(authModuleBuilders)
+                .build();
     }
 
     /**
@@ -106,14 +90,14 @@ public class GuiceModule extends AbstractModule {
     @Provides
     @Named("SessionAuthModule")
     @Inject
-    public ServerAuthModule getSessionAuthModule(ConfigurationResource configurationResource, Injector injector)
+    public AsyncServerAuthModule getSessionAuthModule(ConfigurationResource configurationResource, Injector injector)
             throws ResourceException, ClassNotFoundException {
 
         Resource configuration = newInternalConnection(newSingleton(configurationResource))
                 .read(new RootContext(), newReadRequest("configuration"));
         JsonValue sessionModuleConfig = configuration.getContent().get("serverAuthContext").get("sessionModule");
         if (!sessionModuleConfig.isNull()) {
-            return (ServerAuthModule) injector.getInstance(
+            return (AsyncServerAuthModule) injector.getInstance(
                     Class.forName(sessionModuleConfig.get("className").asString()));
         } else {
             return null;
@@ -132,16 +116,16 @@ public class GuiceModule extends AbstractModule {
     @Provides
     @Named("AuthModules")
     @Inject
-    public List<ServerAuthModule> getAuthModules(ConfigurationResource configurationResource, Injector injector)
+    public List<AsyncServerAuthModule> getAuthModules(ConfigurationResource configurationResource, Injector injector)
             throws ResourceException, ClassNotFoundException {
 
-        List<ServerAuthModule> authModules = new ArrayList<ServerAuthModule>();
+        List<AsyncServerAuthModule> authModules = new ArrayList<AsyncServerAuthModule>();
 
         Resource configuration = newInternalConnection(newSingleton(configurationResource))
                 .read(new RootContext(), newReadRequest("configuration"));
         JsonValue authModulesConfig = configuration.getContent().get("serverAuthContext").get("authModules");
         for (JsonValue authModuleConfig : authModulesConfig) {
-            authModules.add((ServerAuthModule) injector.getInstance(
+            authModules.add((AsyncServerAuthModule) injector.getInstance(
                     Class.forName(authModuleConfig.get("className").asString())));
         }
 

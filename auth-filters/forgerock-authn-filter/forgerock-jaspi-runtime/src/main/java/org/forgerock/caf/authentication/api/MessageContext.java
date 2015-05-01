@@ -16,10 +16,11 @@
 
 package org.forgerock.caf.authentication.api;
 
+import org.forgerock.caf.authentication.framework.AuditTrail;
 import org.forgerock.http.Context;
 
 /**
- * <p>The authentication framework uses this {@code Context} to pass messages and message
+ * <p>The authentication framework uses this {@code MessageContext} to pass messages and message
  * processing state to authentication contexts for processing by authentication modules.</p>
  *
  * <p>This class encapsulates a request and response message objects for a message exchange. This
@@ -32,6 +33,20 @@ import org.forgerock.http.Context;
  */
 public interface MessageContext extends Context, MessageContextInfo {
 
-    //Methods like setAuthContextState(...) and getAuthContextState(...) will end up here
-    //  which do not want to be exposed to auth modules
+    /**
+     * Gets the {@link AuditTrail} instance for this message exchange.
+     *
+     * @return The {@code AuditTrail}
+     */
+    AuditTrail getAuditTrail();
+
+    /**
+     * Gets the {@link AuthenticationState} instance that maintains any stateful information for
+     * the provided {@link AsyncServerAuthContext}.
+     *
+     * @param authContext The {@code AsyncServerAuthContext} for which the state applies.
+     * @param <T> The type of state class.
+     * @return The {@code AuthenticationState} instance.
+     */
+    <T extends AuthenticationState> T getState(AsyncServerAuthContext authContext);
 }

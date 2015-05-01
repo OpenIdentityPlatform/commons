@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.caf.authn.test.modules;
@@ -19,43 +19,65 @@ package org.forgerock.caf.authn.test.modules;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthStatus;
-import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.MessagePolicy;
-import javax.security.auth.message.module.ServerAuthModule;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 
+import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
+import org.forgerock.caf.authentication.api.AuthenticationException;
+import org.forgerock.caf.authentication.api.MessageContextInfo;
+import org.forgerock.http.protocol.Request;
+import org.forgerock.http.protocol.Response;
+import org.forgerock.util.promise.Promise;
+import org.forgerock.util.promise.Promises;
+
 /**
- * A test auth module in which the {@link #validateRequest(MessageInfo, Subject, Subject)} and
- * {@link #secureResponse(MessageInfo, Subject)} methods return values can be decided based on the value of two request
- * headers.
+ * A test auth module in which the {@link #validateRequest(MessageContextInfo, Subject, Subject)} and
+ * {@link #secureResponse(MessageContextInfo, Subject)} methods return values can be decided based on the
+ * value of two request headers.
  *
  * @since 1.5.0
  */
-public class AuthModuleUnsupportedMessageTypes implements ServerAuthModule {
+public class AuthModuleUnsupportedMessageTypes implements AsyncServerAuthModule {
+
+    /**
+     * Returns the class's short name.
+     *
+     * @return {@inheritDoc}
+     */
+    @Override
+    public String getModuleId() {
+        return getClass().getSimpleName();
+    }
 
     /**
      * Does nothing.
      *
-     * @param requestMessagePolicy {@inheritDoc}
-     * @param responseMessagePolicy {@inheritDoc}
+     * @param requestPolicy {@inheritDoc}
+     * @param responsePolicy {@inheritDoc}
      * @param callbackHandler {@inheritDoc}
      * @param config {@inheritDoc}
      */
     @SuppressWarnings("rawtypes")
     @Override
-    public void initialize(MessagePolicy requestMessagePolicy, MessagePolicy responseMessagePolicy,
+    public Promise<Void, AuthenticationException> initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy,
             CallbackHandler callbackHandler, Map config) {
+        return Promises.newSuccessfulPromise(null);
     }
 
     /**
-     * Returns the {@code String} and {@code Integer} classes, to force an unsupported message types scenario.
+     * Returns the {@code HttpServletRequest} and {@code HttpServletResponse} classes.
      *
      * @return {@inheritDoc}
      */
     @SuppressWarnings("rawtypes")
     @Override
-    public Class[] getSupportedMessageTypes() {
-        return new Class[]{String.class, Integer.class};
+    public Collection<Class<?>> getSupportedMessageTypes() {
+        Collection<Class<?>> supportedMessageTypes = new HashSet<Class<?>>();
+        supportedMessageTypes.add(String.class);
+        supportedMessageTypes.add(Response.class);
+        return supportedMessageTypes;
     }
 
     /**
@@ -67,8 +89,9 @@ public class AuthModuleUnsupportedMessageTypes implements ServerAuthModule {
      * @return {@inheritDoc}
      */
     @Override
-    public AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject) {
-        return AuthStatus.SUCCESS;
+    public Promise<AuthStatus, AuthenticationException> validateRequest(MessageContextInfo messageInfo,
+            Subject clientSubject, Subject serviceSubject) {
+        return Promises.newSuccessfulPromise(AuthStatus.SUCCESS);
     }
 
     /**
@@ -79,8 +102,9 @@ public class AuthModuleUnsupportedMessageTypes implements ServerAuthModule {
      * @return {@inheritDoc}
      */
     @Override
-    public AuthStatus secureResponse(MessageInfo messageInfo, Subject serviceSubject) {
-        return AuthStatus.SEND_SUCCESS;
+    public Promise<AuthStatus, AuthenticationException> secureResponse(MessageContextInfo messageInfo,
+            Subject serviceSubject) {
+        return Promises.newSuccessfulPromise(AuthStatus.SEND_SUCCESS);
     }
 
     /**
@@ -90,6 +114,7 @@ public class AuthModuleUnsupportedMessageTypes implements ServerAuthModule {
      * @param clientSubject {@inheritDoc}
      */
     @Override
-    public void cleanSubject(MessageInfo messageInfo, Subject clientSubject) {
+    public Promise<Void, AuthenticationException> cleanSubject(MessageContextInfo messageInfo, Subject clientSubject) {
+        return Promises.newSuccessfulPromise(null);
     }
 }

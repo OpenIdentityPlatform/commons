@@ -52,7 +52,7 @@ public interface AsyncServerAuthModule {
     String getModuleId();
 
     /**>
-     * Initialize this module with request and response message policies to enforce, a
+     * <p>Initialize this module with request and response message policies to enforce, a
      * {@code CallbackHandler}, and any module specific configuration properties.</p>
      *
      * <p>The request policy and the response policy must not both be null.</p>
@@ -146,4 +146,11 @@ public interface AsyncServerAuthModule {
      * javax.security.auth.message.MessageInfo, Subject)
      */
     Promise<Void, AuthenticationException> cleanSubject(MessageContextInfo messageInfo, Subject clientSubject);
+
+    /**
+     * A short but useful description of this authentication context. Description should include
+     * at least the ID of this module and optionally configuration details.
+     */
+    @Override
+    String toString();
 }

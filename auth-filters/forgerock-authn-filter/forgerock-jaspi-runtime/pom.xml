@@ -34,51 +34,37 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <DynamicImport-Package>*</DynamicImport-Package>
-                    </instructions>
-                </configuration>
             </plugin>
         </plugins>
     </build>
 
     <dependencies>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>forgerock-auth-filter-common</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.forgerock.http</groupId>
-            <artifactId>chf-http-core</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>json-resource</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>javax.security.auth.message</artifactId>
         </dependency>
-
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
+            <groupId>org.forgerock.http</groupId>
+            <artifactId>chf-http-core</artifactId>
         </dependency>
 
-        <dependency>
+
+        <!-- TODO remove -->
+        <dependency> <!-- Required for deprecated Logging framework in JaspiRuntime#LOG -->
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>forgerock-auth-filter-common</artifactId>
+        </dependency>
+
+        <dependency> <!-- Required for JsonValue and ResourceException -->
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>json-resource</artifactId>
+        </dependency>
+
+        <dependency> <!-- Required for MediaType in FailureResponseHandler -->
             <groupId>org.forgerock.commons.guava</groupId>
             <artifactId>forgerock-guava-net</artifactId>
         </dependency>

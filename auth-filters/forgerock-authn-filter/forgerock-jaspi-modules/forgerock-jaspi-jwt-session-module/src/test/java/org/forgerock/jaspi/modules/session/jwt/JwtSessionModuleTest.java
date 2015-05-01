@@ -44,7 +44,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.forgerock.caf.authentication.framework.JaspiRuntime;
+import org.forgerock.caf.authentication.framework.AuthenticationFramework;
 import org.forgerock.json.jose.builders.EncryptedJwtBuilder;
 import org.forgerock.json.jose.builders.JweHeaderBuilder;
 import org.forgerock.json.jose.builders.JwtBuilderFactory;
@@ -439,7 +439,7 @@ public class JwtSessionModuleTest {
         given(messageInfo.getRequestMessage()).willReturn(request);
         given(messageInfo.getResponseMessage()).willReturn(response);
         given(messageInfo.getMap()).willReturn(map);
-        map.put(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT, contextMap);
+        map.put(AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT, contextMap);
 
         given(request.getCookies()).willReturn(cookies);
         given(cookie1.getName()).willReturn("COOKIE1");
@@ -455,7 +455,7 @@ public class JwtSessionModuleTest {
         given(claimsSet.getClaim("prn", String.class)).willReturn("PRINCIPAL");
         Map<String, Object> newContext = new HashMap<String, Object>();
         newContext.put("KEY", "VALUE");
-        given(claimsSet.getClaim(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT, Map.class)).willReturn(newContext);
+        given(claimsSet.getClaim(AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT, Map.class)).willReturn(newContext);
         given(claimsSet.get("sessionId")).willReturn(json("SESSION_ID"));
 
         //When
@@ -519,7 +519,7 @@ public class JwtSessionModuleTest {
         given(messageInfo.getRequestMessage()).willReturn(request);
         given(messageInfo.getResponseMessage()).willReturn(response);
         given(messageInfo.getMap()).willReturn(map);
-        map.put(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT, contextMap);
+        map.put(AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT, contextMap);
 
         given(request.getCookies()).willReturn(cookies);
         given(cookie1.getName()).willReturn("COOKIE1");
@@ -535,7 +535,7 @@ public class JwtSessionModuleTest {
         given(claimsSet.getClaim("prn", String.class)).willReturn("PRINCIPAL");
         Map<String, Object> newContext = new HashMap<String, Object>();
         newContext.put("KEY", "VALUE");
-        given(claimsSet.getClaim(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT, Map.class)).willReturn(newContext);
+        given(claimsSet.getClaim(AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT, Map.class)).willReturn(newContext);
         given(claimsSet.get("sessionId")).willReturn(json("SESSION_ID"));
 
         //When

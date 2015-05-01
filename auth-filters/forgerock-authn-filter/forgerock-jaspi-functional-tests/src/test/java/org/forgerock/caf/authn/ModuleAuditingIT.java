@@ -11,10 +11,21 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.caf.authn;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.data.MapEntry.entry;
+import static org.forgerock.caf.authn.AuthModuleParameters.moduleArray;
+import static org.forgerock.caf.authn.AuthModuleParameters.moduleParams;
+import static org.forgerock.caf.authn.TestFramework.*;
+import static org.forgerock.caf.authn.test.modules.SessionAuthModule.*;
+import static org.testng.Assert.fail;
+
+import java.util.List;
+import java.util.Map;
 
 import com.jayway.restassured.specification.RequestSpecification;
 import org.assertj.core.api.Assertions;
@@ -23,28 +34,11 @@ import org.forgerock.caf.authn.test.modules.AuditingAuthModule;
 import org.forgerock.caf.authn.test.modules.AuditingSessionAuthModule;
 import org.forgerock.caf.authn.test.modules.FailureAuditingAuthModule;
 import org.forgerock.json.fluent.JsonValue;
-import org.hamcrest.Matcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.data.MapEntry.entry;
-import static org.forgerock.caf.authn.AuthModuleParameters.moduleArray;
-import static org.forgerock.caf.authn.AuthModuleParameters.moduleParams;
-import static org.forgerock.caf.authn.TestFramework.*;
-import static org.forgerock.caf.authn.test.modules.SessionAuthModule.SEND_FAILURE_AUTH_STATUS;
-import static org.forgerock.caf.authn.test.modules.SessionAuthModule.SEND_SUCCESS_AUTH_STATUS;
-import static org.forgerock.caf.authn.test.modules.SessionAuthModule.SUCCESS_AUTH_STATUS;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.nullValue;
-import static org.testng.Assert.fail;
 
 /**
  * Functional tests for auditing in the JASPI runtime.
@@ -84,8 +78,8 @@ public class ModuleAuditingIT {
             {"Session Module Only",
                 moduleParams(AuditingSessionAuthModule.class, "SESSION", SUCCESS_AUTH_STATUS,
                     SEND_SUCCESS_AUTH_STATUS),
-                moduleArray(), 200, "SUCCESSFUL", true, "Session-AuditingSessionAuthModule",
-                    Collections.singletonMap("AUDITING_SESSION_AUTH_MODULE_AUDIT_INFO", "AUDIT_INFO"), new MapEntry[0]
+                moduleArray(), 200, "SUCCESSFUL", true, "AuditingSessionAuthModule", new MapEntry[]{
+                    entry("AUDITING_SESSION_AUTH_MODULE_AUDIT_INFO", "AUDIT_INFO")}, new MapEntry[0]
             },
             /**
              * Auditing Auth Module
@@ -107,8 +101,9 @@ public class ModuleAuditingIT {
             {"Single Auth Module Only",
                 null, moduleArray(moduleParams(AuditingAuthModule.class, "AUTH-MODULE-ONE",
                     SUCCESS_AUTH_STATUS, SEND_SUCCESS_AUTH_STATUS)), 200, "SUCCESSFUL", false,
-                "AuthModule-AuditingAuthModule-0",
-                Collections.singletonMap("AUDITING_AUTH_MODULE_AUDIT_INFO", "AUDIT_INFO"), new MapEntry[0]
+                "AuditingAuthModule", new MapEntry[]{
+                    entry("AUDITING_AUTH_MODULE_AUDIT_INFO", "AUDIT_INFO"),
+                    entry("MORE_AUDITING_AUTH_MODULE_AUDIT_INFO", "AUDIT_INFO")}, new MapEntry[0],
             },
             /**
              * Failing Auditing Session Auth Module
@@ -127,7 +122,7 @@ public class ModuleAuditingIT {
              */
             {"Failing Session Module Only",
                 moduleParams(FailureAuditingAuthModule.class, "SESSION", SEND_FAILURE_AUTH_STATUS, null), moduleArray(),
-                401, "FAILED", false, "Session-FailureAuditingAuthModule", Collections.emptyMap(),
+                401, "FAILED", false, "FailureAuditingAuthModule", new MapEntry[0],
                 new MapEntry[]{entry("message", "FAILURE_REASON")}
             },
             /**
@@ -147,8 +142,8 @@ public class ModuleAuditingIT {
              */
             {"Single Failing Auth Module Only",
                 null, moduleArray(moduleParams(FailureAuditingAuthModule.class, "AUTH-MODULE-ONE",
-                    SEND_FAILURE_AUTH_STATUS, null)), 401, "FAILED", false, "AuthModule-FailureAuditingAuthModule-0",
-                    Collections.emptyMap(), new MapEntry[]{entry("message", "FAILURE_REASON")}
+                    SEND_FAILURE_AUTH_STATUS, null)), 401, "FAILED", false, "FailureAuditingAuthModule",
+                    new MapEntry[0], new MapEntry[]{entry("message", "FAILURE_REASON")}
             },
         };
     }
@@ -156,7 +151,7 @@ public class ModuleAuditingIT {
     @Test (dataProvider = "auditing")
     public void auditing(String dataName, AuthModuleParameters sessionModuleParams,
             List<AuthModuleParameters> authModuleParametersList, int expectedResponseStatus, String auditResult,
-            boolean sessionPresent, String moduleId, Map<String, Object> moduleAuditInfo,
+            boolean sessionPresent, String moduleId, MapEntry[] moduleAuditInfo,
             MapEntry[] auditReasonMatchers) {
         logger.info("Running ModuleAuditing test with data set: " + dataName);
 
@@ -184,8 +179,8 @@ public class ModuleAuditingIT {
 
         Map<String, Object> entries = auditRecords.get(0).get("entries").get(0).asMap();
         assertThat(entries)
-                .contains(Assertions.entry("moduleId", moduleId), Assertions.entry("result", auditResult),
-                        Assertions.entry("info", moduleAuditInfo));
+                .contains(Assertions.entry("moduleId", moduleId), Assertions.entry("result", auditResult));
+        assertThat(((Map<String, Object>) entries.get("info"))).contains(moduleAuditInfo);
         Map<String, Object> reason = (Map<String, Object>) entries.get("reason");
         if (reason != null) {
             assertThat(reason).containsOnly(auditReasonMatchers);

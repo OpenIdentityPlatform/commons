@@ -16,7 +16,7 @@
 
 package org.forgerock.jaspi.modules.openid;
 
-import static org.forgerock.caf.authentication.framework.JaspiRuntime.LOG;
+import static org.forgerock.caf.authentication.framework.AuthenticationFramework.LOG;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;

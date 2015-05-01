@@ -11,24 +11,10 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.caf.authn;
-
-import org.forgerock.caf.authn.test.modules.AuthModuleOne;
-import org.forgerock.caf.authn.test.modules.AuthModuleTwo;
-import org.forgerock.caf.authn.test.modules.SessionAuthModule;
-import org.hamcrest.Matcher;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
 import static org.forgerock.caf.authn.AuditParameters.Entry.entry;
 import static org.forgerock.caf.authn.AuditParameters.auditParams;
@@ -40,6 +26,20 @@ import static org.forgerock.caf.authn.TestFramework.setUpConnection;
 import static org.forgerock.caf.authn.test.modules.AuthModuleOne.AUTH_MODULE_ONE_PRINCIPAL;
 import static org.forgerock.caf.authn.test.modules.AuthModuleTwo.AUTH_MODULE_TWO_PRINCIPAL;
 import static org.forgerock.caf.authn.test.modules.SessionAuthModule.*;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import org.forgerock.caf.authn.test.modules.AuthModuleOne;
+import org.forgerock.caf.authn.test.modules.AuthModuleTwo;
+import org.forgerock.caf.authn.test.modules.SessionAuthModule;
+import org.hamcrest.Matcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
 /**
  * Functional tests for the JASPI runtime to test that SEND_CONTINUE (multi-stage module) support works.
@@ -93,7 +93,7 @@ public class SendContinueSupportIT {
                 request(moduleParams(SessionAuthModule.class, "SESSION", SEND_SUCCESS_AUTH_STATUS, null),
                         moduleArray(), 200, false, noData(),
                     auditParams("SUCCESSFUL", SESSION_MODULE_PRINCIPAL, false,
-                            entry("Session-SessionAuthModule", "SUCCESSFUL"))))
+                            entry("SessionAuthModule", "SUCCESSFUL"))))
             },
             /**
              * Single Auth Module Only - SEND_CONTINUE->SEND_SUCCESS:AuthException
@@ -131,7 +131,7 @@ public class SendContinueSupportIT {
                         moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", SEND_SUCCESS_AUTH_STATUS, null)),
                     200, false, noData(),
                     auditParams("SUCCESSFUL", AUTH_MODULE_ONE_PRINCIPAL, false,
-                            entry("AuthModule-AuthModuleOne-0", "SUCCESSFUL"))))
+                            entry("AuthModuleOne", "SUCCESSFUL"))))
             },
             /**
              * Session Module and Two Auth Modules - SEND_CONTINUE->SEND_SUCCESS:AuthException &
@@ -178,7 +178,7 @@ public class SendContinueSupportIT {
                         moduleParams(AuthModuleTwo.class, "AUTH-MODULE-TWO", null, null)), 200, false,
                     noData(),
                     auditParams("SUCCESSFUL", SESSION_MODULE_PRINCIPAL, false,
-                            entry("Session-SessionAuthModule", "SUCCESSFUL"))))
+                            entry("SessionAuthModule", "SUCCESSFUL"))))
             },
             /**
              * Session Module and Two Auth Modules - SEND_FAILURE:AuthException &
@@ -226,8 +226,8 @@ public class SendContinueSupportIT {
                         moduleParams(AuthModuleTwo.class, "AUTH-MODULE-TWO", null, null)), 200, false,
                     noData(),
                     auditParams("SUCCESSFUL", AUTH_MODULE_ONE_PRINCIPAL, false,
-                            entry("Session-SessionAuthModule", "FAILED"),
-                            entry("AuthModule-AuthModuleOne-0", "SUCCESSFUL"))))
+                            entry("SessionAuthModule", "FAILED"),
+                            entry("AuthModuleOne", "SUCCESSFUL"))))
             },
             /**
              * Session Module and Two Auth Modules - SEND_FAILURE:AuthException & SEND_FAILURE:AuthException &
@@ -276,8 +276,8 @@ public class SendContinueSupportIT {
                         moduleParams(AuthModuleTwo.class, "AUTH-MODULE-TWO", SEND_SUCCESS_AUTH_STATUS, null)), 200,
                     false, noData(),
                     auditParams("SUCCESSFUL", AUTH_MODULE_TWO_PRINCIPAL, false,
-                            entry("Session-SessionAuthModule", "FAILED"), entry("AuthModule-AuthModuleOne-0", "FAILED"),
-                            entry("AuthModule-AuthModuleTwo-1", "SUCCESSFUL"))))
+                            entry("SessionAuthModule", "FAILED"), entry("AuthModuleOne", "FAILED"),
+                            entry("AuthModuleTwo", "SUCCESSFUL"))))
             },
         };
     }

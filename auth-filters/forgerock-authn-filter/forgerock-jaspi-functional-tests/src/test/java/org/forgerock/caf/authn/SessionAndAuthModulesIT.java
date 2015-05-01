@@ -11,10 +11,26 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.caf.authn;
+
+import static org.forgerock.caf.authn.AuditParameters.Entry.entry;
+import static org.forgerock.caf.authn.AuditParameters.auditParams;
+import static org.forgerock.caf.authn.AuthModuleParameters.moduleArray;
+import static org.forgerock.caf.authn.AuthModuleParameters.moduleParams;
+import static org.forgerock.caf.authn.BodyMatcher.*;
+import static org.forgerock.caf.authn.TestFramework.runTest;
+import static org.forgerock.caf.authn.TestFramework.setUpConnection;
+import static org.forgerock.caf.authn.test.modules.AuthModuleOne.AUTH_MODULE_ONE_CONTEXT_ENTRY;
+import static org.forgerock.caf.authn.test.modules.AuthModuleOne.AUTH_MODULE_ONE_PRINCIPAL;
+import static org.forgerock.caf.authn.test.modules.AuthModuleTwo.AUTH_MODULE_TWO_CONTEXT_ENTRY;
+import static org.forgerock.caf.authn.test.modules.AuthModuleTwo.AUTH_MODULE_TWO_PRINCIPAL;
+import static org.forgerock.caf.authn.test.modules.SessionAuthModule.*;
+
+import java.util.List;
+import java.util.Map;
 
 import org.forgerock.caf.authn.test.modules.AuthModuleOne;
 import org.forgerock.caf.authn.test.modules.AuthModuleTwo;
@@ -25,24 +41,6 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import java.util.List;
-import java.util.Map;
-
-import static org.forgerock.caf.authn.AuditParameters.auditParams;
-import static org.forgerock.caf.authn.AuthModuleParameters.moduleArray;
-import static org.forgerock.caf.authn.AuthModuleParameters.moduleParams;
-import static org.forgerock.caf.authn.BodyMatcher.exceptionMatcher;
-import static org.forgerock.caf.authn.BodyMatcher.noData;
-import static org.forgerock.caf.authn.BodyMatcher.resourceMatcher;
-import static org.forgerock.caf.authn.TestFramework.runTest;
-import static org.forgerock.caf.authn.TestFramework.setUpConnection;
-import static org.forgerock.caf.authn.test.modules.AuthModuleOne.AUTH_MODULE_ONE_CONTEXT_ENTRY;
-import static org.forgerock.caf.authn.test.modules.AuthModuleOne.AUTH_MODULE_ONE_PRINCIPAL;
-import static org.forgerock.caf.authn.test.modules.AuthModuleTwo.AUTH_MODULE_TWO_CONTEXT_ENTRY;
-import static org.forgerock.caf.authn.test.modules.AuthModuleTwo.AUTH_MODULE_TWO_PRINCIPAL;
-import static org.forgerock.caf.authn.test.modules.SessionAuthModule.*;
-import static org.forgerock.caf.authn.AuditParameters.Entry.entry;
 
 /**
  * Functional tests for the JASPI runtime when configured with a "Session" auth module and two auth modules.
@@ -94,7 +92,7 @@ public class SessionAndAuthModulesIT {
                         moduleParams(AuthModuleTwo.class, "AUTH-MODULE-TWO", null, null)),
                 200, false, noData(),
                 auditParams("SUCCESSFUL", SESSION_MODULE_PRINCIPAL, false,
-                        entry("Session-SessionAuthModule", "SUCCESSFUL"))
+                        entry("SessionAuthModule", "SUCCESSFUL"))
             },
             /**
              * Session Module and Two Auth Modules - SUCCESS:SEND_SUCCESS & AuthException:AuthException &
@@ -129,7 +127,7 @@ public class SessionAndAuthModulesIT {
                         moduleParams(AuthModuleTwo.class, "AUTH-MODULE-TWO", null, null)),
                 200, true, resourceMatcher(SESSION_MODULE_PRINCIPAL, SESSION_MODULE_CONTEXT_ENTRY),
                 auditParams("SUCCESSFUL", SESSION_MODULE_PRINCIPAL, true,
-                        entry("Session-SessionAuthModule", "SUCCESSFUL"))
+                        entry("SessionAuthModule", "SUCCESSFUL"))
             },
             /**
              * Session Module and Two Auth Modules - SEND_CONTINUE:AuthException &
@@ -193,7 +191,7 @@ public class SessionAndAuthModulesIT {
                         moduleParams(AuthModuleTwo.class, "AUTH-MODULE-TWO", null, null)),
                 200, false, noData(),
                 auditParams("SUCCESSFUL", AUTH_MODULE_ONE_PRINCIPAL, false,
-                        entry("Session-SessionAuthModule", "FAILED"), entry("AuthModule-AuthModuleOne-0", "SUCCESSFUL"))
+                        entry("SessionAuthModule", "FAILED"), entry("AuthModuleOne", "SUCCESSFUL"))
             },
             /**
              * Session Module and Two Auth Modules - SEND_FAILURE:AuthException & SEND_CONTINUE:AuthException &
@@ -259,8 +257,8 @@ public class SessionAndAuthModulesIT {
                         moduleParams(AuthModuleTwo.class, "AUTH-MODULE-TWO", null, null)),
                 200, true, resourceMatcher(AUTH_MODULE_ONE_PRINCIPAL, SESSION_MODULE_CONTEXT_ENTRY,
                     AUTH_MODULE_ONE_CONTEXT_ENTRY),
-                auditParams("SUCCESSFUL", AUTH_MODULE_ONE_PRINCIPAL, true, entry("Session-SessionAuthModule", "FAILED"),
-                        entry("AuthModule-AuthModuleOne-0", "SUCCESSFUL"))
+                auditParams("SUCCESSFUL", AUTH_MODULE_ONE_PRINCIPAL, true, entry("SessionAuthModule", "FAILED"),
+                        entry("AuthModuleOne", "SUCCESSFUL"))
             },
             /**
              * Session Module and Two Auth Modules - SEND_FAILURE:AuthException & SEND_FAILURE:AuthException &
@@ -296,8 +294,8 @@ public class SessionAndAuthModulesIT {
                         moduleParams(AuthModuleTwo.class, "AUTH-MODULE-TWO", SEND_SUCCESS_AUTH_STATUS, null)),
                 200, false, noData(),
                 auditParams("SUCCESSFUL", AUTH_MODULE_TWO_PRINCIPAL, false,
-                        entry("Session-SessionAuthModule", "FAILED"), entry("AuthModule-AuthModuleOne-0", "FAILED"),
-                        entry("AuthModule-AuthModuleTwo-1", "SUCCESSFUL"))
+                        entry("SessionAuthModule", "FAILED"), entry("AuthModuleOne", "FAILED"),
+                        entry("AuthModuleTwo", "SUCCESSFUL"))
             },
             /**
              * Session Module and Two Auth Modules - SEND_FAILURE:AuthException & SEND_FAILURE:AuthException &
@@ -361,8 +359,8 @@ public class SessionAndAuthModulesIT {
                         moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", SEND_FAILURE_AUTH_STATUS, null),
                         moduleParams(AuthModuleTwo.class, "AUTH-MODULE-TWO", SEND_FAILURE_AUTH_STATUS, null)),
                 401, false, exceptionMatcher(401),
-                auditParams("FAILED", "", false, entry("Session-SessionAuthModule", "FAILED"),
-                        entry("AuthModule-AuthModuleOne-0", "FAILED"), entry("AuthModule-AuthModuleTwo-1", "FAILED"))
+                auditParams("FAILED", "", false, entry("SessionAuthModule", "FAILED"),
+                        entry("AuthModuleOne", "FAILED"), entry("AuthModuleTwo", "FAILED"))
             },
             /**
              * Session Module and Two Auth Modules - SEND_FAILURE:AuthException & SEND_FAILURE:AuthException &
@@ -400,8 +398,8 @@ public class SessionAndAuthModulesIT {
                 500, true, resourceMatcher(AUTH_MODULE_TWO_PRINCIPAL, SESSION_MODULE_CONTEXT_ENTRY,
                     AUTH_MODULE_TWO_CONTEXT_ENTRY),
                 auditParams("SUCCESSFUL", AUTH_MODULE_TWO_PRINCIPAL, false,
-                        entry("Session-SessionAuthModule", "FAILED"), entry("AuthModule-AuthModuleOne-0", "FAILED"),
-                        entry("AuthModule-AuthModuleTwo-1", "SUCCESSFUL"))
+                        entry("SessionAuthModule", "FAILED"), entry("AuthModuleOne", "FAILED"),
+                        entry("AuthModuleTwo", "SUCCESSFUL"))
             },
             /**
              * Session Module and Two Auth Modules - SEND_FAILURE:SEND_FAILURE & SEND_FAILURE:AuthException &
@@ -440,8 +438,8 @@ public class SessionAndAuthModulesIT {
                 500, true, resourceMatcher(AUTH_MODULE_TWO_PRINCIPAL, SESSION_MODULE_CONTEXT_ENTRY,
                     AUTH_MODULE_TWO_CONTEXT_ENTRY),
                 auditParams("SUCCESSFUL", AUTH_MODULE_TWO_PRINCIPAL, false,
-                        entry("Session-SessionAuthModule", "FAILED"), entry("AuthModule-AuthModuleOne-0", "FAILED"),
-                        entry("AuthModule-AuthModuleTwo-1", "SUCCESSFUL"))
+                        entry("SessionAuthModule", "FAILED"), entry("AuthModuleOne", "FAILED"),
+                        entry("AuthModuleTwo", "SUCCESSFUL"))
             },
             /**
              * Session Module and Two Auth Modules - SEND_FAILURE:SEND_SUCCESS & SEND_FAILURE:AuthException &
@@ -479,9 +477,9 @@ public class SessionAndAuthModulesIT {
                                 SEND_SUCCESS_AUTH_STATUS)),
                 200, true, resourceMatcher(AUTH_MODULE_TWO_PRINCIPAL, SESSION_MODULE_CONTEXT_ENTRY,
                     AUTH_MODULE_TWO_CONTEXT_ENTRY),
-                auditParams("SUCCESSFUL", AUTH_MODULE_TWO_PRINCIPAL, true, entry("Session-SessionAuthModule", "FAILED"),
-                        entry("AuthModule-AuthModuleOne-0", "FAILED"),
-                        entry("AuthModule-AuthModuleTwo-1", "SUCCESSFUL"))
+                auditParams("SUCCESSFUL", AUTH_MODULE_TWO_PRINCIPAL, true, entry("SessionAuthModule", "FAILED"),
+                        entry("AuthModuleOne", "FAILED"),
+                        entry("AuthModuleTwo", "SUCCESSFUL"))
             },
         };
     }

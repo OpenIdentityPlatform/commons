@@ -11,22 +11,10 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.caf.authn;
-
-import org.assertj.core.data.MapEntry;
-import org.forgerock.caf.authn.test.modules.SessionAuthModule;
-import org.hamcrest.Matcher;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
-import java.util.List;
-import java.util.Map;
 
 import static org.forgerock.caf.authn.AuditParameters.Entry.entry;
 import static org.forgerock.caf.authn.AuditParameters.auditParams;
@@ -37,7 +25,18 @@ import static org.forgerock.caf.authn.TestFramework.runTest;
 import static org.forgerock.caf.authn.TestFramework.setUpConnection;
 import static org.forgerock.caf.authn.test.modules.SessionAuthModule.*;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
+
+import java.util.List;
+import java.util.Map;
+
+import org.assertj.core.data.MapEntry;
+import org.forgerock.caf.authn.test.modules.SessionAuthModule;
+import org.hamcrest.Matcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
 /**
  * Functional tests for the JASPI runtime when configured with just a "Session" auth module.
@@ -100,7 +99,7 @@ public class SessionModuleOnlyIT {
                 moduleParams(SessionAuthModule.class, "SESSION", SEND_SUCCESS_AUTH_STATUS, null),
                 moduleArray(), 200, false, noData(),
                 auditParams("SUCCESSFUL", SESSION_MODULE_PRINCIPAL, false,
-                        entry("Session-SessionAuthModule", "SUCCESSFUL"))
+                        entry("SessionAuthModule", "SUCCESSFUL"))
             },
             /**
              * Session Module Only - SEND_FAILURE:AuthException
@@ -125,7 +124,7 @@ public class SessionModuleOnlyIT {
             {"Session Module Only - SEND_FAILURE:AuthException",
                 moduleParams(SessionAuthModule.class, "SESSION", SEND_FAILURE_AUTH_STATUS, null),
                 moduleArray(), 401, false, exceptionMatcher(401),
-                auditParams("FAILED", "", false, entry("Session-SessionAuthModule", "FAILED"))
+                auditParams("FAILED", "", false, entry("SessionAuthModule", "FAILED"))
             },
             /**
              * Session Module Only - SEND_CONTINUE:AuthException
@@ -172,7 +171,7 @@ public class SessionModuleOnlyIT {
             {"Session Module Only - AuthException:SEND_SUCCESS",
                 moduleParams(SessionAuthModule.class, "SESSION", null, SEND_SUCCESS_AUTH_STATUS),
                 moduleArray(), 500, false, exceptionMatcher(500),
-                    auditParams("FAILED", "", false, entry("Session-SessionAuthModule", "FAILED",
+                    auditParams("FAILED", "", false, entry("SessionAuthModule", "FAILED",
                             MapEntry.entry("exception", SESSION_VALIDATE_REQUEST_HEADER_NAME
                                     + " header not set, so throwing AuthException.")))
             },
@@ -202,7 +201,7 @@ public class SessionModuleOnlyIT {
                 moduleParams(SessionAuthModule.class, "SESSION", SUCCESS_AUTH_STATUS, SEND_SUCCESS_AUTH_STATUS),
                 moduleArray(), 200, true, resourceMatcher(SESSION_MODULE_PRINCIPAL, SESSION_MODULE_CONTEXT_ENTRY),
                 auditParams("SUCCESSFUL", SESSION_MODULE_PRINCIPAL, true,
-                        entry("Session-SessionAuthModule", "SUCCESSFUL"))
+                        entry("SessionAuthModule", "SUCCESSFUL"))
             },
             /**
              * Session Module Only - SUCCESS:SEND_FAILURE
@@ -231,7 +230,7 @@ public class SessionModuleOnlyIT {
                 moduleArray(), 500, true,
                 resourceMatcher(SESSION_MODULE_PRINCIPAL, SESSION_MODULE_CONTEXT_ENTRY),
                 auditParams("SUCCESSFUL", SESSION_MODULE_PRINCIPAL, false,
-                        entry("Session-SessionAuthModule", "SUCCESSFUL"))
+                        entry("SessionAuthModule", "SUCCESSFUL"))
             },
             /**
              * Session Module Only - SUCCESS:AuthException
@@ -246,7 +245,7 @@ public class SessionModuleOnlyIT {
              *
              * Expected Result:
              * * HTTP 500 status
-             * * HTTP response from resource
+             * * HTTP response detailing the cause of the failure
              * * Audit Session Module success
              * * Audit overall result as success
              * * Audit record contains principal
@@ -258,9 +257,9 @@ public class SessionModuleOnlyIT {
             {"Session Module Only - SUCCESS:AuthException",
                 moduleParams(SessionAuthModule.class, "SESSION", SUCCESS_AUTH_STATUS, null),
                 moduleArray(), 500, true,
-                resourceMatcher(SESSION_MODULE_PRINCIPAL, SESSION_MODULE_CONTEXT_ENTRY),
+                exceptionMatcher(500, containsString("X-JASPI-SESSION-SECURE-RESPONSE header not set, so throwing AuthException")),
                 auditParams("SUCCESSFUL", SESSION_MODULE_PRINCIPAL, false,
-                        entry("Session-SessionAuthModule", "SUCCESSFUL"))
+                        entry("SessionAuthModule", "SUCCESSFUL"))
             },
         };
     }
@@ -293,7 +292,7 @@ public class SessionModuleOnlyIT {
                 moduleParams(SessionAuthModule.class, "SESSION", FAILURE_AUTH_STATUS, SEND_SUCCESS_AUTH_STATUS),
                 moduleArray(), 500, false,
                 exceptionMatcher(500, containsString("Invalid AuthStatus returned from validateRequest, FAILURE")),
-                auditParams("FAILED", "", false, entry("Session-SessionAuthModule", "FAILED",
+                auditParams("FAILED", "", false, entry("SessionAuthModule", "FAILED",
                         MapEntry.entry("message", "Invalid AuthStatus returned from validateRequest, FAILURE")))
             },
             /**
@@ -321,7 +320,7 @@ public class SessionModuleOnlyIT {
                 moduleParams(SessionAuthModule.class, "SESSION", NULL_AUTH_STATUS, SEND_SUCCESS_AUTH_STATUS),
                 moduleArray(), 500, false,
                 exceptionMatcher(500, containsString("Invalid AuthStatus returned from validateRequest, null")),
-                auditParams("FAILED", "", false, entry("Session-SessionAuthModule", "FAILED",
+                auditParams("FAILED", "", false, entry("SessionAuthModule", "FAILED",
                         MapEntry.entry("message", "Invalid AuthStatus returned from validateRequest, null")))
             },
             /**
@@ -350,7 +349,7 @@ public class SessionModuleOnlyIT {
                 moduleParams(SessionAuthModule.class, "SESSION", SUCCESS_AUTH_STATUS, SEND_CONTINUE_AUTH_STATUS),
                 moduleArray(), 200, true, resourceMatcher(SESSION_MODULE_PRINCIPAL, SESSION_MODULE_CONTEXT_ENTRY),
                 auditParams("SUCCESSFUL", SESSION_MODULE_PRINCIPAL, false,
-                        entry("Session-SessionAuthModule", "SUCCESSFUL"))
+                        entry("SessionAuthModule", "SUCCESSFUL"))
             },
             /**
              * Session Module Only - SUCCESS:SUCCESS
@@ -365,7 +364,7 @@ public class SessionModuleOnlyIT {
              *
              * Expected Result:
              * * HTTP 500 status
-             * * HTTP response from resource
+             * * HTTP response detailing the cause of the failure
              * * Audit Session Module success
              * * Audit overall result as success
              * * Audit record contains principal
@@ -377,9 +376,9 @@ public class SessionModuleOnlyIT {
             {"Session Module Only - SUCCESS:SUCCESS",
                 moduleParams(SessionAuthModule.class, "SESSION", SUCCESS_AUTH_STATUS, SUCCESS_AUTH_STATUS),
                 moduleArray(), 500, true,
-                resourceMatcher(SESSION_MODULE_PRINCIPAL, SESSION_MODULE_CONTEXT_ENTRY),
+                exceptionMatcher(500, containsString("Invalid AuthStatus returned from secureResponse, SUCCESS")),
                 auditParams("SUCCESSFUL", SESSION_MODULE_PRINCIPAL, false,
-                        entry("Session-SessionAuthModule", "SUCCESSFUL"))
+                        entry("SessionAuthModule", "SUCCESSFUL"))
             },
             /**
              * Session Module Only - SUCCESS:FAILURE
@@ -393,7 +392,7 @@ public class SessionModuleOnlyIT {
              *
              * Expected Result:
              * * HTTP 500 status
-             * * HTTP response from resource
+             * * HTTP response detailing the cause of the failure
              * * Audit Session Module success
              * * Audit overall result as success
              * * Audit record contains principal
@@ -405,9 +404,9 @@ public class SessionModuleOnlyIT {
             {"Session Module Only - SUCCESS:FAILURE",
                 moduleParams(SessionAuthModule.class, "SESSION", SUCCESS_AUTH_STATUS, FAILURE_AUTH_STATUS),
                 moduleArray(), 500, true,
-                resourceMatcher(SESSION_MODULE_PRINCIPAL, SESSION_MODULE_CONTEXT_ENTRY),
+                exceptionMatcher(500, containsString("Invalid AuthStatus returned from secureResponse, FAILURE")),
                 auditParams("SUCCESSFUL", SESSION_MODULE_PRINCIPAL, false,
-                        entry("Session-SessionAuthModule", "SUCCESSFUL"))
+                        entry("SessionAuthModule", "SUCCESSFUL"))
             },
             /**
              * Session Module Only - SUCCESS:null
@@ -422,7 +421,7 @@ public class SessionModuleOnlyIT {
              *
              * Expected Result:
              * * HTTP 500 status
-             * * HTTP response from resource
+             * * HTTP response detailing the cause of the failure
              * * Audit Session Module success
              * * Audit overall result as success
              * * Audit record contains principal
@@ -434,9 +433,9 @@ public class SessionModuleOnlyIT {
             {"Session Module Only - SUCCESS:null",
                 moduleParams(SessionAuthModule.class, "SESSION", SUCCESS_AUTH_STATUS, NULL_AUTH_STATUS),
                 moduleArray(), 500, true,
-                resourceMatcher(SESSION_MODULE_PRINCIPAL, SESSION_MODULE_CONTEXT_ENTRY),
+                exceptionMatcher(500, containsString("Invalid AuthStatus returned from secureResponse, null")),
                 auditParams("SUCCESSFUL", SESSION_MODULE_PRINCIPAL, false,
-                        entry("Session-SessionAuthModule", "SUCCESSFUL"))
+                        entry("SessionAuthModule", "SUCCESSFUL"))
             },
         };
     }
