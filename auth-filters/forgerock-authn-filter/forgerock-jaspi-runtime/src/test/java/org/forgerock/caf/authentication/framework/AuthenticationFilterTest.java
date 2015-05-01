@@ -76,8 +76,8 @@ public class AuthenticationFilterTest {
 
         //Then
         ArgumentCaptor<Logger> loggerCaptor = ArgumentCaptor.forClass(Logger.class);
-        ArgumentCaptor<FailureResponseHandler> responseHandlerCaptor =
-                ArgumentCaptor.forClass(FailureResponseHandler.class);
+        ArgumentCaptor<ResponseHandler> responseHandlerCaptor =
+                ArgumentCaptor.forClass(ResponseHandler.class);
         ArgumentCaptor<Subject> serviceSubjectCaptor = ArgumentCaptor.forClass(Subject.class);
         ArgumentCaptor<List> authModulesCaptor = ArgumentCaptor.forClass(List.class);
 
@@ -108,7 +108,7 @@ public class AuthenticationFilterTest {
         //Then
         ArgumentCaptor<Logger> loggerCaptor = ArgumentCaptor.forClass(Logger.class);
 
-        verify(builder).createFilter(loggerCaptor.capture(), eq(auditApi), Matchers.<FailureResponseHandler>anyObject(),
+        verify(builder).createFilter(loggerCaptor.capture(), eq(auditApi), Matchers.<ResponseHandler>anyObject(),
                 Matchers.<Subject>anyObject(), eq(sessionAuthModule), Matchers.<List<AsyncServerAuthModule>>anyObject(),
                 Matchers.<Promise<List<Void>, AuthenticationException>>anyObject());
 
@@ -123,7 +123,7 @@ public class AuthenticationFilterTest {
         Logger logger = mock(Logger.class);
         AuditApi auditApi = mock(AuditApi.class);
         Subject serviceSubject = new Subject();
-        ResourceExceptionHandler responseHandler = mock(ResourceExceptionHandler.class);
+        ResponseWriter responseWriter = mock(ResponseWriter.class);
 
         AsyncServerAuthModule sessionAuthModule = mockAuthModule();
         MessagePolicy sessionAuthModuleRequestPolicy = mock(MessagePolicy.class);
@@ -149,7 +149,7 @@ public class AuthenticationFilterTest {
         builder.logger(logger)
                 .auditApi(auditApi)
                 .serviceSubject(serviceSubject)
-                .responseHandler(responseHandler)
+                .responseHandler(responseWriter)
                 .sessionModule(
                         configureModule(sessionAuthModule)
                                 .requestPolicy(sessionAuthModuleRequestPolicy)
@@ -171,8 +171,8 @@ public class AuthenticationFilterTest {
 
         //Then
         ArgumentCaptor<Logger> loggerCaptor = ArgumentCaptor.forClass(Logger.class);
-        ArgumentCaptor<FailureResponseHandler> responseHandlerCaptor =
-                ArgumentCaptor.forClass(FailureResponseHandler.class);
+        ArgumentCaptor<ResponseHandler> responseHandlerCaptor =
+                ArgumentCaptor.forClass(ResponseHandler.class);
         ArgumentCaptor<List> authModulesCaptor = ArgumentCaptor.forClass(List.class);
 
         verify(builder).createFilter(loggerCaptor.capture(), eq(auditApi), responseHandlerCaptor.capture(),
@@ -219,7 +219,7 @@ public class AuthenticationFilterTest {
 
         //Then
         verify(builder).createFilter(Matchers.<Logger>anyObject(), eq(auditApi),
-                Matchers.<FailureResponseHandler>anyObject(), Matchers.<Subject>anyObject(),
+                Matchers.<ResponseHandler>anyObject(), Matchers.<Subject>anyObject(),
                 Matchers.<AsyncServerAuthModule>anyObject(), anyListOf(AsyncServerAuthModule.class),
                 Matchers.<Promise<List<Void>, AuthenticationException>>anyObject());
 

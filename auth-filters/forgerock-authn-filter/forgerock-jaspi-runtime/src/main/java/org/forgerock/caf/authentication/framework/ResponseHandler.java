@@ -16,27 +16,37 @@
 
 package org.forgerock.caf.authentication.framework;
 
+import static org.forgerock.json.fluent.JsonValue.*;
+import static org.forgerock.json.resource.ResourceException.UNAUTHORIZED;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.api.MessageContext;
 import org.forgerock.guava.common.net.MediaType;
 import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
+import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.PermanentException;
 import org.forgerock.json.resource.ResourceException;
 
 /**
- * A handler class for rendering failures in the most acceptable supported content type.
+ * A handler class for rendering {@code AuthenticationException}s in the most acceptable supported
+ * content type.
+ *
+ * @since 2.0.0
  */
-class FailureResponseHandler {
+class ResponseHandler {
 
     private static final Pattern ACCEPT_HEADER = Pattern.compile("(?:(?:[^\",]*|(?:.*[^\\\\]\".*[^\\\\]\".*)))( *, *)");
     private static final MediaType WILDCARD = MediaType.parse("*/*");
@@ -58,28 +68,34 @@ class FailureResponseHandler {
         }
     };
 
-    private final List<ResourceExceptionHandler> handlers = new ArrayList<ResourceExceptionHandler>();
-    private final JsonResourceExceptionHandler defaultHandler;
+    private final List<ResponseWriter> writers = new ArrayList<ResponseWriter>();
+    private final JsonResponseWriter defaultHandler;
 
-    FailureResponseHandler() {
-        defaultHandler = new JsonResourceExceptionHandler();
-        handlers.add(defaultHandler);
+    /**
+     * Creates a new {@code ResponseHandler} instance.
+     */
+    ResponseHandler() {
+        defaultHandler = new JsonResponseWriter();
+        writers.add(defaultHandler);
     }
 
     /**
-     * Handles the error. The message's request {@code Accept} header preference is parsed, and the most suitable
-     * handler is selected. If no specific handler is found, or if the highest quality accepted content type is
-     * {@code \*\/\*}, then the {@code JsonResourceExceptionHandler} is used.
-     * @param jre
-     * @param context
+     * <p>Handles the {@code AuthenticationException}.</p>
+     *
+     * <p>The message's request {@code Accept} header preference is parsed, and the most suitable
+     * {@code ResponseWriter} is selected. If no specific writer is found, or if the highest
+     * quality accepted content type is {@code \*\/\*}, then the default JSON writer is used.</p>
+     *
+     * @param context The {@code MessageContext} for the request.
+     * @param exception The {@code AuthenticationException} to handle.
      */
-    void handle(ResourceException jre, MessageContext context)  {
+    void handle(MessageContext context, AuthenticationException exception)  {
         Request request = context.getRequest();
-        Response response = context.getResponse();
-
-        response.setStatusAndReason(jre.getCode());
-
         String acceptHeader = request.getHeaders().getFirst("Accept");
+        getResponseHandler(acceptHeader).write(context, exception);
+    }
+
+    private ResponseWriter getResponseHandler(String acceptHeader) {
         if (acceptHeader != null) {
             SortedSet<MediaType> acceptedTypes = new TreeSet<MediaType>(ACCEPT_QUALITY_COMPARATOR);
             Matcher m = ACCEPT_HEADER.matcher(acceptHeader);
@@ -92,11 +108,10 @@ class FailureResponseHandler {
 
             for (MediaType type : acceptedTypes) {
                 MediaType forComparison = type.withoutParameters();
-                for (ResourceExceptionHandler handler : handlers) {
+                for (ResponseWriter handler : writers) {
                     for (MediaType handled : handler.handles()) {
                         if (handled.is(forComparison)) {
-                            handler.write(jre, response);
-                            return;
+                            return handler;
                         }
                     }
                 }
@@ -105,22 +120,30 @@ class FailureResponseHandler {
                 }
             }
         }
-        defaultHandler.write(jre, response);
+
+        return defaultHandler;
     }
 
     /**
-     * Register a class to handle {@code ResourceException}s.
-
-     * @param handler The {@code ResourceExceptionHandler}.
+     * Register a class to handle {@code AuthenticationException}s.
+     *
+     * @param writer The {@code ResponseWriter}.
      */
-    void registerExceptionHandler(ResourceExceptionHandler handler) {
-        this.handlers.add(handler);
+    void addResponseWriter(ResponseWriter writer) {
+        writers.add(writer);
+    }
+
+    @Override
+    public String toString() {
+        return "Registered Handlers: " + writers.toString() + ", Default Handler: " + defaultHandler.toString();
     }
 
     /**
-     * A default implementation of {@code ResourceExceptionHandler} that renders the exception to JSON.
+     * A default implementation of {@code ResponseWriter} that renders the exception to JSON.
+     *
+     * @since 2.0.0
      */
-    static final class JsonResourceExceptionHandler implements ResourceExceptionHandler {
+    static final class JsonResponseWriter implements ResponseWriter {
 
         private static final List<MediaType> MEDIA_TYPES = Arrays.asList(
                 MediaType.JSON_UTF_8,
@@ -130,8 +153,24 @@ class FailureResponseHandler {
             return MEDIA_TYPES;
         }
 
-        public void write(ResourceException jre, Response response)  {
-            response.getHeaders().putSingle(ContentTypeHeader.valueOf("application/json; charset=UTF-8"));
+        @Override
+        public void write(MessageContext context, AuthenticationException exception)  {
+            ResourceException jre;
+            if (exception instanceof AuthenticationFailedException) {
+                jre = new PermanentException(UNAUTHORIZED, exception.getMessage(), null);
+            } else if (exception.getCause() instanceof ResourceException) {
+                jre = (ResourceException) exception.getCause();
+            } else {
+                jre = new InternalServerErrorException(exception.getMessage(), exception);
+            }
+            AuditTrail auditTrail = context.getAuditTrail();
+            List<Map<String, Object>> failureReasonList = auditTrail.getFailureReasons();
+            if (failureReasonList != null && !failureReasonList.isEmpty()) {
+                jre.setDetail(json(object(field("failureReasons", failureReasonList))));
+            }
+            Response response = context.getResponse();
+            response.setStatusAndReason(jre.getCode());
+            response.getHeaders().putSingle(ContentTypeHeader.valueOf(MediaType.JSON_UTF_8.toString()));
             response.setEntity(jre.includeCauseInJsonValue().toJsonValue().asMap());
         }
 
@@ -139,10 +178,5 @@ class FailureResponseHandler {
         public String toString() {
             return MEDIA_TYPES.toString();
         }
-    }
-
-    @Override
-    public String toString() {
-        return "Registered Handlers: " + handlers.toString() + ", Default Handler: " + defaultHandler.toString();
     }
 }

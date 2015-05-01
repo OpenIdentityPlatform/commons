@@ -20,7 +20,8 @@ import static org.forgerock.caf.authentication.framework.AuditTrail.AUDIT_TRAIL_
 import static org.forgerock.caf.authentication.framework.AuthContexts.*;
 import static org.forgerock.caf.authentication.framework.AuthStatusUtils.isSendFailure;
 import static org.forgerock.caf.authentication.framework.AuthStatusUtils.isSuccess;
-import static org.forgerock.json.fluent.JsonValue.*;
+import static org.forgerock.json.resource.ResourceException.INTERNAL_ERROR;
+import static org.forgerock.json.resource.ResourceException.UNAUTHORIZED;
 
 import javax.security.auth.Subject;
 import javax.security.auth.message.AuthStatus;
@@ -41,7 +42,6 @@ import org.forgerock.http.HttpContext;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.ResponseException;
-import org.forgerock.json.resource.ResourceException;
 import org.forgerock.util.Reject;
 import org.forgerock.util.promise.AsyncFunction;
 import org.forgerock.util.promise.Promise;
@@ -69,18 +69,6 @@ public final class AuthenticationFramework {
     public static final Logger LOG = LoggerFactory.getLogger(AuthenticationFramework.class);
 
     /**
-     * Indicates that the request could not be authenticated either because no credentials were
-     * provided or the credentials provided did not pass authentication. Equivalent to HTTP
-     * status: 401 Unauthorized.
-     */
-    public static final int UNAUTHORIZED_HTTP_ERROR_CODE = 401;
-
-    /**
-     * The exception message for a 401 ResourceException.
-     */
-    public static final String UNAUTHORIZED_ERROR_MESSAGE = "Access Denied";
-
-    /**
      * The name of the HTTP Servlet Request attribute where the principal name of the user/client
      * making the request will be set.
      */
@@ -104,7 +92,7 @@ public final class AuthenticationFramework {
 
     private final Logger logger;
     private final AuditApi auditApi;
-    private final FailureResponseHandler responseHandler;
+    private final ResponseHandler responseHandler;
     private final AsyncServerAuthContext authContext;
     private final Subject serviceSubject;
     private final Promise<List<Void>, AuthenticationException> initializationPromise;
@@ -115,13 +103,13 @@ public final class AuthenticationFramework {
      *
      * @param logger The non-{@code null} {@link Logger} instance.
      * @param auditApi The non-{@code null} {@link AuditApi} instance.
-     * @param responseHandler The non-{@code null} {@link FailureResponseHandler} instance.
+     * @param responseHandler The non-{@code null} {@link ResponseHandler} instance.
      * @param authContext The non-{@code null} {@link AsyncServerAuthContext} instance.
      * @param serviceSubject The non-{@code null} service {@link Subject}.
      * @param initializationPromise A {@link Promise} which will be completed once the configured
      *                              auth modules have been initialised.
      */
-    AuthenticationFramework(Logger logger, AuditApi auditApi, FailureResponseHandler responseHandler,
+    AuthenticationFramework(Logger logger, AuditApi auditApi, ResponseHandler responseHandler,
             AsyncServerAuthContext authContext, Subject serviceSubject,
             Promise<List<Void>, AuthenticationException> initializationPromise) {
         Reject.ifNull(logger, auditApi, responseHandler, authContext, serviceSubject, initializationPromise);
@@ -187,11 +175,9 @@ public final class AuthenticationFramework {
             @Override
             public Promise<AuthStatus, AuthenticationException> apply(AuthStatus authStatus) {
                 if (isSendFailure(authStatus)) {
-                    context.getResponse().setStatusAndReason(401);
                     logger.debug("Authentication has failed.");
-                    ResourceException jre = ResourceException.getException(UNAUTHORIZED_HTTP_ERROR_CODE,
-                            UNAUTHORIZED_ERROR_MESSAGE);
-                    return Promises.newFailedPromise(new AuthenticationException(jre));
+                    AuthenticationException exception = new AuthenticationFailedException();
+                    return Promises.newFailedPromise(exception);
                 } else if (isSuccess(authStatus)) {
                     String principalName = null;
                     for (Principal principal : clientSubject.getPrincipals()) {
@@ -200,7 +186,6 @@ public final class AuthenticationFramework {
                             break;
                         }
                     }
-
                     Map<String, Object> contextMap =
                             getMap(context.getRequestContextMap(), AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT);
                     logger.debug("Setting principal name, {}, and {} context values on to the request.",
@@ -258,7 +243,7 @@ public final class AuthenticationFramework {
             @Override
             public Promise<Response, ResponseException> apply(AuthStatus authStatus) {
                 if (isSendFailure(authStatus)) {
-                    context.getResponse().setStatusAndReason(500);
+                    context.getResponse().setStatusAndReason(INTERNAL_ERROR);
                 }
                 return Promises.newSuccessfulPromise(context.getResponse());
             }
@@ -270,18 +255,11 @@ public final class AuthenticationFramework {
         return new AsyncFunction<AuthenticationException, Response, ResponseException>() {
             @Override
             public Promise<Response, ResponseException> apply(AuthenticationException error) {
-                ResourceException jre;
-                if (error.getCause() instanceof ResourceException) {
-                    jre = (ResourceException) error.getCause();
-                } else {
-                    jre = ResourceException.getException(ResourceException.INTERNAL_ERROR, error.getMessage());
+                responseHandler.handle(context, error);
+                if (error instanceof AuthenticationFailedException) {
+                    //Force 401 HTTP status
+                    context.getResponse().setStatusAndReason(UNAUTHORIZED);
                 }
-                AuditTrail auditTrail = context.getAuditTrail();
-                List<Map<String, Object>> failureReasonList = auditTrail.getFailureReasons();
-                if (failureReasonList != null && !failureReasonList.isEmpty()) {
-                    jre.setDetail(json(object(field("failureReasons", failureReasonList))));
-                }
-                responseHandler.handle(jre, context);
                 return Promises.newFailedPromise(new ResponseException(context.getResponse(),
                         error.getMessage(), error));
             }

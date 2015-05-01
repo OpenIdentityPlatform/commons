@@ -70,13 +70,13 @@ public final class AuthenticationFilter implements Filter {
      *
      * @param logger The non-{@code null} {@link Logger} instance.
      * @param auditApi The non-{@code null} {@link AuditApi} instance.
-     * @param responseHandler The non-{@code null} {@link FailureResponseHandler} instance.
+     * @param responseHandler The non-{@code null} {@link ResponseHandler} instance.
      * @param authContext The non-{@code null} {@link AsyncServerAuthContext} instance.
      * @param serviceSubject The non-{@code null} service {@link Subject}.
      * @param initializationPromise A {@link Promise} which will be completed once the configured
      *                              auth modules have been initialised.
      */
-    AuthenticationFilter(Logger logger, AuditApi auditApi, Subject serviceSubject, FailureResponseHandler responseHandler,
+    AuthenticationFilter(Logger logger, AuditApi auditApi, Subject serviceSubject, ResponseHandler responseHandler,
             AsyncServerAuthContext authContext, Promise<List<Void>, AuthenticationException> initializationPromise) {
         this.runtime = new AuthenticationFramework(logger, auditApi, responseHandler, authContext, serviceSubject,
                 initializationPromise);
@@ -150,7 +150,7 @@ public final class AuthenticationFilter implements Filter {
         private Logger logger;
         private AuditApi auditApi;
         private Subject serviceSubject = new Subject();
-        private final FailureResponseHandler responseHandler = new FailureResponseHandler();
+        private final ResponseHandler responseHandler = new ResponseHandler();
         private AuthenticationModuleBuilder sessionAuthModuleBuilder = null;
         private final List<AuthenticationModuleBuilder> authModuleBuilders =
                 new ArrayList<AuthenticationModuleBuilder>();
@@ -210,11 +210,11 @@ public final class AuthenticationFilter implements Filter {
          * Adds an additional response handler instance that adds support for protecting resources
          * which return responses with non-JSON content types.
          *
-         * @param responseHandler The {@code ResourceExceptionHandler} instance.
+         * @param responseWriter The {@code ResourceExceptionHandler} instance.
          * @return This builder instance.
          */
-        public AuthenticationFilterBuilder responseHandler(ResourceExceptionHandler responseHandler) {
-            this.responseHandler.registerExceptionHandler(responseHandler);
+        public AuthenticationFilterBuilder responseHandler(ResponseWriter responseWriter) {
+            this.responseHandler.addResponseWriter(responseWriter);
             return this;
         }
 
@@ -309,7 +309,7 @@ public final class AuthenticationFilter implements Filter {
                     moduleBuilder.handler, moduleBuilder.settings);
         }
 
-        AuthenticationFilter createFilter(Logger logger, AuditApi auditApi, FailureResponseHandler responseHandler,
+        AuthenticationFilter createFilter(Logger logger, AuditApi auditApi, ResponseHandler responseHandler,
                 Subject serviceSubject, AsyncServerAuthModule sessionAuthModule,
                 List<AsyncServerAuthModule> authModules,
                 Promise<List<Void>, AuthenticationException> initializationPromise) {

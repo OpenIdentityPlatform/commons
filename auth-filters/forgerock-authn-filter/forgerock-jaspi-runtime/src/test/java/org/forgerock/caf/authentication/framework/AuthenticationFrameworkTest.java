@@ -52,7 +52,7 @@ public class AuthenticationFrameworkTest {
     private AuthenticationFramework runtime;
 
     private AuditApi auditApi;
-    private FailureResponseHandler responseHandler;
+    private ResponseHandler responseHandler;
     private AsyncServerAuthContext authContext;
     private Subject serviceSubject;
 
@@ -64,7 +64,7 @@ public class AuthenticationFrameworkTest {
     @BeforeMethod
     public void setup() {
         auditApi = mock(AuditApi.class);
-        responseHandler = mock(FailureResponseHandler.class);
+        responseHandler = mock(ResponseHandler.class);
         authContext = mock(AsyncServerAuthContext.class);
         serviceSubject = new Subject();
         Promise<List<Void>, AuthenticationException> initializationPromise =
@@ -129,7 +129,8 @@ public class AuthenticationFrameworkTest {
 
         //Then
         assertThat(promise).failedWithException();
-        verify(responseHandler).handle(Matchers.<ResourceException>anyObject(), Matchers.<MessageContext>anyObject());
+        verify(responseHandler).handle(Matchers.<MessageContext>anyObject(),
+                Matchers.<AuthenticationException>anyObject());
         verify(authContext, never()).validateRequest(Matchers.<MessageContext>anyObject(),
                 Matchers.<Subject>anyObject(), eq(serviceSubject));
         verify(authContext, never()).secureResponse(Matchers.<MessageContext>anyObject(), eq(serviceSubject));
@@ -154,7 +155,8 @@ public class AuthenticationFrameworkTest {
 
         //Then
         assertThat(promise).failedWithException();
-        verify(responseHandler).handle(eq(resourceException), Matchers.<MessageContext>anyObject());
+        verify(responseHandler).handle(Matchers.<MessageContext>anyObject(),
+                Matchers.<AuthenticationException>anyObject());
         verify(authContext, never()).validateRequest(Matchers.<MessageContext>anyObject(),
                 Matchers.<Subject>anyObject(), eq(serviceSubject));
         verify(authContext, never()).secureResponse(Matchers.<MessageContext>anyObject(), eq(serviceSubject));
@@ -272,7 +274,8 @@ public class AuthenticationFrameworkTest {
 
         //Then
         assertThat(promise).failedWithException();
-        verify(responseHandler).handle(Matchers.<ResourceException>anyObject(), Matchers.<MessageContext>anyObject());
+        verify(responseHandler).handle(Matchers.<MessageContext>anyObject(),
+                Matchers.<AuthenticationException>anyObject());
         verify(authContext).validateRequest(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject(),
                 eq(serviceSubject));
         verify(authContext, never()).secureResponse(Matchers.<MessageContext>anyObject(), eq(serviceSubject));
@@ -296,7 +299,8 @@ public class AuthenticationFrameworkTest {
 
         //Then
         assertThat(promise).failedWithException();
-        verify(responseHandler).handle(Matchers.<ResourceException>anyObject(), Matchers.<MessageContext>anyObject());
+        verify(responseHandler).handle(Matchers.<MessageContext>anyObject(),
+                Matchers.<AuthenticationException>anyObject());
         verify(authContext).validateRequest(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject(),
                 eq(serviceSubject));
         verify(authContext, never()).secureResponse(Matchers.<MessageContext>anyObject(), eq(serviceSubject));
@@ -362,7 +366,8 @@ public class AuthenticationFrameworkTest {
 
         //Then
         assertThat(promise).failedWithException();
-        verify(responseHandler).handle(Matchers.<ResourceException>anyObject(), Matchers.<MessageContext>anyObject());
+        verify(responseHandler).handle(Matchers.<MessageContext>anyObject(),
+                Matchers.<AuthenticationException>anyObject());
         verify(authContext).validateRequest(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject(),
                 eq(serviceSubject));
         verify(authContext).secureResponse(Matchers.<MessageContext>anyObject(), eq(serviceSubject));
@@ -386,7 +391,8 @@ public class AuthenticationFrameworkTest {
 
         //Then
         assertThat(promise).failedWithException();
-        verify(responseHandler).handle(Matchers.<ResourceException>anyObject(), Matchers.<MessageContext>anyObject());
+        verify(responseHandler).handle(Matchers.<MessageContext>anyObject(),
+                Matchers.<AuthenticationException>anyObject());
         verify(authContext).validateRequest(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject(),
                 eq(serviceSubject));
         verify(authContext).secureResponse(Matchers.<MessageContext>anyObject(), eq(serviceSubject));

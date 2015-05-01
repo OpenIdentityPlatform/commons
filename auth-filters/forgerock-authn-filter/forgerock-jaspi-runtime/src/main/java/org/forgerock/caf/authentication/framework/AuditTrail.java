@@ -203,20 +203,14 @@ public class AuditTrail {
      */
     @SuppressWarnings("unchecked")
     List<Map<String, Object>> getFailureReasons() {
-
         List<Map<String, Object>> failureReasons = new ArrayList<Map<String, Object>>();
-
         for (Map<String, Object> entry : entries) {
-
             Map<String, Object> failureReason = (Map<String, Object>) entry.get(REASON_KEY);
-
             if (failureReason == null || failureReason.isEmpty()) {
                 continue;
             }
-
             failureReasons.add(failureReason);
         }
-
         return failureReasons;
     }
 

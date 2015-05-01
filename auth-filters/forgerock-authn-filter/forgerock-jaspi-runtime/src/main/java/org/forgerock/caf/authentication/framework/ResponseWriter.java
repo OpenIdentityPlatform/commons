@@ -18,14 +18,19 @@ package org.forgerock.caf.authentication.framework;
 
 import java.util.Collection;
 
+import org.forgerock.caf.authentication.api.AuthenticationException;
+import org.forgerock.caf.authentication.api.MessageContext;
 import org.forgerock.guava.common.net.MediaType;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.json.resource.ResourceException;
 
 /**
- * Handle ResourceException responses for different media types. Implementations should be thread-safe.
+ * Writes {@code AuthenticationException} responses for different media types.
+ * Implementations should be thread-safe.
+ *
+ * @since 2.0.0
  */
-public interface ResourceExceptionHandler {
+public interface ResponseWriter {
 
     /**
      * Which media types can this handler handle.
@@ -37,13 +42,13 @@ public interface ResourceExceptionHandler {
     /**
      * Write the details of the exception out, and set the content type of the response.
      *
-     * @param exception The exception to be written.
-     * @param response The response to write the details to.
+     * @param context The {@code MessageContext} containing the response to write the details to.
+     * @param exception The {@code AuthenticationException} to be written.
      */
-    void write(ResourceException exception, Response response);
+    void write(MessageContext context, AuthenticationException exception);
 
     /**
-     * A short but useful description of this response handler. Description should include the
+     * A short but useful description of this response writer. Description should include the
      * media type this response handler handles.
      */
     @Override
