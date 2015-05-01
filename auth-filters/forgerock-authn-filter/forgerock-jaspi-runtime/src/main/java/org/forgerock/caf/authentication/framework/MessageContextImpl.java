@@ -28,6 +28,7 @@ import org.forgerock.http.Context;
 import org.forgerock.http.ServerContext;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
+import org.forgerock.http.protocol.Status;
 import org.forgerock.util.Reject;
 
 /**
@@ -60,7 +61,7 @@ final class MessageContextImpl extends ServerContext implements MessageContext {
         super(parent, "jaspi");
         Reject.ifNull(request, auditTrail);
         this.request = request;
-        this.response = new Response().setStatusAndReason(200);
+        this.response = new Response().setStatus(Status.OK);
         this.auditTrail = auditTrail;
     }
 

@@ -61,12 +61,12 @@ public class SessionAuthContextTest {
         given(sessionAuthModule.validateRequest(Matchers.<MessageInfoContext>anyObject(), Matchers.<Subject>anyObject(),
                 Matchers.<Subject>anyObject()))
                 .willReturn(
-                        Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(AuthStatus.SUCCESS));
+                        Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SUCCESS));
         given(sessionAuthModule.secureResponse(Matchers.<MessageInfoContext>anyObject(), Matchers.<Subject>anyObject()))
                 .willReturn(
-                        Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(AuthStatus.SEND_SUCCESS));
+                        Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_SUCCESS));
         given(sessionAuthModule.cleanSubject(Matchers.<MessageInfoContext>anyObject(), Matchers.<Subject>anyObject()))
-                .willReturn(Promises.<Void, AuthenticationException>newSuccessfulPromise(null));
+                .willReturn(Promises.<Void, AuthenticationException>newResultPromise(null));
 
         return sessionAuthModule;
     }

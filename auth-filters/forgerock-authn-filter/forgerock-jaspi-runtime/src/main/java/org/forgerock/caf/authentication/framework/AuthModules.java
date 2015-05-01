@@ -33,11 +33,11 @@ import java.util.Map;
 import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
 import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.api.MessageInfoContext;
-import org.forgerock.util.promise.AsyncFunction;
-import org.forgerock.util.promise.FailureHandler;
+import org.forgerock.util.AsyncFunction;
+import org.forgerock.util.promise.ExceptionHandler;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
-import org.forgerock.util.promise.SuccessHandler;
+import org.forgerock.util.promise.ResultHandler;
 import org.slf4j.Logger;
 
 /**
@@ -292,11 +292,11 @@ final class AuthModules {
                         @Override
                         public Promise<AuthStatus, AuthenticationException> apply(AuthStatus authStatus) {
                             if (isNull(authStatus) || isFailure(authStatus)) {
-                                return Promises.newFailedPromise(
+                                return Promises.newExceptionPromise(
                                         new AuthenticationException("Invalid AuthStatus returned from validateRequest, "
                                                 + asString(authStatus)));
                             }
-                            return Promises.newSuccessfulPromise(authStatus);
+                            return Promises.newResultPromise(authStatus);
                         }
                     });
         }
@@ -309,11 +309,11 @@ final class AuthModules {
                         @Override
                         public Promise<AuthStatus, AuthenticationException> apply(AuthStatus authStatus) {
                             if (isSuccess(authStatus) || isFailure(authStatus) || isNull(authStatus)) {
-                                return Promises.newFailedPromise(
+                                return Promises.newExceptionPromise(
                                         new AuthenticationException("Invalid AuthStatus returned from secureResponse, "
                                                 + asString(authStatus)));
                             }
-                            return Promises.newSuccessfulPromise(authStatus);
+                            return Promises.newResultPromise(authStatus);
                         }
                     });
         }
@@ -346,7 +346,7 @@ final class AuthModules {
                             }
                         }
                     })
-                    .onSuccess(new SuccessHandler<AuthStatus>() {
+                    .thenOnResult(new ResultHandler<AuthStatus>() {
                         @Override
                         public void handleResult(AuthStatus authStatus) {
                             if (isSuccess(authStatus) || isSendSuccess(authStatus)) {
@@ -366,9 +366,9 @@ final class AuthModules {
                             }
                         }
                     })
-                    .onFailure(new FailureHandler<AuthenticationException>() {
+                    .thenOnException(new ExceptionHandler<AuthenticationException>() {
                         @Override
-                        public void handleError(AuthenticationException error) {
+                        public void handleException(AuthenticationException error) {
                             Map<String, Object> failureReason = removeMap(messageInfo, AUDIT_FAILURE_REASON_KEY);
                             if (failureReason == null) {
                                 failureReason = new HashMap<String, Object>();
@@ -433,7 +433,7 @@ final class AuthModules {
         public Promise<Void, AuthenticationException> initialize(final MessagePolicy requestPolicy,
                 final MessagePolicy responsePolicy, CallbackHandler handler, final Map<String, Object> options) {
             return super.initialize(requestPolicy, responsePolicy, handler, options)
-                    .onSuccess(new SuccessHandler<Void>() {
+                    .thenOnResult(new ResultHandler<Void>() {
                         @Override
                         public void handleResult(Void result) {
                             if (logger.isDebugEnabled()) {
@@ -443,9 +443,9 @@ final class AuthModules {
                             }
                         }
                     })
-                    .onFailure(new FailureHandler<AuthenticationException>() {
+                    .thenOnException(new ExceptionHandler<AuthenticationException>() {
                         @Override
-                        public void handleError(AuthenticationException error) {
+                        public void handleException(AuthenticationException error) {
                             if (logger.isErrorEnabled()) {
                                 logger.error("{} failed to initialize. \nrequest MessagePolicy: {}, "
                                                 + "\nresponse MessagePolicy: {}, \noptions: {}", getModuleId(),
@@ -460,7 +460,7 @@ final class AuthModules {
                 Subject clientSubject, Subject serviceSubject) {
             final String moduleId = getModuleId();
             return super.validateRequest(messageInfo, clientSubject, serviceSubject)
-                    .onSuccess(new SuccessHandler<AuthStatus>() {
+                    .thenOnResult(new ResultHandler<AuthStatus>() {
                         @Override
                         public void handleResult(AuthStatus authStatus) {
                             if (isSuccess(authStatus)) {
@@ -480,9 +480,9 @@ final class AuthModules {
                             }
                         }
                     })
-                    .onFailure(new FailureHandler<AuthenticationException>() {
+                    .thenOnException(new ExceptionHandler<AuthenticationException>() {
                         @Override
-                        public void handleError(AuthenticationException error) {
+                        public void handleException(AuthenticationException error) {
                             logger.error("{} has thrown an error whilst attempting to authenticate the client",
                                     moduleId, error);
                         }
@@ -494,7 +494,7 @@ final class AuthModules {
                 Subject serviceSubject) {
             final String moduleId = getModuleId();
             return super.secureResponse(messageInfo, serviceSubject)
-                    .onSuccess(new SuccessHandler<AuthStatus>() {
+                    .thenOnResult(new ResultHandler<AuthStatus>() {
                         @Override
                         public void handleResult(AuthStatus authStatus) {
                             if (isSendSuccess(authStatus)) {
@@ -515,9 +515,9 @@ final class AuthModules {
                             }
                         }
                     })
-                    .onFailure(new FailureHandler<AuthenticationException>() {
+                    .thenOnException(new ExceptionHandler<AuthenticationException>() {
                         @Override
-                        public void handleError(AuthenticationException error) {
+                        public void handleException(AuthenticationException error) {
                             logger.error("{} has thrown an error whilst attempting to secure the response",
                                     moduleId, error);
                         }
@@ -528,15 +528,15 @@ final class AuthModules {
         public Promise<Void, AuthenticationException> cleanSubject(MessageInfoContext messageInfo,
                 Subject clientSubject) {
             return super.cleanSubject(messageInfo, clientSubject)
-                    .onSuccess(new SuccessHandler<Void>() {
+                    .thenOnResult(new ResultHandler<Void>() {
                         @Override
                         public void handleResult(Void result) {
                             logger.debug("{} successfully cleaned client subject", getModuleId());
                         }
                     })
-                    .onFailure(new FailureHandler<AuthenticationException>() {
+                    .thenOnException(new ExceptionHandler<AuthenticationException>() {
                         @Override
-                        public void handleError(AuthenticationException error) {
+                        public void handleException(AuthenticationException error) {
                             logger.error("{} failed clean client subject", getModuleId(), error);
                         }
                     });

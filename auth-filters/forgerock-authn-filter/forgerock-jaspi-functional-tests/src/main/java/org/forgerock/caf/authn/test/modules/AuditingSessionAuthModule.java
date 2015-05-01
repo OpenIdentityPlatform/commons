@@ -67,7 +67,7 @@ public class AuditingSessionAuthModule implements AsyncServerAuthModule {
     @Override
     public Promise<Void, AuthenticationException> initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy,
             CallbackHandler callbackHandler, Map config) {
-        return Promises.newSuccessfulPromise(null);
+        return Promises.newResultPromise(null);
     }
 
     /**
@@ -108,7 +108,7 @@ public class AuditingSessionAuthModule implements AsyncServerAuthModule {
             }
         });
 
-        return Promises.newSuccessfulPromise(AuthStatus.SUCCESS);
+        return Promises.newResultPromise(AuthStatus.SUCCESS);
     }
 
     /**
@@ -129,7 +129,7 @@ public class AuditingSessionAuthModule implements AsyncServerAuthModule {
 
         messageInfo.getRequestContextMap().put(AUDIT_SESSION_ID_KEY, "AUDITING_SESSION_AUTH_MODULE_SESSION_ID");
 
-        return Promises.newSuccessfulPromise(AuthStatus.SEND_SUCCESS);
+        return Promises.newResultPromise(AuthStatus.SEND_SUCCESS);
     }
 
     /**
@@ -140,6 +140,6 @@ public class AuditingSessionAuthModule implements AsyncServerAuthModule {
      */
     @Override
     public Promise<Void, AuthenticationException> cleanSubject(MessageInfoContext messageInfo, Subject clientSubject) {
-        return Promises.newSuccessfulPromise(null);
+        return Promises.newResultPromise(null);
     }
 }

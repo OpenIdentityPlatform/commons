@@ -20,8 +20,6 @@ import static org.forgerock.caf.authentication.framework.AuditTrail.AUDIT_TRAIL_
 import static org.forgerock.caf.authentication.framework.AuthContexts.*;
 import static org.forgerock.caf.authentication.framework.AuthStatusUtils.isSendFailure;
 import static org.forgerock.caf.authentication.framework.AuthStatusUtils.isSuccess;
-import static org.forgerock.json.resource.ResourceException.INTERNAL_ERROR;
-import static org.forgerock.json.resource.ResourceException.UNAUTHORIZED;
 
 import javax.security.auth.Subject;
 import javax.security.auth.message.AuthStatus;
@@ -42,8 +40,9 @@ import org.forgerock.http.HttpContext;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.ResponseException;
+import org.forgerock.http.protocol.Status;
 import org.forgerock.util.Reject;
-import org.forgerock.util.promise.AsyncFunction;
+import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 import org.slf4j.Logger;
@@ -177,7 +176,7 @@ public final class AuthenticationFramework {
                 if (isSendFailure(authStatus)) {
                     logger.debug("Authentication has failed.");
                     AuthenticationException exception = new AuthenticationFailedException();
-                    return Promises.newFailedPromise(exception);
+                    return Promises.newExceptionPromise(exception);
                 } else if (isSuccess(authStatus)) {
                     String principalName = null;
                     for (Principal principal : clientSubject.getPrincipals()) {
@@ -194,7 +193,7 @@ public final class AuthenticationFramework {
                     requestAttributes.put(AuthenticationFramework.ATTRIBUTE_AUTH_PRINCIPAL, principalName);
                     requestAttributes.put(AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT, contextMap);
                 }
-                return Promises.newSuccessfulPromise(authStatus);
+                return Promises.newResultPromise(authStatus);
             }
         };
     }
@@ -210,7 +209,7 @@ public final class AuthenticationFramework {
                             .put(AuthenticationFramework.ATTRIBUTE_REQUEST_ID, auditTrail.getRequestId());
                     return grantAccess(context, next);
                 }
-                return Promises.newSuccessfulPromise(context.getResponse());
+                return Promises.newResultPromise(context.getResponse());
             }
         };
     }
@@ -243,9 +242,9 @@ public final class AuthenticationFramework {
             @Override
             public Promise<Response, ResponseException> apply(AuthStatus authStatus) {
                 if (isSendFailure(authStatus)) {
-                    context.getResponse().setStatusAndReason(INTERNAL_ERROR);
+                    context.getResponse().setStatus(Status.INTERNAL_SERVER_ERROR);
                 }
-                return Promises.newSuccessfulPromise(context.getResponse());
+                return Promises.newResultPromise(context.getResponse());
             }
         };
     }
@@ -258,9 +257,9 @@ public final class AuthenticationFramework {
                 responseHandler.handle(context, error);
                 if (error instanceof AuthenticationFailedException) {
                     //Force 401 HTTP status
-                    context.getResponse().setStatusAndReason(UNAUTHORIZED);
+                    context.getResponse().setStatus(Status.UNAUTHORIZED);
                 }
-                return Promises.newFailedPromise(new ResponseException(context.getResponse(),
+                return Promises.newExceptionPromise(new ResponseException(context.getResponse(),
                         error.getMessage(), error));
             }
         };

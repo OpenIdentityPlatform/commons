@@ -34,10 +34,10 @@ import org.forgerock.caf.authentication.api.AuthenticationState;
 import org.forgerock.caf.authentication.api.MessageContext;
 import org.forgerock.caf.authentication.api.MessageInfoContext;
 import org.forgerock.util.Reject;
-import org.forgerock.util.promise.AsyncFunction;
+import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
-import org.forgerock.util.promise.SuccessHandler;
+import org.forgerock.util.promise.ResultHandler;
 import org.slf4j.Logger;
 
 /**
@@ -114,7 +114,7 @@ public final class FallbackAuthContext implements AsyncServerAuthContext, AuthCo
             if (position < authModules.size()) {
                 final AsyncServerAuthModule authModule = authModules.get(position);
                 return authModule.validateRequest(messageInfo, clientSubject, serviceSubject)
-                        .onSuccess(new SuccessHandler<AuthStatus>() {
+                        .thenOnResult(new ResultHandler<AuthStatus>() {
                             @Override
                             public void handleResult(AuthStatus authStatus) {
                                 if (isSuccess(authStatus)) {
@@ -134,12 +134,12 @@ public final class FallbackAuthContext implements AsyncServerAuthContext, AuthCo
                                 if (isSendFailure(authStatus)) {
                                     return next().validateRequest(messageInfo, clientSubject, serviceSubject);
                                 } else {
-                                    return Promises.newSuccessfulPromise(authStatus);
+                                    return Promises.newResultPromise(authStatus);
                                 }
                             }
                         });
             } else {
-                return Promises.newSuccessfulPromise(AuthStatus.SEND_FAILURE);
+                return Promises.newResultPromise(AuthStatus.SEND_FAILURE);
             }
         }
 
@@ -165,7 +165,7 @@ public final class FallbackAuthContext implements AsyncServerAuthContext, AuthCo
         FallbackAuthContextState state = context.getState(this);
 
         if (state.getAuthenticatedAuthModuleIndex() < 0) {
-            return Promises.newFailedPromise(
+            return Promises.newExceptionPromise(
                     new AuthenticationException("No auth module authenticated the incoming request message. "
                             + "Cannot secure response message."));
         }

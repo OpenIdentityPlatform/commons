@@ -38,6 +38,7 @@ import org.forgerock.http.Session;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.ResponseException;
+import org.forgerock.http.protocol.Status;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
@@ -56,10 +57,10 @@ public class AuthenticationFrameworkTest {
     private AsyncServerAuthContext authContext;
     private Subject serviceSubject;
 
-    private final Response successfulResponse = new Response().setStatusAndReason(200);
-    private final Response unauthenticatedResponse = new Response().setStatusAndReason(401);
-    private final Response failedResponse = new Response().setStatusAndReason(400);
-    private final Response serverErrorResponse = new Response().setStatusAndReason(500);
+    private final Response successfulResponse = new Response().setStatus(Status.OK);
+    private final Response unauthenticatedResponse = new Response().setStatus(Status.UNAUTHORIZED);
+    private final Response failedResponse = new Response().setStatus(Status.BAD_REQUEST);
+    private final Response serverErrorResponse = new Response().setStatus(Status.INTERNAL_SERVER_ERROR);
 
     @BeforeMethod
     public void setup() {
@@ -68,7 +69,7 @@ public class AuthenticationFrameworkTest {
         authContext = mock(AsyncServerAuthContext.class);
         serviceSubject = new Subject();
         Promise<List<Void>, AuthenticationException> initializationPromise =
-                Promises.newSuccessfulPromise(Collections.<Void>emptyList());
+                Promises.newResultPromise(Collections.<Void>emptyList());
 
         runtime = createRuntime(initializationPromise);
     }
@@ -92,13 +93,13 @@ public class AuthenticationFrameworkTest {
 
     private void mockAuthContext(Promise<AuthStatus, AuthenticationException> validateRequestResult) {
         mockAuthContext(validateRequestResult, null,
-                Promises.<Void, AuthenticationException>newSuccessfulPromise(null));
+                Promises.<Void, AuthenticationException>newResultPromise(null));
     }
 
     private void mockAuthContext(Promise<AuthStatus, AuthenticationException> validateRequestResult,
             Promise<AuthStatus, AuthenticationException> secureResponseResult) {
         mockAuthContext(validateRequestResult, secureResponseResult,
-                Promises.<Void, AuthenticationException>newSuccessfulPromise(null));
+                Promises.<Void, AuthenticationException>newResultPromise(null));
     }
 
     private void mockAuthContext(Promise<AuthStatus, AuthenticationException> validateRequestResult,
@@ -119,9 +120,9 @@ public class AuthenticationFrameworkTest {
         Context context = mockContext();
         Request request = new Request();
         Handler next = mockHandler(request,
-                Promises.<Response, ResponseException>newSuccessfulPromise(successfulResponse));
+                Promises.<Response, ResponseException>newResultPromise(successfulResponse));
 
-        runtime = createRuntime(Promises.<List<Void>, AuthenticationException>newFailedPromise(
+        runtime = createRuntime(Promises.<List<Void>, AuthenticationException>newExceptionPromise(
                 new AuthenticationException("ERROR")));
 
         //When
@@ -144,10 +145,10 @@ public class AuthenticationFrameworkTest {
         Context context = mockContext();
         Request request = new Request();
         Handler next = mockHandler(request,
-                Promises.<Response, ResponseException>newSuccessfulPromise(successfulResponse));
+                Promises.<Response, ResponseException>newResultPromise(successfulResponse));
 
         ResourceException resourceException = mock(ResourceException.class);
-        runtime = createRuntime(Promises.<List<Void>, AuthenticationException>newFailedPromise(
+        runtime = createRuntime(Promises.<List<Void>, AuthenticationException>newExceptionPromise(
                 new AuthenticationException("ERROR", resourceException)));
 
         //When
@@ -170,10 +171,10 @@ public class AuthenticationFrameworkTest {
         HttpContext context = mockContext();
         Request request = new Request();
         Handler next = mockHandler(request,
-                Promises.<Response, ResponseException>newSuccessfulPromise(successfulResponse));
+                Promises.<Response, ResponseException>newResultPromise(successfulResponse));
 
-        mockAuthContext(Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(AuthStatus.SUCCESS),
-                Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(AuthStatus.SEND_SUCCESS));
+        mockAuthContext(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SUCCESS),
+                Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_SUCCESS));
 
         //When
         Promise<Response, ResponseException> promise = runtime.processMessage(context, request, next);
@@ -197,9 +198,9 @@ public class AuthenticationFrameworkTest {
         Context context = mockContext();
         Request request = new Request();
         Handler next = mockHandler(request,
-                Promises.<Response, ResponseException>newSuccessfulPromise(successfulResponse));
+                Promises.<Response, ResponseException>newResultPromise(successfulResponse));
 
-        mockAuthContext(Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(AuthStatus.SEND_FAILURE));
+        mockAuthContext(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_FAILURE));
 
         //When
         Promise<Response, ResponseException> promise = runtime.processMessage(context, request, next);
@@ -234,16 +235,16 @@ public class AuthenticationFrameworkTest {
         Context context = mockContext();
         Request request = new Request();
         Handler next = mockHandler(request,
-                Promises.<Response, ResponseException>newSuccessfulPromise(successfulResponse));
+                Promises.<Response, ResponseException>newResultPromise(successfulResponse));
 
-        mockAuthContext(Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(authStatus));
+        mockAuthContext(Promises.<AuthStatus, AuthenticationException>newResultPromise(authStatus));
 
         //When
         Promise<Response, ResponseException> promise = runtime.processMessage(context, request, next);
 
         //Then
         assertThat(promise).succeeded();
-        Assertions.assertThat(promise.getOrThrowUninterruptibly().getStatus()).isEqualTo(200);
+        Assertions.assertThat(promise.getOrThrowUninterruptibly().getStatus()).isEqualTo(Status.OK);
         verify(authContext).validateRequest(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject(),
                 eq(serviceSubject));
         verify(authContext, never()).secureResponse(Matchers.<MessageContext>anyObject(), eq(serviceSubject));
@@ -265,9 +266,9 @@ public class AuthenticationFrameworkTest {
         Context context = mockContext();
         Request request = new Request();
         Handler next = mockHandler(request,
-                Promises.<Response, ResponseException>newSuccessfulPromise(successfulResponse));
+                Promises.<Response, ResponseException>newResultPromise(successfulResponse));
 
-        mockAuthContext(Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(authStatus));
+        mockAuthContext(Promises.<AuthStatus, AuthenticationException>newResultPromise(authStatus));
 
         //When
         Promise<Response, ResponseException> promise = runtime.processMessage(context, request, next);
@@ -289,9 +290,9 @@ public class AuthenticationFrameworkTest {
         Context context = mockContext();
         Request request = new Request();
         Handler next = mockHandler(request,
-                Promises.<Response, ResponseException>newSuccessfulPromise(successfulResponse));
+                Promises.<Response, ResponseException>newResultPromise(successfulResponse));
 
-        mockAuthContext(Promises.<AuthStatus, AuthenticationException>newFailedPromise(
+        mockAuthContext(Promises.<AuthStatus, AuthenticationException>newExceptionPromise(
                 new AuthenticationException("ERROR")));
 
         //When
@@ -323,10 +324,10 @@ public class AuthenticationFrameworkTest {
         Context context = mockContext();
         Request request = new Request();
         Handler next = mockHandler(request,
-                Promises.<Response, ResponseException>newSuccessfulPromise(successfulResponse));
+                Promises.<Response, ResponseException>newResultPromise(successfulResponse));
 
-        mockAuthContext(Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(AuthStatus.SUCCESS),
-                Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(authStatus));
+        mockAuthContext(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SUCCESS),
+                Promises.<AuthStatus, AuthenticationException>newResultPromise(authStatus));
 
         //When
         Promise<Response, ResponseException> promise = runtime.processMessage(context, request, next);
@@ -356,10 +357,10 @@ public class AuthenticationFrameworkTest {
         Context context = mockContext();
         Request request = new Request();
         Handler next = mockHandler(request,
-                Promises.<Response, ResponseException>newSuccessfulPromise(successfulResponse));
+                Promises.<Response, ResponseException>newResultPromise(successfulResponse));
 
-        mockAuthContext(Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(AuthStatus.SUCCESS),
-                Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(authStatus));
+        mockAuthContext(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SUCCESS),
+                Promises.<AuthStatus, AuthenticationException>newResultPromise(authStatus));
 
         //When
         Promise<Response, ResponseException> promise = runtime.processMessage(context, request, next);
@@ -381,10 +382,11 @@ public class AuthenticationFrameworkTest {
         Context context = mockContext();
         Request request = new Request();
         Handler next = mockHandler(request,
-                Promises.<Response, ResponseException>newSuccessfulPromise(successfulResponse));
+                Promises.<Response, ResponseException>newResultPromise(successfulResponse));
 
-        mockAuthContext(Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(AuthStatus.SUCCESS),
-                Promises.<AuthStatus, AuthenticationException>newFailedPromise(new AuthenticationException("ERROR")));
+        mockAuthContext(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SUCCESS),
+                Promises.<AuthStatus, AuthenticationException>newExceptionPromise(
+                        new AuthenticationException("ERROR")));
 
         //When
         Promise<Response, ResponseException> promise = runtime.processMessage(context, request, next);
@@ -406,10 +408,10 @@ public class AuthenticationFrameworkTest {
         Context context = mockContext();
         Request request = new Request();
         Handler next = mockHandler(request,
-                Promises.<Response, ResponseException>newFailedPromise(new ResponseException(failedResponse)));
+                Promises.<Response, ResponseException>newExceptionPromise(new ResponseException(failedResponse)));
 
-        mockAuthContext(Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(AuthStatus.SUCCESS),
-                Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(AuthStatus.SEND_SUCCESS));
+        mockAuthContext(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SUCCESS),
+                Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_SUCCESS));
 
         //When
         Promise<Response, ResponseException> promise = runtime.processMessage(context, request, next);

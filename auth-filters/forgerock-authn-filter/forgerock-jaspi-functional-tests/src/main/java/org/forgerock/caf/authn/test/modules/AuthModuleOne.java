@@ -90,7 +90,7 @@ public class AuthModuleOne implements AsyncServerAuthModule {
     @Override
     public Promise<Void, AuthenticationException> initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy,
             CallbackHandler callbackHandler, Map config) {
-        return Promises.newSuccessfulPromise(null);
+        return Promises.newResultPromise(null);
     }
 
     /**
@@ -138,7 +138,7 @@ public class AuthModuleOne implements AsyncServerAuthModule {
                     return AUTH_MODULE_ONE_PRINCIPAL;
                 }
             });
-            return Promises.newSuccessfulPromise(AuthStatus.SUCCESS);
+            return Promises.newResultPromise(AuthStatus.SUCCESS);
         }
 
         if (SEND_SUCCESS_AUTH_STATUS.equalsIgnoreCase(header)) {
@@ -149,26 +149,26 @@ public class AuthModuleOne implements AsyncServerAuthModule {
                     return AUTH_MODULE_ONE_PRINCIPAL;
                 }
             });
-            return Promises.newSuccessfulPromise(AuthStatus.SEND_SUCCESS);
+            return Promises.newResultPromise(AuthStatus.SEND_SUCCESS);
         }
 
         if (SEND_FAILURE_AUTH_STATUS.equalsIgnoreCase(header)) {
-            return Promises.newSuccessfulPromise(AuthStatus.SEND_FAILURE);
+            return Promises.newResultPromise(AuthStatus.SEND_FAILURE);
         }
 
         if (SEND_CONTINUE_AUTH_STATUS.equalsIgnoreCase(header)) {
-            return Promises.newSuccessfulPromise(AuthStatus.SEND_CONTINUE);
+            return Promises.newResultPromise(AuthStatus.SEND_CONTINUE);
         }
 
         if (FAILURE_AUTH_STATUS.equalsIgnoreCase(header)) {
-            return Promises.newSuccessfulPromise(AuthStatus.FAILURE);
+            return Promises.newResultPromise(AuthStatus.FAILURE);
         }
 
         if (NULL_AUTH_STATUS.equalsIgnoreCase(header)) {
-            return Promises.newSuccessfulPromise(null);
+            return Promises.newResultPromise(null);
         }
 
-        return Promises.newFailedPromise(new AuthenticationException(AUTH_MODULE_ONE_VALIDATE_REQUEST_HEADER_NAME
+        return Promises.newExceptionPromise(new AuthenticationException(AUTH_MODULE_ONE_VALIDATE_REQUEST_HEADER_NAME
                 + " header not set, so throwing AuthException."));
     }
 
@@ -190,30 +190,30 @@ public class AuthModuleOne implements AsyncServerAuthModule {
         String header = request.getHeader(AUTH_MODULE_ONE_SECURE_RESPONSE_HEADER_NAME.toLowerCase());
 
         if (SUCCESS_AUTH_STATUS.equalsIgnoreCase(header)) {
-            return Promises.newSuccessfulPromise(AuthStatus.SUCCESS);
+            return Promises.newResultPromise(AuthStatus.SUCCESS);
         }
 
         if (SEND_SUCCESS_AUTH_STATUS.equalsIgnoreCase(header)) {
-            return Promises.newSuccessfulPromise(AuthStatus.SEND_SUCCESS);
+            return Promises.newResultPromise(AuthStatus.SEND_SUCCESS);
         }
 
         if (SEND_FAILURE_AUTH_STATUS.equalsIgnoreCase(header)) {
-            return Promises.newSuccessfulPromise(AuthStatus.SEND_FAILURE);
+            return Promises.newResultPromise(AuthStatus.SEND_FAILURE);
         }
 
         if (SEND_CONTINUE_AUTH_STATUS.equalsIgnoreCase(header)) {
-            return Promises.newSuccessfulPromise(AuthStatus.SEND_CONTINUE);
+            return Promises.newResultPromise(AuthStatus.SEND_CONTINUE);
         }
 
         if (FAILURE_AUTH_STATUS.equalsIgnoreCase(header)) {
-            return Promises.newSuccessfulPromise(AuthStatus.FAILURE);
+            return Promises.newResultPromise(AuthStatus.FAILURE);
         }
 
         if (NULL_AUTH_STATUS.equalsIgnoreCase(header)) {
-            return Promises.newSuccessfulPromise(null);
+            return Promises.newResultPromise(null);
         }
 
-        return Promises.newFailedPromise(new AuthenticationException(AUTH_MODULE_ONE_SECURE_RESPONSE_HEADER_NAME
+        return Promises.newExceptionPromise(new AuthenticationException(AUTH_MODULE_ONE_SECURE_RESPONSE_HEADER_NAME
                 + " header not set, so throwing AuthException."));
     }
 
@@ -225,6 +225,6 @@ public class AuthModuleOne implements AsyncServerAuthModule {
      */
     @Override
     public Promise<Void, AuthenticationException> cleanSubject(MessageInfoContext messageInfo, Subject clientSubject) {
-        return Promises.newSuccessfulPromise(null);
+        return Promises.newResultPromise(null);
     }
 }

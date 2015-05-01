@@ -65,7 +65,7 @@ public class FailureAuditingAuthModule implements AsyncServerAuthModule {
     @Override
     public Promise<Void, AuthenticationException> initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy,
             CallbackHandler callbackHandler, Map config) {
-        return Promises.newSuccessfulPromise(null);
+        return Promises.newResultPromise(null);
     }
 
     /**
@@ -97,7 +97,7 @@ public class FailureAuditingAuthModule implements AsyncServerAuthModule {
 
         messageInfo.getRequestContextMap().put(AUDIT_FAILURE_REASON_KEY, Collections.singletonMap("message", "FAILURE_REASON"));
 
-        return Promises.newSuccessfulPromise(AuthStatus.SEND_FAILURE);
+        return Promises.newResultPromise(AuthStatus.SEND_FAILURE);
     }
 
     /**
@@ -111,7 +111,7 @@ public class FailureAuditingAuthModule implements AsyncServerAuthModule {
     @Override
     public Promise<AuthStatus, AuthenticationException> secureResponse(MessageInfoContext messageInfo,
             Subject serviceSubject) {
-        return Promises.newSuccessfulPromise(null);
+        return Promises.newResultPromise(null);
     }
 
     /**
@@ -122,6 +122,6 @@ public class FailureAuditingAuthModule implements AsyncServerAuthModule {
      */
     @Override
     public Promise<Void, AuthenticationException> cleanSubject(MessageInfoContext messageInfo, Subject clientSubject) {
-        return Promises.newSuccessfulPromise(null);
+        return Promises.newResultPromise(null);
     }
 }

@@ -66,7 +66,7 @@ public class AuthModulesTest {
         Subject serviceSubject = new Subject();
 
         given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
-                .willReturn(Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(authStatus));
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(authStatus));
 
         //When
         Promise<AuthStatus, AuthenticationException> promise = AuthModules.withValidation(authModule)
@@ -94,7 +94,7 @@ public class AuthModulesTest {
         Subject serviceSubject = new Subject();
 
         given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
-                .willReturn(Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(authStatus));
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(authStatus));
 
         //When
         Promise<AuthStatus, AuthenticationException> promise = AuthModules.withValidation(authModule)
@@ -125,7 +125,7 @@ public class AuthModulesTest {
         Subject serviceSubject = new Subject();
 
         given(authModule.secureResponse(messageInfo, serviceSubject))
-                .willReturn(Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(authStatus));
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(authStatus));
 
         //When
         Promise<AuthStatus, AuthenticationException> promise = AuthModules.withValidation(authModule)
@@ -153,7 +153,7 @@ public class AuthModulesTest {
         Subject serviceSubject = new Subject();
 
         given(authModule.secureResponse(messageInfo, serviceSubject))
-                .willReturn(Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(authStatus));
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(authStatus));
 
         //When
         Promise<AuthStatus, AuthenticationException> promise = AuthModules.withValidation(authModule)
@@ -179,7 +179,7 @@ public class AuthModulesTest {
         Map<String, Object> moduleAuditInfo = new HashMap<String, Object>();
 
         given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
-                .willReturn(Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(AuthStatus.SUCCESS));
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SUCCESS));
         given(messageInfo.getRequestContextMap()).willReturn(requestContextMap);
         requestContextMap.put(AuditTrail.AUDIT_TRAIL_KEY, auditTrail);
         requestContextMap.put(AuditTrail.AUDIT_INFO_KEY, moduleAuditInfo);
@@ -216,7 +216,7 @@ public class AuthModulesTest {
 
         given(authModule.getModuleId()).willReturn("MODULE_ID");
         given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
-                .willReturn(Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(authStatus));
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(authStatus));
         given(messageInfo.getRequestContextMap()).willReturn(requestContextMap);
         requestContextMap.put(AuditTrail.AUDIT_TRAIL_KEY, auditTrail);
         requestContextMap.put(AuditTrail.AUDIT_INFO_KEY, moduleAuditInfo);
@@ -245,7 +245,7 @@ public class AuthModulesTest {
 
         given(authModule.getModuleId()).willReturn("MODULE_ID");
         given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
-                .willReturn(Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(
                         AuthStatus.SEND_FAILURE));
         given(messageInfo.getRequestContextMap()).willReturn(requestContextMap);
         requestContextMap.put(AuditTrail.AUDIT_TRAIL_KEY, auditTrail);
@@ -276,7 +276,7 @@ public class AuthModulesTest {
 
         given(authModule.getModuleId()).willReturn("MODULE_ID");
         given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
-                .willReturn(Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(
                         AuthStatus.SEND_FAILURE));
         given(messageInfo.getRequestContextMap()).willReturn(requestContextMap);
         requestContextMap.put(AuditTrail.AUDIT_TRAIL_KEY, auditTrail);
@@ -316,7 +316,7 @@ public class AuthModulesTest {
 
         given(authModule.getModuleId()).willReturn("MODULE_ID");
         given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
-                .willReturn(Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(authStatus));
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(authStatus));
         given(messageInfo.getRequestContextMap()).willReturn(requestContextMap);
         requestContextMap.put(AuditTrail.AUDIT_TRAIL_KEY, auditTrail);
         requestContextMap.put(AuditTrail.AUDIT_INFO_KEY, moduleAuditInfo);
@@ -351,7 +351,7 @@ public class AuthModulesTest {
 
         given(authModule.getModuleId()).willReturn("MODULE_ID");
         given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
-                .willReturn(Promises.<AuthStatus, AuthenticationException>newFailedPromise(
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newExceptionPromise(
                         new AuthenticationException("ERROR")));
         given(messageInfo.getRequestContextMap()).willReturn(requestContextMap);
         requestContextMap.put(AuditTrail.AUDIT_TRAIL_KEY, auditTrail);
@@ -383,7 +383,7 @@ public class AuthModulesTest {
 
         given(authModule.getModuleId()).willReturn("MODULE_ID");
         given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
-                .willReturn(Promises.<AuthStatus, AuthenticationException>newFailedPromise(
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newExceptionPromise(
                         new AuthenticationException("ERROR")));
         given(messageInfo.getRequestContextMap()).willReturn(requestContextMap);
         requestContextMap.put(AuditTrail.AUDIT_TRAIL_KEY, auditTrail);
@@ -428,7 +428,7 @@ public class AuthModulesTest {
 
         given(authModule.getModuleId()).willReturn("MODULE_ID");
         given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
-                .willReturn(Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(authStatus));
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(authStatus));
         given(messageInfo.getRequestContextMap()).willReturn(requestContextMap);
         requestContextMap.put(AuditTrail.AUDIT_TRAIL_KEY, auditTrail);
         requestContextMap.put(AuditTrail.AUDIT_INFO_KEY, moduleAuditInfo);
@@ -467,7 +467,7 @@ public class AuthModulesTest {
 
         given(authModule.getModuleId()).willReturn("MODULE_ID");
         given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
-                .willReturn(Promises.<AuthStatus, AuthenticationException>newFailedPromise(
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newExceptionPromise(
                         new AuthenticationException("ERROR")));
         given(messageInfo.getRequestContextMap()).willReturn(requestContextMap);
         requestContextMap.put(AuditTrail.AUDIT_TRAIL_KEY, auditTrail);
@@ -512,7 +512,7 @@ public class AuthModulesTest {
         AuditTrail auditTrail = mock(AuditTrail.class);
 
         given(authModule.secureResponse(messageInfo, serviceSubject))
-                .willReturn(Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(authStatus));
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(authStatus));
         given(messageInfo.getRequestContextMap()).willReturn(requestContextMap);
         requestContextMap.put(AuditTrail.AUDIT_TRAIL_KEY, auditTrail);
         requestContextMap.put(AuditTrail.AUDIT_INFO_KEY, new HashMap<String, Object>());
@@ -543,7 +543,7 @@ public class AuthModulesTest {
         AuditTrail auditTrail = mock(AuditTrail.class);
 
         given(authModule.secureResponse(messageInfo, serviceSubject))
-                .willReturn(Promises.<AuthStatus, AuthenticationException>newFailedPromise(
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newExceptionPromise(
                         new AuthenticationException("ERROR")));
         given(messageInfo.getRequestContextMap()).willReturn(requestContextMap);
         requestContextMap.put(AuditTrail.AUDIT_TRAIL_KEY, auditTrail);
@@ -584,7 +584,7 @@ public class AuthModulesTest {
         Map<String, Object> options = new HashMap<String, Object>();
 
         given(authModule.initialize(requestPolicy, responsePolicy, handler, options))
-                .willReturn(Promises.<Void, AuthenticationException>newSuccessfulPromise(null));
+                .willReturn(Promises.<Void, AuthenticationException>newResultPromise(null));
         given(logger.isDebugEnabled()).willReturn(logLevelEnabled);
 
         //When
@@ -613,7 +613,7 @@ public class AuthModulesTest {
         AuthenticationException exception = new AuthenticationException("ERROR");
 
         given(authModule.initialize(requestPolicy, responsePolicy, handler, options))
-                .willReturn(Promises.<Void, AuthenticationException>newFailedPromise(exception));
+                .willReturn(Promises.<Void, AuthenticationException>newExceptionPromise(exception));
         given(logger.isErrorEnabled()).willReturn(logLevelEnabled);
 
         //When
@@ -655,7 +655,7 @@ public class AuthModulesTest {
 
         given(authModule.getModuleId()).willReturn("MODULE_ID");
         given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
-                .willReturn(Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(authStatus));
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(authStatus));
         given(logger.isDebugEnabled()).willReturn(true);
 
         //When
@@ -684,7 +684,7 @@ public class AuthModulesTest {
 
         given(authModule.getModuleId()).willReturn("MODULE_ID");
         given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
-                .willReturn(Promises.<AuthStatus, AuthenticationException>newFailedPromise(exception));
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newExceptionPromise(exception));
 
         //When
         Promise<AuthStatus, AuthenticationException> promise = AuthModules.withLogging(logger, authModule)
@@ -719,7 +719,7 @@ public class AuthModulesTest {
 
         given(authModule.getModuleId()).willReturn("MODULE_ID");
         given(authModule.secureResponse(messageInfo, serviceSubject))
-                .willReturn(Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(authStatus));
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(authStatus));
         given(logger.isDebugEnabled()).willReturn(true);
 
         //When
@@ -747,7 +747,7 @@ public class AuthModulesTest {
 
         given(authModule.getModuleId()).willReturn("MODULE_ID");
         given(authModule.secureResponse(messageInfo, serviceSubject))
-                .willReturn(Promises.<AuthStatus, AuthenticationException>newFailedPromise(exception));
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newExceptionPromise(exception));
 
         //When
         Promise<AuthStatus, AuthenticationException> promise = AuthModules.withLogging(logger, authModule)
@@ -769,7 +769,7 @@ public class AuthModulesTest {
 
         given(authModule.getModuleId()).willReturn("MODULE_ID");
         given(authModule.cleanSubject(messageInfo, clientSubject))
-                .willReturn(Promises.<Void, AuthenticationException>newSuccessfulPromise(null));
+                .willReturn(Promises.<Void, AuthenticationException>newResultPromise(null));
 
         //When
         Promise<Void, AuthenticationException> promise = AuthModules.withLogging(logger, authModule)
@@ -792,7 +792,7 @@ public class AuthModulesTest {
 
         given(authModule.getModuleId()).willReturn("MODULE_ID");
         given(authModule.cleanSubject(messageInfo, clientSubject))
-                .willReturn(Promises.<Void, AuthenticationException>newFailedPromise(exception));
+                .willReturn(Promises.<Void, AuthenticationException>newExceptionPromise(exception));
 
         //When
         Promise<Void, AuthenticationException> promise = AuthModules.withLogging(logger, authModule)

@@ -140,9 +140,9 @@ public class FallbackAuthContextTest {
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
         AsyncServerAuthModule authModuleOne = mockAuthModule(
-                Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(authStatus));
+                Promises.<AuthStatus, AuthenticationException>newResultPromise(authStatus));
         AsyncServerAuthModule authModuleTwo = mockAuthModule(
-                Promises.<AuthStatus, AuthenticationException>newFailedPromise(
+                Promises.<AuthStatus, AuthenticationException>newExceptionPromise(
                         new AuthenticationException("ERROR")));
 
         authContext = createFallbackAuthContext(authModuleOne, authModuleTwo);
@@ -175,9 +175,9 @@ public class FallbackAuthContextTest {
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
         AsyncServerAuthModule authModuleOne = mockAuthModule(
-                Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(AuthStatus.SEND_FAILURE));
+                Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_FAILURE));
         AsyncServerAuthModule authModuleTwo = mockAuthModule(
-                Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(authStatus));
+                Promises.<AuthStatus, AuthenticationException>newResultPromise(authStatus));
 
         authContext = createFallbackAuthContext(authModuleOne, authModuleTwo);
 
@@ -216,13 +216,13 @@ public class FallbackAuthContextTest {
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
         AsyncServerAuthModule authModuleTwo = mockAuthModule(
-                Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(AuthStatus.SUCCESS),
-                Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(AuthStatus.SEND_SUCCESS));
+                Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SUCCESS),
+                Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_SUCCESS));
 
         authContext = createFallbackAuthContext(
                 mockAuthModule(
-                        Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(AuthStatus.SEND_FAILURE),
-                        Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(AuthStatus.SEND_FAILURE)),
+                        Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_FAILURE),
+                        Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_FAILURE)),
                 authModuleTwo);
 
         authContext.validateRequest(context, clientSubject, serviceSubject);
@@ -242,9 +242,9 @@ public class FallbackAuthContextTest {
         MessageContext context = mockMessageContext();
         Subject clientSubject = new Subject();
         AsyncServerAuthModule authModuleOne = mockAuthModule(null, null,
-                Promises.<Void, AuthenticationException>newSuccessfulPromise(null));
+                Promises.<Void, AuthenticationException>newResultPromise(null));
         AsyncServerAuthModule authModuleTwo = mockAuthModule(null, null,
-                Promises.<Void, AuthenticationException>newSuccessfulPromise(null));
+                Promises.<Void, AuthenticationException>newResultPromise(null));
 
         authContext = createFallbackAuthContext(authModuleOne, authModuleTwo);
 
@@ -264,9 +264,9 @@ public class FallbackAuthContextTest {
         MessageContext context = mockMessageContext();
         Subject clientSubject = new Subject();
         AsyncServerAuthModule authModuleOne = mockAuthModule(null, null,
-                Promises.<Void, AuthenticationException>newFailedPromise(new AuthenticationException("ERROR")));
+                Promises.<Void, AuthenticationException>newExceptionPromise(new AuthenticationException("ERROR")));
         AsyncServerAuthModule authModuleTwo = mockAuthModule(null, null,
-                Promises.<Void, AuthenticationException>newSuccessfulPromise(null));
+                Promises.<Void, AuthenticationException>newResultPromise(null));
 
         authContext = createFallbackAuthContext(authModuleOne, authModuleTwo);
 

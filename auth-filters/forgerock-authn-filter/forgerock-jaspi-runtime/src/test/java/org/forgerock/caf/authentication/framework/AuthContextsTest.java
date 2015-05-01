@@ -61,7 +61,7 @@ public class AuthContextsTest {
         Subject serviceSubject = new Subject();
 
         given(authContext.validateRequest(context, clientSubject, serviceSubject))
-                .willReturn(Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(authStatus));
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(authStatus));
 
         //When
         Promise<AuthStatus, AuthenticationException> promise = AuthContexts.withValidation(authContext)
@@ -89,7 +89,7 @@ public class AuthContextsTest {
         Subject serviceSubject = new Subject();
 
         given(authContext.validateRequest(context, clientSubject, serviceSubject))
-                .willReturn(Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(authStatus));
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(authStatus));
 
         //When
         Promise<AuthStatus, AuthenticationException> promise = AuthContexts.withValidation(authContext)
@@ -120,7 +120,7 @@ public class AuthContextsTest {
         Subject serviceSubject = new Subject();
 
         given(authContext.secureResponse(context, serviceSubject))
-                .willReturn(Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(authStatus));
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(authStatus));
 
         //When
         Promise<AuthStatus, AuthenticationException> promise = AuthContexts.withValidation(authContext)
@@ -148,7 +148,7 @@ public class AuthContextsTest {
         Subject serviceSubject = new Subject();
 
         given(authContext.secureResponse(context, serviceSubject))
-                .willReturn(Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(authStatus));
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(authStatus));
 
         //When
         Promise<AuthStatus, AuthenticationException> promise = AuthContexts.withValidation(authContext)
@@ -182,7 +182,7 @@ public class AuthContextsTest {
         Principal principalTwo = mock(Principal.class);
 
         given(authContext.validateRequest(context, clientSubject, serviceSubject))
-                .willReturn(Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(authStatus));
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(authStatus));
         given(context.getAuditTrail()).willReturn(auditTrail);
         clientSubject.getPrincipals().add(principalOne);
         clientSubject.getPrincipals().add(principalTwo);
@@ -218,7 +218,7 @@ public class AuthContextsTest {
         AuditTrail auditTrail = mock(AuditTrail.class);
 
         given(authContext.validateRequest(context, clientSubject, serviceSubject))
-                .willReturn(Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(authStatus));
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(authStatus));
         given(context.getAuditTrail()).willReturn(auditTrail);
 
         //When
@@ -243,7 +243,7 @@ public class AuthContextsTest {
         AuthenticationException exception = new AuthenticationException("ERROR");
 
         given(authContext.validateRequest(context, clientSubject, serviceSubject))
-                .willReturn(Promises.<AuthStatus, AuthenticationException>newFailedPromise(
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newExceptionPromise(
                         exception));
         given(context.getAuditTrail()).willReturn(auditTrail);
 
@@ -268,7 +268,7 @@ public class AuthContextsTest {
         AuditTrail auditTrail = mock(AuditTrail.class);
 
         given(authContext.validateRequest(context, clientSubject, serviceSubject))
-                .willReturn(Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(AuthStatus.SUCCESS));
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SUCCESS));
         given(context.getAuditTrail()).willReturn(auditTrail);
 
         //When
@@ -305,7 +305,7 @@ public class AuthContextsTest {
         Subject serviceSubject = new Subject();
 
         given(authContext.validateRequest(context, clientSubject, serviceSubject))
-                .willReturn(Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(authStatus));
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(authStatus));
 
         //When
         Promise<AuthStatus, AuthenticationException> promise = AuthContexts.withLogging(logger, authContext)
@@ -332,7 +332,7 @@ public class AuthContextsTest {
         AuthenticationException exception = new AuthenticationException("ERROR");
 
         given(authContext.validateRequest(context, clientSubject, serviceSubject))
-                .willReturn(Promises.<AuthStatus, AuthenticationException>newFailedPromise(exception));
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newExceptionPromise(exception));
 
         //When
         Promise<AuthStatus, AuthenticationException> promise = AuthContexts.withLogging(logger, authContext)
@@ -366,7 +366,7 @@ public class AuthContextsTest {
         Subject serviceSubject = new Subject();
 
         given(authContext.secureResponse(context, serviceSubject))
-                .willReturn(Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(authStatus));
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(authStatus));
 
         //When
         Promise<AuthStatus, AuthenticationException> promise = AuthContexts.withLogging(logger, authContext)
@@ -392,7 +392,7 @@ public class AuthContextsTest {
         AuthenticationException exception = new AuthenticationException("ERROR");
 
         given(authContext.secureResponse(context, serviceSubject))
-                .willReturn(Promises.<AuthStatus, AuthenticationException>newFailedPromise(exception));
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newExceptionPromise(exception));
 
         //When
         Promise<AuthStatus, AuthenticationException> promise = AuthContexts.withLogging(logger, authContext)
@@ -413,7 +413,7 @@ public class AuthContextsTest {
         Subject clientSubject = new Subject();
 
         given(authContext.cleanSubject(context, clientSubject))
-                .willReturn(Promises.<Void, AuthenticationException>newSuccessfulPromise(null));
+                .willReturn(Promises.<Void, AuthenticationException>newResultPromise(null));
 
         //When
         Promise<Void, AuthenticationException> promise = AuthContexts.withLogging(logger, authContext)
@@ -435,7 +435,7 @@ public class AuthContextsTest {
         AuthenticationException exception = new AuthenticationException("ERROR");
 
         given(authContext.cleanSubject(context, clientSubject))
-                .willReturn(Promises.<Void, AuthenticationException>newFailedPromise(exception));
+                .willReturn(Promises.<Void, AuthenticationException>newExceptionPromise(exception));
 
         //When
         Promise<Void, AuthenticationException> promise = AuthContexts.withLogging(logger, authContext)

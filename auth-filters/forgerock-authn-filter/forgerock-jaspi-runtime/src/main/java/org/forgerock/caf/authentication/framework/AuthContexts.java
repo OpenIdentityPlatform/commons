@@ -27,11 +27,11 @@ import org.forgerock.caf.authentication.api.AsyncServerAuthContext;
 import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.api.MessageContext;
 import org.forgerock.util.Reject;
-import org.forgerock.util.promise.AsyncFunction;
-import org.forgerock.util.promise.FailureHandler;
+import org.forgerock.util.AsyncFunction;
+import org.forgerock.util.promise.ExceptionHandler;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
-import org.forgerock.util.promise.SuccessHandler;
+import org.forgerock.util.promise.ResultHandler;
 import org.slf4j.Logger;
 
 /**
@@ -78,7 +78,7 @@ final class AuthContexts {
             new AsyncFunction<List<Void>, Void, AuthenticationException>() {
                 @Override
                 public Promise<Void, AuthenticationException> apply(List<Void> voids) {
-                    return Promises.newSuccessfulPromise(null);
+                    return Promises.newResultPromise(null);
                 }
             };
 
@@ -192,11 +192,11 @@ final class AuthContexts {
                         @Override
                         public Promise<AuthStatus, AuthenticationException> apply(AuthStatus authStatus) {
                             if (isFailure(authStatus) || isNull(authStatus)) {
-                                return Promises.newFailedPromise(
+                                return Promises.newExceptionPromise(
                                         new AuthenticationException("Invalid AuthStatus from validateRequest: "
                                                 + asString(authStatus)));
                             }
-                            return Promises.newSuccessfulPromise(authStatus);
+                            return Promises.newResultPromise(authStatus);
                         }
                     });
         }
@@ -209,11 +209,11 @@ final class AuthContexts {
                         @Override
                         public Promise<AuthStatus, AuthenticationException> apply(AuthStatus authStatus) {
                             if (isSuccess(authStatus) || isFailure(authStatus) || isNull(authStatus)) {
-                                return Promises.newFailedPromise(
+                                return Promises.newExceptionPromise(
                                         new AuthenticationException("Invalid AuthStatus from secureResponse: "
                                                 + asString(authStatus)));
                             }
-                            return Promises.newSuccessfulPromise(authStatus);
+                            return Promises.newResultPromise(authStatus);
                         }
                     });
         }
@@ -229,7 +229,7 @@ final class AuthContexts {
         public Promise<AuthStatus, AuthenticationException> validateRequest(final MessageContext context,
                 final Subject clientSubject, Subject serviceSubject) {
             return super.validateRequest(context, clientSubject, serviceSubject)
-                    .onSuccess(new SuccessHandler<AuthStatus>() {
+                    .thenOnResult(new ResultHandler<AuthStatus>() {
                         @Override
                         public void handleResult(AuthStatus authStatus) {
                             AuditTrail auditTrail = context.getAuditTrail();
@@ -248,9 +248,9 @@ final class AuthContexts {
                             }
                         }
                     })
-                    .onFailure(new FailureHandler<AuthenticationException>() {
+                    .thenOnException(new ExceptionHandler<AuthenticationException>() {
                         @Override
-                        public void handleError(AuthenticationException error) {
+                        public void handleException(AuthenticationException error) {
                             AuditTrail auditTrail = context.getAuditTrail();
                             auditTrail.completeAuditAsFailure(error);
                             auditTrail.audit();
@@ -282,7 +282,7 @@ final class AuthContexts {
         public Promise<AuthStatus, AuthenticationException> validateRequest(MessageContext context,
                 Subject clientSubject, Subject serviceSubject) {
             return super.validateRequest(context, clientSubject, serviceSubject)
-                    .onSuccess(new SuccessHandler<AuthStatus>() {
+                    .thenOnResult(new ResultHandler<AuthStatus>() {
                         @Override
                         public void handleResult(AuthStatus authStatus) {
                             if (isSuccess(authStatus)) {
@@ -299,9 +299,9 @@ final class AuthContexts {
                             }
                         }
                     })
-                    .onFailure(new FailureHandler<AuthenticationException>() {
+                    .thenOnException(new ExceptionHandler<AuthenticationException>() {
                         @Override
-                        public void handleError(AuthenticationException error) {
+                        public void handleException(AuthenticationException error) {
                             logger.error(error.getMessage(), error);
                         }
                     });
@@ -311,7 +311,7 @@ final class AuthContexts {
         public Promise<AuthStatus, AuthenticationException> secureResponse(MessageContext context,
                 Subject serviceSubject) {
             return super.secureResponse(context, serviceSubject)
-                    .onSuccess(new SuccessHandler<AuthStatus>() {
+                    .thenOnResult(new ResultHandler<AuthStatus>() {
                         @Override
                         public void handleResult(AuthStatus authStatus) {
 
@@ -330,9 +330,9 @@ final class AuthContexts {
                             }
                         }
                     })
-                    .onFailure(new FailureHandler<AuthenticationException>() {
+                    .thenOnException(new ExceptionHandler<AuthenticationException>() {
                         @Override
-                        public void handleError(AuthenticationException error) {
+                        public void handleException(AuthenticationException error) {
                             logger.error(error.getMessage(), error);
                         }
                     });
@@ -341,9 +341,9 @@ final class AuthContexts {
         @Override
         public Promise<Void, AuthenticationException> cleanSubject(MessageContext context, Subject clientSubject) {
             return super.cleanSubject(context, clientSubject)
-                    .onFailure(new FailureHandler<AuthenticationException>() {
+                    .thenOnException(new ExceptionHandler<AuthenticationException>() {
                         @Override
-                        public void handleError(AuthenticationException error) {
+                        public void handleException(AuthenticationException error) {
                             logger.error(error.getMessage(), error);
                         }
                     });

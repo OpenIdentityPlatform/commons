@@ -31,6 +31,7 @@ import org.forgerock.caf.authentication.api.MessageContext;
 import org.forgerock.http.Context;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
+import org.forgerock.http.protocol.Status;
 import org.forgerock.util.promise.Promise;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -85,23 +86,21 @@ public class MessageContextImplTest {
         Response response = context.getResponse();
 
         //Then
-        assertThat(response.getStatus()).isEqualTo(200);
-        assertThat(response.getReason()).isEqualTo("OK");
+        assertThat(response.getStatus()).isEqualTo(Status.OK);
     }
 
     @Test
     public void setResponseShouldReplaceInitialResponse() {
 
         //Given
-        Response response = new Response().setStatusAndReason(401);
+        Response response = new Response().setStatus(Status.UNAUTHORIZED);
 
         //When
         context.setResponse(response);
 
         //Then
         assertThat(context.getResponse()).isEqualTo(response);
-        assertThat(response.getStatus()).isEqualTo(401);
-        assertThat(response.getReason()).isEqualTo("Unauthorized");
+        assertThat(response.getStatus()).isEqualTo(Status.UNAUTHORIZED);
     }
 
     @Test

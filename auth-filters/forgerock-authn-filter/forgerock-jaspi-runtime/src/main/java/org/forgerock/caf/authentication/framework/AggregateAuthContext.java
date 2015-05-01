@@ -29,10 +29,10 @@ import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.api.AuthenticationState;
 import org.forgerock.caf.authentication.api.MessageContext;
 import org.forgerock.util.Reject;
-import org.forgerock.util.promise.AsyncFunction;
+import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
-import org.forgerock.util.promise.SuccessHandler;
+import org.forgerock.util.promise.ResultHandler;
 import org.slf4j.Logger;
 
 /**
@@ -92,7 +92,7 @@ final class AggregateAuthContext implements AsyncServerAuthContext, AuthContextW
                     public Promise<AuthStatus, AuthenticationException> apply(AuthStatus authStatus) {
                         if (isSendFailure(authStatus)) {
                             return authModuleContext.validateRequest(context, clientSubject, serviceSubject)
-                                    .onSuccess(new SuccessHandler<AuthStatus>() {
+                                    .thenOnResult(new ResultHandler<AuthStatus>() {
                                         @Override
                                         public void handleResult(AuthStatus authStatus) {
                                             // Record the AuthModules AuthStatus to decided later whether to call
@@ -103,7 +103,7 @@ final class AggregateAuthContext implements AsyncServerAuthContext, AuthContextW
                                         }
                                     });
                         } else {
-                            return Promises.newSuccessfulPromise(authStatus);
+                            return Promises.newResultPromise(authStatus);
                         }
                     }
                 });
@@ -124,7 +124,7 @@ final class AggregateAuthContext implements AsyncServerAuthContext, AuthContextW
     public Promise<AuthStatus, AuthenticationException> secureResponse(final MessageContext context,
             final Subject serviceSubject) {
         AggregateAuthContextState state = context.getState(this);
-        Promise<AuthStatus, AuthenticationException> promise = Promises.newSuccessfulPromise(AuthStatus.SEND_SUCCESS);
+        Promise<AuthStatus, AuthenticationException> promise = Promises.newResultPromise(AuthStatus.SEND_SUCCESS);
         if (state.isAuthenticatedByAuthContext()) {
             promise = authModuleContext.secureResponse(context, serviceSubject);
         }
@@ -134,7 +134,7 @@ final class AggregateAuthContext implements AsyncServerAuthContext, AuthContextW
                 if (AuthStatus.SEND_SUCCESS.equals(authStatus)) {
                     return sessionModuleContext.secureResponse(context, serviceSubject);
                 } else {
-                    return Promises.newSuccessfulPromise(authStatus);
+                    return Promises.newResultPromise(authStatus);
                 }
             }
         });

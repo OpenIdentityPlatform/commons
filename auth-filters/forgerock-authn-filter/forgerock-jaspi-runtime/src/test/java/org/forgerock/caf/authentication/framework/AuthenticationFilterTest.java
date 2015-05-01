@@ -237,7 +237,7 @@ public class AuthenticationFilterTest {
 
         given(authModule.initialize(Matchers.<MessagePolicy>anyObject(), Matchers.<MessagePolicy>anyObject(),
                 Matchers.<CallbackHandler>anyObject(), anyMapOf(String.class, Object.class)))
-                .willReturn(Promises.<Void, AuthenticationException>newSuccessfulPromise(null));
+                .willReturn(Promises.<Void, AuthenticationException>newResultPromise(null));
 
         return authModule;
     }

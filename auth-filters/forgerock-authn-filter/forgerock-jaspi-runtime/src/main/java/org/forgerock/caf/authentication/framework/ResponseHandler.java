@@ -17,7 +17,6 @@
 package org.forgerock.caf.authentication.framework;
 
 import static org.forgerock.json.fluent.JsonValue.*;
-import static org.forgerock.json.resource.ResourceException.UNAUTHORIZED;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -36,6 +35,7 @@ import org.forgerock.guava.common.net.MediaType;
 import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
+import org.forgerock.http.protocol.Status;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.PermanentException;
 import org.forgerock.json.resource.ResourceException;
@@ -157,7 +157,7 @@ class ResponseHandler {
         public void write(MessageContext context, AuthenticationException exception)  {
             ResourceException jre;
             if (exception instanceof AuthenticationFailedException) {
-                jre = new PermanentException(UNAUTHORIZED, exception.getMessage(), null);
+                jre = new PermanentException(Status.UNAUTHORIZED.getCode(), exception.getMessage(), null);
             } else if (exception.getCause() instanceof ResourceException) {
                 jre = (ResourceException) exception.getCause();
             } else {
@@ -169,7 +169,7 @@ class ResponseHandler {
                 jre.setDetail(json(object(field("failureReasons", failureReasonList))));
             }
             Response response = context.getResponse();
-            response.setStatusAndReason(jre.getCode());
+            response.setStatus(Status.valueOf(jre.getCode()));
             response.getHeaders().putSingle(ContentTypeHeader.valueOf(MediaType.JSON_UTF_8.toString()));
             response.setEntity(jre.includeCauseInJsonValue().toJsonValue().asMap());
         }

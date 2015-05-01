@@ -119,7 +119,7 @@ public class AggregateAuthContextTest {
         Subject serviceSubject = new Subject();
 
         mockAuthContext(sessionModuleContext,
-                Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(authStatus));
+                Promises.<AuthStatus, AuthenticationException>newResultPromise(authStatus));
 
         //When
         Promise<AuthStatus, AuthenticationException> promise = authContext.validateRequest(context, clientSubject,
@@ -150,9 +150,9 @@ public class AggregateAuthContextTest {
         Subject serviceSubject = new Subject();
 
         mockAuthContext(sessionModuleContext,
-                Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(AuthStatus.SEND_FAILURE));
+                Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_FAILURE));
         mockAuthContext(authModuleContext,
-                Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(authStatus));
+                Promises.<AuthStatus, AuthenticationException>newResultPromise(authStatus));
 
         //When
         Promise<AuthStatus, AuthenticationException> promise = authContext.validateRequest(context, clientSubject,
@@ -172,7 +172,7 @@ public class AggregateAuthContextTest {
         Subject serviceSubject = new Subject();
 
         mockAuthContext(sessionModuleContext, null,
-                Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(AuthStatus.SEND_SUCCESS));
+                Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_SUCCESS));
 
         //When
         Promise<AuthStatus, AuthenticationException> promise = authContext.secureResponse(context, serviceSubject);
@@ -192,14 +192,14 @@ public class AggregateAuthContextTest {
         Subject serviceSubject = new Subject();
 
         mockAuthContext(sessionModuleContext, null,
-                Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(AuthStatus.SEND_SUCCESS));
+                Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_SUCCESS));
 
         mockAuthContext(sessionModuleContext,
-                Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(AuthStatus.SEND_FAILURE),
-                Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(AuthStatus.SEND_SUCCESS));
+                Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_FAILURE),
+                Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_SUCCESS));
         mockAuthContext(authModuleContext,
-                Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(AuthStatus.SUCCESS),
-                Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(AuthStatus.SEND_SUCCESS));
+                Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SUCCESS),
+                Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_SUCCESS));
 
         authContext.validateRequest(context, clientSubject, serviceSubject);
 
@@ -221,11 +221,11 @@ public class AggregateAuthContextTest {
         Subject serviceSubject = new Subject();
 
         mockAuthContext(sessionModuleContext,
-                Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(AuthStatus.SEND_FAILURE),
-                Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(AuthStatus.SEND_SUCCESS));
+                Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_FAILURE),
+                Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_SUCCESS));
         mockAuthContext(authModuleContext,
-                Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(AuthStatus.SUCCESS),
-                Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(AuthStatus.SEND_CONTINUE));
+                Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SUCCESS),
+                Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_CONTINUE));
 
         authContext.validateRequest(context, clientSubject, serviceSubject);
 
@@ -246,9 +246,9 @@ public class AggregateAuthContextTest {
         Subject clientSubject = new Subject();
 
         mockAuthContext(sessionModuleContext, null, null,
-                Promises.<Void, AuthenticationException>newSuccessfulPromise(null));
+                Promises.<Void, AuthenticationException>newResultPromise(null));
         mockAuthContext(authModuleContext, null, null,
-                Promises.<Void, AuthenticationException>newSuccessfulPromise(null));
+                Promises.<Void, AuthenticationException>newResultPromise(null));
 
         //When
         Promise<Void, AuthenticationException> promise = authContext.cleanSubject(context, clientSubject);
@@ -267,9 +267,9 @@ public class AggregateAuthContextTest {
         Subject clientSubject = new Subject();
 
         mockAuthContext(sessionModuleContext, null, null,
-                Promises.<Void, AuthenticationException>newFailedPromise(new AuthenticationException("ERROR")));
+                Promises.<Void, AuthenticationException>newExceptionPromise(new AuthenticationException("ERROR")));
         mockAuthContext(authModuleContext, null, null,
-                Promises.<Void, AuthenticationException>newSuccessfulPromise(null));
+                Promises.<Void, AuthenticationException>newResultPromise(null));
 
         //When
         Promise<Void, AuthenticationException> promise = authContext.cleanSubject(context, clientSubject);

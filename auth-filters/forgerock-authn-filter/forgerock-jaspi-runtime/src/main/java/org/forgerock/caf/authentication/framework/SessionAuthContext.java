@@ -71,7 +71,7 @@ final class SessionAuthContext implements AsyncServerAuthContext {
     public Promise<AuthStatus, AuthenticationException> validateRequest(MessageContext context, Subject clientSubject,
             Subject serviceSubject) {
         if (sessionAuthModule == null) {
-            return Promises.newSuccessfulPromise(AuthStatus.SEND_FAILURE);
+            return Promises.newResultPromise(AuthStatus.SEND_FAILURE);
         } else {
             return sessionAuthModule.validateRequest(context, clientSubject, serviceSubject);
         }
@@ -91,7 +91,7 @@ final class SessionAuthContext implements AsyncServerAuthContext {
     @Override
     public Promise<AuthStatus, AuthenticationException> secureResponse(MessageContext context, Subject serviceSubject) {
         if (sessionAuthModule == null) {
-            return Promises.newSuccessfulPromise(AuthStatus.SEND_SUCCESS);
+            return Promises.newResultPromise(AuthStatus.SEND_SUCCESS);
         }
         return sessionAuthModule.secureResponse(context, serviceSubject);
     }
@@ -110,7 +110,7 @@ final class SessionAuthContext implements AsyncServerAuthContext {
     @Override
     public Promise<Void, AuthenticationException> cleanSubject(MessageContext context, Subject clientSubject) {
         if (sessionAuthModule == null) {
-            return Promises.newSuccessfulPromise(null);
+            return Promises.newResultPromise(null);
         }
         return sessionAuthModule.cleanSubject(context, clientSubject);
     }

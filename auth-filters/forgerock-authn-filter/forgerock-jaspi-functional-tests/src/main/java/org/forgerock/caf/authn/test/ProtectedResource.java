@@ -19,8 +19,6 @@ package org.forgerock.caf.authn.test;
 import static org.forgerock.json.fluent.JsonValue.json;
 import static org.forgerock.json.fluent.JsonValue.object;
 
-import javax.servlet.ServletException;
-import java.io.IOException;
 import java.util.Map;
 
 import org.forgerock.caf.authentication.framework.AuthenticationFramework;
@@ -30,6 +28,7 @@ import org.forgerock.http.HttpContext;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.ResponseException;
+import org.forgerock.http.protocol.Status;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
@@ -53,15 +52,13 @@ public class ProtectedResource implements Handler {
      * Sets a header, "RESOURCE_CALLED:true" on the response to signify that it has been called and write a JSON
      * string to the response containing the principal and context from the request attributes.
      *
-     * @param req {@inheritDoc}
-     * @param resp {@inheritDoc}
-     * @throws ServletException {@inheritDoc}
-     * @throws IOException {@inheritDoc}
+     * @param context {@inheritDoc}
+     * @param request {@inheritDoc}
      */
     @Override
     public Promise<Response, ResponseException> handle(Context context, Request request) {
 
-        Response response = new Response().setStatusAndReason(200);
+        Response response = new Response().setStatus(Status.OK);
 
         response.getHeaders().putSingle(RESOURCE_CALLED_HEADER, "true");
 
@@ -77,6 +74,6 @@ public class ProtectedResource implements Handler {
             json.add("context", requestContextMap);
         }
         response.setEntity(json.getObject());
-        return Promises.newSuccessfulPromise(response);
+        return Promises.newResultPromise(response);
     }
 }
