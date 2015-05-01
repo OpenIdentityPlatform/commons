@@ -23,6 +23,7 @@ import org.forgerock.caf.authentication.api.AsyncServerAuthContext;
 import org.forgerock.caf.authentication.api.AuthContextWithState;
 import org.forgerock.caf.authentication.api.AuthenticationState;
 import org.forgerock.caf.authentication.api.MessageContext;
+import org.forgerock.caf.authentication.api.MessageInfoContext;
 import org.forgerock.http.Context;
 import org.forgerock.http.ServerContext;
 import org.forgerock.http.protocol.Request;
@@ -34,7 +35,7 @@ import org.forgerock.util.Reject;
  * given request and response message exchange.
  *
  * @see MessageContext
- * @see org.forgerock.caf.authentication.api.MessageContextInfo
+ * @see MessageInfoContext
  *
  * @since 2.0.0
  */

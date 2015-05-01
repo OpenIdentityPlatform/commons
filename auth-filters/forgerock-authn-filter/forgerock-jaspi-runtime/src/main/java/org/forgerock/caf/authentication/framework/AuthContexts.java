@@ -21,6 +21,7 @@ import static org.forgerock.caf.authentication.framework.AuthStatusUtils.*;
 import javax.security.auth.Subject;
 import javax.security.auth.message.AuthStatus;
 import java.security.Principal;
+import java.util.List;
 
 import org.forgerock.caf.authentication.api.AsyncServerAuthContext;
 import org.forgerock.caf.authentication.api.AuthenticationException;
@@ -68,6 +69,18 @@ final class AuthContexts {
     private AuthContexts() {
         // Private constructor
     }
+
+    /**
+     * A {@code AsyncFunction} which takes a list of {@code Void}s and returns a single
+     * {@code Void}.
+     */
+    static final AsyncFunction<List<Void>, Void, AuthenticationException> ON_SUCCESS_RETURN_VOID =
+            new AsyncFunction<List<Void>, Void, AuthenticationException>() {
+                @Override
+                public Promise<Void, AuthenticationException> apply(List<Void> voids) {
+                    return Promises.newSuccessfulPromise(null);
+                }
+            };
 
     /**
      * <p>Attaches a success function to the result of both the

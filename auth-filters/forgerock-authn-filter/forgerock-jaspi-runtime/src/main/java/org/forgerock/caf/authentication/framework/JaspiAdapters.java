@@ -33,7 +33,7 @@ import org.forgerock.caf.authentication.api.AsyncServerAuthContext;
 import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
 import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.api.MessageContext;
-import org.forgerock.caf.authentication.api.MessageContextInfo;
+import org.forgerock.caf.authentication.api.MessageInfoContext;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.util.Reject;
@@ -85,11 +85,11 @@ final class JaspiAdapters {
     /**
      * Adapts an {@code MessageContextInfo} into a JASPI {@code MessageInfo}.
      *
-     * @param messageContextInfo The {@code MessageContextInfo} to adapt.
+     * @param messageInfoContext The {@code MessageContextInfo} to adapt.
      * @return An {@code MessageInfo}.
      */
-    static MessageInfo adapt(MessageContextInfo messageContextInfo) {
-        return new MessageInfoAdapter(messageContextInfo);
+    static MessageInfo adapt(MessageInfoContext messageInfoContext) {
+        return new MessageInfoAdapter(messageInfoContext);
     }
 
     private static final class ServerAuthContextAdapter implements AsyncServerAuthContext {
@@ -164,7 +164,7 @@ final class JaspiAdapters {
         }
 
         @Override
-        public Promise<AuthStatus, AuthenticationException> validateRequest(MessageContextInfo messageInfo,
+        public Promise<AuthStatus, AuthenticationException> validateRequest(MessageInfoContext messageInfo,
                 Subject clientSubject, Subject serviceSubject) {
             try {
                 AuthStatus authStatus = authModule.validateRequest(adapt(messageInfo), clientSubject,
@@ -176,7 +176,7 @@ final class JaspiAdapters {
         }
 
         @Override
-        public Promise<AuthStatus, AuthenticationException> secureResponse(MessageContextInfo messageInfo,
+        public Promise<AuthStatus, AuthenticationException> secureResponse(MessageInfoContext messageInfo,
                 Subject serviceSubject) {
             try {
                 AuthStatus authStatus = authModule.secureResponse(adapt(messageInfo), serviceSubject);
@@ -187,7 +187,7 @@ final class JaspiAdapters {
         }
 
         @Override
-        public Promise<Void, AuthenticationException> cleanSubject(MessageContextInfo messageInfo,
+        public Promise<Void, AuthenticationException> cleanSubject(MessageInfoContext messageInfo,
                 Subject clientSubject) {
             try {
                 authModule.cleanSubject(adapt(messageInfo), clientSubject);
@@ -200,38 +200,38 @@ final class JaspiAdapters {
 
     private static final class MessageInfoAdapter implements MessageInfo {
 
-        private final MessageContextInfo messageContextInfo;
+        private final MessageInfoContext messageInfoContext;
 
-        private MessageInfoAdapter(MessageContextInfo messageContextInfo) {
-            this.messageContextInfo = messageContextInfo;
+        private MessageInfoAdapter(MessageInfoContext messageInfoContext) {
+            this.messageInfoContext = messageInfoContext;
         }
 
         @Override
         public Object getRequestMessage() {
-            return messageContextInfo.getRequest();
+            return messageInfoContext.getRequest();
         }
 
         @Override
         public Object getResponseMessage() {
-            return messageContextInfo.getResponse();
+            return messageInfoContext.getResponse();
         }
 
         @Override
         public void setRequestMessage(Object request) {
             Reject.ifFalse(request instanceof Request);
-            messageContextInfo.setRequest((Request) request);
+            messageInfoContext.setRequest((Request) request);
         }
 
         @Override
         public void setResponseMessage(Object response) {
             Reject.ifFalse(response instanceof Response);
-            messageContextInfo.setResponse((Response) response);
+            messageInfoContext.setResponse((Response) response);
         }
 
         @SuppressWarnings("rawtypes")
         @Override
         public Map getMap() {
-            return messageContextInfo.getRequestContextMap();
+            return messageInfoContext.getRequestContextMap();
         }
     }
 }

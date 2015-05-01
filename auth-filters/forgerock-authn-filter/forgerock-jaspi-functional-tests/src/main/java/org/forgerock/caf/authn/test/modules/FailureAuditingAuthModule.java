@@ -29,15 +29,15 @@ import java.util.Map;
 
 import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
 import org.forgerock.caf.authentication.api.AuthenticationException;
-import org.forgerock.caf.authentication.api.MessageContextInfo;
+import org.forgerock.caf.authentication.api.MessageInfoContext;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 
 /**
- * A test auth module in which the {@link #validateRequest(MessageContextInfo, Subject, Subject)} adds additional audit
- * information and the {@link #secureResponse(MessageContextInfo, Subject)} attempts to audit a session id.
+ * A test auth module in which the {@link #validateRequest(MessageInfoContext, Subject, Subject)} adds additional audit
+ * information and the {@link #secureResponse(MessageInfoContext, Subject)} attempts to audit a session id.
  *
  * @since 1.5.0
  */
@@ -92,7 +92,7 @@ public class FailureAuditingAuthModule implements AsyncServerAuthModule {
      */
     @SuppressWarnings("unchecked")
     @Override
-    public Promise<AuthStatus, AuthenticationException> validateRequest(MessageContextInfo messageInfo,
+    public Promise<AuthStatus, AuthenticationException> validateRequest(MessageInfoContext messageInfo,
             Subject clientSubject, Subject serviceSubject) {
 
         messageInfo.getRequestContextMap().put(AUDIT_FAILURE_REASON_KEY, Collections.singletonMap("message", "FAILURE_REASON"));
@@ -109,7 +109,7 @@ public class FailureAuditingAuthModule implements AsyncServerAuthModule {
      * @return {@inheritDoc}
      */
     @Override
-    public Promise<AuthStatus, AuthenticationException> secureResponse(MessageContextInfo messageInfo,
+    public Promise<AuthStatus, AuthenticationException> secureResponse(MessageInfoContext messageInfo,
             Subject serviceSubject) {
         return Promises.newSuccessfulPromise(null);
     }
@@ -121,7 +121,7 @@ public class FailureAuditingAuthModule implements AsyncServerAuthModule {
      * @param clientSubject {@inheritDoc}
      */
     @Override
-    public Promise<Void, AuthenticationException> cleanSubject(MessageContextInfo messageInfo, Subject clientSubject) {
+    public Promise<Void, AuthenticationException> cleanSubject(MessageInfoContext messageInfo, Subject clientSubject) {
         return Promises.newSuccessfulPromise(null);
     }
 }

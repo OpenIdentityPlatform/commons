@@ -34,7 +34,7 @@ import org.forgerock.http.protocol.Response;
  *
  * @since 2.0.0
  */
-public interface MessageContextInfo extends Context {
+public interface MessageInfoContext extends Context {
 
     /**
      * Gets the request object from this {@code MessageContextInfo}.

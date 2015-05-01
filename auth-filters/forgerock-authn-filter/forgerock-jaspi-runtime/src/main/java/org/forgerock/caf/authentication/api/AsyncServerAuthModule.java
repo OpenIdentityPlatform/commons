@@ -32,8 +32,8 @@ import org.forgerock.util.promise.Promise;
  *
  * <p>Implementations of this interface must be thread-safe as instances may be used processes
  * concurrent requests. If the module needs to store any state for a single request it should
- * store the state in the {@link MessageContextInfo} so that it can be retrieved later for the in
- * the {@link #secureResponse(MessageContextInfo, javax.security.auth.Subject)} method.</p>
+ * store the state in the {@link MessageInfoContext} so that it can be retrieved later for the in
+ * the {@link #secureResponse(MessageInfoContext, javax.security.auth.Subject)} method.</p>
  *
  * @see javax.security.auth.message.module.ServerAuthModule
  * @see javax.security.auth.message.MessageInfo
@@ -51,7 +51,7 @@ public interface AsyncServerAuthModule {
      */
     String getModuleId();
 
-    /**>
+    /**
      * <p>Initialize this module with request and response message policies to enforce, a
      * {@code CallbackHandler}, and any module specific configuration properties.</p>
      *
@@ -103,7 +103,7 @@ public interface AsyncServerAuthModule {
      * @see javax.security.auth.message.module.ServerAuthModule#validateRequest(
      * javax.security.auth.message.MessageInfo, Subject, Subject)
      */
-    Promise<AuthStatus, AuthenticationException> validateRequest(MessageContextInfo messageInfo, Subject clientSubject,
+    Promise<AuthStatus, AuthenticationException> validateRequest(MessageInfoContext messageInfo, Subject clientSubject,
             Subject serviceSubject);
 
     /**
@@ -130,7 +130,7 @@ public interface AsyncServerAuthModule {
      * @see javax.security.auth.message.module.ServerAuthModule#secureResponse(
      * javax.security.auth.message.MessageInfo, Subject)
      */
-    Promise<AuthStatus, AuthenticationException> secureResponse(MessageContextInfo messageInfo, Subject serviceSubject);
+    Promise<AuthStatus, AuthenticationException> secureResponse(MessageInfoContext messageInfo, Subject serviceSubject);
 
     /**
      * Removes any method specific principals and credentials from the client subject.
@@ -145,7 +145,7 @@ public interface AsyncServerAuthModule {
      * @see javax.security.auth.message.module.ServerAuthModule#cleanSubject(
      * javax.security.auth.message.MessageInfo, Subject)
      */
-    Promise<Void, AuthenticationException> cleanSubject(MessageContextInfo messageInfo, Subject clientSubject);
+    Promise<Void, AuthenticationException> cleanSubject(MessageInfoContext messageInfo, Subject clientSubject);
 
     /**
      * A short but useful description of this authentication context. Description should include

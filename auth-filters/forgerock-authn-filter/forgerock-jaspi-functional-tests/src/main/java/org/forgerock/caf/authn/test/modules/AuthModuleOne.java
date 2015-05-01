@@ -30,7 +30,7 @@ import java.util.Map;
 
 import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
 import org.forgerock.caf.authentication.api.AuthenticationException;
-import org.forgerock.caf.authentication.api.MessageContextInfo;
+import org.forgerock.caf.authentication.api.MessageInfoContext;
 import org.forgerock.caf.authentication.framework.AuthenticationFramework;
 import org.forgerock.http.HttpContext;
 import org.forgerock.http.protocol.Request;
@@ -39,8 +39,8 @@ import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 
 /**
- * A test auth module in which the {@link #validateRequest(MessageContextInfo, Subject, Subject)}
- * and {@link #secureResponse(MessageContextInfo, Subject)} methods return values can be decided
+ * A test auth module in which the {@link #validateRequest(MessageInfoContext, Subject, Subject)}
+ * and {@link #secureResponse(MessageInfoContext, Subject)} methods return values can be decided
  * based on the value of two request headers.
  *
  * @since 1.5.0
@@ -48,13 +48,13 @@ import org.forgerock.util.promise.Promises;
 public class AuthModuleOne implements AsyncServerAuthModule {
 
     /**
-     * The request header for deciding the return value from {@link #validateRequest(MessageContextInfo, Subject, Subject)}.
+     * The request header for deciding the return value from {@link #validateRequest(MessageInfoContext, Subject, Subject)}.
      */
     public final static String AUTH_MODULE_ONE_VALIDATE_REQUEST_HEADER_NAME =
             "X-JASPI-AUTH-MODULE-ONE-VALIDATE-REQUEST";
 
     /**
-     * The request header for deciding the return value from {@link #secureResponse(MessageContextInfo, Subject)}.
+     * The request header for deciding the return value from {@link #secureResponse(MessageInfoContext, Subject)}.
      */
     public final static String AUTH_MODULE_ONE_SECURE_RESPONSE_HEADER_NAME = "X-JASPI-AUTH-MODULE-ONE-SECURE-RESPONSE";
 
@@ -118,7 +118,7 @@ public class AuthModuleOne implements AsyncServerAuthModule {
      */
     @SuppressWarnings("unchecked")
     @Override
-    public Promise<AuthStatus, AuthenticationException> validateRequest(MessageContextInfo messageInfo,
+    public Promise<AuthStatus, AuthenticationException> validateRequest(MessageInfoContext messageInfo,
             Subject clientSubject, Subject serviceSubject) {
 
         HttpContext httpContext = messageInfo.asContext(HttpContext.class);
@@ -181,7 +181,7 @@ public class AuthModuleOne implements AsyncServerAuthModule {
      * @return {@inheritDoc}
      */
     @Override
-    public Promise<AuthStatus, AuthenticationException> secureResponse(MessageContextInfo messageInfo,
+    public Promise<AuthStatus, AuthenticationException> secureResponse(MessageInfoContext messageInfo,
             Subject serviceSubject) {
 
         HttpContext httpContext = messageInfo.asContext(HttpContext.class);
@@ -224,7 +224,7 @@ public class AuthModuleOne implements AsyncServerAuthModule {
      * @param clientSubject {@inheritDoc}
      */
     @Override
-    public Promise<Void, AuthenticationException> cleanSubject(MessageContextInfo messageInfo, Subject clientSubject) {
+    public Promise<Void, AuthenticationException> cleanSubject(MessageInfoContext messageInfo, Subject clientSubject) {
         return Promises.newSuccessfulPromise(null);
     }
 }

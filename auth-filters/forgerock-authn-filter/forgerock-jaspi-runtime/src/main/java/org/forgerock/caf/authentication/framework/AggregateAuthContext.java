@@ -16,12 +16,12 @@
 
 package org.forgerock.caf.authentication.framework;
 
+import static org.forgerock.caf.authentication.framework.AuthContexts.ON_SUCCESS_RETURN_VOID;
 import static org.forgerock.caf.authentication.framework.AuthStatusUtils.isSendFailure;
 import static org.forgerock.caf.authentication.framework.AuthStatusUtils.isSuccess;
 
 import javax.security.auth.Subject;
 import javax.security.auth.message.AuthStatus;
-import java.util.List;
 
 import org.forgerock.caf.authentication.api.AsyncServerAuthContext;
 import org.forgerock.caf.authentication.api.AuthContextWithState;
@@ -155,12 +155,7 @@ final class AggregateAuthContext implements AsyncServerAuthContext, AuthContextW
         return Promises.when(
                 sessionModuleContext.cleanSubject(context, clientSubject),
                 authModuleContext.cleanSubject(context, clientSubject)
-        ).thenAsync(new AsyncFunction<List<Void>, Void, AuthenticationException>() {
-            @Override
-            public Promise<Void, AuthenticationException> apply(List<Void> value) {
-                return Promises.newSuccessfulPromise(null);
-            }
-        });
+        ).thenAsync(ON_SUCCESS_RETURN_VOID);
     }
 
     @Override

@@ -49,6 +49,7 @@ public class AuthStatusUtilsTest {
 
     @DataProvider(name = "isAuthStatus")
     public Object[][] getIsAuthStatusData() {
+        // formatter:off
         return new Object[][]{
             // AuthStatus             | isSuccess | isSendSuccess | isSendContinue | isSendFailure | isFailure | isNull
             {AuthStatus.SUCCESS,        true,       false,          false,           false,          false,      false},
@@ -58,6 +59,7 @@ public class AuthStatusUtilsTest {
             {AuthStatus.FAILURE,        false,      false,          false,           false,          true,       false},
             {null,                      false,      false,          false,           false,          false,      true},
         };
+        // formatter:on
     }
 
     @Test(dataProvider = "isAuthStatus")

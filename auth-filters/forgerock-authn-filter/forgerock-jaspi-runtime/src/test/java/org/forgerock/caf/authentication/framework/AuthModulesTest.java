@@ -36,7 +36,7 @@ import java.util.Map;
 import org.assertj.core.api.Assertions;
 import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
 import org.forgerock.caf.authentication.api.AuthenticationException;
-import org.forgerock.caf.authentication.api.MessageContextInfo;
+import org.forgerock.caf.authentication.api.MessageInfoContext;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 import org.mockito.ArgumentCaptor;
@@ -61,7 +61,7 @@ public class AuthModulesTest {
 
         //Given
         AsyncServerAuthModule authModule = mock(AsyncServerAuthModule.class);
-        MessageContextInfo messageInfo = mock(MessageContextInfo.class);
+        MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
 
@@ -89,7 +89,7 @@ public class AuthModulesTest {
 
         //Given
         AsyncServerAuthModule authModule = mock(AsyncServerAuthModule.class);
-        MessageContextInfo messageInfo = mock(MessageContextInfo.class);
+        MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
 
@@ -121,7 +121,7 @@ public class AuthModulesTest {
 
         //Given
         AsyncServerAuthModule authModule = mock(AsyncServerAuthModule.class);
-        MessageContextInfo messageInfo = mock(MessageContextInfo.class);
+        MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject serviceSubject = new Subject();
 
         given(authModule.secureResponse(messageInfo, serviceSubject))
@@ -149,7 +149,7 @@ public class AuthModulesTest {
 
         //Given
         AsyncServerAuthModule authModule = mock(AsyncServerAuthModule.class);
-        MessageContextInfo messageInfo = mock(MessageContextInfo.class);
+        MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject serviceSubject = new Subject();
 
         given(authModule.secureResponse(messageInfo, serviceSubject))
@@ -171,7 +171,7 @@ public class AuthModulesTest {
 
         //Given
         AsyncServerAuthModule authModule = mock(AsyncServerAuthModule.class);
-        MessageContextInfo messageInfo = mock(MessageContextInfo.class);
+        MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
         Map<String, Object> requestContextMap = new HashMap<String, Object>();
@@ -207,7 +207,7 @@ public class AuthModulesTest {
 
         //Given
         AsyncServerAuthModule authModule = mock(AsyncServerAuthModule.class);
-        MessageContextInfo messageInfo = mock(MessageContextInfo.class);
+        MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
         Map<String, Object> requestContextMap = new HashMap<String, Object>();
@@ -235,7 +235,7 @@ public class AuthModulesTest {
 
         //Given
         AsyncServerAuthModule authModule = mock(AsyncServerAuthModule.class);
-        MessageContextInfo messageInfo = mock(MessageContextInfo.class);
+        MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
         Map<String, Object> requestContextMap = new HashMap<String, Object>();
@@ -267,7 +267,7 @@ public class AuthModulesTest {
 
         //Given
         AsyncServerAuthModule authModule = mock(AsyncServerAuthModule.class);
-        MessageContextInfo messageInfo = mock(MessageContextInfo.class);
+        MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
         Map<String, Object> requestContextMap = new HashMap<String, Object>();
@@ -307,7 +307,7 @@ public class AuthModulesTest {
 
         //Given
         AsyncServerAuthModule authModule = mock(AsyncServerAuthModule.class);
-        MessageContextInfo messageInfo = mock(MessageContextInfo.class);
+        MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
         Map<String, Object> requestContextMap = new HashMap<String, Object>();
@@ -341,7 +341,7 @@ public class AuthModulesTest {
 
         //Given
         AsyncServerAuthModule authModule = mock(AsyncServerAuthModule.class);
-        MessageContextInfo messageInfo = mock(MessageContextInfo.class);
+        MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
         Map<String, Object> requestContextMap = new HashMap<String, Object>();
@@ -374,7 +374,7 @@ public class AuthModulesTest {
 
         //Given
         AsyncServerAuthModule authModule = mock(AsyncServerAuthModule.class);
-        MessageContextInfo messageInfo = mock(MessageContextInfo.class);
+        MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
         Map<String, Object> requestContextMap = new HashMap<String, Object>();
@@ -418,7 +418,7 @@ public class AuthModulesTest {
 
         //Given
         AsyncServerAuthModule authModule = mock(AsyncServerAuthModule.class);
-        MessageContextInfo messageInfo = mock(MessageContextInfo.class);
+        MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
         Map<String, Object> requestContextMap = new HashMap<String, Object>();
@@ -458,7 +458,7 @@ public class AuthModulesTest {
 
         //Given
         AsyncServerAuthModule authModule = mock(AsyncServerAuthModule.class);
-        MessageContextInfo messageInfo = mock(MessageContextInfo.class);
+        MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
         Map<String, Object> requestContextMap = new HashMap<String, Object>();
@@ -506,7 +506,7 @@ public class AuthModulesTest {
 
         //Given
         AsyncServerAuthModule authModule = mock(AsyncServerAuthModule.class);
-        MessageContextInfo messageInfo = mock(MessageContextInfo.class);
+        MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject serviceSubject = new Subject();
         Map<String, Object> requestContextMap = new HashMap<String, Object>();
         AuditTrail auditTrail = mock(AuditTrail.class);
@@ -537,7 +537,7 @@ public class AuthModulesTest {
 
         //Given
         AsyncServerAuthModule authModule = mock(AsyncServerAuthModule.class);
-        MessageContextInfo messageInfo = mock(MessageContextInfo.class);
+        MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject serviceSubject = new Subject();
         Map<String, Object> requestContextMap = new HashMap<String, Object>();
         AuditTrail auditTrail = mock(AuditTrail.class);
@@ -649,7 +649,7 @@ public class AuthModulesTest {
         //Given
         Logger logger = mock(Logger.class);
         AsyncServerAuthModule authModule = mock(AsyncServerAuthModule.class);
-        MessageContextInfo messageInfo = mock(MessageContextInfo.class);
+        MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
 
@@ -677,7 +677,7 @@ public class AuthModulesTest {
         //Given
         Logger logger = mock(Logger.class);
         AsyncServerAuthModule authModule = mock(AsyncServerAuthModule.class);
-        MessageContextInfo messageInfo = mock(MessageContextInfo.class);
+        MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
         AuthenticationException exception = new AuthenticationException("ERROR");
@@ -714,7 +714,7 @@ public class AuthModulesTest {
         //Given
         Logger logger = mock(Logger.class);
         AsyncServerAuthModule authModule = mock(AsyncServerAuthModule.class);
-        MessageContextInfo messageInfo = mock(MessageContextInfo.class);
+        MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject serviceSubject = new Subject();
 
         given(authModule.getModuleId()).willReturn("MODULE_ID");
@@ -741,7 +741,7 @@ public class AuthModulesTest {
         //Given
         Logger logger = mock(Logger.class);
         AsyncServerAuthModule authModule = mock(AsyncServerAuthModule.class);
-        MessageContextInfo messageInfo = mock(MessageContextInfo.class);
+        MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject serviceSubject = new Subject();
         AuthenticationException exception = new AuthenticationException("ERROR");
 
@@ -764,7 +764,7 @@ public class AuthModulesTest {
         //Given
         Logger logger = mock(Logger.class);
         AsyncServerAuthModule authModule = mock(AsyncServerAuthModule.class);
-        MessageContextInfo messageInfo = mock(MessageContextInfo.class);
+        MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject clientSubject = new Subject();
 
         given(authModule.getModuleId()).willReturn("MODULE_ID");
@@ -786,7 +786,7 @@ public class AuthModulesTest {
         //Given
         Logger logger = mock(Logger.class);
         AsyncServerAuthModule authModule = mock(AsyncServerAuthModule.class);
-        MessageContextInfo messageInfo = mock(MessageContextInfo.class);
+        MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject clientSubject = new Subject();
         AuthenticationException exception = new AuthenticationException("ERROR");
 

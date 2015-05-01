@@ -31,7 +31,7 @@ import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
 import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.api.AuthenticationState;
 import org.forgerock.caf.authentication.api.MessageContext;
-import org.forgerock.caf.authentication.api.MessageContextInfo;
+import org.forgerock.caf.authentication.api.MessageInfoContext;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 import org.mockito.Matchers;
@@ -73,11 +73,11 @@ public class FallbackAuthContextTest {
             Promise<Void, AuthenticationException> cleanSubjectResult) {
         AsyncServerAuthModule authModule = mock(AsyncServerAuthModule.class);
 
-        given(authModule.validateRequest(Matchers.<MessageContextInfo>anyObject(), Matchers.<Subject>anyObject(),
+        given(authModule.validateRequest(Matchers.<MessageInfoContext>anyObject(), Matchers.<Subject>anyObject(),
                 Matchers.<Subject>anyObject())).willReturn(validateRequestResult);
-        given(authModule.secureResponse(Matchers.<MessageContextInfo>anyObject(), Matchers.<Subject>anyObject()))
+        given(authModule.secureResponse(Matchers.<MessageInfoContext>anyObject(), Matchers.<Subject>anyObject()))
                 .willReturn(secureResponseResult);
-        given(authModule.cleanSubject(Matchers.<MessageContextInfo>anyObject(), Matchers.<Subject>anyObject()))
+        given(authModule.cleanSubject(Matchers.<MessageInfoContext>anyObject(), Matchers.<Subject>anyObject()))
                 .willReturn(cleanSubjectResult);
 
         return authModule;

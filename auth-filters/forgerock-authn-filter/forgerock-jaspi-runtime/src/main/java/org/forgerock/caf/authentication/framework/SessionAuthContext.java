@@ -25,6 +25,7 @@ import org.forgerock.caf.authentication.api.AsyncServerAuthContext;
 import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
 import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.api.MessageContext;
+import org.forgerock.caf.authentication.api.MessageInfoContext;
 import org.forgerock.util.Reject;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
@@ -56,7 +57,7 @@ final class SessionAuthContext implements AsyncServerAuthContext {
 
     /**
      * <p>Calls {@link AsyncServerAuthModule#validateRequest(
-     * org.forgerock.caf.authentication.api.MessageContextInfo, Subject, Subject)} directly.</p>
+     * MessageInfoContext, Subject, Subject)} directly.</p>
      *
      * <p>If the configured {@code AsyncServerAuthModule} is {@code null} return a successful
      * promise with the value {@link AuthStatus#SEND_FAILURE}.</p>
@@ -78,7 +79,7 @@ final class SessionAuthContext implements AsyncServerAuthContext {
 
     /**
      * <p>Calls {@link AsyncServerAuthModule#secureResponse(
-     * org.forgerock.caf.authentication.api.MessageContextInfo, Subject)} directly.</p>
+     * MessageInfoContext, Subject)} directly.</p>
      *
      * <p>If the configured {@code AsyncServerAuthModule} is {@code null} return a successful
      * promise with the value {@link AuthStatus#SEND_SUCCESS}.</p>
@@ -97,7 +98,7 @@ final class SessionAuthContext implements AsyncServerAuthContext {
 
     /**
      * <p>Calls {@link AsyncServerAuthModule#cleanSubject(
-     * org.forgerock.caf.authentication.api.MessageContextInfo, Subject)} directly.</p>
+     * MessageInfoContext, Subject)} directly.</p>
      *
      * <p>If the configured {@code AsyncServerAuthModule} is {@code null} return a successful
      * promise with the value {@code null}.</p>

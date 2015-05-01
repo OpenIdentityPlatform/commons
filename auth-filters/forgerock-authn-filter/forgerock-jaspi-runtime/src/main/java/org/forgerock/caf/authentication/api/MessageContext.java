@@ -31,7 +31,7 @@ import org.forgerock.http.Context;
  *
  * @since 2.0.0
  */
-public interface MessageContext extends Context, MessageContextInfo {
+public interface MessageContext extends Context, MessageInfoContext {
 
     /**
      * Gets the {@link AuditTrail} instance for this message exchange.

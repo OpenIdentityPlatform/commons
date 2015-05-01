@@ -16,8 +16,10 @@
 
 package org.forgerock.caf.authentication.framework;
 
+import static org.forgerock.caf.authentication.framework.AuthContexts.ON_SUCCESS_RETURN_VOID;
 import static org.forgerock.caf.authentication.framework.AuthModules.*;
-import static org.forgerock.caf.authentication.framework.AuthStatusUtils.*;
+import static org.forgerock.caf.authentication.framework.AuthStatusUtils.isSendFailure;
+import static org.forgerock.caf.authentication.framework.AuthStatusUtils.isSuccess;
 
 import javax.security.auth.Subject;
 import javax.security.auth.message.AuthStatus;
@@ -30,11 +32,10 @@ import org.forgerock.caf.authentication.api.AuthContextWithState;
 import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.api.AuthenticationState;
 import org.forgerock.caf.authentication.api.MessageContext;
-import org.forgerock.caf.authentication.api.MessageContextInfo;
+import org.forgerock.caf.authentication.api.MessageInfoContext;
 import org.forgerock.util.Reject;
 import org.forgerock.util.promise.AsyncFunction;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.promise.PromiseImpl;
 import org.forgerock.util.promise.Promises;
 import org.forgerock.util.promise.SuccessHandler;
 import org.slf4j.Logger;
@@ -108,7 +109,7 @@ public final class FallbackAuthContext implements AsyncServerAuthContext, AuthCo
             this.state = state;
         }
 
-        private Promise<AuthStatus, AuthenticationException> validateRequest(final MessageContextInfo messageInfo,
+        private Promise<AuthStatus, AuthenticationException> validateRequest(final MessageInfoContext messageInfo,
                 final Subject clientSubject, final Subject serviceSubject) {
             if (position < authModules.size()) {
                 final AsyncServerAuthModule authModule = authModules.get(position);
@@ -188,22 +189,10 @@ public final class FallbackAuthContext implements AsyncServerAuthContext, AuthCo
     public Promise<Void, AuthenticationException> cleanSubject(MessageContext context, Subject clientSubject) {
 
         List<Promise<Void, AuthenticationException>> promises = new ArrayList<Promise<Void, AuthenticationException>>();
-        PromiseImpl<Void, AuthenticationException> kicker = PromiseImpl.create();
-        promises.add(kicker);
-
         for (AsyncServerAuthModule serverAuthModule : authModules) {
             promises.add(serverAuthModule.cleanSubject(context, clientSubject));
         }
-
-        Promise<Void, AuthenticationException> when = Promises.when(promises)
-                .thenAsync(new AsyncFunction<List<Void>, Void, AuthenticationException>() {
-                    @Override
-                    public Promise<Void, AuthenticationException> apply(List<Void> voids) {
-                        return Promises.newSuccessfulPromise(null);
-                    }
-                });
-        kicker.handleResult(null);
-        return when;
+        return Promises.when(promises).thenAsync(ON_SUCCESS_RETURN_VOID);
     }
 
     @Override

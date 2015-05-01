@@ -29,7 +29,7 @@ import org.forgerock.caf.authentication.api.AsyncServerAuthContext;
 import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
 import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.api.MessageContext;
-import org.forgerock.caf.authentication.api.MessageContextInfo;
+import org.forgerock.caf.authentication.api.MessageInfoContext;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 import org.mockito.Matchers;
@@ -58,14 +58,14 @@ public class SessionAuthContextTest {
     private AsyncServerAuthModule mockSessionAuthModule() {
         AsyncServerAuthModule sessionAuthModule = mock(AsyncServerAuthModule.class);
 
-        given(sessionAuthModule.validateRequest(Matchers.<MessageContextInfo>anyObject(), Matchers.<Subject>anyObject(),
+        given(sessionAuthModule.validateRequest(Matchers.<MessageInfoContext>anyObject(), Matchers.<Subject>anyObject(),
                 Matchers.<Subject>anyObject()))
                 .willReturn(
                         Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(AuthStatus.SUCCESS));
-        given(sessionAuthModule.secureResponse(Matchers.<MessageContextInfo>anyObject(), Matchers.<Subject>anyObject()))
+        given(sessionAuthModule.secureResponse(Matchers.<MessageInfoContext>anyObject(), Matchers.<Subject>anyObject()))
                 .willReturn(
                         Promises.<AuthStatus, AuthenticationException>newSuccessfulPromise(AuthStatus.SEND_SUCCESS));
-        given(sessionAuthModule.cleanSubject(Matchers.<MessageContextInfo>anyObject(), Matchers.<Subject>anyObject()))
+        given(sessionAuthModule.cleanSubject(Matchers.<MessageInfoContext>anyObject(), Matchers.<Subject>anyObject()))
                 .willReturn(Promises.<Void, AuthenticationException>newSuccessfulPromise(null));
 
         return sessionAuthModule;

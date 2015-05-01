@@ -2,18 +2,18 @@
 
 ## Async API Usage:
 
-A **AsyncServerAuthContext** uses a **MessageContext** instance to store state for its own later use and
+An **AsyncServerAuthContext** uses a **MessageContext** instance to store state for its own later use and
 to pass additional information to other **AsyncServerAuthContext** and **AsyncServerAuthModule** instances
 that are configured.
 
-On the other hand a **AsyncServerAuthModule** uses a **MessageContextInfo** instance to store state for
+On the other hand an **AsyncServerAuthModule** uses a **MessageContextInfo** instance to store state for
 its own later use and to pass additional information to other **AsyncServerAuthContext** and
 **AsyncServerAuthModule** instances that are configured.
 
 The reason for these two different objects is to hide information from the **AsyncServerAuthModule**
 instances that is only application at the **AsyncServerAuthContext** level. A **MessageContext** is a
 **MessageContextInfo** so no conversion needs to take place when passing a **MessageContext** into a call
-to a **AsyncServerAuthModule**.
+to an **AsyncServerAuthModule**.
 
 The authentication framework will create a new **MessageContext** instance for each incoming request to
 process, which will be passed to the configured **AsyncServerAuthContext**.
@@ -152,19 +152,19 @@ will be overloaded so as they can accept either asynchronous and synchronous aut
 
 ---
 
-### Example of adapting a JASPI **ServerAuthContext** to a **AsyncServerAuthContext**
+### Example of adapting a JASPI **ServerAuthContext** to an **AsyncServerAuthContext**
 ```java
 ServerAuthContext authContext = ...;
 AsyncServerAuthContext asyncAuthContext = JaspiAdapters.adapt(authContext);
 ```
 
-### Example of adapting a JASPI **ServerAuthModule** to a **AsyncServerAuthModule**
+### Example of adapting a JASPI **ServerAuthModule** to an **AsyncServerAuthModule**
 ```java
 ServerAuthModule authModule = ...;
 AsyncServerAuthModule asyncAuthModule = JaspiAdapters.adapt(authModule);
 ```
 
-### Example of adapting a JASPI **AuthException** to a **AuthenticationException**
+### Example of adapting a JASPI **AuthException** to an **AuthenticationException**
 ```java
 AuthException authException = ...;
 AuthenticationException authenticationException = JaspiAdapters.adapt(authException);

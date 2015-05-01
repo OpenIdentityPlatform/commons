@@ -32,7 +32,7 @@ import java.util.Map;
 
 import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
 import org.forgerock.caf.authentication.api.AuthenticationException;
-import org.forgerock.caf.authentication.api.MessageContextInfo;
+import org.forgerock.caf.authentication.api.MessageInfoContext;
 import org.forgerock.util.promise.AsyncFunction;
 import org.forgerock.util.promise.FailureHandler;
 import org.forgerock.util.promise.Promise;
@@ -84,8 +84,8 @@ final class AuthModules {
 
     /**
      * <p>Attaches a success function to the result of both the
-     * {@link AsyncServerAuthModule#validateRequest(MessageContextInfo, Subject, Subject)} and
-     * {@link AsyncServerAuthModule#secureResponse(MessageContextInfo, Subject)} method calls, for
+     * {@link AsyncServerAuthModule#validateRequest(MessageInfoContext, Subject, Subject)} and
+     * {@link AsyncServerAuthModule#secureResponse(MessageInfoContext, Subject)} method calls, for
      * the given {@code AsyncServerAuthModule}, which validates that the returned
      * {@link AuthStatus} is valid for the method being called.</p>
      *
@@ -120,8 +120,8 @@ final class AuthModules {
 
     /**
      * <p>Attaches a success function to the result of both the
-     * {@link AsyncServerAuthModule#validateRequest(MessageContextInfo, Subject, Subject)} and
-     * {@link AsyncServerAuthModule#secureResponse(MessageContextInfo, Subject)} method calls, for
+     * {@link AsyncServerAuthModule#validateRequest(MessageInfoContext, Subject, Subject)} and
+     * {@link AsyncServerAuthModule#secureResponse(MessageInfoContext, Subject)} method calls, for
      * the given {@code List} of {@code AsyncServerAuthModule}s, which validates that the returned
      * {@link AuthStatus} is valid for the method being called.</p>
      *
@@ -142,7 +142,7 @@ final class AuthModules {
 
     /**
      * <p>Attaches a success and failure functions to the result of the
-     * {@link AsyncServerAuthModule#validateRequest(MessageContextInfo, Subject, Subject)} method
+     * {@link AsyncServerAuthModule#validateRequest(MessageInfoContext, Subject, Subject)} method
      * call, for the given {@code AsyncServerAuthModule}, which audits the outcome of the call.</p>
      *
      * <p>Audits:
@@ -166,7 +166,7 @@ final class AuthModules {
 
     /**
      * <p>Attaches a success and failure functions to the result of the
-     * {@link AsyncServerAuthModule#validateRequest(MessageContextInfo, Subject, Subject)} method
+     * {@link AsyncServerAuthModule#validateRequest(MessageInfoContext, Subject, Subject)} method
      * call, for the given {@code List} of {@code AsyncServerAuthModule}s, which audits the
      * outcome of each the call.</p>
      *
@@ -187,8 +187,8 @@ final class AuthModules {
 
     /**
      * <p>Attaches a success and failure functions to the result of both the
-     * {@link AsyncServerAuthModule#validateRequest(MessageContextInfo, Subject, Subject)} and
-     * {@link AsyncServerAuthModule#secureResponse(MessageContextInfo, Subject)} method
+     * {@link AsyncServerAuthModule#validateRequest(MessageInfoContext, Subject, Subject)} and
+     * {@link AsyncServerAuthModule#secureResponse(MessageInfoContext, Subject)} method
      * calls, for the given "session" {@code AsyncServerAuthModule}, which audits the outcome of
      * the call.</p>
      *
@@ -221,7 +221,7 @@ final class AuthModules {
      * </p>
      *
      * <p>
-     * {@link AsyncServerAuthModule#validateRequest(MessageContextInfo, Subject, Subject)} logs:
+     * {@link AsyncServerAuthModule#validateRequest(MessageInfoContext, Subject, Subject)} logs:
      * <ul>
      *     <li>valid {@code AuthStatus} values at <strong>debug</strong> level</li>
      *     <li>invalid {@code AuthStatus} values at <strong>error</strong> level</li>
@@ -230,7 +230,7 @@ final class AuthModules {
      * </p>
      *
      * <p>
-     * {@link AsyncServerAuthModule#secureResponse(MessageContextInfo, Subject)} logs:
+     * {@link AsyncServerAuthModule#secureResponse(MessageInfoContext, Subject)} logs:
      * <ul>
      *     <li>valid {@code AuthStatus} values at <strong>debug</strong> level</li>
      *     <li>invalid {@code AuthStatus} values at <strong>error</strong> level</li>
@@ -239,7 +239,7 @@ final class AuthModules {
      * </p>
      *
      * <p>
-     * {@link AsyncServerAuthModule#cleanSubject(MessageContextInfo, Subject)} logs:
+     * {@link AsyncServerAuthModule#cleanSubject(MessageInfoContext, Subject)} logs:
      * <ul>
      *     <li>successfully cleaning client subject at <strong>debug</strong> level</li>
      *     <li>failed cleaning of client subject at <strong>error</strong> level</li>
@@ -285,7 +285,7 @@ final class AuthModules {
         }
 
         @Override
-        public Promise<AuthStatus, AuthenticationException> validateRequest(final MessageContextInfo messageInfo,
+        public Promise<AuthStatus, AuthenticationException> validateRequest(final MessageInfoContext messageInfo,
                 Subject clientSubject, Subject serviceSubject) {
             return super.validateRequest(messageInfo, clientSubject, serviceSubject)
                     .thenAsync(new AsyncFunction<AuthStatus, AuthStatus, AuthenticationException>() {
@@ -302,7 +302,7 @@ final class AuthModules {
         }
 
         @Override
-        public Promise<AuthStatus, AuthenticationException> secureResponse(MessageContextInfo messageInfo,
+        public Promise<AuthStatus, AuthenticationException> secureResponse(MessageInfoContext messageInfo,
                 Subject serviceSubject) {
             return super.secureResponse(messageInfo, serviceSubject)
                     .thenAsync(new AsyncFunction<AuthStatus, AuthStatus, AuthenticationException>() {
@@ -330,7 +330,7 @@ final class AuthModules {
         }
 
         @Override
-        public Promise<AuthStatus, AuthenticationException> validateRequest(final MessageContextInfo messageInfo,
+        public Promise<AuthStatus, AuthenticationException> validateRequest(final MessageInfoContext messageInfo,
                 Subject clientSubject, Subject serviceSubject) {
             final AuditTrail auditTrail = (AuditTrail) messageInfo.getRequestContextMap().get(AUDIT_TRAIL_KEY);
             final Map<String, Object> moduleAuditInfo = getMap(messageInfo.getRequestContextMap(), AUDIT_INFO_KEY);
@@ -388,7 +388,7 @@ final class AuthModules {
         }
 
         @Override
-        public Promise<AuthStatus, AuthenticationException> validateRequest(final MessageContextInfo messageInfo,
+        public Promise<AuthStatus, AuthenticationException> validateRequest(final MessageInfoContext messageInfo,
                 Subject clientSubject, Subject serviceSubject) {
             return super.validateRequest(messageInfo, clientSubject, serviceSubject)
                     .thenAlways(new Runnable() {
@@ -400,7 +400,7 @@ final class AuthModules {
         }
 
         @Override
-        public Promise<AuthStatus, AuthenticationException> secureResponse(final MessageContextInfo messageInfo,
+        public Promise<AuthStatus, AuthenticationException> secureResponse(final MessageInfoContext messageInfo,
                 Subject serviceSubject) {
             return super.secureResponse(messageInfo, serviceSubject)
                     .thenAlways(new Runnable() {
@@ -411,7 +411,7 @@ final class AuthModules {
                     });
         }
 
-        private void auditSessionId(MessageContextInfo messageInfo) {
+        private void auditSessionId(MessageInfoContext messageInfo) {
             AuditTrail auditTrail = (AuditTrail) messageInfo.getRequestContextMap().get(AUDIT_TRAIL_KEY);
             messageInfo.getRequestContextMap().remove(AUDIT_INFO_KEY);
             messageInfo.getRequestContextMap().remove(AUDIT_FAILURE_REASON_KEY);
@@ -456,7 +456,7 @@ final class AuthModules {
         }
 
         @Override
-        public Promise<AuthStatus, AuthenticationException> validateRequest(final MessageContextInfo messageInfo,
+        public Promise<AuthStatus, AuthenticationException> validateRequest(final MessageInfoContext messageInfo,
                 Subject clientSubject, Subject serviceSubject) {
             final String moduleId = getModuleId();
             return super.validateRequest(messageInfo, clientSubject, serviceSubject)
@@ -490,7 +490,7 @@ final class AuthModules {
         }
 
         @Override
-        public Promise<AuthStatus, AuthenticationException> secureResponse(MessageContextInfo messageInfo,
+        public Promise<AuthStatus, AuthenticationException> secureResponse(MessageInfoContext messageInfo,
                 Subject serviceSubject) {
             final String moduleId = getModuleId();
             return super.secureResponse(messageInfo, serviceSubject)
@@ -525,7 +525,7 @@ final class AuthModules {
         }
 
         @Override
-        public Promise<Void, AuthenticationException> cleanSubject(MessageContextInfo messageInfo,
+        public Promise<Void, AuthenticationException> cleanSubject(MessageInfoContext messageInfo,
                 Subject clientSubject) {
             return super.cleanSubject(messageInfo, clientSubject)
                     .onSuccess(new SuccessHandler<Void>() {
@@ -568,19 +568,19 @@ final class AuthModules {
         }
 
         @Override
-        public Promise<AuthStatus, AuthenticationException> validateRequest(final MessageContextInfo messageInfo,
+        public Promise<AuthStatus, AuthenticationException> validateRequest(final MessageInfoContext messageInfo,
                 Subject clientSubject, Subject serviceSubject) {
             return authModule.validateRequest(messageInfo, clientSubject, serviceSubject);
         }
 
         @Override
-        public Promise<AuthStatus, AuthenticationException> secureResponse(MessageContextInfo messageInfo,
+        public Promise<AuthStatus, AuthenticationException> secureResponse(MessageInfoContext messageInfo,
                 Subject serviceSubject) {
             return authModule.secureResponse(messageInfo, serviceSubject);
         }
 
         @Override
-        public Promise<Void, AuthenticationException> cleanSubject(MessageContextInfo messageInfo,
+        public Promise<Void, AuthenticationException> cleanSubject(MessageInfoContext messageInfo,
                 Subject clientSubject) {
             return authModule.cleanSubject(messageInfo, clientSubject);
         }
@@ -597,7 +597,7 @@ final class AuthModules {
     }
 
     @SuppressWarnings("unchecked")
-    private static Map<String, Object> removeMap(MessageContextInfo context, String mapKey) {
+    private static Map<String, Object> removeMap(MessageInfoContext context, String mapKey) {
         return (Map<String, Object>) context.getRequestContextMap().remove(mapKey);
     }
 }

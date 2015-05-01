@@ -37,7 +37,7 @@ import org.forgerock.caf.authentication.api.AsyncServerAuthContext;
 import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
 import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.api.MessageContext;
-import org.forgerock.caf.authentication.api.MessageContextInfo;
+import org.forgerock.caf.authentication.api.MessageInfoContext;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.util.promise.Promise;
@@ -240,7 +240,7 @@ public class JaspiAdaptersTest {
 
         //Given
         ServerAuthModule authModule = mock(ServerAuthModule.class);
-        MessageContextInfo messageInfo = mock(MessageContextInfo.class);
+        MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
 
@@ -261,7 +261,7 @@ public class JaspiAdaptersTest {
 
         //Given
         ServerAuthModule authModule = mock(ServerAuthModule.class);
-        MessageContextInfo messageInfo = mock(MessageContextInfo.class);
+        MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
 
@@ -282,7 +282,7 @@ public class JaspiAdaptersTest {
 
         //Given
         ServerAuthModule authModule = mock(ServerAuthModule.class);
-        MessageContextInfo messageInfo = mock(MessageContextInfo.class);
+        MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject serviceSubject = new Subject();
 
         given(authModule.secureResponse(Matchers.<MessageInfo>anyObject(), eq(serviceSubject)))
@@ -302,7 +302,7 @@ public class JaspiAdaptersTest {
 
         //Given
         ServerAuthModule authModule = mock(ServerAuthModule.class);
-        MessageContextInfo messageInfo = mock(MessageContextInfo.class);
+        MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject serviceSubject = new Subject();
 
         doThrow(AuthException.class).when(authModule)
@@ -322,7 +322,7 @@ public class JaspiAdaptersTest {
 
         //Given
         ServerAuthModule authModule = mock(ServerAuthModule.class);
-        MessageContextInfo messageInfo = mock(MessageContextInfo.class);
+        MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject clientSubject = new Subject();
 
         //When
@@ -339,7 +339,7 @@ public class JaspiAdaptersTest {
 
         //Given
         ServerAuthModule authModule = mock(ServerAuthModule.class);
-        MessageContextInfo messageInfo = mock(MessageContextInfo.class);
+        MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject clientSubject = new Subject();
 
         doThrow(AuthException.class).when(authModule)
@@ -371,71 +371,71 @@ public class JaspiAdaptersTest {
     public void adaptedMessageInfoShouldAdaptGetRequestMessageCall() {
 
         //Given
-        MessageContextInfo messageContextInfo = mock(MessageContextInfo.class);
+        MessageInfoContext messageInfoContext = mock(MessageInfoContext.class);
 
         //When
-        MessageInfo messageInfo = JaspiAdapters.adapt(messageContextInfo);
+        MessageInfo messageInfo = JaspiAdapters.adapt(messageInfoContext);
         messageInfo.getRequestMessage();
 
         //Then
-        verify(messageContextInfo).getRequest();
+        verify(messageInfoContext).getRequest();
     }
 
     @Test
     public void adaptedMessageInfoShouldAdaptSetRequestMessageCall() {
 
         //Given
-        MessageContextInfo messageContextInfo = mock(MessageContextInfo.class);
+        MessageInfoContext messageInfoContext = mock(MessageInfoContext.class);
         Request request = new Request();
 
         //When
-        MessageInfo messageInfo = JaspiAdapters.adapt(messageContextInfo);
+        MessageInfo messageInfo = JaspiAdapters.adapt(messageInfoContext);
         messageInfo.setRequestMessage(request);
 
         //Then
-        verify(messageContextInfo).setRequest(request);
+        verify(messageInfoContext).setRequest(request);
     }
 
     @Test
     public void adaptedMessageInfoShouldAdaptGetResponseMessageCall() {
 
         //Given
-        MessageContextInfo messageContextInfo = mock(MessageContextInfo.class);
+        MessageInfoContext messageInfoContext = mock(MessageInfoContext.class);
 
         //When
-        MessageInfo messageInfo = JaspiAdapters.adapt(messageContextInfo);
+        MessageInfo messageInfo = JaspiAdapters.adapt(messageInfoContext);
         messageInfo.getResponseMessage();
 
         //Then
-        verify(messageContextInfo).getResponse();
+        verify(messageInfoContext).getResponse();
     }
 
     @Test
     public void adaptedMessageInfoShouldAdaptSetResponseMessageCall() {
 
         //Given
-        MessageContextInfo messageContextInfo = mock(MessageContextInfo.class);
+        MessageInfoContext messageInfoContext = mock(MessageInfoContext.class);
         Response response = new Response();
 
         //When
-        MessageInfo messageInfo = JaspiAdapters.adapt(messageContextInfo);
+        MessageInfo messageInfo = JaspiAdapters.adapt(messageInfoContext);
         messageInfo.setResponseMessage(response);
 
         //Then
-        verify(messageContextInfo).setResponse(response);
+        verify(messageInfoContext).setResponse(response);
     }
 
     @Test
     public void adaptedMessageInfoShouldAdaptGetMapCall() {
 
         //Given
-        MessageContextInfo messageContextInfo = mock(MessageContextInfo.class);
+        MessageInfoContext messageInfoContext = mock(MessageInfoContext.class);
 
         //When
-        MessageInfo messageInfo = JaspiAdapters.adapt(messageContextInfo);
+        MessageInfo messageInfo = JaspiAdapters.adapt(messageInfoContext);
         messageInfo.getMap();
 
         //Then
-        verify(messageContextInfo).getRequestContextMap();
+        verify(messageInfoContext).getRequestContextMap();
     }
 }
