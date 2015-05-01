@@ -34,6 +34,7 @@ import org.forgerock.http.RouterContext;
 import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.ResponseException;
+import org.forgerock.http.protocol.Status;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.AdviceContext;
@@ -105,7 +106,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, ResponseEx
                                 writeJsonValue(result);
                             } else {
                                 // No content.
-                                httpResponse.setStatus(204);
+                                httpResponse.setStatus(Status.NO_CONTENT);
                             }
                             onSuccess();
                         } catch (final Exception e) {
@@ -137,7 +138,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, ResponseEx
                                 httpResponse.getHeaders().putSingle(HEADER_LOCATION, getResourceURL(request,
                                         result));
                             }
-                            httpResponse.setStatus(201);
+                            httpResponse.setStatus(Status.CREATED);
                             writeResource(result);
                             onSuccess();
                         } catch (final Exception e) {
@@ -337,7 +338,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, ResponseEx
                             // No change so 304.
                             Map<String, Object> responseBody = ResourceException.getException(304)
                                     .setReason("Not Modified").toJsonValue().asMap();
-                            return Promises.newResultPromise(new Response().setStatusAndReason(304)
+                            return Promises.newResultPromise(new Response().setStatus(Status.valueOf(304))
                                     .setEntity(responseBody));
                         }
                     }
