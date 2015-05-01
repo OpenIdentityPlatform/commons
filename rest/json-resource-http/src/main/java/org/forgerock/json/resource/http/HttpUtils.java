@@ -51,6 +51,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.ResponseException;
+import org.forgerock.http.protocol.Status;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
@@ -248,7 +249,7 @@ public final class HttpUtils {
         final ResourceException re = adapt(t);
         try {
             Response resp = prepareResponse(req);
-            resp.setStatusAndReason(re.getCode());
+            resp.setStatus(Status.valueOf(re.getCode()));
             final JsonGenerator writer = getJsonGenerator(req, resp);
             writer.writeObject(re.toJsonValue().getObject());
             closeSilently(writer);
@@ -256,7 +257,7 @@ public final class HttpUtils {
         } catch (final IOException ignored) {
             // Ignore the error since this was probably the cause.
             return Promises.newExceptionPromise(
-                    new ResponseException(new Response().setStatusAndReason(500), ignored.getMessage(), ignored));
+                    new ResponseException(new Response().setStatus(Status.INTERNAL_SERVER_ERROR), ignored.getMessage(), ignored));
         }
     }
 
@@ -451,7 +452,7 @@ public final class HttpUtils {
         //get content type from req path
         try {
             Response resp = new Response()
-                    .setStatusAndReason(200);
+                    .setStatus(Status.OK);
             String mimeType = req.getForm().getFirst(PARAM_MIME_TYPE);
             if (METHOD_GET.equalsIgnoreCase(getMethod(req)) && mimeType != null && !mimeType.isEmpty()) {
                 ContentType contentType = new ContentType(mimeType);
