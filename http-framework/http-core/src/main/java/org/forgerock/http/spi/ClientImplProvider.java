@@ -17,7 +17,7 @@
 package org.forgerock.http.spi;
 
 import org.forgerock.http.HttpApplicationException;
-import org.forgerock.http.util.Options;
+import org.forgerock.util.Options;
 
 /**
  * A provider interface for obtaining {@link ClientImpl} instances. A

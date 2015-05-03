@@ -45,9 +45,9 @@ import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.spi.ClientImpl;
 import org.forgerock.http.spi.ClientImplProvider;
-import org.forgerock.http.util.Duration;
-import org.forgerock.http.util.Options;
 import org.forgerock.util.Factory;
+import org.forgerock.util.Options;
+import org.forgerock.util.time.Duration;
 
 /**
  * An HTTP client implementation provider for Apache HttpClient.

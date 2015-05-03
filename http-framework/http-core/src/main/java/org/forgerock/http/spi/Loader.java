@@ -18,7 +18,7 @@ package org.forgerock.http.spi;
 import java.util.Iterator;
 import java.util.ServiceLoader;
 
-import org.forgerock.http.util.Options;
+import org.forgerock.util.Options;
 
 /**
  * An SPI interface for implementing alternative service loading strategies. By

@@ -16,7 +16,7 @@
 
 package org.forgerock.http;
 
-import static org.forgerock.http.util.Duration.*;
+import static org.forgerock.util.time.Duration.duration;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -33,12 +33,12 @@ import org.forgerock.http.protocol.Status;
 import org.forgerock.http.spi.ClientImpl;
 import org.forgerock.http.spi.ClientImplProvider;
 import org.forgerock.http.spi.Loader;
-import org.forgerock.http.util.Duration;
-import org.forgerock.http.util.Option;
-import org.forgerock.http.util.Options;
 import org.forgerock.util.Factory;
+import org.forgerock.util.Option;
+import org.forgerock.util.Options;
 import org.forgerock.util.Reject;
 import org.forgerock.util.promise.Promise;
+import org.forgerock.util.time.Duration;
 
 /**
  * An HTTP client for sending requests to remote servers.
