@@ -65,8 +65,8 @@ import java.util.Map;
  * <p>The reason phrases are only recommendations they can be replaced by local
  * equivalents without affecting the protocol.</p>
  *
- * @link https://tools.ietf.org/html/rfc7231#section-6
- *
+ * @see <a href="https://tools.ietf.org/html/rfc7231#section-6">Hypertext Transfer Protocol (HTTP/1.1): Response Status
+ *      Codes</a>
  */
 public final class Status {
 
@@ -722,8 +722,10 @@ public final class Status {
      * include relevant diagnostic information. HTTP access authentication is explained in
      * "HTTP Authentication: Basic and Digest Access Authentication" (see RFC 2617).
      *
-     * @see http://www.ietf.org/rfc/rfc2616.txt
-     * @see http://www.ietf.org/rfc/rfc2617.txt
+     * @see <a href="http://tools.ietf.org/html/rfc7231">RFC 7231 : Hypertext Transfer Protocol (HTTP/1.1): Semantics
+     *      and Content</a>
+     * @see <a href="http://tools.ietf.org/html/rfc2617">RFC 2617 : HTTP Authentication: Basic and Digest Access
+     *      Authentication</a>
      */
     public static final Status UNAUTHORIZED = newStatus(401, "Unauthorized");
 
@@ -911,7 +913,7 @@ public final class Status {
      * RFC 2324, Hyper Text Coffee Pot Control Protocol, and is not expected to be implemented by actual HTTP servers.
      * The RFC specifies this code should be returned by tea pots requested to brew coffee.
      *
-     * @see http://tools.ietf.org/html/rfc2324
+     * @see <a href="http://tools.ietf.org/html/rfc2324">Hyper Text Coffee Pot Control Protocol (HTCPCP/1.0)</a>
      */
     public static final Status TEAPOT = newStatus(418, "I'm a teapot");
 
