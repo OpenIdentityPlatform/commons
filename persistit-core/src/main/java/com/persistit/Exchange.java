@@ -476,7 +476,7 @@ public class Exchange implements ReadOnlyExchange {
   }
 
   void removeState(final boolean secure) {
-    assertCorrectThread(false);
+    checkThread(false);
     _key.clear(secure);
     _value.clear(secure);
     _spareKey1.clear(secure);
