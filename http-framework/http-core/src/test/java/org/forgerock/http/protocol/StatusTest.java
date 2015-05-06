@@ -54,12 +54,12 @@ public class StatusTest {
         assertThat(status.getFamily()).isEqualTo(Status.Family.SUCCESSFUL);
     }
 
-    @Test(expectedExceptions = { IllegalArgumentException.class})
+    @Test(expectedExceptions = { IllegalArgumentException.class })
     public void shouldNotConstructStatusLessThan100() throws Exception {
         Status.valueOf(10, "Blah");
     }
 
-    @Test(expectedExceptions = { IllegalArgumentException.class})
+    @Test(expectedExceptions = { IllegalArgumentException.class })
     public void shouldNotConstructStatusGreaterThan999() throws Exception {
         Status.valueOf(1000, "Blah");
     }
@@ -70,7 +70,7 @@ public class StatusTest {
         assertThat(family).isEqualTo(Status.Family.SUCCESSFUL);
     }
 
-    @Test(expectedExceptions = { IllegalArgumentException.class})
+    @Test(expectedExceptions = { IllegalArgumentException.class })
     public void shouldNotLookupFamilyWithInvalidCode() throws Exception {
         Status.Family.valueOf(10);
     }
