@@ -707,14 +707,20 @@ hr {
   float:left;
 }
 
-.modal-header {
-  margin-bottom:15px;
+.bootstrap-dialog.type-default .bootstrap-dialog-title {
+  font-weight: 600;
+  color: @base-theme-color;
 }
 
+.modal-header {
+  margin-bottom: 0;
+  padding-bottom: 5px;
+  border-bottom-color: transparent;
+}
 
-
-/* Buttons */
-
+/*
+  Buttons
+*/
 .btn-uppercase {
   text-transform: uppercase;
   letter-spacing: 1px;
