@@ -72,7 +72,7 @@
             <dependency>
                 <groupId>org.assertj</groupId>
                 <artifactId>assertj-core</artifactId>
-                <version>1.7.1</version>
+                <version>1.6.1</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
@@ -113,4 +113,22 @@
             </snapshots>
         </repository>
     </repositories>
+    <build>
+        <plugins>
+            <plugin>
+              <artifactId>maven-compiler-plugin</artifactId>
+              <version>3.3</version>
+              <configuration>
+                <compilerId>eclipse</compilerId>
+              </configuration>
+              <dependencies>
+                <dependency>
+                  <groupId>org.codehaus.plexus</groupId>
+                  <artifactId>plexus-compiler-eclipse</artifactId>
+                  <version>2.5</version>
+                </dependency>
+              </dependencies>
+            </plugin>
+        </plugins>
+    </build>
 </project>
