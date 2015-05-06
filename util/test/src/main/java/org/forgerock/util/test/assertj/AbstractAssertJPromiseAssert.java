@@ -19,8 +19,8 @@ package org.forgerock.util.test.assertj;
 import java.util.concurrent.ExecutionException;
 
 import org.assertj.core.api.AbstractAssert;
+import org.assertj.core.api.AbstractThrowableAssert;
 import org.assertj.core.api.Assertions;
-import org.assertj.core.api.ThrowableAssert;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -68,7 +68,7 @@ public abstract class AbstractAssertJPromiseAssert<T, A extends AbstractAssertJP
      * @return A {@link org.assertj.core.api.ThrowableAssert} for making
      * assertions on the promise's failure cause.
      */
-    public final ThrowableAssert failedWithException() {
+    public final AbstractThrowableAssert<?, ? extends Throwable> failedWithException() {
         isNotNull();
         try {
             Object value = actual.get();

@@ -22,19 +22,19 @@ import java.util.List;
 import java.util.Map;
 
 import org.assertj.core.api.AbstractAssert;
+import org.assertj.core.api.AbstractBooleanAssert;
+import org.assertj.core.api.AbstractCharSequenceAssert;
+import org.assertj.core.api.AbstractDoubleAssert;
+import org.assertj.core.api.AbstractFileAssert;
+import org.assertj.core.api.AbstractInputStreamAssert;
+import org.assertj.core.api.AbstractIntegerAssert;
+import org.assertj.core.api.AbstractIterableAssert;
+import org.assertj.core.api.AbstractListAssert;
+import org.assertj.core.api.AbstractLongAssert;
+import org.assertj.core.api.AbstractMapAssert;
+import org.assertj.core.api.AbstractObjectArrayAssert;
+import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.Assertions;
-import org.assertj.core.api.BooleanAssert;
-import org.assertj.core.api.DoubleAssert;
-import org.assertj.core.api.FileAssert;
-import org.assertj.core.api.InputStreamAssert;
-import org.assertj.core.api.IntegerAssert;
-import org.assertj.core.api.IterableAssert;
-import org.assertj.core.api.ListAssert;
-import org.assertj.core.api.LongAssert;
-import org.assertj.core.api.MapAssert;
-import org.assertj.core.api.ObjectArrayAssert;
-import org.assertj.core.api.ObjectAssert;
-import org.assertj.core.api.StringAssert;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -76,7 +76,7 @@ public final class AssertJPromiseAssert
          * @param <V> The map value type.
          * @return A {@link org.assertj.core.api.MapAssert} instance for making assertions on the value.
          */
-        public <K, V> MapAssert<K, V> withMap() {
+        public <K, V> AbstractMapAssert<?, ? extends Map<K, V>, K, V> withMap() {
             isInstanceOf(Map.class);
             return Assertions.assertThat((Map<K, V>) actual);
         }
@@ -84,82 +84,83 @@ public final class AssertJPromiseAssert
         /**
          * Asserts that the value was a {@link Iterable} instance.
          * @param <T> The iterable contents type.
-         * @return A {@link IterableAssert} instance for making assertions on the value.
+         * @return A {@link AbstractIterableAssert} instance for making assertions on the value.
          */
-        public <T> IterableAssert<T> withIterable() {
+        public <T> AbstractIterableAssert<?, ? extends Iterable<? extends T>, T> withIterable() {
             isInstanceOf(Iterable.class);
             return Assertions.assertThat((Iterable<T>) actual);
         }
 
         /**
          * Asserts that the value was a {@link List} instance.
+         *
          * @param <T> The list contents type.
-         * @return A {@link ListAssert} instance for making assertions on the value.
+         * @return A {@link AbstractListAssert} instance for making assertions on the value.
          */
-        public <T> ListAssert<T> withList() {
+        public <T> AbstractListAssert<?, ? extends List<? extends T>, T> withList() {
             isInstanceOf(List.class);
             return Assertions.assertThat((List<T>) actual);
         }
 
         /**
          * Asserts that the value was a {@link String} instance.
-         * @return A {@link StringAssert} instance for making assertions on the value.
+         * @return A {@link AbstractCharSequenceAssert} instance for making assertions on the value.
          */
-        public StringAssert withString() {
+        public AbstractCharSequenceAssert<?, String> withString() {
             isInstanceOf(String.class);
             return Assertions.assertThat((String) actual);
         }
 
         /**
          * Asserts that the value was a {@link InputStream} instance.
-         * @return A {@link InputStreamAssert} instance for making assertions on the value.
+         * @return A {@link AbstractInputStreamAssert} instance for making assertions on the value.
          */
-        public InputStreamAssert withInputStream() {
+        public AbstractInputStreamAssert<?, ? extends InputStream> withInputStream() {
             isInstanceOf(InputStream.class);
             return Assertions.assertThat((InputStream) actual);
         }
 
         /**
          * Asserts that the value was a {@link File} instance.
-         * @return A {@link FileAssert} instance for making assertions on the value.
+         * @return A {@link AbstractFileAssert} instance for making assertions on the value.
          */
-        public FileAssert withFile() {
+        public AbstractFileAssert<?> withFile() {
             isInstanceOf(File.class);
             return Assertions.assertThat((File) actual);
         }
 
         /**
          * Asserts that the value was a {@link Integer} instance.
-         * @return A {@link IntegerAssert} instance for making assertions on the value.
+         * @return A {@link AbstractIntegerAssert} instance for making assertions on the value.
          */
-        public IntegerAssert withInteger() {
+        public AbstractIntegerAssert<?> withInteger() {
             isInstanceOf(Integer.class);
             return Assertions.assertThat((Integer) actual);
         }
 
         /**
          * Asserts that the value was a {@link Boolean} instance.
-         * @return A {@link BooleanAssert} instance for making assertions on the value.
+         * @return A {@link AbstractBooleanAssert} instance for making assertions on the value.
          */
-        public BooleanAssert withBoolean() {
+        public AbstractBooleanAssert<?> withBoolean() {
             isInstanceOf(Boolean.class);
             return Assertions.assertThat((Boolean) actual);
         }
 
         /**
          * Asserts that the value was a {@link Long} instance.
-         * @return A {@link LongAssert} instance for making assertions on the value.
+         * @return A {@link AbstractLongAssert} instance for making assertions on the value.
          */
-        public LongAssert withLong() {
+        public AbstractLongAssert<?> withLong() {
             isInstanceOf(Long.class);
             return Assertions.assertThat((Long) actual);
         }
 
         /**
          * Asserts that the value was a {@link Double} instance.
-         * @return A {@link DoubleAssert} instance for making assertions on the value.
+         * @return A {@link AbstractDoubleAssert} instance for making assertions on the value.
          */
-        public DoubleAssert withDouble() {
+        public AbstractDoubleAssert<?> withDouble() {
             isInstanceOf(Double.class);
             return Assertions.assertThat((Double) actual);
         }
@@ -167,18 +168,18 @@ public final class AssertJPromiseAssert
         /**
          * Asserts that the value was an instance of type {@code T}.
          * @param <T> The type of the expected object.
-         * @return A {@link ObjectAssert} instance for making assertions on the value.
+         * @return A {@link AbstractObjectAssert} instance for making assertions on the value.
          */
-        public <T> ObjectAssert<T> withObject() {
+        public <T> AbstractObjectAssert<?, T> withObject() {
             return Assertions.assertThat((T) actual);
         }
 
         /**
          * Asserts that the value was an array of type {@code T}.
          * @param <T> The type of the expected array.
-         * @return A {@link ObjectArrayAssert} instance for making assertions on the value.
+         * @return A {@link AbstractObjectArrayAssert} instance for making assertions on the value.
          */
-        public <T> ObjectArrayAssert<T> withObjectArray() {
+        public <T> AbstractObjectArrayAssert<?, T> withObjectArray() {
             return Assertions.assertThat((T[]) actual);
         }
 
