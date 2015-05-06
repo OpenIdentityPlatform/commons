@@ -28,4 +28,10 @@ public class ResponseTest {
         assertThat(response.getVersion()).isEqualTo("123");
         assertThat(response.getStatus()).isEqualTo(Status.OK);
     }
+
+    @Test
+    public void testConstructor() {
+        Response response = new Response(Status.TEAPOT);
+        assertThat(response.getStatus()).isEqualTo(Status.TEAPOT);
+    }
 }

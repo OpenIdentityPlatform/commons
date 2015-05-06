@@ -116,12 +116,12 @@ final class DefaultRouteHandler implements Handler {
             dispatcher.forward(req, resp);
         } catch (ServletException e) {
             return Promises.newExceptionPromise(
-                    new ResponseException(new Response().setStatus(Status.INTERNAL_SERVER_ERROR),
+                    new ResponseException(new Response(Status.INTERNAL_SERVER_ERROR),
                                           e.getMessage(),
                                           e));
         } catch (IOException e) {
             return Promises.newExceptionPromise(
-                    new ResponseException(new Response().setStatus(Status.INTERNAL_SERVER_ERROR),
+                    new ResponseException(new Response(Status.INTERNAL_SERVER_ERROR),
                                           e.getMessage(),
                                           e));
         }

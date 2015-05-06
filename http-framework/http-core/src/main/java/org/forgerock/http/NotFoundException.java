@@ -53,6 +53,6 @@ public class NotFoundException extends ResponseException {
      *            The exception which caused this exception to be thrown.
      */
     public NotFoundException(String message, Throwable cause) {
-        super(new Response().setStatus(Status.BAD_REQUEST), message, cause);
+        super(new Response(Status.BAD_REQUEST), message, cause);
     }
 }

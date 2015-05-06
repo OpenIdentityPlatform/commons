@@ -34,6 +34,15 @@ public final class Response extends MessageImpl<Response> {
     }
 
     /**
+     * Creates a new response with a default status.
+     *
+     * @param status The status to use for the Reponse.
+     */
+    public Response(Status status) {
+        this.status = status;
+    }
+
+    /**
      * Returns the response status.
      *
      * @return The response status.
