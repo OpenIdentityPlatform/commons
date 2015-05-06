@@ -49,7 +49,7 @@ public class ResponseException extends IOException {
     }
 
     public ResponseException(final Response response) {
-        this(response, response.getStatus() != null ?response.getStatus().getReasonPhrase() :"");
+        this(response, response.getStatus() != null ? response.getStatus().getReasonPhrase() : "");
     }
 
     public ResponseException(final Response response, String message) {

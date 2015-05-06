@@ -85,7 +85,7 @@ public final class Status {
 
     @Override
     public String toString() {
-        return "[Status: " + code + " " + (reasonPhrase == null ?"No reason given" :reasonPhrase) + "]";
+        return "[Status: " + code + " " + (reasonPhrase == null ? "No reason given" : reasonPhrase) + "]";
     }
 
     /**
