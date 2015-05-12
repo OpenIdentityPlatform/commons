@@ -48,7 +48,6 @@ define("org/forgerock/commons/ui/common/components/BSDialog", [
             self.loadContent(function(content){
                 self.message = $("<div></div>").append(content);
                 BootstrapDialog.show(self);
-                self.rebind();
                 if (callback) {
                     callback();
                 }
