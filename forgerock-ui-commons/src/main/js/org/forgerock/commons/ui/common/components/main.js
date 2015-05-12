@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -25,13 +25,14 @@
 /*global define*/
 
 define("org/forgerock/commons/ui/common/components/main", [
-	"./Breadcrumbs",
-	"./popup/PopupCtrl",
-	"./Dialog",
-	"./Footer",
-	"./Navigation",
-	"./GridTableView",
-	"./LineTableView",
-	"./Messages",
-	"./ConfirmationDialog"
+    "./popup/PopupCtrl",
+    "./Breadcrumbs",
+    "./ConfirmationDialog",
+    "./Dialog",
+    "./BSDialog",
+    "./Footer",
+    "./GridTableView",
+    "./LineTableView",
+    "./Messages",
+    "./Navigation"
 ]);

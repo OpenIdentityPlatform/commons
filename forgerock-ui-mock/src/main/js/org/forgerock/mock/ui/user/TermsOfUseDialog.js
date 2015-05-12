@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -22,17 +22,17 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define */
+/*global define, $*/
 
-/**
- * @author mbilski
- */
 define("org/forgerock/mock/ui/user/TermsOfUseDialog", [
-    "org/forgerock/commons/ui/common/components/Dialog"
-], function (Dialog) {
-    var TermsOfUseDialog = Dialog.extend({
+    "org/forgerock/commons/ui/common/components/BSDialog"
+], function (BSDialog) {
+    var TermsOfUseDialog = BSDialog.extend({
         contentTemplate: "templates/mock/TermsOfUseTemplate.html",
-        baseTemplate: "templates/common/MediumBaseTemplate.html"
+        render: function(){
+            this.setTitle($.t("templates.user.TermsOfUseTemplate.termsOfUse"));
+            this.show();
+        }
     });
 
     return new TermsOfUseDialog();
