@@ -36,8 +36,8 @@ import org.forgerock.http.Filter;
 import org.forgerock.http.Handler;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
-import org.forgerock.http.protocol.ResponseException;
 import org.forgerock.util.Reject;
+import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.PromiseImpl;
 import org.forgerock.util.promise.Promises;
@@ -93,7 +93,7 @@ public final class AuthenticationFilter implements Filter {
      * @return A {@code Promise} representing the response to be returned to the client.
      */
     @Override
-    public Promise<Response, ResponseException> filter(Context context, Request request, Handler next) {
+    public Promise<Response, NeverThrowsException> filter(Context context, Request request, Handler next) {
         return runtime.processMessage(context, request, next);
     }
 

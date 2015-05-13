@@ -27,9 +27,9 @@ import org.forgerock.http.Handler;
 import org.forgerock.http.HttpContext;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
-import org.forgerock.http.protocol.ResponseException;
 import org.forgerock.http.protocol.Status;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 
@@ -56,7 +56,7 @@ public class ProtectedResource implements Handler {
      * @param request {@inheritDoc}
      */
     @Override
-    public Promise<Response, ResponseException> handle(Context context, Request request) {
+    public Promise<Response, NeverThrowsException> handle(Context context, Request request) {
 
         Response response = new Response().setStatus(Status.OK);
 

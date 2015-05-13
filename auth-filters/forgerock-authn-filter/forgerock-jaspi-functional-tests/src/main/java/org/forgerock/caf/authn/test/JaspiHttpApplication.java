@@ -27,11 +27,11 @@ import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.RoutingMode;
 import org.forgerock.http.UriRouter;
 import org.forgerock.http.io.Buffer;
-import org.forgerock.json.resource.http.CrestHttp;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
-import org.forgerock.http.protocol.ResponseException;
+import org.forgerock.json.resource.http.CrestHttp;
 import org.forgerock.util.Factory;
+import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -55,7 +55,7 @@ public class JaspiHttpApplication implements HttpApplication {
     private static final class ConfigurableAuthenticationFilterHandler implements Handler {
 
         @Override
-        public Promise<Response, ResponseException> handle(Context context, Request request) {
+        public Promise<Response, NeverThrowsException> handle(Context context, Request request) {
             ProtectedResource protectedResource = InjectorHolder.getInstance(ProtectedResource.class);
             AuthenticationFilter authenticationFilter = InjectorHolder.getInstance(AuthenticationFilter.class);
             return Http.chainOf(protectedResource, authenticationFilter).handle(context, request);

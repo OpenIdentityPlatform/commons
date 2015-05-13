@@ -37,9 +37,9 @@ import org.forgerock.http.RootContext;
 import org.forgerock.http.Session;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
-import org.forgerock.http.protocol.ResponseException;
 import org.forgerock.http.protocol.Status;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 import org.mockito.Matchers;
@@ -85,7 +85,7 @@ public class AuthenticationFrameworkTest {
         return new HttpContext(new RootContext(), session);
     }
 
-    private Handler mockHandler(Request request, Promise<Response, ResponseException> response) {
+    private Handler mockHandler(Request request, Promise<Response, NeverThrowsException> response) {
         Handler next = mock(Handler.class);
         given(next.handle(Matchers.<Context>anyObject(), eq(request))).willReturn(response);
         return next;
@@ -120,16 +120,15 @@ public class AuthenticationFrameworkTest {
         Context context = mockContext();
         Request request = new Request();
         Handler next = mockHandler(request,
-                Promises.<Response, ResponseException>newResultPromise(successfulResponse));
+                Promises.<Response, NeverThrowsException>newResultPromise(successfulResponse));
 
         runtime = createRuntime(Promises.<List<Void>, AuthenticationException>newExceptionPromise(
                 new AuthenticationException("ERROR")));
 
         //When
-        Promise<Response, ResponseException> promise = runtime.processMessage(context, request, next);
+        runtime.processMessage(context, request, next);
 
         //Then
-        assertThat(promise).failedWithException();
         verify(responseHandler).handle(Matchers.<MessageContext>anyObject(),
                 Matchers.<AuthenticationException>anyObject());
         verify(authContext, never()).validateRequest(Matchers.<MessageContext>anyObject(),
@@ -145,17 +144,16 @@ public class AuthenticationFrameworkTest {
         Context context = mockContext();
         Request request = new Request();
         Handler next = mockHandler(request,
-                Promises.<Response, ResponseException>newResultPromise(successfulResponse));
+                Promises.<Response, NeverThrowsException>newResultPromise(successfulResponse));
 
         ResourceException resourceException = mock(ResourceException.class);
         runtime = createRuntime(Promises.<List<Void>, AuthenticationException>newExceptionPromise(
                 new AuthenticationException("ERROR", resourceException)));
 
         //When
-        Promise<Response, ResponseException> promise = runtime.processMessage(context, request, next);
+        runtime.processMessage(context, request, next);
 
         //Then
-        assertThat(promise).failedWithException();
         verify(responseHandler).handle(Matchers.<MessageContext>anyObject(),
                 Matchers.<AuthenticationException>anyObject());
         verify(authContext, never()).validateRequest(Matchers.<MessageContext>anyObject(),
@@ -171,13 +169,13 @@ public class AuthenticationFrameworkTest {
         HttpContext context = mockContext();
         Request request = new Request();
         Handler next = mockHandler(request,
-                Promises.<Response, ResponseException>newResultPromise(successfulResponse));
+                Promises.<Response, NeverThrowsException>newResultPromise(successfulResponse));
 
         mockAuthContext(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SUCCESS),
                 Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_SUCCESS));
 
         //When
-        Promise<Response, ResponseException> promise = runtime.processMessage(context, request, next);
+        Promise<Response, NeverThrowsException> promise = runtime.processMessage(context, request, next);
 
         //Then
         assertThat(promise).succeeded().withObject().isEqualTo(successfulResponse);
@@ -188,35 +186,30 @@ public class AuthenticationFrameworkTest {
         verify(authContext).cleanSubject(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject());
 
         Assertions.assertThat(context.getAttributes())
-                .containsKeys(AuthenticationFramework.ATTRIBUTE_AUTH_PRINCIPAL, AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT);
+                .containsKeys(AuthenticationFramework.ATTRIBUTE_AUTH_PRINCIPAL,
+                        AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT);
     }
 
     @Test
-    public void whenValidateRequestReturnSendFailureShouldReturnAccessDeniedResponse() throws Exception {
+    public void whenValidateRequestReturnSendFailureShouldReturnAccessDeniedResponse() {
 
         //Given
         Context context = mockContext();
         Request request = new Request();
         Handler next = mockHandler(request,
-                Promises.<Response, ResponseException>newResultPromise(successfulResponse));
+                Promises.<Response, NeverThrowsException>newResultPromise(successfulResponse));
 
         mockAuthContext(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_FAILURE));
 
         //When
-        Promise<Response, ResponseException> promise = runtime.processMessage(context, request, next);
+        Promise<Response, NeverThrowsException> promise = runtime.processMessage(context, request, next);
 
         //Then
-        assertThat(promise).failedWithException();
-        try {
-            promise.getOrThrowUninterruptibly();
-            Assertions.failBecauseExceptionWasNotThrown(ResourceException.class);
-        } catch (ResponseException error) {
-            Assertions.assertThat(error.getResponse().getStatus()).isEqualTo(unauthenticatedResponse.getStatus());
-            verify(authContext).validateRequest(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject(),
-                    eq(serviceSubject));
-            verify(authContext, never()).secureResponse(Matchers.<MessageContext>anyObject(), eq(serviceSubject));
-            verify(authContext).cleanSubject(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject());
-        }
+        Response response = promise.getOrThrowUninterruptibly();
+        Assertions.assertThat(response.getStatus()).isEqualTo(unauthenticatedResponse.getStatus());
+        verify(authContext).validateRequest(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject(), eq(serviceSubject));
+        verify(authContext, never()).secureResponse(Matchers.<MessageContext>anyObject(), eq(serviceSubject));
+        verify(authContext).cleanSubject(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject());
     }
 
     @DataProvider(name = "validateRequestResponse")
@@ -235,12 +228,12 @@ public class AuthenticationFrameworkTest {
         Context context = mockContext();
         Request request = new Request();
         Handler next = mockHandler(request,
-                Promises.<Response, ResponseException>newResultPromise(successfulResponse));
+                Promises.<Response, NeverThrowsException>newResultPromise(successfulResponse));
 
         mockAuthContext(Promises.<AuthStatus, AuthenticationException>newResultPromise(authStatus));
 
         //When
-        Promise<Response, ResponseException> promise = runtime.processMessage(context, request, next);
+        Promise<Response, NeverThrowsException> promise = runtime.processMessage(context, request, next);
 
         //Then
         assertThat(promise).succeeded();
@@ -266,15 +259,14 @@ public class AuthenticationFrameworkTest {
         Context context = mockContext();
         Request request = new Request();
         Handler next = mockHandler(request,
-                Promises.<Response, ResponseException>newResultPromise(successfulResponse));
+                Promises.<Response, NeverThrowsException>newResultPromise(successfulResponse));
 
         mockAuthContext(Promises.<AuthStatus, AuthenticationException>newResultPromise(authStatus));
 
         //When
-        Promise<Response, ResponseException> promise = runtime.processMessage(context, request, next);
+        runtime.processMessage(context, request, next);
 
         //Then
-        assertThat(promise).failedWithException();
         verify(responseHandler).handle(Matchers.<MessageContext>anyObject(),
                 Matchers.<AuthenticationException>anyObject());
         verify(authContext).validateRequest(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject(),
@@ -290,16 +282,15 @@ public class AuthenticationFrameworkTest {
         Context context = mockContext();
         Request request = new Request();
         Handler next = mockHandler(request,
-                Promises.<Response, ResponseException>newResultPromise(successfulResponse));
+                Promises.<Response, NeverThrowsException>newResultPromise(successfulResponse));
 
         mockAuthContext(Promises.<AuthStatus, AuthenticationException>newExceptionPromise(
                 new AuthenticationException("ERROR")));
 
         //When
-        Promise<Response, ResponseException> promise = runtime.processMessage(context, request, next);
+        runtime.processMessage(context, request, next);
 
         //Then
-        assertThat(promise).failedWithException();
         verify(responseHandler).handle(Matchers.<MessageContext>anyObject(),
                 Matchers.<AuthenticationException>anyObject());
         verify(authContext).validateRequest(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject(),
@@ -324,13 +315,13 @@ public class AuthenticationFrameworkTest {
         Context context = mockContext();
         Request request = new Request();
         Handler next = mockHandler(request,
-                Promises.<Response, ResponseException>newResultPromise(successfulResponse));
+                Promises.<Response, NeverThrowsException>newResultPromise(successfulResponse));
 
         mockAuthContext(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SUCCESS),
                 Promises.<AuthStatus, AuthenticationException>newResultPromise(authStatus));
 
         //When
-        Promise<Response, ResponseException> promise = runtime.processMessage(context, request, next);
+        Promise<Response, NeverThrowsException> promise = runtime.processMessage(context, request, next);
 
         //Then
         assertThat(promise).succeeded();
@@ -357,16 +348,15 @@ public class AuthenticationFrameworkTest {
         Context context = mockContext();
         Request request = new Request();
         Handler next = mockHandler(request,
-                Promises.<Response, ResponseException>newResultPromise(successfulResponse));
+                Promises.<Response, NeverThrowsException>newResultPromise(successfulResponse));
 
         mockAuthContext(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SUCCESS),
                 Promises.<AuthStatus, AuthenticationException>newResultPromise(authStatus));
 
         //When
-        Promise<Response, ResponseException> promise = runtime.processMessage(context, request, next);
+        runtime.processMessage(context, request, next);
 
         //Then
-        assertThat(promise).failedWithException();
         verify(responseHandler).handle(Matchers.<MessageContext>anyObject(),
                 Matchers.<AuthenticationException>anyObject());
         verify(authContext).validateRequest(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject(),
@@ -382,17 +372,16 @@ public class AuthenticationFrameworkTest {
         Context context = mockContext();
         Request request = new Request();
         Handler next = mockHandler(request,
-                Promises.<Response, ResponseException>newResultPromise(successfulResponse));
+                Promises.<Response, NeverThrowsException>newResultPromise(successfulResponse));
 
         mockAuthContext(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SUCCESS),
                 Promises.<AuthStatus, AuthenticationException>newExceptionPromise(
                         new AuthenticationException("ERROR")));
 
         //When
-        Promise<Response, ResponseException> promise = runtime.processMessage(context, request, next);
+        runtime.processMessage(context, request, next);
 
         //Then
-        assertThat(promise).failedWithException();
         verify(responseHandler).handle(Matchers.<MessageContext>anyObject(),
                 Matchers.<AuthenticationException>anyObject());
         verify(authContext).validateRequest(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject(),
@@ -408,13 +397,13 @@ public class AuthenticationFrameworkTest {
         Context context = mockContext();
         Request request = new Request();
         Handler next = mockHandler(request,
-                Promises.<Response, ResponseException>newExceptionPromise(new ResponseException(failedResponse)));
+                Promises.<Response, NeverThrowsException>newResultPromise(failedResponse));
 
         mockAuthContext(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SUCCESS),
                 Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_SUCCESS));
 
         //When
-        Promise<Response, ResponseException> promise = runtime.processMessage(context, request, next);
+        Promise<Response, NeverThrowsException> promise = runtime.processMessage(context, request, next);
 
         //Then
         assertThat(promise).succeeded();

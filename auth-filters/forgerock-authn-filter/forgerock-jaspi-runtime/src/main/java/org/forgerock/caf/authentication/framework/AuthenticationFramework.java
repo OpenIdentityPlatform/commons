@@ -39,10 +39,10 @@ import org.forgerock.http.Handler;
 import org.forgerock.http.HttpContext;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
-import org.forgerock.http.protocol.ResponseException;
 import org.forgerock.http.protocol.Status;
-import org.forgerock.util.Reject;
 import org.forgerock.util.AsyncFunction;
+import org.forgerock.util.Reject;
+import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 import org.slf4j.Logger;
@@ -130,7 +130,7 @@ public final class AuthenticationFramework {
      *             request was successfully authenticated.
      * @return A {@code Promise} representing the response to be returned to the client.
      */
-    Promise<Response, ResponseException> processMessage(Context context, Request request, final Handler next) {
+    Promise<Response, NeverThrowsException> processMessage(Context context, Request request, final Handler next) {
 
         final Subject clientSubject = new Subject();
         Map<String, Object> contextMap = new HashMap<String, Object>();
@@ -145,11 +145,11 @@ public final class AuthenticationFramework {
                 .thenAsync(onInitializationSuccess(messageContext, clientSubject, next), onFailure(messageContext));
     }
 
-    private AsyncFunction<List<Void>, Response, ResponseException> onInitializationSuccess(
+    private AsyncFunction<List<Void>, Response, NeverThrowsException> onInitializationSuccess(
             final MessageContext context, final Subject clientSubject, final Handler next) {
-        return new AsyncFunction<List<Void>, Response, ResponseException>() {
+        return new AsyncFunction<List<Void>, Response, NeverThrowsException>() {
             @Override
-            public Promise<Response, ResponseException> apply(List<Void> voids) {
+            public Promise<Response, NeverThrowsException> apply(List<Void> voids) {
                 return validateRequest(context, clientSubject, next)
                         .thenAlways(new Runnable() {
                             @Override
@@ -161,7 +161,7 @@ public final class AuthenticationFramework {
         };
     }
 
-    private Promise<Response, ResponseException> validateRequest(final MessageContext context, Subject clientSubject,
+    private Promise<Response, NeverThrowsException> validateRequest(final MessageContext context, Subject clientSubject,
             final Handler next) {
         return authContext.validateRequest(context, clientSubject, serviceSubject)
                 .thenAsync(processResult(context, clientSubject))
@@ -198,11 +198,11 @@ public final class AuthenticationFramework {
         };
     }
 
-    private AsyncFunction<AuthStatus, Response, ResponseException> onValidateRequestSuccess(
+    private AsyncFunction<AuthStatus, Response, NeverThrowsException> onValidateRequestSuccess(
             final MessageContext context, final Handler next) {
-        return new AsyncFunction<AuthStatus, Response, ResponseException>() {
+        return new AsyncFunction<AuthStatus, Response, NeverThrowsException>() {
             @Override
-            public Promise<Response, ResponseException> apply(AuthStatus authStatus) {
+            public Promise<Response, NeverThrowsException> apply(AuthStatus authStatus) {
                 if (isSuccess(authStatus)) {
                     AuditTrail auditTrail = context.getAuditTrail();
                     context.asContext(HttpContext.class).getAttributes()
@@ -214,33 +214,27 @@ public final class AuthenticationFramework {
         };
     }
 
-    private Promise<Response, ResponseException> grantAccess(final MessageContext context, Handler next) {
+    private Promise<Response, NeverThrowsException> grantAccess(final MessageContext context, Handler next) {
         return next.handle(context, context.getRequest())
-                .thenAsync(new AsyncFunction<Response, Response, ResponseException>() {
+                .thenAsync(new AsyncFunction<Response, Response, NeverThrowsException>() {
                     @Override
-                    public Promise<Response, ResponseException> apply(Response response) {
+                    public Promise<Response, NeverThrowsException> apply(Response response) {
                         context.setResponse(response);
-                        return secureResponse(context);
-                    }
-                }, new AsyncFunction<ResponseException, Response, ResponseException>() {
-                    @Override
-                    public Promise<Response, ResponseException> apply(ResponseException error) {
-                        context.setResponse(error.getResponse());
                         return secureResponse(context);
                     }
                 });
     }
 
-    private Promise<Response, ResponseException> secureResponse(final MessageContext context) {
+    private Promise<Response, NeverThrowsException> secureResponse(final MessageContext context) {
         return authContext.secureResponse(context, serviceSubject)
                 .thenAsync(onSecureResponseSuccess(context), onFailure(context));
     }
 
-    private AsyncFunction<AuthStatus, Response, ResponseException> onSecureResponseSuccess(
+    private AsyncFunction<AuthStatus, Response, NeverThrowsException> onSecureResponseSuccess(
             final MessageContext context) {
-        return new AsyncFunction<AuthStatus, Response, ResponseException>() {
+        return new AsyncFunction<AuthStatus, Response, NeverThrowsException>() {
             @Override
-            public Promise<Response, ResponseException> apply(AuthStatus authStatus) {
+            public Promise<Response, NeverThrowsException> apply(AuthStatus authStatus) {
                 if (isSendFailure(authStatus)) {
                     context.getResponse().setStatus(Status.INTERNAL_SERVER_ERROR);
                 }
@@ -249,18 +243,18 @@ public final class AuthenticationFramework {
         };
     }
 
-    private AsyncFunction<AuthenticationException, Response, ResponseException> onFailure(
+    private AsyncFunction<AuthenticationException, Response, NeverThrowsException> onFailure(
             final MessageContext context) {
-        return new AsyncFunction<AuthenticationException, Response, ResponseException>() {
+        return new AsyncFunction<AuthenticationException, Response, NeverThrowsException>() {
             @Override
-            public Promise<Response, ResponseException> apply(AuthenticationException error) {
+            public Promise<Response, NeverThrowsException> apply(AuthenticationException error) {
                 responseHandler.handle(context, error);
                 if (error instanceof AuthenticationFailedException) {
                     //Force 401 HTTP status
                     context.getResponse().setStatus(Status.UNAUTHORIZED);
                 }
-                return Promises.newExceptionPromise(new ResponseException(context.getResponse(),
-                        error.getMessage(), error));
+                logger.debug(error.getMessage(), error);
+                return Promises.newResultPromise(context.getResponse());
             }
         };
     }
