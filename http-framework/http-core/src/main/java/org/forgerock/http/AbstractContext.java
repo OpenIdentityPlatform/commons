@@ -16,9 +16,6 @@
 
 package org.forgerock.http;
 
-import java.util.Collections;
-import java.util.Iterator;
-
 import org.forgerock.util.Reject;
 
 /**
@@ -134,32 +131,4 @@ public abstract class AbstractContext implements Context {
         return null;
     }
 
-    @Override
-    public Iterator<Context> iterator() {
-        // TODO Having a real implementation makes IG crash with a StackOverflowException when capturing the Context
-        /*
-        List<Context> contexts = new ArrayList<Context>();
-        for (Context context = this; context != null; context = context.getParent()) {
-            contexts.add(context);
-        }
-        return contexts.iterator();
-        */
-        return Collections.<Context>emptySet().iterator();
-    }
-
-    @Override
-    public <T extends Context> Iterator<T> iterator(Class<T> clazz) { //TODO to implement
-        return null;
-//        return new Iterator<T>() {
-//            @Override
-//            public boolean hasNext() {
-//                return false;
-//            }
-//
-//            @Override
-//            public T next() {
-//                return null;
-//            }
-//        };
-    }
 }

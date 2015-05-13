@@ -11,12 +11,10 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.http;
-
-import java.util.Iterator;
 
 /**
  * The context associated with a request currently being processed by a {@code Handler}.
@@ -27,7 +25,7 @@ import java.util.Iterator;
  *
  * @since 1.0.0
  */
-public interface Context extends Iterable<Context> {
+public interface Context {
 
     /**
      * Get this Context's name.
@@ -116,20 +114,4 @@ public interface Context extends Iterable<Context> {
      */
     boolean isRootContext();
 
-    /**
-     * Returns an iterator that iterates over the context hierarchy from child to the root context.
-     *
-     * @return A context iterator.
-     */
-    Iterator<Context> iterator();
-
-    /**
-     * Returns an iterator that iterates over the context hierarchy from child to the root context, for all contexts
-     * that are of the given type.
-     *
-     * @param clazz The class of the context to iterate over.
-     * @param <T> The type of the context to iterate over.
-     * @return A context iterator.
-     */
-    <T extends Context> Iterator<T> iterator(Class<T> clazz);
 }
