@@ -16,6 +16,8 @@
 
 package org.forgerock.json.resource.http;
 
+import static org.forgerock.json.resource.http.HttpUtils.*;
+
 import java.util.Arrays;
 
 import org.forgerock.http.Context;
@@ -23,12 +25,10 @@ import org.forgerock.http.Filter;
 import org.forgerock.http.Handler;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
-import org.forgerock.http.protocol.ResponseException;
 import org.forgerock.http.protocol.Status;
+import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
-
-import static org.forgerock.json.resource.http.HttpUtils.*;
 
 /**
  * {@link Filter} which handles OPTION HTTP requests to CREST resources.
@@ -41,7 +41,7 @@ public class OptionsHandler implements Filter {
      * Handles all OPTION requests to CREST resources, all other request methods are handled by the {@link Handler}.
      */
     @Override
-    public Promise<Response, ResponseException> filter(Context context, Request request,
+    public Promise<Response, NeverThrowsException> filter(Context context, Request request,
             Handler next) {
         if ("OPTIONS".equals(request.getMethod())) {
             Response response = new Response().setStatus(Status.OK);
