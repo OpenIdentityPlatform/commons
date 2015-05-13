@@ -22,12 +22,14 @@ import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
-import org.forgerock.http.protocol.ResponseException;
 import org.forgerock.util.AsyncFunction;
+import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 import org.mockito.InOrder;
@@ -43,7 +45,7 @@ public final class HandlersTest {
     private static final Response RESPONSE = new Response();
 
     @Test
-    public void testFilterCanInvokeAllFiltersAndHandler() throws ResponseException {
+    public void testFilterCanInvokeAllFiltersAndHandler() throws Exception {
         Handler target = target();
         Filter filter1 = mock(Filter.class);
         doAnswer(invoke()).when(filter1).filter(any(Context.class), any(Request.class), any(Handler.class));
@@ -71,7 +73,7 @@ public final class HandlersTest {
      * the target rather than the next filter.
      */
     @Test
-    public void testFilterCanInvokeMultipleSubRequests() throws ResponseException {
+    public void testFilterCanInvokeMultipleSubRequests() throws Exception {
         Handler target = target();
         Filter filter1 = mock(Filter.class);
         doAnswer(invoke(2)).when(filter1).filter(any(Context.class), any(Request.class), any(Handler.class));
@@ -98,40 +100,12 @@ public final class HandlersTest {
     }
 
     @Test
-    public void testFilterCanStopProcessingWithError() throws ResponseException {
+    public void testFilterCanStopProcessingWithResult() throws Exception {
         Handler target = target();
         Filter filter1 = mock(Filter.class);
-        doAnswer(new Answer<Promise<Response, ResponseException>>() {
+        doAnswer(new Answer<Promise<Response, NeverThrowsException>>() {
             @Override
-            public Promise<Response, ResponseException> answer(final InvocationOnMock invocation) throws Throwable {
-                return Promises.newExceptionPromise(new ResponseException(RESPONSE));
-            }
-        }).when(filter1).filter(any(Context.class), any(Request.class), any(Handler.class));
-        Filter filter2 = filter();
-        Handler chain = Http.chainOf(target, filter1, filter2);
-        Context context = context();
-        Request request = new Request();
-
-        Response response = null;
-        try {
-            chain.handle(context, request).getOrThrowUninterruptibly();
-        } catch (ResponseException error) {
-            response = error.getResponse();
-        }
-
-        InOrder inOrder = inOrder(filter1, filter2, target, target);
-        inOrder.verify(filter1).filter(same(context), same(request), any(Handler.class));
-        assertThat(response).isEqualTo(RESPONSE);
-        verifyZeroInteractions(filter2, target);
-    }
-
-    @Test
-    public void testFilterCanStopProcessingWithResult() throws ResponseException {
-        Handler target = target();
-        Filter filter1 = mock(Filter.class);
-        doAnswer(new Answer<Promise<Response, ResponseException>>() {
-            @Override
-            public Promise<Response, ResponseException> answer(final InvocationOnMock invocation) throws Throwable {
+            public Promise<Response, NeverThrowsException> answer(final InvocationOnMock invocation) throws Throwable {
                 return Promises.newResultPromise(RESPONSE);
             }
         }).when(filter1).filter(any(Context.class), any(Request.class), any(Handler.class));
@@ -153,30 +127,30 @@ public final class HandlersTest {
         return new HttpContext(new RootContext(), session);
     }
 
-    private Filter filter() throws ResponseException {
+    private Filter filter() throws Exception {
         Filter filter = mock(Filter.class);
         doAnswer(invoke()).when(filter).filter(any(Context.class), any(Request.class), any(Handler.class));
         return filter;
     }
 
-    private Answer<Promise<Response, ResponseException>> invoke() {
+    private Answer<Promise<Response, NeverThrowsException>> invoke() {
         return invoke(1);
     }
 
-    private Answer<Promise<Response, ResponseException>> invoke(final int count) {
-        return new Answer<Promise<Response, ResponseException>>() {
+    private Answer<Promise<Response, NeverThrowsException>> invoke(final int count) {
+        return new Answer<Promise<Response, NeverThrowsException>>() {
             @Override
-            public Promise<Response, ResponseException> answer(final InvocationOnMock invocation) throws Throwable {
+            public Promise<Response, NeverThrowsException> answer(final InvocationOnMock invocation) throws Throwable {
                 Object[] args = invocation.getArguments();
                 final Context context = (Context) args[0];
                 final Request request = (Request) args[1];
                 final Handler next = (Handler) args[2];
-                Promise<Response, ResponseException> promise = Promises.newResultPromise(new Response());
+                Promise<Response, NeverThrowsException> promise = Promises.newResultPromise(new Response());
                 for (int i = 0; i < count; i++) {
                     promise.thenAsync(
-                            new AsyncFunction<Response, Response, ResponseException>() {
+                            new AsyncFunction<Response, Response, NeverThrowsException>() {
                                 @Override
-                                public Promise<Response, ResponseException> apply(Response o) {
+                                public Promise<Response, NeverThrowsException> apply(Response o) {
                                     return next.handle(context, request);
                                 }
                             }
@@ -196,7 +170,7 @@ public final class HandlersTest {
         };
     }
 
-    private Handler target() throws ResponseException {
+    private Handler target() throws Exception {
         Handler target = mock(Handler.class);
         doAnswer(result()).when(target).handle(any(Context.class), any(Request.class));
         return target;

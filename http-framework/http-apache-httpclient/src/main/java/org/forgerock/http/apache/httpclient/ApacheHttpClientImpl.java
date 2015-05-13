@@ -38,11 +38,11 @@ import org.forgerock.http.io.Buffer;
 import org.forgerock.http.io.IO;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
-import org.forgerock.http.protocol.ResponseException;
 import org.forgerock.http.protocol.Status;
 import org.forgerock.http.spi.ClientImpl;
 import org.forgerock.http.util.CaseInsensitiveSet;
 import org.forgerock.util.Factory;
+import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 
@@ -127,7 +127,7 @@ final class ApacheHttpClientImpl implements ClientImpl {
     }
 
     @Override
-    public Promise<Response, ResponseException> sendAsync(final Request request) {
+    public Promise<Response, NeverThrowsException> sendAsync(final Request request) {
         final HttpRequestBase clientRequest =
                 request.getEntity().mayContainData() ? new EntityRequest(request)
                         : new NonEntityRequest(request);
@@ -156,9 +156,7 @@ final class ApacheHttpClientImpl implements ClientImpl {
                         storage));
             }
         } catch (final IOException e) {
-            response.setStatus(Status.INTERNAL_SERVER_ERROR);
-            final ResponseException re = new ResponseException(response, "Cannot obtain a Response from server", e);
-            return Promises.newExceptionPromise(re);
+            return Promises.newResultPromise(response.setStatus(Status.INTERNAL_SERVER_ERROR));
         }
 
         // response status line
@@ -176,12 +174,7 @@ final class ApacheHttpClientImpl implements ClientImpl {
                 response.getHeaders().add(name, header.getValue());
             }
         }
-        // TODO: decide if need to try-finally to call httpRequest.abort?
-        if (response.getStatus().isSuccessful()) {
-            return Promises.newResultPromise(response);
-        } else {
-            return Promises.newExceptionPromise(new ResponseException(response));
-        }
+        return Promises.newResultPromise(response);
     }
 
 }

@@ -23,17 +23,13 @@ import java.util.List;
 
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
-import org.forgerock.http.protocol.ResponseException;
+import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 
 /**
  * Utility methods for creating common types of handler and filters.
  */
 public final class Http {
-    /*
-     * FIXME: handlers and filters should always return responses regardless of
-     * the status code. Exceptions should be reserved for internal failures.
-     */
 
     public static Filter newSessionFilter(SessionManager sessionManager) {
         return new SessionFilter(sessionManager);
@@ -72,7 +68,7 @@ public final class Http {
         }
 
         @Override
-        public Promise<Response, ResponseException> handle(Context context, Request request) {
+        public Promise<Response, NeverThrowsException> handle(Context context, Request request) {
             if (position < filters.size()) {
                 return filters.get(position).filter(context, request, next());
             } else {

@@ -29,11 +29,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.forgerock.http.Context;
 import org.forgerock.http.Handler;
+import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpContext;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
-import org.forgerock.http.protocol.ResponseException;
 import org.forgerock.http.protocol.Status;
+import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 
@@ -98,7 +99,7 @@ final class DefaultRouteHandler implements Handler {
      * handled the response or a Internal Server Error response if the request could not be dispatched.
      */
     @Override
-    public Promise<Response, ResponseException> handle(Context context, Request request) {
+    public Promise<Response, NeverThrowsException> handle(Context context, Request request) {
 
         HttpContext httpContext = context.asContext(HttpContext.class);
         HttpServletRequest req =
@@ -115,15 +116,11 @@ final class DefaultRouteHandler implements Handler {
         try {
             dispatcher.forward(req, resp);
         } catch (ServletException e) {
-            return Promises.newExceptionPromise(
-                    new ResponseException(new Response(Status.INTERNAL_SERVER_ERROR),
-                                          e.getMessage(),
-                                          e));
+            HttpApplication.LOGGER.warn("Can't route Request with default servlet {}", servletName, e);
+            return Promises.newResultPromise(new Response(Status.INTERNAL_SERVER_ERROR));
         } catch (IOException e) {
-            return Promises.newExceptionPromise(
-                    new ResponseException(new Response(Status.INTERNAL_SERVER_ERROR),
-                                          e.getMessage(),
-                                          e));
+            HttpApplication.LOGGER.warn("Can't route Request with default servlet {}", servletName, e);
+            return Promises.newResultPromise(new Response(Status.INTERNAL_SERVER_ERROR));
         }
 
         // Returns null as the container has already handled the response.

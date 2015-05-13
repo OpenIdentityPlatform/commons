@@ -16,12 +16,16 @@
 
 package org.forgerock.http;
 
+import static java.lang.String.format;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.ResponseException;
+import org.forgerock.http.protocol.Status;
+import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 
@@ -58,12 +62,12 @@ public final class UriRouter extends AbstractUriRouter<UriRouter, Handler> imple
     }
 
     @Override
-    public Promise<Response, ResponseException> handle(Context context, Request request) {
+    public Promise<Response, NeverThrowsException> handle(Context context, Request request) {
         try {
             RouteMatcher<Handler> bestMatch = getBestRoute(context, request);
             return bestMatch.getHandler().handle(bestMatch.getContext(), request);
         } catch (ResponseException e) {
-            return Promises.newExceptionPromise(e);
+            return Promises.newResultPromise(e.getResponse().setStatus(Status.NOT_FOUND));
         }
     }
 
@@ -79,7 +83,7 @@ public final class UriRouter extends AbstractUriRouter<UriRouter, Handler> imple
         try {
             return getBestRoute(context, uri);
         } catch (RouteNotFoundException e) {
-            throw new NotFoundException(e.getMessage(), e);
+            throw new ResponseException(format("Can't find a route matching remaining uri %s", uri), e);
         }
     }
 

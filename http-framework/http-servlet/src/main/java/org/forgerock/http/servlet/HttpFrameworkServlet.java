@@ -17,8 +17,10 @@
 
 package org.forgerock.http.servlet;
 
-import static org.forgerock.http.io.IO.*;
-import static org.forgerock.util.Utils.*;
+import static org.forgerock.http.io.IO.newBranchingInputStream;
+import static org.forgerock.http.io.IO.newTemporaryStorage;
+import static org.forgerock.util.Utils.closeSilently;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -51,10 +53,9 @@ import org.forgerock.http.URIUtil;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
-import org.forgerock.http.protocol.ResponseException;
 import org.forgerock.http.util.CaseInsensitiveSet;
 import org.forgerock.util.Factory;
-import org.forgerock.util.promise.ExceptionHandler;
+import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
 
@@ -174,7 +175,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
 
         // handle request
         final ServletSynchronizer sync = adapter.createServletSynchronizer(req, resp);
-        final Promise<Response, ResponseException> promise =
+        final Promise<Response, NeverThrowsException> promise =
                 handler.handle(context, request).thenOnResult(new ResultHandler<Response>() {
                     @Override
                     public void handleResult(Response response) {
@@ -184,19 +185,6 @@ public final class HttpFrameworkServlet extends HttpServlet {
                             log("Failed to write success response", e);
                         } finally {
                             closeSilently(request, response);
-                            sync.signalAndComplete();
-                        }
-                    }
-                }).thenOnException(new ExceptionHandler<ResponseException>() {
-                    @Override
-                    public void handleException(ResponseException error) {
-                        log("Unexpected error", error);
-                        try {
-                            writeResponse(httpContext, resp, error.getResponse());
-                        } catch (IOException e) {
-                            log("Failed to write success response", e);
-                        } finally {
-                            closeSilently(request, error.getResponse());
                             sync.signalAndComplete();
                         }
                     }

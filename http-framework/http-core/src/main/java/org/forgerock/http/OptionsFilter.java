@@ -21,8 +21,8 @@ import java.util.List;
 
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
-import org.forgerock.http.protocol.ResponseException;
 import org.forgerock.http.protocol.Status;
+import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 
@@ -60,7 +60,7 @@ public final class OptionsFilter implements Filter {
      * Handles all OPTION requests to CREST resources, all other request methods are handled by the {@link Handler}.
      */
     @Override
-    public Promise<Response, ResponseException> filter(Context context, Request request,
+    public Promise<Response, NeverThrowsException> filter(Context context, Request request,
             Handler next) {
         if ("OPTIONS".equals(request.getMethod())) {
             Response response = new Response(Status.OK);

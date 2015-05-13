@@ -28,7 +28,6 @@ import org.forgerock.http.io.Buffer;
 import org.forgerock.http.io.IO;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
-import org.forgerock.http.protocol.ResponseException;
 import org.forgerock.http.protocol.Status;
 import org.forgerock.http.spi.ClientImpl;
 import org.forgerock.http.spi.ClientImplProvider;
@@ -37,6 +36,7 @@ import org.forgerock.util.Factory;
 import org.forgerock.util.Option;
 import org.forgerock.util.Options;
 import org.forgerock.util.Reject;
+import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.time.Duration;
 
@@ -188,17 +188,14 @@ public final class Client implements Closeable {
      *
      * @param request
      *            The HTTP request to send.
-     * @return The HTTP response if the response has a 2xx status code.
-     * @throws ResponseException
-     *             The HTTP error response if the response did not have a 2xx
-     *             status code.
+     * @return The HTTP response
      */
-    public Response send(final Request request) throws ResponseException {
+    public Response send(final Request request) {
         try {
             return sendAsync(request).getOrThrow();
         } catch (final InterruptedException e) {
             // FIXME: is a 408 time out the best status code?
-            throw new ResponseException(Status.REQUEST_TIMEOUT);
+            return new Response().setStatus(Status.REQUEST_TIMEOUT);
         }
     }
 
@@ -208,11 +205,9 @@ public final class Client implements Closeable {
      *
      * @param request
      *            The HTTP request to send.
-     * @return A promise representing the pending HTTP response. The promise
-     *         will yield a {@code ResponseException} when a non-2xx HTTP status
-     *         code is returned.
+     * @return A promise representing the pending HTTP response.
      */
-    public Promise<Response, ResponseException> sendAsync(final Request request) {
+    public Promise<Response, NeverThrowsException> sendAsync(final Request request) {
         return impl.sendAsync(request);
     }
 }

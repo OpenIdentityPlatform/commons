@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 package org.forgerock.http.spi;
 
@@ -20,7 +20,7 @@ import java.io.IOException;
 
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
-import org.forgerock.http.protocol.ResponseException;
+import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -33,16 +33,19 @@ import org.forgerock.util.promise.Promise;
 public interface ClientImpl extends Closeable {
 
     /**
-     * Sends an HTTP request to a remote server and returns a {@code Promise}
-     * representing the asynchronous response.
+     * Returns a {@link Promise} representing the asynchronous {@link Response} of the given {@code request}.
+     * If any (asynchronous) processing goes wrong, the promise still contains a {@link Response} (probably from the
+     * {@literal 4xx} or {@literal 5xx} status code family).
+     * <p>
+     * The returned {@link Promise} contains the response returned from the server as-is.
+     * This is responsibility of the client to produce the appropriate error response ({@literal 404},
+     * {@literal 500}, ...) in case of processing or transport errors.
      *
      * @param request
      *            The HTTP request to send.
-     * @return A promise representing the pending HTTP response. The promise
-     *         will yield a {@code ResponseException} when a non-2xx HTTP status
-     *         code is returned.
+     * @return A promise representing the pending HTTP response.
      */
-    public Promise<Response, ResponseException> sendAsync(Request request);
+    public Promise<Response, NeverThrowsException> sendAsync(Request request);
 
     /**
      * Completes all pending requests and release resources associated with
