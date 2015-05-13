@@ -32,7 +32,6 @@ import org.forgerock.http.RouterContext;
 import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.protocol.Form;
 import org.forgerock.http.protocol.Response;
-import org.forgerock.http.protocol.ResponseException;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.AcceptAPIVersion;
 import org.forgerock.json.resource.AcceptAPIVersionContext;
@@ -57,6 +56,7 @@ import org.forgerock.json.resource.ResourceName;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.json.resource.Version;
 import org.forgerock.util.AsyncFunction;
+import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -154,7 +154,7 @@ final class HttpAdapter implements Handler {
      * @return Promise containing a {@code Response} or {@code ResponseException}.
      */
     @Override
-    public Promise<Response, ResponseException> handle(Context context, org.forgerock.http.protocol.Request request) {
+    public Promise<Response, NeverThrowsException> handle(Context context, org.forgerock.http.protocol.Request request) {
 
         // Dispatch the request based on method, taking into account \
         // method override header.
@@ -175,7 +175,7 @@ final class HttpAdapter implements Handler {
         }
     }
 
-    Promise<Response, ResponseException> doDelete(Context context, org.forgerock.http.protocol.Request req) {
+    Promise<Response, NeverThrowsException> doDelete(Context context, org.forgerock.http.protocol.Request req) {
         try {
             // Parse out the required API versions.
             final AcceptAPIVersion acceptVersion = parseAcceptAPIVersion(req);
@@ -205,7 +205,7 @@ final class HttpAdapter implements Handler {
         }
     }
 
-    Promise<Response, ResponseException> doGet(Context context, org.forgerock.http.protocol.Request req) {
+    Promise<Response, NeverThrowsException> doGet(Context context, org.forgerock.http.protocol.Request req) {
         try {
             // Parse out the required API versions.
             final AcceptAPIVersion acceptVersion = parseAcceptAPIVersion(req);
@@ -324,7 +324,7 @@ final class HttpAdapter implements Handler {
         }
     }
 
-    Promise<Response, ResponseException> doPatch(Context context, org.forgerock.http.protocol.Request req) {
+    Promise<Response, NeverThrowsException> doPatch(Context context, org.forgerock.http.protocol.Request req) {
         try {
             // Parse out the required API versions.
             final AcceptAPIVersion acceptVersion = parseAcceptAPIVersion(req);
@@ -361,7 +361,7 @@ final class HttpAdapter implements Handler {
         }
     }
 
-    Promise<Response, ResponseException> doPost(Context context, org.forgerock.http.protocol.Request req) {
+    Promise<Response, NeverThrowsException> doPost(Context context, org.forgerock.http.protocol.Request req) {
         try {
             // Parse out the required API versions.
             final AcceptAPIVersion acceptVersion = parseAcceptAPIVersion(req);
@@ -419,7 +419,7 @@ final class HttpAdapter implements Handler {
         }
     }
 
-    Promise<Response, ResponseException> doPut(Context context, org.forgerock.http.protocol.Request req) {
+    Promise<Response, NeverThrowsException> doPut(Context context, org.forgerock.http.protocol.Request req) {
         try {
             // Parse out the required API versions.
             final AcceptAPIVersion acceptVersion = parseAcceptAPIVersion(req);
@@ -489,20 +489,20 @@ final class HttpAdapter implements Handler {
         }
     }
 
-    private Promise<Response, ResponseException> doRequest(Context context, org.forgerock.http.protocol.Request req,
+    private Promise<Response, NeverThrowsException> doRequest(Context context, org.forgerock.http.protocol.Request req,
             Response resp, AcceptAPIVersion acceptVersion, Request request) throws Exception {
 
         Context ctx = newRequestContext(context, req, acceptVersion);
         final RequestRunner runner = new RequestRunner(ctx, request, req, resp);
         return connectionFactory.getConnectionAsync()
-                .thenAsync(new AsyncFunction<Connection, Response, ResponseException>() {
+                .thenAsync(new AsyncFunction<Connection, Response, NeverThrowsException>() {
                     @Override
-                    public Promise<Response, ResponseException> apply(Connection connection) {
+                    public Promise<Response, NeverThrowsException> apply(Connection connection) {
                         return runner.handleResult(connection);
                     }
-                }, new AsyncFunction<ResourceException, Response, ResponseException>() {
+                }, new AsyncFunction<ResourceException, Response, NeverThrowsException>() {
                     @Override
-                    public Promise<Response, ResponseException> apply(ResourceException error) {
+                    public Promise<Response, NeverThrowsException> apply(ResourceException error) {
                         return runner.handleError(error);
                     }
                 });
