@@ -26,6 +26,8 @@ public final class Response extends MessageImpl<Response> {
     /** The response status. */
     private Status status;
 
+    private Exception cause;
+
     /**
      * Creates a new response.
      */
@@ -49,6 +51,30 @@ public final class Response extends MessageImpl<Response> {
      */
     public Status getStatus() {
         return status;
+    }
+
+    /**
+     * Returns the (possibly {@code null}) cause of this error message (assuming it is a 4xx or a 5xx).
+     *
+     * @return the (possibly {@code null}) cause of this error message (assuming it is a 4xx or a 5xx).
+     */
+    public Exception getCause() {
+        return cause;
+    }
+
+    /**
+     * Link a 'caused by' exception to this response.
+     * That can be used to determine if this error response was triggered by an exception (as opposed
+     * to obtained from a remote server).
+     * <b>Note:</b> this method does not change the {@code status} of this message, neither touch its content.
+     * It's up to the caller to ensure consistency (if required in the execution context).
+     *
+     * @param cause Cause of this error response
+     * @return This response.
+     */
+    public Response setCause(final Exception cause) {
+        this.cause = cause;
+        return this;
     }
 
     @Override

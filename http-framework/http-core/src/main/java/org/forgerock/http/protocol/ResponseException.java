@@ -28,7 +28,10 @@ package org.forgerock.http.protocol;
  *     <li>Ease control-flow inside async call-backs or in synchronous code</li>
  *     <li>Contains a {@link Response} that may be used to forward an error message without losing detailed
  *     information about the cause of the failure</li>
+ *     <li>Contained {@link Response} may be automatically associated to this exception in order to keep track of the
+ *     original failure</li>
  * </ul>
+ * @see Response#getCause()
  */
 public class ResponseException extends Exception {
     private static final long serialVersionUID = 7012424171155584261L;
@@ -41,13 +44,24 @@ public class ResponseException extends Exception {
      * @param message Error message
      */
     public ResponseException(String message) {
-        this(new Response(Status.INTERNAL_SERVER_ERROR).setEntity(message),
-             message,
-             null);
+        this(message, null);
+    }
+
+    /**
+     * Constructs a ResponseException using the given {@code response}.
+     * The provided Response won't be linked to this exception.
+     *
+     * @param response Response
+     * @see Response#setCause(Exception)
+     * @see #getResponse()
+     */
+    public ResponseException(Response response) {
+        this(response, null, null);
     }
 
     /**
      * Constructs a ResponseException using the given {@code message} and parent {@code cause}.
+     * This constructor also build a {@link Response} object that will be linked to this exception instance.
      *
      * @param message Error message
      * @param cause Error cause
@@ -55,23 +69,42 @@ public class ResponseException extends Exception {
     public ResponseException(String message, Throwable cause) {
         this(new Response(Status.INTERNAL_SERVER_ERROR).setEntity(message),
              message,
-             cause);
+             cause,
+             true);
     }
 
     /**
      * Constructs a ResponseException using the given {@code response}, {@code message} and parent {@code cause}.
+     * The provided Response won't be linked to this exception.
      *
      * @param response response object
      * @param message Error message
      * @param cause Error cause
      */
     public ResponseException(Response response, String message, Throwable cause) {
-        super(message, cause);
-        this.response = response;
+        this(response, message, cause, false);
     }
 
     /**
-     * Returns the response linked to this exception.
+     * Constructs a ResponseException using the given {@code response}, {@code message} and parent {@code cause}, then
+     * link (if {@code link} is {@code true}) the given {@code response} to this exception.
+     *
+     * @param response response object
+     * @param message Error message
+     * @param cause Error cause
+     * @param link link this exception with the contained response
+     */
+    private ResponseException(Response response, String message, Throwable cause, boolean link) {
+        super(message, cause);
+        this.response = response;
+        if (link) {
+            // Auto-link the response with this exception instance
+            response.setCause(this);
+        }
+    }
+
+    /**
+     * Returns the response associated to this exception.
      * It is intended to be used when propagating a specific Response message (constructed at the point where the
      * original error occurred) in try-catch blocks:
      *
