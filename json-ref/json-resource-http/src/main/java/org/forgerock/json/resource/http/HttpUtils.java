@@ -27,7 +27,6 @@ import javax.mail.internet.ContentType;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.ParseException;
-
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
@@ -47,10 +46,8 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.protocol.Response;
-import org.forgerock.http.protocol.ResponseException;
 import org.forgerock.http.protocol.Status;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -63,6 +60,7 @@ import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Version;
 import org.forgerock.util.encode.Base64url;
+import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 
@@ -245,7 +243,7 @@ public final class HttpUtils {
      * @param t
      *            The resource exception indicating why the request failed.
      */
-    static Promise<Response, ResponseException> fail(org.forgerock.http.protocol.Request req, final Throwable t) {
+    static Promise<Response, NeverThrowsException> fail(org.forgerock.http.protocol.Request req, final Throwable t) {
         final ResourceException re = adapt(t);
         try {
             Response resp = prepareResponse(req);
@@ -256,8 +254,7 @@ public final class HttpUtils {
             return Promises.newResultPromise(resp);
         } catch (final IOException ignored) {
             // Ignore the error since this was probably the cause.
-            return Promises.newExceptionPromise(
-                    new ResponseException(new Response().setStatus(Status.INTERNAL_SERVER_ERROR), ignored.getMessage(), ignored));
+            return Promises.newResultPromise(new Response().setStatus(Status.INTERNAL_SERVER_ERROR));
         }
     }
 
