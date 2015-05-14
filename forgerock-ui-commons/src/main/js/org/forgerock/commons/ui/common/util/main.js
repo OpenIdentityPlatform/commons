@@ -25,12 +25,15 @@
 /*global define*/
 
 define("org/forgerock/commons/ui/common/util/main", [
-    "./Constants",
-    "./UIUtils",
-    "./ObjectUtil",
-    "./ValidatorsUtils",
-    "./typeextentions/String",
-    "./CustomPolyfill",
     "./Base64",
-    "./Mime"
+    "./Constants",
+    "./CookieHelper",
+    "./CustomPolyfill",
+    "./DateUtil",
+    "./ModuleLoader",
+    "./Mime",
+    "./ObjectUtil",
+    "./UIUtils",
+    "./ValidatorsUtils",
+    "./typeextentions/String"
 ]);

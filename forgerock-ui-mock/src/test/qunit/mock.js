@@ -304,6 +304,17 @@ define([
                 window.location.hash = "registerTerms/foo&bar=blah";
             });
 
+            QUnit.asyncTest("Loading a module asynchronously (CUI-62)", function () {
+
+                QUnit.equal(typeof $.prototype.jqGrid, "undefined", "jqGrid not loaded");
+
+                require("org/forgerock/commons/ui/common/util/ModuleLoader").load("jqgrid").then(function () {
+                    QUnit.equal(typeof $.prototype.jqGrid, "function", "jqGrid loaded by module loader");
+                    QUnit.start();
+                });
+
+            });
+
         }
     };
 });
