@@ -181,6 +181,23 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons.ui.libs</groupId>
+            <artifactId>jquery.placeholder</artifactId>
+            <type>js</type>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <artifactId>bootstrap</artifactId>
+            <classifier>custom</classifier>
+            <type>js</type>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <artifactId>bootstrap</artifactId>
+            <classifier>custom</classifier>
+            <type>css</type>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons.ui.libs</groupId>
             <artifactId>selectize</artifactId>
             <classifier>min</classifier>
             <type>js</type>
@@ -189,6 +206,18 @@
             <groupId>org.forgerock.commons.ui.libs</groupId>
             <artifactId>selectize</artifactId>
             <classifier>bootstrap3</classifier>
+            <type>css</type>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <artifactId>bootstrap-dialog</artifactId>
+            <classifier>min</classifier>
+            <type>js</type>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <artifactId>bootstrap-dialog</artifactId>
+            <classifier>min</classifier>
             <type>css</type>
         </dependency>
     </dependencies>

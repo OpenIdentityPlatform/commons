@@ -213,6 +213,12 @@
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons.ui.libs</groupId>
+                <artifactId>jquery.placeholder</artifactId>
+                <version>2.0.8</version>
+                <type>js</type>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons.ui.libs</groupId>
                 <artifactId>less</artifactId>
                 <version>1.5.1</version>
                 <type>js</type>
@@ -232,6 +238,20 @@
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons.ui.libs</groupId>
+                <artifactId>bootstrap</artifactId>
+                <version>3.3.4</version>
+                <classifier>custom</classifier>
+                <type>js</type>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons.ui.libs</groupId>
+                <artifactId>bootstrap</artifactId>
+                <version>3.3.4</version>
+                <classifier>custom</classifier>
+                <type>css</type>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons.ui.libs</groupId>
                 <artifactId>selectize</artifactId>
                 <version>0.12.1</version>
                 <classifier>min</classifier>
@@ -242,6 +262,20 @@
                 <artifactId>selectize</artifactId>
                 <version>0.12.1</version>
                 <classifier>bootstrap3</classifier>
+                <type>css</type>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons.ui.libs</groupId>
+                <artifactId>bootstrap-dialog</artifactId>
+                <version>1.34.4</version>
+                <classifier>min</classifier>
+                <type>js</type>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons.ui.libs</groupId>
+                <artifactId>bootstrap-dialog</artifactId>
+                <version>1.34.4</version>
+                <classifier>min</classifier>
                 <type>css</type>
             </dependency>
         </dependencies>

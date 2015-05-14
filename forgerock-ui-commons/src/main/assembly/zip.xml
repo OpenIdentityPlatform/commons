@@ -43,7 +43,7 @@
             <includes>
                 <include>org.forgerock.commons.ui.libs:*:css</include>
             </includes>
-            <outputDirectory>/css</outputDirectory>
+            <outputDirectory>/css/common</outputDirectory>
         </dependencySet>
     </dependencySets>
 
