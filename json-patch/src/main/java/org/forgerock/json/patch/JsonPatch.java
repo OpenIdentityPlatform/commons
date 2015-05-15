@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2015 ForgeRock AS. All rights reserved.
  */
 
 package org.forgerock.json.patch;
@@ -30,91 +30,50 @@ import org.forgerock.json.fluent.JsonValueException;
 
 /**
  * Processes partial modifications to JSON values. Implements
- * <a href="http://tools.ietf.org/html/draft-pbryan-json-patch-02">draft-pbryan-json-patch-02</a>.
- *
- * @author Paul C. Bryan
+ * <a href="http://tools.ietf.org/html/rfc6902#section-4.1">RFC 6902 - JSON Patch</a>.
  */
 public class JsonPatch {
 
-    /** Internet media type for the JSON Patch format. */
+    /**
+     * Internet media type for the JSON Patch format.
+     */
     public static final String MEDIA_TYPE = "application/json-patch";
 
     /**
-     * Returns {@code true} if the type contained by {@code v1} is different than the type
-     * contained by {@code v2}.
-     * <p>
-     * Note: If an unexpected (non-JSON) type is encountered, this method returns
-     * {@code true}, triggering a change in the resulting patch. 
+     * Path to the "op" attribute of a patch entry. Required.
      */
-    private static boolean differentTypes(JsonValue v1, JsonValue v2) {
-        if (v1.isNull() && v2.isNull()) { // both values are null
-            return false;
-        } else if (v1.isMap() && v2.isMap()) {
-            return false;
-        } else if (v1.isList() && v2.isList()) {
-            return false;
-        } else if (v1.isString() && v2.isString()) {
-            return false;
-        } else if (v1.isNumber() && v2.isNumber()) {
-            return false;
-        } else if (v1.isBoolean() && v2.isBoolean()) {
-            return false;
-        } else {
-            return true;
-        }
-    }
+    private static final JsonPointer opPtr = new JsonPointer("/op");
 
     /**
-     * Produces a JSON Patch operation object.
-     *
-     * @param op the operation to perform.
-     * @param pointer the JSON value to modify.
-     * @param value the JSON value to apply, or {@code null} if not applicable.
-     * @return the resulting JSON Patch operation.
+     * Path to the "path" attribute of a patch entry. Required.
      */
-    private static HashMap<String, Object> op(String op, JsonPointer pointer, JsonValue value) {
-        HashMap<String, Object> result = new HashMap<String, Object>();
-        result.put(op, pointer.toString());
-        if (value != null) {
-            result.put("value", value.copy().getObject());
-        }
-        return result;
-    }
+    private static final JsonPointer pathPtr = new JsonPointer("/path");
 
     /**
-     * Returns value of an operation.
-     *
-     * @param op the patch operation containing the value to be returned.
-     * @return the value specified in the operation.
-     * @throws JsonValueException if a value is not provided.
+     * Path to the "from" attribute of a patch entry. Required only for "move" and "copy"
+     * operations. Ignored for all others.
      */
-    private static Object opValue(JsonValue op) throws JsonValueException {
-        Object value = op.get("value").getObject();
-        if (value == null && !op.isDefined("value")) { // allow explicit null value
+    private static final JsonPointer fromPtr = new JsonPointer("/from");
+
+    /**
+     * Path to the "value" attribute of a patch entry. Required for "add", "replace" and
+     * "test" operations; Ignored for all others.
+     *
+     * This is public to allow for alternate implementations of {@link JsonPatchValueTransformer}.
+     */
+    public static final JsonPointer valuePtr = new JsonPointer("/value");
+
+    /**
+     * Default transform for patch values; Conforms to RFC6902.
+     */
+    private static final JsonPatchValueTransformer DEFAULT_TRANSFORM = new JsonPatchValueTransformer() {
+        public Object getTransformedValue(JsonValue target, JsonValue op) throws JsonValueException {
+            if (op.get(JsonPatch.valuePtr) != null) {
+                return op.get(JsonPatch.valuePtr).getObject();
+            }
             throw new JsonValueException(op, "expecting a value member");
         }
-        return value;
-    }
-
-    /**
-     * Returns the parent value of the value identified by the JSON pointer.
-     *
-     * @param pointer the pointer to the value whose parent value is to be returned.
-     * @param target the JSON value against which to resolve the JSON pointer.
-     * @return the parent value of the value identified by the JSON pointer.
-     * @throws JsonException if the parent value could not be found.
-     */
-    private static JsonValue parentValue(JsonPointer pointer, JsonValue target) throws JsonException {
-        JsonValue result = null;
-        JsonPointer parent = pointer.parent();
-        if (parent != null) {
-            result = target.get(parent);
-            if (result == null) {
-                throw new JsonException("parent value not found");
-            }
-        }
-        return result;
-    }
+    };
 
     /**
      * Compares two JSON values, and produces a JSON Patch value, which contains the
@@ -170,6 +129,32 @@ public class JsonPatch {
     }
 
     /**
+     * Returns {@code true} if the type contained by {@code v1} is different than the type
+     * contained by {@code v2}.
+     * <p>
+     * Note: If an unexpected (non-JSON) type is encountered, this method returns
+     * {@code true}, triggering a change in the resulting patch.
+     */
+    private static boolean differentTypes(JsonValue v1, JsonValue v2) {
+        return !(v1.isNull() && v2.isNull()) &&
+                !(v1.isMap() && v2.isMap()) &&
+                !(v1.isList() && v2.isList()) &&
+                !(v1.isString() && v2.isString()) &&
+                !(v1.isNumber() && v2.isNumber()) &&
+                !(v1.isBoolean() && v2.isBoolean());
+    }
+
+    private static HashMap<String, Object> op(String op, JsonPointer pointer, JsonValue value) {
+        HashMap<String, Object> result = new HashMap<String, Object>();
+        result.put(opPtr.leaf(), op);
+        result.put(pathPtr.leaf(), pointer.toString());
+        if (value != null) {
+            result.put(valuePtr.leaf(), value.copy().getObject());
+        }
+        return result;
+    }
+
+    /**
      * Applies a set of modifications in a JSON patch value to an original value, resulting
      * in the intended target value. In the event of a failure, this method does not revert
      * any modifications applied up to the point of failure.
@@ -179,51 +164,190 @@ public class JsonPatch {
      * @throws JsonValueException if application of the patch failed.
      */
     public static void patch(JsonValue original, JsonValue patch) throws JsonValueException {
-        for (JsonValue op : patch.required().expect(List.class)) {
-            JsonPointer pointer;
-            if ((pointer = op.get("replace").asPointer()) != null) {
-                JsonValue parent = parentValue(pointer, original);
-                if (parent != null) { // replacing a child
-                    String leaf = pointer.leaf();
-                    if (!parent.isDefined(leaf)) {
-                        throw new JsonValueException(op, "value to replace not found");
-                    }
-                    parent.put(leaf, opValue(op));
-                } else { // replacing the root value itself
-                    original.setObject(opValue(op));
-                }
-            } else if ((pointer = op.get("add").asPointer()) != null) {
-                JsonValue parent = parentValue(pointer, original);
+        patch(original, patch, DEFAULT_TRANSFORM);
+    }
+
+    /**
+     * Applies a set of modifications in a JSON patch value to an original value, resulting
+     * in the intended target value. In the event of a failure, this method does not revert
+     * any modifications applied up to the point of failure.
+     *
+     * @param original the original value on which to apply the modifications.
+     * @param patch the JSON Patch value, specifying the modifications to apply to the original value.
+     * @param transform a custom transform used to determine the target value.
+     * @throws JsonValueException if application of the patch failed.
+     */
+    public static void patch(JsonValue original, JsonValue patch, JsonPatchValueTransformer transform)
+            throws JsonValueException {
+        for (JsonValue operation : patch.required().expect(List.class)) {
+            if (!operation.isDefined("op")) {
+                throw new JsonValueException(operation, "op not specified");
+            }
+            PatchOperation op = PatchOperation.valueOf(operation.get(opPtr));
+            if (op == null) {
+                throw new JsonValueException(operation, "invalid op specified");
+            }
+            op.execute(original, operation, transform);
+        }
+    }
+
+    private enum PatchOperation {
+        ADD {
+            // http://tools.ietf.org/html/rfc6902#section-4.1
+            @Override
+            void execute(JsonValue original, JsonValue operation, JsonPatchValueTransformer transform) {
+                JsonPointer modifyPath = operation.get(pathPtr).expect(String.class).asPointer();
+                JsonValue parent = parentValue(modifyPath, original);
                 if (parent == null) {
+                    // patch specifies a new root object
                     if (original.getObject() != null) {
-                        throw new JsonValueException(op, "root value already exists");
+                        throw new JsonValueException(operation, "root value already exists");
                     }
-                    original.setObject(opValue(op));
+                    original.setObject(transform.getTransformedValue(original, operation));
                 } else {
                     try {
-                        parent.add(pointer.leaf(), opValue(op));
+                        if (parent.isList()) {
+                            try {
+                                // if the path points to an array index then we should insert the value
+                                Integer index = Integer.valueOf(modifyPath.leaf());
+                                parent.add(index, transform.getTransformedValue(original, operation));
+                            } catch (Exception e) {
+                                // leaf is not an array index, replace value
+                                parent.add(modifyPath.leaf(), transform.getTransformedValue(original, operation));
+                            }
+                        } else if (original.get(modifyPath) != null && original.get(modifyPath).isList()) {
+                            // modifyPath does not indicate an index, use the whole object
+                            JsonValue target = original.get(modifyPath);
+                            target.asList().add(transform.getTransformedValue(original, operation));
+                        } else {
+                            // this will replace the value even if present
+                            parent.add(modifyPath.leaf(), transform.getTransformedValue(original, operation));
+                        }
                     } catch (JsonException je) {
-                        throw new JsonValueException(op, je);
+                        throw new JsonValueException(operation, je);
                     }
                 }
-            } else if ((pointer = op.get("remove").asPointer()) != null) {
-                JsonValue parent = parentValue(pointer, original);
-                String leaf = pointer.leaf();
+            }
+        },
+        REMOVE {
+            //http://tools.ietf.org/html/rfc6902#section-4.2
+            @Override
+            void execute(JsonValue original, JsonValue operation, JsonPatchValueTransformer transform) {
+                JsonPointer modifyPath = operation.get(pathPtr).expect(String.class).asPointer();
+                JsonValue parent = parentValue(modifyPath, original);
+                String leaf = modifyPath.leaf();
                 if (parent == null) {
+                    // patch specifies root object
                     original.setObject(null);
                 } else {
                     if (!parent.isDefined(leaf)) {
-                        throw new JsonValueException(op, "value to remove not found");
+                        throw new JsonValueException(operation, "value to remove not found");
                     }
                     try {
                         parent.remove(leaf);
                     } catch (JsonException je) {
-                        throw new JsonValueException(op, je);
+                        throw new JsonValueException(operation, je);
                     }
                 }
-            } else {
-                throw new JsonValueException(op, "expecting add, remove or replace member");
+            }
+        },
+        REPLACE {
+            //http://tools.ietf.org/html/rfc6902#section-4.3
+            @Override
+            void execute(JsonValue original, JsonValue operation, JsonPatchValueTransformer transform) {
+                JsonPointer modifyPath = operation.get(pathPtr).expect(String.class).asPointer();
+                JsonValue parent = parentValue(modifyPath, original);
+                if (parent != null) {
+                    // replacing a child
+                    String leaf = modifyPath.leaf();
+                    if (!parent.isDefined(leaf)) {
+                        throw new JsonValueException(operation, "value to replace not found");
+                    }
+                    parent.put(leaf, transform.getTransformedValue(original, operation));
+                } else {
+                    // replacing the root value itself
+                    original.setObject(transform.getTransformedValue(original, operation));
+                }
+            }
+        },
+        MOVE {
+            // http://tools.ietf.org/html/rfc6902#section-4.4
+            @Override
+            void execute(JsonValue original, JsonValue operation, JsonPatchValueTransformer transform) {
+                JsonPointer sourcePath = operation.get(fromPtr).expect(String.class).asPointer();
+                JsonPointer destPath = operation.get(pathPtr).expect(String.class).asPointer();
+                JsonValue sourceParent = parentValue(sourcePath, original);
+                if (sourceParent == null) {
+                    throw new JsonValueException(operation, "cannot move root object");
+                }
+                JsonValue object = sourceParent.get(sourcePath.leaf());
+                JsonValue destParent = parentValue(destPath, original);
+                if (destParent == null) {
+                    // replacing root object with moved object
+                    original.setObject(object);
+                } else {
+                    sourceParent.remove(sourcePath.leaf());
+                    destParent.put(destPath.leaf(), object);
+                }
+            }
+        },
+        COPY {
+            // http://tools.ietf.org/html/rfc6902#section-4.5
+            @Override
+            void execute(JsonValue original, JsonValue operation, JsonPatchValueTransformer transform) {
+                JsonPointer sourcePath = operation.get(fromPtr).expect(String.class).asPointer();
+                JsonPointer destPath = operation.get(pathPtr).expect(String.class).asPointer();
+                JsonValue sourceParent = parentValue(sourcePath, original);
+                JsonValue object = sourceParent.get(sourcePath.leaf());
+                JsonValue destParent = parentValue(destPath, original);
+                if (destParent == null) {
+                    // replacing root object with copied object
+                    original.setObject(object);
+                } else {
+                    destParent.put(destPath.leaf(), object);
+                }
+            }
+        },
+        TEST {
+            // http://tools.ietf.org/html/rfc6902#section-4.6
+            @Override
+            void execute(JsonValue original, JsonValue operation, JsonPatchValueTransformer transform) {
+                JsonPointer testPath = operation.get(pathPtr).expect(String.class).asPointer();
+                JsonValue testTarget = parentValue(testPath, original).get(testPath.leaf());
+                JsonValue testValue = new JsonValue(transform.getTransformedValue(original, operation));
+
+                if (diff(testTarget, testValue).asList().size() > 0) {
+                    throw new JsonValueException(operation, "test failed");
+                }
+            }
+        };
+
+        void execute(JsonValue original, JsonValue operation, JsonPatchValueTransformer transform) {
+            throw new JsonValueException(original, "unsupported operation");
+        }
+
+        static PatchOperation valueOf(JsonValue op) {
+            return valueOf(op.expect(String.class).asString().toUpperCase());
+        }
+    }
+
+    /**
+     * Returns the parent value of the value identified by the JSON pointer.
+     *
+     * @param pointer the pointer to the value whose parent value is to be returned.
+     * @param target the JSON value against which to resolve the JSON pointer.
+     * @return the parent value of the value identified by the JSON pointer.
+     * @throws JsonException if the parent value could not be found.
+     */
+    private static JsonValue parentValue(JsonPointer pointer, JsonValue target) throws JsonException {
+        JsonValue result = null;
+        JsonPointer parent = pointer.parent();
+        if (parent != null) {
+            result = target.get(parent);
+            if (result == null) {
+                throw new JsonException("parent value not found");
             }
         }
+        return result;
     }
 }

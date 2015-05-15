@@ -11,63 +11,36 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright 2011 ForgeRock AS. All rights reserved.
  */
 
 package org.forgerock.json.patch;
-
-// Java SE
-import java.util.ArrayList;
-import java.util.HashMap;
 
 // FEST-Assert
 import static org.fest.assertions.Assertions.assertThat;
 
 // TestNG
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 // JSON Fluent
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
+import static org.forgerock.json.fluent.JsonValue.*;
 
-/**
- * @author Paul C. Bryan
- */
 public class JsonPatchTest {
 
-    /** JSON value encapsulating a map. */
-    private JsonValue mapValue;
-
-    /** JSON value encapsulating a list. */
-    private JsonValue listValue;
-
-    /** TODO: Description. */
     private JsonValue v1;
-
-    /** TODO: Description. */
     private JsonValue v2;
-
-    /** TODO: Description. */
     private JsonValue diff;
-
-    // ----- preparation ----------
-
-    @BeforeMethod
-    public void beforeMethod() {
-        mapValue = new JsonValue(new HashMap());
-        listValue = new JsonValue(new ArrayList());
-        v1 = null;
-        v2 = null;
-    }
 
     // ----- happy path unit tests ----------
 
     @Test
     public void removeMapItem() {
-        v1 = mapValue;
-        v1.put("a", "1");
-        v1.put("b", "2");
+        v1 = json(object(
+                field("a", "1"),
+                field("b", "2")
+        ));
         v2 = v1.copy();
         v2.remove("b");
         diff = JsonPatch.diff(v1, v2);
@@ -79,8 +52,9 @@ public class JsonPatchTest {
 
     @Test
     public void addMapItem() {
-        v1 = mapValue;
-        v1.put("a", "b");
+        v1 = json(object(
+                field("a", "b")
+        ));
         v2 = v1.copy();
         v2.put("c", "d");
         diff = JsonPatch.diff(v1, v2);
@@ -91,10 +65,34 @@ public class JsonPatchTest {
     }
 
     @Test
+    public void addMapItem2() {
+        v1 = json(object(
+                field("a", array(
+                        "1",
+                        "2",
+                        "3"
+                ))
+        ));
+
+        diff = json(array(object(
+                field("op", "add"),
+                field("path", "/a"),
+                field("value", array(
+                        "x",
+                        "y"
+                ))
+        )));
+
+        JsonPatch.patch(v1, diff);
+        assertThat(v1.get("a").asList().size()).isEqualTo(4);
+    }
+
+    @Test
     public void replaceMapItem() {
-        v1 = mapValue;
-        v1.put("a", "b");
-        v1.put("c", "d");
+        v1 = json(object(
+                field("a", "b"),
+                field("c", "d")
+        ));
         v2 = v1.copy();
         v2.put("a", "e");
         diff = JsonPatch.diff(v1, v2);
@@ -105,10 +103,65 @@ public class JsonPatchTest {
     }
 
     @Test
+    public void moveMapItem() {
+        v1 = json(object(
+                field("a", "b"),
+                field("c", "d")
+        ));
+        diff = json(array(object(
+                field("op", "move"),
+                field("from", "/c"),
+                field("path", "/e")
+        )));
+        JsonPatch.patch(v1, diff);
+        assertThat(v1.get("e").getObject()).isEqualTo("d");
+        assertThat(v1.get("c").getObject()).isNull();
+    }
+
+    @Test
+    public void copyMapItem() {
+        v1 = json(object(
+                field("a", "b"),
+                field("c", "d")
+        ));
+        diff = json(array(object(
+                field("op", "copy"),
+                field("from", "/c"),
+                field("path", "/e")
+        )));
+        JsonPatch.patch(v1, diff);
+        assertThat(v1.get("e").getObject()).isEqualTo("d");
+        assertThat(v1.get("c").getObject()).isEqualTo("d");
+    }
+
+    @Test
+    public void testMapItem() {
+        v1 = json(object(
+                field("a", "b"),
+                field("c", 10)
+        ));
+        diff = json(
+                array(
+                        object(
+                            field("op", "test"),
+                            field("path", "/a"),
+                            field("value", "b")
+                        ), object(
+                            field("op", "test"),
+                            field("path", "/c"),
+                            field("value", 10)
+                        )
+                )
+        );
+        JsonPatch.patch(v1, diff);
+    }
+
+    @Test
     public void mapDiffNoChanges() {
-        v1 = mapValue;
-        v1.put("foo", "bar");
-        v1.put("boo", "far");
+        v1 = json(object(
+                field("foo", "bar"),
+                field("boo", "far")
+        ));
         v2 = v1.copy();
         diff = JsonPatch.diff(v1, v2);
         assertThat(diff.size()).isEqualTo(0);
@@ -118,10 +171,12 @@ public class JsonPatchTest {
 
     @Test
     public void listDiffNoChanges() {
-        v1 = mapValue;
-        v1.put("a", new ArrayList<Object>());
-        v1.get("a").put(0, "foo");
-        v1.get("a").put(1, "bar");
+        v1 = json(object(
+                field("a", array(
+                        "foo",
+                        "bar"
+                ))
+        ));
         v2 = v1.copy();
         diff = JsonPatch.diff(v1, v2);
         assertThat(diff.size()).isEqualTo(0);
@@ -129,12 +184,27 @@ public class JsonPatchTest {
         assertThat(JsonPatch.diff(v1, v2).size()).isEqualTo(0);
     }
 
+    @Test
+    public void testScriptedReplace() {
+        v1 = json(object(
+                field("a", "b")
+        ));
+        diff = json(array(object(
+                field("op", "replace"),
+                field("path", "/a"),
+                field("script", "var source = content.a; var target = source + 'xformed'; target;")
+        )));
+        JsonPatch.patch(v1, diff, new JsonPatchJavascriptValueTransformer());
+        assertThat(v1.get("a").asString()).isEqualTo("bxformed");
+    }
+
     // ----- exception unit tests ----------
 
     @Test(expectedExceptions=JsonValueException.class)
     public void replaceNonExistentMapItem() {
-        v1 = mapValue;
-        v1.put("a", "1");
+        v1 = json(object(
+                field("a", "1")
+        ));
         v2 = v1.copy();
         v2.put("a", "2");
         diff = JsonPatch.diff(v1, v2);
@@ -144,7 +214,7 @@ public class JsonPatchTest {
 
     @Test(expectedExceptions=JsonValueException.class)
     public void addExistentMapItem() {
-        v1 = mapValue;
+        v1 = json(object());
         v2 = v1.copy();
         v2.put("a", "b");
         diff = JsonPatch.diff(v1, v2);
@@ -154,8 +224,9 @@ public class JsonPatchTest {
 
     @Test(expectedExceptions=JsonValueException.class)
     public void removeNonExistentMapItem() {
-        v1 = mapValue;
-        v1.put("a", "1");
+        v1 = json(object(
+                field("a", "1")
+        ));
         v2 = v1.copy();
         v2.clear();
         diff = JsonPatch.diff(v1, v2);
