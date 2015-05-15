@@ -65,6 +65,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         };
     });
 
+    // TODO: Remove it when jqgrid is not used in both AM and IDM
     obj.commonJQGridFormatters = {
         objectFormatter: function (cellvalue, options, rowObject) {
             if (!cellvalue) {
@@ -117,6 +118,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         }
     };
 
+    // TODO: Remove it when jqgrid is not used in both AM and IDM
     obj.buildJQGrid = function (view, id, options, additional, callback) {
         options = options ? options : {};
 

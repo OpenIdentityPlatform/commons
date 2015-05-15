@@ -1302,3 +1302,100 @@ Button Toolbar
     	border-bottom: (@arrowWidth/2)  solid @color;
     }
 }
+
+/* Helper class for creating multi-column layout */
+.multi-column-layout(@count, @gap, @width: auto) {
+    -webkit-column-count: @count; /* Chrome, Safari, Opera */
+    -moz-column-count: @count; /* Firefox */
+    column-count: @count;
+
+    -webkit-column-gap: @gap; /* Chrome, Safari, Opera */
+    -moz-column-gap: @gap; /* Firefox */
+    column-gap: @gap;
+
+    -webkit-column-width: @width; /* Chrome, Safari, Opera */
+    -moz-column-width: @width; /* Firefox */
+    column-width: @width;
+}
+
+/* Backgrid */
+.backgrid {
+    thead th {
+        vertical-align: top;
+        text-align: left;
+        border-width: 2px;
+        padding: 0 15px 8px;
+
+        .form-search {
+            margin: 5px 0 0 0;
+            width: 210px;
+
+            input[type=search] {
+                width: 160px;
+                padding-left: 25px;
+            }
+        }
+    }
+
+    tbody {
+        tr {
+            &:nth-child(2n) {
+                background-color: #fff;
+            }
+
+            &:hover, &:focus {
+                cursor: pointer;
+            }
+
+            &.selected {
+                background-color: #d9edf7;
+            }
+
+            &.empty {
+                background-color: #d9edf7;
+                td {
+                    display: table-cell;
+                    color: #31708f;
+                }
+            }
+
+            td {
+                padding: 8px 15px;
+
+                &.select-row-cell {
+                    width: 42px;
+                }
+
+                &.template-cell {
+                    width: 61px;
+                }
+
+                &.array-formatter-cell {
+                    ul {
+                        font-size: 13px;
+                        line-height: 1.5;
+                        list-style-type: none;
+                        padding: 0;
+                        margin: 0;
+                    }
+                }
+
+                &.object-formatter-cell {
+                    .dl-horizontal {
+                        margin: 0;
+                        font-size: 12px;
+
+                        dd {
+                            margin-left: 95px;
+                        }
+
+                        dt {
+                            text-transform: uppercase;
+                            width: 85px;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
