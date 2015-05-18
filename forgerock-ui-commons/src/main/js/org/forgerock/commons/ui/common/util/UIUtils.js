@@ -30,11 +30,11 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     "org/forgerock/commons/ui/common/util/typeextentions/String",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "handlebars",
-    "org/forgerock/commons/ui/common/components/BSDialog",
+    "bootstrap-dialog",
     "i18next",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/util/DateUtil"
-], function ($, _, String, AbstractConfigurationAware, handlebars, BSDialog, i18next, router, dateUtil) {
+], function ($, _, String, AbstractConfigurationAware, handlebars, BootstrapDialog, i18next, router, dateUtil) {
     /**
      * @exports org/forgerock/commons/ui/common/util/UIUtils
      */
@@ -704,22 +704,28 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
 
 
     obj.jqConfirm = function(message, confirmCallback, width){
-        var confirmDialog = new BSDialog();
-        confirmDialog.setTitle($.t('common.form.confirm'));
-        confirmDialog.message = message;
-        confirmDialog.actions = [{
-            label: $.t('common.form.ok'),
-            cssClass: "btn-primary",
-            action: function(dialog) {
-                if(confirmCallback) {
-                    confirmCallback();
+        BootstrapDialog.show({
+            title: $.t('common.form.confirm'),
+            type: BootstrapDialog.TYPE_DEFAULT,
+            message: message,
+            buttons: [{
+                label: $.t('common.form.cancel'),
+                action: function(dialog){
+                    dialog.close();
                 }
-                dialog.close();
-            }
-        },{
-            type: "close"
-        }];
-        confirmDialog.show();
+            },
+                {
+                    label: $.t('common.form.ok'),
+                    cssClass: "btn-primary",
+                    action: function(dialog) {
+                        if(confirmCallback) {
+                            confirmCallback();
+                        }
+
+                        dialog.close();
+                    }
+                }]
+        });
      };
 
     obj.responseMessageMatch = function(error, string){
