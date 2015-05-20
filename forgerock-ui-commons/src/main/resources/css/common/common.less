@@ -1325,6 +1325,7 @@ Button Toolbar
         text-align: left;
         border-width: 2px;
         padding: 0 15px 8px;
+        background-color: transparent;
 
         .form-search {
             margin: 5px 0 0 0;
@@ -1343,12 +1344,13 @@ Button Toolbar
                 background-color: #fff;
             }
 
-            &:hover, &:focus {
-                cursor: pointer;
-            }
-
             &.selected {
                 background-color: #d9edf7;
+            }
+
+            &:hover, &:focus {
+                background-color: #e6e6e6;
+                cursor: pointer;
             }
 
             &.empty {
