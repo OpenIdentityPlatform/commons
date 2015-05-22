@@ -25,9 +25,9 @@
 /*global define, $*/
 
 define("org/forgerock/mock/ui/user/TermsOfUseDialog", [
-    "org/forgerock/commons/ui/common/components/BSDialog"
-], function (BSDialog) {
-    var TermsOfUseDialog = BSDialog.extend({
+    "org/forgerock/commons/ui/common/components/BootstrapDialogView"
+], function (BootstrapDialogView) {
+    var TermsOfUseDialog = BootstrapDialogView.extend({
         contentTemplate: "templates/mock/TermsOfUseTemplate.html",
         render: function(){
             this.setTitle($.t("templates.user.TermsOfUseTemplate.termsOfUse"));

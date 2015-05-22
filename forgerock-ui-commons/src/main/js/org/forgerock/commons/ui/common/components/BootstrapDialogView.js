@@ -16,12 +16,12 @@
 
 /*global define, $, _ */
 
-define("org/forgerock/commons/ui/common/components/BSDialog", [
+define("org/forgerock/commons/ui/common/components/BootstrapDialogView", [
     "org/forgerock/commons/ui/common/main/AbstractView",
     "bootstrap-dialog",
     "org/forgerock/commons/ui/common/util/UIUtils"
 ], function(AbstractView, BootstrapDialog, UIUtils) {
-    var BSDialog = AbstractView.extend({
+    var BootstrapDialogView = AbstractView.extend({
         contentTemplate: "templates/common/DefaultBaseTemplate.html",
         data: { },
         noButtons: false,
@@ -92,6 +92,6 @@ define("org/forgerock/commons/ui/common/components/BSDialog", [
         }
     });
 
-    return BSDialog;
+    return BootstrapDialogView;
 });
 

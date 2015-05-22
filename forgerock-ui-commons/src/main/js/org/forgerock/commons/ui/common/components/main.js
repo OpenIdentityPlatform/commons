@@ -29,7 +29,7 @@ define("org/forgerock/commons/ui/common/components/main", [
     "./Breadcrumbs",
     "./ConfirmationDialog",
     "./Dialog",
-    "./BSDialog",
+    "./BootstrapDialogView",
     "./Footer",
     "./GridTableView",
     "./LineTableView",
