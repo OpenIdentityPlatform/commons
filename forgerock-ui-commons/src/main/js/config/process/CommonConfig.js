@@ -24,13 +24,11 @@
 
 /*global define, require, window, _*/
 
-/**
- * @author yaromin
- */
 define("config/process/CommonConfig", [
+    "jquery",
     "org/forgerock/commons/ui/common/util/Constants", 
     "org/forgerock/commons/ui/common/main/EventManager"
-], function(constants, eventManager) {
+], function($, constants, eventManager) {
     var obj = [
         {
             startEvent: constants.EVENT_APP_INTIALIZED,
@@ -376,6 +374,8 @@ define("config/process/CommonConfig", [
                         }
                     } else if (viewManager.currentDialog !== null) {
                         require(viewManager.currentDialog).close();
+                    } else {
+                        $(".modal").modal("hide");
                     }
 
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "loggedIn");
