@@ -125,10 +125,9 @@ define("config/process/CommonConfig", [
                 "org/forgerock/commons/ui/common/main/ViewManager",
                 "org/forgerock/commons/ui/common/main/Router",
                 "org/forgerock/commons/ui/common/main/Configuration",
-                "org/forgerock/commons/ui/common/main/SessionManager",
-                "LoginDialog"
+                "org/forgerock/commons/ui/common/main/SessionManager"
             ],
-            processDescription: function(error, viewManager, router, conf, sessionManager, loginDialog) {
+            processDescription: function(error, viewManager, router, conf, sessionManager) {
                 var saveGotoURL = function () {
                     var hash = router.getCurrentHash();
                     if(!conf.gotoURL && !hash.match(router.configuration.routes.login.url)) {
@@ -158,7 +157,7 @@ define("config/process/CommonConfig", [
                         eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
                     });
                 } else {
-                    viewManager.showDialog(router.configuration.routes.loginDialog.dialog);
+                    eventManager.sendEvent(constants.EVENT_SHOW_LOGIN_DIALOG);
                 }
 
             }
@@ -388,6 +387,16 @@ define("config/process/CommonConfig", [
                     reason = reason ? reason : "authenticationFailed";
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, reason);
                 });
+            }
+        },
+        {
+            startEvent: constants.EVENT_SHOW_LOGIN_DIALOG,
+            description: "",
+            dependencies: [
+                "LoginDialog"
+            ],
+            processDescription: function(event, LoginDialog) {
+                LoginDialog.render(event);
             }
         },
         {

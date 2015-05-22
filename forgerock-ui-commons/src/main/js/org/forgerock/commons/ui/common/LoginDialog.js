@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -27,100 +27,67 @@
 define("org/forgerock/commons/ui/common/LoginDialog", [
     "jquery",
     "underscore",
-    "org/forgerock/commons/ui/common/main/ValidatorsManager",
+    "org/forgerock/commons/ui/common/components/BootstrapDialogView",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/commons/ui/common/main/EventManager", 
-    "org/forgerock/commons/ui/common/util/Constants", 
-    "org/forgerock/commons/ui/common/components/Dialog",
+    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/SessionManager",
+    "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/main/ViewManager"
-], function($, _, validatorsManager, conf, eventManager, constants, Dialog, sessionManager, viewManager) {
-    var LoginDialog = Dialog.extend({
+], function( $, _, BootstrapDialogView, Configuration, Constants, EventManager, SessionManager, ValidatorsManager, ViewManager) {
+    var LoginDialog = BootstrapDialogView.extend({
         contentTemplate: "templates/common/LoginDialog.html",
-        element: '#dialogs',
-        events: {
-            "click input[type=submit]": "login",
-            "click .dialogCloseCross img": "loginClose",
-            "click input[name='close']": "loginClose",
-            "click .modal-content": "stop",
-            "onValidate": "onValidate",
-            "keypress input": "submitForm"
-        },
-        
         displayed: false,
-        
+        title: function(){ return $.t("common.form.sessionExpired");},
+        closable: false,
         submitForm: function(event) {
             if(event.which === 13) {
                 this.login(event);
             }
         },
-        
+        actions: [{
+            label: function(){ return $.t("common.user.login");},
+            cssClass: "btn-primary",
+            action: function(dialog) {
+                var userName,
+                    password,
+                    refreshOnLogin,
+                    self = this;
+
+                userName = dialog.$modalBody.find("input[name=login]").val();
+                password = dialog.$modalBody.find("input[name=password]").val();
+                refreshOnLogin = dialog.$modalBody.find("input[name=refreshOnLogin]:checked").val();
+
+                SessionManager.login({"userName":userName, "password":password}, function(user) {
+                    Configuration.setProperty('loggedUser', user);
+                    EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: false});
+                    EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "loggedIn");
+                    dialog.close();
+                    if (refreshOnLogin) {
+                        ViewManager.refresh();
+                    }
+                }, function() {
+                    EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "authenticationFailed");
+                });
+            }
+        }],
+
         render: function () {
+            var self = this;
             if(this.displayed === false) {
                 this.displayed = true;
-                
-                this.addAction("Login", "submit");
-                this.show(_.bind(function(){ 
-                    validatorsManager.bindValidators(this.$el);
-                    
-                    $(".dialog-background").off('click').on('click', _.bind(this.loginClose, this));
-
-                    if (conf.loggedUser && conf.loggedUser.userName)
-                    {
-                        $("input[name=login]").val(conf.loggedUser.userName).trigger("keyup");
-                        $("input[name=password]").focus();
+                this.show(function(){
+                    ValidatorsManager.bindValidators(self.$el);
+                    if (Configuration.loggedUser && Configuration.loggedUser.userName) {
+                        self.$el.find("input[name=login]").val(Configuration.loggedUser.userName).trigger("keyup");
+                        self.$el.find("input[name=password]").focus();
+                    } else {
+                        self.$el.find("input[name=login]").focus();
                     }
-                    else
-                    {
-                        $("input[name=login]").focus();
-                    }
-                }, this));
+                });
             }
-        },
-        
-        loginClose: function(e) {
-            if (e) {
-                e.preventDefault();
-            }
-            
-            this.displayed = false;
-            this.close(e);
-        },
-        
-        login: function (e) {
-            e.preventDefault();
-
-            var userName,
-                password,
-                refreshOnLogin,
-                _this = this;
-
-            userName = this.$el.find("input[name=login]").val();
-            password = this.$el.find("input[name=password]").val();
-            refreshOnLogin = this.$el.find("input[name=refreshOnLogin]:checked").val();
-
-            sessionManager.login({"userName":userName, "password":password}, function(user) {
-                conf.setProperty('loggedUser', user);
-                eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: false});
-                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "loggedIn");
-                _this.loginClose();
-
-                if (refreshOnLogin) {
-                    viewManager.refresh();
-                }
-
-            }, function() {
-                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "authenticationFailed");
-            });
-
-        },
-        data : {
-            height: 200,
-            width: 400
         }
     });
 
     return new LoginDialog();
-    
 });
-
