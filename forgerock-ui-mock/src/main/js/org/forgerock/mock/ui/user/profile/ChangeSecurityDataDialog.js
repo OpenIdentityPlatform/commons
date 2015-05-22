@@ -24,19 +24,15 @@
 
 /*global define, $, _, form2js*/
 define("org/forgerock/mock/ui/user/profile/ChangeSecurityDataDialog", [
-    "org/forgerock/commons/ui/common/main/AbstractView",
-    "org/forgerock/commons/ui/common/main/ValidatorsManager",
+    "org/forgerock/commons/ui/common/components/BootstrapDialogView",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "UserDelegate",
-    "org/forgerock/commons/ui/common/util/UIUtils",
-    "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    'org/forgerock/commons/ui/common/components/Messages',
-    "bootstrap-dialog"
-], function(AbstractView, ValidatorsManager, Configuration, UserDelegate, UIUtils, EventManager, Constants, Messages, BootstrapDialog) {
-    var ChangeSecurityDataDialog = AbstractView.extend({
-        template: "templates/mock/ChangeSecurityDataDialogTemplate.html",
-        data: { },
+    "org/forgerock/commons/ui/common/main/EventManager",
+    "UserDelegate",
+    "org/forgerock/commons/ui/common/main/ValidatorsManager"
+], function(BootstrapDialogView, Configuration, Constants, EventManager, UserDelegate, ValidatorsManager) {
+    var ChangeSecurityDataDialog = BootstrapDialogView.extend({
+        contentTemplate: "templates/mock/ChangeSecurityDataDialogTemplate.html",
         events: {
             "click input[type=submit]": "formSubmit",
             "onValidate": "onValidate",
@@ -45,70 +41,41 @@ define("org/forgerock/mock/ui/user/profile/ChangeSecurityDataDialog", [
         errorsHandlers: {
             "Bad Request": { status: "400" }
         },
-        show: function(callback) {
-
-            var self = this,
-                data = {},
-                args = {
-                    type: BootstrapDialog.TYPE_PRIMARY,
-                    title: $.t("templates.user.ChangeSecurityDataDialogTemplate.securityDataChange"),
-                    buttons: [{
-                        id: "btnOk",
-                        label: $.t("common.form.update"),
-                        cssClass: "btn-primary",
-                        disabled: true,
-                        action: function(dialog) {
-
-                            dialog.getButton("btnOk").text($.t("common.form.working")).prop('disabled', true);
-
-                            var patchDefinitionObject = [];
-
-                            if (ValidatorsManager.formValidated(dialog.$modalBody.find("#passwordChange"))) {
-
-                                patchDefinitionObject.push({operation: "replace", field: "password", value: self.$el.find("input[name=password]").val()});
-
-                                UserDelegate.patchSelectedUserAttributes(UserDelegate.getUserResourceName(Configuration.loggedUser), Configuration.loggedUser._rev, patchDefinitionObject, _.bind(function (r) {
-                                    EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "securityDataChanged");
-                                    var headers = {};
-                                    headers[Constants.HEADER_PARAM_USERNAME] = Configuration.loggedUser.userName;
-                                    headers[Constants.HEADER_PARAM_PASSWORD] = self.$el.find("input[name=password]").val();
-                                    headers[Constants.HEADER_PARAM_NO_SESSION] = false;
-                                    UserDelegate.getProfile(function (user) {
-                                        Configuration.loggedUser = user;
-                                    }, null, null, headers);
-                                    dialog.close();
-                                }, self));
-
-                            }
-                        }
-                    }, {
-                        label: $.t("common.form.cancel"),
-                        action: function(dialog) {
-                           dialog.close();
-                        }
-                    }],
-                    onshown: function(dialog){
-                        self.element = dialog.$modal;
-                        self.rebind();
-                        ValidatorsManager.bindValidators(dialog.$modal);
-                        self.customValidate();
-                        if (callback && callback.callback) {
-                            callback.callback(self);
-                        }
-                    }
-                };
-
-            UIUtils.fillTemplateWithData(this.template, this.data, function(template) {
-                args.message = function (dialog) {
-                    return $('<div></div>').append(template);
-                };
-
-                BootstrapDialog.show(args);
-            });
-
+        title: function(){ return $.t("templates.user.ChangeSecurityDataDialogTemplate.securityDataChange");},
+        actions: [{
+            id: "btnOk",
+            label: function(){ return $.t("common.form.update");},
+            cssClass: "btn-primary",
+            disabled: true,
+            action: function(dialog) {
+                dialog.getButton("btnOk").text($.t("common.form.working")).prop('disabled', true);
+                var patchDefinitionObject = [];
+                if (ValidatorsManager.formValidated(dialog.$modalBody.find("#passwordChange"))) {
+                    patchDefinitionObject.push({operation: "replace", field: "password", value: dialog.$modalBody.find("input[name=password]").val()});
+                    UserDelegate.patchSelectedUserAttributes(UserDelegate.getUserResourceName(Configuration.loggedUser), Configuration.loggedUser._rev, patchDefinitionObject, _.bind(function (r) {
+                        EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "securityDataChanged");
+                        var headers = {};
+                        headers[Constants.HEADER_PARAM_USERNAME] = Configuration.loggedUser.userName;
+                        headers[Constants.HEADER_PARAM_PASSWORD] = dialog.$modalBody.find("input[name=password]").val();
+                        headers[Constants.HEADER_PARAM_NO_SESSION] = false;
+                        UserDelegate.getProfile(function (user) {
+                            Configuration.loggedUser = user;
+                        }, null, null, headers);
+                        dialog.close();
+                    }, this));
+                }
+            }
+        }, {
+            type: "close"
+        }],
+        onshown: function(dialog){
+            this.element = dialog.$modal;
+            this.rebind();
+            ValidatorsManager.bindValidators(dialog.$modal);
+            this.customValidate();
         },
-        close: function () {
-            $(".bootstrap-dialog").modal("hide");
+        render: function(callback) {
+            this.show(callback);
         },
         customValidate: function () {
             if (ValidatorsManager.formValidated(this.$el.find("#passwordChange"))) {
@@ -117,7 +84,6 @@ define("org/forgerock/mock/ui/user/profile/ChangeSecurityDataDialog", [
                 this.$el.find("#btnOk").prop('disabled', true);
             }
         }
-
     });
 
     return new ChangeSecurityDataDialog();

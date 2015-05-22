@@ -35,7 +35,7 @@ define("config/process/MockConfig", [
                 "org/forgerock/commons/ui/user/profile/ConfirmPasswordDialog"
             ],
             processDescription: function(event, ConfirmPasswordDialog) {
-                ConfirmPasswordDialog.show();
+                ConfirmPasswordDialog.render(event);
             }
         },
         {
@@ -45,7 +45,7 @@ define("config/process/MockConfig", [
                 "org/forgerock/mock/ui/user/profile/ChangeSecurityDataDialog"
             ],
             processDescription: function(event, ChangeSecurityDataDialog) {
-                ChangeSecurityDataDialog.show(event);
+                ChangeSecurityDataDialog.render(event);
             }
         }
     ];
