@@ -1336,6 +1336,10 @@ Button Toolbar
                 padding-left: 25px;
             }
         }
+
+        .backgrid-filter .clear {
+            right: 15px;
+        }
     }
 
     tbody {
@@ -1349,7 +1353,7 @@ Button Toolbar
             }
 
             &:hover, &:focus {
-                background-color: #e6e6e6;
+                background-color: #eeeeee;
                 cursor: pointer;
             }
 
@@ -1369,7 +1373,30 @@ Button Toolbar
                 }
 
                 &.template-cell {
-                    width: 61px;
+                    text-align: center;
+
+                    &.edit-cell {
+                        padding: 0;
+                        width: 60px;
+
+                        .fa-pencil {
+                            display: block;
+                            height: 100%;
+                            position: relative;
+
+                            &:before {
+                                position: absolute;
+                                top: 50%;
+                                left: 50%;
+                                margin-left: -0.5em;
+                                margin-top: -0.5em;
+                            }
+                        }
+
+                        &:hover {
+                            background-color: #e6e6e6;
+                        }
+                    }
                 }
 
                 &.array-formatter-cell {
