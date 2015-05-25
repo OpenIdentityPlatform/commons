@@ -123,8 +123,8 @@ public class AuditServiceTest {
         auditService.handleRead(new ServerContext(new RootContext()), readRequest, resultHandler);
 
         //then
-        verify(resultHandler, times(2)).handleResult(resourceCaptor.capture());
-        verify(resultHandler, never()).handleError(any(ResourceException.class));
+        verify(resultHandler, times(1)).handleResult(resourceCaptor.capture());
+        verify(resultHandler).handleError(any(ResourceException.class));
 
         final Resource resource = resourceCaptor.getValue();
         assertThat(resource != null);
