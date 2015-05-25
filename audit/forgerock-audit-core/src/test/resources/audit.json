@@ -15,9 +15,9 @@
             "id": "timestamp",
             "type": "string"
           },
-          "transactionIds": {
+          "transactionId": {
             "id": "transactionId",
-            "type": "array"
+            "type": "string"
           }
         }
       }
