@@ -48,6 +48,7 @@ define("mock/Data", [
     "text!templates/mock/UserRegistrationTemplate.html",
     "text!templates/common/MediumBaseTemplate.html",
     "text!templates/mock/ChangeSecurityDataDialogTemplate.html",
+    "text!templates/user/ConfirmPasswordDialogTemplate.html",
     "text!templates/mock/TermsOfUseTemplate.html",
     "text!templates/common/DialogTemplate.html"
 ], function () {
@@ -74,6 +75,7 @@ var deps = arguments,
     "templates/mock/UserRegistrationTemplate.html",
     "templates/common/MediumBaseTemplate.html",
     "templates/mock/ChangeSecurityDataDialogTemplate.html",
+    "templates/user/ConfirmPasswordDialogTemplate.html",
     "templates/mock/TermsOfUseTemplate.html",
     "templates/common/DialogTemplate.html"
     ];

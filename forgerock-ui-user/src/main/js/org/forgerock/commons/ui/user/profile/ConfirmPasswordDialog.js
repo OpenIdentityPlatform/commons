@@ -25,14 +25,13 @@
 /*global define, $, _*/
 
 define("org/forgerock/commons/ui/user/profile/ConfirmPasswordDialog", [
-    "org/forgerock/commons/ui/common/main/AbstractView",
-    "org/forgerock/commons/ui/common/main/ValidatorsManager",
+    "org/forgerock/commons/ui/common/components/BootstrapDialogView",
     "org/forgerock/commons/ui/user/profile/UserProfileView",
     "org/forgerock/commons/ui/common/util/UIUtils",
-    "bootstrap-dialog"
-], function(AbstractView, ValidatorsManager, UserProfileView, UIUtils, BootstrapDialog) {
-    var ConfirmPasswordDialog = AbstractView.extend({
-        template: "templates/user/ConfirmPasswordDialogTemplate.html",
+    "org/forgerock/commons/ui/common/main/ValidatorsManager"
+], function(BootstrapDialogView, UserProfileView, UIUtils, ValidatorsManager) {
+    var ConfirmPasswordDialog = BootstrapDialogView.extend({
+        contentTemplate: "templates/user/ConfirmPasswordDialogTemplate.html",
         events: {
             "onValidate": "onValidate",
             "customValidate": "customValidate"
@@ -40,42 +39,34 @@ define("org/forgerock/commons/ui/user/profile/ConfirmPasswordDialog", [
         errorsHandlers: {
             "Bad Request": { status: "400" }
         },
+        title: function(){ return $.t("common.user.confirmPassword"); },
+        actions: [{
+            id: "btnUpdate",
+            label: function(){ return $.t("common.form.update"); },
+            cssClass: "btn-primary",
+            disabled: true,
+            action: function(dialog) {
+                UserProfileView.data.currentpassword = dialog.$modal.find("#currentPassword").val();
+                UserProfileView.submit();
+                dialog.close();
+            }
+        }],
         customValidate: function () {
             if(ValidatorsManager.formValidated(this.$el.find("#confirmPasswordForm"))) {
                 this.$el.find("#btnUpdate").prop('disabled', false);
-            }
-            else {
+            } else {
                 this.$el.find("#btnUpdate").prop('disabled', true);
             }
         },
-        show: function() {
-            var self = this,
-                dialog;
-
+        onshown: function(dialog){
+            this.element = dialog.$modal;
+            this.rebind();
+            ValidatorsManager.bindValidators(dialog.$modal);
+            this.customValidate();
+        },
+        render: function() {
             this.data.changedProtected = UserProfileView.data.changedProtected;
-            dialog = new BootstrapDialog({
-                type: BootstrapDialog.TYPE_PRIMARY,
-                title: $.t("common.user.confirmPassword"),
-                buttons: [{
-                    id: "btnUpdate",
-                    label: $.t("common.form.update"),
-                    cssClass: "btn-primary",
-                    disabled: true,
-                    action: function(dialog) {
-                        UserProfileView.data.currentpassword = dialog.$modal.find("#currentPassword").val();
-                        UserProfileView.submit();
-                        dialog.close();
-                    }
-                }],
-                message: $(UIUtils.fillTemplateWithData(self.template, self.data)),
-                onshown: function(dialog){
-                    self.element = dialog.$modal;
-                    self.rebind();
-                    ValidatorsManager.bindValidators(dialog.$modal);
-                    self.customValidate();
-                }
-            });
-            dialog.open();
+            this.show();
         }
     });
 

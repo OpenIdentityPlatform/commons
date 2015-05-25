@@ -70,6 +70,11 @@
                 "selectQuestionAndAnserIfYouWant" : "Please select question and enter your answer if you want to set up a one.",
                 "securityQuestionAndAnserExplanation" : "The Security Question selected and corresponding Answer provided by you will be used to help identify you in the event that you forget your password."
             },
+            "ConfirmPasswordDialogTemplate" : {
+                "title" : "Current Password",
+                "explanation1" : "Changing the following attributes requires re-authentication: ",
+                "explanation2" : "Please confirm your current password to continue."
+            },
             "ChangeSiteIdentificationDialogTemplate" : {
                 "siteImageAndPhaseExplanation" : "The Site Image and Phrase selected will be shown to you upon login to confirm that you are logging in to the genuine site"
             },
@@ -94,7 +99,7 @@
         }
     },
     "common" : {
-         "form" : {
+        "form" : {
             "true" : "True",
             "false" : "False",
             "update" : "Update",
@@ -159,8 +164,8 @@
                 "shouldBeLong" : "Should be long value",
                 "wrongDateFormat" : "Wrong format"
             }
-         },
-         "user" : {
+        },
+        "user" : {
             "user" : "User",
             "login" : "Login",
             "profile" : "Profile",
@@ -196,6 +201,7 @@
             "confirmPassword" : "Confirm Password",
             "newPassword" : "New password",
             "oldPassword" : "Old password",
+            "currentPassword" : "Current Password",
             "confirmNewPassword" : "Confirm new password",
             "usersList" : "Users list",
             "addUsers" : "Add users",
@@ -206,6 +212,6 @@
             "changePhoto" : "Change photo",
             "SKYPE" : "SKYPE",
             "googlePlus" : "Google+"
-         }
+        }
     }
 }
