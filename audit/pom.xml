@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.forgerock</groupId>
         <artifactId>forgerock-parent</artifactId>
-        <version>1.2.1</version>
+        <version>2.0.1-SNAPSHOT</version>
     </parent>
     <groupId>org.forgerock.commons</groupId>
     <artifactId>forgerock-audit</artifactId>
@@ -43,8 +43,6 @@
     </licenses>
 
     <properties>
-        <maven.compiler.target>1.6</maven.compiler.target>
-        <maven.compiler.source>1.6</maven.compiler.source>
 
         <commons.forgerock-rest.version>2.4.2</commons.forgerock-rest.version>
         <commons.forgerock-script.version>1.4.0</commons.forgerock-script.version>
@@ -156,6 +154,15 @@
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
+        </repository>
+
+        <repository>
+            <id>forgerock-snapshots-repository</id>
+            <name>ForgeRock Snapshot Repository</name>
+            <url>http://maven.forgerock.org/repo/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
         </repository>
     </repositories>
 
