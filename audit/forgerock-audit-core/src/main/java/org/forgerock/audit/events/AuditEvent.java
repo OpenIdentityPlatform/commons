@@ -13,7 +13,7 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-package org.forgerock.audit.event;
+package org.forgerock.audit.events;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.util.Reject;

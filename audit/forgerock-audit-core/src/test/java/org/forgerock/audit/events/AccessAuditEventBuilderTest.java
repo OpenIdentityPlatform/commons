@@ -13,11 +13,11 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-package org.forgerock.audit.event;
+package org.forgerock.audit.events;
 
 import static java.util.Arrays.*;
 import static org.fest.assertions.api.Assertions.*;
-import static org.forgerock.audit.event.AccessAuditEventBuilderTest.OpenProductAccessAuditEventBuilder.*;
+import static org.forgerock.audit.events.AccessAuditEventBuilderTest.OpenProductAccessAuditEventBuilder.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -33,6 +33,9 @@ import java.util.Map;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.forgerock.audit.events.AccessAuditEventBuilder.DnsUtils;
+import org.forgerock.audit.events.AccessAuditEventBuilder;
+import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.Request;
