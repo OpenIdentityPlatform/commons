@@ -98,8 +98,8 @@ public class AuditServiceTest {
         verify(resultHandler).handleResult(resourceCaptor.capture());
 
         final Resource resource = resourceCaptor.getValue();
-        assertThat(resource != null);
-        assertThat(resource.getContent().asMap().equals(createRequest.getContent().asMap()));
+        assertThat(resource).isNotNull();
+        assertThat(resource.getContent().asMap()).isEqualTo(createRequest.getContent().asMap());
     }
 
     @Test
@@ -127,8 +127,8 @@ public class AuditServiceTest {
         verify(resultHandler).handleError(any(ResourceException.class));
 
         final Resource resource = resourceCaptor.getValue();
-        assertThat(resource != null);
-        assertThat(resource.getContent().asMap().equals(createRequest.getContent().asMap()));
+        assertThat(resource).isNotNull();
+        assertThat(resource.getContent().asMap()).isEqualTo(createRequest.getContent().asMap());
     }
 
     @Test
@@ -152,7 +152,7 @@ public class AuditServiceTest {
         verify(resultHandler, never()).handleResult(resourceCaptor.capture());
         verify(resultHandler).handleError(resourceExceptionCaptor.capture());
 
-        assertThat(resourceExceptionCaptor.getValue() instanceof NotSupportedException);
+        assertThat(resourceExceptionCaptor.getValue()).isInstanceOf(NotSupportedException.class);
     }
 
     @Test
@@ -176,7 +176,7 @@ public class AuditServiceTest {
         verify(resultHandler, never()).handleResult(resourceCaptor.capture());
         verify(resultHandler).handleError(resourceExceptionCaptor.capture());
 
-        assertThat(resourceExceptionCaptor.getValue() instanceof NotSupportedException);
+        assertThat(resourceExceptionCaptor.getValue()).isInstanceOf(NotSupportedException.class);
     }
 
     @Test
@@ -200,7 +200,7 @@ public class AuditServiceTest {
         verify(resultHandler, never()).handleResult(resourceCaptor.capture());
         verify(resultHandler).handleError(resourceExceptionCaptor.capture());
 
-        assertThat(resourceExceptionCaptor.getValue() instanceof NotSupportedException);
+        assertThat(resourceExceptionCaptor.getValue()).isInstanceOf(NotSupportedException.class);
     }
 
     @Test
@@ -224,7 +224,7 @@ public class AuditServiceTest {
         verify(resultHandler, never()).handleResult(resourceCaptor.capture());
         verify(resultHandler).handleError(resourceExceptionCaptor.capture());
 
-        assertThat(resourceExceptionCaptor.getValue() instanceof NotSupportedException);
+        assertThat(resourceExceptionCaptor.getValue()).isInstanceOf(NotSupportedException.class);
     }
 
     @Test
@@ -248,7 +248,7 @@ public class AuditServiceTest {
         verify(resultHandler, never()).handleResult(resourceCaptor.capture());
         verify(resultHandler).handleError(resourceExceptionCaptor.capture());
 
-        assertThat(resourceExceptionCaptor.getValue() instanceof NotSupportedException);
+        assertThat(resourceExceptionCaptor.getValue()).isInstanceOf(NotSupportedException.class);
     }
 
     @Test
@@ -260,7 +260,7 @@ public class AuditServiceTest {
         auditService.configure(config);
 
         //then
-        assertThat(auditService.getConfig().asMap().equals(config.asMap()));
+        assertThat(auditService.getConfig().asMap()).isEqualTo(config.asMap());
     }
 
     @Test
@@ -284,7 +284,7 @@ public class AuditServiceTest {
 
         //then
         verify(resultHandler).handleError(resourceExceptionCaptor.capture());
-        assertThat(resourceExceptionCaptor.getValue() instanceof BadRequestException);
+        assertThat(resourceExceptionCaptor.getValue()).isInstanceOf(BadRequestException.class);
     }
 
     @Test
@@ -308,7 +308,7 @@ public class AuditServiceTest {
 
         //then
         verify(resultHandler).handleError(resourceExceptionCaptor.capture());
-        assertThat(resourceExceptionCaptor.getValue() instanceof BadRequestException);
+        assertThat(resourceExceptionCaptor.getValue()).isInstanceOf(BadRequestException.class);
     }
 
     private CreateRequest makeCreateRequest() {
