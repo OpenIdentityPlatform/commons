@@ -45,8 +45,6 @@
     <properties>
 
         <commons.forgerock-rest.version>2.4.2</commons.forgerock-rest.version>
-        <commons.forgerock-script.version>1.4.0</commons.forgerock-script.version>
-        <commons.forgerock-guava.version>18.0.1</commons.forgerock-guava.version>
 
         <supercsv.version>2.1.0</supercsv.version>
         <slf4j.version>1.7.5</slf4j.version>
@@ -54,7 +52,6 @@
         <jodaTime.version>2.1</jodaTime.version>
 
         <fest-assert.version>2.0M10</fest-assert.version>
-        <assertj.version>1.6.1</assertj.version>
         <mockito.version>1.9.5</mockito.version>
         <testng.version>6.8.21</testng.version>
     </properties>
