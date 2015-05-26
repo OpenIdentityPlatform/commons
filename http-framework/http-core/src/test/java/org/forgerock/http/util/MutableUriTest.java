@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.http.util;
@@ -20,12 +20,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.http.MutableUri.uri;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.forgerock.http.MutableUri;
 import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")
 public class MutableUriTest {
+
+    @Test(expectedExceptions = URISyntaxException.class)
+    public void shouldFailWithInvalidUri() throws Exception {
+        new MutableUri("http://<<servername>>:8080");
+    }
 
     // Test for un-encoded values
     // ----------------------------------------------------------
@@ -242,6 +248,12 @@ public class MutableUriTest {
 
     // Other methods
     // ---------------------------------------
+
+    @Test(enabled = false, expectedExceptions = IllegalArgumentException.class) // SEE OPENIG-468
+    public void shouldFailToRebaseWithEmptyUri() throws Exception {
+        final MutableUri uri = uri("https://doot.doot.doo.org/all/good/things?come=to&those=who#breakdance");
+        uri.rebase(URI.create(""));
+    }
 
     @Test
     public void shouldRebaseSchemeHostAndPort() throws Exception {
