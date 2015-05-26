@@ -19,6 +19,9 @@ import static org.forgerock.json.fluent.JsonValue.*;
 
 import org.forgerock.audit.util.DateUtil;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.Context;
+import org.forgerock.json.resource.RootContext;
+import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.util.Reject;
 
 /**
@@ -30,15 +33,16 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
 
     public static final String TIMESTAMP = "timestamp";
     public static final String TRANSACTION_ID = "transactionId";
+    public static final String AUTHENTICATION_ID = "authenticationId";
 
     /** Represents the event as a JSON value. */
-    protected final JsonValue jsonValue = json(object());
+    protected JsonValue jsonValue = json(object());
 
-    /** Flag to track if the timestamp was set */
-    private boolean timestamp = false;
+    /** Flag used to ensure super class implementations of validate() get called by subclasses. */
+    private boolean superValidateCalled = false;
 
-    /** Flag to track if the transactionId was set */
-    private boolean transactionId = false;
+    /** Flag used to ensure super class implementations of setDefaults() get called by subclasses. */
+    private boolean superSetDefaultsCalled = false;
 
     /**
      * Creates the builder.
@@ -52,35 +56,71 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
      *
      * @return this object
      */
-    protected abstract T self();
+    @SuppressWarnings("unchecked")
+    protected final T self() {
+        return (T) this;
+    }
 
     /**
      * Generates the audit event.
      *
+     * As a side-effect of calling this method, this builder is reset to its starting state.
+     *
      * @return the audit event
      */
     public final AuditEvent toEvent() {
+
+        superSetDefaultsCalled = false;
         setDefaults();
+        if (!superSetDefaultsCalled) {
+            throw new IllegalStateException("Subclasses overriding setDefaults() must call super.setDefaults()");
+        }
+
+        superValidateCalled = false;
         validate();
-        return new AuditEvent(jsonValue);
+        if (!superValidateCalled) {
+            throw new IllegalStateException("Subclasses overriding validate() must call super.validate()");
+        }
+
+        AuditEvent auditEvent = new AuditEvent(jsonValue);
+        jsonValue = json(object());
+        return auditEvent;
     }
 
     /**
-     * Template method called by {@link #toEvent()} to allow any unset fields to be given their default value.
+     * Called by {@link #toEvent()} to allow any unset fields to be given their default value.
+     *
+     * When overriding this method, the super class implementation must be called.
      */
     protected void setDefaults() {
-        if (!timestamp) {
+        if (!jsonValue.isDefined(TIMESTAMP)) {
             timestamp(System.currentTimeMillis());
         }
+        superSetDefaultsCalled = true;
     }
 
     /**
-     * Template method called by {@link #toEvent()} to prevent ensure that the audit event will be created
-     * in a valid state.
+     * Called by {@link #toEvent()} to ensure that the audit event will be created in a valid state.
+     *
+     * When overriding this method, the super class implementation must be called.
+     *
+     * @throws IllegalStateException if a required field has not been populated.
      */
     protected void validate() {
-        if (!transactionId) {
-            throw new IllegalStateException("The field transactionId is mandatory.");
+        requireField(TRANSACTION_ID);
+        requireField(AUTHENTICATION_ID);
+        superValidateCalled = true;
+    }
+
+    /**
+     * Helper method to be used when overriding {@link #validate()}.
+     *
+     * @param rootFieldName The name of the field that must be populated.
+     * @throws IllegalStateException if the required field has not been populated.
+     */
+    protected void requireField(String rootFieldName) {
+        if (!jsonValue.isDefined(rootFieldName)) {
+            throw new IllegalStateException("The field " + rootFieldName + " is mandatory.");
         }
     }
 
@@ -93,7 +133,6 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
     public final T timestamp(long timestamp) {
         Reject.ifTrue(timestamp <= 0, "The timestamp has to be greater than 0.");
         jsonValue.put(TIMESTAMP, DateUtil.getDateUtil("UTC").formatDateTime(timestamp));
-        this.timestamp = true;
         return self();
     }
 
@@ -106,7 +145,48 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
     public final T transactionId(String id) {
         Reject.ifNull(id);
         jsonValue.put(TRANSACTION_ID, id);
-        transactionId = true;
+        return self();
+    }
+
+    /**
+     * Sets the provided authentication id for the event.
+     *
+     * @param id the authentication id.
+     * @return this builder
+     */
+    public final T authenticationId(String id) {
+        Reject.ifNull(id);
+        jsonValue.put(AUTHENTICATION_ID, id);
+        return self();
+    }
+
+    /**
+     * Sets transactionId from ID of {@link RootContext}, iff the provided
+     * <code>Context</code> contains a <code>RootContext</code>.
+     *
+     * @param context The CREST context.
+     * @return this builder
+     */
+    public final T transactionIdFromRootContext(Context context) {
+        if (context.containsContext(RootContext.class)) {
+            RootContext rootContext = context.asContext(RootContext.class);
+            transactionId(rootContext.getId());
+        }
+        return self();
+    }
+
+    /**
+     * Sets authenticationId from {@link SecurityContext}, iff the provided
+     * <code>Context</code> contains a <code>SecurityContext</code>.
+     *
+     * @param context The CREST context.
+     * @return this builder
+     */
+    public final T authenticationIdFromSecurityContext(Context context) {
+        if (context.containsContext(SecurityContext.class)) {
+            SecurityContext securityContext = context.asContext(SecurityContext.class);
+            authenticationId(securityContext.getAuthenticationId());
+        }
         return self();
     }
 

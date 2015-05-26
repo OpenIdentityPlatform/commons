@@ -1,3 +1,18 @@
+/*
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
+ *
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
+ *
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Copyright 2015 ForgeRock AS.
+ */
 package org.forgerock.audit.events;
 
 import static org.forgerock.json.fluent.JsonValue.*;
@@ -62,7 +77,6 @@ import java.util.Map;
 public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> extends AuditEventBuilder<T> {
 
     public static final String MESSAGE_ID = "messageId";
-    public static final String AUTHENTICATION_ID = "authenticationId";
     public static final String SERVER = "server";
     public static final String CLIENT = "client";
     public static final String HOST = "host";
@@ -87,7 +101,7 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
     private static final String HTTP_CONTEXT_NAME = "http";
     private static final String HTTP_CONTEXT_REMOTE_ADDRESS = "remoteAddress";
 
-    private static final Logger logger = LoggerFactory.getLogger(AuditEventBuilder.class);
+    private static final Logger logger = LoggerFactory.getLogger(AccessAuditEventBuilder.class);
     private static final ResourceOperationRequestVisitor RESOURCE_OPERATION_VISITOR = new ResourceOperationRequestVisitor();
 
     /**
@@ -98,6 +112,7 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
      *
      * @return an audit access event builder
      */
+    @SuppressWarnings("rawtypes")
     public static AccessAuditEventBuilder<?> accessEvent() {
         return new AccessAuditEventBuilder();
     }
@@ -110,17 +125,6 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
      */
     public final T messageId(String id) {
         jsonValue.put(MESSAGE_ID, id);
-        return self();
-    }
-
-    /**
-     * Sets the provided authentication id for the event.
-     *
-     * @param id the authentication id.
-     * @return this builder
-     */
-    public final T authenticationId(String id) {
-        jsonValue.put(AUTHENTICATION_ID, id);
         return self();
     }
 
@@ -308,36 +312,6 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
     }
 
     /**
-     * Sets transactionId from ID of {@link RootContext}, iff the provided
-     * <code>Context</code> contains a <code>RootContext</code>.
-     *
-     * @param context The CREST context.
-     * @return this builder
-     */
-    public final T transactionIdFromRootContext(Context context) {
-        if (context.containsContext(RootContext.class)) {
-            RootContext rootContext = context.asContext(RootContext.class);
-            transactionId(rootContext.getId());
-        }
-        return self();
-    }
-
-    /**
-     * Sets authenticationId from {@link SecurityContext}, iff the provided
-     * <code>Context</code> contains a <code>SecurityContext</code>.
-     *
-     * @param context The CREST context.
-     * @return this builder
-     */
-    public final T authenticationIdFromSecurityContext(Context context) {
-        if (context.containsContext(SecurityContext.class)) {
-            SecurityContext securityContext = context.asContext(SecurityContext.class);
-            authenticationId(securityContext.getAuthenticationId());
-        }
-        return self();
-    }
-
-    /**
      * Sets client ip, port and host from <code>HttpContext</code>, iff the provided
      * <code>Context</code> contains a <code>HttpContext</code>.
      *
@@ -447,12 +421,6 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
         authenticationIdFromSecurityContext(context);
         resourceOperationFromRequest(request);
         return self();
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    protected T self() {
-        return (T) this;
     }
 
     private String buildQueryString(Map<String, List<String>> parameters) {
