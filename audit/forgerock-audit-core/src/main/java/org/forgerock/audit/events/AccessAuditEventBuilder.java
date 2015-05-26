@@ -27,8 +27,6 @@ import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestVisitor;
-import org.forgerock.json.resource.RootContext;
-import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,11 +60,6 @@ import java.util.Map;
  *    public T someField(String v) {
  *      jsonValue.put("someField", v);
  *      return self();
- *    }
- *
- *    {@literal @}Override
- *    protected T self() {
- *      return (T) this;
  *    }
  *
  *    ...

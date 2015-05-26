@@ -137,6 +137,170 @@
           }
         }
       }
+    },
+    "activity": {
+      "logTo": ["csv"],
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "id": "/",
+        "type": "object",
+        "properties": {
+          "_id": {
+            "id": "_id",
+            "type": "string"
+          },
+          "timestamp": {
+            "id": "timestamp",
+            "type": "string"
+          },
+          "transactionId": {
+            "id": "transactionId",
+            "type": "string"
+          },
+          "messageId": {
+            "id": "messageId",
+            "type": "string"
+          },
+          "authenticationId": {
+            "id": "authenticationId",
+            "type": "string"
+          },
+          "runAs": {
+            "id": "runAs",
+            "type": "string"
+          },
+          "resourceOperation": {
+            "id": "resourceOperation",
+            "type": "object",
+            "properties": {
+              "uri": {
+                "id": "uri",
+                "type": "string"
+              },
+              "protocol": {
+                "id": "protocol",
+                "type": "string"
+              }
+            },
+            "operation": {
+              "id": "operation",
+              "type": "object",
+              "properties": {
+                "uri": {
+                  "id": "method",
+                  "type": "string"
+                },
+                "protocol": {
+                  "id": "detail",
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "before": {
+            "id": "before",
+            "type": "string"
+          },
+          "after": {
+            "id": "after",
+            "type": "string"
+          },
+          "changedFields": {
+            "id": "changedFields",
+            "type": "array",
+            "items": {
+              "id": "1",
+              "type": "string"
+            }
+          },
+          "revision": {
+            "id": "revision",
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "config": {
+      "logTo": ["csv"],
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "id": "/",
+        "type": "object",
+        "properties": {
+          "_id": {
+            "id": "_id",
+            "type": "string"
+          },
+          "timestamp": {
+            "id": "timestamp",
+            "type": "string"
+          },
+          "transactionId": {
+            "id": "transactionId",
+            "type": "string"
+          },
+          "messageId": {
+            "id": "messageId",
+            "type": "string"
+          },
+          "authenticationId": {
+            "id": "authenticationId",
+            "type": "string"
+          },
+          "runAs": {
+            "id": "runAs",
+            "type": "string"
+          },
+          "resourceOperation": {
+            "id": "resourceOperation",
+            "type": "object",
+            "properties": {
+              "uri": {
+                "id": "uri",
+                "type": "string"
+              },
+              "protocol": {
+                "id": "protocol",
+                "type": "string"
+              }
+            },
+            "operation": {
+              "id": "operation",
+              "type": "object",
+              "properties": {
+                "uri": {
+                  "id": "method",
+                  "type": "string"
+                },
+                "protocol": {
+                  "id": "detail",
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "before": {
+            "id": "before",
+            "type": "string"
+          },
+          "after": {
+            "id": "after",
+            "type": "string"
+          },
+          "changedFields": {
+            "id": "changedFields",
+            "type": "array",
+            "items": {
+              "id": "1",
+              "type": "string"
+            }
+          },
+          "revision": {
+            "id": "revision",
+            "type": "integer"
+          }
+        }
+      }
     }
   },
   "eventHandlers" : {
