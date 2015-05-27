@@ -54,6 +54,7 @@ public class QueryFilterParserTest {
                 { "foo pr 123" },   // trailing token
                 { "true foo" },     // trailing token
                 { "name op! 123" }, // bad operator
+                { "name op! 123\\" }, // ending with an escape character
                 // @formatter:on
         };
     }
@@ -72,6 +73,13 @@ public class QueryFilterParserTest {
                 { alwaysTrue(), "true" },
                 { alwaysFalse(), "false" },
                 { equalTo("/name", "alice"), "/name eq \"alice\""},
+                { equalTo("/name", "alice"), "/name eq 'alice'"},
+                { equalTo("/name", "al\"ice"), "/name eq \"al\\\"ice\""},
+                { equalTo("/name", "al'ice"), "/name eq \"al\'ice\""},
+                { equalTo("/name", "al\"ice"), "/name eq 'al\"ice'"},
+                { equalTo("/name", "al'ice"), "/name eq 'al\\\'ice'"},
+                { equalTo("/name", "\\alice"), "/name eq \"\\\\alice\""},
+                { equalTo("/name", "al\nice"), "/name eq \"al\\\nice\""},
                 { equalTo("/age", 1234L), "/age eq 1234" },
                 { equalTo("/balance", 3.14159), "/balance eq 3.14159" },
                 { equalTo("/isAdmin", false), "/isAdmin eq false" },
@@ -80,7 +88,9 @@ public class QueryFilterParserTest {
                 { greaterThan("/age", 1234L), "/age gt 1234" },
                 { greaterThanOrEqualTo("/age", 1234L), "/age ge 1234" },
                 { contains("/name", "al"), "/name co \"al\"" },
+                { contains("/name", "al"), "/name co 'al'" },
                 { startsWith("/name", "al"), "/name sw \"al\"" },
+                { startsWith("/name", "al"), "/name sw 'al'" },
                 { present("/name"), "/name pr" },
                 { or(), "false" }, // zero operand or is always false
                 { and(), "true" }, // zero operand and is always true
@@ -96,9 +106,12 @@ public class QueryFilterParserTest {
                         "(/role eq \"a\" or (/role eq \"b\" and /role eq \"c\"))" },
                 { and(equalTo("/role", "a"), or(equalTo("/role", "b"), equalTo("/role", "c"))),
                         "(/role eq \"a\" and (/role eq \"b\" or /role eq \"c\"))" },
+                { and(equalTo("/role", "a"), or(equalTo("/role", "b"), equalTo("/role", "c"))),
+                        "(/role eq 'a' and (/role eq 'b' or /role eq 'c'))" },
                 { not(equalTo("/age", 1234L)), "! (/age eq 1234)" },
                 { not(not(equalTo("/age", 1234L))), "! (! (/age eq 1234))" },
                 { extendedMatch("/name", "regex", "al.*"), "/name regex \"al.*\"" },
+                { extendedMatch("/name", "regex", "al.*"), "/name regex 'al.*'" },
                 { equalTo("/name", "alice"), "/name eq \"alice\"" },
                 // @formatter:on
         };

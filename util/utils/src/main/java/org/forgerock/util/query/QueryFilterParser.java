@@ -44,13 +44,17 @@ import java.util.NoSuchElementException;
  *                  'gt' |  # greater than
  *                  'ge' |  # greater than or equal to
  *                  STRING  # extended operator
- * JsonValue      = NUMBER | BOOLEAN | '"' UTF8STRING '"'
+ * JsonValue      = NUMBER | BOOLEAN | '"' UTF8STRING '"' | ''' UTF8STRING '''
  * STRING         = ASCII string not containing white-space
  * UTF8STRING     = UTF-8 string possibly containing white-space
  * </pre>
  *
  * Note that white space, parentheses, and exclamation characters need URL
- * encoding in HTTP query strings.
+ * encoding in HTTP query strings.  
+ * <p>
+ * ASCII and UTF-8 strings will treat the backslash character as an escape character.
+ * For an example, the will allow for the inclusion of quotes or single-quotes within 
+ * a string that is surrounded by the same type of quotes: "tes\"t"
  *
  * @param <F> The type of field description used in parsed {@link QueryFilter} objects.
  * @see <a href="http://www.simplecloud.info/specs/draft-scim-api-01.html#rfc.section.3.2.2.1">SCIM</a>
@@ -186,12 +190,21 @@ public abstract class QueryFilterParser<F> {
                 final Object assertionValue;
                 nextToken = tokenizer.next();
                 if (nextToken.equals("\"")) {
-                    // UTFSTRING
+                    // UTF8STRING delimited by quotes
                     if (!tokenizer.hasNext()) {
                         return valueOfIllegalArgument(tokenizer);
                     }
                     assertionValue = tokenizer.next();
                     if (!tokenizer.hasNext() || !tokenizer.next().equals("\"")) {
+                        return valueOfIllegalArgument(tokenizer);
+                    }
+                } else if (nextToken.equals("'")) {
+                    // UTF8STRING delimited by single quotes
+                    if (!tokenizer.hasNext()) {
+                        return valueOfIllegalArgument(tokenizer);
+                    }
+                    assertionValue = tokenizer.next();
+                    if (!tokenizer.hasNext() || !tokenizer.next().equals("'")) {
                         return valueOfIllegalArgument(tokenizer);
                     }
                 } else if (nextToken.equalsIgnoreCase("true")
@@ -260,10 +273,11 @@ public abstract class QueryFilterParser<F> {
         private static final int NEED_START_STRING = 1;
         private static final int NEED_TOKEN = 0;
 
-        private final String filterString;
+        private String filterString;
         private String nextToken;
         private int pos;
         private int state;
+        private char stringDelimiter;
 
         private FilterTokenizer(final String filterString) {
             this.filterString = filterString;
@@ -305,7 +319,14 @@ public abstract class QueryFilterParser<F> {
             switch (state) {
                 case NEED_START_STRING:
                     final int stringStart = pos;
-                    for (; pos < filterString.length() && filterString.charAt(pos) != '"'; pos++) {
+                    for (; pos < filterString.length() && filterString.charAt(pos) != stringDelimiter; pos++) {
+                    	if (filterString.charAt(pos) == '\\') {
+                    		if ((pos + 1) == filterString.length()) {
+                    			throw new IllegalArgumentException("The filter string cannot end with an escape character");
+                    		}
+                    		// Found an escaped character, so remove the '\')
+                        	filterString = new StringBuilder(filterString).deleteCharAt(pos).toString();
+                    	}
                         // Do nothing
                     }
                     nextToken = filterString.substring(stringStart, pos);
@@ -332,6 +353,11 @@ public abstract class QueryFilterParser<F> {
                                 break;
                             case '"':
                                 state = NEED_START_STRING;
+                                stringDelimiter = '"';
+                                break;
+                            case '\'':
+                                state = NEED_START_STRING;
+                                stringDelimiter = '\'';
                                 break;
                             default:
                                 for (; pos < filterString.length(); pos++) {
