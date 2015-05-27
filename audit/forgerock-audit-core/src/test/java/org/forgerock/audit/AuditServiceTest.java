@@ -108,27 +108,23 @@ public class AuditServiceTest {
         final AuditService auditService = new AuditService();
         auditService.configure(config);
 
-        final CreateRequest createRequest = makeCreateRequest();
-        final ResultHandler<Resource> resultHandler = mockResultHandler(Resource.class);
-        final ArgumentCaptor<Resource> resourceCaptor = ArgumentCaptor.forClass(Resource.class);
+        Resource event = createAccessEvent(auditService);
 
-        auditService.handleCreate(new ServerContext(new RootContext()), createRequest, resultHandler);
+        final ReadRequest readRequest = Requests.newReadRequest("access", event.getId());
 
-        verify(resultHandler, never()).handleError(any(ResourceException.class));
-        verify(resultHandler).handleResult(resourceCaptor.capture());
-
-        final ReadRequest readRequest = Requests.newReadRequest("access", resourceCaptor.getValue().getId());
+        ResultHandler<Resource> readResultHandler = mockResultHandler(Resource.class);
+        ArgumentCaptor<Resource> readArgument = ArgumentCaptor.forClass(Resource.class);
 
         //when
-        auditService.handleRead(new ServerContext(new RootContext()), readRequest, resultHandler);
+        auditService.handleRead(new ServerContext(new RootContext()), readRequest, readResultHandler);
 
         //then
-        verify(resultHandler, times(1)).handleResult(resourceCaptor.capture());
-        verify(resultHandler).handleError(any(ResourceException.class));
+        verify(readResultHandler).handleResult(readArgument.capture());
+        verify(readResultHandler, never()).handleError(any(ResourceException.class));
 
-        final Resource resource = resourceCaptor.getValue();
+        final Resource resource = readArgument.getValue();
         assertThat(resource).isNotNull();
-        assertThat(resource.getContent().asMap()).isEqualTo(createRequest.getContent().asMap());
+        assertThat(resource.getContent().asMap()).isEqualTo(event.getContent().asMap());
     }
 
     @Test
@@ -327,4 +323,18 @@ public class AuditServiceTest {
         return mock(ResultHandler.class);
 
     }
- }
+
+    private Resource createAccessEvent(AuditService auditService) {
+        final CreateRequest createRequest = makeCreateRequest();
+        final ResultHandler<Resource> createResultHandler = mockResultHandler(Resource.class);
+        final ArgumentCaptor<Resource> createArgument = ArgumentCaptor.forClass(Resource.class);
+
+        auditService.handleCreate(new ServerContext(new RootContext()), createRequest, createResultHandler);
+
+        verify(createResultHandler, never()).handleError(any(ResourceException.class));
+        verify(createResultHandler).handleResult(createArgument.capture());
+
+        return createArgument.getValue();
+    }
+
+}
