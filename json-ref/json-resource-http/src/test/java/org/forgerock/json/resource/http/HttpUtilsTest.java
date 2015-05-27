@@ -366,4 +366,29 @@ public class HttpUtilsTest {
                                 new ContentTypeHeader(result, HttpUtils.CHARACTER_ENCODING, null).toString())),
                         entry(HttpUtils.HEADER_CACHE_CONTROL, Collections.singletonList(HttpUtils.CACHE_CONTROL)));
     }
+
+    @DataProvider
+    public Object[][] BadJsonContent() {
+        return new Object[][] { 
+                { "" }, // No JSON content
+                { "{{{" }, // Invalid JSON content
+                { "{ \"test\" : \"value\" }garbage" } // trailing garbage JSON content
+        };
+    }
+
+    @Test(dataProvider = "BadJsonContent", expectedExceptions = BadRequestException.class)
+    public void testBadJsonContent(final String badContent) throws Exception {
+        // given
+        request = newRequest();
+        createRequest(badContent);
+        setUpRequestMock(request, HttpUtils.MIME_TYPE_APPLICATION_JSON);
+
+        // when
+        try {
+            HttpUtils.getJsonContent(request);
+        } catch (BadRequestException e) {
+            assertThat(e.getClass()).isEqualTo(BadRequestException.class);
+            throw e;
+        }
+    }
 }

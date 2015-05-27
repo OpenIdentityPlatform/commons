@@ -19,16 +19,7 @@ package org.forgerock.json.resource.http;
 import static org.forgerock.json.resource.VersionConstants.ACCEPT_API_VERSION;
 import static org.forgerock.util.Utils.closeSilently;
 
-import javax.activation.DataSource;
-import javax.mail.BodyPart;
-import javax.mail.MessagingException;
-import javax.mail.internet.ContentDisposition;
-import javax.mail.internet.ContentType;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMultipart;
-import javax.mail.internet.ParseException;
 import java.io.ByteArrayOutputStream;
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -42,10 +33,15 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import javax.activation.DataSource;
+import javax.mail.BodyPart;
+import javax.mail.MessagingException;
+import javax.mail.internet.ContentDisposition;
+import javax.mail.internet.ContentType;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.ParseException;
+
 import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.Status;
@@ -63,6 +59,12 @@ import org.forgerock.util.encode.Base64url;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
+
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * HTTP utility methods and constants.
@@ -656,7 +658,7 @@ public final class HttpUtils {
                     "The request could not be processed because the provided "
                             + "content is not valid JSON", e)
                 .setDetail(new JsonValue(e.getMessage()));
-        } catch (final EOFException e) {
+        } catch (final JsonMappingException e) {
             if (allowEmpty) {
                 return null;
             } else {
