@@ -21,12 +21,12 @@ import static org.forgerock.json.fluent.JsonValue.*;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -52,7 +52,7 @@ public class AuditServiceTest {
 
     private static final ObjectMapper MAPPER;
     private JsonValue config;
-    File file = null;
+    Path path = null;
 
     static {
         final JsonFactory jsonFactory = new JsonFactory();
@@ -63,11 +63,10 @@ public class AuditServiceTest {
     @BeforeMethod
     public void setUp() {
         try {
-            final InputStream configStream =
-                    AuditServiceTest.class.getResourceAsStream("/audit.json");
+            final InputStream configStream = getClass().getResourceAsStream("/audit.json");
             config = new JsonValue(MAPPER.readValue(configStream, Map.class));
-            file = File.createTempFile("access", "csv");
-            config.get("eventHandlers").get("csv").get("config").put("location", file.getParent());
+            path = Files.createTempDirectory("commons-audit");
+            config.get("eventHandlers").get("csv").get("config").put("location", path.toFile().getAbsolutePath());
         } catch (IOException e) {
             throw new RuntimeException("Unable to parse audit.json config", e);
         }
@@ -76,7 +75,7 @@ public class AuditServiceTest {
     @AfterMethod
     public void tearDown() {
         config = null;
-        file.delete();
+        path.toFile().delete();
 
     }
 
@@ -123,8 +122,25 @@ public class AuditServiceTest {
         verify(readResultHandler, never()).handleError(any(ResourceException.class));
 
         final Resource resource = readArgument.getValue();
-        assertThat(resource).isNotNull();
-        assertThat(resource.getContent().asMap()).isEqualTo(event.getContent().asMap());
+        assertResourceEquals(resource, event);
+    }
+
+    private static void assertResourceEquals(Resource left, Resource right) {
+        Map<String, Object> leftAsMap = dropNullEntries(left.getContent()).asMap();
+        Map<String, Object> rightAsMap = dropNullEntries(right.getContent()).asMap();
+        assertThat(leftAsMap).isEqualTo(rightAsMap);
+    }
+
+    private static JsonValue dropNullEntries(JsonValue jsonValue) {
+        JsonValue result = jsonValue.clone();
+
+        for(String key : jsonValue.keys()) {
+          if (jsonValue.get(key).isNull()) {
+              result.remove(key);
+          }
+        }
+
+        return result;
     }
 
     @Test
