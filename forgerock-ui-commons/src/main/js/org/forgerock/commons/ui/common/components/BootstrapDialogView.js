@@ -25,8 +25,8 @@ define("org/forgerock/commons/ui/common/components/BootstrapDialogView", [
         contentTemplate: "templates/common/DefaultBaseTemplate.html",
         data: { },
         noButtons: false,
-        type: "type-default",
-        size: "size-normal",
+        type: BootstrapDialog.TYPE_DEFAULT,
+        size: BootstrapDialog.SIZE_NORMAL,
         closable : true,
         actions: [{
             label: function (){return $.t('common.form.close');},
@@ -94,4 +94,3 @@ define("org/forgerock/commons/ui/common/components/BootstrapDialogView", [
 
     return BootstrapDialogView;
 });
-

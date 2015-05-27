@@ -26,7 +26,7 @@
 
 define("config/process/CommonConfig", [
     "jquery",
-    "org/forgerock/commons/ui/common/util/Constants", 
+    "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager"
 ], function($, constants, eventManager) {
     var obj = [
@@ -82,7 +82,7 @@ define("config/process/CommonConfig", [
             processDescription: function(event, navigation, popupCtrl, breadcrumbs, conf,footer) {
                 navigation.init();
                 popupCtrl.init();
-                
+
                 breadcrumbs.buildByUrl();
                 footer.render();
             }
@@ -95,7 +95,7 @@ define("config/process/CommonConfig", [
                 "org/forgerock/commons/ui/common/components/Navigation"
             ],
             processDescription: function(event, conf, navigation) {
-                var serviceInvokerModuleName, serviceInvokerConfig; 
+                var serviceInvokerModuleName, serviceInvokerConfig;
                 serviceInvokerModuleName = "org/forgerock/commons/ui/common/main/ServiceInvoker";
                 serviceInvokerConfig = conf.getModuleConfiguration(serviceInvokerModuleName);
                 if(!event.anonymousMode) {
@@ -103,13 +103,13 @@ define("config/process/CommonConfig", [
                     delete serviceInvokerConfig.defaultHeaders[constants.HEADER_PARAM_PASSWORD];
                     delete serviceInvokerConfig.defaultHeaders[constants.HEADER_PARAM_USERNAME];
                     delete serviceInvokerConfig.defaultHeaders[constants.HEADER_PARAM_NO_SESSION];
-                    
+
                     eventManager.sendEvent(constants.EVENT_AUTHENTICATED);
                 } else {
                     serviceInvokerConfig.defaultHeaders[constants.HEADER_PARAM_PASSWORD] = constants.ANONYMOUS_PASSWORD;
                     serviceInvokerConfig.defaultHeaders[constants.HEADER_PARAM_USERNAME] = constants.ANONYMOUS_USERNAME;
-                    serviceInvokerConfig.defaultHeaders[constants.HEADER_PARAM_NO_SESSION]= true; 
-                    
+                    serviceInvokerConfig.defaultHeaders[constants.HEADER_PARAM_NO_SESSION]= true;
+
                     conf.setProperty('loggedUser', null);
                     navigation.reload();
                 }
@@ -272,7 +272,7 @@ define("config/process/CommonConfig", [
 
                 conf.setProperty("baseView", args.base);
                 conf.setProperty("baseViewArgs", baseViewArgs);
-                
+
                 navigation.init();
 
                 if (!_.has(route, "baseView") && _.has(route, "base")) {
@@ -289,8 +289,8 @@ define("config/process/CommonConfig", [
                      * params that the dialog uses, and that they are in the same order.
                      * The base might have a url like myView/foo, where '/foo' is the first param.
                      * The dialog should be constructed so that its own arguments follow, like so:
-                     * myViewDialog/foo/bar - the params being '/foo' and '/bar'. Because '/foo' 
-                     * is still in the first position, it is reasonable to pass to the base view 
+                     * myViewDialog/foo/bar - the params being '/foo' and '/bar'. Because '/foo'
+                     * is still in the first position, it is reasonable to pass to the base view
                      * (along with '/bar', which will presumably be ignored)
                      */
 
@@ -352,9 +352,9 @@ define("config/process/CommonConfig", [
             processDescription: function(event, sessionManager, conf, router, viewManager) {
                 sessionManager.login(event, function(user) {
                     conf.setProperty('loggedUser', user);
-                    
+
                     eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: false});
-                    
+
                     if (! conf.backgroundLogin) {
                         if(conf.globalData.auth.urlParams && conf.globalData.auth.urlParams.goto){
                             window.location.href = conf.globalData.auth.urlParams.goto;
@@ -416,7 +416,7 @@ define("config/process/CommonConfig", [
                 });
             }
         }
-        
+
         ];
     return obj;
 });

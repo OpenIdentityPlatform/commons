@@ -13,35 +13,73 @@
         <div id="mainNavBar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
                 {{#each topNav}}
-                <li {{#if active}} class="active" {{/if}}>
-                {{#if hashurl}}
-                <a href="{{hashurl}}" title="{{title}}">{{#if icon}}<i class="{{icon}}"></i>{{/if}}{{title}}</a>
-                {{else}}
-                {{#if event}}
-                <a href="#" title="{{title}}" class="event-link" data-event="{{event}}">{{#if icon}}<i class="{{icon}}"></i>{{/if}}{{title}}</a>
-                {{/if}}
-                {{/if}}
-                {{#if subNav.length}}
-                <div class="subnav">
-                    <div class="container">
-                        <ul class="nav nav-subnav" role="menu">
-                            {{#each ../subNav}}
-                            <li {{#if active}} class="active" {{/if}}>
-                            {{#if hashurl}}
-                            <a href="{{hashurl}}" title="{{title}}">{{#if icon}}<i class="{{icon}}"></i>{{/if}}{{title}}</a>
-                            {{else}}
-                            {{#if event}}
-                            <a href="#" title="{{title}}" class="event-link" data-event="{{event}}">{{#if icon}}<i class="{{icon}}"></i>{{/if}}{{title}}</a>
-                            {{/if}}
-                            {{/if}}
-                            </li>
-                            {{/each}}
-                        </ul>
-                    </div>
-                </div>
-                {{/if}}
 
-                </li>
+                    <li class="{{#if active}}active{{/if}}{{#if dropdown}} dropdown{{/if}}" >
+
+                        <a  title="{{title}}"
+                            href="{{#if hashurl}}{{hashurl}}{{else}}#{{/if}}"
+                            class="{{#if event}}event-link{{/if}} {{#if urls}}dropdown-toggle{{/if}}"
+                            {{#if event}}data-event="{{event}}"{{/if}}
+                            {{#if urls}}data-toggle="dropdown" role="button" aria-expanded="false"{{/if}}
+                            >
+                            {{#if icon}}<i class="{{icon}}"></i>{{/if}}
+                            <span class="hidden-sm">{{title}}</span>
+                            {{#if urls}}<span class="caret"></span>{{/if}}
+                        </a>
+
+                        {{#if dropdown}}
+            
+                            {{#if urls}}
+                                <ul class="dropdown-menu" role="menu">
+                                    {{#each urls}}
+
+                                        {{#if divider}}
+                                            <li class="divider"></li>
+                                        {{else}}
+                                            <li>
+                                                <a  title="{{title}}"
+                                                    href="{{#if hashurl}}{{hashurl}}{{else}}#{{/if}}"
+                                                    class="{{#if event}}event-link{{/if}} {{#if urls}}dropdown-toggle{{/if}}"
+                                                    {{#if event}}data-event="{{event}}"{{/if}}
+                                                    {{#if urls}}data-toggle="dropdown" role="button" aria-expanded="false"{{/if}}
+                                                    >
+                                                    {{#if icon}}<i class="{{icon}}"></i>{{/if}}
+                                                    {{#if urls}}
+                                                        <span class="hidden-sm">{{title}}</span> <span class="caret"></span>
+                                                    {{else}}
+                                                        {{title}}
+                                                    {{/if}}
+                                                </a>
+                                            </li>
+                                        {{/if}}
+                                    {{/each}}
+                                </ul>
+                            {{/if}}
+
+                        {{else}}
+
+                            {{#if subNav.length}}
+                                <div class="subnav">
+                                    <div class="container">
+                                        <ul class="nav nav-subnav" role="menu">
+                                            {{#each ../subNav}}
+                                                <li {{#if active}} class="active" {{/if}}>
+                                                    {{#if hashurl}}
+                                                        <a href="{{hashurl}}" title="{{title}}">{{#if icon}}<i class="{{icon}}"></i>{{/if}}{{title}}</a>
+                                                    {{else}}
+                                                        {{#if event}}
+                                                        <a href="#" title="{{title}}" class="event-link" data-event="{{event}}">{{#if icon}}<i class="{{icon}}"></i>{{/if}}{{title}}</a>
+                                                        {{/if}}
+                                                    {{/if}}
+                                                </li>
+                                            {{/each}}
+                                        </ul>
+                                    </div>
+                                </div>
+                            {{/if}}
+
+                        {{/if}}
+                    </li>
                 {{/each}}
             </ul>
 
@@ -56,17 +94,17 @@
                     {{#if userBar.length}}
                     <ul class="dropdown-menu" role="menu" id="navDropdownMenu">
                         {{#each userBar}}
-                        <li>
-                            {{#if href}}
-                                <a href="{{href}}" id="{{id}}">{{label}}</a>
-                            {{else}}
-                            {{#if event}}
-                                <a href="#" id="{{id}}" class="event-link" data-event="{{event}}">{{label}}</a>
-                            {{else}}
-                                <span id="{{id}}">{{label}}</span>
-                            {{/if}}
-                            {{/if}}
-                        </li>
+                            <li>
+                                {{#if href}}
+                                    <a href="{{href}}" id="{{id}}">{{label}}</a>
+                                {{else}}
+                                    {{#if event}}
+                                        <a href="#" id="{{id}}" class="event-link" data-event="{{event}}">{{label}}</a>
+                                    {{else}}
+                                        <span id="{{id}}">{{label}}</span>
+                                    {{/if}}
+                                {{/if}}
+                            </li>
                         {{/each}}
                     </ul>
                     {{/if}}
@@ -77,24 +115,25 @@
         {{/if}}
     </div>
 </nav>
+
 {{#if subNav.length}}
-<nav id="subNavHolder" class="navbar navbar-default navbar-static-top" role="navigation">
-    <div class="container">
-        <div id="subNavBar" class="navbar-collapse collapse subnav">
-            <ul class="nav navbar-nav nav-subnav" role="menu">
-                {{#each subNav}}
-                <li {{#if active}} class="active" {{/if}}>
-                {{#if hashurl}}
-                   <a href="{{hashurl}}" title="{{title}}">{{#if icon}}<i class="{{icon}}"></i>{{/if}}<span>{{title}}</span></a>
-                {{else}}
-                {{#if event}}
-                    <a href="#" title="{{title}}" class="event-link" data-event="{{event}}">{{#if icon}}<i class="{{icon}}"></i>{{/if}}<span>{{title}}</span></a>
-                {{/if}}
-                {{/if}}
-                </li>
-                {{/each}}
-            </ul>
+    <nav id="subNavHolder" class="navbar navbar-default navbar-static-top" role="navigation">
+        <div class="container">
+            <div id="subNavBar" class="navbar-collapse collapse subnav">
+                <ul class="nav navbar-nav nav-subnav" role="menu">
+                    {{#each subNav}}
+                        <li {{#if active}} class="active" {{/if}}>
+                        {{#if hashurl}}
+                           <a href="{{hashurl}}" title="{{title}}">{{#if icon}}<i class="{{icon}}"></i>{{/if}}<span>{{title}}</span></a>
+                        {{else}}
+                            {{#if event}}
+                                <a href="#" title="{{title}}" class="event-link" data-event="{{event}}">{{#if icon}}<i class="{{icon}}"></i>{{/if}}<span>{{title}}</span></a>
+                            {{/if}}
+                        {{/if}}
+                        </li>
+                    {{/each}}
+                </ul>
+            </div>
         </div>
-    </div>
-</nav>
+    </nav>
 {{/if}}

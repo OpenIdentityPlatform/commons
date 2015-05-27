@@ -86,41 +86,64 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
 
 
             addLinks: function(linkName) {
-                var url,
-                    urlName,
+                var urlName,
                     subUrl,
                     subUrlName,
-                    baseActive;
+                    baseActive,
+                    navObj;
+
 
                 for (urlName in obj.configuration.links[linkName].urls) {
-                    url = obj.configuration.links[linkName].urls[urlName];
-                    baseActive = this.isCurrent(url.url) || this.isCurrent(url.baseUrl) || this.childIsCurrent(url.urls);
 
-                    this.data.topNav.push(this.buildNavElement(url, baseActive));
+                    navObj = obj.configuration.links[linkName].urls[urlName];
+                    baseActive = this.isCurrent(navObj.url) || this.isCurrent(navObj.baseUrl) || this.childIsCurrent(navObj.urls);
 
-                    if (baseActive && url.urls) {
-                        for (subUrlName in url.urls) {
-                            subUrl = url.urls[subUrlName];
-                            this.data.subNav.push(this.buildNavElement(subUrl, this.isCurrent(subUrl.url)));
+                    this.data.topNav.push(this.buildNavElement(navObj, baseActive));
+
+                    // none dropdown menus display as submenus and only render for the baseActive.
+                    if (navObj.dropdown !== true){
+
+                        if (baseActive && navObj.urls) {
+                            for (subUrlName in navObj.urls) {
+                                subUrl = navObj.urls[subUrlName];
+                                this.data.subNav.push(this.buildNavElement(subUrl, this.isCurrent(subUrl.url)));
+                            }
+
+                            //Added to provide reference for responsive design submenus to appear in the correct location.
+                            this.data.topNav[this.data.topNav.length - 1].subNav = this.data.subNav;
                         }
-
-                        //Added to provide reference for responsive design submenus to appear in the correct location.
-                        this.data.topNav[this.data.topNav.length - 1].subNav = this.data.subNav;
                     }
                 }
             },
 
-            buildNavElement: function (link, active) {
-                var navElement = {
-                    key: link.name,
-                    title: $.t(link.name),
-                    active: active,
-                    icon: link.icon
-                };
-                if (link.url) {
-                    navElement.hashurl = link.url;
-                } else if (link.event) {
-                    navElement.event = link.event;
+            buildNavElement: function (navObj, active) {
+                var self = this,
+                    subs = [],
+                    navElement = {
+                        key: navObj.name,
+                        title: $.t(navObj.name),
+                        icon: navObj.icon
+                    };
+
+                if (active) {
+                    navElement.active = active;
+                }
+                if (navObj.url) {
+                    navElement.hashurl = navObj.url;
+                } else if (navObj.event) {
+                    navElement.event = navObj.event;
+                }
+                if (navObj.divider) {
+                    navElement.divider = navObj.divider;
+                }
+
+                if (navObj.dropdown === true) {
+                    navElement.dropdown = true;
+                     _.each(navObj.urls, function(link){
+                        subs.push(self.buildNavElement(link));
+                    });
+
+                    navElement.urls = subs;
                 }
 
                 return navElement;
@@ -159,10 +182,10 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                 for(linkName in obj.configuration.links) {
                     link = obj.configuration.links[linkName];
 
-                    if(link.role && conf.loggedUser && _.contains(conf.loggedUser.roles, link.role)) {
+                    if(!link.role){
                         this.addLinks(linkName);
                         return;
-                    } else if(!link.role) {
+                    } else if (link.role && conf.loggedUser && _.contains(conf.loggedUser.roles, link.role)) {
                         this.addLinks(linkName);
                         return;
                     }
