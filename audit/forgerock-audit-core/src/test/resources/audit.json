@@ -1,33 +1,10 @@
 {
-  "eventTypes" : {
-    "access": {
-      "logTo" : ["csv"],
-      "schema": {
-        "$schema": "http://json-schema.org/draft-04/schema#",
-        "id": "/",
-        "type": "object",
-        "properties": {
-          "_id": {
-            "id": "_id",
-            "type": "string"
-          },
-          "timestamp": {
-            "id": "timestamp",
-            "type": "string"
-          },
-          "transactionId": {
-            "id": "transactionId",
-            "type": "string"
-          }
-        }
-      }
-    }
-  },
   "eventHandlers" : {
     "csv" : {
       "config" : {
         "location" : "test"
-      }
+      },
+      "events" : [ "access" ]
     }
   },
   "useForQueries" : "csv"

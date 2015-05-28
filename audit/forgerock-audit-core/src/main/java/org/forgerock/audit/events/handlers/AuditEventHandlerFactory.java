@@ -18,7 +18,6 @@ package org.forgerock.audit.events.handlers;
 
 import org.forgerock.audit.events.handlers.impl.CSVAuditEventHandler;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.ResourceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,23 +34,18 @@ public final class AuditEventHandlerFactory {
     private static final String CONFIG_LOG_TYPE_REPO = "repo";
     private static final String CONFIG_LOG_TYPE_ROUTER = "router";
 
-    private static final String CONFIG = "config";
-
     private AuditEventHandlerFactory() { }
 
     /**
      * Creates an AuditEventHandler.
      * @param name the name of the audit event handler.
-     * @param auditEventHandler the definition of the audit event handler
+     * @param config the configuration of the audit event handler
      * @param auditEvents the audit events supported in the audit service.
-     * @param connectionFactory the internal crest connection factory.
      * @return an audit event handler.
      * @throws ResourceException if unable to create a AuditEventHandler
      */
-    public static AuditEventHandler createAuditEventHandler(
-            final String name, final JsonValue auditEventHandler,
-            final Map<String, JsonValue> auditEvents,
-            final ConnectionFactory connectionFactory) throws ResourceException {
+    public static AuditEventHandler createAuditEventHandler(final String name, final JsonValue config,
+            final Map<String, JsonValue> auditEvents) throws ResourceException {
         AuditEventHandler handler = null;
         if (CONFIG_LOG_TYPE_CSV.equalsIgnoreCase(name)) {
             handler = new CSVAuditEventHandler(auditEvents);
@@ -65,7 +59,7 @@ public final class AuditEventHandlerFactory {
             return null;
         }
 
-        handler.configure(auditEventHandler.get(CONFIG));
+        handler.configure(config);
         return handler;
     }
 }
