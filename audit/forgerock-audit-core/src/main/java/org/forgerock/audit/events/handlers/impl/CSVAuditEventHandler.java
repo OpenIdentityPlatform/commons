@@ -18,7 +18,6 @@ package org.forgerock.audit.events.handlers.impl;
 
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.audit.events.AuditEventHelper;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
@@ -67,7 +66,7 @@ import java.util.TreeSet;
 public class CSVAuditEventHandler extends AuditEventHandlerBase {
     private static final Logger logger = LoggerFactory.getLogger(CSVAuditEventHandler.class);
 
-    private final Map<String, JsonValue> auditEvents;
+    private Map<String, JsonValue> auditEvents;
     private String auditLogDirectory;
     private String recordDelim;
 
@@ -79,29 +78,20 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
 
     static {
         JsonFactory jsonFactory = new JsonFactory();
-        jsonFactory.configure(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS, true);
         mapper = new ObjectMapper(jsonFactory);
     }
 
 
     /**
-     * Constructs a CSVAuditEventHandler with a list of auditEvents to handle.
+     * {@inheritDoc}
      */
-    public CSVAuditEventHandler() {
-        this(new HashMap<String, JsonValue>());
-    }
-
-    /**
-     * Constructs a CSVAuditEventHandler with a list of auditEvents to handle.
-     * @param auditEvents List of AuditEvents to handle.
-     */
-    public CSVAuditEventHandler(final Map<String, JsonValue> auditEvents) {
+    public void setAuditEventsMetaData(final Map<String, JsonValue> auditEvents) {
         this.auditEvents = auditEvents;
     }
 
     /**
      * Configure the CSVAuditEventHandler.
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public void configure(final JsonValue config) throws ResourceException {
@@ -127,6 +117,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
                 recordDelim = System.getProperty("line.separator");
             }
         }
+        logger.info("{} successfully configured", getClass().getName());
     }
 
     @Override
@@ -136,7 +127,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
 
     /**
      * Perform an action on the csv audit log.
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public void actionCollection(
@@ -148,7 +139,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
 
     /**
      * Perform an action on the csv audit log entry.
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public void actionInstance(
@@ -161,7 +152,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
 
     /**
      * Create a csv audit log entry.
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public void createInstance(
@@ -237,7 +228,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
 
     /**
      * Perform a query on the csv audit log.
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public void queryCollection(
@@ -249,7 +240,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
 
     /**
      * Read from the csv audit log.
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public void readInstance(

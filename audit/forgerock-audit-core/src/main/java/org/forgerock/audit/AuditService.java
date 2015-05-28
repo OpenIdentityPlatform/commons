@@ -15,8 +15,6 @@
  */
 package org.forgerock.audit;
 
-import static org.forgerock.audit.events.handlers.AuditEventHandlerFactory.createAuditEventHandler;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -68,7 +66,7 @@ public class AuditService implements RequestHandler {
     private JsonValue config; // Existing active configuration
 
     /** All the AuditEventHandlers configured. */
-    private Map<String, AuditEventHandler> defaultAuditEventHandlers;
+    private Map<String, AuditEventHandler> allAuditEventHandlers;
     /** All the AuditEventHandlers configured for each event type. */
     private Map<String, List<AuditEventHandler>> eventTypeAuditEventHandlers;
     /** All the audit event types configured. */
@@ -76,7 +74,6 @@ public class AuditService implements RequestHandler {
     /** The name of the AuditEventHandler to use for queries. */
     private AuditEventHandler queryAuditEventHandler;
 
-    private static final String EVENT_HANDLERS = "eventHandlers";
     private static final String USE_FOR_QUERIES = "useForQueries";
 
     /**
@@ -93,6 +90,7 @@ public class AuditService implements RequestHandler {
      */
     public AuditService(JsonValue extendedEventTypes) {
         eventTypeAuditEventHandlers = new HashMap<>();
+        allAuditEventHandlers = new HashMap<>();
         try(final InputStream configStream = getClass().getResourceAsStream("/org/forgerock/audit/events.json")) {
             final JsonValue jsonConfig = new JsonValue(mapper.readValue(configStream, Map.class));
             auditEvents = getEventTypes(jsonConfig, extendedEventTypes);
@@ -113,41 +111,55 @@ public class AuditService implements RequestHandler {
     public void configure(final JsonValue jsonConfig) throws ResourceException {
         cleanupPreviousConfig();
 
-        defaultAuditEventHandlers = getAuditEventHandlers(jsonConfig);
         queryAuditEventHandler = getQueryAuditEventHandler(jsonConfig.get(USE_FOR_QUERIES).asString());
 
         //set current config
-        config = jsonConfig;
+        config = jsonConfig.clone();
     }
 
-    private void register(AuditEventHandler handler, List<String> events) {
+    /**
+     * Register an AuditEventHandler. After that registration, that AuditEventHandler can be refered with the given
+     * name. This AuditEventHandler will only be notified about the events specified in the parameter events.
+     *
+     * @param handler
+     *            the AuditEventHandler to register
+     * @param name
+     *            the name of the AuditEventHandler we want to register
+     * @param events
+     *            the events that this AuditEventHandler is interested.
+     * @throws AuditException
+     *             if there is already an AuditEventHandler register with the same name.
+     */
+    public void register(AuditEventHandler handler, String name, Set<String> events) throws AuditException {
+        if (!allAuditEventHandlers.containsKey(name)) {
+            allAuditEventHandlers.put(name, handler);
+        } else {
+            throw new AuditException("There is already a handler registered for " + name);
+        }
+
+        logger.info("Registering {} with {} for {}", handler.getClass().getName(), name, events.toString());
+
+        Map<String, JsonValue> auditEventsMetaData = new HashMap<>();
         for (String event : events) {
             if (!auditEvents.containsKey(event)) {
                 logger.error("unknown event : {}", event);
                 continue;
             }
+
+            auditEventsMetaData.put(event, auditEvents.get(event));
+
             List<AuditEventHandler> handlers = eventTypeAuditEventHandlers.get(event);
             // TODO Use a Set as we do not want duplicates.
             if (!handlers.contains(handler)) {
                 handlers.add(handler);
             }
         }
+
+        handler.setAuditEventsMetaData(auditEventsMetaData);
+        logger.info("Registered {}", eventTypeAuditEventHandlers.toString());
     }
 
     private void cleanupPreviousConfig() throws ResourceException {
-        // drop audit event handlers
-        if (defaultAuditEventHandlers != null) {
-            // notify the audit event handlers to close
-            for (AuditEventHandler auditEventHandler : defaultAuditEventHandlers.values()) {
-                auditEventHandler.close();
-            }
-            defaultAuditEventHandlers.clear();
-            defaultAuditEventHandlers = null;
-        }
-
-        for(Map.Entry<String, List<AuditEventHandler>> entry : eventTypeAuditEventHandlers.entrySet()) {
-            entry.getValue().clear();
-        }
         queryAuditEventHandler = null;
     }
 
@@ -184,8 +196,9 @@ public class AuditService implements RequestHandler {
      * {@inheritDoc}
      */
     @Override
-    public void handleCreate(final ServerContext context, final CreateRequest request,
-            final ResultHandler<Resource> handler) {
+    public void handleCreate(final ServerContext context,
+                             final CreateRequest request,
+                             final ResultHandler<Resource> handler) {
         try {
             if (request.getResourceName() == null) {
                 throw new BadRequestException(
@@ -204,6 +217,8 @@ public class AuditService implements RequestHandler {
                     ? UUID.randomUUID().toString()
                     : request.getNewResourceId();
             request.getContent().put(Resource.FIELD_CONTENT_ID, localId);
+            logger.debug("Audit create id {}",
+                         request.getContent().get(Resource.FIELD_CONTENT_ID));
 
             if (!request.getContent().isDefined("transactionId")
                     || !request.getContent().isDefined("timestamp")) {
@@ -219,10 +234,22 @@ public class AuditService implements RequestHandler {
             }
 
             final String auditEventType = request.getResourceNameObject().head(1).toString();
-            for (AuditEventHandler auditEventHandler : getAuditEventHandlersForEvent(auditEventType)) {
-                auditEventHandler.createInstance(context, request, handler);
+            if (!auditEvents.containsKey(auditEventType)) {
+                logger.warn("The AuditService is not aware about events of type {}", auditEventType);
+                return;
+            } else {
+                Collection<AuditEventHandler> auditEventHandlersForEvent;
+                auditEventHandlersForEvent = getAuditEventHandlersForEvent(auditEventType);
+                logger.info("Will cascade the event of type {} to the handlers : {}",
+                            auditEventType,
+                            auditEventHandlersForEvent);
+                for (AuditEventHandler auditEventHandler : auditEventHandlersForEvent) {
+                    auditEventHandler.createInstance(context, request, handler);
+                }
             }
         } catch (Throwable t) {
+            // TODO Throwable might be a little bit too large ? (that also catches Error)
+            // What about Exception | RuntimeException ?
             handler.handleError(ResourceExceptionsUtil.adapt(t));
         }
     }
@@ -276,15 +303,7 @@ public class AuditService implements RequestHandler {
      */
     @Override
     public void handleQuery(final ServerContext context, final QueryRequest request, final QueryResultHandler handler) {
-        try {
-            logger.debug(
-                    "Audit query called for {} with {}",
-                    request.getResourceName(),
-                    request.getAdditionalParameters());
-            queryAuditEventHandler.queryCollection(context, request, handler);
-        } catch (Throwable t) {
-            handler.handleError(ResourceExceptionsUtil.adapt(t));
-        }
+        handler.handleError(ResourceExceptionsUtil.notSupported(request));
     }
     /**
      * Audit service does not support actions on audit entries.
@@ -300,14 +319,10 @@ public class AuditService implements RequestHandler {
 
     private Collection<AuditEventHandler> getAuditEventHandlersForEvent(final String auditEvent)
             throws InternalServerErrorException {
-        if (eventTypeAuditEventHandlers == null && defaultAuditEventHandlers == null) {
-            throw new InternalServerErrorException("No audit event type handlers were configured");
-        }
-
-        if (eventTypeAuditEventHandlers == null || eventTypeAuditEventHandlers.get(auditEvent) == null) {
-            return defaultAuditEventHandlers.values();
-        } else {
+        if (eventTypeAuditEventHandlers.containsKey(auditEvent)) {
             return eventTypeAuditEventHandlers.get(auditEvent);
+        } else {
+            return Collections.<AuditEventHandler>emptyList();
         }
     }
 
@@ -316,12 +331,11 @@ public class AuditService implements RequestHandler {
      *
      * @param auditEventHandlerKey the name of the audit event handler to use for queries.
      * @return an AuditEventHandler to use for queries.
-     * @throws ResourceException on failure to find an appropriate logger.
      */
-    private AuditEventHandler getQueryAuditEventHandler(final String auditEventHandlerKey) throws ResourceException {
+    private AuditEventHandler getQueryAuditEventHandler(final String auditEventHandlerKey) {
         //return configured audit event handler
         if (auditEventHandlerKey != null) {
-            final AuditEventHandler auditEventHandler = defaultAuditEventHandlers.get(auditEventHandlerKey);
+            final AuditEventHandler auditEventHandler = allAuditEventHandlers.get(auditEventHandlerKey);
             if (auditEventHandler != null) {
                 return auditEventHandler;
             } else {
@@ -329,12 +343,13 @@ public class AuditService implements RequestHandler {
             }
         }
 
-        if (defaultAuditEventHandlers != null
-                && !defaultAuditEventHandlers.isEmpty()) {
+        if (allAuditEventHandlers != null
+                && !allAuditEventHandlers.isEmpty()) {
             //return first global audit event handler
-            return defaultAuditEventHandlers.values().iterator().next();
+            return allAuditEventHandlers.values().iterator().next();
         } else {
-            throw new InternalServerErrorException("No audit event handlers configured to be queried.");
+            logger.warn("No audit event handlers configured to be queried.");
+            return null;
         }
     }
 
@@ -363,29 +378,6 @@ public class AuditService implements RequestHandler {
         }
 
         return Collections.unmodifiableMap(listOfEventTypes);
-    }
-
-    private Map<String, AuditEventHandler> getAuditEventHandlers(JsonValue config) throws ResourceException {
-        Map<String, AuditEventHandler> auditEventHandlers = new HashMap<String, AuditEventHandler>();
-        JsonValue eventHandlers = config.get(EVENT_HANDLERS);
-        if (!eventHandlers.isNull()) {
-            Set<String> eventHandlersKeys = eventHandlers.keys();
-            if (eventHandlersKeys.isEmpty()) {
-                logger.error("No audit event handlers configured");
-                throw new InternalServerErrorException("No audit event handlers configured");
-            }
-            // Loop through event handlers
-            for (String eventHandlerKey : eventHandlersKeys) {
-                JsonValue handlerDefinition = eventHandlers.get(eventHandlerKey);
-                AuditEventHandler handler = createAuditEventHandler(eventHandlerKey,
-                                                                    handlerDefinition.get("config"),
-                                                                    auditEvents);
-                auditEventHandlers.put(eventHandlerKey, handler);
-
-                register(handler, handlerDefinition.get("events").asList(String.class));
-            }
-        }
-        return auditEventHandlers;
     }
 
     /**

@@ -23,13 +23,15 @@ import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.forgerock.audit.events.handlers.AuditEventHandler;
+import org.forgerock.audit.events.handlers.impl.PassThroughAuditEventHandler;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CreateRequest;
@@ -52,7 +54,6 @@ public class AuditServiceTest {
 
     private static final ObjectMapper mapper;
     private JsonValue config;
-    Path path = null;
 
     static {
         final JsonFactory jsonFactory = new JsonFactory();
@@ -65,8 +66,6 @@ public class AuditServiceTest {
         try {
             final InputStream configStream = getClass().getResourceAsStream("/audit.json");
             config = new JsonValue(mapper.readValue(configStream, Map.class));
-            path = Files.createTempDirectory("commons-audit");
-            config.get("eventHandlers").get("csv").get("config").put("location", path.toFile().getAbsolutePath());
         } catch (IOException e) {
             throw new RuntimeException("Unable to parse audit.json config", e);
         }
@@ -75,15 +74,65 @@ public class AuditServiceTest {
     @AfterMethod
     public void tearDown() {
         config = null;
-        path.toFile().delete();
-
     }
 
     @Test
-    public void testCreatingAuditLogEntry() throws ResourceException {
+    public void testRegisterInjectEventMetaData() throws Exception {
         //given
         final AuditService auditService = new AuditService();
         auditService.configure(config);
+        AuditEventHandler auditEventHandler = mock(AuditEventHandler.class);
+        final ArgumentCaptor<Map> auditEventMetaDataCaptor = ArgumentCaptor.forClass(Map.class);
+
+        auditService.register(auditEventHandler, "mock", Collections.singleton("access"));
+        verify(auditEventHandler).setAuditEventsMetaData(auditEventMetaDataCaptor.capture());
+
+        Map<String, JsonValue> auditEventMetaData = auditEventMetaDataCaptor.getValue();
+        assertThat(auditEventMetaData).containsKey("access");
+        JsonValue accessMetaData = auditEventMetaData.get("access");
+        assertThat(accessMetaData.isDefined("schema")).isTrue();
+    }
+
+    @Test
+    public void testRegisterForSomeEvents() throws Exception {
+        //given
+        final AuditService auditService = new AuditService();
+        auditService.configure(config);
+        // No events specified, we want to get all events !
+        PassThroughAuditEventHandler auditEventHandler = new PassThroughAuditEventHandler();
+        // Only interested about the access events.
+        auditService.register(auditEventHandler, "pass-through", Collections.singleton("access"));
+
+        final CreateRequest createRequestAccess = makeCreateRequest("access");
+        final ResultHandler<Resource> resultHandlerAccess = mockResultHandler(Resource.class);
+        final ArgumentCaptor<Resource> resourceCaptorAccess = ArgumentCaptor.forClass(Resource.class);
+
+        final CreateRequest createRequestActivity = makeCreateRequest("activity");
+        final ResultHandler<Resource> resultHandlerActivity = mockResultHandler(Resource.class);
+
+        //when
+        auditService.handleCreate(new ServerContext(new RootContext()), createRequestAccess, resultHandlerAccess);
+        auditService.handleCreate(new ServerContext(new RootContext()), createRequestActivity, resultHandlerActivity);
+
+        //then
+        verify(resultHandlerAccess, never()).handleError(any(ResourceException.class));
+        verify(resultHandlerAccess).handleResult(resourceCaptorAccess.capture());
+
+        Resource resource;
+        resource = resourceCaptorAccess.getValue();
+        assertThat(resource != null);
+        assertThat(resource.getContent().asMap().equals(createRequestAccess.getContent().asMap()));
+
+        verifyZeroInteractions(resultHandlerActivity);
+    }
+
+    @Test
+    public void testCreatingAuditLogEntry() throws Exception {
+        //given
+        final AuditService auditService = new AuditService();
+        auditService.configure(config);
+        PassThroughAuditEventHandler auditEventHandler = new PassThroughAuditEventHandler();
+        auditService.register(auditEventHandler, "pass-through", Collections.singleton("access"));
 
         final CreateRequest createRequest = makeCreateRequest();
         final ResultHandler<Resource> resultHandler = mockResultHandler(Resource.class);
@@ -102,45 +151,31 @@ public class AuditServiceTest {
     }
 
     @Test
-    public void testReadingAuditLogEntry() throws ResourceException {
+    public void testReadingAuditLogEntry() throws Exception {
         //given
         final AuditService auditService = new AuditService();
-        auditService.configure(config);
+        AuditEventHandler queryAuditEventHandler = mock(AuditEventHandler.class, "queryAuditEventHandler");
+        auditService.register(queryAuditEventHandler, "query-handler", Collections.singleton("access"));
 
-        Resource event = createAccessEvent(auditService);
+        AuditEventHandler auditEventHandler = mock(AuditEventHandler.class, "auditEventHandler");
+        auditService.register(auditEventHandler, "another-handler", Collections.singleton("access"));
+        reset(auditEventHandler, queryAuditEventHandler); // So the verify assertions below can work.
 
-        final ReadRequest readRequest = Requests.newReadRequest("access", event.getId());
+        auditService.configure(json(object(field("useForQueries", "query-handler"))));
 
-        ResultHandler<Resource> readResultHandler = mockResultHandler(Resource.class);
-        ArgumentCaptor<Resource> readArgument = ArgumentCaptor.forClass(Resource.class);
+        final ReadRequest readRequest = Requests.newReadRequest("access", "1234");
+        ResultHandler<Resource> readResultHandler = mockResultHandler(Resource.class, "readResultHandler");
+        ServerContext context = new ServerContext(new RootContext());
 
         //when
-        auditService.handleRead(new ServerContext(new RootContext()), readRequest, readResultHandler);
+        auditService.handleRead(context, readRequest, readResultHandler);
 
         //then
-        verify(readResultHandler).handleResult(readArgument.capture());
-        verify(readResultHandler, never()).handleError(any(ResourceException.class));
-
-        final Resource resource = readArgument.getValue();
-        assertResourceEquals(resource, event);
-    }
-
-    private static void assertResourceEquals(Resource left, Resource right) {
-        Map<String, Object> leftAsMap = dropNullEntries(left.getContent()).asMap();
-        Map<String, Object> rightAsMap = dropNullEntries(right.getContent()).asMap();
-        assertThat(leftAsMap).isEqualTo(rightAsMap);
-    }
-
-    private static JsonValue dropNullEntries(JsonValue jsonValue) {
-        JsonValue result = jsonValue.clone();
-
-        for(String key : jsonValue.keys()) {
-          if (jsonValue.get(key).isNull()) {
-              result.remove(key);
-          }
-        }
-
-        return result;
+        verify(queryAuditEventHandler).readInstance(same(context),
+                                                    eq("1234"),
+                                                    same(readRequest),
+                                                    same(readResultHandler));
+        verifyZeroInteractions(auditEventHandler);
     }
 
     @Test
@@ -324,6 +359,10 @@ public class AuditServiceTest {
     }
 
     private CreateRequest makeCreateRequest() {
+        return makeCreateRequest("access");
+    }
+
+    private CreateRequest makeCreateRequest(String event) {
         final JsonValue content = json(
                 object(
                         field("_id", "_id"),
@@ -331,18 +370,22 @@ public class AuditServiceTest {
                         field("transactionId", "transactionId")
                 )
         );
-        return Requests.newCreateRequest("access", content);
+        return Requests.newCreateRequest(event, content);
     }
 
     @SuppressWarnings("unchecked")
     private static <T> ResultHandler<T> mockResultHandler(Class<T> type) {
         return mock(ResultHandler.class);
+    }
 
+    @SuppressWarnings("unchecked")
+    private static <T> ResultHandler<T> mockResultHandler(Class<T> type, String name) {
+        return mock(ResultHandler.class, name);
     }
 
     private Resource createAccessEvent(AuditService auditService) {
         final CreateRequest createRequest = makeCreateRequest();
-        final ResultHandler<Resource> createResultHandler = mockResultHandler(Resource.class);
+        final ResultHandler<Resource> createResultHandler = mockResultHandler(Resource.class, "createResultHandler");
         final ArgumentCaptor<Resource> createArgument = ArgumentCaptor.forClass(Resource.class);
 
         auditService.handleCreate(new ServerContext(new RootContext()), createRequest, createResultHandler);

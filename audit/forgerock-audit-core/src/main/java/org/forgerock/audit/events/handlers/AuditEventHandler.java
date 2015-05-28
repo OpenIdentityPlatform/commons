@@ -16,6 +16,8 @@
 
 package org.forgerock.audit.events.handlers;
 
+import java.util.Map;
+
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.CollectionResourceProvider;
 import org.forgerock.json.resource.ResourceException;
@@ -37,4 +39,13 @@ public interface AuditEventHandler extends CollectionResourceProvider {
      * @throws ResourceException if closing the AuditEventHandler fails
      */
     public void close() throws ResourceException;
+
+    /**
+     * Set the audit events that this EventHandler may have to handle. This method is supposed to be called by the
+     * AuditService when registering this AuditEventHandler.
+     *
+     * @param auditEvents
+     *            List of AuditEvents to handle.
+     */
+    public void setAuditEventsMetaData(Map<String, JsonValue> auditEvents);
 }

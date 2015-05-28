@@ -1,11 +1,3 @@
 {
-  "eventHandlers" : {
-    "csv" : {
-      "config" : {
-        "location" : "test"
-      },
-      "events" : [ "access" ]
-    }
-  },
-  "useForQueries" : "csv"
+  "useForQueries" : "pass-through"
 }
