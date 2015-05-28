@@ -50,21 +50,21 @@ import org.testng.annotations.Test;
 
 public class AuditServiceTest {
 
-    private static final ObjectMapper MAPPER;
+    private static final ObjectMapper mapper;
     private JsonValue config;
     Path path = null;
 
     static {
         final JsonFactory jsonFactory = new JsonFactory();
         jsonFactory.configure(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS, true);
-        MAPPER = new ObjectMapper(jsonFactory);
+        mapper = new ObjectMapper(jsonFactory);
     }
 
     @BeforeMethod
     public void setUp() {
         try {
             final InputStream configStream = getClass().getResourceAsStream("/audit.json");
-            config = new JsonValue(MAPPER.readValue(configStream, Map.class));
+            config = new JsonValue(mapper.readValue(configStream, Map.class));
             path = Files.createTempDirectory("commons-audit");
             config.get("eventHandlers").get("csv").get("config").put("location", path.toFile().getAbsolutePath());
         } catch (IOException e) {

@@ -75,12 +75,12 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
     private static final String CONFIG_LOG_RECORD_DELIM = "recordDelimiter";
 
     private final Map<String, FileWriter> fileWriters = new HashMap<String, FileWriter>();
-    private static final ObjectMapper MAPPER;
+    private static final ObjectMapper mapper;
 
     static {
         JsonFactory jsonFactory = new JsonFactory();
         jsonFactory.configure(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS, true);
-        MAPPER = new ObjectMapper(jsonFactory);
+        mapper = new ObjectMapper(jsonFactory);
     }
 
 
@@ -424,13 +424,13 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
             // Check if value is JSON object
             if (((String) value).startsWith("{") && ((String) value).endsWith("}")) {
                 try {
-                    jv = new JsonValue(MAPPER.readValue((String) value, Map.class));
+                    jv = new JsonValue(mapper.readValue((String) value, Map.class));
                 } catch (Exception e) {
                     logger.debug("Error parsing JSON string: " + e.getMessage());
                 }
             } else if (((String) value).startsWith("[") && ((String) value).endsWith("]")) {
                 try {
-                    jv = new JsonValue(MAPPER.readValue((String) value, List.class));
+                    jv = new JsonValue(mapper.readValue((String) value, List.class));
                 } catch (Exception e) {
                     logger.debug("Error parsing JSON string: " + e.getMessage());
                 }

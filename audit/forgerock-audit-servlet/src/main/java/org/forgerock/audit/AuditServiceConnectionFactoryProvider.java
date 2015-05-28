@@ -41,12 +41,12 @@ public final class AuditServiceConnectionFactoryProvider {
     private static final String INIT_PARAM_URI_TEMPLATE = "uri-template";
 
     private static final Logger logger = LoggerFactory.getLogger(AuditServiceConnectionFactoryProvider.class);
-    private static final ObjectMapper MAPPER;
+    private static final ObjectMapper mapper;
 
     static {
         final JsonFactory jsonFactory = new JsonFactory();
         jsonFactory.configure(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS, true);
-        MAPPER = new ObjectMapper(jsonFactory);
+        mapper = new ObjectMapper(jsonFactory);
     }
     private AuditServiceConnectionFactoryProvider() {
 
@@ -71,7 +71,7 @@ public final class AuditServiceConnectionFactoryProvider {
         try {
             final InputStream configStream =
                     AuditServiceConnectionFactoryProvider.class.getResourceAsStream("/conf/audit.json");
-            final JsonValue jsonConfig = new JsonValue(MAPPER.readValue(configStream, Map.class));
+            final JsonValue jsonConfig = new JsonValue(mapper.readValue(configStream, Map.class));
             auditService.configure(jsonConfig);
         } catch (IOException e) {
             throw new RuntimeException("Unable to parse audit.json config", e);

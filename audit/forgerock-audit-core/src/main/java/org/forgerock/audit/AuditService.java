@@ -59,11 +59,11 @@ import org.slf4j.LoggerFactory;
 public class AuditService implements RequestHandler {
     private static final Logger logger = LoggerFactory.getLogger(AuditService.class);
 
-    private static final ObjectMapper MAPPER;
+    private static final ObjectMapper mapper;
 
     static {
         final JsonFactory jsonFactory = new JsonFactory();
-        MAPPER = new ObjectMapper(jsonFactory);
+        mapper = new ObjectMapper(jsonFactory);
     }
 
     /** The connection factory. */
@@ -110,7 +110,7 @@ public class AuditService implements RequestHandler {
 
         eventTypeAuditEventHandlers = new HashMap<>();
         try(final InputStream configStream = getClass().getResourceAsStream("/org/forgerock/audit/events.json")) {
-            final JsonValue jsonConfig = new JsonValue(MAPPER.readValue(configStream, Map.class));
+            final JsonValue jsonConfig = new JsonValue(mapper.readValue(configStream, Map.class));
             auditEvents = getEventTypes(jsonConfig, extendedEventTypes);
         } catch (IOException ioe) {
             logger.error("Error while parsing the events definition.", ioe);

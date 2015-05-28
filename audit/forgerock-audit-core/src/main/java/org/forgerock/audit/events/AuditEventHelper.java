@@ -52,12 +52,12 @@ public final class AuditEventHelper {
     private static final String CONFIG = "config";
     private static final String LOG_TO = "logTo";
 
-    private static final ObjectMapper MAPPER;
+    private static final ObjectMapper mapper;
 
     static {
         JsonFactory jsonFactory = new JsonFactory();
         jsonFactory.configure(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS, true);
-        MAPPER = new ObjectMapper(jsonFactory);
+        mapper = new ObjectMapper(jsonFactory);
     }
 
     private AuditEventHelper() {
