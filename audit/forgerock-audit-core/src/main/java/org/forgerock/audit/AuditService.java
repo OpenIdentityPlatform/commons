@@ -36,7 +36,6 @@ import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
-import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
@@ -66,9 +65,6 @@ public class AuditService implements RequestHandler {
         mapper = new ObjectMapper(jsonFactory);
     }
 
-    /** The connection factory. */
-    private ConnectionFactory connectionFactory;
-
     private JsonValue config; // Existing active configuration
 
     /** All the AuditEventHandlers configured. */
@@ -87,7 +83,7 @@ public class AuditService implements RequestHandler {
      * Constructs an AuditService.
      */
     public AuditService() {
-        this(null, new JsonValue(null));
+        this(new JsonValue(null));
     }
 
     /**
@@ -96,18 +92,6 @@ public class AuditService implements RequestHandler {
      * @param extendedEventTypes the extension of the core event types.
      */
     public AuditService(JsonValue extendedEventTypes) {
-        this(null, extendedEventTypes);
-    }
-
-    /**
-     * Constructs an AuditService.
-     *
-     * @param connectionFactory  the ConnectionFactory to add to the AuditService
-     * @param extendedEventTypes the extension of the core event types.
-     */
-    public AuditService(ConnectionFactory connectionFactory, JsonValue extendedEventTypes) {
-        this.connectionFactory = connectionFactory;
-
         eventTypeAuditEventHandlers = new HashMap<>();
         try(final InputStream configStream = getClass().getResourceAsStream("/org/forgerock/audit/events.json")) {
             final JsonValue jsonConfig = new JsonValue(mapper.readValue(configStream, Map.class));
