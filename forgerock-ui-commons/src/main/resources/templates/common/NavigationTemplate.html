@@ -3,7 +3,9 @@
         <div class="navbar-header">
             {{#if username}}
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#mainNavBar" aria-expanded="false" aria-controls="navbar">
-                <i class="fa fa-bars fa-lg"></i>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
             </button>
             {{/if}}
             <a href="#" class="navbar-brand" title="{{theme.settings.logo.title}}"><img  style="{{#if theme.settings.logo.width}}width:{{theme.settings.logo.width}};{{/if}}{{#if theme.settings.logo.height}} height:{{theme.settings.logo.height}};{{/if}}"  src="{{theme.settings.logo.src}}" alt="{{theme.settings.logo.alt}}" /> </a>
@@ -28,7 +30,7 @@
                         </a>
 
                         {{#if dropdown}}
-            
+
                             {{#if urls}}
                                 <ul class="dropdown-menu" role="menu">
                                     {{#each urls}}
@@ -36,7 +38,7 @@
                                         {{#if divider}}
                                             <li class="divider"></li>
                                         {{else}}
-                                            <li>
+                                            <li {{#if cssClass}}class="{{cssClass}}"{{/if}}>
                                                 <a  title="{{title}}"
                                                     href="{{#if hashurl}}{{hashurl}}{{else}}#{{/if}}"
                                                     class="{{#if event}}event-link{{/if}} {{#if urls}}dropdown-toggle{{/if}}"

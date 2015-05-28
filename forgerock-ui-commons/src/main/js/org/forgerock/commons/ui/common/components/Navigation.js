@@ -136,11 +136,14 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                 if (navObj.divider) {
                     navElement.divider = navObj.divider;
                 }
+                if (navObj.cssClass) {
+                    navElement.cssClass = navObj.cssClass;
+                }
 
                 if (navObj.dropdown === true) {
                     navElement.dropdown = true;
-                     _.each(navObj.urls, function(link){
-                        subs.push(self.buildNavElement(link));
+                     _.each(navObj.urls, function(obj){
+                        subs.push(self.buildNavElement(obj));
                     });
 
                     navElement.urls = subs;

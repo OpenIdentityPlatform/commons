@@ -717,11 +717,11 @@ To override default theme settings, create _ui-themeconfig.json_ under resources
         "icon": "favicon.ico",
         "settings": {
             "logo": {
-                "src": "images/logo.png",
+                "src": "images/logo-horizontal.png",
                 "title": "ForgeRock",
                 "alt": "ForgeRock",
-                "height": "80",
-                "width": "120"
+                "height": "54",
+                "width": "202"
             },
             "lessVars": {
                 "background-color": "#000",

@@ -37,7 +37,7 @@ define("ThemeManager", [
     var obj = {},
         themePromise;
 
-    obj.loadThemeCSS = function(theme){
+    obj.loadThemeCSS = function (theme) {
         $('head').find('link[href*=less]').remove();
         $('head').find('link[href*=favicon]').remove();
 
@@ -67,21 +67,20 @@ define("ThemeManager", [
     };
 
 
-    obj.loadThemeConfig = function(){
+    obj.loadThemeConfig = function () {
         var prom = $.Deferred();
         //check to see if the config file has been loaded already
         //if so use what is already there if not load it
-        if(conf.globalData.themeConfig){
+        if (conf.globalData.themeConfig) {
             prom.resolve(conf.globalData.themeConfig);
             return prom;
-        }
-        else{
+        } else {
             return $.Deferred().resolve({
                 "path": "",
                 "icon": "favicon.ico",
                 "settings": {
                     "logo": {
-                        "src": "images/logo.png",
+                        "src": "images/logo-horizontal.png",
                         "title": "ForgeRock",
                         "alt": "ForgeRock"
                     },
@@ -115,13 +114,13 @@ define("ThemeManager", [
         }
     };
 
-    obj.getTheme = function(){
+    obj.getTheme = function () {
         if (themePromise === undefined) {
-            themePromise = obj.loadThemeConfig().then(function(themeConfig){
+            themePromise = obj.loadThemeConfig().then(function (themeConfig) {
                 var newLessVars = {};
 
                 conf.globalData.theme = themeConfig;
-                return obj.loadThemeCSS(themeConfig).then(function(){
+                return obj.loadThemeCSS(themeConfig).then(function () {
                     _.each(themeConfig.settings.lessVars, function (value, key) {
                         newLessVars['@' + key] = value;
                     });

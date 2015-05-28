@@ -1,0 +1,126 @@
+.panel-default>.panel-heading {
+    background-color: transparent;
+    padding: 15px;
+}
+
+.panel-collapse .panel-body {
+    padding-left: 33px;
+}
+
+.panel-default {
+    -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+}
+
+.panel-default>.panel-heading {
+    padding: 15px;
+}
+
+.panel-title {
+    font-weight: normal;
+    letter-spacing: 1px;
+
+    .panel-title-icon {
+        display: inline-block;
+        margin-right:5px;
+    }
+}
+
+.panel-collapse .panel-title>a {
+    color: @base-theme-color;
+}
+
+.panel-title a:focus {
+    color: @base-theme-color;
+    text-decoration: none;
+}
+
+.panel-title a:hover {
+    color: @panel-hover-color;
+    text-decoration: none;
+}
+
+.panel-title>a {
+    position: relative;
+    padding-left: 17px;
+}
+
+.panel .nav-list>li:last-child>a {
+    border-bottom: none;
+}
+
+.panel-footer {
+    background-color: #fff;
+}
+
+.panel-title a:before {
+    content: '';
+    display: inline-block;
+    width: 0;
+    height: 0;
+    margin-left: 2px;
+    vertical-align: middle;
+    position: absolute;
+    left: 3px;
+    top: 5px;
+    border-left: 4px solid;
+    border-right: 0;
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+}
+
+.panel-title a[aria-expanded="true"]:before {
+    content: '';
+    display: inline-block;
+    width: 0;
+    height: 0;
+    margin-left: 2px;
+    vertical-align: middle;
+    position: absolute;
+    border-top: 4px solid;
+    border-right: 4px solid transparent;
+    border-left: 4px solid transparent;
+    top: 7px;
+    left: 0;
+}
+
+.panel {
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+
+.panel-collapse {
+    box-shadow: none;
+    -webkit-box-shadow: none;
+    margin-bottom: 5px;
+    border: none;
+}
+
+.panel-collapse>.panel-heading {
+    background-color: transparent;
+    border-color: transparent;
+
+}
+
+.panel-default.panel-collapse {
+    border-bottom: 1px solid #eee;
+}
+
+.panel-default.panel-collapse:last-child {
+    border-bottom: none;
+}
+
+.panel-description {
+    margin-bottom: 20px;
+}
+
+.panel-default > .panel-heading,
+.panel-primary > .panel-heading,
+.panel-success > .panel-heading,
+.panel-info > .panel-heading,
+.panel-warning > .panel-heading,
+.panel-danger > .panel-heading {
+    // required to override bootstrap-theme which adds background gradients
+    background-image: none;
+    filter: none;
+}

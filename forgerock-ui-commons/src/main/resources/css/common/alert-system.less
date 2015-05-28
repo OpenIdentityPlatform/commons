@@ -1,0 +1,57 @@
+.alert-system {
+    position:fixed;
+    margin: 5px auto 0;
+    z-index:10000;
+    left: 0;
+    right: 0;
+    width:400px;
+    min-height: 50px;
+    background-image:none;
+}
+
+.logged-user .alert-system {
+    margin-top: 70px;
+}
+
+.alert-message.alert-warning {
+    .alert-message-icon {
+        .fa-icon();
+        font-weight:bold;
+        margin-right: 15px;
+
+        &:before {
+            content:@fa-var-times-circle-o;
+        }
+    }
+}
+
+.alert-message.alert-danger{
+    .alert-message-icon {
+        .fa-icon();
+        font-weight:bold;
+        margin-right: 15px;
+
+        &:before {
+            content:@fa-var-exclamation-circle;
+        }
+    }
+}
+
+.alert-message.alert-info {
+    .alert-message-icon {
+        .fa-icon();
+        margin-right: 15px;
+        font-weight:bold;
+
+        &:before {
+            content:@fa-var-info-circle;
+        }
+    }
+}
+
+
+// required to override bootstrap-theme which adds background gradients
+.alert, .alert-success, .alert-info, .alert-warning, .alert-danger {
+    background-image: none;
+    filter: none;
+}

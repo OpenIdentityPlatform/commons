@@ -1,0 +1,110 @@
+/* Backgrid */
+.backgrid {
+    thead th {
+        vertical-align: top;
+        text-align: left;
+        border-width: 2px;
+        padding: 0 15px 8px;
+        background-color: transparent;
+
+        .form-search {
+            margin: 5px 0 0 0;
+            width: 210px;
+
+            input[type=search] {
+                width: 160px;
+                padding-left: 25px;
+            }
+        }
+
+        .backgrid-filter .clear {
+            right: 15px;
+        }
+
+    }
+
+    tbody {
+        tr {
+            &:nth-child(2n) {
+                background-color: #fff;
+            }
+
+            &.selected {
+                background-color: #d9edf7;
+            }
+
+            &:hover, &:focus {
+                background-color: #eeeeee;
+                cursor: pointer;
+            }
+
+            &.empty {
+                background-color: #d9edf7;
+                td {
+                    display: table-cell;
+                    color: #31708f;
+                }
+            }
+
+            td {
+                padding: 8px 15px;
+
+                &.select-row-cell {
+                    width: 42px;
+                }
+
+                &.template-cell {
+                    text-align: center;
+                    &.edit-cell {
+                        padding: 0;
+                        width: 60px;
+
+                        .fa-pencil {
+                            display: block;
+                            height: 100%;
+                            position: relative;
+
+                            &:before {
+                                position: absolute;
+                                top: 50%;
+                                left: 50%;
+                                margin-left: -0.5em;
+                                margin-top: -0.5em;
+                            }
+                        }
+
+                        &:hover {
+                            background-color: #e6e6e6;
+                        }
+                    }
+                }
+
+                &.array-formatter-cell {
+                    ul {
+                        font-size: 13px;
+                        line-height: 1.5;
+                        list-style-type: none;
+                        padding: 0;
+                        margin: 0;
+                    }
+                }
+
+                &.object-formatter-cell {
+                    .dl-horizontal {
+                        margin: 0;
+                        font-size: 12px;
+
+                        dd {
+                            margin-left: 95px;
+                        }
+
+                        dt {
+                            text-transform: uppercase;
+                            width: 85px;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
