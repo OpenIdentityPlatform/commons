@@ -18,6 +18,7 @@ package org.forgerock.json.resource;
 
 import java.util.List;
 
+import org.forgerock.http.ResourcePath;
 import org.forgerock.json.fluent.JsonPointer;
 
 /**
@@ -64,13 +65,13 @@ public interface DeleteRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    String getResourceName();
+    String getResourcePath();
 
     /**
      * {@inheritDoc}
      */
     @Override
-    ResourceName getResourceNameObject();
+    ResourcePath getResourcePathObject();
 
     /**
      * Returns the expected version information associated with the JSON
@@ -92,13 +93,13 @@ public interface DeleteRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    Request setResourceName(ResourceName name);
+    Request setResourcePath(ResourcePath path);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    DeleteRequest setResourceName(String name);
+    DeleteRequest setResourcePath(String path);
 
     /**
      * Sets the expected version information associated with the JSON resource

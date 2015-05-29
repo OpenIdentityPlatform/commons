@@ -52,7 +52,7 @@ import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResourceName;
+import org.forgerock.http.ResourcePath;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.json.resource.Version;
 import org.forgerock.util.AsyncFunction;
@@ -189,7 +189,7 @@ final class HttpAdapter implements Handler {
 
             final Form parameters = req.getForm();
             final DeleteRequest request =
-                    Requests.newDeleteRequest(getResourceName(context, req)).setRevision(getIfMatch(req));
+                    Requests.newDeleteRequest(getResourcePath(context, req)).setRevision(getIfMatch(req));
             for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
                 final String name = p.getKey();
                 final List<String> values = p.getValue();
@@ -224,7 +224,7 @@ final class HttpAdapter implements Handler {
                 rejectIfNoneMatch(req);
 
                 // Query against collection.
-                final QueryRequest request = Requests.newQueryRequest(getResourceName(context, req));
+                final QueryRequest request = Requests.newQueryRequest(getResourcePath(context, req));
 
                 for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
                     final String name = p.getKey();
@@ -297,7 +297,7 @@ final class HttpAdapter implements Handler {
                             + getMethod(req) + " requests");
                 }
 
-                final ReadRequest request = Requests.newReadRequest(getResourceName(context, req));
+                final ReadRequest request = Requests.newReadRequest(getResourcePath(context, req));
                 for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
                     final String name = p.getKey();
                     final List<String> values = p.getValue();
@@ -342,7 +342,7 @@ final class HttpAdapter implements Handler {
 
             final Form parameters = req.getForm();
             final PatchRequest request =
-                    Requests.newPatchRequest(getResourceName(context, req)).setRevision(getIfMatch(req));
+                    Requests.newPatchRequest(getResourcePath(context, req)).setRevision(getIfMatch(req));
             request.getPatchOperations().addAll(getJsonPatchContent(req));
             for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
                 final String name = p.getKey();
@@ -379,7 +379,7 @@ final class HttpAdapter implements Handler {
             if (action.equalsIgnoreCase(ACTION_ID_CREATE)) {
                 final JsonValue content = getJsonContent(req);
                 final CreateRequest request =
-                        Requests.newCreateRequest(getResourceName(context, req), content);
+                        Requests.newCreateRequest(getResourcePath(context, req), content);
                 for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
                     final String name = p.getKey();
                     final List<String> values = p.getValue();
@@ -398,7 +398,7 @@ final class HttpAdapter implements Handler {
                 // Action request.
                 final JsonValue content = getJsonActionContent(req);
                 final ActionRequest request =
-                        Requests.newActionRequest(getResourceName(context, req), action).setContent(content);
+                        Requests.newActionRequest(getResourcePath(context, req), action).setContent(content);
                 for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
                     final String name = p.getKey();
                     final List<String> values = p.getValue();
@@ -445,16 +445,16 @@ final class HttpAdapter implements Handler {
             if (ETAG_ANY.equals(rev)) {
                 // This is a create with a user provided resource ID: split the
                 // path into the parent resource name and resource ID.
-                final ResourceName resourceName = getResourceName(context, req);
-                if (resourceName.isEmpty()) {
+                final ResourcePath resourcePath = getResourcePath(context, req);
+                if (resourcePath.isEmpty()) {
                     // FIXME: i18n.
                     throw new BadRequestException("No new resource ID in HTTP PUT request");
                 }
 
                 // We have a pathInfo of the form "{container}/{id}"
                 final CreateRequest request =
-                        Requests.newCreateRequest(resourceName.parent(), content).setNewResourceId(
-                                resourceName.leaf());
+                        Requests.newCreateRequest(resourcePath.parent(), content).setNewResourceId(
+                                resourcePath.leaf());
                 for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
                     final String name = p.getKey();
                     final List<String> values = p.getValue();
@@ -469,7 +469,7 @@ final class HttpAdapter implements Handler {
                 return doRequest(context, req, resp, acceptVersion, request);
             } else {
                 final UpdateRequest request =
-                        Requests.newUpdateRequest(getResourceName(context, req), content).setRevision(
+                        Requests.newUpdateRequest(getResourcePath(context, req), content).setRevision(
                                 getIfMatch(req));
                 for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
                     final String name = p.getKey();
@@ -511,32 +511,32 @@ final class HttpAdapter implements Handler {
     /**
      * Gets the raw (still url-encoded) resource name from the request. Removes leading and trailing forward slashes.
      */
-    private ResourceName getResourceName(Context context, org.forgerock.http.protocol.Request req) throws ResourceException {
+    private ResourcePath getResourcePath(Context context, org.forgerock.http.protocol.Request req) throws ResourceException {
         try {
             if (context.containsContext(RouterContext.class)) {
-                ResourceName reqName = ResourceName.valueOf(req.getUri().getRawPath());
-                return reqName.subSequence(getMatchedUri(context).size(), reqName.size());
+                ResourcePath reqPath = ResourcePath.valueOf(req.getUri().getRawPath());
+                return reqPath.subSequence(getMatchedUri(context).size(), reqPath.size());
             } else {
-                return ResourceName.valueOf(req.getUri().getRawPath()); //TODO is this a valid assumption?
+                return ResourcePath.valueOf(req.getUri().getRawPath()); //TODO is this a valid assumption?
             }
         } catch (IllegalArgumentException e) {
             throw new BadRequestException(e.getMessage());
         }
     }
 
-    private ResourceName getMatchedUri(Context context) {
-        List<ResourceName> matched = new ArrayList<ResourceName>();
+    private ResourcePath getMatchedUri(Context context) {
+        List<ResourcePath> matched = new ArrayList<ResourcePath>();
         for (Context ctx = context; ctx != null; ctx = ctx.getParent()) {
             if (!ctx.containsContext(RouterContext.class)) {
                 break;
             } else {
-                matched.add(ResourceName.valueOf(ctx.asContext(RouterContext.class).getMatchedUri()));
+                matched.add(ResourcePath.valueOf(ctx.asContext(RouterContext.class).getMatchedUri()));
             }
         }
         Collections.reverse(matched);
-        ResourceName matchedUri = new ResourceName();
-        for (ResourceName resourceName : matched) {
-            matchedUri = matchedUri.concat(resourceName);
+        ResourcePath matchedUri = new ResourcePath();
+        for (ResourcePath resourcePath : matched) {
+            matchedUri = matchedUri.concat(resourcePath);
         }
         return matchedUri;
     }

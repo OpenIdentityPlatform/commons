@@ -30,7 +30,7 @@ import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResourceName;
+import org.forgerock.http.ResourcePath;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.ResultHandler;
 
@@ -76,34 +76,34 @@ public final class SimpleRealmDemo {
             @Override
             public void handleRead(final ServerContext context, final ReadRequest request,
                     final ResultHandler<Resource> handler) {
-                final ResourceName name = request.getResourceNameObject();
-                final int size = name.size();
+                final ResourcePath path = request.getResourcePathObject();
+                final int size = path.size();
                 if (size == 0) {
                     log("Reading root");
-                } else if (name.leaf().equals("users")) {
-                    log("Reading users container in " + name.subSequence(0, size - 1));
-                } else if (name.leaf().equals("groups")) {
-                    log("Reading groups container in " + name.subSequence(0, size - 1));
+                } else if (path.leaf().equals("users")) {
+                    log("Reading users container in " + path.subSequence(0, size - 1));
+                } else if (path.leaf().equals("groups")) {
+                    log("Reading groups container in " + path.subSequence(0, size - 1));
                 } else if (size > 1) {
-                    if (name.get(size - 2).equals("users")) {
-                        read("user", name);
-                    } else if (name.get(size - 2).equals("groups")) {
-                        read("group", name);
+                    if (path.get(size - 2).equals("users")) {
+                        read("user", path);
+                    } else if (path.get(size - 2).equals("groups")) {
+                        read("group", path);
                     } else {
-                        log("Reading realm " + name);
+                        log("Reading realm " + path);
                     }
                 } else {
-                    log("Reading realm " + name);
+                    log("Reading realm " + path);
                 }
 
                 final JsonValue content =
-                        new JsonValue(Collections.singletonMap("id", (Object) name.leaf()));
-                handler.handleResult(new Resource(name.leaf(), "1", content));
+                        new JsonValue(Collections.singletonMap("id", (Object) path.leaf()));
+                handler.handleResult(new Resource(path.leaf(), "1", content));
             }
         };
     }
 
-    private static void read(final String type, final ResourceName path) {
+    private static void read(final String type, final ResourcePath path) {
         log("Reading " + type);
         log("    resource ID : " + path.leaf());
         log("    realm path  : " + path.subSequence(0, path.size() - 2));

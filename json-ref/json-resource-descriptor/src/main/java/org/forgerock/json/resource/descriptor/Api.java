@@ -53,7 +53,7 @@ import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResourceName;
+import org.forgerock.http.ResourcePath;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.json.resource.descriptor.RelationDescriptor.Multiplicity;
@@ -93,7 +93,7 @@ public final class Api {
             @Override
             public void handleRead(final ServerContext context, final ReadRequest request,
                     final ResultHandler<Resource> handler) {
-                if (request.getResourceNameObject().isEmpty()) {
+                if (request.getResourcePathObject().isEmpty()) {
                     handler.handleResult(new Resource(null, null, json(apiToJson(api))));
                 } else {
                     handler.handleException(new NotSupportedException());
@@ -107,7 +107,7 @@ public final class Api {
             @Override
             public void handleRead(final ServerContext context, final ReadRequest request,
                     final ResultHandler<Resource> handler) {
-                if (request.getResourceNameObject().isEmpty()) {
+                if (request.getResourcePathObject().isEmpty()) {
                     final List<Object> values = new ArrayList<Object>(apis.size());
                     for (final ApiDescriptor api : apis) {
                         values.add(apiToJson(api));
@@ -225,13 +225,13 @@ public final class Api {
             private boolean isBetterMatch(final RelationDescriptor oldMatch,
                     final RelationDescriptor newMatch) {
                 return oldMatch == null
-                        || oldMatch.getResourceNameObject().size() < newMatch
-                                .getResourceNameObject().size();
+                        || oldMatch.getResourcePathObject().size() < newMatch
+                                .getResourcePathObject().size();
             }
 
-            private boolean isChildRequest(final ResourceName relationName,
-                    final ResourceName target) {
-                return target.size() == relationName.size() + 1;
+            private boolean isChildRequest(final ResourcePath relationPath,
+                    final ResourcePath target) {
+                return target.size() == relationPath.size() + 1;
             }
 
             private boolean isOneToMany(final RelationDescriptor relation) {
@@ -256,21 +256,21 @@ public final class Api {
                  * singleton/*
                  */
                 // @formatter:on
-                final ResourceName name = mutableRequest.getResourceNameObject();
+                final ResourcePath path = mutableRequest.getResourcePathObject();
                 RelationDescriptor exactMatch = null;
                 RelationDescriptor childMatch = null;
                 RelationDescriptor subMatch = null;
                 for (final RelationDescriptor relation : relations) {
-                    final ResourceName relationName = relation.getResourceNameObject();
-                    if (name.equals(relationName)) {
+                    final ResourcePath relationPath = relation.getResourcePathObject();
+                    if (path.equals(relationPath)) {
                         /*
                          * Got an exact match - this wins outright so no point
                          * in continuing.
                          */
                         exactMatch = relation;
                         break;
-                    } else if (name.startsWith(relationName)) {
-                        if (isOneToMany(relation) && isChildRequest(relationName, name)) {
+                    } else if (path.startsWith(relationPath)) {
+                        if (isOneToMany(relation) && isChildRequest(relationPath, path)) {
                             // Child match.
                             childMatch = relation;
                         } else if (isBetterMatch(subMatch, relation)) {
@@ -287,10 +287,10 @@ public final class Api {
                         RequestHandler resolvedRequestHandler;
                         if (exactMatch != null) {
                             resolvedRequestHandler = resolver.getRequestHandler(exactMatch);
-                            mutableRequest.setResourceName(ResourceName.empty());
+                            mutableRequest.setResourcePath(ResourcePath.empty());
                         } else {
                             resolvedRequestHandler = resolver.getRequestHandler(childMatch);
-                            mutableRequest.setResourceName(name.tail(name.size() - 1));
+                            mutableRequest.setResourcePath(path.tail(path.size() - 1));
                         }
                         handler.handleResult(resolvedRequestHandler);
                     } catch (final ResourceException e) {
@@ -298,14 +298,14 @@ public final class Api {
                     }
                 } else if (subMatch != null) {
                     final String childId;
-                    final int relationNameSize = subMatch.getResourceNameObject().size();
+                    final int relationNameSize = subMatch.getResourcePathObject().size();
                     if (isOneToMany(subMatch)) {
                         // Strip off collection name and resource ID.
-                        mutableRequest.setResourceName(name.tail(relationNameSize + 1));
-                        childId = name.get(relationNameSize);
+                        mutableRequest.setResourcePath(path.tail(relationNameSize + 1));
+                        childId = path.get(relationNameSize);
                     } else {
                         // Strip off resource name.
-                        mutableRequest.setResourceName(name.tail(relationNameSize));
+                        mutableRequest.setResourcePath(path.tail(relationNameSize));
                         childId = null;
                     }
                     resolver.getRelationsForResource(subMatch, childId,
@@ -322,7 +322,7 @@ public final class Api {
                             });
                 } else {
                     handler.handleException(new NotFoundException(String.format(
-                            "Resource '%s' not found", name)));
+                            "Resource '%s' not found", path)));
                 }
             }
         };
@@ -414,7 +414,7 @@ public final class Api {
         for (final RelationDescriptor relation : relations) {
             // @formatter:off
             json.add(object(
-                    field("name", relation.getResourceName()),
+                    field("path", relation.getResourcePath()),
                     field("description", relation.getDescription()),
                     field("multiplicity", relation.getMultiplicity()),
                     actionsToJson(relation.getActions()),

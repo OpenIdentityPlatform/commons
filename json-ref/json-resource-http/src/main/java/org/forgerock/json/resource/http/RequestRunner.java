@@ -49,7 +49,7 @@ import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestVisitor;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResourceName;
+import org.forgerock.http.ResourcePath;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.util.encode.Base64url;
 import org.forgerock.util.AsyncFunction;
@@ -312,11 +312,11 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
         // Add back the context path.
         builder.append(context.asContext(RouterContext.class).getMatchedUri());
 
-        // Add new resource name and resource ID.
-        final ResourceName resourceName = request.getResourceNameObject();
-        if (!resourceName.isEmpty()) {
+        // Add new resource path and resource ID.
+        final ResourcePath resourcePath = request.getResourcePathObject();
+        if (!resourcePath.isEmpty()) {
             builder.append('/');
-            builder.append(resourceName);
+            builder.append(resourcePath);
         }
         builder.append('/');
         builder.append(resource.getId());
