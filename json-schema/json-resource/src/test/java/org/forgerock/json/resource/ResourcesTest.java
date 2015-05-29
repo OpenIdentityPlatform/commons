@@ -190,17 +190,17 @@ public final class ResourcesTest {
 
     @SuppressWarnings("unchecked")
     @Test(dataProvider = "testCollectionResourceProviderData")
-    public void testCollectionResourceProvider(String resourceName, String expectedId)
+    public void testCollectionResourceProvider(String resourcePath, String expectedId)
             throws Exception {
         CollectionResourceProvider collection = mock(CollectionResourceProvider.class);
         RequestHandler handler = Resources.newCollection(collection);
         Connection connection = Resources.newInternalConnection(handler);
-        ReadRequest read = Requests.newReadRequest(resourceName);
+        ReadRequest read = Requests.newReadRequest(resourcePath);
         connection.readAsync(new RootContext(), read);
         ArgumentCaptor<ReadRequest> captor = ArgumentCaptor.forClass(ReadRequest.class);
         verify(collection).readInstance(any(ServerContext.class), eq(expectedId), captor.capture(),
                 any(ResultHandler.class));
-        Assertions.assertThat(captor.getValue().getResourceName()).isEqualTo("");
+        Assertions.assertThat(captor.getValue().getResourcePath()).isEqualTo("");
     }
 
     @DataProvider

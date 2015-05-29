@@ -18,6 +18,7 @@ package org.forgerock.json.resource;
 
 import java.util.List;
 
+import org.forgerock.http.ResourcePath;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 
@@ -79,13 +80,13 @@ public interface UpdateRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    String getResourceName();
+    String getResourcePath();
 
     /**
      * {@inheritDoc}
      */
     @Override
-    ResourceName getResourceNameObject();
+    ResourcePath getResourcePathObject();
 
     /**
      * Returns the expected version information associated with the JSON
@@ -119,13 +120,13 @@ public interface UpdateRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    Request setResourceName(ResourceName name);
+    Request setResourcePath(ResourcePath path);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    UpdateRequest setResourceName(String name);
+    UpdateRequest setResourcePath(String path);
 
     /**
      * Sets the expected version information associated with the JSON resource

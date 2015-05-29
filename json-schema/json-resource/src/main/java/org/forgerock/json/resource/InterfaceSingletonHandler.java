@@ -37,7 +37,7 @@ class InterfaceSingletonHandler implements RequestHandler {
             final ResultHandler<Resource> handler) {
         // TODO: i18n
         handler.handleException(Resources.newBadRequestException(
-                "The singleton resource %s cannot be created", request.getResourceName()));
+                "The singleton resource %s cannot be created", request.getResourcePath()));
     }
 
     @Override
@@ -45,7 +45,7 @@ class InterfaceSingletonHandler implements RequestHandler {
             final ResultHandler<Resource> handler) {
         // TODO: i18n
         handler.handleException(Resources.newBadRequestException(
-                "The singleton resource %s cannot be deleted", request.getResourceName()));
+                "The singleton resource %s cannot be deleted", request.getResourcePath()));
     }
 
     @Override
@@ -59,7 +59,7 @@ class InterfaceSingletonHandler implements RequestHandler {
             final QueryResultHandler handler) {
         // TODO: i18n
         handler.handleException(Resources.newBadRequestException(
-                "The singleton resource %s cannot be queried", request.getResourceName()));
+                "The singleton resource %s cannot be queried", request.getResourcePath()));
     }
 
     @Override

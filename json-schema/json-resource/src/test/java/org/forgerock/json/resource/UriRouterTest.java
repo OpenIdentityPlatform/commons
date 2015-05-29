@@ -61,17 +61,17 @@ public final class UriRouterTest {
     }
 
     @Test(dataProvider = "absoluteRouteHitTestData")
-    public void testAbsoluteRouteHit(final String resourceName) {
+    public void testAbsoluteRouteHit(final String resourcePath) {
         final UriRouter router = new UriRouter();
         final RequestHandler h = mock(RequestHandler.class);
-        router.addRoute(RoutingMode.EQUALS, resourceName, h);
+        router.addRoute(RoutingMode.EQUALS, resourcePath, h);
         final ServerContext c = newServerContext(router);
-        final ReadRequest r = newReadRequest(resourceName);
+        final ReadRequest r = newReadRequest(resourcePath);
         router.handleRead(c, r, null);
         final ArgumentCaptor<RouterContext> rc = ArgumentCaptor.forClass(RouterContext.class);
         verify(h).handleRead(rc.capture(), Matchers.<ReadRequest> any(),
                 Matchers.<ResultHandler<Resource>> any());
-        checkRouterContext(rc, c, resourceName);
+        checkRouterContext(rc, c, resourcePath);
     }
 
     private void checkRouterContext(ArgumentCaptor<RouterContext> rc, final ServerContext c,
@@ -95,7 +95,7 @@ public final class UriRouterTest {
     private void checkReadRequest(ArgumentCaptor<ReadRequest> rr, ReadRequest r) {
         assertThat(rr.getValue().getFields()).isEqualTo(r.getFields());
         assertThat(rr.getValue().getRequestType()).isEqualTo(r.getRequestType());
-        assertThat(rr.getValue().getResourceName()).isEqualTo(r.getResourceName());
+        assertThat(rr.getValue().getResourcePath()).isEqualTo(r.getResourcePath());
     }
 
     @Test
@@ -223,13 +223,13 @@ public final class UriRouterTest {
     }
 
     @Test(dataProvider = "routeMissTestData", expectedExceptions = NotFoundException.class)
-    public void testRouteMiss(final String template, final String resourceName)
+    public void testRouteMiss(final String template, final String resourcePath)
             throws ResourceException {
         final UriRouter router = new UriRouter();
         final RequestHandler h = mock(RequestHandler.class);
         router.addRoute(RoutingMode.EQUALS, template, h);
         final ServerContext c = newServerContext(router);
-        final ReadRequest r = newReadRequest(resourceName);
+        final ReadRequest r = newReadRequest(resourcePath);
         try {
             newInternalConnection(router).read(c, r);
         } finally {
@@ -256,13 +256,13 @@ public final class UriRouterTest {
     }
 
     @Test(dataProvider = "variableRouteHitTestData")
-    public void testVariableRouteHit(final String template, final String resourceName,
+    public void testVariableRouteHit(final String template, final String resourcePath,
             final String[] expectedVars) {
         final UriRouter router = new UriRouter();
         final RequestHandler h = mock(RequestHandler.class);
         router.addRoute(RoutingMode.EQUALS, template, h);
         final ServerContext c = newServerContext(router);
-        final ReadRequest r = newReadRequest(resourceName);
+        final ReadRequest r = newReadRequest(resourcePath);
         router.handleRead(c, r, null);
         final Map<String, String> expectedMap = new LinkedHashMap<String, String>();
         for (int i = 0; i < expectedVars.length; i += 2) {
@@ -271,7 +271,7 @@ public final class UriRouterTest {
         final ArgumentCaptor<RouterContext> rc = ArgumentCaptor.forClass(RouterContext.class);
         verify(h).handleRead(rc.capture(), Matchers.<ReadRequest> any(),
                 Matchers.<ResultHandler<Resource>> any());
-        checkRouterContext(rc, c, resourceName, expectedMap);
+        checkRouterContext(rc, c, resourcePath, expectedMap);
     }
 
     @Test(expectedExceptions = NotFoundException.class)

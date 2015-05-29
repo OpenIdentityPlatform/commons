@@ -18,6 +18,7 @@ package org.forgerock.json.resource;
 
 import java.util.List;
 
+import org.forgerock.http.ResourcePath;
 import org.forgerock.json.fluent.JsonPointer;
 
 /**
@@ -58,25 +59,25 @@ public interface ReadRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    String getResourceName();
+    String getResourcePath();
 
     /**
      * {@inheritDoc}
      */
     @Override
-    ResourceName getResourceNameObject();
+    ResourcePath getResourcePathObject();
 
     /**
      * {@inheritDoc}
      */
     @Override
-    Request setResourceName(ResourceName name);
+    Request setResourcePath(ResourcePath path);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    ReadRequest setResourceName(String name);
+    ReadRequest setResourcePath(String path);
 
     /**
      * {@inheritDoc}

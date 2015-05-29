@@ -16,6 +16,7 @@
 
 package org.forgerock.json.resource;
 
+import org.forgerock.http.ResourcePath;
 import org.forgerock.json.fluent.JsonPointer;
 
 import java.util.List;
@@ -240,13 +241,13 @@ public interface QueryRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    String getResourceName();
+    String getResourcePath();
 
     /**
      * {@inheritDoc}
      */
     @Override
-    ResourceName getResourceNameObject();
+    ResourcePath getResourcePathObject();
 
     /**
      * Returns the sort keys which should be used for ordering the JSON
@@ -385,13 +386,13 @@ public interface QueryRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    Request setResourceName(ResourceName name);
+    Request setResourcePath(ResourcePath path);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    QueryRequest setResourceName(String name);
+    QueryRequest setResourcePath(String path);
 
     /**
      * {@inheritDoc}
