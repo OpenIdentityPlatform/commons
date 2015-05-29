@@ -73,9 +73,9 @@ public final class UriRouter extends AbstractUriRouter<UriRouter, Handler> imple
 
     private RouteMatcher<Handler> getBestRoute(Context context, Request request) throws ResponseException {
 
-        ResourceName path = ResourceName.valueOf(request.getUri().getPath());
+        ResourcePath path = ResourcePath.resourcePath(request.getUri().getPath());
         if (context.containsContext(RouterContext.class)) {
-            ResourceName matchedUri = getMatchedUri(context);
+            ResourcePath matchedUri = getMatchedUri(context);
             path = path.tail(matchedUri.size());
         }
         String uri = path.toString();
@@ -87,7 +87,7 @@ public final class UriRouter extends AbstractUriRouter<UriRouter, Handler> imple
         }
     }
 
-    private ResourceName getMatchedUri(Context context) {
+    private ResourcePath getMatchedUri(Context context) {
         List<String> matched = new ArrayList<String>();
         for (Context ctx = context; ctx != null; ctx = ctx.getParent()) {
             if (!ctx.containsContext(RouterContext.class)) {
@@ -96,6 +96,6 @@ public final class UriRouter extends AbstractUriRouter<UriRouter, Handler> imple
                 matched.add(ctx.asContext(RouterContext.class).getMatchedUri());
             }
         }
-        return new ResourceName(matched);
+        return new ResourcePath(matched);
     }
 }

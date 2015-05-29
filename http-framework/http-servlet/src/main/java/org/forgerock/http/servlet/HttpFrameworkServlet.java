@@ -45,7 +45,7 @@ import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.HttpContext;
-import org.forgerock.http.ResourceName;
+import org.forgerock.http.ResourcePath;
 import org.forgerock.http.RootContext;
 import org.forgerock.http.RouterContext;
 import org.forgerock.http.Session;
@@ -247,7 +247,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
         String contextPath = forceEmptyIfNull(req.getContextPath());
         contextPath = contextPath.startsWith("/") ? contextPath.substring(1) : contextPath;
         String matchedUri = contextPath + forceEmptyIfNull(req.getServletPath());
-        if (ResourceName.valueOf(matchedUri).equals(ResourceName.valueOf(req.getRequestURI()))) {
+        if (ResourcePath.resourcePath(matchedUri).equals(ResourcePath.resourcePath(req.getRequestURI()))) {
             //Must be registered at '/' path
             matchedUri = contextPath;
         }

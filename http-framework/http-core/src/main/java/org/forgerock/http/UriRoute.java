@@ -16,7 +16,7 @@
 
 package org.forgerock.http;
 
-import static org.forgerock.http.ResourceName.urlDecode;
+import static org.forgerock.http.ResourcePath.urlDecode;
 import static org.forgerock.http.RoutingMode.EQUALS;
 import static org.forgerock.http.RoutingMode.STARTS_WITH;
 
