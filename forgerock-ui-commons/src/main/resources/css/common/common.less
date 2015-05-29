@@ -1,4 +1,9 @@
 /*
+Generic css helpers
+*/
+@import "helpers.less";
+
+/*
 General Styles
 */
 html {
@@ -37,10 +42,6 @@ hr {
     border-top: 1px solid #ddd;
 }
 
-/*
-Generic css helpers
-*/
-@import "helpers.less";
 
 /*
 Navbar and SubNav
@@ -69,18 +70,6 @@ Page Header
     }
 }
 
-
-/*
-For font awesome
-*/
-.fa-icon() {
-    display: inline-block;
-    font: normal normal normal 14px/1 FontAwesome; // shortening font declaration
-    font-size: inherit; // can't have font-size inherit on line above, so need to override
-    text-rendering: auto; // optimizelegibility throws things off #1094
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
 
 /*
 Registration
