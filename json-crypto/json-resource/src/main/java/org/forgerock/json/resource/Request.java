@@ -19,6 +19,7 @@ package org.forgerock.json.resource;
 import java.util.List;
 import java.util.Map;
 
+import org.forgerock.http.ResourcePath;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 
@@ -43,7 +44,7 @@ public interface Request {
      * The name of the field which contains the resource name in the JSON
      * representation.
      */
-    public static final String FIELD_RESOURCE_NAME = "resourceName";
+    public static final String FIELD_RESOURCE_PATH = "resourcePath";
 
     /**
      * The name of the field which contains the additional query parameters in
@@ -123,32 +124,32 @@ public interface Request {
     RequestType getRequestType();
 
     /**
-     * Returns the non-{@code null} name of the JSON resource to which this
-     * request should be targeted. The resource name is relative and never
+     * Returns the non-{@code null} path of the JSON resource to which this
+     * request should be targeted. The resource path is relative and never
      * begins or ends with a forward slash, but may be empty.
      * <p>
-     * <b>NOTE</b>: for resource provider implementations the resource name is
+     * <b>NOTE</b>: for resource provider implementations the resource path is
      * relative to the current resource being accessed. See the description of
      * {@link org.forgerock.http.RouterContext} for more information.
      *
-     * @return The non-{@code null} name of the JSON resource to which this
+     * @return The non-{@code null} path of the JSON resource to which this
      *         request should be targeted, which may be the empty string.
      */
-    String getResourceName();
+    String getResourcePath();
 
     /**
-     * Returns the non-{@code null} name of the JSON resource to which this
-     * request should be targeted. The resource name is relative and never
+     * Returns the non-{@code null} path of the JSON resource to which this
+     * request should be targeted. The resource path is relative and never
      * begins or ends with a forward slash, but may be empty.
      * <p>
-     * <b>NOTE</b>: for resource provider implementations the resource name is
+     * <b>NOTE</b>: for resource provider implementations the resource path is
      * relative to the current resource being accessed. See the description of
      * {@link org.forgerock.http.RouterContext} for more information.
      *
-     * @return The non-{@code null} name of the JSON resource to which this
+     * @return The non-{@code null} path of the JSON resource to which this
      *         request should be targeted, which may be the empty string.
      */
-    ResourceName getResourceNameObject();
+    ResourcePath getResourcePathObject();
 
     /**
      * Returns the additional parameters which should be used to control the
@@ -172,43 +173,43 @@ public interface Request {
     String getAdditionalParameter(String name);
 
     /**
-     * Sets the non-{@code null} name of the JSON resource to which this request
-     * should be targeted. The resource name is relative and never begins or
+     * Sets the non-{@code null} path of the JSON resource to which this request
+     * should be targeted. The resource path is relative and never begins or
      * ends with a forward slash, but may be empty.
      * <p>
-     * <b>NOTE</b>: for resource provider implementations the resource name is
+     * <b>NOTE</b>: for resource provider implementations the resource path is
      * relative to the current resource being accessed. See the description of
      * {@link org.forgerock.http.RouterContext} for more information.
      *
-     * @param name
-     *            The non-{@code null} name of the JSON resource to which this
+     * @param path
+     *            The non-{@code null} path of the JSON resource to which this
      *            request should be targeted, which may be the empty string.
-     *            The name should be URL-encoded.
+     *            The path should be URL-encoded.
      * @return This request.
      * @throws UnsupportedOperationException
      *             If this request does not permit changes to the JSON resource
-     *             name.
+     *             path.
      */
-    Request setResourceName(String name);
+    Request setResourcePath(String path);
 
     /**
-     * Sets the non-{@code null} name of the JSON resource to which this request
-     * should be targeted. The resource name is relative and never begins or
+     * Sets the non-{@code null} path of the JSON resource to which this request
+     * should be targeted. The resource path is relative and never begins or
      * ends with a forward slash, but may be empty.
      * <p>
-     * <b>NOTE</b>: for resource provider implementations the resource name is
+     * <b>NOTE</b>: for resource provider implementations the resource path is
      * relative to the current resource being accessed. See the description of
      * {@link org.forgerock.http.RouterContext} for more information.
      *
-     * @param name
-     *            The non-{@code null} name of the JSON resource to which this
+     * @param path
+     *            The non-{@code null} path of the JSON resource to which this
      *            request should be targeted, which may be the empty string.
      * @return This request.
      * @throws UnsupportedOperationException
      *             If this request does not permit changes to the JSON resource
-     *             name.
+     *             path.
      */
-    Request setResourceName(ResourceName name);
+    Request setResourcePath(ResourcePath path);
 
     /**
      * Sets an additional parameter which should be used to control the behavior

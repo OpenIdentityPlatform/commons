@@ -65,6 +65,7 @@
         <i18nFrameworkVersion>1.4.1</i18nFrameworkVersion>
         <jacksonVersion>2.4.3</jacksonVersion>
         <forgerockUtilVersion>2.0.0-SNAPSHOT</forgerockUtilVersion>
+        <forgerockChfVersion>0.0.1-SNAPSHOT</forgerockChfVersion>
     </properties>
     <modules>
         <module>json-fluent</module>
@@ -154,6 +155,11 @@
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>i18n-core</artifactId>
                 <version>${i18nFrameworkVersion}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.http</groupId>
+                <artifactId>chf-http-servlet</artifactId>
+                <version>${forgerockChfVersion}</version>
             </dependency>
             <dependency>
                 <groupId>com.sun.mail</groupId>

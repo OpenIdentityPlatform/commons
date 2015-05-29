@@ -21,9 +21,9 @@ import static org.forgerock.json.resource.descriptor.Api.unmodifiableCopyOf;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.forgerock.http.ResourcePath;
 import org.forgerock.i18n.LocalizableMessage;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.ResourceName;
 import org.forgerock.json.resource.Version;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -50,14 +50,14 @@ public final class ResourceDescriptor {
             this.parentBuilder = parentBuilder;
         }
 
-        public RelationDescriptor.Builder<Builder> addRelation(final String name,
+        public RelationDescriptor.Builder<Builder> addRelation(final String path,
                 final String resourceUrn) {
-            return addRelation(ResourceName.valueOf(name), Urn.valueOf(resourceUrn));
+            return addRelation(ResourcePath.valueOf(path), Urn.valueOf(resourceUrn));
         }
 
-        public RelationDescriptor.Builder<Builder> addRelation(final String name,
+        public RelationDescriptor.Builder<Builder> addRelation(final String path,
                 final Urn resourceUrn) {
-            return addRelation(ResourceName.valueOf(name), resourceUrn);
+            return addRelation(ResourcePath.valueOf(path), resourceUrn);
         }
 
         public Builder addProfile(final String urn, final JsonValue content) {
@@ -69,9 +69,9 @@ public final class ResourceDescriptor {
             return this;
         }
 
-        public RelationDescriptor.Builder<Builder> addRelation(final ResourceName name,
+        public RelationDescriptor.Builder<Builder> addRelation(final ResourcePath path,
                 final Urn resourceUrn) {
-            return RelationDescriptor.builder(name, resourceUrn,
+            return RelationDescriptor.builder(path, resourceUrn,
                     new RelationCapableBuilder<Builder>() {
                         @Override
                         public Builder addRelationFromBuilder(final RelationDescriptor relation) {

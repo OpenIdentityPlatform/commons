@@ -23,6 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.forgerock.http.ResourcePath;
 import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
@@ -35,7 +36,7 @@ import static org.forgerock.util.Utils.asEnum;
 public final class Requests {
     private static abstract class AbstractRequestImpl<T extends Request> implements Request {
         private final List<JsonPointer> fields = new LinkedList<JsonPointer>();
-        private ResourceName resourceName;
+        private ResourcePath resourcePath;
         private final Map<String, String> parameters = new LinkedHashMap<String, String>(2);
 
         protected AbstractRequestImpl() {
@@ -43,7 +44,7 @@ public final class Requests {
         }
 
         protected AbstractRequestImpl(final Request request) {
-            this.resourceName = request.getResourceNameObject();
+            this.resourcePath = request.getResourcePathObject();
             this.fields.addAll(request.getFields());
             this.parameters.putAll(request.getAdditionalParameters());
         }
@@ -74,13 +75,13 @@ public final class Requests {
         }
 
         @Override
-        public final String getResourceName() {
-            return resourceName.toString();
+        public final String getResourcePath() {
+            return resourcePath.toString();
         }
 
         @Override
-        public final ResourceName getResourceNameObject() {
-            return resourceName;
+        public final ResourcePath getResourcePathObject() {
+            return resourcePath;
         }
 
         @Override
@@ -94,14 +95,14 @@ public final class Requests {
         }
 
         @Override
-        public final T setResourceName(final String name) {
-            resourceName = ResourceName.valueOf(name);
+        public final T setResourcePath(final String path) {
+            resourcePath = ResourcePath.valueOf(path);
             return getThis();
         }
 
         @Override
-        public final T setResourceName(final ResourceName name) {
-            resourceName = notNull(name);
+        public final T setResourcePath(final ResourcePath path) {
+            resourcePath = notNull(path);
             return getThis();
         }
 
@@ -124,7 +125,7 @@ public final class Requests {
         public JsonValue toJsonValue() {
             return new JsonValue(new HashMap<String, Object>())
                     .put("method", getRequestType().name().toLowerCase())
-                    .put(FIELD_RESOURCE_NAME, getResourceName())
+                    .put(FIELD_RESOURCE_PATH, getResourcePath())
                     .put(FIELD_FIELDS, getFields());
         }
 
@@ -698,7 +699,7 @@ public final class Requests {
     }
 
     /**
-     * Returns a new action request with the provided resource name and action
+     * Returns a new action request with the provided resource path and action
      * ID. Invoking this method as follows:
      *
      * <pre>
@@ -713,33 +714,33 @@ public final class Requests {
      *
      * Except that the resource ID is already URL encoded in the first form.
      *
-     * @param resourceName
-     *            The URL-encoded resource name.
+     * @param resourcePath
+     *            The URL-encoded resource path.
      * @param actionId
      *            The action ID.
      * @return The new action request.
      */
-    public static ActionRequest newActionRequest(final String resourceName, final String actionId) {
-        return new ActionRequestImpl().setResourceName(resourceName).setAction(actionId);
+    public static ActionRequest newActionRequest(final String resourcePath, final String actionId) {
+        return new ActionRequestImpl().setResourcePath(resourcePath).setAction(actionId);
     }
 
     /**
-     * Returns a new action request with the provided resource name and action
+     * Returns a new action request with the provided resource path and action
      * ID.
      *
-     * @param resourceName
-     *            The parsed resource name.
+     * @param resourcePath
+     *            The parsed resource path.
      * @param actionId
      *            The action ID.
      * @return The new action request.
      */
-    public static ActionRequest newActionRequest(final ResourceName resourceName,
+    public static ActionRequest newActionRequest(final ResourcePath resourcePath,
             final String actionId) {
-        return new ActionRequestImpl().setResourceName(resourceName).setAction(actionId);
+        return new ActionRequestImpl().setResourcePath(resourcePath).setAction(actionId);
     }
 
     /**
-     * Returns a new action request with the provided resource container name,
+     * Returns a new action request with the provided resource container path,
      * resource ID, and action ID. Invoking this method as follows:
      *
      * <pre>
@@ -755,7 +756,7 @@ public final class Requests {
      * Except that the resource ID is already URL encoded in the second form.
      *
      * @param resourceContainer
-     *            The URL-encoded name of the resource container.
+     *            The URL-encoded path of the resource container.
      * @param resourceId
      *            The URL decoded ID of the resource.
      * @param actionId
@@ -764,28 +765,28 @@ public final class Requests {
      */
     public static ActionRequest newActionRequest(final String resourceContainer,
             final String resourceId, final String actionId) {
-        return newActionRequest(ResourceName.valueOf(resourceContainer), resourceId, actionId);
+        return newActionRequest(ResourcePath.valueOf(resourceContainer), resourceId, actionId);
     }
 
     /**
-     * Returns a new action request with the provided resource container name,
+     * Returns a new action request with the provided resource container path,
      * resource ID, and action ID.
      *
      * @param resourceContainer
-     *            The parsed name of the resource container.
+     *            The parsed path of the resource container.
      * @param resourceId
      *            The URL decoded ID of the resource.
      * @param actionId
      *            The action ID.
      * @return The new action request.
      */
-    public static ActionRequest newActionRequest(final ResourceName resourceContainer,
+    public static ActionRequest newActionRequest(final ResourcePath resourceContainer,
             final String resourceId, final String actionId) {
         return newActionRequest(resourceContainer.child(resourceId), actionId);
     }
 
     /**
-     * Returns a new create request with the provided resource name, and JSON
+     * Returns a new create request with the provided resource path, and JSON
      * content. The create request will have a {@code null} new resource ID,
      * indicating that the server will be responsible for generating the ID of
      * the new resource. Invoking this method as follows:
@@ -803,7 +804,7 @@ public final class Requests {
      * Except that the resource ID is already URL encoded in the first form.
      *
      * @param resourceContainer
-     *            The URL-encoded name of the resource container beneath which the new
+     *            The URL-encoded path of the resource container beneath which the new
      *            resource should be created.
      * @param content
      *            The JSON content.
@@ -811,29 +812,29 @@ public final class Requests {
      */
     public static CreateRequest newCreateRequest(final String resourceContainer,
             final JsonValue content) {
-        return new CreateRequestImpl().setResourceName(resourceContainer).setContent(content);
+        return new CreateRequestImpl().setResourcePath(resourceContainer).setContent(content);
     }
 
     /**
-     * Returns a new create request with the provided resource name, and JSON
+     * Returns a new create request with the provided resource path, and JSON
      * content. The create request will have a {@code null} new resource ID,
      * indicating that the server will be responsible for generating the ID of
      * the new resource.
      *
      * @param resourceContainer
-     *            The parsed name of the resource container beneath which the
+     *            The parsed path of the resource container beneath which the
      *            new resource should be created.
      * @param content
      *            The JSON content.
      * @return The new create request.
      */
-    public static CreateRequest newCreateRequest(final ResourceName resourceContainer,
+    public static CreateRequest newCreateRequest(final ResourcePath resourceContainer,
             final JsonValue content) {
-        return new CreateRequestImpl().setResourceName(resourceContainer).setContent(content);
+        return new CreateRequestImpl().setResourcePath(resourceContainer).setContent(content);
     }
 
     /**
-     * Returns a new create request with the provided resource name, new
+     * Returns a new create request with the provided resource path, new
      * resource ID, and JSON content. Invoking this method as follows:
      *
      * <pre>
@@ -849,7 +850,7 @@ public final class Requests {
      * Except that the resource ID is already URL encoded in the second form.
      *
      * @param resourceContainer
-     *            The URL-encoded name of the resource container beneath which
+     *            The URL-encoded path of the resource container beneath which
      *            the new resource should be created.
      * @param newResourceId
      *            The URL decoded client provided ID of the resource to be
@@ -865,11 +866,11 @@ public final class Requests {
     }
 
     /**
-     * Returns a new create request with the provided resource name, new
+     * Returns a new create request with the provided resource path, new
      * resource ID, and JSON content.
      *
      * @param resourceContainer
-     *            The parsed name of the resource container beneath which the
+     *            The parsed path of the resource container beneath which the
      *            new resource should be created.
      * @param newResourceId
      *            The URL decoded client provided ID of the resource to be
@@ -879,13 +880,13 @@ public final class Requests {
      *            The JSON content.
      * @return The new create request.
      */
-    public static CreateRequest newCreateRequest(final ResourceName resourceContainer,
+    public static CreateRequest newCreateRequest(final ResourcePath resourceContainer,
             final String newResourceId, final JsonValue content) {
         return newCreateRequest(resourceContainer, content).setNewResourceId(newResourceId);
     }
 
     /**
-     * Returns a new delete request with the provided resource name. Invoking
+     * Returns a new delete request with the provided resource path. Invoking
      * this method as follows:
      *
      * <pre>
@@ -900,27 +901,27 @@ public final class Requests {
      *
      * Except that the resource ID is already URL encoded in the first form.
      *
-     * @param resourceName
-     *            The URL-encoded resource name.
+     * @param resourcePath
+     *            The URL-encoded resource path.
      * @return The new delete request.
      */
-    public static DeleteRequest newDeleteRequest(final String resourceName) {
-        return new DeleteRequestImpl().setResourceName(resourceName);
+    public static DeleteRequest newDeleteRequest(final String resourcePath) {
+        return new DeleteRequestImpl().setResourcePath(resourcePath);
     }
 
     /**
-     * Returns a new delete request with the provided resource name.
+     * Returns a new delete request with the provided resource path.
      *
-     * @param resourceName
-     *            The parsed resource name.
+     * @param resourcePath
+     *            The parsed resource path.
      * @return The new delete request.
      */
-    public static DeleteRequest newDeleteRequest(final ResourceName resourceName) {
-        return new DeleteRequestImpl().setResourceName(resourceName);
+    public static DeleteRequest newDeleteRequest(final ResourcePath resourcePath) {
+        return new DeleteRequestImpl().setResourcePath(resourcePath);
     }
 
     /**
-     * Returns a new delete request with the provided resource container name,
+     * Returns a new delete request with the provided resource container path,
      * and resource ID. Invoking this method as follows:
      *
      * <pre>
@@ -936,33 +937,33 @@ public final class Requests {
      * Except that the resource ID is already URL encoded in the second form.
      *
      * @param resourceContainer
-     *            The URL-encoded name of the resource container.
+     *            The URL-encoded path of the resource container.
      * @param resourceId
      *            The URL decoded ID of the resource.
      * @return The new delete request.
      */
     public static DeleteRequest newDeleteRequest(final String resourceContainer,
             final String resourceId) {
-        return newDeleteRequest(ResourceName.valueOf(resourceContainer), resourceId);
+        return newDeleteRequest(ResourcePath.valueOf(resourceContainer), resourceId);
     }
 
     /**
-     * Returns a new delete request with the provided resource container name,
+     * Returns a new delete request with the provided resource container path,
      * and resource ID.
      *
      * @param resourceContainer
-     *            The parsed name of the resource container.
+     *            The parsed path of the resource container.
      * @param resourceId
      *            The URL decoded ID of the resource.
      * @return The new delete request.
      */
-    public static DeleteRequest newDeleteRequest(final ResourceName resourceContainer,
+    public static DeleteRequest newDeleteRequest(final ResourcePath resourceContainer,
             final String resourceId) {
         return newDeleteRequest(resourceContainer.child(resourceId));
     }
 
     /**
-     * Returns a new patch request with the provided resource name and JSON
+     * Returns a new patch request with the provided resource path and JSON
      * patch operations. Invoking this method as follows:
      *
      * <pre>
@@ -977,34 +978,34 @@ public final class Requests {
      *
      * Except that the resource ID is already URL encoded in the first form.
      *
-     * @param resourceName
-     *            The URL-encoded resource name.
+     * @param resourcePath
+     *            The URL-encoded resource path.
      * @param operations
      *            The JSON patch operations.
      * @return The new patch request.
      */
-    public static PatchRequest newPatchRequest(final String resourceName,
+    public static PatchRequest newPatchRequest(final String resourcePath,
             final PatchOperation... operations) {
-        return new PatchRequestImpl().setResourceName(resourceName).addPatchOperation(operations);
+        return new PatchRequestImpl().setResourcePath(resourcePath).addPatchOperation(operations);
     }
 
     /**
-     * Returns a new patch request with the provided resource name and JSON
+     * Returns a new patch request with the provided resource path and JSON
      * patch operations.
      *
-     * @param resourceName
-     *            The parsed resource name.
+     * @param resourcePath
+     *            The parsed resource path.
      * @param operations
      *            The JSON patch operations.
      * @return The new patch request.
      */
-    public static PatchRequest newPatchRequest(final ResourceName resourceName,
+    public static PatchRequest newPatchRequest(final ResourcePath resourcePath,
             final PatchOperation... operations) {
-        return new PatchRequestImpl().setResourceName(resourceName).addPatchOperation(operations);
+        return new PatchRequestImpl().setResourcePath(resourcePath).addPatchOperation(operations);
     }
 
     /**
-     * Returns a new patch request with the provided resource container name,
+     * Returns a new patch request with the provided resource container path,
      * resource ID, and JSON patch operations. Invoking this method as follows:
      *
      * <pre>
@@ -1020,7 +1021,7 @@ public final class Requests {
      * Except that the resource ID is already URL encoded in the second form.
      *
      * @param resourceContainer
-     *            The URL-encoded name of the resource container.
+     *            The URL-encoded path of the resource container.
      * @param resourceId
      *            The URL decoded ID of the resource.
      * @param operations
@@ -1029,28 +1030,28 @@ public final class Requests {
      */
     public static PatchRequest newPatchRequest(final String resourceContainer,
             final String resourceId, final PatchOperation... operations) {
-        return newPatchRequest(ResourceName.valueOf(resourceContainer), resourceId, operations);
+        return newPatchRequest(ResourcePath.valueOf(resourceContainer), resourceId, operations);
     }
 
     /**
-     * Returns a new patch request with the provided resource container name,
+     * Returns a new patch request with the provided resource container path,
      * resource ID, and JSON patch operations.
      *
      * @param resourceContainer
-     *            The parsed name of the resource container.
+     *            The parsed path of the resource container.
      * @param resourceId
      *            The URL decoded ID of the resource.
      * @param operations
      *            The JSON patch operations.
      * @return The new patch request.
      */
-    public static PatchRequest newPatchRequest(final ResourceName resourceContainer,
+    public static PatchRequest newPatchRequest(final ResourcePath resourceContainer,
             final String resourceId, final PatchOperation... operations) {
         return newPatchRequest(resourceContainer.child(resourceId), operations);
     }
 
     /**
-     * Returns a new query request with the provided resource container name.
+     * Returns a new query request with the provided resource container path.
      * Example:
      *
      * <pre>
@@ -1058,31 +1059,31 @@ public final class Requests {
      * </pre>
      *
      * @param resourceContainer
-     *            The URL-encoded name of the resource container.
+     *            The URL-encoded path of the resource container.
      * @return The new query request.
      */
     public static QueryRequest newQueryRequest(final String resourceContainer) {
-        return new QueryRequestImpl().setResourceName(resourceContainer);
+        return new QueryRequestImpl().setResourcePath(resourceContainer);
     }
 
     /**
-     * Returns a new query request with the provided resource container name.
+     * Returns a new query request with the provided resource container path.
      * Example:
      *
      * <pre>
-     * newQueryRequest(ResourceName.valueOf(&quot;users&quot;));
+     * newQueryRequest(ResourcePath.valueOf(&quot;users&quot;));
      * </pre>
      *
      * @param resourceContainer
-     *            The parsed name of the resource container.
+     *            The parsed path of the resource container.
      * @return The new query request.
      */
-    public static QueryRequest newQueryRequest(final ResourceName resourceContainer) {
-        return new QueryRequestImpl().setResourceName(resourceContainer);
+    public static QueryRequest newQueryRequest(final ResourcePath resourceContainer) {
+        return new QueryRequestImpl().setResourcePath(resourceContainer);
     }
 
     /**
-     * Returns a new read request with the provided resource name. Invoking this
+     * Returns a new read request with the provided resource path. Invoking this
      * method as follows:
      *
      * <pre>
@@ -1097,27 +1098,27 @@ public final class Requests {
      *
      * Except that the resource ID is already URL encoded in the first form.
      *
-     * @param resourceName
-     *            The URL-encoded resource name.
+     * @param resourcePath
+     *            The URL-encoded resource path.
      * @return The new read request.
      */
-    public static ReadRequest newReadRequest(final String resourceName) {
-        return new ReadRequestImpl().setResourceName(resourceName);
+    public static ReadRequest newReadRequest(final String resourcePath) {
+        return new ReadRequestImpl().setResourcePath(resourcePath);
     }
 
     /**
-     * Returns a new read request with the provided resource name.
+     * Returns a new read request with the provided resource path.
      *
-     * @param resourceName
-     *            The parsed resource name.
+     * @param resourcePath
+     *            The parsed resource path.
      * @return The new read request.
      */
-    public static ReadRequest newReadRequest(final ResourceName resourceName) {
-        return new ReadRequestImpl().setResourceName(resourceName);
+    public static ReadRequest newReadRequest(final ResourcePath resourcePath) {
+        return new ReadRequestImpl().setResourcePath(resourcePath);
     }
 
     /**
-     * Returns a new read request with the provided resource container name, and
+     * Returns a new read request with the provided resource container path, and
      * resource ID. Invoking this method as follows:
      *
      * <pre>
@@ -1133,32 +1134,32 @@ public final class Requests {
      * Except that the resource ID is already URL encoded in the second form.
      *
      * @param resourceContainer
-     *            The URL-encoded name of the resource container.
+     *            The URL-encoded path of the resource container.
      * @param resourceId
      *            The URL decoded ID of the resource.
      * @return The new read request.
      */
     public static ReadRequest newReadRequest(final String resourceContainer, final String resourceId) {
-        return newReadRequest(ResourceName.valueOf(resourceContainer), resourceId);
+        return newReadRequest(ResourcePath.valueOf(resourceContainer), resourceId);
     }
 
     /**
-     * Returns a new read request with the provided resource container name, and
+     * Returns a new read request with the provided resource container path, and
      * resource ID.
      *
      * @param resourceContainer
-     *            The parsed name of the resource container.
+     *            The parsed path of the resource container.
      * @param resourceId
      *            The URL decoded ID of the resource.
      * @return The new read request.
      */
-    public static ReadRequest newReadRequest(final ResourceName resourceContainer,
+    public static ReadRequest newReadRequest(final ResourcePath resourceContainer,
             final String resourceId) {
         return newReadRequest(resourceContainer.child(resourceId));
     }
 
     /**
-     * Returns a new update request with the provided resource name and new JSON
+     * Returns a new update request with the provided resource path and new JSON
      * content. Invoking this method as follows:
      *
      * <pre>
@@ -1173,34 +1174,34 @@ public final class Requests {
      *
      * Except that the resource ID is already URL encoded in the first form.
      *
-     * @param resourceName
-     *            The URL-encoded resource name.
+     * @param resourcePath
+     *            The URL-encoded resource path.
      * @param newContent
      *            The new JSON content.
      * @return The new update request.
      */
-    public static UpdateRequest newUpdateRequest(final String resourceName,
+    public static UpdateRequest newUpdateRequest(final String resourcePath,
             final JsonValue newContent) {
-        return new UpdateRequestImpl().setResourceName(resourceName).setContent(newContent);
+        return new UpdateRequestImpl().setResourcePath(resourcePath).setContent(newContent);
     }
 
     /**
-     * Returns a new update request with the provided resource name and new JSON
+     * Returns a new update request with the provided resource path and new JSON
      * content.
      *
-     * @param resourceName
-     *            The parsed resource name.
+     * @param resourcePath
+     *            The parsed resource path.
      * @param newContent
      *            The new JSON content.
      * @return The new update request.
      */
-    public static UpdateRequest newUpdateRequest(final ResourceName resourceName,
+    public static UpdateRequest newUpdateRequest(final ResourcePath resourcePath,
             final JsonValue newContent) {
-        return new UpdateRequestImpl().setResourceName(resourceName).setContent(newContent);
+        return new UpdateRequestImpl().setResourcePath(resourcePath).setContent(newContent);
     }
 
     /**
-     * Returns a new update request with the provided resource container name,
+     * Returns a new update request with the provided resource container path,
      * resource ID, and new JSON content. Invoking this method as follows:
      *
      * <pre>
@@ -1216,7 +1217,7 @@ public final class Requests {
      * Except that the resource ID is already URL encoded in the second form.
      *
      * @param resourceContainer
-     *            The URL-encoded name of the resource container.
+     *            The URL-encoded path of the resource container.
      * @param resourceId
      *            The URL decoded ID of the resource.
      * @param newContent
@@ -1225,22 +1226,22 @@ public final class Requests {
      */
     public static UpdateRequest newUpdateRequest(final String resourceContainer,
             final String resourceId, final JsonValue newContent) {
-        return newUpdateRequest(ResourceName.valueOf(resourceContainer), resourceId, newContent);
+        return newUpdateRequest(ResourcePath.valueOf(resourceContainer), resourceId, newContent);
     }
 
     /**
-     * Returns a new update request with the provided resource container name,
+     * Returns a new update request with the provided resource container path,
      * resource ID, and new JSON content.
      *
      * @param resourceContainer
-     *            The parsed name of the resource container.
+     *            The parsed path of the resource container.
      * @param resourceId
      *            The URL decoded ID of the resource.
      * @param newContent
      *            The new JSON content.
      * @return The new update request.
      */
-    public static UpdateRequest newUpdateRequest(final ResourceName resourceContainer,
+    public static UpdateRequest newUpdateRequest(final ResourcePath resourceContainer,
             final String resourceId, final JsonValue newContent) {
         return newUpdateRequest(resourceContainer.child(resourceId), newContent);
     }
