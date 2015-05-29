@@ -23,7 +23,7 @@ import java.util.Set;
 
 import org.forgerock.i18n.LocalizableMessage;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.ResourceName;
+import org.forgerock.http.ResourcePath;
 
 @SuppressWarnings("javadoc")
 public final class RelationDescriptor {
@@ -32,7 +32,7 @@ public final class RelationDescriptor {
     }
 
     public static final class Builder<T> {
-        private final ResourceName name;
+        private final ResourcePath path;
         private final Urn resourceUrn;
         private LocalizableMessage description;
         private Multiplicity multiplicity = ONE_TO_MANY;
@@ -40,9 +40,9 @@ public final class RelationDescriptor {
         private final Set<Profile> profiles = new LinkedHashSet<Profile>();
         private final Set<ActionDescriptor> actions = new LinkedHashSet<ActionDescriptor>();
 
-        private Builder(final ResourceName name, final Urn resourceUrn,
+        private Builder(final ResourcePath path, final Urn resourceUrn,
                 final RelationCapableBuilder<T> parentBuilder) {
-            this.name = name;
+            this.path = path;
             this.resourceUrn = resourceUrn;
             this.parentBuilder = parentBuilder;
         }
@@ -82,7 +82,7 @@ public final class RelationDescriptor {
 
         public T build() {
             final RelationDescriptor relation =
-                    new RelationDescriptor(name, description, multiplicity,
+                    new RelationDescriptor(path, description, multiplicity,
                             unmodifiableCopyOf(actions), resourceUrn, unmodifiableCopyOf(profiles));
             return parentBuilder.addRelationFromBuilder(relation);
         }
@@ -92,7 +92,7 @@ public final class RelationDescriptor {
             if (this == obj) {
                 return true;
             } else if (obj instanceof Builder) {
-                return name.equals(((Builder<?>) obj).name);
+                return path.equals(((Builder<?>) obj).path);
             } else {
                 return false;
             }
@@ -100,21 +100,21 @@ public final class RelationDescriptor {
 
         @Override
         public int hashCode() {
-            return name.hashCode();
+            return path.hashCode();
         }
 
         @Override
         public String toString() {
-            return name.toString();
+            return path.toString();
         }
     }
 
-    static <T> Builder<T> builder(final ResourceName name, final Urn resourceUrn,
+    static <T> Builder<T> builder(final ResourcePath path, final Urn resourceUrn,
             final RelationCapableBuilder<T> parentBuilder) {
-        return new Builder<T>(name, resourceUrn, parentBuilder);
+        return new Builder<T>(path, resourceUrn, parentBuilder);
     }
 
-    private final ResourceName name;
+    private final ResourcePath path;
     private final Urn resourceUrn;
     private ResourceDescriptor resource;
     private final LocalizableMessage description;
@@ -122,10 +122,10 @@ public final class RelationDescriptor {
     private final Set<Profile> profiles;
     private final Set<ActionDescriptor> actions;
 
-    private RelationDescriptor(final ResourceName name, final LocalizableMessage description,
+    private RelationDescriptor(final ResourcePath path, final LocalizableMessage description,
             final Multiplicity multiplicity, final Set<ActionDescriptor> actions,
             final Urn resourceUrn, final Set<Profile> profiles) {
-        this.name = name;
+        this.path = path;
         this.description = description; // Delegate to resource if null.
         this.multiplicity = multiplicity;
         this.actions = actions;
@@ -134,7 +134,7 @@ public final class RelationDescriptor {
     }
 
     RelationDescriptor(final RelationDescriptor relation) {
-        this.name = relation.name;
+        this.path = relation.path;
         this.description = relation.description;
         this.multiplicity = relation.multiplicity;
         this.actions = relation.actions;
@@ -154,12 +154,12 @@ public final class RelationDescriptor {
         return resourceUrn;
     }
 
-    public String getResourceName() {
-        return name.toString();
+    public String getResourcePath() {
+        return path.toString();
     }
 
-    public ResourceName getResourceNameObject() {
-        return name;
+    public ResourcePath getResourcePathObject() {
+        return path;
     }
 
     public LocalizableMessage getDescription() {
@@ -171,7 +171,7 @@ public final class RelationDescriptor {
         if (this == obj) {
             return true;
         } else if (obj instanceof RelationDescriptor) {
-            return name.equals(((RelationDescriptor) obj).name);
+            return path.equals(((RelationDescriptor) obj).path);
         } else {
             return false;
         }
@@ -179,12 +179,12 @@ public final class RelationDescriptor {
 
     @Override
     public int hashCode() {
-        return name.hashCode();
+        return path.hashCode();
     }
 
     @Override
     public String toString() {
-        return name.toString();
+        return path.toString();
     }
 
     public Multiplicity getMultiplicity() {

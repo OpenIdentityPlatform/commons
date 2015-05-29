@@ -30,7 +30,7 @@ import java.util.Set;
 import org.forgerock.i18n.LocalizableMessage;
 import org.forgerock.i18n.LocalizedIllegalArgumentException;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.ResourceName;
+import org.forgerock.http.ResourcePath;
 import org.forgerock.json.resource.Version;
 
 @SuppressWarnings("javadoc")
@@ -69,19 +69,19 @@ public final class ApiDescriptor {
             return addResource(Urn.valueOf(urn));
         }
 
-        public RelationDescriptor.Builder<Builder> addRelation(final String name,
+        public RelationDescriptor.Builder<Builder> addRelation(final String path,
                 final String resourceUrn) {
-            return addRelation(ResourceName.valueOf(name), Urn.valueOf(resourceUrn));
+            return addRelation(ResourcePath.valueOf(path), Urn.valueOf(resourceUrn));
         }
 
-        public RelationDescriptor.Builder<Builder> addRelation(final String name,
+        public RelationDescriptor.Builder<Builder> addRelation(final String path,
                 final Urn resourceUrn) {
-            return addRelation(ResourceName.valueOf(name), resourceUrn);
+            return addRelation(ResourcePath.valueOf(path), resourceUrn);
         }
 
-        public RelationDescriptor.Builder<Builder> addRelation(final ResourceName name,
+        public RelationDescriptor.Builder<Builder> addRelation(final ResourcePath path,
                 final Urn resourceUrn) {
-            return RelationDescriptor.builder(name, resourceUrn,
+            return RelationDescriptor.builder(path, resourceUrn,
                     new RelationCapableBuilder<Builder>() {
                         @Override
                         public Builder addRelationFromBuilder(final RelationDescriptor relation) {
@@ -175,7 +175,7 @@ public final class ApiDescriptor {
                                 warnings.add(LocalizableMessage
                                         .raw("The relation '%s' for resource '%s' in API '%s' "
                                                 + "is invalid because it refers to a non-existant resource '%s'",
-                                                relation.getResourceName(), resource.getUrn(), urn,
+                                                relation.getResourcePath(), resource.getUrn(), urn,
                                                 relation.getResourceUrn()));
                             }
                             resourceIsValid = false;
@@ -215,7 +215,7 @@ public final class ApiDescriptor {
                     warnings.add(LocalizableMessage.raw(
                             "The relation '%s' in API '%s' is invalid because it refers "
                                     + "to a non-existant resource '%s'",
-                            relation.getResourceName(), urn, relation.getResourceUrn()));
+                            relation.getResourcePath(), urn, relation.getResourceUrn()));
                 }
             }
             return new ApiDescriptor(urn, description, unmodifiableSet(resolvedRelations),

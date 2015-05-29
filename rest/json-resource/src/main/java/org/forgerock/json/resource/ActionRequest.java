@@ -16,6 +16,7 @@
 
 package org.forgerock.json.resource;
 
+import org.forgerock.http.ResourcePath;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 
@@ -110,13 +111,13 @@ public interface ActionRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    String getResourceName();
+    String getResourcePath();
 
     /**
      * {@inheritDoc}
      */
     @Override
-    ResourceName getResourceNameObject();
+    ResourcePath getResourcePathObject();
 
     /**
      * Sets the ID of the action to be performed by this action request.
@@ -147,13 +148,13 @@ public interface ActionRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    Request setResourceName(ResourceName name);
+    Request setResourcePath(ResourcePath path);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    ActionRequest setResourceName(String name);
+    ActionRequest setResourcePath(String path);
 
     /**
      * {@inheritDoc}

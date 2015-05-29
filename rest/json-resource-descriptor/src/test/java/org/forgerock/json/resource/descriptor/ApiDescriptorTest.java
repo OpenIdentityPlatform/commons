@@ -99,8 +99,8 @@ public final class ApiDescriptorTest {
                                     final ReadRequest request, final ResultHandler<Resource> handler) {
                                 System.out.println("Reading user from realm " + realmList);
                                 final JsonValue content =
-                                        json(object(field("id", request.getResourceName())));
-                                handler.handleResult(new Resource(request.getResourceName(), "1",
+                                        json(object(field("id", request.getResourcePath())));
+                                handler.handleResult(new Resource(request.getResourcePath(), "1",
                                         content));
                             }
                         };

@@ -119,7 +119,7 @@ public final class UriRouter extends AbstractUriRouter<UriRouter, RequestHandler
      * </pre>
      *
      * @param uriTemplate
-     *            The URI template which request resource names must match.
+     *            The URI template which request resource paths must match.
      * @param provider
      *            The collection resource provider to which matching requests
      *            will be routed.
@@ -137,7 +137,7 @@ public final class UriRouter extends AbstractUriRouter<UriRouter, RequestHandler
      * requests.
      *
      * @param uriTemplate
-     *            The URI template which request resource names must match.
+     *            The URI template which request resource paths must match.
      * @param provider
      *            The singleton resource provider to which matching requests
      *            will be routed.
@@ -154,7 +154,7 @@ public final class UriRouter extends AbstractUriRouter<UriRouter, RequestHandler
         try {
             final RouteMatcher<RequestHandler> bestMatch = getBestRoute(context, request);
             final ActionRequest routedRequest = bestMatch.wasRouted()
-                    ? copyOfActionRequest(request).setResourceName(bestMatch.getRemaining())
+                    ? copyOfActionRequest(request).setResourcePath(bestMatch.getRemaining())
                     : request;
             bestMatch.getHandler().handleAction(bestMatch.getContext(), routedRequest, handler);
         } catch (final ResourceException e) {
@@ -168,7 +168,7 @@ public final class UriRouter extends AbstractUriRouter<UriRouter, RequestHandler
         try {
             final RouteMatcher<RequestHandler> bestMatch = getBestRoute(context, request);
             final CreateRequest routedRequest = bestMatch.wasRouted()
-                    ? copyOfCreateRequest(request).setResourceName(bestMatch.getRemaining())
+                    ? copyOfCreateRequest(request).setResourcePath(bestMatch.getRemaining())
                     : request;
             bestMatch.getHandler().handleCreate(bestMatch.getContext(), routedRequest, handler);
         } catch (final ResourceException e) {
@@ -182,7 +182,7 @@ public final class UriRouter extends AbstractUriRouter<UriRouter, RequestHandler
         try {
             final RouteMatcher<RequestHandler> bestMatch = getBestRoute(context, request);
             final DeleteRequest routedRequest = bestMatch.wasRouted()
-                    ? copyOfDeleteRequest(request).setResourceName(bestMatch.getRemaining())
+                    ? copyOfDeleteRequest(request).setResourcePath(bestMatch.getRemaining())
                     : request;
             bestMatch.getHandler().handleDelete(bestMatch.getContext(), routedRequest, handler);
         } catch (final ResourceException e) {
@@ -196,7 +196,7 @@ public final class UriRouter extends AbstractUriRouter<UriRouter, RequestHandler
         try {
             final RouteMatcher<RequestHandler> bestMatch = getBestRoute(context, request);
             final PatchRequest routedRequest = bestMatch.wasRouted()
-                    ? copyOfPatchRequest(request).setResourceName(bestMatch.getRemaining())
+                    ? copyOfPatchRequest(request).setResourcePath(bestMatch.getRemaining())
                     : request;
             bestMatch.getHandler().handlePatch(bestMatch.getContext(), routedRequest, handler);
         } catch (final ResourceException e) {
@@ -210,7 +210,7 @@ public final class UriRouter extends AbstractUriRouter<UriRouter, RequestHandler
         try {
             final RouteMatcher<RequestHandler> bestMatch = getBestRoute(context, request);
             final QueryRequest routedRequest = bestMatch.wasRouted()
-                    ? copyOfQueryRequest(request).setResourceName(bestMatch.getRemaining())
+                    ? copyOfQueryRequest(request).setResourcePath(bestMatch.getRemaining())
                     : request;
             bestMatch.getHandler().handleQuery(bestMatch.getContext(), routedRequest, handler);
         } catch (final ResourceException e) {
@@ -224,7 +224,7 @@ public final class UriRouter extends AbstractUriRouter<UriRouter, RequestHandler
         try {
             final RouteMatcher<RequestHandler> bestMatch = getBestRoute(context, request);
             final ReadRequest routedRequest = bestMatch.wasRouted()
-                    ? copyOfReadRequest(request).setResourceName(bestMatch.getRemaining())
+                    ? copyOfReadRequest(request).setResourcePath(bestMatch.getRemaining())
                     : request;
             bestMatch.getHandler().handleRead(bestMatch.getContext(), routedRequest, handler);
         } catch (final ResourceException e) {
@@ -238,7 +238,7 @@ public final class UriRouter extends AbstractUriRouter<UriRouter, RequestHandler
         try {
             final RouteMatcher<RequestHandler> bestMatch = getBestRoute(context, request);
             final UpdateRequest routedRequest = bestMatch.wasRouted()
-                    ? copyOfUpdateRequest(request).setResourceName(bestMatch.getRemaining())
+                    ? copyOfUpdateRequest(request).setResourcePath(bestMatch.getRemaining())
                     : request;
             bestMatch.getHandler().handleUpdate(bestMatch.getContext(), routedRequest, handler);
         } catch (final ResourceException e) {
@@ -249,11 +249,11 @@ public final class UriRouter extends AbstractUriRouter<UriRouter, RequestHandler
     private RouteMatcher<RequestHandler> getBestRoute(final ServerContext context, final Request request)
             throws ResourceException {
         try {
-            return getBestRoute(context, request.getResourceName());
+            return getBestRoute(context, request.getResourcePath());
         } catch (RouteNotFoundException e) {
             // TODO: i18n
             throw new NotFoundException(String.format("Resource '%s' not found", request
-                    .getResourceName()));
+                    .getResourcePath()));
         }
     }
 }

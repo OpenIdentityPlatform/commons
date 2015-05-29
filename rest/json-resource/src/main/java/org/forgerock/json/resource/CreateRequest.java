@@ -18,6 +18,7 @@ package org.forgerock.json.resource;
 
 import java.util.List;
 
+import org.forgerock.http.ResourcePath;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 
@@ -76,18 +77,18 @@ public interface CreateRequest extends Request {
 
     /**
      * Returns the client provided ID of the resource to be created. The new
-     * resource ID will be appended to the resource name in order to obtain the
-     * full name of the new resource.
+     * resource ID will be appended to the resource path in order to obtain the
+     * full path of the new resource.
      * <p>
      * The new resource ID is optional and should be used in cases where the
-     * client wishes to determine the name of the resource to be created. If the
+     * client wishes to determine the path of the resource to be created. If the
      * new resource ID is not provided then the server will be responsible for
      * generating the ID of the new resource.
      *
      * @return The client provided ID of the resource to be created, or
      *         {@code null} if the server should be responsible for generating
      *         the resource ID.
-     * @see #getResourceName()
+     * @see #getResourcePath()
      */
     String getNewResourceId();
 
@@ -98,25 +99,25 @@ public interface CreateRequest extends Request {
     RequestType getRequestType();
 
     /**
-     * Returns the name of the JSON resource container beneath which the new
+     * Returns the path of the JSON resource container beneath which the new
      * resource should be created.
      * <p>
-     * The name of the newly created resource will be the concatenation of the
-     * resource name and either the client provided resource ID, if provided, or
+     * The path of the newly created resource will be the concatenation of the
+     * resource path and either the client provided resource ID, if provided, or
      * a server generated resource ID.
      *
-     * @return The name of the JSON resource container beneath which the new
+     * @return The path of the JSON resource container beneath which the new
      *         resource should be created.
      * @see #getNewResourceId()
      */
     @Override
-    String getResourceName();
+    String getResourcePath();
 
     /**
      * {@inheritDoc}
      */
     @Override
-    ResourceName getResourceNameObject();
+    ResourcePath getResourcePathObject();
 
     /**
      * Sets the content of the JSON resource to be created.
@@ -132,11 +133,11 @@ public interface CreateRequest extends Request {
 
     /**
      * Sets the client provided ID of the resource to be created. The new
-     * resource ID will be appended to the resource name in order to obtain the
-     * full name of the new resource.
+     * resource ID will be appended to the resource path in order to obtain the
+     * full path of the new resource.
      * <p>
      * The new resource ID is optional and should be used in cases where the
-     * client wishes to determine the name of the resource to be created. If the
+     * client wishes to determine the path of the resource to be created. If the
      * new resource ID is not provided then the server will be responsible for
      * generating the ID of the new resource.
      *
@@ -148,7 +149,7 @@ public interface CreateRequest extends Request {
      * @throws UnsupportedOperationException
      *             If this create request does not permit changes to the new
      *             resource ID.
-     * @see #setResourceName(String)
+     * @see #setResourcePath(String)
      */
     CreateRequest setNewResourceId(String id);
 
@@ -156,27 +157,27 @@ public interface CreateRequest extends Request {
      * {@inheritDoc}
      */
     @Override
-    Request setResourceName(ResourceName name);
+    Request setResourcePath(ResourcePath path);
 
     /**
-     * Sets the name of the JSON resource container beneath which the new
+     * Sets the path of the JSON resource container beneath which the new
      * resource should be created.
      * <p>
-     * The name of the newly created resource will be the concatenation of the
-     * resource name and either the client provided resource ID, if provided, or
+     * The path of the newly created resource will be the concatenation of the
+     * resource path and either the client provided resource ID, if provided, or
      * a server generated resource ID.
      *
-     * @param name
-     *            The name of the JSON resource container beneath which the new
+     * @param path
+     *            The path of the JSON resource container beneath which the new
      *            resource should be created.
      * @return This create request.
      * @throws UnsupportedOperationException
      *             If this create request does not permit changes to the
-     *             resource name.
+     *             resource path.
      * @see #setNewResourceId(String)
      */
     @Override
-    CreateRequest setResourceName(String name);
+    CreateRequest setResourcePath(String path);
 
     /**
      * {@inheritDoc}

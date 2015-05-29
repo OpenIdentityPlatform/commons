@@ -520,35 +520,35 @@ public final class Filters {
 
     /**
      * Returns a {@code FilterCondition} which will only match requests whose
-     * resource name matches the provided regular expression.
+     * resource path matches the provided regular expression.
      *
      * @param regex
      *            The regular expression which must match a request's resource
-     *            name.
+     *            path.
      * @return The filter condition.
-     * @see Request#getResourceName()
+     * @see Request#getResourcePath()
      */
-    public static FilterCondition matchResourceName(final Pattern regex) {
+    public static FilterCondition matchResourcePath(final Pattern regex) {
         return new FilterCondition() {
             @Override
             public boolean matches(final ServerContext context, final Request request) {
-                return regex.matcher(request.getResourceName()).matches();
+                return regex.matcher(request.getResourcePath()).matches();
             }
         };
     }
 
     /**
      * Returns a {@code FilterCondition} which will only match requests whose
-     * resource name matches the provided regular expression.
+     * resource path matches the provided regular expression.
      *
      * @param regex
      *            The regular expression which must match a request's resource
-     *            name.
+     *            path.
      * @return The filter condition.
-     * @see Request#getResourceName()
+     * @see Request#getResourcePath()
      */
-    public static FilterCondition matchResourceName(final String regex) {
-        return matchResourceName(Pattern.compile(regex));
+    public static FilterCondition matchResourcePath(final String regex) {
+        return matchResourcePath(Pattern.compile(regex));
     }
 
     /**

@@ -19,6 +19,7 @@ package org.forgerock.json.resource;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.resource.Requests.newReadRequest;
 
+import org.forgerock.http.ResourcePath;
 import org.forgerock.json.fluent.JsonValue;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -30,7 +31,7 @@ import org.testng.annotations.Test;
 public final class RequestsTest {
 
     @DataProvider
-    public Object[][] containerNames() {
+    public Object[][] containerPaths() {
         return new Object[][] {
             // @formatter:off
             { "", "test", "test" },
@@ -46,51 +47,51 @@ public final class RequestsTest {
         };
     }
 
-    @Test(dataProvider = "containerNames")
-    public void testResourceNameConcatenation(final String container,
-            final String id, final String expectedResourceName) {
+    @Test(dataProvider = "containerPaths")
+    public void testResourcePathConcatenation(final String container,
+            final String id, final String expectedResourcePath) {
         final Request request = newReadRequest(container, id);
-        assertThat(request.getResourceName()).isEqualTo(expectedResourceName);
+        assertThat(request.getResourcePath()).isEqualTo(expectedResourcePath);
     }
 
     // test the contract that resource name must not be null
     @Test(expectedExceptions = NullPointerException.class)
-    public void testNullResourceName() {
+    public void testNullResourcePath() {
         newReadRequest((String) null);
     }
 
-    // test the contract that request.getResourceName/getResourceNameObject
+    // test the contract that request.getResourcePath/getResourcePathObject
     // always returns non-null by creating a "legit" request and then
-    // updating the ResourceName to null using the setter
+    // updating the ResourcePath to null using the setter
     @Test(expectedExceptions = NullPointerException.class)
-    public void testSetNullResourceName() {
+    public void testSetNullResourcePath() {
         final Request request = newReadRequest("/hello");
-        request.setResourceName((ResourceName) null);
+        request.setResourcePath((ResourcePath) null);
     }
 
     @Test
     public void testResourceIdEscaping1() {
         Request r = Requests.newReadRequest("test/users/forward%2fslash");
-        assertThat(r.getResourceName()).isEqualTo("test/users/forward%2fslash");
-        assertThat(r.getResourceNameObject().leaf()).isEqualTo("forward/slash");
-        assertThat(r.getResourceNameObject()).hasSize(3);
+        assertThat(r.getResourcePath()).isEqualTo("test/users/forward%2fslash");
+        assertThat(r.getResourcePathObject().leaf()).isEqualTo("forward/slash");
+        assertThat(r.getResourcePathObject()).hasSize(3);
     }
 
     @Test
     public void testResourceIdEscaping2() {
         Request r = Requests.newReadRequest("test/users", "forward/slash");
-        assertThat(r.getResourceName()).isEqualTo("test/users/forward%2Fslash");
-        assertThat(r.getResourceNameObject().leaf()).isEqualTo("forward/slash");
-        assertThat(r.getResourceNameObject()).hasSize(3);
+        assertThat(r.getResourcePath()).isEqualTo("test/users/forward%2Fslash");
+        assertThat(r.getResourcePathObject().leaf()).isEqualTo("forward/slash");
+        assertThat(r.getResourcePathObject()).hasSize(3);
     }
 
     @Test
     public void testNewResourceIdEscaping() {
         CreateRequest r =
                 Requests.newCreateRequest("test/users", "forward/slash", new JsonValue(null));
-        assertThat(r.getResourceName()).isEqualTo("test/users");
-        assertThat(r.getResourceNameObject().leaf()).isEqualTo("users");
-        assertThat(r.getResourceNameObject()).hasSize(2);
+        assertThat(r.getResourcePath()).isEqualTo("test/users");
+        assertThat(r.getResourcePathObject().leaf()).isEqualTo("users");
+        assertThat(r.getResourcePathObject()).hasSize(2);
         assertThat(r.getNewResourceId()).isEqualTo("forward/slash");
     }
 
