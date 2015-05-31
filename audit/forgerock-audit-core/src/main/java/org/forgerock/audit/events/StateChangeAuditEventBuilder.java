@@ -24,7 +24,6 @@ import org.forgerock.json.fluent.JsonValue;
  */
 abstract class StateChangeAuditEventBuilder<T extends StateChangeAuditEventBuilder<T>> extends AuditEventBuilder<T> {
 
-    public static final String MESSAGE_ID = "messageId";
     public static final String RUN_AS = "runAs";
     public static final String RESOURCE_OPERATION = "resourceOperation";
     public static final String URI = "uri";
@@ -52,20 +51,8 @@ abstract class StateChangeAuditEventBuilder<T extends StateChangeAuditEventBuild
      */
     protected void validate() {
         super.validate();
-        requireField(MESSAGE_ID);
         requireField(RUN_AS);
         requireField(RESOURCE_OPERATION);
-    }
-
-    /**
-     * Sets the provided message id for the event.
-     *
-     * @param id the message id.
-     * @return this builder
-     */
-    public final T messageId(String id) {
-        jsonValue.put(MESSAGE_ID, id);
-        return self();
     }
 
     /**

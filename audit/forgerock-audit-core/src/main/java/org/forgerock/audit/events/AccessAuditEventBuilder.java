@@ -69,7 +69,6 @@ import java.util.Map;
  */
 public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> extends AuditEventBuilder<T> {
 
-    public static final String MESSAGE_ID = "messageId";
     public static final String SERVER = "server";
     public static final String CLIENT = "client";
     public static final String HOST = "host";
@@ -108,17 +107,6 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
     @SuppressWarnings("rawtypes")
     public static AccessAuditEventBuilder<?> accessEvent() {
         return new AccessAuditEventBuilder();
-    }
-
-    /**
-     * Sets the provided message id for the event.
-     *
-     * @param id the message id.
-     * @return this builder
-     */
-    public final T messageId(String id) {
-        jsonValue.put(MESSAGE_ID, id);
-        return self();
     }
 
     /**

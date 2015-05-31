@@ -56,7 +56,7 @@ public class AuthenticationAuditEventBuilderTest {
         AuditEvent event = productAuthenticationEvent()
                 .transactionId("transactionId")
                 .timestamp(1427293286239l)
-                .eventType("AM-AUTHENTICATION-SUCCESS")
+                .eventName("AM-AUTHENTICATION-SUCCESS")
                 .authentication("someone@forgerock.com", Operation.LOGIN, Status.SUCCEEDED, "Module", "DataStore")
                 .openField("value")
                 .toEvent();
@@ -67,7 +67,7 @@ public class AuthenticationAuditEventBuilderTest {
     @Test
     public void ensureBuilderMethodsCanBeCalledInAnyOrder() {
         AuditEvent event = productAuthenticationEvent()
-                .eventType("AM-AUTHENTICATION-SUCCESS")
+                .eventName("AM-AUTHENTICATION-SUCCESS")
                 .authentication("someone@forgerock.com", Operation.LOGIN, Status.SUCCEEDED, "Module", "DataStore")
                 .openField("value")
                 .transactionId("transactionId")

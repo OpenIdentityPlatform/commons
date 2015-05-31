@@ -73,7 +73,7 @@ public class AccessAuditEventBuilderTest {
         AuditEvent event = productAccessEvent()
                 .transactionId("transactionId")
                 .timestamp(1427293286239l)
-                .messageId("IDM-sync-10")
+                .eventName("IDM-sync-10")
                 .client("cip", 1203)
                 .server("sip", 80)
                 .authorizationId("managed/user", "aegloff", "openidm-admin", "openidm-authorized")
@@ -87,7 +87,7 @@ public class AccessAuditEventBuilderTest {
         JsonValue value = event.getValue();
         assertThat(value.get(TRANSACTION_ID).asString()).isEqualTo("transactionId");
         assertThat(value.get(TIMESTAMP).asString()).isEqualTo("2015-03-25T14:21:26.239Z");
-        assertThat(value.get(MESSAGE_ID).asString()).isEqualTo("IDM-sync-10");
+        assertThat(value.get(EVENT_NAME).asString()).isEqualTo("IDM-sync-10");
         assertThat(value.get(SERVER).get(IP).asString()).isEqualTo("sip");
         assertThat(value.get(SERVER).get(PORT).asLong()).isEqualTo(80);
         assertThat(value.get(HTTP).get(METHOD).asString()).isEqualTo("GET");
@@ -102,6 +102,7 @@ public class AccessAuditEventBuilderTest {
     @Test
     public void ensureBuilderMethodsCanBeCalledInAnyOrder() {
         AuditEvent event1 = productAccessEvent()
+                .eventName("IDM-sync-10")
                 .server("ip", 80)
                 .client("cip", 1203)
                 .openField("value")
@@ -116,6 +117,7 @@ public class AccessAuditEventBuilderTest {
                 .authentication("someone@forgerock.com")
                 .openField("value")
                 .server("ip", 80)
+                .eventName("IDM-sync-10")
                 .transactionId("transactionId")
                 .timestamp(1427293286239l)
                 .toEvent();
@@ -129,6 +131,7 @@ public class AccessAuditEventBuilderTest {
                 .authentication("someone@forgerock.com")
                 .transactionId("transactionId")
                 .timestamp(1427293286239l)
+                .eventName("IDM-sync-10")
                 .toEvent();
         assertEvent(event3);
 
@@ -138,6 +141,7 @@ public class AccessAuditEventBuilderTest {
                 .client("cip", 1203)
                 .openField("value")
                 .server("ip", 80)
+                .eventName("IDM-sync-10")
                 .transactionId("transactionId")
                 .timestamp(1427293286239l)
                 .toEvent();
@@ -151,6 +155,7 @@ public class AccessAuditEventBuilderTest {
         Map<String, List<String>> headers = Collections.<String, List<String>>emptyMap();
 
         AuditEvent event = productAccessEvent()
+                .eventName("IDM-sync-10")
                 .transactionId("transactionId")
                 .authentication("someone@forgerock.com")
                 .timestamp(1427293286239l)
@@ -172,6 +177,7 @@ public class AccessAuditEventBuilderTest {
 
         // When
         AuditEvent event = productAccessEvent()
+                .eventName("IDM-sync-10")
                 .transactionId("transactionId")
                 .authentication("someone@forgerock.com")
                 .clientFromHttpContext(httpContext, dnsUtils)
@@ -194,6 +200,7 @@ public class AccessAuditEventBuilderTest {
 
         // When
         AuditEvent event = productAccessEvent()
+                .eventName("IDM-sync-10")
                 .transactionId("transactionId")
                 .authentication("someone@forgerock.com")
                 .httpFromHttpContext(httpContext)
@@ -214,6 +221,7 @@ public class AccessAuditEventBuilderTest {
 
         // When
         AuditEvent event = productAccessEvent()
+                .eventName("IDM-sync-10")
                 .transactionId("transactionId")
                 .authentication("someone@forgerock.com")
                 .resourceOperationFromRequest(actionRequest)
@@ -232,6 +240,7 @@ public class AccessAuditEventBuilderTest {
 
         // When
         AuditEvent event = productAccessEvent()
+                .eventName("IDM-sync-10")
                 .transactionId("transactionId")
                 .authentication("someone@forgerock.com")
                 .resourceOperationFromRequest(deleteRequest)

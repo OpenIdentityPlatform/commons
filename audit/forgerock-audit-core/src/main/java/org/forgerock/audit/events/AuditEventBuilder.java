@@ -31,6 +31,7 @@ import org.forgerock.util.Reject;
  */
 public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
 
+    public static final String EVENT_NAME = "eventName";
     public static final String TIMESTAMP = "timestamp";
     public static final String TRANSACTION_ID = "transactionId";
     public static final String AUTHENTICATION = "authentication";
@@ -108,6 +109,7 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
      * @throws IllegalStateException if a required field has not been populated.
      */
     protected void validate() {
+        requireField(EVENT_NAME);
         requireField(TRANSACTION_ID);
         requireField(AUTHENTICATION);
         superValidateCalled = true;
@@ -123,6 +125,20 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
         if (!jsonValue.isDefined(rootFieldName)) {
             throw new IllegalStateException("The field " + rootFieldName + " is mandatory.");
         }
+    }
+
+    /**
+     * Sets the provided name for the event.
+     *
+     * An event's name will usually be of the form {product}-{component}-{operation}. For example,
+     * AM-SESSION-CREATED, AM-CREST-SUCCESS, etc.
+     *
+     * @param name the event's name.
+     * @return this builder
+     */
+    public final T eventName(String name) {
+        jsonValue.put(EVENT_NAME, name);
+        return self();
     }
 
     /**

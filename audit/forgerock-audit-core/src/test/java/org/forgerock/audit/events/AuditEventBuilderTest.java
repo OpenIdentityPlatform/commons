@@ -57,6 +57,7 @@ public class AuditEventBuilderTest {
     @Test
     public void ensureAuditEventContainsTimestampEvenIfNotAdded() throws Exception {
         AuditEvent event = productEvent()
+                .eventName("AM-CREST-SUCCESS")
                 .transactionId("transactionId")
                 .authentication("someone@forgerock.com")
                 .toEvent();
@@ -67,6 +68,26 @@ public class AuditEventBuilderTest {
     @Test(expectedExceptions= { IllegalStateException.class })
     public void ensureAuditEventContainsTransactionId() throws Exception {
         productEvent()
+                .eventName("AM-CREST-SUCCESS")
+                .timestamp(System.currentTimeMillis())
+                .authentication("someone@forgerock.com")
+                .toEvent();
+    }
+
+    @Test(expectedExceptions= { IllegalStateException.class })
+    public void ensureAuditEventContainsEventName() throws Exception {
+        productEvent()
+                .transactionId("transactionId")
+                .timestamp(System.currentTimeMillis())
+                .authentication("someone@forgerock.com")
+                .toEvent();
+    }
+
+    @Test(expectedExceptions= { IllegalStateException.class })
+    public void ensureAuditEventContainsAuthentication() throws Exception {
+        productEvent()
+                .eventName("AM-CREST-SUCCESS")
+                .transactionId("transactionId")
                 .timestamp(System.currentTimeMillis())
                 .toEvent();
     }
@@ -78,6 +99,7 @@ public class AuditEventBuilderTest {
         headers.put("Content-Type", asList("application/json"));
 
         AuditEvent event = productEvent()
+                .eventName("AM-CREST-SUCCESS")
                 .transactionId("transactionId")
                 .timestamp(1427293286239l)
                 .authentication("someone@forgerock.com")
@@ -93,6 +115,7 @@ public class AuditEventBuilderTest {
                 .authentication("someone@forgerock.com")
                 .openField("value")
                 .transactionId("transactionId")
+                .eventName("AM-CREST-SUCCESS")
                 .timestamp(1427293286239l)
                 .toEvent();
         assertEvent(event);
@@ -105,6 +128,7 @@ public class AuditEventBuilderTest {
 
         // When
         AuditEvent event = productEvent()
+                .eventName("AM-CREST-SUCCESS")
                 .transactionIdFromRootContext(context)
                 .authentication("someone@forgerock.com")
                 .toEvent();
@@ -123,6 +147,7 @@ public class AuditEventBuilderTest {
 
         // When
         AuditEvent event = productEvent()
+                .eventName("AM-CREST-SUCCESS")
                 .transactionId("transactionId")
                 .authenticationFromSecurityContext(context)
                 .toEvent();

@@ -51,10 +51,6 @@ import org.forgerock.util.Reject;
 public class AuthenticationAuditEventBuilder<T extends AuthenticationAuditEventBuilder<T>> extends AuditEventBuilder<T> {
 
     /**
-     * 'eventName' field name.
-     */
-    public static final String EVENT_NAME = "eventName";
-    /**
      * authentication.'operation' field name.
      */
     public static final String OPERATION = "operation";
@@ -89,20 +85,6 @@ public class AuthenticationAuditEventBuilder<T extends AuthenticationAuditEventB
     @SuppressWarnings("rawtypes")
     public static AuthenticationAuditEventBuilder<?> authenticationEvent() {
         return new AuthenticationAuditEventBuilder();
-    }
-
-    /**
-     * Sets the type of this event.
-     *
-     * Not to be confused with an events topic (such as access, activity, config, etc), the eventType is a more
-     * fine grained categorisation.
-     *
-     * @param type the type of this event.
-     * @return this builder
-     */
-    public final T eventType(String type) {
-        jsonValue.put(EVENT_NAME, type);
-        return self();
     }
 
     /**
