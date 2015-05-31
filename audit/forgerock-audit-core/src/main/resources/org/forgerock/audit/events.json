@@ -217,6 +217,67 @@
       }
     }
   },
+  "authentication": {
+    "schema": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
+      "id": "/",
+      "type": "object",
+      "properties": {
+        "_id": {
+          "id": "_id",
+          "type": "string"
+        },
+        "timestamp": {
+          "id": "timestamp",
+          "type": "string"
+        },
+        "transactionId": {
+          "id": "transactionId",
+          "type": "string"
+        },
+        "eventType": {
+          "id": "eventType",
+          "type": "string"
+        },
+        "authentication": {
+          "id": "authentication",
+          "type": "object",
+          "properties": {
+            "id": {
+              "id": "id",
+              "type": "string"
+            },
+            "operation": {
+              "id": "operation",
+              "type": "string"
+            },
+            "status": {
+              "id": "status",
+              "type": "string"
+            },
+            "method": {
+              "id": "method",
+              "type": "object",
+              "properties": {
+                "type": {
+                  "id": "type",
+                  "type": "string"
+                },
+                "detail": {
+                  "id": "detail",
+                  "type": "string"
+                }
+              }
+            },
+            "message": {
+              "id": "message",
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  },
   "config": {
     "schema": {
       "$schema": "http://json-schema.org/draft-04/schema#",

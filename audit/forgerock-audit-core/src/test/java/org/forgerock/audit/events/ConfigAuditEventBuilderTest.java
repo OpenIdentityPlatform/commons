@@ -57,7 +57,7 @@ public class ConfigAuditEventBuilderTest {
                 .transactionId("transactionId")
                 .timestamp(1427293286239l)
                 .messageId("AM-REALM-CREATE")
-                .authenticationId("someone@forgerock.com")
+                .authentication("someone@forgerock.com")
                 .runAs("admin")
                 .resourceOperation("some/resource", "CREST", "ACTION", "customAction")
                 .before("{ \"name\": \"Old\", \"revision\": 1 }")
@@ -74,7 +74,7 @@ public class ConfigAuditEventBuilderTest {
     public void ensureBuilderMethodsCanBeCalledInAnyOrder() {
         AuditEvent event = productConfigEvent()
                 .messageId("AM-REALM-CREATE")
-                .authenticationId("someone@forgerock.com")
+                .authentication("someone@forgerock.com")
                 .runAs("admin")
                 .resourceOperation("some/resource", "CREST", "ACTION", "customAction")
                 .before("{ \"name\": \"Old\", \"revision\": 1 }")
@@ -93,7 +93,7 @@ public class ConfigAuditEventBuilderTest {
         assertThat(value.get(TRANSACTION_ID).asString()).isEqualTo("transactionId");
         assertThat(value.get(TIMESTAMP).asString()).isEqualTo("2015-03-25T14:21:26.239Z");
         assertThat(value.get(MESSAGE_ID).asString()).isEqualTo("AM-REALM-CREATE");
-        assertThat(value.get(AUTHENTICATION_ID).asString()).isEqualTo("someone@forgerock.com");
+        assertThat(value.get(AUTHENTICATION).get(ID).asString()).isEqualTo("someone@forgerock.com");
         assertThat(value.get(RUN_AS).asString()).isEqualTo("admin");
         assertThat(value.get(RESOURCE_OPERATION).get(URI).asString()).isEqualTo("some/resource");
         assertThat(value.get(RESOURCE_OPERATION).get(PROTOCOL).asString()).isEqualTo("CREST");

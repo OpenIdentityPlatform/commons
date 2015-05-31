@@ -33,7 +33,8 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
 
     public static final String TIMESTAMP = "timestamp";
     public static final String TRANSACTION_ID = "transactionId";
-    public static final String AUTHENTICATION_ID = "authenticationId";
+    public static final String AUTHENTICATION = "authentication";
+    public static final String ID = "id";
 
     /** Represents the event as a JSON value. */
     protected JsonValue jsonValue = json(object());
@@ -108,7 +109,7 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
      */
     protected void validate() {
         requireField(TRANSACTION_ID);
-        requireField(AUTHENTICATION_ID);
+        requireField(AUTHENTICATION);
         superValidateCalled = true;
     }
 
@@ -154,9 +155,10 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
      * @param id the authentication id.
      * @return this builder
      */
-    public final T authenticationId(String id) {
+    public final T authentication(String id) {
         Reject.ifNull(id);
-        jsonValue.put(AUTHENTICATION_ID, id);
+        JsonValue object = json(object(field(ID, id)));
+        jsonValue.put(AUTHENTICATION, object);
         return self();
     }
 
@@ -176,16 +178,16 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
     }
 
     /**
-     * Sets authenticationId from {@link SecurityContext}, iff the provided
+     * Sets authentication from {@link SecurityContext}, iff the provided
      * <code>Context</code> contains a <code>SecurityContext</code>.
      *
      * @param context The CREST context.
      * @return this builder
      */
-    public final T authenticationIdFromSecurityContext(Context context) {
+    public final T authenticationFromSecurityContext(Context context) {
         if (context.containsContext(SecurityContext.class)) {
             SecurityContext securityContext = context.asContext(SecurityContext.class);
-            authenticationId(securityContext.getAuthenticationId());
+            authentication(securityContext.getAuthenticationId());
         }
         return self();
     }

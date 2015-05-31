@@ -381,7 +381,7 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
      * @see #transactionIdFromRootContext(Context)
      * @see #clientFromHttpContext(Context)
      * @see #httpFromHttpContext(Context)
-     * @see #authenticationIdFromSecurityContext(Context)
+     * @see #authenticationFromSecurityContext(Context)
      * @see #resourceOperationFromRequest(Request)
      *
      * @return this builder
@@ -402,7 +402,7 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
      * @see #transactionIdFromRootContext(Context)
      * @see #clientFromHttpContext(Context)
      * @see #httpFromHttpContext(Context)
-     * @see #authenticationIdFromSecurityContext(Context)
+     * @see #authenticationFromSecurityContext(Context)
      * @see #resourceOperationFromRequest(Request)
      *
      * @return this builder
@@ -411,7 +411,7 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
         transactionIdFromRootContext(context);
         clientFromHttpContext(context, dnsUtils);
         httpFromHttpContext(context);
-        authenticationIdFromSecurityContext(context);
+        authenticationFromSecurityContext(context);
         resourceOperationFromRequest(request);
         return self();
     }

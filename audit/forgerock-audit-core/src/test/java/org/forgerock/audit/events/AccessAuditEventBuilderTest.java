@@ -18,6 +18,7 @@ package org.forgerock.audit.events;
 import static java.util.Arrays.*;
 import static org.fest.assertions.api.Assertions.*;
 import static org.forgerock.audit.events.AccessAuditEventBuilderTest.OpenProductAccessAuditEventBuilder.*;
+import static org.forgerock.audit.events.AuditEventBuilder.ID;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -76,7 +77,7 @@ public class AccessAuditEventBuilderTest {
                 .client("cip", 1203)
                 .server("sip", 80)
                 .authorizationId("managed/user", "aegloff", "openidm-admin", "openidm-authorized")
-                .authenticationId("someone@forgerock.com")
+                .authentication("someone@forgerock.com")
                 .resourceOperation("action", "reconcile")
                 .http("GET", "/some/path", "p1=v1&p2=v2", headers)
                 .response("200", 12)
@@ -105,14 +106,14 @@ public class AccessAuditEventBuilderTest {
                 .client("cip", 1203)
                 .openField("value")
                 .transactionId("transactionId")
-                .authenticationId("someone@forgerock.com")
+                .authentication("someone@forgerock.com")
                 .timestamp(1427293286239l)
                 .toEvent();
         assertEvent(event1);
 
         AuditEvent event2 = productAccessEvent()
                 .client("cip", 1203)
-                .authenticationId("someone@forgerock.com")
+                .authentication("someone@forgerock.com")
                 .openField("value")
                 .server("ip", 80)
                 .transactionId("transactionId")
@@ -125,14 +126,14 @@ public class AccessAuditEventBuilderTest {
                 .transactionId("transactionId")
                 .client("cip", 1203)
                 .server("ip", 80)
-                .authenticationId("someone@forgerock.com")
+                .authentication("someone@forgerock.com")
                 .transactionId("transactionId")
                 .timestamp(1427293286239l)
                 .toEvent();
         assertEvent(event3);
 
         AuditEvent event4 = productAccessEvent()
-                .authenticationId("someone@forgerock.com")
+                .authentication("someone@forgerock.com")
                 .transactionId("transactionId")
                 .client("cip", 1203)
                 .openField("value")
@@ -151,7 +152,7 @@ public class AccessAuditEventBuilderTest {
 
         AuditEvent event = productAccessEvent()
                 .transactionId("transactionId")
-                .authenticationId("someone@forgerock.com")
+                .authentication("someone@forgerock.com")
                 .timestamp(1427293286239l)
                 .http("GET", "/some/path", "p1=v1&p2=v2", headers)
                 .toEvent();
@@ -172,7 +173,7 @@ public class AccessAuditEventBuilderTest {
         // When
         AuditEvent event = productAccessEvent()
                 .transactionId("transactionId")
-                .authenticationId("someone@forgerock.com")
+                .authentication("someone@forgerock.com")
                 .clientFromHttpContext(httpContext, dnsUtils)
                 .toEvent();
 
@@ -194,7 +195,7 @@ public class AccessAuditEventBuilderTest {
         // When
         AuditEvent event = productAccessEvent()
                 .transactionId("transactionId")
-                .authenticationId("someone@forgerock.com")
+                .authentication("someone@forgerock.com")
                 .httpFromHttpContext(httpContext)
                 .toEvent();
 
@@ -214,7 +215,7 @@ public class AccessAuditEventBuilderTest {
         // When
         AuditEvent event = productAccessEvent()
                 .transactionId("transactionId")
-                .authenticationId("someone@forgerock.com")
+                .authentication("someone@forgerock.com")
                 .resourceOperationFromRequest(actionRequest)
                 .toEvent();
 
@@ -232,7 +233,7 @@ public class AccessAuditEventBuilderTest {
         // When
         AuditEvent event = productAccessEvent()
                 .transactionId("transactionId")
-                .authenticationId("someone@forgerock.com")
+                .authentication("someone@forgerock.com")
                 .resourceOperationFromRequest(deleteRequest)
                 .toEvent();
 
@@ -251,7 +252,7 @@ public class AccessAuditEventBuilderTest {
         assertThat(value.get(CLIENT).get(PORT).asLong()).isEqualTo(1203);
         assertThat(value.get(TRANSACTION_ID).asString()).isEqualTo("transactionId");
         assertThat(value.get(TIMESTAMP).asString()).isEqualTo("2015-03-25T14:21:26.239Z");
-        assertThat(value.get(AUTHENTICATION_ID).asString()).isEqualTo("someone@forgerock.com");
+        assertThat(value.get(AUTHENTICATION).get(ID).asString()).isEqualTo("someone@forgerock.com");
     }
 
     private JsonValue jsonFromFile(String resourceFilePath) throws IOException {

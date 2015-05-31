@@ -58,7 +58,7 @@ public class AuditEventBuilderTest {
     public void ensureAuditEventContainsTimestampEvenIfNotAdded() throws Exception {
         AuditEvent event = productEvent()
                 .transactionId("transactionId")
-                .authenticationId("someone@forgerock.com")
+                .authentication("someone@forgerock.com")
                 .toEvent();
         JsonValue value = event.getValue();
         assertThat(value.get(TIMESTAMP).asString()).isNotNull().isNotEmpty();
@@ -80,7 +80,7 @@ public class AuditEventBuilderTest {
         AuditEvent event = productEvent()
                 .transactionId("transactionId")
                 .timestamp(1427293286239l)
-                .authenticationId("someone@forgerock.com")
+                .authentication("someone@forgerock.com")
                 .openField("value")
                 .toEvent();
 
@@ -90,7 +90,7 @@ public class AuditEventBuilderTest {
     @Test
     public void ensureBuilderMethodsCanBeCalledInAnyOrder() {
         AuditEvent event = productEvent()
-                .authenticationId("someone@forgerock.com")
+                .authentication("someone@forgerock.com")
                 .openField("value")
                 .transactionId("transactionId")
                 .timestamp(1427293286239l)
@@ -106,7 +106,7 @@ public class AuditEventBuilderTest {
         // When
         AuditEvent event = productEvent()
                 .transactionIdFromRootContext(context)
-                .authenticationId("someone@forgerock.com")
+                .authentication("someone@forgerock.com")
                 .toEvent();
 
         // Then
@@ -124,19 +124,19 @@ public class AuditEventBuilderTest {
         // When
         AuditEvent event = productEvent()
                 .transactionId("transactionId")
-                .authenticationIdFromSecurityContext(context)
+                .authenticationFromSecurityContext(context)
                 .toEvent();
 
         // Then
         JsonValue value = event.getValue();
-        assertThat(value.get(AUTHENTICATION_ID).asString()).isEqualTo(authenticationId);
+        assertThat(value.get(AUTHENTICATION).get(ID).asString()).isEqualTo(authenticationId);
     }
 
     private void assertEvent(AuditEvent event) {
         JsonValue value = event.getValue();
         assertThat(value.get(TRANSACTION_ID).asString()).isEqualTo("transactionId");
         assertThat(value.get(TIMESTAMP).asString()).isEqualTo("2015-03-25T14:21:26.239Z");
-        assertThat(value.get(AUTHENTICATION_ID).asString()).isEqualTo("someone@forgerock.com");
+        assertThat(value.get(AUTHENTICATION).get(ID).asString()).isEqualTo("someone@forgerock.com");
         assertThat(value.get("open").getObject()).isEqualTo("value");
     }
 
