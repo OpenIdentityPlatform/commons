@@ -46,6 +46,15 @@
     <maven.compiler.target>1.6</maven.compiler.target>
     <maven.compiler.source>1.6</maven.compiler.source>
   </properties>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+      </plugin>
+    </plugins>
+  </build>
   <dependencyManagement>
     <dependencies>
       <dependency>
