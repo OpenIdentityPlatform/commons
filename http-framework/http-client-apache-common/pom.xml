@@ -25,7 +25,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>chf-http-apache-client-common</artifactId>
+  <artifactId>chf-client-apache-common</artifactId>
   <packaging>bundle</packaging>
   <name>HTTP Apache HttpClient(s) base</name>
 

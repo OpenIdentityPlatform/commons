@@ -37,10 +37,10 @@
   <modules>
     <module>http-core</module>
     <module>http-servlet</module>
-    <module>http-apache-httpclient</module>
     <module>http-test</module>
-    <module>http-apache-client</module>
-    <module>http-apache-asynchttpclient</module>
+    <module>http-client-apache-common</module>
+    <module>http-client-apache-sync</module>
+    <module>http-client-apache-async</module>
   </modules>
   <properties>
     <maven.compiler.target>1.6</maven.compiler.target>

@@ -22,7 +22,7 @@
     <artifactId>forgerock-http-framework</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  <artifactId>chf-apache-httpclient</artifactId>
+  <artifactId>chf-client-apache-sync</artifactId>
   <packaging>bundle</packaging>
   <name>HTTP Apache HttpClient integration</name>
   <dependencies>
@@ -33,7 +33,7 @@
     </dependency>
     <dependency>
       <groupId>org.forgerock.http</groupId>
-      <artifactId>chf-http-apache-client-common</artifactId>
+      <artifactId>chf-client-apache-common</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
