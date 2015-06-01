@@ -21,27 +21,16 @@ package org.forgerock.http.apache.httpclient;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import java.security.GeneralSecurityException;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
 
 import javax.net.ssl.SSLContext;
 
-import org.apache.http.Header;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpResponse;
-import org.apache.http.auth.AuthOption;
-import org.apache.http.auth.AuthScheme;
-import org.apache.http.auth.MalformedChallengeException;
-import org.apache.http.client.AuthenticationStrategy;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.NoConnectionReuseStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.protocol.HttpContext;
 import org.forgerock.http.Client;
 import org.forgerock.http.HttpApplicationException;
+import org.forgerock.http.client.ahc.NoAuthenticationStrategy;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.spi.ClientImpl;
 import org.forgerock.http.spi.ClientImplProvider;
@@ -53,43 +42,6 @@ import org.forgerock.util.time.Duration;
  * An HTTP client implementation provider for Apache HttpClient.
  */
 public final class ApacheHttpClientImplProvider implements ClientImplProvider {
-    /**
-     * An authentication strategy that never performs authentication.
-     */
-    private static final AuthenticationStrategy NO_AUTH = new AuthenticationStrategy() {
-
-        @Override
-        public void authFailed(final HttpHost authhost, final AuthScheme authScheme,
-                final HttpContext context) {
-            // Nothing to do.
-        }
-
-        @Override
-        public void authSucceeded(final HttpHost authhost, final AuthScheme authScheme,
-                final HttpContext context) {
-            // Nothing to do.
-        }
-
-        @Override
-        public Map<String, Header> getChallenges(final HttpHost authhost,
-                final HttpResponse response, final HttpContext context)
-                throws MalformedChallengeException {
-            return Collections.emptyMap();
-        }
-
-        @Override
-        public boolean isAuthenticationRequested(final HttpHost authhost,
-                final HttpResponse response, final HttpContext context) {
-            return false;
-        }
-
-        @Override
-        public Queue<AuthOption> select(final Map<String, Header> challenges,
-                final HttpHost authhost, final HttpResponse response, final HttpContext context)
-                throws MalformedChallengeException {
-            return new LinkedList<AuthOption>();
-        }
-    };
 
     @Override
     public ClientImpl newClientImpl(final Options options) throws HttpApplicationException {
@@ -148,8 +100,8 @@ public final class ApacheHttpClientImplProvider implements ClientImplProvider {
 
         // FIXME: is this equivalent to original OpenIG config?
         builder.disableCookieManagement();
-        builder.setProxyAuthenticationStrategy(NO_AUTH);
-        builder.setTargetAuthenticationStrategy(NO_AUTH);
+        builder.setProxyAuthenticationStrategy(NoAuthenticationStrategy.INSTANCE);
+        builder.setTargetAuthenticationStrategy(NoAuthenticationStrategy.INSTANCE);
 
         return new ApacheHttpClientImpl(builder.build(), storage);
     }
