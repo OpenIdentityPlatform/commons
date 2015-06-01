@@ -23,7 +23,6 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>chf-http-test</artifactId>
-  <packaging>jar</packaging>
   <name>HTTP Test library</name>
   <dependencies>
     <dependency>
