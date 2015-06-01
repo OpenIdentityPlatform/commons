@@ -90,6 +90,11 @@
         <artifactId>slf4j-api</artifactId>
         <version>1.7.5</version>
       </dependency>
+      <dependency>
+        <groupId>com.xebialabs.restito</groupId>
+        <artifactId>restito</artifactId>
+        <version>0.4-beta-2</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
   <repositories>
