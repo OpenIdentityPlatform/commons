@@ -194,8 +194,6 @@ public final class HttpFrameworkServlet extends HttpServlet {
             @Override
             public void run() {
                 promise.cancel(true);
-                //TODO is this needed? Not sure if the latch would have been freed by now.
-                sync.signalAndComplete();
             }
         });
 
