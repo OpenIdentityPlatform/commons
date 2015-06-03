@@ -17,6 +17,7 @@
 package org.forgerock.http;
 
 import static java.lang.String.format;
+import static org.forgerock.http.ResourcePath.resourcePath;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,7 +74,7 @@ public final class UriRouter extends AbstractUriRouter<UriRouter, Handler> imple
 
     private RouteMatcher<Handler> getBestRoute(Context context, Request request) throws ResponseException {
 
-        ResourcePath path = ResourcePath.resourcePath(request.getUri().getPath());
+        ResourcePath path = resourcePath(request.getUri().getPath());
         if (context.containsContext(RouterContext.class)) {
             ResourcePath matchedUri = getMatchedUri(context);
             path = path.tail(matchedUri.size());

@@ -20,6 +20,7 @@ package org.forgerock.http.servlet;
 import static org.forgerock.http.io.IO.newBranchingInputStream;
 import static org.forgerock.http.io.IO.newTemporaryStorage;
 import static org.forgerock.util.Utils.closeSilently;
+import static org.forgerock.http.ResourcePath.resourcePath;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,7 +46,6 @@ import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.HttpContext;
-import org.forgerock.http.ResourcePath;
 import org.forgerock.http.RootContext;
 import org.forgerock.http.RouterContext;
 import org.forgerock.http.Session;
@@ -245,7 +245,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
         String contextPath = forceEmptyIfNull(req.getContextPath());
         contextPath = contextPath.startsWith("/") ? contextPath.substring(1) : contextPath;
         String matchedUri = contextPath + forceEmptyIfNull(req.getServletPath());
-        if (ResourcePath.resourcePath(matchedUri).equals(ResourcePath.resourcePath(req.getRequestURI()))) {
+        if (resourcePath(matchedUri).equals(resourcePath(req.getRequestURI()))) {
             //Must be registered at '/' path
             matchedUri = contextPath;
         }

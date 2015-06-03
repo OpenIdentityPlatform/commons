@@ -17,6 +17,7 @@
 package org.forgerock.http;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.http.ResourcePath.resourcePath;
 
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -47,7 +48,7 @@ public final class ResourcePathTest {
 
     @Test(dataProvider = "invalidStrings", expectedExceptions = IllegalArgumentException.class)
     public void valueOfShouldRejectEmptyPathElements(final String value) {
-        ResourcePath.resourcePath(value);
+        resourcePath(value);
     }
 
     @DataProvider
@@ -105,7 +106,7 @@ public final class ResourcePathTest {
 
     @Test(dataProvider = "valueOfStrings")
     public void testValueOf(final String path, final String normalizedPath, final String[] elements) {
-        final ResourcePath name = ResourcePath.resourcePath(path);
+        final ResourcePath name = resourcePath(path);
         assertThat(name).hasSize(elements.length);
         assertThat(name.size()).isEqualTo(elements.length);
         if (elements.length == 0) {
@@ -113,8 +114,8 @@ public final class ResourcePathTest {
         } else {
             assertThat(name).containsOnly(elements);
         }
-        assertThat((Object) name).isEqualTo(ResourcePath.resourcePath(normalizedPath));
-        assertThat((Object) ResourcePath.resourcePath(normalizedPath)).isEqualTo(name);
+        assertThat((Object) name).isEqualTo(resourcePath(normalizedPath));
+        assertThat((Object) resourcePath(normalizedPath)).isEqualTo(name);
     }
 
     @Test(dataProvider = "valueOfStrings")
@@ -124,8 +125,8 @@ public final class ResourcePathTest {
         assertThat(name).hasSize(elements.length);
         assertThat(name.size()).isEqualTo(elements.length);
         assertThat(name).containsOnly(elements);
-        assertThat((Object) name).isEqualTo(ResourcePath.resourcePath(normalizedPath));
-        assertThat((Object) ResourcePath.resourcePath(normalizedPath)).isEqualTo(name);
+        assertThat((Object) name).isEqualTo(resourcePath(normalizedPath));
+        assertThat((Object) resourcePath(normalizedPath)).isEqualTo(name);
     }
 
     @Test(dataProvider = "valueOfStrings")
@@ -135,8 +136,8 @@ public final class ResourcePathTest {
         assertThat(name).hasSize(elements.length);
         assertThat(name.size()).isEqualTo(elements.length);
         assertThat(name).containsOnly(elements);
-        assertThat((Object) name).isEqualTo(ResourcePath.resourcePath(normalizedPath));
-        assertThat((Object) ResourcePath.resourcePath(normalizedPath)).isEqualTo(name);
+        assertThat((Object) name).isEqualTo(resourcePath(normalizedPath));
+        assertThat((Object) resourcePath(normalizedPath)).isEqualTo(name);
     }
 
     @DataProvider
@@ -153,9 +154,9 @@ public final class ResourcePathTest {
 
     @Test(dataProvider = "parent")
     public void testParent(final String child, final String parent) {
-        final ResourcePath actualParent = ResourcePath.resourcePath(child).parent();
+        final ResourcePath actualParent = resourcePath(child).parent();
         assertThat((Object) actualParent).isEqualTo(
-                parent != null ? ResourcePath.resourcePath(parent) : null);
+                parent != null ? resourcePath(parent) : null);
         assertThat(actualParent != null ? actualParent.toString() : null).isEqualTo(parent);
     }
 
@@ -174,22 +175,22 @@ public final class ResourcePathTest {
 
     @Test(dataProvider = "child")
     public void testChild(final String base, final Object element, final String expected) {
-        final ResourcePath parent = ResourcePath.resourcePath(base);
+        final ResourcePath parent = resourcePath(base);
         final ResourcePath child = parent.child(element);
-        assertThat((Object) child).isEqualTo(ResourcePath.resourcePath(expected));
+        assertThat((Object) child).isEqualTo(resourcePath(expected));
         assertThat(child.toString()).isEqualTo(expected);
     }
 
     @Test(dataProvider = "child")
     public void testFormat(final String base, final Object element, final String expected) {
         final ResourcePath child = ResourcePath.format(base + "/%s", element);
-        assertThat((Object) child).isEqualTo(ResourcePath.resourcePath(expected));
+        assertThat((Object) child).isEqualTo(resourcePath(expected));
         assertThat(child.toString()).isEqualTo(expected);
     }
 
     @Test(dataProvider = "child")
     public void testLeaf(final String base, final Object element, final String path) {
-        final ResourcePath name = ResourcePath.resourcePath(path);
+        final ResourcePath name = resourcePath(path);
         assertThat(name.leaf()).isEqualTo(element.toString());
     }
 
@@ -216,8 +217,8 @@ public final class ResourcePathTest {
 
     @Test(dataProvider = "compare")
     public void testCompareTo(final String first, final String second, final int expected) {
-        final ResourcePath firstPath = ResourcePath.resourcePath(first);
-        final ResourcePath secondPath = ResourcePath.resourcePath(second);
+        final ResourcePath firstPath = resourcePath(first);
+        final ResourcePath secondPath = resourcePath(second);
         if (expected < 0) {
             assertThat(firstPath.compareTo(secondPath)).isLessThan(0);
         } else if (expected > 0) {
@@ -241,48 +242,48 @@ public final class ResourcePathTest {
     @Test(dataProvider = "concat")
     public void testConcatResourcePath(final String first, final String second,
             final String expected) {
-        final ResourcePath firstPath = ResourcePath.resourcePath(first);
-        final ResourcePath secondPath = ResourcePath.resourcePath(second);
-        assertThat((Object) firstPath.concat(secondPath)).isEqualTo(ResourcePath.resourcePath(expected));
+        final ResourcePath firstPath = resourcePath(first);
+        final ResourcePath secondPath = resourcePath(second);
+        assertThat((Object) firstPath.concat(secondPath)).isEqualTo(resourcePath(expected));
         assertThat(firstPath.concat(secondPath).toString()).isEqualTo(expected);
     }
 
     @Test(dataProvider = "concat")
     public void testConcatString(final String first, final String second, final String expected) {
-        final ResourcePath firstPath = ResourcePath.resourcePath(first);
-        assertThat((Object) firstPath.concat(second)).isEqualTo(ResourcePath.resourcePath(expected));
+        final ResourcePath firstPath = resourcePath(first);
+        assertThat((Object) firstPath.concat(second)).isEqualTo(resourcePath(expected));
         assertThat(firstPath.concat(second).toString()).isEqualTo(expected);
     }
 
     @Test
     public void testNotEquals() {
-        final ResourcePath value = ResourcePath.resourcePath("hello/world");
+        final ResourcePath value = resourcePath("hello/world");
         assertThat((Object) value).isNotEqualTo("hello/world");
     }
 
     @Test
     public void testEquals() {
-        final ResourcePath value1 = ResourcePath.resourcePath("hello/world");
-        final ResourcePath value2 = ResourcePath.resourcePath("HELLO/WORLD");
+        final ResourcePath value1 = resourcePath("hello/world");
+        final ResourcePath value2 = resourcePath("HELLO/WORLD");
         assertThat((Object) value1).isEqualTo(value2);
     }
 
     @Test
     public void testHashCode() {
-        final ResourcePath value1 = ResourcePath.resourcePath("hello/world");
-        final ResourcePath value2 = ResourcePath.resourcePath("HELLO/WORLD");
+        final ResourcePath value1 = resourcePath("hello/world");
+        final ResourcePath value2 = resourcePath("HELLO/WORLD");
         assertThat(value1.hashCode()).isNotEqualTo(0);
         assertThat(value1.hashCode()).isEqualTo(value2.hashCode());
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testValueOfInvalidString() {
-        ResourcePath.resourcePath("must/not/contain//empty/elements");
+        resourcePath("must/not/contain//empty/elements");
     }
 
     @Test(expectedExceptions = UnsupportedOperationException.class)
     public void testImmutableIterator() {
-        final Iterator<String> i = ResourcePath.resourcePath("hello/world").iterator();
+        final Iterator<String> i = resourcePath("hello/world").iterator();
         assertThat(i.next()).isEqualTo("hello");
         i.remove();
     }
@@ -349,8 +350,8 @@ public final class ResourcePathTest {
     @Test(dataProvider = "subSequence")
     public void testSubSequnce(final String path, final int beginIndex, final int endIndex,
             final String expected) {
-        final ResourcePath name = ResourcePath.resourcePath(path);
-        final ResourcePath expectedPath = ResourcePath.resourcePath(expected);
+        final ResourcePath name = resourcePath(path);
+        final ResourcePath expectedPath = resourcePath(expected);
         final ResourcePath actualPath = name.subSequence(beginIndex, endIndex);
         assertThat((Object) actualPath).isEqualTo(expectedPath);
         assertThat(actualPath.size()).isEqualTo(endIndex - beginIndex);
@@ -358,16 +359,16 @@ public final class ResourcePathTest {
 
     @Test
     public void testHead() {
-        ResourcePath name = ResourcePath.resourcePath("ONE/TWO/THREE/FOUR");
-        ResourcePath expected = ResourcePath.resourcePath("ONE/two");
+        ResourcePath name = resourcePath("ONE/TWO/THREE/FOUR");
+        ResourcePath expected = resourcePath("ONE/two");
         assertThat((Object) name.head(2)).isEqualTo(expected);
 
     }
 
     @Test
     public void testTail() {
-        ResourcePath name = ResourcePath.resourcePath("ONE/TWO/THREE/FOUR");
-        ResourcePath expected = ResourcePath.resourcePath("THREE/four");
+        ResourcePath name = resourcePath("ONE/TWO/THREE/FOUR");
+        ResourcePath expected = resourcePath("THREE/four");
         assertThat((Object) name.tail(2)).isEqualTo(expected);
     }
 
@@ -395,6 +396,6 @@ public final class ResourcePathTest {
 
     @Test(dataProvider = "startsWith")
     public void testStartsWith(final String name, final String prefix, final boolean expected) {
-        assertThat(ResourcePath.resourcePath(name).startsWith(prefix)).isEqualTo(expected);
+        assertThat(resourcePath(name).startsWith(prefix)).isEqualTo(expected);
     }
 }
