@@ -347,9 +347,7 @@ final class HttpAdapter implements Handler {
             for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
                 final String name = p.getKey();
                 final List<String> values = p.getValue();
-                if (HttpUtils.isMultiPartRequest(ContentTypeHeader.valueOf(req).toString())) {
-                    // Ignore - multipart content adds form parts to the parameter set
-                } else if (parseCommonParameter(name, values, request)) {
+                if (parseCommonParameter(name, values, request)) {
                     continue;
                 } else {
                     request.setAdditionalParameter(name, asSingleValue(name, values));
@@ -387,8 +385,6 @@ final class HttpAdapter implements Handler {
                         continue;
                     } else if (name.equalsIgnoreCase(PARAM_ACTION)) {
                         // Ignore - already handled.
-                    } else if (HttpUtils.isMultiPartRequest(ContentTypeHeader.valueOf(req).toString())) {
-                        // Ignore - multipart content adds form parts to the parameter set
                     } else {
                         request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
@@ -406,8 +402,6 @@ final class HttpAdapter implements Handler {
                         continue;
                     } else if (name.equalsIgnoreCase(PARAM_ACTION)) {
                         // Ignore - already handled.
-                    } else if (HttpUtils.isMultiPartRequest(ContentTypeHeader.valueOf(req).toString())) {
-                        // Ignore - multipart content adds form parts to the parameter set
                     } else {
                         request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
@@ -458,9 +452,7 @@ final class HttpAdapter implements Handler {
                 for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
                     final String name = p.getKey();
                     final List<String> values = p.getValue();
-                    if (HttpUtils.isMultiPartRequest(ContentTypeHeader.valueOf(req).toString())) {
-                        // Ignore - multipart content adds form parts to the parameter set
-                    } else if (parseCommonParameter(name, values, request)) {
+                    if (parseCommonParameter(name, values, request)) {
                         continue;
                     } else {
                         request.setAdditionalParameter(name, asSingleValue(name, values));
@@ -474,9 +466,7 @@ final class HttpAdapter implements Handler {
                 for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
                     final String name = p.getKey();
                     final List<String> values = p.getValue();
-                    if (HttpUtils.isMultiPartRequest(ContentTypeHeader.valueOf(req).toString())) {
-                        // Ignore - multipart content adds form parts to the parameter set
-                    } else if (parseCommonParameter(name, values, request)) {
+                    if (parseCommonParameter(name, values, request)) {
                         continue;
                     } else {
                         request.setAdditionalParameter(name, asSingleValue(name, values));
