@@ -1,74 +1,108 @@
 /*
-Generic css helpers
+    Base: All base HTML tags. No IDs or Classes should be included here.
+*/
+@import "base.less";
+
+/*
+    Generic css helpers and functions
 */
 @import "helpers.less";
 
 /*
-General Styles
-*/
-html {
-    position: relative;
-    min-height: 100%;
-}
-
-body {
-    background-color: @background-color;
-    background-position: right top;
-    background-repeat: no-repeat;
-    margin-bottom: @footer-height;
-}
-
-h1, h2, h3 {
-    font-weight: 600;
-}
-
-h1 {
-    font-size: 40px;
-}
-
-h2, h3 {
-    color: @base-theme-color;
-}
-
-table {
-    font-size: 14px;
-}
-
-.light {
-    font-weight:normal;
-}
-
-hr {
-    border-top: 1px solid #ddd;
-}
-
-
-/*
-Navbar and SubNav
+    Navbar and SubNav
 */
 @import "navbar.less";
 
-
 /*
-Dropdown-menus - The drop down menu in the Navbar is styled within navbar.less
+    Dropdown-menus - The drop down menu in the Navbar is styled within navbar.less
 */
 @import "dropdown-menu.less";
 
 /*
-Page Header
+    Page Header
 */
 @import "page-header.less";
 
+/*
+    Tab Styles
+*/
+@import "tabs.less";
+
+/*
+    Sortable List
+*/
+@import "sortable-list.less";
+
+/*
+    Popovers
+*/
+@import "popover.less";
+
+/*
+    Validation Rules
+*/
+@import "validation-rules.less";
+
+/*
+    Forms
+*/
+@import "form.less";
+
+/*
+    Wells
+*/
+@import "wells.less";
+
+/*
+    Alert System
+*/
+@import "alert-system.less";
+
+/*
+    dialogs
+*/
+@import "dialogs.less";
+
+/*
+    Toolbar
+*/
+@import "toolbar.less";
+
+/*
+    Generic buttons CSS
+*/
+@import "buttons.less";
+
+/*
+    Panel Styles
+*/
+@import "panel.less";
 
 
-// Used in IDM only
-.row.no-gutters {
-    .col-xs-1, .col-sm-1, .col-md-1, .col-lg-1, .col-xs-2, .col-sm-2, .col-md-2, .col-lg-2, .col-xs-3, .col-sm-3, .col-md-3, .col-lg-3, .col-xs-4, .col-sm-4, .col-md-4, .col-lg-4, .col-xs-5,
-    .col-sm-5, .col-md-5, .col-lg-5, .col-xs-6, .col-sm-6, .col-md-6, .col-lg-6, .col-xs-7, .col-sm-7, .col-md-7, .col-lg-7, .col-xs-8, .col-sm-8, .col-md-8, .col-lg-8, .col-xs-9, .col-sm-9,
-    .col-md-9, .col-lg-9, .col-xs-10, .col-sm-10, .col-md-10, .col-lg-10, .col-xs-11, .col-sm-11, .col-md-11, .col-lg-11, .col-xs-12, .col-sm-12, .col-md-12, .col-lg-12 {
-        padding: 0;
-    }
+/*
+    IDM Styles - please remove from commons
+*/
+@import "idm-only.less";
+
+
+
+/*
+Footer
+*/
+
+.footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: @footer-height;
+    text-align: center;
+    color: @footer-color;
+    border-top: 1px solid #ccc;
+    background-color:  @footer-background-color;
+    padding: 10px;
 }
+
+
 
 
 /*
@@ -76,221 +110,6 @@ Registration
 */
 #passPhrasePictures img {
     cursor: pointer;
-}
-
-/*
-  JQGrid Styles
-*/
-.ui-jqgrid .ui-pg-button:hover {
-    border: none;
-}
-
-
-
-/*
-Form Styles
-*/
-
-.field-error {
-    border-color: @failure-color;
-}
-
-.form-control.field-error:focus{
-    border-color: @failure-color;
-    box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px fade(@failure-color, 60%);
-}
-
-.field-rule {
-    margin-bottom: 5px;
-
-    .validation-icon {
-        margin-right: 5px;
-    }
-}
-
-
-
-/**
-Bootstrap Tab Styles
-*/
-
-.nav-tabs {
-    /* Font weight 600 is between normal (400) and bold (700) */
-    font-weight: 600;
-    .dropdown .dropdown-toggle {
-        margin-right: 0;
-        i {
-            padding: 0;
-        }
-    }
-
-    &>li:not(.dropdown) {
-        a {
-            text-transform: capitalize;
-
-            i {
-                padding-right: 5px;
-            }
-        }
-    }
-}
-
-.tab-content {
-    border: 1px solid #ddd;
-    border-top: none;
-}
-
-/*!
-* Tab drop for Bootstrap
-*
-* Copyright 2012 Stefan Petre
-* Licensed under the Apache License v2.0
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-*/
-
-.nav-tabs,
-.nav-pills {
-    position: relative;
-}
-
-
-
-/*
-Sortable List
-*/
-@import "sortable-list.less";
-
-
-/*
-Validation Tooltip
-*/
-.popover-error {
-    min-width: 140px;
-}
-.popover-error .popover-content {
-    color: @failure-color;
-}
-.popover>.arrow {
-    overflow: visible;
-}
-.popover.top>.arrow:after {
-    top: auto;
-}
-
-.validationRules .error,
-.has-feedback .form-control-feedback.error {
-    .validation-icon {
-        .fa-icon();
-        color: @failure-color;
-
-        &:before {
-            content: @fa-var-times;
-        }
-    }
-}
-
-.validationRules .ok,
-.has-feedback .form-control-feedback.ok {
-    .validation-icon {
-        .fa-icon();
-        color: @success-color;
-
-        &:before {
-            content:'';
-        }
-    }
-}
-
-.validationRules .ok .validation-icon:before {
-    content: @fa-var-check;
-}
-
-
-
-.form-group {
-    input[type='password'],
-    input[type='text'] {
-        padding-right: 30px;
-    }
-
-    .error {
-        color: @failure-color;
-    }
-
-    textarea{
-        width:100%;
-        resize: vertical;
-    }
-}
-
-.form-group.required .control-label:after {
-    content: "*";
-    color: @failure-color;
-}
-
-.form-section {
-    h3 {
-        margin-top: 10px;
-    }
-
-    .control-label {
-        text-transform: capitalize;
-    }
-}
-
-.form-text-header {
-    margin-bottom:15px;
-
-    h3{
-        margin-top:0;
-    }
-}
-
-
-// required to override bootstrap-theme which adds background gradients
-.well {
-    background-image: none;
-    filter: none;
-}
-/*
-
-*/
-.form-horizontal {
-    .has-feedback.no-right-padding .form-control-feedback {
-        right: 0;
-    }
-
-    .form-group-large.has-feedback .form-control-feedback {
-        right: 0;
-        line-height: 44px;
-    }
-
-    .form-group-header {
-        margin-left: 0;
-        margin-right: 0;
-        border-bottom: 1px solid #ddd;
-        padding-bottom: 15px;
-        margin-bottom: 20px;
-
-        .control-label {
-            font-weight: 600;
-            display: inline-block;
-            margin-right: 5px;
-        }
-
-        .form-control {
-            display: inline-block;
-            margin-right: 5px;
-            max-width: 300px;
-            width: auto;
-        }
-
-        .help-block {
-            display: inline-block;
-            margin-right: 5px;
-        }
-    }
 }
 
 #userRegistration {
@@ -311,26 +130,6 @@ Validation Tooltip
     }
 }
 
-/*
-Footer
-*/
-
-.footer {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    height: @footer-height;
-    text-align: center;
-    color: @footer-color;
-    border-top: 1px solid #ccc;
-    background-color:  @footer-background-color;
-    padding: 10px;
-}
-
-/*
-Alert Messages
-*/
-@import "alert-system.less";
 
 
 /*
@@ -391,93 +190,3 @@ Login
         }
     }
 }
-
-/*
-Dialogs CSS
-*/
-@import "dialogs.less";
-
-
-
-/*
-Toolbar
-*/
-.toolbar .form-group {
-    margin-bottom: 0;
-}
-
-.toolbar-search {
-    position: relative;
-
-    button {
-        position: absolute;
-        right: 0;
-        top: 2px;
-        border: 0;
-        border-radius: 0;
-        background: transparent;
-    }
-}
-
-.tool-group-right .btn-group {
-    margin-left: 5px;
-}
-
-
-
-/*
-Subtitle / help bar
-*/
-.subtitle-bar a {
-    margin-bottom: 10px;
-    text-decoration: none;
-}
-
-
-/*
-Generic buttons CSS
-*/
-@import "buttons.less";
-
-
-
-/*
-Panel Styles
-*/
-@import "panel.less";
-
-
-
-
-
-/* Medium devices (desktops, 768px and up) */
-@media (min-width: @screen-sm) {
-
-    .overview {
-        .row-fluid {
-            .span6  {
-                width: 100%;
-            }
-
-            .span6:first-child {
-                margin-bottom: 20px;
-            }
-
-            .span6:nth-child(even) {
-                margin-left: 0;
-            }
-        }
-    }
-
-}
-
-
-/* Medium devices (desktops, 992px and up) */
-@media (min-width: @screen-md) {
-    .tool-group-right {
-        float: right;
-        margin-left: 20px;
-    }
-}
-
-// No styles to be placed after the media queries..

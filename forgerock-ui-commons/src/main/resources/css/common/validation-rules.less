@@ -1,0 +1,25 @@
+.validationRules .error,
+.has-feedback .form-control-feedback.error {
+    .validation-icon {
+        .fa-icon();
+        color: @failure-color;
+        &:before {
+            content: @fa-var-times;
+        }
+    }
+}
+
+.validationRules .ok,
+.has-feedback .form-control-feedback.ok {
+    .validation-icon {
+        .fa-icon();
+        color: @success-color;
+        &:before {
+            content:'';
+        }
+    }
+}
+
+.validationRules .ok .validation-icon:before {
+    content: @fa-var-check;
+}

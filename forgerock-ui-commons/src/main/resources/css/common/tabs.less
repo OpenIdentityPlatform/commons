@@ -1,0 +1,60 @@
+.nav-tabs {
+    /* Font weight 600 is between normal (400) and bold (700) */
+    font-weight: 600;
+    .dropdown .dropdown-toggle {
+        margin-right: 0;
+        i {
+            padding: 0;
+        }
+    }
+
+    &>li:not(.dropdown) {
+        a {
+            text-transform: capitalize;
+
+            i {
+                padding-right: 5px;
+            }
+        }
+    }
+
+    >li>a {
+        color: #777;
+        padding: 10px 20apx;
+        font-weight: 600;
+
+        &:hover{
+            color: #555;
+        }
+    }
+
+}
+
+.tab-menu {
+    margin-bottom: -1px;
+}
+
+.tab-content {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    margin-bottom: 50px;
+}
+
+.tab-pane-footer{
+    padding:25px;
+}
+
+
+/*!
+* Tab drop for Bootstrap
+*
+* Copyright 2012 Stefan Petre
+* Licensed under the Apache License v2.0
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+*/
+
+.nav-tabs,
+.nav-pills {
+    position: relative;
+}
