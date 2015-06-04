@@ -11,7 +11,6 @@
     &>li:not(.dropdown) {
         a {
             text-transform: capitalize;
-
             i {
                 padding-right: 5px;
             }
@@ -35,13 +34,15 @@
 }
 
 .tab-content {
-    background-color: #fff;
-    border: 1px solid #ddd;
-    margin-bottom: 50px;
+    // Do not style the tab-content as this is used in different ways in different places.
+    // Please use .nav-tab-content to create the classic tabbed views.
 }
 
-.tab-pane-footer{
-    padding:25px;
+.nav-tab-content {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    margin-bottom: 20px;
+    padding: 30px;
 }
 
 
