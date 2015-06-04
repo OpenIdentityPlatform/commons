@@ -971,7 +971,7 @@ public final class Status {
      *
      * @see <a href="http://tools.ietf.org/html/rfc6585">Additional HTTP Status Codes</a>
      */
-    public static final Status TOO_MANY_REQUESTS = newStatus(429, "Too many requests");
+    public static final Status TOO_MANY_REQUESTS = newStatus(429, "Too Many Requests");
 
     /**
      * The 500 (Internal Server Error) status code indicates that the server
