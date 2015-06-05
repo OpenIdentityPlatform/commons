@@ -21,21 +21,18 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
- * A base implementation of a parser for {@link QueryFilter} string representations.
- * This is currently designed with infix notation in mind and with operators based
- * on the SCIM standard (note that SCIM 1.1 does not define a 'not' operator, and
- * this is subject to change once SCIM 2.0 moves to final).
- *
+ * A query string has the following string representation:
+ * 
  * <pre>
  * Expr           = OrExpr
  * OrExpr         = AndExpr ( 'or' AndExpr ) *
  * AndExpr        = NotExpr ( 'and' NotExpr ) *
  * NotExpr        = '!' PrimaryExpr | PrimaryExpr
  * PrimaryExpr    = '(' Expr ')' | ComparisonExpr | PresenceExpr | LiteralExpr
- * ComparisonExpr = Pointer OpName JsonValue
+ * ComparisonExpr = Pointer OpName Value
  * PresenceExpr   = Pointer 'pr'
  * LiteralExpr    = 'true' | 'false'
- * Pointer        = Field specification
+ * Pointer        = Case-sensitive field specification
  * OpName         = 'eq' |  # equal to
  *                  'co' |  # contains
  *                  'sw' |  # starts with
@@ -44,20 +41,25 @@ import java.util.NoSuchElementException;
  *                  'gt' |  # greater than
  *                  'ge' |  # greater than or equal to
  *                  STRING  # extended operator
- * JsonValue      = NUMBER | BOOLEAN | '"' UTF8STRING '"' | ''' UTF8STRING '''
+ * Value          = NUMBER | BOOLEAN | '"' UTF8STRING '"' | ''' UTF8STRING '''
  * STRING         = ASCII string not containing white-space
  * UTF8STRING     = UTF-8 string possibly containing white-space
  * </pre>
  *
  * Note that white space, parentheses, and exclamation characters need URL
- * encoding in HTTP query strings.  
+ * when passed via HTTP query strings.  
  * <p>
  * ASCII and UTF-8 strings will treat the backslash character as an escape character.
- * For an example, the will allow for the inclusion of quotes or single-quotes within 
- * a string that is surrounded by the same type of quotes: "tes\"t"
+ * For an example, this will allow for the inclusion of quotes or single-quotes within 
+ * a string that is surrounded by the same type of quotes: "tes\"t".  The backslash 
+ * character itself will also need to be escaped if it is to be included in the string.
+ * <p>
+ * In addition to single valued properties (number, boolean, and string), query filters
+ * can be applied to multi-valued properties. When operating on properties that are an 
+ * array or list type the operation should be evaluated on each element in the array, 
+ * passing if any of the elements in the array or list pass the operation.
  *
  * @param <F> The type of field description used in parsed {@link QueryFilter} objects.
- * @see <a href="http://www.simplecloud.info/specs/draft-scim-api-01.html#rfc.section.3.2.2.1">SCIM</a>
  */
 public abstract class QueryFilterParser<F> {
 

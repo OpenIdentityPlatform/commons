@@ -501,7 +501,10 @@ public class QueryFilter<F> {
     /**
      * Creates a new {@code contains} filter using the provided field name and
      * value assertion. This method is used to check that the string representation
-     * of the field contains the provided substring.
+     * of the field contains the provided substring. When operating on a collection 
+     * of values the operation should be evaluated on each element in the collection, 
+     * passing if any of the element's string representations contain the provided 
+     * substring.
      *
      * @param field
      *            The name of field to be compared.
@@ -534,7 +537,10 @@ public class QueryFilter<F> {
 
     /**
      * Creates a new {@code greater than} filter using the provided field name
-     * and value assertion.
+     * and value assertion. This method is used to check that the value of the field 
+     * is greater than the provided value. When operating on a collection of values 
+     * the operation should be evaluated on each element in the collection, passing 
+     * if any of the element's values are greater than the provided value.
      *
      * @param field
      *            The name of field to be compared.
@@ -550,7 +556,11 @@ public class QueryFilter<F> {
 
     /**
      * Creates a new {@code greater than or equal to} filter using the provided
-     * field name and value assertion.
+     * field name and value assertion. This method is used to check that the value 
+     * of the field is greater than or equal to the provided value. When operating 
+     * on a collection of values the operation should be evaluated on each element 
+     * in the collection, passing if any of the element's values are greater than 
+     * or equal to the provided value.
      *
      * @param field
      *            The name of field to be compared.
@@ -567,7 +577,10 @@ public class QueryFilter<F> {
 
     /**
      * Creates a new {@code less than} filter using the provided field name and
-     * value assertion.
+     * value assertion. This method is used to check that the value of the field 
+     * is less than the provided value. When operating on a collection of values 
+     * the operation should be evaluated on each element in the collection, passing 
+     * if any of the element's values are less than the provided value.
      *
      * @param field
      *            The name of field to be compared.
@@ -601,7 +614,11 @@ public class QueryFilter<F> {
 
     /**
      * Creates a new {@code less than or equal to} filter using the provided
-     * field name and value assertion.
+     * field name and value assertion. This method is used to check that the value 
+     * of the field is less than or equal to the provided value. When operating 
+     * on a collection of values the operation should be evaluated on each element 
+     * in the collection, passing if any of the element's values are less than 
+     * or equal to the provided value.
      *
      * @param field
      *            The name of field to be compared.
@@ -684,7 +701,11 @@ public class QueryFilter<F> {
 
     /**
      * Creates a new {@code starts with} filter using the provided field name
-     * and value assertion.
+     * and value assertion. This method is used to check that the string representation
+     * of the field starts with the provided substring. When operating on a collection 
+     * of values the operation should be evaluated on each element in the collection, 
+     * passing if any of the element's string representations starts with the provided 
+     * substring.
      *
      * @param field
      *            The name of field to be compared.
