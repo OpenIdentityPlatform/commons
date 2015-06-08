@@ -348,6 +348,12 @@ final class HttpAdapter implements Handler {
                         + PARAM_QUERY_EXPRESSION + " are mutually exclusive");
             }
 
+            if (request.getPagedResultsOffset() > 0 && request.getPagedResultsCookie() != null) {
+                // FIXME: i18n.
+                throw new BadRequestException("The parameters " + PARAM_PAGED_RESULTS_OFFSET + " and "
+                        + PARAM_PAGED_RESULTS_COOKIE + " are mutually exclusive");
+            }
+
             return doRequest(context, req, resp, request);
         } catch (final Exception e) {
             return fail(req, e);

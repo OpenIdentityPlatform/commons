@@ -82,12 +82,30 @@ public interface QueryResponse extends Response {
     CountPolicy getTotalPagedResultsPolicy();
 
     /**
-     * Returns the opaque cookie which should be used with the next paged
-     * results query request.
+     * Returns the opaque cookie which can be used for the next cookie-based
+     * paged request. A cookie will only be returned if paged results have
+     * been requested via a non-zero {@code pageSize}. Cookies are only
+     * guaranteed for {@link org.forgerock.util.query.QueryFilter}-based
+     * queries. Implicit sorting may be supported by the resource provider
+     * but it is not required. Given the arbitrary nature of query expressions
+     * (and expression-backed queryIds) there can be no guarantee made of
+     * cookie support for these queries.
      *
-     * @return The opaque cookie which should be used with the next paged
+     * <p>
+     *     <em>Note:</em>Cookies have a limited lifespan. They should
+     *     not be stored long-term. Cookies should only be used on immediate
+     *     subsequent requests or behavior is undefined.
+     * </p>
+     *
+     * @return The opaque cookie which should be used with the next cookie-based paged
      *         results query request, or {@code null} if paged results were not
-     *         requested, or if there are not more pages to be returned.
+     *         requested, there are no more pages to be returned, or cookies are not
+     *         supported for this query.
+     *
+     * @see QueryRequest#getPagedResultsCookie()
+     * @see QueryRequest#setPagedResultsCookie(String)
+     * @see QueryRequest#addSortKey(SortKey...)
+     * @see QueryRequest#addSortKey(String...)
      */
     String getPagedResultsCookie();
 
@@ -95,13 +113,13 @@ public interface QueryResponse extends Response {
      * Returns the total number of paged results in adherence with
      * the {@link QueryRequest#getTotalPagedResultsPolicy()} in the request
      * or {@link #NO_COUNT} if paged results were not requested, the count
-     * policy is {@code NONE}, or the total number of remaining
+     * policy is {@code NONE}, or the total number of paged
      * results is unknown.
      *
      * @return A count of the total number of paged results to be
      *         returned in subsequent paged results query requests, or
      *         {@link #NO_COUNT} if paged results were not requested, or if the total
-     *         number of remaining results is unknown.
+     *         number of paged results is unknown.
      */
     int getTotalPagedResults();
 

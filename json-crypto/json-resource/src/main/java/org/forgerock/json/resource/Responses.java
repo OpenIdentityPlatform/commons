@@ -290,8 +290,8 @@ public final class Responses {
         private final int remainingPagedResults;
 
         /**
-         * Creates a new query result with the provided paged results cookie and
-         * a count of the total number of remaining results according to
+         * Creates a new query response with the provided paged results cookie and
+         * a count of the total number of resources according to
          * {@link #totalPagedResultsPolicy}.
          *
          * @param pagedResultsCookie
@@ -305,8 +305,7 @@ public final class Responses {
          *            The total number of paged results requested in adherence to
          *            the {@link QueryRequest#getTotalPagedResultsPolicy()} in the request,
          *            or {@link #NO_COUNT} if paged results were not requested, the count
-         *            policy is {@code NONE}, or if the total number of remaining
-         *            results is unknown.
+         *            policy is {@code NONE}, or if the total number of results is unknown.
          * @param remainingPagedResults
          *            An estimate of the total number of remaining results to be
          *            returned in subsequent paged results query requests, or
@@ -324,39 +323,14 @@ public final class Responses {
             this.remainingPagedResults = remainingPagedResults;
         }
 
-        /**
-         * Returns the policy that was used to calculate the {@link #totalPagedResults}.
-         *
-         * @see #getTotalPagedResults()
-         */
         @Override
         public CountPolicy getTotalPagedResultsPolicy() { return totalPagedResultsPolicy; }
 
-        /**
-         * Returns the opaque cookie which should be used with the next paged
-         * results query request.
-         *
-         * @return The opaque cookie which should be used with the next paged
-         *         results query request, or {@code null} if paged results were not
-         *         requested, or if there are not more pages to be returned.
-         */
         @Override
         public String getPagedResultsCookie() {
             return pagedResultsCookie;
         }
 
-        /**
-         * Returns the total number of paged results in adherence with
-         * the {@link QueryRequest#getTotalPagedResultsPolicy()} in the request
-         * or {@link #NO_COUNT} if paged results were not requested, the count
-         * policy is {@code NONE}, or the total number of remaining
-         * results is unknown.
-         *
-         * @return A count of the total number of paged results to be
-         *         returned in subsequent paged results query requests, or
-         *         {@link #NO_COUNT} if paged results were not requested, or if the total
-         *         number of remaining results is unknown.
-         */
         @Override
         public int getTotalPagedResults() {
             return totalPagedResults;
