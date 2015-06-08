@@ -183,24 +183,6 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <configuration>
-                    <taglet>ch.arrenbrecht.jcite.JCiteTaglet</taglet>
-                    <tagletArtifact>
-                        <groupId>org.mcraig</groupId>
-                        <artifactId>jcite</artifactId>
-                        <version>1.13.0</version>
-                    </tagletArtifact>
-                    <sourcepath>src/test/java</sourcepath>
-                    <additionalJOption>-J-Djcitesourcepath=src/test/java</additionalJOption>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
     <reporting>
         <plugins>
             <plugin>
