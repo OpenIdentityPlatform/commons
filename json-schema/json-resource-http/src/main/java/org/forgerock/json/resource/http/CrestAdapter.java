@@ -341,7 +341,6 @@ final class CrestAdapter implements RequestHandler {
                                   QueryResponse queryResponse = newQueryResponse(pagedResultsCookie,
                                                                                  countPolicy,
                                                                                  totalPagedResults);
-                                  // FIXME remaining paged results has no setter !
                                   for (JsonValue value : content.get(FIELD_RESULT)) {
                                       queryHandler.handleResource(createResourceResponse(value));
                                   }

@@ -258,6 +258,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
                     writer.writeStringField(FIELD_TOTAL_PAGED_RESULTS_POLICY,
                             result.getTotalPagedResultsPolicy().toString());
                     writer.writeNumberField(FIELD_TOTAL_PAGED_RESULTS, result.getTotalPagedResults());
+                    // Remaining is only present for backwards compatibility with CREST2 via Accept-API-Version
                     writer.writeNumberField(FIELD_REMAINING_PAGED_RESULTS, result.getRemainingPagedResults());
                     writer.writeEndObject();
                     onSuccess();

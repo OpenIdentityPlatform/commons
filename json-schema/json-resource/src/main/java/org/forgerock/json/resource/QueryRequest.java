@@ -16,9 +16,10 @@
 
 package org.forgerock.json.resource;
 
-import java.util.List;
-
 import org.forgerock.json.JsonPointer;
+import org.forgerock.util.query.QueryFilter;
+
+import java.util.List;
 
 /**
  * A request to search for all JSON resources matching a user specified set of
@@ -29,7 +30,7 @@ import org.forgerock.json.JsonPointer;
  * <li>default query: when neither a filter, expression or query ID are
  * specified all resources will be returned
  * <li>query by filter: returns all resources which match the
- * {@link QueryFilters} specified using {@link #setQueryFilter(org.forgerock.util.query.QueryFilter)}
+ * {@link QueryFilters} specified using {@link #setQueryFilter(QueryFilter)}
  * <li>query by ID: returns all resources which match the named prepared query
  * specified using {@link #setQueryId(String)}
  * <li>query by expression: returns all resources which match a native
@@ -39,6 +40,11 @@ import org.forgerock.json.JsonPointer;
  * addition, applications should take care to prevent users from directly
  * accessing this form of query for security reasons.
  * </ul>
+ *
+ * <p>
+ * In addition to the above mentioned query types queries may also be paged
+ * when a page size is found via {@link #getPageSize()}. Paged requests should
+ * be used in most cases when an unknown number of query results will be returned.
  */
 public interface QueryRequest extends Request<QueryRequest> {
     /**
@@ -129,12 +135,15 @@ public interface QueryRequest extends Request<QueryRequest> {
      * returned with the previous query result, until the resource provider
      * returns a {@code null} cookie indicating that the final page of results
      * has been returned.
+     * <p>
+     * <em>Note:</em> Cookies and offsets are mutually exclusive.
      *
      * @return The opaque cookie which is used by the resource provider to track
      *         its position in the set of query results, or {@code null} if
-     *         paged results are not requested (when the page size is 0), or if
+     *         paged results are not requested (when the page size is 0) or if
      *         the first page of results is being requested (when the page size
      *         is non-zero).
+     *
      * @see #getPageSize()
      * @see #getPagedResultsOffset()
      */
@@ -149,15 +158,21 @@ public interface QueryRequest extends Request<QueryRequest> {
     CountPolicy getTotalPagedResultsPolicy();
 
     /**
-     * Returns the index within the result set of the first result which should
-     * be returned. Paged results will be enabled if and only if the page size
-     * is non-zero. If the parameter is not present or a value less than 1 is
-     * specified then then the page following the previous page returned will be
-     * returned. A value equal to or greater than 1 indicates that a specific
-     * page should be returned starting from the position specified.
+     * Returns the zero-based index of the first resource which should be
+     * included in the query results. An offset of 0 (default) will return
+     * the first resource in the collection. An offset of {@code 1} will
+     * return the second, and so on ...
+     * <p>
+     * <em>Note:</em> Offsets and cookies are mutually exclusive. When a
+     * cookie is supplied only the default {@code 0} offset is supported.
+     * <p>
+     * Offset must be a zero-based integer denoting the number of records to
+     * skip. This is very similar to the <code>LIMIT</code> and
+     * <code>SKIP</code> clauses in SQL databases.
      *
-     * @return The index within the result set of the first result which should
+     * @return The zero-based index within the result set of the first result which should
      *         be returned.
+     *
      * @see #getPageSize()
      * @see #getPagedResultsCookie()
      */
@@ -205,7 +220,7 @@ public interface QueryRequest extends Request<QueryRequest> {
      * @see QueryRequest#getQueryExpression()
      * @see QueryRequest#getQueryId()
      */
-    org.forgerock.util.query.QueryFilter<JsonPointer> getQueryFilter();
+    QueryFilter<JsonPointer> getQueryFilter();
 
     /**
      * Returns the query identifier for pre-defined queries.
@@ -241,19 +256,22 @@ public interface QueryRequest extends Request<QueryRequest> {
      * returned with the previous query result, until the resource provider
      * returns a {@code null} cookie indicating that the final page of results
      * has been returned.
+     * <p>
+     * When subsequent paged requests are being made no query parameters
+     * may be altered; doing so will result in undefined behavior. The only
+     * parameter that may be changed during paged requests is the page
+     * size.
      *
      * @param cookie
      *            The opaque cookie which is used by the resource provider to
-     *            track its position in the set of query results, or
-     *            {@code null} if paged results are not requested (when the page
-     *            size is 0), or if the first page of results is being requested
-     *            (when the page size is non-zero).
+     *            track its position in the set of query results.
      * @return This query request.
      * @throws UnsupportedOperationException
      *             If this query request does not permit changes to the paged
      *             results cookie.
      * @see #setPageSize(int)
-     * @see #setPagedResultsOffset(int)
+     * @see #addSortKey(SortKey...)
+     * @see #addSortKey(String...)
      */
     QueryRequest setPagedResultsCookie(String cookie);
 
@@ -273,12 +291,17 @@ public interface QueryRequest extends Request<QueryRequest> {
     QueryRequest setTotalPagedResultsPolicy(CountPolicy policy);
 
     /**
-     * Sets the index within the result set of the first result which should be
-     * returned. Paged results will be enabled if and only if the page size is
-     * non-zero. If the parameter is not present or a value less than 1 is
-     * specified then then the page following the previous page returned will be
-     * returned. A value equal to or greater than 1 indicates that a specific
-     * page should be returned starting from the position specified.
+     * Sets the zero-based index of the first resource which should be
+     * included in the query results. An offset of 0 (default) will return
+     * the first resource in the collection. An offset of {@code 1} will
+     * return the second, and so on ...
+     * <p>
+     * <em>Note:</em> Offsets and cookies are mutually exclusive. When a
+     * cookie is supplied only the default {@code 0} offset is supported.
+     * <p>
+     * Offset must be a zero-based integer denoting the number of records to
+     * skip. This is very similar to the <code>LIMIT</code> and
+     * <code>SKIP</code> clauses in SQL databases.
      *
      * @param offset
      *            The index within the result set of the first result which
@@ -326,7 +349,7 @@ public interface QueryRequest extends Request<QueryRequest> {
      * @throws UnsupportedOperationException
      *             If this query request does not permit changes to the query
      *             identifier.
-     * @see QueryRequest#setQueryFilter(org.forgerock.util.query.QueryFilter)
+     * @see QueryRequest#setQueryFilter(QueryFilter)
      * @see QueryRequest#setQueryId(String)
      */
     QueryRequest setQueryExpression(String expression);
@@ -349,7 +372,7 @@ public interface QueryRequest extends Request<QueryRequest> {
      * @see QueryRequest#setQueryExpression(String)
      * @see QueryRequest#setQueryId(String)
      */
-    QueryRequest setQueryFilter(org.forgerock.util.query.QueryFilter<JsonPointer> filter);
+    QueryRequest setQueryFilter(QueryFilter<JsonPointer> filter);
 
     /**
      * Sets the query identifier for pre-defined queries.
@@ -365,7 +388,7 @@ public interface QueryRequest extends Request<QueryRequest> {
      *             If this query request does not permit changes to the query
      *             identifier.
      * @see QueryRequest#setQueryExpression(String)
-     * @see QueryRequest#setQueryFilter(org.forgerock.util.query.QueryFilter)
+     * @see QueryRequest#setQueryFilter(QueryFilter)
      */
     QueryRequest setQueryId(String id);
 }
