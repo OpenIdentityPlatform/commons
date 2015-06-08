@@ -35,6 +35,7 @@ import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Tests for {@link MemoryBackend}.
@@ -147,6 +148,112 @@ public final class MemoryBackendTest {
         connection.query(ctx(), newQueryRequest("users"), results);
         assertThat(results).containsOnly(asResource(userAliceWithIdAndRev(0, 0)),
                 asResource(userBobWithIdAndRev(1, 0)));
+    }
+
+    @Test
+    public void testQueryCollectionWithSort() throws Exception {
+        final Connection connection = getConnection();
+        connection.create(ctx(), newCreateRequest("users", jsonUser("foo", 30, "it")));
+        connection.create(ctx(), newCreateRequest("users", jsonUser("foo3", 33, "it")));
+        connection.create(ctx(), newCreateRequest("users", jsonUser("foo1", 31, "it")));
+        connection.create(ctx(), newCreateRequest("users", jsonUser("foo4", 34, "it")));
+        connection.create(ctx(), newCreateRequest("users", jsonUser("foo5", 35, "it")));
+        connection.create(ctx(), newCreateRequest("users", jsonUser("foo2", 32, "it")));
+
+        final QueryRequest request = newQueryRequest("users")
+                .addSortKey("+/age");
+
+        final List<ResourceResponse> results = new ArrayList<ResourceResponse>();
+        final QueryResponse result = connection.query(ctx(), request, results);
+
+        assertThat(results.get(0).getContent().get("name").asString()).isEqualTo("foo");
+        assertThat(results.get(3).getContent().get("name").asString()).isEqualTo("foo3");
+        assertThat(results.get(5).getContent().get("name").asString()).isEqualTo("foo5");
+    }
+
+    @Test
+    public void testQueryCollectionWithOffset() throws Exception {
+        final Connection connection = getConnection();
+        connection.create(ctx(), newCreateRequest("users", jsonUser("foo", 30, "it")));
+        connection.create(ctx(), newCreateRequest("users", jsonUser("foo1", 31, "it")));
+        connection.create(ctx(), newCreateRequest("users", jsonUser("foo2", 32, "it")));
+        connection.create(ctx(), newCreateRequest("users", jsonUser("foo3", 33, "it")));
+        connection.create(ctx(), newCreateRequest("users", jsonUser("foo4", 34, "it")));
+        connection.create(ctx(), newCreateRequest("users", jsonUser("foo5", 35, "it")));
+        connection.create(ctx(), newCreateRequest("users", jsonUser("foo6", 36, "it")));
+
+        final QueryRequest request = newQueryRequest("users")
+                .addSortKey("+/age") // have to sort since backend is a hash
+                .setPageSize(2)
+                .setPagedResultsOffset(2);
+
+        final List<ResourceResponse> results = new ArrayList<ResourceResponse>();
+        final QueryResponse result = connection.query(ctx(), request, results);
+
+        assertThat(results.get(0).getContent().get("name").asString()).isEqualTo("foo2");
+        assertThat(results.get(1).getContent().get("name").asString()).isEqualTo("foo3");
+
+        assertThat(results.size()).isEqualTo(2);
+        assertThat(result.getPagedResultsCookie()).isNotNull();
+    }
+
+    @Test
+    public void testQueryCollectionWithCookie() throws Exception {
+        final Connection connection = getConnection();
+        connection.create(ctx(), newCreateRequest("users", jsonUser("foo", 30, "eng")));
+        connection.create(ctx(), newCreateRequest("users", jsonUser("foo1", 31, "eng")));
+        connection.create(ctx(), newCreateRequest("users", jsonUser("foo2", 32, "eng")));
+        connection.create(ctx(), newCreateRequest("users", jsonUser("foo3", 33, "eng")));
+        connection.create(ctx(), newCreateRequest("users", jsonUser("foo4", 34, "eng")));
+
+        // first page
+
+        QueryRequest request = newQueryRequest("users").addSortKey("+/name").setPageSize(2);
+        List<ResourceResponse> results = new ArrayList<ResourceResponse>();
+        QueryResponse result = connection.query(ctx(), request, results);
+
+        assertThat(results.size()).isEqualTo(2);
+        assertThat(result.getPagedResultsCookie()).isNotNull();
+        assertThat(results.get(0).getContent().get("name").asString()).isEqualTo("foo");
+        assertThat(results.get(1).getContent().get("name").asString()).isEqualTo("foo1");
+
+        // second page
+
+        results = new ArrayList<ResourceResponse>();
+        request.setPagedResultsCookie(result.getPagedResultsCookie());
+        result = connection.query(ctx(), request, results);
+        assertThat(results.size()).isEqualTo(2);
+        assertThat(results.get(0).getContent().get("name").asString()).isEqualTo("foo2");
+        assertThat(results.get(1).getContent().get("name").asString()).isEqualTo("foo3");
+        assertThat(result.getPagedResultsCookie()).isNotNull();
+
+        // third (final) page
+
+        results = new ArrayList<ResourceResponse>();
+        request.setPagedResultsCookie(result.getPagedResultsCookie());
+        result = connection.query(ctx(), request, results);
+        assertThat(results.size()).isEqualTo(1);
+        assertThat(results.get(0).getContent().get("name").asString()).isEqualTo("foo4");
+        assertThat(result.getPagedResultsCookie()).isNull();
+    }
+
+    @Test
+    public void testQueryCollectionFailsWithOffsetAndCookie() throws Exception {
+        final Connection connection = getConnection();
+        connection.create(ctx(), newCreateRequest("users", userAlice()));
+        connection.create(ctx(), newCreateRequest("users", userBob()));
+
+        QueryRequest request = newQueryRequest("users").setPageSize(1).addSortKey("+/name");
+        final QueryResponse result = connection.query(ctx(), request, new ArrayList<ResourceResponse>());
+        final String nextCookie = result.getPagedResultsCookie();
+        request.setPagedResultsOffset(1).setPagedResultsCookie(nextCookie);
+
+        try {
+            connection.query(ctx(), request, new ArrayList<ResourceResponse>());
+            fail("Query with offset and cookie unexpectedly succeeded");
+        } catch (final Exception e) {
+            assertThat(e).isInstanceOf(BadRequestException.class);
+        }
     }
 
     @Test
@@ -308,6 +415,10 @@ public final class MemoryBackendTest {
         connection.create(ctx(), newCreateRequest("users", userBob()));
 
         return connection;
+    }
+
+    private JsonValue jsonUser(String name, int age, String role) {
+        return content(object(field("name", name), field("age", age), field("role", role)));
     }
 
     private JsonValue userAlice() {

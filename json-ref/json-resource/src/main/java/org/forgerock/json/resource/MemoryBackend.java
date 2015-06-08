@@ -36,7 +36,9 @@ import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
+import org.forgerock.util.encode.Base64;
 import org.forgerock.util.promise.Promise;
+import org.forgerock.util.query.QueryFilter;
 import org.forgerock.util.query.QueryFilterVisitor;
 
 /**
@@ -54,6 +56,54 @@ public final class MemoryBackend implements CollectionResourceProvider {
 
         boolean toBoolean() {
             return this == TRUE; // UNDEFINED collapses to FALSE.
+        }
+    }
+
+    private static final class Cookie {
+        private final List<SortKey> sortKeys;
+        private final int lastResultIndex;
+
+        Cookie(final int lastResultIndex, final List<SortKey> sortKeys) {
+            this.sortKeys = sortKeys;
+            this.lastResultIndex = lastResultIndex;
+        }
+
+        static Cookie valueOf(String base64) {
+            final String decoded = new String(Base64.decode(base64));
+            final String[] split = decoded.split(":");
+            final int lastOffset = Integer.parseInt(split[0]);
+            final List<SortKey> sortKeys = new ArrayList<>();
+            final String[] splitKeys = split[1].split(",");
+
+            for (String key : splitKeys) {
+                if (!key.equals("")) {
+                    sortKeys.add(SortKey.valueOf(key));
+                }
+            }
+
+            return new Cookie(lastOffset, sortKeys);
+        }
+
+        String toBase64() {
+            final StringBuilder buf = new StringBuilder();
+            buf.append(lastResultIndex).append(":");
+
+            for (int i = 0; i < sortKeys.size(); i++) {
+                if (i > 0) {
+                    buf.append(",");
+                }
+                buf.append(sortKeys.get(i).toString());
+            }
+
+            return Base64.encode(buf.toString().getBytes());
+        }
+
+        public List<SortKey> getSortKeys() {
+            return sortKeys;
+        }
+
+        public int getLastResultIndex() {
+            return lastResultIndex;
         }
     }
 
@@ -531,7 +581,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
             return new NotSupportedException("Query by expression not supported").asPromise();
         } else {
             // No filtering or query by filter.
-            final org.forgerock.util.query.QueryFilter<JsonPointer> filter = request.getQueryFilter();
+            final QueryFilter<JsonPointer> filter = request.getQueryFilter();
 
             // If paged results are requested then decode the cookie in order to determine
             // the index of the first result to be returned.
@@ -539,25 +589,30 @@ public final class MemoryBackend implements CollectionResourceProvider {
             final String pagedResultsCookie = request.getPagedResultsCookie();
             final boolean pagedResultsRequested = pageSize > 0;
             final int firstResultIndex;
-            if (!pagedResultsRequested || pagedResultsCookie == null
-                    || pagedResultsCookie.isEmpty() || request.getPagedResultsOffset() > 0) {
-                firstResultIndex = Math.max(0, request.getPagedResultsOffset() - 1);
+            final List<SortKey> sortKeys = request.getSortKeys();
+
+            if (pageSize > 0 && pagedResultsCookie != null) {
+                if (request.getPagedResultsOffset() > 0) {
+                    return new BadRequestException("Cookies and offsets are mutually exclusive").asPromise();
+                }
+
+                firstResultIndex = Cookie.valueOf(pagedResultsCookie).getLastResultIndex();
             } else {
-                try {
-                    firstResultIndex = Integer.parseInt(pagedResultsCookie);
-                } catch (final NumberFormatException e) {
-                    return new BadRequestException("Invalid paged results cookie").asPromise();
+                if (request.getPagedResultsOffset() > 0) {
+                    firstResultIndex = request.getPagedResultsOffset();
+                } else {
+                    firstResultIndex = 0;
                 }
             }
+
             final int lastResultIndex =
                     pagedResultsRequested ? firstResultIndex + pageSize : Integer.MAX_VALUE;
 
             // Select, filter, and return the results. These can be streamed if server
             // side sorting has not been requested.
             int resultIndex = 0;
-
             int resultCount;
-            if (request.getSortKeys().isEmpty()) {
+            if (sortKeys.isEmpty()) {
                 // No sorting so stream the results.
                 for (final ResourceResponse resource : resources.values()) {
                     if (filter == null || filter.accept(RESOURCE_FILTER, resource).toBoolean()) {
@@ -578,7 +633,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
                         results.add(resource);
                     }
                 }
-                Collections.sort(results, new ResourceComparator(request.getSortKeys()));
+                Collections.sort(results, new ResourceComparator(sortKeys));
                 for (final ResourceResponse resource : results) {
                     if (resultIndex >= firstResultIndex && resultIndex < lastResultIndex) {
                         handler.handleResource(resource);
@@ -595,8 +650,9 @@ public final class MemoryBackend implements CollectionResourceProvider {
             }
 
             if (pagedResultsRequested) {
-                final String nextCookie =
-                        resultIndex > lastResultIndex ? String.valueOf(lastResultIndex) : null;
+                final String nextCookie = resultIndex < resources.size() ?
+                        new Cookie(lastResultIndex, sortKeys).toBase64()
+                        : null;
 
                 switch (request.getTotalPagedResultsPolicy()) {
                 case NONE:
