@@ -422,7 +422,7 @@ public final class Requests {
         private org.forgerock.util.query.QueryFilter<JsonPointer> filter;
         private final List<SortKey> keys = new LinkedList<>();
         private String pagedResultsCookie;
-        private CountPolicy totalPagedResultsPolicy;
+        private CountPolicy totalPagedResultsPolicy = CountPolicy.NONE;
         private int pagedResultsOffset = 0;
         private int pageSize = 0;
         private String queryId;
@@ -512,8 +512,8 @@ public final class Requests {
         }
 
         @Override
-        public QueryRequest setTotalPagedResultsPolicy(CountPolicy totalPagedResultsPolicy) {
-            this.totalPagedResultsPolicy = totalPagedResultsPolicy;
+        public QueryRequest setTotalPagedResultsPolicy(final CountPolicy totalPagedResultsPolicy) {
+            this.totalPagedResultsPolicy = notNull(totalPagedResultsPolicy);
             return this;
         }
 
