@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2012 ForgeRock AS. All rights reserved.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -54,8 +54,7 @@ public interface SynchronousRequestHandler {
      * @return The possibly {@code null} result of the action.
      * @throws ResourceException
      *             If the request failed for some reason.
-     * @see RequestHandler#handleAction(ServerContext, ActionRequest,
-     *      ResultHandler)
+     * @see RequestHandler#handleAction(ServerContext, ActionRequest)
      */
     JsonValue handleAction(ServerContext context, ActionRequest request) throws ResourceException;
 
@@ -69,8 +68,7 @@ public interface SynchronousRequestHandler {
      * @return The new resource.
      * @throws ResourceException
      *             If the request failed for some reason.
-     * @see RequestHandler#handleCreate(ServerContext, CreateRequest,
-     *      ResultHandler)
+     * @see RequestHandler#handleCreate(ServerContext, CreateRequest)
      */
     Resource handleCreate(ServerContext context, CreateRequest request) throws ResourceException;
 
@@ -84,8 +82,7 @@ public interface SynchronousRequestHandler {
      * @return The deleted resource.
      * @throws ResourceException
      *             If the request failed for some reason.
-     * @see RequestHandler#handleDelete(ServerContext, DeleteRequest,
-     *      ResultHandler)
+     * @see RequestHandler#handleDelete(ServerContext, DeleteRequest)
      */
     Resource handleDelete(ServerContext context, DeleteRequest request) throws ResourceException;
 
@@ -100,8 +97,7 @@ public interface SynchronousRequestHandler {
      * @return The patched resource.
      * @throws ResourceException
      *             If the request failed for some reason.
-     * @see RequestHandler#handlePatch(ServerContext, PatchRequest,
-     *      ResultHandler)
+     * @see RequestHandler#handlePatch(ServerContext, PatchRequest)
      */
     Resource handlePatch(ServerContext context, PatchRequest request) throws ResourceException;
 
@@ -120,7 +116,7 @@ public interface SynchronousRequestHandler {
      * @throws ResourceException
      *             If the request failed for some reason.
      * @see RequestHandler#handleQuery(ServerContext, QueryRequest,
-     *      QueryResultHandler)
+     *      QueryResourceHandler)
      */
     QueryResult handleQuery(ServerContext context, QueryRequest request,
             Collection<Resource> resources) throws ResourceException;
@@ -135,7 +131,7 @@ public interface SynchronousRequestHandler {
      * @return The resource.
      * @throws ResourceException
      *             If the request failed for some reason.
-     * @see RequestHandler#handleRead(ServerContext, ReadRequest, ResultHandler)
+     * @see RequestHandler#handleRead(ServerContext, ReadRequest)
      */
     Resource handleRead(ServerContext context, ReadRequest request) throws ResourceException;
 
@@ -150,9 +146,7 @@ public interface SynchronousRequestHandler {
      * @return The updated resource.
      * @throws ResourceException
      *             If the request failed for some reason.
-     * @see RequestHandler#handleUpdate(ServerContext, UpdateRequest,
-     *      ResultHandler)
+     * @see RequestHandler#handleUpdate(ServerContext, UpdateRequest)
      */
     Resource handleUpdate(ServerContext context, UpdateRequest request) throws ResourceException;
-
 }

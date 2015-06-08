@@ -18,6 +18,8 @@ package org.forgerock.json.resource.http;
 
 import static org.forgerock.http.test.HttpTest.newRequest;
 import static org.forgerock.json.fluent.JsonValue.*;
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
+import static org.forgerock.util.promise.Promises.newResultPromise;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
@@ -31,52 +33,47 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResult;
-import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.util.promise.Promises;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Matchers;
+import org.forgerock.util.promise.Promise;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")
 public class RequestRunnerTest {
 
-    private static final ResourceException EXCEPTION = ResourceException
-            .getException(ResourceException.NOT_FOUND);
+    private static final ResourceException EXCEPTION = ResourceException.getException(ResourceException.NOT_FOUND);
+    private static final Promise<QueryResult, ResourceException> QUERY_RESULT = newResultPromise(new QueryResult());
+    private static final Promise<QueryResult, ResourceException> RESOURCE_EXCEPTION = newExceptionPromise(EXCEPTION);
 
     @Test
-    public void testHandleResultAnonymousQueryResultHandlerInVisitQueryAsync() throws Exception {
-        Response response = new Response();
-        QueryResultHandler resultHandler = getAnonymousQueryResultHandler(response);
-        resultHandler.handleResult(new QueryResult());
+    public void testHandleResultAnonymousQueryResourceHandlerInVisitQueryAsync() throws Exception {
+        Response response = getAnonymousQueryResourceHandler(QUERY_RESULT);
         assertEquals(getResponseContent(response), "{" + "\"result\":[],"
                 + "\"resultCount\":0,\"pagedResultsCookie\":null,\"remainingPagedResults\":-1"
                 + "}");
     }
 
     @Test
-    public void testHandleResourceAnonymousQueryResultHandlerInVisitQueryAsync() throws Exception {
-        Response response = new Response();
-        QueryResultHandler resultHandler = getAnonymousQueryResultHandler(response);
-        resultHandler.handleResource(new Resource("id", "revision", new JsonValue("jsonValue")));
-        resultHandler.handleResult(new QueryResult());
+    public void testHandleResourceAnonymousQueryResourceHandlerInVisitQueryAsync() throws Exception {
+        Response response = getAnonymousQueryResourceHandler(QUERY_RESULT,
+                new Resource("id", "revision", new JsonValue("jsonValue")));
         assertEquals(getResponseContent(response), "{" + "\"result\":[\"jsonValue\"],"
                 + "\"resultCount\":1,\"pagedResultsCookie\":null,\"remainingPagedResults\":-1"
                 + "}");
     }
 
     @Test
-    public void testHandleResourceTwoAnonymousQueryResultHandlerInVisitQueryAsync()
+    public void testHandleResourceTwoAnonymousQueryResourceHandlerInVisitQueryAsync()
             throws Exception {
-        Response response = new Response();
-        QueryResultHandler resultHandler = getAnonymousQueryResultHandler(response);
-        resultHandler.handleResource(new Resource("id", "revision", json(object(field("intField",
-                42), field("stringField", "stringValue")))));
-        resultHandler.handleResource(new Resource("id", "revision", json(object(field("intField",
-                43), field("stringField", "otherString")))));
-        resultHandler.handleResult(new QueryResult());
+        Response response = getAnonymousQueryResourceHandler(QUERY_RESULT,
+                new Resource("id", "revision",
+                        json(object(field("intField", 42), field("stringField", "stringValue")))),
+                new Resource("id", "revision",
+                        json(object(field("intField", 43), field("stringField", "otherString")))));
         assertEquals(getResponseContent(response), "{" + "\"result\":["
                 + "{\"intField\":42,\"stringField\":\"stringValue\"},"
                 + "{\"intField\":43,\"stringField\":\"otherString\"}" + "],"
@@ -85,25 +82,18 @@ public class RequestRunnerTest {
     }
 
     @Test
-    public void testHandleErrorAnonymousQueryResultHandlerInVisitQueryAsync() throws Exception {
-        Response response = new Response();
-        QueryResultHandler resultHandler = getAnonymousQueryResultHandler(response);
-        resultHandler.handleException(EXCEPTION);
-        assertEquals(getResponseContent(response), "");
+    public void testHandleErrorAnonymousQueryResourceHandlerInVisitQueryAsync() throws Exception {
+        Response response = getAnonymousQueryResourceHandler(RESOURCE_EXCEPTION);
+        assertEquals(getResponseContent(response), "{\"code\":404,\"reason\":\"Not Found\",\"message\":\"Not Found\"}");
     }
 
     @Test
-    public void testHandleResourceThenErrorAnonymousQueryResultHandlerInVisitQueryAsync()
+    public void testHandleResourceThenErrorAnonymousQueryResourceHandlerInVisitQueryAsync()
             throws Exception {
-        Response response = new Response();
-        QueryResultHandler resultHandler = getAnonymousQueryResultHandler(response);
-        resultHandler.handleResource(new Resource("id", "revision", json(object(field("intField",
-                42), field("stringField", "stringValue")))));
-        resultHandler.handleException(EXCEPTION);
-        assertEquals(getResponseContent(response), "{" + "\"result\":["
-                + "{\"intField\":42,\"stringField\":\"stringValue\"}" + "]," + "\"resultCount\":1,"
-                + "\"error\":{\"code\":404,\"reason\":\"Not Found\",\"message\":\"Not Found\"}"
-                + "}");
+        Response response = getAnonymousQueryResourceHandler(RESOURCE_EXCEPTION,
+                new Resource("id", "revision",
+                        json(object(field("intField", 42), field("stringField", "stringValue")))));
+        assertEquals(getResponseContent(response), "{\"code\":404,\"reason\":\"Not Found\",\"message\":\"Not Found\"}");
     }
 
     private String getResponseContent(Response response) throws IOException {
@@ -112,24 +102,30 @@ public class RequestRunnerTest {
         return new String(outputStream.toByteArray());
     }
 
-    private QueryResultHandler getAnonymousQueryResultHandler(Response httpResponse) throws Exception {
+    private Response getAnonymousQueryResourceHandler(final Promise<QueryResult, ResourceException> queryPromise,
+            final Resource... resources) throws Exception {
         // mock everything
         Context context = mock(Context.class);
         QueryRequest request = Requests.newQueryRequest("");
+        Response httpResponse = new Response();
         org.forgerock.http.protocol.Request httpRequest = newRequest();
         Connection connection = mock(Connection.class);
 
         // set the expectations
-        when(connection.queryAsync(eq(context), eq(request), Matchers.<QueryResultHandler>anyObject()))
-                .thenReturn(Promises.<QueryResult, ResourceException>newResultPromise(null));
+        when(connection.queryAsync(eq(context), eq(request), any(QueryResourceHandler.class)))
+                .thenAnswer(new Answer<Promise<QueryResult, ResourceException>>() {
+                    @Override
+                    public Promise<QueryResult, ResourceException> answer(InvocationOnMock invocationOnMock) {
+                        QueryResourceHandler handler = (QueryResourceHandler) invocationOnMock.getArguments()[2];
+                        for (Resource resource : resources) {
+                            handler.handleResource(resource);
+                        }
+                        return queryPromise;
+                    }
+                });
 
         // run the code to access the anonymous class
         RequestRunner requestRunner = new RequestRunner(context, request, httpRequest, httpResponse);
-        requestRunner.handleResult(connection);
-
-        // Retrieve the anonymous class (phewww!)
-        ArgumentCaptor<QueryResultHandler> arg = ArgumentCaptor.forClass(QueryResultHandler.class);
-        verify(connection).queryAsync(eq(context), eq(request), arg.capture());
-        return arg.getValue();
+        return requestRunner.handleResult(connection).getOrThrowUninterruptibly();
     }
 }

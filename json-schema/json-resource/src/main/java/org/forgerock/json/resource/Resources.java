@@ -17,6 +17,7 @@
 package org.forgerock.json.resource;
 
 import static org.forgerock.http.RoutingMode.EQUALS;
+import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -27,7 +28,6 @@ import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.promise.Promises;
 
 /**
  * This class contains methods for creating and manipulating connection
@@ -270,7 +270,7 @@ public final class Resources {
     }
 
     private static <V> Promise<V, ResourceException> newSuccessfulPromise(V result) {
-        return Promises.newResultPromise(result);
+        return newResultPromise(result);
     }
 
     // Strips off the unwanted leaf routing context which was added when routing

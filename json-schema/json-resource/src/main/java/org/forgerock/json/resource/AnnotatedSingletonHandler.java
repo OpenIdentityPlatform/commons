@@ -22,6 +22,7 @@ import org.forgerock.json.resource.annotations.Patch;
 import org.forgerock.json.resource.annotations.Read;
 import org.forgerock.json.resource.annotations.RequestHandler;
 import org.forgerock.json.resource.annotations.Update;
+import org.forgerock.util.promise.Promise;
 
 /**
  * Exposes an annotated POJO as an instance {@link org.forgerock.json.resource.RequestHandler} by looking for annotated
@@ -52,23 +53,23 @@ class AnnotatedSingletonHandler extends InterfaceSingletonHandler {
     }
 
     @Override
-    public void handleRead(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
-        RequestHandlerUtils.handle(readMethod, context, request, handler);
+    public Promise<Resource, ResourceException> handleRead(ServerContext context, ReadRequest request) {
+        return RequestHandlerUtils.handle(readMethod, context, request);
     }
 
     @Override
-    public void handleUpdate(ServerContext context, UpdateRequest request, ResultHandler<Resource> handler) {
-        RequestHandlerUtils.handle(updateMethod, context, request, handler);
+    public Promise<Resource, ResourceException> handleUpdate(ServerContext context, UpdateRequest request) {
+        return RequestHandlerUtils.handle(updateMethod, context, request);
     }
 
     @Override
-    public void handlePatch(ServerContext context, PatchRequest request, ResultHandler<Resource> handler) {
-        RequestHandlerUtils.handle(patchMethod, context, request, handler);
+    public Promise<Resource, ResourceException> handlePatch(ServerContext context, PatchRequest request) {
+        return RequestHandlerUtils.handle(patchMethod, context, request);
     }
 
     @Override
-    public void handleAction(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
-        RequestHandlerUtils.handle(actionMethods.invoke(context, request, null), handler);
+    public Promise<JsonValue, ResourceException> handleAction(ServerContext context, ActionRequest request) {
+        return actionMethods.invoke(context, request, null);
     }
 
 }

@@ -11,13 +11,14 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2012 ForgeRock AS. All rights reserved.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
 
 import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.util.promise.Promise;
 
 /**
  * An implementation interface for resource providers which exposes a single
@@ -44,64 +45,54 @@ public interface SingletonResourceProvider {
 
     /**
      * Performs the provided
-     * {@link RequestHandler#handleAction(ServerContext, ActionRequest, ResultHandler)
+     * {@link RequestHandler#handleAction(ServerContext, ActionRequest)
      * action} against the single resource instance.
      *
      * @param context
      *            The request server context.
      * @param request
      *            The action request.
-     * @param handler
-     *            The result handler to be notified on completion.
-     * @see RequestHandler#handleAction(ServerContext, ActionRequest,
-     *      ResultHandler)
+     * @return A {@code Promise} containing the result of the operation.
+     * @see RequestHandler#handleAction(ServerContext, ActionRequest)
      */
-    void actionInstance(ServerContext context, ActionRequest request,
-            ResultHandler<JsonValue> handler);
+    Promise<JsonValue, ResourceException> actionInstance(ServerContext context, ActionRequest request);
 
     /**
-     * {@link RequestHandler#handlePatch(ServerContext, PatchRequest, ResultHandler)
+     * {@link RequestHandler#handlePatch(ServerContext, PatchRequest)
      * Patches} the single resource instance.
      *
      * @param context
      *            The request server context.
      * @param request
      *            The patch request.
-     * @param handler
-     *            The result handler to be notified on completion.
-     * @see RequestHandler#handlePatch(ServerContext, PatchRequest,
-     *      ResultHandler)
+     * @return A {@code Promise} containing the result of the operation.
+     * @see RequestHandler#handlePatch(ServerContext, PatchRequest)
      */
-    void patchInstance(ServerContext context, PatchRequest request, ResultHandler<Resource> handler);
+    Promise<Resource, ResourceException> patchInstance(ServerContext context, PatchRequest request);
 
     /**
-     * {@link RequestHandler#handleRead(ServerContext, ReadRequest, ResultHandler)
+     * {@link RequestHandler#handleRead(ServerContext, ReadRequest)
      * Reads} the single resource instance.
      *
      * @param context
      *            The request server context.
      * @param request
      *            The read request.
-     * @param handler
-     *            The result handler to be notified on completion.
-     * @see RequestHandler#handleRead(ServerContext, ReadRequest, ResultHandler)
+     * @return A {@code Promise} containing the result of the operation.
+     * @see RequestHandler#handleRead(ServerContext, ReadRequest)
      */
-    void readInstance(ServerContext context, ReadRequest request, ResultHandler<Resource> handler);
+    Promise<Resource, ResourceException> readInstance(ServerContext context, ReadRequest request);
 
     /**
-     * {@link RequestHandler#handleUpdate(ServerContext, UpdateRequest, ResultHandler)
+     * {@link RequestHandler#handleUpdate(ServerContext, UpdateRequest)
      * Updates} the single resource instance.
      *
      * @param context
      *            The request server context.
      * @param request
      *            The update request.
-     * @param handler
-     *            The result handler to be notified on completion.
-     * @see RequestHandler#handleUpdate(ServerContext, UpdateRequest,
-     *      ResultHandler)
+     * @return A {@code Promise} containing the result of the operation.
+     * @see RequestHandler#handleUpdate(ServerContext, UpdateRequest)
      */
-    void updateInstance(ServerContext context, UpdateRequest request,
-            ResultHandler<Resource> handler);
-
+    Promise<Resource, ResourceException> updateInstance(ServerContext context, UpdateRequest request);
 }

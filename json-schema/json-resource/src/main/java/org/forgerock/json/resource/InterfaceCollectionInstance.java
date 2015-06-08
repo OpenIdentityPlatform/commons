@@ -16,8 +16,11 @@
 
 package org.forgerock.json.resource;
 
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
+
 import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.util.promise.Promise;
 
 class InterfaceCollectionInstance implements RequestHandler {
     private final CollectionResourceProvider provider;
@@ -27,48 +30,43 @@ class InterfaceCollectionInstance implements RequestHandler {
     }
 
     @Override
-    public void handleAction(final ServerContext context, final ActionRequest request,
-            final ResultHandler<JsonValue> handler) {
-        provider.actionInstance(Resources.parentOf(context), Resources.idOf(context), request, handler);
+    public Promise<JsonValue, ResourceException> handleAction(final ServerContext context, final ActionRequest request) {
+        return provider.actionInstance(Resources.parentOf(context), Resources.idOf(context), request);
     }
 
     @Override
-    public final void handleCreate(final ServerContext context, final CreateRequest request,
-            final ResultHandler<Resource> handler) {
+    public final Promise<Resource, ResourceException> handleCreate(final ServerContext context,
+            final CreateRequest request) {
         // TODO: i18n
-        handler.handleException(Resources.newBadRequestException(
+        return newExceptionPromise(Resources.newBadRequestException(
                 "The resource instance %s cannot be created", request.getResourcePath()));
     }
 
     @Override
-    public void handleDelete(final ServerContext context, final DeleteRequest request,
-            final ResultHandler<Resource> handler) {
-        provider.deleteInstance(Resources.parentOf(context), Resources.idOf(context), request, handler);
+    public Promise<Resource, ResourceException> handleDelete(final ServerContext context, final DeleteRequest request) {
+        return provider.deleteInstance(Resources.parentOf(context), Resources.idOf(context), request);
     }
 
     @Override
-    public void handlePatch(final ServerContext context, final PatchRequest request,
-            final ResultHandler<Resource> handler) {
-        provider.patchInstance(Resources.parentOf(context), Resources.idOf(context), request, handler);
+    public Promise<Resource, ResourceException> handlePatch(final ServerContext context, final PatchRequest request) {
+        return provider.patchInstance(Resources.parentOf(context), Resources.idOf(context), request);
     }
 
     @Override
-    public final void handleQuery(final ServerContext context, final QueryRequest request,
-            final QueryResultHandler handler) {
+    public final Promise<QueryResult, ResourceException> handleQuery(final ServerContext context,
+            final QueryRequest request, QueryResourceHandler handler) {
         // TODO: i18n
-        handler.handleException(Resources.newBadRequestException(
+        return newExceptionPromise(Resources.newBadRequestException(
                 "The resource instance %s cannot be queried", request.getResourcePath()));
     }
 
     @Override
-    public void handleRead(final ServerContext context, final ReadRequest request,
-            final ResultHandler<Resource> handler) {
-        provider.readInstance(Resources.parentOf(context), Resources.idOf(context), request, handler);
+    public Promise<Resource, ResourceException> handleRead(final ServerContext context, final ReadRequest request) {
+        return provider.readInstance(Resources.parentOf(context), Resources.idOf(context), request);
     }
 
     @Override
-    public void handleUpdate(final ServerContext context, final UpdateRequest request,
-            final ResultHandler<Resource> handler) {
-        provider.updateInstance(Resources.parentOf(context), Resources.idOf(context), request, handler);
+    public Promise<Resource, ResourceException> handleUpdate(final ServerContext context, final UpdateRequest request) {
+        return provider.updateInstance(Resources.parentOf(context), Resources.idOf(context), request);
     }
 }

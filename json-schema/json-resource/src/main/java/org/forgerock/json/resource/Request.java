@@ -38,19 +38,19 @@ public interface Request {
      * The name of the field which contains the fields in the JSON
      * representation.
      */
-    public static final String FIELD_FIELDS = "fields";
+    String FIELD_FIELDS = "fields";
 
     /**
      * The name of the field which contains the resource name in the JSON
      * representation.
      */
-    public static final String FIELD_RESOURCE_PATH = "resourcePath";
+    String FIELD_RESOURCE_PATH = "resourcePath";
 
     /**
      * The name of the field which contains the additional query parameters in
      * the JSON representation.
      */
-    public static final String FIELD_ADDITIONAL_PARAMETERS = "additionalParameters";
+    String FIELD_ADDITIONAL_PARAMETERS = "additionalParameters";
 
     /**
      * Applies a {@code RequestVisitor} to this {@code Request}.

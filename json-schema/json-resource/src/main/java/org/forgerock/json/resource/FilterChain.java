@@ -11,8 +11,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
+
 package org.forgerock.json.resource;
 
 import static org.forgerock.util.Reject.checkNotNull;
@@ -24,6 +25,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.util.promise.Promise;
 
 /**
  * A chain of filters terminated by a target request handler. The filter chain
@@ -50,72 +52,71 @@ public final class FilterChain implements RequestHandler {
         }
 
         @Override
-        public void handleAction(final ServerContext context, final ActionRequest request,
-                final ResultHandler<JsonValue> handler) {
+        public Promise<JsonValue, ResourceException> handleAction(final ServerContext context,
+                final ActionRequest request) {
             if (hasNext()) {
-                get().filterAction(context, request, handler, next());
+                return get().filterAction(context, request, next());
             } else {
-                target.handleAction(context, request, handler);
+                return target.handleAction(context, request);
             }
         }
 
         @Override
-        public void handleCreate(final ServerContext context, final CreateRequest request,
-                final ResultHandler<Resource> handler) {
+        public Promise<Resource, ResourceException> handleCreate(final ServerContext context,
+                final CreateRequest request) {
             if (hasNext()) {
-                get().filterCreate(context, request, handler, next());
+                return get().filterCreate(context, request, next());
             } else {
-                target.handleCreate(context, request, handler);
+                return target.handleCreate(context, request);
             }
         }
 
         @Override
-        public void handleDelete(final ServerContext context, final DeleteRequest request,
-                final ResultHandler<Resource> handler) {
+        public Promise<Resource, ResourceException> handleDelete(final ServerContext context,
+                final DeleteRequest request) {
             if (hasNext()) {
-                get().filterDelete(context, request, handler, next());
+                return get().filterDelete(context, request, next());
             } else {
-                target.handleDelete(context, request, handler);
+                return target.handleDelete(context, request);
             }
         }
 
         @Override
-        public void handlePatch(final ServerContext context, final PatchRequest request,
-                final ResultHandler<Resource> handler) {
+        public Promise<Resource, ResourceException> handlePatch(final ServerContext context,
+                final PatchRequest request) {
             if (hasNext()) {
-                get().filterPatch(context, request, handler, next());
+                return get().filterPatch(context, request, next());
             } else {
-                target.handlePatch(context, request, handler);
+                return target.handlePatch(context, request);
             }
         }
 
         @Override
-        public void handleQuery(final ServerContext context, final QueryRequest request,
-                final QueryResultHandler handler) {
+        public Promise<QueryResult, ResourceException> handleQuery(final ServerContext context,
+                final QueryRequest request, final QueryResourceHandler handler) {
             if (hasNext()) {
-                get().filterQuery(context, request, handler, next());
+                return get().filterQuery(context, request, handler, next());
             } else {
-                target.handleQuery(context, request, handler);
+                return target.handleQuery(context, request, handler);
             }
         }
 
         @Override
-        public void handleRead(final ServerContext context, final ReadRequest request,
-                final ResultHandler<Resource> handler) {
+        public Promise<Resource, ResourceException> handleRead(final ServerContext context, final ReadRequest request) {
             if (hasNext()) {
-                get().filterRead(context, request, handler, next());
+                return get().filterRead(context, request, next());
             } else {
-                target.handleRead(context, request, handler);
+                return target.handleRead(context, request);
             }
         }
 
         @Override
-        public void handleUpdate(final ServerContext context, final UpdateRequest request,
-                final ResultHandler<Resource> handler) {
+        public Promise<Resource, ResourceException> handleUpdate(final ServerContext context,
+                final UpdateRequest request) {
             if (hasNext()) {
-                get().filterUpdate(context, request, handler, next());
+                return get().filterUpdate(context, request, next());
             } else {
-                target.handleUpdate(context, request, handler);
+                return target.handleUpdate(context, request);
             }
         }
 
@@ -201,45 +202,40 @@ public final class FilterChain implements RequestHandler {
     }
 
     @Override
-    public void handleAction(final ServerContext context, final ActionRequest request,
-            final ResultHandler<JsonValue> handler) {
-        new Cursor().handleAction(context, request, handler);
+    public Promise<JsonValue, ResourceException> handleAction(final ServerContext context,
+            final ActionRequest request) {
+        return new Cursor().handleAction(context, request);
     }
 
     @Override
-    public void handleCreate(final ServerContext context, final CreateRequest request,
-            final ResultHandler<Resource> handler) {
-        new Cursor().handleCreate(context, request, handler);
+    public Promise<Resource, ResourceException> handleCreate(final ServerContext context, final CreateRequest request) {
+        return new Cursor().handleCreate(context, request);
     }
 
     @Override
-    public void handleDelete(final ServerContext context, final DeleteRequest request,
-            final ResultHandler<Resource> handler) {
-        new Cursor().handleDelete(context, request, handler);
+    public Promise<Resource, ResourceException> handleDelete(final ServerContext context, final DeleteRequest request) {
+        return new Cursor().handleDelete(context, request);
     }
 
     @Override
-    public void handlePatch(final ServerContext context, final PatchRequest request,
-            final ResultHandler<Resource> handler) {
-        new Cursor().handlePatch(context, request, handler);
+    public Promise<Resource, ResourceException> handlePatch(final ServerContext context, final PatchRequest request) {
+        return new Cursor().handlePatch(context, request);
     }
 
     @Override
-    public void handleQuery(final ServerContext context, final QueryRequest request,
-            final QueryResultHandler handler) {
-        new Cursor().handleQuery(context, request, handler);
+    public Promise<QueryResult, ResourceException> handleQuery(final ServerContext context, final QueryRequest request,
+            final QueryResourceHandler handler) {
+        return new Cursor().handleQuery(context, request, handler);
     }
 
     @Override
-    public void handleRead(final ServerContext context, final ReadRequest request,
-            final ResultHandler<Resource> handler) {
-        new Cursor().handleRead(context, request, handler);
+    public Promise<Resource, ResourceException> handleRead(final ServerContext context, final ReadRequest request) {
+        return new Cursor().handleRead(context, request);
     }
 
     @Override
-    public void handleUpdate(final ServerContext context, final UpdateRequest request,
-            final ResultHandler<Resource> handler) {
-        new Cursor().handleUpdate(context, request, handler);
+    public Promise<Resource, ResourceException> handleUpdate(final ServerContext context, final UpdateRequest request) {
+        return new Cursor().handleUpdate(context, request);
     }
 
     /**
