@@ -72,6 +72,8 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                         this.data.username = conf.loggedUser._id; //fallback option
                     }
 
+                    this.data.admin = _.contains(conf.loggedUser.roles, "ui-admin");
+
                     this.data.userBar = _.map(obj.configuration.userBar, function (link) {
                         if (_.has(link, "i18nKey")) {
                             link.label = $.t(link.i18nKey);

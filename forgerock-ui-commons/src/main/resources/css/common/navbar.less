@@ -1,6 +1,6 @@
 
 /*
-Navbar and SubNav
+  Navbar and SubNav
 */
 
 .navbar {
@@ -119,12 +119,22 @@ Navbar and SubNav
         }
 
         .nav-subnav li.active a,
-        .nav-subnav li.active a:hover{
+        .nav-subnav li.active a:hover {
             padding-left: 40px;
             background-color:@subnav-small-device-active-background;
             color:@subnav-small-device-active-color;
         }
     }
+
+    .user-avatar.fa {
+        background-color: @base-theme-color;
+        width: 28px;
+        height: 28px;
+        color: white;
+        border-radius: 14px;
+        padding: 8px 0 0;
+    }
+
 }
 
 
@@ -268,6 +278,7 @@ Navbar and SubNav
 
 /* Medium devices (desktops, 992px and up)*/
 @media (min-width: @screen-md) {
+
     .navbar-inverse #main-nav {
         border-right: none;
     }
@@ -275,5 +286,17 @@ Navbar and SubNav
     .navbar-inverse #main-nav .nav>li>a {
         border-left: none;
     }
+}
 
+@media (min-width: @screen-md) {
+    .navbar.navbar-inverse .navbar-admin > li > a > i{
+        display: none;
+    }
+}
+
+/* Medium devices (desktops, 992px and up)*/
+@media (min-width: @screen-lg) {
+    .navbar.navbar-inverse .navbar-admin > li > a > i{
+        display: inline-block;
+    }
 }

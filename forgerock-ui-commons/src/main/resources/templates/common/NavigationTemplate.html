@@ -13,9 +13,8 @@
 
         {{#if username}}
         <div id="mainNavBar" class="navbar-collapse collapse">
-            <ul class="nav navbar-nav">
+            <ul class="nav navbar-nav {{#if admin}}navbar-admin{{/if}}">
                 {{#each topNav}}
-
                     <li class="{{#if active}}active{{/if}}{{#if dropdown}} dropdown{{/if}}" >
 
                         <a  title="{{title}}"
@@ -88,10 +87,8 @@
             <ul id="loginContent" class="nav navbar-nav navbar-right">
                 <li class="dropdown">
                     <a href="#" aria-haspopup="true" aria-expanded="false" class="dropdown-toggle" data-toggle="dropdown">
-                        <span class="user-avatar">
-                            <i class="fa fa-user"></i>
-                        </span>
-                        <span id="user_name">{{username}}</span><span class="caret"></span>
+                        <i class="user-avatar fa fa-user"></i>
+                        {{#unless admin}}<span id="user_name">{{username}}</span>{{/unless}}<span class="caret"></span>
                     </a>
                     {{#if userBar.length}}
                     <ul class="dropdown-menu" role="menu" id="navDropdownMenu">
