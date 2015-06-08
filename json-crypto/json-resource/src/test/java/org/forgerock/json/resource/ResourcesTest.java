@@ -22,6 +22,7 @@ import static org.forgerock.json.fluent.JsonValue.*;
 import static org.forgerock.json.resource.TestUtils.*;
 import static org.forgerock.json.resource.test.assertj.AssertJResourceAssert.assertThat;
 import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThatJsonValue;
+import static org.forgerock.util.promise.Promises.newResultPromise;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -43,7 +44,6 @@ import org.forgerock.json.resource.annotations.Read;
 import org.forgerock.json.resource.annotations.Update;
 import org.forgerock.json.test.assertj.AssertJJsonValueAssert;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.promise.Promises;
 import org.forgerock.util.test.assertj.AssertJPromiseAssert;
 import org.mockito.ArgumentCaptor;
 import org.testng.annotations.DataProvider;
@@ -60,110 +60,110 @@ public final class ResourcesTest {
         // @formatter:off
         return new Object[][] {
 
-            // Null content
-            {
-                filter(),
-                content(null),
-                expected(null)
-            },
+                // Null content
+                {
+                        filter(),
+                        content(null),
+                        expected(null)
+                },
 
-            {
-                filter("/"),
-                content(null),
-                expected(null)
-            },
+                {
+                        filter("/"),
+                        content(null),
+                        expected(null)
+                },
 
-            {
-                filter("/a/b"),
-                content(null),
-                expected(null)
-            },
+                {
+                        filter("/a/b"),
+                        content(null),
+                        expected(null)
+                },
 
-            {
-                filter("/1"),
-                content(null),
-                expected(null)
-            },
+                {
+                        filter("/1"),
+                        content(null),
+                        expected(null)
+                },
 
-            // Empty object
-            {
-                filter(),
-                content(object()),
-                expected(object())
-            },
+                // Empty object
+                {
+                        filter(),
+                        content(object()),
+                        expected(object())
+                },
 
-            {
-                filter("/"),
-                content(object()),
-                expected(object())
-            },
+                {
+                        filter("/"),
+                        content(object()),
+                        expected(object())
+                },
 
-            {
-                filter("/a/b"),
-                content(object()),
-                expected(object())
-            },
+                {
+                        filter("/a/b"),
+                        content(object()),
+                        expected(object())
+                },
 
-            {
-                filter("/1"),
-                content(object()),
-                expected(object())
-            },
+                {
+                        filter("/1"),
+                        content(object()),
+                        expected(object())
+                },
 
-            // Miscellaneous
-            {
-                filter(),
-                content(object(field("a", "1"), field("b", "2"))),
-                expected(object(field("a", "1"), field("b", "2")))
-            },
+                // Miscellaneous
+                {
+                        filter(),
+                        content(object(field("a", "1"), field("b", "2"))),
+                        expected(object(field("a", "1"), field("b", "2")))
+                },
 
-            {
-                filter("/"),
-                content(object(field("a", "1"), field("b", "2"))),
-                expected(object(field("a", "1"), field("b", "2")))
-            },
+                {
+                        filter("/"),
+                        content(object(field("a", "1"), field("b", "2"))),
+                        expected(object(field("a", "1"), field("b", "2")))
+                },
 
-            {
-                filter("/a"),
-                content(object(field("a", "1"), field("b", "2"))),
-                expected(object(field("a", "1")))
-            },
+                {
+                        filter("/a"),
+                        content(object(field("a", "1"), field("b", "2"))),
+                        expected(object(field("a", "1")))
+                },
 
-            {
-                filter("/a/b"),
-                content(object(field("a", "1"), field("b", "2"))),
-                expected(object())
-            },
+                {
+                        filter("/a/b"),
+                        content(object(field("a", "1"), field("b", "2"))),
+                        expected(object())
+                },
 
-            {
-                filter("/a"),
-                content(object(field("a", object(field("b", "1"), field("c", "2"))), field("d", "3"))),
-                expected(object(field("a", object(field("b", "1"), field("c", "2")))))
-            },
+                {
+                        filter("/a"),
+                        content(object(field("a", object(field("b", "1"), field("c", "2"))), field("d", "3"))),
+                        expected(object(field("a", object(field("b", "1"), field("c", "2")))))
+                },
 
-            {
-                filter("/a/b"),
-                content(object(field("a", object(field("b", "1"), field("c", "2"))), field("d", "3"))),
-                expected(object(field("b", "1")))
-            },
+                {
+                        filter("/a/b"),
+                        content(object(field("a", object(field("b", "1"), field("c", "2"))), field("d", "3"))),
+                        expected(object(field("b", "1")))
+                },
 
-            {
-                filter("/a/b", "/d"),
-                content(object(field("a", object(field("b", "1"), field("c", "2"))), field("d", "3"))),
-                expected(object(field("b", "1"), field("d", "3")))
-            },
+                {
+                        filter("/a/b", "/d"),
+                        content(object(field("a", object(field("b", "1"), field("c", "2"))), field("d", "3"))),
+                        expected(object(field("b", "1"), field("d", "3")))
+                },
 
-            {
-                filter("/a/b", "/a"),
-                content(object(field("a", object(field("b", "1"), field("c", "2"))), field("d", "3"))),
-                expected(object(field("b", "1"), field("a", object(field("b", "1"), field("c", "2")))))
-            },
+                {
+                        filter("/a/b", "/a"),
+                        content(object(field("a", object(field("b", "1"), field("c", "2"))), field("d", "3"))),
+                        expected(object(field("b", "1"), field("a", object(field("b", "1"), field("c", "2")))))
+                },
 
-            {
-                filter("/a", "/a/b"),
-                content(object(field("a", object(field("b", "1"), field("c", "2"))), field("d", "3"))),
-                expected(object(field("a", object(field("b", "1"), field("c", "2"))), field("b", "1")))
-            },
+                {
+                        filter("/a", "/a/b"),
+                        content(object(field("a", object(field("b", "1"), field("c", "2"))), field("d", "3"))),
+                        expected(object(field("a", object(field("b", "1"), field("c", "2"))), field("b", "1")))
+                },
 
         };
         // @formatter:on
@@ -179,11 +179,11 @@ public final class ResourcesTest {
     public Object[][] testCollectionResourceProviderData() {
         // @formatter:off
         return new Object[][] {
-            { "test", "test" },
-            { "test%2fuser", "test/user" },
-            { "test user", "test user" },
-            { "test%20user", "test user" },
-            { "test+%2buser", "test++user" }
+                { "test", "test" },
+                { "test%2fuser", "test/user" },
+                { "test user", "test user" },
+                { "test%20user", "test user" },
+                { "test+%2buser", "test++user" }
         };
         // @formatter:on
     }
@@ -198,8 +198,7 @@ public final class ResourcesTest {
         ReadRequest read = Requests.newReadRequest(resourcePath);
         connection.readAsync(new RootContext(), read);
         ArgumentCaptor<ReadRequest> captor = ArgumentCaptor.forClass(ReadRequest.class);
-        verify(collection).readInstance(any(ServerContext.class), eq(expectedId), captor.capture(),
-                any(ResultHandler.class));
+        verify(collection).readInstance(any(ServerContext.class), eq(expectedId), captor.capture());
         Assertions.assertThat(captor.getValue().getResourcePath()).isEqualTo("");
     }
 
@@ -479,7 +478,7 @@ public final class ResourcesTest {
         QueryRequest req = Requests.newQueryRequest("/test");
 
         // When
-        Promise<QueryResult, ResourceException> promise = connection.queryAsync(new RootContext(), req, mock(QueryResultHandler.class));
+        Promise<QueryResult, ResourceException> promise = connection.queryAsync(new RootContext(), req, mock(QueryResourceHandler.class));
 
         // Then
         if (query && collection) {
@@ -508,43 +507,43 @@ public final class ResourcesTest {
     public static final class AnnotationCollection {
         @Create
         public Promise<Resource, ResourceException> myCreate(CreateRequest request) {
-            return Promises.newResultPromise(new Resource("create", "1", json(object(field("result", "read")))));
+            return newResultPromise(new Resource("create", "1", json(object(field("result", "read")))));
         }
         @Read
         public Promise<Resource, ResourceException> myRead(String id) {
-            return Promises.newResultPromise(new Resource("read-" + id, "1", json(object(field("result", null)))));
+            return newResultPromise(new Resource("read-" + id, "1", json(object(field("result", null)))));
         }
         @Update
         public Promise<Resource, ResourceException> myUpdate(UpdateRequest request, String id) {
-            return Promises.newResultPromise(new Resource("update-" + id, "1", json(object(field("result", null)))));
+            return newResultPromise(new Resource("update-" + id, "1", json(object(field("result", null)))));
         }
         @Delete
         public Promise<Resource, ResourceException> myDelete(String id) {
-            return Promises.newResultPromise(new Resource("delete-" + id, "1", json(object(field("result", null)))));
+            return newResultPromise(new Resource("delete-" + id, "1", json(object(field("result", null)))));
         }
         @Patch
         public Promise<Resource, ResourceException> myPatch(PatchRequest request, String id) {
-            return Promises.newResultPromise(new Resource("patch-" + id, "1", json(object(field("result", null)))));
+            return newResultPromise(new Resource("patch-" + id, "1", json(object(field("result", null)))));
         }
         @Action("instanceAction1")
         public Promise<JsonValue, ResourceException> instAction1(String id) {
-            return Promises.newResultPromise(json(object(field("result", "instanceAction1-" + id))));
+            return newResultPromise(json(object(field("result", "instanceAction1-" + id))));
         }
         @Action
         public Promise<JsonValue, ResourceException> instanceAction2(String id) {
-            return Promises.newResultPromise(json(object(field("result", "instanceAction2-" + id))));
+            return newResultPromise(json(object(field("result", "instanceAction2-" + id))));
         }
         @Action("collectionAction1")
         public Promise<JsonValue, ResourceException> action1() {
-            return Promises.newResultPromise(json(object(field("result", "collectionAction1"))));
+            return newResultPromise(json(object(field("result", "collectionAction1"))));
         }
         @Action
         public Promise<JsonValue, ResourceException> collectionAction2() {
-            return Promises.newResultPromise(json(object(field("result", "collectionAction2"))));
+            return newResultPromise(json(object(field("result", "collectionAction2"))));
         }
         @Query
-        public Promise<QueryResult, ResourceException> query(QueryRequest request, QueryResultHandler handler) {
-            return Promises.newResultPromise(new QueryResult("query", -1));
+        public Promise<QueryResult, ResourceException> query(QueryRequest request, QueryResourceHandler handler) {
+            return newResultPromise(new QueryResult("query", -1));
         }
     }
 
@@ -552,58 +551,58 @@ public final class ResourcesTest {
     public static final class AnnotationSingleton {
         @Read
         public Promise<Resource, ResourceException> myRead() {
-            return Promises.newResultPromise(new Resource("read", "1", json(object(field("result", "read")))));
+            return newResultPromise(new Resource("read", "1", json(object(field("result", "read")))));
         }
         @Update
         public Promise<Resource, ResourceException> myUpdate(UpdateRequest request) {
-            return Promises.newResultPromise(new Resource("update", "1", json(object(field("result", null)))));
+            return newResultPromise(new Resource("update", "1", json(object(field("result", null)))));
         }
         @Patch
         public Promise<Resource, ResourceException> myPatch(PatchRequest request) {
-            return Promises.newResultPromise(new Resource("patch", "1", json(object(field("result", null)))));
+            return newResultPromise(new Resource("patch", "1", json(object(field("result", null)))));
         }
         @Action("instanceAction1")
         public Promise<JsonValue, ResourceException> action1() {
-            return Promises.newResultPromise(json(object(field("result", "instanceAction1"))));
+            return newResultPromise(json(object(field("result", "instanceAction1"))));
         }
         @Action
         public Promise<JsonValue, ResourceException> instanceAction2() {
-            return Promises.newResultPromise(json(object(field("result", "instanceAction2"))));
+            return newResultPromise(json(object(field("result", "instanceAction2"))));
         }
     }
 
     @org.forgerock.json.resource.annotations.RequestHandler
     public static final class ConventionCollection {
         public Promise<Resource, ResourceException> create(CreateRequest request) {
-            return Promises.newResultPromise(new Resource("create", "1", json(object(field("result", "read")))));
+            return newResultPromise(new Resource("create", "1", json(object(field("result", "read")))));
         }
         public Promise<Resource, ResourceException> read(String id) {
-            return Promises.newResultPromise(new Resource("read-" + id, "1", json(object(field("result", null)))));
+            return newResultPromise(new Resource("read-" + id, "1", json(object(field("result", null)))));
         }
         public Promise<Resource, ResourceException> update(UpdateRequest request, String id) {
-            return Promises.newResultPromise(new Resource("update-" + id, "1", json(object(field("result", null)))));
+            return newResultPromise(new Resource("update-" + id, "1", json(object(field("result", null)))));
         }
         public Promise<Resource, ResourceException> delete(String id) {
-            return Promises.newResultPromise(new Resource("delete-" + id, "1", json(object(field("result", null)))));
+            return newResultPromise(new Resource("delete-" + id, "1", json(object(field("result", null)))));
         }
         public Promise<Resource, ResourceException> patch(PatchRequest request, String id) {
-            return Promises.newResultPromise(new Resource("patch-" + id, "1", json(object(field("result", null)))));
+            return newResultPromise(new Resource("patch-" + id, "1", json(object(field("result", null)))));
         }
-        public Promise<QueryResult, ResourceException> query(QueryRequest request, QueryResultHandler handler) {
-            return Promises.newResultPromise(new QueryResult("query", -1));
+        public Promise<QueryResult, ResourceException> query(QueryRequest request, QueryResourceHandler handler) {
+            return newResultPromise(new QueryResult("query", -1));
         }
     }
 
     @org.forgerock.json.resource.annotations.RequestHandler
     public static final class ConventionSingleton {
         public Promise<Resource, ResourceException> read() {
-            return Promises.newResultPromise(new Resource("read", "1", json(object(field("result", "read")))));
+            return newResultPromise(new Resource("read", "1", json(object(field("result", "read")))));
         }
         public Promise<Resource, ResourceException> update(UpdateRequest request) {
-            return Promises.newResultPromise(new Resource("update", "1", json(object(field("result", null)))));
+            return newResultPromise(new Resource("update", "1", json(object(field("result", null)))));
         }
         public Promise<Resource, ResourceException> patch(PatchRequest request) {
-            return Promises.newResultPromise(new Resource("patch", "1", json(object(field("result", null)))));
+            return newResultPromise(new Resource("patch", "1", json(object(field("result", null)))));
         }
     }
 

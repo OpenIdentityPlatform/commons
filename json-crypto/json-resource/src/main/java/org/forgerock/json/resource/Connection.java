@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2014 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -207,7 +207,8 @@ public interface Connection extends Closeable {
 
     /**
      * Searches for all JSON resources matching a user specified set of
-     * criteria, and passes the results to the provided result handler.
+     * criteria, and returns a {@code Promise} that will be completed with the
+     * results of the search.
      * <p>
      * Result processing <b><i>happens-before</i></b> this method returns to the
      * caller.
@@ -217,8 +218,8 @@ public interface Connection extends Closeable {
      * @param request
      *            The query request.
      * @param handler
-     *            A result handler which can be used to process matching
-     *            resources as they are received.
+     *            A query resource handler which can be used to process
+     *            matching resources as they are received.
      * @return The query result.
      * @throws ResourceException
      *             If the query could not be performed.
@@ -228,7 +229,7 @@ public interface Connection extends Closeable {
      *             If this connection has already been closed, i.e. if
      *             {@code isClosed() == true}.
      */
-    QueryResult query(Context context, QueryRequest request, QueryResultHandler handler)
+    QueryResult query(Context context, QueryRequest request, QueryResourceHandler handler)
             throws ResourceException;
 
     /**
@@ -256,7 +257,8 @@ public interface Connection extends Closeable {
 
     /**
      * Asynchronously searches for all JSON resources matching a user specified
-     * set of criteria, and passes the results to the provided result handler.
+     * set of criteria, and returns a {@code Promise} that will be completed with the
+     * results of the search.
      * <p>
      * Result processing <b><i>happens-before</i></b> the returned future
      * completes.
@@ -266,8 +268,8 @@ public interface Connection extends Closeable {
      * @param request
      *            The create request.
      * @param handler
-     *            A result handler which can be used to process matching
-     *            resources as they are received.
+     *            A non-{@code null} query resource handler which should be
+     *            used to process matching resources as they are received.
      * @return A future representing the result of the request.
      * @throws UnsupportedOperationException
      *             If this connection does not support query requests.
@@ -276,7 +278,7 @@ public interface Connection extends Closeable {
      *             {@code isClosed() == true}.
      */
     Promise<QueryResult, ResourceException> queryAsync(Context context, QueryRequest request,
-            QueryResultHandler handler);
+            QueryResourceHandler handler);
 
     /**
      * Reads a JSON resource.

@@ -17,12 +17,12 @@
 package org.forgerock.json.test.assertj;
 
 import static org.forgerock.json.fluent.JsonValue.*;
+import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Condition;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.promise.Promises;
 import org.testng.annotations.Test;
 
 public class AssertJJsonValueAssertTest {
@@ -102,7 +102,7 @@ public class AssertJJsonValueAssertTest {
     @Test
     public void testPromisedAssertion() throws Exception {
         // Given
-        Promise<JsonValue, Exception> value = Promises.newResultPromise(json(object(field("bool", true))));
+        Promise<JsonValue, Exception> value = newResultPromise(json(object(field("bool", true))));
 
         // When
         AssertJJsonValueAssert.AssertJJsonValuePromiseAssert asserter = AssertJJsonValueAssert.assertThat(value);

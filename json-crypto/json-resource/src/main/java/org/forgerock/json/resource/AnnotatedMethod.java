@@ -16,6 +16,9 @@
 
 package org.forgerock.json.resource;
 
+import static org.forgerock.json.resource.ResourceException.newNotSupportedException;
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -27,7 +30,6 @@ import org.forgerock.json.resource.annotations.Patch;
 import org.forgerock.json.resource.annotations.Query;
 import org.forgerock.json.resource.annotations.Update;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.promise.Promises;
 
 /**
  * Represents an annotated (or conventionally named) CREST method on an object request handler.
@@ -61,14 +63,14 @@ final class AnnotatedMethod {
         this.numberOfParameters = numberOfParameters;
     }
 
-    <T> Promise<T, ? extends ResourceException> invoke(ServerContext context, Request request, String id) {
+    <T> Promise<T, ResourceException> invoke(ServerContext context, Request request, String id) {
         return invoke(context, request, null, id);
     }
 
-    <T> Promise<T, ? extends ResourceException> invoke(ServerContext context, Request request,
-            QueryResultHandler queryHandler, String id) {
+    <T> Promise<T, ResourceException> invoke(ServerContext context, Request request,
+            QueryResourceHandler queryHandler, String id) {
         if (method == null) {
-            return Promises.newExceptionPromise(new NotSupportedException(operation + " not supported"));
+            return newExceptionPromise(newNotSupportedException(operation + " not supported"));
         }
         Object[] args = new Object[numberOfParameters];
         if (idParameter > -1) {
@@ -84,7 +86,7 @@ final class AnnotatedMethod {
             args[queryHandlerParameter] = queryHandler;
         }
         try {
-            return (Promise<T, ? extends ResourceException>) method.invoke(requestHandler, args);
+            return (Promise<T, ResourceException>) method.invoke(requestHandler, args);
         } catch (IllegalAccessException e) {
             throw new IllegalStateException("Cannot access the annotated method: " + method.getName(), e);
         } catch (InvocationTargetException e) {
@@ -126,7 +128,7 @@ final class AnnotatedMethod {
                     contextParam = i;
                 } else if (Request.class.isAssignableFrom(type)) {
                     requestParam = i;
-                } else if (type.isAssignableFrom(QueryResultHandler.class)) {
+                } else if (type.isAssignableFrom(QueryResourceHandler.class)) {
                     queryHandlerParam = i;
                 }
             }

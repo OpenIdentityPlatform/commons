@@ -11,12 +11,11 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
 
-// Java SE
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -139,15 +138,111 @@ public class ResourceException extends IOException {
     private boolean includeCause = false;
 
     /**
-     * Returns this ResourceException with the includeCause flag set to true
-     * so that toJsonValue() method will include the cause if there is
-     * one supplied.
+     * Constructs a new {@link NotSupportedException} with {@code null} as its
+     * detail message.
      *
-     * @return  the exception where this flag has been set
+     * @return A {@code NotSupportedException}.
+     * @since 3.0.0
      */
-    public final ResourceException includeCauseInJsonValue() {
-        includeCause = true;
-        return this;
+    public static ResourceException newNotSupportedException() {
+        return new NotSupportedException();
+    }
+
+    /**
+     * Constructs a new {@link NotSupportedException} with the specified
+     * detail message.
+     *
+     * @param message The detail message.
+     * @return A {@code NotSupportedException}.
+     * @since 3.0.0
+     */
+    public static ResourceException newNotSupportedException(String message) {
+        return new NotSupportedException(message);
+    }
+
+    /**
+     * Constructs a new {@link NotSupportedException} with the specified
+     * detail message and cause.
+     *
+     * @param message The detail message.
+     * @param cause The exception which caused this exception to be thrown.
+     * @return A {@code NotSupportedException}.
+     * @since 3.0.0
+     */
+    public static ResourceException newNotSupportedException(String message, Throwable cause) {
+        return new NotSupportedException(message, cause);
+    }
+
+    /**
+     * Constructs a new {@link BadRequestException} with {@code null} as its
+     * detail message.
+     *
+     * @return A {@code BadRequestException}.
+     * @since 3.0.0
+     */
+    public static ResourceException newBadRequestException() {
+        return new BadRequestException();
+    }
+
+    /**
+     * Constructs a new {@link BadRequestException} with the specified detail
+     * message.
+     *
+     * @param message The detail message.
+     * @return A {@code BadRequestException}.
+     * @since 3.0.0
+     */
+    public static ResourceException newBadRequestException(String message) {
+        return new BadRequestException(message);
+    }
+
+    /**
+     * Constructs a new {@link BadRequestException} with the specified detail
+     * message and cause.
+     *
+     * @param message The detail message.
+     * @param cause The exception which caused this exception to be thrown.
+     * @return A {@code BadRequestException}.
+     * @since 3.0.0
+     */
+    public static ResourceException newBadRequestException(String message, Throwable cause) {
+        return new BadRequestException(message, cause);
+    }
+
+    /**
+     * Constructs a new {@link NotFoundException} with {@code null} as its
+     * detail message.
+     *
+     * @return A {@code NotFoundException}.
+     * @since 3.0.0
+     */
+    public static ResourceException newNotFoundException() {
+        return new NotFoundException();
+    }
+
+    /**
+     * Constructs a new {@link NotFoundException} with the specified detail
+     * message.
+     *
+     * @param message The detail message.
+     * @return A {@code NotFoundException}.
+     * @since 3.0.0
+     */
+    public static ResourceException newNotFoundException(String message) {
+        return new NotFoundException(message);
+    }
+
+    /**
+     * Constructs a new {@link NotFoundException} with the specified detail
+     * message and cause.
+     *
+     * @param message The detail message.
+     * @param cause The exception which caused this exception to be thrown.
+     * @return A {@code NotFoundException}.
+     * @since 3.0.0
+     */
+    public static ResourceException newNotFoundException(String message, Throwable cause) {
+        return new NotFoundException(message, cause);
     }
 
     /**
@@ -486,6 +581,18 @@ public class ResourceException extends IOException {
      */
     public final ResourceException setReason(final String reason) {
         this.reason = reason;
+        return this;
+    }
+
+    /**
+     * Returns this ResourceException with the includeCause flag set to true
+     * so that toJsonValue() method will include the cause if there is
+     * one supplied.
+     *
+     * @return  the exception where this flag has been set
+     */
+    public final ResourceException includeCauseInJsonValue() {
+        includeCause = true;
         return this;
     }
 

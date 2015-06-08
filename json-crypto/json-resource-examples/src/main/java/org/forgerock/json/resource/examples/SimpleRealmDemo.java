@@ -11,16 +11,18 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource.examples;
 
 import static org.forgerock.json.resource.examples.DemoUtils.ctx;
 import static org.forgerock.json.resource.examples.DemoUtils.log;
+import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.util.Collections;
 
+import org.forgerock.http.ResourcePath;
 import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.AbstractRequestHandler;
@@ -30,9 +32,8 @@ import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.http.ResourcePath;
 import org.forgerock.json.resource.Resources;
-import org.forgerock.json.resource.ResultHandler;
+import org.forgerock.util.promise.Promise;
 
 /**
  * An example illustrating how you can route realms / sub-realm requests using
@@ -74,31 +75,31 @@ public final class SimpleRealmDemo {
     private static RequestHandler simpleRouter() {
         return new AbstractRequestHandler() {
             @Override
-            public void handleRead(final ServerContext context, final ReadRequest request,
-                    final ResultHandler<Resource> handler) {
-                final ResourcePath path = request.getResourcePathObject();
-                final int size = path.size();
+            public Promise<Resource, ResourceException> handleRead(final ServerContext context,
+                    final ReadRequest request) {
+                final ResourcePath name = request.getResourcePathObject();
+                final int size = name.size();
                 if (size == 0) {
                     log("Reading root");
-                } else if (path.leaf().equals("users")) {
-                    log("Reading users container in " + path.subSequence(0, size - 1));
-                } else if (path.leaf().equals("groups")) {
-                    log("Reading groups container in " + path.subSequence(0, size - 1));
+                } else if (name.leaf().equals("users")) {
+                    log("Reading users container in " + name.subSequence(0, size - 1));
+                } else if (name.leaf().equals("groups")) {
+                    log("Reading groups container in " + name.subSequence(0, size - 1));
                 } else if (size > 1) {
-                    if (path.get(size - 2).equals("users")) {
-                        read("user", path);
-                    } else if (path.get(size - 2).equals("groups")) {
-                        read("group", path);
+                    if (name.get(size - 2).equals("users")) {
+                        read("user", name);
+                    } else if (name.get(size - 2).equals("groups")) {
+                        read("group", name);
                     } else {
-                        log("Reading realm " + path);
+                        log("Reading realm " + name);
                     }
                 } else {
-                    log("Reading realm " + path);
+                    log("Reading realm " + name);
                 }
 
                 final JsonValue content =
-                        new JsonValue(Collections.singletonMap("id", (Object) path.leaf()));
-                handler.handleResult(new Resource(path.leaf(), "1", content));
+                        new JsonValue(Collections.singletonMap("id", (Object) name.leaf()));
+                return newResultPromise(new Resource(name.leaf(), "1", content));
             }
         };
     }

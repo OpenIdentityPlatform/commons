@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2013 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -46,43 +46,43 @@ public interface QueryRequest extends Request {
      * The name of the field which contains the paged results cookie in the JSON
      * representation.
      */
-    public static final String FIELD_PAGED_RESULTS_COOKIE = "pagedResultsCookie";
+    String FIELD_PAGED_RESULTS_COOKIE = "pagedResultsCookie";
 
     /**
      * The name of the field which contains the paged results offset in the JSON
      * representation.
      */
-    public static final String FIELD_PAGED_RESULTS_OFFSET = "pagedResultsOffset";
+    String FIELD_PAGED_RESULTS_OFFSET = "pagedResultsOffset";
 
     /**
      * The name of the field which contains the page size in the JSON
      * representation.
      */
-    public static final String FIELD_PAGE_SIZE = "pageSize";
+    String FIELD_PAGE_SIZE = "pageSize";
 
     /**
      * The name of the field which contains the query expression in the JSON
      * representation.
      */
-    public static final String FIELD_QUERY_EXPRESSION = "queryExpression";
+    String FIELD_QUERY_EXPRESSION = "queryExpression";
 
     /**
      * The name of the field which contains the query filter in the JSON
      * representation.
      */
-    public static final String FIELD_QUERY_FILTER = "queryFilter";
+    String FIELD_QUERY_FILTER = "queryFilter";
 
     /**
      * The name of the field which contains the query ID in the JSON
      * representation.
      */
-    public static final String FIELD_QUERY_ID = "queryId";
+    String FIELD_QUERY_ID = "queryId";
 
     /**
      * The name of the field which contains the sort keys in the JSON
      * representation.
      */
-    public static final String FIELD_SORT_KEYS = "sortKeys";
+    String FIELD_SORT_KEYS = "sortKeys";
 
     /**
      * {@inheritDoc}

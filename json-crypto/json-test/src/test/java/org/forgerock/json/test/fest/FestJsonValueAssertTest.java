@@ -17,12 +17,12 @@
 package org.forgerock.json.test.fest;
 
 import static org.forgerock.json.fluent.JsonValue.*;
+import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import org.fest.assertions.Condition;
 import org.fest.assertions.MapAssert;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.promise.Promises;
 import org.testng.annotations.Test;
 
 public class FestJsonValueAssertTest {
@@ -98,7 +98,7 @@ public class FestJsonValueAssertTest {
     @Test
     public void testPromisedAssertion() throws Exception {
         // Given
-        Promise<JsonValue, Exception> value = Promises.newResultPromise(json(object(field("bool", true))));
+        Promise<JsonValue, Exception> value = newResultPromise(json(object(field("bool", true))));
 
         // When
         FestJsonValueAssert.FestJsonValuePromiseAssert asserter = FestJsonValueAssert.assertThat(value);

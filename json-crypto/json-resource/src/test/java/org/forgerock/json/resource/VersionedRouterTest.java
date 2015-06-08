@@ -16,9 +16,9 @@
 
 package org.forgerock.json.resource;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.fluent.JsonValue.json;
 import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -27,9 +27,11 @@ import org.forgerock.http.RoutingMode;
 import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.VersionSelector.DefaultVersionBehaviour;
-import org.mockito.ArgumentCaptor;
+import org.forgerock.util.promise.Promise;
 import org.mockito.Matchers;
+import org.mockito.Mockito;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -76,6 +78,12 @@ public class VersionedRouterTest {
                 .addVersion("2.1", groupsHandlerThree));
     }
 
+    @BeforeMethod
+    public void setupMethod() {
+        Mockito.reset(usersHandlerOne, usersHandlerTwo, usersHandlerThree, groupsHandlerOne, groupsHandlerTwo,
+                groupsHandlerThree);
+    }
+
     @DataProvider(name = "dataWithVersionHeader")
     private Object[][] dataWithVersionHeader() {
         return new Object[][]{
@@ -91,7 +99,7 @@ public class VersionedRouterTest {
     @Test (dataProvider = "dataWithVersionHeader")
     @SuppressWarnings("unchecked")
     public void shouldRouteCreateVersionRequests(String resource, String requestedVersion, boolean expectException,
-                                                 RequestHandler provider) {
+            RequestHandler provider) {
 
         //Given
         AcceptAPIVersionContext apiVersionContext = new AcceptAPIVersionContext(new RootContext(), "PROTOCOL_NAME",
@@ -99,27 +107,24 @@ public class VersionedRouterTest {
                         .withDefaultResourceVersion(requestedVersion).build());
         ServerContext context = new ServerContext(apiVersionContext);
         CreateRequest request = Requests.newCreateRequest(resource, json(object()));
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
 
         //When
-        router.handleCreate(context, request, handler);
+        Promise<Resource, ResourceException> promise = router.handleCreate(context, request);
 
         //Then
         if (expectException) {
-            ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-            verify(handler).handleException(exceptionCaptor.capture());
-            assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
+            assertThat(promise).failedWithException().isInstanceOf(NotFoundException.class);
             verifyZeroInteractions(usersHandlerOne, usersHandlerTwo, usersHandlerThree, groupsHandlerOne,
                     groupsHandlerTwo, groupsHandlerThree);
         } else {
-            verify(provider).handleCreate(Matchers.<ServerContext>anyObject(), Matchers.<CreateRequest>anyObject(), eq(handler));
+            verify(provider).handleCreate(Matchers.<ServerContext>anyObject(), Matchers.<CreateRequest>anyObject());
         }
     }
 
     @Test (dataProvider = "dataWithVersionHeader")
     @SuppressWarnings("unchecked")
     public void shouldRouteReadVersionRequests(String resource, String requestedVersion, boolean expectException,
-                                               RequestHandler provider) {
+            RequestHandler provider) {
 
         //Given
         AcceptAPIVersionContext apiVersionContext = new AcceptAPIVersionContext(new RootContext(), "PROTOCOL_NAME",
@@ -127,28 +132,24 @@ public class VersionedRouterTest {
                         .withDefaultResourceVersion(requestedVersion).build());
         ServerContext context = new ServerContext(apiVersionContext);
         ReadRequest request = Requests.newReadRequest(resource);
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
 
         //When
-        router.handleRead(context, request, handler);
+        Promise<Resource, ResourceException> promise = router.handleRead(context, request);
 
         //Then
         if (expectException) {
-            ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-            verify(handler).handleException(exceptionCaptor.capture());
-            assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
+            assertThat(promise).failedWithException().isInstanceOf(NotFoundException.class);
             verifyZeroInteractions(usersHandlerOne, usersHandlerTwo, usersHandlerThree, groupsHandlerOne,
                     groupsHandlerTwo, groupsHandlerThree);
         } else {
-            verify(provider).handleRead(Matchers.<ServerContext>anyObject(), Matchers.<ReadRequest>anyObject(),
-                    eq(handler));
+            verify(provider).handleRead(Matchers.<ServerContext>anyObject(), Matchers.<ReadRequest>anyObject());
         }
     }
 
     @Test (dataProvider = "dataWithVersionHeader")
     @SuppressWarnings("unchecked")
     public void shouldRouteUpdateVersionRequests(String resource, String requestedVersion, boolean expectException,
-                                                 RequestHandler provider) {
+            RequestHandler provider) {
 
         //Given
         AcceptAPIVersionContext apiVersionContext = new AcceptAPIVersionContext(new RootContext(), "PROTOCOL_NAME",
@@ -156,28 +157,24 @@ public class VersionedRouterTest {
                         .withDefaultResourceVersion(requestedVersion).build());
         ServerContext context = new ServerContext(apiVersionContext);
         UpdateRequest request = Requests.newUpdateRequest(resource, json(object()));
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
 
         //When
-        router.handleUpdate(context, request, handler);
+        Promise<Resource, ResourceException> promise = router.handleUpdate(context, request);
 
         //Then
         if (expectException) {
-            ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-            verify(handler).handleException(exceptionCaptor.capture());
-            assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
+            assertThat(promise).failedWithException().isInstanceOf(NotFoundException.class);
             verifyZeroInteractions(usersHandlerOne, usersHandlerTwo, usersHandlerThree, groupsHandlerOne,
                     groupsHandlerTwo, groupsHandlerThree);
         } else {
-            verify(provider).handleUpdate(Matchers.<ServerContext>anyObject(), Matchers.<UpdateRequest>anyObject(),
-                    eq(handler));
+            verify(provider).handleUpdate(Matchers.<ServerContext>anyObject(), Matchers.<UpdateRequest>anyObject());
         }
     }
 
     @Test (dataProvider = "dataWithVersionHeader")
     @SuppressWarnings("unchecked")
     public void shouldRouteDeleteVersionRequests(String resource, String requestedVersion, boolean expectException,
-                                                 RequestHandler provider) {
+            RequestHandler provider) {
 
         //Given
         AcceptAPIVersionContext apiVersionContext = new AcceptAPIVersionContext(new RootContext(), "PROTOCOL_NAME",
@@ -185,28 +182,24 @@ public class VersionedRouterTest {
                         .withDefaultResourceVersion(requestedVersion).build());
         ServerContext context = new ServerContext(apiVersionContext);
         DeleteRequest request = Requests.newDeleteRequest(resource);
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
 
         //When
-        router.handleDelete(context, request, handler);
+        Promise<Resource, ResourceException> promise = router.handleDelete(context, request);
 
         //Then
         if (expectException) {
-            ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-            verify(handler).handleException(exceptionCaptor.capture());
-            assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
+            assertThat(promise).failedWithException().isInstanceOf(NotFoundException.class);
             verifyZeroInteractions(usersHandlerOne, usersHandlerTwo, usersHandlerThree, groupsHandlerOne,
                     groupsHandlerTwo, groupsHandlerThree);
         } else {
-            verify(provider).handleDelete(Matchers.<ServerContext>anyObject(), Matchers.<DeleteRequest>anyObject(),
-                    eq(handler));
+            verify(provider).handleDelete(Matchers.<ServerContext>anyObject(), Matchers.<DeleteRequest>anyObject());
         }
     }
 
     @Test (dataProvider = "dataWithVersionHeader")
     @SuppressWarnings("unchecked")
     public void shouldRoutePatchVersionRequests(String resource, String requestedVersion, boolean expectException,
-                                                RequestHandler provider) {
+            RequestHandler provider) {
 
         //Given
         AcceptAPIVersionContext apiVersionContext = new AcceptAPIVersionContext(new RootContext(), "PROTOCOL_NAME",
@@ -214,28 +207,24 @@ public class VersionedRouterTest {
                         .withDefaultResourceVersion(requestedVersion).build());
         ServerContext context = new ServerContext(apiVersionContext);
         PatchRequest request = Requests.newPatchRequest(resource);
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
 
         //When
-        router.handlePatch(context, request, handler);
+        Promise<Resource, ResourceException> promise = router.handlePatch(context, request);
 
         //Then
         if (expectException) {
-            ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-            verify(handler).handleException(exceptionCaptor.capture());
-            assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
+            assertThat(promise).failedWithException().isInstanceOf(NotFoundException.class);
             verifyZeroInteractions(usersHandlerOne, usersHandlerTwo, usersHandlerThree, groupsHandlerOne,
                     groupsHandlerTwo, groupsHandlerThree);
         } else {
-            verify(provider).handlePatch(Matchers.<ServerContext>anyObject(), Matchers.<PatchRequest>anyObject(),
-                    eq(handler));
+            verify(provider).handlePatch(Matchers.<ServerContext>anyObject(), Matchers.<PatchRequest>anyObject());
         }
     }
 
     @Test (dataProvider = "dataWithVersionHeader")
     @SuppressWarnings("unchecked")
     public void shouldRouteActionVersionRequests(String resource, String requestedVersion, boolean expectException,
-                                                 RequestHandler provider) {
+            RequestHandler provider) {
 
         //Given
         AcceptAPIVersionContext apiVersionContext = new AcceptAPIVersionContext(new RootContext(), "PROTOCOL_NAME",
@@ -243,27 +232,23 @@ public class VersionedRouterTest {
                         .withDefaultResourceVersion(requestedVersion).build());
         ServerContext context = new ServerContext(apiVersionContext);
         ActionRequest request = Requests.newActionRequest(resource, "ACTION_ID").setContent(json(object()));
-        ResultHandler<JsonValue> handler = mock(ResultHandler.class);
 
         //When
-        router.handleAction(context, request, handler);
+        Promise<JsonValue, ResourceException> promise = router.handleAction(context, request);
 
         //Then
         if (expectException) {
-            ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-            verify(handler).handleException(exceptionCaptor.capture());
-            assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
+            assertThat(promise).failedWithException().isInstanceOf(NotFoundException.class);
             verifyZeroInteractions(usersHandlerOne, usersHandlerTwo, usersHandlerThree, groupsHandlerOne,
                     groupsHandlerTwo, groupsHandlerThree);
         } else {
-            verify(provider).handleAction(Matchers.<ServerContext>anyObject(), Matchers.<ActionRequest>anyObject(),
-                    eq(handler));
+            verify(provider).handleAction(Matchers.<ServerContext>anyObject(), Matchers.<ActionRequest>anyObject());
         }
     }
 
     @Test (dataProvider = "dataWithVersionHeader")
     public void shouldRouteQueryVersionRequests(String resource, String requestedVersion, boolean expectException,
-                                                RequestHandler provider) {
+            RequestHandler provider) {
 
         //Given
         AcceptAPIVersionContext apiVersionContext = new AcceptAPIVersionContext(new RootContext(), "PROTOCOL_NAME",
@@ -271,21 +256,18 @@ public class VersionedRouterTest {
                         .withDefaultResourceVersion(requestedVersion).build());
         ServerContext context = new ServerContext(apiVersionContext);
         QueryRequest request = Requests.newQueryRequest(resource);
-        QueryResultHandler handler = mock(QueryResultHandler.class);
+        QueryResourceHandler handler = mock(QueryResourceHandler.class);
 
         //When
-        router.handleQuery(context, request, handler);
+        Promise<QueryResult, ResourceException> promise = router.handleQuery(context, request, handler);
 
         //Then
         if (expectException) {
-            ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-            verify(handler).handleException(exceptionCaptor.capture());
-            assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
+            assertThat(promise).failedWithException().isInstanceOf(NotFoundException.class);
             verifyZeroInteractions(usersHandlerOne, usersHandlerTwo, usersHandlerThree, groupsHandlerOne,
                     groupsHandlerTwo, groupsHandlerThree);
         } else {
-            verify(provider).handleQuery(Matchers.<ServerContext>anyObject(), Matchers.<QueryRequest>anyObject(),
-                    eq(handler));
+            verify(provider).handleQuery(Matchers.<ServerContext>anyObject(), Matchers.<QueryRequest>anyObject(), eq(handler));
         }
     }
 
@@ -311,22 +293,19 @@ public class VersionedRouterTest {
                 AcceptAPIVersion.newBuilder().withDefaultProtocolVersion("1.0").build());
         ServerContext context = new ServerContext(apiVersionContext);
         CreateRequest request = Requests.newCreateRequest(resource, json(object()));
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
         setDefaultVersionBehaviour(versionRouter1, versionBehaviour);
         setDefaultVersionBehaviour(versionRouter2, versionBehaviour);
 
         //When
-        router.handleCreate(context, request, handler);
+        Promise<Resource, ResourceException> promise = router.handleCreate(context, request);
 
         //Then
         if (expectException) {
-            ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-            verify(handler).handleException(exceptionCaptor.capture());
-            assertThat(exceptionCaptor.getValue()).isInstanceOf(BadRequestException.class);
+            assertThat(promise).failedWithException().isInstanceOf(BadRequestException.class);
             verifyZeroInteractions(usersHandlerOne, usersHandlerTwo, usersHandlerThree, groupsHandlerOne,
                     groupsHandlerTwo, groupsHandlerThree);
         } else {
-            verify(provider).handleCreate(Matchers.<ServerContext>anyObject(), Matchers.<CreateRequest>anyObject(), eq(handler));
+            verify(provider).handleCreate(Matchers.<ServerContext>anyObject(), Matchers.<CreateRequest>anyObject());
         }
     }
 
@@ -340,23 +319,19 @@ public class VersionedRouterTest {
                 AcceptAPIVersion.newBuilder().withDefaultProtocolVersion("1.0").build());
         ServerContext context = new ServerContext(apiVersionContext);
         ReadRequest request = Requests.newReadRequest(resource);
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
         setDefaultVersionBehaviour(versionRouter1, versionBehaviour);
         setDefaultVersionBehaviour(versionRouter2, versionBehaviour);
 
         //When
-        router.handleRead(context, request, handler);
+        Promise<Resource, ResourceException> promise = router.handleRead(context, request);
 
         //Then
         if (expectException) {
-            ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-            verify(handler).handleException(exceptionCaptor.capture());
-            assertThat(exceptionCaptor.getValue()).isInstanceOf(BadRequestException.class);
+            assertThat(promise).failedWithException().isInstanceOf(BadRequestException.class);
             verifyZeroInteractions(usersHandlerOne, usersHandlerTwo, usersHandlerThree, groupsHandlerOne,
                     groupsHandlerTwo, groupsHandlerThree);
         } else {
-            verify(provider).handleRead(Matchers.<ServerContext>anyObject(), Matchers.<ReadRequest>anyObject(),
-                    eq(handler));
+            verify(provider).handleRead(Matchers.<ServerContext>anyObject(), Matchers.<ReadRequest>anyObject());
         }
     }
 
@@ -370,23 +345,19 @@ public class VersionedRouterTest {
                 AcceptAPIVersion.newBuilder().withDefaultProtocolVersion("1.0").build());
         ServerContext context = new ServerContext(apiVersionContext);
         UpdateRequest request = Requests.newUpdateRequest(resource, json(object()));
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
         setDefaultVersionBehaviour(versionRouter1, versionBehaviour);
         setDefaultVersionBehaviour(versionRouter2, versionBehaviour);
 
         //When
-        router.handleUpdate(context, request, handler);
+        Promise<Resource, ResourceException> promise = router.handleUpdate(context, request);
 
         //Then
         if (expectException) {
-            ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-            verify(handler).handleException(exceptionCaptor.capture());
-            assertThat(exceptionCaptor.getValue()).isInstanceOf(BadRequestException.class);
+            assertThat(promise).failedWithException().isInstanceOf(BadRequestException.class);
             verifyZeroInteractions(usersHandlerOne, usersHandlerTwo, usersHandlerThree, groupsHandlerOne,
                     groupsHandlerTwo, groupsHandlerThree);
         } else {
-            verify(provider).handleUpdate(Matchers.<ServerContext>anyObject(), Matchers.<UpdateRequest>anyObject(),
-                    eq(handler));
+            verify(provider).handleUpdate(Matchers.<ServerContext>anyObject(), Matchers.<UpdateRequest>anyObject());
         }
     }
 
@@ -400,23 +371,19 @@ public class VersionedRouterTest {
                 AcceptAPIVersion.newBuilder().withDefaultProtocolVersion("1.0").build());
         ServerContext context = new ServerContext(apiVersionContext);
         DeleteRequest request = Requests.newDeleteRequest(resource);
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
         setDefaultVersionBehaviour(versionRouter1, versionBehaviour);
         setDefaultVersionBehaviour(versionRouter2, versionBehaviour);
 
         //When
-        router.handleDelete(context, request, handler);
+        Promise<Resource, ResourceException> promise = router.handleDelete(context, request);
 
         //Then
         if (expectException) {
-            ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-            verify(handler).handleException(exceptionCaptor.capture());
-            assertThat(exceptionCaptor.getValue()).isInstanceOf(BadRequestException.class);
+            assertThat(promise).failedWithException().isInstanceOf(BadRequestException.class);
             verifyZeroInteractions(usersHandlerOne, usersHandlerTwo, usersHandlerThree, groupsHandlerOne,
                     groupsHandlerTwo, groupsHandlerThree);
         } else {
-            verify(provider).handleDelete(Matchers.<ServerContext>anyObject(), Matchers.<DeleteRequest>anyObject(),
-                    eq(handler));
+            verify(provider).handleDelete(Matchers.<ServerContext>anyObject(), Matchers.<DeleteRequest>anyObject());
         }
     }
 
@@ -430,23 +397,19 @@ public class VersionedRouterTest {
                 AcceptAPIVersion.newBuilder().withDefaultProtocolVersion("1.0").build());
         ServerContext context = new ServerContext(apiVersionContext);
         PatchRequest request = Requests.newPatchRequest(resource);
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
         setDefaultVersionBehaviour(versionRouter1, versionBehaviour);
         setDefaultVersionBehaviour(versionRouter2, versionBehaviour);
 
         //When
-        router.handlePatch(context, request, handler);
+        Promise<Resource, ResourceException> promise = router.handlePatch(context, request);
 
         //Then
         if (expectException) {
-            ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-            verify(handler).handleException(exceptionCaptor.capture());
-            assertThat(exceptionCaptor.getValue()).isInstanceOf(BadRequestException.class);
+            assertThat(promise).failedWithException().isInstanceOf(BadRequestException.class);
             verifyZeroInteractions(usersHandlerOne, usersHandlerTwo, usersHandlerThree, groupsHandlerOne,
                     groupsHandlerTwo, groupsHandlerThree);
         } else {
-            verify(provider).handlePatch(Matchers.<ServerContext>anyObject(), Matchers.<PatchRequest>anyObject(),
-                    eq(handler));
+            verify(provider).handlePatch(Matchers.<ServerContext>anyObject(), Matchers.<PatchRequest>anyObject());
         }
     }
 
@@ -460,23 +423,19 @@ public class VersionedRouterTest {
                 AcceptAPIVersion.newBuilder().withDefaultProtocolVersion("1.0").build());
         ServerContext context = new ServerContext(apiVersionContext);
         ActionRequest request = Requests.newActionRequest(resource, "ACTION_ID").setContent(json(object()));
-        ResultHandler<JsonValue> handler = mock(ResultHandler.class);
         setDefaultVersionBehaviour(versionRouter1, versionBehaviour);
         setDefaultVersionBehaviour(versionRouter2, versionBehaviour);
 
         //When
-        router.handleAction(context, request, handler);
+        Promise<JsonValue, ResourceException> promise = router.handleAction(context, request);
 
         //Then
         if (expectException) {
-            ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-            verify(handler).handleException(exceptionCaptor.capture());
-            assertThat(exceptionCaptor.getValue()).isInstanceOf(BadRequestException.class);
+            assertThat(promise).failedWithException().isInstanceOf(BadRequestException.class);
             verifyZeroInteractions(usersHandlerOne, usersHandlerTwo, usersHandlerThree, groupsHandlerOne,
                     groupsHandlerTwo, groupsHandlerThree);
         } else {
-            verify(provider).handleAction(Matchers.<ServerContext>anyObject(), Matchers.<ActionRequest>anyObject(),
-                    eq(handler));
+            verify(provider).handleAction(Matchers.<ServerContext>anyObject(), Matchers.<ActionRequest>anyObject());
         }
     }
 
@@ -489,18 +448,16 @@ public class VersionedRouterTest {
                 AcceptAPIVersion.newBuilder().withDefaultProtocolVersion("1.0").build());
         ServerContext context = new ServerContext(apiVersionContext);
         QueryRequest request = Requests.newQueryRequest(resource);
-        QueryResultHandler handler = mock(QueryResultHandler.class);
+        QueryResourceHandler handler = mock(QueryResourceHandler.class);
         setDefaultVersionBehaviour(versionRouter1, versionBehaviour);
         setDefaultVersionBehaviour(versionRouter2, versionBehaviour);
 
         //When
-        router.handleQuery(context, request, handler);
+        Promise<QueryResult, ResourceException> promise = router.handleQuery(context, request, handler);
 
         //Then
         if (expectException) {
-            ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-            verify(handler).handleException(exceptionCaptor.capture());
-            assertThat(exceptionCaptor.getValue()).isInstanceOf(BadRequestException.class);
+            assertThat(promise).failedWithException().isInstanceOf(BadRequestException.class);
             verifyZeroInteractions(usersHandlerOne, usersHandlerTwo, usersHandlerThree, groupsHandlerOne,
                     groupsHandlerTwo, groupsHandlerThree);
         } else {
