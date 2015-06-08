@@ -17,16 +17,11 @@
 package org.forgerock.json.resource.descriptor;
 
 import static java.util.Collections.unmodifiableSet;
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
-import static org.forgerock.json.resource.Requests.copyOfActionRequest;
-import static org.forgerock.json.resource.Requests.copyOfCreateRequest;
-import static org.forgerock.json.resource.Requests.copyOfDeleteRequest;
-import static org.forgerock.json.resource.Requests.copyOfPatchRequest;
-import static org.forgerock.json.resource.Requests.copyOfQueryRequest;
-import static org.forgerock.json.resource.Requests.copyOfReadRequest;
-import static org.forgerock.json.resource.Requests.copyOfUpdateRequest;
+import static org.forgerock.json.fluent.JsonValue.*;
+import static org.forgerock.json.resource.Requests.*;
+import static org.forgerock.json.resource.ResourceException.newNotSupportedException;
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
+import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,6 +31,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.forgerock.http.ResourcePath;
 import org.forgerock.http.ServerContext;
 import org.forgerock.i18n.LocalizableMessage;
 import org.forgerock.json.fluent.JsonValue;
@@ -44,59 +41,33 @@ import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.NotFoundException;
-import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.http.ResourcePath;
-import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.json.resource.descriptor.RelationDescriptor.Multiplicity;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.forgerock.util.AsyncFunction;
+import org.forgerock.util.promise.Promise;
 
 @SuppressWarnings("javadoc")
 public final class Api {
     static final ObjectMapper JSON_MAPPER = new ObjectMapper();
 
-    private static abstract class AbstractResolverHandler implements ResultHandler<RequestHandler> {
-        private final ResultHandler<?> handler;
-        private final Resolver resolver;
-
-        private AbstractResolverHandler(final ResultHandler<?> handler, final Resolver resolver) {
-            this.handler = handler;
-            this.resolver = resolver;
-        }
-
-        @Override
-        public final void handleException(final ResourceException error) {
-            resolver.close();
-            handler.handleException(error);
-        }
-
-        @Override
-        public final void handleResult(final RequestHandler requestHandler) {
-            resolver.close();
-            dispatch(requestHandler);
-        }
-
-        protected abstract void dispatch(RequestHandler requestHandler);
-    }
-
     public static RequestHandler newApiDescriptorRequestHandler(final ApiDescriptor api) {
         return new AbstractRequestHandler() {
             @Override
-            public void handleRead(final ServerContext context, final ReadRequest request,
-                    final ResultHandler<Resource> handler) {
+            public Promise<Resource, ResourceException> handleRead(final ServerContext context,
+                    final ReadRequest request) {
                 if (request.getResourcePathObject().isEmpty()) {
-                    handler.handleResult(new Resource(null, null, json(apiToJson(api))));
+                    return newResultPromise(new Resource(null, null, json(apiToJson(api))));
                 } else {
-                    handler.handleException(new NotSupportedException());
+                    return newExceptionPromise(newNotSupportedException());
                 }
             }
         };
@@ -105,16 +76,16 @@ public final class Api {
     public static RequestHandler newApiDescriptorRequestHandler(final Collection<ApiDescriptor> apis) {
         return new AbstractRequestHandler() {
             @Override
-            public void handleRead(final ServerContext context, final ReadRequest request,
-                    final ResultHandler<Resource> handler) {
+            public Promise<Resource, ResourceException> handleRead(final ServerContext context,
+                    final ReadRequest request) {
                 if (request.getResourcePathObject().isEmpty()) {
                     final List<Object> values = new ArrayList<Object>(apis.size());
                     for (final ApiDescriptor api : apis) {
                         values.add(apiToJson(api));
                     }
-                    handler.handleResult(new Resource(null, null, json(values)));
+                    return newResultPromise(new Resource(null, null, json(values)));
                 } else {
-                    handler.handleException(new NotSupportedException());
+                    return newExceptionPromise(newNotSupportedException());
                 }
             }
         };
@@ -125,99 +96,99 @@ public final class Api {
         return new RequestHandler() {
 
             @Override
-            public void handleAction(final ServerContext context, final ActionRequest request,
-                    final ResultHandler<JsonValue> handler) {
+            public Promise<JsonValue, ResourceException> handleAction(final ServerContext context,
+                    final ActionRequest request) {
                 final ActionRequest mutableCopy = copyOfActionRequest(request);
                 final Resolver resolver = factory.createResolver(context, request);
-                resolveAndInvoke(api.getRelations(), mutableCopy, resolver,
-                        new AbstractResolverHandler(handler, resolver) {
+                return resolveAndInvoke(api.getRelations(), mutableCopy, resolver)
+                        .thenAsync(new AsyncFunction<RequestHandler, JsonValue, ResourceException>() {
                             @Override
-                            protected void dispatch(final RequestHandler resolvedRequestHandler) {
-                                resolvedRequestHandler.handleAction(context, mutableCopy, handler);
+                            public Promise<JsonValue, ResourceException> apply(RequestHandler resolvedRequestHandler) {
+                                return resolvedRequestHandler.handleAction(context, mutableCopy);
                             }
                         });
             }
 
             @Override
-            public void handleCreate(final ServerContext context, final CreateRequest request,
-                    final ResultHandler<Resource> handler) {
+            public Promise<Resource, ResourceException> handleCreate(final ServerContext context,
+                    final CreateRequest request) {
                 final CreateRequest mutableCopy = copyOfCreateRequest(request);
                 final Resolver resolver = factory.createResolver(context, request);
-                resolveAndInvoke(api.getRelations(), mutableCopy, resolver,
-                        new AbstractResolverHandler(handler, resolver) {
+                return resolveAndInvoke(api.getRelations(), mutableCopy, resolver)
+                        .thenAsync(new AsyncFunction<RequestHandler, Resource, ResourceException>() {
                             @Override
-                            protected void dispatch(final RequestHandler resolvedRequestHandler) {
-                                resolvedRequestHandler.handleCreate(context, mutableCopy, handler);
+                            public Promise<Resource, ResourceException> apply(RequestHandler resolvedRequestHandler) {
+                                return resolvedRequestHandler.handleCreate(context, mutableCopy);
                             }
                         });
             }
 
             @Override
-            public void handleDelete(final ServerContext context, final DeleteRequest request,
-                    final ResultHandler<Resource> handler) {
+            public Promise<Resource, ResourceException> handleDelete(final ServerContext context,
+                    final DeleteRequest request) {
                 final DeleteRequest mutableCopy = copyOfDeleteRequest(request);
                 final Resolver resolver = factory.createResolver(context, request);
-                resolveAndInvoke(api.getRelations(), mutableCopy, resolver,
-                        new AbstractResolverHandler(handler, resolver) {
+                return resolveAndInvoke(api.getRelations(), mutableCopy, resolver)
+                        .thenAsync(new AsyncFunction<RequestHandler, Resource, ResourceException>() {
                             @Override
-                            protected void dispatch(final RequestHandler resolvedRequestHandler) {
-                                resolvedRequestHandler.handleDelete(context, mutableCopy, handler);
+                            public Promise<Resource, ResourceException> apply(RequestHandler resolvedRequestHandler) {
+                                return resolvedRequestHandler.handleDelete(context, mutableCopy);
                             }
                         });
             }
 
             @Override
-            public void handlePatch(final ServerContext context, final PatchRequest request,
-                    final ResultHandler<Resource> handler) {
+            public Promise<Resource, ResourceException> handlePatch(final ServerContext context,
+                    final PatchRequest request) {
                 final PatchRequest mutableCopy = copyOfPatchRequest(request);
                 final Resolver resolver = factory.createResolver(context, request);
-                resolveAndInvoke(api.getRelations(), mutableCopy, resolver,
-                        new AbstractResolverHandler(handler, resolver) {
+                return resolveAndInvoke(api.getRelations(), mutableCopy, resolver)
+                        .thenAsync(new AsyncFunction<RequestHandler, Resource, ResourceException>() {
                             @Override
-                            protected void dispatch(final RequestHandler resolvedRequestHandler) {
-                                resolvedRequestHandler.handlePatch(context, mutableCopy, handler);
+                            public Promise<Resource, ResourceException> apply(RequestHandler resolvedRequestHandler) {
+                                return resolvedRequestHandler.handlePatch(context, mutableCopy);
                             }
                         });
             }
 
             @Override
-            public void handleQuery(final ServerContext context, final QueryRequest request,
-                    final QueryResultHandler handler) {
+            public Promise<QueryResult, ResourceException> handleQuery(final ServerContext context,
+                    final QueryRequest request, final QueryResourceHandler handler) {
                 final QueryRequest mutableCopy = copyOfQueryRequest(request);
                 final Resolver resolver = factory.createResolver(context, request);
-                resolveAndInvoke(api.getRelations(), mutableCopy, resolver,
-                        new AbstractResolverHandler(handler, resolver) {
+                return resolveAndInvoke(api.getRelations(), mutableCopy, resolver)
+                        .thenAsync(new AsyncFunction<RequestHandler, QueryResult, ResourceException>() {
                             @Override
-                            protected void dispatch(final RequestHandler resolvedRequestHandler) {
-                                resolvedRequestHandler.handleQuery(context, mutableCopy, handler);
+                            public Promise<QueryResult, ResourceException> apply(RequestHandler resolvedRequestHandler) {
+                                return resolvedRequestHandler.handleQuery(context, mutableCopy, handler);
                             }
                         });
             }
 
             @Override
-            public void handleRead(final ServerContext context, final ReadRequest request,
-                    final ResultHandler<Resource> handler) {
+            public Promise<Resource, ResourceException> handleRead(final ServerContext context,
+                    final ReadRequest request) {
                 final ReadRequest mutableCopy = copyOfReadRequest(request);
                 final Resolver resolver = factory.createResolver(context, request);
-                resolveAndInvoke(api.getRelations(), mutableCopy, resolver,
-                        new AbstractResolverHandler(handler, resolver) {
+                return resolveAndInvoke(api.getRelations(), mutableCopy, resolver)
+                        .thenAsync(new AsyncFunction<RequestHandler, Resource, ResourceException>() {
                             @Override
-                            protected void dispatch(final RequestHandler resolvedRequestHandler) {
-                                resolvedRequestHandler.handleRead(context, mutableCopy, handler);
+                            public Promise<Resource, ResourceException> apply(RequestHandler resolvedRequestHandler) {
+                                return resolvedRequestHandler.handleRead(context, mutableCopy);
                             }
                         });
             }
 
             @Override
-            public void handleUpdate(final ServerContext context, final UpdateRequest request,
-                    final ResultHandler<Resource> handler) {
+            public Promise<Resource, ResourceException> handleUpdate(final ServerContext context,
+                    final UpdateRequest request) {
                 final UpdateRequest mutableCopy = copyOfUpdateRequest(request);
                 final Resolver resolver = factory.createResolver(context, request);
-                resolveAndInvoke(api.getRelations(), mutableCopy, resolver,
-                        new AbstractResolverHandler(handler, resolver) {
+                return resolveAndInvoke(api.getRelations(), mutableCopy, resolver)
+                        .thenAsync(new AsyncFunction<RequestHandler, Resource, ResourceException>() {
                             @Override
-                            protected void dispatch(final RequestHandler resolvedRequestHandler) {
-                                resolvedRequestHandler.handleUpdate(context, mutableCopy, handler);
+                            public Promise<Resource, ResourceException> apply(RequestHandler resolvedRequestHandler) {
+                                return resolvedRequestHandler.handleUpdate(context, mutableCopy);
                             }
                         });
             }
@@ -226,21 +197,33 @@ public final class Api {
                     final RelationDescriptor newMatch) {
                 return oldMatch == null
                         || oldMatch.getResourcePathObject().size() < newMatch
-                                .getResourcePathObject().size();
+                        .getResourcePathObject().size();
             }
 
-            private boolean isChildRequest(final ResourcePath relationPath,
+            private boolean isChildRequest(final ResourcePath relationName,
                     final ResourcePath target) {
-                return target.size() == relationPath.size() + 1;
+                return target.size() == relationName.size() + 1;
             }
 
             private boolean isOneToMany(final RelationDescriptor relation) {
                 return relation.getMultiplicity() == Multiplicity.ONE_TO_MANY;
             }
 
-            private void resolveAndInvoke(final Collection<RelationDescriptor> relations,
-                    final Request mutableRequest, final Resolver resolver,
-                    final ResultHandler<RequestHandler> handler) {
+            private Promise<RequestHandler, ResourceException> resolveAndInvoke(
+                    final Collection<RelationDescriptor> relations, final Request mutableRequest,
+                    final Resolver resolver) {
+                return resolveAndInvoke0(relations, mutableRequest, resolver)
+                        .thenAlways(new Runnable() {
+                            @Override
+                            public void run() {
+                                resolver.close();
+                            }
+                        });
+            }
+
+            private Promise<RequestHandler, ResourceException> resolveAndInvoke0(
+                    final Collection<RelationDescriptor> relations, final Request mutableRequest,
+                    final Resolver resolver) {
                 // @formatter:off
                 /*
                  * We need to find the best match so first try all
@@ -256,21 +239,21 @@ public final class Api {
                  * singleton/*
                  */
                 // @formatter:on
-                final ResourcePath path = mutableRequest.getResourcePathObject();
+                final ResourcePath name = mutableRequest.getResourcePathObject();
                 RelationDescriptor exactMatch = null;
                 RelationDescriptor childMatch = null;
                 RelationDescriptor subMatch = null;
                 for (final RelationDescriptor relation : relations) {
-                    final ResourcePath relationPath = relation.getResourcePathObject();
-                    if (path.equals(relationPath)) {
+                    final ResourcePath relationName = relation.getResourcePathObject();
+                    if (name.equals(relationName)) {
                         /*
                          * Got an exact match - this wins outright so no point
                          * in continuing.
                          */
                         exactMatch = relation;
                         break;
-                    } else if (path.startsWith(relationPath)) {
-                        if (isOneToMany(relation) && isChildRequest(relationPath, path)) {
+                    } else if (name.startsWith(relationName)) {
+                        if (isOneToMany(relation) && isChildRequest(relationName, name)) {
                             // Child match.
                             childMatch = relation;
                         } else if (isBetterMatch(subMatch, relation)) {
@@ -290,39 +273,34 @@ public final class Api {
                             mutableRequest.setResourcePath(ResourcePath.empty());
                         } else {
                             resolvedRequestHandler = resolver.getRequestHandler(childMatch);
-                            mutableRequest.setResourcePath(path.tail(path.size() - 1));
+                            mutableRequest.setResourcePath(name.tail(name.size() - 1));
                         }
-                        handler.handleResult(resolvedRequestHandler);
+                        return newResultPromise(resolvedRequestHandler);
                     } catch (final ResourceException e) {
-                        handler.handleException(e);
+                        return newExceptionPromise(e);
                     }
                 } else if (subMatch != null) {
                     final String childId;
                     final int relationNameSize = subMatch.getResourcePathObject().size();
                     if (isOneToMany(subMatch)) {
                         // Strip off collection name and resource ID.
-                        mutableRequest.setResourcePath(path.tail(relationNameSize + 1));
-                        childId = path.get(relationNameSize);
+                        mutableRequest.setResourcePath(name.tail(relationNameSize + 1));
+                        childId = name.get(relationNameSize);
                     } else {
                         // Strip off resource name.
-                        mutableRequest.setResourcePath(path.tail(relationNameSize));
+                        mutableRequest.setResourcePath(name.tail(relationNameSize));
                         childId = null;
                     }
-                    resolver.getRelationsForResource(subMatch, childId,
-                            new ResultHandler<Collection<RelationDescriptor>>() {
+                    return resolver.getRelationsForResource(subMatch, childId)
+                            .thenAsync(new AsyncFunction<Collection<RelationDescriptor>, RequestHandler, ResourceException>() {
                                 @Override
-                                public void handleException(final ResourceException error) {
-                                    handler.handleException(error);
-                                }
-
-                                @Override
-                                public void handleResult(final Collection<RelationDescriptor> result) {
-                                    resolveAndInvoke(result, mutableRequest, resolver, handler);
+                                public Promise<RequestHandler, ResourceException> apply(Collection<RelationDescriptor> result) {
+                                    return resolveAndInvoke(result, mutableRequest, resolver);
                                 }
                             });
                 } else {
-                    handler.handleException(new NotFoundException(String.format(
-                            "Resource '%s' not found", path)));
+                    ResourceException e = new NotFoundException(String.format("Resource '%s' not found", name));
+                    return newExceptionPromise(e);
                 }
             }
         };
@@ -414,7 +392,7 @@ public final class Api {
         for (final RelationDescriptor relation : relations) {
             // @formatter:off
             json.add(object(
-                    field("path", relation.getResourcePath()),
+                    field("name", relation.getResourcePath()),
                     field("description", relation.getDescription()),
                     field("multiplicity", relation.getMultiplicity()),
                     actionsToJson(relation.getActions()),

@@ -16,8 +16,11 @@
 
 package org.forgerock.json.resource;
 
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
+
 import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.util.promise.Promise;
 
 class InterfaceCollectionHandler implements RequestHandler {
     private final CollectionResourceProvider provider;
@@ -27,52 +30,51 @@ class InterfaceCollectionHandler implements RequestHandler {
     }
 
     @Override
-    public void handleAction(final ServerContext context, final ActionRequest request,
-            final ResultHandler<JsonValue> handler) {
-        provider.actionCollection(Resources.parentOf(context), request, handler);
+    public Promise<JsonValue, ResourceException> handleAction(final ServerContext context,
+            final ActionRequest request) {
+        return provider.actionCollection(Resources.parentOf(context), request);
     }
 
     @Override
-    public void handleCreate(final ServerContext context, final CreateRequest request,
-            final ResultHandler<Resource> handler) {
-        provider.createInstance(Resources.parentOf(context), request, handler);
+    public Promise<Resource, ResourceException> handleCreate(final ServerContext context, final CreateRequest request) {
+        return provider.createInstance(Resources.parentOf(context), request);
     }
 
     @Override
-    public final void handleDelete(final ServerContext context, final DeleteRequest request,
-            final ResultHandler<Resource> handler) {
+    public final Promise<Resource, ResourceException> handleDelete(final ServerContext context,
+            final DeleteRequest request) {
         // TODO: i18n
-        handler.handleException(Resources.newBadRequestException(
+        return newExceptionPromise(Resources.newBadRequestException(
                 "The resource collection %s cannot be deleted", request.getResourcePath()));
     }
 
     @Override
-    public final void handlePatch(final ServerContext context, final PatchRequest request,
-            final ResultHandler<Resource> handler) {
+    public final Promise<Resource, ResourceException> handlePatch(final ServerContext context,
+            final PatchRequest request) {
         // TODO: i18n
-        handler.handleException(Resources.newBadRequestException(
+        return newExceptionPromise(Resources.newBadRequestException(
                 "The resource collection %s cannot be patched", request.getResourcePath()));
     }
 
     @Override
-    public void handleQuery(final ServerContext context, final QueryRequest request,
-            final QueryResultHandler handler) {
-        provider.queryCollection(Resources.parentOf(context), request, handler);
+    public Promise<QueryResult, ResourceException> handleQuery(final ServerContext context, final QueryRequest request,
+            final QueryResourceHandler handler) {
+        return provider.queryCollection(Resources.parentOf(context), request, handler);
     }
 
     @Override
-    public final void handleRead(final ServerContext context, final ReadRequest request,
-            final ResultHandler<Resource> handler) {
+    public final Promise<Resource, ResourceException> handleRead(final ServerContext context,
+            final ReadRequest request) {
         // TODO: i18n
-        handler.handleException(Resources.newBadRequestException("The resource collection %s cannot be read",
-                request.getResourcePath()));
+        return newExceptionPromise(Resources.newBadRequestException(
+                "The resource collection %s cannot be read", request.getResourcePath()));
     }
 
     @Override
-    public final void handleUpdate(final ServerContext context, final UpdateRequest request,
-            final ResultHandler<Resource> handler) {
+    public final Promise<Resource, ResourceException> handleUpdate(final ServerContext context,
+            final UpdateRequest request) {
         // TODO: i18n
-        handler.handleException(Resources.newBadRequestException(
+        return newExceptionPromise(Resources.newBadRequestException(
                 "The resource collection %s cannot be updated", request.getResourcePath()));
     }
 }

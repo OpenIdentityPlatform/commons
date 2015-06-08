@@ -21,7 +21,6 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.annotations.Create;
 import org.forgerock.json.resource.annotations.Query;
 import org.forgerock.json.resource.annotations.RequestHandler;
-import org.forgerock.util.promise.ExceptionHandler;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -52,32 +51,18 @@ class AnnotatedCollectionHandler extends InterfaceCollectionHandler {
     }
 
     @Override
-    public void handleCreate(ServerContext context, CreateRequest request, ResultHandler<Resource> handler) {
-        RequestHandlerUtils.handle(createMethod, context, request, handler);
+    public Promise<Resource, ResourceException> handleCreate(ServerContext context, CreateRequest request) {
+        return RequestHandlerUtils.handle(createMethod, context, request);
     }
 
     @Override
-    public void handleQuery(ServerContext context, QueryRequest request, QueryResultHandler handler) {
-        RequestHandlerUtils.handle(queryMethod, context, request, handler, handler);
+    public Promise<QueryResult, ResourceException> handleQuery(ServerContext context, QueryRequest request,
+            QueryResourceHandler handler) {
+        return RequestHandlerUtils.handle(queryMethod, context, request, handler);
     }
 
     @Override
-    public void handleAction(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
-        handle(actionMethods.invoke(context, request, null), handler);
+    public Promise<JsonValue, ResourceException> handleAction(ServerContext context, ActionRequest request) {
+        return actionMethods.invoke(context, request, null);
     }
-
-    private <T> void handle(Promise<T, ? extends ResourceException> promise, final ResultHandler<T> handler) {
-        promise.thenOnResult(new org.forgerock.util.promise.ResultHandler<T>() {
-            @Override
-            public void handleResult(T result) {
-                handler.handleResult(result);
-            }
-        }).thenOnException(new ExceptionHandler<ResourceException>() {
-            @Override
-            public void handleException(ResourceException error) {
-                handler.handleException(error);
-            }
-        });
-    }
-
 }

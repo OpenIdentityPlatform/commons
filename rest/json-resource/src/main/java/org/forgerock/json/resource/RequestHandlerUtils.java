@@ -17,7 +17,6 @@
 package org.forgerock.json.resource;
 
 import org.forgerock.http.ServerContext;
-import org.forgerock.util.promise.ExceptionHandler;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -25,33 +24,18 @@ import org.forgerock.util.promise.Promise;
  */
 class RequestHandlerUtils {
 
-    static <T> void handle(AnnotatedMethod method, ServerContext context, Request request,
-            final ResultHandler<T> handler) {
-        handle(method.<T>invoke(context, request, null), handler);
+    static <T> Promise<T, ResourceException> handle(AnnotatedMethod method, ServerContext context, Request request) {
+        return method.invoke(context, request, null);
     }
 
-    static <T> void handle(AnnotatedMethod method, ServerContext context, Request request,
-            final ResultHandler<T> handler, QueryResultHandler queryResultHandler) {
-        handle(method.<T>invoke(context, request, queryResultHandler, null), handler);
+    static <T> Promise<T, ResourceException> handle(AnnotatedMethod method, ServerContext context, Request request,
+            QueryResourceHandler queryResourceHandler) {
+        return method.invoke(context, request, queryResourceHandler, null);
     }
 
-    static <T> void handle(AnnotatedMethod method, ServerContext context, Request request, String id,
-            final ResultHandler<T> handler) {
-        handle(method.<T>invoke(context, request, id), handler);
-    }
-
-    static <T> void handle(Promise<T, ? extends ResourceException> promise, final ResultHandler<T> handler) {
-        promise.thenOnResult(new org.forgerock.util.promise.ResultHandler<T>() {
-            @Override
-            public void handleResult(T result) {
-                handler.handleResult(result);
-            }
-        }).thenOnException(new ExceptionHandler<ResourceException>() {
-            @Override
-            public void handleException(ResourceException error) {
-                handler.handleException(error);
-            }
-        });
+    static <T> Promise<T, ResourceException> handle(AnnotatedMethod method, ServerContext context, Request request,
+            String id) {
+        return method.invoke(context, request, id);
     }
 
     private RequestHandlerUtils() {}

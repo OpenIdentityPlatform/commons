@@ -21,6 +21,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.forgerock.json.resource.QueryResourceHandler;
+
 /**
  * Indicates an CREST query method on a {@link RequestHandler}-annotated POJO. This annotation can only be used on
  * collection resource request handlers.
@@ -31,7 +33,7 @@ import java.lang.annotation.Target;
  * </ul>
  * The method must take the following parameters:
  * <ul>
- *     <li>A {@link org.forgerock.json.resource.QueryResultHandler} for the results of the query.</li>
+ *     <li>A {@link QueryResourceHandler} for the results of the query.</li>
  *     <li>A {@link org.forgerock.json.resource.QueryRequest} for the request.</li>
  * </ul>
  * The method may also take the following parameters:

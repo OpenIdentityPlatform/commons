@@ -11,8 +11,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
+
 package org.forgerock.json.resource.descriptor;
 
 import java.io.Closeable;
@@ -20,14 +21,14 @@ import java.util.Collection;
 
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResultHandler;
+import org.forgerock.util.promise.Promise;
 
 public interface Resolver extends Closeable {
 
     RequestHandler getRequestHandler(RelationDescriptor relation) throws ResourceException;
 
-    void getRelationsForResource(RelationDescriptor relation, String resourceId,
-            ResultHandler<Collection<RelationDescriptor>> handler);
+    Promise<Collection<RelationDescriptor>, ResourceException> getRelationsForResource(RelationDescriptor relation,
+            String resourceId);
 
     void close();
 }

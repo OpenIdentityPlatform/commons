@@ -17,20 +17,15 @@
 package org.forgerock.json.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.util.promise.Promise;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -39,198 +34,6 @@ import org.testng.annotations.Test;
  */
 @SuppressWarnings({ "javadoc" })
 public final class FiltersTest {
-
-    private static final class MockFilter implements UntypedCrossCutFilter<Object> {
-        ServerContext context;
-        ResourceException error;
-        final List<Resource> queryResources = new LinkedList<Resource>();
-        Request request;
-        Object result;
-        private final boolean removeQueryResources;
-        private final Object state = new Object();
-
-        // Filter which continues.
-        MockFilter(final boolean removeQueryResources) {
-            this.removeQueryResources = removeQueryResources;
-        }
-
-        // Filter which stops with result.
-        MockFilter(final Object result) {
-            this.removeQueryResources = false;
-            this.result = result;
-        }
-
-        // Filter which stops with error.
-        MockFilter(final ResourceException error) {
-            this.removeQueryResources = false;
-            this.error = error;
-        }
-
-        @Override
-        public void filterGenericError(final ServerContext context, final Object state,
-                final ResourceException error, final ResultHandler<Object> handler) {
-            // Check state:
-            assertThat(this.context).isSameAs(context);
-            assertThat(this.request).isNotNull();
-            assertThat(this.error).isNull();
-            assertThat(this.result).isNull();
-
-            // Check args:
-            assertThat(state).isSameAs(this.state);
-            assertThat(error).isNotNull();
-
-            // Update state and notify caller:
-            this.error = error;
-            handler.handleException(error);
-        }
-
-        @Override
-        public void filterGenericRequest(final ServerContext context, final Request request,
-                final RequestHandler next, final CrossCutFilterResultHandler<Object, Object> handler) {
-            // Check state:
-            assertThat(this.context).isNull();
-            assertThat(this.request).isNull();
-
-            // Check args:
-            assertThat(context).isNotNull();
-            assertThat(next).isNotNull();
-            assertThat(request).isNotNull();
-
-            // Update state and notify caller:
-            this.context = context;
-            this.request = request;
-
-            if (result != null) {
-                // Stop with result.
-                handler.handleResult(result);
-            } else if (error != null) {
-                // Stop with error.
-                handler.handleError(error);
-            } else {
-                // Continue.
-                handler.handleContinue(context, state);
-            }
-        }
-
-        @Override
-        public <R> void filterGenericResult(final ServerContext context, final Object state,
-                final R result, final ResultHandler<R> handler) {
-            // Check state:
-            assertThat(this.context).isSameAs(context);
-            assertThat(this.request).isNotNull();
-            assertThat(this.error).isNull();
-            assertThat(this.result).isNull();
-
-            // Check args:
-            assertThat(state).isSameAs(this.state);
-            assertThat(result).isNotNull();
-
-            // Update state and notify caller:
-            this.result = result;
-            handler.handleResult(result);
-        }
-
-        @Override
-        public void filterQueryResource(final ServerContext context, final Object state,
-                final Resource resource, final QueryResultHandler handler) {
-            // Check state:
-            assertThat(this.context).isSameAs(context);
-            assertThat(this.request).isNotNull();
-            assertThat(this.error).isNull();
-            assertThat(this.result).isNull();
-
-            // Check args:
-            assertThat(state).isSameAs(this.state);
-            assertThat(resource).isNotNull();
-
-            // Update state and notify caller:
-            queryResources.add(resource);
-            if (!removeQueryResources) {
-                handler.handleResource(resource);
-            }
-        }
-
-    }
-
-    private static final class MockRequestHandler implements RequestHandler {
-        Request request;
-        private final boolean returnError;
-
-        MockRequestHandler(final boolean returnError) {
-            this.returnError = returnError;
-        }
-
-        @Override
-        public void handleAction(final ServerContext context, final ActionRequest request,
-                final ResultHandler<JsonValue> handler) {
-            checkState(context, request);
-            if (returnError) {
-                handler.handleException(ERROR);
-            } else {
-                handler.handleResult(JSON);
-            }
-        }
-
-        @Override
-        public void handleCreate(final ServerContext context, final CreateRequest request,
-                final ResultHandler<Resource> handler) {
-            handle0(context, request, handler);
-        }
-
-        @Override
-        public void handleDelete(final ServerContext context, final DeleteRequest request,
-                final ResultHandler<Resource> handler) {
-            handle0(context, request, handler);
-        }
-
-        @Override
-        public void handlePatch(final ServerContext context, final PatchRequest request,
-                final ResultHandler<Resource> handler) {
-            handle0(context, request, handler);
-        }
-
-        @Override
-        public void handleQuery(final ServerContext context, final QueryRequest request,
-                final QueryResultHandler handler) {
-            checkState(context, request);
-            if (returnError) {
-                handler.handleException(ERROR);
-            } else {
-                handler.handleResource(RESOURCE1);
-                handler.handleResource(RESOURCE2);
-                handler.handleResult(QUERY_RESULT);
-            }
-        }
-
-        @Override
-        public void handleRead(final ServerContext context, final ReadRequest request,
-                final ResultHandler<Resource> handler) {
-            handle0(context, request, handler);
-        }
-
-        @Override
-        public void handleUpdate(final ServerContext context, final UpdateRequest request,
-                final ResultHandler<Resource> handler) {
-            handle0(context, request, handler);
-        }
-
-        private void checkState(final ServerContext context, final Request request) {
-            assertThat(this.request).isNull();
-            assertThat(context).isNotNull();
-            assertThat(request).isNotNull();
-            this.request = request;
-        }
-
-        private void handle0(final ServerContext context, final Request request,
-                final ResultHandler<Resource> handler) {
-            checkState(context, request);
-            if (returnError) {
-                handler.handleException(ERROR);
-            } else {
-                handler.handleResult(RESOURCE1);
-            }
-        }
-    }
 
     private static final ResourceException ERROR = new InternalServerErrorException();
     private static final JsonValue JSON = new JsonValue(Collections.singletonMap("test", "value"));
@@ -252,13 +55,13 @@ public final class FiltersTest {
     public Object[][] booleanData() {
         // @formatter:off
         return new Object[][] {
-            { cl(),             true,  false },
-            { cl(false),        false, false },
-            { cl(true),         true,  true },
-            { cl(false, false), false, false },
-            { cl(false, true),  false, true },
-            { cl(true,  false), false, true },
-            { cl(true,  true),  true,  true },
+                { cl(),             true,  false },
+                { cl(false),        false, false },
+                { cl(true),         true,  true },
+                { cl(false, false), false, false },
+                { cl(false, true),  false, true },
+                { cl(true,  false), false, true },
+                { cl(true,  true),  true,  true },
         };
         // @formatter:on
     }
@@ -280,78 +83,6 @@ public final class FiltersTest {
         final FilterCondition condition = Filters.and(conditions.toArray(new FilterCondition[0]));
         final Request request = Requests.newActionRequest("", "test");
         assertThat(condition.matches(null, request)).isEqualTo(andExpected);
-    }
-
-    @Test(dataProvider = "requestTypes")
-    @SuppressWarnings({ "rawtypes" })
-    public void testAsFilterContinueWithError(final RequestType type) {
-        final MockFilter filter = new MockFilter(false);
-        final Filter wrapped = Filters.asFilter(filter);
-        final MockRequestHandler next = new MockRequestHandler(true);
-        final ServerContext context = mock(ServerContext.class);
-        final ResultHandler handler = mockHandler(type);
-        invokeFilter(context, type, wrapped, handler, next);
-
-        // Check post-conditions: the request handler should have been invoked.
-        assertThat(next.request).isSameAs(request(type));
-        assertThat(filter.context).isSameAs(context);
-        assertThat(filter.request).isSameAs(request(type));
-        assertThat(filter.error).isSameAs(ERROR);
-        assertThat(filter.result).isNull();
-        assertThat(filter.queryResources).isEmpty();
-        verify(handler).handleException(ERROR);
-        verifyNoMoreInteractions(handler);
-    }
-
-    @Test(dataProvider = "requestTypes")
-    public void testAsFilterContinueWithResultAndKeepResources(final RequestType type) {
-        testAsFilterContinueWithResult0(type, false);
-    }
-
-    @Test(dataProvider = "requestTypes")
-    public void testAsFilterContinueWithResultAndRemoveResources(final RequestType type) {
-        testAsFilterContinueWithResult0(type, true);
-    }
-
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    @Test(dataProvider = "requestTypes")
-    public void testAsFilterStopWithError(final RequestType type) {
-        final MockFilter filter = new MockFilter(ERROR);
-        final Filter wrapped = Filters.asFilter(filter);
-        final RequestHandler next = mock(RequestHandler.class);
-        final ServerContext context = mock(ServerContext.class);
-        final ResultHandler handler = mockHandler(type);
-        invokeFilter(context, type, wrapped, handler, next);
-
-        // Check post-conditions: the request handler should not have been invoked.
-        verifyZeroInteractions(next);
-        assertThat(filter.context).isSameAs(context);
-        assertThat(filter.request).isSameAs(request(type));
-        assertThat(filter.result).isNull();
-        assertThat(filter.queryResources).isEmpty();
-        verify(handler, never()).handleResult(any(Object.class));
-        verify(handler).handleException(ERROR);
-    }
-
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    @Test(dataProvider = "requestTypes")
-    public void testAsFilterStopWithResult(final RequestType type) {
-        final Object result = result(type);
-        final MockFilter filter = new MockFilter(result);
-        final Filter wrapped = Filters.asFilter(filter);
-        final RequestHandler next = mock(RequestHandler.class);
-        final ServerContext context = mock(ServerContext.class);
-        final ResultHandler handler = mockHandler(type);
-        invokeFilter(context, type, wrapped, handler, next);
-
-        // Check post-conditions: the request handler should not have been invoked.
-        verifyZeroInteractions(next);
-        assertThat(filter.context).isSameAs(context);
-        assertThat(filter.request).isSameAs(request(type));
-        assertThat(filter.error).isNull();
-        assertThat(filter.queryResources).isEmpty();
-        verify(handler).handleResult(result);
-        verify(handler, never()).handleException(any(ResourceException.class));
     }
 
     @Test(dataProvider = "requestTypes")
@@ -470,124 +201,81 @@ public final class FiltersTest {
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private void invokeFilter(final ServerContext context, final RequestType type,
-            final Filter filter, final ResultHandler handler, final RequestHandler next) {
+    private <R> Promise<R, ResourceException> invokeFilter(final ServerContext context, final RequestType type,
+            final Filter filter, final QueryResourceHandler handler, final RequestHandler next) {
         switch (type) {
-        case ACTION:
-            filter.filterAction(context, ACTION_REQUEST, handler, next);
-            break;
-        case CREATE:
-            filter.filterCreate(context, CREATE_REQUEST, handler, next);
-            break;
-        case DELETE:
-            filter.filterDelete(context, DELETE_REQUEST, handler, next);
-            break;
-        case PATCH:
-            filter.filterPatch(context, PATCH_REQUEST, handler, next);
-            break;
-        case QUERY:
-            filter.filterQuery(context, QUERY_REQUEST, (QueryResultHandler) handler, next);
-            break;
-        case READ:
-            filter.filterRead(context, READ_REQUEST, handler, next);
-            break;
-        case UPDATE:
-            filter.filterUpdate(context, UPDATE_REQUEST, handler, next);
-            break;
+            case ACTION:
+                return (Promise<R, ResourceException>) filter.filterAction(context, ACTION_REQUEST, next);
+            case CREATE:
+                return (Promise<R, ResourceException>) filter.filterCreate(context, CREATE_REQUEST, next);
+            case DELETE:
+                return (Promise<R, ResourceException>) filter.filterDelete(context, DELETE_REQUEST, next);
+            case PATCH:
+                return (Promise<R, ResourceException>) filter.filterPatch(context, PATCH_REQUEST, next);
+            case QUERY:
+                return (Promise<R, ResourceException>) filter.filterQuery(context, QUERY_REQUEST, handler, next);
+            case READ:
+                return (Promise<R, ResourceException>) filter.filterRead(context, READ_REQUEST, next);
+            case UPDATE:
+                return (Promise<R, ResourceException>) filter.filterUpdate(context, UPDATE_REQUEST, next);
         }
+        throw new IllegalStateException("Unknown operation! " + type.toString());
     }
 
-    private void invokeRequestHandler(final ServerContext context, final RequestType type,
+    @SuppressWarnings({ "unchecked" })
+    private <R> Promise<R, ResourceException> invokeRequestHandler(final ServerContext context, final RequestType type,
             final RequestHandler handler) {
         switch (type) {
-        case ACTION:
-            handler.handleAction(context, ACTION_REQUEST, null);
-            break;
-        case CREATE:
-            handler.handleCreate(context, CREATE_REQUEST, null);
-            break;
-        case DELETE:
-            handler.handleDelete(context, DELETE_REQUEST, null);
-            break;
-        case PATCH:
-            handler.handlePatch(context, PATCH_REQUEST, null);
-            break;
-        case QUERY:
-            handler.handleQuery(context, QUERY_REQUEST, null);
-            break;
-        case READ:
-            handler.handleRead(context, READ_REQUEST, null);
-            break;
-        case UPDATE:
-            handler.handleUpdate(context, UPDATE_REQUEST, null);
-            break;
+            case ACTION:
+                return (Promise<R, ResourceException>) handler.handleAction(context, ACTION_REQUEST);
+            case CREATE:
+                return (Promise<R, ResourceException>) handler.handleCreate(context, CREATE_REQUEST);
+            case DELETE:
+                return (Promise<R, ResourceException>) handler.handleDelete(context, DELETE_REQUEST);
+            case PATCH:
+                return (Promise<R, ResourceException>) handler.handlePatch(context, PATCH_REQUEST);
+            case QUERY:
+                return (Promise<R, ResourceException>) handler.handleQuery(context, QUERY_REQUEST, null);
+            case READ:
+                return (Promise<R, ResourceException>) handler.handleRead(context, READ_REQUEST);
+            case UPDATE:
+                return (Promise<R, ResourceException>) handler.handleUpdate(context, UPDATE_REQUEST);
         }
+        throw new IllegalStateException("Unknown operation! " + type.toString());
     }
 
     @SuppressWarnings({ "rawtypes" })
-    private ResultHandler mockHandler(final RequestType type) {
-        return type == RequestType.QUERY ? mock(QueryResultHandler.class)
-                : mock(ResultHandler.class);
+    private QueryResourceHandler mockHandler(final RequestType type) {
+        return type == RequestType.QUERY ? mock(QueryResourceHandler.class) : null;
     }
 
     private Request request(final RequestType type) {
         switch (type) {
-        case ACTION:
-            return ACTION_REQUEST;
-        case CREATE:
-            return CREATE_REQUEST;
-        case DELETE:
-            return DELETE_REQUEST;
-        case PATCH:
-            return PATCH_REQUEST;
-        case QUERY:
-            return QUERY_REQUEST;
-        case READ:
-            return READ_REQUEST;
-        default: // UPDATE
-            return UPDATE_REQUEST;
+            case ACTION:
+                return ACTION_REQUEST;
+            case CREATE:
+                return CREATE_REQUEST;
+            case DELETE:
+                return DELETE_REQUEST;
+            case PATCH:
+                return PATCH_REQUEST;
+            case QUERY:
+                return QUERY_REQUEST;
+            case READ:
+                return READ_REQUEST;
+            default: // UPDATE
+                return UPDATE_REQUEST;
         }
     }
 
     private Object result(final RequestType type) {
         switch (type) {
-        case ACTION:
-            return JSON;
-        case QUERY:
-            return QUERY_RESULT;
-        default:
-            return RESOURCE1;
+            case ACTION:
+                return JSON;
+            case QUERY:
+                return QUERY_RESULT;
+            default:
+                return RESOURCE1;
         }
-    }
-
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private void testAsFilterContinueWithResult0(final RequestType type,
-            final boolean removeResources) {
-        final Object result = result(type);
-        final MockFilter filter = new MockFilter(removeResources);
-        final Filter wrapped = Filters.asFilter(filter);
-        final MockRequestHandler next = new MockRequestHandler(false);
-        final ServerContext context = mock(ServerContext.class);
-        final ResultHandler handler = mockHandler(type);
-        invokeFilter(context, type, wrapped, handler, next);
-
-        // Check post-conditions: the request handler should have been invoked.
-        assertThat(next.request).isSameAs(request(type));
-        assertThat(filter.context).isSameAs(context);
-        assertThat(filter.request).isSameAs(request(type));
-        assertThat(filter.error).isNull();
-        assertThat(filter.result).isSameAs(result);
-        if (type == RequestType.QUERY) {
-            assertThat(filter.queryResources).containsExactly(RESOURCE1, RESOURCE2);
-            if (!removeResources) {
-                verify((QueryResultHandler) handler).handleResource(RESOURCE1);
-                verify((QueryResultHandler) handler).handleResource(RESOURCE2);
-            }
-            verify((QueryResultHandler) handler).handleResult(QUERY_RESULT);
-        } else {
-            assertThat(filter.queryResources).isEmpty();
-            verify(handler).handleResult(result);
-        }
-        verifyNoMoreInteractions(handler);
     }
 }

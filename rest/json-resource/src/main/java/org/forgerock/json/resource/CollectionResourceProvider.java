@@ -11,13 +11,14 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright 2012-2014 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
 
 import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.util.promise.Promise;
 
 /**
  * An implementation interface for resource providers which exposes a collection
@@ -51,24 +52,21 @@ public interface CollectionResourceProvider {
 
     /**
      * Performs the provided
-     * {@link RequestHandler#handleAction(ServerContext, ActionRequest, ResultHandler)
-     * action} against the resource collection.
+     * {@link RequestHandler#handleAction(ServerContext, ActionRequest) action}
+     * against the resource collection.
      *
      * @param context
      *            The request server context.
      * @param request
      *            The action request.
-     * @param handler
-     *            The result handler to be notified on completion.
-     * @see RequestHandler#handleAction(ServerContext, ActionRequest,
-     *      ResultHandler)
+     * @return A {@code Promise} containing the result of the operation.
+     * @see RequestHandler#handleAction(ServerContext, ActionRequest)
      */
-    void actionCollection(ServerContext context, ActionRequest request,
-            ResultHandler<JsonValue> handler);
+    Promise<JsonValue, ResourceException> actionCollection(ServerContext context, ActionRequest request);
 
     /**
      * Performs the provided
-     * {@link RequestHandler#handleAction(ServerContext, ActionRequest, ResultHandler)
+     * {@link RequestHandler#handleAction(ServerContext, ActionRequest)
      * action} against a resource within the collection.
      *
      * @param context
@@ -77,16 +75,14 @@ public interface CollectionResourceProvider {
      *            The ID of the targeted resource within the collection.
      * @param request
      *            The action request.
-     * @param handler
-     *            The result handler to be notified on completion.
-     * @see RequestHandler#handleAction(ServerContext, ActionRequest,
-     *      ResultHandler)
+     * @return A {@code Promise} containing the result of the operation.
+     * @see RequestHandler#handleAction(ServerContext, ActionRequest)
      */
-    void actionInstance(ServerContext context, String resourceId, ActionRequest request,
-            ResultHandler<JsonValue> handler);
+    Promise<JsonValue, ResourceException> actionInstance(ServerContext context, String resourceId,
+            ActionRequest request);
 
     /**
-     * {@link RequestHandler#handleCreate(ServerContext, CreateRequest, ResultHandler)
+     * {@link RequestHandler#handleCreate(ServerContext, CreateRequest)
      * Adds} a new resource instance to the collection.
      * <p>
      * Create requests are targeted at the collection itself and may include a
@@ -98,17 +94,14 @@ public interface CollectionResourceProvider {
      *            The request server context.
      * @param request
      *            The create request.
-     * @param handler
-     *            The result handler to be notified on completion.
-     * @see RequestHandler#handleCreate(ServerContext, CreateRequest,
-     *      ResultHandler)
+     * @return A {@code Promise} containing the result of the operation.
+     * @see RequestHandler#handleCreate(ServerContext, CreateRequest)
      * @see CreateRequest#getNewResourceId()
      */
-    void createInstance(ServerContext context, CreateRequest request,
-            ResultHandler<Resource> handler);
+    Promise<Resource, ResourceException> createInstance(ServerContext context, CreateRequest request);
 
     /**
-     * {@link RequestHandler#handleDelete(ServerContext, DeleteRequest, ResultHandler)
+     * {@link RequestHandler#handleDelete(ServerContext, DeleteRequest)
      * Removes} a resource instance from the collection.
      *
      * @param context
@@ -117,16 +110,14 @@ public interface CollectionResourceProvider {
      *            The ID of the targeted resource within the collection.
      * @param request
      *            The delete request.
-     * @param handler
-     *            The result handler to be notified on completion.
-     * @see RequestHandler#handleDelete(ServerContext, DeleteRequest,
-     *      ResultHandler)
+     * @return A {@code Promise} containing the result of the operation.
+     * @see RequestHandler#handleDelete(ServerContext, DeleteRequest)
      */
-    void deleteInstance(ServerContext context, String resourceId, DeleteRequest request,
-            ResultHandler<Resource> handler);
+    Promise<Resource, ResourceException> deleteInstance(ServerContext context, String resourceId,
+            DeleteRequest request);
 
     /**
-     * {@link RequestHandler#handlePatch(ServerContext, PatchRequest, ResultHandler)
+     * {@link RequestHandler#handlePatch(ServerContext, PatchRequest)
      * Patches} an existing resource within the collection.
      *
      * @param context
@@ -135,42 +126,40 @@ public interface CollectionResourceProvider {
      *            The ID of the targeted resource within the collection.
      * @param request
      *            The patch request.
-     * @param handler
-     *            The result handler to be notified on completion.
-     * @see RequestHandler#handlePatch(ServerContext, PatchRequest,
-     *      ResultHandler)
+     * @return A {@code Promise} containing the result of the operation.
+     * @see RequestHandler#handlePatch(ServerContext, PatchRequest)
      */
-    void patchInstance(ServerContext context, String resourceId, PatchRequest request,
-            ResultHandler<Resource> handler);
+    Promise<Resource, ResourceException> patchInstance(ServerContext context, String resourceId, PatchRequest request);
 
     /**
-     * {@link RequestHandler#handleQuery(ServerContext, QueryRequest, QueryResultHandler)
+     * {@link RequestHandler#handleQuery(ServerContext, QueryRequest, QueryResourceHandler)
      * Searches} the collection for all resources which match the query request
      * criteria.
      * <p>
      * Implementations must invoke
-     * {@link QueryResultHandler#handleResource(Resource)} for each resource
+     * {@link QueryResourceHandler#handleResource(Resource)} for each resource
      * which matches the query criteria. Once all matching resources have been
-     * returned implementations are required to invoke either
-     * {@link QueryResultHandler#handleResult(QueryResult)} if the query has
-     * completed successfully, or
-     * {@link QueryResultHandler#handleError(ResourceException)} if the query
-     * did not complete successfully (even if some matching resources were
-     * returned).
+     * returned implementations are required to return either a
+     * {@link QueryResult} if the query has completed successfully, or
+     * {@link ResourceException} if the query did not complete successfully
+     * (even if some matching resources were returned).
      *
      * @param context
      *            The request server context.
      * @param request
      *            The query request.
      * @param handler
-     *            The query result handler to be notified on completion.
+     *            The query resource handler to be notified for each matching
+     *            resource.
+     * @return A {@code Promise} containing the result of the operation.
      * @see RequestHandler#handleQuery(ServerContext, QueryRequest,
-     *      QueryResultHandler)
+     *      QueryResourceHandler)
      */
-    void queryCollection(ServerContext context, QueryRequest request, QueryResultHandler handler);
+    Promise<QueryResult, ResourceException> queryCollection(ServerContext context, QueryRequest request,
+            QueryResourceHandler handler);
 
     /**
-     * {@link RequestHandler#handleRead(ServerContext, ReadRequest, ResultHandler)
+     * {@link RequestHandler#handleRead(ServerContext, ReadRequest)
      * Reads} an existing resource within the collection.
      *
      * @param context
@@ -179,15 +168,13 @@ public interface CollectionResourceProvider {
      *            The ID of the targeted resource within the collection.
      * @param request
      *            The read request.
-     * @param handler
-     *            The result handler to be notified on completion.
-     * @see RequestHandler#handleRead(ServerContext, ReadRequest, ResultHandler)
+     * @return A {@code Promise} containing the result of the operation.
+     * @see RequestHandler#handleRead(ServerContext, ReadRequest)
      */
-    void readInstance(ServerContext context, String resourceId, ReadRequest request,
-            ResultHandler<Resource> handler);
+    Promise<Resource, ResourceException> readInstance(ServerContext context, String resourceId, ReadRequest request);
 
     /**
-     * {@link RequestHandler#handleUpdate(ServerContext, UpdateRequest, ResultHandler)
+     * {@link RequestHandler#handleUpdate(ServerContext, UpdateRequest)
      * Updates} an existing resource within the collection.
      *
      * @param context
@@ -196,12 +183,9 @@ public interface CollectionResourceProvider {
      *            The ID of the targeted resource within the collection.
      * @param request
      *            The update request.
-     * @param handler
-     *            The result handler to be notified on completion.
-     * @see RequestHandler#handleUpdate(ServerContext, UpdateRequest,
-     *      ResultHandler)
+     * @return A {@code Promise} containing the result of the operation.
+     * @see RequestHandler#handleUpdate(ServerContext, UpdateRequest)
      */
-    void updateInstance(ServerContext context, String resourceId, UpdateRequest request,
-            ResultHandler<Resource> handler);
-
+    Promise<Resource, ResourceException> updateInstance(ServerContext context, String resourceId,
+            UpdateRequest request);
 }

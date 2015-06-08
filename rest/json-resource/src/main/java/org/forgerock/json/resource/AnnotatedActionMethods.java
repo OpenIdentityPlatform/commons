@@ -16,6 +16,9 @@
 
 package org.forgerock.json.resource;
 
+import static org.forgerock.json.resource.ResourceException.newNotSupportedException;
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
+
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +27,6 @@ import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.annotations.Action;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.promise.Promises;
 
 /**
  * This class is used to find all methods annotated with {@link Action}, and provides
@@ -35,10 +37,10 @@ class AnnotatedActionMethods {
 
     private Map<String, AnnotatedMethod> methods = new HashMap<String, AnnotatedMethod>();
 
-    Promise<JsonValue, ? extends ResourceException> invoke(ServerContext context, ActionRequest request, String id) {
+    Promise<JsonValue, ResourceException> invoke(ServerContext context, ActionRequest request, String id) {
         AnnotatedMethod method = methods.get(request.getAction());
         if (method == null) {
-            return Promises.newExceptionPromise(new NotSupportedException(request.getAction() + "not supported"));
+            return newExceptionPromise(newNotSupportedException(request.getAction() + "not supported"));
         }
         return method.invoke(context, request, id);
     }
