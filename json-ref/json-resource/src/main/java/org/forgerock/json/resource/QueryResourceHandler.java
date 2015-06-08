@@ -16,14 +16,16 @@
 
 package org.forgerock.json.resource;
 
+import org.forgerock.http.ServerContext;
+
 /**
  * A completion handler for consuming the results of a query request.
  * <p>
  * A query result completion handler may be specified when performing query
  * requests using a {@link Connection} object. The {@link #handleResource}
  * method is invoked for each resource which matches the query criteria,
- * followed by {@link #handleResult} or {@link #handleException} indicating that no
- * more JSON resources will be returned.
+ * followed by returning a {@link QueryResult} or a {@link ResourceException}
+ * indicating that no more JSON resources will be returned.
  * <p>
  * Implementations of these methods should complete in a timely manner so as to
  * avoid keeping the invoking thread from dispatching to other completion
@@ -34,33 +36,22 @@ package org.forgerock.json.resource;
  * "http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/package-summary.html#MemoryVisibility"
  * >happens-before</a></i> the invocation of {@code handleResource} for the next
  * resource. Invocation of {@code handleResource} for the final resource
- * <i>happens-before</i> either {@link #handleResult(QueryResult) handleResult}
- * or {@link #handleException(ResourceException) handleError} are invoked with the
- * final query status. In other words, query result handler method invocations
- * will occur sequentially and one at a time.
+ * <i>happens-before</i> returning a {@link QueryResult} or a
+ * {@link ResourceException} are invoked with the final query status. In other
+ * words, query resource handler method invocations will occur sequentially and
+ * one at a time.
  */
-public interface QueryResultHandler extends ResultHandler<QueryResult> {
-
-    /**
-     * Invoked when the query request has failed and no more matching resources
-     * can been {@link #handleResource(Resource) returned}.
-     *
-     * @param error
-     *            {@inheritDoc}
-     */
-    @Override
-    void handleException(ResourceException error);
+public interface QueryResourceHandler {
 
     /**
      * Invoked each time a matching JSON resource is returned from a query
      * request. More specifically, if a query request matches 10 resources, then
      * this method will be invoked 10 times, once for each matching resource.
-     * Once all matching resources have been returned, either
-     * {@link QueryResultHandler#handleResult(QueryResult)} will be invoked if
-     * the query has completed successfully, or
-     * {@link QueryResultHandler#handleException(ResourceException)} will be invoked
-     * if the query did not complete successfully (even if some matching
-     * resources were returned).
+     *
+     * <p>Refer to
+     * {@link RequestHandler#handleQuery(ServerContext, QueryRequest, QueryResourceHandler)}
+     * for information regarding the concurrency and the order in which events
+     * are processed.</p>
      *
      * @param resource
      *            The matching JSON resource.
@@ -70,16 +61,4 @@ public interface QueryResultHandler extends ResultHandler<QueryResult> {
      *         a client side size limit has been reached).
      */
     boolean handleResource(Resource resource);
-
-    /**
-     * Invoked when the query request has completed successfully and all
-     * matching resources have been {@link #handleResource(Resource) returned}.
-     *
-     * @param result
-     *            The query result indicating that no more resources are to be
-     *            returned and, if applicable, including information which
-     *            should be used for subsequent paged results query requests.
-     */
-    @Override
-    void handleResult(QueryResult result);
 }

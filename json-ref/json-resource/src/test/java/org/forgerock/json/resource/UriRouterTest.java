@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2014 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -26,6 +26,7 @@ import org.forgerock.http.RootContext;
 import org.forgerock.http.RouterContext;
 import org.forgerock.http.RoutingMode;
 import org.forgerock.http.ServerContext;
+import org.forgerock.util.promise.Promise;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.testng.annotations.DataProvider;
@@ -51,11 +52,11 @@ public final class UriRouterTest {
         // @formatter:off
         return new Object[][] {
             /* resource name */
-            { "" },
-            { "a" },
-            { "a/b" },
-            { "a/b/c" },
-            { "one/two/three" }, // Check multi-char path elements.
+                { "" },
+                { "a" },
+                { "a/b" },
+                { "a/b/c" },
+                { "one/two/three" }, // Check multi-char path elements.
         };
         // @formatter:on
     }
@@ -65,12 +66,11 @@ public final class UriRouterTest {
         final UriRouter router = new UriRouter();
         final RequestHandler h = mock(RequestHandler.class);
         router.addRoute(RoutingMode.EQUALS, resourcePath, h);
-        final ServerContext c = newServerContext(router);
+        final ServerContext c = newServerContext();
         final ReadRequest r = newReadRequest(resourcePath);
-        router.handleRead(c, r, null);
+        router.handleRead(c, r);
         final ArgumentCaptor<RouterContext> rc = ArgumentCaptor.forClass(RouterContext.class);
-        verify(h).handleRead(rc.capture(), Matchers.<ReadRequest> any(),
-                Matchers.<ResultHandler<Resource>> any());
+        verify(h).handleRead(rc.capture(), Matchers.<ReadRequest> any());
         checkRouterContext(rc, c, resourcePath);
     }
 
@@ -106,12 +106,12 @@ public final class UriRouterTest {
         final RequestHandler h2 = mock(RequestHandler.class);
         router.setDefaultRoute(h2);
 
-        final ServerContext c = newServerContext(router);
+        final ServerContext c = newServerContext();
         final ReadRequest r = newReadRequest("object");
-        router.handleRead(c, r, null);
+        router.handleRead(c, r);
         final ArgumentCaptor<RouterContext> rc = ArgumentCaptor.forClass(RouterContext.class);
         final ArgumentCaptor<ReadRequest> rr = ArgumentCaptor.forClass(ReadRequest.class);
-        verify(h2).handleRead(rc.capture(), rr.capture(), Matchers.<ResultHandler<Resource>> any());
+        verify(h2).handleRead(rc.capture(), rr.capture());
         checkRouterContext(rc, c, "");
         checkReadRequest(rr, r);
     }
@@ -122,12 +122,12 @@ public final class UriRouterTest {
         final RequestHandler h = mock(RequestHandler.class);
         router.setDefaultRoute(h);
 
-        final ServerContext c = newServerContext(router);
+        final ServerContext c = newServerContext();
         final ReadRequest r = newReadRequest("object");
-        router.handleRead(c, r, null);
+        router.handleRead(c, r);
         final ArgumentCaptor<RouterContext> rc = ArgumentCaptor.forClass(RouterContext.class);
         final ArgumentCaptor<ReadRequest> rr = ArgumentCaptor.forClass(ReadRequest.class);
-        verify(h).handleRead(rc.capture(), rr.capture(), Matchers.<ResultHandler<Resource>> any());
+        verify(h).handleRead(rc.capture(), rr.capture());
         checkRouterContext(rc, c, "");
         checkReadRequest(rr, r);
     }
@@ -137,11 +137,11 @@ public final class UriRouterTest {
         // @formatter:off
         return new Object[][] {
             /* invalid template */
-            { "{" },
-            { "{}" },
-            { "{a" },
-            { "{a/b" },
-            { "{a/{b}" }
+                { "{" },
+                { "{}" },
+                { "{a" },
+                { "{a/b" },
+                { "{a/{b}" }
         };
         // @formatter:on
     }
@@ -162,19 +162,17 @@ public final class UriRouterTest {
         final RequestHandler h2 = mock(RequestHandler.class);
         router.addRoute(RoutingMode.EQUALS, "{objectId}", h2);
 
-        final ServerContext c = newServerContext(router);
+        final ServerContext c = newServerContext();
         final ReadRequest r1 = newReadRequest("object");
-        router.handleRead(c, r1, null);
+        router.handleRead(c, r1);
         final ArgumentCaptor<RouterContext> rc1 = ArgumentCaptor.forClass(RouterContext.class);
-        verify(h1).handleRead(rc1.capture(), Matchers.<ReadRequest> any(),
-                Matchers.<ResultHandler<Resource>> any());
+        verify(h1).handleRead(rc1.capture(), Matchers.<ReadRequest> any());
         checkRouterContext(rc1, c, "object");
 
         final ReadRequest r2 = newReadRequest("thing");
-        router.handleRead(c, r2, null);
+        router.handleRead(c, r2);
         final ArgumentCaptor<RouterContext> rc2 = ArgumentCaptor.forClass(RouterContext.class);
-        verify(h2).handleRead(rc2.capture(), Matchers.<ReadRequest> any(),
-                Matchers.<ResultHandler<Resource>> any());
+        verify(h2).handleRead(rc2.capture(), Matchers.<ReadRequest> any());
         checkRouterContext(rc2, c, "thing", "objectId", "thing");
     }
 
@@ -186,19 +184,17 @@ public final class UriRouterTest {
         final RequestHandler h2 = mock(RequestHandler.class);
         router.addRoute(RoutingMode.EQUALS, "groups", h2);
 
-        final ServerContext c = newServerContext(router);
+        final ServerContext c = newServerContext();
         final ReadRequest r1 = newReadRequest("users");
-        router.handleRead(c, r1, null);
+        router.handleRead(c, r1);
         final ArgumentCaptor<RouterContext> rc1 = ArgumentCaptor.forClass(RouterContext.class);
-        verify(h1).handleRead(rc1.capture(), Matchers.<ReadRequest> any(),
-                Matchers.<ResultHandler<Resource>> any());
+        verify(h1).handleRead(rc1.capture(), Matchers.<ReadRequest> any());
         checkRouterContext(rc1, c, "users");
 
         final ReadRequest r2 = newReadRequest("groups");
-        router.handleRead(c, r2, null);
+        router.handleRead(c, r2);
         final ArgumentCaptor<RouterContext> rc2 = ArgumentCaptor.forClass(RouterContext.class);
-        verify(h2).handleRead(rc2.capture(), Matchers.<ReadRequest> any(),
-                Matchers.<ResultHandler<Resource>> any());
+        verify(h2).handleRead(rc2.capture(), Matchers.<ReadRequest> any());
         checkRouterContext(rc2, c, "groups");
     }
 
@@ -207,17 +203,17 @@ public final class UriRouterTest {
         // @formatter:off
         return new Object[][] {
             /* template - resource name */
-            { "", "a" },
-            { "a", "" },
-            { "a", "b" },
-            { "a/b", "a" },
-            { "a", "a/b" },
-            { "a/b", "b/b" },
-            { "one/two", "one/twox" },
-            { "one/twox", "one/two" },
-            { "{a}", "one/two" },
-            { "{a}/{b}", "one/two/three" },
-            { "one/{a}/{b}", "one/two" },
+                { "", "a" },
+                { "a", "" },
+                { "a", "b" },
+                { "a/b", "a" },
+                { "a", "a/b" },
+                { "a/b", "b/b" },
+                { "one/two", "one/twox" },
+                { "one/twox", "one/two" },
+                { "{a}", "one/two" },
+                { "{a}/{b}", "one/two/three" },
+                { "one/{a}/{b}", "one/two" },
         };
         // @formatter:on
     }
@@ -228,7 +224,7 @@ public final class UriRouterTest {
         final UriRouter router = new UriRouter();
         final RequestHandler h = mock(RequestHandler.class);
         router.addRoute(RoutingMode.EQUALS, template, h);
-        final ServerContext c = newServerContext(router);
+        final ServerContext c = newServerContext();
         final ReadRequest r = newReadRequest(resourcePath);
         try {
             newInternalConnection(router).read(c, r);
@@ -243,14 +239,14 @@ public final class UriRouterTest {
         // @formatter:off
         return new Object[][] {
             /* template - resource name - variables */
-            { "{userId}", "a", new String[] {"userId", "a" }},
-            { "{userId}", "test", new String[] {"userId", "test" }},
-            { "x{userId}", "xtest", new String[] {"userId", "test" }},
-            { "{userId}/devices", "test/devices", new String[] {"userId", "test" }},
-            { "{a}/{b}", "aaa/bbb", new String[] {"a", "aaa", "b", "bbb" }},
-            { "{a}/b/{c}", "aaa/b/ccc", new String[] {"a", "aaa", "c", "ccc" }},
-            { "users/{id}/devices", "users/test%20user/devices", new String[] {"id", "test user" }},
-            { "users/{id}/devices", "users/test%2fdevices/devices", new String[] {"id", "test/devices" }},
+                { "{userId}", "a", new String[] {"userId", "a" }},
+                { "{userId}", "test", new String[] {"userId", "test" }},
+                { "x{userId}", "xtest", new String[] {"userId", "test" }},
+                { "{userId}/devices", "test/devices", new String[] {"userId", "test" }},
+                { "{a}/{b}", "aaa/bbb", new String[] {"a", "aaa", "b", "bbb" }},
+                { "{a}/b/{c}", "aaa/b/ccc", new String[] {"a", "aaa", "c", "ccc" }},
+                { "users/{id}/devices", "users/test%20user/devices", new String[] {"id", "test user" }},
+                { "users/{id}/devices", "users/test%2fdevices/devices", new String[] {"id", "test/devices" }},
         };
         // @formatter:on
     }
@@ -261,16 +257,15 @@ public final class UriRouterTest {
         final UriRouter router = new UriRouter();
         final RequestHandler h = mock(RequestHandler.class);
         router.addRoute(RoutingMode.EQUALS, template, h);
-        final ServerContext c = newServerContext(router);
+        final ServerContext c = newServerContext();
         final ReadRequest r = newReadRequest(resourcePath);
-        router.handleRead(c, r, null);
+        router.handleRead(c, r);
         final Map<String, String> expectedMap = new LinkedHashMap<String, String>();
         for (int i = 0; i < expectedVars.length; i += 2) {
             expectedMap.put(expectedVars[i], expectedVars[i + 1]);
         }
         final ArgumentCaptor<RouterContext> rc = ArgumentCaptor.forClass(RouterContext.class);
-        verify(h).handleRead(rc.capture(), Matchers.<ReadRequest> any(),
-                Matchers.<ResultHandler<Resource>> any());
+        verify(h).handleRead(rc.capture(), Matchers.<ReadRequest> any());
         checkRouterContext(rc, c, resourcePath, expectedMap);
     }
 
@@ -282,8 +277,7 @@ public final class UriRouterTest {
         newInternalConnection(router).read(c, r);
     }
 
-    private ServerContext newServerContext(final RequestHandler handler) {
+    private ServerContext newServerContext() {
         return new ServerContext(new RootContext());
     }
-
 }

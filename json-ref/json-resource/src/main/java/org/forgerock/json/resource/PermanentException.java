@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -27,33 +27,6 @@ public class PermanentException extends ResourceException {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Constructs a new exception with {@code null} as its detail message.
-     */
-    // public RetryableException() {
-    // super(ResourceException.BAD_REQUEST);
-    // }
-
-    /**
-     * Constructs a new exception with the specified detail message.
-     *
-     * @param message
-     *            The detail message.
-     */
-    // public RetryableException(String message) {
-    // super(ResourceException.BAD_REQUEST, message);
-    // }
-
-    /**
-     * Constructs a new exception with the specified cause.
-     *
-     * @param cause
-     *            The exception which caused this exception to be thrown.
-     */
-    // public RetryableException(Throwable cause) {
-    // super(ResourceException.BAD_REQUEST, cause);
-    // }
-
-    /**
      * Constructs a new exception with the specified detail message and cause.
      *
      * @param code
@@ -66,5 +39,4 @@ public class PermanentException extends ResourceException {
     public PermanentException(final int code, final String message, final Throwable cause) {
         super(code, message, cause);
     }
-
 }

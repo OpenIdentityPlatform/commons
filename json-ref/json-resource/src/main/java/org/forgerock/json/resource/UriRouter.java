@@ -21,6 +21,7 @@ import static org.forgerock.http.RoutingMode.STARTS_WITH;
 import static org.forgerock.json.resource.Requests.*;
 import static org.forgerock.json.resource.Resources.newCollection;
 import static org.forgerock.json.resource.Resources.newSingleton;
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
 
 import org.forgerock.http.AbstractUriRouter;
 import org.forgerock.http.RouteMatcher;
@@ -28,6 +29,7 @@ import org.forgerock.http.RouteNotFoundException;
 import org.forgerock.http.ServerContext;
 import org.forgerock.http.UriRoute;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.util.promise.Promise;
 
 /**
  * A request handler which routes requests using URI template matching against
@@ -149,100 +151,95 @@ public final class UriRouter extends AbstractUriRouter<UriRouter, RequestHandler
     }
 
     @Override
-    public void handleAction(final ServerContext context, final ActionRequest request,
-            final ResultHandler<JsonValue> handler) {
+    public Promise<JsonValue, ResourceException> handleAction(final ServerContext context,
+            final ActionRequest request) {
         try {
             final RouteMatcher<RequestHandler> bestMatch = getBestRoute(context, request);
             final ActionRequest routedRequest = bestMatch.wasRouted()
                     ? copyOfActionRequest(request).setResourcePath(bestMatch.getRemaining())
                     : request;
-            bestMatch.getHandler().handleAction(bestMatch.getContext(), routedRequest, handler);
+            return bestMatch.getHandler().handleAction(bestMatch.getContext(), routedRequest);
         } catch (final ResourceException e) {
-            handler.handleException(e);
+            return newExceptionPromise(e);
         }
     }
 
     @Override
-    public void handleCreate(final ServerContext context, final CreateRequest request,
-            final ResultHandler<Resource> handler) {
+    public Promise<Resource, ResourceException> handleCreate(final ServerContext context, final CreateRequest request) {
         try {
             final RouteMatcher<RequestHandler> bestMatch = getBestRoute(context, request);
             final CreateRequest routedRequest = bestMatch.wasRouted()
                     ? copyOfCreateRequest(request).setResourcePath(bestMatch.getRemaining())
                     : request;
-            bestMatch.getHandler().handleCreate(bestMatch.getContext(), routedRequest, handler);
+            return bestMatch.getHandler().handleCreate(bestMatch.getContext(), routedRequest);
         } catch (final ResourceException e) {
-            handler.handleException(e);
+            return newExceptionPromise(e);
         }
     }
 
     @Override
-    public void handleDelete(final ServerContext context, final DeleteRequest request,
-            final ResultHandler<Resource> handler) {
+    public Promise<Resource, ResourceException> handleDelete(final ServerContext context, final DeleteRequest request) {
         try {
             final RouteMatcher<RequestHandler> bestMatch = getBestRoute(context, request);
             final DeleteRequest routedRequest = bestMatch.wasRouted()
                     ? copyOfDeleteRequest(request).setResourcePath(bestMatch.getRemaining())
                     : request;
-            bestMatch.getHandler().handleDelete(bestMatch.getContext(), routedRequest, handler);
+            return bestMatch.getHandler().handleDelete(bestMatch.getContext(), routedRequest);
         } catch (final ResourceException e) {
-            handler.handleException(e);
+            return newExceptionPromise(e);
         }
     }
 
     @Override
-    public void handlePatch(final ServerContext context, final PatchRequest request,
-            final ResultHandler<Resource> handler) {
+    public Promise<Resource, ResourceException> handlePatch(final ServerContext context, final PatchRequest request) {
         try {
             final RouteMatcher<RequestHandler> bestMatch = getBestRoute(context, request);
             final PatchRequest routedRequest = bestMatch.wasRouted()
                     ? copyOfPatchRequest(request).setResourcePath(bestMatch.getRemaining())
                     : request;
-            bestMatch.getHandler().handlePatch(bestMatch.getContext(), routedRequest, handler);
+            return bestMatch.getHandler().handlePatch(bestMatch.getContext(), routedRequest);
         } catch (final ResourceException e) {
-            handler.handleException(e);
+            return newExceptionPromise(e);
         }
     }
 
     @Override
-    public void handleQuery(final ServerContext context, final QueryRequest request,
-            final QueryResultHandler handler) {
+    public Promise<QueryResult, ResourceException> handleQuery(final ServerContext context, final QueryRequest request,
+            final QueryResourceHandler handler) {
         try {
             final RouteMatcher<RequestHandler> bestMatch = getBestRoute(context, request);
             final QueryRequest routedRequest = bestMatch.wasRouted()
                     ? copyOfQueryRequest(request).setResourcePath(bestMatch.getRemaining())
                     : request;
-            bestMatch.getHandler().handleQuery(bestMatch.getContext(), routedRequest, handler);
+            return bestMatch.getHandler().handleQuery(bestMatch.getContext(), routedRequest, handler);
         } catch (final ResourceException e) {
-            handler.handleException(e);
+            return newExceptionPromise(e);
         }
     }
 
     @Override
-    public void handleRead(final ServerContext context, final ReadRequest request,
-            final ResultHandler<Resource> handler) {
+    public Promise<Resource, ResourceException> handleRead(final ServerContext context, final ReadRequest request) {
         try {
             final RouteMatcher<RequestHandler> bestMatch = getBestRoute(context, request);
             final ReadRequest routedRequest = bestMatch.wasRouted()
                     ? copyOfReadRequest(request).setResourcePath(bestMatch.getRemaining())
                     : request;
-            bestMatch.getHandler().handleRead(bestMatch.getContext(), routedRequest, handler);
+            return bestMatch.getHandler().handleRead(bestMatch.getContext(), routedRequest);
         } catch (final ResourceException e) {
-            handler.handleException(e);
+            return newExceptionPromise(e);
         }
     }
 
     @Override
-    public void handleUpdate(final ServerContext context, final UpdateRequest request,
-            final ResultHandler<Resource> handler) {
+    public Promise<Resource, ResourceException> handleUpdate(final ServerContext context, final UpdateRequest request) {
         try {
             final RouteMatcher<RequestHandler> bestMatch = getBestRoute(context, request);
             final UpdateRequest routedRequest = bestMatch.wasRouted()
                     ? copyOfUpdateRequest(request).setResourcePath(bestMatch.getRemaining())
                     : request;
-            bestMatch.getHandler().handleUpdate(bestMatch.getContext(), routedRequest, handler);
+            return bestMatch.getHandler().handleUpdate(bestMatch.getContext(), routedRequest);
         } catch (final ResourceException e) {
-            handler.handleException(e);
+            return newExceptionPromise(e);
         }
     }
 
@@ -252,8 +249,7 @@ public final class UriRouter extends AbstractUriRouter<UriRouter, RequestHandler
             return getBestRoute(context, request.getResourcePath());
         } catch (RouteNotFoundException e) {
             // TODO: i18n
-            throw new NotFoundException(String.format("Resource '%s' not found", request
-                    .getResourcePath()));
+            throw new NotFoundException(String.format("Resource '%s' not found", request.getResourcePath()));
         }
     }
 }

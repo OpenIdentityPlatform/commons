@@ -16,17 +16,18 @@
 
 package org.forgerock.json.resource;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.fluent.JsonValue.json;
 import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
 import org.forgerock.http.RootContext;
 import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
-import org.mockito.ArgumentCaptor;
+import org.forgerock.util.promise.Promise;
 import org.mockito.Matchers;
+import org.mockito.Mockito;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -51,6 +52,7 @@ public class VersionRouterTest {
     @BeforeMethod
     public void setUp() {
         versionRouter = new VersionRouter();
+        Mockito.reset(handlerOne, handlerTwo, handlerThree);
     }
 
     @DataProvider(name = "data")
@@ -83,19 +85,16 @@ public class VersionRouterTest {
                         withDefaultResourceVersion(requestedVersion).build());
         ServerContext context = new ServerContext(apiVersionContext);
         CreateRequest request = Requests.newCreateRequest("RESOURCE_NAME", json(object()));
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
 
         //When
-        versionRouter.handleCreate(context, request, handler);
+        Promise<Resource, ResourceException> promise = versionRouter.handleCreate(context, request);
 
         //Then
         if (expectException) {
-            ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-            verify(handler).handleException(exceptionCaptor.capture());
-            assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
+            assertThat(promise).failedWithException().isInstanceOf(NotFoundException.class);
             verifyZeroInteractions(handlerOne, handlerTwo, handlerThree);
         } else {
-            verify(provider).handleCreate(Matchers.<ServerContext>anyObject(), Matchers.<CreateRequest>anyObject(), eq(handler));
+            verify(provider).handleCreate(Matchers.<ServerContext>anyObject(), Matchers.<CreateRequest>anyObject());
         }
     }
 
@@ -112,20 +111,16 @@ public class VersionRouterTest {
                         withDefaultResourceVersion(requestedVersion).build());
         ServerContext context = new ServerContext(apiVersionContext);
         ReadRequest request = Requests.newReadRequest("RESOURCE_NAME");
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
 
         //When
-        versionRouter.handleRead(context, request, handler);
+        Promise<Resource, ResourceException> promise = versionRouter.handleRead(context, request);
 
         //Then
         if (expectException) {
-            ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-            verify(handler).handleException(exceptionCaptor.capture());
-            assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
+            assertThat(promise).failedWithException().isInstanceOf(NotFoundException.class);
             verifyZeroInteractions(handlerOne, handlerTwo, handlerThree);
         } else {
-            verify(provider).handleRead(Matchers.<ServerContext>anyObject(), Matchers.<ReadRequest>anyObject(),
-                    eq(handler));
+            verify(provider).handleRead(Matchers.<ServerContext>anyObject(), Matchers.<ReadRequest>anyObject());
         }
     }
 
@@ -142,20 +137,16 @@ public class VersionRouterTest {
                         withDefaultResourceVersion(requestedVersion).build());
         ServerContext context = new ServerContext(apiVersionContext);
         UpdateRequest request = Requests.newUpdateRequest("RESOURCE_NAME", json(object()));
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
 
         //When
-        versionRouter.handleUpdate(context, request, handler);
+        Promise<Resource, ResourceException> promise = versionRouter.handleUpdate(context, request);
 
         //Then
         if (expectException) {
-            ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-            verify(handler).handleException(exceptionCaptor.capture());
-            assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
+            assertThat(promise).failedWithException().isInstanceOf(NotFoundException.class);
             verifyZeroInteractions(handlerOne, handlerTwo, handlerThree);
         } else {
-            verify(provider).handleUpdate(Matchers.<ServerContext>anyObject(), Matchers.<UpdateRequest>anyObject(),
-                    eq(handler));
+            verify(provider).handleUpdate(Matchers.<ServerContext>anyObject(), Matchers.<UpdateRequest>anyObject());
         }
     }
 
@@ -172,20 +163,16 @@ public class VersionRouterTest {
                         withDefaultResourceVersion(requestedVersion).build());
         ServerContext context = new ServerContext(apiVersionContext);
         DeleteRequest request = Requests.newDeleteRequest("RESOURCE_NAME");
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
 
         //When
-        versionRouter.handleDelete(context, request, handler);
+        Promise<Resource, ResourceException> promise = versionRouter.handleDelete(context, request);
 
         //Then
         if (expectException) {
-            ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-            verify(handler).handleException(exceptionCaptor.capture());
-            assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
+            assertThat(promise).failedWithException().isInstanceOf(NotFoundException.class);
             verifyZeroInteractions(handlerOne, handlerTwo, handlerThree);
         } else {
-            verify(provider).handleDelete(Matchers.<ServerContext>anyObject(), Matchers.<DeleteRequest>anyObject(),
-                    eq(handler));
+            verify(provider).handleDelete(Matchers.<ServerContext>anyObject(), Matchers.<DeleteRequest>anyObject());
         }
     }
 
@@ -202,20 +189,16 @@ public class VersionRouterTest {
                         withDefaultResourceVersion(requestedVersion).build());
         ServerContext context = new ServerContext(apiVersionContext);
         PatchRequest request = Requests.newPatchRequest("RESOURCE_NAME");
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
 
         //When
-        versionRouter.handlePatch(context, request, handler);
+        Promise<Resource, ResourceException> promise = versionRouter.handlePatch(context, request);
 
         //Then
         if (expectException) {
-            ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-            verify(handler).handleException(exceptionCaptor.capture());
-            assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
+            assertThat(promise).failedWithException().isInstanceOf(NotFoundException.class);
             verifyZeroInteractions(handlerOne, handlerTwo, handlerThree);
         } else {
-            verify(provider).handlePatch(Matchers.<ServerContext>anyObject(), Matchers.<PatchRequest>anyObject(),
-                    eq(handler));
+            verify(provider).handlePatch(Matchers.<ServerContext>anyObject(), Matchers.<PatchRequest>anyObject());
         }
     }
 
@@ -232,20 +215,16 @@ public class VersionRouterTest {
                         withDefaultResourceVersion(requestedVersion).build());
         ServerContext context = new ServerContext(apiVersionContext);
         ActionRequest request = Requests.newActionRequest("RESOURCE_NAME", "ACTION_ID").setContent(json(object()));
-        ResultHandler<JsonValue> handler = mock(ResultHandler.class);
 
         //When
-        versionRouter.handleAction(context, request, handler);
+        Promise<JsonValue, ResourceException> promise = versionRouter.handleAction(context, request);
 
         //Then
         if (expectException) {
-            ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-            verify(handler).handleException(exceptionCaptor.capture());
-            assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
+            assertThat(promise).failedWithException().isInstanceOf(NotFoundException.class);
             verifyZeroInteractions(handlerOne, handlerTwo, handlerThree);
         } else {
-            verify(provider).handleAction(Matchers.<ServerContext>anyObject(), Matchers.<ActionRequest>anyObject(),
-                    eq(handler));
+            verify(provider).handleAction(Matchers.<ServerContext>anyObject(), Matchers.<ActionRequest>anyObject());
         }
     }
 
@@ -261,20 +240,17 @@ public class VersionRouterTest {
                         withDefaultResourceVersion(requestedVersion).build());
         ServerContext context = new ServerContext(apiVersionContext);
         QueryRequest request = Requests.newQueryRequest("");
-        QueryResultHandler handler = mock(QueryResultHandler.class);
+        QueryResourceHandler handler = mock(QueryResourceHandler.class);
 
         //When
-        versionRouter.handleQuery(context, request, handler);
+        Promise<QueryResult, ResourceException> promise = versionRouter.handleQuery(context, request, handler);
 
         //Then
         if (expectException) {
-            ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-            verify(handler).handleException(exceptionCaptor.capture());
-            assertThat(exceptionCaptor.getValue()).isInstanceOf(NotFoundException.class);
+            assertThat(promise).failedWithException().isInstanceOf(NotFoundException.class);
             verifyZeroInteractions(handlerOne, handlerTwo, handlerThree);
         } else {
-            verify(provider).handleQuery(Matchers.<ServerContext>anyObject(), Matchers.<QueryRequest>anyObject(),
-                    eq(handler));
+            verify(provider).handleQuery(Matchers.<ServerContext>anyObject(), Matchers.<QueryRequest>anyObject(), eq(handler));
         }
     }
 }

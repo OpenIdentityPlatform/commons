@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2013 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -33,19 +33,19 @@ public interface PatchRequest extends Request {
      * The name of the field which contains the patch content in the JSON
      * representation.
      */
-    public static final String FIELD_PATCH = "patch";
+    String FIELD_PATCH = "patch";
 
     /**
      * The name of the field which contains the patch operations in the JSON
      * representation.
      */
-    public static final String FIELD_PATCH_OPERATIONS = "patchOperations";
+    String FIELD_PATCH_OPERATIONS = "patchOperations";
 
     /**
      * The name of the field which contains the resource version in the JSON
      * representation.
      */
-    public static final String FIELD_REVISION = "revision";
+    String FIELD_REVISION = "revision";
 
     /**
      * {@inheritDoc}

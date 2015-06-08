@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2013 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -31,19 +31,19 @@ public interface CreateRequest extends Request {
      * The name of the field which contains the resource content in the JSON
      * representation.
      */
-    public static final String FIELD_CONTENT = "content";
+    String FIELD_CONTENT = "content";
 
     /**
      * The name of the field which contains the new resource ID in the JSON
      * representation.
      */
-    public static final String FIELD_NEW_RESOURCE_ID = "newResourceId";
+    String FIELD_NEW_RESOURCE_ID = "newResourceId";
 
     /**
      * The name of the action which is reserved for performing "create"
      * operations.
      */
-    public static final String ACTION_ID_CREATE = ActionRequest.ACTION_ID_CREATE;
+    String ACTION_ID_CREATE = ActionRequest.ACTION_ID_CREATE;
 
     /**
      * {@inheritDoc}

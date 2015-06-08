@@ -17,6 +17,7 @@
 package org.forgerock.json.resource.http;
 
 import static org.forgerock.json.resource.http.HttpUtils.*;
+import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.util.Arrays;
 
@@ -28,7 +29,6 @@ import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.Status;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.promise.Promises;
 
 /**
  * {@link Filter} which handles OPTION HTTP requests to CREST resources.
@@ -48,7 +48,7 @@ public class OptionsHandler implements Filter {
             response.getHeaders().put("Allow",
                     Arrays.asList(METHOD_DELETE, METHOD_GET, METHOD_HEAD, METHOD_PATCH, METHOD_POST, METHOD_PUT,
                             METHOD_OPTIONS, METHOD_TRACE));
-            return Promises.newResultPromise(response);
+            return newResultPromise(response);
         } else {
             return next.handle(context, request);
         }

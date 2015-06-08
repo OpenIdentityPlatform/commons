@@ -16,14 +16,13 @@
 
 package org.forgerock.json.resource;
 
-import static org.forgerock.json.resource.RequestHandlerUtils.handle;
-
 import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.annotations.Delete;
 import org.forgerock.json.resource.annotations.Patch;
 import org.forgerock.json.resource.annotations.Read;
 import org.forgerock.json.resource.annotations.Update;
+import org.forgerock.util.promise.Promise;
 
 /**
  * Exposes an annotated POJO as collection instance methods {@link org.forgerock.json.resource.RequestHandler} by
@@ -53,28 +52,27 @@ class AnnotationCollectionInstance extends InterfaceCollectionInstance {
     }
 
     @Override
-    public void handleRead(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
-        RequestHandlerUtils.handle(readMethod, context, request, Resources.idOf(context), handler);
+    public Promise<Resource, ResourceException> handleRead(ServerContext context, ReadRequest request) {
+        return RequestHandlerUtils.handle(readMethod, context, request, Resources.idOf(context));
     }
 
     @Override
-    public void handleUpdate(ServerContext context, UpdateRequest request, ResultHandler<Resource> handler) {
-        RequestHandlerUtils.handle(updateMethod, context, request, Resources.idOf(context), handler);
+    public Promise<Resource, ResourceException> handleUpdate(ServerContext context, UpdateRequest request) {
+        return RequestHandlerUtils.handle(updateMethod, context, request, Resources.idOf(context));
     }
 
     @Override
-    public void handleDelete(ServerContext context, DeleteRequest request, ResultHandler<Resource> handler) {
-        RequestHandlerUtils.handle(deleteMethod, context, request, Resources.idOf(context), handler);
+    public Promise<Resource, ResourceException> handleDelete(ServerContext context, DeleteRequest request) {
+        return RequestHandlerUtils.handle(deleteMethod, context, request, Resources.idOf(context));
     }
 
     @Override
-    public void handlePatch(ServerContext context, PatchRequest request, ResultHandler<Resource> handler) {
-        RequestHandlerUtils.handle(patchMethod, context, request, Resources.idOf(context), handler);
+    public Promise<Resource, ResourceException> handlePatch(ServerContext context, PatchRequest request) {
+        return RequestHandlerUtils.handle(patchMethod, context, request, Resources.idOf(context));
     }
 
     @Override
-    public void handleAction(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
-        RequestHandlerUtils.handle(actionMethods.invoke(context, request, Resources.idOf(context)), handler);
+    public Promise<JsonValue, ResourceException> handleAction(ServerContext context, ActionRequest request) {
+        return actionMethods.invoke(context, request, Resources.idOf(context));
     }
-
 }

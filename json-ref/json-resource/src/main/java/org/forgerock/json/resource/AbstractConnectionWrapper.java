@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -165,7 +165,7 @@ public abstract class AbstractConnectionWrapper<C extends Connection> implements
      * <p>
      * The default implementation is to delegate.
      */
-    public QueryResult query(Context context, QueryRequest request, QueryResultHandler handler)
+    public QueryResult query(Context context, QueryRequest request, QueryResourceHandler handler)
             throws ResourceException {
         return connection.query(transform(context), request, handler);
     }
@@ -186,7 +186,7 @@ public abstract class AbstractConnectionWrapper<C extends Connection> implements
      * The default implementation is to delegate.
      */
     public Promise<QueryResult, ResourceException> queryAsync(Context context,
-            QueryRequest request, QueryResultHandler handler) {
+            QueryRequest request, QueryResourceHandler handler) {
         return connection.queryAsync(transform(context), request, handler);
     }
 

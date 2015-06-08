@@ -59,29 +59,18 @@ public abstract class AbstractAsynchronousConnection implements Connection {
 
     @Override
     public QueryResult query(final Context context, final QueryRequest request,
-            final QueryResultHandler handler) throws ResourceException {
+            final QueryResourceHandler handler) throws ResourceException {
         return queryAsync(context, request, handler).getOrThrowUninterruptibly();
     }
 
     @Override
     public QueryResult query(final Context context, final QueryRequest request,
             final Collection<? super Resource> results) throws ResourceException {
-        return query(context, request, new QueryResultHandler() {
-
-            @Override
-            public void handleException(final ResourceException error) {
-                // Ignore - handled by future.
-            }
-
+        return query(context, request, new QueryResourceHandler() {
             @Override
             public boolean handleResource(final Resource resource) {
                 results.add(resource);
                 return true;
-            }
-
-            @Override
-            public void handleResult(final QueryResult result) {
-                // Ignore - handled by future.
             }
         });
     }

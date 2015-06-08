@@ -19,17 +19,19 @@ package org.forgerock.json.resource.http;
 import static org.forgerock.json.resource.QueryResult.*;
 import static org.forgerock.json.resource.http.HttpUtils.*;
 import static org.forgerock.util.Utils.closeSilently;
+import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import javax.mail.internet.ContentType;
 import javax.mail.internet.ParseException;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-
 import org.forgerock.http.Context;
+import org.forgerock.http.ResourcePath;
 import org.forgerock.http.RouterContext;
 import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.protocol.Response;
@@ -43,19 +45,19 @@ import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResult;
-import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestVisitor;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.http.ResourcePath;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.util.encode.Base64url;
 import org.forgerock.util.AsyncFunction;
+import org.forgerock.util.encode.Base64url;
+import org.forgerock.util.promise.ExceptionHandler;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.promise.Promises;
+import org.forgerock.util.promise.ResultHandler;
 
 /**
  * Common request processing.
@@ -113,7 +115,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
                             onError(e);
                         }
 
-                        return Promises.newResultPromise(httpResponse);
+                        return newResultPromise(httpResponse);
                     }
                 }, new AsyncFunction<ResourceException, Response, NeverThrowsException>() {
                     @Override
@@ -144,7 +146,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
                         } catch (final Exception e) {
                             onError(e);
                         }
-                        return Promises.newResultPromise(httpResponse);
+                        return newResultPromise(httpResponse);
                     }
                 }, new AsyncFunction<ResourceException, Response, NeverThrowsException>() {
                     @Override
@@ -189,47 +191,28 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
      */
     @Override
     public final Promise<Response, NeverThrowsException> visitQueryRequest(final Void p, final QueryRequest request) {
-        return connection.queryAsync(context, request, new QueryResultHandler() {
-            private boolean isFirstResult = true;
-            private int resultCount = 0;
-
-            @Override
-            public void handleException(final ResourceException error) {
-                if (isFirstResult) {
-                    onError(error);
-                } else {
-                    // Partial results - it's too late to set the status.
-                    try {
-                        writer.writeEndArray();
-                        writer.writeNumberField(FIELD_RESULT_COUNT, resultCount);
-                        writer.writeObjectField(FIELD_ERROR, error.toJsonValue().getObject());
-                        writer.writeEndObject();
-                        onSuccess();
-                    } catch (final Exception e) {
-                        onError(e);
-                    }
-                }
-            }
-
+        final AtomicBoolean isFirstResult = new AtomicBoolean(true);
+        final AtomicInteger resultCount = new AtomicInteger(0);
+        return connection.queryAsync(context, request, new QueryResourceHandler() {
             @Override
             public boolean handleResource(final Resource resource) {
                 try {
-                    writeHeader();
+                    writeHeader(isFirstResult);
                     writeJsonValue(resource.getContent());
-                    resultCount++;
+                    resultCount.incrementAndGet();
                     return true;
                 } catch (final Exception e) {
                     handleError(adapt(e));
                     return false;
                 }
             }
-
+        }).thenOnResult(new ResultHandler<QueryResult>() {
             @Override
-            public void handleResult(final QueryResult result) {
+            public void handleResult(QueryResult result) {
                 try {
-                    writeHeader();
+                    writeHeader(isFirstResult);
                     writer.writeEndArray();
-                    writer.writeNumberField(FIELD_RESULT_COUNT, resultCount);
+                    writer.writeNumberField(FIELD_RESULT_COUNT, resultCount.get());
                     writer.writeStringField(FIELD_PAGED_RESULTS_COOKIE, result
                             .getPagedResultsCookie());
                     writer.writeNumberField(FIELD_REMAINING_PAGED_RESULTS, result
@@ -240,19 +223,28 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
                     onError(e);
                 }
             }
-
-            private void writeHeader() throws IOException {
-                if (isFirstResult) {
-                    writeAdvice();
-                    writer.writeStartObject();
-                    writer.writeArrayFieldStart(FIELD_RESULT);
-                    isFirstResult = false;
+        }).thenOnException(new ExceptionHandler<ResourceException>() {
+            @Override
+            public void handleException(ResourceException error) {
+                if (isFirstResult.get()) {
+                    onError(error);
+                } else {
+                    // Partial results - it's too late to set the status.
+                    try {
+                        writer.writeEndArray();
+                        writer.writeNumberField(FIELD_RESULT_COUNT, resultCount.get());
+                        writer.writeObjectField(FIELD_ERROR, error.toJsonValue().getObject());
+                        writer.writeEndObject();
+                        onSuccess();
+                    } catch (final Exception e) {
+                        onError(e);
+                    }
                 }
             }
         }).thenAsync(new AsyncFunction<QueryResult, Response, NeverThrowsException>() {
             @Override
             public Promise<Response, NeverThrowsException> apply(QueryResult queryResult) {
-                return Promises.newResultPromise(httpResponse);
+                return newResultPromise(httpResponse);
             }
         }, new AsyncFunction<ResourceException, Response, NeverThrowsException>() {
             @Override
@@ -260,6 +252,14 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
                 return handleError(e);
             }
         });
+    }
+
+    private void writeHeader(AtomicBoolean isFirstResult) throws IOException {
+        if (isFirstResult.compareAndSet(true, false)) {
+            writeAdvice();
+            writer.writeStartObject();
+            writer.writeArrayFieldStart(FIELD_RESULT);
+        }
     }
 
     /**
@@ -312,7 +312,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
         // Add back the context path.
         builder.append(context.asContext(RouterContext.class).getMatchedUri());
 
-        // Add new resource path and resource ID.
+        // Add new resource name and resource ID.
         final ResourcePath resourcePath = request.getResourcePathObject();
         if (!resourcePath.isEmpty()) {
             builder.append('/');
@@ -338,7 +338,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
                             // No change so 304.
                             Map<String, Object> responseBody = ResourceException.getException(304)
                                     .setReason("Not Modified").toJsonValue().asMap();
-                            return Promises.newResultPromise(new Response().setStatus(Status.valueOf(304))
+                            return newResultPromise(new Response().setStatus(Status.valueOf(304))
                                     .setEntity(responseBody));
                         }
                     }
@@ -347,7 +347,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
                 } catch (final Exception e) {
                     onError(e);
                 }
-                return Promises.newResultPromise(httpResponse);
+                return newResultPromise(httpResponse);
             }
         };
     }

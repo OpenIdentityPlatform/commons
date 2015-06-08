@@ -11,22 +11,23 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource.descriptor;
 
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.json.fluent.JsonValue.*;
 import static org.forgerock.json.resource.Requests.newReadRequest;
 import static org.forgerock.json.resource.descriptor.Api.JSON_MAPPER;
+import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonGenerator.Feature;
 import org.forgerock.http.RootContext;
 import org.forgerock.http.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
@@ -39,12 +40,9 @@ import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
-import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.descriptor.RelationDescriptor.Multiplicity;
+import org.forgerock.util.promise.Promise;
 import org.testng.annotations.Test;
-
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonGenerator.Feature;
 
 @SuppressWarnings("javadoc")
 public final class ApiDescriptorTest {
@@ -79,12 +77,12 @@ public final class ApiDescriptorTest {
                 private final List<String> realmList = new LinkedList<String>();
 
                 @Override
-                public void getRelationsForResource(final RelationDescriptor relation,
-                        final String resourceId,
-                        final ResultHandler<Collection<RelationDescriptor>> handler) {
+                public Promise<Collection<RelationDescriptor>, ResourceException> getRelationsForResource(
+                        final RelationDescriptor relation, final String resourceId) {
                     System.out.println("Queried " + relation + " : " + resourceId);
                     realmList.add(resourceId);
-                    handler.handleResult(relation.getResource().getRelations());
+                    Collection<RelationDescriptor> descriptors = relation.getResource().getRelations();
+                    return newResultPromise(descriptors);
                 }
 
                 @Override
@@ -95,12 +93,12 @@ public final class ApiDescriptorTest {
                     } else if (relation.getResourceUrn().equals(USERS_URN)) {
                         return new AbstractRequestHandler() {
                             @Override
-                            public void handleRead(final ServerContext context,
-                                    final ReadRequest request, final ResultHandler<Resource> handler) {
+                            public Promise<Resource, ResourceException> handleRead(final ServerContext context,
+                                    final ReadRequest request) {
                                 System.out.println("Reading user from realm " + realmList);
                                 final JsonValue content =
                                         json(object(field("id", request.getResourcePath())));
-                                handler.handleResult(new Resource(request.getResourcePath(), "1",
+                                return newResultPromise(new Resource(request.getResourcePath(), "1",
                                         content));
                             }
                         };
@@ -131,55 +129,55 @@ public final class ApiDescriptorTest {
 
         // @formatter:off
         final ApiDescriptor api = ApiDescriptor.builder("urn:forgerock:openam:api:repo:1.0")
-                                .setDescription("Example OpenAM REST API")
-                                .addRelation("", API_URN)
-                                    .setMultiplicity(Multiplicity.ONE_TO_ONE)
-                                    .build()
-                                .addRelation("users", USERS_URN)
-                                    .build()
-                                .addRelation("groups", "urn:forgerock:openam:resource:group:1.0")
-                                    .build()
-                                .addRelation("realms", "urn:forgerock:openam:resource:realm:1.0")
-                                    .setDescription("An OpenAM realm")
-                                    .build()
-                                .addResource(API_URN)
-                                    .setDescription("Commons Rest API Descriptor")
-                                    .setSchema(ApiDescriptor.class)
-                                    .build()
-                                .addResource("urn:forgerock:openam:resource:user:1.0")
-                                    .setDescription("An OpenAM user")
-                                    .addAction("login")
-                                        .setDescription("Authenticates a user")
-                                        .addParameter("password", "The user's password")
-                                        .build()
-                                    .setSchema(User.class)
-                                    .addProfile("urn:forgerock:ldap:profile:schema:1.0",
-                                            json(object(field("objectClass", "inetOrgPerson"))))
-                                    .build()
-                                .addResource("urn:forgerock:openam:resource:admin:1.0")
-                                    .setDescription("An OpenAM administrator")
-                                    .setParent("urn:forgerock:openam:resource:user:1.0")
-                                    .setSchema(AdminUser.class)
-                                    .build()
-                                .addResource("urn:forgerock:openam:resource:group:1.0")
-                                    .setDescription("An OpenAM group")
-                                    .setSchema(Group.class)
-                                    .build()
-                                .addResource("urn:forgerock:openam:resource:realm:1.0")
-                                    .setDescription("An OpenAM realm")
-                                    .addRelation("users", USERS_URN)
-                                        .addAction("bulk-add")
-                                            .setDescription("Bulk add a load of users")
-                                            .build()
-                                        .build()
-                                    .addRelation("groups", "urn:forgerock:openam:resource:group:1.0")
-                                        .build()
-                                    .addRelation("subrealms", "urn:forgerock:openam:resource:realm:1.0")
-                                        .setDescription("An OpenAM sub-realm")
-                                        .build()
-                                    .setSchema(Realm.class)
-                                    .build()
-                                .build();
+                .setDescription("Example OpenAM REST API")
+                .addRelation("", API_URN)
+                .setMultiplicity(Multiplicity.ONE_TO_ONE)
+                .build()
+                .addRelation("users", USERS_URN)
+                .build()
+                .addRelation("groups", "urn:forgerock:openam:resource:group:1.0")
+                .build()
+                .addRelation("realms", "urn:forgerock:openam:resource:realm:1.0")
+                .setDescription("An OpenAM realm")
+                .build()
+                .addResource(API_URN)
+                .setDescription("Commons Rest API Descriptor")
+                .setSchema(ApiDescriptor.class)
+                .build()
+                .addResource("urn:forgerock:openam:resource:user:1.0")
+                .setDescription("An OpenAM user")
+                .addAction("login")
+                .setDescription("Authenticates a user")
+                .addParameter("password", "The user's password")
+                .build()
+                .setSchema(User.class)
+                .addProfile("urn:forgerock:ldap:profile:schema:1.0",
+                        json(object(field("objectClass", "inetOrgPerson"))))
+                .build()
+                .addResource("urn:forgerock:openam:resource:admin:1.0")
+                .setDescription("An OpenAM administrator")
+                .setParent("urn:forgerock:openam:resource:user:1.0")
+                .setSchema(AdminUser.class)
+                .build()
+                .addResource("urn:forgerock:openam:resource:group:1.0")
+                .setDescription("An OpenAM group")
+                .setSchema(Group.class)
+                .build()
+                .addResource("urn:forgerock:openam:resource:realm:1.0")
+                .setDescription("An OpenAM realm")
+                .addRelation("users", USERS_URN)
+                .addAction("bulk-add")
+                .setDescription("Bulk add a load of users")
+                .build()
+                .build()
+                .addRelation("groups", "urn:forgerock:openam:resource:group:1.0")
+                .build()
+                .addRelation("subrealms", "urn:forgerock:openam:resource:realm:1.0")
+                .setDescription("An OpenAM sub-realm")
+                .build()
+                .setSchema(Realm.class)
+                .build()
+                .build();
         // @formatter:on
         final RequestHandler handler = Api.newApiDispatcher(api, new ResolverFactoryImpl(api));
         final Connection connection = Resources.newInternalConnection(handler);

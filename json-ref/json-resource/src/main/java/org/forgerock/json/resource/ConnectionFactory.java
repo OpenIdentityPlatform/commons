@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2013 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -57,7 +57,7 @@ public interface ConnectionFactory extends Closeable {
      * @see Resources#uncloseable(ConnectionFactory)
      */
     @Override
-    public void close();
+    void close();
 
     /**
      * Returns a connection to the JSON resource provider associated with this
