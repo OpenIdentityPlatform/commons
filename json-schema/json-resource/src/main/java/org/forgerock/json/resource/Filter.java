@@ -53,7 +53,51 @@ import org.forgerock.util.promise.Promise;
  * The following example illustrates how an authorization filter could be
  * implemented:
  *
- * {@.jcite org.forgerock.json.resource.jcite.AuthzFilter}
+ * <pre>
+ * public class AuthzFilter implements Filter {
+ *
+ *     public Promise&lt;Resource, ResourceException&gt; filterRead(final ServerContext context,
+ *             final ReadRequest request, final RequestHandler next) {
+ *         /*
+ *          * Only forward the request if the request is allowed.
+ *          &#42;/
+ *         if (isAuthorized(context, request)) {
+ *             /*
+ *              * Continue processing the request since it is allowed. Chain the
+ *              * promise so that we can filter the returned resource.
+ *              &#42;/
+ *             return next.handleRead(context, request)
+ *                     .thenAsync(new AsyncFunction&lt;Resource, Resource, ResourceException&gt;() {
+ *                         &#064;Override
+ *                         public Promise&lt;Resource, ResourceException&gt; apply(Resource result) {
+ *                             /*
+ *                              * Filter the resource and its attributes.
+ *                              &#42;/
+ *                             if (isAuthorized(context, result)) {
+ *                                 return Promises.newResultPromise(filterResource(context, result));
+ *                             } else {
+ *                                 return newExceptionPromise(ResourceException.newNotFoundException());
+ *                             }
+ *                         }
+ *                     }, new AsyncFunction&lt;ResourceException, Resource, ResourceException&gt;() {
+ *                         &#064;Override
+ *                         public Promise&lt;Resource, ResourceException&gt; apply(ResourceException error) {
+ *                             // Forward - assumes no authorization is required.
+ *                             return newExceptionPromise(error);
+ *                         }
+ *                     });
+ *         } else {
+ *             /*
+ *              * Stop processing the request since it is not allowed.
+ *              &#42;/
+ *             ResourceException exception = new ForbiddenException();
+ *             return newExceptionPromise(exception);
+ *         }
+ *     }
+ *
+ *     // Remaining filterXXX methods...
+ * }
+ * </pre>
  *
  * @see Filters
  */
