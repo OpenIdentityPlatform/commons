@@ -213,11 +213,8 @@ public final class Entity implements Closeable {
      */
     public Object getJson() throws IOException {
         if (json == null) {
-            final BufferedReader reader = newDecodedContentReader(UTF_8); // RFC 7159
-            try {
+            try (BufferedReader reader = newDecodedContentReader(UTF_8) /* RFC 7159 */) {
                 json = readJson(reader);
-            } finally {
-                reader.close();
             }
         }
         return json;
@@ -312,14 +309,9 @@ public final class Entity implements Closeable {
      * @throws IOException
      *             If an IO error occurred while reading the content.
      */
-    public InputStream newDecodedContentInputStream() throws UnsupportedEncodingException,
-            IOException {
-        final BranchingInputStream headBranch = head.branch();
-        try {
+    public InputStream newDecodedContentInputStream() throws IOException {
+        try (final BranchingInputStream headBranch = head.branch()) {
             return getDecodedInputStream(headBranch);
-        } catch (final IOException e) {
-            closeSilently(headBranch);
-            throw e;
         }
     }
 
@@ -349,13 +341,9 @@ public final class Entity implements Closeable {
      *             If an IO error occurred while reading the content.
      */
     public BufferedReader newDecodedContentReader(final Charset charset)
-            throws UnsupportedEncodingException, IOException {
-        final BranchingInputStream headBranch = head.branch();
-        try {
+            throws IOException {
+        try (final BranchingInputStream headBranch = head.branch()) {
             return getBufferedReader(headBranch, charset);
-        } catch (final IOException e) {
-            closeSilently(headBranch);
-            throw e;
         }
     }
 
@@ -497,12 +485,12 @@ public final class Entity implements Closeable {
     }
 
     private BufferedReader getBufferedReader(final InputStream is, final Charset charset)
-            throws UnsupportedEncodingException, IOException {
+            throws IOException {
         return new BufferedReader(new InputStreamReader(getDecodedInputStream(is), cs(charset)));
     }
 
     private InputStream getDecodedInputStream(final InputStream is)
-            throws UnsupportedEncodingException, IOException {
+            throws IOException {
         return ContentEncodingHeader.valueOf(message).decode(is);
     }
 }

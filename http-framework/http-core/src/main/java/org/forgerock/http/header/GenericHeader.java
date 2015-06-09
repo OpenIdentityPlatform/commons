@@ -12,7 +12,7 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2014 ForgeRock AS.
+ * Portions Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.http.header;
@@ -38,7 +38,7 @@ public class GenericHeader implements Header {
      *            The header value.
      */
     public GenericHeader(String name, String value) {
-        this.name = value;
+        this.name = name;
         this.value = value;
     }
 

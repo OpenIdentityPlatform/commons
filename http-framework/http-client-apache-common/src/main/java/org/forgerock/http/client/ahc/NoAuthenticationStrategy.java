@@ -46,38 +46,30 @@ public final class NoAuthenticationStrategy implements AuthenticationStrategy {
     private NoAuthenticationStrategy() { }
 
     @Override
-    public void authFailed(final HttpHost host,
-                           final AuthScheme authScheme,
-                           final HttpContext context) {
+    public void authFailed(final HttpHost host, final AuthScheme authScheme, final HttpContext context) {
         // Nothing to do.
     }
 
     @Override
-    public void authSucceeded(final HttpHost host,
-                              final AuthScheme authScheme,
-                              final HttpContext context) {
+    public void authSucceeded(final HttpHost host, final AuthScheme authScheme, final HttpContext context) {
         // Nothing to do.
     }
 
     @Override
-    public Map<String, Header> getChallenges(final HttpHost host,
-                                             final HttpResponse response,
-                                             final HttpContext context) throws MalformedChallengeException {
+    public Map<String, Header> getChallenges(final HttpHost host, final HttpResponse response,
+            final HttpContext context) throws MalformedChallengeException {
         return Collections.emptyMap();
     }
 
     @Override
-    public boolean isAuthenticationRequested(final HttpHost host,
-                                             final HttpResponse response,
-                                             final HttpContext context) {
+    public boolean isAuthenticationRequested(final HttpHost host, final HttpResponse response,
+            final HttpContext context) {
         return false;
     }
 
     @Override
-    public Queue<AuthOption> select(final Map<String, Header> challenges,
-                                    final HttpHost host,
-                                    final HttpResponse response,
-                                    final HttpContext context) throws MalformedChallengeException {
-        return new LinkedList<AuthOption>();
+    public Queue<AuthOption> select(final Map<String, Header> challenges, final HttpHost host,
+            final HttpResponse response, final HttpContext context) throws MalformedChallengeException {
+        return new LinkedList<>();
     }
 }

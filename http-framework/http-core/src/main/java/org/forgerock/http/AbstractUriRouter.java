@@ -70,7 +70,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 public abstract class AbstractUriRouter<T extends AbstractUriRouter<T, H>, H> {
 
     private volatile H defaultRoute = null;
-    private final Set<UriRoute<H>> routes = new CopyOnWriteArraySet<UriRoute<H>>();
+    private final Set<UriRoute<H>> routes = new CopyOnWriteArraySet<>();
 
     /**
      * Creates a new router with no routes defined.
@@ -138,7 +138,7 @@ public abstract class AbstractUriRouter<T extends AbstractUriRouter<T, H>, H> {
      *         route later.
      */
     public final UriRoute<H> addRoute(RoutingMode mode, String uriTemplate, H handler) {
-        return addRoute(new UriRoute<H>(mode, uriTemplate, handler));
+        return addRoute(new UriRoute<>(mode, uriTemplate, handler));
     }
 
     /**
@@ -223,7 +223,7 @@ public abstract class AbstractUriRouter<T extends AbstractUriRouter<T, H>, H> {
          * is specific to the endpoint requested.
          */
         if (handler != null) {
-            return new RouteMatcher<H>(context, uri, handler);
+            return new RouteMatcher<>(context, uri, handler);
         }
         // TODO: i18n
         throw new RouteNotFoundException(String.format("Resource '%s' not found", uri));

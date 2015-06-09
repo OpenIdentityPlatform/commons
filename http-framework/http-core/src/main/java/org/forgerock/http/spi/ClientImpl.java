@@ -45,7 +45,7 @@ public interface ClientImpl extends Closeable {
      *            The HTTP request to send.
      * @return A promise representing the pending HTTP response.
      */
-    public Promise<Response, NeverThrowsException> sendAsync(Request request);
+    Promise<Response, NeverThrowsException> sendAsync(Request request);
 
     /**
      * Completes all pending requests and release resources associated with
@@ -54,5 +54,5 @@ public interface ClientImpl extends Closeable {
      * @throws IOException if an I/O error occurs
      */
     @Override
-    public void close() throws IOException;
+    void close() throws IOException;
 }

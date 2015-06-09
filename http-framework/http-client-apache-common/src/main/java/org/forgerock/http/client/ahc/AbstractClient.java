@@ -84,7 +84,7 @@ public abstract class AbstractClient implements ClientImpl {
             this.method = request.getMethod();
             final InputStreamEntity entity =
                     new InputStreamEntity(request.getEntity().getRawContentInputStream(),
-                                          ContentLengthHeader.valueOf(request).getLength());
+                            ContentLengthHeader.valueOf(request).getLength());
             entity.setContentType(ContentTypeHeader.valueOf(request).toString());
             entity.setContentEncoding(ContentEncodingHeader.valueOf(request).toString());
             setEntity(entity);

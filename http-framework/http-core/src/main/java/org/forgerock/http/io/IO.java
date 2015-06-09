@@ -13,7 +13,7 @@
  *
  * Copyright 2009 Sun Microsystems Inc.
  * Portions Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2014 ForgeRock AS.
+ * Portions Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.http.io;
@@ -37,20 +37,20 @@ public final class IO {
     /**
      * 8 KiB.
      */
-    public static final int DEFAULT_TMP_INIT_LENGTH = 8 * 1024;
+    public static final int DEFAULT_TMP_INIT_LENGTH = 8 * 1_024;
 
     /**
      * 64 KiB.
      */
-    public static final int DEFAULT_TMP_MEMORY_LIMIT = 64 * 1024;
+    public static final int DEFAULT_TMP_MEMORY_LIMIT = 64 * 1_024;
 
     /**
      * 1 MiB.
      */
-    public static final int DEFAULT_TMP_FILE_LIMIT = 1 * 1024 * 1024;
+    public static final int DEFAULT_TMP_FILE_LIMIT = 1 * 1_024 * 1_024;
 
     /** Size of buffer to use during streaming. */
-    private static final int BUF_SIZE = 8 * 1024;
+    private static final int BUF_SIZE = 8 * 1_024;
 
     private static final InputStream NULL_INPUT_STREAM = new ByteArrayInputStream(new byte[0]);
 

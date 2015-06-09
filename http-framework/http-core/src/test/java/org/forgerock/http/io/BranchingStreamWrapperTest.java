@@ -12,7 +12,7 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2014 ForgeRock AS.
+ * Portions Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.http.io;
@@ -34,7 +34,7 @@ import org.testng.annotations.Test;
 public class BranchingStreamWrapperTest {
 
     /** The size of a read buffer. */
-    private static final int BUFSIZE = 8192;
+    private static final int BUFSIZE = 8_192;
 
     /** Number of concurrent branches to test against. */
     private static final int BRANCHES = 17; // prime number of branches

@@ -13,7 +13,7 @@
  *
  * Copyright 2009 Sun Microsystems Inc.
  * Portions Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2014 ForgeRock AS.
+ * Portions Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.http.util;
@@ -53,7 +53,7 @@ public class MultiValueMap<K, V> extends MapDecorator<K, List<V>> {
     public void add(K key, V value) {
         List<V> list = get(key);
         if (list == null) {
-            list = new ArrayList<V>();
+            list = new ArrayList<>();
             put(key, list);
         }
         list.add(value);
@@ -69,7 +69,7 @@ public class MultiValueMap<K, V> extends MapDecorator<K, List<V>> {
     public void addAll(K key, Collection<? extends V> values) {
         List<V> list = get(key);
         if (list == null) {
-            list = new ArrayList<V>();
+            list = new ArrayList<>();
             put(key, list);
         }
         list.addAll(values);

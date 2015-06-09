@@ -11,8 +11,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
+
 package org.forgerock.http.util;
 
 import static org.assertj.core.api.Assertions.*;
@@ -173,7 +174,7 @@ public class CaseInsensitiveSetTest {
         assertThat(set.contains(lower)).isTrue();
         assertThat(set.contains(upper)).isTrue();
 
-        final Set<String> another = new HashSet<String>();
+        final Set<String> another = new HashSet<>();
         another.add("OpenIG");
         assertThat(set.containsAll(another)).isFalse();
     }
@@ -218,14 +219,14 @@ public class CaseInsensitiveSetTest {
     }
 
     private static Collection<String> createRegularListWithUpperAndLowerCasedKeys() {
-        final List<String> sample = new ArrayList<String>();
+        final List<String> sample = new ArrayList<>();
         sample.add(upper);
         sample.add(lower);
         return sample;
     }
 
     private static Collection<String> createRegularSetWithUpperAndLowerCasedKeys() {
-        final Set<String> hashSet = new HashSet<String>();
+        final Set<String> hashSet = new HashSet<>();
         hashSet.add(upper);
         hashSet.add(lower);
         return hashSet;

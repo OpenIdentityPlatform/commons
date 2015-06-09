@@ -38,7 +38,7 @@ public final class HttpContext extends AbstractContext {
     /** Session information associated with the remote client. */
     private Session session;
 
-    private final Map<String, Object> attributes = new HashMap<String, Object>();
+    private final Map<String, Object> attributes = new HashMap<>();
 
     public HttpContext(Context parent, Session session) {
         super(parent, "httpRequest");

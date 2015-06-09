@@ -12,7 +12,7 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2014 ForgeRock AS.
+ * Portions Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.http.io;
@@ -162,8 +162,7 @@ final class BranchingStreamWrapper extends BranchingInputStream {
     private void closeBranches() throws IOException {
         // multiple calls are harmless
         if (trunk != null) {
-            ArrayList<BranchingStreamWrapper> branches =
-                    new ArrayList<BranchingStreamWrapper>(trunk.branches);
+            ArrayList<BranchingStreamWrapper> branches = new ArrayList<>(trunk.branches);
             for (BranchingStreamWrapper branch : branches) {
                 if (branch.parent == this) {
                     // recursively closes its children
@@ -251,8 +250,7 @@ final class BranchingStreamWrapper extends BranchingInputStream {
     /** Object shared by all branches. */
     private final class Trunk {
         /** Keeps track of all branches on this trunk. */
-        private final List<BranchingStreamWrapper> branches =
-                new ArrayList<BranchingStreamWrapper>();
+        private final List<BranchingStreamWrapper> branches = new ArrayList<>();
 
         /** The input stream being wrapped by the branches. */
         private final InputStream in;

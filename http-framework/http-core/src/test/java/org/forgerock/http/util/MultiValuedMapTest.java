@@ -11,8 +11,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
+
 package org.forgerock.http.util;
 
 import static org.assertj.core.api.Assertions.*;
@@ -122,23 +123,23 @@ public class MultiValuedMapTest {
     }
 
     private static Map<String, List<String>> getStandard() {
-        final Map<String, List<String>> custom = new LinkedHashMap<String, List<String>>();
-        custom.put("milk-type", new LinkedList<String>(Arrays.asList("Half-and-half", "Plus")));
-        custom.put("coffee", new LinkedList<String>(Arrays.asList("Arabica")));
+        final Map<String, List<String>> custom = new LinkedHashMap<>();
+        custom.put("milk-type", new LinkedList<>(Arrays.asList("Half-and-half", "Plus")));
+        custom.put("coffee", new LinkedList<>(Arrays.asList("Arabica")));
         return custom;
     }
 
     private static Map<String, List<String>> getIcedCreamCoffee() {
-        final Map<String, List<String>> custom = new LinkedHashMap<String, List<String>>();
-        custom.put("milk-type", new LinkedList<String>(Arrays.asList("Cream")));
-        custom.put("brew", new LinkedList<String>(Arrays.asList("Iced")));
-        custom.put("sugar", new LinkedList<String>(Arrays.asList("None")));
+        final Map<String, List<String>> custom = new LinkedHashMap<>();
+        custom.put("milk-type", new LinkedList<>(Arrays.asList("Cream")));
+        custom.put("brew", new LinkedList<>(Arrays.asList("Iced")));
+        custom.put("sugar", new LinkedList<>(Arrays.asList("None")));
         return custom;
     }
 
     private class Coffee extends MultiValueMap<String, String> {
         Coffee(Map<String, List<String>> map) {
-            super(new LinkedHashMap<String, List<String>>(map));
+            super(new LinkedHashMap<>(map));
         }
     }
 }

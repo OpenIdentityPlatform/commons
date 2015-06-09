@@ -12,7 +12,7 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2014 ForgeRock AS.
+ * Portions Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.http.io;
@@ -50,7 +50,7 @@ public interface Buffer extends Closeable {
      * @throws IOException if an I/O exception occurs.
      * @throws OverflowException if appending {@code len} bytes to the buffer would exceed its limit.
      */
-    void append(byte[] b, int off, int len) throws IOException, OverflowException;
+    void append(byte[] b, int off, int len) throws IOException;
 
     /**
      * Returns the current length of the buffer.

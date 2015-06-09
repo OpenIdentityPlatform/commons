@@ -62,12 +62,13 @@ public final class OptionsFilter implements Filter {
     @Override
     public Promise<Response, NeverThrowsException> filter(Context context, Request request,
             Handler next) {
-        if ("OPTIONS".equals(request.getMethod())) {
-            Response response = new Response(Status.OK);
-            response.getHeaders().put("Allow", allowedMethods);
-            return Promises.newResultPromise(response);
-        } else {
-            return next.handle(context, request);
+        switch (request.getMethod()) {
+            case METHOD_OPTIONS:
+                Response response = new Response(Status.OK);
+                response.getHeaders().put("Allow", allowedMethods);
+                return Promises.newResultPromise(response);
+            default:
+                return next.handle(context, request);
         }
     }
 }

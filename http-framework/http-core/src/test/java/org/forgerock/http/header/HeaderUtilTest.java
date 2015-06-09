@@ -11,8 +11,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
+
 package org.forgerock.http.header;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -71,7 +72,7 @@ public class HeaderUtilTest {
 
     @Test(dataProvider = "invalidSeparatorProvider", expectedExceptions = IllegalArgumentException.class)
     public void testJoinDoesntAllowSpecificSeparators(final char separator) {
-        final ArrayList<String> list = new ArrayList<String>();
+        final ArrayList<String> list = new ArrayList<>();
         list.add(ACCEPT_CHARSET_SAMPLE);
         list.add(ESCAPING_TYPE_SAMPLE);
         HeaderUtil.join(list, separator);
@@ -79,7 +80,7 @@ public class HeaderUtilTest {
 
     @Test(dataProvider = "validSeparatorProvider")
     public void testJoinSucceed(final char separator) {
-        final ArrayList<String> list = new ArrayList<String>();
+        final ArrayList<String> list = new ArrayList<>();
         list.add(ACCEPT_CHARSET_SAMPLE);
         list.add(ESCAPING_TYPE_SAMPLE);
         final String result = HeaderUtil.join(list, separator);

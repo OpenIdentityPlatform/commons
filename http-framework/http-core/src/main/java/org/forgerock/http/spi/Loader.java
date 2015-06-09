@@ -32,7 +32,7 @@ public interface Loader {
      * framework. This implementation uses {@link ServiceLoader} for loading
      * services.
      */
-    static final Loader SERVICE_LOADER = new Loader() {
+    Loader SERVICE_LOADER = new Loader() {
         @Override
         public <S> S load(final Class<S> service, final Options options) {
             final ServiceLoader<S> loader = ServiceLoader.load(service);

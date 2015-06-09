@@ -168,7 +168,7 @@ public class EntityTest {
     public void setJson() throws Exception {
         entity.setRawContentInputStream(mockJsonContent1);
         assertThatContentIsJsonContent1();
-        Map<String, Object> jsonEntity = new LinkedHashMap<String, Object>();
+        Map<String, Object> jsonEntity = new LinkedHashMap<>();
         jsonEntity.put("c", 3);
         jsonEntity.put("d", 4);
         entity.setJson(jsonEntity);

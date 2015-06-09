@@ -275,7 +275,7 @@ public class JsonTest {
 
     @Test
     public void testJsonCompatibilityWithMapOfString() throws Exception {
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         map.put("one", "one");
         map.put("two", "two");
         map.put("three", "three");
@@ -296,7 +296,7 @@ public class JsonTest {
     @Test(expectedExceptions = IllegalArgumentException.class,
           expectedExceptionsMessageRegExp = ".*'map/object'.*")
     public void shouldWriteErrorTrailForIncorrectMap() throws Exception {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("one", "one");
         map.put("object", new Object());
         checkJsonCompatibility("map", map);

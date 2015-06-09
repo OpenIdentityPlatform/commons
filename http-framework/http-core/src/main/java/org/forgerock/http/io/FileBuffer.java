@@ -12,7 +12,7 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2014 ForgeRock AS.
+ * Portions Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.http.io;
@@ -62,7 +62,7 @@ final class FileBuffer implements Buffer {
     }
 
     @Override
-    public void append(byte[] b, int off, int len) throws IOException, OverflowException {
+    public void append(byte[] b, int off, int len) throws IOException {
         if (off < 0 || len < 0 || len > b.length - off) {
             throw new IndexOutOfBoundsException();
         }

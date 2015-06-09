@@ -113,5 +113,4 @@ public interface Context {
      * @return {@code true} if this context is a root context.
      */
     boolean isRootContext();
-
 }

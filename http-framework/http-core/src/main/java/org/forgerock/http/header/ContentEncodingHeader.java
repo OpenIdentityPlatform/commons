@@ -12,7 +12,7 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2014 ForgeRock AS.
+ * Portions Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.http.header;
@@ -93,7 +93,7 @@ public class ContentEncodingHeader implements Header {
      * @throws UnsupportedEncodingException
      *             if an unsupported content-encoding is specified.
      */
-    public InputStream decode(InputStream in) throws IOException, UnsupportedEncodingException {
+    public InputStream decode(InputStream in) throws IOException {
         // decode in the reverse order that encoding was applied
         for (ListIterator<String> i = codings.listIterator(codings.size()); i.hasPrevious();) {
             String name = i.previous();

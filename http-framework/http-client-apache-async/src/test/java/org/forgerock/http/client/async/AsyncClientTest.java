@@ -91,8 +91,7 @@ public class AsyncClientTest {
 
         // By default, the client has a pool of less than 10 threads
         final Client client = new Client();
-        List<Promise<Response, NeverThrowsException>> promises =
-                new ArrayList<Promise<Response, NeverThrowsException>>();
+        List<Promise<Response, NeverThrowsException>> promises = new ArrayList<>();
         for (int i = 0; i < 20; i++) {
             Request request = new Request();
             request.setMethod("POST");

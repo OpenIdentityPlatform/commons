@@ -12,7 +12,7 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2014 ForgeRock AS.
+ * Portions Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.http.util;
@@ -34,7 +34,7 @@ import org.forgerock.util.MapDecorator;
 public class CaseInsensitiveMap<V> extends MapDecorator<String, V> {
 
     /** Maps lowercase keys to the real string keys. */
-    private final Map<String, String> lc = new HashMap<String, String>();
+    private final Map<String, String> lc = new HashMap<>();
 
     /**
      * Constructs a new empty case-insensitive map. The backing map is a new {@link HashMap}

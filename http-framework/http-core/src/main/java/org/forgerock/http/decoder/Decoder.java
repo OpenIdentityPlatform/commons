@@ -12,7 +12,7 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2014 ForgeRock AS.
+ * Portions Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.http.decoder;
@@ -32,7 +32,7 @@ import org.forgerock.http.util.Loader;
 public interface Decoder extends Indexed<String> {
 
     /** Mapping of supported codings to associated decoders. */
-    Map<String, Decoder> SERVICES = Collections.unmodifiableMap(new CaseInsensitiveMap<Decoder>(Loader.loadMap(
+    Map<String, Decoder> SERVICES = Collections.unmodifiableMap(new CaseInsensitiveMap<>(Loader.loadMap(
             String.class, Decoder.class)));
 
     /**

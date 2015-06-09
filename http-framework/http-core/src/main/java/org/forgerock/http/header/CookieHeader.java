@@ -12,7 +12,7 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2014 ForgeRock AS.
+ * Portions Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.http.header;
@@ -39,7 +39,7 @@ import org.forgerock.http.protocol.Message;
  */
 public class CookieHeader implements Header {
     private static CookieHeader valueOf(final List<String> values) {
-        List<Cookie> cookies = new ArrayList<Cookie>(values.size());
+        List<Cookie> cookies = new ArrayList<>(values.size());
         Integer version = null;
         Cookie cookie = new Cookie();
         for (String s1 : values) {

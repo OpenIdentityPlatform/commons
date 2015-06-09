@@ -12,7 +12,7 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2014 ForgeRock AS.
+ * Portions Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.http.util;
@@ -42,7 +42,7 @@ public class CaseInsensitiveSet extends SetDecorator<String> {
      */
     public CaseInsensitiveSet() {
         super(new HashSet<String>());
-        lc = new HashMap<String, String>();
+        lc = new HashMap<>();
     }
 
     /**
@@ -54,8 +54,8 @@ public class CaseInsensitiveSet extends SetDecorator<String> {
      * @throws NullPointerException if the specified collection is {@code null}.
      */
     public CaseInsensitiveSet(Collection<String> c) {
-        super(c instanceof Set ? (Set<String>) c : new HashSet<String>(c));
-        lc = new HashMap<String, String>(c.size());
+        super(c instanceof Set ? (Set<String>) c : new HashSet<>(c));
+        lc = new HashMap<>(c.size());
         for (String e : c) {
             lc.put(e.toLowerCase(), e);
         }
@@ -71,7 +71,7 @@ public class CaseInsensitiveSet extends SetDecorator<String> {
      */
     public CaseInsensitiveSet(int initialCapacity, float loadFactor) {
         super(new HashSet<String>(initialCapacity, loadFactor));
-        lc = new HashMap<String, String>(initialCapacity, loadFactor);
+        lc = new HashMap<>(initialCapacity, loadFactor);
     }
 
     /**
@@ -83,7 +83,7 @@ public class CaseInsensitiveSet extends SetDecorator<String> {
      */
     public CaseInsensitiveSet(int initialCapacity) {
         super(new HashSet<String>(initialCapacity));
-        lc = new HashMap<String, String>(initialCapacity);
+        lc = new HashMap<>(initialCapacity);
     }
 
     private Object translate(Object element) {

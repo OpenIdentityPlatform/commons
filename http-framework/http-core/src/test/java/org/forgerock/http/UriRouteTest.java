@@ -63,7 +63,7 @@ public final class UriRouteTest {
     @Test(dataProvider = "testData")
     public void testGetRouteMatcher(final RoutingMode mode, final String template,
             final String resourceName, final String expectedRemaining) {
-        UriRoute<Void> uriRoute = new UriRoute<Void>(mode, template, null);
+        UriRoute<Void> uriRoute = new UriRoute<>(mode, template, null);
         RouteMatcher<Void> matcher = uriRoute.getRouteMatcher(mock(Context.class), resourceName);
         if (expectedRemaining != null) {
             assertThat(matcher).isNotNull();

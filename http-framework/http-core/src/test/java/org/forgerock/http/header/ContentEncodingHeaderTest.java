@@ -11,13 +11,13 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
+
 package org.forgerock.http.header;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.forgerock.http.header.ContentEncodingHeader.*;
-import static org.forgerock.util.Utils.*;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -32,7 +32,6 @@ import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
 
 /**
  * This class is unit testing the content encoding class.
@@ -124,45 +123,34 @@ public class ContentEncodingHeaderTest {
 
     @Test(dataProvider = "nullOrEmptyDataProvider", dataProviderClass = StaticProvider.class)
     public void testDecodeWithNullOrEmptyDecoderHasNoEffectOnInputStream(final String cheader) throws Exception {
-        InputStream in = null;
-        InputStream out = null;
-        try {
             final ContentEncodingHeader ceh = ContentEncodingHeader.valueOf(cheader);
-            in = new ByteArrayInputStream(getStringToDecodeToCompressedBytes());
-            out = ceh.decode(in);
+        try (InputStream in = new ByteArrayInputStream(getStringToDecodeToCompressedBytes());
+             InputStream out = ceh.decode(in)) {
             // The decode has no effects.
             assertThat(in).isEqualTo(out);
-        } finally {
-            closeSilently(in, out);
         }
     }
 
     @Test
     public void testDecodeSucceedEncodingGzipHeader() throws Exception {
-        BufferedReader br = null;
-        try {
-            byte[] compressedBytes = getStringToDecodeToCompressedBytes();
+        byte[] compressedBytes = getStringToDecodeToCompressedBytes();
 
-            final ContentEncodingHeader ceh = ContentEncodingHeader.valueOf("gzip");
-            br = new BufferedReader(new InputStreamReader(ceh.decode(new ByteArrayInputStream(compressedBytes))));
+        final ContentEncodingHeader ceh = ContentEncodingHeader.valueOf("gzip");
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(
+                ceh.decode(new ByteArrayInputStream(compressedBytes))))) {
             String line;
             while ((line = br.readLine()) != null) {
                 assertThat(line).isEqualTo(STRING_TO_DECODE);
             }
-        } finally {
-            closeSilently(br);
         }
     }
 
     private byte[] getStringToDecodeToCompressedBytes() throws Exception {
-        final ByteArrayOutputStream baostream = new ByteArrayOutputStream();
-        final OutputStream outStream = new GZIPOutputStream(baostream);
-        try {
+        try (ByteArrayOutputStream baostream = new ByteArrayOutputStream();
+             OutputStream outStream = new GZIPOutputStream(baostream)) {
             outStream.write(STRING_TO_DECODE.getBytes("UTF-8"));
             outStream.close();
             return baostream.toByteArray();
-        } finally {
-            closeSilently(baostream, outStream);
         }
     }
 

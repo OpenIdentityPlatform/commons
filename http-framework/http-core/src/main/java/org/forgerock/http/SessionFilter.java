@@ -43,8 +43,7 @@ class SessionFilter implements Filter {
     }
 
     @Override
-    public Promise<Response, NeverThrowsException> filter(Context context, Request request,
-                                                          Handler next) {
+    public Promise<Response, NeverThrowsException> filter(Context context, Request request, Handler next) {
         final HttpContext httpContext = context.asContext(HttpContext.class);
         final Session oldSession = httpContext.getSession();
         httpContext.setSession(sessionManager.load(request));

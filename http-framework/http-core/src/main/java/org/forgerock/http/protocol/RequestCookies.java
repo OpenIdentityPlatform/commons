@@ -12,7 +12,7 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2014 ForgeRock AS.
+ * Portions Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.http.protocol;
@@ -66,7 +66,7 @@ public class RequestCookies extends AbstractMap<String, List<Cookie>> implements
 
     @Override
     public List<Cookie> get(final Object key) {
-        final ArrayList<Cookie> list = new ArrayList<Cookie>();
+        final ArrayList<Cookie> list = new ArrayList<>();
         if (key instanceof String) {
             final String s = (String) key;
             for (final Cookie cookie : CookieHeader.valueOf(request).getCookies()) {
@@ -104,12 +104,11 @@ public class RequestCookies extends AbstractMap<String, List<Cookie>> implements
     }
 
     private Map<String, List<Cookie>> cookies() {
-        final Map<String, List<Cookie>> cookies =
-                new TreeMap<String, List<Cookie>>(String.CASE_INSENSITIVE_ORDER);
+        final Map<String, List<Cookie>> cookies = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         for (final Cookie cookie : CookieHeader.valueOf(request).getCookies()) {
             List<Cookie> list = cookies.get(cookie.getName());
             if (list == null) {
-                cookies.put(cookie.getName(), list = new ArrayList<Cookie>(1));
+                cookies.put(cookie.getName(), list = new ArrayList<>(1));
             }
             list.add(cookie);
         }

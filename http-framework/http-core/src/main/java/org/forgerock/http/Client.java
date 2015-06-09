@@ -112,7 +112,7 @@ public final class Client implements Closeable {
     /**
      * SSL host name verification policies.
      */
-    public static enum HostnameVerifier {
+    public enum HostnameVerifier {
         /**
          * Accepts any host name (disables host name verification).
          */

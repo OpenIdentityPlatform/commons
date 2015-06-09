@@ -70,7 +70,7 @@ import java.util.Map;
  */
 public final class Status {
 
-    private static final Map<Integer, Status> KNOWN_STATUSES = new HashMap<Integer, Status>();
+    private static final Map<Integer, Status> KNOWN_STATUSES = new HashMap<>();
 
     private final int code;
     private final String reasonPhrase;

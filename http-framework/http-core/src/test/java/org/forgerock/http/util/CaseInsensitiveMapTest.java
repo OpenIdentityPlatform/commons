@@ -12,7 +12,7 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2014 ForgeRock AS.
+ * Portions Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.http.util;
@@ -39,7 +39,7 @@ public class CaseInsensitiveMapTest {
 
     @BeforeMethod
     public void before() {
-        map = new CaseInsensitiveMap<String>(new HashMap<String, String>());
+        map = new CaseInsensitiveMap<>(new HashMap<String, String>());
         upper = "AAA-" + UUID.randomUUID().toString().toUpperCase() + "-BBB";
         lower = upper.toLowerCase();
         value1 = UUID.randomUUID().toString();

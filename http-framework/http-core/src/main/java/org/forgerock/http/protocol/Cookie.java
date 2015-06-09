@@ -12,7 +12,7 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2014 ForgeRock AS.
+ * Portions Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.http.protocol;
@@ -68,7 +68,7 @@ public class Cookie {
     private String path;
 
     /** Restricts the port(s) to which a cookie may be returned. */
-    private final List<Integer> port = new ArrayList<Integer>();
+    private final List<Integer> port = new ArrayList<>();
 
     /**
      * Directs the user agent to use only secure means to send back this cookie.

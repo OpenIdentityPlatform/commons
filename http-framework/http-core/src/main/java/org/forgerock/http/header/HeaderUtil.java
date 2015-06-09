@@ -12,7 +12,7 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2014 ForgeRock AS.
+ * Portions Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.http.header;
@@ -57,7 +57,7 @@ public final class HeaderUtil {
         if (separator == '"' || separator == '\\') {
             throw new IllegalArgumentException("invalid separator: " + separator);
         }
-        final ArrayList<String> values = new ArrayList<String>();
+        final ArrayList<String> values = new ArrayList<>();
         if (value != null) {
             int length = value.length();
             final StringBuilder sb = new StringBuilder();
@@ -221,8 +221,7 @@ public final class HeaderUtil {
      * @return a map of parameter name-value pairs.
      */
     public static Map<String, String> parseParameters(final Collection<String> values) {
-        final CaseInsensitiveMap<String> map =
-                new CaseInsensitiveMap<String>(new HashMap<String, String>());
+        final CaseInsensitiveMap<String> map = new CaseInsensitiveMap<>(new HashMap<String, String>());
         if (values != null) {
             for (final String value : values) {
                 final String[] param = parseParameter(value);

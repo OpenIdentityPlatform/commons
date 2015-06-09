@@ -12,7 +12,7 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2014 ForgeRock AS.
+ * Portions Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.http.servlet;
@@ -126,7 +126,7 @@ final class ServletSession extends AbstractMap<String, Object> implements Sessio
         if (httpSession != null) {
             // Do in 2 steps to avoid CME.
             final Enumeration<String> attributes = httpSession.getAttributeNames();
-            final List<String> names = new ArrayList<String>();
+            final List<String> names = new ArrayList<>();
             while (attributes.hasMoreElements()) {
                 names.add(attributes.nextElement());
             }

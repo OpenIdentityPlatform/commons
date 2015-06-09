@@ -12,7 +12,7 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2014 ForgeRock AS.
+ * Portions Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.http;
@@ -49,7 +49,7 @@ public final class URIUtil {
      * @throws URISyntaxException if the resulting URI would be malformed per RFC 2396.
      */
     public static URI create(String scheme, String rawUserInfo, String host, int port,
-                             String rawPath, String rawQuery, String rawFragment) throws URISyntaxException {
+            String rawPath, String rawQuery, String rawFragment) throws URISyntaxException {
         StringBuilder sb = new StringBuilder();
         if (scheme != null) {
             sb.append(scheme).append(':');
@@ -118,8 +118,8 @@ public final class URIUtil {
      */
     public static URI withQuery(final URI uri, final Form query) {
         try {
-            return create(uri.getScheme(), uri.getRawUserInfo(), uri.getHost(), uri.getPort(), uri
-                    .getRawPath(), query.toString(), uri.getRawFragment());
+            return create(uri.getScheme(), uri.getRawUserInfo(), uri.getHost(), uri.getPort(),
+                    uri.getRawPath(), query.toString(), uri.getRawFragment());
         } catch (final URISyntaxException e) {
             throw new IllegalStateException(e);
         }

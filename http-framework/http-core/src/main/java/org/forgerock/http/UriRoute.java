@@ -45,7 +45,7 @@ public final class UriRoute<H> {
     private final RoutingMode mode;
     private final Pattern regex;
     private final String uriTemplate;
-    private final List<String> variables = new LinkedList<String>();
+    private final List<String> variables = new LinkedList<>();
 
     UriRoute(RoutingMode mode, String uriTemplate, H handler) {
         this.handler = handler;
@@ -139,7 +139,7 @@ public final class UriRoute<H> {
             variableMap = Collections.singletonMap(variables.get(0), urlDecode(matcher.group(2)));
             break;
         default:
-            variableMap = new LinkedHashMap<String, String>(variables.size());
+            variableMap = new LinkedHashMap<>(variables.size());
             for (int i = 0; i < variables.size(); i++) {
                 // Group 0 matches entire URL, group 1 matches entire template.
                 variableMap.put(variables.get(i), urlDecode(matcher.group(i + 2)));
@@ -148,7 +148,7 @@ public final class UriRoute<H> {
         }
         String remaining = removeLeadingSlash(uri.substring(matcher.end(1)));
         String matched = matcher.group(1);
-        return new RouteMatcher<H>(this, matcher.group(1), remaining, new RouterContext(context,
+        return new RouteMatcher<>(this, matcher.group(1), remaining, new RouterContext(context,
                 matched, variableMap), handler);
     }
 

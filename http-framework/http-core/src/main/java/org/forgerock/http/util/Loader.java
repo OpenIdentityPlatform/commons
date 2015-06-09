@@ -12,7 +12,7 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2014 ForgeRock AS.
+ * Portions Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.http.util;
@@ -103,7 +103,7 @@ public final class Loader {
      * @return a map containing the loaded services, indexed by the services' keys.
      */
     public static <K, V extends Indexed<K>> Map<K, V> loadMap(Class<K> keyType, Class<V> serviceType) {
-        HashMap<K, V> map = new HashMap<K, V>();
+        HashMap<K, V> map = new HashMap<>();
         for (V v : ServiceLoader.load(serviceType, getClassLoader())) {
             map.put(v.getKey(), v);
         }
@@ -118,7 +118,7 @@ public final class Loader {
      * @return a list containing the loaded services.
      */
     public static <E> List<E> loadList(Class<E> serviceType) {
-        ArrayList<E> list = new ArrayList<E>();
+        ArrayList<E> list = new ArrayList<>();
         for (E e : ServiceLoader.load(serviceType, getClassLoader())) {
             list.add(e);
         }

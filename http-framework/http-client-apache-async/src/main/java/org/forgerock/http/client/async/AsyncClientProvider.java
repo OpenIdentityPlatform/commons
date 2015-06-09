@@ -73,16 +73,14 @@ public class AsyncClientProvider implements ClientImplProvider {
      */
     private static final RedirectStrategy DISABLE_REDIRECT = new RedirectStrategy() {
         @Override
-        public boolean isRedirected(final HttpRequest request,
-                                    final HttpResponse response,
-                                    final HttpContext context) throws ProtocolException {
+        public boolean isRedirected(final HttpRequest request, final HttpResponse response,
+                final HttpContext context) throws ProtocolException {
             return false;
         }
 
         @Override
-        public HttpUriRequest getRedirect(final HttpRequest request,
-                                          final HttpResponse response,
-                                          final HttpContext context) throws ProtocolException {
+        public HttpUriRequest getRedirect(final HttpRequest request, final HttpResponse response,
+                final HttpContext context) throws ProtocolException {
             return null;
         }
     };
@@ -115,9 +113,9 @@ public class AsyncClientProvider implements ClientImplProvider {
         // Create a registry of custom connection session strategies for supported protocol schemes
         Registry<SchemeIOSessionStrategy> registry =
                 RegistryBuilder.<SchemeIOSessionStrategy>create()
-                               .register("http", NoopIOSessionStrategy.INSTANCE)
-                               .register("https", new SSLIOSessionStrategy(sslContext, verifier))
-                               .build();
+                        .register("http", NoopIOSessionStrategy.INSTANCE)
+                        .register("https", new SSLIOSessionStrategy(sslContext, verifier))
+                        .build();
 
         // Timeouts
         final Duration soTimeout = options.get(Client.OPTION_SO_TIMEOUT);
@@ -170,11 +168,11 @@ public class AsyncClientProvider implements ClientImplProvider {
         // builder.setUserAgent("CHF/1.0");
 
         CloseableHttpAsyncClient client = builder.setConnectionManager(manager)
-                                                 .disableCookieManagement()
-                                                 .setRedirectStrategy(DISABLE_REDIRECT)
-                                                 .setTargetAuthenticationStrategy(NoAuthenticationStrategy.INSTANCE)
-                                                 .setProxyAuthenticationStrategy(NoAuthenticationStrategy.INSTANCE)
-                                                 .build();
+                .disableCookieManagement()
+                .setRedirectStrategy(DISABLE_REDIRECT)
+                .setTargetAuthenticationStrategy(NoAuthenticationStrategy.INSTANCE)
+                .setProxyAuthenticationStrategy(NoAuthenticationStrategy.INSTANCE)
+                .build();
         client.start();
         return new AsyncClient(client, storage);
     }

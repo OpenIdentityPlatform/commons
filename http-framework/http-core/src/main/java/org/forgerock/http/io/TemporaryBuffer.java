@@ -12,7 +12,7 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2014 ForgeRock AS.
+ * Portions Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.http.io;
@@ -52,7 +52,7 @@ final class TemporaryBuffer implements Buffer {
     }
 
     @Override
-    public void append(byte[] b, int off, int len) throws IOException, OverflowException {
+    public void append(byte[] b, int off, int len) throws IOException {
         notClosed();
         try {
             buffer.append(b, off, len);
@@ -94,7 +94,7 @@ final class TemporaryBuffer implements Buffer {
         }
     }
 
-    private void promote() throws IOException, OverflowException {
+    private void promote() throws IOException {
         if (buffer instanceof MemoryBuffer) {
             MemoryBuffer membuf = (MemoryBuffer) buffer;
             file = File.createTempFile("buf", null, directory);

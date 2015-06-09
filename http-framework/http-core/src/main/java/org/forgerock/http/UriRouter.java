@@ -89,7 +89,7 @@ public final class UriRouter extends AbstractUriRouter<UriRouter, Handler> imple
     }
 
     private ResourcePath getMatchedUri(Context context) {
-        List<String> matched = new ArrayList<String>();
+        List<String> matched = new ArrayList<>();
         for (Context ctx = context; ctx != null; ctx = ctx.getParent()) {
             if (!ctx.containsContext(RouterContext.class)) {
                 break;
