@@ -11,17 +11,17 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
 
 /**
- * An opaque handle for a route which has been registered in a {@link UriRouter uriRouter} or
- * {@link VersionRouter versionRouter}. A reference to a route should be maintained if there is a chance that the route
- * will need to be removed from the router at a later time.
+ * An opaque handle for a route which has been registered in a
+ * {@link VersionRouter versionRouter}. A reference to a route should be
+ * maintained if there is a chance that the route will need to be removed from
+ * the router at a later time.
  *
- * @see UriRouter
  * @see VersionRouter
  */
 public interface Route {

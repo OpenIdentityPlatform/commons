@@ -19,6 +19,7 @@ package org.forgerock.json.resource;
 import static org.forgerock.http.RoutingMode.EQUALS;
 import static org.forgerock.http.RoutingMode.STARTS_WITH;
 import static org.forgerock.json.fluent.JsonValue.*;
+import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
 import static org.forgerock.json.resource.TestUtils.*;
 import static org.forgerock.json.resource.test.assertj.AssertJResourceAssert.assertThat;
 import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThatJsonValue;
@@ -494,8 +495,8 @@ public final class ResourcesTest {
 
     private RequestHandler createHandler(boolean collection, Object provider) {
         RequestHandler handler = collection ? Resources.newCollection(provider) : Resources.newSingleton(provider);
-        UriRouter router = new UriRouter();
-        router.addRoute(collection ? STARTS_WITH : EQUALS, "test", handler);
+        Router router = new Router();
+        router.addRoute(requestUriMatcher(collection ? STARTS_WITH : EQUALS, "test"), handler);
         return router;
     }
 

@@ -16,12 +16,14 @@
 
 package org.forgerock.json.resource.http.examples;
 
+import static org.forgerock.http.routing.RouteMatchers.requestUriMatcher;
+
 import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.RoutingMode;
-import org.forgerock.http.UriRouter;
 import org.forgerock.http.io.Buffer;
+import org.forgerock.http.routing.Router;
 import org.forgerock.util.Factory;
 
 /**
@@ -33,9 +35,9 @@ public class CrestHttpApplication implements HttpApplication {
 
     @Override
     public Handler start() throws HttpApplicationException {
-        UriRouter router = new UriRouter();
-        router.addRoute(RoutingMode.STARTS_WITH, "/users", MemoryBackendHandler.getHandler());
-        router.addRoute(RoutingMode.STARTS_WITH, "/groups", MemoryBackendHandler.getHandler());
+        Router router = new Router();
+        router.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "/users"), MemoryBackendHandler.getHandler());
+        router.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "/groups"), MemoryBackendHandler.getHandler());
         return router;
     }
 

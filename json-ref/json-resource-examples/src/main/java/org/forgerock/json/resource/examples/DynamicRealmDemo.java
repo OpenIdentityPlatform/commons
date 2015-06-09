@@ -16,6 +16,7 @@
 
 package org.forgerock.json.resource.examples;
 
+import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
 import static org.forgerock.json.resource.examples.DemoUtils.ctx;
 import static org.forgerock.json.resource.examples.DemoUtils.log;
 import static org.forgerock.util.promise.Promises.newExceptionPromise;
@@ -25,9 +26,9 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.forgerock.http.RouterContext;
 import org.forgerock.http.RoutingMode;
 import org.forgerock.http.ServerContext;
+import org.forgerock.http.routing.RouterContext;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.AbstractRequestHandler;
 import org.forgerock.json.resource.ActionRequest;
@@ -47,8 +48,8 @@ import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.json.resource.UriRouter;
 import org.forgerock.util.promise.Promise;
+import org.forgerock.json.resource.Router;
 
 /**
  * An example illustrating how you can route realms / sub-realm requests using
@@ -169,10 +170,10 @@ public final class DynamicRealmDemo {
      *         including sub-realms, users, and groups.
      */
     private static RequestHandler realm(final List<String> path) {
-        final UriRouter router = new UriRouter();
+        final Router router = new Router();
         router.addRoute("/users", collection(path, "user"));
         router.addRoute("/groups", collection(path, "group"));
-        router.addRoute(RoutingMode.STARTS_WITH, "/{realm}", subrealms(path));
+        router.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "/{realm}"), subrealms(path));
         return router;
     }
 

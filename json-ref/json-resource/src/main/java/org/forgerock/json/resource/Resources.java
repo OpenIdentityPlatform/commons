@@ -18,13 +18,14 @@ package org.forgerock.json.resource;
 
 import static org.forgerock.http.RoutingMode.EQUALS;
 import static org.forgerock.util.promise.Promises.newResultPromise;
+import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.forgerock.http.RouterContext;
 import org.forgerock.http.ServerContext;
+import org.forgerock.http.routing.RouterContext;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.util.promise.Promise;
@@ -148,19 +149,19 @@ public final class Resources {
     public static RequestHandler newCollection(final Object provider) {
         boolean fromInterface = provider instanceof CollectionResourceProvider;
         // Route requests to the collection/instance using a router.
-        final UriRouter router = new UriRouter();
+        final Router router = new Router();
 
         // Create a route for the collection.
         final RequestHandler collectionHandler = fromInterface ?
                 new InterfaceCollectionHandler((CollectionResourceProvider) provider) :
                 new AnnotatedCollectionHandler(provider);
-        router.addRoute(EQUALS, "", collectionHandler);
+        router.addRoute(requestUriMatcher(EQUALS, ""), collectionHandler);
 
         // Create a route for the instances within the collection.
         final RequestHandler instanceHandler = fromInterface ?
                 new InterfaceCollectionInstance((CollectionResourceProvider) provider) :
                 new AnnotationCollectionInstance(provider);
-        router.addRoute(EQUALS, "{id}", instanceHandler);
+        router.addRoute(requestUriMatcher(EQUALS, "{id}"), instanceHandler);
 
         return router;
     }

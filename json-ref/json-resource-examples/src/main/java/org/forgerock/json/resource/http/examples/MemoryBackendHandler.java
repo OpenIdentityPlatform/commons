@@ -19,9 +19,7 @@ package org.forgerock.json.resource.http.examples;
 import org.forgerock.http.Handler;
 import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.Resources;
-import org.forgerock.json.resource.UriRouter;
 import org.forgerock.json.resource.http.CrestHttp;
-import org.forgerock.util.Reject;
 
 /**
  * Default in-memory {@link Handler}.
