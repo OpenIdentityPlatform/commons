@@ -75,18 +75,18 @@ public class AggregateAuthContextTest {
             Promise<AuthStatus, AuthenticationException> validateRequestResult,
             Promise<AuthStatus, AuthenticationException> secureResponseResult,
             Promise<Void, AuthenticationException> cleanSubjectResult) {
-        given(authContext.validateRequest(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject(),
-                Matchers.<Subject>anyObject())).willReturn(validateRequestResult);
-        given(authContext.secureResponse(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject()))
+        given(authContext.validateRequest(any(MessageContext.class), any(Subject.class), any(Subject.class)))
+                .willReturn(validateRequestResult);
+        given(authContext.secureResponse(any(MessageContext.class), any(Subject.class)))
                 .willReturn(secureResponseResult);
-        given(authContext.cleanSubject(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject()))
+        given(authContext.cleanSubject(any(MessageContext.class), any(Subject.class)))
                 .willReturn(cleanSubjectResult);
     }
 
     private MessageContext mockMessageContext() {
         MessageContext context = mock(MessageContext.class);
 
-        when(context.getState(Matchers.<AsyncServerAuthContext>anyObject()))
+        when(context.getState(any(AsyncServerAuthContext.class)))
                 .thenAnswer(new Answer<AuthenticationState>() {
                     @Override
                     public AuthenticationState answer(InvocationOnMock invocationOnMock) {

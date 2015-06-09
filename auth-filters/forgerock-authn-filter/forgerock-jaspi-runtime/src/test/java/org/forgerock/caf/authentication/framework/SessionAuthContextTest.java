@@ -58,14 +58,11 @@ public class SessionAuthContextTest {
     private AsyncServerAuthModule mockSessionAuthModule() {
         AsyncServerAuthModule sessionAuthModule = mock(AsyncServerAuthModule.class);
 
-        given(sessionAuthModule.validateRequest(Matchers.<MessageInfoContext>anyObject(), Matchers.<Subject>anyObject(),
-                Matchers.<Subject>anyObject()))
-                .willReturn(
-                        Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SUCCESS));
-        given(sessionAuthModule.secureResponse(Matchers.<MessageInfoContext>anyObject(), Matchers.<Subject>anyObject()))
-                .willReturn(
-                        Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_SUCCESS));
-        given(sessionAuthModule.cleanSubject(Matchers.<MessageInfoContext>anyObject(), Matchers.<Subject>anyObject()))
+        given(sessionAuthModule.validateRequest(any(MessageInfoContext.class), any(Subject.class), any(Subject.class)))
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SUCCESS));
+        given(sessionAuthModule.secureResponse(any(MessageInfoContext.class), any(Subject.class)))
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_SUCCESS));
+        given(sessionAuthModule.cleanSubject(any(MessageInfoContext.class), any(Subject.class)))
                 .willReturn(Promises.<Void, AuthenticationException>newResultPromise(null));
 
         return sessionAuthModule;

@@ -108,8 +108,8 @@ public class AuthenticationFilterTest {
         //Then
         ArgumentCaptor<Logger> loggerCaptor = ArgumentCaptor.forClass(Logger.class);
 
-        verify(builder).createFilter(loggerCaptor.capture(), eq(auditApi), Matchers.<ResponseHandler>anyObject(),
-                Matchers.<Subject>anyObject(), eq(sessionAuthModule), Matchers.<List<AsyncServerAuthModule>>anyObject(),
+        verify(builder).createFilter(loggerCaptor.capture(), eq(auditApi), any(ResponseHandler.class),
+                any(Subject.class), eq(sessionAuthModule), anyListOf(AsyncServerAuthModule.class),
                 Matchers.<Promise<List<Void>, AuthenticationException>>anyObject());
 
         assertThat(loggerCaptor.getValue()).isNotNull();
@@ -218,9 +218,8 @@ public class AuthenticationFilterTest {
                 .build();
 
         //Then
-        verify(builder).createFilter(Matchers.<Logger>anyObject(), eq(auditApi),
-                Matchers.<ResponseHandler>anyObject(), Matchers.<Subject>anyObject(),
-                Matchers.<AsyncServerAuthModule>anyObject(), anyListOf(AsyncServerAuthModule.class),
+        verify(builder).createFilter(any(Logger.class), eq(auditApi), any(ResponseHandler.class), any(Subject.class),
+                any(AsyncServerAuthModule.class), anyListOf(AsyncServerAuthModule.class),
                 Matchers.<Promise<List<Void>, AuthenticationException>>anyObject());
 
         verify(authModule).initialize(authModuleRequestPolicy, authModuleResponsePolicy,
@@ -235,8 +234,8 @@ public class AuthenticationFilterTest {
         supportedMessageTypes.add(Response.class);
         given(authModule.getSupportedMessageTypes()).willReturn(supportedMessageTypes);
 
-        given(authModule.initialize(Matchers.<MessagePolicy>anyObject(), Matchers.<MessagePolicy>anyObject(),
-                Matchers.<CallbackHandler>anyObject(), anyMapOf(String.class, Object.class)))
+        given(authModule.initialize(any(MessagePolicy.class), any(MessagePolicy.class), any(CallbackHandler.class),
+                anyMapOf(String.class, Object.class)))
                 .willReturn(Promises.<Void, AuthenticationException>newResultPromise(null));
 
         return authModule;

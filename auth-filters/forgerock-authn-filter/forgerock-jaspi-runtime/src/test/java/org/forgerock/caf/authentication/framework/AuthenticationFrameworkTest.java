@@ -87,7 +87,7 @@ public class AuthenticationFrameworkTest {
 
     private Handler mockHandler(Request request, Promise<Response, NeverThrowsException> response) {
         Handler next = mock(Handler.class);
-        given(next.handle(Matchers.<Context>anyObject(), eq(request))).willReturn(response);
+        given(next.handle(any(Context.class), eq(request))).willReturn(response);
         return next;
     }
 
@@ -105,11 +105,11 @@ public class AuthenticationFrameworkTest {
     private void mockAuthContext(Promise<AuthStatus, AuthenticationException> validateRequestResult,
             Promise<AuthStatus, AuthenticationException> secureResponseResult,
             Promise<Void, AuthenticationException> cleanSubjectResult) {
-        given(authContext.validateRequest(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject(),
-                eq(serviceSubject))).willReturn(validateRequestResult);
-        given(authContext.secureResponse(Matchers.<MessageContext>anyObject(), eq(serviceSubject)))
+        given(authContext.validateRequest(any(MessageContext.class), any(Subject.class), eq(serviceSubject)))
+                .willReturn(validateRequestResult);
+        given(authContext.secureResponse(any(MessageContext.class), eq(serviceSubject)))
                 .willReturn(secureResponseResult);
-        given(authContext.cleanSubject(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject()))
+        given(authContext.cleanSubject(any(MessageContext.class), any(Subject.class)))
                 .willReturn(cleanSubjectResult);
     }
 
@@ -129,12 +129,10 @@ public class AuthenticationFrameworkTest {
         runtime.processMessage(context, request, next);
 
         //Then
-        verify(responseHandler).handle(Matchers.<MessageContext>anyObject(),
-                Matchers.<AuthenticationException>anyObject());
-        verify(authContext, never()).validateRequest(Matchers.<MessageContext>anyObject(),
-                Matchers.<Subject>anyObject(), eq(serviceSubject));
-        verify(authContext, never()).secureResponse(Matchers.<MessageContext>anyObject(), eq(serviceSubject));
-        verify(authContext, never()).cleanSubject(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject());
+        verify(responseHandler).handle(any(MessageContext.class), any(AuthenticationException.class));
+        verify(authContext, never()).validateRequest(any(MessageContext.class), any(Subject.class), eq(serviceSubject));
+        verify(authContext, never()).secureResponse(any(MessageContext.class), eq(serviceSubject));
+        verify(authContext, never()).cleanSubject(any(MessageContext.class), any(Subject.class));
     }
 
     @Test
@@ -154,12 +152,10 @@ public class AuthenticationFrameworkTest {
         runtime.processMessage(context, request, next);
 
         //Then
-        verify(responseHandler).handle(Matchers.<MessageContext>anyObject(),
-                Matchers.<AuthenticationException>anyObject());
-        verify(authContext, never()).validateRequest(Matchers.<MessageContext>anyObject(),
-                Matchers.<Subject>anyObject(), eq(serviceSubject));
-        verify(authContext, never()).secureResponse(Matchers.<MessageContext>anyObject(), eq(serviceSubject));
-        verify(authContext, never()).cleanSubject(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject());
+        verify(responseHandler).handle(any(MessageContext.class), any(AuthenticationException.class));
+        verify(authContext, never()).validateRequest(any(MessageContext.class), any(Subject.class), eq(serviceSubject));
+        verify(authContext, never()).secureResponse(any(MessageContext.class), eq(serviceSubject));
+        verify(authContext, never()).cleanSubject(any(MessageContext.class), any(Subject.class));
     }
 
     @Test
@@ -180,10 +176,9 @@ public class AuthenticationFrameworkTest {
         //Then
         assertThat(promise).succeeded().withObject().isEqualTo(successfulResponse);
         Assertions.assertThat(context.getAttributes()).containsKey(AuthenticationFramework.ATTRIBUTE_REQUEST_ID);
-        verify(authContext).validateRequest(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject(),
-                eq(serviceSubject));
-        verify(authContext).secureResponse(Matchers.<MessageContext>anyObject(), eq(serviceSubject));
-        verify(authContext).cleanSubject(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject());
+        verify(authContext).validateRequest(any(MessageContext.class), any(Subject.class), eq(serviceSubject));
+        verify(authContext).secureResponse(any(MessageContext.class), eq(serviceSubject));
+        verify(authContext).cleanSubject(any(MessageContext.class), any(Subject.class));
 
         Assertions.assertThat(context.getAttributes())
                 .containsKeys(AuthenticationFramework.ATTRIBUTE_AUTH_PRINCIPAL,
@@ -207,9 +202,9 @@ public class AuthenticationFrameworkTest {
         //Then
         Response response = promise.getOrThrowUninterruptibly();
         Assertions.assertThat(response.getStatus()).isEqualTo(unauthenticatedResponse.getStatus());
-        verify(authContext).validateRequest(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject(), eq(serviceSubject));
-        verify(authContext, never()).secureResponse(Matchers.<MessageContext>anyObject(), eq(serviceSubject));
-        verify(authContext).cleanSubject(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject());
+        verify(authContext).validateRequest(any(MessageContext.class), any(Subject.class), eq(serviceSubject));
+        verify(authContext, never()).secureResponse(any(MessageContext.class), eq(serviceSubject));
+        verify(authContext).cleanSubject(any(MessageContext.class), any(Subject.class));
     }
 
     @DataProvider(name = "validateRequestResponse")
@@ -238,10 +233,9 @@ public class AuthenticationFrameworkTest {
         //Then
         assertThat(promise).succeeded();
         Assertions.assertThat(promise.getOrThrowUninterruptibly().getStatus()).isEqualTo(Status.OK);
-        verify(authContext).validateRequest(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject(),
-                eq(serviceSubject));
-        verify(authContext, never()).secureResponse(Matchers.<MessageContext>anyObject(), eq(serviceSubject));
-        verify(authContext).cleanSubject(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject());
+        verify(authContext).validateRequest(any(MessageContext.class), any(Subject.class), eq(serviceSubject));
+        verify(authContext, never()).secureResponse(any(MessageContext.class), eq(serviceSubject));
+        verify(authContext).cleanSubject(any(MessageContext.class), any(Subject.class));
     }
 
     @DataProvider(name = "invalidValidateRequestResults")
@@ -267,12 +261,10 @@ public class AuthenticationFrameworkTest {
         runtime.processMessage(context, request, next);
 
         //Then
-        verify(responseHandler).handle(Matchers.<MessageContext>anyObject(),
-                Matchers.<AuthenticationException>anyObject());
-        verify(authContext).validateRequest(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject(),
-                eq(serviceSubject));
-        verify(authContext, never()).secureResponse(Matchers.<MessageContext>anyObject(), eq(serviceSubject));
-        verify(authContext).cleanSubject(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject());
+        verify(responseHandler).handle(any(MessageContext.class), any(AuthenticationException.class));
+        verify(authContext).validateRequest(any(MessageContext.class), any(Subject.class), eq(serviceSubject));
+        verify(authContext, never()).secureResponse(any(MessageContext.class), eq(serviceSubject));
+        verify(authContext).cleanSubject(any(MessageContext.class), any(Subject.class));
     }
 
     @Test
@@ -291,12 +283,10 @@ public class AuthenticationFrameworkTest {
         runtime.processMessage(context, request, next);
 
         //Then
-        verify(responseHandler).handle(Matchers.<MessageContext>anyObject(),
-                Matchers.<AuthenticationException>anyObject());
-        verify(authContext).validateRequest(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject(),
-                eq(serviceSubject));
-        verify(authContext, never()).secureResponse(Matchers.<MessageContext>anyObject(), eq(serviceSubject));
-        verify(authContext).cleanSubject(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject());
+        verify(responseHandler).handle(any(MessageContext.class), any(AuthenticationException.class));
+        verify(authContext).validateRequest(any(MessageContext.class), any(Subject.class), eq(serviceSubject));
+        verify(authContext, never()).secureResponse(any(MessageContext.class), eq(serviceSubject));
+        verify(authContext).cleanSubject(any(MessageContext.class), any(Subject.class));
     }
 
     @DataProvider(name = "secureResponseResponse")
@@ -326,10 +316,9 @@ public class AuthenticationFrameworkTest {
         //Then
         assertThat(promise).succeeded();
         Assertions.assertThat(promise.getOrThrowUninterruptibly().getStatus()).isEqualTo(expectedResponse.getStatus());
-        verify(authContext).validateRequest(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject(),
-                eq(serviceSubject));
-        verify(authContext).secureResponse(Matchers.<MessageContext>anyObject(), eq(serviceSubject));
-        verify(authContext).cleanSubject(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject());
+        verify(authContext).validateRequest(any(MessageContext.class), any(Subject.class), eq(serviceSubject));
+        verify(authContext).secureResponse(any(MessageContext.class), eq(serviceSubject));
+        verify(authContext).cleanSubject(any(MessageContext.class), any(Subject.class));
     }
 
     @DataProvider(name = "invalidSecureResponseResults")
@@ -357,12 +346,10 @@ public class AuthenticationFrameworkTest {
         runtime.processMessage(context, request, next);
 
         //Then
-        verify(responseHandler).handle(Matchers.<MessageContext>anyObject(),
-                Matchers.<AuthenticationException>anyObject());
-        verify(authContext).validateRequest(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject(),
-                eq(serviceSubject));
-        verify(authContext).secureResponse(Matchers.<MessageContext>anyObject(), eq(serviceSubject));
-        verify(authContext).cleanSubject(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject());
+        verify(responseHandler).handle(any(MessageContext.class), any(AuthenticationException.class));
+        verify(authContext).validateRequest(any(MessageContext.class), any(Subject.class), eq(serviceSubject));
+        verify(authContext).secureResponse(any(MessageContext.class), eq(serviceSubject));
+        verify(authContext).cleanSubject(any(MessageContext.class), any(Subject.class));
     }
 
     @Test
@@ -382,12 +369,10 @@ public class AuthenticationFrameworkTest {
         runtime.processMessage(context, request, next);
 
         //Then
-        verify(responseHandler).handle(Matchers.<MessageContext>anyObject(),
-                Matchers.<AuthenticationException>anyObject());
-        verify(authContext).validateRequest(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject(),
-                eq(serviceSubject));
-        verify(authContext).secureResponse(Matchers.<MessageContext>anyObject(), eq(serviceSubject));
-        verify(authContext).cleanSubject(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject());
+        verify(responseHandler).handle(any(MessageContext.class), any(AuthenticationException.class));
+        verify(authContext).validateRequest(any(MessageContext.class), any(Subject.class), eq(serviceSubject));
+        verify(authContext).secureResponse(any(MessageContext.class), eq(serviceSubject));
+        verify(authContext).cleanSubject(any(MessageContext.class), any(Subject.class));
     }
 
     @Test
@@ -408,9 +393,8 @@ public class AuthenticationFrameworkTest {
         //Then
         assertThat(promise).succeeded();
         Assertions.assertThat(promise.getOrThrowUninterruptibly().getStatus()).isEqualTo(failedResponse.getStatus());
-        verify(authContext).validateRequest(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject(),
-                eq(serviceSubject));
-        verify(authContext).secureResponse(Matchers.<MessageContext>anyObject(), eq(serviceSubject));
-        verify(authContext).cleanSubject(Matchers.<MessageContext>anyObject(), Matchers.<Subject>anyObject());
+        verify(authContext).validateRequest(any(MessageContext.class), any(Subject.class), eq(serviceSubject));
+        verify(authContext).secureResponse(any(MessageContext.class), eq(serviceSubject));
+        verify(authContext).cleanSubject(any(MessageContext.class), any(Subject.class));
     }
 }

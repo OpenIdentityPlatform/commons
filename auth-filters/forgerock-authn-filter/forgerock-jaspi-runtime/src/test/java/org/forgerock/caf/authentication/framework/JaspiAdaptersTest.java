@@ -55,7 +55,7 @@ public class JaspiAdaptersTest {
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
 
-        given(authContext.validateRequest(Matchers.<MessageInfo>anyObject(), eq(clientSubject), eq(serviceSubject)))
+        given(authContext.validateRequest(any(MessageInfo.class), eq(clientSubject), eq(serviceSubject)))
                 .willReturn(AuthStatus.SUCCESS);
 
         //When
@@ -77,7 +77,7 @@ public class JaspiAdaptersTest {
         Subject serviceSubject = new Subject();
 
         doThrow(AuthException.class).when(authContext)
-                .validateRequest(Matchers.<MessageInfo>anyObject(), eq(clientSubject), eq(serviceSubject));
+                .validateRequest(any(MessageInfo.class), eq(clientSubject), eq(serviceSubject));
 
         //When
         AsyncServerAuthContext asyncAuthContext = JaspiAdapters.adapt(authContext);
@@ -96,7 +96,7 @@ public class JaspiAdaptersTest {
         MessageContext messageContext = mock(MessageContext.class);
         Subject serviceSubject = new Subject();
 
-        given(authContext.secureResponse(Matchers.<MessageInfo>anyObject(), eq(serviceSubject)))
+        given(authContext.secureResponse(any(MessageInfo.class), eq(serviceSubject)))
                 .willReturn(AuthStatus.SEND_SUCCESS);
 
         //When
@@ -117,7 +117,7 @@ public class JaspiAdaptersTest {
         Subject serviceSubject = new Subject();
 
         doThrow(AuthException.class).when(authContext)
-                .secureResponse(Matchers.<MessageInfo>anyObject(), eq(serviceSubject));
+                .secureResponse(any(MessageInfo.class), eq(serviceSubject));
 
         //When
         AsyncServerAuthContext asyncAuthContext = JaspiAdapters.adapt(authContext);
@@ -142,7 +142,7 @@ public class JaspiAdaptersTest {
 
         //Then
         assertThat(promise).succeeded().withObject().isNull();
-        verify(authContext).cleanSubject(Matchers.<MessageInfo>anyObject(), eq(clientSubject));
+        verify(authContext).cleanSubject(any(MessageInfo.class), eq(clientSubject));
     }
 
     @Test
@@ -154,7 +154,7 @@ public class JaspiAdaptersTest {
         Subject clientSubject = new Subject();
 
         doThrow(AuthException.class).when(authContext)
-                .cleanSubject(Matchers.<MessageInfo>anyObject(), eq(clientSubject));
+                .cleanSubject(any(MessageInfo.class), eq(clientSubject));
 
         //When
         AsyncServerAuthContext asyncAuthContext = JaspiAdapters.adapt(authContext);
@@ -244,7 +244,7 @@ public class JaspiAdaptersTest {
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
 
-        given(authModule.validateRequest(Matchers.<MessageInfo>anyObject(), eq(clientSubject), eq(serviceSubject)))
+        given(authModule.validateRequest(any(MessageInfo.class), eq(clientSubject), eq(serviceSubject)))
                 .willReturn(AuthStatus.SUCCESS);
 
         //When
@@ -266,7 +266,7 @@ public class JaspiAdaptersTest {
         Subject serviceSubject = new Subject();
 
         doThrow(AuthException.class).when(authModule)
-                .validateRequest(Matchers.<MessageInfo>anyObject(), eq(clientSubject), eq(serviceSubject));
+                .validateRequest(any(MessageInfo.class), eq(clientSubject), eq(serviceSubject));
 
         //When
         AsyncServerAuthModule asyncAuthModule = JaspiAdapters.adapt(authModule);
@@ -285,7 +285,7 @@ public class JaspiAdaptersTest {
         MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject serviceSubject = new Subject();
 
-        given(authModule.secureResponse(Matchers.<MessageInfo>anyObject(), eq(serviceSubject)))
+        given(authModule.secureResponse(any(MessageInfo.class), eq(serviceSubject)))
                 .willReturn(AuthStatus.SEND_SUCCESS);
 
         //When
@@ -306,7 +306,7 @@ public class JaspiAdaptersTest {
         Subject serviceSubject = new Subject();
 
         doThrow(AuthException.class).when(authModule)
-                .secureResponse(Matchers.<MessageInfo>anyObject(), eq(serviceSubject));
+                .secureResponse(any(MessageInfo.class), eq(serviceSubject));
 
         //When
         AsyncServerAuthModule asyncAuthModule = JaspiAdapters.adapt(authModule);
@@ -331,7 +331,7 @@ public class JaspiAdaptersTest {
 
         //Then
         assertThat(promise).succeeded().withObject().isNull();
-        verify(authModule).cleanSubject(Matchers.<MessageInfo>anyObject(), eq(clientSubject));
+        verify(authModule).cleanSubject(any(MessageInfo.class), eq(clientSubject));
     }
 
     @Test
@@ -343,7 +343,7 @@ public class JaspiAdaptersTest {
         Subject clientSubject = new Subject();
 
         doThrow(AuthException.class).when(authModule)
-                .cleanSubject(Matchers.<MessageInfo>anyObject(), eq(clientSubject));
+                .cleanSubject(any(MessageInfo.class), eq(clientSubject));
 
         //When
         AsyncServerAuthModule asyncAuthModule = JaspiAdapters.adapt(authModule);

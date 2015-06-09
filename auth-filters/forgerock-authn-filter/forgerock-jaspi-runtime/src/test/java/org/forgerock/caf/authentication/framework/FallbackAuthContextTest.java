@@ -73,11 +73,11 @@ public class FallbackAuthContextTest {
             Promise<Void, AuthenticationException> cleanSubjectResult) {
         AsyncServerAuthModule authModule = mock(AsyncServerAuthModule.class);
 
-        given(authModule.validateRequest(Matchers.<MessageInfoContext>anyObject(), Matchers.<Subject>anyObject(),
-                Matchers.<Subject>anyObject())).willReturn(validateRequestResult);
-        given(authModule.secureResponse(Matchers.<MessageInfoContext>anyObject(), Matchers.<Subject>anyObject()))
+        given(authModule.validateRequest(any(MessageInfoContext.class), any(Subject.class), any(Subject.class)))
+                .willReturn(validateRequestResult);
+        given(authModule.secureResponse(any(MessageInfoContext.class), any(Subject.class)))
                 .willReturn(secureResponseResult);
-        given(authModule.cleanSubject(Matchers.<MessageInfoContext>anyObject(), Matchers.<Subject>anyObject()))
+        given(authModule.cleanSubject(any(MessageInfoContext.class), any(Subject.class)))
                 .willReturn(cleanSubjectResult);
 
         return authModule;
@@ -91,7 +91,7 @@ public class FallbackAuthContextTest {
         given(context.getRequestContextMap()).willReturn(requestContextMap);
         requestContextMap.put(AuditTrail.AUDIT_TRAIL_KEY, auditTrail);
 
-        when(context.getState(Matchers.<AsyncServerAuthContext>anyObject()))
+        when(context.getState(any(AsyncServerAuthContext.class)))
                 .thenAnswer(new Answer<AuthenticationState>() {
                     @Override
                     public AuthenticationState answer(InvocationOnMock invocationOnMock) {
