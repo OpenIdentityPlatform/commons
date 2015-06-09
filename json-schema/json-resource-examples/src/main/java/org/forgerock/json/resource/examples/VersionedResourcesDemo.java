@@ -16,6 +16,7 @@
 
 package org.forgerock.json.resource.examples;
 
+import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
 import static org.forgerock.json.resource.Requests.newCreateRequest;
 import static org.forgerock.json.resource.Resources.newInternalConnection;
 import static org.forgerock.json.resource.examples.DemoUtils.*;
@@ -42,9 +43,9 @@ import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
+import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.json.resource.UriRouter;
 import org.forgerock.json.resource.VersionRouter;
 import org.forgerock.util.promise.Promise;
 
@@ -112,18 +113,18 @@ public final class VersionedResourcesDemo {
 
         MemoryBackend groups = new MemoryBackend();
 
-        UriRouter router = new UriRouter();
-        router.addRoute(RoutingMode.STARTS_WITH, "/users", new VersionRouter()
+        Router router = new Router();
+        router.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "/users"), new VersionRouter()
                 .addVersion("1", usersV1Dot0)
                 .addVersion("1.5", usersV1Dot5)
                 .addVersion("2.0", usersV2Dot0));
 
-        router.addRoute(RoutingMode.EQUALS, "/roles", new VersionRouter()
+        router.addRoute(requestUriMatcher(RoutingMode.EQUALS, "/roles"), new VersionRouter()
                 .addVersion("1.0", rolesV1Dot0)
                 .addVersion("1.5", rolesV1Dot5)
                 .addVersion("2.0", rolesV2Dot0));
 
-        router.addRoute(RoutingMode.STARTS_WITH, "/config", new VersionRouter()
+        router.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "/config"), new VersionRouter()
                 .addVersion("1.0", configV1Dot0)
                 .addVersion("1.5", configV1Dot5)
                 .addVersion("2.0", configV2Dot0));
