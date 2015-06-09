@@ -47,7 +47,7 @@ import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.HttpContext;
 import org.forgerock.http.RootContext;
-import org.forgerock.http.RouterContext;
+import org.forgerock.http.routing.RouterContext;
 import org.forgerock.http.Session;
 import org.forgerock.http.URIUtil;
 import org.forgerock.http.io.Buffer;
@@ -249,7 +249,8 @@ public final class HttpFrameworkServlet extends HttpServlet {
             //Must be registered at '/' path
             matchedUri = contextPath;
         }
-        return new RouterContext(parent, matchedUri, Collections.<String, String>emptyMap());
+        String remaining = req.getRequestURI().substring(req.getRequestURI().indexOf(matchedUri) + matchedUri.length());
+        return new RouterContext(parent, matchedUri, remaining, Collections.<String, String>emptyMap());
     }
 
     private String forceEmptyIfNull(final String s) {

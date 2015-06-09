@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.http;
@@ -44,6 +44,7 @@ public final class MutableUri implements Comparable<MutableUri> {
      * The real URI, hidden by this class. Recreated each time a field is updated.
      */
     private URI uri;
+    private ResourcePath resourcePath;
 
     /**
      * Builds a new MutableUri using the given URI.
@@ -51,6 +52,7 @@ public final class MutableUri implements Comparable<MutableUri> {
      */
     public MutableUri(final URI uri) {
         this.uri = uri;
+        setResourcePath(uri.getPath());
     }
 
     /**
@@ -58,7 +60,7 @@ public final class MutableUri implements Comparable<MutableUri> {
      * @param mutableUri URI
      */
     public MutableUri(final MutableUri mutableUri) {
-        this.uri = mutableUri.asURI();
+        this(mutableUri.asURI());
     }
 
     /**
@@ -67,7 +69,7 @@ public final class MutableUri implements Comparable<MutableUri> {
      * @throws URISyntaxException if the given Uri is not well-formed
      */
     public MutableUri(final String uri) throws URISyntaxException {
-        this.uri = new URI(uri);
+        this(new URI(uri));
     }
 
     /**
@@ -89,7 +91,7 @@ public final class MutableUri implements Comparable<MutableUri> {
                       String query,
                       String fragment)
             throws URISyntaxException {
-        uri = new URI(scheme, userInfo, host, port, path, query, fragment);
+        this(new URI(scheme, userInfo, host, port, path, query, fragment));
     }
 
     /**
@@ -244,7 +246,7 @@ public final class MutableUri implements Comparable<MutableUri> {
                            path,
                            uri.getQuery(),
                            uri.getFragment());
-
+        setResourcePath(uri.getPath());
     }
 
     /**
@@ -260,6 +262,7 @@ public final class MutableUri implements Comparable<MutableUri> {
                      rawPath,
                      uri.getRawQuery(),
                      uri.getRawFragment());
+        setResourcePath(uri.getPath());
     }
 
     /**
@@ -368,6 +371,26 @@ public final class MutableUri implements Comparable<MutableUri> {
      */
     public String getRawAuthority() {
         return uri.getRawAuthority();
+    }
+
+    /**
+     * Sets the {@literal resourcePath} from the URI path.
+     *
+     * <p>This method does not set or recreate the {@literal uri}, this is the
+     * responsibility of the method caller.</p>
+     *
+     * @param path The URI path.
+     */
+    private void setResourcePath(String path) {
+        this.resourcePath = ResourcePath.valueOf(path);
+    }
+
+    /**
+     * Return the URI path element as a {@code ResourcePath}.
+     * @return The URI path element as a {@code ResourcePath}.
+     */
+    public ResourcePath getResourcePath() {
+        return resourcePath;
     }
 
     /**

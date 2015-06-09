@@ -11,21 +11,25 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2014 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
-package org.forgerock.http;
+package org.forgerock.http.routing;
 
 import static org.forgerock.util.Reject.*;
 
 import java.util.Collections;
 import java.util.Map;
 
+import org.forgerock.http.Context;
+import org.forgerock.http.ServerContext;
+
 /**
- * A {@link org.forgerock.http.Context} which is created when a request has been routed. The
+ * A {@link Context} which is created when a request has been routed. The
  * context includes:
  * <ul>
  * <li>the portion of the request URI which matched the URI template
+ * <li>the portion of the request URI which is remaining to be matched</li>
  * <li>a method for obtaining the base URI, which represents the portion of the
  * request URI which has been routed so far. This is obtained dynamically by
  * concatenating the matched URI with matched URIs in parent router contexts
@@ -38,6 +42,7 @@ import java.util.Map;
 public final class RouterContext extends ServerContext {
 
     private final String matchedUri;
+    private final String remainingUri;
     private final Map<String, String> uriTemplateVariables;
 
     /**
@@ -49,14 +54,17 @@ public final class RouterContext extends ServerContext {
      *            The parent server context.
      * @param matchedUri
      *            The matched URI
+     * @param remainingUri
+     *            The remaining URI to be matched.
      * @param uriTemplateVariables
      *            A {@code Map} containing the parsed URI template variables,
      *            keyed on the URI template variable name.
      */
-    public RouterContext(final Context parent, final String matchedUri,
+    public RouterContext(final Context parent, final String matchedUri, final String remainingUri,
             final Map<String, String> uriTemplateVariables) {
         super(checkNotNull(parent, "Cannot instantiate RouterContext with null parent Context"), "router");
         this.matchedUri = matchedUri;
+        this.remainingUri = remainingUri;
         this.uriTemplateVariables = Collections.unmodifiableMap(uriTemplateVariables);
     }
 
@@ -74,7 +82,7 @@ public final class RouterContext extends ServerContext {
         final Context parent = getParent();
         if (parent.containsContext(RouterContext.class)) {
             final String baseUri = parent.asContext(RouterContext.class).getBaseUri();
-            if (baseUri.length() > 1) {
+            if (!baseUri.isEmpty()) {
                 builder.append(baseUri);
             }
         }
@@ -97,6 +105,18 @@ public final class RouterContext extends ServerContext {
      */
     public String getMatchedUri() {
         return matchedUri;
+    }
+
+    /**
+     * Returns the portion of the request URI which is remaining to be matched
+     * be the next router. The remaining URI is never {@code null} but may be
+     * "" (empty string).
+     *
+     * @return The non-{@code null} portion of the request URI which is
+     * remaining to be matched.
+     */
+    public String getRemainingUri() {
+        return remainingUri;
     }
 
     /**

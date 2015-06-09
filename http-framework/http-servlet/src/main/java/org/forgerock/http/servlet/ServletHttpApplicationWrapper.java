@@ -11,23 +11,22 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.http.servlet;
 
-import org.forgerock.http.Handler;
-import org.forgerock.http.HttpApplication;
-import org.forgerock.http.HttpApplicationException;
-import org.forgerock.http.UriRouter;
-import org.forgerock.http.io.Buffer;
-import org.forgerock.util.Factory;
-
 import javax.servlet.ServletContext;
-
 import java.util.Collections;
 import java.util.Map;
 import java.util.regex.Pattern;
+
+import org.forgerock.http.Handler;
+import org.forgerock.http.HttpApplication;
+import org.forgerock.http.HttpApplicationException;
+import org.forgerock.http.io.Buffer;
+import org.forgerock.http.routing.Router;
+import org.forgerock.util.Factory;
 
 /**
  * Wraps a {@link HttpApplication} instance and encapsulates Servlet specific application handling logic.
@@ -50,7 +49,7 @@ final class ServletHttpApplicationWrapper implements HttpApplication {
      * <p>This method also performs extra processing that is specific to the application being deployed in a Servlet
      * container. If the wrapped {@code HttpApplication} is an instance of {@link ServletHttpApplication} then
      * the configured {@code Map} of static route handlers will be loaded. If the root {@code Handler} is an instance
-     * of {@link UriRouter} then a default route will be set for the container to handler requests to static resource
+     * of {@link Router} then a default route will be set for the container to handler requests to static resource
      * using it's default Servlet and/or the {@code Map} of configured static route handlers.</p>
      *
      * @return {@inheritDoc}
@@ -66,8 +65,8 @@ final class ServletHttpApplicationWrapper implements HttpApplication {
             staticRouteServlets = servletApplication.getStaticRouteServlets();
         }
         Handler handler = application.start();
-        if (handler instanceof UriRouter) {
-            UriRouter router = (UriRouter) handler;
+        if (handler instanceof Router) {
+            Router router = (Router) handler;
             if (router.getDefaultRoute() == null) {
                 router.setDefaultRoute(new DefaultRouteHandler(servletContext, defaultServletName,
                         staticRouteServlets));

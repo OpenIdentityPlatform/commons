@@ -103,7 +103,7 @@ public final class HandlersTest {
         Filter filter1 = mock(Filter.class);
         doAnswer(new Answer<Promise<Response, NeverThrowsException>>() {
             @Override
-            public Promise<Response, NeverThrowsException> answer(final InvocationOnMock invocation) throws Throwable {
+            public Promise<Response, NeverThrowsException> answer(final InvocationOnMock invocation) {
                 return Promises.newResultPromise(RESPONSE);
             }
         }).when(filter1).filter(any(Context.class), any(Request.class), any(Handler.class));
