@@ -19,6 +19,7 @@ package org.forgerock.json.resource;
 import static org.forgerock.json.fluent.JsonValue.json;
 import static org.forgerock.json.fluent.JsonValue.object;
 import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
+import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -41,7 +42,7 @@ import org.testng.annotations.Test;
 @SuppressWarnings("javadoc")
 public class VersionedRouterTest {
 
-    private UriRouter router;
+    private Router router;
     private VersionRouter versionRouter1;
     private VersionRouter versionRouter2;
 
@@ -55,7 +56,7 @@ public class VersionedRouterTest {
 
     @BeforeClass
     public void setUp() {
-        router = new UriRouter();
+        router = new Router();
 
         usersHandlerOne = mock(RequestHandler.class);
         usersHandlerTwo = mock(RequestHandler.class);
@@ -67,12 +68,12 @@ public class VersionedRouterTest {
 
         versionRouter1 = new VersionRouter();
         versionRouter2 = new VersionRouter();
-        router.addRoute(RoutingMode.EQUALS, "/users", versionRouter1
+        router.addRoute(requestUriMatcher(RoutingMode.EQUALS, "/users"), versionRouter1
                 .addVersion("1.0", usersHandlerOne)
                 .addVersion("1.5", usersHandlerTwo)
                 .addVersion("2.1", usersHandlerThree));
 
-        router.addRoute(RoutingMode.EQUALS, "/groups", versionRouter2
+        router.addRoute(requestUriMatcher(RoutingMode.EQUALS, "/groups"), versionRouter2
                 .addVersion("1.0", groupsHandlerOne)
                 .addVersion("1.5", groupsHandlerTwo)
                 .addVersion("2.1", groupsHandlerThree));
