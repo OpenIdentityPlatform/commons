@@ -18,6 +18,9 @@ package org.forgerock.caf.authn.test.configuration;
 
 import static org.forgerock.json.fluent.JsonValue.array;
 import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.resource.ResourceException.newNotSupportedException;
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
+import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import javax.inject.Inject;
 
@@ -29,9 +32,9 @@ import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.util.promise.Promise;
 
 /**
  * <p>CREST resource responsible for exposing the audit records created by the JASPI runtime.</p>
@@ -60,21 +63,16 @@ public class AuditResource implements SingletonResourceProvider {
      *
      * @param context {@inheritDoc}
      * @param request {@inheritDoc}
-     * @param handler {@inheritDoc}
+     * @return {@inheritDoc}
      */
     @Override
-    public void actionInstance(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
-
+    public Promise<JsonValue, ResourceException> actionInstance(ServerContext context, ActionRequest request) {
         if ("readAndClear".equalsIgnoreCase(request.getAction())) {
-
             JsonValue jsonAuditRecords = getAuditRecords();
-
-            handler.handleResult(jsonAuditRecords);
-
             auditApi.clear();
-
+            return newResultPromise(jsonAuditRecords);
         } else {
-            handler.handleException(ResourceException.getException(ResourceException.NOT_SUPPORTED));
+            return newExceptionPromise(newNotSupportedException());
         }
     }
 
@@ -83,11 +81,11 @@ public class AuditResource implements SingletonResourceProvider {
      *
      * @param context {@inheritDoc}
      * @param request {@inheritDoc}
-     * @param handler {@inheritDoc}
+     * @return {@inheritDoc}
      */
     @Override
-    public void patchInstance(ServerContext context, PatchRequest request, ResultHandler<Resource> handler) {
-        handler.handleException(ResourceException.getException(ResourceException.NOT_SUPPORTED));
+    public Promise<Resource, ResourceException> patchInstance(ServerContext context, PatchRequest request) {
+        return newExceptionPromise(newNotSupportedException());
     }
 
     /**
@@ -95,14 +93,13 @@ public class AuditResource implements SingletonResourceProvider {
      *
      * @param context {@inheritDoc}
      * @param request {@inheritDoc}
-     * @param handler {@inheritDoc}
+     * @return {@inheritDoc}
      */
     @Override
-    public void readInstance(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
-
+    public Promise<Resource, ResourceException> readInstance(ServerContext context, ReadRequest request) {
         JsonValue jsonAuditRecords = getAuditRecords();
-
-        handler.handleResult(new Resource("AuditRecords", jsonAuditRecords.hashCode() + "", jsonAuditRecords));
+        return newResultPromise(new Resource("AuditRecords", Integer.toString(jsonAuditRecords.hashCode()),
+                jsonAuditRecords));
     }
 
     /**
@@ -110,11 +107,11 @@ public class AuditResource implements SingletonResourceProvider {
      *
      * @param context {@inheritDoc}
      * @param request {@inheritDoc}
-     * @param handler {@inheritDoc}
+     * @return {@inheritDoc}
      */
     @Override
-    public void updateInstance(ServerContext context, UpdateRequest request, ResultHandler<Resource> handler) {
-        handler.handleException(ResourceException.getException(ResourceException.NOT_SUPPORTED));
+    public Promise<Resource, ResourceException> updateInstance(ServerContext context, UpdateRequest request) {
+        return newExceptionPromise(newNotSupportedException());
     }
 
     /**

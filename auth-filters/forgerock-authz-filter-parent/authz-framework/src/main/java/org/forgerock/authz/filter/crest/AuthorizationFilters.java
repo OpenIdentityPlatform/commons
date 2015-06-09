@@ -16,6 +16,8 @@
 
 package org.forgerock.authz.filter.crest;
 
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,17 +33,18 @@ import org.forgerock.json.resource.Filter;
 import org.forgerock.json.resource.FilterChain;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
-import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.Reject;
-import org.forgerock.util.promise.ExceptionHandler;
+import org.forgerock.util.promise.Promise;
 
 /**
  * This class contains methods for creating {@link FilterChain}s to protect resources by performing authorization on
@@ -149,22 +152,6 @@ public final class AuthorizationFilters {
         }
 
         /**
-         * Creates a new {@code FailureHandler} for handling failures from the authorize call on the
-         * {@link CrestAuthorizationModule}.
-         *
-         * @param handler The {@code ResultHandler} that will handle the {@code ResourceException}.
-         * @return A new {@code FailureHandler}.
-         */
-        private ExceptionHandler<ResourceException> newExceptionHandler(final ResultHandler<?> handler) {
-            return new ExceptionHandler<ResourceException>() {
-                @Override
-                public void handleException(ResourceException e) {
-                    handler.handleException(e);
-                }
-            };
-        }
-
-        /**
          * Creates a new unauthorized {@code ResourceException}.
          *
          * @param result An {@code AuthorizationResult} instance for a unauthorized request.
@@ -185,24 +172,23 @@ public final class AuthorizationFilters {
          *
          * @param context {@inheritDoc}
          * @param request {@inheritDoc}
-         * @param handler {@inheritDoc}
          * @param next {@inheritDoc}
+         * @return {@inheritDoc}
          */
         @Override
-        public void filterAction(final ServerContext context, final ActionRequest request,
-                final ResultHandler<JsonValue> handler, final RequestHandler next) {
-            module.authorizeAction(context, request)
-                    .thenOnResult(new org.forgerock.util.promise.ResultHandler<AuthorizationResult>() {
+        public Promise<JsonValue, ResourceException> filterAction(final ServerContext context,
+                final ActionRequest request, final RequestHandler next) {
+            return module.authorizeAction(context, request)
+                    .thenAsync(new AsyncFunction<AuthorizationResult, JsonValue, ResourceException>() {
                         @Override
-                        public void handleResult(AuthorizationResult result) {
+                        public Promise<JsonValue, ResourceException> apply(AuthorizationResult result) {
                             if (result.isAuthorized()) {
-                                next.handleAction(context, request, handler);
+                                return next.handleAction(context, request);
                             } else {
-                                handler.handleException(newUnauthorizedException(result));
+                                return newExceptionPromise(newUnauthorizedException(result));
                             }
                         }
-                    })
-                    .thenOnException(newExceptionHandler(handler));
+                    });
         }
 
         /**
@@ -214,24 +200,23 @@ public final class AuthorizationFilters {
          *
          * @param context {@inheritDoc}
          * @param request {@inheritDoc}
-         * @param handler {@inheritDoc}
          * @param next {@inheritDoc}
+         * @return {@inheritDoc}
          */
         @Override
-        public void filterCreate(final ServerContext context, final CreateRequest request,
-                final ResultHandler<Resource> handler, final RequestHandler next) {
-            module.authorizeCreate(context, request)
-                    .thenOnResult(new org.forgerock.util.promise.ResultHandler<AuthorizationResult>() {
+        public Promise<Resource, ResourceException> filterCreate(final ServerContext context,
+                final CreateRequest request, final RequestHandler next) {
+            return module.authorizeCreate(context, request)
+                    .thenAsync(new AsyncFunction<AuthorizationResult, Resource, ResourceException>() {
                         @Override
-                        public void handleResult(AuthorizationResult result) {
+                        public Promise<Resource, ResourceException> apply(AuthorizationResult result) {
                             if (result.isAuthorized()) {
-                                next.handleCreate(context, request, handler);
+                                return next.handleCreate(context, request);
                             } else {
-                                handler.handleException(newUnauthorizedException(result));
+                                return newExceptionPromise(newUnauthorizedException(result));
                             }
                         }
-                    })
-                    .thenOnException(newExceptionHandler(handler));
+                    });
         }
 
         /**
@@ -243,24 +228,23 @@ public final class AuthorizationFilters {
          *
          * @param context {@inheritDoc}
          * @param request {@inheritDoc}
-         * @param handler {@inheritDoc}
          * @param next {@inheritDoc}
+         * @return {@inheritDoc}
          */
         @Override
-        public void filterDelete(final ServerContext context, final DeleteRequest request,
-                final ResultHandler<Resource> handler, final RequestHandler next) {
-            module.authorizeDelete(context, request)
-                    .thenOnResult(new org.forgerock.util.promise.ResultHandler<AuthorizationResult>() {
+        public Promise<Resource, ResourceException> filterDelete(final ServerContext context,
+                final DeleteRequest request, final RequestHandler next) {
+            return module.authorizeDelete(context, request)
+                    .thenAsync(new AsyncFunction<AuthorizationResult, Resource, ResourceException>() {
                         @Override
-                        public void handleResult(AuthorizationResult result) {
+                        public Promise<Resource, ResourceException> apply(AuthorizationResult result) {
                             if (result.isAuthorized()) {
-                                next.handleDelete(context, request, handler);
+                                return next.handleDelete(context, request);
                             } else {
-                                handler.handleException(newUnauthorizedException(result));
+                                return newExceptionPromise(newUnauthorizedException(result));
                             }
                         }
-                    })
-                    .thenOnException(newExceptionHandler(handler));
+                    });
         }
 
         /**
@@ -272,24 +256,23 @@ public final class AuthorizationFilters {
          *
          * @param context {@inheritDoc}
          * @param request {@inheritDoc}
-         * @param handler {@inheritDoc}
          * @param next {@inheritDoc}
+         * @return {@inheritDoc}
          */
         @Override
-        public void filterPatch(final ServerContext context, final PatchRequest request,
-                final ResultHandler<Resource> handler, final RequestHandler next) {
-            module.authorizePatch(context, request)
-                    .thenOnResult(new org.forgerock.util.promise.ResultHandler<AuthorizationResult>() {
+        public Promise<Resource, ResourceException> filterPatch(final ServerContext context,
+                final PatchRequest request, final RequestHandler next) {
+            return module.authorizePatch(context, request)
+                    .thenAsync(new AsyncFunction<AuthorizationResult, Resource, ResourceException>() {
                         @Override
-                        public void handleResult(AuthorizationResult result) {
+                        public Promise<Resource, ResourceException> apply(AuthorizationResult result) {
                             if (result.isAuthorized()) {
-                                next.handlePatch(context, request, handler);
+                                return next.handlePatch(context, request);
                             } else {
-                                handler.handleException(newUnauthorizedException(result));
+                                return newExceptionPromise(newUnauthorizedException(result));
                             }
                         }
-                    })
-                    .thenOnException(newExceptionHandler(handler));
+                    });
         }
 
         /**
@@ -303,22 +286,22 @@ public final class AuthorizationFilters {
          * @param request {@inheritDoc}
          * @param handler {@inheritDoc}
          * @param next {@inheritDoc}
+         * @return {@inheritDoc}
          */
         @Override
-        public void filterQuery(final ServerContext context, final QueryRequest request,
-                final QueryResultHandler handler, final RequestHandler next) {
-            module.authorizeQuery(context, request)
-                    .thenOnResult(new org.forgerock.util.promise.ResultHandler<AuthorizationResult>() {
+        public Promise<QueryResult, ResourceException> filterQuery(final ServerContext context,
+                final QueryRequest request, final QueryResourceHandler handler, final RequestHandler next) {
+            return module.authorizeQuery(context, request)
+                    .thenAsync(new AsyncFunction<AuthorizationResult, QueryResult, ResourceException>() {
                         @Override
-                        public void handleResult(AuthorizationResult result) {
+                        public Promise<QueryResult, ResourceException> apply(AuthorizationResult result) {
                             if (result.isAuthorized()) {
-                                next.handleQuery(context, request, handler);
+                                return next.handleQuery(context, request, handler);
                             } else {
-                                handler.handleException(newUnauthorizedException(result));
+                                return newExceptionPromise(newUnauthorizedException(result));
                             }
                         }
-                    })
-                    .thenOnException(newExceptionHandler(handler));
+                    });
         }
 
         /**
@@ -330,24 +313,23 @@ public final class AuthorizationFilters {
          *
          * @param context {@inheritDoc}
          * @param request {@inheritDoc}
-         * @param handler {@inheritDoc}
          * @param next {@inheritDoc}
+         * @return {@inheritDoc}
          */
         @Override
-        public void filterRead(final ServerContext context, final ReadRequest request,
-                final ResultHandler<Resource> handler, final RequestHandler next) {
-            module.authorizeRead(context, request)
-                    .thenOnResult(new org.forgerock.util.promise.ResultHandler<AuthorizationResult>() {
+        public Promise<Resource, ResourceException> filterRead(final ServerContext context, final ReadRequest request,
+                final RequestHandler next) {
+            return module.authorizeRead(context, request)
+                    .thenAsync(new AsyncFunction<AuthorizationResult, Resource, ResourceException>() {
                         @Override
-                        public void handleResult(AuthorizationResult result) {
+                        public Promise<Resource, ResourceException> apply(AuthorizationResult result) {
                             if (result.isAuthorized()) {
-                                next.handleRead(context, request, handler);
+                                return next.handleRead(context, request);
                             } else {
-                                handler.handleException(newUnauthorizedException(result));
+                                return newExceptionPromise(newUnauthorizedException(result));
                             }
                         }
-                    })
-                    .thenOnException(newExceptionHandler(handler));
+                    });
         }
 
         /**
@@ -359,24 +341,23 @@ public final class AuthorizationFilters {
          *
          * @param context {@inheritDoc}
          * @param request {@inheritDoc}
-         * @param handler {@inheritDoc}
          * @param next {@inheritDoc}
+         * @return {@inheritDoc}
          */
         @Override
-        public void filterUpdate(final ServerContext context, final UpdateRequest request,
-                final ResultHandler<Resource> handler, final RequestHandler next) {
-            module.authorizeUpdate(context, request)
-                    .thenOnResult(new org.forgerock.util.promise.ResultHandler<AuthorizationResult>() {
+        public Promise<Resource, ResourceException> filterUpdate(final ServerContext context,
+                final UpdateRequest request, final RequestHandler next) {
+            return module.authorizeUpdate(context, request)
+                    .thenAsync(new AsyncFunction<AuthorizationResult, Resource, ResourceException>() {
                         @Override
-                        public void handleResult(AuthorizationResult result) {
+                        public Promise<Resource, ResourceException> apply(AuthorizationResult result) {
                             if (result.isAuthorized()) {
-                                next.handleUpdate(context, request, handler);
+                                return next.handleUpdate(context, request);
                             } else {
-                                handler.handleException(newUnauthorizedException(result));
+                                return newExceptionPromise(newUnauthorizedException(result));
                             }
                         }
-                    })
-                    .thenOnException(newExceptionHandler(handler));
+                    });
         }
     }
 }

@@ -17,6 +17,9 @@
 package org.forgerock.caf.authn.test.configuration;
 
 import static org.forgerock.json.fluent.JsonValue.*;
+import static org.forgerock.json.resource.ResourceException.newNotSupportedException;
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
+import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import com.google.inject.Singleton;
 import org.forgerock.http.ServerContext;
@@ -26,9 +29,9 @@ import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.util.promise.Promise;
 
 /**
  * <p>CREST resource responsible for exposing the module configuration of the JASPI runtime.</p>
@@ -49,11 +52,11 @@ public class ConfigurationResource implements SingletonResourceProvider {
      *
      * @param context {@inheritDoc}
      * @param request {@inheritDoc}
-     * @param handler {@inheritDoc}
+     * @return {@inheritDoc}
      */
     @Override
-    public void actionInstance(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
-        handler.handleException(ResourceException.getException(ResourceException.NOT_SUPPORTED));
+    public Promise<JsonValue, ResourceException> actionInstance(ServerContext context, ActionRequest request) {
+        return newExceptionPromise(newNotSupportedException());
     }
 
     /**
@@ -61,11 +64,11 @@ public class ConfigurationResource implements SingletonResourceProvider {
      *
      * @param context {@inheritDoc}
      * @param request {@inheritDoc}
-     * @param handler {@inheritDoc}
+     * @return {@inheritDoc}
      */
     @Override
-    public void patchInstance(ServerContext context, PatchRequest request, ResultHandler<Resource> handler) {
-        handler.handleException(ResourceException.getException(ResourceException.NOT_SUPPORTED));
+    public Promise<Resource, ResourceException> patchInstance(ServerContext context, PatchRequest request) {
+        return newExceptionPromise(newNotSupportedException());
     }
 
     /**
@@ -73,11 +76,11 @@ public class ConfigurationResource implements SingletonResourceProvider {
      *
      * @param context {@inheritDoc}
      * @param request {@inheritDoc}
-     * @param handler {@inheritDoc}
+     * @return {@inheritDoc}
      */
     @Override
-    public void readInstance(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
-        handler.handleResult(new Resource("ModuleConfiguration", moduleConfiguration.hashCode() + "",
+    public Promise<Resource, ResourceException> readInstance(ServerContext context, ReadRequest request) {
+        return newResultPromise(new Resource("ModuleConfiguration", Integer.toString(moduleConfiguration.hashCode()),
                 moduleConfiguration));
     }
 
@@ -86,14 +89,12 @@ public class ConfigurationResource implements SingletonResourceProvider {
      *
      * @param context {@inheritDoc}
      * @param request {@inheritDoc}
-     * @param handler {@inheritDoc}
+     * @return {@inheritDoc}
      */
     @Override
-    public void updateInstance(ServerContext context, UpdateRequest request, ResultHandler<Resource> handler) {
-
+    public Promise<Resource, ResourceException> updateInstance(ServerContext context, UpdateRequest request) {
         moduleConfiguration = request.getContent();
-
-        handler.handleResult(new Resource("ModuleConfiguration", moduleConfiguration.hashCode() + "",
+        return newResultPromise(new Resource("ModuleConfiguration", Integer.toString(moduleConfiguration.hashCode()),
                 moduleConfiguration));
     }
 }

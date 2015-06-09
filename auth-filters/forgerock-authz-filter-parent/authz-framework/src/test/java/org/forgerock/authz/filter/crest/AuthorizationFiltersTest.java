@@ -16,7 +16,9 @@
 
 package org.forgerock.authz.filter.crest;
 
+import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 import static org.forgerock.json.fluent.JsonValue.*;
+import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -34,18 +36,17 @@ import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.FilterChain;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.testng.annotations.Test;
 
@@ -193,18 +194,16 @@ public class AuthorizationFiltersTest {
 
         ServerContext context = mock(ServerContext.class);
         ActionRequest request = Requests.newActionRequest("RESOURCE_NAME", "ACTION_ID");
-        ResultHandler<JsonValue> handler = mock(ResultHandler.class);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newResultPromise(AuthorizationResult.accessPermitted());
 
         given(module.authorizeAction(context, request)).willReturn(authorizePromise);
 
         //When
-        chain.handleAction(context, request, handler);
+        chain.handleAction(context, request);
 
         //Then
-        verify(target).actionInstance(eq(context), eq("RESOURCE_NAME"), Matchers.<ActionRequest>anyObject(),
-                eq(handler));
+        verify(target).actionInstance(eq(context), eq("RESOURCE_NAME"), Matchers.<ActionRequest>anyObject());
     }
 
     @SuppressWarnings("unchecked")
@@ -220,7 +219,6 @@ public class AuthorizationFiltersTest {
 
         ServerContext context = mock(ServerContext.class);
         ActionRequest request = Requests.newActionRequest("RESOURCE_NAME", "ACTION_ID");
-        ResultHandler<JsonValue> handler = mock(ResultHandler.class);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newResultPromise(AuthorizationResult.accessDenied("REASON",
                         json(object(field("DETAIL", "VALUE")))));
@@ -228,16 +226,19 @@ public class AuthorizationFiltersTest {
         given(module.authorizeAction(context, request)).willReturn(authorizePromise);
 
         //When
-        chain.handleAction(context, request, handler);
+        Promise<JsonValue, ResourceException> promise = chain.handleAction(context, request);
 
         //Then
-        ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-        verify(handler).handleException(exceptionCaptor.capture());
-        ResourceException exception = exceptionCaptor.getValue();
-        assertEquals(exception.getCode(), 403);
-        assertEquals(exception.getMessage(), "REASON");
-        assertTrue(exception.getDetail().isDefined("DETAIL"));
-        assertTrue(exception.getDetail().contains("VALUE"));
+        assertThat(promise).failedWithException();
+        try {
+            promise.getOrThrowUninterruptibly();
+            failBecauseExceptionWasNotThrown(ResourceException.class);
+        } catch (ResourceException e) {
+            assertEquals(e.getCode(), 403);
+            assertEquals(e.getMessage(), "REASON");
+            assertTrue(e.getDetail().isDefined("DETAIL"));
+            assertTrue(e.getDetail().contains("VALUE"));
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -253,7 +254,6 @@ public class AuthorizationFiltersTest {
 
         ServerContext context = mock(ServerContext.class);
         ActionRequest request = Requests.newActionRequest("RESOURCE_NAME", "ACTION_ID");
-        ResultHandler<JsonValue> handler = mock(ResultHandler.class);
         ResourceException resourceException = ResourceException.getException(ResourceException.INTERNAL_ERROR);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newExceptionPromise(resourceException);
@@ -261,13 +261,16 @@ public class AuthorizationFiltersTest {
         given(module.authorizeAction(context, request)).willReturn(authorizePromise);
 
         //When
-        chain.handleAction(context, request, handler);
+        Promise<JsonValue, ResourceException> promise = chain.handleAction(context, request);
 
         //Then
-        ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-        verify(handler).handleException(exceptionCaptor.capture());
-        ResourceException exception = exceptionCaptor.getValue();
-        assertEquals(exception, resourceException);
+        assertThat(promise).failedWithException();
+        try {
+            promise.getOrThrowUninterruptibly();
+            failBecauseExceptionWasNotThrown(ResourceException.class);
+        } catch (ResourceException e) {
+            assertEquals(e, resourceException);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -283,17 +286,16 @@ public class AuthorizationFiltersTest {
 
         ServerContext context = mock(ServerContext.class);
         CreateRequest request = Requests.newCreateRequest("", json(object()));
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newResultPromise(AuthorizationResult.accessPermitted());
 
         given(module.authorizeCreate(context, request)).willReturn(authorizePromise);
 
         //When
-        chain.handleCreate(context, request, handler);
+        chain.handleCreate(context, request);
 
         //Then
-        verify(target).createInstance(eq(context), Matchers.<CreateRequest>anyObject(), eq(handler));
+        verify(target).createInstance(eq(context), Matchers.<CreateRequest>anyObject());
     }
 
     @SuppressWarnings("unchecked")
@@ -309,7 +311,6 @@ public class AuthorizationFiltersTest {
 
         ServerContext context = mock(ServerContext.class);
         CreateRequest request = Requests.newCreateRequest("RESOURCE_NAME", json(object()));
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newResultPromise(AuthorizationResult.accessDenied("REASON",
                         json(object(field("DETAIL", "VALUE")))));
@@ -317,16 +318,19 @@ public class AuthorizationFiltersTest {
         given(module.authorizeCreate(context, request)).willReturn(authorizePromise);
 
         //When
-        chain.handleCreate(context, request, handler);
+        Promise<Resource, ResourceException> promise = chain.handleCreate(context, request);
 
         //Then
-        ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-        verify(handler).handleException(exceptionCaptor.capture());
-        ResourceException exception = exceptionCaptor.getValue();
-        assertEquals(exception.getCode(), 403);
-        assertEquals(exception.getMessage(), "REASON");
-        assertTrue(exception.getDetail().isDefined("DETAIL"));
-        assertTrue(exception.getDetail().contains("VALUE"));
+        assertThat(promise).failedWithException();
+        try {
+            promise.getOrThrowUninterruptibly();
+            failBecauseExceptionWasNotThrown(ResourceException.class);
+        } catch (ResourceException e) {
+            assertEquals(e.getCode(), 403);
+            assertEquals(e.getMessage(), "REASON");
+            assertTrue(e.getDetail().isDefined("DETAIL"));
+            assertTrue(e.getDetail().contains("VALUE"));
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -342,7 +346,6 @@ public class AuthorizationFiltersTest {
 
         ServerContext context = mock(ServerContext.class);
         CreateRequest request = Requests.newCreateRequest("RESOURCE_NAME", json(object()));
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
         ResourceException resourceException = ResourceException.getException(ResourceException.INTERNAL_ERROR);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newExceptionPromise(resourceException);
@@ -350,13 +353,16 @@ public class AuthorizationFiltersTest {
         given(module.authorizeCreate(context, request)).willReturn(authorizePromise);
 
         //When
-        chain.handleCreate(context, request, handler);
+        Promise<Resource, ResourceException> promise = chain.handleCreate(context, request);
 
         //Then
-        ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-        verify(handler).handleException(exceptionCaptor.capture());
-        ResourceException exception = exceptionCaptor.getValue();
-        assertEquals(exception, resourceException);
+        assertThat(promise).failedWithException();
+        try {
+            promise.getOrThrowUninterruptibly();
+            failBecauseExceptionWasNotThrown(ResourceException.class);
+        } catch (ResourceException e) {
+            assertEquals(e, resourceException);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -372,18 +378,16 @@ public class AuthorizationFiltersTest {
 
         ServerContext context = mock(ServerContext.class);
         DeleteRequest request = Requests.newDeleteRequest("RESOURCE_NAME");
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newResultPromise(AuthorizationResult.accessPermitted());
 
         given(module.authorizeDelete(context, request)).willReturn(authorizePromise);
 
         //When
-        chain.handleDelete(context, request, handler);
+        chain.handleDelete(context, request);
 
         //Then
-        verify(target).deleteInstance(eq(context), eq("RESOURCE_NAME"), Matchers.<DeleteRequest>anyObject(),
-                eq(handler));
+        verify(target).deleteInstance(eq(context), eq("RESOURCE_NAME"), Matchers.<DeleteRequest>anyObject());
     }
 
     @SuppressWarnings("unchecked")
@@ -399,7 +403,6 @@ public class AuthorizationFiltersTest {
 
         ServerContext context = mock(ServerContext.class);
         DeleteRequest request = Requests.newDeleteRequest("RESOURCE_NAME");
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newResultPromise(AuthorizationResult.accessDenied("REASON",
                         json(object(field("DETAIL", "VALUE")))));
@@ -407,16 +410,19 @@ public class AuthorizationFiltersTest {
         given(module.authorizeDelete(context, request)).willReturn(authorizePromise);
 
         //When
-        chain.handleDelete(context, request, handler);
+        Promise<Resource, ResourceException> promise = chain.handleDelete(context, request);
 
         //Then
-        ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-        verify(handler).handleException(exceptionCaptor.capture());
-        ResourceException exception = exceptionCaptor.getValue();
-        assertEquals(exception.getCode(), 403);
-        assertEquals(exception.getMessage(), "REASON");
-        assertTrue(exception.getDetail().isDefined("DETAIL"));
-        assertTrue(exception.getDetail().contains("VALUE"));
+        assertThat(promise).failedWithException();
+        try {
+            promise.getOrThrowUninterruptibly();
+            failBecauseExceptionWasNotThrown(ResourceException.class);
+        } catch (ResourceException e) {
+            assertEquals(e.getCode(), 403);
+            assertEquals(e.getMessage(), "REASON");
+            assertTrue(e.getDetail().isDefined("DETAIL"));
+            assertTrue(e.getDetail().contains("VALUE"));
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -432,7 +438,6 @@ public class AuthorizationFiltersTest {
 
         ServerContext context = mock(ServerContext.class);
         DeleteRequest request = Requests.newDeleteRequest("RESOURCE_NAME");
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
         ResourceException resourceException = ResourceException.getException(ResourceException.INTERNAL_ERROR);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newExceptionPromise(resourceException);
@@ -440,13 +445,16 @@ public class AuthorizationFiltersTest {
         given(module.authorizeDelete(context, request)).willReturn(authorizePromise);
 
         //When
-        chain.handleDelete(context, request, handler);
+        Promise<Resource, ResourceException> promise = chain.handleDelete(context, request);
 
         //Then
-        ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-        verify(handler).handleException(exceptionCaptor.capture());
-        ResourceException exception = exceptionCaptor.getValue();
-        assertEquals(exception, resourceException);
+        assertThat(promise).failedWithException();
+        try {
+            promise.getOrThrowUninterruptibly();
+            failBecauseExceptionWasNotThrown(ResourceException.class);
+        } catch (ResourceException e) {
+            assertEquals(e, resourceException);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -462,18 +470,16 @@ public class AuthorizationFiltersTest {
 
         ServerContext context = mock(ServerContext.class);
         PatchRequest request = Requests.newPatchRequest("RESOURCE_NAME");
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newResultPromise(AuthorizationResult.accessPermitted());
 
         given(module.authorizePatch(context, request)).willReturn(authorizePromise);
 
         //When
-        chain.handlePatch(context, request, handler);
+        chain.handlePatch(context, request);
 
         //Then
-        verify(target).patchInstance(eq(context), eq("RESOURCE_NAME"), Matchers.<PatchRequest>anyObject(),
-                eq(handler));
+        verify(target).patchInstance(eq(context), eq("RESOURCE_NAME"), Matchers.<PatchRequest>anyObject());
     }
 
     @SuppressWarnings("unchecked")
@@ -489,7 +495,6 @@ public class AuthorizationFiltersTest {
 
         ServerContext context = mock(ServerContext.class);
         PatchRequest request = Requests.newPatchRequest("RESOURCE_NAME");
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newResultPromise(AuthorizationResult.accessDenied("REASON",
                         json(object(field("DETAIL", "VALUE")))));
@@ -497,16 +502,19 @@ public class AuthorizationFiltersTest {
         given(module.authorizePatch(context, request)).willReturn(authorizePromise);
 
         //When
-        chain.handlePatch(context, request, handler);
+        Promise<Resource, ResourceException> promise = chain.handlePatch(context, request);
 
         //Then
-        ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-        verify(handler).handleException(exceptionCaptor.capture());
-        ResourceException exception = exceptionCaptor.getValue();
-        assertEquals(exception.getCode(), 403);
-        assertEquals(exception.getMessage(), "REASON");
-        assertTrue(exception.getDetail().isDefined("DETAIL"));
-        assertTrue(exception.getDetail().contains("VALUE"));
+        assertThat(promise).failedWithException();
+        try {
+            promise.getOrThrowUninterruptibly();
+            failBecauseExceptionWasNotThrown(ResourceException.class);
+        } catch (ResourceException e) {
+            assertEquals(e.getCode(), 403);
+            assertEquals(e.getMessage(), "REASON");
+            assertTrue(e.getDetail().isDefined("DETAIL"));
+            assertTrue(e.getDetail().contains("VALUE"));
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -522,7 +530,6 @@ public class AuthorizationFiltersTest {
 
         ServerContext context = mock(ServerContext.class);
         PatchRequest request = Requests.newPatchRequest("RESOURCE_NAME");
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
         ResourceException resourceException = ResourceException.getException(ResourceException.INTERNAL_ERROR);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newExceptionPromise(resourceException);
@@ -530,13 +537,16 @@ public class AuthorizationFiltersTest {
         given(module.authorizePatch(context, request)).willReturn(authorizePromise);
 
         //When
-        chain.handlePatch(context, request, handler);
+        Promise<Resource, ResourceException> promise = chain.handlePatch(context, request);
 
         //Then
-        ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-        verify(handler).handleException(exceptionCaptor.capture());
-        ResourceException exception = exceptionCaptor.getValue();
-        assertEquals(exception, resourceException);
+        assertThat(promise).failedWithException();
+        try {
+            promise.getOrThrowUninterruptibly();
+            failBecauseExceptionWasNotThrown(ResourceException.class);
+        } catch (ResourceException e) {
+            assertEquals(e, resourceException);
+        }
     }
 
     @Test
@@ -551,7 +561,7 @@ public class AuthorizationFiltersTest {
 
         ServerContext context = mock(ServerContext.class);
         QueryRequest request = Requests.newQueryRequest("");
-        QueryResultHandler handler = mock(QueryResultHandler.class);
+        QueryResourceHandler handler = mock(QueryResourceHandler.class);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newResultPromise(AuthorizationResult.accessPermitted());
 
@@ -576,7 +586,7 @@ public class AuthorizationFiltersTest {
 
         ServerContext context = mock(ServerContext.class);
         QueryRequest request = Requests.newQueryRequest("RESOURCE_CONTAINER");
-        QueryResultHandler handler = mock(QueryResultHandler.class);
+        QueryResourceHandler handler = mock(QueryResourceHandler.class);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newResultPromise(AuthorizationResult.accessDenied("REASON",
                         json(object(field("DETAIL", "VALUE")))));
@@ -584,16 +594,19 @@ public class AuthorizationFiltersTest {
         given(module.authorizeQuery(context, request)).willReturn(authorizePromise);
 
         //When
-        chain.handleQuery(context, request, handler);
+        Promise<QueryResult, ResourceException> promise = chain.handleQuery(context, request, handler);
 
         //Then
-        ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-        verify(handler).handleException(exceptionCaptor.capture());
-        ResourceException exception = exceptionCaptor.getValue();
-        assertEquals(exception.getCode(), 403);
-        assertEquals(exception.getMessage(), "REASON");
-        assertTrue(exception.getDetail().isDefined("DETAIL"));
-        assertTrue(exception.getDetail().contains("VALUE"));
+        assertThat(promise).failedWithException();
+        try {
+            promise.getOrThrowUninterruptibly();
+            failBecauseExceptionWasNotThrown(ResourceException.class);
+        } catch (ResourceException e) {
+            assertEquals(e.getCode(), 403);
+            assertEquals(e.getMessage(), "REASON");
+            assertTrue(e.getDetail().isDefined("DETAIL"));
+            assertTrue(e.getDetail().contains("VALUE"));
+        }
     }
 
     @Test
@@ -608,7 +621,7 @@ public class AuthorizationFiltersTest {
 
         ServerContext context = mock(ServerContext.class);
         QueryRequest request = Requests.newQueryRequest("RESOURCE_CONTAINER");
-        QueryResultHandler handler = mock(QueryResultHandler.class);
+        QueryResourceHandler handler = mock(QueryResourceHandler.class);
         ResourceException resourceException = ResourceException.getException(ResourceException.INTERNAL_ERROR);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newExceptionPromise(resourceException);
@@ -616,13 +629,16 @@ public class AuthorizationFiltersTest {
         given(module.authorizeQuery(context, request)).willReturn(authorizePromise);
 
         //When
-        chain.handleQuery(context, request, handler);
+        Promise<QueryResult, ResourceException> promise = chain.handleQuery(context, request, handler);
 
         //Then
-        ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-        verify(handler).handleException(exceptionCaptor.capture());
-        ResourceException exception = exceptionCaptor.getValue();
-        assertEquals(exception, resourceException);
+        assertThat(promise).failedWithException();
+        try {
+            promise.getOrThrowUninterruptibly();
+            failBecauseExceptionWasNotThrown(ResourceException.class);
+        } catch (ResourceException e) {
+            assertEquals(e, resourceException);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -638,18 +654,16 @@ public class AuthorizationFiltersTest {
 
         ServerContext context = mock(ServerContext.class);
         ReadRequest request = Requests.newReadRequest("RESOURCE_NAME");
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newResultPromise(AuthorizationResult.accessPermitted());
 
         given(module.authorizeRead(context, request)).willReturn(authorizePromise);
 
         //When
-        chain.handleRead(context, request, handler);
+        chain.handleRead(context, request);
 
         //Then
-        verify(target).readInstance(eq(context), eq("RESOURCE_NAME"), Matchers.<ReadRequest>anyObject(),
-                eq(handler));
+        verify(target).readInstance(eq(context), eq("RESOURCE_NAME"), Matchers.<ReadRequest>anyObject());
     }
 
     @SuppressWarnings("unchecked")
@@ -665,7 +679,6 @@ public class AuthorizationFiltersTest {
 
         ServerContext context = mock(ServerContext.class);
         ReadRequest request = Requests.newReadRequest("RESOURCE_NAME");
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newResultPromise(AuthorizationResult.accessDenied("REASON",
                         json(object(field("DETAIL", "VALUE")))));
@@ -673,16 +686,19 @@ public class AuthorizationFiltersTest {
         given(module.authorizeRead(context, request)).willReturn(authorizePromise);
 
         //When
-        chain.handleRead(context, request, handler);
+        Promise<Resource, ResourceException> promise = chain.handleRead(context, request);
 
         //Then
-        ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-        verify(handler).handleException(exceptionCaptor.capture());
-        ResourceException exception = exceptionCaptor.getValue();
-        assertEquals(exception.getCode(), 403);
-        assertEquals(exception.getMessage(), "REASON");
-        assertTrue(exception.getDetail().isDefined("DETAIL"));
-        assertTrue(exception.getDetail().contains("VALUE"));
+        assertThat(promise).failedWithException();
+        try {
+            promise.getOrThrowUninterruptibly();
+            failBecauseExceptionWasNotThrown(ResourceException.class);
+        } catch (ResourceException e) {
+            assertEquals(e.getCode(), 403);
+            assertEquals(e.getMessage(), "REASON");
+            assertTrue(e.getDetail().isDefined("DETAIL"));
+            assertTrue(e.getDetail().contains("VALUE"));
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -698,7 +714,6 @@ public class AuthorizationFiltersTest {
 
         ServerContext context = mock(ServerContext.class);
         ReadRequest request = Requests.newReadRequest("RESOURCE_NAME");
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
         ResourceException resourceException = ResourceException.getException(ResourceException.INTERNAL_ERROR);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newExceptionPromise(resourceException);
@@ -706,13 +721,16 @@ public class AuthorizationFiltersTest {
         given(module.authorizeRead(context, request)).willReturn(authorizePromise);
 
         //When
-        chain.handleRead(context, request, handler);
+        Promise<Resource, ResourceException> promise = chain.handleRead(context, request);
 
         //Then
-        ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-        verify(handler).handleException(exceptionCaptor.capture());
-        ResourceException exception = exceptionCaptor.getValue();
-        assertEquals(exception, resourceException);
+        assertThat(promise).failedWithException();
+        try {
+            promise.getOrThrowUninterruptibly();
+            failBecauseExceptionWasNotThrown(ResourceException.class);
+        } catch (ResourceException e) {
+            assertEquals(e, resourceException);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -728,18 +746,16 @@ public class AuthorizationFiltersTest {
 
         ServerContext context = mock(ServerContext.class);
         UpdateRequest request = Requests.newUpdateRequest("RESOURCE_NAME", json(object()));
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newResultPromise(AuthorizationResult.accessPermitted());
 
         given(module.authorizeUpdate(context, request)).willReturn(authorizePromise);
 
         //When
-        chain.handleUpdate(context, request, handler);
+        chain.handleUpdate(context, request);
 
         //Then
-        verify(target).updateInstance(eq(context), eq("RESOURCE_NAME"), Matchers.<UpdateRequest>anyObject(),
-                eq(handler));
+        verify(target).updateInstance(eq(context), eq("RESOURCE_NAME"), Matchers.<UpdateRequest>anyObject());
     }
 
     @SuppressWarnings("unchecked")
@@ -755,7 +771,6 @@ public class AuthorizationFiltersTest {
 
         ServerContext context = mock(ServerContext.class);
         UpdateRequest request = Requests.newUpdateRequest("RESOURCE_NAME", json(object()));
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newResultPromise(AuthorizationResult.accessDenied("REASON",
                         json(object(field("DETAIL", "VALUE")))));
@@ -763,16 +778,19 @@ public class AuthorizationFiltersTest {
         given(module.authorizeUpdate(context, request)).willReturn(authorizePromise);
 
         //When
-        chain.handleUpdate(context, request, handler);
+        Promise<Resource, ResourceException> promise = chain.handleUpdate(context, request);
 
         //Then
-        ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-        verify(handler).handleException(exceptionCaptor.capture());
-        ResourceException exception = exceptionCaptor.getValue();
-        assertEquals(exception.getCode(), 403);
-        assertEquals(exception.getMessage(), "REASON");
-        assertTrue(exception.getDetail().isDefined("DETAIL"));
-        assertTrue(exception.getDetail().contains("VALUE"));
+        assertThat(promise).failedWithException();
+        try {
+            promise.getOrThrowUninterruptibly();
+            failBecauseExceptionWasNotThrown(ResourceException.class);
+        } catch (ResourceException e) {
+            assertEquals(e.getCode(), 403);
+            assertEquals(e.getMessage(), "REASON");
+            assertTrue(e.getDetail().isDefined("DETAIL"));
+            assertTrue(e.getDetail().contains("VALUE"));
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -788,7 +806,6 @@ public class AuthorizationFiltersTest {
 
         ServerContext context = mock(ServerContext.class);
         UpdateRequest request = Requests.newUpdateRequest("RESOURCE_NAME", json(object()));
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
         ResourceException resourceException = ResourceException.getException(ResourceException.INTERNAL_ERROR);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newExceptionPromise(resourceException);
@@ -796,12 +813,15 @@ public class AuthorizationFiltersTest {
         given(module.authorizeUpdate(context, request)).willReturn(authorizePromise);
 
         //When
-        chain.handleUpdate(context, request, handler);
+        Promise<Resource, ResourceException> promise = chain.handleUpdate(context, request);
 
         //Then
-        ArgumentCaptor<ResourceException> exceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
-        verify(handler).handleException(exceptionCaptor.capture());
-        ResourceException exception = exceptionCaptor.getValue();
-        assertEquals(exception, resourceException);
+        assertThat(promise).failedWithException();
+        try {
+            promise.getOrThrowUninterruptibly();
+            failBecauseExceptionWasNotThrown(ResourceException.class);
+        } catch (ResourceException e) {
+            assertEquals(e, resourceException);
+        }
     }
 }
