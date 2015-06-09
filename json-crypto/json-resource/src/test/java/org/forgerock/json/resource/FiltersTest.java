@@ -142,14 +142,14 @@ public final class FiltersTest {
     }
 
     @Test
-    public void testMatchResourceNameFalse() {
+    public void testMatchResourcePathFalse() {
         final FilterCondition condition = Filters.matchResourcePath("nomatch/name");
         final Request request = Requests.newActionRequest("resource/name", "test");
         assertThat(condition.matches(null, request)).isFalse();
     }
 
     @Test
-    public void testMatchResourceNameTrue() {
+    public void testMatchResourcePathTrue() {
         final FilterCondition condition = Filters.matchResourcePath("resource/.*");
         final Request request = Requests.newActionRequest("resource/name", "test");
         assertThat(condition.matches(null, request)).isTrue();

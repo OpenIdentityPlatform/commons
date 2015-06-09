@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2014 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.forgerock.http.Context;
 import org.forgerock.http.RootContext;
-import org.forgerock.http.RouterContext;
+import org.forgerock.http.routing.RouterContext;
 import org.forgerock.http.ServerContext;
 import org.testng.annotations.Test;
 
@@ -77,7 +77,7 @@ public final class ContextTest {
         final Context root = new RootContext("root-id");
         final InternalServerContext internal = new InternalServerContext(root);
         final ServerContext server = new ServerContext(internal);
-        final RouterContext router = new RouterContext(server, "test", new HashMap<String, String>(0));
+        final RouterContext router = new RouterContext(server, "test", "", new HashMap<String, String>(0));
         final InternalServerContext internal2 = new InternalServerContext(router);
 
         assertThat(server.asContext(RootContext.class)).isSameAs(root);

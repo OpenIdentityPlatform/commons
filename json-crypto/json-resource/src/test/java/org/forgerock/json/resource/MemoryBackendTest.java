@@ -223,7 +223,7 @@ public final class MemoryBackendTest {
 
     private Connection getConnection() {
         final MemoryBackend users = new MemoryBackend();
-        final UriRouter router = new UriRouter();
+        final Router router = new Router();
         router.addRoute("users", users);
         return newInternalConnection(router);
     }

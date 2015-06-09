@@ -28,7 +28,7 @@ import java.util.Map;
 
 import org.forgerock.http.Context;
 import org.forgerock.http.Handler;
-import org.forgerock.http.RouterContext;
+import org.forgerock.http.routing.RouterContext;
 import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.protocol.Form;
 import org.forgerock.http.protocol.Response;

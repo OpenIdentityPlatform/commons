@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource.examples;
@@ -28,7 +28,7 @@ import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
-import org.forgerock.json.resource.UriRouter;
+import org.forgerock.json.resource.Router;
 
 /**
  * Utility methods for demo apps.
@@ -57,7 +57,7 @@ final class DemoUtils {
 
     static ConnectionFactory getConnectionFactory() throws ResourceException {
         final MemoryBackend users = new MemoryBackend();
-        final UriRouter router = new UriRouter();
+        final Router router = new Router();
         router.addRoute("users", users);
         final Connection connection = newInternalConnection(router);
         connection.create(ctx(), newCreateRequest("users", "1", userAliceWithIdAndRev(1, 0)));
