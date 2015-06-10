@@ -33,7 +33,7 @@ public class FestJsonValueAssertTest {
         JsonValue value = json(object(
                 field("bool", true),
                 field("int", 5),
-                field("long", 3257259826582038L),
+                field("long", 3_257_259_826_582_038L),
                 field("double", 50.91D),
                 field("string", "fred"),
                 field("null", null),
@@ -69,12 +69,12 @@ public class FestJsonValueAssertTest {
         asserter.isObject().stringAt("string").isEqualTo("fred");
         asserter.isObject().booleanAt("bool").isEqualTo(true);
         asserter.isObject().integerAt("int").isEqualTo(5);
-        asserter.isObject().longAt("long").isEqualTo(3257259826582038L);
+        asserter.isObject().longAt("long").isEqualTo(3_257_259_826_582_038L);
         asserter.isObject().doubleAt("double").isEqualTo(50.91D);
         asserter.isObject()
                 .stringIs("string", EqualToCondition.equalTo("fred"))
                 .integerIs("int", EqualToCondition.equalTo(5))
-                .longIs("long", EqualToCondition.equalTo(3257259826582038L))
+                .longIs("long", EqualToCondition.equalTo(3_257_259_826_582_038L))
                 .doubleIs("double", EqualToCondition.equalTo(50.91D))
                 .booleanIs("bool", EqualToCondition.equalTo(true));
 
@@ -112,7 +112,7 @@ public class FestJsonValueAssertTest {
         private T expected;
 
         static <T> EqualToCondition<T> equalTo(T expected) {
-            EqualToCondition<T> condition = new EqualToCondition<T>();
+            EqualToCondition<T> condition = new EqualToCondition<>();
             condition.expected = expected;
             return condition;
         }

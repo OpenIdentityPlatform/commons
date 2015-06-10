@@ -146,7 +146,7 @@ public final class MemoryBackendTest {
         final Connection connection = getConnection();
         connection.create(ctx(), newCreateRequest("users", userAlice()));
         connection.create(ctx(), newCreateRequest("users", userBob()));
-        final Collection<Resource> results = new ArrayList<Resource>();
+        final Collection<Resource> results = new ArrayList<>();
         connection.query(ctx(), newQueryRequest("users"), results);
         assertThat(results).containsOnly(asResource(userAliceWithIdAndRev(0, 0)),
                 asResource(userBobWithIdAndRev(1, 0)));
@@ -157,7 +157,7 @@ public final class MemoryBackendTest {
         final Connection connection = getConnection();
         connection.create(ctx(), newCreateRequest("users", userAlice()));
         connection.create(ctx(), newCreateRequest("users", userBob()));
-        final Collection<Resource> results = new ArrayList<Resource>();
+        final Collection<Resource> results = new ArrayList<>();
         connection.query(ctx(), newQueryRequest("users").setQueryFilter(
                 QueryFilter.equalTo(new JsonPointer("name"), "alice")).addField("_id"), results);
         assertThat(results).hasSize(1);
@@ -172,7 +172,7 @@ public final class MemoryBackendTest {
         final Connection connection = getConnection();
         connection.create(ctx(), newCreateRequest("users", userAlice()));
         connection.create(ctx(), newCreateRequest("users", userBob()));
-        final Collection<Resource> results = new ArrayList<Resource>();
+        final Collection<Resource> results = new ArrayList<>();
         connection.query(ctx(), newQueryRequest("users/0"), results);
     }
 

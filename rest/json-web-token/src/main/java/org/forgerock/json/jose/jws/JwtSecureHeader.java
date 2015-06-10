@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jws;
@@ -184,7 +184,7 @@ public abstract class JwtSecureHeader extends JwtHeader {
      * @param x509CertificateChain The X.509 Certificate Chain.
      */
     public void setX509CertificateChain(List<String> x509CertificateChain) {
-        List<String> encodedCertChain = new ArrayList<String>();
+        List<String> encodedCertChain = new ArrayList<>();
         for (String x509Cert : x509CertificateChain) {
             encodedCertChain.add(Base64.encode(x509Cert.getBytes(Utils.CHARSET)));
         }

@@ -11,8 +11,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
+
 package org.forgerock.json.resource.descriptor;
 
 import static org.forgerock.json.resource.descriptor.Api.unmodifiableCopyOf;
@@ -21,9 +22,9 @@ import static org.forgerock.json.resource.descriptor.RelationDescriptor.Multipli
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.forgerock.http.ResourcePath;
 import org.forgerock.i18n.LocalizableMessage;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.http.ResourcePath;
 
 @SuppressWarnings("javadoc")
 public final class RelationDescriptor {
@@ -37,8 +38,8 @@ public final class RelationDescriptor {
         private LocalizableMessage description;
         private Multiplicity multiplicity = ONE_TO_MANY;
         private final RelationCapableBuilder<T> parentBuilder;
-        private final Set<Profile> profiles = new LinkedHashSet<Profile>();
-        private final Set<ActionDescriptor> actions = new LinkedHashSet<ActionDescriptor>();
+        private final Set<Profile> profiles = new LinkedHashSet<>();
+        private final Set<ActionDescriptor> actions = new LinkedHashSet<>();
 
         private Builder(final ResourcePath path, final Urn resourceUrn,
                 final RelationCapableBuilder<T> parentBuilder) {
@@ -111,7 +112,7 @@ public final class RelationDescriptor {
 
     static <T> Builder<T> builder(final ResourcePath path, final Urn resourceUrn,
             final RelationCapableBuilder<T> parentBuilder) {
-        return new Builder<T>(path, resourceUrn, parentBuilder);
+        return new Builder<>(path, resourceUrn, parentBuilder);
     }
 
     private final ResourcePath path;

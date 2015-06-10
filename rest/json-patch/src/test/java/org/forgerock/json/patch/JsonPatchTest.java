@@ -11,20 +11,20 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright 2011-2014 ForgeRock AS.
+ * Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.patch;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 
 @SuppressWarnings("javadoc")
 public class JsonPatchTest {
@@ -42,7 +42,7 @@ public class JsonPatchTest {
 
     @BeforeMethod
     public void beforeMethod() {
-        mapValue = new JsonValue(new HashMap<String, Object>());
+        mapValue = new JsonValue(new HashMap<>());
         v1 = null;
         v2 = null;
     }
@@ -105,7 +105,7 @@ public class JsonPatchTest {
     @Test
     public void listDiffNoChanges() {
         v1 = mapValue;
-        v1.put("a", new ArrayList<Object>());
+        v1.put("a", new ArrayList<>());
         v1.get("a").put(0, "foo");
         v1.get("a").put(1, "bar");
         v2 = v1.copy();

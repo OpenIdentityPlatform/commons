@@ -54,8 +54,8 @@ public class JsonValueTest {
 
     @BeforeMethod
     public void beforeMethod() {
-        mapValue = new JsonValue(new HashMap<String, Object>());
-        listValue = new JsonValue(new ArrayList<Object>());
+        mapValue = new JsonValue(new HashMap<>());
+        listValue = new JsonValue(new ArrayList<>());
     }
 
     // ----- manipulation tests ----------
@@ -151,19 +151,19 @@ public class JsonValueTest {
     @Test
     public void testGetMapPointer() {
         Map<String, Object> m = mapValue.asMap();
-        m.put("a", (m = new HashMap<String, Object>()));
-        m.put("b", (m = new HashMap<String, Object>()));
+        m.put("a", (m = new HashMap<>()));
+        m.put("b", (m = new HashMap<>()));
         m.put("c", "d");
         assertThat(mapValue.get(new JsonPointer("/a/b/c")).asString()).isEqualTo("d");
     }
 
     @Test
     public void testGetMultiDimensionalArrayPointer() {
-        mapValue.put("a", new ArrayList<Object>());
-        mapValue.get("a").put(0, new ArrayList<Object>());
+        mapValue.put("a", new ArrayList<>());
+        mapValue.get("a").put(0, new ArrayList<>());
         mapValue.get("a").get(0).put(0, "a00");
         mapValue.get("a").get(0).put(1, "a01");
-        mapValue.get("a").put(1, new ArrayList<Object>());
+        mapValue.get("a").put(1, new ArrayList<>());
         mapValue.get("a").get(1).put(0, "a10");
         mapValue.get("a").get(1).put(1, "a11");
         assertThat(mapValue.get(new JsonPointer("/a/0/0")).getObject()).isEqualTo("a00");
@@ -177,24 +177,24 @@ public class JsonValueTest {
      */
     @Test
     public void testHashCodeStability() {
-        final JsonValue v1 = new JsonValue(new HashMap<String, Object>());
+        final JsonValue v1 = new JsonValue(new HashMap<>());
         v1.put("key1", "value1");
         v1.put("key2", "value2");
 
         // Reverse order, but should be equivalent.
-        final JsonValue v2 = new JsonValue(new HashMap<String, Object>());
+        final JsonValue v2 = new JsonValue(new HashMap<>());
         v2.put("key2", "value2");
         v2.put("key1", "value1");
         assertThat(v1.getObject().hashCode()).isEqualTo(v2.getObject().hashCode());
 
         // Now add a sub-object.
-        final Map<String, Object> o1 = new HashMap<String, Object>();
+        final Map<String, Object> o1 = new HashMap<>();
         o1.put("skey1", "svalue1");
         o1.put("skey2", "svalue2");
         v1.add("object", o1);
         assertThat(v1.getObject().hashCode()).isNotEqualTo(v2.getObject().hashCode());
 
-        final Map<String, Object> o2 = new HashMap<String, Object>();
+        final Map<String, Object> o2 = new HashMap<>();
         o2.put("skey2", "svalue2");
         o2.put("skey1", "svalue1");
         v2.add("object", o2);
@@ -231,28 +231,28 @@ public class JsonValueTest {
     @Test
     public void testPutJsonPointer() throws Exception {
 
-        final List<String> listObject1 = new ArrayList<String>(3);
+        final List<String> listObject1 = new ArrayList<>(3);
         listObject1.add("valueA");
         listObject1.add("valueB");
         listObject1.add("valueC");
 
-        final Map<String, Object> mapObject1 = new HashMap<String, Object>();
+        final Map<String, Object> mapObject1 = new HashMap<>();
         mapObject1.put("keyE", "valueE");
         mapObject1.put("keyF", listObject1);
         mapObject1.put("keyG", "valueG");
 
-        final Map<String, Object> mapObject2 = new HashMap<String, Object>();
+        final Map<String, Object> mapObject2 = new HashMap<>();
         mapObject2.put("keyH", "valueH");
         mapObject2.put("keyI", "valueI");
         mapObject2.put("keyJ", mapObject1);
 
-        final List<String> listObject2 = new ArrayList<String>(3);
+        final List<String> listObject2 = new ArrayList<>(3);
         listObject2.add("valueD");
         listObject2.add("valueE");
         listObject2.add("valueF");
 
         final JsonValue listValue = new JsonValue(listObject1);
-        final JsonValue mapValue = new JsonValue(new HashMap<String, Object>());
+        final JsonValue mapValue = new JsonValue(new HashMap<>());
 
         mapValue.put("keyA", "valueA");
         mapValue.put("keyB", "valueB");

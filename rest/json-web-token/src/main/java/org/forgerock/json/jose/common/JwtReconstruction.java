@@ -192,7 +192,7 @@ public class JwtReconstruction {
         verifyNumberOfParts(encryptedJwtParts, JWE_NUM_PARTS);
         EncryptedJwt encryptedJwt = reconstructEncryptedJwt(encryptedJwtParts);
 
-        Map<String, Object> combinedHeader = new HashMap<String, Object>(encryptedJwt.getHeader().getParameters());
+        Map<String, Object> combinedHeader = new HashMap<>(encryptedJwt.getHeader().getParameters());
         combinedHeader.putAll(Utils.parseJson(header));
 
         JwsHeader jwsHeader = new JwsHeader(combinedHeader);

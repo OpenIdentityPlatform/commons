@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource.http;
@@ -333,7 +333,6 @@ public class HttpUtilsTest {
             HttpUtils.prepareResponse(httpRequest);
         } catch (BadRequestException e) {
             assertThat(e.getClass()).isEqualTo(BadRequestException.class);
-            int a = 1;
             throw e;
         }
     }

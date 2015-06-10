@@ -11,15 +11,13 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.crypto;
 
-// Java Standard Edition
 import java.util.HashMap;
 
-// JSON Fluent
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 
@@ -130,10 +128,10 @@ public class JsonCrypto {
      * Returns this object as a {@code $crypto} JSON object value.
      */
     public JsonValue toJsonValue() {
-        HashMap<String, Object> crypto = new HashMap<String, Object>();
+        HashMap<String, Object> crypto = new HashMap<>();
         crypto.put("type", type);
         crypto.put("value", value == null ? null : value.getObject());
-        HashMap<String, Object> result = new HashMap<String, Object>();
+        HashMap<String, Object> result = new HashMap<>();
         result.put("$crypto", crypto);
         return new JsonValue(result);
     }

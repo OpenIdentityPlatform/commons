@@ -11,12 +11,11 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.crypto.cli;
 
-// Java Standard Edition
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -25,29 +24,22 @@ import java.security.Key;
 import java.security.KeyStore;
 import java.util.ArrayList;
 
-// Jackson
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-// Apache Commons CLI
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
-
-// JSON Fluent
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonTransformer;
-
-// JSON Crypto
 import org.forgerock.json.crypto.JsonCrypto;
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.crypto.JsonCryptoTransformer;
 import org.forgerock.json.crypto.simple.SimpleDecryptor;
 import org.forgerock.json.crypto.simple.SimpleEncryptor;
 import org.forgerock.json.crypto.simple.SimpleKeyStoreSelector;
+import org.forgerock.json.fluent.JsonPointer;
+import org.forgerock.json.fluent.JsonTransformer;
+import org.forgerock.json.fluent.JsonValue;
 
 /**
  * @author László Hordós
@@ -134,7 +126,7 @@ public class Main {
             value = new JsonCrypto(encryptor.getType(), encryptor.encrypt(value)).toJsonValue();
             setDestinationValue(cmd.getOptionValue(PROPERTIES_DESTJSON_OPTION), value);
         } else if (cmd.hasOption(PROPERTIES_DECRYPT_COMMAND)) {
-            final ArrayList<JsonTransformer> decryptionTransformers = new ArrayList<JsonTransformer>(1);
+            final ArrayList<JsonTransformer> decryptionTransformers = new ArrayList<>(1);
             decryptionTransformers.add(new JsonCryptoTransformer(new SimpleDecryptor(getSimpleKeySelector(cmd.getOptionValue(PROPERTIES_KEYSTORE_OPTION),
                     cmd.getOptionValue(PROPERTIES_STORETYPE_OPTION, KeyStore.getDefaultType()), cmd.getOptionValue(PROPERTIES_STOREPASS_OPTION), cmd.getOptionValue(PROPERTIES_PROVIDERNAME_OPTION)))));
             JsonValue value = getSourceValue(cmd.getOptionValue(PROPERTIES_SRCJSON_OPTION), true);

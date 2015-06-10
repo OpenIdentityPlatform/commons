@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2013 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -151,7 +151,7 @@ public final class Resource {
      */
     @Override
     public String toString() {
-        final JsonValue wrapper = new JsonValue(new LinkedHashMap<String, Object>(3));
+        final JsonValue wrapper = new JsonValue(new LinkedHashMap<>(3));
         wrapper.add("id", id);
         wrapper.add("rev", revision);
         wrapper.add("content", content);

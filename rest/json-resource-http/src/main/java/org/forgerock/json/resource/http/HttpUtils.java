@@ -153,7 +153,7 @@ public final class HttpUtils {
     private static final int PART_DATA_TYPE = 2;
     private static final String REFERENCE_TAG = "$ref";
 
-    private static final int BUFFER_SIZE = 1024;
+    private static final int BUFFER_SIZE = 1_024;
     private static final int EOF = -1;
 
     /**
@@ -467,8 +467,7 @@ public final class HttpUtils {
         }
     }
 
-    static void rejectIfMatch(org.forgerock.http.protocol.Request req) throws ResourceException,
-            PreconditionFailedException {
+    static void rejectIfMatch(org.forgerock.http.protocol.Request req) throws ResourceException {
         if (req.getHeaders().getFirst(HEADER_IF_MATCH) != null) {
             // FIXME: i18n
             throw new PreconditionFailedException("If-Match not supported for " + getMethod(req)
@@ -489,7 +488,7 @@ public final class HttpUtils {
             throws ResourceException {
         final Object body = parseJsonBody(req, allowEmpty);
         if (body == null) {
-            return new JsonValue(new LinkedHashMap<String, Object>(0));
+            return new JsonValue(new LinkedHashMap<>(0));
         } else if (!(body instanceof Map)) {
             throw new BadRequestException(
                     "The request could not be processed because the provided "
@@ -522,8 +521,7 @@ public final class HttpUtils {
     }
 
     private static String getRequestPartData(final MimeMultipart mimeMultiparts,
-            final String partName, final String partDataType) throws BadRequestException,
-            ResourceException, IOException, MessagingException {
+            final String partName, final String partDataType) throws IOException, MessagingException {
         if (mimeMultiparts == null) {
             throw new BadRequestException(
                     "The request parameter is null when retrieving part data for part name: "
@@ -568,11 +566,11 @@ public final class HttpUtils {
     }
 
     private static Object swapRequestPartsIntoContent(final MimeMultipart mimeMultiparts,
-            Object content) throws BadRequestException, ResourceException {
+            Object content) throws ResourceException {
         try {
             JsonValue root = new JsonValue(content);
 
-            ArrayDeque<JsonValue> stack = new ArrayDeque<JsonValue>();
+            ArrayDeque<JsonValue> stack = new ArrayDeque<>();
             stack.push(root);
 
             while (!stack.isEmpty()) {
@@ -619,38 +617,40 @@ public final class HttpUtils {
     }
 
     private static Object parseJsonBody(org.forgerock.http.protocol.Request req, boolean allowEmpty)
-            throws BadRequestException, ResourceException {
-        JsonParser parser = null;
+            throws ResourceException {
         try {
             boolean isMultiPartRequest = isMultiPartRequest(ContentTypeHeader.valueOf(req).toString());
             MimeMultipart mimeMultiparts = null;
+            JsonParser jsonParser;
             if (isMultiPartRequest) {
                 mimeMultiparts = new MimeMultipart(new HttpServletRequestDataSource(req));
                 BodyPart jsonPart = getJsonRequestPart(mimeMultiparts);
-                parser = JSON_MAPPER.getFactory().createParser(jsonPart.getInputStream());
+                jsonParser = JSON_MAPPER.getFactory().createParser(jsonPart.getInputStream());
             } else {
-                parser = JSON_MAPPER.getFactory().createParser(req.getEntity().getRawContentInputStream());
+                jsonParser = JSON_MAPPER.getFactory().createParser(req.getEntity().getRawContentInputStream());
             }
-            Object content = parser.readValueAs(Object.class);
+            try (JsonParser parser = jsonParser) {
+                Object content = parser.readValueAs(Object.class);
 
-            // Ensure that there is no trailing data following the JSON resource.
-            boolean hasTrailingGarbage;
-            try {
-                hasTrailingGarbage = parser.nextToken() != null;
-            } catch (JsonParseException e) {
-                hasTrailingGarbage = true;
-            }
-            if (hasTrailingGarbage) {
-                throw new BadRequestException(
-                        "The request could not be processed because there is "
-                                + "trailing data after the JSON content");
-            }
+                // Ensure that there is no trailing data following the JSON resource.
+                boolean hasTrailingGarbage;
+                try {
+                    hasTrailingGarbage = parser.nextToken() != null;
+                } catch (JsonParseException e) {
+                    hasTrailingGarbage = true;
+                }
+                if (hasTrailingGarbage) {
+                    throw new BadRequestException(
+                            "The request could not be processed because there is "
+                                    + "trailing data after the JSON content");
+                }
 
-            if (isMultiPartRequest) {
-                swapRequestPartsIntoContent(mimeMultiparts, content);
-            }
+                if (isMultiPartRequest) {
+                    swapRequestPartsIntoContent(mimeMultiparts, content);
+                }
 
-            return content;
+                return content;
+            }
         } catch (final JsonParseException e) {
             throw new BadRequestException(
                     "The request could not be processed because the provided "
@@ -668,8 +668,6 @@ public final class HttpUtils {
         } catch (final MessagingException e) {
             throw new BadRequestException(
                     "The request could not be processed because it can't be parsed", e);
-        } finally {
-            closeSilently(parser);
         }
     }
 

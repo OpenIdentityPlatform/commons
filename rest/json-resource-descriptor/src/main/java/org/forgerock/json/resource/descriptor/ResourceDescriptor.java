@@ -11,8 +11,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
+
 package org.forgerock.json.resource.descriptor;
 
 import static java.util.Collections.unmodifiableSet;
@@ -21,15 +22,14 @@ import static org.forgerock.json.resource.descriptor.Api.unmodifiableCopyOf;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.forgerock.http.ResourcePath;
-import org.forgerock.i18n.LocalizableMessage;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.Version;
-
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.factories.SchemaFactoryWrapper;
+import org.forgerock.http.ResourcePath;
+import org.forgerock.i18n.LocalizableMessage;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.Version;
 
 @SuppressWarnings("javadoc")
 public final class ResourceDescriptor {
@@ -37,12 +37,12 @@ public final class ResourceDescriptor {
 
     public static final class Builder {
         private LocalizableMessage description;
-        private final Set<RelationDescriptor> relations = new LinkedHashSet<RelationDescriptor>();
+        private final Set<RelationDescriptor> relations = new LinkedHashSet<>();
         private Urn parentResourceUrn;
         private JsonSchema schema;
-        private final Set<ActionDescriptor> actions = new LinkedHashSet<ActionDescriptor>();
+        private final Set<ActionDescriptor> actions = new LinkedHashSet<>();
         private final ApiDescriptor.Builder parentBuilder;
-        private final Set<Profile> profiles = new LinkedHashSet<Profile>();
+        private final Set<Profile> profiles = new LinkedHashSet<>();
         private final Urn urn;
 
         private Builder(final Urn urn, final ApiDescriptor.Builder parentBuilder) {
@@ -170,7 +170,7 @@ public final class ResourceDescriptor {
     private final JsonSchema schema;
     private ResourceDescriptor parent;
     private final Urn parentUrn;
-    private final Set<ResourceDescriptor> mutableChildren = new LinkedHashSet<ResourceDescriptor>();
+    private final Set<ResourceDescriptor> mutableChildren = new LinkedHashSet<>();
     private final Set<ResourceDescriptor> children = unmodifiableSet(mutableChildren);
     private final Set<ActionDescriptor> actions;
     private final Set<RelationDescriptor> relations;
@@ -198,8 +198,7 @@ public final class ResourceDescriptor {
         this.profiles = resource.profiles;
 
         // Need to copy the relations in order to make them unresolved.
-        final Set<RelationDescriptor> unresolvedRelations =
-                new LinkedHashSet<RelationDescriptor>(resource.relations.size());
+        final Set<RelationDescriptor> unresolvedRelations = new LinkedHashSet<>(resource.relations.size());
         for (final RelationDescriptor relation : resource.relations) {
             unresolvedRelations.add(new RelationDescriptor(relation));
         }

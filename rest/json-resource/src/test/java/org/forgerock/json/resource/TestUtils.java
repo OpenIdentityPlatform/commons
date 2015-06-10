@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -85,7 +85,7 @@ public final class TestUtils {
      * @return The list of parsed JSON pointers.
      */
     public static List<JsonPointer> filter(final String... fields) {
-        final List<JsonPointer> result = new ArrayList<JsonPointer>(fields.length);
+        final List<JsonPointer> result = new ArrayList<>(fields.length);
         for (final String field : fields) {
             result.add(new JsonPointer(field));
         }

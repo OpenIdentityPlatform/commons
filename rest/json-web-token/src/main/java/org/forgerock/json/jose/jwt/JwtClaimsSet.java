@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwt;
@@ -201,7 +201,7 @@ public class JwtClaimsSet extends JWObject implements Payload {
     private List<String> getAudienceNullCheck() {
         List<String> audienceList = getAudience();
         if (audienceList == null) {
-            audienceList = new ArrayList<String>();
+            audienceList = new ArrayList<>();
             put(AUD.value(), audienceList);
         }
         return audienceList;

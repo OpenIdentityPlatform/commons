@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwt;
@@ -91,7 +91,7 @@ public class JwtHeaderTest {
 
         //Given
         JwtHeader header = new JwsHeader();
-        Map<String, Object> headers = new HashMap<String, Object>();
+        Map<String, Object> headers = new HashMap<>();
         headers.put("KEY1", "HEADER1");
         headers.put("KEY2", true);
         headers.put("KEY3", 1234L);
@@ -185,7 +185,7 @@ public class JwtHeaderTest {
     public void shouldCreateJwtHeaderWithMap() {
 
         //Given
-        Map<String, Object> headers = new HashMap<String, Object>();
+        Map<String, Object> headers = new HashMap<>();
         headers.put("typ", "JWT");
         headers.put("alg", JwsAlgorithm.NONE);
         headers.put("KEY1", "HEADER1");

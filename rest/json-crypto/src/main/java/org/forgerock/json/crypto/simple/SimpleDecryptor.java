@@ -11,35 +11,24 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.crypto.simple;
 
-// Java Standard Edition
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 
-import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-
-
-// Apache Commons Codec
-import org.apache.commons.codec.binary.Base64;
-
-// Jackson
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-// JSON Fluent
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
-
-// JSON Crypto
+import org.apache.commons.codec.binary.Base64;
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.crypto.JsonDecryptor;
-
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 
 /**
  * Decrypts a {@code $crypto} JSON object value encrypted with the
@@ -101,12 +90,8 @@ public class SimpleDecryptor implements JsonDecryptor {
             symmetric.init(Cipher.DECRYPT_MODE, symmetricKey, ivps);
             byte[] plaintext = symmetric.doFinal(Base64.decodeBase64(value.get("data").required().asString()));
             return new JsonValue(mapper.readValue(plaintext, Object.class));
-        } catch (GeneralSecurityException gse) { // Java Cryptography Extension
-            throw new JsonCryptoException(gse);
-        } catch (IOException ioe) { // Jackson
-            throw new JsonCryptoException(ioe);
-        } catch (JsonValueException jne) { // JSON Fluent
-            throw new JsonCryptoException(jne);
+        } catch (GeneralSecurityException | IOException | JsonValueException e) {
+            throw new JsonCryptoException(e);
         }
     }
 

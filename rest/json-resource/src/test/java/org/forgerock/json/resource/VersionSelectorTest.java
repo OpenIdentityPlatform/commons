@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -37,7 +37,7 @@ public class VersionSelectorTest {
     private Object candidateOneDotNine;
     private Object candidateTwoDotFive;
 
-    private Map<Version, Object> candidates = new HashMap<Version, Object>();
+    private Map<Version, Object> candidates = new HashMap<>();
 
     @BeforeClass
     public void setUp() {

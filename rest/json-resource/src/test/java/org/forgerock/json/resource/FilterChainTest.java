@@ -311,7 +311,7 @@ public final class FilterChainTest {
                 } else {
                     next = (RequestHandler) args[2];
                 }
-                List<Promise<R, ResourceException>> promises = new ArrayList<Promise<R, ResourceException>>();
+                List<Promise<R, ResourceException>> promises = new ArrayList<>();
                 for (int i = 0; i < count; i++) {
                     switch (request.getRequestType()) {
                         case ACTION:

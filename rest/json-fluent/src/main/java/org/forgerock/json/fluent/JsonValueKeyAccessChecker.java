@@ -11,8 +11,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2013 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
+
 package org.forgerock.json.fluent;
 
 import java.io.File;
@@ -35,9 +36,8 @@ import java.util.regex.Pattern;
 public class JsonValueKeyAccessChecker extends JsonValue {
 
     private final JsonValue delegate;
-    private final Set<String> accessedKeyNames = new HashSet<String>();
-    private final Map<JsonPointer, JsonValueKeyAccessChecker> subCheckers =
-            new HashMap<JsonPointer, JsonValueKeyAccessChecker>();
+    private final Set<String> accessedKeyNames = new HashSet<>();
+    private final Map<JsonPointer, JsonValueKeyAccessChecker> subCheckers = new HashMap<>();
 
     /**
      * Constructs a {@link JsonValueKeyAccessChecker}.
@@ -95,8 +95,8 @@ public class JsonValueKeyAccessChecker extends JsonValue {
     }
 
     private void verifyAllKeysAccessed(StringBuilder errors) {
-        final Set<String> unaccessedKeys = isList() ? Collections.<String> emptySet()
-                            : new TreeSet<String>(this.delegate.keys());
+        final Set<String> unaccessedKeys = isList() ? Collections.<String>emptySet()
+                            : new TreeSet<>(this.delegate.keys());
         unaccessedKeys.removeAll(this.accessedKeyNames);
         if (!unaccessedKeys.isEmpty()) {
             if (errors.length() > 0) {

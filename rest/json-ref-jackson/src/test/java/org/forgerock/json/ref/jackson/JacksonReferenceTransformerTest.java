@@ -11,16 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright 2011-2014 ForgeRock AS.
+ * Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.ref.jackson;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.ref.JsonReference;
-import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,6 +24,10 @@ import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
+
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.ref.JsonReference;
+import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")
 public class JacksonReferenceTransformerTest {
@@ -43,7 +43,7 @@ public class JacksonReferenceTransformerTest {
         out.print("}\n");
         out.close();
         JsonReference ref = new JsonReference().setURI(new URI(tmp.toURI().toString() + "#/a/b/c"));
-        JsonValue root = new JsonValue(new HashMap<String, Object>());
+        JsonValue root = new JsonValue(new HashMap<>());
         root.put("g", ref.toJsonValue().getObject());
         root.getTransformers().add(0, new JacksonReferenceTransformer(null, null));
         root.applyTransformers();

@@ -615,7 +615,7 @@ public class ResourceException extends IOException {
      *         in the entity of an HTTP error response.
      */
     public final JsonValue toJsonValue() {
-        final Map<String, Object> result = new LinkedHashMap<String, Object>(4);
+        final Map<String, Object> result = new LinkedHashMap<>(4);
         result.put(FIELD_CODE, code); // required
         if (reason != null) { // optional
             result.put(FIELD_REASON, reason);
@@ -628,7 +628,7 @@ public class ResourceException extends IOException {
             result.put(FIELD_DETAIL, detail.getObject());
         }
         if (includeCause && getCause() != null && getCause().getMessage() != null) {
-            final Map<String, Object> cause = new LinkedHashMap<String, Object>(2);
+            final Map<String, Object> cause = new LinkedHashMap<>(2);
             cause.put("message", getCause().getMessage());
             result.put(FIELD_CAUSE, cause);
         }

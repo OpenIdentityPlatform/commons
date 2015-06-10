@@ -1,26 +1,19 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright © 2011-2013 ForgeRock AS. All rights reserved.
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2011-2015 ForgeRock AS.
  */
+
 package org.forgerock.json.schema.validator.validators;
 
 import static org.forgerock.json.schema.validator.Constants.*;
@@ -142,7 +135,7 @@ public class ArrayTypeValidator extends Validator {
                             ObjectValidatorFactory.getTypeValidator((Map<String, Object>) e.getValue(), newPointer);
                 } else if (e.getValue() instanceof List) {
                     final List<Object> arrayTypes = (List<Object>) e.getValue();
-                    tupleValidators = new ArrayList<Validator>(arrayTypes.size());
+                    tupleValidators = new ArrayList<>(arrayTypes.size());
                     for (Object o : arrayTypes) {
                         if (o instanceof Map) {
                             tupleValidators.add(
@@ -199,7 +192,7 @@ public class ArrayTypeValidator extends Validator {
 
     private void checkUniqueItems(List<Object> nodeValue, JsonPointer at, ErrorHandler handler) {
         if (uniqueItems && nodeValue.size() > 1) {
-            Set<Object> set = new HashSet<Object>(nodeValue);
+            Set<Object> set = new HashSet<>(nodeValue);
             if (set.size() < nodeValue.size()) {
                 handler.error(new ValidationException("The items in the array must be unique", getPath(at, null)));
             }

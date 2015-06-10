@@ -49,7 +49,7 @@ public final class AsyncReadModifyWriteDemo {
      */
     public static void main(final String[] args) throws ResourceException {
         final ConnectionFactory server = getConnectionFactory();
-        final AtomicReference<Connection> connectionHolder = new AtomicReference<Connection>();
+        final AtomicReference<Connection> connectionHolder = new AtomicReference<>();
 
         // @formatter:off
         log("Opening connection");

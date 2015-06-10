@@ -11,18 +11,16 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.patch;
 
-// Java SE
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-// JSON Fluent
 import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
@@ -73,7 +71,7 @@ public class JsonPatch {
      * @return the resulting JSON Patch operation.
      */
     private static HashMap<String, Object> op(String op, JsonPointer pointer, JsonValue value) {
-        HashMap<String, Object> result = new HashMap<String, Object>();
+        HashMap<String, Object> result = new HashMap<>();
         result.put(op, pointer.toString());
         if (value != null) {
             result.put("value", value.copy().getObject());
@@ -127,7 +125,7 @@ public class JsonPatch {
      * @throws NullPointerException if either of {@code original} or {@code target} are {@code null}.
      */
     public static JsonValue diff(JsonValue original, JsonValue target) {
-        ArrayList<Object> result = new ArrayList<Object>();
+        ArrayList<Object> result = new ArrayList<>();
         if (differentTypes(original, target)) { // different types cause a replace
             result.add(op("replace", original.getPointer(), target));
         } else if (original.isMap()) {

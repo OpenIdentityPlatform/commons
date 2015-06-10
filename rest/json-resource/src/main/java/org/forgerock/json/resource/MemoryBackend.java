@@ -101,7 +101,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
             } else if (value.isList()) {
                 List<Object> results = value.asList();
                 if (results.size() > 1) {
-                    results = new ArrayList<Object>(results);
+                    results = new ArrayList<>(results);
                     Collections.sort(results, VALUE_COMPARATOR);
                 }
                 return results;
@@ -331,7 +331,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
     }
 
     private final AtomicLong nextResourceId = new AtomicLong();
-    private final Map<String, Resource> resources = new ConcurrentHashMap<String, Resource>();
+    private final Map<String, Resource> resources = new ConcurrentHashMap<>();
     private final Object writeLock = new Object();
 
     /**
@@ -354,7 +354,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
                     size = resources.size();
                     resources.clear();
                 }
-                final JsonValue result = new JsonValue(new LinkedHashMap<String, Object>(1));
+                final JsonValue result = new JsonValue(new LinkedHashMap<>(1));
                 result.put("cleared", size);
                 return newResultPromise(result);
             } else {
@@ -568,7 +568,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
             } else {
                 // Server side sorting: aggregate the result set then sort. A robust implementation
                 // would need to impose administrative limits in order to control memory utilization.
-                final List<Resource> results = new ArrayList<Resource>();
+                final List<Resource> results = new ArrayList<>();
                 for (final Resource resource : resources.values()) {
                     if (filter == null || filter.accept(RESOURCE_FILTER, resource).toBoolean()) {
                         results.add(resource);
