@@ -29,6 +29,7 @@ import org.forgerock.http.io.IO;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
@@ -323,7 +324,8 @@ public class EntityTest {
     }
 
     private BranchingInputStream mockContent(final byte[] bytes) {
-        return mock(BranchingInputStream.class, delegatesTo(IO.newBranchingInputStream(bytes)));
+        return mock(BranchingInputStream.class, delegatesTo(
+                IO.newBranchingInputStream(new ByteArrayInputStream(bytes), IO.newTemporaryStorage())));
     }
 
     /**

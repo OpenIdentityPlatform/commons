@@ -310,8 +310,12 @@ public final class Entity implements Closeable {
      *             If an IO error occurred while reading the content.
      */
     public InputStream newDecodedContentInputStream() throws IOException {
-        try (final BranchingInputStream headBranch = head.branch()) {
+        final BranchingInputStream headBranch = head.branch();
+        try {
             return getDecodedInputStream(headBranch);
+        } catch (final IOException e) {
+            closeSilently(headBranch);
+            throw e;
         }
     }
 
@@ -342,8 +346,12 @@ public final class Entity implements Closeable {
      */
     public BufferedReader newDecodedContentReader(final Charset charset)
             throws IOException {
-        try (final BranchingInputStream headBranch = head.branch()) {
+        final BranchingInputStream headBranch = head.branch();
+        try {
             return getBufferedReader(headBranch, charset);
+        } catch (final IOException e) {
+            closeSilently(headBranch);
+            throw e;
         }
     }
 
