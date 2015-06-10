@@ -65,18 +65,18 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <maven.compiler.target>1.6</maven.compiler.target>
-        <maven.compiler.source>1.6</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
+        <maven.compiler.source>1.7</maven.compiler.source>
 
-        <slf4j.version>1.7.5</slf4j.version>
+        <slf4j.version>1.7.12</slf4j.version>
         <forgerock-http.version>0.0.1-SNAPSHOT</forgerock-http.version>
         <forgerock-rest.version>3.0.0-SNAPSHOT</forgerock-rest.version>
         <forgerock-util.version>2.0.0-SNAPSHOT</forgerock-util.version>
         <restlet.version>2.1.2</restlet.version>
-        <jackson.version>2.1.5</jackson.version>
+        <jackson.version>2.5.3</jackson.version>
 
-        <testng.version>6.8.8</testng.version>
-        <mockito.version>1.9.5</mockito.version>
+        <testng.version>6.9.4</testng.version>
+        <mockito.version>1.10.19</mockito.version>
         <assertj.version>1.6.1</assertj.version>
     </properties>
 

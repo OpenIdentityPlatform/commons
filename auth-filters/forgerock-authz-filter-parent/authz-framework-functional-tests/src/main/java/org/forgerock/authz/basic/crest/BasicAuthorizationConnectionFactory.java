@@ -17,12 +17,13 @@
 package org.forgerock.authz.basic.crest;
 
 import static org.forgerock.http.RoutingMode.STARTS_WITH;
+import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
 
 import org.forgerock.authz.filter.crest.AuthorizationFilters;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Resources;
-import org.forgerock.json.resource.UriRouter;
+import org.forgerock.json.resource.Router;
 
 /**
  * Factory class for getting the {@code ConnectionFactory} instance that has all of the CREST routes.
@@ -47,12 +48,12 @@ public final class BasicAuthorizationConnectionFactory {
      */
     public static ConnectionFactory getConnectionFactory() {
 
-        final UriRouter router = new UriRouter();
+        Router router = new Router();
 
-        router.addRoute(STARTS_WITH, "/simple", createEndpointCheckerHandler());
-        router.addRoute(STARTS_WITH, "/notAction", createNotActionHandler());
-        router.addRoute(STARTS_WITH, "/notCreateOrPatch", createNotCreateOrPatchHandler());
-        router.addRoute(STARTS_WITH, "/none", createNoneHandler());
+        router.addRoute(requestUriMatcher(STARTS_WITH, "/simple"), createEndpointCheckerHandler());
+        router.addRoute(requestUriMatcher(STARTS_WITH, "/notAction"), createNotActionHandler());
+        router.addRoute(requestUriMatcher(STARTS_WITH, "/notCreateOrPatch"), createNotCreateOrPatchHandler());
+        router.addRoute(requestUriMatcher(STARTS_WITH, "/none"), createNoneHandler());
 
         return Resources.newInternalConnectionFactory(router);
     }
@@ -64,11 +65,11 @@ public final class BasicAuthorizationConnectionFactory {
      * @return A {@code RequestHandler}.
      */
     private static RequestHandler createEndpointCheckerHandler() {
-        final UriRouter router = new UriRouter();
+        Router router = new Router();
 
-        router.addRoute(STARTS_WITH, "/users", AuthorizationFilters.createFilter(SIMPLE_RESOURCE,
+        router.addRoute(requestUriMatcher(STARTS_WITH, "/users"), AuthorizationFilters.createFilter(SIMPLE_RESOURCE,
                 new AlwaysAllowAuthorizationModule()));
-        router.addRoute(STARTS_WITH, "/roles", AuthorizationFilters.createFilter(SIMPLE_RESOURCE,
+        router.addRoute(requestUriMatcher(STARTS_WITH, "/roles"), AuthorizationFilters.createFilter(SIMPLE_RESOURCE,
                 new AlwaysDenyAuthorizationModule("roles")));
 
         return router;

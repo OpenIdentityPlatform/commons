@@ -16,6 +16,8 @@
 
 package org.forgerock.caf.authn.test;
 
+import static org.forgerock.http.routing.RouteMatchers.requestUriMatcher;
+
 import org.forgerock.caf.authentication.framework.AuthenticationFilter;
 import org.forgerock.caf.authn.test.configuration.ConfigurationConnectionFactory;
 import org.forgerock.guice.core.InjectorHolder;
@@ -25,10 +27,10 @@ import org.forgerock.http.Http;
 import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.RoutingMode;
-import org.forgerock.http.UriRouter;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
+import org.forgerock.http.routing.Router;
 import org.forgerock.json.resource.http.CrestHttp;
 import org.forgerock.util.Factory;
 import org.forgerock.util.promise.NeverThrowsException;
@@ -43,12 +45,10 @@ public class JaspiHttpApplication implements HttpApplication {
 
     @Override
     public Handler start() throws HttpApplicationException {
-        UriRouter router = new UriRouter();
-
-        router.addRoute(RoutingMode.EQUALS, "/protected/resource", new ConfigurableAuthenticationFilterHandler());
-
+        Router router = new Router();
+        router.addRoute(requestUriMatcher(RoutingMode.EQUALS, "/protected/resource"),
+                new ConfigurableAuthenticationFilterHandler());
         router.setDefaultRoute(CrestHttp.newHttpHandler(ConfigurationConnectionFactory.getConnectionFactory()));
-
         return router;
     }
 

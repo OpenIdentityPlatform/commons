@@ -16,14 +16,16 @@
 
 package org.forgerock.authz.basic;
 
+import static org.forgerock.http.routing.RouteMatchers.requestUriMatcher;
+
 import org.forgerock.authz.basic.crest.BasicAuthorizationConnectionFactory;
 import org.forgerock.authz.modules.oauth2.crest.OAuth2AuthorizationConnectionFactory;
 import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.RoutingMode;
-import org.forgerock.http.UriRouter;
 import org.forgerock.http.io.Buffer;
+import org.forgerock.http.routing.Router;
 import org.forgerock.json.resource.http.CrestHttp;
 import org.forgerock.util.Factory;
 
@@ -36,14 +38,11 @@ public class AuthzHttpApplication implements HttpApplication {
 
     @Override
     public Handler start() throws HttpApplicationException {
-        UriRouter router = new UriRouter();
-
-        router.addRoute(RoutingMode.STARTS_WITH, "/basic/crest",
+        Router router = new Router();
+        router.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "/basic/crest"),
                 CrestHttp.newHttpHandler(BasicAuthorizationConnectionFactory.getConnectionFactory()));
-
-        router.addRoute(RoutingMode.STARTS_WITH, "/modules/oauth2/crest",
+        router.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "/modules/oauth2/crest"),
                 CrestHttp.newHttpHandler(OAuth2AuthorizationConnectionFactory.getConnectionFactory()));
-
         return router;
     }
 

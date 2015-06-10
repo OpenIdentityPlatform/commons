@@ -17,6 +17,7 @@
 package org.forgerock.authz.modules.oauth2.crest;
 
 import static org.forgerock.http.RoutingMode.STARTS_WITH;
+import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
 
 import java.util.Collections;
 
@@ -28,7 +29,7 @@ import org.forgerock.authz.modules.oauth2.OAuth2Authorization;
 import org.forgerock.authz.modules.oauth2.OAuth2CrestAuthorizationModule;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Resources;
-import org.forgerock.json.resource.UriRouter;
+import org.forgerock.json.resource.Router;
 
 /**
  * A factory class for creating an {@code ConnectionFactory} configured with an OAuth2 authorization filter.
@@ -69,9 +70,9 @@ public final class OAuth2AuthorizationConnectionFactory {
                     }
                 }, Collections.<String>emptySet(), false, 0);
 
-        final UriRouter router = new UriRouter();
+        Router router = new Router();
 
-        router.addRoute(STARTS_WITH, "/resource", AuthorizationFilters.createFilter(SIMPLE_RESOURCE,
+        router.addRoute(requestUriMatcher(STARTS_WITH, "/resource"), AuthorizationFilters.createFilter(SIMPLE_RESOURCE,
                 authorizationModule));
 
         return Resources.newInternalConnectionFactory(router);
