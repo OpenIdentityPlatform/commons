@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwt;
@@ -221,7 +221,7 @@ public class JwtClaimsSetTest {
 
         //Given
         JwtClaimsSet claimsSet = new JwtClaimsSet();
-        Map<String, Object> claims = new HashMap<String, Object>();
+        Map<String, Object> claims = new HashMap<>();
         claims.put("KEY1", "CLAIM1");
         claims.put("KEY2", true);
         claims.put("KEY3", 1234L);
@@ -310,7 +310,7 @@ public class JwtClaimsSetTest {
         //Given
         JwtClaimsSet claimsSet = new JwtClaimsSet();
 
-        List<String> audienceList = new ArrayList<String>();
+        List<String> audienceList = new ArrayList<>();
         audienceList.add("AUDIENCE1");
         audienceList.add("AUDIENCE2");
 
@@ -443,12 +443,12 @@ public class JwtClaimsSetTest {
     public void shouldCreateJwtClaimSetWithMap() {
 
         //Given
-        Map<String, Object> claims = new HashMap<String, Object>();
+        Map<String, Object> claims = new HashMap<>();
         claims.put("typ", "TYPE");
         claims.put("jti", "JWT_ID");
         claims.put("iss", "ISSUER");
         claims.put("sub", "SUBJECT");
-        List<String> audience = new ArrayList<String>();
+        List<String> audience = new ArrayList<>();
         audience.add("AUDIENCE1");
         audience.add("AUDIENCE2");
         claims.put("aud", audience);
@@ -514,14 +514,14 @@ public class JwtClaimsSetTest {
     public void shouldCreateJwtClaimSetUsingURIsWithMap() throws URISyntaxException {
 
         //Given
-        Map<String, Object> claims = new HashMap<String, Object>();
+        Map<String, Object> claims = new HashMap<>();
         claims.put("typ", "TYPE");
         claims.put("jti", "JWT_ID");
         URI issuer = new URI("urn:issuer:animal:ferret:nose");
         claims.put("iss", issuer);
         URI subject = new URI("urn:subject:animal:ferret:nose");
         claims.put("sub", subject);
-        List<URI> audienceList = new ArrayList<URI>();
+        List<URI> audienceList = new ArrayList<>();
         URI audience1 = new URI("urn:audience1:animal:ferret:nose");
         URI audience2 = new URI("urn:audience2:animal:ferret:nose");
         audienceList.add(audience1);
@@ -593,7 +593,7 @@ public class JwtClaimsSetTest {
     public void shouldSetAudience() throws URISyntaxException {
 
         //Given
-        Map<String, Object> claims = new HashMap<String, Object>();
+        Map<String, Object> claims = new HashMap<>();
         URI audience = new URI("urn:audience1:animal:ferret:nose");
         claims.put("aud", audience);
 
@@ -611,7 +611,7 @@ public class JwtClaimsSetTest {
     public void shouldSetAudienceWithURIs() {
 
         //Given
-        Map<String, Object> claims = new HashMap<String, Object>();
+        Map<String, Object> claims = new HashMap<>();
         claims.put("aud", "AUDIENCE");
 
         //When
@@ -627,7 +627,7 @@ public class JwtClaimsSetTest {
     public void shouldThrowJwtRuntimeExceptionWhenValueIsOfWrongType() {
 
         //Given
-        Map<String, Object> claims = new HashMap<String, Object>();
+        Map<String, Object> claims = new HashMap<>();
         claims.put("typ", "TYPE");
         claims.put("jti", 1);
         claims.put("iss", "ISSUER");

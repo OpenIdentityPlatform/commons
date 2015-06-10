@@ -11,8 +11,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2011-2013 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2015 ForgeRock AS.
  */
+
 package org.forgerock.json.fluent;
 
 import java.net.URI;
@@ -49,7 +50,7 @@ public class JsonPointer implements Iterable<String> {
     public JsonPointer(String pointer) throws JsonException {
         String[] split = pointer.split("/", -1);
         int length = split.length;
-        ArrayList<String> list = new ArrayList<String>(length);
+        ArrayList<String> list = new ArrayList<>(length);
         for (int n = 0; n < length; n++) {
             if (n == 0 && split[n].length() == 0) {
                 continue; // leading slash ignored
@@ -77,7 +78,7 @@ public class JsonPointer implements Iterable<String> {
      * @param iterable an iterable collection of reference tokens.
      */
     public JsonPointer(Iterable<String> iterable) {
-        ArrayList<String> list = new ArrayList<String>();
+        ArrayList<String> list = new ArrayList<>();
         for (String element : iterable) {
             list.add(element);
         }

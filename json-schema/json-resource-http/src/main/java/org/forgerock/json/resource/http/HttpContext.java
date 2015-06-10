@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2014 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource.http;
@@ -55,11 +55,11 @@ public final class HttpContext extends AbstractContext implements ClientContext 
         this.method = HttpUtils.getMethod(req);
         this.path = getRequestPath(req);
         this.remoteAddress = getRemoteAddress(parent);
-        this.headers = Collections.unmodifiableMap(new LazyMap<String, List<String>>(
+        this.headers = Collections.unmodifiableMap(new LazyMap<>(
                 new Factory<Map<String, List<String>>>() {
                     @Override
                     public Map<String, List<String>> newInstance() {
-                        Map<String, List<String>> result = new LinkedHashMap<String, List<String>>();
+                        Map<String, List<String>> result = new LinkedHashMap<>();
                         Set<Map.Entry<String, List<String>>> headers = req.getHeaders().entrySet();
                         for (Map.Entry<String, List<String>> header : headers) {
                             String name = header.getKey();
@@ -69,11 +69,11 @@ public final class HttpContext extends AbstractContext implements ClientContext 
                         return result;
                     }
                 }));
-        this.parameters = Collections.unmodifiableMap(new LazyMap<String, List<String>>(
+        this.parameters = Collections.unmodifiableMap(new LazyMap<>(
                 new Factory<Map<String, List<String>>>() {
                     @Override
                     public Map<String, List<String>> newInstance() {
-                        Map<String, List<String>> result = new LinkedHashMap<String, List<String>>();
+                        Map<String, List<String>> result = new LinkedHashMap<>();
                         Set<Map.Entry<String, List<String>>> parameters = req.getForm().entrySet();
                         for (Map.Entry<String, List<String>> parameter : parameters) {
                             String name = parameter.getKey();

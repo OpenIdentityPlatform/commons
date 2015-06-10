@@ -11,10 +11,30 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2015 ForgeRock AS.
  */
+
 package org.forgerock.json.schema;
 
+import static org.kohsuke.args4j.ExampleMode.ALL;
+import static org.kohsuke.args4j.ExampleMode.REQUIRED;
+
+import java.io.Console;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.schema.validator.Constants;
 import org.forgerock.json.schema.validator.ErrorHandler;
@@ -28,16 +48,6 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.io.*;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.*;
-
-import static org.kohsuke.args4j.ExampleMode.ALL;
-import static org.kohsuke.args4j.ExampleMode.REQUIRED;
-
 /**
  * @author $author$
  * @version $Revision$ $Date$
@@ -48,7 +58,7 @@ public class Main {
     private static final ObjectMapper mapper = new ObjectMapper();
     private static final String ROOT_SCHEMA_ID = "http://www.forgerock.org/schema/";
 
-    private final Map<URI, Validator> schemaCache = new HashMap<URI, Validator>();
+    private final Map<URI, Validator> schemaCache = new HashMap<>();
 
     @Option(name = "-v", aliases = {"--verbose"}, usage = "display all validation error not just the first")
     private boolean verbose;
@@ -67,7 +77,7 @@ public class Main {
 
     // receives other command line parameters than options
     @Argument
-    private List<String> arguments = new ArrayList<String>();
+    private List<String> arguments = new ArrayList<>();
 
     public static void main(String[] args) throws Exception {
         new Main().doMain(args);
@@ -183,7 +193,7 @@ public class Main {
      * @throws java.io.FileNotFoundException
      */
     private List<File> getFileListingNoSort(File aStartingDir, FileFilter filter) throws FileNotFoundException {
-        List<File> result = new ArrayList<File>();
+        List<File> result = new ArrayList<>();
         List<File> filesDirs = Arrays.asList(aStartingDir.listFiles(filter));
         for (File file : filesDirs) {
             if (!file.isFile()) {

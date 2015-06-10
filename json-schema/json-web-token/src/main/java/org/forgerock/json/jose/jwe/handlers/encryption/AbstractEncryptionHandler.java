@@ -58,13 +58,7 @@ public abstract class AbstractEncryptionHandler implements EncryptionHandler {
             return cipher.doFinal(data);
         } catch (NoSuchAlgorithmException e) {
             throw new JweEncryptionException("Unsupported Encryption Algorithm, " + algorithm, e);
-        } catch (IllegalBlockSizeException e) {
-            throw new JweEncryptionException(e);
-        } catch (InvalidKeyException e) {
-            throw new JweEncryptionException(e);
-        } catch (BadPaddingException e) {
-            throw new JweEncryptionException(e);
-        } catch (NoSuchPaddingException e) {
+        } catch (IllegalBlockSizeException | InvalidKeyException | NoSuchPaddingException | BadPaddingException e) {
             throw new JweEncryptionException(e);
         }
     }
@@ -89,15 +83,8 @@ public abstract class AbstractEncryptionHandler implements EncryptionHandler {
             return cipher.doFinal(data);
         } catch (NoSuchAlgorithmException e) {
             throw new JweEncryptionException("Unsupported Encryption Algorithm, " + algorithm, e);
-        } catch (IllegalBlockSizeException e) {
-            throw new JweEncryptionException(e);
-        } catch (InvalidKeyException e) {
-            throw new JweEncryptionException(e);
-        } catch (BadPaddingException e) {
-            throw new JweEncryptionException(e);
-        } catch (NoSuchPaddingException e) {
-            throw new JweEncryptionException(e);
-        } catch (InvalidAlgorithmParameterException e) {
+        } catch (IllegalBlockSizeException | InvalidKeyException | NoSuchPaddingException | BadPaddingException
+                | InvalidAlgorithmParameterException e) {
             throw new JweEncryptionException(e);
         }
     }

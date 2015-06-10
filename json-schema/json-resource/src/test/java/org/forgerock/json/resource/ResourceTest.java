@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -63,23 +63,23 @@ public final class ResourceTest {
         return new Object[][] {
             {
                 new Resource("751E0000000oRV1IAM", "123", new JsonValue(
-                        new HashMap<String, Object>())),
+                        new HashMap<>())),
                 new Resource("751E0000000oRV1IAM", "124", new JsonValue(
-                        new HashMap<String, Object>())) },
+                        new HashMap<>())) },
             {
                 new Resource("751E0000000oRV1IAM", "123", new JsonValue(
-                        new HashMap<String, Object>())),
+                        new HashMap<>())),
                 new Resource("751E0000000oRV1IAN", "123", new JsonValue(
-                        new HashMap<String, Object>())) } };
+                        new HashMap<>())) } };
     }
 
     @DataProvider
     Object[][] resources() {
         return new Object[][] {
             { new Resource("751E0000000oRV1IAM", "123",
-                    new JsonValue(new HashMap<String, Object>())) },
-            { new Resource("751E0000000oRV1IAM", null, new JsonValue(new HashMap<String, Object>())) },
-            { new Resource(null, "123", new JsonValue(new HashMap<String, Object>())) },
-            { new Resource(null, null, new JsonValue(new HashMap<String, Object>())) }, };
+                    new JsonValue(new HashMap<>())) },
+            { new Resource("751E0000000oRV1IAM", null, new JsonValue(new HashMap<>())) },
+            { new Resource(null, "123", new JsonValue(new HashMap<>())) },
+            { new Resource(null, null, new JsonValue(new HashMap<>())) }, };
     }
 }

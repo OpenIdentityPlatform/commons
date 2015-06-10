@@ -11,13 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.utils;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -70,15 +69,7 @@ public class KeystoreManager {
             }
             FileInputStream fis = new FileInputStream(keyStoreFile);
             keyStore.load(fis, keyStorePassword.toCharArray());
-        } catch (KeyStoreException e) {
-            throw new KeystoreManagerException(e);
-        } catch (FileNotFoundException e) {
-            throw new KeystoreManagerException(e);
-        } catch (NoSuchAlgorithmException e) {
-            throw new KeystoreManagerException(e);
-        } catch (CertificateException e) {
-            throw new KeystoreManagerException(e);
-        } catch (IOException e) {
+        } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
             throw new KeystoreManagerException(e);
         }
     }
@@ -145,11 +136,7 @@ public class KeystoreManager {
 
         try {
             return (PrivateKey) keyStore.getKey(keyAlias, privateKeyPassword.toCharArray());
-        } catch (KeyStoreException e) {
-            throw new KeystoreManagerException(e);
-        } catch (NoSuchAlgorithmException e) {
-            throw new KeystoreManagerException(e);
-        } catch (UnrecoverableKeyException e) {
+        } catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
             throw new KeystoreManagerException(e);
         }
     }

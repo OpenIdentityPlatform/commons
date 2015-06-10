@@ -11,24 +11,18 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.ref.jackson;
 
-// Java Standard Edition
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 
-// Jackson
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-// JSON Fluent
 import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonValue;
-
-// JSON Reference
 import org.forgerock.json.ref.JsonReferenceException;
 import org.forgerock.json.ref.JsonReferenceTransformer;
 
@@ -66,20 +60,10 @@ public class JacksonReferenceTransformer extends JsonReferenceTransformer {
     @Override
     protected JsonValue resolve(URI uri) throws JsonException {
         JsonValue result;
-        InputStream in = null;
-        try {
-            in = uri.toURL().openStream();
+        try (InputStream in = uri.toURL().openStream()) {
             result = new JsonValue(mapper.readValue(in, Object.class));
         } catch (IOException ioe) {
             throw new JsonException(ioe);
-        } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException ioe) {
-                    // nothing useful we can do about it
-                }
-            }
         }
         result.getTransformers().add(0, new JacksonReferenceTransformer(uri, result)); // support $refs
         return result;

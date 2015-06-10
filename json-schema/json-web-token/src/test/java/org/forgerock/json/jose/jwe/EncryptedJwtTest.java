@@ -63,8 +63,8 @@ public class EncryptedJwtTest {
         // cases, otherwise the attacker can easily break the encryption.
         int ivEnd = initialisationVector.length-1;
         byte pad = 0x01;
-        final Set<String> errorMessages = new HashSet<String>();
-        final Set<String> stackTraces = new HashSet<String>();
+        final Set<String> errorMessages = new HashSet<>();
+        final Set<String> stackTraces = new HashSet<>();
         for (int i = 0; i < 256; ++i) {
             try {
                 // NB: we are assuming CBC-mode block cipher with IV...

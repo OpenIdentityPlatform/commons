@@ -11,7 +11,7 @@
 * Header, with the fields enclosed by brackets [] replaced by your own identifying
 * information: "Portions copyright [year] [name of copyright owner]".
 *
-* Copyright 2014 ForgeRock AS.
+* Copyright 2014-2015 ForgeRock AS.
 */
 
 package org.forgerock.json.resource;
@@ -40,10 +40,10 @@ public class AdviceContext extends AbstractContext {
 
     private static final Pattern ALLOWED_RFC_CHARACTERS = Pattern.compile("^[\\x20-\\x7E]*$");
 
-    private final Collection<String> restrictedAdviceNames = new HashSet<String>();
+    private final Collection<String> restrictedAdviceNames = new HashSet<>();
 
     /** advice currently stored for this context is help in this map. **/
-    private final Map<String, List<String>> advice = new TreeMap<String, List<String>>(String.CASE_INSENSITIVE_ORDER);
+    private final Map<String, List<String>> advice = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
     /**
      * Creates a new AdviceContext with the provided parent
@@ -79,7 +79,7 @@ public class AdviceContext extends AbstractContext {
         }
         List<String> adviceEntry = advice.get(adviceName);
         if (adviceEntry == null) {
-            adviceEntry = new ArrayList<String>();
+            adviceEntry = new ArrayList<>();
             advice.put(adviceName, adviceEntry);
         }
         adviceEntry.addAll(Arrays.asList(advices));

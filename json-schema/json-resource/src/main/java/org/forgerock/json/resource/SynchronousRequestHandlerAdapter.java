@@ -58,7 +58,7 @@ final class SynchronousRequestHandlerAdapter implements RequestHandler {
     public Promise<QueryResult, ResourceException> handleQuery(final ServerContext context, final QueryRequest request,
             final QueryResourceHandler handler) {
         try {
-            final Collection<Resource> resources = new LinkedList<Resource>();
+            final Collection<Resource> resources = new LinkedList<>();
             final QueryResult result = syncHandler.handleQuery(context, request, resources);
             for (final Resource resource : resources) {
                 handler.handleResource(resource);

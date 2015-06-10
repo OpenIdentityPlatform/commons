@@ -35,7 +35,7 @@ import org.forgerock.util.promise.Promise;
  */
 class AnnotatedActionMethods {
 
-    private Map<String, AnnotatedMethod> methods = new HashMap<String, AnnotatedMethod>();
+    private Map<String, AnnotatedMethod> methods = new HashMap<>();
 
     Promise<JsonValue, ResourceException> invoke(ServerContext context, ActionRequest request, String id) {
         AnnotatedMethod method = methods.get(request.getAction());

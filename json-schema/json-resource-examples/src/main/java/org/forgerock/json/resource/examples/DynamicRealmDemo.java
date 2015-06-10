@@ -194,7 +194,7 @@ public final class DynamicRealmDemo {
 
             private RequestHandler subrealm(final List<String> parentPath, final ServerContext context) {
                 final String realm = context.asContext(RouterContext.class).getUriTemplateVariables().get("realm");
-                final List<String> path = new LinkedList<String>(parentPath);
+                final List<String> path = new LinkedList<>(parentPath);
                 path.add(realm);
 
                 // TODO: check that the path references an existing realm?

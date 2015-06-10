@@ -565,7 +565,7 @@ public final class PatchOperation {
                     "The request could not be processed because the provided "
                             + "content is not a JSON array of patch operations");
         }
-        final List<PatchOperation> patch = new ArrayList<PatchOperation>(json.size());
+        final List<PatchOperation> patch = new ArrayList<>(json.size());
         for (final JsonValue operation : json) {
             patch.add(valueOf(operation));
         }
@@ -714,7 +714,7 @@ public final class PatchOperation {
      * @return A JSON value representation of this patch operation.
      */
     public JsonValue toJsonValue() {
-        final JsonValue json = new JsonValue(new LinkedHashMap<String, Object>(3));
+        final JsonValue json = new JsonValue(new LinkedHashMap<>(3));
         json.put(FIELD_OPERATION, operation);
         json.put(FIELD_FIELD, field.toString());
         if (isMove() || isCopy()) {

@@ -134,7 +134,7 @@ public final class FilterChain implements RequestHandler {
 
     }
 
-    private final List<Filter> filters = new CopyOnWriteArrayList<Filter>();
+    private final List<Filter> filters = new CopyOnWriteArrayList<>();
     private volatile RequestHandler target;
 
     /**

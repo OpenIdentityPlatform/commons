@@ -12,7 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright © 2010–2011 ApexIdentity Inc. All rights reserved.
- * Portions Copyrighted 2011-2014 ForgeRock AS.
+ * Portions Copyrighted 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.fluent;
@@ -42,9 +42,9 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import org.forgerock.util.Function;
 import org.forgerock.util.RangeSet;
 import org.forgerock.util.Utils;
-import org.forgerock.util.Function;
 
 /**
  * Represents a value in a JSON object model structure. JSON values are
@@ -75,7 +75,7 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
      * @return A JSON array.
      */
     public static List<Object> array(final Object... objects) {
-        return new ArrayList<Object>(Arrays.asList(objects));
+        return new ArrayList<>(Arrays.asList(objects));
     }
 
     /**
@@ -92,7 +92,7 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
      * @return A JSON set.
      */
     public static Set<Object> set(final Object... objects) {
-        return new LinkedHashSet<Object>(Arrays.asList(objects));
+        return new LinkedHashSet<>(Arrays.asList(objects));
     }
 
     /**
@@ -111,7 +111,7 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
      * @return The JSON field for inclusion in a JSON object.
      */
     public static Map.Entry<String, Object> field(final String key, final Object value) {
-        return new AbstractMap.SimpleImmutableEntry<String, Object>(key, value);
+        return new AbstractMap.SimpleImmutableEntry<>(key, value);
     }
 
     /**
@@ -151,7 +151,7 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static Object object(final Map.Entry... fields) {
-        final Map<String, Object> object = new LinkedHashMap<String, Object>(fields.length);
+        final Map<String, Object> object = new LinkedHashMap<>(fields.length);
         for (final Map.Entry<String, Object> field : fields) {
             if (field != null) {
                 object.put(field.getKey(), field.getValue());
@@ -192,7 +192,7 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
     private JsonPointer pointer;
 
     /** Transformers to apply to the value; are inherited by its members. */
-    private final ArrayList<JsonTransformer> transformers = new ArrayList<JsonTransformer>(0);
+    private final ArrayList<JsonTransformer> transformers = new ArrayList<>(0);
 
     /**
      * Constructs a JSON value object with a given object. This constructor will
@@ -456,10 +456,8 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
     public Charset asCharset() {
         try {
             return (object == null ? null : Charset.forName(asString()));
-        } catch (final IllegalCharsetNameException icne) {
-            throw new JsonValueException(this, icne);
-        } catch (final UnsupportedCharsetException uce) {
-            throw new JsonValueException(this, uce);
+        } catch (final IllegalCharsetNameException | UnsupportedCharsetException e) {
+            throw new JsonValueException(this, e);
         }
     }
 
@@ -614,7 +612,7 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
     public <E> List<E> asList(final Class<E> type) {
         if (object != null) {
             if (isSet()) {
-                return new ArrayList<E>(asSet(type));
+                return new ArrayList<>(asSet(type));
             }
             expect(List.class);
             if (type != Object.class) {
@@ -653,7 +651,7 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
     public <E> Set<E> asSet(final Class<E> type) {
         if (object != null) {
             if (isList()) {
-                return new LinkedHashSet<E>(asList(type));
+                return new LinkedHashSet<>(asList(type));
             }
             expect(Set.class);
             if (type != Object.class) {
@@ -696,11 +694,11 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
     public <V, E extends Exception> List<V> asList(final Function<JsonValue, V, E> transformFunction) throws E {
         if (object != null) {
             if (isSet()) {
-                return new ArrayList<V>(asSet(transformFunction));
+                return new ArrayList<>(asSet(transformFunction));
             }
             expect(List.class);
             final int size = size();
-            final List<V> list = new ArrayList<V>(size);
+            final List<V> list = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
                 list.add(transformFunction.apply(get(i)));
             }
@@ -739,11 +737,11 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
     public <V, E extends Exception> Set<V> asSet(final Function<JsonValue, V, E> transformFunction) throws E {
         if (object != null) {
             if (isList()) {
-                return new LinkedHashSet<V>(asList(transformFunction));
+                return new LinkedHashSet<>(asList(transformFunction));
             }
             expect(Set.class);
             final int size = size();
-            final Set<V> set = new LinkedHashSet<V>(size);
+            final Set<V> set = new LinkedHashSet<>(size);
             for (JsonValue element : this) {
                 set.add(transformFunction.apply(element));
             }
@@ -1009,11 +1007,11 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
         final JsonValue result = new JsonValue(this.object, this.pointer);
         result.transformers.addAll(this.transformers); // avoid re-applying transformers
         if (isMap()) {
-            result.object = new LinkedHashMap<String, Object>(this.asMap());
+            result.object = new LinkedHashMap<>(this.asMap());
         } else if (isList()) {
-            result.object = new ArrayList<Object>(this.asList());
+            result.object = new ArrayList<>(this.asList());
         } else if (isSet()) {
-            result.object = new LinkedHashSet<Object>(this.asSet());
+            result.object = new LinkedHashSet<>(this.asSet());
         }
         return result;
     }
@@ -1053,19 +1051,19 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
         // TODO: track original values to resolve cyclic references
         final JsonValue result = new JsonValue(object, pointer); // start with shallow copy
         if (this.isMap()) {
-            final Map<String, Object> map = new LinkedHashMap<String, Object>(size());
+            final Map<String, Object> map = new LinkedHashMap<>(size());
             for (final String key : keys()) {
                 map.put(key, this.get(key).copy().getObject()); // recursion
             }
             result.object = map;
         } else if (isList()) {
-            final ArrayList<Object> list = new ArrayList<Object>(size());
+            final ArrayList<Object> list = new ArrayList<>(size());
             for (final JsonValue element : this) {
                 list.add(element.copy().getObject()); // recursion
             }
             result.object = list;
         } else if (isSet()) {
-            final Set<Object> set = new LinkedHashSet<Object>(size());
+            final Set<Object> set = new LinkedHashSet<>(size());
             for (final JsonValue element : this) {
                 set.add(element.copy().getObject()); // recursion
             }
@@ -1785,12 +1783,12 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
                 // Create the field based on the type of the next token.
                 final String nextToken = pointer.get(n + 1);
                 if (isEndOfListToken(nextToken)) {
-                    jv.add(token, new ArrayList<Object>());
+                    jv.add(token, new ArrayList<>());
                     jv = jv.get(token);
                 } else if (isIndexToken(nextToken)) {
                     throw new JsonValueException(this, "Expecting a value");
                 } else {
-                    jv.add(token, new LinkedHashMap<String, Object>());
+                    jv.add(token, new LinkedHashMap<>());
                     jv = jv.get(token);
                 }
             }
