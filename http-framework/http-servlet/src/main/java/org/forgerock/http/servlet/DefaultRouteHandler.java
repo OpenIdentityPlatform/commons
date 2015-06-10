@@ -115,10 +115,7 @@ final class DefaultRouteHandler implements Handler {
         }
         try {
             dispatcher.forward(req, resp);
-        } catch (ServletException e) {
-            HttpApplication.LOGGER.warn("Can't route Request with default servlet {}", servletName, e);
-            return Promises.newResultPromise(new Response(Status.INTERNAL_SERVER_ERROR));
-        } catch (IOException e) {
+        } catch (ServletException | IOException e) {
             HttpApplication.LOGGER.warn("Can't route Request with default servlet {}", servletName, e);
             return Promises.newResultPromise(new Response(Status.INTERNAL_SERVER_ERROR));
         }
