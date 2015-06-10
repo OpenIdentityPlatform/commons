@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jws;
@@ -144,7 +144,7 @@ public class JwsSecureHeaderTest {
 
         //Given
         JwsHeader header = new JwsHeader();
-        List<String> x509CertificateChain = new ArrayList<String>();
+        List<String> x509CertificateChain = new ArrayList<>();
         x509CertificateChain.add("CERT_CHAIN1");
         x509CertificateChain.add("CERT_CHAIN2");
 
@@ -165,10 +165,10 @@ public class JwsSecureHeaderTest {
 
         //Given
         JwsHeader header = new JwsHeader();
-        List<String> x509CertificateChain = new ArrayList<String>();
+        List<String> x509CertificateChain = new ArrayList<>();
         x509CertificateChain.add("CERT_CHAIN1");
         x509CertificateChain.add("CERT_CHAIN2");
-        List<String> base64EncodedX509CertificateChain = new ArrayList<String>();
+        List<String> base64EncodedX509CertificateChain = new ArrayList<>();
         base64EncodedX509CertificateChain.add(Base64.encode("CERT_CHAIN1".getBytes(Utils.CHARSET)));
         base64EncodedX509CertificateChain.add(Base64.encode("CERT_CHAIN2".getBytes(Utils.CHARSET)));
         header.setParameter("x5c", x509CertificateChain);
@@ -241,7 +241,7 @@ public class JwsSecureHeaderTest {
 
         //Given
         JwsHeader header = new JwsHeader();
-        List<String> criticalHeaders = new ArrayList<String>();
+        List<String> criticalHeaders = new ArrayList<>();
         criticalHeaders.add("CRITICAL_HEADER1");
         criticalHeaders.add("CRITICAL_HEADER2");
         header.setParameter("crit", criticalHeaders);

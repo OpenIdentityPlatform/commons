@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwe.handlers.compression;
@@ -39,14 +39,10 @@ public class DeflateCompressionHandler implements CompressionHandler {
      */
     @Override
     public byte[] compress(byte[] bytes) {
-
         ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
-        DeflaterOutputStream deflaterOutputStream = new DeflaterOutputStream(byteOutputStream,
-                new Deflater(Deflater.DEFLATED, true));
-        try {
+        try (DeflaterOutputStream deflaterOutputStream = new DeflaterOutputStream(byteOutputStream,
+                     new Deflater(Deflater.DEFLATED, true))) {
             deflaterOutputStream.write(bytes);
-            deflaterOutputStream.flush();
-            deflaterOutputStream.close();
         } catch (IOException e) {
             throw new JweCompressionException("Failed to apply compression algorithm.", e);
         }
@@ -59,20 +55,15 @@ public class DeflateCompressionHandler implements CompressionHandler {
      */
     @Override
     public byte[] decompress(byte[] bytes) {
-
-        InflaterInputStream inflaterInputStream = new InflaterInputStream(new ByteArrayInputStream(bytes),
-                new Inflater(true));
         ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
-
-        try {
+        try (InflaterInputStream inflaterInputStream = new InflaterInputStream(new ByteArrayInputStream(bytes),
+                new Inflater(true));
+             ByteArrayOutputStream out = byteOutputStream) {
             byte[] buffer = new byte[1024];
             int l;
             while ((l = inflaterInputStream.read(buffer)) > 0) {
-                byteOutputStream.write(buffer, 0, l);
+                out.write(buffer, 0, l);
             }
-
-            inflaterInputStream.close();
-            byteOutputStream.close();
         } catch (IOException e) {
             throw new JweCompressionException("Failed to apply de-compression algorithm.", e);
         }
