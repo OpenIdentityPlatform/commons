@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2014 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -131,7 +131,7 @@ public final class SecurityContext extends AbstractContext {
         super(id, "security", checkNotNull(parent, "Cannot instantiate SecurityContext with null parent Context"));
         this.authenticationId = authenticationId != null ? authenticationId : "";
         this.authorizationId = authorizationId != null
-                ? Collections.unmodifiableMap(new LinkedHashMap<String, Object>(authorizationId))
+                ? Collections.unmodifiableMap(new LinkedHashMap<>(authorizationId))
                 : Collections.<String, Object>emptyMap();
     }
 

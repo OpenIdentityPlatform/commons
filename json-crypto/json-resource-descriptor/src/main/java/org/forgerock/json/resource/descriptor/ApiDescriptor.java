@@ -11,8 +11,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
+
 package org.forgerock.json.resource.descriptor;
 
 import static java.util.Collections.unmodifiableSet;
@@ -27,20 +28,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.forgerock.http.ResourcePath;
 import org.forgerock.i18n.LocalizableMessage;
 import org.forgerock.i18n.LocalizedIllegalArgumentException;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.http.ResourcePath;
 import org.forgerock.json.resource.Version;
 
 @SuppressWarnings("javadoc")
 public final class ApiDescriptor {
     public static final class Builder {
         private LocalizableMessage description;
-        private final Map<Urn, ResourceDescriptor> resources =
-                new LinkedHashMap<Urn, ResourceDescriptor>();
-        private final Set<RelationDescriptor> relations = new LinkedHashSet<RelationDescriptor>();
-        private final Set<Profile> profiles = new LinkedHashSet<Profile>();
+        private final Map<Urn, ResourceDescriptor> resources = new LinkedHashMap<>();
+        private final Set<RelationDescriptor> relations = new LinkedHashSet<>();
+        private final Set<Profile> profiles = new LinkedHashSet<>();
         private final Urn urn;
 
         private Builder(final Urn urn) {
@@ -110,7 +110,7 @@ public final class ApiDescriptor {
         }
 
         public ApiDescriptor build() {
-            final List<LocalizableMessage> warnings = new LinkedList<LocalizableMessage>();
+            final List<LocalizableMessage> warnings = new LinkedList<>();
             final ApiDescriptor descriptor = build(warnings);
             if (warnings.isEmpty()) {
                 return descriptor;
@@ -123,8 +123,7 @@ public final class ApiDescriptor {
              * Check the resource descriptors to see if they contain any invalid
              * references. Repeat until only valid resource descriptors remain.
              */
-            final Map<Urn, ResourceDescriptor> resolvedResources =
-                    new LinkedHashMap<Urn, ResourceDescriptor>(resources);
+            final Map<Urn, ResourceDescriptor> resolvedResources = new LinkedHashMap<>(resources);
             boolean foundInvalidResource;
             do {
                 foundInvalidResource = false;
@@ -202,8 +201,7 @@ public final class ApiDescriptor {
             }
 
             // Now resolve API relations.
-            final Set<RelationDescriptor> resolvedRelations =
-                    new LinkedHashSet<RelationDescriptor>(relations.size());
+            final Set<RelationDescriptor> resolvedRelations = new LinkedHashSet<>(relations.size());
             for (final RelationDescriptor relation : relations) {
                 final ResourceDescriptor resource =
                         resolvedResources.get(relation.getResourceUrn());

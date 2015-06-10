@@ -11,21 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright 2011-2014 ForgeRock AS.
+ * Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.crypto;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import org.forgerock.json.crypto.simple.SimpleDecryptor;
-import org.forgerock.json.crypto.simple.SimpleEncryptor;
-import org.forgerock.json.crypto.simple.SimpleKeySelector;
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonTransformer;
-import org.forgerock.json.fluent.JsonValue;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -38,6 +29,15 @@ import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.forgerock.json.crypto.simple.SimpleDecryptor;
+import org.forgerock.json.crypto.simple.SimpleEncryptor;
+import org.forgerock.json.crypto.simple.SimpleKeySelector;
+import org.forgerock.json.fluent.JsonPointer;
+import org.forgerock.json.fluent.JsonTransformer;
+import org.forgerock.json.fluent.JsonValue;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 /**
  * @author Paul C. Bryan
@@ -113,7 +113,7 @@ public class JsonCryptoTest {
         JsonValue value = new JsonValue(PLAINTEXT);
         JsonEncryptor encryptor = new SimpleEncryptor(SYMMETRIC_CIPHER, secretKey, "secretKey");
         JsonValue crypto = new JsonCrypto(encryptor.getType(), encryptor.encrypt(value)).toJsonValue();
-        ArrayList<JsonTransformer> transformers = new ArrayList<JsonTransformer>();
+        ArrayList<JsonTransformer> transformers = new ArrayList<>();
         transformers.add(new JsonCryptoTransformer(new SimpleDecryptor(selector)));
         value = new JsonValue(crypto.getObject(), null, transformers);
         assertThat(value.getObject()).isEqualTo(PLAINTEXT);
@@ -122,7 +122,7 @@ public class JsonCryptoTest {
     @Test
     public void testDeepObjectEncryption() throws JsonCryptoException {
         SimpleEncryptor encryptor = new SimpleEncryptor(SYMMETRIC_CIPHER, secretKey, "secretKey");
-        ArrayList<JsonTransformer> transformers = new ArrayList<JsonTransformer>();
+        ArrayList<JsonTransformer> transformers = new ArrayList<>();
         transformers.add(new JsonCryptoTransformer(new SimpleDecryptor(selector)));
 
         // encrypt a simple value
@@ -131,9 +131,9 @@ public class JsonCryptoTest {
         assertThat(value.getObject()).isNotEqualTo(PASSWORD);
         assertThat(JsonCrypto.isJsonCrypto(value)).isTrue();
 
-        Map<String, Object> inner = new HashMap<String, Object>();
+        Map<String, Object> inner = new HashMap<>();
         inner.put("password", value.getObject());
-        value = new JsonValue(new HashMap<String, Object>());
+        value = new JsonValue(new HashMap<>());
         value.put("user", inner);
         value.put("description", PLAINTEXT);
 

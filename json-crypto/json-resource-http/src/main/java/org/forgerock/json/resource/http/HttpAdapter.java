@@ -515,7 +515,7 @@ final class HttpAdapter implements Handler {
     }
 
     private ResourcePath getMatchedUri(Context context) {
-        List<ResourcePath> matched = new ArrayList<ResourcePath>();
+        List<ResourcePath> matched = new ArrayList<>();
         for (Context ctx = context; ctx != null; ctx = ctx.getParent()) {
             if (!ctx.containsContext(RouterContext.class)) {
                 break;

@@ -1,26 +1,19 @@
 /*
- * DO NOT REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2013 ForgeRock AS All rights reserved.
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions copyright [year] [name of copyright owner]"
+ * Copyright 2013-2015 ForgeRock AS.
  */
+
 package org.forgerock.json.jose.jwk;
 
 import java.math.BigInteger;
@@ -77,7 +70,7 @@ public class RsaJWK extends JWK {
          * @param t t value
          */
         public OtherFactors(String r, String d, String t) {
-            super(new HashMap<String, String>());
+            super(new HashMap<>());
             put(R, r);
             put(D, d);
             put(T, t);
@@ -88,7 +81,7 @@ public class RsaJWK extends JWK {
          * @param info RSAOtherPrimeInfo used to create the other prime factors object.
          */
         public OtherFactors(RSAOtherPrimeInfo info) {
-            super(new HashMap<String, String>());
+            super(new HashMap<>());
             put(R, Base64url.encode(info.getPrime().toByteArray()));
             put(D, Base64url.encode(info.getExponent().toByteArray()));
             put(T, Base64url.encode(info.getCrtCoefficient().toByteArray()));
@@ -545,7 +538,7 @@ public class RsaJWK extends JWK {
         x5t = json.get(X5T).asString();
         x5c = json.get(X5C).asList(Base64.class);
         if (factors != null && !factors.isEmpty()) {
-            listOfFactors = new ArrayList<OtherFactors>(factors.size());
+            listOfFactors = new ArrayList<>(factors.size());
             for (Object factor : factors) {
                 String r = null, dd = null, t = null;
                 r = ((JsonValue) factor).get("r").asString();

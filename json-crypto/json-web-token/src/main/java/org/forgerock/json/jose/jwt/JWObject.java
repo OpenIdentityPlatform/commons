@@ -40,7 +40,7 @@ public abstract class JWObject {
      * Constructs a new, empty JWObject.
      */
     public JWObject() {
-        this.jsonValue = new JsonValue(new LinkedHashMap<String, Object>());
+        this.jsonValue = new JsonValue(new LinkedHashMap<>());
     }
 
     /**

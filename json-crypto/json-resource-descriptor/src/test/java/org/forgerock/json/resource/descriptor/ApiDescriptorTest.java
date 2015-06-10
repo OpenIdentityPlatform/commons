@@ -74,7 +74,7 @@ public final class ApiDescriptorTest {
         @Override
         public Resolver createResolver(ServerContext context, Request request) {
             return new AbstractResolver() {
-                private final List<String> realmList = new LinkedList<String>();
+                private final List<String> realmList = new LinkedList<>();
 
                 @Override
                 public Promise<Collection<RelationDescriptor>, ResourceException> getRelationsForResource(

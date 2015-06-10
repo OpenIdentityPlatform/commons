@@ -11,14 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
+
 package org.forgerock.json.resource.examples;
 
-import static org.forgerock.json.resource.examples.DemoUtils.ctx;
-import static org.forgerock.json.resource.examples.DemoUtils.getConnectionFactory;
-import static org.forgerock.json.resource.examples.DemoUtils.log;
-import static org.forgerock.json.resource.examples.DemoUtils.userAliceWithIdAndRev;
+import static org.forgerock.json.resource.examples.DemoUtils.*;
 
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
@@ -46,9 +44,8 @@ public final class ReadModifyWriteDemo {
      *             If an unexpected error occurred.
      */
     public static void main(final String[] args) throws ResourceException {
-        final ConnectionFactory server = getConnectionFactory();
-        final Connection connection = server.getConnection();
-        try {
+        try (final ConnectionFactory server = getConnectionFactory();
+             final Connection connection = server.getConnection()) {
             log("Reading resource");
             final Resource before = connection.read(ctx(), Requests.newReadRequest("users/1"));
             log("Resource read and has revision " + before.getRevision());
@@ -57,11 +54,6 @@ public final class ReadModifyWriteDemo {
                     connection.update(ctx(), Requests.newUpdateRequest("users/1",
                             userAliceWithIdAndRev(1, 1)));
             log("Updated resource now has revision " + after.getRevision());
-        } finally {
-            log("Closing connection");
-            if (connection != null) {
-                connection.close();
-            }
         }
     }
 

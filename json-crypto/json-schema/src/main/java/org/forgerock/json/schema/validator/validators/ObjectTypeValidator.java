@@ -1,26 +1,19 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright © 2011-2013 ForgeRock AS. All rights reserved.
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2011-2015 ForgeRock AS.
  */
+
 package org.forgerock.json.schema.validator.validators;
 
 import static org.forgerock.json.schema.validator.Constants.*;
@@ -74,7 +67,7 @@ public class ObjectTypeValidator extends Validator {
      * An object instance is valid against this keyword if its property set
      * contains all elements in this keyword's array value.
      */
-    private final Set<String> requiredPropertyNames = new HashSet<String>();
+    private final Set<String> requiredPropertyNames = new HashSet<>();
     /**
      * This attribute is an object that defines the requirements of a
      * property on an instance object.  If an object instance has a property
@@ -144,7 +137,7 @@ public class ObjectTypeValidator extends Validator {
         super(schema, jsonPointer);
         Map<String, Object> objectProperties = (Map<String, Object>) schema.get(PROPERTIES);
         if (null != objectProperties) {
-            propertyValidators = new HashMap<String, PropertyValidatorBag>(objectProperties.size());
+            propertyValidators = new HashMap<>(objectProperties.size());
 
             for (Map.Entry<String, Object> entry : objectProperties.entrySet()) {
                 final List<String> newPointer = newList(jsonPointer, PROPERTIES, entry.getKey());
@@ -166,7 +159,7 @@ public class ObjectTypeValidator extends Validator {
             } else if (PATTERNPROPERTIES.equals(e.getKey())) {
                 if (e.getValue() instanceof Map) {
                     Map<String, Object> properties = (Map<String, Object>) e.getValue();
-                    patternPropertyValidators = new HashMap<Pattern, Validator>(properties.size());
+                    patternPropertyValidators = new HashMap<>(properties.size());
 
                     for (Map.Entry<String, Object> entry : properties.entrySet()) {
                         try {
@@ -192,7 +185,7 @@ public class ObjectTypeValidator extends Validator {
                             }
                         } else {
                             if (null == dependencyValues) {
-                                dependencyValues = new HashMap<String, Set<String>>(1);
+                                dependencyValues = new HashMap<>(1);
                             }
                             if (d.getValue() instanceof Map) {
                                 // @TODO: Validate additional properties
@@ -200,7 +193,7 @@ public class ObjectTypeValidator extends Validator {
                             } else if (d.getValue() instanceof String) {
                                 dependencyValues.put(d.getKey(), Collections.singleton((String) d.getValue()));
                             } else if (d.getValue() instanceof Collection) {
-                                dependencyValues.put(d.getKey(), new HashSet<String>((Collection<String>) d.getValue()));
+                                dependencyValues.put(d.getKey(), new HashSet<>((Collection<String>) d.getValue()));
                             }
                         }
                     }
@@ -216,7 +209,7 @@ public class ObjectTypeValidator extends Validator {
             } else if (ONEOF.equals(e.getKey())) {
                 if (e.getValue() instanceof List) {
                     final List<Object> l = (List<Object>) e.getValue();
-                    oneOfValidators = new ArrayList<Validator>(l.size());
+                    oneOfValidators = new ArrayList<>(l.size());
                     for (int i = 0; i < l.size(); i++) {
                         Object obj = l.get(i);
                         if (obj instanceof Map) {
@@ -229,7 +222,7 @@ public class ObjectTypeValidator extends Validator {
             } else if (DEFINITIONS.equals(e.getKey())) {
                 if (e.getValue() instanceof Map) {
                     Map<String, Object> definitions = (Map<String, Object>) e.getValue();
-                    definitionValidators = new HashMap<String, Validator>(definitions.size());
+                    definitionValidators = new HashMap<>(definitions.size());
                     for (Map.Entry<String, Object> entry : definitions.entrySet()) {
                         if (entry.getValue() instanceof Map) {
                             final List<String> newPointer = newList(jsonPointer, DEFINITIONS, entry.getKey());
@@ -253,14 +246,14 @@ public class ObjectTypeValidator extends Validator {
             Map<String, Object> mapValue = (Map<String, Object>) value;
 
             if (!mapValue.keySet().containsAll(requiredPropertyNames)) {
-                Set<String> missingRequiredProperties = new HashSet<String>(requiredPropertyNames);
+                Set<String> missingRequiredProperties = new HashSet<>(requiredPropertyNames);
                 missingRequiredProperties.removeAll(mapValue.keySet());
                 // @TODO: Add exception message: Missing required property names
                 handler.error(new ValidationException(
                         "Missing required property names: " + missingRequiredProperties, getPath(at, null)));
             }
 
-            Set<String> additionalPropertyNames = new HashSet<String>(mapValue.keySet());
+            Set<String> additionalPropertyNames = new HashSet<>(mapValue.keySet());
             Set<String> instancePropertyKeySet = Collections.unmodifiableSet(mapValue.keySet());
 
             for (Map.Entry<String, PropertyValidatorBag> schemaProperty : propertyValidators.entrySet()) {
@@ -376,7 +369,7 @@ public class ObjectTypeValidator extends Validator {
             if (dependencyValue instanceof String) {
                 requiredProperties = Collections.singleton((String) dependencyValue);
             } else if (dependencyValue instanceof Collection) {
-                requiredProperties = new HashSet<String>((Collection<String>) dependencyValue);
+                requiredProperties = new HashSet<>((Collection<String>) dependencyValue);
             }
         }
 

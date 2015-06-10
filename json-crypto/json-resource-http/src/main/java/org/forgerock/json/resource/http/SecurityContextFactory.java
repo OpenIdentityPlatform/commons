@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2014 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource.http;
@@ -63,7 +63,7 @@ import org.forgerock.json.resource.SecurityContext;
  *     // Add the attributes.
  *     if (checkCredentials(authcid, password)) {
  *         // Obtain principals for authorization.
- *         Map<String, Object> authzid = new HashMap<String, Object>();
+ *         Map<String, Object> authzid = new HashMap<>();
  *         authzid.put(AUTHZID_ID, id);
  *         ...
  *

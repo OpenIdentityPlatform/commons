@@ -11,35 +11,24 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.crypto.simple;
 
-// Java SE
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.util.HashMap;
 
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-
-
-// Apache Commons Codec
-import org.apache.commons.codec.binary.Base64;
-
-// Jackson
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-// JSON Fluent
-import org.forgerock.json.fluent.JsonValue;
-
-// JSON Crypto
+import org.apache.commons.codec.binary.Base64;
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.crypto.JsonEncryptor;
-
+import org.forgerock.json.fluent.JsonValue;
 
 /**
  * Encrypts a JSON value into an {@code x-simple-encryption} type {@code $crypto} JSON object.
@@ -94,7 +83,7 @@ public class SimpleEncryptor implements JsonEncryptor {
         symmetric.init(Cipher.ENCRYPT_MODE, key);
         String data = Base64.encodeBase64String(symmetric.doFinal(mapper.writeValueAsBytes(object)));
         byte[] iv = symmetric.getIV();
-        HashMap<String, Object> result = new HashMap<String, Object>();
+        HashMap<String, Object> result = new HashMap<>();
         result.put("cipher", this.cipher);
         result.put("key", this.alias);
         result.put("data", data);
@@ -122,11 +111,11 @@ public class SimpleEncryptor implements JsonEncryptor {
         String data = Base64.encodeBase64String(symmetric.doFinal(mapper.writeValueAsBytes(object)));
         Cipher asymmetric = Cipher.getInstance(cipher);
         asymmetric.init(Cipher.ENCRYPT_MODE, key);
-        HashMap<String, Object> keyObject = new HashMap<String, Object>();
+        HashMap<String, Object> keyObject = new HashMap<>();
         keyObject.put("cipher", this.cipher);
         keyObject.put("key", this.alias);
         keyObject.put("data", Base64.encodeBase64String(asymmetric.doFinal(sessionKey.getEncoded())));
-        HashMap<String, Object> result = new HashMap<String, Object>();
+        HashMap<String, Object> result = new HashMap<>();
         result.put("cipher", symmetricCipher);
         result.put("key", keyObject);
         result.put("data", data);
@@ -138,10 +127,8 @@ public class SimpleEncryptor implements JsonEncryptor {
         Object object = value.getObject();
         try {
             return new JsonValue((key instanceof SecretKey ? symmetric(object) : asymmetric(object)));
-        } catch (GeneralSecurityException gse) { // Java Cryptography Extension
-            throw new JsonCryptoException(gse);
-        } catch (IOException ioe) { // Jackson
-            throw new JsonCryptoException(ioe);
+        } catch (GeneralSecurityException | IOException e) {
+            throw new JsonCryptoException(e);
         }
     }
 }

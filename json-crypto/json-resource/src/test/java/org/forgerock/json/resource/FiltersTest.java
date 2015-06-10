@@ -193,7 +193,7 @@ public final class FiltersTest {
     }
 
     private List<FilterCondition> cl(final boolean... values) {
-        final List<FilterCondition> cl = new ArrayList<FilterCondition>(values.length);
+        final List<FilterCondition> cl = new ArrayList<>(values.length);
         for (int i = 0; i < values.length; i++) {
             cl.add(c(values[i]));
         }

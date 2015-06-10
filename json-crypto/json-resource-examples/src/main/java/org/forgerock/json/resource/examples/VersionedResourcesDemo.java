@@ -69,9 +69,8 @@ public final class VersionedResourcesDemo {
      *             If an unexpected error occurs.
      */
     public static void main(String... args) throws ResourceException {
-        ConnectionFactory server = getConnectionFactory();
-        Connection connection = server.getConnection();
-        try {
+        try (ConnectionFactory server = getConnectionFactory();
+             Connection connection = server.getConnection()) {
             log("Reading version 1.0 of resource");
             Resource resource = connection.read(apiCtx("1.0"), Requests.newReadRequest("users/1"));
             log("Retrieved resource with revision: " + resource.getRevision());
@@ -84,11 +83,6 @@ public final class VersionedResourcesDemo {
             log("Reading version 2.0 of resource");
             resource = connection.read(apiCtx("2.0"), Requests.newReadRequest("users/1"));
             log("Retrieved resource with revision: " + resource.getRevision());
-        } finally {
-            log("Closing connection");
-            if (connection != null) {
-                connection.close();
-            }
         }
     }
 
