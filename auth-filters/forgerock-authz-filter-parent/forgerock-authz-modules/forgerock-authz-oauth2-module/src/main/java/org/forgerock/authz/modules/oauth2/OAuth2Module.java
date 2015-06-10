@@ -50,7 +50,7 @@ public class OAuth2Module {
     public static final String OAUTH2_PROFILE_INFO_CONTEXT_KEY = "org.forgerock.authorization.context.oauth2";
 
     private volatile OAuth2AccessTokenValidator accessTokenValidator;
-    private volatile Set<String> requiredScopes = new HashSet<String>();
+    private volatile Set<String> requiredScopes = new HashSet<>();
     private volatile boolean cacheEnabled = true;
     private volatile AccessTokenValidationCache cache;
 

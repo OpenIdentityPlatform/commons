@@ -76,7 +76,7 @@ public class AuditTrail {
     private static final String FAILED_RESULT = "FAILED";
 
     private final AuditApi api;
-    private final List<Map<String, Object>> entries = new ArrayList<Map<String, Object>>();
+    private final List<Map<String, Object>> entries = new ArrayList<>();
     private final JsonValue auditMessage = json(object(
             field(REQUEST_ID_KEY, UUID.randomUUID().toString()),
             field(ENTRIES_KEY, entries)));
@@ -203,7 +203,7 @@ public class AuditTrail {
      */
     @SuppressWarnings("unchecked")
     List<Map<String, Object>> getFailureReasons() {
-        List<Map<String, Object>> failureReasons = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> failureReasons = new ArrayList<>();
         for (Map<String, Object> entry : entries) {
             Map<String, Object> failureReason = (Map<String, Object>) entry.get(REASON_KEY);
             if (failureReason == null || failureReason.isEmpty()) {

@@ -11,8 +11,9 @@
 * Header, with the fields enclosed by brackets [] replaced by your own identifying
 * information: "Portions copyright [year] [name of copyright owner]".
 *
-* Copyright 2014 ForgeRock AS.
+* Copyright 2014-2015 ForgeRock AS.
 */
+
 package org.forgerock.jaspi.modules.openid.helpers;
 
 import java.io.BufferedReader;
@@ -32,12 +33,12 @@ public class SimpleHTTPClient {
     /**
      * Default read timeout on HTTP requests from this client.
      */
-    private final int DEFAULT_READ_TIMEOUT = 5000;
+    private final int DEFAULT_READ_TIMEOUT = 5_000;
 
     /**
      * Default connection timeout on HTTP requests from this client.
      */
-    private final int DEFAULT_CONNECTION_TIMEOUT = 5000;
+    private final int DEFAULT_CONNECTION_TIMEOUT = 5_000;
 
     private final int readTimeout;
     private final int connTimeout;
@@ -85,16 +86,13 @@ public class SimpleHTTPClient {
             conn.setConnectTimeout(DEFAULT_CONNECTION_TIMEOUT);
         }
 
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
         final StringBuilder sb = new StringBuilder();
 
-        try {
+        try (final BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
             String input;
             while ((input = reader.readLine()) != null) {
                 sb.append(input);
             }
-        } finally {
-            reader.close();
         }
 
         return sb.toString();

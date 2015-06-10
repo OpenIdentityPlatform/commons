@@ -233,10 +233,7 @@ public class JwtSessionModule implements ServerAuthModule {
                     context.putAll(claimsSetContext);
                 }
                 messageInfo.getMap().put(AUDIT_SESSION_ID_KEY, jwt.getClaimsSet().get("sessionId").asString());
-            } catch (IOException e) {
-                LOG.error("Error setting user principal", e);
-                throw new AuthException(e.getMessage());
-            } catch (UnsupportedCallbackException e) {
+            } catch (IOException | UnsupportedCallbackException e) {
                 LOG.error("Error setting user principal", e);
                 throw new AuthException(e.getMessage());
             }
@@ -324,7 +321,7 @@ public class JwtSessionModule implements ServerAuthModule {
         Map<String, Object> internalMap = (Map<String, Object>) messageInfo.getMap().get(AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT);
 
         if (internalMap == null) {
-            internalMap = new HashMap<String, Object>();
+            internalMap = new HashMap<>();
             messageInfo.getMap().put(AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT, internalMap);
         }
 
@@ -436,7 +433,7 @@ public class JwtSessionModule implements ServerAuthModule {
     @Override
     public AuthStatus secureResponse(MessageInfo messageInfo, Subject serviceSubject) throws AuthException {
 
-        Map<String, Object> jwtParameters = new HashMap<String, Object>();
+        Map<String, Object> jwtParameters = new HashMap<>();
 
         Map<String, Object> map = messageInfo.getMap();
         HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
@@ -544,7 +541,7 @@ public class JwtSessionModule implements ServerAuthModule {
     }
 
     private Collection<Cookie> createCookies(String value, int maxAge, String path) {
-        Collection<Cookie> cookies = new HashSet<Cookie>();
+        Collection<Cookie> cookies = new HashSet<>();
         for (String cookieDomain : cookieDomains) {
             Cookie cookie = newCookie(sessionCookieName, value);
             cookie.setMaxAge(maxAge);

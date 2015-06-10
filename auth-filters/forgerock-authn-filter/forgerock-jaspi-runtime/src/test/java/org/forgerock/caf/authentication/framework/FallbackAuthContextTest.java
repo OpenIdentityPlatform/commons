@@ -85,7 +85,7 @@ public class FallbackAuthContextTest {
 
     private MessageContext mockMessageContext() {
         MessageContext context = mock(MessageContext.class);
-        Map<String, Object> requestContextMap = new HashMap<String, Object>();
+        Map<String, Object> requestContextMap = new HashMap<>();
         AuditTrail auditTrail = mock(AuditTrail.class);
 
         given(context.getRequestContextMap()).willReturn(requestContextMap);

@@ -160,7 +160,7 @@ final class JaspiAdapters {
         @Override
         public Collection<Class<?>> getSupportedMessageTypes() {
             Class<?>[] supportedMessageTypes = authModule.getSupportedMessageTypes();
-            return new HashSet<Class<?>>(Arrays.asList(supportedMessageTypes));
+            return new HashSet<>(Arrays.asList(supportedMessageTypes));
         }
 
         @Override

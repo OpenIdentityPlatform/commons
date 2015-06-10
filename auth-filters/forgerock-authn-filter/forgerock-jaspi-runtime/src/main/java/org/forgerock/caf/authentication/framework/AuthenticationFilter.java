@@ -152,8 +152,7 @@ public final class AuthenticationFilter implements Filter {
         private Subject serviceSubject = new Subject();
         private final ResponseHandler responseHandler = new ResponseHandler();
         private AuthenticationModuleBuilder sessionAuthModuleBuilder = null;
-        private final List<AuthenticationModuleBuilder> authModuleBuilders =
-                new ArrayList<AuthenticationModuleBuilder>();
+        private final List<AuthenticationModuleBuilder> authModuleBuilders = new ArrayList<>();
 
         /**
          * <p>Sets the name of the logger instance that the framework should create and use to log
@@ -283,10 +282,9 @@ public final class AuthenticationFilter implements Filter {
             }
 
             AsyncServerAuthModule sessionAuthModule = null;
-            List<AsyncServerAuthModule> authModules = new ArrayList<AsyncServerAuthModule>();
+            List<AsyncServerAuthModule> authModules = new ArrayList<>();
 
-            List<Promise<Void, AuthenticationException>> initializationPromises =
-                    new ArrayList<Promise<Void, AuthenticationException>>();
+            List<Promise<Void, AuthenticationException>> initializationPromises = new ArrayList<>();
             PromiseImpl<Void, AuthenticationException> kicker = PromiseImpl.create();
             initializationPromises.add(kicker);
 

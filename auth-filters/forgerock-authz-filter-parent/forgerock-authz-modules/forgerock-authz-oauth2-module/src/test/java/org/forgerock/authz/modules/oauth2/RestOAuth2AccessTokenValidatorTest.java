@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.authz.modules.oauth2;
@@ -71,7 +71,7 @@ public class RestOAuth2AccessTokenValidatorTest {
 
         //Given
         String accessToken = "ACCESS_TOKEN";
-        Map<String, Object> jsonMap = new HashMap<String, Object>();
+        Map<String, Object> jsonMap = new HashMap<>();
         jsonMap.put("error", "ERROR");
         JsonValue tokenInfoResponse = new JsonValue(jsonMap);
 
@@ -94,7 +94,7 @@ public class RestOAuth2AccessTokenValidatorTest {
 
         //Given
         String accessToken = "ACCESS_TOKEN";
-        Map<String, Object> jsonMap = new HashMap<String, Object>();
+        Map<String, Object> jsonMap = new HashMap<>();
         jsonMap.put("expires_in", -1);
         jsonMap.put("scope", "A B C");
         JsonValue tokenInfoResponse = new JsonValue(jsonMap);
@@ -123,7 +123,7 @@ public class RestOAuth2AccessTokenValidatorTest {
         ));
         accessTokenValidator = new RestOAuth2AccessTokenValidator(config, restResourceFactory);
         String accessToken = "ACCESS_TOKEN";
-        Map<String, Object> jsonMap = new HashMap<String, Object>();
+        Map<String, Object> jsonMap = new HashMap<>();
         jsonMap.put("expires_in", 10);
         jsonMap.put("scope", "A B C");
         JsonValue tokenInfoResponse = new JsonValue(jsonMap);
@@ -147,7 +147,7 @@ public class RestOAuth2AccessTokenValidatorTest {
 
         //Given
         String accessToken = "ACCESS_TOKEN";
-        Map<String, Object> jsonMap = new HashMap<String, Object>();
+        Map<String, Object> jsonMap = new HashMap<>();
         jsonMap.put("expires_in", -1);
         jsonMap.put("scope", "A B C");
         JsonValue tokenInfoResponse = new JsonValue(jsonMap);
@@ -168,14 +168,14 @@ public class RestOAuth2AccessTokenValidatorTest {
 
         //Given
         String accessToken = "ACCESS_TOKEN";
-        Map<String, Object> tokenInfoMap = new HashMap<String, Object>();
+        Map<String, Object> tokenInfoMap = new HashMap<>();
         tokenInfoMap.put("expires_in", 1);
         tokenInfoMap.put("scope", "A B C");
         JsonValue tokenInfoResponse = new JsonValue(tokenInfoMap);
 
         given(tokenInfoRequest.get()).willReturn(tokenInfoResponse);
 
-        Map<String, Object> userProfileMap = new HashMap<String, Object>();
+        Map<String, Object> userProfileMap = new HashMap<>();
         userProfileMap.put("KEY1", "VAL");
         userProfileMap.put("KEY2", "VAL");
         JsonValue profileResponse = new JsonValue(userProfileMap);
@@ -207,7 +207,7 @@ public class RestOAuth2AccessTokenValidatorTest {
         ));
         accessTokenValidator = new RestOAuth2AccessTokenValidator(config, restResourceFactory);
         String accessToken = "ACCESS_TOKEN";
-        Map<String, Object> tokenInfoMap = new HashMap<String, Object>();
+        Map<String, Object> tokenInfoMap = new HashMap<>();
         tokenInfoMap.put("expires_in", 1);
         tokenInfoMap.put("scope", "A B C");
         JsonValue tokenInfoResponse = new JsonValue(tokenInfoMap);
@@ -228,7 +228,7 @@ public class RestOAuth2AccessTokenValidatorTest {
 
         //Given
         String accessToken = "ACCESS_TOKEN";
-        Map<String, Object> jsonMap = new HashMap<String, Object>();
+        Map<String, Object> jsonMap = new HashMap<>();
         jsonMap.put("expires_in", -1);
         jsonMap.put("scope", asList("A", "B", "C"));
         JsonValue tokenInfoResponse = new JsonValue(jsonMap);

@@ -97,7 +97,7 @@ public class JwtSessionModuleTest {
     private Map<String, Object> getOptionsMap(Integer idleTimeout, Integer maxLife, int timeUnit)
             throws UnsupportedEncodingException {
 
-        Map<String, Object> options = new HashMap<String, Object>();
+        Map<String, Object> options = new HashMap<>();
         options.put(JwtSessionModule.KEY_ALIAS_KEY, "jwt-test-ks");
         options.put(JwtSessionModule.PRIVATE_KEY_PASSWORD_KEY, "password");
         options.put(JwtSessionModule.KEYSTORE_TYPE_KEY, "JKS");
@@ -287,7 +287,7 @@ public class JwtSessionModuleTest {
         calendar.set(Calendar.MILLISECOND, 0);
         calendar.add(Calendar.SECOND, -5);
         Date idleTimeout = calendar.getTime();
-        int idleTimeoutSeconds = new Long(idleTimeout.getTime() / 1000L).intValue();
+        int idleTimeoutSeconds = new Long(idleTimeout.getTime() / 1_000L).intValue();
 
         given(messageInfo.getRequestMessage()).willReturn(request);
         given(messageInfo.getResponseMessage()).willReturn(response);
@@ -372,7 +372,7 @@ public class JwtSessionModuleTest {
         calendar.set(Calendar.MILLISECOND, 0);
         calendar.add(Calendar.SECOND, 5);
         Date idleTimeout = calendar.getTime();
-        int idleTimeoutSeconds = new Long(idleTimeout.getTime() / 1000L).intValue();
+        int idleTimeoutSeconds = new Long(idleTimeout.getTime() / 1_000L).intValue();
 
         given(messageInfo.getRequestMessage()).willReturn(request);
         given(messageInfo.getResponseMessage()).willReturn(response);
@@ -409,8 +409,8 @@ public class JwtSessionModuleTest {
         jwtSessionModule.initialize(requestPolicy, responsePolicy, callbackHandler, options);
 
         MessageInfo messageInfo = mock(MessageInfo.class);
-        Map<String, Object> map = new HashMap<String, Object>();
-        Map<String, Object> contextMap = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> contextMap = new HashMap<>();
         Subject clientSubject = null;
         Subject serviceSubject = null;
         HttpServletRequest request = mock(HttpServletRequest.class);
@@ -430,7 +430,7 @@ public class JwtSessionModuleTest {
         calendar.set(Calendar.MILLISECOND, 0);
         calendar.add(Calendar.SECOND, 5);
         Date idleTimeout = calendar.getTime();
-        int idleTimeoutSeconds = new Long(idleTimeout.getTime() / 1000L).intValue();
+        int idleTimeoutSeconds = new Long(idleTimeout.getTime() / 1_000L).intValue();
         calendar.setTime(new Date());
         calendar.set(Calendar.MILLISECOND, 0);
         calendar.add(Calendar.MINUTE, -1);
@@ -453,7 +453,7 @@ public class JwtSessionModuleTest {
                 .willReturn(idleTimeoutSeconds);
         given(claimsSet.getIssuedAtTime()).willReturn(issuedAtTime);
         given(claimsSet.getClaim("prn", String.class)).willReturn("PRINCIPAL");
-        Map<String, Object> newContext = new HashMap<String, Object>();
+        Map<String, Object> newContext = new HashMap<>();
         newContext.put("KEY", "VALUE");
         given(claimsSet.getClaim(AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT, Map.class)).willReturn(newContext);
         given(claimsSet.get("sessionId")).willReturn(json("SESSION_ID"));
@@ -488,8 +488,8 @@ public class JwtSessionModuleTest {
         jwtSessionModule.initialize(requestPolicy, responsePolicy, callbackHandler, options);
 
         MessageInfo messageInfo = mock(MessageInfo.class);
-        Map<String, Object> map = new HashMap<String, Object>();
-        Map<String, Object> contextMap = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> contextMap = new HashMap<>();
         Subject clientSubject = new Subject();
         Subject serviceSubject = null;
         HttpServletRequest request = mock(HttpServletRequest.class);
@@ -509,7 +509,7 @@ public class JwtSessionModuleTest {
         calendar.set(Calendar.MILLISECOND, 0);
         calendar.add(Calendar.SECOND, 5);
         Date idleTimeout = calendar.getTime();
-        int idleTimeoutSeconds = new Long(idleTimeout.getTime() / 1000L).intValue();
+        int idleTimeoutSeconds = new Long(idleTimeout.getTime() / 1_000L).intValue();
         calendar.setTime(new Date());
         calendar.set(Calendar.MILLISECOND, 0);
         calendar.add(Calendar.SECOND, -5);
@@ -533,7 +533,7 @@ public class JwtSessionModuleTest {
                 .willReturn(idleTimeoutSeconds);
         given(claimsSet.getIssuedAtTime()).willReturn(issuedAtTime);
         given(claimsSet.getClaim("prn", String.class)).willReturn("PRINCIPAL");
-        Map<String, Object> newContext = new HashMap<String, Object>();
+        Map<String, Object> newContext = new HashMap<>();
         newContext.put("KEY", "VALUE");
         given(claimsSet.getClaim(AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT, Map.class)).willReturn(newContext);
         given(claimsSet.get("sessionId")).willReturn(json("SESSION_ID"));
@@ -577,7 +577,7 @@ public class JwtSessionModuleTest {
         Subject serviceSubject = null;
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("skipSession", true);
 
         given(messageInfo.getRequestMessage()).willReturn(request);
@@ -607,7 +607,7 @@ public class JwtSessionModuleTest {
         Subject serviceSubject = null;
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put(JwtSessionModule.JWT_VALIDATED_KEY, true);
 
         given(messageInfo.getRequestMessage()).willReturn(request);
@@ -637,7 +637,7 @@ public class JwtSessionModuleTest {
         Subject serviceSubject = null;
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
 
         given(messageInfo.getRequestMessage()).willReturn(request);
         given(messageInfo.getResponseMessage()).willReturn(response);
@@ -723,7 +723,7 @@ public class JwtSessionModuleTest {
         Subject serviceSubject = null;
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
 
         given(messageInfo.getRequestMessage()).willReturn(request);
         given(messageInfo.getResponseMessage()).willReturn(response);
@@ -798,7 +798,7 @@ public class JwtSessionModuleTest {
         //Given
         MessageInfo messageInfo = mock(MessageInfo.class);
 
-        Map<String, Object> messageInfoMap = new HashMap<String, Object>();
+        Map<String, Object> messageInfoMap = new HashMap<>();
 
         given(messageInfo.getMap()).willReturn(messageInfoMap);
 
@@ -817,10 +817,10 @@ public class JwtSessionModuleTest {
         //Given
         MessageInfo messageInfo = mock(MessageInfo.class);
 
-        Map<String, Object> internalMap = new HashMap<String, Object>();
+        Map<String, Object> internalMap = new HashMap<>();
         internalMap.put("TEST", "TEST");
 
-        Map<String, Object> messageInfoMap = new HashMap<String, Object>();
+        Map<String, Object> messageInfoMap = new HashMap<>();
         messageInfoMap.put("org.forgerock.authentication.context", internalMap);
 
         given(messageInfo.getMap()).willReturn(messageInfoMap);
@@ -848,7 +848,7 @@ public class JwtSessionModuleTest {
         Subject serviceSubject = null;
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
 
         given(messageInfo.getRequestMessage()).willReturn(request);
         given(messageInfo.getResponseMessage()).willReturn(response);
@@ -934,7 +934,7 @@ public class JwtSessionModuleTest {
         Subject serviceSubject = null;
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
 
         given(messageInfo.getRequestMessage()).willReturn(request);
         given(messageInfo.getResponseMessage()).willReturn(response);
@@ -957,7 +957,7 @@ public class JwtSessionModuleTest {
         given(jwtClaimsSetBuilder.nbf(Matchers.<Date>anyObject())).willReturn(jwtClaimsSetBuilder);
         given(jwtClaimsSetBuilder.iat(Matchers.<Date>anyObject())).willReturn(jwtClaimsSetBuilder);
         given(jwtClaimsSetBuilder.claim(anyString(), anyObject())).willReturn(jwtClaimsSetBuilder);
-        given(jwtClaimsSetBuilder.claims(anyMap())).willReturn(jwtClaimsSetBuilder);
+        given(jwtClaimsSetBuilder.claims(anyMapOf(String.class, Object.class))).willReturn(jwtClaimsSetBuilder);
         given(jwtClaimsSetBuilder.build()).willReturn(claimsSet);
         given(encryptedJwtBuilder.claims(claimsSet)).willReturn(encryptedJwtBuilder);
         given(encryptedJwtBuilder.build()).willReturn("ENCRYPTED_JWT");
@@ -1097,7 +1097,7 @@ public class JwtSessionModuleTest {
         calendar.add(Calendar.MINUTE, -1);
         calendar.add(Calendar.SECOND, -5);
         Date issuedAtTime = calendar.getTime();
-        int idleTimeoutSeconds = new Long(idleTimeout.getTime() / 1000L).intValue();
+        int idleTimeoutSeconds = new Long(idleTimeout.getTime() / 1_000L).intValue();
 
         given(jwtBuilderFactory.reconstruct("SESSION_JWT", EncryptedJwt.class)).willReturn(encryptedJwt);
         given(encryptedJwt.getClaimsSet()).willReturn(claimsSet);

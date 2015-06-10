@@ -138,7 +138,7 @@ class TestFramework {
     static RequestSpecification given(AuthModuleParameters sessionModuleParams,
             List<AuthModuleParameters> authModuleParametersList) {
         Class<? extends AsyncServerAuthModule> sessionModuleClass = null;
-        List<Class<? extends AsyncServerAuthModule>> authModuleClasses = new ArrayList<Class<? extends AsyncServerAuthModule>>();
+        List<Class<? extends AsyncServerAuthModule>> authModuleClasses = new ArrayList<>();
 
         RequestSpecification given = com.jayway.restassured.RestAssured.given();
         if (sessionModuleParams != null) {

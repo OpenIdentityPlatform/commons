@@ -68,7 +68,7 @@ class ResponseHandler {
         }
     };
 
-    private final List<ResponseWriter> writers = new ArrayList<ResponseWriter>();
+    private final List<ResponseWriter> writers = new ArrayList<>();
     private final JsonResponseWriter defaultHandler;
 
     /**
@@ -97,7 +97,7 @@ class ResponseHandler {
 
     private ResponseWriter getResponseHandler(String acceptHeader) {
         if (acceptHeader != null) {
-            SortedSet<MediaType> acceptedTypes = new TreeSet<MediaType>(ACCEPT_QUALITY_COMPARATOR);
+            SortedSet<MediaType> acceptedTypes = new TreeSet<>(ACCEPT_QUALITY_COMPARATOR);
             Matcher m = ACCEPT_HEADER.matcher(acceptHeader);
             int lastGroup = 0;
             while (m.find()) {

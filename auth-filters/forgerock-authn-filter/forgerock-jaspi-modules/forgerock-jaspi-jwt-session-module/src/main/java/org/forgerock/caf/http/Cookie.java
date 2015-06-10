@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.caf.http;
@@ -351,7 +351,7 @@ public class Cookie {
      * @return A {@code Set} of {@code Cookie}s.
      */
     public static Set<Cookie> getCookies(HttpServletRequest request) {
-        Set<Cookie> cookies = new HashSet<Cookie>();
+        Set<Cookie> cookies = new HashSet<>();
         for (javax.servlet.http.Cookie cookie : request.getCookies()) {
             cookies.add(newCookie(cookie));
         }

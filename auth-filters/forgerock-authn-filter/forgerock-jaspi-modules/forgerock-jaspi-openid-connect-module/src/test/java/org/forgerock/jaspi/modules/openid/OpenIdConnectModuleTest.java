@@ -11,8 +11,9 @@
 * Header, with the fields enclosed by brackets [] replaced by your own identifying
 * information: "Portions copyright [year] [name of copyright owner]".
 *
-* Copyright 2014 ForgeRock AS.
+* Copyright 2014-2015 ForgeRock AS.
 */
+
 package org.forgerock.jaspi.modules.openid;
 
 import java.io.IOException;
@@ -72,7 +73,7 @@ public class OpenIdConnectModuleTest {
 
     private Map<String, Object> getConfig() throws UnsupportedEncodingException {
 
-        Map<String, Object> options = new HashMap<String, Object>();
+        Map<String, Object> options = new HashMap<>();
         options.put(OpenIdConnectModule.HEADER_KEY, "openam-openid-connect-header");
 
         return options;
@@ -84,7 +85,7 @@ public class OpenIdConnectModuleTest {
         MessagePolicy requestPolicy = mock(MessagePolicy.class);
         MessagePolicy responsePolicy =  mock(MessagePolicy.class);
         CallbackHandler callback =  mock(CallbackHandler.class);
-        Map<String, Object> config = new HashMap<String, Object>();
+        Map<String, Object> config = new HashMap<>();
 
         //when
         testModule.initialize(requestPolicy, responsePolicy, callback, config);

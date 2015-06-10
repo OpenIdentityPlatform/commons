@@ -11,8 +11,9 @@
 * Header, with the fields enclosed by brackets [] replaced by your own identifying
 * information: "Portions copyright [year] [name of copyright owner]".
 *
-* Copyright 2014 ForgeRock AS.
+* Copyright 2014-2015 ForgeRock AS.
 */
+
 package org.forgerock.jaspi.modules.openid.helpers;
 
 import java.io.IOException;
@@ -113,7 +114,7 @@ public class JWKSetParser {
      */
     public Map<String, Key> jwkSetToMap(JWKSet jwkSet) throws FailedToLoadJWKException {
 
-        final Map<String, Key> keyMap = new HashMap<String, Key>();
+        final Map<String, Key> keyMap = new HashMap<>();
 
         //store the retrieved JSON as String (kid) : Key (having converted) in this resolver
         for (JWK jwk : jwkSet.getJWKsAsList()) {

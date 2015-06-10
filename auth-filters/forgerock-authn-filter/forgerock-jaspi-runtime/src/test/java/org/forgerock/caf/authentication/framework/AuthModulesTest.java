@@ -174,9 +174,9 @@ public class AuthModulesTest {
         MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
-        Map<String, Object> requestContextMap = new HashMap<String, Object>();
+        Map<String, Object> requestContextMap = new HashMap<>();
         AuditTrail auditTrail = mock(AuditTrail.class);
-        Map<String, Object> moduleAuditInfo = new HashMap<String, Object>();
+        Map<String, Object> moduleAuditInfo = new HashMap<>();
 
         given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
                 .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SUCCESS));
@@ -210,9 +210,9 @@ public class AuthModulesTest {
         MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
-        Map<String, Object> requestContextMap = new HashMap<String, Object>();
+        Map<String, Object> requestContextMap = new HashMap<>();
         AuditTrail auditTrail = mock(AuditTrail.class);
-        Map<String, Object> moduleAuditInfo = new HashMap<String, Object>();
+        Map<String, Object> moduleAuditInfo = new HashMap<>();
 
         given(authModule.getModuleId()).willReturn("MODULE_ID");
         given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
@@ -238,10 +238,10 @@ public class AuthModulesTest {
         MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
-        Map<String, Object> requestContextMap = new HashMap<String, Object>();
+        Map<String, Object> requestContextMap = new HashMap<>();
         AuditTrail auditTrail = mock(AuditTrail.class);
-        Map<String, Object> moduleAuditInfo = new HashMap<String, Object>();
-        Map<String, Object> failureReason = new HashMap<String, Object>();
+        Map<String, Object> moduleAuditInfo = new HashMap<>();
+        Map<String, Object> failureReason = new HashMap<>();
 
         given(authModule.getModuleId()).willReturn("MODULE_ID");
         given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
@@ -270,9 +270,9 @@ public class AuthModulesTest {
         MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
-        Map<String, Object> requestContextMap = new HashMap<String, Object>();
+        Map<String, Object> requestContextMap = new HashMap<>();
         AuditTrail auditTrail = mock(AuditTrail.class);
-        Map<String, Object> moduleAuditInfo = new HashMap<String, Object>();
+        Map<String, Object> moduleAuditInfo = new HashMap<>();
 
         given(authModule.getModuleId()).willReturn("MODULE_ID");
         given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
@@ -310,9 +310,9 @@ public class AuthModulesTest {
         MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
-        Map<String, Object> requestContextMap = new HashMap<String, Object>();
+        Map<String, Object> requestContextMap = new HashMap<>();
         AuditTrail auditTrail = mock(AuditTrail.class);
-        Map<String, Object> moduleAuditInfo = new HashMap<String, Object>();
+        Map<String, Object> moduleAuditInfo = new HashMap<>();
 
         given(authModule.getModuleId()).willReturn("MODULE_ID");
         given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
@@ -344,10 +344,10 @@ public class AuthModulesTest {
         MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
-        Map<String, Object> requestContextMap = new HashMap<String, Object>();
+        Map<String, Object> requestContextMap = new HashMap<>();
         AuditTrail auditTrail = mock(AuditTrail.class);
-        Map<String, Object> moduleAuditInfo = new HashMap<String, Object>();
-        Map<String, Object> failureReason = new HashMap<String, Object>();
+        Map<String, Object> moduleAuditInfo = new HashMap<>();
+        Map<String, Object> failureReason = new HashMap<>();
 
         given(authModule.getModuleId()).willReturn("MODULE_ID");
         given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
@@ -377,9 +377,9 @@ public class AuthModulesTest {
         MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
-        Map<String, Object> requestContextMap = new HashMap<String, Object>();
+        Map<String, Object> requestContextMap = new HashMap<>();
         AuditTrail auditTrail = mock(AuditTrail.class);
-        Map<String, Object> moduleAuditInfo = new HashMap<String, Object>();
+        Map<String, Object> moduleAuditInfo = new HashMap<>();
 
         given(authModule.getModuleId()).willReturn("MODULE_ID");
         given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
@@ -421,9 +421,9 @@ public class AuthModulesTest {
         MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
-        Map<String, Object> requestContextMap = new HashMap<String, Object>();
+        Map<String, Object> requestContextMap = new HashMap<>();
         AuditTrail auditTrail = mock(AuditTrail.class);
-        Map<String, Object> moduleAuditInfo = new HashMap<String, Object>();
+        Map<String, Object> moduleAuditInfo = new HashMap<>();
 
 
         given(authModule.getModuleId()).willReturn("MODULE_ID");
@@ -433,7 +433,7 @@ public class AuthModulesTest {
         requestContextMap.put(AuditTrail.AUDIT_TRAIL_KEY, auditTrail);
         requestContextMap.put(AuditTrail.AUDIT_INFO_KEY, moduleAuditInfo);
         requestContextMap.put(AuditTrail.AUDIT_SESSION_ID_KEY, "SESSION_ID");
-        requestContextMap.put(AuditTrail.AUDIT_FAILURE_REASON_KEY, new HashMap<String, Object>());
+        requestContextMap.put(AuditTrail.AUDIT_FAILURE_REASON_KEY, new HashMap<>());
 
         //When
         Promise<AuthStatus, AuthenticationException> promise = AuthModules.withSessionAuditing(authModule)
@@ -461,9 +461,9 @@ public class AuthModulesTest {
         MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
-        Map<String, Object> requestContextMap = new HashMap<String, Object>();
+        Map<String, Object> requestContextMap = new HashMap<>();
         AuditTrail auditTrail = mock(AuditTrail.class);
-        Map<String, Object> moduleAuditInfo = new HashMap<String, Object>();
+        Map<String, Object> moduleAuditInfo = new HashMap<>();
 
         given(authModule.getModuleId()).willReturn("MODULE_ID");
         given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
@@ -472,7 +472,7 @@ public class AuthModulesTest {
         given(messageInfo.getRequestContextMap()).willReturn(requestContextMap);
         requestContextMap.put(AuditTrail.AUDIT_TRAIL_KEY, auditTrail);
         requestContextMap.put(AuditTrail.AUDIT_INFO_KEY, moduleAuditInfo);
-        requestContextMap.put(AuditTrail.AUDIT_FAILURE_REASON_KEY, new HashMap<String, Object>());
+        requestContextMap.put(AuditTrail.AUDIT_FAILURE_REASON_KEY, new HashMap<>());
         requestContextMap.put(AuditTrail.AUDIT_SESSION_ID_KEY, "SESSION_ID");
 
         //When
@@ -508,15 +508,15 @@ public class AuthModulesTest {
         AsyncServerAuthModule authModule = mock(AsyncServerAuthModule.class);
         MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject serviceSubject = new Subject();
-        Map<String, Object> requestContextMap = new HashMap<String, Object>();
+        Map<String, Object> requestContextMap = new HashMap<>();
         AuditTrail auditTrail = mock(AuditTrail.class);
 
         given(authModule.secureResponse(messageInfo, serviceSubject))
                 .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(authStatus));
         given(messageInfo.getRequestContextMap()).willReturn(requestContextMap);
         requestContextMap.put(AuditTrail.AUDIT_TRAIL_KEY, auditTrail);
-        requestContextMap.put(AuditTrail.AUDIT_INFO_KEY, new HashMap<String, Object>());
-        requestContextMap.put(AuditTrail.AUDIT_FAILURE_REASON_KEY, new HashMap<String, Object>());
+        requestContextMap.put(AuditTrail.AUDIT_INFO_KEY, new HashMap<>());
+        requestContextMap.put(AuditTrail.AUDIT_FAILURE_REASON_KEY, new HashMap<>());
         requestContextMap.put(AuditTrail.AUDIT_SESSION_ID_KEY, "SESSION_ID");
 
         //When
@@ -539,7 +539,7 @@ public class AuthModulesTest {
         AsyncServerAuthModule authModule = mock(AsyncServerAuthModule.class);
         MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject serviceSubject = new Subject();
-        Map<String, Object> requestContextMap = new HashMap<String, Object>();
+        Map<String, Object> requestContextMap = new HashMap<>();
         AuditTrail auditTrail = mock(AuditTrail.class);
 
         given(authModule.secureResponse(messageInfo, serviceSubject))
@@ -547,8 +547,8 @@ public class AuthModulesTest {
                         new AuthenticationException("ERROR")));
         given(messageInfo.getRequestContextMap()).willReturn(requestContextMap);
         requestContextMap.put(AuditTrail.AUDIT_TRAIL_KEY, auditTrail);
-        requestContextMap.put(AuditTrail.AUDIT_INFO_KEY, new HashMap<String, Object>());
-        requestContextMap.put(AuditTrail.AUDIT_FAILURE_REASON_KEY, new HashMap<String, Object>());
+        requestContextMap.put(AuditTrail.AUDIT_INFO_KEY, new HashMap<>());
+        requestContextMap.put(AuditTrail.AUDIT_FAILURE_REASON_KEY, new HashMap<>());
         requestContextMap.put(AuditTrail.AUDIT_SESSION_ID_KEY, "SESSION_ID");
 
         //When
@@ -581,7 +581,7 @@ public class AuthModulesTest {
         MessagePolicy requestPolicy = mock(MessagePolicy.class);
         MessagePolicy responsePolicy = mock(MessagePolicy.class);
         CallbackHandler handler = mock(CallbackHandler.class);
-        Map<String, Object> options = new HashMap<String, Object>();
+        Map<String, Object> options = new HashMap<>();
 
         given(authModule.initialize(requestPolicy, responsePolicy, handler, options))
                 .willReturn(Promises.<Void, AuthenticationException>newResultPromise(null));
@@ -609,7 +609,7 @@ public class AuthModulesTest {
         MessagePolicy requestPolicy = mock(MessagePolicy.class);
         MessagePolicy responsePolicy = mock(MessagePolicy.class);
         CallbackHandler handler = mock(CallbackHandler.class);
-        Map<String, Object> options = new HashMap<String, Object>();
+        Map<String, Object> options = new HashMap<>();
         AuthenticationException exception = new AuthenticationException("ERROR");
 
         given(authModule.initialize(requestPolicy, responsePolicy, handler, options))

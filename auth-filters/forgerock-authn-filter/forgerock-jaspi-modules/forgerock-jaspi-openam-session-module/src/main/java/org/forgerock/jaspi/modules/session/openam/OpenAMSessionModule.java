@@ -255,9 +255,7 @@ public class OpenAMSessionModule implements ServerAuthModule {
         } catch (ResourceException e) {
             LOG.error("REST validation call returned non HTTP 200 response", e);
             return AuthStatus.SEND_FAILURE;
-        } catch (UnsupportedCallbackException e) {
-            throw new AuthenticationException(e.getMessage(), e);
-        } catch (IOException e) {
+        } catch (UnsupportedCallbackException | IOException e) {
             throw new AuthenticationException(e.getMessage(), e);
         }
     }

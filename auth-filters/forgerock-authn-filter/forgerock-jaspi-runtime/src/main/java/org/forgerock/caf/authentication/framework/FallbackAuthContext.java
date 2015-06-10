@@ -188,7 +188,7 @@ public final class FallbackAuthContext implements AsyncServerAuthContext, AuthCo
     @Override
     public Promise<Void, AuthenticationException> cleanSubject(MessageContext context, Subject clientSubject) {
 
-        List<Promise<Void, AuthenticationException>> promises = new ArrayList<Promise<Void, AuthenticationException>>();
+        List<Promise<Void, AuthenticationException>> promises = new ArrayList<>();
         for (AsyncServerAuthModule serverAuthModule : authModules) {
             promises.add(serverAuthModule.cleanSubject(context, clientSubject));
         }

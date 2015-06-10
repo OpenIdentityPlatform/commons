@@ -133,7 +133,7 @@ public final class AuthenticationFramework {
     Promise<Response, NeverThrowsException> processMessage(Context context, Request request, final Handler next) {
 
         final Subject clientSubject = new Subject();
-        Map<String, Object> contextMap = new HashMap<String, Object>();
+        Map<String, Object> contextMap = new HashMap<>();
         AuditTrail auditTrail = new AuditTrail(auditApi, contextMap);
         final MessageContextImpl messageContext = new MessageContextImpl(context, request, auditTrail);
 
@@ -263,7 +263,7 @@ public final class AuthenticationFramework {
     private Map<String, Object> getMap(Map<String, Object> containingMap, String key) {
         Map<String, Object> map = (Map<String, Object>) containingMap.get(key);
         if (map == null) {
-            map = new HashMap<String, Object>();
+            map = new HashMap<>();
             containingMap.put(key, map);
         }
         return map;

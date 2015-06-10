@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.authz.filter.servlet;
@@ -60,9 +60,7 @@ public final class AuthorizationModules {
                     moduleType.asSubclass(HttpServletAuthorizationModule.class).newInstance());
         } catch (ClassNotFoundException e) {
             throw new IllegalArgumentException("Servlet authz module class not found: " + moduleTypeName, e);
-        } catch (InstantiationException e) {
-            throw new IllegalArgumentException("Cannot instantiate module: " + moduleTypeName, e);
-        } catch (IllegalAccessException e) {
+        } catch (InstantiationException | IllegalAccessException e) {
             throw new IllegalArgumentException("Cannot instantiate module: " + moduleTypeName, e);
         }
     }

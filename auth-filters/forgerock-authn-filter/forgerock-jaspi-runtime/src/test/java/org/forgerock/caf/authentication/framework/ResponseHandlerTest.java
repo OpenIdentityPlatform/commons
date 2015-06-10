@@ -111,7 +111,7 @@ public class ResponseHandlerTest {
         MessageContext context = mock(MessageContext.class);
         Response response = new Response();
         AuditTrail auditTrail = mock(AuditTrail.class);
-        List<Map<String, Object>> failureReasons = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> failureReasons = new ArrayList<>();
         ResourceException jre = ResourceException.getException(ResourceException.BAD_REQUEST, "BAD_REQUEST");
         AuthenticationException exception = new AuthenticationException(jre);
 

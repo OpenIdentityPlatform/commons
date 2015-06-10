@@ -55,12 +55,12 @@ public class OpenIdConnectModule implements ServerAuthModule {
     /**
      * Default read timeout for HTTP connections.
      */
-    private static final int DEFAULT_READ_TIMEOUT = 5000;
+    private static final int DEFAULT_READ_TIMEOUT = 5_000;
 
     /**
      * Default connection timeout for HTTP connections.
      */
-    private static final int DEFAULT_CONN_TIMEOUT = 5000;
+    private static final int DEFAULT_CONN_TIMEOUT = 5_000;
 
     /**
      * Lookup key for the configured HTTP connection's read timeout for this module.
@@ -214,10 +214,7 @@ public class OpenIdConnectModule implements ServerAuthModule {
         } catch (OpenIdConnectVerificationException oice) {
             LOG.debug("Unable to validate authenticated identity from JWT.", oice);
             return AuthStatus.SEND_FAILURE;
-        } catch (IOException e) {
-            LOG.debug("Error setting user principal", e);
-            throw new AuthException(e.getMessage());
-        } catch (UnsupportedCallbackException e) {
+        } catch (IOException | UnsupportedCallbackException e) {
             LOG.debug("Error setting user principal", e);
             throw new AuthException(e.getMessage());
         }

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.authz.filter.api;
@@ -83,7 +83,7 @@ public class AuthorizationContext {
      * @return A copy of the attributes in this context.
      */
     public Map<String, Object> getAttributes() {
-        return new LinkedHashMap<String, Object>(attributes);
+        return new LinkedHashMap<>(attributes);
     }
 
     /**

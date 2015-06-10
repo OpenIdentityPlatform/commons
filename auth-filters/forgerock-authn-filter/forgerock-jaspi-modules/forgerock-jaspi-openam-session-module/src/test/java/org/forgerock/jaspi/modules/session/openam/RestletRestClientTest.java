@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.jaspi.modules.session.openam;
@@ -63,7 +63,7 @@ public class RestletRestClientTest {
         };
 
         Request request = mock(Request.class);
-        ConcurrentHashMap<String, Object> requestAttributes = new ConcurrentHashMap<String, Object>();
+        ConcurrentHashMap<String, Object> requestAttributes = new ConcurrentHashMap<>();
         requestHeaders = mock(Series.class);
         given(resource.getRequest()).willReturn(request);
         given(request.getAttributes()).willReturn(requestAttributes);
@@ -115,8 +115,8 @@ public class RestletRestClientTest {
 
         //Given
         final String uri = "URI";
-        final Map<String, String> queryParameters = new HashMap<String, String>();
-        final Map<String, String> headers = new HashMap<String, String>();
+        final Map<String, String> queryParameters = new HashMap<>();
+        final Map<String, String> headers = new HashMap<>();
         final JSONObject restResponse = mock(JSONObject.class);
 
         given(resource.post(anyObject(), eq(JSONObject.class))).willReturn(restResponse);
@@ -137,8 +137,8 @@ public class RestletRestClientTest {
 
         //Given
         final String uri = "URI";
-        final Map<String, String> queryParameters = new HashMap<String, String>();
-        final Map<String, String> headers = new HashMap<String, String>();
+        final Map<String, String> queryParameters = new HashMap<>();
+        final Map<String, String> headers = new HashMap<>();
         final JSONObject restResponse = mock(JSONObject.class);
 
         queryParameters.put("PARAM1", "VALUE1");
@@ -162,10 +162,10 @@ public class RestletRestClientTest {
         //Given
         setSslConfiguration();
         final String uri = "URI";
-        final Map<String, String> queryParameters = new HashMap<String, String>();
-        final Map<String, String> headers = new HashMap<String, String>();
+        final Map<String, String> queryParameters = new HashMap<>();
+        final Map<String, String> headers = new HashMap<>();
         final Context context = mock(Context.class);
-        final ConcurrentHashMap<String, Object> requestAttributes = new ConcurrentHashMap<String, Object>();
+        final ConcurrentHashMap<String, Object> requestAttributes = new ConcurrentHashMap<>();
         final JSONObject restResponse = mock(JSONObject.class);
 
         given(resource.getContext()).willReturn(context);
@@ -189,8 +189,8 @@ public class RestletRestClientTest {
 
         //Given
         final String uri = "URI";
-        final Map<String, String> queryParameters = new HashMap<String, String>();
-        final Map<String, String> headers = new HashMap<String, String>();
+        final Map<String, String> queryParameters = new HashMap<>();
+        final Map<String, String> headers = new HashMap<>();
         final org.restlet.resource.ResourceException exception =
                 new org.restlet.resource.ResourceException(500, "EXCEPTION_MESSAGE", "DESCRIPTION", "URI");
 
@@ -214,8 +214,8 @@ public class RestletRestClientTest {
 
         //Given
         final String uri = "URI";
-        final Map<String, String> queryParameters = new HashMap<String, String>();
-        final Map<String, String> headers = new HashMap<String, String>();
+        final Map<String, String> queryParameters = new HashMap<>();
+        final Map<String, String> headers = new HashMap<>();
         final JSONObject restResponse = mock(JSONObject.class);
 
         given(resource.get(JSONObject.class)).willReturn(restResponse);
@@ -236,8 +236,8 @@ public class RestletRestClientTest {
 
         //Given
         final String uri = "URI";
-        final Map<String, String> queryParameters = new HashMap<String, String>();
-        final Map<String, String> headers = new HashMap<String, String>();
+        final Map<String, String> queryParameters = new HashMap<>();
+        final Map<String, String> headers = new HashMap<>();
         final JSONObject restResponse = mock(JSONObject.class);
 
         queryParameters.put("PARAM1", "VALUE1");
@@ -261,10 +261,10 @@ public class RestletRestClientTest {
         //Given
         setSslConfiguration();
         final String uri = "URI";
-        final Map<String, String> queryParameters = new HashMap<String, String>();
-        final Map<String, String> headers = new HashMap<String, String>();
+        final Map<String, String> queryParameters = new HashMap<>();
+        final Map<String, String> headers = new HashMap<>();
         final Context context = mock(Context.class);
-        final ConcurrentHashMap<String, Object> requestAttributes = new ConcurrentHashMap<String, Object>();
+        final ConcurrentHashMap<String, Object> requestAttributes = new ConcurrentHashMap<>();
         final JSONObject restResponse = mock(JSONObject.class);
 
         given(resource.getContext()).willReturn(context);
@@ -288,8 +288,8 @@ public class RestletRestClientTest {
 
         //Given
         final String uri = "URI";
-        final Map<String, String> queryParameters = new HashMap<String, String>();
-        final Map<String, String> headers = new HashMap<String, String>();
+        final Map<String, String> queryParameters = new HashMap<>();
+        final Map<String, String> headers = new HashMap<>();
         final org.restlet.resource.ResourceException exception =
                 new org.restlet.resource.ResourceException(500, "EXCEPTION_MESSAGE", "DESCRIPTION", "URI");
 

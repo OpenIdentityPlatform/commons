@@ -129,19 +129,19 @@ public class AuthenticationFilterTest {
         MessagePolicy sessionAuthModuleRequestPolicy = mock(MessagePolicy.class);
         MessagePolicy sessionAuthModuleResponsePolicy = mock(MessagePolicy.class);
         CallbackHandler sessionAuthModuleHandler = mock(CallbackHandler.class);
-        Map<String, Object> sessionAuthModuleSettings = new HashMap<String, Object>();
+        Map<String, Object> sessionAuthModuleSettings = new HashMap<>();
 
         AsyncServerAuthModule authModuleOne = mockAuthModule();
         MessagePolicy authModuleOneRequestPolicy = mock(MessagePolicy.class);
         MessagePolicy authModuleOneResponsePolicy = mock(MessagePolicy.class);
         CallbackHandler authModuleOneHandler = mock(CallbackHandler.class);
-        Map<String, Object> authModuleOneSettings = new HashMap<String, Object>();
+        Map<String, Object> authModuleOneSettings = new HashMap<>();
 
         AsyncServerAuthModule authModuleTwo = mockAuthModule();
         MessagePolicy authModuleTwoRequestPolicy = mock(MessagePolicy.class);
         MessagePolicy authModuleTwoResponsePolicy = mock(MessagePolicy.class);
         CallbackHandler authModuleTwoHandler = mock(CallbackHandler.class);
-        Map<String, Object> authModuleTwoSettings = new HashMap<String, Object>();
+        Map<String, Object> authModuleTwoSettings = new HashMap<>();
 
         AuthenticationFilterBuilder builder = spy(AuthenticationFilter.builder());
 
@@ -201,7 +201,7 @@ public class AuthenticationFilterTest {
         MessagePolicy authModuleRequestPolicy = mock(MessagePolicy.class);
         MessagePolicy authModuleResponsePolicy = mock(MessagePolicy.class);
         CallbackHandler authModuleHandler = mock(CallbackHandler.class);
-        Map<String, Object> authModuleSettings = new HashMap<String, Object>();
+        Map<String, Object> authModuleSettings = new HashMap<>();
 
         given(authModule.getSupportedMessageTypes()).willReturn(new Class[]{Request.class, Response.class});
 
@@ -229,7 +229,7 @@ public class AuthenticationFilterTest {
     private AsyncServerAuthModule mockAuthModule() {
         AsyncServerAuthModule authModule = mock(AsyncServerAuthModule.class);
 
-        Collection<Class<?>> supportedMessageTypes = new HashSet<Class<?>>();
+        Collection<Class<?>> supportedMessageTypes = new HashSet<>();
         supportedMessageTypes.add(Request.class);
         supportedMessageTypes.add(Response.class);
         given(authModule.getSupportedMessageTypes()).willReturn(supportedMessageTypes);

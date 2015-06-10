@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.authz.filter.api;
@@ -31,7 +31,7 @@ public class AuthorizationAttributeTest {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldRejectNullKeys() {
-        new AuthorizationAttribute<Object>(null);
+        new AuthorizationAttribute<>(null);
     }
 
     @Test
@@ -39,7 +39,7 @@ public class AuthorizationAttributeTest {
         // Given
         AuthorizationContext context = mock(AuthorizationContext.class);
         String key = "abc";
-        AuthorizationAttribute<String> attribute = new AuthorizationAttribute<String>(key);
+        AuthorizationAttribute<String> attribute = new AuthorizationAttribute<>(key);
 
         // When
         attribute.get(context);
@@ -54,7 +54,7 @@ public class AuthorizationAttributeTest {
         AuthorizationContext context = mock(AuthorizationContext.class);
         String key = "abc";
         int value = 123;
-        AuthorizationAttribute<Integer> attribute = new AuthorizationAttribute<Integer>(key);
+        AuthorizationAttribute<Integer> attribute = new AuthorizationAttribute<>(key);
 
         // When
         attribute.set(context, value);
@@ -67,7 +67,7 @@ public class AuthorizationAttributeTest {
     public void shouldEqualSameObjectReference() {
 
         //Given
-        AuthorizationAttribute<String> attributeOne = new AuthorizationAttribute<String>("KEY");
+        AuthorizationAttribute<String> attributeOne = new AuthorizationAttribute<>("KEY");
         AuthorizationAttribute<String> attributeTwo = attributeOne;
 
         //When
@@ -81,7 +81,7 @@ public class AuthorizationAttributeTest {
     public void shouldNotEqualDifferentObjectType() {
 
         //Given
-        AuthorizationAttribute<String> attributeOne = new AuthorizationAttribute<String>("KEY");
+        AuthorizationAttribute<String> attributeOne = new AuthorizationAttribute<>("KEY");
         Object attributeTwo = new Object();
 
         //When
@@ -95,8 +95,8 @@ public class AuthorizationAttributeTest {
     public void shouldEqualWithSameAttribute() {
 
         //Given
-        AuthorizationAttribute<String> attributeOne = new AuthorizationAttribute<String>("KEY");
-        AuthorizationAttribute<String> attributeTwo = new AuthorizationAttribute<String>("KEY");
+        AuthorizationAttribute<String> attributeOne = new AuthorizationAttribute<>("KEY");
+        AuthorizationAttribute<String> attributeTwo = new AuthorizationAttribute<>("KEY");
 
         //When
         boolean equals = attributeOne.equals(attributeTwo);
@@ -109,8 +109,8 @@ public class AuthorizationAttributeTest {
     public void shouldNotEqualDifferentObjectReference() {
 
         //Given
-        AuthorizationAttribute<String> attributeOne = new AuthorizationAttribute<String>("KEY");
-        AuthorizationAttribute<String> attributeTwo = new AuthorizationAttribute<String>("KEY_TWO");
+        AuthorizationAttribute<String> attributeOne = new AuthorizationAttribute<>("KEY");
+        AuthorizationAttribute<String> attributeTwo = new AuthorizationAttribute<>("KEY_TWO");
 
         //When
         boolean equals = attributeOne.equals(attributeTwo);
@@ -125,7 +125,7 @@ public class AuthorizationAttributeTest {
         //Given
 
         //When
-        AuthorizationAttribute<String> authorizationAttribute = new AuthorizationAttribute<String>("KEY");
+        AuthorizationAttribute<String> authorizationAttribute = new AuthorizationAttribute<>("KEY");
 
         //Then
         assertEquals(authorizationAttribute.hashCode(), "KEY".hashCode());
@@ -137,7 +137,7 @@ public class AuthorizationAttributeTest {
         //Given
 
         //When
-        AuthorizationAttribute<String> authorizationAttribute = new AuthorizationAttribute<String>("KEY");
+        AuthorizationAttribute<String> authorizationAttribute = new AuthorizationAttribute<>("KEY");
 
         //Then
         assertTrue(authorizationAttribute.toString().contains("KEY"));

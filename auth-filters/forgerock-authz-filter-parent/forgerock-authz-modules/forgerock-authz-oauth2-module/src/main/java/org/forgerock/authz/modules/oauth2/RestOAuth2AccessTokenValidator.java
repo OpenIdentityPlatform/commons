@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.authz.modules.oauth2;
@@ -80,10 +80,10 @@ public class RestOAuth2AccessTokenValidator implements OAuth2AccessTokenValidato
             }
 
             // expires_in is expressed in seconds, and we compare it later with milliseconds since epoch
-            final long expiresIn = tokenInfo.get("expires_in").required().asLong() * 1000;
+            final long expiresIn = tokenInfo.get("expires_in").required().asLong() * 1_000;
             final Set<String> scopes = getScope(tokenInfo);
 
-            final Map<String, Object> profileInfo = new HashMap<String, Object>();
+            final Map<String, Object> profileInfo = new HashMap<>();
             if (userProfileEndpoint != null && expiresIn > 0) {
                 logger.debug("Fetching user profile information from endpoint");
                 final RestResource userProfileRequest = restResourceFactory.resource(userProfileEndpoint);
@@ -117,8 +117,8 @@ public class RestOAuth2AccessTokenValidator implements OAuth2AccessTokenValidato
         // Some identity Providers are returning the "scope" attribute as an array of string
         // where some others are using a simple space-delimited string
         if (scope.isString()) {
-            return new HashSet<String>(Arrays.asList(scope.asString().split(" ")));
+            return new HashSet<>(Arrays.asList(scope.asString().split(" ")));
         }
-        return new HashSet<String>(scope.asList(String.class));
+        return new HashSet<>(scope.asList(String.class));
     }
 }

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.authz.modules.oauth2.restlet;
@@ -83,7 +83,7 @@ public class RestletResource implements RestResource {
     public void addHeader(String name, String value) {
         Series<Header> headers = (Series<Header>) resource.getRequestAttributes().get(ATTRIBUTE_HEADERS);
         if (headers == null) {
-            headers = new Series<Header>(Header.class);
+            headers = new Series<>(Header.class);
             resource.getRequestAttributes().put(ATTRIBUTE_HEADERS, headers);
         }
         headers.set(name, value);

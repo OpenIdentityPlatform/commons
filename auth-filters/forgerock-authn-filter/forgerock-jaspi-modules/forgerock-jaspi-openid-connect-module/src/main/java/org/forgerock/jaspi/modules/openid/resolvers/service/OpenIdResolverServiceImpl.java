@@ -40,8 +40,7 @@ import org.forgerock.json.jose.utils.KeystoreManagerException;
  */
 public class OpenIdResolverServiceImpl implements OpenIdResolverService {
 
-    private final ConcurrentMap<String, OpenIdResolver> openIdResolvers =
-            new ConcurrentHashMap<String, OpenIdResolver>();
+    private final ConcurrentMap<String, OpenIdResolver> openIdResolvers = new ConcurrentHashMap<>();
 
     private final int readTimeout;
     private final int connTimeout;

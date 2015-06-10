@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.authz.basic.servlet;
@@ -26,7 +26,7 @@ import java.util.Set;
  */
 public class EndpointChecker {
 
-    private final Set<String> allowedEndpoints = new HashSet<String>();
+    private final Set<String> allowedEndpoints = new HashSet<>();
 
     /**
      * Creates a new {@code EndpointChecker} instance, which only allows requests to the {@code users} endpoint.

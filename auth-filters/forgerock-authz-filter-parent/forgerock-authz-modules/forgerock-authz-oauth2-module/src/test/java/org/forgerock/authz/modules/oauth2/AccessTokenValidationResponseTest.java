@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.authz.modules.oauth2;
@@ -63,7 +63,7 @@ public class AccessTokenValidationResponseTest {
     public void shouldCreateResponseWithScope() {
 
         //Given
-        Set<String> scope = new HashSet<String>();
+        Set<String> scope = new HashSet<>();
 
         //When
         final AccessTokenValidationResponse validationResponse =
@@ -79,8 +79,8 @@ public class AccessTokenValidationResponseTest {
     public void shouldCreateResponseWithScopeAndProfileInfo() {
 
         //Given
-        Map<String, Object> profileInfo = new HashMap<String, Object>();
-        Set<String> scope = new HashSet<String>();
+        Map<String, Object> profileInfo = new HashMap<>();
+        Set<String> scope = new HashSet<>();
 
         //When
         final AccessTokenValidationResponse validationResponse =

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.authz.filter.api;
@@ -93,7 +93,7 @@ public class AuthorizationContextTest {
                .setAttribute("two", 2)
                .setAttribute("three", 3.0);
 
-        Map<String, Object> expected = new LinkedHashMap<String, Object>();
+        Map<String, Object> expected = new LinkedHashMap<>();
         expected.put("one", "one");
         expected.put("two", 2);
         expected.put("three", 3.0);
@@ -182,7 +182,7 @@ public class AuthorizationContextTest {
     public void shouldGetHashCode() {
 
         //Given
-        Map<String, Object> attributes = new HashMap<String, Object>();
+        Map<String, Object> attributes = new HashMap<>();
         AuthorizationContext context = new AuthorizationContext(attributes);
 
         attributes.put("KEY", "VALUE");

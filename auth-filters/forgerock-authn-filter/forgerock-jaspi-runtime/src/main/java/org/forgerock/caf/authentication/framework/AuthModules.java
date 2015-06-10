@@ -131,7 +131,7 @@ final class AuthModules {
      * @see {@link #withValidation(AsyncServerAuthModule)}
      */
     static List<AsyncServerAuthModule> withValidation(List<AsyncServerAuthModule> authModules) {
-        List<AsyncServerAuthModule> modules = new ArrayList<AsyncServerAuthModule>();
+        List<AsyncServerAuthModule> modules = new ArrayList<>();
         if (authModules != null) {
             for (AsyncServerAuthModule authModule : authModules) {
                 modules.add(withValidation(authModule));
@@ -176,7 +176,7 @@ final class AuthModules {
      * @see {@link #withAuditing(AsyncServerAuthModule)}
      */
     static List<AsyncServerAuthModule> withAuditing(List<AsyncServerAuthModule> authModules) {
-        List<AsyncServerAuthModule> modules = new ArrayList<AsyncServerAuthModule>();
+        List<AsyncServerAuthModule> modules = new ArrayList<>();
         if (authModules != null) {
             for (AsyncServerAuthModule authModule : authModules) {
                 modules.add(withAuditing(authModule));
@@ -269,7 +269,7 @@ final class AuthModules {
      * @see {@link #withLogging(Logger, AsyncServerAuthModule)}
      */
     static List<AsyncServerAuthModule> withLogging(Logger logger, List<AsyncServerAuthModule> authModules) {
-        List<AsyncServerAuthModule> modules = new ArrayList<AsyncServerAuthModule>();
+        List<AsyncServerAuthModule> modules = new ArrayList<>();
         if (authModules != null) {
             for (AsyncServerAuthModule authModule : authModules) {
                 modules.add(withLogging(logger, authModule));
@@ -371,7 +371,7 @@ final class AuthModules {
                         public void handleException(AuthenticationException error) {
                             Map<String, Object> failureReason = removeMap(messageInfo, AUDIT_FAILURE_REASON_KEY);
                             if (failureReason == null) {
-                                failureReason = new HashMap<String, Object>();
+                                failureReason = new HashMap<>();
                             }
                             failureReason.put("exception", error.getMessage());
                             failureReason = Collections.<String, Object>singletonMap("exception", error.getMessage());
@@ -590,7 +590,7 @@ final class AuthModules {
     private static Map<String, Object> getMap(Map<String, Object> containingMap, String key) {
         Map<String, Object> map = (Map<String, Object>) containingMap.get(key);
         if (map == null) {
-            map = new HashMap<String, Object>();
+            map = new HashMap<>();
             containingMap.put(key, map);
         }
         return map;

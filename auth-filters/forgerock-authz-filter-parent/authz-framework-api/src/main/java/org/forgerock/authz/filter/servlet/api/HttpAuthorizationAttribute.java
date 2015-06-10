@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.authz.filter.servlet.api;
@@ -25,7 +25,7 @@ import javax.servlet.ServletRequest;
  * <p>Provides a convenience layer on top of {@link AuthorizationContext} to simplify access to particular attributes in
  * the authorisation context. Usage:
  * <pre>{@code
- *     AuthorizationAttribute<Set<String>> rolesAttr = new AuthorizationAttribute<Set<String>>("roles");
+ *     AuthorizationAttribute&lt;Set&lt;String&gt;&gt; rolesAttr = new AuthorizationAttribute&lt;&gt;("roles");
  *     ...
  *     rolesAttr.set(context, Collections.singleton("someRole"));
  *     ...
@@ -52,7 +52,7 @@ public final class HttpAuthorizationAttribute<T> {
      * @throws NullPointerException If the key is null.
      */
     public HttpAuthorizationAttribute(String key) {
-        this.attribute = new AuthorizationAttribute<T>(key);
+        this.attribute = new AuthorizationAttribute<>(key);
     }
 
     /**

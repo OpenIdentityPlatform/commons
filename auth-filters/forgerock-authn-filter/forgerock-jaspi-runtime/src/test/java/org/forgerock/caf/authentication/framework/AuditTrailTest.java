@@ -40,7 +40,7 @@ public class AuditTrailTest {
     @BeforeMethod
     public void setUp() {
         auditApi = mock(AuditApi.class);
-        contextMap = new HashMap<String, Object>();
+        contextMap = new HashMap<>();
 
         auditTrail = new AuditTrail(auditApi, contextMap);
     }
@@ -120,12 +120,12 @@ public class AuditTrailTest {
     public void shouldAuditFullFailedAuditMessage() {
 
         //Given
-        Map<String, Object> moduleOneAuditInfo = new HashMap<String, Object>();
+        Map<String, Object> moduleOneAuditInfo = new HashMap<>();
         moduleOneAuditInfo.put("MODULE_ONE", "INFO");
         moduleOneAuditInfo.put(AuditTrail.AUDIT_PRINCIPAL_KEY, "admin");
         auditTrail.auditFailure("MODULE_ONE_ID",
                 Collections.<String, Object>singletonMap("message", "MODULE_ONE_REASON"), moduleOneAuditInfo);
-        Map<String, Object> moduleTwoAuditInfo = new HashMap<String, Object>();
+        Map<String, Object> moduleTwoAuditInfo = new HashMap<>();
         moduleTwoAuditInfo.put("MODULE_TWO", "INFO");
         moduleTwoAuditInfo.put(AuditTrail.AUDIT_PRINCIPAL_KEY, "demo");
         auditTrail.auditFailure("MODULE_TWO_ID",

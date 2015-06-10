@@ -11,8 +11,9 @@
 * Header, with the fields enclosed by brackets [] replaced by your own identifying
 * information: "Portions copyright [year] [name of copyright owner]".
 *
-* Copyright 2014 ForgeRock AS.
+* Copyright 2014-2015 ForgeRock AS.
 */
+
 package org.forgerock.jaspi.modules.openid.resolvers.service;
 
 import java.net.URL;
@@ -46,7 +47,7 @@ public class OpenIdResolverServiceConfiguratorImplTest {
     @Test
     public void checkConfigureServiceFailsOnEmptyResolverConfig() {
         //given
-        List<Map<String, String>> resolverConfigs = new ArrayList<Map<String, String>>();
+        List<Map<String, String>> resolverConfigs = new ArrayList<>();
 
         OpenIdResolverService service = mock(OpenIdResolverService.class);
 
@@ -74,9 +75,9 @@ public class OpenIdResolverServiceConfiguratorImplTest {
     @Test //well-known takes priority over JWK
     public void checkConfigureServiceCreatesCorrectOpenIdConfigurationResolver() {
         //given
-        List<Map<String, String>> resolverConfigs = new ArrayList<Map<String, String>>();
+        List<Map<String, String>> resolverConfigs = new ArrayList<>();
 
-        Map<String, String> resolverConfigMap1 = new HashMap<String, String>();
+        Map<String, String> resolverConfigMap1 = new HashMap<>();
         resolverConfigMap1.put(OpenIdResolver.ISSUER_KEY, "issuer");
         resolverConfigMap1.put(OpenIdResolver.WELL_KNOWN_CONFIGURATION, "http://www.google.com");
         resolverConfigMap1.put(OpenIdResolver.JWK, "http://www.google.com");
@@ -95,9 +96,9 @@ public class OpenIdResolverServiceConfiguratorImplTest {
     @Test //JWK takes priority over keystore
     public void checkConfigureServiceCreatesCorrectJWKResolver() {
         //given
-        List<Map<String, String>> resolverConfigs = new ArrayList<Map<String, String>>();
+        List<Map<String, String>> resolverConfigs = new ArrayList<>();
 
-        Map<String, String> resolverConfigMap1 = new HashMap<String, String>();
+        Map<String, String> resolverConfigMap1 = new HashMap<>();
         resolverConfigMap1.put(OpenIdResolver.ISSUER_KEY, "issuer");
         resolverConfigMap1.put(OpenIdResolver.JWK, "http://www.google.com");
         resolverConfigMap1.put(OpenIdResolver.CLIENT_SECRET_KEY, "clientSecret");
@@ -116,9 +117,9 @@ public class OpenIdResolverServiceConfiguratorImplTest {
     @Test //keystore takes priority over shared secret
     public void checkConfigureServiceCreatesCorrectKeystoreResolver() {
         //given
-        List<Map<String, String>> resolverConfigs = new ArrayList<Map<String, String>>();
+        List<Map<String, String>> resolverConfigs = new ArrayList<>();
 
-        Map<String, String> resolverConfigMap1 = new HashMap<String, String>();
+        Map<String, String> resolverConfigMap1 = new HashMap<>();
         resolverConfigMap1.put(OpenIdResolver.ISSUER_KEY, "issuer");
         resolverConfigMap1.put(OpenIdResolver.KEY_ALIAS_KEY, "keyAlias");
         resolverConfigMap1.put(OpenIdResolver.KEYSTORE_LOCATION_KEY, "cacerts.jks");
@@ -142,9 +143,9 @@ public class OpenIdResolverServiceConfiguratorImplTest {
     @Test
     public void checkKeystoreConfiguredResolverFailsWhenMissingKeystoreDetailsType() {
         //given
-        List<Map<String, String>> resolverConfigs = new ArrayList<Map<String, String>>();
+        List<Map<String, String>> resolverConfigs = new ArrayList<>();
 
-        Map<String, String> resolverConfigMap1 = new HashMap<String, String>();
+        Map<String, String> resolverConfigMap1 = new HashMap<>();
         resolverConfigMap1.put(OpenIdResolver.ISSUER_KEY, "issuer");
         resolverConfigMap1.put(OpenIdResolver.KEYSTORE_LOCATION_KEY, "cacerts.jks");
         resolverConfigMap1.put(OpenIdResolver.KEYSTORE_PASS_KEY, "storepass");
@@ -165,9 +166,9 @@ public class OpenIdResolverServiceConfiguratorImplTest {
     @Test
     public void checkKeystoreConfiguredResolverFailsWhenMissingKeystoreDetailsPassword() {
         //given
-        List<Map<String, String>> resolverConfigs = new ArrayList<Map<String, String>>();
+        List<Map<String, String>> resolverConfigs = new ArrayList<>();
 
-        Map<String, String> resolverConfigMap1 = new HashMap<String, String>();
+        Map<String, String> resolverConfigMap1 = new HashMap<>();
         resolverConfigMap1.put(OpenIdResolver.ISSUER_KEY, "issuer");
         resolverConfigMap1.put(OpenIdResolver.KEYSTORE_LOCATION_KEY, "cacerts.jks");
         resolverConfigMap1.put(OpenIdResolver.KEYSTORE_TYPE_KEY, "JKS");
@@ -188,9 +189,9 @@ public class OpenIdResolverServiceConfiguratorImplTest {
     @Test
     public void checkKeystoreConfiguredResolverFailsWhenMissingKeystoreDetailsAlias() {
         //given
-        List<Map<String, String>> resolverConfigs = new ArrayList<Map<String, String>>();
+        List<Map<String, String>> resolverConfigs = new ArrayList<>();
 
-        Map<String, String> resolverConfigMap1 = new HashMap<String, String>();
+        Map<String, String> resolverConfigMap1 = new HashMap<>();
         resolverConfigMap1.put(OpenIdResolver.ISSUER_KEY, "issuer");
         resolverConfigMap1.put(OpenIdResolver.KEYSTORE_LOCATION_KEY, "cacerts.jks");
         resolverConfigMap1.put(OpenIdResolver.KEYSTORE_TYPE_KEY, "JKS");
@@ -211,9 +212,9 @@ public class OpenIdResolverServiceConfiguratorImplTest {
     @Test //keystore takes priority over shared secret
     public void checkKeystoreConfiguredResolverFailsWhenMissingKeystoreDetailsLocation() {
         //given
-        List<Map<String, String>> resolverConfigs = new ArrayList<Map<String, String>>();
+        List<Map<String, String>> resolverConfigs = new ArrayList<>();
 
-        Map<String, String> resolverConfigMap1 = new HashMap<String, String>();
+        Map<String, String> resolverConfigMap1 = new HashMap<>();
         resolverConfigMap1.put(OpenIdResolver.ISSUER_KEY, "issuer");
         resolverConfigMap1.put(OpenIdResolver.JWK, "http://www.google.com");
         resolverConfigMap1.put(OpenIdResolver.KEY_ALIAS_KEY, "keyAlias");
@@ -235,9 +236,9 @@ public class OpenIdResolverServiceConfiguratorImplTest {
     @Test //keystore takes priority over shared secret
     public void checkConfigureServiceCreatesCorrectSharedKeyResolver() {
         //given
-        List<Map<String, String>> resolverConfigs = new ArrayList<Map<String, String>>();
+        List<Map<String, String>> resolverConfigs = new ArrayList<>();
 
-        Map<String, String> resolverConfigMap1 = new HashMap<String, String>();
+        Map<String, String> resolverConfigMap1 = new HashMap<>();
         resolverConfigMap1.put(OpenIdResolver.ISSUER_KEY, "issuer");
         resolverConfigMap1.put(OpenIdResolver.CLIENT_SECRET_KEY, "clientSecret");
 
@@ -255,9 +256,9 @@ public class OpenIdResolverServiceConfiguratorImplTest {
     @Test
     public void checkConfigurationWithoutIssuerWillNotProceedIfNotOpenIdConnectWellKnown() {
         //given
-        List<Map<String, String>> resolverConfigs = new ArrayList<Map<String, String>>();
+        List<Map<String, String>> resolverConfigs = new ArrayList<>();
 
-        Map<String, String> resolverConfigMap1 = new HashMap<String, String>();
+        Map<String, String> resolverConfigMap1 = new HashMap<>();
         resolverConfigMap1.put(OpenIdResolver.JWK, "http://www.google.com");
 
         resolverConfigs.add(resolverConfigMap1);

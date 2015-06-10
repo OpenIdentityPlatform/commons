@@ -101,7 +101,7 @@ public class AuthModuleTwo implements AsyncServerAuthModule {
     @SuppressWarnings("rawtypes")
     @Override
     public Collection<Class<?>> getSupportedMessageTypes() {
-        Collection<Class<?>> supportedMessageTypes = new HashSet<Class<?>>();
+        Collection<Class<?>> supportedMessageTypes = new HashSet<>();
         supportedMessageTypes.add(Request.class);
         supportedMessageTypes.add(Response.class);
         return supportedMessageTypes;

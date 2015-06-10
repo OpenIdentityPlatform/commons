@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.authz.filter.servlet.api;
@@ -37,7 +37,7 @@ public class HttpAuthorizationAttributeTest {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldRejectNullKeys() {
-        new AuthorizationAttribute<Object>(null);
+        new AuthorizationAttribute<>(null);
     }
 
     @Test
@@ -45,7 +45,7 @@ public class HttpAuthorizationAttributeTest {
         // Given
         AuthorizationContext context = mock(AuthorizationContext.class);
         String key = "abc";
-        HttpAuthorizationAttribute<String> attribute = new HttpAuthorizationAttribute<String>(key);
+        HttpAuthorizationAttribute<String> attribute = new HttpAuthorizationAttribute<>(key);
 
         // When
         attribute.get(context);
@@ -58,11 +58,11 @@ public class HttpAuthorizationAttributeTest {
     public void shouldUseAssociatedContext() {
         // Given
         ServletRequest request = mock(ServletRequest.class);
-        Map<String, Object> context = new LinkedHashMap<String, Object>();
+        Map<String, Object> context = new LinkedHashMap<>();
         String value = "123";
         String key = "abc";
         context.put(key, value);
-        HttpAuthorizationAttribute<String> attribute = new HttpAuthorizationAttribute<String>(key);
+        HttpAuthorizationAttribute<String> attribute = new HttpAuthorizationAttribute<>(key);
         given(request.getAttribute(HttpAuthorizationContext.ATTRIBUTE_AUTHORIZATION_CONTEXT)).willReturn(context);
 
         // When
@@ -78,7 +78,7 @@ public class HttpAuthorizationAttributeTest {
         AuthorizationContext context = mock(AuthorizationContext.class);
         String key = "abc";
         int value = 123;
-        HttpAuthorizationAttribute<Integer> attribute = new HttpAuthorizationAttribute<Integer>(key);
+        HttpAuthorizationAttribute<Integer> attribute = new HttpAuthorizationAttribute<>(key);
 
         // When
         attribute.set(context, value);
@@ -93,8 +93,8 @@ public class HttpAuthorizationAttributeTest {
         ServletRequest request = mock(ServletRequest.class);
         String value = "123";
         String key = "abc";
-        HttpAuthorizationAttribute<String> attribute = new HttpAuthorizationAttribute<String>(key);
-        Map<String, Object> context = new LinkedHashMap<String, Object>();
+        HttpAuthorizationAttribute<String> attribute = new HttpAuthorizationAttribute<>(key);
+        Map<String, Object> context = new LinkedHashMap<>();
         given(request.getAttribute(HttpAuthorizationContext.ATTRIBUTE_AUTHORIZATION_CONTEXT)).willReturn(context);
 
         // When

@@ -128,7 +128,7 @@ class RestletRestClient implements RestClient {
             resource.addQueryParameter(entry.getKey(), entry.getValue());
         }
 
-        resource.getRequest().getAttributes().putIfAbsent("org.restlet.http.headers", new Series<Header>(Header.class));
+        resource.getRequest().getAttributes().putIfAbsent("org.restlet.http.headers", new Series<>(Header.class));
         final Series<Header> resourceHeaders = (Series<Header>) resource.getRequestAttributes()
                 .get("org.restlet.http.headers");
         for (final Map.Entry<String, String> entry : headers.entrySet()) {

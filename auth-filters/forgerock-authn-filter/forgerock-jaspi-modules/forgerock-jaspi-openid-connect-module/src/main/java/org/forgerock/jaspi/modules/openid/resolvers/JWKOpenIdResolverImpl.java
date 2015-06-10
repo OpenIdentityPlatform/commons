@@ -49,7 +49,7 @@ public class JWKOpenIdResolverImpl extends BaseOpenIdResolver {
 
     private final URL jwkUrl;
 
-    private final Map<String, Key> keyMap = new HashMap<String, Key>();
+    private final Map<String, Key> keyMap = new HashMap<>();
 
     private final JWKSetParser jwkParser;
 

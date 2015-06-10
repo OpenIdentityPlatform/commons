@@ -11,8 +11,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
+
 package org.forgerock.authz.modules.oauth2;
 
 import org.forgerock.authz.filter.api.AuthorizationContext;
@@ -60,7 +61,7 @@ public class OAuth2ModuleTest {
 
     private void createOAuth2Module(boolean cacheEnabled, String... requiredScopes) {
         oAuth2Module = new OAuth2Module(cacheFactory, tokenValidator,
-                new HashSet<String>(Arrays.asList(requiredScopes)), cacheEnabled, 10);
+                new HashSet<>(Arrays.asList(requiredScopes)), cacheEnabled, 10);
     }
 
     @Test
@@ -203,7 +204,7 @@ public class OAuth2ModuleTest {
         String accessToken = "ACCESS_TOKEN";
         AuthorizationContext context = mock(AuthorizationContext.class);
         AccessTokenValidationResponse validationResponse = mock(AccessTokenValidationResponse.class);
-        Map<String, Object> profileInfo = new HashMap<String, Object>();
+        Map<String, Object> profileInfo = new HashMap<>();
 
         createOAuth2Module(false);
         given(tokenValidator.validate("ACCESS_TOKEN")).willReturn(validationResponse);

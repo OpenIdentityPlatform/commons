@@ -45,9 +45,8 @@ final class MessageContextImpl extends ServerContext implements MessageContext {
     private Request request;
     private Response response;
     private AuditTrail auditTrail;
-    private Map<String, Object> requestContextMap = new HashMap<String, Object>();
-    private final Map<Class<? extends AsyncServerAuthContext>, AuthenticationState> authContextState =
-            new HashMap<Class<? extends AsyncServerAuthContext>, AuthenticationState>();
+    private Map<String, Object> requestContextMap = new HashMap<>();
+    private final Map<Class<? extends AsyncServerAuthContext>, AuthenticationState> authContextState = new HashMap<>();
 
     /**
      * Creates a new message context that holds both the request and response messages and the

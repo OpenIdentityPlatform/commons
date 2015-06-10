@@ -95,7 +95,7 @@ class ResponseHandler {
      */
     private JsonValue getJsonExceptionResponse(int code, String reason, String message, JsonValue detail) {
 
-        final Map<String, Object> result = new LinkedHashMap<String, Object>(4);
+        final Map<String, Object> result = new LinkedHashMap<>(4);
         result.put("code", code); // required
         result.put("reason", reason); // required
         if (message != null) { // should always be present

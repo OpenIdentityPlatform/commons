@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.authz.filter.servlet.api;
@@ -65,7 +65,7 @@ public final class HttpAuthorizationContext extends AuthorizationContext {
     public static HttpAuthorizationContext forRequest(ServletRequest request) {
         Map<String, Object> contextMap = asMap(request.getAttribute(ATTRIBUTE_AUTHORIZATION_CONTEXT));
         if (contextMap == null) {
-            contextMap = new LinkedHashMap<String, Object>();
+            contextMap = new LinkedHashMap<>();
             request.setAttribute(ATTRIBUTE_AUTHORIZATION_CONTEXT, contextMap);
         }
         return new HttpAuthorizationContext(contextMap);

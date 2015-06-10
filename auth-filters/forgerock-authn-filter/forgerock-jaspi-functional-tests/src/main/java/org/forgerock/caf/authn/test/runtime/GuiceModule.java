@@ -66,7 +66,7 @@ public class GuiceModule extends AbstractModule {
     AuthenticationFilter getAuthenticationFilter(Logger logger, AuditApi auditApi,
             @Named("SessionAuthModule") AsyncServerAuthModule sessionAuthModule,
             @Named("AuthModules") List<AsyncServerAuthModule> authModules) {
-        List<AuthenticationModuleBuilder> authModuleBuilders = new ArrayList<AuthenticationModuleBuilder>();
+        List<AuthenticationModuleBuilder> authModuleBuilders = new ArrayList<>();
         for (AsyncServerAuthModule authModule : authModules) {
             authModuleBuilders.add(configureModule(authModule));
         }
@@ -119,7 +119,7 @@ public class GuiceModule extends AbstractModule {
     public List<AsyncServerAuthModule> getAuthModules(ConfigurationResource configurationResource, Injector injector)
             throws ResourceException, ClassNotFoundException {
 
-        List<AsyncServerAuthModule> authModules = new ArrayList<AsyncServerAuthModule>();
+        List<AsyncServerAuthModule> authModules = new ArrayList<>();
 
         Resource configuration = newInternalConnection(newSingleton(configurationResource))
                 .read(new RootContext(), newReadRequest("configuration"));

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.authz.filter.api;
@@ -20,7 +20,7 @@ package org.forgerock.authz.filter.api;
  * <p>Provides a convenience layer on top of {@link AuthorizationContext} to simplify access to particular attributes in
  * the authorisation context. Usage:
  * <pre>{@code
- *     AuthorizationAttribute<Set<String>> rolesAttr = new AuthorizationAttribute<Set<String>>("roles");
+ *     AuthorizationAttribute&lt;Set&lt;String&gt;&gt; rolesAttr = new AuthorizationAttribute&lt;&gt;("roles");
  *     ...
  *     rolesAttr.set(context, Collections.singleton("someRole"));
  *     ...

@@ -77,7 +77,7 @@ public final class AuthorizationFilters {
         Reject.ifNull(modules, "Authorization module cannot be null.");
         Reject.ifTrue(modules.length == 0, "Authorization filters cannot be empty.");
 
-        final List<Filter> filters = new ArrayList<Filter>();
+        final List<Filter> filters = new ArrayList<>();
         for (final CrestAuthorizationModule module : modules) {
             filters.add(new AuthorizationFilter(module));
         }
@@ -101,7 +101,7 @@ public final class AuthorizationFilters {
         Reject.ifNull(modules, "Authorization module cannot be null.");
         Reject.ifTrue(modules.length == 0, "Authorization filters cannot be empty.");
 
-        final List<Filter> filters = new ArrayList<Filter>();
+        final List<Filter> filters = new ArrayList<>();
         for (final CrestAuthorizationModule module : modules) {
             filters.add(new AuthorizationFilter(module));
         }
@@ -124,7 +124,7 @@ public final class AuthorizationFilters {
         Reject.ifNull(modules, "Authorization module cannot be null.");
         Reject.ifTrue(modules.length == 0, "Authorization filters cannot be empty.");
 
-        final List<Filter> filters = new ArrayList<Filter>();
+        final List<Filter> filters = new ArrayList<>();
         for (final CrestAuthorizationModule module : modules) {
             filters.add(new AuthorizationFilter(module));
         }

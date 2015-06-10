@@ -65,7 +65,7 @@ public class OpenAMSessionModuleTest {
         final MessagePolicy requestMessagePolicy = mock(MessagePolicy.class);
         final MessagePolicy responseMessagePolicy = mock(MessagePolicy.class);
         final CallbackHandler callbackHandler = mock(CallbackHandler.class);
-        final Map<String, Object> options = new HashMap<String, Object>();
+        final Map<String, Object> options = new HashMap<>();
 
         //When
         try {
@@ -83,7 +83,7 @@ public class OpenAMSessionModuleTest {
         final MessagePolicy requestMessagePolicy = mock(MessagePolicy.class);
         final MessagePolicy responseMessagePolicy = mock(MessagePolicy.class);
         final CallbackHandler callbackHandler = mock(CallbackHandler.class);
-        final Map<String, Object> options = new HashMap<String, Object>();
+        final Map<String, Object> options = new HashMap<>();
 
         options.put("openamDeploymentUrl", "");
 
@@ -103,7 +103,7 @@ public class OpenAMSessionModuleTest {
         final MessagePolicy requestMessagePolicy = mock(MessagePolicy.class);
         final MessagePolicy responseMessagePolicy = mock(MessagePolicy.class);
         final CallbackHandler callbackHandler = mock(CallbackHandler.class);
-        final Map<String, Object> options = new HashMap<String, Object>();
+        final Map<String, Object> options = new HashMap<>();
 
         options.put("openamDeploymentUrl", "https://OPENAM_DEPLOYMENT_URI/");
 
@@ -123,7 +123,7 @@ public class OpenAMSessionModuleTest {
         final MessagePolicy requestMessagePolicy = mock(MessagePolicy.class);
         final MessagePolicy responseMessagePolicy = mock(MessagePolicy.class);
         final CallbackHandler callbackHandler = mock(CallbackHandler.class);
-        final Map<String, Object> options = new HashMap<String, Object>();
+        final Map<String, Object> options = new HashMap<>();
 
         options.put("openamDeploymentUrl", "https://OPENAM_DEPLOYMENT_URI/");
         options.put("openamSSOTokenCookieName", "");
@@ -144,7 +144,7 @@ public class OpenAMSessionModuleTest {
         final MessagePolicy requestMessagePolicy = mock(MessagePolicy.class);
         final MessagePolicy responseMessagePolicy = mock(MessagePolicy.class);
         final CallbackHandler callbackHandler = mock(CallbackHandler.class);
-        final Map<String, Object> options = new HashMap<String, Object>();
+        final Map<String, Object> options = new HashMap<>();
 
         options.put("openamDeploymentUrl", "https://OPENAM_DEPLOYMENT_URI/");
         options.put("openamSSOTokenCookieName", "OPENAM_SSO_TOKEN_COOKIE_NAME");
@@ -165,7 +165,7 @@ public class OpenAMSessionModuleTest {
         final MessagePolicy requestMessagePolicy = mock(MessagePolicy.class);
         final MessagePolicy responseMessagePolicy = mock(MessagePolicy.class);
         final CallbackHandler callbackHandler = mock(CallbackHandler.class);
-        final Map<String, Object> options = new HashMap<String, Object>();
+        final Map<String, Object> options = new HashMap<>();
 
         options.put("openamDeploymentUrl", "https://OPENAM_DEPLOYMENT_URI/");
         options.put("openamSSOTokenCookieName", "OPENAM_SSO_TOKEN_COOKIE_NAME");
@@ -187,7 +187,7 @@ public class OpenAMSessionModuleTest {
         final MessagePolicy requestMessagePolicy = mock(MessagePolicy.class);
         final MessagePolicy responseMessagePolicy = mock(MessagePolicy.class);
         final CallbackHandler callbackHandler = mock(CallbackHandler.class);
-        final Map<String, Object> options = new HashMap<String, Object>();
+        final Map<String, Object> options = new HashMap<>();
 
         options.put("openamDeploymentUrl", "http://OPENAM_DEPLOYMENT_URI/");
         options.put("openamSSOTokenCookieName", "OPENAM_SSO_TOKEN_COOKIE_NAME");
@@ -207,7 +207,7 @@ public class OpenAMSessionModuleTest {
         final MessagePolicy requestMessagePolicy = mock(MessagePolicy.class);
         final MessagePolicy responseMessagePolicy = mock(MessagePolicy.class);
         final CallbackHandler callbackHandler = mock(CallbackHandler.class);
-        final Map<String, Object> options = new HashMap<String, Object>();
+        final Map<String, Object> options = new HashMap<>();
 
         options.put("openamDeploymentUrl", "https://OPENAM_DEPLOYMENT_URI/");
         options.put("openamSSOTokenCookieName", "OPENAM_SSO_TOKEN_COOKIE_NAME");
@@ -230,7 +230,7 @@ public class OpenAMSessionModuleTest {
         final MessagePolicy requestMessagePolicy = mock(MessagePolicy.class);
         final MessagePolicy responseMessagePolicy = mock(MessagePolicy.class);
         final CallbackHandler callbackHandler = mock(CallbackHandler.class);
-        final Map<String, Object> options = new HashMap<String, Object>();
+        final Map<String, Object> options = new HashMap<>();
 
         options.put("openamDeploymentUrl", "https://OPENAM_DEPLOYMENT_URI/");
         options.put("openamSSOTokenCookieName", "OPENAM_SSO_TOKEN_COOKIE_NAME");
@@ -254,7 +254,7 @@ public class OpenAMSessionModuleTest {
         final MessagePolicy requestMessagePolicy = mock(MessagePolicy.class);
         final MessagePolicy responseMessagePolicy = mock(MessagePolicy.class);
         final CallbackHandler callbackHandler = mock(CallbackHandler.class);
-        final Map<String, Object> options = new HashMap<String, Object>();
+        final Map<String, Object> options = new HashMap<>();
 
         options.put("openamDeploymentUrl", "https://OPENAM_DEPLOYMENT_URI/");
         options.put("openamSSOTokenCookieName", "OPENAM_SSO_TOKEN_COOKIE_NAME");
@@ -278,7 +278,7 @@ public class OpenAMSessionModuleTest {
         final MessagePolicy requestMessagePolicy = mock(MessagePolicy.class);
         final MessagePolicy responseMessagePolicy = mock(MessagePolicy.class);
         final CallbackHandler callbackHandler = mock(CallbackHandler.class);
-        final Map<String, Object> options = new HashMap<String, Object>();
+        final Map<String, Object> options = new HashMap<>();
 
         options.put("openamDeploymentUrl", "https://OPENAM_DEPLOYMENT_URI/");
         options.put("openamSSOTokenCookieName", "OPENAM_SSO_TOKEN_COOKIE_NAME");
@@ -303,7 +303,7 @@ public class OpenAMSessionModuleTest {
         final MessagePolicy requestMessagePolicy = mock(MessagePolicy.class);
         final MessagePolicy responseMessagePolicy = mock(MessagePolicy.class);
         final CallbackHandler callbackHandler = mock(CallbackHandler.class);
-        final Map<String, Object> options = new HashMap<String, Object>();
+        final Map<String, Object> options = new HashMap<>();
 
         options.put("openamDeploymentUrl", "https://OPENAM_DEPLOYMENT_URI/");
         options.put("openamSSOTokenCookieName", "OPENAM_SSO_TOKEN_COOKIE_NAME");
@@ -328,7 +328,7 @@ public class OpenAMSessionModuleTest {
         final MessagePolicy requestMessagePolicy = mock(MessagePolicy.class);
         final MessagePolicy responseMessagePolicy = mock(MessagePolicy.class);
         final CallbackHandler callbackHandler = mock(CallbackHandler.class);
-        final Map<String, Object> options = new HashMap<String, Object>();
+        final Map<String, Object> options = new HashMap<>();
 
         options.put("openamDeploymentUrl", "https://OPENAM_DEPLOYMENT_URI/");
         options.put("openamSSOTokenCookieName", "OPENAM_SSO_TOKEN_COOKIE_NAME");
@@ -354,7 +354,7 @@ public class OpenAMSessionModuleTest {
         final MessagePolicy requestMessagePolicy = mock(MessagePolicy.class);
         final MessagePolicy responseMessagePolicy = mock(MessagePolicy.class);
         final CallbackHandler callbackHandler = mock(CallbackHandler.class);
-        final Map<String, Object> options = new HashMap<String, Object>();
+        final Map<String, Object> options = new HashMap<>();
 
         options.put("openamDeploymentUrl", "https://OPENAM_DEPLOYMENT_URI/");
         options.put("openamSSOTokenCookieName", "OPENAM_SSO_TOKEN_COOKIE_NAME");
@@ -384,7 +384,7 @@ public class OpenAMSessionModuleTest {
         final MessagePolicy requestMessagePolicy = mock(MessagePolicy.class);
         final MessagePolicy responseMessagePolicy = mock(MessagePolicy.class);
         final CallbackHandler callbackHandler = mock(CallbackHandler.class);
-        final Map<String, Object> options = new HashMap<String, Object>();
+        final Map<String, Object> options = new HashMap<>();
 
         options.put("openamDeploymentUrl", "https://OPENAM_DEPLOYMENT_URI/");
         options.put("openamSSOTokenCookieName", "OPENAM_SSO_TOKEN_COOKIE_NAME");
@@ -431,7 +431,7 @@ public class OpenAMSessionModuleTest {
         final MessagePolicy requestMessagePolicy = mock(MessagePolicy.class);
         final MessagePolicy responseMessagePolicy = mock(MessagePolicy.class);
         final CallbackHandler callbackHandler = mock(CallbackHandler.class);
-        final Map<String, Object> options = new HashMap<String, Object>();
+        final Map<String, Object> options = new HashMap<>();
 
         options.put("openamDeploymentUrl", openamDeploymentUrl);
         options.put("openamSSOTokenCookieName", "OPENAM_SSO_TOKEN_COOKIE_NAME");

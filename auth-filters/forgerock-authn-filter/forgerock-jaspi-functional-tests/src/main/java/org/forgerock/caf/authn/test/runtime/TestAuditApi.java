@@ -45,7 +45,7 @@ public class TestAuditApi implements AuditApi {
         return InjectorHolder.getInstance(AuditApi.class);
     }
 
-    private final List<JsonValue> auditRecords = new ArrayList<JsonValue>();
+    private final List<JsonValue> auditRecords = new ArrayList<>();
 
     /**
      * {@inheritDoc}
