@@ -79,7 +79,7 @@ public final class Api {
             public Promise<Resource, ResourceException> handleRead(final ServerContext context,
                     final ReadRequest request) {
                 if (request.getResourcePathObject().isEmpty()) {
-                    final List<Object> values = new ArrayList<Object>(apis.size());
+                    final List<Object> values = new ArrayList<>(apis.size());
                     for (final ApiDescriptor api : apis) {
                         values.add(apiToJson(api));
                     }
@@ -311,14 +311,14 @@ public final class Api {
     }
 
     static <T> Set<T> unmodifiableCopyOf(final Collection<T> set) {
-        return unmodifiableSet(new LinkedHashSet<T>(set));
+        return unmodifiableSet(new LinkedHashSet<>(set));
     }
 
     private static Entry<String, Object> actionsToJson(final Set<ActionDescriptor> actions) {
         if (actions.isEmpty()) {
             return null;
         }
-        final List<Object> json = new ArrayList<Object>(actions.size());
+        final List<Object> json = new ArrayList<>(actions.size());
         for (final ActionDescriptor action : actions) {
             // @formatter:off
             json.add(object(
@@ -350,7 +350,7 @@ public final class Api {
         if (parameters.isEmpty()) {
             return null;
         }
-        final List<Object> json = new ArrayList<Object>(parameters.size());
+        final List<Object> json = new ArrayList<>(parameters.size());
         for (final ActionParameter parameter : parameters) {
             // @formatter:off
             json.add(object(
@@ -370,7 +370,7 @@ public final class Api {
         if (profiles.isEmpty()) {
             return null;
         }
-        final List<Object> json = new ArrayList<Object>(profiles.size());
+        final List<Object> json = new ArrayList<>(profiles.size());
         for (final Profile profile : profiles) {
             // @formatter:off
             json.add(object(
@@ -388,7 +388,7 @@ public final class Api {
         if (relations.isEmpty()) {
             return null;
         }
-        final List<Object> json = new ArrayList<Object>(relations.size());
+        final List<Object> json = new ArrayList<>(relations.size());
         for (final RelationDescriptor relation : relations) {
             // @formatter:off
             json.add(object(
@@ -408,7 +408,7 @@ public final class Api {
         if (resources.isEmpty()) {
             return null;
         }
-        final List<Object> json = new ArrayList<Object>(resources.size());
+        final List<Object> json = new ArrayList<>(resources.size());
         for (final ResourceDescriptor resource : resources) {
             // @formatter:off
             json.add(object(

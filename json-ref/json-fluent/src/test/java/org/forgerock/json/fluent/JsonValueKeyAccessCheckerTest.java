@@ -11,13 +11,14 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.fluent;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -63,7 +64,7 @@ public class JsonValueKeyAccessCheckerTest {
     }
 
     private Map<String, Object> buildMap() {
-        final Map<String, Object> map = new HashMap<String, Object>();
+        final Map<String, Object> map = new HashMap<>();
         map.put("string", "value");
         map.put("int", 42);
         map.put("list", Arrays.asList("val1", "val2"));
@@ -71,7 +72,7 @@ public class JsonValueKeyAccessCheckerTest {
     }
 
     private Map<String, Object> buildSubMap() {
-        final Map<String, Object> subMap = new HashMap<String, Object>();
+        final Map<String, Object> subMap = new HashMap<>();
         subMap.put("string", "subValue");
         subMap.put("int", 4242);
         subMap.put("list", Arrays.asList("subVal1", "subVal2"));
@@ -121,7 +122,7 @@ public class JsonValueKeyAccessCheckerTest {
 
     @Test
     public void testThatBasicKeysAccessedThroughIteratorAreChecked() {
-        final Map<String, Object> map = new HashMap<String, Object>();
+        final Map<String, Object> map = new HashMap<>();
         map.put("string", "value");
         map.put("int", 42);
 
@@ -134,7 +135,7 @@ public class JsonValueKeyAccessCheckerTest {
 
     @Test
     public void testThatSpecialKeysAccessedThroughIteratorAreChecked() {
-        final Map<String, Object> map = new HashMap<String, Object>();
+        final Map<String, Object> map = new HashMap<>();
         map.put("list", Collections.emptyList());
         map.put("map", Collections.emptyMap());
 

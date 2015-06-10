@@ -11,8 +11,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
+
 package org.forgerock.json.resource.descriptor;
 
 import static org.forgerock.json.resource.descriptor.Api.unmodifiableCopyOf;
@@ -30,9 +31,9 @@ public final class ActionDescriptor {
         private final String name;
         private final String normalizedName;
         private LocalizableMessage description;
-        private final Set<ActionParameter> parameters = new LinkedHashSet<ActionParameter>();
+        private final Set<ActionParameter> parameters = new LinkedHashSet<>();
         private final ActionCapableBuilder<T> parentBuilder;
-        private final Set<Profile> profiles = new LinkedHashSet<Profile>();
+        private final Set<Profile> profiles = new LinkedHashSet<>();
 
         Builder(final String name, final ActionCapableBuilder<T> parentBuilder) {
             this.name = name;
@@ -107,7 +108,7 @@ public final class ActionDescriptor {
     private final Set<Profile> profiles;
 
     static <T> Builder<T> builder(final String name, final ActionCapableBuilder<T> parentBuilder) {
-        return new Builder<T>(name, parentBuilder);
+        return new Builder<>(name, parentBuilder);
     }
 
     private ActionDescriptor(final String name, final String normalizedName,

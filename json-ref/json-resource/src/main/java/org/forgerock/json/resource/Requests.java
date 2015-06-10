@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2014 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -35,9 +35,9 @@ import static org.forgerock.util.Utils.asEnum;
  */
 public final class Requests {
     private static abstract class AbstractRequestImpl<T extends Request> implements Request {
-        private final List<JsonPointer> fields = new LinkedList<JsonPointer>();
+        private final List<JsonPointer> fields = new LinkedList<>();
         private ResourcePath resourcePath;
-        private final Map<String, String> parameters = new LinkedHashMap<String, String>(2);
+        private final Map<String, String> parameters = new LinkedHashMap<>(2);
 
         protected AbstractRequestImpl() {
             // Default constructor.
@@ -123,7 +123,7 @@ public final class Requests {
 
         @Override
         public JsonValue toJsonValue() {
-            return new JsonValue(new HashMap<String, Object>())
+            return new JsonValue(new HashMap<>())
                     .put("method", getRequestType().name().toLowerCase())
                     .put(FIELD_RESOURCE_PATH, getResourcePath())
                     .put(FIELD_FIELDS, getFields());
@@ -323,12 +323,12 @@ public final class Requests {
         private String version;
 
         private PatchRequestImpl() {
-            operations = new LinkedList<PatchOperation>();
+            operations = new LinkedList<>();
         }
 
         private PatchRequestImpl(final PatchRequest request) {
             super(request);
-            this.operations = new LinkedList<PatchOperation>(request.getPatchOperations());
+            this.operations = new LinkedList<>(request.getPatchOperations());
             this.version = request.getRevision();
         }
 
@@ -379,7 +379,7 @@ public final class Requests {
 
         @Override
         public JsonValue toJsonValue() {
-            final List<Object> operations = new ArrayList<Object>();
+            final List<Object> operations = new ArrayList<>();
             for (PatchOperation operation : getPatchOperations()) {
                 operations.add(operation.toJsonValue().getObject());
             }
@@ -392,7 +392,7 @@ public final class Requests {
     private static final class QueryRequestImpl extends AbstractRequestImpl<QueryRequest> implements
             QueryRequest {
         private org.forgerock.util.query.QueryFilter<JsonPointer> filter;
-        private final List<SortKey> keys = new LinkedList<SortKey>();
+        private final List<SortKey> keys = new LinkedList<>();
         private String pagedResultsCookie;
         private int pagedResultsOffset = 0;
         private int pageSize = 0;
@@ -518,7 +518,7 @@ public final class Requests {
 
         @Override
         public JsonValue toJsonValue() {
-            final List<String> sortKeys =  new ArrayList<String>();
+            final List<String> sortKeys =  new ArrayList<>();
             for (SortKey key : getSortKeys()) {
                 sortKeys.add(String.valueOf(key));
             }

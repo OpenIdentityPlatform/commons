@@ -60,8 +60,7 @@ public final class VersionRouter implements RequestHandler {
     private static final String COMMA = ",";
 
     private final VersionSelector versionSelector = new VersionSelector();
-    private final Map<Version, VersionRoute<RequestHandler>> routes =
-            new ConcurrentHashMap<Version, VersionRoute<RequestHandler>>();
+    private final Map<Version, VersionRoute<RequestHandler>> routes = new ConcurrentHashMap<>();
     private boolean warningEnabled = true;
 
     /**
@@ -130,7 +129,7 @@ public final class VersionRouter implements RequestHandler {
      * @return An opaque handle for the route which may be used for removing the route later.
      */
     public VersionRouter addVersion(String version, RequestHandler handler) {
-        addVersion(new VersionRoute<RequestHandler>(Version.valueOf(version), handler));
+        addVersion(new VersionRoute<>(Version.valueOf(version), handler));
         return this;
     }
 

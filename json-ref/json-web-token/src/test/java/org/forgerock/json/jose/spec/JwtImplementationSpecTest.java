@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.spec;
@@ -183,8 +183,8 @@ public class JwtImplementationSpecTest {
     public void shouldConvertDateToIntDate() {
 
         //Given
-        long intDateLong = 1373896932;
-        Date intDate = new Date(intDateLong * 1000L);
+        long intDateLong = 1_373_896_932;
+        Date intDate = new Date(intDateLong * 1_000L);
 
         //When
         long convertedDate = IntDate.toIntDate(intDate);
@@ -197,8 +197,8 @@ public class JwtImplementationSpecTest {
     public void shouldConvertIntDateToDate() {
 
         //Given
-        long intDateLong = 1373896932;
-        Date intDate = new Date(intDateLong * 1000L);
+        long intDateLong = 1_373_896_932;
+        Date intDate = new Date(intDateLong * 1_000L);
 
         //When
         Date convertedIntDate = IntDate.fromIntDate(intDateLong);
@@ -213,7 +213,7 @@ public class JwtImplementationSpecTest {
 //        //Given
 //        Calendar calendar = Calendar.getInstance();
 //        calendar.add(Calendar.MINUTE, -1);
-//        long expiryTime = calendar.getTime().getTime() / 1000L;
+//        long expiryTime = calendar.getTime().getTime() / 1_000L;
 //
 //        StringBuilder claimsSet = new StringBuilder();
 //        claimsSet.append("{")
@@ -241,8 +241,8 @@ public class JwtImplementationSpecTest {
 
         //Given
         JwtBuilderFactory jwtBuilderFactory = new JwtBuilderFactory();
-        long expiryTimeLong = 1373896932;
-        Date expiryTime = new Date(expiryTimeLong * 1000L);
+        long expiryTimeLong = 1_373_896_932;
+        Date expiryTime = new Date(expiryTimeLong * 1_000L);
 
         //When
         JwtClaimsSet claimsSet = jwtBuilderFactory.claims()
@@ -266,7 +266,7 @@ public class JwtImplementationSpecTest {
 //        //Given
 //        Calendar calendar = Calendar.getInstance();
 //        calendar.add(Calendar.MINUTE, -1);
-//        long notBeforeTime = calendar.getTime().getTime() / 1000L;
+//        long notBeforeTime = calendar.getTime().getTime() / 1_000L;
 //
 //        StringBuilder claimsSet = new StringBuilder();
 //        claimsSet.append("{")
@@ -294,8 +294,8 @@ public class JwtImplementationSpecTest {
 
         //Given
         JwtBuilderFactory jwtBuilderFactory = new JwtBuilderFactory();
-        long notBeforeTimeLong = 1373896932;
-        Date notBeforeTime = new Date(notBeforeTimeLong * 1000L);
+        long notBeforeTimeLong = 1_373_896_932;
+        Date notBeforeTime = new Date(notBeforeTimeLong * 1_000L);
 
         //When
         JwtClaimsSet claimsSet = jwtBuilderFactory.claims()
@@ -318,8 +318,8 @@ public class JwtImplementationSpecTest {
 
         //Given
         JwtBuilderFactory jwtBuilderFactory = new JwtBuilderFactory();
-        long issuedAtTimeLong = 1373896932;
-        Date issuedAtTime = new Date(issuedAtTimeLong * 1000L);
+        long issuedAtTimeLong = 1_373_896_932;
+        Date issuedAtTime = new Date(issuedAtTimeLong * 1_000L);
 
         //When
         JwtClaimsSet claimsSet = jwtBuilderFactory.claims()
@@ -365,7 +365,7 @@ public class JwtImplementationSpecTest {
         //Given
         JwtBuilderFactory jwtBuilderFactory = new JwtBuilderFactory();
         URI audience = new URI("urn:ietf:params:oauth:token-type:jwt");
-        List<String> audienceList = new ArrayList<String>();
+        List<String> audienceList = new ArrayList<>();
         audienceList.add(audience.toString());
 
         //When

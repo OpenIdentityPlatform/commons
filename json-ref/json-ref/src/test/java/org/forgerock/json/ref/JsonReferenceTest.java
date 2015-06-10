@@ -11,20 +11,20 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright 2011-2014 ForgeRock AS.
+ * Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.ref;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.forgerock.json.fluent.JsonValue;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
+
+import org.forgerock.json.fluent.JsonValue;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")
 public class JsonReferenceTest {
@@ -34,7 +34,7 @@ public class JsonReferenceTest {
 
     @BeforeMethod
     public void beforeMethod() {
-        root = new JsonValue(new HashMap<String, Object>());
+        root = new JsonValue(new HashMap<>());
     }
 
     @Test

@@ -1,33 +1,22 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
- * $Id$
+ * Copyright 2011-2015 ForgeRock AS.
  */
+
 package org.forgerock.json.schema.validator;
 
-import org.forgerock.json.schema.validator.ObjectValidatorFactory;
-import org.forgerock.json.schema.validator.Constants;
-
-import junit.framework.Assert;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.forgerock.json.schema.validator.validators.*;
 import org.testng.annotations.Test;
@@ -45,31 +34,31 @@ public class ObjectValidatorFactoryTest {
     @SuppressWarnings("deprecation")
     @Test
     public void testGetTypeValidatorBySchema() throws Exception {
-        Map<String, Object> schema = new HashMap<String, Object>();
-        Assert.assertTrue(ObjectValidatorFactory.getTypeValidator(schema) instanceof AnyTypeValidator);
+        Map<String, Object> schema = new HashMap<>();
+        assertThat(ObjectValidatorFactory.getTypeValidator(schema)).isInstanceOf(AnyTypeValidator.class);
         schema.put(Constants.TYPE,Constants.TYPE_STRING);
-        Assert.assertTrue(ObjectValidatorFactory.getTypeValidator(schema) instanceof StringTypeValidator);
+        assertThat(ObjectValidatorFactory.getTypeValidator(schema)).isInstanceOf(StringTypeValidator.class);
         schema.put(Constants.TYPE,Constants.TYPE_NUMBER);
-        Assert.assertTrue(ObjectValidatorFactory.getTypeValidator(schema) instanceof NumberTypeValidator);
+        assertThat(ObjectValidatorFactory.getTypeValidator(schema)).isInstanceOf(NumberTypeValidator.class);
         schema.put(Constants.TYPE,Constants.TYPE_INTEGER);
-        Assert.assertTrue(ObjectValidatorFactory.getTypeValidator(schema) instanceof IntegerTypeValidator);
+        assertThat(ObjectValidatorFactory.getTypeValidator(schema)).isInstanceOf(IntegerTypeValidator.class);
         schema.put(Constants.TYPE,Constants.TYPE_BOOLEAN);
-        Assert.assertTrue(ObjectValidatorFactory.getTypeValidator(schema) instanceof BooleanTypeValidator);
+        assertThat(ObjectValidatorFactory.getTypeValidator(schema)).isInstanceOf(BooleanTypeValidator.class);
         schema.put(Constants.TYPE,Constants.TYPE_OBJECT);
-        Assert.assertTrue(ObjectValidatorFactory.getTypeValidator(schema) instanceof ObjectTypeValidator);
+        assertThat(ObjectValidatorFactory.getTypeValidator(schema)).isInstanceOf(ObjectTypeValidator.class);
         schema.put(Constants.TYPE,Constants.TYPE_ARRAY);
-        Assert.assertTrue(ObjectValidatorFactory.getTypeValidator(schema) instanceof ArrayTypeValidator);
+        assertThat(ObjectValidatorFactory.getTypeValidator(schema)).isInstanceOf(ArrayTypeValidator.class);
         schema.put(Constants.TYPE,Constants.TYPE_NULL);
-        Assert.assertTrue(ObjectValidatorFactory.getTypeValidator(schema) instanceof NullTypeValidator);
+        assertThat(ObjectValidatorFactory.getTypeValidator(schema)).isInstanceOf(NullTypeValidator.class);
         schema.put(Constants.TYPE,Constants.TYPE_ANY);
-        Assert.assertTrue(ObjectValidatorFactory.getTypeValidator(schema) instanceof AnyTypeValidator);
+        assertThat(ObjectValidatorFactory.getTypeValidator(schema)).isInstanceOf(AnyTypeValidator.class);
         schema.put(Constants.TYPE, Arrays.asList(Constants.TYPE_ANY,Constants.TYPE_NULL));
-        Assert.assertTrue(ObjectValidatorFactory.getTypeValidator(schema) instanceof UnionTypeValidator);
+        assertThat(ObjectValidatorFactory.getTypeValidator(schema)).isInstanceOf(UnionTypeValidator.class);
     }
 
     @Test(expectedExceptions = RuntimeException.class)
     public void testGetUnsupportedTypeValidator() throws Exception {
-        Map<String, Object> schema = new HashMap<String, Object>();
+        Map<String, Object> schema = new HashMap<>();
         schema.put(Constants.TYPE,"FAKE");
         ObjectValidatorFactory.getTypeValidator(schema);
 
@@ -77,10 +66,9 @@ public class ObjectValidatorFactoryTest {
 
      @Test(expectedExceptions = RuntimeException.class)
     public void testInvalidSchema() throws Exception {
-        Map<String, Object> schema = new HashMap<String, Object>();
+        Map<String, Object> schema = new HashMap<>();
         schema.put(Constants.TYPE,1);
         ObjectValidatorFactory.getTypeValidator(schema);
-
     }
 
     @Test

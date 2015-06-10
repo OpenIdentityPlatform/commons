@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.forgerock</groupId>
         <artifactId>forgerock-parent</artifactId>
-        <version>1.2.9-SNAPSHOT</version>
+        <version>2.0.0</version>
     </parent>
     <groupId>org.forgerock.commons</groupId>
     <artifactId>forgerock-rest</artifactId>
@@ -60,10 +60,10 @@
         </site>
     </distributionManagement>
     <properties>
-        <maven.compiler.target>1.6</maven.compiler.target>
-        <maven.compiler.source>1.6</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
+        <maven.compiler.source>1.7</maven.compiler.source>
         <i18nFrameworkVersion>1.4.1</i18nFrameworkVersion>
-        <jacksonVersion>2.4.3</jacksonVersion>
+        <jacksonVersion>2.5.3</jacksonVersion>
         <forgerockUtilVersion>2.0.0-SNAPSHOT</forgerockUtilVersion>
         <forgerockChfVersion>0.0.1-SNAPSHOT</forgerockChfVersion>
     </properties>
@@ -87,19 +87,18 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>1.6.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>6.2</version>
+            <version>6.9.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
-            <version>1.8.5</version>
+            <version>1.10.19</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -124,7 +123,7 @@
                 <!-- note: typically only ".0" patch version exists for core annotations -->
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
-                <version>2.4.0</version>
+                <version>2.5.0</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>

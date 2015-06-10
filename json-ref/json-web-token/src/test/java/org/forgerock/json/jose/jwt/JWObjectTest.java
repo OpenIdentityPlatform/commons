@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwt;
@@ -118,10 +118,10 @@ public class JWObjectTest {
 
         //Given
         JWObject jwObject = new JWObject() { };
-        List<String> strings = new ArrayList<String>();
+        List<String> strings = new ArrayList<>();
         strings.add("STRING");
-        List<Date> dates = new ArrayList<Date>();
-        List<Long> longs = new ArrayList<Long>();
+        List<Date> dates = new ArrayList<>();
+        List<Long> longs = new ArrayList<>();
         longs.add(1234L);
 
         //When
@@ -137,10 +137,10 @@ public class JWObjectTest {
 
         //Given
         JWObject jwObject = new JWObject() { };
-        List<String> strings = new ArrayList<String>();
+        List<String> strings = new ArrayList<>();
         strings.add("STRING");
-        List<Integer> dates = new ArrayList<Integer>();
-        List<Long> longs = new ArrayList<Long>();
+        List<Integer> dates = new ArrayList<>();
+        List<Long> longs = new ArrayList<>();
         longs.add(1234L);
 
         //When
@@ -156,11 +156,11 @@ public class JWObjectTest {
 
         //Given
         JWObject jwObject = new JWObject() { };
-        List<String> strings = new ArrayList<String>();
+        List<String> strings = new ArrayList<>();
         strings.add("STRING");
-        List<Integer> dates = new ArrayList<Integer>();
+        List<Integer> dates = new ArrayList<>();
         dates.add(1234);
-        List<Long> longs = new ArrayList<Long>();
+        List<Long> longs = new ArrayList<>();
         longs.add(1234L);
 
         //When

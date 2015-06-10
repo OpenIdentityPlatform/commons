@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -124,7 +124,7 @@ public class VersionSelector {
      * @return A {@code SortedMap}.
      */
     private <T> SortedMap<Version, T> sort(Map<Version, T> map) {
-        SortedMap<Version, T> sortedMap = new TreeMap<Version, T>(Collections.reverseOrder());
+        SortedMap<Version, T> sortedMap = new TreeMap<>(Collections.reverseOrder());
         sortedMap.putAll(map);
         return sortedMap;
     }

@@ -90,7 +90,7 @@ public final class Resources {
         if (fields.isEmpty() || resource.isNull() || resource.size() == 0) {
             return resource;
         } else {
-            final Map<String, Object> filtered = new LinkedHashMap<String, Object>(fields.size());
+            final Map<String, Object> filtered = new LinkedHashMap<>(fields.size());
             for (final JsonPointer field : fields) {
                 if (field.isEmpty()) {
                     // Special case - copy resource fields (assumes Map).
