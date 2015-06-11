@@ -18,9 +18,9 @@ package org.forgerock.http.client.async;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
-import java.security.GeneralSecurityException;
-
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
+import java.security.GeneralSecurityException;
 
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -29,8 +29,8 @@ import org.apache.http.client.RedirectStrategy;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.X509HostnameVerifier;
+import org.apache.http.conn.ssl.DefaultHostnameVerifier;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.NoConnectionReuseStrategy;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
@@ -100,13 +100,10 @@ public class AsyncClientProvider implements ClientImplProvider {
             throw new HttpApplicationException("Can't create SSL Context", e);
         }
 
-        X509HostnameVerifier verifier = SSLConnectionSocketFactory.STRICT_HOSTNAME_VERIFIER;
+        HostnameVerifier verifier = new DefaultHostnameVerifier();
         switch (options.get(Client.OPTION_HOSTNAME_VERIFIER)) {
         case ALLOW_ALL:
-            verifier = SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
-            break;
-        case BROWSER_COMPATIBLE:
-            verifier = SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER;
+            verifier = NoopHostnameVerifier.INSTANCE;
             break;
         }
 

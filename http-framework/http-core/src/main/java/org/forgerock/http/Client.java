@@ -120,16 +120,9 @@ public final class Client implements Closeable {
 
         /**
          * Requires that the host name matches the host name presented in the
-         * certificate. Similar to {@code STRICT} except that wild-cards match
-         * any number of sub-domains.
-         */
-        BROWSER_COMPATIBLE,
-
-        /**
-         * Requires that the host name matches the host name presented in the
          * certificate. Wild-cards only match a single domain.
          */
-        STRICT;
+        STRICT
     }
 
     /**

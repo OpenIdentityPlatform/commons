@@ -20,12 +20,12 @@ package org.forgerock.http.apache.httpclient;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
+import javax.net.ssl.SSLContext;
 import java.security.GeneralSecurityException;
 
-import javax.net.ssl.SSLContext;
-
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.DefaultHostnameVerifier;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.NoConnectionReuseStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.forgerock.http.Client;
@@ -88,13 +88,10 @@ public final class ApacheHttpClientImplProvider implements ClientImplProvider {
 
         switch (options.get(Client.OPTION_HOSTNAME_VERIFIER)) {
         case ALLOW_ALL:
-            builder.setHostnameVerifier(SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-            break;
-        case BROWSER_COMPATIBLE:
-            builder.setHostnameVerifier(SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
+            builder.setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE);
             break;
         default:
-            builder.setHostnameVerifier(SSLConnectionSocketFactory.STRICT_HOSTNAME_VERIFIER);
+            builder.setSSLHostnameVerifier(new DefaultHostnameVerifier());
             break;
         }
 
