@@ -18,6 +18,7 @@ package org.forgerock.http.header;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.forgerock.http.header.ContentEncodingHeader.*;
+import static org.forgerock.util.Utils.closeSilently;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -146,11 +147,14 @@ public class ContentEncodingHeaderTest {
     }
 
     private byte[] getStringToDecodeToCompressedBytes() throws Exception {
-        try (ByteArrayOutputStream baostream = new ByteArrayOutputStream();
-             OutputStream outStream = new GZIPOutputStream(baostream)) {
+        final ByteArrayOutputStream baostream = new ByteArrayOutputStream();
+        final OutputStream outStream = new GZIPOutputStream(baostream);
+        try {
             outStream.write(STRING_TO_DECODE.getBytes("UTF-8"));
             outStream.close();
             return baostream.toByteArray();
+        } finally {
+            closeSilently(baostream, outStream);
         }
     }
 

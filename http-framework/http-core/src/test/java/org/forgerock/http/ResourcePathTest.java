@@ -132,7 +132,7 @@ public final class ResourcePathTest {
     @Test(dataProvider = "valueOfStrings")
     public void testConstructorVarargs(final String path, final String normalizedPath,
             final String[] elements) {
-        final ResourcePath name = new ResourcePath(elements);
+        final ResourcePath name = new ResourcePath((Object[]) elements);
         assertThat((Iterable<String>) name).hasSize(elements.length);
         assertThat(name.size()).isEqualTo(elements.length);
         assertThat((Iterable<String>) name).containsOnly(elements);

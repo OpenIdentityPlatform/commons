@@ -166,6 +166,7 @@ public abstract class AbstractRouter<T extends AbstractRouter<T, R, H>, R, H> {
      * @param routes The {@code RouteMatcher}s of the routes to be removed.
      * @return {@code true} if at least one of the routes was found and removed.
      */
+    @SafeVarargs
     public final boolean removeRoute(RouteMatcher<R>... routes) {
         boolean isModified = false;
         for (RouteMatcher<R> route : routes) {
