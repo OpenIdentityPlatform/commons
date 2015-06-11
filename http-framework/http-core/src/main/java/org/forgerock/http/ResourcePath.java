@@ -72,8 +72,6 @@ import java.util.regex.Pattern;
  * ResourcePath user = base.child(&quot;users&quot;).child(123);
  * user.toString(); // commons/rest/users/123
  * </pre>
- *
- * @since 1.0.0
  */
 public final class ResourcePath implements Comparable<ResourcePath>, Iterable<String> {
     private static final ResourcePath EMPTY = new ResourcePath();

@@ -18,8 +18,6 @@ package org.forgerock.http;
 
 /**
  * An exception that is thrown during a Http Application start up when the start up of the application fails.
- *
- * @since 1.0.0
  */
 public class HttpApplicationException extends Exception {
     private static final long serialVersionUID = 3010033632180707412L;

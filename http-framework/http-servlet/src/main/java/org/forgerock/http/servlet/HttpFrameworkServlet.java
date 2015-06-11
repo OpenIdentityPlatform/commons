@@ -70,7 +70,6 @@ import org.forgerock.util.promise.ResultHandler;
  * </p>
  *
  * @see HttpApplication
- * @since 1.0.0
  */
 public final class HttpFrameworkServlet extends HttpServlet {
     private static final long serialVersionUID = 3524182656424860912L;

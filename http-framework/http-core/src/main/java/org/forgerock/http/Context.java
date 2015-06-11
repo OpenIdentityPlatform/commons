@@ -22,8 +22,6 @@ package org.forgerock.http;
  * about the request. Implementations may provide additional information,
  * time-stamp information, HTTP headers, etc. Contexts are linked together to
  * form a parent-child chain of context, whose root is a {@link RootContext}.
- *
- * @since 1.0.0
  */
 public interface Context {
 

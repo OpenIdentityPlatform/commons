@@ -25,8 +25,6 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * We're assuming here that we only have requirement for IDs to be globally unique and non-repeating but not "secure"
  * (unguessable).
- *
- * @since 1.0.0
  */
 public final class RootContext extends AbstractContext {
 

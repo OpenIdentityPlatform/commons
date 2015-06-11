@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2014 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.http.servlet;
@@ -28,8 +28,6 @@ import org.forgerock.http.servlet.Servlet2Adapter.Servlet2Synchronizer;
 
 /**
  * An adapter for use in Servlet 3.x containers.
- *
- * @since 1.0.0
  */
 final class Servlet3Adapter implements ServletVersionAdapter {
 

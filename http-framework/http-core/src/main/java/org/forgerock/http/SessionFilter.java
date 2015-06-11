@@ -31,8 +31,6 @@ import org.forgerock.util.promise.ResultHandler;
  * Filter implementation that uses a {@link SessionManager} to set the {@link Session} in the {@link HttpContext}.
  *
  * The previous {@code Session} value will be saved and restored after the {@code Handler} has been executed.
- *
- * @since 1.0.0
  */
 class SessionFilter implements Filter {
     private SessionManager sessionManager;

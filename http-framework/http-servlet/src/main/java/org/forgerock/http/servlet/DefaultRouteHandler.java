@@ -42,8 +42,6 @@ import org.forgerock.util.promise.Promises;
  * <p>{@code Handler} implementation to handle the default route for Servlet containers.</p>
  *
  * <p>This {@code Handler} should be used to handle requests to static resources.</p>
- *
- * @since 1.0.0
  */
 final class DefaultRouteHandler implements Handler {
 

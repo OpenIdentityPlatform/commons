@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.http;
@@ -19,8 +19,6 @@ package org.forgerock.http;
 /**
  * The algorithm which should be used when matching URI templates against
  * request resource names.
- *
- * @since 1.0.0
  */
 public enum RoutingMode {
 

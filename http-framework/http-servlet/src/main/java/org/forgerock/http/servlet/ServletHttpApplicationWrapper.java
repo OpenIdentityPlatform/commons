@@ -30,8 +30,6 @@ import org.forgerock.util.Factory;
 
 /**
  * Wraps a {@link HttpApplication} instance and encapsulates Servlet specific application handling logic.
- *
- * @since 1.0.0
  */
 final class ServletHttpApplicationWrapper implements HttpApplication {
 

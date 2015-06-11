@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2014 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.http.servlet;
@@ -25,8 +25,6 @@ import javax.servlet.http.HttpServletResponse;
  * independently of the Servlet API version. At the moment the adapter only
  * provides an abstraction for performing asynchronous processing, but other API
  * features could be added in future (such as async IO).
- *
- * @since 1.0.0
  */
 interface ServletVersionAdapter {
 

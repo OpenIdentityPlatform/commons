@@ -23,8 +23,6 @@ import org.forgerock.http.protocol.Request;
 
 /**
  * A utility class that contains methods for creating route matchers.
- *
- * @since 1.0.0
  */
 public final class RouteMatchers {
 
@@ -58,8 +56,6 @@ public final class RouteMatchers {
      * A CHF specific {@code RouteMatcher} which extracts the routable path
      * from a {@code Request} and passes it as a {@code ResourcePath} to the
      * common {@code ResourcePath} route matcher.
-     *
-     * @since 1.0.0
      */
     private static final class RequestUriRouteMatcher extends RouteMatcher<Request> {
 

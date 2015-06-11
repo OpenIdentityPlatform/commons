@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2014 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.http;
@@ -21,8 +21,6 @@ import static org.forgerock.util.Reject.*;
 /**
  * The context associated with a request currently being processed by a {@code Handler}
  * within a server.
- *
- * @since 1.0.0
  */
 //TODO not sure if this is needed?
 public class ServerContext extends AbstractContext {

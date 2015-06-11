@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.http.servlet;
@@ -28,7 +28,6 @@ import org.forgerock.http.HttpApplication;
  * this ties the application to being run in a Servlet container.</p>
  *
  * @see HttpApplication
- * @since 1.0.0
  */
 public interface ServletHttpApplication extends HttpApplication {
 

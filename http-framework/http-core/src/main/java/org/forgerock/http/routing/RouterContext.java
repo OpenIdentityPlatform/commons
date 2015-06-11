@@ -36,8 +36,6 @@ import org.forgerock.http.ServerContext;
  * <li>a map which contains the parsed URI template variables, keyed on the URI
  * template variable name.
  * </ul>
- *
- * @since 1.0.0
  */
 public final class RouterContext extends ServerContext {
 

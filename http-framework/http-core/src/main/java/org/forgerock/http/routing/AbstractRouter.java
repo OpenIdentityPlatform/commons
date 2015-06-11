@@ -52,7 +52,6 @@ import org.forgerock.util.Pair;
  * @param <T> The type of the router.
  * @param <R> The type of the request.
  * @param <H> The type of the handler that will be used to handle routing requests.
- * @since 1.0.0
  */
 public abstract class AbstractRouter<T extends AbstractRouter<T, R, H>, R, H> {
 

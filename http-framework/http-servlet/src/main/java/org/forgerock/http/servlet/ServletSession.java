@@ -38,8 +38,6 @@ import org.forgerock.http.protocol.Response;
  * This implementation will get a servlet session if already allocated,
  * otherwise will not create one until an attempt is made to put an attribute in
  * it.
- *
- * @since 1.0.0
  */
 final class ServletSession extends AbstractMap<String, Object> implements Session {
 

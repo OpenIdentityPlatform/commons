@@ -3,8 +3,6 @@ package org.forgerock.http.routing;
 /**
  * An exception which is thrown when two incompatible {@link RouteMatch}
  * instances are attempted to be compared.
- *
- * @since 1.0.0
  */
 public class IncomparableRouteMatchException extends Exception {
 

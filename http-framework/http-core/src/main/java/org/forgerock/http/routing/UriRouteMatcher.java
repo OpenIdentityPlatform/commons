@@ -65,8 +65,6 @@ import static org.forgerock.http.RoutingMode.STARTS_WITH;
  *
  * <b>NOTE:</b> for simplicity this implementation only supports a small
  * sub-set of the functionality described in RFC 6570.
- *
- * @since 1.0.0
  */
 class UriRouteMatcher extends RouteMatcher<ResourcePath> {
 
@@ -155,8 +153,6 @@ class UriRouteMatcher extends RouteMatcher<ResourcePath> {
     /**
      * Parses routing mode and uri templates into regular expression for
      * matching incoming request URIs.
-     *
-     * @since 1.0.0
      */
     private static final class UriTemplateParser {
 
@@ -260,8 +256,6 @@ class UriRouteMatcher extends RouteMatcher<ResourcePath> {
 
     /**
      * Contains the result of routing to a URI based route.
-     *
-     * @since 1.0.0
      */
     private static final class UriRouteMatch implements RouteMatch {
 

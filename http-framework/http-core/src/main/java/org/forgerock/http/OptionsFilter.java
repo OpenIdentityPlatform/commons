@@ -28,8 +28,6 @@ import org.forgerock.util.promise.Promises;
 
 /**
  * {@link Filter} which handles OPTION HTTP requests to CREST resources.
- *
- * @since 1.0.0
  */
 public final class OptionsFilter implements Filter {
 

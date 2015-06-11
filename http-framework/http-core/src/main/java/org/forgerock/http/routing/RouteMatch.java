@@ -20,8 +20,6 @@ import org.forgerock.http.Context;
 
 /**
  * Contains the result of routing to a particular route.
- *
- * @since 1.0.0
  */
 public interface RouteMatch {
 

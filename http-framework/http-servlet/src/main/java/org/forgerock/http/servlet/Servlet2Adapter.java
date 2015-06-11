@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2014 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.http.servlet;
@@ -22,8 +22,6 @@ import java.util.concurrent.CountDownLatch;
 
 /**
  * An adapter for use in Servlet 2.x containers.
- *
- * @since 1.0.0
  */
 final class Servlet2Adapter implements ServletVersionAdapter {
 

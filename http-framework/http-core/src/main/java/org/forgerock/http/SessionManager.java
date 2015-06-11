@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.http;
@@ -25,8 +25,6 @@ import org.forgerock.http.protocol.Response;
  * <p>A SessionFactory is responsible to create a new type of {@link Session}.</p>
  *
  * <p>This allows users to extends the default OpenIG behaviour quite easily.</p>
- *
- * @since 1.0.0
  */
 public interface SessionManager {
 
