@@ -159,7 +159,11 @@ public final class HttpFrameworkServlet extends HttpServlet {
         final HttpContext httpContext = new HttpContext(new RootContext(), session)
                 .setPrincipal(req.getUserPrincipal());
 
-        Enumeration<String> attributeNames = req.getAttributeNames(); //TODO add comment on why this was added as probably shouldn't stick around as only to fix AM's case of forwarding the request from a different servlet?....
+        /* TODO
+         * add comment on why this was added as probably shouldn't stick around as
+         * only to fix AM's case of forwarding the request from a different servlet?....
+         */
+        Enumeration<String> attributeNames = req.getAttributeNames();
         while (attributeNames.hasMoreElements()) {
             String attributeName = attributeNames.nextElement();
             httpContext.getAttributes().put(attributeName, req.getAttribute(attributeName));

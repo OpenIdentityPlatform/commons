@@ -33,7 +33,7 @@ import java.util.List;
  *     <li>User-Agent information</li>
  * </ul>
  */
-public class ClientInfoContext extends ServerContext implements ClientInfo {
+public final class ClientInfoContext extends ServerContext implements ClientInfo {
 
     private final String remoteUser;
     private final String remoteAddress;
@@ -58,6 +58,9 @@ public class ClientInfoContext extends ServerContext implements ClientInfo {
         this.userAgent = userAgent;
     }
 
+    /**
+     * Builder for creating {@code ClientInfoContext} instances.
+     */
     public final static class ClientInfoContextBuilder {
 
         private final Context parent;
@@ -72,26 +75,57 @@ public class ClientInfoContext extends ServerContext implements ClientInfo {
             this.parent = parent;
         }
 
+        /**
+         * Sets the client's remote user.
+         *
+         * @param remoteUser The remote user.
+         * @return The builder instance.
+         */
         public ClientInfoContextBuilder remoteUser(String remoteUser) {
             this.remoteUser = remoteUser;
             return this;
         }
 
+        /**
+         * Sets the client's remote address.
+         *
+         * @param remoteAddress The remove address.
+         * @return The builder instance.
+         */
         public ClientInfoContextBuilder remoteAddress(String remoteAddress) {
             this.remoteAddress = remoteAddress;
             return this;
         }
 
+        /**
+         * Sets the client's remote host.
+         *
+         * @param remoteHost The remote host.
+         * @return The builder instance.
+         */
         public ClientInfoContextBuilder remoteHost(String remoteHost) {
             this.remoteHost = remoteHost;
             return this;
         }
 
+        /**
+         * Sets the client's remote port.
+         *
+         * @param remotePort The remote port.
+         * @return The builder instance.
+         */
         public ClientInfoContextBuilder remotePort(int remotePort) {
             this.remotePort = remotePort;
             return this;
         }
 
+        /**
+         * Sets the client's certificates.
+         *
+         * @param certificates The list of certificates.
+         * @return The builder instance.
+         * @see #certificates(List)
+         */
         public ClientInfoContextBuilder certificates(X509Certificate... certificates) {
             if (certificates != null) {
                 return certificates(asList(certificates));
@@ -100,16 +134,34 @@ public class ClientInfoContext extends ServerContext implements ClientInfo {
             }
         }
 
+        /**
+         * Sets the client's certificates.
+         *
+         * @param certificates The {@code List} of certificates.
+         * @return The builder instance.
+         * @see #certificates(X509Certificate...)
+         */
         public ClientInfoContextBuilder certificates(List<X509Certificate> certificates) {
             this.certificates = certificates;
             return this;
         }
 
+        /**
+         * Sets the client's user agent.
+         *
+         * @param userAgent The user agent.
+         * @return The builder instance.
+         */
         public ClientInfoContextBuilder userAgent(String userAgent) {
             this.userAgent = userAgent;
             return this;
         }
 
+        /**
+         * Creates a {@code ClientInfoContext} instance from the specifed properties.
+         *
+         * @return A {@code ClientInfoContext} instance.
+         */
         public ClientInfoContext build() {
             return new ClientInfoContext(parent, remoteUser, remoteAddress, remoteHost, remotePort, certificates,
                     userAgent);

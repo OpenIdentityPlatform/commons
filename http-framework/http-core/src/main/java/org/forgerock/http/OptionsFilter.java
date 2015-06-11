@@ -31,21 +31,21 @@ import org.forgerock.util.promise.Promises;
  */
 public final class OptionsFilter implements Filter {
 
-    /**  */
+    /** The HTTP DELETE method. */
     public static final String METHOD_DELETE = "DELETE";
-    /**  */
+    /** The HTTP GET method. */
     public static final String METHOD_GET = "GET";
-    /**  */
+    /** The HTTP HEAD method. */
     public static final String METHOD_HEAD = "HEAD";
-    /**  */
+    /** The HTTP OPTIONS method. */
     public static final String METHOD_OPTIONS = "OPTIONS";
-    /**  */
+    /** The HTTP PATCH method. */
     public static final String METHOD_PATCH = "PATCH";
-    /**  */
+    /** The HTTP POST method. */
     public static final String METHOD_POST = "POST";
-    /**  */
+    /** The HTTP PUT method. */
     public static final String METHOD_PUT = "PUT";
-    /**  */
+    /** The HTTP TRACE method. */
     public static final String METHOD_TRACE = "TRACE";
 
     private final List<String> allowedMethods;
@@ -56,17 +56,22 @@ public final class OptionsFilter implements Filter {
 
     /**
      * Handles all OPTION requests to CREST resources, all other request methods are handled by the {@link Handler}.
+     *
+     * @param context {@inheritDoc}
+     * @param request {@inheritDoc}
+     * @param next {@inheritDoc}
+     * @return {@inheritDoc}
      */
     @Override
     public Promise<Response, NeverThrowsException> filter(Context context, Request request,
             Handler next) {
         switch (request.getMethod()) {
-            case METHOD_OPTIONS:
-                Response response = new Response(Status.OK);
-                response.getHeaders().put("Allow", allowedMethods);
-                return Promises.newResultPromise(response);
-            default:
-                return next.handle(context, request);
+        case METHOD_OPTIONS:
+            Response response = new Response(Status.OK);
+            response.getHeaders().put("Allow", allowedMethods);
+            return Promises.newResultPromise(response);
+        default:
+            return next.handle(context, request);
         }
     }
 }

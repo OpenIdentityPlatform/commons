@@ -952,15 +952,15 @@ public final class Status {
      * Content-Type: text/html
      * Retry-After: 3600
      *
-     * <html>
-     *  <head>
-     *   <title>Too Many Requests</title>
-     *  </head>
-     *  <body>
-     *   <h1>Too Many Requests</h1>
-     *   <p>I only allow 50 requests per hour to this Web site per logged in user. Try again soon.</p>
-     *   </body>
-     * </html>
+     * &lt;html&gt;
+     *  &lt;head&gt;
+     *   &lt;title&gt;Too Many Requests&lt;/title&gt;
+     *  &lt;/head&gt;
+     *  &lt;body&gt;
+     *   &lt;h1&gt;Too Many Requests&lt;/h1&gt;
+     *   &lt;p&gt;I only allow 50 requests per hour to this Web site per logged in user. Try again soon.&lt;/p&gt;
+     *   &lt;/body&gt;
+     * &lt;/html&gt;
      * }</pre>
      *
      * Note that this specification does not define how the origin server identifies the user, nor how

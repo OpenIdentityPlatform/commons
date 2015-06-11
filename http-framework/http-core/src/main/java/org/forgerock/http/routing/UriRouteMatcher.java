@@ -16,17 +16,21 @@
 
 package org.forgerock.http.routing;
 
-import org.forgerock.http.Context;
-import org.forgerock.http.ResourcePath;
-import org.forgerock.http.RoutingMode;
-
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import static org.forgerock.http.ResourcePath.urlDecode;
 import static org.forgerock.http.RoutingMode.EQUALS;
 import static org.forgerock.http.RoutingMode.STARTS_WITH;
+
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.forgerock.http.Context;
+import org.forgerock.http.ResourcePath;
+import org.forgerock.http.RoutingMode;
 
 /**
  * A {@link RouteMatcher} which routes requests using URI template matching
@@ -129,14 +133,24 @@ class UriRouteMatcher extends RouteMatcher<ResourcePath> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof UriRouteMatcher)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof UriRouteMatcher)) {
+            return false;
+        }
 
         UriRouteMatcher that = (UriRouteMatcher) o;
 
-        if (mode != that.mode) return false;
-        if (!regex.toString().equals(that.regex.toString())) return false;
-        if (!uriTemplate.equals(that.uriTemplate)) return false;
+        if (mode != that.mode) {
+            return false;
+        }
+        if (!regex.toString().equals(that.regex.toString())) {
+            return false;
+        }
+        if (!uriTemplate.equals(that.uriTemplate)) {
+            return false;
+        }
         return variables.equals(that.variables);
 
     }

@@ -123,7 +123,7 @@ public class ContentEncodingHeaderTest {
 
     @Test(dataProvider = "nullOrEmptyDataProvider", dataProviderClass = StaticProvider.class)
     public void testDecodeWithNullOrEmptyDecoderHasNoEffectOnInputStream(final String cheader) throws Exception {
-            final ContentEncodingHeader ceh = ContentEncodingHeader.valueOf(cheader);
+        final ContentEncodingHeader ceh = ContentEncodingHeader.valueOf(cheader);
         try (InputStream in = new ByteArrayInputStream(getStringToDecodeToCompressedBytes());
              InputStream out = ceh.decode(in)) {
             // The decode has no effects.

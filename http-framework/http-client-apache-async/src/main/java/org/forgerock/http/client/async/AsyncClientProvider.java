@@ -131,7 +131,7 @@ public class AsyncClientProvider implements ClientImplProvider {
             reactorBuilder.setSoTimeout((int) soTimeout.to(MILLISECONDS));
         }
         Integer threadCount = options.get(OPTION_WORKER_THREADS);
-        if(threadCount != null) {
+        if (threadCount != null) {
             reactorBuilder.setIoThreadCount(threadCount);
         }
         IOReactorConfig ioReactorConfig = reactorBuilder.build();

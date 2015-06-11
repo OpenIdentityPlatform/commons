@@ -15,6 +15,7 @@
  */
 
 /**
- * Integrates with the Java Enterprise Edition Servlet API.
+ * Provides routing functionality for HTTP requests. Offers support for URI
+ * and API version based routing.
  */
-package org.forgerock.http.servlet;
+package org.forgerock.http.routing;

@@ -112,7 +112,7 @@ public final class ResourcePathTest {
         if (elements.length == 0) {
             assertThat((Object) name).isSameAs(ResourcePath.empty());
         } else {
-            assertThat((Iterable<String>)name).containsOnly(elements);
+            assertThat((Iterable<String>) name).containsOnly(elements);
         }
         assertThat((Object) name).isEqualTo(resourcePath(normalizedPath));
         assertThat((Object) resourcePath(normalizedPath)).isEqualTo(name);
@@ -122,9 +122,9 @@ public final class ResourcePathTest {
     public void testConstructorCollection(final String path, final String normalizedPath,
             final String[] elements) {
         final ResourcePath name = new ResourcePath(Arrays.asList(elements));
-        assertThat((Iterable<String>)name).hasSize(elements.length);
+        assertThat((Iterable<String>) name).hasSize(elements.length);
         assertThat(name.size()).isEqualTo(elements.length);
-        assertThat((Iterable<String>)name).containsOnly(elements);
+        assertThat((Iterable<String>) name).containsOnly(elements);
         assertThat((Object) name).isEqualTo(resourcePath(normalizedPath));
         assertThat((Object) resourcePath(normalizedPath)).isEqualTo(name);
     }
@@ -133,9 +133,9 @@ public final class ResourcePathTest {
     public void testConstructorVarargs(final String path, final String normalizedPath,
             final String[] elements) {
         final ResourcePath name = new ResourcePath(elements);
-        assertThat((Iterable<String>)name).hasSize(elements.length);
+        assertThat((Iterable<String>) name).hasSize(elements.length);
         assertThat(name.size()).isEqualTo(elements.length);
-        assertThat((Iterable<String>)name).containsOnly(elements);
+        assertThat((Iterable<String>) name).containsOnly(elements);
         assertThat((Object) name).isEqualTo(resourcePath(normalizedPath));
         assertThat((Object) resourcePath(normalizedPath)).isEqualTo(name);
     }

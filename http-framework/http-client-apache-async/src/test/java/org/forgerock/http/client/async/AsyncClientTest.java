@@ -145,7 +145,9 @@ public class AsyncClientTest {
 
     private static class WaitForLatch implements Applicable {
         private final CountDownLatch one;
-        public WaitForLatch(final CountDownLatch one) {this.one = one;}
+        public WaitForLatch(final CountDownLatch one) {
+            this.one = one;
+        }
 
         @Override
         public org.glassfish.grizzly.http.server.Response apply(final org.glassfish.grizzly.http.server.Response r) {

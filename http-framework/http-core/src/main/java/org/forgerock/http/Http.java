@@ -31,27 +31,78 @@ import org.forgerock.util.promise.Promise;
  */
 public final class Http {
 
+    /**
+     * Creates a session {@link Filter} that will use the provided
+     * {@link SessionManager} to manage the users session.
+     *
+     * @param sessionManager The {@code SessionManager}.
+     * @return A session {@code Filter}.
+     */
     public static Filter newSessionFilter(SessionManager sessionManager) {
         return new SessionFilter(sessionManager);
     }
 
+    /**
+     * Creates a {@link Handler} which wraps the provided {@literal filters}
+     * around the provided target {@literal handler}.
+     *
+     * @param handler The target handler which will be invoked once
+     *                processing has reached the end of the filter chain.
+     * @param filters The list of filters to be processed before invoking the
+     *                target.
+     * @return A {@code Handler}.
+     * @see #chainOf(Handler, List)
+     */
     public static Handler chainOf(final Handler handler, final Filter... filters) {
         return chainOf(handler, Arrays.asList(filters));
     }
 
+    /**
+     * Creates a {@link Handler} which wraps the provided {@literal filters}
+     * around the provided target {@literal handler}.
+     *
+     * @param handler The target handler which will be invoked once
+     *                processing has reached the end of the filter chain.
+     * @param filters The list of filters to be processed before invoking the
+     *                target.
+     * @return A {@code Handler}.
+     * @see #chainOf(Handler, Filter...)
+     */
     public static Handler chainOf(final Handler handler, final List<Filter> filters) {
         return new Chain(handler, filters, 0);
     }
 
+    /**
+     * Creates a {@link Filter} which encapsulates the provided {@literal filters}
+     * into a single {@code Filter}.
+     *
+     * @param filters The list of filters to be invoked, in order.
+     * @return A {@code Filter}.
+     * @see #chainOf(Collection)
+     */
     public static Filter chainOf(final Filter... filters) {
         return chainOf(Arrays.asList(filters));
     }
 
+    /**
+     * Creates a {@link Filter} which encapsulates the provided {@literal filters}
+     * into a single {@code Filter}.
+     *
+     * @param filters The list of filters to be invoked, in order.
+     * @return A {@code Filter}.
+     * @see #chainOf(Filter...)
+     */
     public static Filter chainOf(final Collection<Filter> filters) {
         // TODO: return a subsequence of filters.
         return null;
     }
 
+    /**
+     * Creates a {@link Filter} which handles HTTP OPTIONS method requests.
+     *
+     * @param allowedMethods The allowed HTTP methods of the endpoint.
+     * @return A {@code Filter}.
+     */
     public static Filter newOptionsFilter(String... allowedMethods) {
         return new OptionsFilter(allowedMethods);
     }

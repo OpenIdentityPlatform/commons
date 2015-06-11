@@ -33,10 +33,10 @@ public class RouterContextTest {
         return new Object[][]{
             {newContext(parentContext, "MATCHED_URI"), "MATCHED_URI"},
             {newContext(newContext(parentContext, "PREVIOUSLY_MATCHED_URI"), "MATCHED_URI"),
-                    "PREVIOUSLY_MATCHED_URI/MATCHED_URI"},
+                "PREVIOUSLY_MATCHED_URI/MATCHED_URI"},
             {newContext(newContext(
-                    newContext(parentContext, "FIRST_MATCHED_URI"), "PREVIOUSLY_MATCHED_URI"), "MATCHED_URI"),
-                    "FIRST_MATCHED_URI/PREVIOUSLY_MATCHED_URI/MATCHED_URI"},
+                newContext(parentContext, "FIRST_MATCHED_URI"), "PREVIOUSLY_MATCHED_URI"), "MATCHED_URI"),
+                "FIRST_MATCHED_URI/PREVIOUSLY_MATCHED_URI/MATCHED_URI"},
             {newContext(newContext(parentContext, "PREVIOUSLY_MATCHED_URI"), ""), "PREVIOUSLY_MATCHED_URI"},
 
         };

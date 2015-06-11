@@ -45,6 +45,8 @@ public abstract class RouteMatcher<R> {
     public abstract RouteMatch evaluate(Context context, R request);
 
     /**
+     * Returns a {@code String} representation of the route matcher.
+     *
      * @return A string representation of the route matcher.
      */
     @Override

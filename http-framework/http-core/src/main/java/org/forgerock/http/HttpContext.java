@@ -40,30 +40,63 @@ public final class HttpContext extends AbstractContext {
 
     private final Map<String, Object> attributes = new HashMap<>();
 
+    /**
+     * Constructs a new {@code HttpContext}.
+     *
+     * @param parent The parent {@code Context}.
+     * @param session The HTTP {@code Session}.
+     */
     public HttpContext(Context parent, Session session) {
         super(parent, "httpRequest");
         Reject.ifNull(session, "Session cannot be null.");
         this.session = session;
     }
 
+    /**
+     * Returns the {@code Principal} of this request.
+     *
+     * @return The principal.
+     */
     public Principal getPrincipal() {
         return principal;
     }
 
+    /**
+     * Sets the {@code Principal} of this request.
+     *
+     * @param principal The principal.
+     * @return The {@code HttpContext}.
+     */
     public HttpContext setPrincipal(Principal principal) {
         this.principal = principal;
         return this;
     }
 
+    /**
+     * Returns the {@code Session} associated with this request.
+     *
+     * @return The session.
+     */
     public Session getSession() {
         return session;
     }
 
+    /**
+     * Sets the {@code Session} associated with this request.
+     *
+     * @param session The session.
+     * @return The {@code HttpContext}
+     */
     public HttpContext setSession(Session session) {
         this.session = session;
         return this;
     }
 
+    /**
+     * Returns the attributes associated with this request.
+     *
+     * @return The request attributes.
+     */
     public Map<String, Object> getAttributes() {
         return attributes;
     }

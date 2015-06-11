@@ -22,15 +22,15 @@ import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 
 /**
- * <p>A SessionFactory is responsible to create a new type of {@link Session}.</p>
+ * A SessionFactory is responsible to create a new type of {@link Session}.
  *
  * <p>This allows users to extends the default OpenIG behaviour quite easily.</p>
  */
 public interface SessionManager {
 
     /**
-     * <p>Loads a new Session for the given {@link Request}. The implementations are free to keep a reference to the
-     * {@code Request}.</p>
+     * Loads a new Session for the given {@link Request}. The implementations
+     * are free to keep a reference to the {@code Request}.
      *
      * <p>The session object is scoped by the {@code Request}'s own lifecycle.</p>
      *
@@ -39,5 +39,13 @@ public interface SessionManager {
      */
     Session load(Request request);
 
+    /**
+     * Saves the {@literal session} into the provided {@literal response}.
+     *
+     * @param session The session to save.
+     * @param response The response to save the session to.
+     * @throws IOException If the {@literal session} could not be saved to the
+     * {@literal response}.
+     */
     void save(Session session, Response response) throws IOException;
 }

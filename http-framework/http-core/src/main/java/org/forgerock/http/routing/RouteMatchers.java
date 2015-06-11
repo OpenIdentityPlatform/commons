@@ -26,6 +26,10 @@ import org.forgerock.http.protocol.Request;
  */
 public final class RouteMatchers {
 
+    private RouteMatchers() {
+        // Private utility constructor.
+    }
+
     /**
      * Creates a {@code RouteMatcher} instance that matches
      * {@code ResourcePath}s with the provided {@literal mode} and
@@ -77,8 +81,12 @@ public final class RouteMatchers {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof RequestUriRouteMatcher)) return false;
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof RequestUriRouteMatcher)) {
+                return false;
+            }
             RequestUriRouteMatcher that = (RequestUriRouteMatcher) o;
             return delegate.equals(that.delegate);
         }
