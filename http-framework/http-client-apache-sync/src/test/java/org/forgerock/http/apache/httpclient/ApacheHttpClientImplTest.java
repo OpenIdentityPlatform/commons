@@ -27,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.xebialabs.restito.semantics.Predicate;
 import com.xebialabs.restito.semantics.Predicates;
 import org.forgerock.http.Client;
+import org.forgerock.http.HttpClientHandler;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Status;
 import org.glassfish.grizzly.http.util.HttpStatus;
@@ -73,12 +74,12 @@ public class ApacheHttpClientImplTest {
                                withPostBodyContaining("Hello"))
                         .then(status(HttpStatus.OK_200));
 
-        Client client = new Client();
+        Client client = new Client(new HttpClientHandler());
         Request request = new Request();
         request.setMethod("POST");
         request.setUri(format("http://localhost:%d/test", server.getPort()));
         request.getEntity().setString("Hello");
-        assertThat(client.send(request).getStatus()).isEqualTo(Status.OK);
+        assertThat(client.send(request).get().getStatus()).isEqualTo(Status.OK);
     }
 
     @Test
@@ -87,11 +88,11 @@ public class ApacheHttpClientImplTest {
                                not(withPostBody()))
                         .then(status(HttpStatus.OK_200));
 
-        Client client = new Client();
+        Client client = new Client(new HttpClientHandler());
         Request request = new Request();
         request.setMethod("POST");
         request.setUri(format("http://localhost:%d/test", server.getPort()));
-        assertThat(client.send(request).getStatus()).isEqualTo(Status.OK);
+        assertThat(client.send(request).get().getStatus()).isEqualTo(Status.OK);
     }
 
     /**

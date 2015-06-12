@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import org.forgerock.http.Client;
+import org.forgerock.http.HttpClientHandler;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.Status;
@@ -74,11 +75,11 @@ public class AsyncClientTest {
         whenHttp(server).match(post("/ping"))
                         .then(composite(ok(), stringContent("Pong")));
 
-        Client client = new Client();
+        Client client = new Client(new HttpClientHandler());
         Request request = new Request();
         request.setMethod("POST");
         request.setUri(format("http://localhost:%d/ping", server.getPort()));
-        Response response = client.send(request);
+        Response response = client.send(request).get();
         assertThat(response.getStatus()).isEqualTo(Status.OK);
         assertThat(response.getEntity().getString()).isEqualTo("Pong");
     }
@@ -90,13 +91,13 @@ public class AsyncClientTest {
                         .then(composite(ok()));
 
         // By default, the client has a pool of less than 10 threads
-        final Client client = new Client();
+        Client client = new Client(new HttpClientHandler());
         List<Promise<Response, NeverThrowsException>> promises = new ArrayList<>();
         for (int i = 0; i < 20; i++) {
             Request request = new Request();
             request.setMethod("POST");
             request.setUri(format("http://localhost:%d/ping", server.getPort()));
-            promises.add(client.sendAsync(request)
+            promises.add(client.send(request)
                                .thenOnResult(new ResultHandler<Response>() {
                                    @Override
                                    public void handleResult(final Response result) {
@@ -130,8 +131,8 @@ public class AsyncClientTest {
         request.setMethod("POST");
         request.setUri(format("http://localhost:%d/ping", server.getPort()));
 
-        Client client = new Client();
-        Promise<Response, NeverThrowsException> promise = client.sendAsync(request);
+        Client client = new Client(new HttpClientHandler());
+        Promise<Response, NeverThrowsException> promise = client.send(request);
 
         // We're still waiting for the server's response
         assertThat(promise.isDone()).isFalse();

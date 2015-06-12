@@ -17,6 +17,7 @@
 package org.forgerock.http.client.async;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.forgerock.http.HttpClientHandler.*;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
@@ -44,7 +45,6 @@ import org.apache.http.nio.conn.ssl.SSLIOSessionStrategy;
 import org.apache.http.nio.reactor.ConnectingIOReactor;
 import org.apache.http.nio.reactor.IOReactorException;
 import org.apache.http.protocol.HttpContext;
-import org.forgerock.http.Client;
 import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.client.ahc.NoAuthenticationStrategy;
 import org.forgerock.http.io.Buffer;
@@ -88,20 +88,20 @@ public class AsyncClientProvider implements ClientImplProvider {
     @Override
     public ClientImpl newClientImpl(final Options options) throws HttpApplicationException {
 
-        final Factory<Buffer> storage = options.get(Client.OPTION_TEMPORARY_STORAGE);
+        final Factory<Buffer> storage = options.get(OPTION_TEMPORARY_STORAGE);
 
         // SSL
         final SSLContext sslContext;
         try {
             sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(options.get(Client.OPTION_KEY_MANAGERS),
-                            options.get(Client.OPTION_TRUST_MANAGERS), null);
+            sslContext.init(options.get(OPTION_KEY_MANAGERS),
+                            options.get(OPTION_TRUST_MANAGERS), null);
         } catch (final GeneralSecurityException e) {
             throw new HttpApplicationException("Can't create SSL Context", e);
         }
 
         HostnameVerifier verifier = new DefaultHostnameVerifier();
-        switch (options.get(Client.OPTION_HOSTNAME_VERIFIER)) {
+        switch (options.get(OPTION_HOSTNAME_VERIFIER)) {
         case ALLOW_ALL:
             verifier = NoopHostnameVerifier.INSTANCE;
             break;
@@ -115,8 +115,8 @@ public class AsyncClientProvider implements ClientImplProvider {
                         .build();
 
         // Timeouts
-        final Duration soTimeout = options.get(Client.OPTION_SO_TIMEOUT);
-        final Duration connectTimeout = options.get(Client.OPTION_CONNECT_TIMEOUT);
+        final Duration soTimeout = options.get(OPTION_SO_TIMEOUT);
+        final Duration connectTimeout = options.get(OPTION_CONNECT_TIMEOUT);
         // FIXME GSA Can we support requestConnectTimeout ?
 
         // Create I/O reactor configuration
@@ -145,19 +145,19 @@ public class AsyncClientProvider implements ClientImplProvider {
         PoolingNHttpClientConnectionManager manager = new PoolingNHttpClientConnectionManager(reactor, registry);
 
         // Connection pooling
-        final int maxConnections = options.get(Client.OPTION_MAX_CONNECTIONS);
+        final int maxConnections = options.get(OPTION_MAX_CONNECTIONS);
         manager.setMaxTotal(maxConnections);
         manager.setDefaultMaxPerRoute(maxConnections);
 
         // FIXME GSA Couldn't find how to configure retries in async http client
-        //if (!options.get(Client.OPTION_RETRY_REQUESTS)) {
+        //if (!options.get(OPTION_RETRY_REQUESTS)) {
         //    builder.disableAutomaticRetries();
         //}
 
         // Create a client with the given custom dependencies and configuration.
         HttpAsyncClientBuilder builder = HttpAsyncClients.custom();
 
-        if (!options.get(Client.OPTION_REUSE_CONNECTIONS)) {
+        if (!options.get(OPTION_REUSE_CONNECTIONS)) {
             builder.setConnectionReuseStrategy(NoConnectionReuseStrategy.INSTANCE);
         }
 

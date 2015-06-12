@@ -19,6 +19,7 @@
 package org.forgerock.http.apache.httpclient;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.forgerock.http.HttpClientHandler.*;
 
 import javax.net.ssl.SSLContext;
 import java.security.GeneralSecurityException;
@@ -28,7 +29,6 @@ import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.NoConnectionReuseStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.forgerock.http.Client;
 import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.client.ahc.NoAuthenticationStrategy;
 import org.forgerock.http.io.Buffer;
@@ -45,27 +45,27 @@ public final class ApacheHttpClientImplProvider implements ClientImplProvider {
 
     @Override
     public ClientImpl newClientImpl(final Options options) throws HttpApplicationException {
-        final Factory<Buffer> storage = options.get(Client.OPTION_TEMPORARY_STORAGE);
+        final Factory<Buffer> storage = options.get(OPTION_TEMPORARY_STORAGE);
 
         final HttpClientBuilder builder = HttpClientBuilder.create();
 
         // Connection pooling.
-        final int maxConnections = options.get(Client.OPTION_MAX_CONNECTIONS);
+        final int maxConnections = options.get(OPTION_MAX_CONNECTIONS);
         builder.setMaxConnTotal(maxConnections);
         builder.setMaxConnPerRoute(maxConnections);
-        if (!options.get(Client.OPTION_REUSE_CONNECTIONS)) {
+        if (!options.get(OPTION_REUSE_CONNECTIONS)) {
             builder.setConnectionReuseStrategy(NoConnectionReuseStrategy.INSTANCE);
         }
-        if (!options.get(Client.OPTION_RETRY_REQUESTS)) {
+        if (!options.get(OPTION_RETRY_REQUESTS)) {
             builder.disableAutomaticRetries();
         }
 
         // Timeouts.
         final RequestConfig.Builder requestConfigBuilder = RequestConfig.custom();
-        final Duration soTimeout = options.get(Client.OPTION_SO_TIMEOUT);
+        final Duration soTimeout = options.get(OPTION_SO_TIMEOUT);
         requestConfigBuilder.setSocketTimeout(soTimeout.isUnlimited() ? 0 : (int) soTimeout
                 .to(MILLISECONDS));
-        final Duration connectTimeout = options.get(Client.OPTION_CONNECT_TIMEOUT);
+        final Duration connectTimeout = options.get(OPTION_CONNECT_TIMEOUT);
         requestConfigBuilder.setConnectTimeout(connectTimeout.isUnlimited() ? 0
                 : (int) connectTimeout.to(MILLISECONDS));
         builder.setDefaultRequestConfig(requestConfigBuilder.build());
@@ -79,14 +79,13 @@ public final class ApacheHttpClientImplProvider implements ClientImplProvider {
         final SSLContext context;
         try {
             context = SSLContext.getInstance("TLS");
-            context.init(options.get(Client.OPTION_KEY_MANAGERS), options
-                    .get(Client.OPTION_TRUST_MANAGERS), null);
+            context.init(options.get(OPTION_KEY_MANAGERS), options.get(OPTION_TRUST_MANAGERS), null);
         } catch (final GeneralSecurityException e) {
             throw new HttpApplicationException(e);
         }
         builder.setSslcontext(context);
 
-        switch (options.get(Client.OPTION_HOSTNAME_VERIFIER)) {
+        switch (options.get(OPTION_HOSTNAME_VERIFIER)) {
         case ALLOW_ALL:
             builder.setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE);
             break;

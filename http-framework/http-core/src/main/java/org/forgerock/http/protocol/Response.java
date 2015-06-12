@@ -18,6 +18,11 @@
 
 package org.forgerock.http.protocol;
 
+import org.forgerock.util.promise.NeverThrowsException;
+import org.forgerock.util.promise.Promise;
+import org.forgerock.util.promise.PromiseImpl;
+import org.forgerock.util.promise.Promises;
+
 
 /**
  * A response message.
@@ -27,6 +32,36 @@ public final class Response extends MessageImpl<Response> {
     private Status status;
 
     private Exception cause;
+
+    /**
+     * Returns a {@link Promise} representing the {@code Response} for an
+     * asynchronous {@code Request} which has already completed. Attempts to get
+     * the {@code Response} will immediately return without blocking, and any
+     * listeners registered against the returned promise will be immediately
+     * invoked in the same thread as the caller.
+     *
+     * @param response
+     *            The {@code Response}.
+     * @return A {@link Promise} representing the {@code Response} for an
+     *         asynchronous {@code Request} which has already completed.
+     */
+    public static Promise<Response, NeverThrowsException> newResponsePromise(Response response) {
+        return Promises.newResultPromise(response);
+    }
+
+    /**
+     * Creates a new pending {@link Promise} implementation representing the
+     * {@code Response} for an asynchronous {@code Request}. The returned
+     * {@link PromiseImpl} must be completed once the {@code Response} is
+     * received by invoking the {@link PromiseImpl#handleResult(Object)
+     * handleResult} method.
+     *
+     * @return A new pending {@link Promise} implementation representing the
+     *         {@code Response} for an asynchronous {@code Request}.
+     */
+    public static PromiseImpl<Response, NeverThrowsException> newResponsePromiseImpl() {
+        return PromiseImpl.create();
+    }
 
     /**
      * Creates a new response.
