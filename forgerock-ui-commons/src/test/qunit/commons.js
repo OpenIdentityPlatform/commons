@@ -35,8 +35,10 @@ define([
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/util/Base64",
     "org/forgerock/commons/ui/common/util/Mime",
-    "org/forgerock/commons/ui/common/main/Router"
-], function (sinon, conf, Dialog, eventManager, constants, cookieHelper, UIUtils, Base64, Mime, router) {
+    "org/forgerock/commons/ui/common/main/Router",
+    "bootstrap-dialog",
+    "./getLoggedUser"
+], function (sinon, conf, Dialog, eventManager, constants, cookieHelper, UIUtils, Base64, Mime, router, BootstrapDialog, getLoggedUser) {
     return {
         executeAll: function (server, parameters) {
 
@@ -354,6 +356,27 @@ define([
 
                 QUnit.ok(template() === "#register/bar", "url helper properly handles simple string value as second argument.");
             });
+            
+            QUnit.asyncTest("Close Dialogs on View Change (OPENIDM-3358)", function () {
+                var closeAllSpy = sinon.stub(BootstrapDialog,"closeAll");
+                
+                conf.loggedUser = getLoggedUser();
+
+                QUnit.ok(!closeAllSpy.called, "BootstrapDialog.closeAll() not yet called before EVENT_CHANGE_VIEW fired");
+                
+                eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {
+                    route: router.configuration.routes.profile,
+                    callback: function () {
+                        QUnit.ok(closeAllSpy.called, "BootstrapDialog.closeAll() successfully called after EVENT_CHANGE_VIEW fired");
+                        BootstrapDialog.closeAll.restore();
+                        BootstrapDialog.closeAll();
+                        QUnit.start();
+                    }
+                });
+                
+                window.location.hash = "profile/change_security_data/";
+            });
+
 
         }
     };

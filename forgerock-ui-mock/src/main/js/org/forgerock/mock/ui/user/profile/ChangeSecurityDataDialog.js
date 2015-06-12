@@ -73,9 +73,13 @@ define("org/forgerock/mock/ui/user/profile/ChangeSecurityDataDialog", [
             this.rebind();
             ValidatorsManager.bindValidators(dialog.$modal);
             this.customValidate();
+            if (this.postRenderCallback) {
+                this.postRenderCallback(dialog);
+            }
         },
-        render: function(callback) {
-            this.show(callback);
+        render: function(args,callback) {
+            this.postRenderCallback = callback;
+            this.show();
         },
         customValidate: function () {
             if (ValidatorsManager.formValidated(this.$el.find("#passwordChange"))) {

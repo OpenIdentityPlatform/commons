@@ -50,7 +50,7 @@ define("config/routes/UserRoutesConfig", [
         },
         "changeSecurityData": {
             base: "profile",
-            dialog: "ChangeSecurityDataDialog",
+            view: "ChangeSecurityDataDialog",
             role: "ui-user,ui-admin",
             url: "profile/change_security_data/"
         }

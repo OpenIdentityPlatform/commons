@@ -183,96 +183,75 @@ define([
             QUnit.asyncTest('Change Security Data', function () {
                 conf.loggedUser = getLoggedUser();
 
-                var loginView = require("LoginView");
-                loginView.render([], function () {
-                    $("#login", loginView.$el).val(parameters.username).trigger('keyup');
-                    $("#password", loginView.$el).val(parameters.password).trigger('keyup');
-                    $("[name=loginButton]", loginView.$el).trigger("click");
-                });
+                var changeDataView = require("ChangeSecurityDataDialog"),
+                    stub = sinon.stub(changeDataView, "render", function (args,callback) {
+                        changeDataView.render.restore();
+                        changeDataView.render([],function (modal) {
+                            var dialog = modal.$modal,
+                                pwd = $('input[name="password"]', dialog),
+                                pwdConfirm = $('input[name="passwordConfirm"]', dialog);
+    
+                            // Test if inputs and submit button are available
+                            QUnit.ok($('input[name="password"]', dialog).length > 0, "Password field is available");
+                            QUnit.ok($('input[name="passwordConfirm"]', dialog).length > 0, "Password confirm field is available");
+                            QUnit.ok($('#btnOk', dialog).length > 0, "Submit button is available");
+    
+                            // Check submit button initial status
+                            QUnit.ok($('#btnOk', dialog).prop('disabled'), 'Initial state of submit button is disabled');
+    
+                            // Check if inputs pass validation
+                            QUnit.equal($('input[name="password"]', dialog).data('validation-status'), 'error', "Empty password field doesn't pass validation");
+                            QUnit.equal($('input[name="passwordConfirm"]', dialog).data('validation-status'), 'error', "Empty password confirm field doesn't pass validation");
+    
+                            var passwordConfirmMatchesPassword = $('[data-for-validator="passwordConfirm"]', dialog).parent(),
+                                passwordRequired = $('[data-for-req="REQUIRED"]', dialog).parent(),
+                                passwordContainsNumbers = $('[data-for-req="AT_LEAST_X_NUMBERS"]', dialog).parent(),
+                                passwordMinLength = $('[data-for-req="MIN_LENGTH"]', dialog).parent(),
+                                passwordContainsCapitalLetters = $('[data-for-req="AT_LEAST_X_CAPITAL_LETTERS"]', dialog).parent();
+    
+                            pwd.val('abc').trigger('change');
+                            QUnit.ok(passwordRequired.find("span.error").length === 0, 'Password field cannot be blank');
+    
+                            pwd.val('abc1').trigger('change');
+                            QUnit.ok(passwordContainsNumbers.find("span.error").length === 0, 'Number added to password satisfied AT_LEAST_X_NUMBERS');
+    
+                            pwd.val('abcdefgh').trigger('change');
+                            QUnit.ok(passwordMinLength.find("span.error").length === 0, 'Password length satisfied MIN_LENGTH');
+    
+                            pwd.val('abCdefgh').trigger('change');
+                            QUnit.ok(passwordContainsCapitalLetters.find("span.error").length === 0, 'Capital letter added to password satisfied AT_LEAST_X_CAPITAL_LETTERS');
+    
+                            pwd.val('1122334455').trigger('change');
+                            QUnit.equal($('input[name="password"]', dialog).data('validation-status'), 'error', "Password doesn't pass validation");
+    
+                            pwd.val('apple').trigger('change');
+                            pwdConfirm.val('apple').trigger('change');
+                            QUnit.equal($('input[name="passwordConfirm"]', dialog).attr('data-validation-status'), 'error', 'Password not confirming with bad values');
+    
+                            pwd.val('Passw0rd').trigger('change');
+                            pwdConfirm.val('Passw0rd').trigger('change');
+                            QUnit.equal($('input[name="password"]', dialog).attr('data-validation-status'), 'ok', 'Password passes validation');
+                            QUnit.equal($('input[name="passwordConfirm"]', dialog).attr('data-validation-status'), 'ok', 'Password confirm field passes validation');
+                            QUnit.ok(passwordConfirmMatchesPassword.find("span.error").length === 0, 'Confirmation matches password');
+                            QUnit.ok(!$('#btnOk', dialog).prop('disabled'), 'Submit button is enabled');
+    
+                            // Check if new password was set for user
+                            pwd.val('Passw0rds').trigger('change');
+                            pwdConfirm.val('Passw0rds').trigger('change');
+                            $('#btnOk', dialog).trigger("click");
+                            QUnit.ok(conf.loggedUser !== undefined, "User should be logged in");
+                            QUnit.ok(conf.loggedUser.password == 'Passw0rds', "New password wasn't set for the user");
+    
+                            // log-out
+                            localStorage.remove('mock/repo/internal/user/test');
+                            conf.setProperty('loggedUser', null);
 
+                            QUnit.start();
+                        });
+                    });
 
-                // Open security change dialog
-                eventManager.sendEvent(constants.EVENT_SHOW_CHANGE_SECURITY_DIALOG, {
-
-                    callback: function (changeDataView) {
-
-                        var pwd = $('input[name="password"]', changeDataView.$el),
-                            pwdConfirm = $('input[name="passwordConfirm"]', changeDataView.$el);
-
-                        // Test if inputs and submit button are available
-                        QUnit.ok($('input[name="password"]', changeDataView.$el).length, "Password field is available");
-                        QUnit.ok($('input[name="passwordConfirm"]', changeDataView.$el).length, "Password confirm field is available");
-                        QUnit.ok($('#btnOk', changeDataView.$el).length, "Submit button is available");
-
-                        // Check submit button initial status
-                        QUnit.ok($('#btnOk', changeDataView.$el).prop('disabled'), 'Initial state of submit button is disabled');
-
-                        // Check if inputs pass validation
-                        QUnit.equal($('input[name="password"]', changeDataView.$el).data('validation-status'), 'error', "Empty password field doesn't pass validation");
-                        QUnit.equal($('input[name="passwordConfirm"]', changeDataView.$el).data('validation-status'), 'error', "Empty password confirm field doesn't pass validation");
-
-                        var passwordConfirmMatchesPassword = $('[data-for-validator="passwordConfirm"]', changeDataView.$el).parent(),
-                            passwordRequired = $('[data-for-req="REQUIRED"]', changeDataView.$el).parent(),
-                            passwordContainsNumbers = $('[data-for-req="AT_LEAST_X_NUMBERS"]', changeDataView.$el).parent(),
-                            passwordMinLength = $('[data-for-req="MIN_LENGTH"]', changeDataView.$el).parent(),
-                            passwordContainsCapitalLetters = $('[data-for-req="AT_LEAST_X_CAPITAL_LETTERS"]', changeDataView.$el).parent();
-
-                        pwd.val('abc').trigger('change');
-                        QUnit.ok(passwordRequired.find("span.error").length === 0, 'Password field cannot be blank');
-
-                        pwd.val('abc1').trigger('change');
-                        QUnit.ok(passwordContainsNumbers.find("span.error").length === 0, 'Number added to password satisfied AT_LEAST_X_NUMBERS');
-
-                        pwd.val('abcdefgh').trigger('change');
-                        QUnit.ok(passwordMinLength.find("span.error").length === 0, 'Password length satisfied MIN_LENGTH');
-
-                        pwd.val('abCdefgh').trigger('change');
-                        QUnit.ok(passwordContainsCapitalLetters.find("span.error").length === 0, 'Capital letter added to password satisfied AT_LEAST_X_CAPITAL_LETTERS');
-
-                        pwd.val('1122334455').trigger('change');
-                        QUnit.equal($('input[name="password"]', changeDataView.$el).data('validation-status'), 'error', "Password doesn't pass validation");
-
-                        pwd.val('apple').trigger('change');
-                        pwdConfirm.val('apple').trigger('change');
-                        QUnit.equal($('input[name="passwordConfirm"]', changeDataView.$el).attr('data-validation-status'), 'error', 'Password not confirming with bad values');
-
-                        pwd.val('Passw0rd').trigger('change');
-                        pwdConfirm.val('Passw0rd').trigger('change');
-                        QUnit.equal($('input[name="password"]', changeDataView.$el).attr('data-validation-status'), 'ok', 'Password passes validation');
-                        QUnit.equal($('input[name="passwordConfirm"]', changeDataView.$el).attr('data-validation-status'), 'ok', 'Password confirm field passes validation');
-                        QUnit.ok(passwordConfirmMatchesPassword.find("span.error").length === 0, 'Confirmation matches password');
-                        QUnit.ok(!$('#btnOk', changeDataView.$el).prop('disabled'), 'Submit button is enabled');
-
-                        // Check if new password was set for user
-                        pwd.val('Passw0rds').trigger('change');
-                        pwdConfirm.val('Passw0rds').trigger('change');
-                        $('#btnOk', changeDataView.$el).trigger("click");
-                        QUnit.ok(conf.loggedUser !== undefined, "User should be logged in");
-                        QUnit.ok(conf.loggedUser.password == 'Passw0rds', "New password wasn't set for the user");
-
-                        // log-out
-                        localStorage.remove('mock/repo/internal/user/test');
-                        conf.setProperty('loggedUser', null);
-
-                        QUnit.start();
-
-                    }
-                });
-            });
-
-            QUnit.asyncTest("Unauthorized GET Request", function () {
-                conf.loggedUser = getLoggedUser();
-                delete conf.globalData.authorizationFailurePending;
-                delete conf.gotoURL;
-                eventManager.sendEvent(constants.EVENT_SHOW_DIALOG, {
-                    route: router.configuration.routes.changeSecurityData,
-                    callback: function () {
-                        eventManager.sendEvent(constants.EVENT_UNAUTHORIZED, {error: {type:"GET"} });
-                        QUnit.ok(conf.loggedUser === null, "User info should be discarded after UNAUTHORIZED GET error");
-                        QUnit.ok(conf.gotoURL === "#profile/change_security_data/", "gotoURL should be set to change security data after UNAUTHORIZED GET error");
-                        QUnit.start();
-                    }
-                });
+                    
+                window.location.hash = "profile/change_security_data/";
             });
 
             QUnit.asyncTest("Unauthorized non-GET Request", function () {
@@ -293,12 +272,33 @@ define([
                 });
             });
 
+            QUnit.asyncTest("Unauthorized GET Request", function () {
+                conf.loggedUser = getLoggedUser();
+                delete conf.globalData.authorizationFailurePending;
+                delete conf.gotoURL;
+
+                var changeDataView = require("ChangeSecurityDataDialog"),
+                    stub = sinon.stub(changeDataView, "render", function (args,callback) {
+                        changeDataView.render.restore();
+                        changeDataView.render([],function (modal) {
+                            eventManager.sendEvent(constants.EVENT_UNAUTHORIZED, {error: {type:"GET"} });
+                            QUnit.ok(conf.loggedUser === null, "User info should be discarded after UNAUTHORIZED GET error");
+                            QUnit.ok(conf.gotoURL === "#profile/change_security_data/", "gotoURL should be set to change security data after UNAUTHORIZED GET error");
+                            QUnit.start();
+                        });
+                    });
+                
+                window.location.hash = "profile/change_security_data/";
+            });
+
             QUnit.asyncTest("Opening a dialog with a parameterized base view (CUI-58)", function () {
                 var selfReg = require("RegisterView"),
                     stub = sinon.stub(selfReg, "render", function (args, callback) {
                         selfReg.render.restore();
-                        QUnit.ok(args[0] === "/foo" && args[1] === "&bar=blah", "Dialog route triggers base view to render with expected arg value");
-                        QUnit.start();
+                        selfReg.render(args, function () {
+                            QUnit.ok(args[0] === "/foo" && args[1] === "&bar=blah", "Dialog route triggers base view to render with expected arg value");
+                            QUnit.start();
+                        });
                     });
 
                 window.location.hash = "registerTerms/foo&bar=blah";
@@ -314,7 +314,6 @@ define([
                 });
 
             });
-
         }
     };
 });

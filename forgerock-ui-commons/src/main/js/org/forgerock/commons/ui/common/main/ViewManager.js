@@ -30,8 +30,9 @@
 define("org/forgerock/commons/ui/common/main/ViewManager", [
     "underscore",
     "org/forgerock/commons/ui/common/util/UIUtils",
-    "org/forgerock/commons/ui/common/components/Messages"
-], function(_, uiUtils, msg) {
+    "org/forgerock/commons/ui/common/components/Messages",
+    "bootstrap-dialog"
+], function(_, uiUtils, msg, BootstrapDialog) {
     var obj = {},
         decodeArgs = function (args) {
             return _.map(args, function (a) {
@@ -57,6 +58,9 @@ define("org/forgerock/commons/ui/common/main/ViewManager", [
             if(obj.currentDialog !== null) {
                 require(obj.currentDialog).close();
             }
+            
+            //close all existing dialogs
+            BootstrapDialog.closeAll();
 
             obj.currentDialog = null;
 

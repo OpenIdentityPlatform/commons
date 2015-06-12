@@ -45,8 +45,7 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
         events: {
             "click input[name=saveButton]": "formSubmit",
             "click input[name=resetButton]": "reloadData",
-            "onValidate": "onValidate",
-            "click #changeSecurity" : "changeSecurity"
+            "onValidate": "onValidate"
         },
 
         data:{},
@@ -66,11 +65,6 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateFailed");
                 _this.reloadData();
             });
-        },
-
-        changeSecurity: function(event){
-            event.preventDefault();
-            eventManager.sendEvent(constants.EVENT_SHOW_CHANGE_SECURITY_DIALOG);
         },
 
         formSubmit: function(event) {
