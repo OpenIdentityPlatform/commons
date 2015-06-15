@@ -106,10 +106,10 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
                 validateCurrent = function () {
                     if (!_.has(_this, "route")) {
                         return true;
-                    } else if (!_this.route.url.length && window.location.hash.replace(/^#/, '') === "") {
+                    } else if (!_this.route.url.length && router.getCurrentHash().replace(/^#/, '') === "") {
                         return true;
                     } else {
-                        return window.location.hash.replace(/^#/, '').match(_this.route.url);
+                        return router.getCurrentHash().replace(/^#/, '').match(_this.route.url);
                     }
                 };
 
