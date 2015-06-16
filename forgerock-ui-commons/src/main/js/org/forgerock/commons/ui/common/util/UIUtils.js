@@ -692,12 +692,13 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
      * Creates a routing hash will all arguments passed through #encodeURIComponent
      */
     Handlebars.registerHelper('routeTo', function (routeKey) {
-        var result, args = _.isArray(arguments[1]) ? arguments[1] : _.toArray([arguments[1]]);
+        var result = '#',
+            args = _.toArray(arguments).slice(1, -1);
         args = _.map(args, function (arg) {
             return encodeURIComponent(arg);
         });
 
-        result = "#" + router.getLink(router.configuration.routes[routeKey], args);
+        result += router.getLink(router.configuration.routes[routeKey], args);
 
         return new Handlebars.SafeString(result);
     });
