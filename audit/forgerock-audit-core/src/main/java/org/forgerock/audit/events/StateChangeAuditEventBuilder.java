@@ -18,6 +18,20 @@ package org.forgerock.audit.events;
 import static org.forgerock.json.fluent.JsonValue.*;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.Context;
+import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.Request;
+import org.forgerock.json.resource.RequestVisitor;
+import org.forgerock.json.resource.UpdateRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.net.URISyntaxException;
 
 /**
  * Base class for {@link ActivityAuditEventBuilder} and {@link ConfigAuditEventBuilder}.
@@ -35,6 +49,12 @@ abstract class StateChangeAuditEventBuilder<T extends StateChangeAuditEventBuild
     public static final String AFTER = "after";
     public static final String REVISION = "revision";
     public static final String CHANGED_FIELDS = "changedFields";
+
+    private static final String HTTP_CONTEXT_NAME = "http";
+
+    private static final Logger logger = LoggerFactory.getLogger(StateChangeAuditEventBuilder.class);
+    private static final ResourceOperationRequestVisitor RESOURCE_OPERATION_VISITOR =
+            new ResourceOperationRequestVisitor();
 
     /**
      * {@inheritDoc}
@@ -150,6 +170,79 @@ abstract class StateChangeAuditEventBuilder<T extends StateChangeAuditEventBuild
     public final T changedFields(String... fieldNames) {
         jsonValue.put(CHANGED_FIELDS, array((Object[]) fieldNames));
         return self();
+    }
+
+    /**
+     * Sets resourceOperation method from {@link org.forgerock.json.resource.Request}; iff the provided <code>Request</code>
+     * is an {@link org.forgerock.json.resource.ActionRequest} then resourceOperation action will also be set.
+     *
+     * @param request The CREST request.
+     * @return this builder
+     */
+    public final T resourceOperationFromContextAndRequest(Context context, Request request) {
+        JsonValue object = request.accept(RESOURCE_OPERATION_VISITOR, null);
+        object.put(URI, request.getResourceName());
+        String protocol = null;
+        if (context.containsContext(HTTP_CONTEXT_NAME)) {
+            JsonValue httpContext = context.getContext(HTTP_CONTEXT_NAME).toJsonValue();
+            try {
+                java.net.URI uri = new java.net.URI(httpContext.get("path").asString());
+                protocol = uri.getScheme();
+            } catch (URISyntaxException e) {
+                logger.debug("Unable to get the resource operation protocol.", e);
+            }
+        } else {
+            logger.debug("Unable to get the resource operation protocol because there is no http context");
+        }
+        object.put(PROTOCOL, protocol);
+        jsonValue.put(RESOURCE_OPERATION, object);
+        return self();
+    }
+
+    /**
+     * Builds "responseOperation" value for CREST Request.
+     */
+    private static class ResourceOperationRequestVisitor implements RequestVisitor<JsonValue, Void> {
+
+        @Override
+        public JsonValue visitActionRequest(Void ignored, ActionRequest request) {
+            return json(object(
+                    field(OPERATION, object(
+                            field(METHOD, request.getRequestType().toString()),
+                            field(DETAIL, request.getAction())
+                    ))
+            ));
+        }
+
+        @Override
+        public JsonValue visitCreateRequest(Void ignored, CreateRequest request) {
+            return json(object(field(METHOD, request.getRequestType().toString())));
+        }
+
+        @Override
+        public JsonValue visitDeleteRequest(Void ignored, DeleteRequest request) {
+            return json(object(field(METHOD, request.getRequestType().toString())));
+        }
+
+        @Override
+        public JsonValue visitPatchRequest(Void ignored, PatchRequest request) {
+            return json(object(field(METHOD, request.getRequestType().toString())));
+        }
+
+        @Override
+        public JsonValue visitQueryRequest(Void ignored, QueryRequest request) {
+            return json(object(field(METHOD, request.getRequestType().toString())));
+        }
+
+        @Override
+        public JsonValue visitReadRequest(Void ignored, ReadRequest request) {
+            return json(object(field(METHOD, request.getRequestType().toString())));
+        }
+
+        @Override
+        public JsonValue visitUpdateRequest(Void ignored, UpdateRequest request) {
+            return json(object(field(METHOD, request.getRequestType().toString())));
+        }
     }
 
 }
