@@ -28,7 +28,7 @@
   <parent>
     <artifactId>i18n-framework</artifactId>
     <groupId>org.forgerock.commons</groupId>
-    <version>1.4.2-SNAPSHOT</version>
+    <version>1.4.2</version>
   </parent>
   <artifactId>i18n-jul</artifactId>
   <name>ForgeRock I18N Java Logging Support</name>
