@@ -38,6 +38,7 @@
   </licenses>
 
   <scm>
+    <developerConnection>scm:git:https://stash.forgerock.org/scm/commons/forgerock-persistit.git</developerConnection>
     <connection>scm:git:https://stash.forgerock.org/scm/commons/forgerock-persistit.git</connection>
     <url>https://stash.forgerock.org/projects/COMMONS/repos/forgerock-persistit/browse</url>
   </scm>
