@@ -8,7 +8,8 @@
   },
   "headers": {
     "h1": [ "h1_v1", "h1_v2" ],
-    "h2": [ "h2_v1", "h2_v2" ]
+    "h2": [ "h2_v1", "h2_v2" ],
+    "Host" : ["product.example.com:8080"]
   },
   "remoteAddress": "168.0.0.10",
   "parent": null

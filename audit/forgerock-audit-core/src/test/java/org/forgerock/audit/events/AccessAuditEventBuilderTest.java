@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +38,8 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.Requests;
+import org.forgerock.json.resource.RootContext;
+import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.servlet.HttpContext;
 import org.testng.annotations.Test;
 
@@ -197,6 +200,7 @@ public class AccessAuditEventBuilderTest {
         Map<String, Object> expectedHeaders = new LinkedHashMap<String, Object>();
         expectedHeaders.put("h1", Arrays.asList("h1_v1", "h1_v2"));
         expectedHeaders.put("h2", Arrays.asList("h2_v1", "h2_v2"));
+        expectedHeaders.put("Host", Arrays.asList("product.example.com:8080"));
 
         // When
         AuditEvent event = productAccessEvent()
@@ -250,6 +254,53 @@ public class AccessAuditEventBuilderTest {
         JsonValue value = event.getValue();
         assertThat(value.get(RESOURCE_OPERATION).get(METHOD).asString()).isEqualTo("DELETE");
         assertThat(value.get(RESOURCE_OPERATION).isDefined(ACTION)).isFalse();
+    }
+
+    @Test
+    public void canPopulateServerFromHttpContext() throws Exception {
+        // Given
+        HttpContext httpContext = new HttpContext(jsonFromFile("/httpContext.json"), null);
+
+        // When
+        AuditEvent event = productAccessEvent()
+                .eventName("IDM-sync-10")
+                .transactionId("transactionId")
+                .authentication("someone@forgerock.com")
+                .serverFromHttpContext(httpContext)
+                .toEvent();
+
+        // Then
+        JsonValue value = event.getValue();
+        assertThat(value.get(SERVER).get(PORT).asInteger()).isEqualTo(8080);
+        assertThat(value.get(SERVER).get(HOST).asString()).isEqualTo("product.example.com");
+    }
+
+    @Test
+    public void canPopulateAuthorizationIdFromSecurityContext() throws Exception {
+        // Given
+        List<String> roles = new LinkedList<>();
+        roles.add("role1");
+        roles.add("role2");
+        Map<String, Object> authorizationId = new HashMap<String,Object>();
+        authorizationId.put(COMPONENT, COMPONENT);
+        authorizationId.put(ID, ID);
+        authorizationId.put(ROLES, roles);
+        SecurityContext securityContext = new SecurityContext(new RootContext(), "authenticationId", authorizationId);
+
+        // When
+        AuditEvent event = productAccessEvent()
+                .eventName("IDM-sync-10")
+                .transactionId("transactionId")
+                .authentication("someone@forgerock.com")
+                .authorizationIdFromSecurityContext(securityContext)
+                .toEvent();
+
+        // Then
+        JsonValue value = event.getValue();
+        assertThat(value.get(AUTHORIZATION_ID).get(COMPONENT).asString()).isEqualTo(COMPONENT);
+        assertThat(value.get(AUTHORIZATION_ID).get(ID).asString()).isEqualTo(ID);
+        assertThat(value.get(AUTHORIZATION_ID).get(ROLES).asList()).contains("role1");
+        assertThat(value.get(AUTHORIZATION_ID).get(ROLES).asList()).contains("role2");
     }
 
     private void assertEvent(AuditEvent event) {

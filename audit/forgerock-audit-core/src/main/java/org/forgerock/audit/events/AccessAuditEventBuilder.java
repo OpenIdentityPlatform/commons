@@ -90,7 +90,9 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
     public static final String RESPONSE = "response";
     public static final String MESSAGE = "message";
 
+    private static final String HOST_HEADER = "Host";
     private static final String HTTP_CONTEXT_NAME = "http";
+    private static final String SECURITY_CONTEXT_NAME = "security";
     private static final String HTTP_CONTEXT_REMOTE_ADDRESS = "remoteAddress";
 
     private static final Logger logger = LoggerFactory.getLogger(AccessAuditEventBuilder.class);
@@ -134,6 +136,25 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
                 field(IP, ip),
                 field(PORT, port)));
         jsonValue.put(SERVER, object);
+        return self();
+    }
+
+    /**
+     * Sets the server fields for the event, iff the provided
+     * <code>Context</code> contains a <code>HttpContext</code>..
+     *
+     * @param context the CREST context
+     * @return this builder
+     */
+    public final T serverFromHttpContext(Context context) {
+        if (context.containsContext(HTTP_CONTEXT_NAME)) {
+            JsonValue httpContext = context.getContext(HTTP_CONTEXT_NAME).toJsonValue();
+            final String hostHeader = httpContext.get(HEADERS).get(HOST_HEADER).get(0).asString();
+            final String[] hostHeaderParts = hostHeader.split(":");
+            if (hostHeaderParts.length == 2) {
+                server(null, Integer.parseInt(hostHeaderParts[1]), hostHeaderParts[0]);
+            }
+        }
         return self();
     }
 
@@ -239,6 +260,31 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
         }
         jsonValue.put(AUTHORIZATION_ID, object);
         return self();
+    }
+
+    /**
+     * Sets the provided authorizationId fields for the event, iff the provided
+     * <code>Context</code> contains a <code>SecurityContext</code>..
+     *
+     * @param context the CREST context
+     * @return this builder
+     */
+    public final T authorizationIdFromSecurityContext(Context context) {
+        if (context.containsContext(SECURITY_CONTEXT_NAME)) {
+            JsonValue securityContext = context.getContext(SECURITY_CONTEXT_NAME).toJsonValue();
+            authorizationId(
+                    securityContext.get(AUTHORIZATION_ID).get(COMPONENT).asString(),
+                    securityContext.get(AUTHORIZATION_ID).get(ID).asString(),
+                    getRoles(securityContext));
+        }
+        return self();
+    }
+
+    private String[] getRoles(JsonValue securityContext) {
+        if (securityContext.get(AUTHORIZATION_ID).isDefined(ROLES)){
+            return securityContext.get(AUTHORIZATION_ID).get(ROLES).asList().toArray(new String[0]);
+        }
+        return null;
     }
 
     /**
