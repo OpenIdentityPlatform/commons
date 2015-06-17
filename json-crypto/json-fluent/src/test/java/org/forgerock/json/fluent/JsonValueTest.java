@@ -58,6 +58,28 @@ public class JsonValueTest {
         listValue = new JsonValue(new ArrayList<>());
     }
 
+    // ----- basics ----------
+
+    @Test
+    public void shouldFieldBeAddedToJsonObject() {
+        final JsonValue jv = json(object(field("uid", "bjensen"),
+                                         field("age", 30),
+                                         field("nullField", null)));
+        assertThat(jv.get("uid").asString()).isEqualTo("bjensen");
+        assertThat(jv.get("age").asInteger()).isEqualTo(30);
+        assertThat(jv.isDefined("nullField")).isTrue();
+    }
+
+    @Test
+    public void shouldFieldIfNotNullDoNotBeAddedToJsonObject() {
+        final JsonValue jv = json(object(field("uid", "bjensen"),
+                                         field("age", 30),
+                                         fieldIfNotNull("nullField", null)));
+        assertThat(jv.get("uid").asString()).isEqualTo("bjensen");
+        assertThat(jv.get("age").asInteger()).isEqualTo(30);
+        assertThat(jv.isDefined("nullField")).isFalse();
+    }
+
     // ----- manipulation tests ----------
 
     @Test
