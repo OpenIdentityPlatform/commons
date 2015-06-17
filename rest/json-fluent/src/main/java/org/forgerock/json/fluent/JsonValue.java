@@ -97,6 +97,30 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
 
     /**
      * Returns a JSON field for inclusion in a JSON object using
+     * {@link #object(java.util.Map.Entry...) object} only if its value is not {@code null}.
+     * Example usage:
+     *
+     * <pre>
+     * JsonValue value = json(object(fieldIfNotNull(&quot;uid&quot;, getUid()));
+     * </pre>
+     * <p>
+     * Note: This feature depends on the {@link #object(java.util.Map.Entry...)} method that
+     * checks if the entry is not {@code null} before including it into the map.
+     * </p>
+     *
+     * @param key
+     *            The JSON field name.
+     * @param value
+     *            The JSON field value (may be {@code null}).
+     * @return The JSON field for inclusion in a JSON object or {@code null}.
+     * @see #object(java.util.Map.Entry...)
+     */
+    public static Map.Entry<String, Object> fieldIfNotNull(final String key, final Object value) {
+        return value != null ? field(key, value) : null;
+    }
+
+    /**
+     * Returns a JSON field for inclusion in a JSON object using
      * {@link #object(java.util.Map.Entry...) object}. This method is provided
      * as a convenience method for constructing JSON objects. Example usage:
      *
