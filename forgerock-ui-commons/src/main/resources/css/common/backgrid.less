@@ -9,10 +9,10 @@
 
         .form-search {
             margin: 5px 0 0 0;
-            width: 210px;
+            width: 150px;
 
             input[type=search] {
-                width: 160px;
+                width: 100px;
                 padding-left: 25px;
             }
         }
@@ -95,15 +95,62 @@
                         font-size: 12px;
 
                         dd {
-                            margin-left: 95px;
+                            margin-left: 0;
+                            float: left;
                         }
 
                         dt {
                             text-transform: uppercase;
-                            width: 85px;
+                            text-align: left;
+                            text-overflow: ellipsis;
+                            overflow-x: hidden;
+                            clear: left;
+                            width: 70px;
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+// min-width: 768px
+@media (min-width: @screen-sm) {
+    .backgrid thead th {
+        .form-search {
+            width: 210px;
+
+            input[type=search] {
+                width: 160px;
+            }
+        }
+    }
+}
+
+// min-width: 992px
+@media (min-width: @screen-md) {
+    .backgrid tbody tr td.object-formatter-cell {
+        .dl-horizontal {
+            .multi-column-layout(2, 10px);
+
+            dd {
+                margin-left: 75px;
+                float: none;
+            }
+        }
+    }
+}
+
+// min-width: 1200px
+@media (min-width: @screen-lg) {
+    .backgrid tbody tr td.object-formatter-cell {
+        .dl-horizontal {
+            dd {
+                margin-left: 100px;
+            }
+
+            dt {
+                width: 95px;
             }
         }
     }
