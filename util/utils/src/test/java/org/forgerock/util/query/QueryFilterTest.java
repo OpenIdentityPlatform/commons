@@ -70,12 +70,4 @@ public class QueryFilterTest {
         assertThat(filter.toString()).isEqualTo(filterString);
     }
 
-    private static final Function<String, String, RuntimeException> IDENTITY_FUNCTION =
-            new Function<String, String, RuntimeException>() {
-        @Override
-        public String apply(String value) throws RuntimeException {
-            return value;
-        }
-    };
-
 }
