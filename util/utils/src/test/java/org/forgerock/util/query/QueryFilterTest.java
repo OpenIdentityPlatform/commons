@@ -18,7 +18,6 @@ package org.forgerock.util.query;
 import static org.fest.assertions.Assertions.*;
 import static org.forgerock.util.query.QueryFilter.*;
 
-import org.forgerock.util.Function;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
