@@ -87,7 +87,7 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
      * @return A new pending {@link Promise} implementation.
      */
     public static <V, E extends Exception> PromiseImpl<V, E> create() {
-        return new PromiseImpl<V, E>();
+        return new PromiseImpl<>();
     }
 
     private volatile int state = PENDING;
@@ -95,7 +95,7 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
     private E exception = null;
 
     private final Queue<StateListener<V, E>> listeners =
-            new ConcurrentLinkedQueue<StateListener<V, E>>();
+            new ConcurrentLinkedQueue<>();
 
     /**
      * Creates a new pending {@link Promise} implementation. This constructor is
@@ -326,7 +326,7 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
     @Override
     public final <VOUT, EOUT extends Exception> Promise<VOUT, EOUT> then(
         final Function<? super V, VOUT, EOUT> onResult, final Function<? super E, VOUT, EOUT> onException) {
-        final PromiseImpl<VOUT, EOUT> chained = new PromiseImpl<VOUT, EOUT>();
+        final PromiseImpl<VOUT, EOUT> chained = new PromiseImpl<>();
         addOrFireListener(new StateListener<V, E>() {
             @Override
             @SuppressWarnings("unchecked")
@@ -369,7 +369,7 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
     public final <VOUT, EOUT extends Exception> Promise<VOUT, EOUT> thenAsync(
             final AsyncFunction<? super V, VOUT, EOUT> onResult,
             final AsyncFunction<? super E, VOUT, EOUT> onException) {
-        final PromiseImpl<VOUT, EOUT> chained = new PromiseImpl<VOUT, EOUT>();
+        final PromiseImpl<VOUT, EOUT> chained = new PromiseImpl<>();
         addOrFireListener(new StateListener<V, E>() {
             @Override
             @SuppressWarnings("unchecked")

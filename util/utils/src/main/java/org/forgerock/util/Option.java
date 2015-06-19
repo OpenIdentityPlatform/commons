@@ -36,7 +36,7 @@ public final class Option<T> {
      * @return An option with the provided type and default value.
      */
     public static <T> Option<T> of(final Class<T> type, final T defaultValue) {
-        return new Option<T>(type, defaultValue);
+        return new Option<>(type, defaultValue);
     }
 
     /**
@@ -50,7 +50,7 @@ public final class Option<T> {
      */
     @SuppressWarnings("unchecked")
     public static <T> Option<T> withDefault(final T defaultValue) {
-        return new Option<T>((Class<T>) defaultValue.getClass(), defaultValue);
+        return new Option<>((Class<T>) defaultValue.getClass(), defaultValue);
     }
 
     private final T defaultValue;

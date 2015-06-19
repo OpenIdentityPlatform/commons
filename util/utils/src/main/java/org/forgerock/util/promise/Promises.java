@@ -281,7 +281,7 @@ public final class Promises {
      *         already failed with the provided exception.
      */
     public static final <V, E extends Exception> Promise<V, E> newExceptionPromise(final E exception) {
-        return new ExceptionPromise<V, E>(exception);
+        return new ExceptionPromise<>(exception);
     }
 
     /**
@@ -303,7 +303,7 @@ public final class Promises {
      *         already succeeded with the provided result.
      */
     public static final <V, E extends Exception> Promise<V, E> newResultPromise(final V result) {
-        return new ResultPromise<V, E>(result);
+        return new ResultPromise<>(result);
     }
 
     /**
@@ -326,7 +326,7 @@ public final class Promises {
             final List<Promise<V, E>> promises) {
         final int size = promises.size();
         final AtomicInteger remaining = new AtomicInteger(size);
-        final List<V> results = new ArrayList<V>(size);
+        final List<V> results = new ArrayList<>(size);
         final PromiseImpl<List<V>, E> composite = PromiseImpl.create();
         for (final Promise<V, E> promise : promises) {
             promise.thenOnResult(new ResultHandler<V>() {
@@ -368,6 +368,7 @@ public final class Promises {
      *         provided promises have succeeded, or as soon as one of them
      *         has thrown an exception.
      */
+    @SafeVarargs
     public static final <V, E extends Exception> Promise<List<V>, E> when(
             final Promise<V, E>... promises) {
         return when(Arrays.asList(promises));

@@ -477,8 +477,7 @@ public class QueryFilter<F> {
         case 1:
             return subFilters.iterator().next();
         default:
-            return new QueryFilter<FF>(new AndImpl<FF>(Collections
-                    .unmodifiableList(new ArrayList<QueryFilter<FF>>(subFilters))));
+            return new QueryFilter<>(new AndImpl<>(Collections.unmodifiableList(new ArrayList<>(subFilters))));
         }
     }
 
@@ -494,6 +493,7 @@ public class QueryFilter<F> {
      *
      * @param <FF> The type of the field specification. Named to be distinct from the type of the parent class.
      */
+    @SafeVarargs
     public static <FF> QueryFilter<FF> and(final QueryFilter<FF>... subFilters) {
         return and(Arrays.asList(subFilters));
     }
@@ -515,7 +515,7 @@ public class QueryFilter<F> {
      * @param <FF> The type of the field specification. Named to be distinct from the type of the parent class.
      */
     public static <FF> QueryFilter<FF> contains(final FF field, final Object valueAssertion) {
-        return new QueryFilter<FF>(new ContainsImpl<FF>(field, valueAssertion));
+        return new QueryFilter<>(new ContainsImpl<>(field, valueAssertion));
     }
 
     /**
@@ -532,7 +532,7 @@ public class QueryFilter<F> {
      * @param <FF> The type of the field specification. Named to be distinct from the type of the parent class.
      */
     public static <FF> QueryFilter<FF> equalTo(final FF field, final Object valueAssertion) {
-        return new QueryFilter<FF>(new EqualsImpl<FF>(field, valueAssertion));
+        return new QueryFilter<>(new EqualsImpl<>(field, valueAssertion));
     }
 
     /**
@@ -551,7 +551,7 @@ public class QueryFilter<F> {
      * @param <FF> The type of the field specification. Named to be distinct from the type of the parent class.
      */
     public static <FF> QueryFilter<FF> greaterThan(final FF field, final Object valueAssertion) {
-        return new QueryFilter<FF>(new GreaterThanImpl<FF>(field, valueAssertion));
+        return new QueryFilter<>(new GreaterThanImpl<>(field, valueAssertion));
     }
 
     /**
@@ -572,7 +572,7 @@ public class QueryFilter<F> {
      */
     public static <FF> QueryFilter<FF> greaterThanOrEqualTo(final FF field,
             final Object valueAssertion) {
-        return new QueryFilter<FF>(new GreaterThanOrEqualToImpl<FF>(field, valueAssertion));
+        return new QueryFilter<>(new GreaterThanOrEqualToImpl<>(field, valueAssertion));
     }
 
     /**
@@ -591,7 +591,7 @@ public class QueryFilter<F> {
      * @param <FF> The type of the field specification. Named to be distinct from the type of the parent class.
      */
     public static <FF> QueryFilter<FF> lessThan(final FF field, final Object valueAssertion) {
-        return new QueryFilter<FF>(new LessThanImpl<FF>(field, valueAssertion));
+        return new QueryFilter<>(new LessThanImpl<>(field, valueAssertion));
     }
 
     /**
@@ -609,7 +609,7 @@ public class QueryFilter<F> {
      * @param <FF> The type of the field specification. Named to be distinct from the type of the parent class.
      */
     public static <FF> QueryFilter<FF> extendedMatch(final FF field, final String operator, final Object valueAssertion) {
-        return new QueryFilter<FF>(new ExtendedMatchImpl<FF>(field, operator, valueAssertion));
+        return new QueryFilter<>(new ExtendedMatchImpl<>(field, operator, valueAssertion));
     }
 
     /**
@@ -629,7 +629,7 @@ public class QueryFilter<F> {
      * @param <FF> The type of the field specification. Named to be distinct from the type of the parent class.
      */
     public static <FF> QueryFilter<FF> lessThanOrEqualTo(final FF field, final Object valueAssertion) {
-        return new QueryFilter<FF>(new LessThanOrEqualToImpl<FF>(field, valueAssertion));
+        return new QueryFilter<>(new LessThanOrEqualToImpl<>(field, valueAssertion));
     }
 
     /**
@@ -642,7 +642,7 @@ public class QueryFilter<F> {
      * @param <FF> The type of the field specification. Named to be distinct from the type of the parent class.
      */
     public static <FF> QueryFilter<FF> not(final QueryFilter<FF> subFilter) {
-        return new QueryFilter<FF>(new NotImpl<FF>(subFilter));
+        return new QueryFilter<>(new NotImpl<>(subFilter));
     }
 
     /**
@@ -664,8 +664,7 @@ public class QueryFilter<F> {
         case 1:
             return subFilters.iterator().next();
         default:
-            return new QueryFilter<FF>(new OrImpl<FF>(Collections
-                    .unmodifiableList(new ArrayList<QueryFilter<FF>>(subFilters))));
+            return new QueryFilter<>(new OrImpl<>(Collections.unmodifiableList(new ArrayList<>(subFilters))));
         }
     }
 
@@ -681,6 +680,7 @@ public class QueryFilter<F> {
      *
      * @param <FF> The type of the field specification. Named to be distinct from the type of the parent class.
      */
+    @SafeVarargs
     public static <FF> QueryFilter<FF> or(final QueryFilter<FF>... subFilters) {
         return or(Arrays.asList(subFilters));
     }
@@ -696,7 +696,7 @@ public class QueryFilter<F> {
      * @param <FF> The type of the field specification. Named to be distinct from the type of the parent class.
      */
     public static <FF> QueryFilter<FF> present(final FF field) {
-        return new QueryFilter<FF>(new PresentImpl<FF>(field));
+        return new QueryFilter<>(new PresentImpl<>(field));
     }
 
     /**
@@ -716,7 +716,7 @@ public class QueryFilter<F> {
      * @param <FF> The type of the field specification. Named to be distinct from the type of the parent class.
      */
     public static <FF> QueryFilter<FF> startsWith(final FF field, final Object valueAssertion) {
-        return new QueryFilter<FF>(new StartsWithImpl<FF>(field, valueAssertion));
+        return new QueryFilter<>(new StartsWithImpl<>(field, valueAssertion));
     }
 
     private static final QueryFilterVisitor<StringBuilder, StringBuilder, Object> TO_STRING_VISITOR =

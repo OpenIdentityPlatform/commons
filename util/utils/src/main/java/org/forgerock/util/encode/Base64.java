@@ -98,9 +98,9 @@ public class Base64 {
          * later.
          */
         int sepCnt = 0; // Number of separator characters. (Actually illegal characters, but that's a bonus...)
-        for (int i = 0; i < sLen; i++) // If input is "pure" (I.e. no line separators or illegal chars) base64 this loop can be commented out.
-        {
-            if (IA[sArr[i] & 0xff] < 0) {
+        // If input is "pure" (I.e. no line separators or illegal chars) base64 this loop can be removed.
+        for (byte aSArr : sArr) {
+            if (IA[aSArr & 0xff] < 0) {
                 sepCnt++;
             }
         }

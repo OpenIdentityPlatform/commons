@@ -36,7 +36,7 @@ public final class Options {
      * @return A copy of the provided set of options.
      */
     public static Options copyOf(final Options options) {
-        return new Options(new IdentityHashMap<Option<?>, Object>(options.map));
+        return new Options(new IdentityHashMap<>(options.map));
     }
 
     /**
@@ -56,7 +56,7 @@ public final class Options {
      * @return An unmodifiable copy of the provided set of options.
      */
     public static Options unmodifiableCopyOf(final Options options) {
-        return new Options(unmodifiableMap(new IdentityHashMap<Option<?>, Object>(options.map)));
+        return new Options(unmodifiableMap(new IdentityHashMap<>(options.map)));
     }
 
     /**

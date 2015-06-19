@@ -31,7 +31,7 @@ public class PromisesTest {
 
         //Given
         final List<Promise<Void, NeverThrowsException>> promises =
-                new ArrayList<Promise<Void, NeverThrowsException>>();
+                new ArrayList<>();
         final AtomicBoolean complete = new AtomicBoolean(false);
 
         //When

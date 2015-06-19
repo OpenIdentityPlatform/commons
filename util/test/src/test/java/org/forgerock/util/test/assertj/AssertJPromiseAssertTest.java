@@ -139,7 +139,7 @@ public class AssertJPromiseAssertTest {
     @Test
     public void testSuccessMap() throws Exception {
         // Given
-        Map<String, String> value = new HashMap<String, String>();
+        Map<String, String> value = new HashMap<>();
         value.put("test", "fred");
         Promise<Map<String, String>, Exception> promise = Promises.newResultPromise(value);
 

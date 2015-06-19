@@ -112,7 +112,7 @@ public abstract class QueryFilterParser<F> {
         while (tokenizer.hasNext() && tokenizer.peek().equalsIgnoreCase("and")) {
             tokenizer.next();
             if (subFilters == null) {
-                subFilters = new LinkedList<QueryFilter<F>>();
+                subFilters = new LinkedList<>();
                 subFilters.add(filter);
             }
             subFilters.add(valueOfNotExpr(tokenizer, depth + 1));
@@ -145,7 +145,7 @@ public abstract class QueryFilterParser<F> {
         while (tokenizer.hasNext() && tokenizer.peek().equalsIgnoreCase("or")) {
             tokenizer.next();
             if (subFilters == null) {
-                subFilters = new LinkedList<QueryFilter<F>>();
+                subFilters = new LinkedList<>();
                 subFilters.add(filter);
             }
             subFilters.add(valueOfAndExpr(tokenizer, depth + 1));

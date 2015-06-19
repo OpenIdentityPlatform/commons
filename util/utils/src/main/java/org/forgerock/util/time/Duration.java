@@ -59,7 +59,7 @@ public class Duration {
     /**
      * Tokens that represents the unlimited duration.
      */
-    private static final Set<String> UNLIMITED_TOKENS = new TreeSet<String>(
+    private static final Set<String> UNLIMITED_TOKENS = new TreeSet<>(
             String.CASE_INSENSITIVE_ORDER);
     static {
         UNLIMITED_TOKENS.addAll(asList("unlimited", "indefinite", "infinity", "undefined"));
@@ -68,7 +68,7 @@ public class Duration {
     /**
      * Tokens that represents the zero duration.
      */
-    private static final Set<String> ZERO_TOKENS = new TreeSet<String>(
+    private static final Set<String> ZERO_TOKENS = new TreeSet<>(
             String.CASE_INSENSITIVE_ORDER);
     static {
         ZERO_TOKENS.addAll(asList("zero", "disabled"));
@@ -97,7 +97,7 @@ public class Duration {
      *         if the input string is incorrectly formatted.
      */
     public static Duration duration(final String value) {
-        List<Duration> composite = new ArrayList<Duration>();
+        List<Duration> composite = new ArrayList<>();
 
         // Split around ',' and ' and ' patterns
         String[] fragments = value.split(",| and ");
@@ -180,7 +180,7 @@ public class Duration {
         }
     }
 
-    private static Map<String, TimeUnit> TIME_UNITS = new HashMap<String, TimeUnit>();
+    private static Map<String, TimeUnit> TIME_UNITS = new HashMap<>();
     static {
         for (String days : asList("days", "day", "d")) {
             TIME_UNITS.put(days, DAYS);

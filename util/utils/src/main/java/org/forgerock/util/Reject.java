@@ -146,6 +146,7 @@ public final class Reject {
      * @throws NullPointerException
      *             If any of the provided arguments are {@code null}.
      */
+    @SafeVarargs
     public static <T> void ifNull(final T... objects) {
         /*
          * This method is generic in order to play better with varargs.

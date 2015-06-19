@@ -17,7 +17,6 @@ package org.forgerock.util.query;
 
 import static org.fest.assertions.Assertions.*;
 import static org.forgerock.util.query.QueryFilter.*;
-import static org.mockito.Mockito.*;
 
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;

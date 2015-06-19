@@ -86,7 +86,7 @@ public final class Pair<F, S> {
      * @return A new Pair built with the provided elements
      */
     public static <F, S> Pair<F, S> of(F first, S second) {
-        return new Pair<F, S>(first, second);
+        return new Pair<>(first, second);
     }
 
     /**
