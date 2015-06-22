@@ -52,6 +52,19 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This audit service is the entry point for audit logging on the router.
+ * <p>
+ * The service should be configured and registered like this:
+ * <pre>
+ *  // create the service
+ *  AuditService service = new AuditService(extentedTypes);
+ *  // configure it
+ *  service.configure(configuration);
+ *  // register the handlers
+ *  service.register(handler1, handler1Name, events1);
+ *  service.register(handler2, handler2Name, events2);
+ *  ...
+ * </pre>
+ *
  */
 public class AuditService implements RequestHandler {
     private static final Logger logger = LoggerFactory.getLogger(AuditService.class);
@@ -63,7 +76,8 @@ public class AuditService implements RequestHandler {
         mapper = new ObjectMapper(jsonFactory);
     }
 
-    private JsonValue config; // Existing active configuration
+    /** Existing active configuration. */
+    private AuditServiceConfiguration config;
 
     /** All the AuditEventHandlers configured. */
     private Map<String, AuditEventHandler<?>> allAuditEventHandlers;
@@ -71,10 +85,9 @@ public class AuditService implements RequestHandler {
     private Map<String, List<AuditEventHandler<?>>> eventTypeAuditEventHandlers;
     /** All the audit event types configured. */
     private Map<String, JsonValue> auditEvents;
-    /** The name of the AuditEventHandler to use for queries. */
-    private AuditEventHandler<?> queryAuditEventHandler;
 
-    private static final String USE_FOR_QUERIES = "useForQueries";
+    /** The name of the AuditEventHandler to use for queries. */
+    private String queryHandlerName;
 
     /**
      * Constructs an AuditService with no extension for event types.
@@ -118,20 +131,19 @@ public class AuditService implements RequestHandler {
     /**
      * Configure the AuditService.
      *
-     * @param jsonConfig the config of the audit service.
-     * @throws ResourceException if unable to configure audit service.
+     * @param configuration
+     *            the configuration of the audit service.
+     * @throws ResourceException
+     *             if unable to configure audit service.
      */
-    public void configure(final JsonValue jsonConfig) throws ResourceException {
+    public void configure(final AuditServiceConfiguration configuration) throws ResourceException {
         cleanupPreviousConfig();
-
-        queryAuditEventHandler = getQueryAuditEventHandler(jsonConfig.get(USE_FOR_QUERIES).asString());
-
-        //set current config
-        config = jsonConfig.clone();
+        queryHandlerName = configuration.getQueryHandlerName();
+        config = new AuditServiceConfiguration(configuration);
     }
 
     /**
-     * Register an AuditEventHandler. After that registration, that AuditEventHandler can be refered with the given
+     * Register an AuditEventHandler. After that registration, that AuditEventHandler can be referred with the given
      * name. This AuditEventHandler will only be notified about the events specified in the parameter events.
      *
      * @param handler
@@ -173,7 +185,7 @@ public class AuditService implements RequestHandler {
     }
 
     private void cleanupPreviousConfig() throws ResourceException {
-        queryAuditEventHandler = null;
+        queryHandlerName = null;
     }
 
     /**
@@ -189,12 +201,17 @@ public class AuditService implements RequestHandler {
     public void handleRead(final ServerContext context, final ReadRequest request,
                            final ResultHandler<Resource> handler) {
         try {
-            final String id = request.getResourceNameObject().size() > 1
-                    ? request.getResourceNameObject().tail(1).toString()
-                    : null;
 
             logger.debug("Audit read called for {}", request.getResourceName());
-            queryAuditEventHandler.readInstance(context, id, request, handler);
+            if (queryHandlerName != null && allAuditEventHandlers.containsKey(queryHandlerName)) {
+                final String id = request.getResourceNameObject().size() > 1
+                        ? request.getResourceNameObject().tail(1).toString() : null;
+                allAuditEventHandlers.get(queryHandlerName).readInstance(context, id, request, handler);
+                return;
+            }
+            handler.handleError(ResourceExceptionsUtil.adapt(new AuditException(String.format(
+                    "The handler defined for queries, '%s', has not been registered to the audit service.",
+                    queryHandlerName))));
         } catch (Throwable t) {
             handler.handleError(ResourceExceptionsUtil.adapt(t));
         }
@@ -339,33 +356,6 @@ public class AuditService implements RequestHandler {
         }
     }
 
-    /**
-     * Returns the AuditEventHandler to use for reads/queries.
-     *
-     * @param auditEventHandlerKey the name of the audit event handler to use for queries.
-     * @return an AuditEventHandler to use for queries.
-     */
-    private AuditEventHandler<?> getQueryAuditEventHandler(final String auditEventHandlerKey) {
-        //return configured audit event handler
-        if (auditEventHandlerKey != null) {
-            final AuditEventHandler<?> auditEventHandler = allAuditEventHandlers.get(auditEventHandlerKey);
-            if (auditEventHandler != null) {
-                return auditEventHandler;
-            } else {
-                logger.warn("The audit event handler doesn't exist with name: {}", auditEventHandlerKey);
-            }
-        }
-
-        if (allAuditEventHandlers != null
-                && !allAuditEventHandlers.isEmpty()) {
-            //return first global audit event handler
-            return allAuditEventHandlers.values().iterator().next();
-        } else {
-            logger.warn("No audit event handlers configured to be queried.");
-            return null;
-        }
-    }
-
     private Map<String, JsonValue> getEventTypes(JsonValue coreEventTypes, JsonValue extendedEventTypes) {
         final JsonPointer schemaPropertiesPointer = new JsonPointer("/schema/properties");
         Map<String, JsonValue> listOfEventTypes = new HashMap<>(coreEventTypes.keys().size());
@@ -394,10 +384,11 @@ public class AuditService implements RequestHandler {
     }
 
     /**
-     * Gets the AuditService config.
-     * @return the audit service config as a JsonValue
+     * Gets the AuditService configuration.
+     *
+     * @return the audit service config
      */
-    public JsonValue getConfig() {
-        return config.copy();
+    public AuditServiceConfiguration getConfig() {
+        return new AuditServiceConfiguration(config);
     }
 }

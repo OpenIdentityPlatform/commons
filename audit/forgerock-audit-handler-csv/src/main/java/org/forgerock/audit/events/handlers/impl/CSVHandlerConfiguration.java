@@ -15,12 +15,11 @@
  */
 package org.forgerock.audit.events.handlers.impl;
 
-import org.forgerock.audit.events.handlers.AuditEventHandlerConfiguration;
 
 /**
  * A configuration for CSV audit event handler.
  */
-public class CSVHandlerConfiguration implements AuditEventHandlerConfiguration {
+public class CSVHandlerConfiguration {
 
     private String logDirectory;
 

@@ -50,10 +50,11 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+@SuppressWarnings("javadoc")
 public class AuditServiceTest {
 
     private static final ObjectMapper mapper;
-    private JsonValue config;
+    private AuditServiceConfiguration config;
 
     static {
         final JsonFactory jsonFactory = new JsonFactory();
@@ -65,10 +66,21 @@ public class AuditServiceTest {
     public void setUp() {
         try {
             final InputStream configStream = getClass().getResourceAsStream("/audit.json");
-            config = new JsonValue(mapper.readValue(configStream, Map.class));
+            JsonValue jsonConfig = new JsonValue(mapper.readValue(configStream, Map.class));
+            config = getConfigFromJson(jsonConfig);
         } catch (IOException e) {
             throw new RuntimeException("Unable to parse audit.json config", e);
         }
+    }
+
+    private AuditServiceConfiguration getConfigFromJson(JsonValue jsonConfig) {
+        AuditServiceConfiguration config = new AuditServiceConfiguration();
+        String key = "useForQueries";
+        if (jsonConfig.isDefined(key)) {
+            config.setQueryHandlerName(jsonConfig.get(key).asString());
+            return config;
+        }
+        throw new RuntimeException("Json config does not contain expected property: " + key);
     }
 
     @AfterMethod
@@ -81,7 +93,7 @@ public class AuditServiceTest {
         //given
         final AuditService auditService = new AuditService();
         auditService.configure(config);
-        AuditEventHandler auditEventHandler = mock(AuditEventHandler.class);
+        AuditEventHandler<?> auditEventHandler = mock(AuditEventHandler.class);
         final ArgumentCaptor<Map> auditEventMetaDataCaptor = ArgumentCaptor.forClass(Map.class);
 
         auditService.register(auditEventHandler, "mock", Collections.singleton("access"));
@@ -154,14 +166,14 @@ public class AuditServiceTest {
     public void testReadingAuditLogEntry() throws Exception {
         //given
         final AuditService auditService = new AuditService();
-        AuditEventHandler queryAuditEventHandler = mock(AuditEventHandler.class, "queryAuditEventHandler");
+        AuditEventHandler<?> queryAuditEventHandler = mock(AuditEventHandler.class, "queryAuditEventHandler");
         auditService.register(queryAuditEventHandler, "query-handler", Collections.singleton("access"));
 
-        AuditEventHandler auditEventHandler = mock(AuditEventHandler.class, "auditEventHandler");
+        AuditEventHandler<?> auditEventHandler = mock(AuditEventHandler.class, "auditEventHandler");
         auditService.register(auditEventHandler, "another-handler", Collections.singleton("access"));
         reset(auditEventHandler, queryAuditEventHandler); // So the verify assertions below can work.
 
-        auditService.configure(json(object(field("useForQueries", "query-handler"))));
+        auditService.configure(getConfigFromJson(json(object(field("useForQueries", "query-handler")))));
 
         final ReadRequest readRequest = Requests.newReadRequest("access", "1234");
         ResultHandler<Resource> readResultHandler = mockResultHandler(Resource.class, "readResultHandler");
@@ -299,18 +311,6 @@ public class AuditServiceTest {
     }
 
     @Test
-    public void testAuditServiceConfigure() throws ResourceException{
-        //given
-        final AuditService auditService = new AuditService();
-
-        //when
-        auditService.configure(config);
-
-        //then
-        assertThat(auditService.getConfig().asMap()).isEqualTo(config.asMap());
-    }
-
-    @Test
     public void testMandatoryFieldTransactionId() throws ResourceException {
         //given
         final AuditService auditService = new AuditService();
@@ -382,18 +382,4 @@ public class AuditServiceTest {
     private static <T> ResultHandler<T> mockResultHandler(Class<T> type, String name) {
         return mock(ResultHandler.class, name);
     }
-
-    private Resource createAccessEvent(AuditService auditService) {
-        final CreateRequest createRequest = makeCreateRequest();
-        final ResultHandler<Resource> createResultHandler = mockResultHandler(Resource.class, "createResultHandler");
-        final ArgumentCaptor<Resource> createArgument = ArgumentCaptor.forClass(Resource.class);
-
-        auditService.handleCreate(new ServerContext(new RootContext()), createRequest, createResultHandler);
-
-        verify(createResultHandler, never()).handleError(any(ResourceException.class));
-        verify(createResultHandler).handleResult(createArgument.capture());
-
-        return createArgument.getValue();
-    }
-
 }

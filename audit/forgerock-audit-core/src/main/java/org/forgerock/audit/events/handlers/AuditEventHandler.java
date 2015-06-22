@@ -25,9 +25,9 @@ import org.forgerock.json.resource.ResourceException;
 /**
  * The interface for an AuditEventHandler.
  *
- * @param <T> type of the configuration
+ * @param <CFG> type of the configuration
  */
-public interface AuditEventHandler<T extends AuditEventHandlerConfiguration> extends CollectionResourceProvider {
+public interface AuditEventHandler<CFG> extends CollectionResourceProvider {
 
     /**
      * Configures the Audit Event Handler with the provided configuration.
@@ -35,7 +35,7 @@ public interface AuditEventHandler<T extends AuditEventHandlerConfiguration> ext
      * @param config the configuration of the Audit Event Handler
      * @throws ResourceException if configuration fails
      */
-    public void configure(final T config) throws ResourceException;
+    public void configure(final CFG config) throws ResourceException;
 
     /**
      * Configures the Audit Event Handler with a config.

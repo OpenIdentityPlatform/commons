@@ -30,9 +30,9 @@ import org.forgerock.json.resource.UpdateRequest;
 /**
  * Abstract AuditEventHandler class.
  *
- * @param <T> type of the configuration
+ * @param <CFG> type of the configuration
  */
-public abstract class AuditEventHandlerBase<T extends AuditEventHandlerConfiguration> implements AuditEventHandler<T> {
+public abstract class AuditEventHandlerBase<CFG> implements AuditEventHandler<CFG> {
 
     /**
      * {@inheritDoc}

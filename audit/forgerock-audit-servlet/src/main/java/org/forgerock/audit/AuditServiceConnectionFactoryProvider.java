@@ -79,12 +79,14 @@ public final class AuditServiceConnectionFactoryProvider {
         Set<String> csvEvents = csvConfig.get("events").asSet(String.class);
         CSVAuditEventHandler csvAuditEventHandler;
         csvAuditEventHandler = new CSVAuditEventHandler();
-        csvAuditEventHandler.configure(csvConfig.get("config"));
+        //csvAuditEventHandler.configure(csvConfig.get("config"));
 
         auditService.register(csvAuditEventHandler, "csv", csvEvents);
 
         final JsonValue jsonConfig = new JsonValue(mapper.readValue(configStream, Map.class));
-        auditService.configure(jsonConfig);
+        AuditServiceConfiguration serviceConfig = new AuditServiceConfiguration();
+        serviceConfig.setQueryHandlerName(jsonConfig.get("useForQueries").asString());
+        auditService.configure(serviceConfig);
 
         } catch (IOException | ResourceException e) {
             RuntimeException runtimeException = new RuntimeException("Unable to parse audit.json config", e);

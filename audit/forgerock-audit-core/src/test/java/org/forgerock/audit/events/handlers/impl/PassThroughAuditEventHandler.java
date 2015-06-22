@@ -17,7 +17,6 @@
 package org.forgerock.audit.events.handlers.impl;
 
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
-import org.forgerock.audit.events.handlers.EmptyHandlerConfiguration;
 import org.forgerock.audit.util.ResourceExceptionsUtil;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -33,11 +32,11 @@ import org.forgerock.json.resource.ServerContext;
 /**
  * Handles AuditEvents by just calling the result Handler.
  */
-public class PassThroughAuditEventHandler extends AuditEventHandlerBase<EmptyHandlerConfiguration> {
+public class PassThroughAuditEventHandler extends AuditEventHandlerBase<Void> {
 
     /** {@inheritDoc} */
     @Override
-    public void configure(final EmptyHandlerConfiguration config) throws ResourceException {
+    public void configure(Void config) throws ResourceException {
         // nothing to do
     }
 
