@@ -821,6 +821,7 @@ public class QueryFilter<F> {
     protected final Impl<F> pimpl;
     private final QueryFilterVisitor<StringBuilder, StringBuilder, F> toStringVisitor;
 
+    @SuppressWarnings("unchecked")
     protected QueryFilter(final Impl<F> pimpl) {
         this(pimpl, (QueryFilterVisitor<StringBuilder, StringBuilder, F>) TO_STRING_VISITOR);
     }

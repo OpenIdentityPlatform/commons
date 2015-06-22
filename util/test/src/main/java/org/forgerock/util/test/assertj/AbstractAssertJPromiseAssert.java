@@ -27,7 +27,7 @@ import org.forgerock.util.promise.Promise;
  * Assertion class for a promise. Allows verification of the value that was completed with.
  * @param <T> The promised type.
  * @param <A> The type of assert that this class is.
- * @param <T> The type of assert that is returned from the succeeded method.
+ * @param <S> The type of assert that is returned from the succeeded method.
  */
 public abstract class AbstractAssertJPromiseAssert<T, A extends AbstractAssertJPromiseAssert<T, A, S>, S extends AbstractAssert<S, T>>
         extends AbstractAssert<A, Promise<T, ?>> {

@@ -71,8 +71,7 @@ public class SignatureUtil {
             Signature signature = Signature.getInstance(algorithm);
             signature.initSign(privateKey);
             signature.update(message.getBytes());
-            byte[] signatureBytes = signature.sign();
-            return signatureBytes;
+            return signature.sign();
         } catch (NoSuchAlgorithmException e) {
             throw new SignatureException(MessageFormat.format(
                     "Could not get Signature instance with the algorithm: {0}", algorithm), e);
@@ -127,8 +126,7 @@ public class SignatureUtil {
             Signature signature = Signature.getInstance(algorithm);
             signature.initVerify(publicKey);
             signature.update(message.getBytes());
-            boolean verified = signature.verify(signatureData);
-            return verified;
+            return signature.verify(signatureData);
         } catch (NoSuchAlgorithmException e) {
             throw new SignatureException(MessageFormat.format(
                     "Could not get Signature instance with the algorithm: {0}", algorithm), e);

@@ -74,8 +74,9 @@ public final class AssertJPromiseAssert
          * Asserts that the value was a {@link Map} instance.
          * @param <K> The map key type.
          * @param <V> The map value type.
-         * @return A {@link org.assertj.core.api.MapAssert} instance for making assertions on the value.
+         * @return A {@link AbstractMapAssert} instance for making assertions on the value.
          */
+        @SuppressWarnings("unchecked")
         public <K, V> AbstractMapAssert<?, ? extends Map<K, V>, K, V> withMap() {
             isInstanceOf(Map.class);
             return Assertions.assertThat((Map<K, V>) actual);
@@ -86,6 +87,7 @@ public final class AssertJPromiseAssert
          * @param <T> The iterable contents type.
          * @return A {@link AbstractIterableAssert} instance for making assertions on the value.
          */
+        @SuppressWarnings("unchecked")
         public <T> AbstractIterableAssert<?, ? extends Iterable<? extends T>, T> withIterable() {
             isInstanceOf(Iterable.class);
             return Assertions.assertThat((Iterable<T>) actual);
@@ -97,6 +99,7 @@ public final class AssertJPromiseAssert
          * @param <T> The list contents type.
          * @return A {@link AbstractListAssert} instance for making assertions on the value.
          */
+        @SuppressWarnings("unchecked")
         public <T> AbstractListAssert<?, ? extends List<? extends T>, T> withList() {
             isInstanceOf(List.class);
             return Assertions.assertThat((List<T>) actual);
@@ -170,6 +173,7 @@ public final class AssertJPromiseAssert
          * @param <T> The type of the expected object.
          * @return A {@link AbstractObjectAssert} instance for making assertions on the value.
          */
+        @SuppressWarnings("unchecked")
         public <T> AbstractObjectAssert<?, T> withObject() {
             return Assertions.assertThat((T) actual);
         }
@@ -179,6 +183,7 @@ public final class AssertJPromiseAssert
          * @param <T> The type of the expected array.
          * @return A {@link AbstractObjectArrayAssert} instance for making assertions on the value.
          */
+        @SuppressWarnings("unchecked")
         public <T> AbstractObjectArrayAssert<?, T> withObjectArray() {
             return Assertions.assertThat((T[]) actual);
         }
