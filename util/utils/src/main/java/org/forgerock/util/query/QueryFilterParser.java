@@ -15,6 +15,8 @@
 
 package org.forgerock.util.query;
 
+import static org.forgerock.util.query.QueryFilterOperators.*;
+
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -109,7 +111,7 @@ public abstract class QueryFilterParser<F> {
         checkDepth(tokenizer, depth);
         QueryFilter<F> filter = valueOfNotExpr(tokenizer, depth + 1);
         List<QueryFilter<F>> subFilters = null;
-        while (tokenizer.hasNext() && tokenizer.peek().equalsIgnoreCase("and")) {
+        while (tokenizer.hasNext() && tokenizer.peek().equalsIgnoreCase(AND)) {
             tokenizer.next();
             if (subFilters == null) {
                 subFilters = new LinkedList<>();
@@ -129,7 +131,7 @@ public abstract class QueryFilterParser<F> {
 
     private QueryFilter<F> valueOfNotExpr(final FilterTokenizer tokenizer, final int depth) {
         checkDepth(tokenizer, depth);
-        if (tokenizer.hasNext() && tokenizer.peek().equalsIgnoreCase("!")) {
+        if (tokenizer.hasNext() && tokenizer.peek().equalsIgnoreCase(NOT)) {
             tokenizer.next();
             final QueryFilter<F> rhs = valueOfPrimaryExpr(tokenizer, depth + 1);
             return QueryFilter.not(rhs);
@@ -142,7 +144,7 @@ public abstract class QueryFilterParser<F> {
         checkDepth(tokenizer, depth);
         QueryFilter<F> filter = valueOfAndExpr(tokenizer, depth + 1);
         List<QueryFilter<F>> subFilters = null;
-        while (tokenizer.hasNext() && tokenizer.peek().equalsIgnoreCase("or")) {
+        while (tokenizer.hasNext() && tokenizer.peek().equalsIgnoreCase(OR)) {
             tokenizer.next();
             if (subFilters == null) {
                 subFilters = new LinkedList<>();
@@ -169,9 +171,9 @@ public abstract class QueryFilterParser<F> {
                 return valueOfIllegalArgument(tokenizer);
             }
             return filter;
-        } else if (nextToken.equalsIgnoreCase("true")) {
+        } else if (nextToken.equalsIgnoreCase(TRUE)) {
             return QueryFilter.alwaysTrue();
-        } else if (nextToken.equalsIgnoreCase("false")) {
+        } else if (nextToken.equalsIgnoreCase(FALSE)) {
             return QueryFilter.alwaysFalse();
         } else if (nextToken.equals("\"")) {
             return valueOfIllegalArgument(tokenizer);
@@ -182,7 +184,7 @@ public abstract class QueryFilterParser<F> {
                 return valueOfIllegalArgument(tokenizer);
             }
             final String operator = tokenizer.next();
-            if (operator.equalsIgnoreCase("pr")) {
+            if (operator.equalsIgnoreCase(PRESENT)) {
                 return QueryFilter.present(pointer);
             } else {
                 // Read assertion value: NUMBER | BOOLEAN | '"' UTF8STRING '"'
@@ -209,8 +211,8 @@ public abstract class QueryFilterParser<F> {
                     if (!tokenizer.hasNext() || !tokenizer.next().equals("'")) {
                         return valueOfIllegalArgument(tokenizer);
                     }
-                } else if (nextToken.equalsIgnoreCase("true")
-                        || nextToken.equalsIgnoreCase("false")) {
+                } else if (nextToken.equalsIgnoreCase(TRUE)
+                        || nextToken.equalsIgnoreCase(FALSE)) {
                     assertionValue = Boolean.parseBoolean(nextToken);
                 } else if (nextToken.indexOf('.') >= 0) {
                     // Floating point number.
@@ -249,19 +251,19 @@ public abstract class QueryFilterParser<F> {
      *             If {@code operator} is not a valid operator name.
      */
     private QueryFilter<F> comparisonFilter(final F field, final String operator, final Object valueAssertion) {
-        if (operator.equalsIgnoreCase("eq")) {
+        if (operator.equalsIgnoreCase(EQUALS)) {
             return QueryFilter.equalTo(field, valueAssertion);
-        } else if (operator.equalsIgnoreCase("gt")) {
+        } else if (operator.equalsIgnoreCase(GREATER_THAN)) {
             return QueryFilter.greaterThan(field, valueAssertion);
-        } else if (operator.equalsIgnoreCase("ge")) {
+        } else if (operator.equalsIgnoreCase(GREATER_EQUAL)) {
             return QueryFilter.greaterThanOrEqualTo(field, valueAssertion);
-        } else if (operator.equalsIgnoreCase("lt")) {
+        } else if (operator.equalsIgnoreCase(LESS_THAN)) {
             return QueryFilter.lessThan(field, valueAssertion);
-        } else if (operator.equalsIgnoreCase("le")) {
+        } else if (operator.equalsIgnoreCase(LESS_EQUAL)) {
             return QueryFilter.lessThanOrEqualTo(field, valueAssertion);
-        } else if (operator.equalsIgnoreCase("co")) {
+        } else if (operator.equalsIgnoreCase(CONTAINS)) {
             return QueryFilter.contains(field, valueAssertion);
-        } else if (operator.equalsIgnoreCase("sw")) {
+        } else if (operator.equalsIgnoreCase(STARTS_WITH)) {
             return QueryFilter.startsWith(field, valueAssertion);
         } else if (operator.matches("[a-zA-Z_0-9.]+")) {
             return QueryFilter.extendedMatch(field, operator, valueAssertion);
