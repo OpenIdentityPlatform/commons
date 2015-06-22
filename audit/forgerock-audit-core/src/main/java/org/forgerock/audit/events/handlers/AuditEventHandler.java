@@ -24,15 +24,18 @@ import org.forgerock.json.resource.ResourceException;
 
 /**
  * The interface for an AuditEventHandler.
+ *
+ * @param <T> type of the configuration
  */
-public interface AuditEventHandler extends CollectionResourceProvider {
+public interface AuditEventHandler<T extends AuditEventHandlerConfiguration> extends CollectionResourceProvider {
 
     /**
-     * Configures the Audit Event Handler with a config.
+     * Configures the Audit Event Handler with the provided configuration.
+     *
      * @param config the configuration of the Audit Event Handler
      * @throws ResourceException if configuration fails
      */
-    public void configure(final JsonValue config) throws ResourceException;
+    public void configure(final T config) throws ResourceException;
 
     /**
      * Configures the Audit Event Handler with a config.

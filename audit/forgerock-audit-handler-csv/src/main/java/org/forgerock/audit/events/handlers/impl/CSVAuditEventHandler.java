@@ -63,15 +63,12 @@ import java.util.TreeSet;
 /**
  * Handles AuditEvents by writing them to a CSV file.
  */
-public class CSVAuditEventHandler extends AuditEventHandlerBase {
+public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVHandlerConfiguration> {
     private static final Logger logger = LoggerFactory.getLogger(CSVAuditEventHandler.class);
 
     private Map<String, JsonValue> auditEvents;
     private String auditLogDirectory;
     private String recordDelim;
-
-    private static final String CONFIG_LOG_LOCATION = "location";
-    private static final String CONFIG_LOG_RECORD_DELIM = "recordDelimiter";
 
     private final Map<String, FileWriter> fileWriters = new HashMap<String, FileWriter>();
     private static final ObjectMapper mapper;
@@ -85,6 +82,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void setAuditEventsMetaData(final Map<String, JsonValue> auditEvents) {
         this.auditEvents = auditEvents;
     }
@@ -94,11 +92,11 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
      * {@inheritDoc}
      */
     @Override
-    public void configure(final JsonValue config) throws ResourceException {
+    public void configure(final CSVHandlerConfiguration config) throws ResourceException {
         synchronized (this) {
             cleanup();
 
-            auditLogDirectory = config.get(CONFIG_LOG_LOCATION).asString();
+            auditLogDirectory = config.getLogDirectory();
             logger.info("Audit logging to: {}", auditLogDirectory);
 
             File file = new File(auditLogDirectory);
@@ -112,7 +110,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
                 }
             }
 
-            recordDelim = config.get(CONFIG_LOG_RECORD_DELIM).asString();
+            recordDelim = config.getRecordDelimiter();
             if (StringUtils.isBlank(recordDelim)) {
                 recordDelim = System.getProperty("line.separator");
             }
@@ -120,6 +118,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
         logger.info("{} successfully configured", getClass().getName());
     }
 
+    /** {@inheritDoc} */
     @Override
     public void close() throws ResourceException {
         cleanup();

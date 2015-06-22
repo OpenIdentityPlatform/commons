@@ -16,66 +16,31 @@
 
 package org.forgerock.audit.events.handlers;
 
+import java.util.Map;
+
 import org.forgerock.audit.util.ResourceExceptionsUtil;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.PatchRequest;
-import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResultHandler;
-import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Resource;
-import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 
 /**
  * Abstract AuditEventHandler class.
+ *
+ * @param <T> type of the configuration
  */
-public abstract class AuditEventHandlerBase implements AuditEventHandler {
-
-    /**
-     * {@inheritDoc}
-     */
-    public abstract void configure(final JsonValue config) throws ResourceException;
-
-    /**
-     * {@inheritDoc}
-     */
-    public abstract void close() throws ResourceException;
+public abstract class AuditEventHandlerBase<T extends AuditEventHandlerConfiguration> implements AuditEventHandler<T> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public abstract void actionCollection(
-            final ServerContext context,
-            final ActionRequest request,
-            final ResultHandler<JsonValue> handler
-    );
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public abstract void actionInstance(
-            final ServerContext context,
-            final String resourceId,
-            final ActionRequest request,
-            final ResultHandler<JsonValue> handler
-    );
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public abstract void createInstance(
-            final ServerContext context,
-            final CreateRequest request,
-            final ResultHandler<Resource> handler
-    );
+    public void setAuditEventsMetaData(final Map<String, JsonValue> auditEvents) {
+        // do nothing by default
+    }
 
     /**
      * {@inheritDoc}
@@ -100,27 +65,6 @@ public abstract class AuditEventHandlerBase implements AuditEventHandler {
             final ResultHandler<Resource> handler) {
         handler.handleError(ResourceExceptionsUtil.notSupported(request));
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public abstract void queryCollection(
-            final ServerContext context,
-            final QueryRequest request,
-            final QueryResultHandler handler
-    );
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public abstract void readInstance(
-            final ServerContext context,
-            final String resourceId,
-            final ReadRequest request,
-            final ResultHandler<Resource> handler
-    );
 
     /**
      * {@inheritDoc}
