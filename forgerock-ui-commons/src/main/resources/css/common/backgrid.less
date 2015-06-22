@@ -9,10 +9,12 @@
 
         .form-search {
             margin: 5px 0 0 0;
-            width: 150px;
+            width: auto;
 
             input[type=search] {
-                width: 100px;
+                width: 100%;
+                height: 100%;
+                box-sizing: border-box;
                 padding-left: 25px;
             }
         }
@@ -20,7 +22,6 @@
         .backgrid-filter .clear {
             right: 15px;
         }
-
     }
 
     tbody {
@@ -109,19 +110,6 @@
                         }
                     }
                 }
-            }
-        }
-    }
-}
-
-// min-width: 768px
-@media (min-width: @screen-sm) {
-    .backgrid thead th {
-        .form-search {
-            width: 210px;
-
-            input[type=search] {
-                width: 160px;
             }
         }
     }
