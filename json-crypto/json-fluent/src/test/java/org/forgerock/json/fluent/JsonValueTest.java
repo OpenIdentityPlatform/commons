@@ -80,6 +80,22 @@ public class JsonValueTest {
         assertThat(jv.isDefined("nullField")).isFalse();
     }
 
+    @Test
+    public void shouldReturnTrueIfJsonValueIsNull() {
+        final JsonValue jv = json(object(field("uid", "bjensen"),
+                                         field("age", null)));
+        assertThat(jv.get("uid").isNull()).isFalse();
+        assertThat(jv.get("age").isNull()).isTrue();
+    }
+
+    @Test
+    public void shouldReturnTrueIfJsonValueIsNotNull() {
+        final JsonValue jv = json(object(field("uid", "bjensen"),
+                                         field("age", null)));
+        assertThat(jv.get("uid").isNotNull()).isTrue();
+        assertThat(jv.get("age").isNotNull()).isFalse();
+    }
+
     // ----- manipulation tests ----------
 
     @Test
