@@ -31,11 +31,6 @@
             <param-value>org.forgerock.audit.AuditServiceConnectionFactoryProvider</param-value>
         </init-param>
 
-        <init-param>
-            <param-name>uri-template</param-name>
-            <param-value>/audit/{id}</param-value>
-        </init-param>
-
         <!--  Uncomment to specify a non-default factory method name.
                 <init-param>
                     <param-name>connection-factory-method</param-name>

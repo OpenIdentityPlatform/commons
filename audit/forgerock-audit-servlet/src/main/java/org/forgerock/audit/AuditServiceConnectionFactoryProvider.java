@@ -41,7 +41,6 @@ import java.util.Set;
  * ConnectionFactory that instantiates the AuditService on the crest router.
  */
 public final class AuditServiceConnectionFactoryProvider {
-    private static final String INIT_PARAM_URI_TEMPLATE = "uri-template";
 
     private static final Logger logger = LoggerFactory.getLogger(AuditServiceConnectionFactoryProvider.class);
     private static final ObjectMapper mapper;
@@ -63,11 +62,6 @@ public final class AuditServiceConnectionFactoryProvider {
      */
     public static ConnectionFactory getConnectionFactory(final ServletConfig config)
             throws ServletException {
-        final String uriTemplate = config.getInitParameter(INIT_PARAM_URI_TEMPLATE);
-        if (uriTemplate == null) {
-            throw new ServletException("Servlet initialization parameter '"
-                    + INIT_PARAM_URI_TEMPLATE + "' not specified");
-        }
         final Router router = new Router();
         final AuditService auditService = new AuditService();
 

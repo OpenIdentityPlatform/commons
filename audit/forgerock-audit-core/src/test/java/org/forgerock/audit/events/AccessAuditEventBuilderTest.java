@@ -81,7 +81,7 @@ public class AccessAuditEventBuilderTest {
                 .server("sip", 80)
                 .authorizationId("managed/user", "aegloff", "openidm-admin", "openidm-authorized")
                 .authentication("someone@forgerock.com")
-                .resourceOperation("action", "reconcile")
+                .resourceOperation("/some/path", "CREST", "action", "reconcile")
                 .http("GET", "/some/path", "p1=v1&p2=v2", headers)
                 .response("200", 12)
                 .openField("value")
@@ -96,7 +96,7 @@ public class AccessAuditEventBuilderTest {
         assertThat(value.get(HTTP).get(METHOD).asString()).isEqualTo("GET");
         assertThat(value.get(HTTP).get(HEADERS).asMapOfList(String.class)).isEqualTo(headers);
         assertThat(value.get(AUTHORIZATION_ID).get(ID).asString()).isEqualTo("aegloff");
-        assertThat(value.get(RESOURCE_OPERATION).get(METHOD).asString()).isEqualTo("action");
+        assertThat(value.get(RESOURCE_OPERATION).get(OPERATION).get(METHOD).asString()).isEqualTo("action");
         assertThat(value.get(RESPONSE).get(STATUS).asString()).isEqualTo("200");
         assertThat(value.get(RESPONSE).get(ELAPSED_TIME).asLong()).isEqualTo(12);
         assertThat(value.get("open").getObject()).isEqualTo("value");
@@ -233,8 +233,8 @@ public class AccessAuditEventBuilderTest {
 
         // Then
         JsonValue value = event.getValue();
-        assertThat(value.get(RESOURCE_OPERATION).get(METHOD).asString()).isEqualTo("ACTION");
-        assertThat(value.get(RESOURCE_OPERATION).get(ACTION).asString()).isEqualTo("actionId");
+        assertThat(value.get(RESOURCE_OPERATION).get(OPERATION).get(METHOD).asString()).isEqualTo("ACTION");
+        assertThat(value.get(RESOURCE_OPERATION).get(OPERATION).get(DETAIL).asString()).isEqualTo("actionId");
     }
 
     @Test
@@ -252,8 +252,8 @@ public class AccessAuditEventBuilderTest {
 
         // Then
         JsonValue value = event.getValue();
-        assertThat(value.get(RESOURCE_OPERATION).get(METHOD).asString()).isEqualTo("DELETE");
-        assertThat(value.get(RESOURCE_OPERATION).isDefined(ACTION)).isFalse();
+        assertThat(value.get(RESOURCE_OPERATION).get(OPERATION).get(METHOD).asString()).isEqualTo("DELETE");
+        assertThat(value.get(RESOURCE_OPERATION).get(OPERATION).isDefined(DETAIL)).isFalse();
     }
 
     @Test

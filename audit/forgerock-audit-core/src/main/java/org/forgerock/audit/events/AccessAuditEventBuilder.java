@@ -15,19 +15,14 @@
  */
 package org.forgerock.audit.events;
 
+import static org.forgerock.audit.events.AuditEventBuilderUtil.*;
 import static org.forgerock.json.fluent.JsonValue.*;
+
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.Context;
-import org.forgerock.json.resource.CreateRequest;
-import org.forgerock.json.resource.DeleteRequest;
-import org.forgerock.json.resource.PatchRequest;
-import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
-import org.forgerock.json.resource.RequestVisitor;
-import org.forgerock.json.resource.UpdateRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +41,7 @@ import java.util.Map;
  * new specific fields, e.g
  * <pre>
  * <code>
- * class MyProductAccessAuditEventBuilder{@code <T extends MyProductAccessAuditEventBuilder<T>>}
+ * class OpenProductAccessAuditEventBuilder{@code <T extends OpenProductAccessAuditEventBuilder<T>>}
  extends AccessAuditEventBuilder{@code <T>} {
  *
  *    protected OpenProductAccessAuditEventBuilder(DnsUtils dnsUtils) {
@@ -74,9 +69,12 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
     public static final String HOST = "host";
     public static final String IP = "ip";
     public static final String PORT = "port";
-    public static final String METHOD = "method";
-    public static final String ACTION = "action";
-    public static final String RESOURCE_OPERATION = "resourceOperation";
+    public static final String RESOURCE_OPERATION = AuditEventBuilderUtil.RESOURCE_OPERATION;
+    public static final String URI = AuditEventBuilderUtil.URI;
+    public static final String PROTOCOL = AuditEventBuilderUtil.PROTOCOL;
+    public static final String OPERATION = AuditEventBuilderUtil.OPERATION;
+    public static final String METHOD = AuditEventBuilderUtil.METHOD;
+    public static final String DETAIL = AuditEventBuilderUtil.DETAIL;
     public static final String COMPONENT = "component";
     public static final String ID = "id";
     public static final String ROLES = "roles";
@@ -96,7 +94,6 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
     private static final String HTTP_CONTEXT_REMOTE_ADDRESS = "remoteAddress";
 
     private static final Logger logger = LoggerFactory.getLogger(AccessAuditEventBuilder.class);
-    private static final ResourceOperationRequestVisitor RESOURCE_OPERATION_VISITOR = new ResourceOperationRequestVisitor();
 
     /**
      * Starts to build an audit access event.
@@ -214,31 +211,29 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
     }
 
     /**
-     * Sets the provided resource operation method and action for the event.
+     * Sets the provided resourceOperation details for the event.
      *
-     * @param method the method of the operation (for CREST, expect one method in CRUDPAQ).
-     * @param action the detailed action of the operation.
+     * @param uri the resource identifier.
+     * @param protocol the scheme of the resource identifier uri.
+     * @param operationMethod the type of operation (e.g. when protocol is CREST, operation type will be one of CRUDPAQ).
+     * @param operationDetail further defines the operation type (e.g. specifies the name of the CRUDPAQ action).
      * @return this builder
      */
-    public final T resourceOperation(String method, String action) {
-        JsonValue object = json(object(
-                field(METHOD, method),
-                field(ACTION, action)));
-        jsonValue.put(RESOURCE_OPERATION, object);
+    public final T resourceOperation(String uri, String protocol, String operationMethod, String operationDetail) {
+        jsonValue.put(RESOURCE_OPERATION, createResourceOperation(uri, protocol, operationMethod, operationDetail));
         return self();
     }
 
     /**
-     * Sets the provided resource operation method for the event.
+     * Sets the provided resourceOperation details for the event.
      *
-     * If the method is an Action, use {@code resourceOperation(String, String)} method instead.
-     *
-     * @param method the method of the operation (for CREST, expect one method in CRUDPQ).
+     * @param uri the resource identifier.
+     * @param protocol the scheme of the resource identifier uri.
+     * @param operationMethod the type of operation (e.g. when protocol is CREST, operation type will be one of CRUDPAQ).
      * @return this builder
      */
-    public final T resourceOperation(String method) {
-        JsonValue object = json(object(field(METHOD, method)));
-        jsonValue.put(RESOURCE_OPERATION, object);
+    public final T resourceOperation(String uri, String protocol, String operationMethod) {
+        jsonValue.put(RESOURCE_OPERATION, createResourceOperation(uri, protocol, operationMethod));
         return self();
     }
 
@@ -401,7 +396,7 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
      * @return this builder
      */
     public final T resourceOperationFromRequest(Request request) {
-        JsonValue object = request.accept(RESOURCE_OPERATION_VISITOR, null);
+        JsonValue object = createResourceOperationFromRequest(request);
         jsonValue.put(RESOURCE_OPERATION, object);
         return self();
     }
@@ -472,48 +467,6 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
             return URLEncoder.encode(string, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             return string;
-        }
-    }
-
-    /**
-     * Builds "responseOperation" value for CREST Request.
-     */
-    private static class ResourceOperationRequestVisitor implements RequestVisitor<JsonValue, Void> {
-        @Override
-        public JsonValue visitActionRequest(Void ignored, ActionRequest request) {
-            return json(object(
-                    field(METHOD, request.getRequestType().toString()),
-                    field(ACTION, request.getAction())));
-        }
-
-        @Override
-        public JsonValue visitCreateRequest(Void ignored, CreateRequest request) {
-            return json(object(field(METHOD, request.getRequestType().toString())));
-        }
-
-        @Override
-        public JsonValue visitDeleteRequest(Void ignored, DeleteRequest request) {
-            return json(object(field(METHOD, request.getRequestType().toString())));
-        }
-
-        @Override
-        public JsonValue visitPatchRequest(Void ignored, PatchRequest request) {
-            return json(object(field(METHOD, request.getRequestType().toString())));
-        }
-
-        @Override
-        public JsonValue visitQueryRequest(Void ignored, QueryRequest request) {
-            return json(object(field(METHOD, request.getRequestType().toString())));
-        }
-
-        @Override
-        public JsonValue visitReadRequest(Void ignored, ReadRequest request) {
-            return json(object(field(METHOD, request.getRequestType().toString())));
-        }
-
-        @Override
-        public JsonValue visitUpdateRequest(Void ignored, UpdateRequest request) {
-            return json(object(field(METHOD, request.getRequestType().toString())));
         }
     }
 

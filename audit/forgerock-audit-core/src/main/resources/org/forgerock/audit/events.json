@@ -6,63 +6,54 @@
       "type": "object",
       "properties": {
         "_id": {
-          "id": "_id",
           "type": "string"
         },
         "timestamp": {
-          "id": "timestamp",
           "type": "string"
         },
         "transactionId": {
-          "id": "transactionId",
           "type": "string"
         },
-        "messageId": {
-          "id": "messageId",
+        "eventName": {
           "type": "string"
         },
         "server": {
-          "id": "server",
           "type": "object",
           "properties": {
             "ip": {
-              "id": "ip",
               "type": "string"
             },
             "port": {
-              "id": "port",
               "type": "string"
             }
           }
         },
         "client": {
-          "id": "client",
           "type": "object",
           "properties": {
             "host": {
-              "id": "host",
               "type": "string"
             },
             "ip": {
-              "id": "ip",
               "type": "string"
             },
             "port": {
-              "id": "port",
               "type": "string"
             }
           }
         },
-        "authenticationId": {
-          "id": "authenticationId",
-          "type": "string"
+        "authentication": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            }
+          }
         },
         "authorizationId": {
-          "id": "authorizationId",
           "type": "object",
           "properties": {
             "roles": {
-              "id": "roles",
               "type": "array",
               "items": {
                 "id": "1",
@@ -70,47 +61,48 @@
               }
             },
             "component": {
-              "id": "component",
               "type": "string"
             },
             "id": {
-              "id": "id",
               "type": "string"
             }
           }
         },
         "resourceOperation": {
-          "id": "resourceOperation",
           "type": "object",
           "properties": {
-            "method": {
-              "id": "method",
+            "uri": {
               "type": "string"
             },
-            "action": {
-              "id": "action",
+            "protocol": {
               "type": "string"
+            },
+            "operation": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string"
+                },
+                "detail": {
+                  "type": "string"
+                }
+              }
             }
           }
         },
         "http": {
-          "id": "http",
           "type": "object",
           "properties": {
             "method": {
-              "id": "method",
               "type": "string"
             },
             "path": {
-              "id": "path",
               "type": "string"
             },
             "queryString": {
-              "id": "queryString",
               "type": "string"
             },
             "headers": {
-              "id": "headers",
               "type": "array",
               "items": {
                 "id": "0",
@@ -120,15 +112,12 @@
           }
         },
         "response": {
-          "id": "response",
           "type": "object",
           "properties": {
             "status": {
-              "id": "status",
               "type": "string"
             },
             "elapsedTime": {
-              "id": "elapsedTime",
               "type": "string"
             }
           }
@@ -143,67 +132,57 @@
       "type": "object",
       "properties": {
         "_id": {
-          "id": "_id",
           "type": "string"
         },
         "timestamp": {
-          "id": "timestamp",
           "type": "string"
         },
         "transactionId": {
-          "id": "transactionId",
           "type": "string"
         },
-        "messageId": {
-          "id": "messageId",
+        "eventName": {
           "type": "string"
         },
-        "authenticationId": {
-          "id": "authenticationId",
-          "type": "string"
+        "authentication": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            }
+          }
         },
         "runAs": {
-          "id": "runAs",
           "type": "string"
         },
         "resourceOperation": {
-          "id": "resourceOperation",
           "type": "object",
           "properties": {
             "uri": {
-              "id": "uri",
               "type": "string"
             },
             "protocol": {
-              "id": "protocol",
               "type": "string"
-            }
-          },
-          "operation": {
-            "id": "operation",
-            "type": "object",
-            "properties": {
-              "uri": {
-                "id": "method",
-                "type": "string"
-              },
-              "protocol": {
-                "id": "detail",
-                "type": "string"
+            },
+            "operation": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string"
+                },
+                "detail": {
+                  "type": "string"
+                }
               }
             }
           }
         },
         "before": {
-          "id": "before",
           "type": "string"
         },
         "after": {
-          "id": "after",
           "type": "string"
         },
         "changedFields": {
-          "id": "changedFields",
           "type": "array",
           "items": {
             "id": "1",
@@ -211,7 +190,6 @@
           }
         },
         "revision": {
-          "id": "revision",
           "type": "integer"
         }
       }
@@ -224,53 +202,41 @@
       "type": "object",
       "properties": {
         "_id": {
-          "id": "_id",
           "type": "string"
         },
         "timestamp": {
-          "id": "timestamp",
           "type": "string"
         },
         "transactionId": {
-          "id": "transactionId",
           "type": "string"
         },
-        "eventType": {
-          "id": "eventType",
+        "eventName": {
           "type": "string"
         },
         "authentication": {
-          "id": "authentication",
           "type": "object",
           "properties": {
             "id": {
-              "id": "id",
               "type": "string"
             },
             "operation": {
-              "id": "operation",
               "type": "string"
             },
             "status": {
-              "id": "status",
               "type": "string"
             },
             "method": {
-              "id": "method",
               "type": "object",
               "properties": {
                 "type": {
-                  "id": "type",
                   "type": "string"
                 },
                 "detail": {
-                  "id": "detail",
                   "type": "string"
                 }
               }
             },
             "message": {
-              "id": "message",
               "type": "string"
             }
           }
@@ -285,67 +251,57 @@
       "type": "object",
       "properties": {
         "_id": {
-          "id": "_id",
           "type": "string"
         },
         "timestamp": {
-          "id": "timestamp",
           "type": "string"
         },
         "transactionId": {
-          "id": "transactionId",
           "type": "string"
         },
-        "messageId": {
-          "id": "messageId",
+        "eventName": {
           "type": "string"
         },
-        "authenticationId": {
-          "id": "authenticationId",
-          "type": "string"
+        "authentication": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            }
+          }
         },
         "runAs": {
-          "id": "runAs",
           "type": "string"
         },
         "resourceOperation": {
-          "id": "resourceOperation",
           "type": "object",
           "properties": {
             "uri": {
-              "id": "uri",
               "type": "string"
             },
             "protocol": {
-              "id": "protocol",
               "type": "string"
-            }
-          },
-          "operation": {
-            "id": "operation",
-            "type": "object",
-            "properties": {
-              "uri": {
-                "id": "method",
-                "type": "string"
-              },
-              "protocol": {
-                "id": "detail",
-                "type": "string"
+            },
+            "operation": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string"
+                },
+                "detail": {
+                  "type": "string"
+                }
               }
             }
           }
         },
         "before": {
-          "id": "before",
           "type": "string"
         },
         "after": {
-          "id": "after",
           "type": "string"
         },
         "changedFields": {
-          "id": "changedFields",
           "type": "array",
           "items": {
             "id": "1",
@@ -353,7 +309,6 @@
           }
         },
         "revision": {
-          "id": "revision",
           "type": "integer"
         }
       }

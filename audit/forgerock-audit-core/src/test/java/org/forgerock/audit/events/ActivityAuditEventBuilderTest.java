@@ -95,7 +95,7 @@ public class ActivityAuditEventBuilderTest {
                 .timestamp(1427293286239l)
                 .eventName("AM-REALM-CREATE")
                 .authentication("someone@forgerock.com")
-                .resourceOperationFromContextAndRequest(context, request)
+                .resourceOperationFromRequest(request)
                 .toEvent();
 
         final JsonValue resourceOperation = event.getValue().get(RESOURCE_OPERATION);

@@ -15,23 +15,14 @@
  */
 package org.forgerock.audit.events;
 
+import static org.forgerock.audit.events.AuditEventBuilderUtil.*;
 import static org.forgerock.json.fluent.JsonValue.*;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.Context;
-import org.forgerock.json.resource.CreateRequest;
-import org.forgerock.json.resource.DeleteRequest;
-import org.forgerock.json.resource.PatchRequest;
-import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
-import org.forgerock.json.resource.RequestVisitor;
-import org.forgerock.json.resource.UpdateRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.URISyntaxException;
 
 /**
  * Base class for {@link ActivityAuditEventBuilder} and {@link ConfigAuditEventBuilder}.
@@ -39,22 +30,18 @@ import java.net.URISyntaxException;
 abstract class StateChangeAuditEventBuilder<T extends StateChangeAuditEventBuilder<T>> extends AuditEventBuilder<T> {
 
     public static final String RUN_AS = "runAs";
-    public static final String RESOURCE_OPERATION = "resourceOperation";
-    public static final String URI = "uri";
-    public static final String PROTOCOL = "protocol";
-    public static final String OPERATION = "operation";
-    public static final String METHOD = "method";
-    public static final String DETAIL = "detail";
+    public static final String RESOURCE_OPERATION = AuditEventBuilderUtil.RESOURCE_OPERATION;
+    public static final String URI = AuditEventBuilderUtil.URI;
+    public static final String PROTOCOL = AuditEventBuilderUtil.PROTOCOL;
+    public static final String OPERATION = AuditEventBuilderUtil.OPERATION;
+    public static final String METHOD = AuditEventBuilderUtil.METHOD;
+    public static final String DETAIL = AuditEventBuilderUtil.DETAIL;
     public static final String BEFORE = "before";
     public static final String AFTER = "after";
     public static final String REVISION = "revision";
     public static final String CHANGED_FIELDS = "changedFields";
 
-    private static final String HTTP_CONTEXT_NAME = "http";
-
     private static final Logger logger = LoggerFactory.getLogger(StateChangeAuditEventBuilder.class);
-    private static final ResourceOperationRequestVisitor RESOURCE_OPERATION_VISITOR =
-            new ResourceOperationRequestVisitor();
 
     /**
      * {@inheritDoc}
@@ -96,15 +83,7 @@ abstract class StateChangeAuditEventBuilder<T extends StateChangeAuditEventBuild
      * @return this builder
      */
     public final T resourceOperation(String uri, String protocol, String operationMethod, String operationDetail) {
-        JsonValue object = json(object(
-                field(URI, uri),
-                field(PROTOCOL, protocol),
-                field(OPERATION, object(
-                        field(METHOD, operationMethod),
-                        field(DETAIL, operationDetail)
-                ))
-        ));
-        jsonValue.put(RESOURCE_OPERATION, object);
+        jsonValue.put(RESOURCE_OPERATION, createResourceOperation(uri, protocol, operationMethod, operationDetail));
         return self();
     }
 
@@ -117,14 +96,7 @@ abstract class StateChangeAuditEventBuilder<T extends StateChangeAuditEventBuild
      * @return this builder
      */
     public final T resourceOperation(String uri, String protocol, String operationMethod) {
-        JsonValue object = json(object(
-                field(URI, uri),
-                field(PROTOCOL, protocol),
-                field(OPERATION, object(
-                        field(METHOD, operationMethod)
-                ))
-        ));
-        jsonValue.put(RESOURCE_OPERATION, object);
+        jsonValue.put(RESOURCE_OPERATION, createResourceOperation(uri, protocol, operationMethod));
         return self();
     }
 
@@ -173,76 +145,15 @@ abstract class StateChangeAuditEventBuilder<T extends StateChangeAuditEventBuild
     }
 
     /**
-     * Sets resourceOperation method from {@link org.forgerock.json.resource.Request}; iff the provided <code>Request</code>
-     * is an {@link org.forgerock.json.resource.ActionRequest} then resourceOperation action will also be set.
+     * Sets resourceOperation method from {@link Request}; iff the provided <code>Request</code>
+     * is an {@link ActionRequest} then resourceOperation action will also be set.
      *
      * @param request The CREST request.
      * @return this builder
      */
-    public final T resourceOperationFromContextAndRequest(Context context, Request request) {
-        JsonValue object = request.accept(RESOURCE_OPERATION_VISITOR, null);
-        object.put(URI, request.getResourceName());
-        String protocol = null;
-        if (context.containsContext(HTTP_CONTEXT_NAME)) {
-            JsonValue httpContext = context.getContext(HTTP_CONTEXT_NAME).toJsonValue();
-            try {
-                java.net.URI uri = new java.net.URI(httpContext.get("path").asString());
-                protocol = uri.getScheme();
-            } catch (URISyntaxException e) {
-                logger.debug("Unable to get the resource operation protocol.", e);
-            }
-        } else {
-            logger.debug("Unable to get the resource operation protocol because there is no http context");
-        }
-        object.put(PROTOCOL, protocol);
+    public final T resourceOperationFromRequest(Request request) {
+        JsonValue object = createResourceOperationFromRequest(request);
         jsonValue.put(RESOURCE_OPERATION, object);
         return self();
     }
-
-    /**
-     * Builds "responseOperation" value for CREST Request.
-     */
-    private static class ResourceOperationRequestVisitor implements RequestVisitor<JsonValue, Void> {
-
-        @Override
-        public JsonValue visitActionRequest(Void ignored, ActionRequest request) {
-            return json(object(
-                    field(OPERATION, object(
-                            field(METHOD, request.getRequestType().toString()),
-                            field(DETAIL, request.getAction())
-                    ))
-            ));
-        }
-
-        @Override
-        public JsonValue visitCreateRequest(Void ignored, CreateRequest request) {
-            return json(object(field(METHOD, request.getRequestType().toString())));
-        }
-
-        @Override
-        public JsonValue visitDeleteRequest(Void ignored, DeleteRequest request) {
-            return json(object(field(METHOD, request.getRequestType().toString())));
-        }
-
-        @Override
-        public JsonValue visitPatchRequest(Void ignored, PatchRequest request) {
-            return json(object(field(METHOD, request.getRequestType().toString())));
-        }
-
-        @Override
-        public JsonValue visitQueryRequest(Void ignored, QueryRequest request) {
-            return json(object(field(METHOD, request.getRequestType().toString())));
-        }
-
-        @Override
-        public JsonValue visitReadRequest(Void ignored, ReadRequest request) {
-            return json(object(field(METHOD, request.getRequestType().toString())));
-        }
-
-        @Override
-        public JsonValue visitUpdateRequest(Void ignored, UpdateRequest request) {
-            return json(object(field(METHOD, request.getRequestType().toString())));
-        }
-    }
-
 }
