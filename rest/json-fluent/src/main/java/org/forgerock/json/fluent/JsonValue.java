@@ -1305,6 +1305,15 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
     }
 
     /**
+     * Returns {@code true} if the value is not {@code null}.
+     *
+     * @return {@code true} if the value is not {@code null}.
+     */
+    public boolean isNotNull() {
+        return !isNull();
+    }
+
+    /**
      * Returns {@code true} if the JSON value is a {@link Number}.
      *
      * @return {@code true} if the JSON value is a {@link Number}.
@@ -1799,7 +1808,7 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
         for (int n = 0; n < size - 1; n++) {
             final String token = pointer.get(n);
             final JsonValue next = jv.get(token);
-            if (!next.isNull()) {
+            if (next.isNotNull()) {
                 jv = next;
             } else if (isIndexToken(token)) {
                 throw new JsonValueException(this, "Expecting a value");
