@@ -323,8 +323,8 @@ public final class Status {
      * First try to match a known (supported by this enum) status code, otherwise try to build a new one.
      * @param code
      *            the three-digit integer code giving the result of the attempt to understand and satisfy the request.
-     *            It must be in the range {@code 100 <= code < 1000 } and not already used by another {@link Status}, otherwise
-     *            an {@link IllegalArgumentException} is thrown.
+     *            It must be in the range {@code 100 <= code < 1000 } and not already used by another {@link Status},
+     *            otherwise an {@link IllegalArgumentException} is thrown.
      * @return the {@link Status}
      */
     public static Status valueOf(int code) {
@@ -336,8 +336,8 @@ public final class Status {
      * First try to match a known (supported by this enum) status code, otherwise try to build a new one.
      * @param code
      *            the three-digit integer code giving the result of the attempt to understand and satisfy the request.
-     *            It must be in the range {@code 100 <= code < 1000 } and not already used by another {@link Status}, otherwise
-     *            an {@link IllegalArgumentException} is thrown.
+     *            It must be in the range {@code 100 <= code < 1000 } and not already used by another {@link Status},
+     *            otherwise an {@link IllegalArgumentException} is thrown.
      * @param reason
      *            the reason phrase to describe this {@link Status}. It is purely informative.
      * @return the {@link Status}
