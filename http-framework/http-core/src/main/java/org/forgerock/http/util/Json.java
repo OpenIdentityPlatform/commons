@@ -155,6 +155,7 @@ public final class Json {
      *
      *            <pre>
      * <b>JSON       | Type Java Type</b>
+     * {@code
      * ------------------------------------
      * object     | LinkedHashMap<String,?>
      * array      | LinkedList<?>
@@ -163,6 +164,7 @@ public final class Json {
      * float      | Float
      * true|false | Boolean
      * null       | null
+     * }
      * </pre>
      * @return The parsed JSON into its corresponding java type.
      * @throws IOException

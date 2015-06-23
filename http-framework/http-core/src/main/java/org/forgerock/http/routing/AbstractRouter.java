@@ -31,7 +31,7 @@ import org.forgerock.util.Pair;
  * and use the returned {@link RouteMatch} to determine which route best
  * matches the request.
  *
- * <p>Routes may be added and removed from a router as follows:
+ * <p>Routes may be added and removed from a router as follows:</p>
  *
  * <pre>
  * Handler users = ...;
@@ -43,7 +43,7 @@ import org.forgerock.util.Pair;
  *
  * // Deregister a route.
  * router.removeRoute(routeOne, routeTwo);
- * </pre></p>
+ * </pre>
  *
  * @see Router
  * @see UriRouteMatcher

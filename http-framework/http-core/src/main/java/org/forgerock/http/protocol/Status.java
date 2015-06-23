@@ -45,6 +45,7 @@ import java.util.Map;
  * The first digit of the status-code defines the class of response.
  * The last two digits do not have any categorization role.  There are
  * five values for the first digit:
+ * </p>
  * <ul>
  *   <li>1xx (Informational): The request was received, continuing process</li>
  *
@@ -60,7 +61,6 @@ import java.util.Map;
  *   <li>5xx (Server Error): The server failed to fulfill an apparently
  * valid request</li>
  * </ul>
- * </p>
  *
  * <p>The reason phrases are only recommendations they can be replaced by local
  * equivalents without affecting the protocol.</p>
@@ -215,6 +215,7 @@ public final class Status {
          *
          * <p>
          * There are several types of redirects:
+         * </p>
          * <ol>
          *   <li>Redirects that indicate the resource might be available at a
          * different URI, as provided by the Location field, as in the
@@ -248,17 +249,15 @@ public final class Status {
          * that behavior conformant when the original request is POST.</p>
          * </li>
          * </ol>
-         * </p>
          *
          * <p>
          * A client SHOULD detect and intervene in cyclical redirections (i.e.,
          * "infinite" redirection loops).
-         * <p>
+         * <br>
          * Note: An earlier version of this specification recommended a
          * maximum of five redirections ([RFC2068], Section 10.3).  Content
          * developers need to be aware that some clients might implement such
          * a fixed limitation.</p>
-         * </p>
          */
         REDIRECTION,
 
@@ -324,7 +323,7 @@ public final class Status {
      * First try to match a known (supported by this enum) status code, otherwise try to build a new one.
      * @param code
      *            the three-digit integer code giving the result of the attempt to understand and satisfy the request.
-     *            It must be in the range 100 <= code < 1000 and not already used by another {@link Status}, otherwise
+     *            It must be in the range {@code 100 <= code < 1000 } and not already used by another {@link Status}, otherwise
      *            an {@link IllegalArgumentException} is thrown.
      * @return the {@link Status}
      */
@@ -337,7 +336,7 @@ public final class Status {
      * First try to match a known (supported by this enum) status code, otherwise try to build a new one.
      * @param code
      *            the three-digit integer code giving the result of the attempt to understand and satisfy the request.
-     *            It must be in the range 100 <= code < 1000 and not already used by another {@link Status}, otherwise
+     *            It must be in the range {@code 100 <= code < 1000 } and not already used by another {@link Status}, otherwise
      *            an {@link IllegalArgumentException} is thrown.
      * @param reason
      *            the reason phrase to describe this {@link Status}. It is purely informative.

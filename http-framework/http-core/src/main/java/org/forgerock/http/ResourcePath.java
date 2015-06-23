@@ -34,6 +34,7 @@ import java.util.regex.Pattern;
  * 3.3</a>:
  *
  * <pre>
+ * {@code
  * path          = path-abempty    ; begins with "/" or is empty
  *                 / ...
  *
@@ -49,6 +50,7 @@ import java.util.regex.Pattern;
  * HEXDIG        =  DIGIT / "A" / "B" / "C" / "D" / "E" / "F"
  * ALPHA         =  %x41-5A / %x61-7A   ; A-Z / a-z
  * DIGIT         =  %x30-39             ; 0-9
+ * }
  * </pre>
  *
  * The empty resource path having zero path elements may be obtained by calling
@@ -496,7 +498,7 @@ public final class ResourcePath implements Comparable<ResourcePath>, Iterable<St
      *            top level element.
      * @return The path element at the specified position in this resource path.
      * @throws IndexOutOfBoundsException
-     *             If the index is out of range (index < 0 || index >= size()).
+     *             If the index is out of range (index &lt; 0 || index &gt;= size()).
      */
     public String get(final int index) {
         if (index < 0 || index >= size) {

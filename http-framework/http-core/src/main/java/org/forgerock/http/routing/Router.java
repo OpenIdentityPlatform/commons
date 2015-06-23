@@ -34,11 +34,11 @@ import org.forgerock.util.promise.Promise;
  * A router which routes requests based on route matchers. Each route is
  * comprised of a {@link RouteMatcher route matcher} and a corresponding
  * handler, when routing a request the router will call
- * {@link RouteMatcher <Request>#evaluate(Context, Request)} for each
+ * {@link RouteMatcher#evaluate(Context, Object)} for each
  * registered route and use the returned {@link RouteMatch} to determine
  * which route best matches the request.
  *
- * <p>Routes may be added and removed from a router as follows:
+ * <p>Routes may be added and removed from a router as follows:</p>
  *
  * <pre>
  * Handler users = ...;
@@ -50,7 +50,7 @@ import org.forgerock.util.promise.Promise;
  *
  * // Deregister a route.
  * router.removeRoute(routeOne, routeTwo);
- * </pre></p>
+ * </pre>
  *
  * @see AbstractRouter
  * @see UriRouteMatcher
