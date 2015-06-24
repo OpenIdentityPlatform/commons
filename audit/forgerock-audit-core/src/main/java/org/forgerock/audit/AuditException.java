@@ -15,21 +15,37 @@
  */
 package org.forgerock.audit;
 
+/**
+ * Root class of all exceptions in the Commons Audit Framework.
+ */
 public class AuditException extends Exception {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Constructs an AuditException using the given parent {@code cause}.
+     *
+     * @param cause Error cause
+     */
     public AuditException(Throwable cause) {
         super(cause);
     }
 
+    /**
+     * Constructs an AuditException using the given {@code message}.
+     *
+     * @param message Error message
+     */
     public AuditException(String message) {
         super(message);
     }
 
+    /**
+     * Constructs an AuditException using the given {@code message} and parent {@code cause}.
+     *
+     * @param message Error message
+     * @param cause Error cause
+     */
     public AuditException(String message, Throwable cause) {
         super(message, cause);
     }
