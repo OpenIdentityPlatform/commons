@@ -181,7 +181,7 @@ public class JsonPointerTest {
         return new Object[][] {
             { "/" }, { "/a" }, { "/a/b" }, { "/a/b/c" },
             { "/a/b/c/%2F" }, { "/a/b/c/%2f" },
-    };
+        };
     }
 
     @Test(dataProvider = "validJsonPointers")
