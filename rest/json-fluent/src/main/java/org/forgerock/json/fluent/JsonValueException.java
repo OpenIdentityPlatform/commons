@@ -105,7 +105,7 @@ public class JsonValueException extends JsonException {
 
     /**
      * Returns the JSON value for which the exception was thrown.
-     * 
+     *
      * @return The JSON value for which the exception was thrown.
      */
     public JsonValue getJsonValue() {
