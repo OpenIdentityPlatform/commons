@@ -18,8 +18,6 @@ package org.forgerock.json.fluent;
 
 /**
  * An exception that is thrown during JSON operations.
- *
- * @author Paul C. Bryan
  */
 public class JsonException extends RuntimeException {
 

@@ -26,8 +26,6 @@ import java.util.NoSuchElementException;
 /**
  * Identifies a specific value within a JSON structure. Conforms with
  * <a href="http://tools.ietf.org/html/draft-pbryan-zyp-json-pointer-02">draft-pbryan-zip-json-pointer-02</a>.
- *
- * @author Paul C. Bryan
  */
 public class JsonPointer implements Iterable<String> {
 
