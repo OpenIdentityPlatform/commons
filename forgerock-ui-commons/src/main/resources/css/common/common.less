@@ -85,12 +85,14 @@
 */
 @import "idm-only.less";
 
-
+@version: '';
+.nocache-background-image(@url) {
+    background-image: url("@{url}?v=@{version}");
+}
 
 /*
 Footer
 */
-
 .footer {
     position: absolute;
     bottom: 0;
@@ -102,9 +104,6 @@ Footer
     background-color:  @footer-background-color;
     padding: 10px;
 }
-
-
-
 
 /*
 Registration
@@ -130,8 +129,6 @@ Registration
         text-align: center;
     }
 }
-
-
 
 /*
 Login

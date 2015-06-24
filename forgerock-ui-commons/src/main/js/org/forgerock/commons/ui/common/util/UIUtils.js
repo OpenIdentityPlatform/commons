@@ -27,6 +27,7 @@
 define("org/forgerock/commons/ui/common/util/UIUtils", [
     "jquery",
     "underscore",
+    'require',
     "org/forgerock/commons/ui/common/util/typeextentions/String",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "handlebars",
@@ -34,7 +35,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     "i18next",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/util/DateUtil"
-], function ($, _, String, AbstractConfigurationAware, handlebars, BootstrapDialog, i18next, router, dateUtil) {
+], function ($, _, require, String, AbstractConfigurationAware, handlebars, BootstrapDialog, i18next, router, dateUtil) {
     /**
      * @exports org/forgerock/commons/ui/common/util/UIUtils
      */
@@ -383,7 +384,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
             } else {
                 $.ajax({
                     type: "GET",
-                    url: templateUrl,
+                    url: require.toUrl(templateUrl),
                     dataType: "html",
                     success: function(template) {
                         if(data === 'unknown' || data === null) {
@@ -409,7 +410,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     obj.reloadTemplate = function(url) {
         $.ajax({
             type: "GET",
-            url: url,
+            url: require.toUrl(url),
             dataType: "html",
             success: function(template) {
                 obj.templates[url] = template;
