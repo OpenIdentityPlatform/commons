@@ -52,7 +52,7 @@ public final class MutableUri implements Comparable<MutableUri> {
      */
     public MutableUri(final URI uri) {
         this.uri = uri;
-        setResourcePath(uri.getPath());
+        setResourcePath(uri.getRawPath());
     }
 
     /**
