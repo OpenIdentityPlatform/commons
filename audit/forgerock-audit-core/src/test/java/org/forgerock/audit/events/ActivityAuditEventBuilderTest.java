@@ -88,7 +88,7 @@ public class ActivityAuditEventBuilderTest {
         headers.put("Content-Type", asList("application/json"));
 
         HttpContext context = new HttpContext(jsonFromFile("/httpContext.json"), null);
-        Request request = Requests.newActionRequest("some/resource" ,"customAction");
+        Request request = Requests.newActionRequest("some/resource", "customAction");
 
         AuditEvent event = productActivityEvent()
                 .transactionId("transactionId")

@@ -50,7 +50,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-@SuppressWarnings({"javadoc", "rawtypes", "unchecked"})
+@SuppressWarnings({"javadoc", "rawtypes", "unchecked" })
 public class AuditServiceTest {
 
     private static final ObjectMapper mapper;
@@ -190,7 +190,7 @@ public class AuditServiceTest {
     }
 
     @Test
-    public void testDeleteAuditLogEntry() throws ResourceException{
+    public void testDeleteAuditLogEntry() throws ResourceException {
         //given
         final AuditService auditService = new AuditService();
         auditService.configure(config);
@@ -214,7 +214,7 @@ public class AuditServiceTest {
     }
 
     @Test
-    public void testPatchAuditLogEntry() throws ResourceException{
+    public void testPatchAuditLogEntry() throws ResourceException {
         //given
         final AuditService auditService = new AuditService();
         auditService.configure(config);
@@ -238,7 +238,7 @@ public class AuditServiceTest {
     }
 
     @Test
-    public void testUpdateAuditLogEntry() throws ResourceException{
+    public void testUpdateAuditLogEntry() throws ResourceException {
         //given
         final AuditService auditService = new AuditService();
         auditService.configure(config);
@@ -262,7 +262,7 @@ public class AuditServiceTest {
     }
 
     @Test
-    public void testActionOnAuditLogEntry() throws ResourceException{
+    public void testActionOnAuditLogEntry() throws ResourceException {
         //given
         final AuditService auditService = new AuditService();
         auditService.configure(config);
@@ -286,7 +286,7 @@ public class AuditServiceTest {
     }
 
     @Test
-    public void testQueryOnAuditLogEntry() throws ResourceException{
+    public void testQueryOnAuditLogEntry() throws ResourceException {
         //given
         final AuditService auditService = new AuditService();
         auditService.configure(config);

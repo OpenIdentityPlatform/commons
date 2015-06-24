@@ -369,7 +369,7 @@ public class AuditService implements RequestHandler {
     }
 
     private void readPredefinedEventTypes() {
-        try(final InputStream configStream = getClass().getResourceAsStream("/org/forgerock/audit/events.json")) {
+        try (final InputStream configStream = getClass().getResourceAsStream("/org/forgerock/audit/events.json")) {
             final JsonValue predefinedEventTypes = new JsonValue(mapper.readValue(configStream, Map.class));
 
             for (String eventTypeName : predefinedEventTypes.keys()) {

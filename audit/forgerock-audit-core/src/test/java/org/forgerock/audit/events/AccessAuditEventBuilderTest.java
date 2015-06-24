@@ -281,7 +281,7 @@ public class AccessAuditEventBuilderTest {
         List<String> roles = new LinkedList<>();
         roles.add("role1");
         roles.add("role2");
-        Map<String, Object> authorizationId = new HashMap<String,Object>();
+        Map<String, Object> authorizationId = new HashMap<String, Object>();
         authorizationId.put(COMPONENT, COMPONENT);
         authorizationId.put(ID, ID);
         authorizationId.put(ROLES, roles);

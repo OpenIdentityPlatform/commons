@@ -49,7 +49,7 @@ public class AuditEventBuilderTest {
 
     }
 
-    @Test(expectedExceptions= { IllegalStateException.class })
+    @Test(expectedExceptions = { IllegalStateException.class })
     public void ensureAuditEventContainsMandatoryAttributes() throws Exception {
         productEvent().toEvent();
     }
@@ -65,7 +65,7 @@ public class AuditEventBuilderTest {
         assertThat(value.get(TIMESTAMP).asString()).isNotNull().isNotEmpty();
     }
 
-    @Test(expectedExceptions= { IllegalStateException.class })
+    @Test(expectedExceptions = { IllegalStateException.class })
     public void ensureAuditEventContainsTransactionId() throws Exception {
         productEvent()
                 .eventName("AM-CREST-SUCCESS")
@@ -74,7 +74,7 @@ public class AuditEventBuilderTest {
                 .toEvent();
     }
 
-    @Test(expectedExceptions= { IllegalStateException.class })
+    @Test(expectedExceptions = { IllegalStateException.class })
     public void ensureAuditEventContainsEventName() throws Exception {
         productEvent()
                 .transactionId("transactionId")
@@ -83,7 +83,7 @@ public class AuditEventBuilderTest {
                 .toEvent();
     }
 
-    @Test(expectedExceptions= { IllegalStateException.class })
+    @Test(expectedExceptions = { IllegalStateException.class })
     public void ensureAuditEventContainsAuthentication() throws Exception {
         productEvent()
                 .eventName("AM-CREST-SUCCESS")

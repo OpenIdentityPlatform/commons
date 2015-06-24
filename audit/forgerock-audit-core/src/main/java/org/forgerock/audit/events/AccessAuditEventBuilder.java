@@ -276,7 +276,7 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
     }
 
     private String[] getRoles(JsonValue securityContext) {
-        if (securityContext.get(AUTHORIZATION_ID).isDefined(ROLES)){
+        if (securityContext.get(AUTHORIZATION_ID).isDefined(ROLES)) {
             return securityContext.get(AUTHORIZATION_ID).get(ROLES).asList().toArray(new String[0]);
         }
         return null;
