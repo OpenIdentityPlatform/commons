@@ -22,11 +22,9 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.InternalServerErrorException;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Helper methods for AuditEvents.
