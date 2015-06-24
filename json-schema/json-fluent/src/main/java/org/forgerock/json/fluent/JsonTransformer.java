@@ -27,7 +27,7 @@ public interface JsonTransformer {
      * applicable, then this method <strong>must not</strong> modify the value.
      *
      * @param value the JSON value to be transformed.
-     * @throws JsonException if an exception occured applying the transformation.
+     * @throws JsonException if an exception occurred applying the transformation.
      */
-    void transform(JsonValue value) throws JsonException;
+    void transform(JsonValue value);
 }
