@@ -84,6 +84,8 @@ public class JsonValueException extends JsonException {
 
     /**
      * Returns the detail message string of this exception.
+     *
+     * @return The detail message string of this exception.
      */
     @Override
     public String getMessage() {
