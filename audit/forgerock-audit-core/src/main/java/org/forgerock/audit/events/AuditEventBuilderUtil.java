@@ -44,10 +44,14 @@ final class AuditEventBuilderUtil {
      *
      * @param uri the resource identifier.
      * @param protocol the scheme of the resource identifier uri.
-     * @param operationMethod the type of operation (e.g. when protocol is CREST, operation type will be one of CRUDPAQ).
+     * @param operationMethod the type of operation (e.g. when protocol is CREST, operation type will be one of
+     *  CRUDPAQ).
      * @param operationDetail further defines the operation type (e.g. specifies the name of the CRUDPAQ action).
      */
-    static JsonValue createResourceOperation(String uri, String protocol, String operationMethod, String operationDetail) {
+    static JsonValue createResourceOperation(String uri,
+                                             String protocol,
+                                             String operationMethod,
+                                             String operationDetail) {
         return json(object(
                 field(URI, uri),
                 field(PROTOCOL, protocol),
@@ -63,7 +67,8 @@ final class AuditEventBuilderUtil {
      *
      * @param uri the resource identifier.
      * @param protocol the scheme of the resource identifier uri.
-     * @param operationMethod the type of operation (e.g. when protocol is CREST, operation type will be one of CRUDPAQ).
+     * @param operationMethod the type of operation (e.g. when protocol is CREST, operation type will be one of
+     *  CRUDPAQ).
      */
     static JsonValue createResourceOperation(String uri, String protocol, String operationMethod) {
         return json(object(

@@ -215,7 +215,8 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
      *
      * @param uri the resource identifier.
      * @param protocol the scheme of the resource identifier uri.
-     * @param operationMethod the type of operation (e.g. when protocol is CREST, operation type will be one of CRUDPAQ).
+     * @param operationMethod the type of operation (e.g. when protocol is CREST, operation type will be one of
+     *  CRUDPAQ).
      * @param operationDetail further defines the operation type (e.g. specifies the name of the CRUDPAQ action).
      * @return this builder
      */
@@ -229,7 +230,8 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
      *
      * @param uri the resource identifier.
      * @param protocol the scheme of the resource identifier uri.
-     * @param operationMethod the type of operation (e.g. when protocol is CREST, operation type will be one of CRUDPAQ).
+     * @param operationMethod the type of operation (e.g. when protocol is CREST, operation type will be one of
+     *  CRUDPAQ).
      * @return this builder
      */
     public final T resourceOperation(String uri, String protocol, String operationMethod) {

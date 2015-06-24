@@ -46,6 +46,7 @@ abstract class StateChangeAuditEventBuilder<T extends StateChangeAuditEventBuild
     /**
      * {@inheritDoc}
      */
+    @Override
     protected void setDefaults() {
         super.setDefaults();
         if (!jsonValue.isDefined(RUN_AS)) {
@@ -56,6 +57,7 @@ abstract class StateChangeAuditEventBuilder<T extends StateChangeAuditEventBuild
     /**
      * {@inheritDoc}
      */
+    @Override
     protected void validate() {
         super.validate();
         requireField(RUN_AS);
@@ -78,7 +80,8 @@ abstract class StateChangeAuditEventBuilder<T extends StateChangeAuditEventBuild
      *
      * @param uri the resource identifier.
      * @param protocol the scheme of the resource identifier uri.
-     * @param operationMethod the type of operation (e.g. when protocol is CREST, operation type will be one of CRUDPAQ).
+     * @param operationMethod the type of operation (e.g. when protocol is CREST, operation type will be one of
+     *  CRUDPAQ).
      * @param operationDetail further defines the operation type (e.g. specifies the name of the CRUDPAQ action).
      * @return this builder
      */
@@ -92,7 +95,8 @@ abstract class StateChangeAuditEventBuilder<T extends StateChangeAuditEventBuild
      *
      * @param uri the resource identifier.
      * @param protocol the scheme of the resource identifier uri.
-     * @param operationMethod the type of operation (e.g. when protocol is CREST, operation type will be one of CRUDPAQ).
+     * @param operationMethod the type of operation (e.g. when protocol is CREST, operation type will be one of
+     *  CRUDPAQ).
      * @return this builder
      */
     public final T resourceOperation(String uri, String protocol, String operationMethod) {

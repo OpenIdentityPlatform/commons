@@ -48,7 +48,8 @@ import org.forgerock.util.Reject;
  * </code>
  * </pre>
  */
-public class AuthenticationAuditEventBuilder<T extends AuthenticationAuditEventBuilder<T>> extends AuditEventBuilder<T> {
+public class AuthenticationAuditEventBuilder<T extends AuthenticationAuditEventBuilder<T>>
+    extends AuditEventBuilder<T> {
 
     /**
      * authentication.'operation' field name.
@@ -116,7 +117,12 @@ public class AuthenticationAuditEventBuilder<T extends AuthenticationAuditEventB
      *
      * @return this builder
      */
-    public final T authentication(String id, Operation operation, Status status, String type, String typeDetail, String message) {
+    public final T authentication(String id,
+                                  Operation operation,
+                                  Status status,
+                                  String type,
+                                  String typeDetail,
+                                  String message) {
         Reject.<Object>ifNull(id, operation, status, type, typeDetail);
         JsonValue object = json(object(
                 field(ID, id),
