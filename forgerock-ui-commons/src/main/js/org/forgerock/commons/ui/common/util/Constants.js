@@ -88,8 +88,6 @@ define("org/forgerock/commons/ui/common/util/Constants", [
 
     obj.FORGOTTEN_PASSWORD_CHANGED_SUCCESSFULLY = "user.forgottenpassword.FORGOTTEN_PASSWORD_CHANGED_SUCCESSFULLY";
 
-    obj.EVENT_ADD_NEW_REALM_DIALOG = "admin.realms.EVENT_ADD_NEW_REALM_DIALOG";
-
     //configuration
     obj.EVENT_CONFIGURATION_CHANGED = "main.Configuration.EVENT_CONFIGURATION_CHANGED";
 
