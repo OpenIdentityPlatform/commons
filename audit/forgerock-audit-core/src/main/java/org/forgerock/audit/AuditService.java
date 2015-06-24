@@ -71,6 +71,8 @@ public class AuditService implements RequestHandler {
 
     private static final ObjectMapper mapper;
 
+    private static final JsonPointer SCHEMA_PROPERTIES_POINTER = new JsonPointer("/schema/properties");
+
     static {
         final JsonFactory jsonFactory = new JsonFactory();
         mapper = new ObjectMapper(jsonFactory);
@@ -90,14 +92,14 @@ public class AuditService implements RequestHandler {
     private String queryHandlerName;
 
     /**
-     * Constructs an AuditService with no extension for event types.
+     * Constructs an AuditService with no extension for event types and no additional event types.
      */
     public AuditService() {
-        this(new JsonValue(null));
+        this(new JsonValue(null), new JsonValue(null));
     }
 
     /**
-     * Constructs an AuditService with extension of event types.
+     * Constructs an AuditService with extension of event types and additional event types.
      * <p>
      * The extension of the core event types is provided as a
      * Json value which can define additional properties.
@@ -112,20 +114,22 @@ public class AuditService implements RequestHandler {
      * </pre>
      *
      * @param extendedEventTypes the extension of the core event types.
+     * @param additionalEventTypes the additional event types.
      */
-    public AuditService(JsonValue extendedEventTypes) {
+    public AuditService(JsonValue extendedEventTypes, JsonValue customEventTypes) {
         eventTypeAuditEventHandlers = new HashMap<>();
         allAuditEventHandlers = new HashMap<>();
-        try(final InputStream configStream = getClass().getResourceAsStream("/org/forgerock/audit/events.json")) {
-            final JsonValue jsonConfig = new JsonValue(mapper.readValue(configStream, Map.class));
-            auditEvents = getEventTypes(jsonConfig, extendedEventTypes);
-        } catch (IOException ioe) {
-            logger.error("Error while parsing the events definition.", ioe);
-            throw new RuntimeException(ioe);
+
+        auditEvents = new HashMap<>();
+        readPredefinedEventTypes();
+        extendEventTypes(extendedEventTypes);
+        addCustomEventTypes(customEventTypes);
+        auditEvents = Collections.unmodifiableMap(auditEvents);
+
+        for (String eventName : auditEvents.keySet()) {
+            eventTypeAuditEventHandlers.put(eventName, new ArrayList<AuditEventHandler<?>>());
         }
-        for (String event : auditEvents.keySet()) {
-            eventTypeAuditEventHandlers.put(event, new ArrayList<AuditEventHandler<?>>());
-        }
+
     }
 
     /**
@@ -356,31 +360,45 @@ public class AuditService implements RequestHandler {
         }
     }
 
-    private Map<String, JsonValue> getEventTypes(JsonValue coreEventTypes, JsonValue extendedEventTypes) {
-        final JsonPointer schemaPropertiesPointer = new JsonPointer("/schema/properties");
-        Map<String, JsonValue> listOfEventTypes = new HashMap<>(coreEventTypes.keys().size());
+    private void addCustomEventTypes(JsonValue customEventTypes) {
+        for (String eventTypeName : customEventTypes.keys()) {
+            if (!auditEvents.containsKey(eventTypeName)) {
+                auditEvents.put(eventTypeName, customEventTypes.get(eventTypeName));
+            } else {
+                logger.warn("Attempting to override a pre-defined event type : " + eventTypeName);
+            }
+        }
+    }
 
-        for (String eventTypeKey : coreEventTypes.keys()) {
-            JsonValue coreEventType = coreEventTypes.get(eventTypeKey);
+    private void readPredefinedEventTypes() {
+        try(final InputStream configStream = getClass().getResourceAsStream("/org/forgerock/audit/events.json")) {
+            final JsonValue predefinedEventTypes = new JsonValue(mapper.readValue(configStream, Map.class));
 
-            // Is there any extension provided ?
-            if (extendedEventTypes.isDefined(eventTypeKey)) {
-                JsonValue coreProperties = coreEventType.get(schemaPropertiesPointer);
-                JsonValue extendedProperties = extendedEventTypes.get(eventTypeKey).get(schemaPropertiesPointer);
+            for (String eventTypeName : predefinedEventTypes.keys()) {
+                auditEvents.put(eventTypeName, predefinedEventTypes.get(eventTypeName));
+            }
+        } catch (IOException ioe) {
+            logger.error("Error while parsing the events definition.", ioe);
+            throw new RuntimeException(ioe);
+        }
+    }
 
-                for (String key : extendedProperties.keys()) {
-                    if (coreEventType.isDefined(key)) {
-                        logger.warn("It is not allowed to override an existing property : {}", key);
+    private void extendEventTypes(JsonValue extendedEventTypes) {
+        for (String eventTypeName : extendedEventTypes.keys()) {
+            if (auditEvents.containsKey(eventTypeName)) {
+                JsonValue coreEventType = auditEvents.get(eventTypeName);
+                JsonValue coreProperties = coreEventType.get(SCHEMA_PROPERTIES_POINTER);
+                JsonValue extendedProperties = extendedEventTypes.get(eventTypeName).get(SCHEMA_PROPERTIES_POINTER);
+
+                for (String property : extendedProperties.keys()) {
+                    if (coreProperties.isDefined(property)) {
+                        logger.warn("It is not allowed to override an existing property : {}", property);
                     } else {
-                        coreProperties.add(key, extendedProperties.get(key));
+                        coreProperties.add(property, extendedProperties.get(property));
                     }
                 }
             }
-
-            listOfEventTypes.put(eventTypeKey, coreEventType);
         }
-
-        return Collections.unmodifiableMap(listOfEventTypes);
     }
 
     /**

@@ -130,8 +130,7 @@ public class AuditServiceTest {
         verify(resultHandlerAccess, never()).handleError(any(ResourceException.class));
         verify(resultHandlerAccess).handleResult(resourceCaptorAccess.capture());
 
-        Resource resource;
-        resource = resourceCaptorAccess.getValue();
+        Resource resource = resourceCaptorAccess.getValue();
         assertThat(resource != null);
         assertThat(resource.getContent().asMap().equals(createRequestAccess.getContent().asMap()));
 
@@ -358,6 +357,33 @@ public class AuditServiceTest {
         assertThat(resourceExceptionCaptor.getValue()).isInstanceOf(BadRequestException.class);
     }
 
+    @Test
+    public void testAdditionalEventTypes() throws Exception {
+        JsonValue additionalEventTypes = json(object(field("foo", "bar")));
+        //given
+        final AuditService auditService = new AuditService(new JsonValue(null), additionalEventTypes);
+        auditService.configure(config);
+
+        PassThroughAuditEventHandler auditEventHandler = new PassThroughAuditEventHandler();
+        // Only interested about the foo events.
+        auditService.register(auditEventHandler, "pass-through", Collections.singleton("foo"));
+
+        final CreateRequest createRequestAccess = makeCreateRequest("foo");
+        final ResultHandler<Resource> resultHandlerAccess = mockResultHandler(Resource.class);
+        final ArgumentCaptor<Resource> resourceCaptorAccess = ArgumentCaptor.forClass(Resource.class);
+
+        //when
+        auditService.handleCreate(new ServerContext(new RootContext()), createRequestAccess, resultHandlerAccess);
+
+        //then
+        verify(resultHandlerAccess, never()).handleError(any(ResourceException.class));
+        verify(resultHandlerAccess).handleResult(resourceCaptorAccess.capture());
+
+        Resource resource = resourceCaptorAccess.getValue();
+        assertThat(resource != null);
+        assertThat(resource.getContent().asMap().equals(createRequestAccess.getContent().asMap()));
+    }
+
     private CreateRequest makeCreateRequest() {
         return makeCreateRequest("access");
     }
@@ -373,12 +399,10 @@ public class AuditServiceTest {
         return Requests.newCreateRequest(event, content);
     }
 
-    @SuppressWarnings("unchecked")
     private static <T> ResultHandler<T> mockResultHandler(Class<T> type) {
         return mock(ResultHandler.class);
     }
 
-    @SuppressWarnings("unchecked")
     private static <T> ResultHandler<T> mockResultHandler(Class<T> type, String name) {
         return mock(ResultHandler.class, name);
     }
