@@ -24,8 +24,6 @@ import java.util.Set;
 /**
  * Exposes a range of integer values as a set. Used to expose a set of values without
  * requiring the allocation of storage for all values.
- *
- * @author Paul C. Bryan
  */
 class RangeSet extends AbstractSet<String> implements Set<String>, Cloneable, Serializable {
 
