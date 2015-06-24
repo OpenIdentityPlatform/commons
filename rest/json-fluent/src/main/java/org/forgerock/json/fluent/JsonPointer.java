@@ -45,7 +45,7 @@ public class JsonPointer implements Iterable<String> {
      * @param pointer a string containing the JSON pointer of the value to identify.
      * @throws JsonException if the pointer is malformed.
      */
-    public JsonPointer(String pointer) throws JsonException {
+    public JsonPointer(String pointer) {
         String[] split = pointer.split("/", -1);
         int length = split.length;
         ArrayList<String> list = new ArrayList<>(length);
@@ -105,7 +105,7 @@ public class JsonPointer implements Iterable<String> {
      * @return the decoded reference token value.
      * @throws JsonException if the reference token value is malformed.
      */
-    private String decode(String value) throws JsonException {
+    private String decode(String value) {
         try {
             return new URI("#" + value).getFragment();
         } catch (URISyntaxException use) {
@@ -291,7 +291,7 @@ public class JsonPointer implements Iterable<String> {
      * @return the child JSON pointer.
      * @throws IndexOutOfBoundsException if {@code child} is less than zero.
      */
-    public JsonPointer child(int child) throws IndexOutOfBoundsException {
+    public JsonPointer child(int child) {
         if (child < 0) {
             throw new IndexOutOfBoundsException();
         }
