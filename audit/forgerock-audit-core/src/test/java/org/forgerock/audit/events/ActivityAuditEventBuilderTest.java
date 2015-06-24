@@ -66,7 +66,7 @@ public class ActivityAuditEventBuilderTest {
 
         AuditEvent event = productActivityEvent()
                 .transactionId("transactionId")
-                .timestamp(1427293286239l)
+                .timestamp(1427293286239L)
                 .eventName("AM-REALM-CREATE")
                 .authentication("someone@forgerock.com")
                 .runAs("admin")
@@ -92,7 +92,7 @@ public class ActivityAuditEventBuilderTest {
 
         AuditEvent event = productActivityEvent()
                 .transactionId("transactionId")
-                .timestamp(1427293286239l)
+                .timestamp(1427293286239L)
                 .eventName("AM-REALM-CREATE")
                 .authentication("someone@forgerock.com")
                 .resourceOperationFromRequest(request)
@@ -119,7 +119,7 @@ public class ActivityAuditEventBuilderTest {
                 .revision(2)
                 .openField("value")
                 .transactionId("transactionId")
-                .timestamp(1427293286239l)
+                .timestamp(1427293286239L)
                 .toEvent();
         assertEvent(event);
     }

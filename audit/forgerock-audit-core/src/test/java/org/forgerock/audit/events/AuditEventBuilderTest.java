@@ -101,7 +101,7 @@ public class AuditEventBuilderTest {
         AuditEvent event = productEvent()
                 .eventName("AM-CREST-SUCCESS")
                 .transactionId("transactionId")
-                .timestamp(1427293286239l)
+                .timestamp(1427293286239L)
                 .authentication("someone@forgerock.com")
                 .openField("value")
                 .toEvent();
@@ -116,7 +116,7 @@ public class AuditEventBuilderTest {
                 .openField("value")
                 .transactionId("transactionId")
                 .eventName("AM-CREST-SUCCESS")
-                .timestamp(1427293286239l)
+                .timestamp(1427293286239L)
                 .toEvent();
         assertEvent(event);
     }

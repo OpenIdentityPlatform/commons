@@ -75,7 +75,7 @@ public class AccessAuditEventBuilderTest {
 
         AuditEvent event = productAccessEvent()
                 .transactionId("transactionId")
-                .timestamp(1427293286239l)
+                .timestamp(1427293286239L)
                 .eventName("IDM-sync-10")
                 .client("cip", 1203)
                 .server("sip", 80)
@@ -111,7 +111,7 @@ public class AccessAuditEventBuilderTest {
                 .openField("value")
                 .transactionId("transactionId")
                 .authentication("someone@forgerock.com")
-                .timestamp(1427293286239l)
+                .timestamp(1427293286239L)
                 .toEvent();
         assertEvent(event1);
 
@@ -122,7 +122,7 @@ public class AccessAuditEventBuilderTest {
                 .server("ip", 80)
                 .eventName("IDM-sync-10")
                 .transactionId("transactionId")
-                .timestamp(1427293286239l)
+                .timestamp(1427293286239L)
                 .toEvent();
         assertEvent(event2);
 
@@ -133,7 +133,7 @@ public class AccessAuditEventBuilderTest {
                 .server("ip", 80)
                 .authentication("someone@forgerock.com")
                 .transactionId("transactionId")
-                .timestamp(1427293286239l)
+                .timestamp(1427293286239L)
                 .eventName("IDM-sync-10")
                 .toEvent();
         assertEvent(event3);
@@ -146,7 +146,7 @@ public class AccessAuditEventBuilderTest {
                 .server("ip", 80)
                 .eventName("IDM-sync-10")
                 .transactionId("transactionId")
-                .timestamp(1427293286239l)
+                .timestamp(1427293286239L)
                 .toEvent();
 
         assertEvent(event4);
@@ -161,7 +161,7 @@ public class AccessAuditEventBuilderTest {
                 .eventName("IDM-sync-10")
                 .transactionId("transactionId")
                 .authentication("someone@forgerock.com")
-                .timestamp(1427293286239l)
+                .timestamp(1427293286239L)
                 .http("GET", "/some/path", "p1=v1&p2=v2", headers)
                 .toEvent();
 

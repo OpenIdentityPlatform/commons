@@ -55,7 +55,7 @@ public class ConfigAuditEventBuilderTest {
 
         AuditEvent event = productConfigEvent()
                 .transactionId("transactionId")
-                .timestamp(1427293286239l)
+                .timestamp(1427293286239L)
                 .eventName("AM-REALM-CREATE")
                 .authentication("someone@forgerock.com")
                 .runAs("admin")
@@ -83,7 +83,7 @@ public class ConfigAuditEventBuilderTest {
                 .revision(2)
                 .openField("value")
                 .transactionId("transactionId")
-                .timestamp(1427293286239l)
+                .timestamp(1427293286239L)
                 .toEvent();
         assertEvent(event);
     }
