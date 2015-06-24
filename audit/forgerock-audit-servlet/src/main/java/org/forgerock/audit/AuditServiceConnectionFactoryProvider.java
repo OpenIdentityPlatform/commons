@@ -43,12 +43,12 @@ import java.util.Set;
 public final class AuditServiceConnectionFactoryProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(AuditServiceConnectionFactoryProvider.class);
-    private static final ObjectMapper mapper;
+    private static final ObjectMapper MAPPER;
 
     static {
         final JsonFactory jsonFactory = new JsonFactory();
         jsonFactory.configure(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS, true);
-        mapper = new ObjectMapper(jsonFactory);
+        MAPPER = new ObjectMapper(jsonFactory);
     }
     private AuditServiceConnectionFactoryProvider() {
 
@@ -69,7 +69,7 @@ public final class AuditServiceConnectionFactoryProvider {
         try(InputStream configStream = klass.getResourceAsStream("/conf/audit.json");
             InputStream csvConfigStream = klass.getResourceAsStream("/conf/audit-csv-handler.json");
                 ) {
-        JsonValue csvConfig = new JsonValue(mapper.readValue(csvConfigStream, Map.class));
+        JsonValue csvConfig = new JsonValue(MAPPER.readValue(csvConfigStream, Map.class));
         Set<String> csvEvents = csvConfig.get("events").asSet(String.class);
         CSVAuditEventHandler csvAuditEventHandler;
         csvAuditEventHandler = new CSVAuditEventHandler();
@@ -77,7 +77,7 @@ public final class AuditServiceConnectionFactoryProvider {
 
         auditService.register(csvAuditEventHandler, "csv", csvEvents);
 
-        final JsonValue jsonConfig = new JsonValue(mapper.readValue(configStream, Map.class));
+        final JsonValue jsonConfig = new JsonValue(MAPPER.readValue(configStream, Map.class));
         AuditServiceConfiguration serviceConfig = new AuditServiceConfiguration();
         serviceConfig.setQueryHandlerName(jsonConfig.get("useForQueries").asString());
         auditService.configure(serviceConfig);

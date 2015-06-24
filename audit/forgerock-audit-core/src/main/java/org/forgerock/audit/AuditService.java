@@ -69,13 +69,13 @@ import org.slf4j.LoggerFactory;
 public class AuditService implements RequestHandler {
     private static final Logger logger = LoggerFactory.getLogger(AuditService.class);
 
-    private static final ObjectMapper mapper;
+    private static final ObjectMapper MAPPER;
 
     private static final JsonPointer SCHEMA_PROPERTIES_POINTER = new JsonPointer("/schema/properties");
 
     static {
         final JsonFactory jsonFactory = new JsonFactory();
-        mapper = new ObjectMapper(jsonFactory);
+        MAPPER = new ObjectMapper(jsonFactory);
     }
 
     /** Existing active configuration. */
@@ -370,7 +370,7 @@ public class AuditService implements RequestHandler {
 
     private void readPredefinedEventTypes() {
         try (final InputStream configStream = getClass().getResourceAsStream("/org/forgerock/audit/events.json")) {
-            final JsonValue predefinedEventTypes = new JsonValue(mapper.readValue(configStream, Map.class));
+            final JsonValue predefinedEventTypes = new JsonValue(MAPPER.readValue(configStream, Map.class));
 
             for (String eventTypeName : predefinedEventTypes.keys()) {
                 auditEvents.put(eventTypeName, predefinedEventTypes.get(eventTypeName));

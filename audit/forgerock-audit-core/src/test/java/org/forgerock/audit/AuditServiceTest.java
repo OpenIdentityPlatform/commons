@@ -53,20 +53,20 @@ import org.testng.annotations.Test;
 @SuppressWarnings({"javadoc", "rawtypes", "unchecked" })
 public class AuditServiceTest {
 
-    private static final ObjectMapper mapper;
+    private static final ObjectMapper MAPPER;
     private AuditServiceConfiguration config;
 
     static {
         final JsonFactory jsonFactory = new JsonFactory();
         jsonFactory.configure(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS, true);
-        mapper = new ObjectMapper(jsonFactory);
+        MAPPER = new ObjectMapper(jsonFactory);
     }
 
     @BeforeMethod
     public void setUp() {
         try {
             final InputStream configStream = getClass().getResourceAsStream("/audit.json");
-            JsonValue jsonConfig = new JsonValue(mapper.readValue(configStream, Map.class));
+            JsonValue jsonConfig = new JsonValue(MAPPER.readValue(configStream, Map.class));
             config = getConfigFromJson(jsonConfig);
         } catch (IOException e) {
             throw new RuntimeException("Unable to parse audit.json config", e);

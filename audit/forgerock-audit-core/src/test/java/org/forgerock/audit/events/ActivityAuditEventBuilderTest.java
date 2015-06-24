@@ -37,7 +37,7 @@ import org.testng.annotations.Test;
 @SuppressWarnings("javadoc")
 public class ActivityAuditEventBuilderTest {
 
-    private static final ObjectMapper mapper = new ObjectMapper(
+    private static final ObjectMapper MAPPER = new ObjectMapper(
             new JsonFactory().configure(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS, true));
 
     /**
@@ -144,7 +144,7 @@ public class ActivityAuditEventBuilderTest {
 
     private JsonValue jsonFromFile(String resourceFilePath) throws IOException {
         final InputStream configStream = ActivityAuditEventBuilderTest.class.getResourceAsStream(resourceFilePath);
-        return new JsonValue(mapper.readValue(configStream, Map.class));
+        return new JsonValue(MAPPER.readValue(configStream, Map.class));
     }
 
 }
