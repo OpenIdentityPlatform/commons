@@ -216,8 +216,8 @@ public class AuditService implements RequestHandler {
             handler.handleError(ResourceExceptionsUtil.adapt(new AuditException(String.format(
                     "The handler defined for queries, '%s', has not been registered to the audit service.",
                     queryHandlerName))));
-        } catch (Throwable t) {
-            handler.handleError(ResourceExceptionsUtil.adapt(t));
+        } catch (Exception e) {
+            handler.handleError(ResourceExceptionsUtil.adapt(e));
         }
     }
 
@@ -281,10 +281,8 @@ public class AuditService implements RequestHandler {
                     auditEventHandler.createInstance(context, request, handler);
                 }
             }
-        } catch (Throwable t) {
-            // TODO Throwable might be a little bit too large ? (that also catches Error)
-            // What about Exception | RuntimeException ?
-            handler.handleError(ResourceExceptionsUtil.adapt(t));
+        } catch (Exception e) {
+            handler.handleError(ResourceExceptionsUtil.adapt(e));
         }
     }
 
