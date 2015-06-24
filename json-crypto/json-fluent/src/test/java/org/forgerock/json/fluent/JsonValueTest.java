@@ -460,14 +460,15 @@ public class JsonValueTest {
 
     private static final Function<JsonValue, Integer, Exception> AS_INTEGER =
             new Function<JsonValue, Integer, Exception>() {
-        @Override
-        public Integer apply(JsonValue jsonValue) throws Exception {
-            if (jsonValue.isString()) {
-                return Integer.valueOf(jsonValue.asString());
+            @Override
+            public Integer apply(JsonValue jsonValue) throws Exception {
+                if (jsonValue.isString()) {
+                    return Integer.valueOf(jsonValue.asString());
+                }
+                throw new JsonValueException(jsonValue, "jsonValue value " + jsonValue.getObject()
+                                                        + " is not an integer");
             }
-            throw new JsonValueException(jsonValue, "jsonValue value " + jsonValue.getObject() + " is not an integer");
-        }
-    };
+        };
 
     @Test
     public void testAsListTransformFunction() throws Exception {
