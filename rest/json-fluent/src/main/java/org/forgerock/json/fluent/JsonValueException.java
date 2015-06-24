@@ -19,8 +19,6 @@ package org.forgerock.json.fluent;
 
 /**
  * An exception that is thrown during JSON value operations.
- *
- * @author Paul C. Bryan
  */
 public class JsonValueException extends JsonException {
 

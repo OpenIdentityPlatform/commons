@@ -19,8 +19,6 @@ package org.forgerock.json.fluent;
 /**
  * Interface for transforming JSON values. Applied during the construction of a JSON value,
  * and is inherited (and applied) by its child values.
- *
- * @author Paul C. Bryan
  */
 public interface JsonTransformer {
 
