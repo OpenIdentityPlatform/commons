@@ -109,6 +109,33 @@ For font awesome
             transition: @arguments;
 }
 
+/* Helper class for creating icon images.
+ * Example usage.
+ * HTML: <span class=".your-class"><i class="fa fa-your-icon"></i></span>
+ * CSS:
+ * .your-class {
+ *    .icon-circle(20px);
+ *    color:white;
+ *    background:black;
+ * }
+*/
+.icon-circle(@diameter:76px){
+
+    width: @diameter;
+    height: @diameter;
+    border-radius: 50%;
+    line-height: @diameter;
+    font-size: @diameter/2;
+    display: table;
+    text-align: center;
+    overflow: hidden;
+
+    .fa {
+        display: table-cell;
+        vertical-align: middle;
+    }
+}
+
 .wordwrap{
     white-space: initial;
     word-wrap: break-word;
