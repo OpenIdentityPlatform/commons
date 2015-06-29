@@ -1,26 +1,56 @@
-/* Backgrid */
+.backgrid-container {
+    overflow-x: auto;
+    height: auto;
+}
+
 .backgrid {
     thead th {
-        vertical-align: top;
         text-align: left;
         border-width: 2px;
-        padding: 0 15px 8px;
         background-color: transparent;
+        font-size: 12px;
+        line-height: 12px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
 
-        .form-search {
-            margin: 5px 0 0 0;
-            width: auto;
+        > a {
+            color: @base-theme-color;
 
-            input[type=search] {
-                width: 100%;
-                height: 100%;
-                box-sizing: border-box;
-                padding-left: 25px;
+            &:focus, &:hover {
+                color: @panel-hover-color;
             }
         }
 
-        .backgrid-filter .clear {
-            right: 15px;
+        &.descending .sort-caret {
+            border-top-color: inherit;
+        }
+
+        &.ascending .sort-caret {
+            border-bottom-color: inherit;
+        }
+
+        &.filter-header-cell {
+            .form-search {
+                margin: 0 0 10px 0;
+                width: auto;
+                font-size: 14px;
+
+                .search {
+                    display: none;
+                }
+
+                input[type=search] {
+                    width: 100%;
+                    height: 100%;
+                    box-sizing: border-box;
+                    padding-left: 6px;
+                }
+
+                .clear {
+                    right: 7px;
+                    font-size: 16px;
+                }
+            }
         }
     }
 
@@ -48,8 +78,6 @@
             }
 
             td {
-                padding: 8px 15px;
-
                 &.select-row-cell {
                     width: 42px;
                 }
