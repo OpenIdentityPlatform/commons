@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.forgerock.commons.guava</groupId>
         <artifactId>forgerock-guava</artifactId>
-        <version>18.0.1</version>
+        <version>18.0.2-SNAPSHOT</version>
     </parent>
     <packaging>jar</packaging>
     <artifactId>forgerock-guava-concurrent</artifactId>
