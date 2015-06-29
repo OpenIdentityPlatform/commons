@@ -24,7 +24,7 @@
     <packaging>pom</packaging>
     <groupId>org.forgerock.commons.guava</groupId>
     <artifactId>forgerock-guava</artifactId>
-    <version>18.0.3-SNAPSHOT</version>
+    <version>18.0.2-SNAPSHOT</version>
     <name>ForgeRock Guava</name>
     <description>Repackaged version of Guava to avoid dependency collisions.</description>
     <modules>
