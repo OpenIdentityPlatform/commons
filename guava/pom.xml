@@ -24,7 +24,7 @@
     <packaging>pom</packaging>
     <groupId>org.forgerock.commons.guava</groupId>
     <artifactId>forgerock-guava</artifactId>
-    <version>18.0.2-SNAPSHOT</version>
+    <version>18.0.2</version>
     <name>ForgeRock Guava</name>
     <description>Repackaged version of Guava to avoid dependency collisions.</description>
     <modules>
@@ -167,7 +167,7 @@
                             <phase>package</phase>
                             <configuration>
                                 <target>
-                                    <unzip src="${project.build.directory}/${project.artifactId}-${project.version}-sources.jar" dest="${project.build.directory}/sources"/>
+                                    <unzip src="${project.build.directory}/${project.artifactId}-${project.version}-sources.jar" dest="${project.build.directory}/sources" />
                                 </target>
                             </configuration>
                             <goals>
@@ -223,8 +223,8 @@
         </repository>
     </repositories>
     <scm>
-        <connection>scm:svn:https://svn.forgerock.org/commons/forgerock-guava/trunk</connection>
-        <developerConnection>scm:svn:https://svn.forgerock.org/commons/forgerock-guava/trunk</developerConnection>
-        <url>http://sources.forgerock.org/browse/commons/forgerock-guava/trunk</url>
+        <connection>scm:svn:https://svn.forgerock.org/commons/forgerock-guava/tags/18.0.2</connection>
+        <developerConnection>scm:svn:https://svn.forgerock.org/commons/forgerock-guava/tags/18.0.2</developerConnection>
+        <url>http://sources.forgerock.org/browse/commons/forgerock-guava/tags/18.0.2</url>
     </scm>
 </project>
