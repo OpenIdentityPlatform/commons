@@ -48,6 +48,16 @@
     <properties>
         <manifestSourceLocation>../src/main/resources</manifestSourceLocation>
     </properties>
+    <dependencies>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>1.3.9</version>
+            <optional>true</optional>
+            <scope>provided</scope>
+            <!--  needed only for annotations  -->
+        </dependency>
+    </dependencies>
     <dependencyManagement>
         <dependencies>
             <dependency>
