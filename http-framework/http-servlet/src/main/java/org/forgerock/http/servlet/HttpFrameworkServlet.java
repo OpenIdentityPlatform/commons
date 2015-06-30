@@ -17,9 +17,9 @@
 
 package org.forgerock.http.servlet;
 
-import static org.forgerock.http.io.IO.newBranchingInputStream;
-import static org.forgerock.http.io.IO.newTemporaryStorage;
-import static org.forgerock.util.Utils.closeSilently;
+import static java.util.Collections.*;
+import static org.forgerock.http.io.IO.*;
+import static org.forgerock.util.Utils.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -55,6 +55,7 @@ import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RequestAuditContext;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.util.Factory;
+import org.forgerock.util.i18n.PreferredLocales;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
@@ -184,6 +185,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
         final SessionContext sessionContext = new SessionContext(new RootContext(), session);
         final AttributesContext attributesContext = new AttributesContext(new RequestAuditContext(sessionContext));
 
+
         /* TODO
          * add comment on why this was added as probably shouldn't stick around as
          * only to fix AM's case of forwarding the request from a different servlet?....
@@ -246,6 +248,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
         // populate request
         Request request = new Request();
         request.setMethod(req.getMethod());
+        request.setPreferredLocales(new PreferredLocales(list(req.getLocales())));
         try {
             request.setUri(Uris.create(req.getScheme(), null, req.getServerName(),
                                        req.getServerPort(), req.getRequestURI(), req.getQueryString(), null));
@@ -256,7 +259,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
         // request headers
         for (Enumeration<String> e = req.getHeaderNames(); e.hasMoreElements();) {
             String name = e.nextElement();
-            request.getHeaders().addAll(name, Collections.list(req.getHeaders(name)));
+            request.getHeaders().addAll(name, list(req.getHeaders(name)));
         }
 
         // include request entity if appears to be provided with request

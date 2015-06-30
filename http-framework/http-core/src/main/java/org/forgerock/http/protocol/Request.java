@@ -19,10 +19,15 @@
 package org.forgerock.http.protocol;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Locale;
 
 import org.forgerock.http.MutableUri;
+import org.forgerock.http.header.AcceptLanguageHeader;
+import org.forgerock.util.i18n.PreferredLocales;
 
 /**
  * A request message.
@@ -37,6 +42,8 @@ public final class Request extends MessageImpl<Request> {
 
     /** The fully-qualified URI of the resource being accessed. */
     private MutableUri uri;
+
+    private PreferredLocales preferredLocales = new PreferredLocales();
 
     /**
      * Creates a new request message.
@@ -150,4 +157,24 @@ public final class Request extends MessageImpl<Request> {
         setVersion0(version);
         return this;
     }
+
+    /**
+     * Get the language preference for the request.
+     * @return The {@code PreferredLanguages} instance for the request.
+     */
+    public PreferredLocales getPreferredLocales() {
+        return preferredLocales;
+    }
+
+    /**
+     * Set the language preference for the request.
+     * @param preferredLocales The {@code PreferredLanguages} instance for the request.
+     * @return This request.
+     */
+    public Request setPreferredLocales(PreferredLocales preferredLocales) {
+        this.preferredLocales = preferredLocales;
+        getHeaders().putSingle(AcceptLanguageHeader.valueOf(preferredLocales));
+        return this;
+    }
+
 }

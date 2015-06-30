@@ -16,16 +16,34 @@
 
 package org.forgerock.http.protocol;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static java.util.Arrays.*;
+import static org.assertj.core.api.Assertions.*;
 
+import java.util.Locale;
+
+import org.forgerock.util.i18n.PreferredLocales;
 import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")
 public class RequestTest {
+
     @Test
     public void testMethodChaining() {
         Request request = new Request().setVersion("123").setMethod("GET");
         assertThat(request.getVersion()).isEqualTo("123");
         assertThat(request.getMethod()).isEqualTo("GET");
     }
+
+    @Test
+    public void testAcceptLanguageHeader() {
+        // Given
+        Request request = new Request().setPreferredLocales(new PreferredLocales(asList(Locale.forLanguageTag("en"))));
+
+        // When
+        String languageHeader = request.getHeaders().getFirst("Accept-Language");
+
+        // Then
+        assertThat(languageHeader).isEqualTo("en;q=1");
+    }
+
 }
