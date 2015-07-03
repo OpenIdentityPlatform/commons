@@ -31,25 +31,21 @@ import java.security.cert.X509Certificate;
 /**
  * A class that manages a Java Key Store and has methods for extracting out public/private keys and certificates.
  *
- * @author Phill Cunnington
  * @since 2.0.0
  */
 public class KeystoreManager {
 
     private KeyStore keyStore = null;
-    private final String privateKeyPassword;
 
     /**
      * Constructs an instance of the KeystoreManager.
      *
-     * @param privateKeyPassword The private password for the keys.
      * @param keyStoreType The type of Java KeyStore.
      * @param keyStoreFile The file path to the KeyStore.
      * @param keyStorePassword The password for the KeyStore.
      */
-    public KeystoreManager(String privateKeyPassword, String keyStoreType, String keyStoreFile,
+    public KeystoreManager(String keyStoreType, String keyStoreFile,
             String keyStorePassword) {
-        this.privateKeyPassword = privateKeyPassword;
         loadKeyStore(keyStoreType, keyStoreFile, keyStorePassword);
     }
 
@@ -99,7 +95,11 @@ public class KeystoreManager {
      * @return The X509Certificate.
      */
     public X509Certificate getX509Certificate(String certAlias) {
-        return (X509Certificate) getCertificate(certAlias);
+        Certificate certificate = getCertificate(certAlias);
+        if (certificate instanceof X509Certificate) {
+            return (X509Certificate) certificate;
+        }
+        throw new KeystoreManagerException("Certificate not a X509 Certificate for alias: " + certAlias);
     }
 
     /**
@@ -109,17 +109,15 @@ public class KeystoreManager {
      * @return The Public Key.
      */
     public PublicKey getPublicKey(String keyAlias) {
-
-        if (keyAlias == null || keyAlias.length() == 0) {
+        if (keyAlias == null || keyAlias.isEmpty()) {
             return null;
         }
 
-        try {
-            X509Certificate cert = (X509Certificate) keyStore.getCertificate(keyAlias);
-            return cert.getPublicKey();
-        } catch (KeyStoreException e) {
-            throw new KeystoreManagerException(e);
+        X509Certificate cert = getX509Certificate(keyAlias);
+        if (cert == null) {
+            throw new KeystoreManagerException("Unable to retrieve certificate for alias: " + keyAlias);
         }
+        return cert.getPublicKey();
     }
 
     /**
@@ -128,7 +126,7 @@ public class KeystoreManager {
      * @param keyAlias The Private Key Alias.
      * @return The Private Key.
      */
-    public PrivateKey getPrivateKey(String keyAlias) {
+    public PrivateKey getPrivateKey(String keyAlias, String privateKeyPassword) {
 
         if (keyAlias == null || keyAlias.length() == 0) {
             return null;
