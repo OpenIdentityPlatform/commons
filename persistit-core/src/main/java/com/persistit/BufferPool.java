@@ -1384,7 +1384,9 @@ public class BufferPool {
 
         @Override
         protected long pollInterval() {
-            return isFlushing() ? 0 : _writerPollInterval;
+            return (isFlushing() ||
+                      getEarliestDirtyTimestamp() < _persistit.getCurrentCheckpoint().getTimestamp())
+                      ? 0 : _writerPollInterval;
         }
     }
 
