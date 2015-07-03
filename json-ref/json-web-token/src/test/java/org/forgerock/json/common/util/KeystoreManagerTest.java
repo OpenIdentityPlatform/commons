@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.common.util;
@@ -28,9 +28,9 @@ public class KeystoreManagerTest {
     @Test
     public void should() throws UnsupportedEncodingException {
 
-        KeystoreManager keystoreManager = new KeystoreManager("password", "JKS",
+        KeystoreManager keystoreManager = new KeystoreManager("JKS",
                 URLDecoder.decode(ClassLoader.getSystemResource("keystore.jks").getFile(), "UTF-8"), "password");
 
-        keystoreManager.getPrivateKey("jwt-test-ks");
+        keystoreManager.getPrivateKey("jwt-test-ks", "password");
     }
 }
