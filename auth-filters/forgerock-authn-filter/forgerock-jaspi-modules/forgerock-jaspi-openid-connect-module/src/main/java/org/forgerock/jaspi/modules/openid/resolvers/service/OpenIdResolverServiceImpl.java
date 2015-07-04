@@ -101,7 +101,7 @@ public class OpenIdResolverServiceImpl implements OpenIdResolverService {
 
         try {
             // Do not need the private key password as we are only ever getting the public key
-            final KeystoreManager keystoreManager = new KeystoreManager(null, keystoreType, keystoreLocation,
+            final KeystoreManager keystoreManager = new KeystoreManager(keystoreType, keystoreLocation,
                     keystorePassword);
             final PublicKey key = keystoreManager.getPublicKey(keyAlias);
 

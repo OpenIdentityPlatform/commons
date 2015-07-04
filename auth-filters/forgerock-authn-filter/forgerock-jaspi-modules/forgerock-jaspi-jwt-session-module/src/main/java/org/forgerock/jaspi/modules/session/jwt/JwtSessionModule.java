@@ -339,10 +339,9 @@ public class JwtSessionModule implements ServerAuthModule {
      */
     private Jwt verifySessionJwt(String sessionJwt) {
 
-        KeystoreManager keystoreManager = new KeystoreManager(privateKeyPassword, keystoreType,
-                keystoreFile, keystorePassword);
+        KeystoreManager keystoreManager = new KeystoreManager(keystoreType, keystoreFile, keystorePassword);
 
-        RSAPrivateKey privateKey = (RSAPrivateKey) keystoreManager.getPrivateKey(keyAlias);
+        RSAPrivateKey privateKey = (RSAPrivateKey) keystoreManager.getPrivateKey(keyAlias, privateKeyPassword);
 
         EncryptedJwt jwt = jwtBuilderFactory.reconstruct(sessionJwt, EncryptedJwt.class);
         jwt.decrypt(privateKey);
@@ -400,8 +399,7 @@ public class JwtSessionModule implements ServerAuthModule {
         jwt.getClaimsSet().setNotBeforeTime(nbf);
         jwt.getClaimsSet().setClaim(TOKEN_IDLE_TIME_IN_SECONDS_CLAIM_KEY, tokenIdleTime.getTime() / 1000L);
 
-        KeystoreManager keystoreManager = new KeystoreManager(privateKeyPassword, keystoreType,
-                keystoreFile, keystorePassword);
+        KeystoreManager keystoreManager = new KeystoreManager(keystoreType, keystoreFile, keystorePassword);
 
         RSAPublicKey publicKey = (RSAPublicKey) keystoreManager.getPublicKey(keyAlias);
 
@@ -474,8 +472,7 @@ public class JwtSessionModule implements ServerAuthModule {
      */
     private Collection<Cookie> createSessionJwtCookies(Map<String, Object> jwtParameters) throws AuthException {
 
-        KeystoreManager keystoreManager = new KeystoreManager(privateKeyPassword, keystoreType,
-                keystoreFile, keystorePassword);
+        KeystoreManager keystoreManager = new KeystoreManager(keystoreType, keystoreFile, keystorePassword);
 
         RSAPublicKey publicKey = (RSAPublicKey) keystoreManager.getPublicKey(keyAlias);
 
