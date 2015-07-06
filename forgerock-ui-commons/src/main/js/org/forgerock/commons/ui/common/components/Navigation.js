@@ -144,9 +144,10 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
 
                 if (navObj.dropdown === true) {
                     navElement.dropdown = true;
-                     _.each(navObj.urls, function(obj){
-                        subs.push(self.buildNavElement(obj));
-                    });
+
+                    _.each(navObj.urls, function(obj){
+                        subs.push(self.buildNavElement(obj, this.isCurrent(obj.url)));
+                    }, this);
 
                     navElement.urls = subs;
                 }
@@ -156,6 +157,7 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
 
             childIsCurrent: function(urls) {
                 var urlName;
+
                 for (urlName in urls) {
                     if (this.isCurrent(urls[urlName].url)) {
                         return true;
@@ -210,8 +212,8 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
 
     obj.addUserBarLink = function (link, position) {
         if (!_.find(obj.configuration.userBar, function (ub) {
-                return ub.id === link.id;
-            })) {
+            return ub.id === link.id;
+        })) {
 
             if (position === "top") {
                 obj.configuration.userBar.unshift(link);
