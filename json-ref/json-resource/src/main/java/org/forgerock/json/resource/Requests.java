@@ -394,6 +394,7 @@ public final class Requests {
         private org.forgerock.util.query.QueryFilter<JsonPointer> filter;
         private final List<SortKey> keys = new LinkedList<>();
         private String pagedResultsCookie;
+        private CountPolicy totalPagedResultsPolicy;
         private int pagedResultsOffset = 0;
         private int pageSize = 0;
         private String queryId;
@@ -412,6 +413,7 @@ public final class Requests {
             this.pageSize = request.getPageSize();
             this.pagedResultsCookie = request.getPagedResultsCookie();
             this.pagedResultsOffset = request.getPagedResultsOffset();
+            this.totalPagedResultsPolicy = request.getTotalPagedResultsPolicy();
         }
 
         @Override
@@ -438,6 +440,11 @@ public final class Requests {
         @Override
         public String getPagedResultsCookie() {
             return pagedResultsCookie;
+        }
+
+        @Override
+        public CountPolicy getTotalPagedResultsPolicy() {
+            return totalPagedResultsPolicy;
         }
 
         @Override
@@ -473,6 +480,12 @@ public final class Requests {
         @Override
         public QueryRequest setPagedResultsCookie(final String cookie) {
             this.pagedResultsCookie = cookie;
+            return this;
+        }
+
+        @Override
+        public QueryRequest setTotalPagedResultsPolicy(CountPolicy totalPagedResultsPolicy) {
+            this.totalPagedResultsPolicy = totalPagedResultsPolicy;
             return this;
         }
 
@@ -530,6 +543,7 @@ public final class Requests {
                     .put(FIELD_PAGE_SIZE, String.valueOf(getPageSize()))
                     .put(FIELD_PAGED_RESULTS_OFFSET, String.valueOf(getPagedResultsOffset()))
                     .put(FIELD_PAGED_RESULTS_COOKIE, String.valueOf(getPagedResultsCookie()))
+                    .put(FIELD_TOTAL_PAGED_RESULTS_POLICY, String.valueOf(getTotalPagedResultsPolicy()))
                     .put(FIELD_ADDITIONAL_PARAMETERS, getAdditionalParameters());
         }
     }

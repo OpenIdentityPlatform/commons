@@ -29,6 +29,7 @@ public final class QueryResult {
      * representation.
      */
     public static final String FIELD_ERROR = "error";
+
     /**
      * The name of the field which contains the paged results cookie in the JSON
      * representation.
@@ -36,10 +37,16 @@ public final class QueryResult {
     public static final String FIELD_PAGED_RESULTS_COOKIE = QueryRequest.FIELD_PAGED_RESULTS_COOKIE;
 
     /**
-     * The name of the field which contains the remaining paged results in the
-     * JSON representation.
+     * The name of the field which contains the policy used for calculating
+     * the total number of paged results in the JSON representation.
      */
-    public static final String FIELD_REMAINING_PAGED_RESULTS = "remainingPagedResults";
+    public static final String FIELD_TOTAL_PAGED_RESULTS_POLICY = QueryRequest.FIELD_TOTAL_PAGED_RESULTS_POLICY;
+
+    /**
+     * The name of the field which contains the total paged results in the JSON
+     * representation.
+     */
+    public static final String FIELD_TOTAL_PAGED_RESULTS = "totalPagedResults";
 
     /**
      * The name of the field which contains the result count in the JSON
@@ -53,35 +60,66 @@ public final class QueryResult {
      */
     public static final String FIELD_RESULT = "result";
 
+    /**
+     * The value provided when no count is known or can reasonably be supplied.
+     */
+    public static final int NO_COUNT = -1;
+
     private final String pagedResultsCookie;
-    private final int remainingPagedResults;
+
+    private final CountPolicy totalPagedResultsPolicy;
+
+    private final int totalPagedResults;
 
     /**
      * Creates a new query result with a {@code null} paged results cookie and
-     * no estimate of the total number of remaining results.
+     * no count of the total number of remaining results.
      */
     public QueryResult() {
-        this(null, -1);
+        this(null);
     }
 
     /**
      * Creates a new query result with the provided paged results cookie and
-     * estimate of the total number of remaining results.
+     * no count.
+     *
+     * @param pagedResultsCookie
+     */
+    public QueryResult(final String pagedResultsCookie) {
+        this(pagedResultsCookie, CountPolicy.NONE, NO_COUNT);
+    }
+
+    /**
+     * Creates a new query result with the provided paged results cookie and
+     * a count of the total number of remaining results according to {@link #totalPagedResultsPolicy}.
      *
      * @param pagedResultsCookie
      *            The opaque cookie which should be used with the next paged
      *            results query request, or {@code null} if paged results were
      *            not requested, or if there are not more pages to be returned.
-     * @param remainingPagedResults
-     *            An estimate of the total number of remaining results to be
-     *            returned in subsequent paged results query requests, or
-     *            {@code -1} if paged results were not requested, or if the
-     *            total number of remaining results is unknown.
+     * @param totalPagedResultsPolicy
+     *            The policy that was used to calculate {@link #totalPagedResults}
+     * @param totalPagedResults
+     *            The total number of paged results requested in adherence to
+     *            the {@link QueryRequest#getTotalPagedResultsPolicy()} in the request,
+     *            or {@link #NO_COUNT} if paged results were not requested, the count
+     *            policy is {@code NONE}, or if the total number of remaining
+     *            results is unknown.
      */
-    public QueryResult(final String pagedResultsCookie, final int remainingPagedResults) {
+    public QueryResult(final String pagedResultsCookie,
+                       final CountPolicy totalPagedResultsPolicy,
+                       final int totalPagedResults) {
         this.pagedResultsCookie = pagedResultsCookie;
-        this.remainingPagedResults = remainingPagedResults;
+        this.totalPagedResultsPolicy = totalPagedResultsPolicy;
+        this.totalPagedResults = totalPagedResults;
     }
+
+    /**
+     * Returns the policy that was used to calculate the {@link #totalPagedResults}.
+     *
+     * @see #getTotalPagedResults()
+     */
+    public CountPolicy getTotalPagedResultsPolicy() { return totalPagedResultsPolicy; }
 
     /**
      * Returns the opaque cookie which should be used with the next paged
@@ -96,16 +134,19 @@ public final class QueryResult {
     }
 
     /**
-     * Returns an estimate of the total number of remaining results to be
-     * returned in subsequent paged results query requests.
+     * Returns the total number of paged results in adherence with
+     * the {@link QueryRequest#getTotalPagedResultsPolicy()} in the request
+     * or {@link #NO_COUNT} if paged results were not requested, the count
+     * policy is {@code NONE}, or the total number of remaining
+     * results is unknown.
      *
-     * @return An estimate of the total number of remaining results to be
+     * @return A count of the total number of paged results to be
      *         returned in subsequent paged results query requests, or
-     *         {@code -1} if paged results were not requested, or if the total
+     *         {@link #NO_COUNT} if paged results were not requested, or if the total
      *         number of remaining results is unknown.
      */
-    public int getRemainingPagedResults() {
-        return remainingPagedResults;
+    public int getTotalPagedResults() {
+        return totalPagedResults;
     }
 
 }

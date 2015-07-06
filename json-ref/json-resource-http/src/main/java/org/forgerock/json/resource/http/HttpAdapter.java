@@ -41,6 +41,7 @@ import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConflictException;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.CountPolicy;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.NotSupportedException;
@@ -262,6 +263,16 @@ final class HttpAdapter implements Handler {
                             // FIXME: i18n.
                             throw new BadRequestException("The value '" + s + "' for parameter '"
                                     + name + "' could not be parsed as a valid query filter");
+                        }
+                    } else if (name.equalsIgnoreCase(PARAM_TOTAL_PAGED_RESULTS_POLICY)) {
+                        final String policy = asSingleValue(name, values);
+
+                        try {
+                            request.setTotalPagedResultsPolicy(CountPolicy.valueOf(policy.toUpperCase()));
+                        } catch (IllegalArgumentException e) {
+                            // FIXME: i18n.
+                            throw new BadRequestException("The value '" + policy + "' for parameter '"
+                                    + name + "' could not be parsed as a valid count policy");
                         }
                     } else {
                         request.setAdditionalParameter(name, asSingleValue(name, values));
