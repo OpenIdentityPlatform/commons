@@ -544,7 +544,7 @@ public final class ResourcesTest {
         }
         @Query
         public Promise<QueryResult, ResourceException> query(QueryRequest request, QueryResourceHandler handler) {
-            return newResultPromise(new QueryResult("query", -1));
+            return newResultPromise(new QueryResult("query", CountPolicy.NONE, QueryResult.NO_COUNT));
         }
     }
 
@@ -590,7 +590,7 @@ public final class ResourcesTest {
             return newResultPromise(new Resource("patch-" + id, "1", json(object(field("result", null)))));
         }
         public Promise<QueryResult, ResourceException> query(QueryRequest request, QueryResourceHandler handler) {
-            return newResultPromise(new QueryResult("query", -1));
+            return newResultPromise(new QueryResult("query", CountPolicy.NONE, QueryResult.NO_COUNT));
         }
     }
 

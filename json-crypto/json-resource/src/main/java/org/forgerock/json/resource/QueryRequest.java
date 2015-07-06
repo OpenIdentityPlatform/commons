@@ -49,6 +49,12 @@ public interface QueryRequest extends Request {
     String FIELD_PAGED_RESULTS_COOKIE = "pagedResultsCookie";
 
     /**
+     * The name of the field which contains the policy used for calculating
+     * the total number of paged results.
+     */
+    public static final String FIELD_TOTAL_PAGED_RESULTS_POLICY = "totalPagedResultsPolicy";
+
+    /**
      * The name of the field which contains the paged results offset in the JSON
      * representation.
      */
@@ -157,6 +163,13 @@ public interface QueryRequest extends Request {
      * @see #getPagedResultsOffset()
      */
     String getPagedResultsCookie();
+
+    /**
+     * Returns the {@link CountPolicy} used to calculate {@link QueryResult#getTotalPagedResults()}.
+     *
+     * @see QueryResult#getTotalPagedResults()
+     */
+    CountPolicy getTotalPagedResultsPolicy();
 
     /**
      * Returns the index within the result set of the first result which should
@@ -284,6 +297,21 @@ public interface QueryRequest extends Request {
      * @see #setPagedResultsOffset(int)
      */
     QueryRequest setPagedResultsCookie(String cookie);
+
+    /**
+     * Sets the policy for calculating the total number of paged results. If no
+     * count policy is supplied or paged results are not requested a default of
+     * {@link CountPolicy#NONE} will be used. This will result in no count being
+     * performed and no overhead incurred.
+     *
+     * @param policy The policy used to calculate total paged results
+     *
+     * @return This query request.
+     *
+     * @see QueryResult#getTotalPagedResultsPolicy()
+     * @see QueryResult#getTotalPagedResults()
+     */
+    QueryRequest setTotalPagedResultsPolicy(CountPolicy policy);
 
     /**
      * Sets the index within the result set of the first result which should be

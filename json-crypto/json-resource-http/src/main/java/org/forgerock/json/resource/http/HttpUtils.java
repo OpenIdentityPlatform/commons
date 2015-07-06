@@ -135,6 +135,8 @@ public final class HttpUtils {
     public static final String PARAM_QUERY_ID = param(QueryRequest.FIELD_QUERY_ID);
     /** the HTTP request parameter to specify the sort keys. */
     public static final String PARAM_SORT_KEYS = param(QueryRequest.FIELD_SORT_KEYS);
+    /** The policy used for counting total paged results */
+    public static final String PARAM_TOTAL_PAGED_RESULTS_POLICY = param(QueryRequest.FIELD_TOTAL_PAGED_RESULTS_POLICY);
 
     /** The name of the protocol in use */
     public static final String PROTOCOL_NAME = "crest";
