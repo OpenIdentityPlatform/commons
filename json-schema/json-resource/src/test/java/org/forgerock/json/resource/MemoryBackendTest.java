@@ -43,9 +43,7 @@ public final class MemoryBackendTest {
 
     @Test
     public void testActionCollectionClear() throws Exception {
-        final Connection connection = getConnection();
-        connection.create(ctx(), newCreateRequest("users", userAlice()));
-        connection.create(ctx(), newCreateRequest("users", userBob()));
+        final Connection connection = getConnectionWithAliceAndBob();
         connection.action(ctx(), newActionRequest("users", "clear"));
         try {
             connection.read(ctx(), newReadRequest("users/0"));
@@ -143,9 +141,7 @@ public final class MemoryBackendTest {
 
     @Test
     public void testQueryCollection() throws Exception {
-        final Connection connection = getConnection();
-        connection.create(ctx(), newCreateRequest("users", userAlice()));
-        connection.create(ctx(), newCreateRequest("users", userBob()));
+        final Connection connection = getConnectionWithAliceAndBob();
         final Collection<Resource> results = new ArrayList<>();
         connection.query(ctx(), newQueryRequest("users"), results);
         assertThat(results).containsOnly(asResource(userAliceWithIdAndRev(0, 0)),
@@ -154,9 +150,7 @@ public final class MemoryBackendTest {
 
     @Test
     public void testQueryCollectionWithFilters() throws Exception {
-        final Connection connection = getConnection();
-        connection.create(ctx(), newCreateRequest("users", userAlice()));
-        connection.create(ctx(), newCreateRequest("users", userBob()));
+        final Connection connection = getConnectionWithAliceAndBob();
         final Collection<Resource> results = new ArrayList<>();
         connection.query(ctx(), newQueryRequest("users").setQueryFilter(
                 QueryFilter.equalTo(new JsonPointer("name"), "alice")).addField("_id"), results);
@@ -169,11 +163,89 @@ public final class MemoryBackendTest {
 
     @Test(expectedExceptions = BadRequestException.class)
     public void testQueryInstance() throws Exception {
-        final Connection connection = getConnection();
-        connection.create(ctx(), newCreateRequest("users", userAlice()));
-        connection.create(ctx(), newCreateRequest("users", userBob()));
+        final Connection connection = getConnectionWithAliceAndBob();
         final Collection<Resource> results = new ArrayList<>();
         connection.query(ctx(), newQueryRequest("users/0"), results);
+    }
+
+    @Test
+    public void testQueryCollectionEstimateCountWithoutPaging() throws Exception{
+        final Connection connection = getConnectionWithAliceAndBob();
+        final Collection<Resource> results = new ArrayList<Resource>();
+
+        final QueryRequest request = newQueryRequest("users").setTotalPagedResultsPolicy(CountPolicy.ESTIMATE);
+        final QueryResult result = connection.query(ctx(), request, results);
+
+        assertThat(result.getTotalPagedResultsPolicy()).isEqualTo(CountPolicy.NONE);
+        assertThat(result.getTotalPagedResults()).isEqualTo(QueryResult.NO_COUNT);
+    }
+
+    @Test
+    public void testQueryCollectionExactCountWithoutPaging() throws Exception{
+        final Connection connection = getConnectionWithAliceAndBob();
+        final Collection<Resource> results = new ArrayList<Resource>();
+
+        final QueryRequest request = newQueryRequest("users").setTotalPagedResultsPolicy(CountPolicy.EXACT);
+        final QueryResult result = connection.query(ctx(), request, results);
+
+        assertThat(result.getTotalPagedResultsPolicy()).isEqualTo(CountPolicy.NONE);
+        assertThat(result.getTotalPagedResults()).isEqualTo(QueryResult.NO_COUNT);
+    }
+
+    @Test
+    public void testQueryCollectionDefaultsToNoneCount() throws Exception {
+        final Connection connection = getConnectionWithAliceAndBob();
+
+        final Collection<Resource> results = new ArrayList<Resource>();
+        QueryResult result = connection.query(ctx(), newQueryRequest("users"), results);
+
+        assertThat(result.getTotalPagedResults()).isEqualTo(QueryResult.NO_COUNT);
+        assertThat(result.getTotalPagedResultsPolicy()).isEqualTo(CountPolicy.NONE);
+    }
+
+    @Test
+    public void testQueryCollectionWithNoneCount() throws Exception {
+        final Connection connection = getConnectionWithAliceAndBob();
+
+        final Collection<Resource> results = new ArrayList<Resource>();
+        QueryRequest request = newQueryRequest("users");
+
+        request.setTotalPagedResultsPolicy(CountPolicy.NONE);
+        QueryResult result = connection.query(ctx(), request, results);
+
+        assertThat(result.getTotalPagedResultsPolicy()).isEqualTo(CountPolicy.NONE);
+        assertThat(result.getTotalPagedResults()).isEqualTo(QueryResult.NO_COUNT);
+    }
+
+    @Test
+    public void testQueryCollectionWithExactCount() throws Exception {
+        final Connection connection = getConnectionWithAliceAndBob();
+
+        QueryRequest request = newQueryRequest("users");
+        request.setTotalPagedResultsPolicy(CountPolicy.EXACT);
+        request.setPageSize(5);
+
+        final Collection<Resource> results = new ArrayList<Resource>();
+        final QueryResult result = connection.query(ctx(), request, results);
+
+        assertThat(result.getTotalPagedResultsPolicy()).isEqualTo(CountPolicy.EXACT);
+        assertThat(result.getTotalPagedResults()).isEqualTo(2);
+    }
+
+    @Test
+    public void testQueryCollectionWithEstimatedCountIsExact() throws Exception {
+        final Connection connection = getConnectionWithAliceAndBob();
+
+        QueryRequest request = newQueryRequest("users")
+                .setTotalPagedResultsPolicy(CountPolicy.ESTIMATE)
+                .setPageSize(5);
+
+        final Collection<Resource> results = new ArrayList<Resource>();
+        QueryResult result = connection.query(ctx(), request, results);
+
+        // It should fall back to an exact count
+        assertThat(result.getTotalPagedResultsPolicy()).isEqualTo(CountPolicy.EXACT);
+        assertThat(result.getTotalPagedResults()).isEqualTo(2);
     }
 
     @Test(expectedExceptions = BadRequestException.class)
@@ -226,6 +298,15 @@ public final class MemoryBackendTest {
         final Router router = new Router();
         router.addRoute("users", users);
         return newInternalConnection(router);
+    }
+
+    private Connection getConnectionWithAliceAndBob() throws Exception {
+        final Connection connection = getConnection();
+
+        connection.create(ctx(), newCreateRequest("users", userAlice()));
+        connection.create(ctx(), newCreateRequest("users", userBob()));
+
+        return connection;
     }
 
     private JsonValue userAlice() {

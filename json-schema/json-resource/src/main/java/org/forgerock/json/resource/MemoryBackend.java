@@ -555,6 +555,8 @@ public final class MemoryBackend implements CollectionResourceProvider {
             // Select, filter, and return the results. These can be streamed if server
             // side sorting has not been requested.
             int resultIndex = 0;
+
+            int resultCount;
             if (request.getSortKeys().isEmpty()) {
                 // No sorting so stream the results.
                 for (final Resource resource : resources.values()) {
@@ -565,6 +567,8 @@ public final class MemoryBackend implements CollectionResourceProvider {
                         resultIndex++;
                     }
                 }
+
+                resultCount = resources.values().size();
             } else {
                 // Server side sorting: aggregate the result set then sort. A robust implementation
                 // would need to impose administrative limits in order to control memory utilization.
@@ -579,15 +583,31 @@ public final class MemoryBackend implements CollectionResourceProvider {
                     if (resultIndex >= firstResultIndex && resultIndex < lastResultIndex) {
                         handler.handleResource(resource);
                     }
-                    resultIndex++;
+
+                    if (resultIndex < lastResultIndex) {
+                        resultIndex++;
+                    } else {
+                        break;
+                    }
                 }
+
+                resultCount = results.size();
             }
 
             if (pagedResultsRequested) {
                 final String nextCookie =
                         resultIndex > lastResultIndex ? String.valueOf(lastResultIndex) : null;
-                final int remaining = Math.max(resultIndex - lastResultIndex, 0);
-                return newResultPromise(new QueryResult(nextCookie, remaining));
+
+                switch (request.getTotalPagedResultsPolicy()) {
+                    case NONE:
+                        return newResultPromise(new QueryResult(nextCookie));
+                    case EXACT:
+                    case ESTIMATE:
+                        return newResultPromise(new QueryResult(nextCookie, CountPolicy.EXACT, resultCount));
+                    default:
+                        throw new UnsupportedOperationException("totalPagedResultsPolicy: " +
+                                request.getTotalPagedResultsPolicy().toString() + " not supported");
+                }
             } else {
                 return newResultPromise(new QueryResult());
             }
