@@ -14,7 +14,7 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.audit.events.handlers.impl;
+package org.forgerock.audit;
 
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
 import org.forgerock.audit.util.ResourceExceptionsUtil;
@@ -28,15 +28,23 @@ import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.ServerContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Handles AuditEvents by just calling the result Handler.
  */
-public class PassThroughAuditEventHandler extends AuditEventHandlerBase<Void> {
+public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThroughAuditEventHandlerConfiguration> {
 
+    private static final Logger logger = LoggerFactory.getLogger(PassThroughAuditEventHandlerConfiguration.class);
+
+    /** A message logged when a new entry is added. */
+    private String message;
+
+    /** {@inheritDoc} */
     @Override
-    public void configure(Void config) throws ResourceException {
-        // nothing to do
+    public void configure(PassThroughAuditEventHandlerConfiguration config) throws ResourceException {
+        this.message = config.getMessage();
     }
 
     /** {@inheritDoc} */
@@ -79,6 +87,7 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<Void> {
             final ServerContext context,
             final CreateRequest request,
             final ResultHandler<Resource> handler) {
+        logger.info("Added an entry. Message: " + message);
         handler.handleResult(new Resource(request.getContent().get(Resource.FIELD_CONTENT_ID).asString(),
                                           null,
                                           new JsonValue(request.getContent())));

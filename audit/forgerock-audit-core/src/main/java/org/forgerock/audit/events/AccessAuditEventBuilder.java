@@ -61,6 +61,8 @@ import java.util.Map;
  * }
  * </code>
  * </pre>
+ *
+ * @param <T> the type of the builder
  */
 public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> extends AuditEventBuilder<T> {
 

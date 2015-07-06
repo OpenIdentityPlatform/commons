@@ -21,15 +21,10 @@ import static org.forgerock.json.fluent.JsonValue.*;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.audit.events.handlers.impl.PassThroughAuditEventHandler;
 import org.forgerock.json.fluent.JsonValue;
@@ -46,53 +41,16 @@ import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.ServerContext;
 import org.mockito.ArgumentCaptor;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 @SuppressWarnings({"javadoc", "rawtypes", "unchecked" })
 public class AuditServiceTest {
 
-    private static final ObjectMapper MAPPER;
-    private AuditServiceConfiguration config;
-
-    static {
-        final JsonFactory jsonFactory = new JsonFactory();
-        jsonFactory.configure(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS, true);
-        MAPPER = new ObjectMapper(jsonFactory);
-    }
-
-    @BeforeMethod
-    public void setUp() {
-        try {
-            final InputStream configStream = getClass().getResourceAsStream("/audit.json");
-            JsonValue jsonConfig = new JsonValue(MAPPER.readValue(configStream, Map.class));
-            config = getConfigFromJson(jsonConfig);
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to parse audit.json config", e);
-        }
-    }
-
-    private AuditServiceConfiguration getConfigFromJson(JsonValue jsonConfig) {
-        AuditServiceConfiguration config = new AuditServiceConfiguration();
-        String key = "useForQueries";
-        if (jsonConfig.isDefined(key)) {
-            config.setQueryHandlerName(jsonConfig.get(key).asString());
-            return config;
-        }
-        throw new RuntimeException("Json config does not contain expected property: " + key);
-    }
-
-    @AfterMethod
-    public void tearDown() {
-        config = null;
-    }
+    private static final String QUERY_HANDLER_NAME = "pass-through";
 
     @Test
     public void testRegisterInjectEventMetaData() throws Exception {
-        //given
-        final AuditService auditService = new AuditService();
-        auditService.configure(config);
+        final AuditService auditService = getAuditService(QUERY_HANDLER_NAME);
         AuditEventHandler<?> auditEventHandler = mock(AuditEventHandler.class);
         final ArgumentCaptor<Map> auditEventMetaDataCaptor = ArgumentCaptor.forClass(Map.class);
 
@@ -108,12 +66,11 @@ public class AuditServiceTest {
     @Test
     public void testRegisterForSomeEvents() throws Exception {
         //given
-        final AuditService auditService = new AuditService();
-        auditService.configure(config);
+        final AuditService auditService = getAuditService(QUERY_HANDLER_NAME);
         // No events specified, we want to get all events !
         PassThroughAuditEventHandler auditEventHandler = new PassThroughAuditEventHandler();
         // Only interested about the access events.
-        auditService.register(auditEventHandler, "pass-through", Collections.singleton("access"));
+        auditService.register(auditEventHandler, QUERY_HANDLER_NAME, Collections.singleton("access"));
 
         final CreateRequest createRequestAccess = makeCreateRequest("access");
         final ResultHandler<Resource> resultHandlerAccess = mockResultHandler(Resource.class);
@@ -139,11 +96,8 @@ public class AuditServiceTest {
 
     @Test
     public void testCreatingAuditLogEntry() throws Exception {
-        //given
-        final AuditService auditService = new AuditService();
-        auditService.configure(config);
-        PassThroughAuditEventHandler auditEventHandler = new PassThroughAuditEventHandler();
-        auditService.register(auditEventHandler, "pass-through", Collections.singleton("access"));
+        final AuditService auditService = getAuditService(QUERY_HANDLER_NAME);
+        auditService.register(new PassThroughAuditEventHandler(), QUERY_HANDLER_NAME, Collections.singleton("access"));
 
         final CreateRequest createRequest = makeCreateRequest();
         final ResultHandler<Resource> resultHandler = mockResultHandler(Resource.class);
@@ -164,15 +118,14 @@ public class AuditServiceTest {
     @Test
     public void testReadingAuditLogEntry() throws Exception {
         //given
-        final AuditService auditService = new AuditService();
+        final AuditService auditService = getAuditService("query-handler");
+
         AuditEventHandler<?> queryAuditEventHandler = mock(AuditEventHandler.class, "queryAuditEventHandler");
         auditService.register(queryAuditEventHandler, "query-handler", Collections.singleton("access"));
 
         AuditEventHandler<?> auditEventHandler = mock(AuditEventHandler.class, "auditEventHandler");
         auditService.register(auditEventHandler, "another-handler", Collections.singleton("access"));
         reset(auditEventHandler, queryAuditEventHandler); // So the verify assertions below can work.
-
-        auditService.configure(getConfigFromJson(json(object(field("useForQueries", "query-handler")))));
 
         final ReadRequest readRequest = Requests.newReadRequest("access", "1234");
         ResultHandler<Resource> readResultHandler = mockResultHandler(Resource.class, "readResultHandler");
@@ -191,9 +144,7 @@ public class AuditServiceTest {
 
     @Test
     public void testDeleteAuditLogEntry() throws ResourceException {
-        //given
-        final AuditService auditService = new AuditService();
-        auditService.configure(config);
+        final AuditService auditService = getAuditService(QUERY_HANDLER_NAME);
         final ResultHandler<Resource> resultHandler = mockResultHandler(Resource.class);
         final ArgumentCaptor<Resource> resourceCaptor = ArgumentCaptor.forClass(Resource.class);
         final ArgumentCaptor<ResourceException> resourceExceptionCaptor =
@@ -215,9 +166,7 @@ public class AuditServiceTest {
 
     @Test
     public void testPatchAuditLogEntry() throws ResourceException {
-        //given
-        final AuditService auditService = new AuditService();
-        auditService.configure(config);
+        final AuditService auditService = getAuditService(QUERY_HANDLER_NAME);
         final ResultHandler<Resource> resultHandler = mockResultHandler(Resource.class);
         final ArgumentCaptor<Resource> resourceCaptor = ArgumentCaptor.forClass(Resource.class);
         final ArgumentCaptor<ResourceException> resourceExceptionCaptor =
@@ -239,9 +188,7 @@ public class AuditServiceTest {
 
     @Test
     public void testUpdateAuditLogEntry() throws ResourceException {
-        //given
-        final AuditService auditService = new AuditService();
-        auditService.configure(config);
+        final AuditService auditService = getAuditService(QUERY_HANDLER_NAME);
         final ResultHandler<Resource> resultHandler = mockResultHandler(Resource.class);
         final ArgumentCaptor<Resource> resourceCaptor = ArgumentCaptor.forClass(Resource.class);
         final ArgumentCaptor<ResourceException> resourceExceptionCaptor =
@@ -263,9 +210,7 @@ public class AuditServiceTest {
 
     @Test
     public void testActionOnAuditLogEntry() throws ResourceException {
-        //given
-        final AuditService auditService = new AuditService();
-        auditService.configure(config);
+        final AuditService auditService = getAuditService(QUERY_HANDLER_NAME);
         final ResultHandler<JsonValue> resultHandler = mockResultHandler(JsonValue.class);
         final ArgumentCaptor<JsonValue> resourceCaptor = ArgumentCaptor.forClass(JsonValue.class);
         final ArgumentCaptor<ResourceException> resourceExceptionCaptor =
@@ -287,9 +232,7 @@ public class AuditServiceTest {
 
     @Test
     public void testQueryOnAuditLogEntry() throws ResourceException {
-        //given
-        final AuditService auditService = new AuditService();
-        auditService.configure(config);
+        final AuditService auditService = getAuditService(QUERY_HANDLER_NAME);
         final QueryResultHandler resultHandler = mock(QueryResultHandler.class);
         final ArgumentCaptor<QueryResult> resourceCaptor = ArgumentCaptor.forClass(QueryResult.class);
         final ArgumentCaptor<ResourceException> resourceExceptionCaptor =
@@ -311,9 +254,7 @@ public class AuditServiceTest {
 
     @Test
     public void testMandatoryFieldTransactionId() throws ResourceException {
-        //given
-        final AuditService auditService = new AuditService();
-        auditService.configure(config);
+        final AuditService auditService = getAuditService(QUERY_HANDLER_NAME);
 
         // No transactionId in the JSON content
         final JsonValue content = json(object(field("_id", "_id"),
@@ -335,9 +276,7 @@ public class AuditServiceTest {
 
     @Test
     public void testMandatoryFieldTimestamp() throws ResourceException {
-        //given
-        final AuditService auditService = new AuditService();
-        auditService.configure(config);
+        final AuditService auditService = getAuditService(QUERY_HANDLER_NAME);
 
         // No timestamp in the JSON content
         final JsonValue content = json(object(field("_id", "_id"),
@@ -361,8 +300,8 @@ public class AuditServiceTest {
     public void testAdditionalEventTypes() throws Exception {
         JsonValue additionalEventTypes = json(object(field("foo", "bar")));
         //given
-        final AuditService auditService = new AuditService(new JsonValue(null), additionalEventTypes);
-        auditService.configure(config);
+        final AuditService auditService =
+                getAuditServiceWithAdditionalEventTypes(QUERY_HANDLER_NAME, additionalEventTypes);
 
         PassThroughAuditEventHandler auditEventHandler = new PassThroughAuditEventHandler();
         // Only interested about the foo events.
@@ -384,6 +323,19 @@ public class AuditServiceTest {
         assertThat(resource.getContent().asMap().equals(createRequestAccess.getContent().asMap()));
     }
 
+    private AuditService getAuditService(String queryHandlerName) throws ResourceException {
+        return getAuditServiceWithAdditionalEventTypes(queryHandlerName, json(object()));
+    }
+
+    private AuditService getAuditServiceWithAdditionalEventTypes(
+            String queryHandlerName, JsonValue additionalEventTypes) throws ResourceException {
+        AuditServiceConfiguration config = new AuditServiceConfiguration();
+        config.setHandlerForQueries(queryHandlerName);
+        AuditService auditService = new AuditService(json(object()), additionalEventTypes);
+        auditService.configure(config);
+        return auditService;
+    }
+
     private CreateRequest makeCreateRequest() {
         return makeCreateRequest("access");
     }
@@ -393,8 +345,7 @@ public class AuditServiceTest {
                 object(
                         field("_id", "_id"),
                         field("timestamp", "timestamp"),
-                        field("transactionId", "transactionId")
-                )
+                        field("transactionId", "transactionId"))
         );
         return Requests.newCreateRequest(event, content);
     }

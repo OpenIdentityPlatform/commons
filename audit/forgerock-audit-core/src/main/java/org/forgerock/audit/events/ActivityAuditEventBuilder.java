@@ -38,6 +38,8 @@ package org.forgerock.audit.events;
  * }
  * </code>
  * </pre>
+ *
+ * @param <T> the type of the builder
  */
 public class ActivityAuditEventBuilder<T extends ActivityAuditEventBuilder<T>> extends StateChangeAuditEventBuilder<T> {
 

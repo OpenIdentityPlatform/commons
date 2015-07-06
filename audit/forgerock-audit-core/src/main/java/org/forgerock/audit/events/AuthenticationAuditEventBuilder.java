@@ -47,6 +47,7 @@ import org.forgerock.util.Reject;
  * }
  * </code>
  * </pre>
+ * @param <T> the type of the builder
  */
 public class AuthenticationAuditEventBuilder<T extends AuthenticationAuditEventBuilder<T>>
     extends AuditEventBuilder<T> {

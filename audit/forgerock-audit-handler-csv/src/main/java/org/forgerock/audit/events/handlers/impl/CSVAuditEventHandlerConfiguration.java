@@ -15,12 +15,22 @@
  */
 package org.forgerock.audit.events.handlers.impl;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * A configuration for CSV audit event handler.
+ * <p>
+ * This configuration object can be created from JSON. Example of valid JSON configuration:
+ * <pre>
+ *  {
+ *    "logDirectory" : "/tmp/audit",
+ *    "recordDelimiter" : ";"
+ *  }
+ * </pre>
  */
-public class CSVHandlerConfiguration {
+public class CSVAuditEventHandlerConfiguration {
 
+    @JsonProperty(required=true)
     private String logDirectory;
 
     private String recordDelimiter;
@@ -62,5 +72,4 @@ public class CSVHandlerConfiguration {
     public void setRecordDelimiter(String delimiter) {
         recordDelimiter = delimiter;
     }
-
 }

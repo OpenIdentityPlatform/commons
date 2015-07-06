@@ -15,12 +15,22 @@
  */
 package org.forgerock.audit;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Configuration of the audit service.
+ * <p>
+ * This configuration object can be created from JSON. Example of valid JSON configuration:
+ * <pre>
+ *   {
+ *     "handlerForQueries" : "csv"
+ *   }
+ * </pre>
  */
 public class AuditServiceConfiguration {
 
-    private String queryHandlerName;
+    @JsonProperty(required = true)
+    private String handlerForQueries;
 
     /**
      * Empty constructor.
@@ -35,7 +45,7 @@ public class AuditServiceConfiguration {
      * @param config an existing configuration
      */
     public AuditServiceConfiguration(AuditServiceConfiguration config) {
-        queryHandlerName = config.getQueryHandlerName();
+        handlerForQueries = config.getHandlerForQueries();
     }
 
     /**
@@ -43,8 +53,8 @@ public class AuditServiceConfiguration {
      *
      * @return the name of the handler.
      */
-    public String getQueryHandlerName() {
-        return queryHandlerName;
+    public String getHandlerForQueries() {
+        return handlerForQueries;
     }
 
     /**
@@ -53,8 +63,8 @@ public class AuditServiceConfiguration {
      * @param name
      *            the name of the handler.
      */
-    public void setQueryHandlerName(String name) {
-        queryHandlerName = name;
+    public void setHandlerForQueries(String name) {
+        handlerForQueries = name;
     }
 
 }

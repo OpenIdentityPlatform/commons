@@ -16,10 +16,13 @@
 
 package org.forgerock.audit;
 
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.forgerock.audit.events.handlers.impl.CSVAuditEventHandler;
+import java.io.IOException;
+import java.io.InputStream;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+
+import org.forgerock.audit.json.AuditJsonConfig;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.ResourceException;
@@ -29,70 +32,59 @@ import org.forgerock.json.resource.RoutingMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Map;
-import java.util.Set;
-
 /**
  * ConnectionFactory that instantiates the AuditService on the crest router.
  */
 public final class AuditServiceConnectionFactoryProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(AuditServiceConnectionFactoryProvider.class);
-    private static final ObjectMapper MAPPER;
 
-    static {
-        final JsonFactory jsonFactory = new JsonFactory();
-        jsonFactory.configure(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS, true);
-        MAPPER = new ObjectMapper(jsonFactory);
-    }
     private AuditServiceConnectionFactoryProvider() {
-
+        // prevent instantiation
     }
 
     /**
      * Creates a connection factory with the AuditService on the router.
+     *
      * @param config the configuration of the servlet
      * @return a ConnectionFactory containing the AuditService endpoint
      * @throws ServletException if the connection factory can't be created
      */
-    public static ConnectionFactory getConnectionFactory(final ServletConfig config)
-            throws ServletException {
+    public static ConnectionFactory createConnectionFactory(final ServletConfig config) throws ServletException {
         final Router router = new Router();
-        final AuditService auditService = new AuditService();
+        final AuditService auditService = createAndConfigureAuditService();
 
-        Class<AuditServiceConnectionFactoryProvider> klass = AuditServiceConnectionFactoryProvider.class;
-        try(InputStream configStream = klass.getResourceAsStream("/conf/audit.json");
-            InputStream csvConfigStream = klass.getResourceAsStream("/conf/audit-csv-handler.json");
-                ) {
-        JsonValue csvConfig = new JsonValue(MAPPER.readValue(csvConfigStream, Map.class));
-        Set<String> csvEvents = csvConfig.get("events").asSet(String.class);
-        CSVAuditEventHandler csvAuditEventHandler;
-        csvAuditEventHandler = new CSVAuditEventHandler();
-        //csvAuditEventHandler.configure(csvConfig.get("config"));
-
-        auditService.register(csvAuditEventHandler, "csv", csvEvents);
-
-        final JsonValue jsonConfig = new JsonValue(MAPPER.readValue(configStream, Map.class));
-        AuditServiceConfiguration serviceConfig = new AuditServiceConfiguration();
-        serviceConfig.setQueryHandlerName(jsonConfig.get("useForQueries").asString());
-        auditService.configure(serviceConfig);
-
-        } catch (IOException | ResourceException e) {
-            RuntimeException runtimeException = new RuntimeException("Unable to parse audit.json config", e);
-            logger.error(runtimeException.getMessage(), runtimeException.getCause());
-            throw runtimeException;
-        } catch (AuditException e) {
-            RuntimeException runtimeException = new RuntimeException("Error while registering the handlers", e);
-            logger.error(runtimeException.getMessage(), runtimeException.getCause());
-            throw runtimeException;
-        }
+        // TODO: replace hard-coded registration of handlers by dynamic registration to allow to plug-in new
+        // handlers
+        registerCsvHandler(auditService);
 
         router.addRoute(RoutingMode.STARTS_WITH, "/audit", auditService);
         return Resources.newInternalConnectionFactory(router);
+    }
+
+    /** Register the CSV handler based on JSON configuration. */
+    private static void registerCsvHandler(final AuditService auditService) {
+        try (InputStream handlerConfig = auditService.getClass().getResourceAsStream("/conf/audit-csv-handler.json")) {
+            JsonValue jsonHandlerConfig = AuditJsonConfig.getJson(handlerConfig);
+            AuditJsonConfig.registerHandlerToService(jsonHandlerConfig, auditService);
+        } catch (AuditException | IOException e) {
+            RuntimeException runtimeException = new RuntimeException("Error while enabling the CSV handler", e);
+            logger.error(runtimeException.getMessage(), runtimeException.getCause());
+            throw runtimeException;
+        }
+    }
+
+    /** Returns the audit service configured with provided JSON configuration. */
+    private static AuditService createAndConfigureAuditService() {
+        final AuditService auditService = new AuditService();
+        try (InputStream inputStream = auditService.getClass().getResourceAsStream("/conf/audit-service.json")) {
+            AuditServiceConfiguration serviceConfig = AuditJsonConfig.parseAuditServiceConfiguration(inputStream);
+            auditService.configure(serviceConfig);
+            return auditService;
+        } catch (AuditException | ResourceException | IOException e) {
+            RuntimeException exception = new RuntimeException("Error while configuring the audit service", e);
+            logger.error(exception.getMessage(), e);
+            throw exception;
+        }
     }
 }

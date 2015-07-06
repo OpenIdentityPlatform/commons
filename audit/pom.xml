@@ -58,6 +58,7 @@
 
     <modules>
         <module>forgerock-audit-core</module>
+        <module>forgerock-audit-json</module>
         <module>forgerock-audit-servlet</module>
         <module>forgerock-audit-handler-csv</module>
     </modules>

@@ -63,7 +63,7 @@ import java.util.TreeSet;
 /**
  * Handles AuditEvents by writing them to a CSV file.
  */
-public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVHandlerConfiguration> {
+public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHandlerConfiguration> {
     private static final Logger logger = LoggerFactory.getLogger(CSVAuditEventHandler.class);
 
     private Map<String, JsonValue> auditEvents;
@@ -92,7 +92,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVHandlerConfig
      * {@inheritDoc}
      */
     @Override
-    public void configure(final CSVHandlerConfiguration config) throws ResourceException {
+    public void configure(final CSVAuditEventHandlerConfiguration config) throws ResourceException {
         synchronized (this) {
             cleanup();
 

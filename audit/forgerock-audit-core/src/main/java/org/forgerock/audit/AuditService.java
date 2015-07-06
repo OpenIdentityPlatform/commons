@@ -114,7 +114,7 @@ public class AuditService implements RequestHandler {
      * </pre>
      *
      * @param extendedEventTypes the extension of the core event types.
-     * @param additionalEventTypes the additional event types.
+     * @param customEventTypes the custom event types.
      */
     public AuditService(JsonValue extendedEventTypes, JsonValue customEventTypes) {
         eventTypeAuditEventHandlers = new HashMap<>();
@@ -142,7 +142,7 @@ public class AuditService implements RequestHandler {
      */
     public void configure(final AuditServiceConfiguration configuration) throws ResourceException {
         cleanupPreviousConfig();
-        queryHandlerName = configuration.getQueryHandlerName();
+        queryHandlerName = configuration.getHandlerForQueries();
         config = new AuditServiceConfiguration(configuration);
     }
 
@@ -288,6 +288,8 @@ public class AuditService implements RequestHandler {
 
     /**
      * Audit service does not support changing audit entries.
+     *
+     * {@inheritDoc}
      */
     @Override
     public void handleUpdate(final ServerContext context, final UpdateRequest request,
@@ -406,5 +408,17 @@ public class AuditService implements RequestHandler {
      */
     public AuditServiceConfiguration getConfig() {
         return new AuditServiceConfiguration(config);
+    }
+
+    /**
+     * Returns the registered handler corresponding to provided name.
+     *
+     * @param handlerName
+     *            Name of the registered handler to retrieve.
+     * @return the handler, or {@code null} if no handler with the provided name
+     *         was registered to the service.
+     */
+    public AuditEventHandler<?> getRegisteredHandler(String handlerName) {
+        return allAuditEventHandlers.get(handlerName);
     }
 }

@@ -1,6 +1,8 @@
 {
-      "config" : {
-        "location" : "/tmp/audit"
-      },
-      "events" : [ "access", "activity" ]
+  "name" : "csv",
+  "class" : "org.forgerock.audit.events.handlers.impl.CSVAuditEventHandler",
+  "config" : {
+    "location" : "/tmp/audit"
+  },
+  "events" : [ "access", "activity" ]
 }

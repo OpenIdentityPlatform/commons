@@ -21,40 +21,50 @@
         <artifactId>forgerock-audit</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
-    <artifactId>forgerock-audit-servlet</artifactId>
+    <artifactId>forgerock-audit-json</artifactId>
     <packaging>bundle</packaging>
-    <name>Commons - ForgeRock Audit Framework Servlet</name>
+    <name>Commons - ForgeRock Audit Json Support</name>
     <description></description>
 
     <dependencies>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        
+        <!-- Jackson dependencies -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.5.3</version>
+        </dependency>
+
         <!-- ForgeRock Commons Dependencies -->
         <dependency>
             <groupId>org.forgerock.commons</groupId>
-            <artifactId>json-resource-servlet</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.commons</groupId>
             <artifactId>json-resource</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>forgerock-audit-core</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <!-- Test Dependencies -->
         <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>forgerock-audit-handler-csv</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>forgerock-audit-json</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.easytesting</groupId>
+            <artifactId>fest-assert-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <build>
@@ -66,31 +76,10 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            org.forgerock.commons.audit;version=${project.version}
+                            org.forgerock.audit.json;version=${project.version}
                         </Export-Package>
                     </instructions>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>war</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>war</goal>
-                        </goals>
-                        <configuration>
-                            <classifier>servlet</classifier>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-maven-plugin</artifactId>
-                <version>9.0.4.v20130625</version>
             </plugin>
         </plugins>
     </build>
