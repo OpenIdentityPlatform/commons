@@ -16,7 +16,7 @@
 
 package org.forgerock.json.resource;
 
-import static org.forgerock.http.RoutingMode.EQUALS;
+import static org.forgerock.http.routing.RoutingMode.EQUALS;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
 
@@ -24,7 +24,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.forgerock.http.ServerContext;
+import org.forgerock.http.context.ServerContext;
 import org.forgerock.http.routing.RouterContext;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;

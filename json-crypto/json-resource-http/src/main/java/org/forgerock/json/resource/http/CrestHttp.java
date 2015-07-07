@@ -21,7 +21,8 @@ import static org.forgerock.json.resource.http.HttpUtils.*;
 import org.forgerock.http.Context;
 import org.forgerock.http.Filter;
 import org.forgerock.http.Handler;
-import org.forgerock.http.Http;
+import org.forgerock.http.filter.Filters;
+import org.forgerock.http.handler.Handlers;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Resources;
@@ -50,7 +51,7 @@ public class CrestHttp {
      */
     public static Handler newHttpHandler(ConnectionFactory connectionFactory) {
         Reject.ifNull(connectionFactory);
-        return Http.chainOf(new HttpAdapter(connectionFactory), newOptionsFilter());
+        return Handlers.chainOf(new HttpAdapter(connectionFactory), newOptionsFilter());
     }
 
     /**
@@ -68,7 +69,7 @@ public class CrestHttp {
     public static Handler newHttpHandler(ConnectionFactory connectionFactory, Context parentContext) {
         Reject.ifNull(connectionFactory);
         Reject.ifNull(parentContext);
-        return Http.chainOf(new HttpAdapter(connectionFactory, parentContext), newOptionsFilter());
+        return Handlers.chainOf(new HttpAdapter(connectionFactory, parentContext), newOptionsFilter());
     }
 
     /**
@@ -85,7 +86,7 @@ public class CrestHttp {
     public static Handler newHttpHandler(ConnectionFactory connectionFactory, HttpContextFactory contextFactory) {
         Reject.ifNull(connectionFactory);
         Reject.ifNull(contextFactory);
-        return Http.chainOf(new HttpAdapter(connectionFactory, contextFactory), newOptionsFilter());
+        return Handlers.chainOf(new HttpAdapter(connectionFactory, contextFactory), newOptionsFilter());
     }
 
     /**
@@ -96,11 +97,16 @@ public class CrestHttp {
      */
     public static Handler newHttpHandler(RequestHandler handler) {
         Reject.ifNull(handler);
-        return Http.chainOf(new HttpAdapter(Resources.newInternalConnectionFactory(handler)), newOptionsFilter());
+        return Handlers.chainOf(new HttpAdapter(Resources.newInternalConnectionFactory(handler)), newOptionsFilter());
     }
 
     private static Filter newOptionsFilter() {
-        return Http.newOptionsFilter(METHOD_DELETE, METHOD_GET, METHOD_HEAD, METHOD_PATCH, METHOD_PUT, METHOD_OPTIONS,
-                METHOD_TRACE);
+        return Filters.newOptionsFilter(METHOD_DELETE,
+                                        METHOD_GET,
+                                        METHOD_HEAD,
+                                        METHOD_PATCH,
+                                        METHOD_PUT,
+                                        METHOD_OPTIONS,
+                                        METHOD_TRACE);
     }
 }
