@@ -38,6 +38,110 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
 ], function($, _, Backbone, AbstractConfigurationAware, AbstractView, conf, constants, eventManager, viewManager, router) {
     var obj = new AbstractConfigurationAware();
 
+
+    /*
+        Navigation is configured from AppConfiguration in each forgerock application. There are several items that can be controlled and configured.
+
+
+        Username: Configuration of control of the username in userbar. This can be configured in two primary ways
+
+            isLink - Boolean controlling if it is a link or static field (defaults to static username if nothing provided)
+            href - Link location
+            secondaryLabel - Provides a secondary title that will sit below username
+
+            Example:
+
+             username: {
+                 "isLink": true,
+                 "href" : "#profile/",
+                 "secondaryLabel" : "config.AppConfiguration.Navigation.linksviewProfile"
+             },
+
+        Userbar: Configuration of the menu items in the userbar
+
+            id - Element ID
+            href - Link location
+            i18nKey - Translation string
+            divider - When set to true creates a divider for the dropdown menu items
+            event - Rather then a href this will fire off a UI Event.
+
+            Example:
+
+             {
+                 "id": "user_link",
+                 "href": "../selfservice",
+                 "i18nKey": "common.form.userView"
+             },
+             {
+                divider: true
+             },
+             {
+                 "id": "logout_link",
+                 "href": "#logout/",
+                 "i18nKey": "common.form.logout"
+             },
+             {
+                 "id": "changePasswordLink",
+                 "event" : Constants.EVENT_SHOW_CHANGE_SECURITY_DIALOG,
+                 "i18nKey": "common.user.changePassword"
+             }
+
+        Navigation: Besides username and userbar specific controls the general navigation items can be controlled here.
+
+            role - Controls the role a user must have set for this navigation item to display
+            urls - A list of provided navigation. When tied to drop down controls drop down items. Currently this list can only go two levels deep.
+            name - Name of the navigation element
+            icon - Icon to display with the navigation name
+            url - Link location
+            inactive - Boolean that controls whether or not the navigation item is currently in use
+            dropdown - Boolean that controls if a drop down element is used or a standard navigation element
+
+            Example:
+
+            "admin" : {
+                "role": "ui-admin",
+                    "urls": {
+                    "configuration": {
+                        "name": "Configure",
+                            "icon": "fa fa-wrench",
+                            "dropdown": true,
+                            "urls" : [
+                            {
+                                "url": "#connectors/",
+                                "name": "config.AppConfiguration.Navigation.links.connectors",
+                                "icon": "fa fa-cubes",
+                                "inactive": false
+                            },
+                            {
+                                "url": "#managed/",
+                                "name": "config.AppConfiguration.Navigation.links.managedObjects",
+                                "icon": "fa fa-th",
+                                "inactive": false
+                            },
+                            {
+                                "url": "#mapping/",
+                                "name": "config.AppConfiguration.Navigation.links.mapping",
+                                "icon": "fa fa-arrows-h",
+                                "inactive": false
+                            },
+                            {
+                                "url": "#settings/",
+                                "name": "config.AppConfiguration.Navigation.links.systemPref",
+                                "icon": "fa fa-cog",
+                                "inactive": false
+                            }
+                        ]
+                    },
+                    "managed": {
+                        "name": "config.AppConfiguration.Navigation.links.manage",
+                            "icon": "fa fa-cogs",
+                            "dropdown": true,
+                            "urls" : []
+                    }
+                }
+            }
+     */
+
     obj.init = function(callback) {
         var Navigation = AbstractView.extend({
 
@@ -80,6 +184,23 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                         }
                         return link;
                     });
+
+                    if(obj.configuration.username) {
+
+                        if(obj.configuration.username.secondaryLabel) {
+                            obj.configuration.username.secondaryLabel = $.t(obj.configuration.username.secondaryLabel);
+                        }
+
+                        this.data.usernameConf = {
+                            "isLink" : obj.configuration.username.isLink,
+                            "href" : obj.configuration.username.href,
+                            "secondaryLabel" : obj.configuration.username.secondaryLabel
+                        };
+                    } else {
+                        this.data.usernameConf = {
+                            "isLink" : false
+                        };
+                    }
                 }
 
                 this.reload();
@@ -130,14 +251,22 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                 if (active) {
                     navElement.active = active;
                 }
+
                 if (navObj.url) {
                     navElement.hashurl = navObj.url;
                 } else if (navObj.event) {
                     navElement.event = navObj.event;
                 }
+
                 if (navObj.divider) {
                     navElement.divider = navObj.divider;
                 }
+
+                if (navObj.header) {
+                    navElement.header = navObj.header;
+                    navElement.headerTitle = $.t(navObj.headerTitle);
+                }
+
                 if (navObj.cssClass) {
                     navElement.cssClass = navObj.cssClass;
                 }

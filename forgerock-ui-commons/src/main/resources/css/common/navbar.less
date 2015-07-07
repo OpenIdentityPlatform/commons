@@ -14,8 +14,30 @@
             background-color: #000;
             padding-bottom: 10px;
 
+            &>li small,
+            &>li a small {
+              display: block;
+              font-weight: 400;
+            }
+
+            .dropdown-nolink-item {
+              line-height: 20px;
+              padding: 6px 20px;
+              color: #999;
+              text-transform: uppercase;
+              letter-spacing: 1px;
+              font-size: 13px;
+              font-weight: 600;
+            }
+
             .divider {
                 background-color: #333;
+            }
+
+            &>li.dropdown-header {
+              text-transform: uppercase;
+              font-size: 11px;
+              font-weight: 600;
             }
 
             &>li>a {
@@ -141,7 +163,6 @@
     }
 
 }
-
 
 #subNavHolder {
     display:none;
