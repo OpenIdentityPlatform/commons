@@ -33,12 +33,13 @@ define([
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/util/CookieHelper",
     "org/forgerock/commons/ui/common/util/UIUtils",
+    "org/forgerock/commons/ui/common/util/ObjectUtil",
     "org/forgerock/commons/ui/common/util/Base64",
     "org/forgerock/commons/ui/common/util/Mime",
     "org/forgerock/commons/ui/common/main/Router",
     "bootstrap-dialog",
     "./getLoggedUser"
-], function (sinon, conf, Dialog, eventManager, constants, cookieHelper, UIUtils, Base64, Mime, router, BootstrapDialog, getLoggedUser) {
+], function (sinon, conf, Dialog, eventManager, constants, cookieHelper, UIUtils, ObjectUtil, Base64, Mime, router, BootstrapDialog, getLoggedUser) {
     return {
         executeAll: function (server, parameters) {
 
@@ -356,14 +357,14 @@ define([
 
                 QUnit.ok(template() === "#register/bar", "url helper properly handles simple string value as second argument.");
             });
-            
+
             QUnit.asyncTest("Close Dialogs on View Change (OPENIDM-3358)", function () {
                 var closeAllSpy = sinon.stub(BootstrapDialog,"closeAll");
-                
+
                 conf.loggedUser = getLoggedUser();
 
                 QUnit.ok(!closeAllSpy.called, "BootstrapDialog.closeAll() not yet called before EVENT_CHANGE_VIEW fired");
-                
+
                 eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {
                     route: router.configuration.routes.profile,
                     callback: function () {
@@ -373,10 +374,21 @@ define([
                         QUnit.start();
                     }
                 });
-                
+
                 window.location.hash = "profile/change_security_data/";
             });
 
+            QUnit.test("ObjectUtil functions", function () {
+                var jsonMap = ObjectUtil.toJSONPointerMap({"c": 2, "a": {"b": ['x','y','z',true], "d": undefined }});
+                QUnit.equal(jsonMap["/a/b/2"], 'z', "toJSONPointerMap correctly flattens complex object");
+                QUnit.ok(!_.has(jsonMap, '/d'), "undefined value not included in map produced by toJSONPointerMap");
+
+                var patchDef = ObjectUtil.generatePatchSet({"a": 1, "b": 2}, {"a": 1});
+                QUnit.ok(patchDef.length === 1 && patchDef[0].operation === "add" && patchDef[0].field === "/b" && patchDef[0].value === 2, "Simple field addition returned for patchDef");
+
+                patchDef = ObjectUtil.generatePatchSet({"a": 1, "b": 2}, {"c": 1});
+                QUnit.equal(patchDef.length, 3, "Expected operation count for removal of one attribute and addition of two others");
+            });
 
         }
     };

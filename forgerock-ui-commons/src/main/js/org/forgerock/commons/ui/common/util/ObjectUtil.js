@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -25,55 +25,91 @@
 /*global define*/
 
 define("org/forgerock/commons/ui/common/util/ObjectUtil", [
-    "org/forgerock/commons/ui/common/util/DateUtil"                                                           
-], function (dateUtil) {
+    "underscore"
+], function (_) {
+    /**
+     * @exports org/forgerock/commons/ui/common/util/ObjectUtil
+     */
+
     var obj = {};
 
-    obj.copyObject = function (o) {
-        var result, oneAttribute;
-        if (!o) { 
-            return null;
-        }
+    /**
+     * Translates an arbitrarily-complex object into a flat one composed of JSONPointer key-value pairs.
+     * Example:
+     *   toJSONPointerMap({"c": 2, "a": {"b": ['x','y','z',true]}}) returns:
+     *   {/c: 2, /a/b/0: "x", /a/b/1: "y", /a/b/2: "z", /a/b/3: true}
+     * @param {object} originalObject - the object to convert to a flat map of JSONPointer values
+     */
+    obj.toJSONPointerMap = function (originalObject) {
+        var pointerList;
+        pointerList = function (obj) {
+            return _.chain(obj)
+                .pairs()
+                .filter(function (p) {
+                    return p[1] !== undefined;
+                })
+                .map(function (p) {
+                    if (_.indexOf(["string","boolean","number"], (typeof p[1])) !== -1 || p[1] === null) {
+                      return { "pointer": "/" + p[0], "value": p[1]};
+                    } else {
+                        return _.map(pointerList(p[1]), function (child) {
+                            return {"pointer": "/" + p[0] + child.pointer, "value": child.value };
+                        });
+                    }
+                })
+                .flatten(true)
+                .value();
+            };
 
-        if (o instanceof Date) {
-            result = dateUtil.currentDate();
-            result.setTime(o.getTime());
-            return result;
-        }
-
-        if (o instanceof Array) {
-            result = [];
-//          for (var i = 0, var len = o.length; i < len; ++i) {
-//          result[i] = obj.copyObject(o[i]);
-//          }
-            return result;
-        }
-
-        if (o instanceof Object) {
-            result = {};
-            for (oneAttribute in o) {
-                if (o.hasOwnProperty(oneAttribute)) {
-                    obj.copyObject[oneAttribute] = obj.copyObject(o[oneAttribute]);
-                }
-            }
-            return result;
-        }
-
-        throw new Error("Can't copy the object");
+         return _.reduce(pointerList(originalObject), function (map, entry) {
+                  map[entry.pointer] = entry.value;
+                  return map;
+              }, {});
     };
 
-    obj.patchObject = function (original, patch, mode) {
-        var oneAttribute, result = {};
-        for (oneAttribute in patch) {
-            if (!(original.hasOwnProperty(oneAttribute) && original[oneAttribute] instanceof Array && patch[oneAttribute] instanceof Array)) {
-                original[oneAttribute] = patch[oneAttribute];
-            } //else {
-//              for (var i = 0, var len = patch[oneAttribute].length; i < len; ++i) {
-//              original[oneAttribute][i] = obj.copyObject(o[i]);
-//              }                
-            //}
-        }
-        return result;
+    /**
+     * Compares two objects and generates a patchset necessary to convert the second object to match the first
+     * Examples:
+     *   generatePatchSet({"a": 1, "b": 2}, {"a": 1}) returns:
+     *   [{"operation":"add","field":"/b","value":2}]
+     *
+     *   generatePatchSet({"a": 1, "b": 2}, {"c": 1}) returns:
+     *   [
+     *     {"operation":"add","field":"/a","value":1},
+     *     {"operation":"add","field":"/b","value":2},
+     *     {"operation":"remove","field":"/c"}
+     *   ]
+     *
+     * @param {object} newObject - the object to build up to
+     * @param {object} oldObject - the object to start from
+     */
+    obj.generatePatchSet = function (newObject, oldObject) {
+        var newPointerMap = obj.toJSONPointerMap(newObject),
+            previousPointerMap = obj.toJSONPointerMap(oldObject),
+            newValues = _.chain(newPointerMap)
+                         .pairs()
+                         .filter(function (p) {
+                            return previousPointerMap[p[0]] !== p[1];
+                         })
+                         .map(function (p) {
+                            if (previousPointerMap[p[0]] === undefined) {
+                                return { "operation": "add", "field": p[0], "value": p[1] };
+                            } else {
+                                return { "operation": "replace", "field": p[0], "value": p[1] };
+                            }
+                         })
+                         .value(),
+            removedValues = _.chain(previousPointerMap)
+                             .pairs()
+                             .filter(function (p) {
+                                return newPointerMap[p[0]] === undefined;
+                             })
+                             .map(function (p) {
+                                    return { "operation": "remove", "field": p[0] };
+                             })
+                             .value();
+
+           return newValues.concat(removedValues);
     };
 
     return obj;

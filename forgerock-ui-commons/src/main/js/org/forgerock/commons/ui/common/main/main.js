@@ -29,7 +29,7 @@ define("org/forgerock/commons/ui/common/main/main", [
     "./AbstractDelegate",
     "./Configuration",
     "./EventManager",
-    "./ProcessConfiguration", 
+    "./ProcessConfiguration",
     "./ServiceInvoker",
     "./Router",
     "./ViewManager",
