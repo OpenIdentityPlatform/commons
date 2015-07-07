@@ -17,8 +17,8 @@
 package org.forgerock.http.routing;
 
 import static org.forgerock.http.ResourcePath.urlDecode;
-import static org.forgerock.http.RoutingMode.EQUALS;
-import static org.forgerock.http.RoutingMode.STARTS_WITH;
+import static org.forgerock.http.routing.RoutingMode.EQUALS;
+import static org.forgerock.http.routing.RoutingMode.STARTS_WITH;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -30,7 +30,6 @@ import java.util.regex.Pattern;
 
 import org.forgerock.http.Context;
 import org.forgerock.http.ResourcePath;
-import org.forgerock.http.RoutingMode;
 
 /**
  * A {@link RouteMatcher} which routes requests using URI template matching

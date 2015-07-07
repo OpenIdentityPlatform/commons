@@ -17,14 +17,13 @@
 package org.forgerock.http.routing;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.forgerock.http.RoutingMode.EQUALS;
-import static org.forgerock.http.RoutingMode.STARTS_WITH;
+import static org.forgerock.http.routing.RoutingMode.EQUALS;
+import static org.forgerock.http.routing.RoutingMode.STARTS_WITH;
 import static org.mockito.Mockito.mock;
 
 import java.net.URI;
 
 import org.forgerock.http.Context;
-import org.forgerock.http.RoutingMode;
 import org.forgerock.http.protocol.Request;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;

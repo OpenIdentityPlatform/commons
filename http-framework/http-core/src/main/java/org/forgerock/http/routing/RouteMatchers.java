@@ -18,7 +18,6 @@ package org.forgerock.http.routing;
 
 import org.forgerock.http.Context;
 import org.forgerock.http.ResourcePath;
-import org.forgerock.http.RoutingMode;
 import org.forgerock.http.protocol.Request;
 
 /**
