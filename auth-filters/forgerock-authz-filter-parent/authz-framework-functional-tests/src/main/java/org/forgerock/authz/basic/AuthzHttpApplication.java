@@ -23,7 +23,7 @@ import org.forgerock.authz.modules.oauth2.crest.OAuth2AuthorizationConnectionFac
 import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
-import org.forgerock.http.RoutingMode;
+import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.routing.Router;
 import org.forgerock.json.resource.http.CrestHttp;

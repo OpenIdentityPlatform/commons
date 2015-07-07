@@ -19,7 +19,7 @@ package org.forgerock.authz.basic.crest;
 import static org.forgerock.json.fluent.JsonValue.*;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
-import org.forgerock.http.ServerContext;
+import org.forgerock.http.context.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.CollectionResourceProvider;

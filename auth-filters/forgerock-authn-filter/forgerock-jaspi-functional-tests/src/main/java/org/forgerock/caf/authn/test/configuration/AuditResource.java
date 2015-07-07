@@ -25,7 +25,7 @@ import static org.forgerock.util.promise.Promises.newResultPromise;
 import javax.inject.Inject;
 
 import org.forgerock.caf.authn.test.runtime.TestAuditApi;
-import org.forgerock.http.ServerContext;
+import org.forgerock.http.context.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.PatchRequest;

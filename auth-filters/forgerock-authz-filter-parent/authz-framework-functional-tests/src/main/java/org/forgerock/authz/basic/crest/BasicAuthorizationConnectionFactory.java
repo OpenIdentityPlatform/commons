@@ -16,7 +16,7 @@
 
 package org.forgerock.authz.basic.crest;
 
-import static org.forgerock.http.RoutingMode.STARTS_WITH;
+import static org.forgerock.http.routing.RoutingMode.STARTS_WITH;
 import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
 
 import org.forgerock.authz.filter.crest.AuthorizationFilters;

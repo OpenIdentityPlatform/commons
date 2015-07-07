@@ -32,7 +32,7 @@ import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
 import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.api.MessageInfoContext;
 import org.forgerock.caf.authentication.framework.AuthenticationFramework;
-import org.forgerock.http.HttpContext;
+import org.forgerock.http.context.HttpContext;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.util.promise.Promise;

@@ -16,7 +16,7 @@
 
 package org.forgerock.authz.modules.oauth2.crest;
 
-import static org.forgerock.http.RoutingMode.STARTS_WITH;
+import static org.forgerock.http.routing.RoutingMode.STARTS_WITH;
 import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
 
 import java.util.Collections;

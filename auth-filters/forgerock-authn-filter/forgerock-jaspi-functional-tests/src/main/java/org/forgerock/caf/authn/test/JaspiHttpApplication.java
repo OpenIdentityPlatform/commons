@@ -23,10 +23,10 @@ import org.forgerock.caf.authn.test.configuration.ConfigurationConnectionFactory
 import org.forgerock.guice.core.InjectorHolder;
 import org.forgerock.http.Context;
 import org.forgerock.http.Handler;
-import org.forgerock.http.Http;
 import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
-import org.forgerock.http.RoutingMode;
+import org.forgerock.http.handler.Handlers;
+import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
@@ -58,7 +58,7 @@ public class JaspiHttpApplication implements HttpApplication {
         public Promise<Response, NeverThrowsException> handle(Context context, Request request) {
             ProtectedResource protectedResource = InjectorHolder.getInstance(ProtectedResource.class);
             AuthenticationFilter authenticationFilter = InjectorHolder.getInstance(AuthenticationFilter.class);
-            return Http.chainOf(protectedResource, authenticationFilter).handle(context, request);
+            return Handlers.chainOf(protectedResource, authenticationFilter).handle(context, request);
         }
     }
 

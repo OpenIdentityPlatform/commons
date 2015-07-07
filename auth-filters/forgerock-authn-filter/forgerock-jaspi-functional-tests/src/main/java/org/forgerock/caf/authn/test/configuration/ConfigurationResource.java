@@ -22,7 +22,7 @@ import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import com.google.inject.Singleton;
-import org.forgerock.http.ServerContext;
+import org.forgerock.http.context.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.PatchRequest;

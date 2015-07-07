@@ -20,7 +20,7 @@ import org.forgerock.authz.filter.api.AuthorizationContext;
 import org.forgerock.authz.filter.api.AuthorizationException;
 import org.forgerock.authz.filter.api.AuthorizationResult;
 import org.forgerock.authz.filter.crest.api.CrestAuthorizationModule;
-import org.forgerock.http.ServerContext;
+import org.forgerock.http.context.ServerContext;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
