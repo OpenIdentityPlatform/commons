@@ -28,8 +28,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.forgerock.http.RootContext;
-import org.forgerock.http.ServerContext;
+import org.forgerock.http.context.RootContext;
+import org.forgerock.http.context.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.promise.Promise;

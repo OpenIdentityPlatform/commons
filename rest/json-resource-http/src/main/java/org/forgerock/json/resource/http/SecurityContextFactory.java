@@ -19,7 +19,7 @@ package org.forgerock.json.resource.http;
 import java.util.Map;
 
 import org.forgerock.http.Context;
-import org.forgerock.http.HttpContext;
+import org.forgerock.http.context.HttpContext;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.SecurityContext;
@@ -137,7 +137,7 @@ public final class SecurityContextFactory implements HttpContextFactory {
         return new SecurityContext(parent, authcid, authzid);
     }
 
-    private String getAuthenticationIdAttribute(String attributeName, org.forgerock.http.HttpContext context)
+    private String getAuthenticationIdAttribute(String attributeName, HttpContext context)
             throws InternalServerErrorException {
         try {
             return (String) context.getAttributes().get(attributeName);
@@ -152,7 +152,7 @@ public final class SecurityContextFactory implements HttpContextFactory {
 
     @SuppressWarnings("unchecked")
     private Map<String, Object> getAuthorizationIdAttribute(String attributeName,
-            org.forgerock.http.HttpContext context) throws InternalServerErrorException {
+            HttpContext context) throws InternalServerErrorException {
         try {
             return (Map<String, Object>) context.getAttributes().get(attributeName);
         } catch (final ClassCastException e) {
