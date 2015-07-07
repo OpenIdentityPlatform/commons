@@ -14,4 +14,4 @@
 # Copyright 2015 ForgeRock AS.
 #
 
-org.forgerock.http.client.async.AsyncClientProvider
+org.forgerock.http.apache.async.AsyncClientProvider

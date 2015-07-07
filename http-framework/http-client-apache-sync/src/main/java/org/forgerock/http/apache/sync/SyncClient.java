@@ -16,14 +16,14 @@
  * Portions Copyright 2011-2015 ForgeRock AS.
  */
 
-package org.forgerock.http.apache.httpclient;
+package org.forgerock.http.apache.sync;
 
 import java.io.IOException;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.forgerock.http.client.ahc.AbstractClient;
+import org.forgerock.http.apache.AbstractClient;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
@@ -36,12 +36,12 @@ import org.forgerock.util.promise.Promises;
 /**
  * Apache HTTP Client implementation.
  */
-final class ApacheHttpClientImpl extends AbstractClient {
+final class SyncClient extends AbstractClient {
 
     /** The Apache HTTP client to transmit requests through. */
     private final CloseableHttpClient httpClient;
 
-    ApacheHttpClientImpl(final CloseableHttpClient httpClient, final Factory<Buffer> storage) {
+    SyncClient(final CloseableHttpClient httpClient, final Factory<Buffer> storage) {
         super(storage);
         this.httpClient = httpClient;
     }

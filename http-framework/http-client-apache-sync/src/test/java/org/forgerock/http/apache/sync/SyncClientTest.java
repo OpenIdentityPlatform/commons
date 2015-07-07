@@ -14,7 +14,7 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.http.apache.httpclient;
+package org.forgerock.http.apache.sync;
 
 import static com.xebialabs.restito.builder.stub.StubHttp.whenHttp;
 import static com.xebialabs.restito.semantics.Action.status;
@@ -41,7 +41,7 @@ import com.xebialabs.restito.semantics.Condition;
 import com.xebialabs.restito.server.StubServer;
 
 @SuppressWarnings("javadoc")
-public class ApacheHttpClientImplTest {
+public class SyncClientTest {
 
     // TODO: can we test connection pooling, reuse, SSL, HTTP version, etc?
 

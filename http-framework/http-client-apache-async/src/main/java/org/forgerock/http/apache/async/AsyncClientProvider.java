@@ -14,7 +14,7 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.http.client.async;
+package org.forgerock.http.apache.async;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.forgerock.http.handler.HttpClientHandler.*;
@@ -46,7 +46,7 @@ import org.apache.http.nio.reactor.ConnectingIOReactor;
 import org.apache.http.nio.reactor.IOReactorException;
 import org.apache.http.protocol.HttpContext;
 import org.forgerock.http.HttpApplicationException;
-import org.forgerock.http.client.ahc.NoAuthenticationStrategy;
+import org.forgerock.http.apache.NoAuthenticationStrategy;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.spi.ClientImpl;
 import org.forgerock.http.spi.ClientImplProvider;

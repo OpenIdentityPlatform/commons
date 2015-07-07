@@ -15,9 +15,7 @@
  */
 
 /**
- * Provides {@link org.forgerock.http.Client client} integration with
- * Apache HttpComponents Http Async Client.
- *
- * @see <a href="https://hc.apache.org/httpcomponents-asyncclient-dev/index.html">Apache HTTP Async Client</a>
+ * Base classes for Apache HttpClient (synchronous and asynchronous)
+ * {@link org.forgerock.http.spi.ClientImplProvider} implementations.
  */
-package org.forgerock.http.client.async;
+package org.forgerock.http.apache;

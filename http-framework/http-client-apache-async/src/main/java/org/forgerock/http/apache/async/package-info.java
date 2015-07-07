@@ -15,6 +15,9 @@
  */
 
 /**
- * {@literal ahc} stands for Apache Http Client.
+ * Provides {@link org.forgerock.http.handler.HttpClientHandler} client integration with
+ * Apache HttpComponents Http Async Client.
+ *
+ * @see <a href="https://hc.apache.org/httpcomponents-asyncclient-dev/index.html">Apache HTTP Async Client</a>
  */
-package org.forgerock.http.client.ahc;
+package org.forgerock.http.apache.async;

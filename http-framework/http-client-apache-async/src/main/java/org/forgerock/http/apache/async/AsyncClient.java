@@ -14,7 +14,7 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.http.client.async;
+package org.forgerock.http.apache.async;
 
 import static java.lang.String.format;
 
@@ -24,7 +24,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
-import org.forgerock.http.client.ahc.AbstractClient;
+import org.forgerock.http.apache.AbstractClient;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;

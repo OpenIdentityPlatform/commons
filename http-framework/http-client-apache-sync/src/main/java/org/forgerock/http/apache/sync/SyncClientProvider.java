@@ -16,7 +16,7 @@
  * Portions Copyright 2011-2015 ForgeRock AS.
  */
 
-package org.forgerock.http.apache.httpclient;
+package org.forgerock.http.apache.sync;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.forgerock.http.handler.HttpClientHandler.*;
@@ -30,7 +30,7 @@ import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.NoConnectionReuseStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.forgerock.http.HttpApplicationException;
-import org.forgerock.http.client.ahc.NoAuthenticationStrategy;
+import org.forgerock.http.apache.NoAuthenticationStrategy;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.spi.ClientImpl;
 import org.forgerock.http.spi.ClientImplProvider;
@@ -41,7 +41,7 @@ import org.forgerock.util.time.Duration;
 /**
  * An HTTP client implementation provider for Apache HttpClient.
  */
-public final class ApacheHttpClientImplProvider implements ClientImplProvider {
+public final class SyncClientProvider implements ClientImplProvider {
 
     @Override
     public ClientImpl newClientImpl(final Options options) throws HttpApplicationException {
@@ -99,6 +99,6 @@ public final class ApacheHttpClientImplProvider implements ClientImplProvider {
         builder.setProxyAuthenticationStrategy(NoAuthenticationStrategy.INSTANCE);
         builder.setTargetAuthenticationStrategy(NoAuthenticationStrategy.INSTANCE);
 
-        return new ApacheHttpClientImpl(builder.build(), storage);
+        return new SyncClient(builder.build(), storage);
     }
 }

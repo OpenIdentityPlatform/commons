@@ -14,7 +14,7 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.http.client.ahc;
+package org.forgerock.http.apache;
 
 import java.util.Collections;
 import java.util.LinkedList;
