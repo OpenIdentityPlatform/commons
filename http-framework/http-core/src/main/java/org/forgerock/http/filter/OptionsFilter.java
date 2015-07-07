@@ -14,11 +14,14 @@
  * Copyright 2014-2015 ForgeRock AS.
  */
 
-package org.forgerock.http;
+package org.forgerock.http.filter;
 
 import java.util.Arrays;
 import java.util.List;
 
+import org.forgerock.http.Context;
+import org.forgerock.http.Filter;
+import org.forgerock.http.Handler;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.Status;

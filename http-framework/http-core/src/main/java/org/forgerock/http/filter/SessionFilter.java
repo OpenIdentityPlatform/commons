@@ -14,12 +14,18 @@
  * Copyright 2014-2015 ForgeRock AS.
  */
 
-package org.forgerock.http;
+package org.forgerock.http.filter;
 
 import static org.forgerock.http.HttpApplication.LOGGER;
 
 import java.io.IOException;
 
+import org.forgerock.http.Context;
+import org.forgerock.http.Filter;
+import org.forgerock.http.Handler;
+import org.forgerock.http.HttpContext;
+import org.forgerock.http.Session;
+import org.forgerock.http.SessionManager;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.util.Reject;

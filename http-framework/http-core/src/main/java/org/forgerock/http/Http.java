@@ -33,17 +33,6 @@ import org.forgerock.util.promise.PromiseImpl;
 public final class Http {
 
     /**
-     * Creates a session {@link Filter} that will use the provided
-     * {@link SessionManager} to manage the users session.
-     *
-     * @param sessionManager The {@code SessionManager}.
-     * @return A session {@code Filter}.
-     */
-    public static Filter newSessionFilter(SessionManager sessionManager) {
-        return new SessionFilter(sessionManager);
-    }
-
-    /**
      * Creates a {@link Handler} which wraps the provided {@literal filters}
      * around the provided target {@literal handler}.
      *
@@ -96,16 +85,6 @@ public final class Http {
     public static Filter chainOf(final Collection<Filter> filters) {
         // TODO: return a subsequence of filters.
         return null;
-    }
-
-    /**
-     * Creates a {@link Filter} which handles HTTP OPTIONS method requests.
-     *
-     * @param allowedMethods The allowed HTTP methods of the endpoint.
-     * @return A {@code Filter}.
-     */
-    public static Filter newOptionsFilter(String... allowedMethods) {
-        return new OptionsFilter(allowedMethods);
     }
 
     private static final class Chain implements Handler {
