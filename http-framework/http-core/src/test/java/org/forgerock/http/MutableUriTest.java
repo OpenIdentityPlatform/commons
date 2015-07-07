@@ -14,7 +14,7 @@
  * Copyright 2014-2015 ForgeRock AS.
  */
 
-package org.forgerock.http.util;
+package org.forgerock.http;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.http.MutableUri.uri;
@@ -22,7 +22,6 @@ import static org.forgerock.http.MutableUri.uri;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import org.forgerock.http.MutableUri;
 import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")
