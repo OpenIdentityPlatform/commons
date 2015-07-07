@@ -14,13 +14,15 @@
  * Copyright 2014-2015 ForgeRock AS.
  */
 
-package org.forgerock.http;
+package org.forgerock.http.context;
 
 import static java.util.Arrays.asList;
 
 import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.List;
+
+import org.forgerock.http.Context;
 
 /**
  * ClientInfo gives easy access to client-related information that are available into the request.

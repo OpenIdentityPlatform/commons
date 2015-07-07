@@ -22,7 +22,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.forgerock.http.Context;
-import org.forgerock.http.ServerContext;
+import org.forgerock.http.context.ServerContext;
 
 /**
  * A {@link Context} which is created when a request has been routed. The

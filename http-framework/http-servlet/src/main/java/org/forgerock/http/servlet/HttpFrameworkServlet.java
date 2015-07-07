@@ -40,13 +40,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.forgerock.http.ClientInfoContext;
+import org.forgerock.http.context.ClientInfoContext;
 import org.forgerock.http.Context;
 import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
-import org.forgerock.http.HttpContext;
-import org.forgerock.http.RootContext;
+import org.forgerock.http.context.HttpContext;
+import org.forgerock.http.context.RootContext;
 import org.forgerock.http.routing.RouterContext;
 import org.forgerock.http.Session;
 import org.forgerock.http.URIUtil;

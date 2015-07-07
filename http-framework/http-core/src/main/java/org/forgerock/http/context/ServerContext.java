@@ -14,9 +14,11 @@
  * Copyright 2012-2015 ForgeRock AS.
  */
 
-package org.forgerock.http;
+package org.forgerock.http.context;
 
 import static org.forgerock.util.Reject.*;
+
+import org.forgerock.http.Context;
 
 /**
  * The context associated with a request currently being processed by a {@code Handler}

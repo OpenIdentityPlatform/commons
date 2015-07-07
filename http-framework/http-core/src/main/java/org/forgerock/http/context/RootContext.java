@@ -14,10 +14,12 @@
  * Copyright 2012-2015 ForgeRock AS.
  */
 
-package org.forgerock.http;
+package org.forgerock.http.context;
 
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
+
+import org.forgerock.http.Context;
 
 /**
  * A {@link Context} which has an a globally unique ID but no parent. All request context

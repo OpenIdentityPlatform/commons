@@ -14,12 +14,14 @@
  * Copyright 2014-2015 ForgeRock AS.
  */
 
-package org.forgerock.http;
+package org.forgerock.http.context;
 
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.forgerock.http.Context;
+import org.forgerock.http.Session;
 import org.forgerock.util.Reject;
 
 /**

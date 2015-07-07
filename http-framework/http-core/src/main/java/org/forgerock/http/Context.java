@@ -16,6 +16,8 @@
 
 package org.forgerock.http;
 
+import org.forgerock.http.context.RootContext;
+
 /**
  * The context associated with a request currently being processed by a {@code Handler}.
  * A request context can be used to query state information

@@ -14,7 +14,7 @@
  * Copyright 2014 ForgeRock AS.
  */
 
-package org.forgerock.http;
+package org.forgerock.http.context;
 
 import java.security.cert.X509Certificate;
 import java.util.List;

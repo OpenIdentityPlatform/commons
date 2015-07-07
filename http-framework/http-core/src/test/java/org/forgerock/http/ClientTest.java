@@ -26,6 +26,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
+import org.forgerock.http.context.RootContext;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.Status;
