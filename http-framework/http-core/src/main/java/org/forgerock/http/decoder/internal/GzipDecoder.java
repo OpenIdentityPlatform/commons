@@ -12,14 +12,16 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2014 ForgeRock AS.
+ * Portions Copyright 2011-2015 ForgeRock AS.
  */
 
-package org.forgerock.http.decoder;
+package org.forgerock.http.decoder.internal;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.GZIPInputStream;
+
+import org.forgerock.http.decoder.Decoder;
 
 /**
  * Decodes an entity encoded with <strong>{@code gzip}</strong> encoding. See

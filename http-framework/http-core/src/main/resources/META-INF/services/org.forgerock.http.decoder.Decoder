@@ -14,5 +14,5 @@
 # Copyright 2015 ForgeRock AS.
 #
 
-org.forgerock.http.decoder.GzipDecoder
-org.forgerock.http.decoder.DeflateDecoder
+org.forgerock.http.decoder.internal.GzipDecoder
+org.forgerock.http.decoder.internal.DeflateDecoder
