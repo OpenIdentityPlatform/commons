@@ -16,14 +16,12 @@
 
 package org.forgerock.http;
 
-import org.forgerock.http.context.RootContext;
-
 /**
  * The context associated with a request currently being processed by a {@code Handler}.
  * A request context can be used to query state information
  * about the request. Implementations may provide additional information,
  * time-stamp information, HTTP headers, etc. Contexts are linked together to
- * form a parent-child chain of context, whose root is a {@link RootContext}.
+ * form a parent-child chain of context, whose root is a {@link org.forgerock.http.context.RootContext}.
  */
 public interface Context {
 
