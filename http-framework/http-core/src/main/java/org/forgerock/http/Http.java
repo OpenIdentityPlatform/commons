@@ -17,11 +17,6 @@
 
 package org.forgerock.http;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-
-import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
@@ -31,91 +26,6 @@ import org.forgerock.util.promise.PromiseImpl;
  * Utility methods for creating common types of handler and filters.
  */
 public final class Http {
-
-    /**
-     * Creates a {@link Handler} which wraps the provided {@literal filters}
-     * around the provided target {@literal handler}.
-     *
-     * @param handler The target handler which will be invoked once
-     *                processing has reached the end of the filter chain.
-     * @param filters The list of filters to be processed before invoking the
-     *                target.
-     * @return A {@code Handler}.
-     * @see #chainOf(Handler, List)
-     */
-    public static Handler chainOf(final Handler handler, final Filter... filters) {
-        return chainOf(handler, Arrays.asList(filters));
-    }
-
-    /**
-     * Creates a {@link Handler} which wraps the provided {@literal filters}
-     * around the provided target {@literal handler}.
-     *
-     * @param handler The target handler which will be invoked once
-     *                processing has reached the end of the filter chain.
-     * @param filters The list of filters to be processed before invoking the
-     *                target.
-     * @return A {@code Handler}.
-     * @see #chainOf(Handler, Filter...)
-     */
-    public static Handler chainOf(final Handler handler, final List<Filter> filters) {
-        return new Chain(handler, filters, 0);
-    }
-
-    /**
-     * Creates a {@link Filter} which encapsulates the provided {@literal filters}
-     * into a single {@code Filter}.
-     *
-     * @param filters The list of filters to be invoked, in order.
-     * @return A {@code Filter}.
-     * @see #chainOf(Collection)
-     */
-    public static Filter chainOf(final Filter... filters) {
-        return chainOf(Arrays.asList(filters));
-    }
-
-    /**
-     * Creates a {@link Filter} which encapsulates the provided {@literal filters}
-     * into a single {@code Filter}.
-     *
-     * @param filters The list of filters to be invoked, in order.
-     * @return A {@code Filter}.
-     * @see #chainOf(Filter...)
-     */
-    public static Filter chainOf(final Collection<Filter> filters) {
-        // TODO: return a subsequence of filters.
-        return null;
-    }
-
-    private static final class Chain implements Handler {
-        private final Handler handler;
-        private final List<Filter> filters;
-        private final int position;
-
-        private Chain(Handler handler, List<Filter> filters, int position) {
-            this.handler = handler;
-            this.filters = filters;
-            this.position = position;
-        }
-
-        @Override
-        public Promise<Response, NeverThrowsException> handle(Context context, Request request) {
-            if (position < filters.size()) {
-                return filters.get(position).filter(context, request, next());
-            } else {
-                return handler.handle(context, request);
-            }
-        }
-
-        private Handler next() {
-            return new Chain(handler, filters, position + 1);
-        }
-
-        @Override
-        public String toString() {
-            return filters.toString() + " -> " + handler.toString();
-        }
-    }
 
     /**
      * Returns a {@link Promise} representing the {@code Response} for an

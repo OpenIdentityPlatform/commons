@@ -14,7 +14,7 @@
  * Copyright 2013-2015 ForgeRock AS.
  */
 
-package org.forgerock.http;
+package org.forgerock.http.handler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
@@ -24,6 +24,10 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
+import org.forgerock.http.Context;
+import org.forgerock.http.Filter;
+import org.forgerock.http.Handler;
+import org.forgerock.http.Session;
 import org.forgerock.http.context.HttpContext;
 import org.forgerock.http.context.RootContext;
 import org.forgerock.http.protocol.Request;
@@ -50,7 +54,7 @@ public final class HandlersTest {
         Filter filter1 = mock(Filter.class);
         doAnswer(invoke()).when(filter1).filter(any(Context.class), any(Request.class), any(Handler.class));
         Filter filter2 = filter();
-        Handler chain = Http.chainOf(target, filter1, filter2);
+        Handler chain = Handlers.chainOf(target, filter1, filter2);
         Context context = context();
         Request request = new Request();
 
@@ -78,7 +82,7 @@ public final class HandlersTest {
         Filter filter1 = mock(Filter.class);
         doAnswer(invoke(2)).when(filter1).filter(any(Context.class), any(Request.class), any(Handler.class));
         Filter filter2 = filter();
-        Handler chain = Http.chainOf(target, filter1, filter2);
+        Handler chain = Handlers.chainOf(target, filter1, filter2);
         Context context = context();
         Request request = new Request();
 
@@ -110,7 +114,7 @@ public final class HandlersTest {
             }
         }).when(filter1).filter(any(Context.class), any(Request.class), any(Handler.class));
         Filter filter2 = filter();
-        Handler chain = Http.chainOf(target, filter1, filter2);
+        Handler chain = Handlers.chainOf(target, filter1, filter2);
         Context context = context();
         Request request = new Request();
 
