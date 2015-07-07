@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+         version="2.5">
+
+    <display-name>Http Application Servlet</display-name>
+
+    <listener>
+        <listener-class>org.forgerock.http.servlet.example.ExampleHttpFrameworkServletContextListener</listener-class>
+    </listener>
+
+    <servlet>
+        <servlet-name>AdminHttpApplicationServlet</servlet-name>
+        <servlet-class>org.forgerock.http.servlet.HttpFrameworkServlet</servlet-class>
+        <async-supported>true</async-supported>
+        <init-param>
+            <param-name>application-loader</param-name>
+            <param-value>servlet_context</param-value>
+        </init-param>
+        <init-param>
+            <param-name>application-key</param-name>
+            <param-value>adminApp</param-value>
+        </init-param>
+    </servlet>
+
+    <servlet>
+        <servlet-name>StandardHttpApplicationServlet</servlet-name>
+        <servlet-class>org.forgerock.http.servlet.HttpFrameworkServlet</servlet-class>
+        <async-supported>true</async-supported>
+        <init-param>
+            <param-name>application-loader</param-name>
+            <param-value>servlet_context</param-value>
+        </init-param>
+        <init-param>
+            <param-name>application-key</param-name>
+            <param-value>app</param-value>
+        </init-param>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>AdminHttpApplicationServlet</servlet-name>
+        <url-pattern>/admin/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>StandardHttpApplicationServlet</servlet-name>
+        <url-pattern>/app/*</url-pattern>
+    </servlet-mapping>
+
+</web-app>

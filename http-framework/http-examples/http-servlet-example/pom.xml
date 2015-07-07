@@ -12,7 +12,7 @@
   Header, with the fields enclosed by brackets [] replaced by your own identifying
   information: "Portions Copyright [year] [name of copyright owner]".
 
-  Copyright 2014-2015 ForgeRock AS.
+  Copyright 2015 ForgeRock AS.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -23,13 +23,20 @@
     <artifactId>forgerock-http-framework</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  <artifactId>chf-http-servlet</artifactId>
-  <packaging>bundle</packaging>
-  <name>HTTP Servlet integration library</name>
+  <artifactId>chf-http-servlet-example</artifactId>
+  <packaging>war</packaging>
+  <name>HTTP Servlet integration example</name>
+  <description>
+    Contains examples of a: single HttpApplication deployment where the
+    application is unaware of the servlet url path it is registered at, single
+    HttpApplication deployment where the application is registered at multiple
+    servlet url paths and multiple HttpApplication deployment where each
+    application is unaware of the servlet url path it is registered at.
+  </description>
   <dependencies>
     <dependency>
       <groupId>org.forgerock.http</groupId>
-      <artifactId>chf-http-core</artifactId>
+      <artifactId>chf-http-servlet</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -37,27 +44,6 @@
       <artifactId>javax.servlet-api</artifactId>
       <version>3.0.1</version>
       <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.forgerock.commons</groupId>
-      <artifactId>forgerock-guice-core</artifactId>
-      <version>1.1.0-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.assertj</groupId>
-      <artifactId>assertj-core</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-all</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.testng</groupId>
-      <artifactId>testng</artifactId>
-      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>

@@ -41,6 +41,7 @@
     <module>http-client-apache-common</module>
     <module>http-client-apache-sync</module>
     <module>http-client-apache-async</module>
+    <module>http-examples</module>
   </modules>
   <build>
     <plugins>

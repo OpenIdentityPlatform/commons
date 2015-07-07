@@ -20,40 +20,36 @@ package org.forgerock.http.servlet;
 import static org.forgerock.http.io.IO.newBranchingInputStream;
 import static org.forgerock.http.io.IO.newTemporaryStorage;
 import static org.forgerock.util.Utils.closeSilently;
-import static org.forgerock.http.ResourcePath.resourcePath;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ServiceLoader;
-
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.security.cert.X509Certificate;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.ServiceLoader;
 
-import org.forgerock.http.context.ClientInfoContext;
 import org.forgerock.http.Context;
 import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
+import org.forgerock.http.Session;
+import org.forgerock.http.context.ClientInfoContext;
 import org.forgerock.http.context.HttpContext;
 import org.forgerock.http.context.RootContext;
-import org.forgerock.http.routing.RouterContext;
-import org.forgerock.http.Session;
-import org.forgerock.http.util.Uris;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
+import org.forgerock.http.routing.RouterContext;
 import org.forgerock.http.util.CaseInsensitiveSet;
+import org.forgerock.http.util.Uris;
 import org.forgerock.util.Factory;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
@@ -89,15 +85,26 @@ public final class HttpFrameworkServlet extends HttpServlet {
      */
     private static final String SERVLET_TEMP_DIR = "javax.servlet.context.tempdir";
 
+    /**
+     * Servlet init-param for configuring the routing base for the
+     * {@link HttpApplication}.
+     *
+     *  @see ServletRoutingBase
+     */
+    public static final String ROUTING_BASE_INIT_PARAM_NAME = "routing-base";
+
     private ServletVersionAdapter adapter;
     private HttpApplication application;
     private Factory<Buffer> storage;
     private Handler handler;
+    private ServletRoutingBase routingBase;
 
     @Override
     public void init() throws ServletException {
         adapter = getAdapter(getServletContext());
-        application = new ServletHttpApplicationWrapper(getApplication(), getServletContext());
+        routingBase = selectRoutingBase(getServletConfig());
+        HttpApplicationLoader applicationLoader = getApplicationLoader(getServletConfig());
+        application = getApplication(applicationLoader, getServletConfig());
         storage = application.getBufferFactory();
         if (storage == null) {
             final File tmpDir = (File) getServletContext().getAttribute(SERVLET_TEMP_DIR);
@@ -123,32 +130,33 @@ public final class HttpFrameworkServlet extends HttpServlet {
         }
     }
 
-    private HttpApplication getApplication() throws ServletException {
-        ServiceLoader<HttpApplication> configurations = ServiceLoader.load(HttpApplication.class);
-        Iterator<HttpApplication> iterator = configurations.iterator();
-
-        if (!iterator.hasNext()) {
-            throw new ServletException("No ServletConfiguration implementation registered.");
+    private ServletRoutingBase selectRoutingBase(ServletConfig servletConfig) throws ServletException {
+        String routingModeParam = servletConfig.getInitParameter(ROUTING_BASE_INIT_PARAM_NAME);
+        if (routingModeParam == null) {
+            return ServletRoutingBase.SERVLET_PATH;
         }
-
-        HttpApplication configuration = iterator.next();
-
-        if (iterator.hasNext()) {
-            // Multiple ServletConfigurations registered!
-            List<Object> messageParams = new ArrayList<Object>();
-            messageParams.add(iterator.next().getClass().getName());
-
-            String message = "Multiple ServletConfiguration implementations registered.\n%d configurations found: %s";
-
-            while (iterator.hasNext()) {
-                messageParams.add(iterator.next().getClass().getName());
-                message += ", %s";
-            }
-            messageParams.add(0, messageParams.size());
-
-            throw new ServletException(String.format(message, messageParams.toArray()));
+        try {
+            return ServletRoutingBase.valueOf(routingModeParam.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new ServletException("Invalid routing mode: " + routingModeParam);
         }
-        return configuration;
+    }
+
+    private HttpApplicationLoader getApplicationLoader(ServletConfig config) throws ServletException {
+        String applicationLoaderParam = config.getInitParameter("application-loader");
+        if (applicationLoaderParam == null) {
+            return HttpApplicationLoader.SERVICE_LOADER;
+        }
+        try {
+            return HttpApplicationLoader.valueOf(applicationLoaderParam.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new ServletException("Invalid HTTP application loader: " + applicationLoaderParam);
+        }
+    }
+
+    private HttpApplication getApplication(HttpApplicationLoader applicationLoader, ServletConfig config)
+            throws ServletException {
+        return applicationLoader.load(config);
     }
 
     @Override
@@ -245,19 +253,9 @@ public final class HttpFrameworkServlet extends HttpServlet {
     }
 
     private RouterContext createRouterContext(Context parent, HttpServletRequest req) {
-        String contextPath = forceEmptyIfNull(req.getContextPath());
-        contextPath = contextPath.startsWith("/") ? contextPath.substring(1) : contextPath;
-        String matchedUri = contextPath + forceEmptyIfNull(req.getServletPath());
-        if (resourcePath(matchedUri).equals(resourcePath(req.getRequestURI()))) {
-            //Must be registered at '/' path
-            matchedUri = contextPath;
-        }
+        String matchedUri = routingBase.extractMatchedUri(req);
         String remaining = req.getRequestURI().substring(req.getRequestURI().indexOf(matchedUri) + matchedUri.length());
         return new RouterContext(parent, matchedUri, remaining, Collections.<String, String>emptyMap());
-    }
-
-    private String forceEmptyIfNull(final String s) {
-        return s != null ? s : "";
     }
 
     private void writeResponse(HttpContext context, HttpServletResponse resp, Response response)
