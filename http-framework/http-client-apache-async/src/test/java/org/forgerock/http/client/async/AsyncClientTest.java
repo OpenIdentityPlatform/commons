@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import org.forgerock.http.Client;
-import org.forgerock.http.HttpClientHandler;
+import org.forgerock.http.handler.HttpClientHandler;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.Status;

@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.xebialabs.restito.semantics.Predicate;
 import com.xebialabs.restito.semantics.Predicates;
 import org.forgerock.http.Client;
-import org.forgerock.http.HttpClientHandler;
+import org.forgerock.http.handler.HttpClientHandler;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Status;
 import org.glassfish.grizzly.http.util.HttpStatus;

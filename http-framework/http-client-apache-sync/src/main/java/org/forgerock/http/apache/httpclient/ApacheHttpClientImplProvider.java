@@ -19,7 +19,7 @@
 package org.forgerock.http.apache.httpclient;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.forgerock.http.HttpClientHandler.*;
+import static org.forgerock.http.handler.HttpClientHandler.*;
 
 import javax.net.ssl.SSLContext;
 import java.security.GeneralSecurityException;

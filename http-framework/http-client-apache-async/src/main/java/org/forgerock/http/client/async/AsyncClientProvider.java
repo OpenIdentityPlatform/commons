@@ -17,7 +17,7 @@
 package org.forgerock.http.client.async;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.forgerock.http.HttpClientHandler.*;
+import static org.forgerock.http.handler.HttpClientHandler.*;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;

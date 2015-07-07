@@ -14,7 +14,7 @@
  * Copyright 2014-2015 ForgeRock AS.
  */
 
-package org.forgerock.http;
+package org.forgerock.http.handler;
 
 import static org.forgerock.util.time.Duration.duration;
 
@@ -24,6 +24,9 @@ import java.io.IOException;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.TrustManager;
 
+import org.forgerock.http.Context;
+import org.forgerock.http.Handler;
+import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.io.IO;
 import org.forgerock.http.protocol.Request;
