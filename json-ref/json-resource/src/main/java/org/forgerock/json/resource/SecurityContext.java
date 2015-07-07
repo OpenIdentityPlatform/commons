@@ -22,7 +22,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.forgerock.http.AbstractContext;
+import org.forgerock.http.context.AbstractContext;
 import org.forgerock.http.Context;
 
 /**

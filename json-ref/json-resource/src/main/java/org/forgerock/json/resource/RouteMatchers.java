@@ -20,9 +20,9 @@ import static org.forgerock.http.routing.RouteMatchers.uriMatcher;
 
 import org.forgerock.http.Context;
 import org.forgerock.http.ResourcePath;
-import org.forgerock.http.RoutingMode;
 import org.forgerock.http.routing.RouteMatch;
 import org.forgerock.http.routing.RouteMatcher;
+import org.forgerock.http.routing.RoutingMode;
 
 /**
  * A utility class that contains methods for creating route matchers.

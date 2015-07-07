@@ -16,8 +16,8 @@
 
 package org.forgerock.json.resource;
 
-import static org.forgerock.http.RoutingMode.EQUALS;
-import static org.forgerock.http.RoutingMode.STARTS_WITH;
+import static org.forgerock.http.routing.RoutingMode.EQUALS;
+import static org.forgerock.http.routing.RoutingMode.STARTS_WITH;
 import static org.forgerock.json.fluent.JsonValue.*;
 import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
 import static org.forgerock.json.resource.TestUtils.*;
@@ -32,8 +32,8 @@ import static org.mockito.Mockito.verify;
 import java.util.List;
 
 import org.assertj.core.api.Assertions;
-import org.forgerock.http.RootContext;
-import org.forgerock.http.ServerContext;
+import org.forgerock.http.context.RootContext;
+import org.forgerock.http.context.ServerContext;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.annotations.Action;

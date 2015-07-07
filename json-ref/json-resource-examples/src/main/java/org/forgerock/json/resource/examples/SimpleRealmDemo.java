@@ -23,7 +23,7 @@ import static org.forgerock.util.promise.Promises.newResultPromise;
 import java.util.Collections;
 
 import org.forgerock.http.ResourcePath;
-import org.forgerock.http.ServerContext;
+import org.forgerock.http.context.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.AbstractRequestHandler;
 import org.forgerock.json.resource.Connection;
