@@ -23,9 +23,9 @@ import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
-import org.forgerock.http.RootContext;
-import org.forgerock.http.RoutingMode;
-import org.forgerock.http.ServerContext;
+import org.forgerock.http.context.RootContext;
+import org.forgerock.http.routing.RoutingMode;
+import org.forgerock.http.context.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.VersionSelector.DefaultVersionBehaviour;
 import org.forgerock.util.promise.Promise;

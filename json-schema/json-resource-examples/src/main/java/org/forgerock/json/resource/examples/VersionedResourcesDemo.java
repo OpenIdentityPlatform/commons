@@ -22,8 +22,8 @@ import static org.forgerock.json.resource.Resources.newInternalConnection;
 import static org.forgerock.json.resource.examples.DemoUtils.*;
 
 import org.forgerock.http.Context;
-import org.forgerock.http.RoutingMode;
-import org.forgerock.http.ServerContext;
+import org.forgerock.http.routing.RoutingMode;
+import org.forgerock.http.context.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.AcceptAPIVersion;
 import org.forgerock.json.resource.AcceptAPIVersionContext;

@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.forgerock.http.Context;
-import org.forgerock.http.RootContext;
+import org.forgerock.http.context.RootContext;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 

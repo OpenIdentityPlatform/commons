@@ -16,7 +16,7 @@
 
 package org.forgerock.json.resource;
 
-import org.forgerock.http.ServerContext;
+import org.forgerock.http.context.ServerContext;
 
 /**
  * A completion handler for consuming the results of a query request.

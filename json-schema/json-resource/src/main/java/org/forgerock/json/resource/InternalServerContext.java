@@ -11,13 +11,13 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
 
 import org.forgerock.http.Context;
-import org.forgerock.http.ServerContext;
+import org.forgerock.http.context.ServerContext;
 
 /**
  * A {@link ServerContext} from an internal source.

@@ -22,7 +22,7 @@ import static org.forgerock.util.promise.Promises.newResultPromise;
 import java.util.Collection;
 import java.util.LinkedList;
 
-import org.forgerock.http.ServerContext;
+import org.forgerock.http.context.ServerContext;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.util.promise.Promise;
 

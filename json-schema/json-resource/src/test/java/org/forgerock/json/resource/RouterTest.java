@@ -18,8 +18,8 @@ package org.forgerock.json.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
-import static org.forgerock.http.RoutingMode.EQUALS;
-import static org.forgerock.http.RoutingMode.STARTS_WITH;
+import static org.forgerock.http.routing.RoutingMode.EQUALS;
+import static org.forgerock.http.routing.RoutingMode.STARTS_WITH;
 import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
 import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -31,7 +31,7 @@ import java.util.Collections;
 
 import org.forgerock.http.Context;
 import org.forgerock.http.ResourcePath;
-import org.forgerock.http.ServerContext;
+import org.forgerock.http.context.ServerContext;
 import org.forgerock.http.routing.RouterContext;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.util.promise.Promise;

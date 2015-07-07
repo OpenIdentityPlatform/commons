@@ -17,7 +17,7 @@
 package org.forgerock.json.resource;
 
 import org.forgerock.http.Context;
-import org.forgerock.http.ServerContext;
+import org.forgerock.http.context.ServerContext;
 import org.forgerock.http.routing.AbstractRouter;
 import org.forgerock.http.routing.IncomparableRouteMatchException;
 import org.forgerock.http.routing.RouteMatcher;
@@ -26,8 +26,8 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.util.Pair;
 import org.forgerock.util.promise.Promise;
 
-import static org.forgerock.http.RoutingMode.EQUALS;
-import static org.forgerock.http.RoutingMode.STARTS_WITH;
+import static org.forgerock.http.routing.RoutingMode.EQUALS;
+import static org.forgerock.http.routing.RoutingMode.STARTS_WITH;
 import static org.forgerock.json.resource.Requests.*;
 import static org.forgerock.json.resource.Resources.newCollection;
 import static org.forgerock.json.resource.Resources.newSingleton;
