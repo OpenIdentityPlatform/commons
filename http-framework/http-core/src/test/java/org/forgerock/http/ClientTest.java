@@ -17,7 +17,7 @@
 package org.forgerock.http;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.forgerock.http.Http.newResponsePromise;
+import static org.forgerock.http.protocol.Response.newResponsePromise;
 import static org.forgerock.util.Utils.joinAsString;
 import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.when;
