@@ -16,7 +16,7 @@
 
 package org.forgerock.http;
 
-import static org.forgerock.http.URIUtil.*;
+import static org.forgerock.http.util.Uris.create;
 
 import java.net.URI;
 import java.net.URISyntaxException;

@@ -49,7 +49,7 @@ import org.forgerock.http.context.HttpContext;
 import org.forgerock.http.context.RootContext;
 import org.forgerock.http.routing.RouterContext;
 import org.forgerock.http.Session;
-import org.forgerock.http.URIUtil;
+import org.forgerock.http.util.Uris;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
@@ -212,8 +212,8 @@ public final class HttpFrameworkServlet extends HttpServlet {
         Request request = new Request();
         request.setMethod(req.getMethod());
         try {
-            request.setUri(URIUtil.create(req.getScheme(), null, req.getServerName(),
-                    req.getServerPort(), req.getRequestURI(), req.getQueryString(), null));
+            request.setUri(Uris.create(req.getScheme(), null, req.getServerName(),
+                                       req.getServerPort(), req.getRequestURI(), req.getQueryString(), null));
         } catch (URISyntaxException use) {
             throw new ServletException(use);
         }

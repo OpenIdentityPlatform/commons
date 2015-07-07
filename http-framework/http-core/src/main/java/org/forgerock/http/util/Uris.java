@@ -15,7 +15,7 @@
  * Portions Copyright 2011-2015 ForgeRock AS.
  */
 
-package org.forgerock.http;
+package org.forgerock.http.util;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -28,10 +28,10 @@ import org.forgerock.http.protocol.Form;
 /**
  * Utility class for performing operations on universal resource identifiers.
  */
-public final class URIUtil {
+public final class Uris {
 
     /** Static methods only. */
-    private URIUtil() {
+    private Uris() {
     }
 
     /**
