@@ -62,7 +62,7 @@
     </properties>
     <modules>
         <module>utils</module>
-        <module>forgerock-json-utils</module>
+        <module>forgerock-json-util</module>
         <module>test</module>
     </modules>
     <dependencyManagement>
