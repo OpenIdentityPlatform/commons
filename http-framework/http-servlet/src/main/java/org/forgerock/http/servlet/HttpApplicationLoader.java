@@ -186,6 +186,13 @@ enum HttpApplicationLoader {
     GUICE {
         @Override
         HttpApplication load(ServletConfig config) throws ServletException {
+            return LazilyLinkGuice.load(config);
+        }
+    };
+
+    // Force lazy linkage to Guice because the Guice dependency is optional.
+    private static class LazilyLinkGuice {
+        private static HttpApplication load(ServletConfig config) throws ServletException {
             String applicationClassName = config.getInitParameter("application-class");
             try {
                 if (applicationClassName == null) {
@@ -200,7 +207,7 @@ enum HttpApplicationLoader {
                 throw new ServletException("Failed to load the Http Application class: " + applicationClassName, e);
             }
         }
-    };
+    }
 
     /**
      * Loads the {@code HttpApplication}.
