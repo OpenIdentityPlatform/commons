@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.forgerock.commons</groupId>
         <artifactId>forgerock-audit</artifactId>
-        <version>0.1.0-SNAPSHOT</version>
+        <version>0.1.0</version>
     </parent>
     <artifactId>forgerock-audit-handler-csv</artifactId>
     <packaging>bundle</packaging>
