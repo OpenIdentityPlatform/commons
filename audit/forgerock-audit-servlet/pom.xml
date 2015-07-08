@@ -19,12 +19,12 @@
     <parent>
         <groupId>org.forgerock.commons</groupId>
         <artifactId>forgerock-audit</artifactId>
-        <version>0.1.0-SNAPSHOT</version>
+        <version>0.1.0</version>
     </parent>
     <artifactId>forgerock-audit-servlet</artifactId>
     <packaging>bundle</packaging>
     <name>Commons - ForgeRock Audit Framework Servlet</name>
-    <description></description>
+    <description />
 
     <dependencies>
         <!-- ForgeRock Commons Dependencies -->
