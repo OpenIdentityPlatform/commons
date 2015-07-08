@@ -69,7 +69,6 @@
     </properties>
     <modules>
         <module>json-fluent</module>
-        <module>json-patch</module>
         <module>json-ref</module>
         <module>json-ref-jackson</module>
         <module>json-schema</module>
