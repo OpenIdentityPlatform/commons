@@ -52,6 +52,7 @@ public final class AssertJPromiseAssert
         return new AssertJPromiseAssert(promise);
     }
 
+    @SuppressWarnings("unchecked")
     private AssertJPromiseAssert(Promise<?, ?> promise) {
         super((Promise<Object, ?>) promise, AssertJPromiseAssert.class);
     }

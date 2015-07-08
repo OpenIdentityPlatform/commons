@@ -34,6 +34,7 @@ public class MapFilterVisitorTest {
         MAPPER.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
     }
 
+    @SuppressWarnings("rawtypes")
     private static final QueryFilterVisitor MAP_FILTER_VISITOR = new MapFilterVisitor();
 
     @DataProvider
@@ -154,6 +155,7 @@ public class MapFilterVisitorTest {
         };
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Test(dataProvider = "toMapData")
     public void testToMap(QueryFilter filter, String jsonString) throws Exception {
         assertEquals(filter.accept(MAP_FILTER_VISITOR, null), MAPPER.readValue(jsonString, Map.class));

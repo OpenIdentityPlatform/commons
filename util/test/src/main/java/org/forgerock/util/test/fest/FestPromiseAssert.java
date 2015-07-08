@@ -51,6 +51,7 @@ public final class FestPromiseAssert
         return new FestPromiseAssert(promise);
     }
 
+    @SuppressWarnings("unchecked")
     private FestPromiseAssert(Promise<?, ?> promise) {
         super((Promise<Object, ?>) promise, FestPromiseAssert.class);
     }
@@ -75,7 +76,7 @@ public final class FestPromiseAssert
          */
         public MapAssert withMap() {
             isInstanceOf(Map.class);
-            return Assertions.assertThat((Map) actual);
+            return Assertions.assertThat((Map<?, ?>) actual);
         }
 
         /**
@@ -84,7 +85,7 @@ public final class FestPromiseAssert
          */
         public CollectionAssert withCollection() {
             isInstanceOf(Collection.class);
-            return Assertions.assertThat((Collection) actual);
+            return Assertions.assertThat((Collection<?>) actual);
         }
 
         /**
@@ -93,7 +94,7 @@ public final class FestPromiseAssert
          */
         public ListAssert withList() {
             isInstanceOf(List.class);
-            return Assertions.assertThat((List) actual);
+            return Assertions.assertThat((List<?>) actual);
         }
 
         /**

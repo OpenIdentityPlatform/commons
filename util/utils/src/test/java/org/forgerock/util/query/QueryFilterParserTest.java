@@ -117,7 +117,7 @@ public class QueryFilterParserTest {
     }
 
     @Test(dataProvider = "toStringData")
-    public void testValueOf(QueryFilter filter, String filterString) {
+    public void testValueOf(QueryFilter<String> filter, String filterString) {
         assertThat(parser.valueOf(filterString)).isEqualTo(filter);
     }
 

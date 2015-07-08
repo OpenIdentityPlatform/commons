@@ -15,7 +15,6 @@
  */
 package org.forgerock.util;
 
-import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -26,7 +25,7 @@ import org.forgerock.util.promise.Promise;
  * is encountered before asynchronous processing begins (e.g. if the function
  * parameter is invalid). Implementations which do not throw any exceptions
  * should declare that they throw an exception of type
- * {@link NeverThrowsException}.
+ * {@link org.forgerock.util.promise.NeverThrowsException}.
  * <p>
  * Example usage:
  *
@@ -68,10 +67,10 @@ import org.forgerock.util.promise.Promise;
  *            does not return anything (i.e. it only has side-effects).
  * @param <E>
  *            The type of the exception thrown by the function, or
- *            {@link NeverThrowsException} if no exception is thrown by the
+ *            {@link org.forgerock.util.promise.NeverThrowsException} if no exception is thrown by the
  *            function.
  * @see Function
- * @see NeverThrowsException
+ * @see org.forgerock.util.promise.NeverThrowsException
  */
 // @FunctionalInterface
 public interface AsyncFunction<VIN, VOUT, E extends Exception> extends

@@ -44,7 +44,7 @@ public class QueryFilter<F> {
             if (this == obj) {
                 return true;
             } else if (obj instanceof AndImpl) {
-                return subFilters.equals(((AndImpl) obj).subFilters);
+                return subFilters.equals(((AndImpl<?>) obj).subFilters);
             } else {
                 return false;
             }
@@ -65,7 +65,7 @@ public class QueryFilter<F> {
             StringBuilder builder = new StringBuilder();
             builder.append("And(");
             boolean isFirst = true;
-            for (final QueryFilter subFilter : subFilters) {
+            for (final QueryFilter<FF> subFilter : subFilters) {
                 if (isFirst) {
                     isFirst = false;
                 } else {
@@ -93,7 +93,7 @@ public class QueryFilter<F> {
             if (this == obj) {
                 return true;
             } else if (obj instanceof BooleanLiteralImpl) {
-                return value == ((BooleanLiteralImpl) obj).value;
+                return value == ((BooleanLiteralImpl<?>) obj).value;
             } else {
                 return false;
             }
@@ -138,7 +138,7 @@ public class QueryFilter<F> {
             if (this == obj) {
                 return true;
             } else if (obj instanceof ComparatorImpl) {
-                final ComparatorImpl o = (ComparatorImpl) obj;
+                final ComparatorImpl<?> o = (ComparatorImpl<?>) obj;
                 return field.equals(o.field) && getClass().equals(o.getClass())
                         && valueAssertion.equals(o.valueAssertion);
             } else {
@@ -309,7 +309,7 @@ public class QueryFilter<F> {
             if (this == obj) {
                 return true;
             } else if (obj instanceof NotImpl) {
-                return subFilter.equals(((NotImpl) obj).subFilter);
+                return subFilter.equals(((NotImpl<?>) obj).subFilter);
             } else {
                 return false;
             }
@@ -347,7 +347,7 @@ public class QueryFilter<F> {
             if (this == obj) {
                 return true;
             } else if (obj instanceof OrImpl) {
-                return subFilters.equals(((OrImpl) obj).subFilters);
+                return subFilters.equals(((OrImpl<?>) obj).subFilters);
             } else {
                 return false;
             }
@@ -368,7 +368,7 @@ public class QueryFilter<F> {
             StringBuilder builder = new StringBuilder();
             builder.append("Or(");
             boolean isFirst = true;
-            for (final QueryFilter subFilter : subFilters) {
+            for (final QueryFilter<FF> subFilter : subFilters) {
                 if (isFirst) {
                     isFirst = false;
                 } else {
@@ -396,7 +396,7 @@ public class QueryFilter<F> {
             if (this == obj) {
                 return true;
             } else if (obj instanceof PresentImpl) {
-                final PresentImpl o = (PresentImpl) obj;
+                final PresentImpl<?> o = (PresentImpl<?>) obj;
                 return field.equals(o.field);
             } else {
                 return false;
@@ -813,9 +813,9 @@ public class QueryFilter<F> {
                 }
             };
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private static final QueryFilter ALWAYS_FALSE = new QueryFilter(new BooleanLiteralImpl(false));
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private static final QueryFilter ALWAYS_TRUE = new QueryFilter(new BooleanLiteralImpl(true));
 
     protected final Impl<F> pimpl;
@@ -854,7 +854,7 @@ public class QueryFilter<F> {
         if (this == obj) {
             return true;
         } else if (obj instanceof QueryFilter) {
-            return pimpl.equals(((QueryFilter) obj).pimpl);
+            return pimpl.equals(((QueryFilter<?>) obj).pimpl);
         } else {
             return false;
         }

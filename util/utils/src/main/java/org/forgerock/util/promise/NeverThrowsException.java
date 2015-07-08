@@ -14,13 +14,10 @@
  */
 package org.forgerock.util.promise;
 
-import org.forgerock.util.AsyncFunction;
-import org.forgerock.util.Function;
-
 /**
  * The {@code NeverThrowsException} class is an uninstantiable placeholder
- * exception which should be used for indicating that a {@link Function} or
- * {@link AsyncFunction} never throws an exception (i.e. the function cannot
+ * exception which should be used for indicating that a {@link org.forgerock.util.Function} or
+ * {@link org.forgerock.util.AsyncFunction} never throws an exception (i.e. the function cannot
  * fail).
  */
 public final class NeverThrowsException extends RuntimeException {

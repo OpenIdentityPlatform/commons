@@ -65,7 +65,7 @@ public class QueryFilterTest {
     }
 
     @Test(dataProvider = "toStringData")
-    public void testToString(QueryFilter filter, String filterString) {
+    public void testToString(QueryFilter<String> filter, String filterString) {
         assertThat(filter.toString()).isEqualTo(filterString);
     }
 
