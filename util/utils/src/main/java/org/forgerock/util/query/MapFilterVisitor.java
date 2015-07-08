@@ -60,7 +60,7 @@ import java.util.HashMap;
  *         </ul>
  *     </li>
  *     <li>
- *         Field values are shown in {@link org.forgerock.json.fluent.JsonPointer} syntax; actual field representation
+ *         Field values are shown in {@code org.forgerock.json.fluent.JsonPointer} syntax; actual field representation
  * depends on field type of QueryFilter.
  *     </li>
  * </ol>
