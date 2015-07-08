@@ -24,7 +24,7 @@
     </parent>
     <groupId>org.forgerock.commons</groupId>
     <artifactId>forgerock-audit</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.0-SNAPSHOT</version>
     <name>Commons - ForgeRock Audit Framework</name>
     <description>Implements the commons audit framework.</description>
     <packaging>pom</packaging>
@@ -39,7 +39,15 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
-
+    <issueManagement>
+       <system>Jira</system>
+       <url>https://bugster.forgerock.org/jira/browse/COMMONS</url>
+    </issueManagement>
+    <scm>
+       <url>https://svn.forgerock.org/commons/forgerock-audit/trunk/</url>
+       <connection>scm:svn:https://svn.forgerock.org/commons/forgerock-audit/trunk/</connection>
+       <developerConnection>scm:svn:https://svn.forgerock.org/commons/forgerock-audit/trunk/</developerConnection>
+    </scm>
     <properties>
         <commons.forgerock-rest.version>2.4.2</commons.forgerock-rest.version>
 
@@ -167,11 +175,4 @@
             </releases>
         </repository>
     </repositories>
-
-
-  <scm>
-    <connection>scm:svn:https://svn.forgerock.org/commons/forgerock-parent/tags/0.1.0</connection>
-    <developerConnection>scm:svn:https://svn.forgerock.org/commons/forgerock-parent/tags/0.1.0</developerConnection>
-    <url>http://sources.forgerock.org/browse/commons/forgerock-parent/tags/0.1.0</url>
-  </scm>
 </project>
