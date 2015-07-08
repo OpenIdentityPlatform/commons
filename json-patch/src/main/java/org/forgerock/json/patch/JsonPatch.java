@@ -32,7 +32,7 @@ import org.forgerock.json.fluent.JsonValueException;
  * Processes partial modifications to JSON values. Implements
  * <a href="http://tools.ietf.org/html/rfc6902#section-4.1">RFC 6902 - JSON Patch</a>.
  */
-public class JsonPatch {
+public final class JsonPatch {
 
     /**
      * Internet media type for the JSON Patch format.
@@ -42,18 +42,18 @@ public class JsonPatch {
     /**
      * Path to the "op" attribute of a patch entry. Required.
      */
-    private static final JsonPointer opPtr = new JsonPointer("/op");
+    private static final JsonPointer OP_PTR = new JsonPointer("/op");
 
     /**
      * Path to the "path" attribute of a patch entry. Required.
      */
-    private static final JsonPointer pathPtr = new JsonPointer("/path");
+    private static final JsonPointer PATH_PTR = new JsonPointer("/path");
 
     /**
      * Path to the "from" attribute of a patch entry. Required only for "move" and "copy"
      * operations. Ignored for all others.
      */
-    private static final JsonPointer fromPtr = new JsonPointer("/from");
+    private static final JsonPointer FROM_PTR = new JsonPointer("/from");
 
     /**
      * Path to the "value" attribute of a patch entry. Required for "add", "replace" and
@@ -61,19 +61,20 @@ public class JsonPatch {
      *
      * This is public to allow for alternate implementations of {@link JsonPatchValueTransformer}.
      */
-    public static final JsonPointer valuePtr = new JsonPointer("/value");
+    public static final JsonPointer VALUE_PTR = new JsonPointer("/value");
 
     /**
      * Default transform for patch values; Conforms to RFC6902.
      */
-    private static final JsonPatchValueTransformer DEFAULT_TRANSFORM = new JsonPatchValueTransformer() {
-        public Object getTransformedValue(JsonValue target, JsonValue op) throws JsonValueException {
-            if (op.get(JsonPatch.valuePtr) != null) {
-                return op.get(JsonPatch.valuePtr).getObject();
-            }
-            throw new JsonValueException(op, "expecting a value member");
-        }
-    };
+    private static final JsonPatchValueTransformer DEFAULT_TRANSFORM =
+            new JsonPatchValueTransformer() {
+                public Object getTransformedValue(JsonValue target, JsonValue op) {
+                    if (op.get(JsonPatch.VALUE_PTR) != null) {
+                        return op.get(JsonPatch.VALUE_PTR).getObject();
+                    }
+                    throw new JsonValueException(op, "expecting a value member");
+                }
+            };
 
     /**
      * Compares two JSON values, and produces a JSON Patch value, which contains the
@@ -136,20 +137,20 @@ public class JsonPatch {
      * {@code true}, triggering a change in the resulting patch.
      */
     private static boolean differentTypes(JsonValue v1, JsonValue v2) {
-        return !(v1.isNull() && v2.isNull()) &&
-                !(v1.isMap() && v2.isMap()) &&
-                !(v1.isList() && v2.isList()) &&
-                !(v1.isString() && v2.isString()) &&
-                !(v1.isNumber() && v2.isNumber()) &&
-                !(v1.isBoolean() && v2.isBoolean());
+        return !(v1.isNull() && v2.isNull())
+                && !(v1.isMap() && v2.isMap())
+                && !(v1.isList() && v2.isList())
+                && !(v1.isString() && v2.isString())
+                && !(v1.isNumber() && v2.isNumber())
+                && !(v1.isBoolean() && v2.isBoolean());
     }
 
     private static HashMap<String, Object> op(String op, JsonPointer pointer, JsonValue value) {
         HashMap<String, Object> result = new HashMap<String, Object>();
-        result.put(opPtr.leaf(), op);
-        result.put(pathPtr.leaf(), pointer.toString());
+        result.put(OP_PTR.leaf(), op);
+        result.put(PATH_PTR.leaf(), pointer.toString());
         if (value != null) {
-            result.put(valuePtr.leaf(), value.copy().getObject());
+            result.put(VALUE_PTR.leaf(), value.copy().getObject());
         }
         return result;
     }
@@ -163,7 +164,7 @@ public class JsonPatch {
      * @param patch the JSON Patch value, specifying the modifications to apply to the original value.
      * @throws JsonValueException if application of the patch failed.
      */
-    public static void patch(JsonValue original, JsonValue patch) throws JsonValueException {
+    public static void patch(JsonValue original, JsonValue patch) {
         patch(original, patch, DEFAULT_TRANSFORM);
     }
 
@@ -177,13 +178,12 @@ public class JsonPatch {
      * @param transform a custom transform used to determine the target value.
      * @throws JsonValueException if application of the patch failed.
      */
-    public static void patch(JsonValue original, JsonValue patch, JsonPatchValueTransformer transform)
-            throws JsonValueException {
+    public static void patch(JsonValue original, JsonValue patch, JsonPatchValueTransformer transform) {
         for (JsonValue operation : patch.required().expect(List.class)) {
             if (!operation.isDefined("op")) {
                 throw new JsonValueException(operation, "op not specified");
             }
-            PatchOperation op = PatchOperation.valueOf(operation.get(opPtr));
+            PatchOperation op = PatchOperation.valueOf(operation.get(OP_PTR));
             if (op == null) {
                 throw new JsonValueException(operation, "invalid op specified");
             }
@@ -196,7 +196,7 @@ public class JsonPatch {
             // http://tools.ietf.org/html/rfc6902#section-4.1
             @Override
             void execute(JsonValue original, JsonValue operation, JsonPatchValueTransformer transform) {
-                JsonPointer modifyPath = operation.get(pathPtr).expect(String.class).asPointer();
+                JsonPointer modifyPath = operation.get(PATH_PTR).expect(String.class).asPointer();
                 JsonValue parent = parentValue(modifyPath, original);
                 if (parent == null) {
                     // patch specifies a new root object
@@ -233,7 +233,7 @@ public class JsonPatch {
             //http://tools.ietf.org/html/rfc6902#section-4.2
             @Override
             void execute(JsonValue original, JsonValue operation, JsonPatchValueTransformer transform) {
-                JsonPointer modifyPath = operation.get(pathPtr).expect(String.class).asPointer();
+                JsonPointer modifyPath = operation.get(PATH_PTR).expect(String.class).asPointer();
                 JsonValue parent = parentValue(modifyPath, original);
                 String leaf = modifyPath.leaf();
                 if (parent == null) {
@@ -255,7 +255,7 @@ public class JsonPatch {
             //http://tools.ietf.org/html/rfc6902#section-4.3
             @Override
             void execute(JsonValue original, JsonValue operation, JsonPatchValueTransformer transform) {
-                JsonPointer modifyPath = operation.get(pathPtr).expect(String.class).asPointer();
+                JsonPointer modifyPath = operation.get(PATH_PTR).expect(String.class).asPointer();
                 JsonValue parent = parentValue(modifyPath, original);
                 if (parent != null) {
                     // replacing a child
@@ -274,8 +274,8 @@ public class JsonPatch {
             // http://tools.ietf.org/html/rfc6902#section-4.4
             @Override
             void execute(JsonValue original, JsonValue operation, JsonPatchValueTransformer transform) {
-                JsonPointer sourcePath = operation.get(fromPtr).expect(String.class).asPointer();
-                JsonPointer destPath = operation.get(pathPtr).expect(String.class).asPointer();
+                JsonPointer sourcePath = operation.get(FROM_PTR).expect(String.class).asPointer();
+                JsonPointer destPath = operation.get(PATH_PTR).expect(String.class).asPointer();
                 JsonValue sourceParent = parentValue(sourcePath, original);
                 if (sourceParent == null) {
                     throw new JsonValueException(operation, "cannot move root object");
@@ -295,8 +295,8 @@ public class JsonPatch {
             // http://tools.ietf.org/html/rfc6902#section-4.5
             @Override
             void execute(JsonValue original, JsonValue operation, JsonPatchValueTransformer transform) {
-                JsonPointer sourcePath = operation.get(fromPtr).expect(String.class).asPointer();
-                JsonPointer destPath = operation.get(pathPtr).expect(String.class).asPointer();
+                JsonPointer sourcePath = operation.get(FROM_PTR).expect(String.class).asPointer();
+                JsonPointer destPath = operation.get(PATH_PTR).expect(String.class).asPointer();
                 JsonValue sourceParent = parentValue(sourcePath, original);
                 JsonValue object = sourceParent.get(sourcePath.leaf());
                 JsonValue destParent = parentValue(destPath, original);
@@ -312,7 +312,7 @@ public class JsonPatch {
             // http://tools.ietf.org/html/rfc6902#section-4.6
             @Override
             void execute(JsonValue original, JsonValue operation, JsonPatchValueTransformer transform) {
-                JsonPointer testPath = operation.get(pathPtr).expect(String.class).asPointer();
+                JsonPointer testPath = operation.get(PATH_PTR).expect(String.class).asPointer();
                 JsonValue testTarget = parentValue(testPath, original).get(testPath.leaf());
                 JsonValue testValue = new JsonValue(transform.getTransformedValue(original, operation));
 
@@ -339,7 +339,7 @@ public class JsonPatch {
      * @return the parent value of the value identified by the JSON pointer.
      * @throws JsonException if the parent value could not be found.
      */
-    private static JsonValue parentValue(JsonPointer pointer, JsonValue target) throws JsonException {
+    private static JsonValue parentValue(JsonPointer pointer, JsonValue target) {
         JsonValue result = null;
         JsonPointer parent = pointer.parent();
         if (parent != null) {
@@ -349,5 +349,9 @@ public class JsonPatch {
             }
         }
         return result;
+    }
+
+    // prevent construction
+    private JsonPatch() {
     }
 }

@@ -33,7 +33,7 @@ public class JsonPatchJavascriptValueTransformer implements JsonPatchValueTransf
      * place of the "value" attribute to provide a javascript value transform. If both
      * "script" and "value" are present then "value" takes precedence.
      */
-    private static final JsonPointer scriptPtr = new JsonPointer("/script");
+    private static final JsonPointer SCRIPT_PTR = new JsonPointer("/script");
 
     /**
      * Return the value to be used for a given patch operation, transformed via javascript
@@ -49,10 +49,10 @@ public class JsonPatchJavascriptValueTransformer implements JsonPatchValueTransf
      * @throws org.forgerock.json.fluent.JsonValueException
      */
     public Object getTransformedValue(JsonValue target, JsonValue op) throws JsonValueException {
-        if (op.get(JsonPatch.valuePtr) != null) {
-            return op.get(JsonPatch.valuePtr).getObject();
-        } else if (op.get(scriptPtr) != null) {
-            return evalScript(target, op.get(scriptPtr));
+        if (op.get(JsonPatch.VALUE_PTR) != null) {
+            return op.get(JsonPatch.VALUE_PTR).getObject();
+        } else if (op.get(SCRIPT_PTR) != null) {
+            return evalScript(target, op.get(SCRIPT_PTR));
         } else {
             throw new JsonValueException(op, "expecting a value or script member");
         }

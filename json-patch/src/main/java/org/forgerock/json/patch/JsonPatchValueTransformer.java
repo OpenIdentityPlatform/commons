@@ -37,6 +37,6 @@ public interface JsonPatchValueTransformer {
      * @return The value from target pointed to by op, transformed as required by the implementation.
      * @throws JsonValueException when the value cannot be located in the target.
      */
-    public Object getTransformedValue(JsonValue target, JsonValue op) throws JsonValueException;
+    Object getTransformedValue(JsonValue target, JsonValue op);
 }
 

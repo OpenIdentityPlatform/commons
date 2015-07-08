@@ -71,7 +71,7 @@ public class JsonPatchTest {
                         "1",
                         "2",
                         "3"
-                ))
+            ))
         ));
 
         diff = json(array(object(
@@ -80,7 +80,7 @@ public class JsonPatchTest {
                 field("value", array(
                         "x",
                         "y"
-                ))
+            ))
         )));
 
         JsonPatch.patch(v1, diff);
@@ -146,12 +146,11 @@ public class JsonPatchTest {
                             field("op", "test"),
                             field("path", "/a"),
                             field("value", "b")
-                        ), object(
+                ), object(
                             field("op", "test"),
                             field("path", "/c"),
                             field("value", 10)
-                        )
-                )
+                ))
         );
         JsonPatch.patch(v1, diff);
     }
@@ -175,7 +174,7 @@ public class JsonPatchTest {
                 field("a", array(
                         "foo",
                         "bar"
-                ))
+            ))
         ));
         v2 = v1.copy();
         diff = JsonPatch.diff(v1, v2);
@@ -200,7 +199,7 @@ public class JsonPatchTest {
 
     // ----- exception unit tests ----------
 
-    @Test(expectedExceptions=JsonValueException.class)
+    @Test(expectedExceptions = JsonValueException.class)
     public void replaceNonExistentMapItem() {
         v1 = json(object(
                 field("a", "1")
@@ -212,7 +211,7 @@ public class JsonPatchTest {
         JsonPatch.patch(v1, diff);
     }
 
-    @Test(expectedExceptions=JsonValueException.class)
+    @Test(expectedExceptions = JsonValueException.class)
     public void addExistentMapItem() {
         v1 = json(object());
         v2 = v1.copy();
@@ -222,7 +221,7 @@ public class JsonPatchTest {
         JsonPatch.patch(v1, diff);
     }
 
-    @Test(expectedExceptions=JsonValueException.class)
+    @Test(expectedExceptions = JsonValueException.class)
     public void removeNonExistentMapItem() {
         v1 = json(object(
                 field("a", "1")
