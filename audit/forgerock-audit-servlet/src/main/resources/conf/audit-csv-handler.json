@@ -2,7 +2,7 @@
   "name" : "csv",
   "class" : "org.forgerock.audit.events.handlers.impl.CSVAuditEventHandler",
   "config" : {
-    "location" : "/tmp/audit"
+    "logDirectory" : "/tmp/audit"
   },
   "events" : [ "access", "activity" ]
 }

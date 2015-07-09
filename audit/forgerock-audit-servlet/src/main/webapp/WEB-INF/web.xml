@@ -31,12 +31,10 @@
             <param-value>org.forgerock.audit.AuditServiceConnectionFactoryProvider</param-value>
         </init-param>
 
-        <!--  Uncomment to specify a non-default factory method name.
-                <init-param>
-                    <param-name>connection-factory-method</param-name>
-                    <param-value>getConnectionFactory</param-value>
-                </init-param>
-        -->
+        <init-param>
+            <param-name>connection-factory-method</param-name>
+            <param-value>createConnectionFactory</param-value>
+        </init-param>
 
         <!--  Uncomment to specify a context factory and non-default method name.
                 <init-param>

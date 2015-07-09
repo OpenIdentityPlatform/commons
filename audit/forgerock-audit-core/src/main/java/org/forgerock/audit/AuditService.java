@@ -15,6 +15,8 @@
  */
 package org.forgerock.audit;
 
+import static org.forgerock.json.fluent.JsonValue.*;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -37,6 +39,7 @@ import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResultHandler;
@@ -236,7 +239,7 @@ public class AuditService implements RequestHandler {
         try {
             if (request.getResourceName() == null) {
                 throw new BadRequestException(
-                        "Audit service called without specifying which audit log in the identifier");
+                        "Audit service called without specifying audit type in the identifier");
             }
             // Audit create called for /access with {timestamp=2013-07-30T18:10:03.773Z, principal=openidm-admin,
             // status=SUCCESS, roles=[openidm-admin, openidm-authorized], action=authenticate, userid=openidm-admin,
@@ -256,9 +259,7 @@ public class AuditService implements RequestHandler {
 
             if (!request.getContent().isDefined("transactionId")
                     || !request.getContent().isDefined("timestamp")) {
-                String message = "The request requires a transactionId and a timestamp";
-                logger.error(message);
-                throw new BadRequestException(message);
+                throw new BadRequestException("The request requires a transactionId and a timestamp");
             }
 
             // Don't audit the audit log
@@ -269,19 +270,28 @@ public class AuditService implements RequestHandler {
 
             final String auditEventType = request.getResourceNameObject().head(1).toString();
             if (!auditEvents.containsKey(auditEventType)) {
-                logger.warn("The AuditService is not aware about events of type {}", auditEventType);
+                throw new NotSupportedException("Audit service called with unknown event type " + auditEventType);
+            }
+
+            Collection<AuditEventHandler<?>> auditEventHandlersForEvent = getAuditEventHandlersForEvent(auditEventType);
+            logger.info("Will cascade the event of type {} to the handlers : {}",
+                        auditEventType,
+                        auditEventHandlersForEvent);
+
+            // if the event is known but not registered with a handler, it's ok to ignore it
+            if (auditEventHandlersForEvent.isEmpty()) {
+                logger.debug("No handler found for the event of type {}", auditEventType);
+                Resource result = new Resource(localId, null, new JsonValue(request.getContent()));
+                handler.handleResult(result);
                 return;
-            } else {
-                Collection<AuditEventHandler<?>> auditEventHandlersForEvent;
-                auditEventHandlersForEvent = getAuditEventHandlersForEvent(auditEventType);
-                logger.info("Will cascade the event of type {} to the handlers : {}",
-                            auditEventType,
-                            auditEventHandlersForEvent);
-                for (AuditEventHandler<?> auditEventHandler : auditEventHandlersForEvent) {
-                    auditEventHandler.createInstance(context, request, handler);
-                }
+            }
+
+            // Otherwise, let the event handlers set the response
+            for (AuditEventHandler<?> auditEventHandler : auditEventHandlersForEvent) {
+                auditEventHandler.createInstance(context, request, handler);
             }
         } catch (Exception e) {
+            logger.warn(e.getMessage());
             handler.handleError(ResourceExceptionsUtil.adapt(e));
         }
     }

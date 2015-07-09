@@ -64,37 +64,6 @@ public class AuditServiceTest {
     }
 
     @Test
-    public void testRegisterForSomeEvents() throws Exception {
-        //given
-        final AuditService auditService = getAuditService(QUERY_HANDLER_NAME);
-        // No events specified, we want to get all events !
-        PassThroughAuditEventHandler auditEventHandler = new PassThroughAuditEventHandler();
-        // Only interested about the access events.
-        auditService.register(auditEventHandler, QUERY_HANDLER_NAME, Collections.singleton("access"));
-
-        final CreateRequest createRequestAccess = makeCreateRequest("access");
-        final ResultHandler<Resource> resultHandlerAccess = mockResultHandler(Resource.class);
-        final ArgumentCaptor<Resource> resourceCaptorAccess = ArgumentCaptor.forClass(Resource.class);
-
-        final CreateRequest createRequestActivity = makeCreateRequest("activity");
-        final ResultHandler<Resource> resultHandlerActivity = mockResultHandler(Resource.class);
-
-        //when
-        auditService.handleCreate(new ServerContext(new RootContext()), createRequestAccess, resultHandlerAccess);
-        auditService.handleCreate(new ServerContext(new RootContext()), createRequestActivity, resultHandlerActivity);
-
-        //then
-        verify(resultHandlerAccess, never()).handleError(any(ResourceException.class));
-        verify(resultHandlerAccess).handleResult(resourceCaptorAccess.capture());
-
-        Resource resource = resourceCaptorAccess.getValue();
-        assertThat(resource != null);
-        assertThat(resource.getContent().asMap().equals(createRequestAccess.getContent().asMap()));
-
-        verifyZeroInteractions(resultHandlerActivity);
-    }
-
-    @Test
     public void testCreatingAuditLogEntry() throws Exception {
         final AuditService auditService = getAuditService(QUERY_HANDLER_NAME);
         auditService.register(new PassThroughAuditEventHandler(), QUERY_HANDLER_NAME, Collections.singleton("access"));
@@ -113,6 +82,41 @@ public class AuditServiceTest {
         final Resource resource = resourceCaptor.getValue();
         assertThat(resource).isNotNull();
         assertThat(resource.getContent().asMap()).isEqualTo(createRequest.getContent().asMap());
+    }
+
+    @Test
+    public void testHandleCreateIgnoresEventsNotMappedToHandler() {
+        //given
+        AuditService auditService = new AuditService();
+        CreateRequest createRequest = makeCreateRequest("activity");
+        ResultHandler<Resource> resultHandler = mockResultHandler(Resource.class);
+        ArgumentCaptor<Resource> resourceCaptor = ArgumentCaptor.forClass(Resource.class);
+
+        //when
+        auditService.handleCreate(new ServerContext(new RootContext()), createRequest, resultHandler);
+
+        //then
+        verify(resultHandler, never()).handleError(any(ResourceException.class));
+        verify(resultHandler).handleResult(resourceCaptor.capture());
+
+        final Resource resource = resourceCaptor.getValue();
+        assertThat(resource).isNotNull();
+        assertThat(resource.getContent().asMap()).isEqualTo(createRequest.getContent().asMap());
+    }
+
+    @Test
+    public void testHandleCreateReturnsNotSupportedIfEventTopicIsNotKnown() {
+        //given
+        AuditService auditService = new AuditService();
+        CreateRequest createRequest = makeCreateRequest("unknownTopic");
+        ResultHandler<Resource> resultHandler = mockResultHandler(Resource.class);
+
+        //when
+        auditService.handleCreate(new ServerContext(new RootContext()), createRequest, resultHandler);
+
+        //then
+        verify(resultHandler).handleError(any(ResourceException.class));
+        verifyNoMoreInteractions(resultHandler);
     }
 
     @Test

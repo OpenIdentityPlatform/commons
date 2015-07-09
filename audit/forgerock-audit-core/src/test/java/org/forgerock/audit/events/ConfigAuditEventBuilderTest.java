@@ -85,6 +85,9 @@ public class ConfigAuditEventBuilderTest {
                 .transactionId("transactionId")
                 .timestamp(1427293286239L)
                 .toEvent();
+
+        System.out.println(event.toString());
+
         assertEvent(event);
     }
 
