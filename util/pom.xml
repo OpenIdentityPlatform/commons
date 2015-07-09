@@ -61,9 +61,9 @@
         <jackson.version>2.5.1</jackson.version>
     </properties>
     <modules>
-        <module>utils</module>
+        <module>forgerock-util</module>
         <module>forgerock-json-util</module>
-        <module>test</module>
+        <module>forgerock-test-utils</module>
     </modules>
     <dependencyManagement>
         <dependencies>
