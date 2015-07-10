@@ -37,6 +37,11 @@ define("org/forgerock/commons/ui/common/components/Messages", [
 ], function($, _, Backbone, AbstractConfigurationAware, conf) {
     var obj = new AbstractConfigurationAware(), Messages;
 
+    obj.TYPE_SUCCESS =  "success";
+    obj.TYPE_INFO =     "info";
+    obj.TYPE_WARNING =  "warning";
+    obj.TYPE_DANGER =   "error";
+
     Messages = Backbone.View.extend({
 
         list: [],
@@ -44,8 +49,8 @@ define("org/forgerock/commons/ui/common/components/Messages", [
         events: {
             "click div": "removeAndNext"
         },
-        delay:2500,
-        timer:null,
+        delay: 2500,
+        timer: null,
 
         displayMessageFromConfig: function(event) {
             var _this = obj.messages;
@@ -98,8 +103,28 @@ define("org/forgerock/commons/ui/common/components/Messages", [
 
         showMessage: function() {
             var _this = this,
-                errorType = this.list[0].type === "error" ? "alert-danger" : "alert-info",
+                alertClass =  "alert-info",
+                alertIcon = "alert-message-icon",
                 delay = _this.delay + (this.list[0].message.length * 20);
+
+            switch (this.list[0].type ){
+                case obj.TYPE_DANGER:
+                    alertClass = "alert-danger";
+                break;
+                case obj.TYPE_SUCCESS:
+                    alertClass = "alert-success";
+                    alertIcon = "fa-check-circle-o";
+                break;
+                case obj.TYPE_WARNING:
+                    alertClass = "alert-warning";
+                break;
+                case obj.TYPE_INFO:
+                    alertClass = "alert-info";
+                break;
+                default:
+                    alertClass = "alert-info";
+                break;
+            }
 
             if (this.hasNavigation()) {
                 _this.$el.addClass('logged-user');
@@ -107,7 +132,7 @@ define("org/forgerock/commons/ui/common/components/Messages", [
                 _this.$el.removeClass('logged-user');
             }
 
-            this.$el.append("<div role='alert' class='alert-system alert-message alert " + errorType + "'><i class='fa alert-message-icon'></i><span class='message'>" + this.list[0].message + "</span></div>");
+            this.$el.append("<div role='alert' class='alert-system alert-message alert " + alertClass + "'><i class='fa " + alertIcon + "'></i><span class='message'>" + this.list[0].message + "</span></div>");
             this.$el.find("div:last").fadeIn(300, function () {
                 _this.timer = window.setTimeout(_this.removeAndNext, delay);
             });
@@ -127,6 +152,10 @@ define("org/forgerock/commons/ui/common/components/Messages", [
     });
 
     obj.messages = new Messages();
+
+    obj.addMessage = function(msg){
+        obj.messages.addMessage(msg);
+    };
 
     return obj;
 });
