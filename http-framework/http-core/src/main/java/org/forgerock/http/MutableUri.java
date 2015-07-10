@@ -262,7 +262,7 @@ public final class MutableUri implements Comparable<MutableUri> {
                      rawPath,
                      uri.getRawQuery(),
                      uri.getRawFragment());
-        setResourcePath(uri.getPath());
+        setResourcePath(uri.getRawPath());
     }
 
     /**
@@ -374,15 +374,15 @@ public final class MutableUri implements Comparable<MutableUri> {
     }
 
     /**
-     * Sets the {@literal resourcePath} from the URI path.
+     * Sets the {@literal resourcePath} from the URI path (encoded value).
      *
      * <p>This method does not set or recreate the {@literal uri}, this is the
      * responsibility of the method caller.</p>
      *
-     * @param path The URI path.
+     * @param rawPath The raw (URI-encoded) path.
      */
-    private void setResourcePath(String path) {
-        this.resourcePath = ResourcePath.valueOf(path);
+    private void setResourcePath(String rawPath) {
+        this.resourcePath = ResourcePath.valueOf(rawPath);
     }
 
     /**
