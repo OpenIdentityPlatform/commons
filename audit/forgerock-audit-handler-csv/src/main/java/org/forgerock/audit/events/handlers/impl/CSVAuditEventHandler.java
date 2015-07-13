@@ -21,6 +21,8 @@ import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.audit.events.AuditEventHelper;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
+import org.forgerock.audit.util.JsonSchemaUtils;
+import org.forgerock.audit.util.JsonValueUtils;
 import org.forgerock.audit.util.ResourceExceptionsUtil;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
@@ -29,7 +31,9 @@ import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
+import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Resource;
@@ -39,7 +43,6 @@ import org.forgerock.json.resource.ServerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.supercsv.cellprocessor.Optional;
-import org.supercsv.cellprocessor.constraint.NotNull;
 import org.supercsv.cellprocessor.ift.CellProcessor;
 import org.supercsv.io.CsvMapReader;
 import org.supercsv.io.ICsvMapReader;
@@ -50,15 +53,17 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * Handles AuditEvents by writing them to a CSV file.
@@ -71,11 +76,11 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
     private String recordDelim;
 
     private final Map<String, FileWriter> fileWriters = new HashMap<String, FileWriter>();
-    private static final ObjectMapper MAPPER;
+    private static final ObjectMapper mapper;
 
     static {
         JsonFactory jsonFactory = new JsonFactory();
-        MAPPER = new ObjectMapper(jsonFactory);
+        mapper = new ObjectMapper(jsonFactory);
     }
 
 
@@ -115,7 +120,6 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
                 recordDelim = System.getProperty("line.separator");
             }
         }
-        logger.info("{} successfully configured", getClass().getName());
     }
 
     /** {@inheritDoc} */
@@ -126,7 +130,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
 
     /**
      * Perform an action on the csv audit log.
-     * {@inheritDoc}
+     * @{inheritDoc}
      */
     @Override
     public void actionCollection(
@@ -138,7 +142,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
 
     /**
      * Perform an action on the csv audit log entry.
-     * {@inheritDoc}
+     * @{inheritDoc}
      */
     @Override
     public void actionInstance(
@@ -151,7 +155,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
 
     /**
      * Create a csv audit log entry.
-     * {@inheritDoc}
+     * @{inheritDoc}
      */
     @Override
     public void createInstance(
@@ -161,22 +165,22 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
 
         try {
             // Re-try once in case the writer stream became closed for some reason
-            boolean retry = false;
+            boolean retry;
             int retryCount = 0;
             final String auditEventType = request.getResourceName();
             do {
                 retry = false;
                 FileWriter fileWriter = null;
                 try {
-                    final Set<String> auditEventProperties =
-                            AuditEventHelper.getAuditEventProperties(auditEvents.get(auditEventType)).keys();
-                    if (auditEventProperties == null || auditEventProperties.isEmpty()) {
+                    final JsonValue auditEventProperties =
+                            AuditEventHelper.getAuditEventProperties(auditEvents.get(auditEventType));
+                    if (auditEventProperties == null || auditEventProperties.isNull()) {
                         throw new InternalServerErrorException("No audit event properties defined for audit event: "
                                 + auditEventType);
                     }
-                    final Collection<String> fieldOrder =
-                            new TreeSet<String>(Collator.getInstance());
-                    fieldOrder.addAll(auditEventProperties);
+                    final Collection<String> fieldOrder = new LinkedHashSet<>();
+                    fieldOrder.addAll(convertSlashesToDotNotation(JsonSchemaUtils.generateJsonPointers(
+                            AuditEventHelper.getAuditEventSchema(auditEvents.get(auditEventType)))));
 
                     File auditFile = getAuditLogFile(auditEventType);
                     // Create header if creating a new file
@@ -199,7 +203,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
                         }
                     }
                     fileWriter = getWriter(auditEventType, auditFile, true);
-                    writeEntry(fileWriter, request.getContent().asMap(), fieldOrder);
+                    writeEntry(fileWriter, request.getContent(), fieldOrder);
                 } catch (IOException ex) {
                     if (retryCount == 0) {
                         retry = true;
@@ -227,19 +231,27 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
 
     /**
      * Perform a query on the csv audit log.
-     * {@inheritDoc}
+     * @{inheritDoc}
      */
     @Override
     public void queryCollection(
             final ServerContext context,
             final QueryRequest request,
             final QueryResultHandler handler) {
-        handler.handleError(ResourceExceptionsUtil.notSupported(request));
+        try {
+            final String auditEventType = request.getResourceNameObject().head(1).toString();
+            for (final JsonValue value : getEntries(auditEventType, request.getQueryFilter())) {
+                handler.handleResource(new Resource(value.get(Resource.FIELD_CONTENT_ID).asString(), null, value));
+            }
+        } catch (Exception e) {
+            handler.handleError(new BadRequestException(e));
+        }
+        handler.handleResult(new QueryResult());
     }
 
     /**
      * Read from the csv audit log.
-     * {@inheritDoc}
+     * @{inheritDoc}
      */
     @Override
     public void readInstance(
@@ -248,15 +260,18 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
             final ReadRequest request,
             final ResultHandler<Resource> handler) {
         try {
-            final String auditEventType = (new JsonPointer(request.getResourceName())).get(0);
-            final Map<String, Object> entry = getEntry(auditEventType, resourceId);
-            if (entry == null) {
+            final String auditEventType = request.getResourceNameObject().head(1).toString();
+            final Set<JsonValue> entry =
+                    getEntries(auditEventType, QueryFilter.valueOf("/_id eq \"" + resourceId + "\""));
+            if (entry.isEmpty()) {
                 throw new NotFoundException(auditEventType + " audit log not found");
             }
-            final JsonValue auditEvent = new JsonValue(entry);
-            handler.handleResult(new Resource(auditEvent.get(Resource.FIELD_CONTENT_ID).asString(), null, auditEvent));
-        } catch (Exception e) {
+            final JsonValue resource = entry.iterator().next();
+            handler.handleResult(new Resource(resource.get(Resource.FIELD_CONTENT_ID).asString(), null, resource));
+        } catch (IOException e) {
             handler.handleError(new BadRequestException(e));
+        } catch (ResourceException e) {
+            handler.handleError(e);
         }
     }
 
@@ -278,22 +293,17 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
 
     private void writeEntry(
             final FileWriter fileWriter,
-            final Map<String, Object> obj,
+            final JsonValue obj,
             final Collection<String> fieldOrder) throws IOException {
 
         final Iterator<String> iter = fieldOrder.iterator();
         final StringBuilder entry = new StringBuilder();
         while (iter.hasNext()) {
             final String key = iter.next();
-            Object value = obj.get(key);
+            JsonValue value = obj.get(new JsonPointer(key));
             entry.append("\"");
             if (value != null) {
-                if (value instanceof Map) {
-                    value = new JsonValue(value).toString();
-                } else if (value instanceof List) {
-                    value = new JsonValue(value).toString();
-                }
-                final String rawStr = value.toString();
+                String rawStr = value.isString() ? value.asString() : value.toString();
                 // Escape quotes with double quotes
                 final String escapedStr = rawStr.replaceAll("\"", "\"\"");
                 entry.append(escapedStr);
@@ -343,15 +353,20 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
     }
 
     /**
-     * Parser the csv file corresponding the the specified audit entry type and returns a audit entry.
+     * Parser the csv file corresponding the the specified audit entry type and returns a set of matching audit entries.
      *
      * @param auditEntryType the audit log type
-     * @param id the identifier of the entry to return.
+     * @param queryFilter the query filter to apply to the entries
      * @return  A audit log entry; null if no entry exists
      * @throws Exception
      */
-    private Map<String, Object> getEntry(final String auditEntryType, final String id) throws Exception {
+    private Set<JsonValue> getEntries(final String auditEntryType, QueryFilter queryFilter)
+            throws IOException, ResourceException {
         final File auditFile = getAuditLogFile(auditEntryType);
+        final Set<JsonValue> results = new HashSet<>();
+        if (queryFilter == null) {
+            queryFilter = QueryFilter.alwaysTrue();
+        }
         if (auditFile.exists()) {
             ICsvMapReader reader = null;
             try {
@@ -361,12 +376,14 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
                                 new CsvPreference.Builder('"', ',', recordDelim).build());
 
                 // the header elements are used to map the values to the bean (names must match)
-                final String[] header = reader.getHeader(true);
+                final String[] header = convertDotNotationToSlashes(reader.getHeader(true));
                 final CellProcessor[] processors = createCellProcessors(auditEntryType, header);
                 Map<String, Object> entry;
                 while ((entry = reader.read(header, processors)) != null) {
-                    if (entry.get("_id").equals(id)) {
-                        return entry;
+                    entry = convertDotNotationToSlashes(entry);
+                    final JsonValue jsonEntry = JsonValueUtils.expand(entry);
+                    if (queryFilter.accept(JsonValueUtils.JSONVALUE_FILTER_VISITOR, jsonEntry)) {
+                        results.add(jsonEntry);
                     }
                 }
 
@@ -376,25 +393,19 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
                 }
             }
         }
-        return null;
+        return results;
     }
 
     private CellProcessor[] createCellProcessors(final String auditEntryType, final String[] headers)
             throws ResourceException {
-        final List<CellProcessor> cellProcessors = new ArrayList<CellProcessor>();
+        final List<CellProcessor> cellProcessors = new ArrayList<>();
         final JsonValue auditEvent = auditEvents.get(auditEntryType);
 
         for (String header: headers) {
             final String propertyType = AuditEventHelper.getPropertyType(auditEvent, new JsonPointer(header));
-            final boolean propertyRequired = AuditEventHelper.isPropertyRequired(auditEvent, new JsonPointer(header));
-            if ((propertyType.equals(AuditEventHelper.OBJECT_TYPE) || propertyType.equals(AuditEventHelper.ARRAY_TYPE))
-                    && propertyRequired) {
-                cellProcessors.add(new NotNull(new ParseJsonValue()));
-            } else if ((propertyType.equals(AuditEventHelper.OBJECT_TYPE)
-                    || propertyType.equals(AuditEventHelper.ARRAY_TYPE)) && !propertyRequired) {
+            if ((propertyType.equals(AuditEventHelper.OBJECT_TYPE)
+                    || propertyType.equals(AuditEventHelper.ARRAY_TYPE))) {
                 cellProcessors.add(new Optional(new ParseJsonValue()));
-            } else if (propertyRequired) {
-                cellProcessors.add(new NotNull());
             } else {
                 cellProcessors.add(new Optional());
             }
@@ -414,13 +425,13 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
             // Check if value is JSON object
             if (((String) value).startsWith("{") && ((String) value).endsWith("}")) {
                 try {
-                    jv = new JsonValue(MAPPER.readValue((String) value, Map.class));
+                    jv = new JsonValue(mapper.readValue((String) value, Map.class));
                 } catch (Exception e) {
                     logger.debug("Error parsing JSON string: " + e.getMessage());
                 }
             } else if (((String) value).startsWith("[") && ((String) value).endsWith("]")) {
                 try {
-                    jv = new JsonValue(MAPPER.readValue((String) value, List.class));
+                    jv = new JsonValue(mapper.readValue((String) value, List.class));
                 } catch (Exception e) {
                     logger.debug("Error parsing JSON string: " + e.getMessage());
                 }
@@ -449,4 +460,34 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
                     "Unable to close filewriters during " + this.getClass().getName() + " cleanup", e);
         }
     }
+
+    private Map<String, Object> convertDotNotationToSlashes(final Map<String, Object> entries) {
+        final Map<String, Object> newEntry = new LinkedHashMap<>();
+        for (Map.Entry<String, Object> entry : entries.entrySet()) {
+            final String key = StringUtils.replace(entry.getKey(), ".", "/");
+            newEntry.put(key, entry.getValue());
+        }
+        return newEntry;
+    }
+
+    private String[] convertDotNotationToSlashes(final String[] entries) {
+        List<String> newList = new LinkedList<>();
+        for (String entry : entries) {
+            newList.add(StringUtils.replace(entry, ".", "/"));
+        }
+        return newList.toArray(new String[0]);
+    }
+
+    private Set<String> convertSlashesToDotNotation(final Set<String> keys) {
+        final Set<String> newSet = new LinkedHashSet<>();
+        for (String key : keys) {
+            String newKey = key;
+            if (key.startsWith("/")) {
+                newKey = key.substring(1);
+            }
+            newSet.add(StringUtils.replace(newKey, "/", "."));
+        }
+        return newSet;
+    }
 }
+

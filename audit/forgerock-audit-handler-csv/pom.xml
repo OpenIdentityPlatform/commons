@@ -90,7 +90,7 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            org.forgerock.audit.events.handlers;version=${project.version}
+                            org.forgerock.audit.events.handlers.impl;version=${project.version}
                         </Export-Package>
                     </instructions>
                 </configuration>

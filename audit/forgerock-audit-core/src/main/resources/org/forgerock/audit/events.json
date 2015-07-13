@@ -201,45 +201,67 @@
       "id": "/",
       "type": "object",
       "properties": {
-        "_id": {
+        "result": {
+          "id": "result",
           "type": "string"
         },
-        "timestamp": {
+        "principal": {
+          "id": "principal",
+          "type": "array",
+          "items": {
+            "id": "0",
+            "type": "string"
+          }
+        },
+        "context": {
+          "id": "context",
+          "type": "object",
+          "properties": {}
+        },
+        "sessionId": {
+          "id": "sessionId",
           "type": "string"
         },
-        "transactionId": {
-          "type": "string"
-        },
-        "eventName": {
-          "type": "string"
+        "entries": {
+          "id": "entries",
+          "type": "array",
+          "items": {
+            "id": "0",
+            "type": "object",
+            "properties": {
+              "moduleId": {
+                "id": "moduleId",
+                "type": "string"
+              },
+              "result": {
+                "id": "result",
+                "type": "string"
+              },
+              "info": {
+                "id": "info",
+                "type": "object",
+                "properties": {}
+              }
+            }
+          }
         },
         "authentication": {
+          "id": "authentication",
           "type": "object",
           "properties": {
             "id": {
-              "type": "string"
-            },
-            "operation": {
-              "type": "string"
-            },
-            "status": {
-              "type": "string"
-            },
-            "method": {
-              "type": "object",
-              "properties": {
-                "type": {
-                  "type": "string"
-                },
-                "detail": {
-                  "type": "string"
-                }
-              }
-            },
-            "message": {
+              "id": "id",
               "type": "string"
             }
           }
+        },
+        "transactionId": {
+          "id": "transactionId",
+          "type": "string"
+        },
+        "eventName": {
+          "id": "eventName",
+          "type": "string"
         }
       }
     }
