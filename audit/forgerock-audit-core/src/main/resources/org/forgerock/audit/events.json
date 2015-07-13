@@ -201,67 +201,45 @@
       "id": "/",
       "type": "object",
       "properties": {
-        "result": {
-          "id": "result",
+        "_id": {
           "type": "string"
         },
-        "principal": {
-          "id": "principal",
-          "type": "array",
-          "items": {
-            "id": "0",
-            "type": "string"
-          }
-        },
-        "context": {
-          "id": "context",
-          "type": "object",
-          "properties": {}
-        },
-        "sessionId": {
-          "id": "sessionId",
+        "timestamp": {
           "type": "string"
-        },
-        "entries": {
-          "id": "entries",
-          "type": "array",
-          "items": {
-            "id": "0",
-            "type": "object",
-            "properties": {
-              "moduleId": {
-                "id": "moduleId",
-                "type": "string"
-              },
-              "result": {
-                "id": "result",
-                "type": "string"
-              },
-              "info": {
-                "id": "info",
-                "type": "object",
-                "properties": {}
-              }
-            }
-          }
-        },
-        "authentication": {
-          "id": "authentication",
-          "type": "object",
-          "properties": {
-            "id": {
-              "id": "id",
-              "type": "string"
-            }
-          }
         },
         "transactionId": {
-          "id": "transactionId",
           "type": "string"
         },
         "eventName": {
-          "id": "eventName",
           "type": "string"
+        },
+        "authentication": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "operation": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string"
+            },
+            "method": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "detail": {
+                  "type": "string"
+                }
+              }
+            },
+            "message": {
+              "type": "string"
+            }
+          }
         }
       }
     }
