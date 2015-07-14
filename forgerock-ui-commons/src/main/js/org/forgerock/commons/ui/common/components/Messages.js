@@ -71,7 +71,7 @@ define("org/forgerock/commons/ui/common/components/Messages", [
 
         addMessage: function(msg) {
             var i, _this = obj.messages;
-            if(!msg.message && msg.response){
+            if(!msg.message && msg.response && typeof msg.response.responseJSON === "object" && typeof msg.response.responseJSON.message === "string"){
                 msg.message = msg.response.responseJSON.message;
             }
             for(i = 0; i < _this.list.length; i++) {
