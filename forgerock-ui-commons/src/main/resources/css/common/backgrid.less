@@ -1,5 +1,6 @@
 .backgrid-container {
-    overflow: visible;
+    // Do not remove. This is required for table scrolling and frozen columns.
+    overflow-x: auto;
     height: auto;
 }
 
@@ -65,8 +66,7 @@
             }
 
             &:hover, &:focus {
-                background-color: #eeeeee;
-                cursor: pointer;
+                // please use table-hover class
             }
 
             &.empty {
