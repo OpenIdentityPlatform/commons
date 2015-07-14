@@ -71,6 +71,9 @@ define("org/forgerock/commons/ui/common/components/Messages", [
 
         addMessage: function(msg) {
             var i, _this = obj.messages;
+            if(!msg.message && msg.response){
+                msg.message = msg.response.responseJSON.message;
+            }
             for(i = 0; i < _this.list.length; i++) {
                 if(_this.list[i].message === msg.message) {
                     console.log("duplicated message");
