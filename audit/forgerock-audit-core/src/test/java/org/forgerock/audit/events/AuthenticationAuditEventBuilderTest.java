@@ -18,8 +18,11 @@ package org.forgerock.audit.events;
 import static java.util.Arrays.*;
 import static org.fest.assertions.api.Assertions.*;
 import static org.forgerock.audit.events.AuthenticationAuditEventBuilderTest.OpenProductAuthenticationAuditEventBuilder.*;
+import static org.forgerock.json.fluent.JsonValue.array;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -57,7 +60,22 @@ public class AuthenticationAuditEventBuilderTest {
                 .transactionId("transactionId")
                 .timestamp(1427293286239L)
                 .eventName("AM-AUTHENTICATION-SUCCESS")
-                .authentication("someone@forgerock.com", Operation.LOGIN, Status.SUCCEEDED, "Module", "DataStore")
+                .authentication("someone@forgerock.com")
+                .sessionId("sessionId")
+                .principal(new LinkedList<String>() {{
+                    add("admin");
+                }})
+                .context(new LinkedHashMap<String, Object>() {{
+                    put("contextKey", "contextValue");
+                }})
+                .entries(new LinkedList<Map<String, Object>>() {{
+                    add(new LinkedHashMap<String, Object>() {{
+                        put("moduleId", "datastore");
+                        put("result", Status.SUCCESSFUL.toString());
+                        put("info", new LinkedHashMap<>());
+                    }});
+                }})
+                .result(Status.SUCCESSFUL)
                 .openField("value")
                 .toEvent();
 
@@ -68,7 +86,22 @@ public class AuthenticationAuditEventBuilderTest {
     public void ensureBuilderMethodsCanBeCalledInAnyOrder() {
         AuditEvent event = productAuthenticationEvent()
                 .eventName("AM-AUTHENTICATION-SUCCESS")
-                .authentication("someone@forgerock.com", Operation.LOGIN, Status.SUCCEEDED, "Module", "DataStore")
+                .authentication("someone@forgerock.com")
+                .sessionId("sessionId")
+                .principal(new LinkedList<String>() {{
+                    add("admin");
+                }})
+                .context(new LinkedHashMap<String, Object>() {{
+                    put("contextKey", "contextValue");
+                }})
+                .entries(new LinkedList<Map<String, Object>>() {{
+                    add(new LinkedHashMap<String, Object>() {{
+                        put("moduleId", "datastore");
+                        put("result", Status.SUCCESSFUL.toString());
+                        put("info", new LinkedHashMap<>());
+                    }});
+                }})
+                .result(Status.SUCCESSFUL)
                 .openField("value")
                 .transactionId("transactionId")
                 .timestamp(1427293286239L)
@@ -82,10 +115,15 @@ public class AuthenticationAuditEventBuilderTest {
         assertThat(value.get(TIMESTAMP).asString()).isEqualTo("2015-03-25T14:21:26.239Z");
         assertThat(value.get(EVENT_NAME).asString()).isEqualTo("AM-AUTHENTICATION-SUCCESS");
         assertThat(value.get(AUTHENTICATION).get(ID).asString()).isEqualTo("someone@forgerock.com");
-        assertThat(value.get(AUTHENTICATION).get(OPERATION).asString()).isEqualTo("LOGIN");
-        assertThat(value.get(AUTHENTICATION).get(STATUS).asString()).isEqualTo("SUCCEEDED");
-        assertThat(value.get(AUTHENTICATION).get(METHOD).get(TYPE).asString()).isEqualTo("Module");
-        assertThat(value.get(AUTHENTICATION).get(METHOD).get(DETAIL).asString()).isEqualTo("DataStore");
+        assertThat(value.get(RESULT).asEnum(Status.class)).isEqualTo(Status.SUCCESSFUL);
+        assertThat(value.get(SESSION_ID).asString()).isEqualTo("sessionId");
+        assertThat(value.get(PRINCIPAL).asList()).containsExactly("admin");
+        assertThat(value.get(CONTEXT).getObject()).isNotNull();
+        assertThat(value.get(CONTEXT).get("contextKey").asString()).isEqualTo("contextValue");
+        assertThat(value.get(ENTRIES).getObject()).isNotNull();
+        assertThat(value.get(ENTRIES).get(0).get("moduleId").asString()).isEqualTo("datastore");
+        assertThat(value.get(ENTRIES).get(0).get("result").asEnum(Status.class)).isEqualTo(Status.SUCCESSFUL);
+        assertThat(value.get(ENTRIES).get(0).get("info").getObject()).isNotNull();
         assertThat(value.get("open").getObject()).isEqualTo("value");
     }
 

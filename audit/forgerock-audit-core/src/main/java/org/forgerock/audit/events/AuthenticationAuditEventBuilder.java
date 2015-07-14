@@ -15,10 +15,8 @@
  */
 package org.forgerock.audit.events;
 
-import static org.forgerock.json.fluent.JsonValue.*;
-
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.util.Reject;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Builder for audit authentication events.
@@ -52,30 +50,17 @@ import org.forgerock.util.Reject;
 public class AuthenticationAuditEventBuilder<T extends AuthenticationAuditEventBuilder<T>>
     extends AuditEventBuilder<T> {
 
-    /**
-     * authentication.'operation' field name.
-     */
-    public static final String OPERATION = "operation";
-    /**
-     * authentication.'status' field name.
-     */
-    public static final String STATUS = "status";
-    /**
-     * authentication.'method' field name.
-     */
-    public static final String METHOD = "method";
-    /**
-     * authentication.method.'type' field name.
-     */
-    public static final String TYPE = "type";
-    /**
-     * authentication.method.'detail' field name.
-     */
-    public static final String DETAIL = "detail";
-    /**
-     * authentication.'message' field name.
-     */
-    public static final String MESSAGE = "message";
+    /** Defines the authentication result key. */
+    public static final String RESULT = "result";
+    /** Defines the principal key. */
+    public static final String PRINCIPAL = "principal";
+    /** Defines the context key. */
+    public static final String CONTEXT = "context";
+    /** Defines the sessionId key. */
+    public static final String SESSION_ID = "sessionId";
+    /** Defines the entries key. */
+    public static final String ENTRIES = "entries";
+
 
     /**
      * Starts to build an audit authentication event.
@@ -90,66 +75,54 @@ public class AuthenticationAuditEventBuilder<T extends AuthenticationAuditEventB
     }
 
     /**
-     * Sets the provided authentication details for the event.
-     *
-     * @param id the authentication id.
-     * @param operation the attempted authentication operation.
-     * @param status the current state of the authentication operation.
-     * @param type the type of authentication used e.g. LDAP, OpenID Connect, etc.
-     * @param typeDetail provides additional detail to clarify the type of operation being performed; for example,
-     *                   if the operation type is 'ACTION' then the typeDetail gives the action's name.
-     *
-     * @return this builder
+     * Sets the authentication audit event overall result.
+     * @param result the authentication overall result.
+     * @return an audit authentication event builder
      */
-    public final T authentication(String id, Operation operation, Status status, String type, String typeDetail) {
-        return authentication(id, operation, status, type, typeDetail, null);
-    }
+    public T result(Status result) {
 
-    /**
-     * Sets the provided authentication details for the event.
-     *
-     * @param id the authentication id.
-     * @param operation the attempted authentication operation.
-     * @param status the current state of the authentication operation.
-     * @param type the type of authentication used e.g. LDAP, OpenID Connect, etc.
-     * @param typeDetail provides additional detail to clarify the type of operation being performed; for example,
-     *                   if the operation type is 'ACTION' then the typeDetail gives the action's name.
-     * @param message Ad hoc message that can be logged to add information regarding to the authentication.
-     *
-     * @return this builder
-     */
-    public final T authentication(String id,
-                                  Operation operation,
-                                  Status status,
-                                  String type,
-                                  String typeDetail,
-                                  String message) {
-        Reject.<Object>ifNull(id, operation, status, type, typeDetail);
-        JsonValue object = json(object(
-                field(ID, id),
-                field(OPERATION, operation.toString()),
-                field(STATUS, status.toString()),
-                field(METHOD, object(
-                        field(TYPE, type),
-                        field(DETAIL, typeDetail)
-                )),
-                field(MESSAGE, message == null ? "" : message)));
-        jsonValue.put(AUTHENTICATION, object);
+        jsonValue.put(RESULT, result == null ? null : result.toString());
         return self();
     }
 
     /**
-     * Defines a fixed set of authentication operations that can be logged.
+     * Sets the principals of the authentication event.
+     * @param principals the list of principals
+     * @return an audit authentication event builder
      */
-    public enum Operation {
-        /**
-         * Login Operation.
-         */
-        LOGIN,
-        /**
-         * Logout Operation.
-         */
-        LOGOUT
+    public T principal(List<String> principals) {
+        jsonValue.put(PRINCIPAL, principals);
+        return self();
+    }
+
+    /**
+     * Sets the context used int he authentication event.
+     * @param context the authentication event context
+     * @return an audit authentication event builder
+     */
+    public T context(Map<String, Object> context) {
+        jsonValue.put(CONTEXT, context);
+        return self();
+    }
+
+    /**
+     * Sets the list of auth modules used in the authentication event and their state.
+     * @param entries the list of authentication modules and their state
+     * @return an audit authentication event builder
+     */
+    public T entries(List<?> entries) {
+        jsonValue.put(ENTRIES, entries);
+        return self();
+    }
+
+    /**
+     * Sets the sessionId used in the authentication event.
+     * @param sessionId the authentication event sessionId
+     * @return an audit authentication event builder
+     */
+    public T sessionId(String sessionId) {
+        jsonValue.put(SESSION_ID, sessionId);
+        return self();
     }
 
     /**
@@ -159,11 +132,11 @@ public class AuthenticationAuditEventBuilder<T extends AuthenticationAuditEventB
         /**
          * Authentication operation has not yet completed.
          */
-        ONGOING,
+        CONTINUE,
         /**
          * Authentication operation has completed successfully.
          */
-        SUCCEEDED,
+        SUCCESSFUL,
         /**
          * Authentication operation has completed unsuccessfully.
          */
