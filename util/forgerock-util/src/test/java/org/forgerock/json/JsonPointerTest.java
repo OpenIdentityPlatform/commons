@@ -12,10 +12,10 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright © 2010–2011 ApexIdentity Inc. All rights reserved.
- * Portions Copyrighted 2011-2014 ForgeRock AS.
+ * Portions Copyrighted 2011-2015 ForgeRock AS.
  */
 
-package org.forgerock.json.fluent;
+package org.forgerock.json;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

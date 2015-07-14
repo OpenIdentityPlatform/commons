@@ -14,7 +14,7 @@
  * Copyright 2013-2015 ForgeRock AS.
  */
 
-package org.forgerock.json.fluent;
+package org.forgerock.json;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.testng.Assert.assertFalse;

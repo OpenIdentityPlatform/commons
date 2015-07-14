@@ -12,10 +12,10 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright © 2010–2011 ApexIdentity Inc. All rights reserved.
- * Portions Copyrighted 2011 ForgeRock AS.
+ * Portions Copyrighted 2011-2015 ForgeRock AS.
  */
 
-package org.forgerock.json.fluent;
+package org.forgerock.json;
 
 /**
  * An exception that is thrown during JSON value operations.

@@ -29,9 +29,9 @@ import java.util.HashMap;
  * <dl>
  *     <dt>an and expression</dt>
  *     <dd><pre>{ "operator" : "and", "subfilters" : [ the subfilters ] }</pre></dd>
- *     <dt>an or expresion</dt>
+ *     <dt>an or expression</dt>
  *     <dd><pre>{ "operator" : "or", "subfilters" : [ the subfilters ] }</pre></dd>
- *     <dt>a not expresion</dt>
+ *     <dt>a not expression</dt>
  *     <dd><pre>{ "operator" : "not", "subfilter" : the subfilter }</pre></dd>
  *     <dt>a presence expression</dt>
  *     <dd><pre>{ "operator" : "pr", "field" : "/afield"}</pre></dd>
@@ -56,11 +56,11 @@ import java.util.HashMap;
  *         JSON notation used for convenience to illustrate Map-structure.
  *         <ul>
  *             <li>To produce JSON, use <pre>new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(map);</pre></li>
- *             <li>Or wrap with JsonValue: <pre>new org.forgerock.json.fluent.JsonVlaue(map);</pre></li>
+ *             <li>Or wrap with JsonValue: <pre>new org.forgerock.json.JsonValue(map);</pre></li>
  *         </ul>
  *     </li>
  *     <li>
- *         Field values are shown in {@code org.forgerock.json.fluent.JsonPointer} syntax; actual field representation
+ *         Field values are shown in {@code org.forgerock.json.JsonPointer} syntax; actual field representation
  * depends on field type of QueryFilter.
  *     </li>
  * </ol>

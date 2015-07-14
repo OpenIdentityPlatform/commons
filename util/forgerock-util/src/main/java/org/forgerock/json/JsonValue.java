@@ -15,7 +15,7 @@
  * Portions Copyrighted 2011-2015 ForgeRock AS.
  */
 
-package org.forgerock.json.fluent;
+package org.forgerock.json;
 
 import java.io.File;
 import java.net.MalformedURLException;

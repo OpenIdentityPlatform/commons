@@ -11,19 +11,17 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2010–2011 ApexIdentity Inc. All rights reserved.
- * Portions Copyrighted 2011 ForgeRock AS.
+ * Copyright 2010–2011 ApexIdentity Inc. All rights reserved.
+ *
+ * Portions Copyrighted 2011-2015 ForgeRock AS.
  */
 
 /**
- * Provides a <a href="http://en.wikipedia.org/wiki/Fluent_interface">fluent</a> API for the
- * traversal and manipulation of JSON object model structures in Java.
+ * Provides an API for the traversal and manipulation of JSON object model structures in Java.
  * <p>
- * Unlike typical Java JSON libraries, JSON-Fluent is not involved in the serial
+ * Unlike typical Java JSON libraries, org.forgerock.json is not involved in the serial
  * representation of JSON; rather, it focuses exclusively on processing Java structures
  * composed of {@code Map}, {@code List}, {@code String}, {@code Number} and {@code Boolean}
  * objects.
- *
- * @author Paul C. Bryan
  */
-package org.forgerock.json.fluent;
+package org.forgerock.json;

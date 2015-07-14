@@ -15,11 +15,11 @@
  * Portions Copyrighted 2011-2015 ForgeRock AS.
  */
 
-package org.forgerock.json.fluent;
+package org.forgerock.json;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.MapEntry.entry;
-import static org.forgerock.json.fluent.JsonValue.*;
+import static org.forgerock.json.JsonValue.*;
 import static org.testng.Assert.fail;
 
 import org.forgerock.util.Function;

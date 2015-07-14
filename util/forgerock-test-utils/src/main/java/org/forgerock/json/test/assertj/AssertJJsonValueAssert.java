@@ -27,15 +27,15 @@ import org.assertj.core.api.LongAssert;
 import org.assertj.core.api.MapAssert;
 import org.assertj.core.api.StringAssert;
 import org.assertj.core.data.MapEntry;
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.test.assertj.AbstractAssertJPromiseAssert;
 
 public class AssertJJsonValueAssert {
 
     /**
-     * Creates the relevant {@code AbstractJsonValueAssert} instance for the provided {@link org.forgerock.json.fluent.JsonValue}.
+     * Creates the relevant {@code AbstractJsonValueAssert} instance for the provided {@link JsonValue}.
      * @param value The actual value.
      * @return Either a {@code ArrayJsonValueAssert} if the JsonValue is underpinned by a {@link java.util.Set}
      * or {@link java.util.List}, or a {@code ObjectJsonValueAssert} if underpinned by a {@link java.util.Map}.
@@ -113,7 +113,7 @@ public class AssertJJsonValueAssert {
 
         /**
          * Check that the referenced {@link JsonValue} is an object.
-         * @param path The {@link org.forgerock.json.fluent.JsonPointer} path to the expected value.
+         * @param path The {@link JsonPointer} path to the expected value.
          * @return The {@code ObjectJsonValueAssert} for that node.
          */
         public ObjectJsonValueAssert hasObject(String path) {
