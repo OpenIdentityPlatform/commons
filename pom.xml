@@ -20,7 +20,7 @@ Copyright 2014-2015 ForgeRock AS.
     <parent>
         <groupId>org.forgerock</groupId>
         <artifactId>forgerock-parent</artifactId>
-        <version>1.2.1</version>
+        <version>1.2.9</version>
     </parent>
 
     <groupId>org.forgerock.commons</groupId>
@@ -56,9 +56,9 @@ Copyright 2014-2015 ForgeRock AS.
     </issueManagement>
 
     <scm>
-        <url>https://svn.forgerock.org/commons/forgerock-guice/trunk</url>
-        <connection>scm:svn:https://svn.forgerock.org/commons/forgerock-guice/trunk</connection>
-        <developerConnection>scm:svn:https://svn.forgerock.org/commons/forgerock-guice/trunk</developerConnection>
+        <connection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-guice.git</connection>
+        <developerConnection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-guice.git</developerConnection>
+        <url>http://stash.forgerock.org/projects/COMMONS/repos/forgerock-guice/browse</url>
     </scm>
 
     <ciManagement>
