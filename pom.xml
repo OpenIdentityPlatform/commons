@@ -19,7 +19,7 @@
   <parent>
     <groupId>org.forgerock</groupId>
     <artifactId>forgerock-parent</artifactId>
-    <version>1.0.0</version>
+    <version>1.2.9</version>
   </parent>
   <artifactId>forgerock-build-tools</artifactId>
   <version>1.0.3-SNAPSHOT</version>
@@ -55,9 +55,9 @@
     </site>
   </distributionManagement>
   <scm>
-    <url>https://svn.forgerock.org/commons/forgerock-build-tools/trunk/</url>
-    <connection>scm:svn:https://svn.forgerock.org/commons/forgerock-build-tools/trunk/</connection>
-    <developerConnection>scm:svn:https://svn.forgerock.org/commons/forgerock-build-tools/trunk/</developerConnection>
+    <connection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-build-tools.git</connection>
+    <developerConnection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-build-tools.git</developerConnection>
+    <url>http://stash.forgerock.org/projects/COMMONS/repos/forgerock-build-tools/browse</url>
   </scm>
   <ciManagement>
     <system>jenkins</system>
