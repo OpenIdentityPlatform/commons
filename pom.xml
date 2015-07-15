@@ -27,7 +27,7 @@
     <parent>
         <groupId>org.forgerock</groupId>
         <artifactId>forgerock-parent</artifactId>
-        <version>1.2.1</version>
+        <version>1.2.9</version>
     </parent>
 
     <properties>
@@ -43,9 +43,9 @@
 
     <inceptionYear>2012</inceptionYear>
     <scm>
-        <connection>scm:svn:https://svn.forgerock.org/commons/forgerock-ui/trunk</connection>
-        <developerConnection>scm:svn:https://svn.forgerock.org/commons/forgerock-ui/trunk</developerConnection>
-        <url>http://sources.forgerock.org/browse/commons/forgerock-ui/trunk</url>
+        <connection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-ui.git</connection>
+        <developerConnection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-ui.git</developerConnection>
+        <url>http://stash.forgerock.org/projects/COMMONS/repos/forgerock-ui/browse</url>
     </scm>
     <distributionManagement>
         <site>
