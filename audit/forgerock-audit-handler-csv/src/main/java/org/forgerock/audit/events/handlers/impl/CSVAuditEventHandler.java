@@ -179,8 +179,8 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
                                 + auditEventType);
                     }
                     final Collection<String> fieldOrder = new LinkedHashSet<>();
-                    fieldOrder.addAll(convertSlashesToDotNotation(JsonSchemaUtils.generateJsonPointers(
-                            AuditEventHelper.getAuditEventSchema(auditEvents.get(auditEventType)))));
+                    fieldOrder.addAll(JsonSchemaUtils.generateJsonPointers(
+                            AuditEventHelper.getAuditEventSchema(auditEvents.get(auditEventType))));
 
                     File auditFile = getAuditLogFile(auditEventType);
                     // Create header if creating a new file
@@ -323,7 +323,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
         final Iterator<String> iter = fieldOrder.iterator();
         final StringBuilder header = new StringBuilder();
         while (iter.hasNext()) {
-            final String key = iter.next();
+            final String key = convertToDotNotation(iter.next());
             header.append("\"");
             final String escapedStr = key.replaceAll("\"", "\"\"");
             header.append(escapedStr);
@@ -478,16 +478,12 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
         return newList.toArray(new String[0]);
     }
 
-    private Set<String> convertSlashesToDotNotation(final Set<String> keys) {
-        final Set<String> newSet = new LinkedHashSet<>();
-        for (String key : keys) {
-            String newKey = key;
-            if (key.startsWith("/")) {
-                newKey = key.substring(1);
-            }
-            newSet.add(StringUtils.replace(newKey, "/", "."));
+    private String convertToDotNotation(final String path) {
+        String newPath = path;
+        if (path.startsWith("/")) {
+            newPath = path.substring(1);
         }
-        return newSet;
+        return StringUtils.replace(newPath, "/", ".");
     }
 }
 
