@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.forgerock</groupId>
     <artifactId>forgerock-parent</artifactId>
-    <version>2.0.0</version>
+    <version>2.0.2</version>
   </parent>
   <groupId>org.forgerock.http</groupId>
   <artifactId>forgerock-http-framework</artifactId>
@@ -140,9 +140,9 @@
     </license>
   </licenses>
   <scm>
-    <url>https://svn.forgerock.org/commons/forgerock-http-framework/trunk/</url>
-    <connection>scm:svn:https://svn.forgerock.org/commons/forgerock-http-framework/trunk/</connection>
-    <developerConnection>scm:svn:https://svn.forgerock.org/commons/forgerock-http-framework/trunk/</developerConnection>
+    <connection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-http-framework.git</connection>
+    <developerConnection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-http-framework.git</developerConnection>
+    <url>http://stash.forgerock.org/projects/COMMONS/repos/forgerock-http-framework/browse</url>
   </scm>
   <distributionManagement>
     <site>
