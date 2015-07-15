@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.forgerock</groupId>
         <artifactId>forgerock-parent</artifactId>
-        <version>1.2.1</version>
+        <version>1.2.9</version>
     </parent>
     <groupId>org.forgerock.commons</groupId>
     <artifactId>forgerock-bloomfilter</artifactId>
@@ -41,6 +41,12 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
+
+    <scm>
+        <connection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-bloomfilter.git</connection>
+        <developerConnection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-bloomfilter.git</developerConnection>
+        <url>http://stash.forgerock.org/projects/COMMONS/repos/forgerock-bloomfilter/browse</url>
+    </scm>
 
     <properties>
         <maven.compiler.target>1.6</maven.compiler.target>
