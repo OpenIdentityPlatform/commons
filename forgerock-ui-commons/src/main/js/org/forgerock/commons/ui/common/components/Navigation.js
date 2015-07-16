@@ -160,8 +160,9 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
 
             fireEvent: function(e){
                 e.preventDefault();
-                if (e.currentTarget.dataset.event){
-                    eventManager.sendEvent(e.currentTarget.dataset.event);
+                var event = $(e.currentTarget).data().event;
+                if (event){
+                    e.eventManager.sendEvent(event);
                 }
             },
             render: function(args, callback) {
