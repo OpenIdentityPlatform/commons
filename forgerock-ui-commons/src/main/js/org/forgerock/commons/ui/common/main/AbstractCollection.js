@@ -52,7 +52,7 @@ define("org/forgerock/commons/ui/common/main/AbstractCollection", [
         },
 
         setSorting: function (sortKey, order) {
-            if (order === "desc") {
+            if (order === -1) {
                 return BackbonePaginator.prototype.setSorting.call(this, "-" + sortKey, order);
             } else {
                 return BackbonePaginator.prototype.setSorting.call(this, sortKey, order);
