@@ -75,9 +75,9 @@ public final class MemoryBackendTest {
     @Test
     public void testCreateCollection() throws Exception {
         final Connection connection = getConnection();
-        final Resource resource1 =
+        final ResourceResponse resource1 =
                 connection.create(ctx(), newCreateRequest("users", userAlice()));
-        final Resource resource2 = connection.read(ctx(), newReadRequest("users/0"));
+        final ResourceResponse resource2 = connection.read(ctx(), newReadRequest("users/0"));
         assertThat(resource1).isEqualTo(resource2);
         assertThat(resource1.getId()).isEqualTo("0");
         assertThat(resource1.getRevision()).isEqualTo("0");
@@ -88,9 +88,9 @@ public final class MemoryBackendTest {
     @Test
     public void testCreateInstance() throws Exception {
         final Connection connection = getConnection();
-        final Resource resource1 =
+        final ResourceResponse resource1 =
                 connection.create(ctx(), newCreateRequest("users", "123", userAlice()));
-        final Resource resource2 = connection.read(ctx(), newReadRequest("users/123"));
+        final ResourceResponse resource2 = connection.read(ctx(), newReadRequest("users/123"));
         assertThat(resource1).isEqualTo(resource2);
         assertThat(resource1.getId()).isEqualTo("123");
         assertThat(resource1.getRevision()).isEqualTo("0");
@@ -108,7 +108,7 @@ public final class MemoryBackendTest {
     public void testDeleteInstance() throws Exception {
         final Connection connection = getConnection();
         connection.create(ctx(), newCreateRequest("users", userAlice()));
-        final Resource resource = connection.delete(ctx(), newDeleteRequest("users/0"));
+        final ResourceResponse resource = connection.delete(ctx(), newDeleteRequest("users/0"));
         assertThat(resource.getId()).isEqualTo("0");
         assertThat(resource.getRevision()).isEqualTo("0");
         assertThat(resource.getContent().getObject()).isEqualTo(
@@ -131,7 +131,7 @@ public final class MemoryBackendTest {
     public void testPatchInstance() throws Exception {
         final Connection connection = getConnection();
         connection.create(ctx(), newCreateRequest("users", userAlice()));
-        final Resource resource =
+        final ResourceResponse resource =
                 connection.patch(ctx(), newPatchRequest("users/0", replace("/name", "bob"),
                         increment("/age", 10), remove("/role"), add("/role", "it")));
         assertThat(resource.getId()).isEqualTo("0");
@@ -143,7 +143,7 @@ public final class MemoryBackendTest {
     @Test
     public void testQueryCollection() throws Exception {
         final Connection connection = getConnectionWithAliceAndBob();
-        final Collection<Resource> results = new ArrayList<>();
+        final Collection<ResourceResponse> results = new ArrayList<>();
         connection.query(ctx(), newQueryRequest("users"), results);
         assertThat(results).containsOnly(asResource(userAliceWithIdAndRev(0, 0)),
                 asResource(userBobWithIdAndRev(1, 0)));
@@ -152,11 +152,11 @@ public final class MemoryBackendTest {
     @Test
     public void testQueryCollectionWithFilters() throws Exception {
         final Connection connection = getConnectionWithAliceAndBob();
-        final Collection<Resource> results = new ArrayList<>();
+        final Collection<ResourceResponse> results = new ArrayList<>();
         connection.query(ctx(), newQueryRequest("users").setQueryFilter(
                 QueryFilter.equalTo(new JsonPointer("name"), "alice")).addField("_id"), results);
         assertThat(results).hasSize(1);
-        final Resource resource = results.iterator().next();
+        final ResourceResponse resource = results.iterator().next();
         assertThat(resource.getId()).isEqualTo("0");
         assertThat(resource.getRevision()).isEqualTo("0");
         assertThat(resource.getContent().getObject()).isEqualTo(object(field("_id", "0")));
@@ -165,42 +165,42 @@ public final class MemoryBackendTest {
     @Test(expectedExceptions = BadRequestException.class)
     public void testQueryInstance() throws Exception {
         final Connection connection = getConnectionWithAliceAndBob();
-        final Collection<Resource> results = new ArrayList<>();
+        final Collection<ResourceResponse> results = new ArrayList<>();
         connection.query(ctx(), newQueryRequest("users/0"), results);
     }
 
     @Test
     public void testQueryCollectionEstimateCountWithoutPaging() throws Exception{
         final Connection connection = getConnectionWithAliceAndBob();
-        final Collection<Resource> results = new ArrayList<Resource>();
+        final Collection<ResourceResponse> results = new ArrayList<ResourceResponse>();
 
         final QueryRequest request = newQueryRequest("users").setTotalPagedResultsPolicy(CountPolicy.ESTIMATE);
-        final QueryResult result = connection.query(ctx(), request, results);
+        final QueryResponse result = connection.query(ctx(), request, results);
 
         assertThat(result.getTotalPagedResultsPolicy()).isEqualTo(CountPolicy.NONE);
-        assertThat(result.getTotalPagedResults()).isEqualTo(QueryResult.NO_COUNT);
+        assertThat(result.getTotalPagedResults()).isEqualTo(QueryResponse.NO_COUNT);
     }
 
     @Test
     public void testQueryCollectionExactCountWithoutPaging() throws Exception{
         final Connection connection = getConnectionWithAliceAndBob();
-        final Collection<Resource> results = new ArrayList<Resource>();
+        final Collection<ResourceResponse> results = new ArrayList<ResourceResponse>();
 
         final QueryRequest request = newQueryRequest("users").setTotalPagedResultsPolicy(CountPolicy.EXACT);
-        final QueryResult result = connection.query(ctx(), request, results);
+        final QueryResponse result = connection.query(ctx(), request, results);
 
         assertThat(result.getTotalPagedResultsPolicy()).isEqualTo(CountPolicy.NONE);
-        assertThat(result.getTotalPagedResults()).isEqualTo(QueryResult.NO_COUNT);
+        assertThat(result.getTotalPagedResults()).isEqualTo(QueryResponse.NO_COUNT);
     }
 
     @Test
     public void testQueryCollectionDefaultsToNoneCount() throws Exception {
         final Connection connection = getConnectionWithAliceAndBob();
 
-        final Collection<Resource> results = new ArrayList<Resource>();
-        QueryResult result = connection.query(ctx(), newQueryRequest("users"), results);
+        final Collection<ResourceResponse> results = new ArrayList<ResourceResponse>();
+        QueryResponse result = connection.query(ctx(), newQueryRequest("users"), results);
 
-        assertThat(result.getTotalPagedResults()).isEqualTo(QueryResult.NO_COUNT);
+        assertThat(result.getTotalPagedResults()).isEqualTo(QueryResponse.NO_COUNT);
         assertThat(result.getTotalPagedResultsPolicy()).isEqualTo(CountPolicy.NONE);
     }
 
@@ -208,14 +208,14 @@ public final class MemoryBackendTest {
     public void testQueryCollectionWithNoneCount() throws Exception {
         final Connection connection = getConnectionWithAliceAndBob();
 
-        final Collection<Resource> results = new ArrayList<Resource>();
+        final Collection<ResourceResponse> results = new ArrayList<ResourceResponse>();
         QueryRequest request = newQueryRequest("users");
 
         request.setTotalPagedResultsPolicy(CountPolicy.NONE);
-        QueryResult result = connection.query(ctx(), request, results);
+        QueryResponse result = connection.query(ctx(), request, results);
 
         assertThat(result.getTotalPagedResultsPolicy()).isEqualTo(CountPolicy.NONE);
-        assertThat(result.getTotalPagedResults()).isEqualTo(QueryResult.NO_COUNT);
+        assertThat(result.getTotalPagedResults()).isEqualTo(QueryResponse.NO_COUNT);
     }
 
     @Test
@@ -226,8 +226,8 @@ public final class MemoryBackendTest {
         request.setTotalPagedResultsPolicy(CountPolicy.EXACT);
         request.setPageSize(5);
 
-        final Collection<Resource> results = new ArrayList<Resource>();
-        final QueryResult result = connection.query(ctx(), request, results);
+        final Collection<ResourceResponse> results = new ArrayList<ResourceResponse>();
+        final QueryResponse result = connection.query(ctx(), request, results);
 
         assertThat(result.getTotalPagedResultsPolicy()).isEqualTo(CountPolicy.EXACT);
         assertThat(result.getTotalPagedResults()).isEqualTo(2);
@@ -241,8 +241,8 @@ public final class MemoryBackendTest {
                 .setTotalPagedResultsPolicy(CountPolicy.ESTIMATE)
                 .setPageSize(5);
 
-        final Collection<Resource> results = new ArrayList<Resource>();
-        QueryResult result = connection.query(ctx(), request, results);
+        final Collection<ResourceResponse> results = new ArrayList<ResourceResponse>();
+        QueryResponse result = connection.query(ctx(), request, results);
 
         // It should fall back to an exact count
         assertThat(result.getTotalPagedResultsPolicy()).isEqualTo(CountPolicy.EXACT);
@@ -259,7 +259,7 @@ public final class MemoryBackendTest {
     public void testReadInstance() throws Exception {
         final Connection connection = getConnection();
         connection.create(ctx(), newCreateRequest("users", userAlice()));
-        final Resource resource = connection.read(ctx(), newReadRequest("users/0"));
+        final ResourceResponse resource = connection.read(ctx(), newReadRequest("users/0"));
         assertThat(resource.getId()).isEqualTo("0");
         assertThat(resource.getRevision()).isEqualTo("0");
         assertThat(resource.getContent().getObject()).isEqualTo(
@@ -270,7 +270,7 @@ public final class MemoryBackendTest {
     public void testReadInstanceWithFieldFilter() throws Exception {
         final Connection connection = getConnection();
         connection.create(ctx(), newCreateRequest("users", userAlice()));
-        final Resource resource =
+        final ResourceResponse resource =
                 connection.read(ctx(), newReadRequest("users/0").addField("_id"));
         assertThat(resource.getId()).isEqualTo("0");
         assertThat(resource.getRevision()).isEqualTo("0");
@@ -287,7 +287,7 @@ public final class MemoryBackendTest {
     public void testUpdateInstance() throws Exception {
         final Connection connection = getConnection();
         connection.create(ctx(), newCreateRequest("users", userAlice()));
-        final Resource resource = connection.update(ctx(), newUpdateRequest("users/0", userBob()));
+        final ResourceResponse resource = connection.update(ctx(), newUpdateRequest("users/0", userBob()));
         assertThat(resource.getId()).isEqualTo("0");
         assertThat(resource.getRevision()).isEqualTo("1");
         assertThat(resource.getContent().getObject()).isEqualTo(

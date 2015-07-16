@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.forgerock.http.context.ServerContext;
-import org.forgerock.json.JsonValue;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -52,7 +51,7 @@ public final class FilterChain implements RequestHandler {
         }
 
         @Override
-        public Promise<JsonValue, ResourceException> handleAction(final ServerContext context,
+        public Promise<ActionResponse, ResourceException> handleAction(final ServerContext context,
                 final ActionRequest request) {
             if (hasNext()) {
                 return get().filterAction(context, request, next());
@@ -62,7 +61,7 @@ public final class FilterChain implements RequestHandler {
         }
 
         @Override
-        public Promise<Resource, ResourceException> handleCreate(final ServerContext context,
+        public Promise<ResourceResponse, ResourceException> handleCreate(final ServerContext context,
                 final CreateRequest request) {
             if (hasNext()) {
                 return get().filterCreate(context, request, next());
@@ -72,7 +71,7 @@ public final class FilterChain implements RequestHandler {
         }
 
         @Override
-        public Promise<Resource, ResourceException> handleDelete(final ServerContext context,
+        public Promise<ResourceResponse, ResourceException> handleDelete(final ServerContext context,
                 final DeleteRequest request) {
             if (hasNext()) {
                 return get().filterDelete(context, request, next());
@@ -82,7 +81,7 @@ public final class FilterChain implements RequestHandler {
         }
 
         @Override
-        public Promise<Resource, ResourceException> handlePatch(final ServerContext context,
+        public Promise<ResourceResponse, ResourceException> handlePatch(final ServerContext context,
                 final PatchRequest request) {
             if (hasNext()) {
                 return get().filterPatch(context, request, next());
@@ -92,7 +91,7 @@ public final class FilterChain implements RequestHandler {
         }
 
         @Override
-        public Promise<QueryResult, ResourceException> handleQuery(final ServerContext context,
+        public Promise<QueryResponse, ResourceException> handleQuery(final ServerContext context,
                 final QueryRequest request, final QueryResourceHandler handler) {
             if (hasNext()) {
                 return get().filterQuery(context, request, handler, next());
@@ -102,7 +101,7 @@ public final class FilterChain implements RequestHandler {
         }
 
         @Override
-        public Promise<Resource, ResourceException> handleRead(final ServerContext context, final ReadRequest request) {
+        public Promise<ResourceResponse, ResourceException> handleRead(final ServerContext context, final ReadRequest request) {
             if (hasNext()) {
                 return get().filterRead(context, request, next());
             } else {
@@ -111,7 +110,7 @@ public final class FilterChain implements RequestHandler {
         }
 
         @Override
-        public Promise<Resource, ResourceException> handleUpdate(final ServerContext context,
+        public Promise<ResourceResponse, ResourceException> handleUpdate(final ServerContext context,
                 final UpdateRequest request) {
             if (hasNext()) {
                 return get().filterUpdate(context, request, next());
@@ -202,39 +201,44 @@ public final class FilterChain implements RequestHandler {
     }
 
     @Override
-    public Promise<JsonValue, ResourceException> handleAction(final ServerContext context,
+    public Promise<ActionResponse, ResourceException> handleAction(final ServerContext context,
             final ActionRequest request) {
         return new Cursor().handleAction(context, request);
     }
 
     @Override
-    public Promise<Resource, ResourceException> handleCreate(final ServerContext context, final CreateRequest request) {
+    public Promise<ResourceResponse, ResourceException> handleCreate(final ServerContext context,
+            final CreateRequest request) {
         return new Cursor().handleCreate(context, request);
     }
 
     @Override
-    public Promise<Resource, ResourceException> handleDelete(final ServerContext context, final DeleteRequest request) {
+    public Promise<ResourceResponse, ResourceException> handleDelete(final ServerContext context,
+            final DeleteRequest request) {
         return new Cursor().handleDelete(context, request);
     }
 
     @Override
-    public Promise<Resource, ResourceException> handlePatch(final ServerContext context, final PatchRequest request) {
+    public Promise<ResourceResponse, ResourceException> handlePatch(final ServerContext context,
+            final PatchRequest request) {
         return new Cursor().handlePatch(context, request);
     }
 
     @Override
-    public Promise<QueryResult, ResourceException> handleQuery(final ServerContext context, final QueryRequest request,
-            final QueryResourceHandler handler) {
+    public Promise<QueryResponse, ResourceException> handleQuery(final ServerContext context,
+            final QueryRequest request, final QueryResourceHandler handler) {
         return new Cursor().handleQuery(context, request, handler);
     }
 
     @Override
-    public Promise<Resource, ResourceException> handleRead(final ServerContext context, final ReadRequest request) {
+    public Promise<ResourceResponse, ResourceException> handleRead(final ServerContext context,
+            final ReadRequest request) {
         return new Cursor().handleRead(context, request);
     }
 
     @Override
-    public Promise<Resource, ResourceException> handleUpdate(final ServerContext context, final UpdateRequest request) {
+    public Promise<ResourceResponse, ResourceException> handleUpdate(final ServerContext context,
+            final UpdateRequest request) {
         return new Cursor().handleUpdate(context, request);
     }
 

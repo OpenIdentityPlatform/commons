@@ -19,7 +19,6 @@ package org.forgerock.json.resource;
 import java.util.Collection;
 
 import org.forgerock.http.Context;
-import org.forgerock.json.JsonValue;
 
 /**
  * An abstract connection whose synchronous methods are implemented in terms of
@@ -34,41 +33,41 @@ public abstract class AbstractAsynchronousConnection implements Connection {
     }
 
     @Override
-    public JsonValue action(final Context context, final ActionRequest request)
+    public ActionResponse action(final Context context, final ActionRequest request)
             throws ResourceException {
         return actionAsync(context, request).getOrThrowUninterruptibly();
     }
 
     @Override
-    public Resource create(final Context context, final CreateRequest request)
+    public ResourceResponse create(final Context context, final CreateRequest request)
             throws ResourceException {
         return createAsync(context, request).getOrThrowUninterruptibly();
     }
 
     @Override
-    public Resource delete(final Context context, final DeleteRequest request)
+    public ResourceResponse delete(final Context context, final DeleteRequest request)
             throws ResourceException {
         return deleteAsync(context, request).getOrThrowUninterruptibly();
     }
 
     @Override
-    public Resource patch(final Context context, final PatchRequest request)
+    public ResourceResponse patch(final Context context, final PatchRequest request)
             throws ResourceException {
         return patchAsync(context, request).getOrThrowUninterruptibly();
     }
 
     @Override
-    public QueryResult query(final Context context, final QueryRequest request,
+    public QueryResponse query(final Context context, final QueryRequest request,
             final QueryResourceHandler handler) throws ResourceException {
         return queryAsync(context, request, handler).getOrThrowUninterruptibly();
     }
 
     @Override
-    public QueryResult query(final Context context, final QueryRequest request,
-            final Collection<? super Resource> results) throws ResourceException {
+    public QueryResponse query(final Context context, final QueryRequest request,
+            final Collection<? super ResourceResponse> results) throws ResourceException {
         return query(context, request, new QueryResourceHandler() {
             @Override
-            public boolean handleResource(final Resource resource) {
+            public boolean handleResource(final ResourceResponse resource) {
                 results.add(resource);
                 return true;
             }
@@ -76,12 +75,12 @@ public abstract class AbstractAsynchronousConnection implements Connection {
     }
 
     @Override
-    public Resource read(final Context context, final ReadRequest request) throws ResourceException {
+    public ResourceResponse read(final Context context, final ReadRequest request) throws ResourceException {
         return readAsync(context, request).getOrThrowUninterruptibly();
     }
 
     @Override
-    public Resource update(final Context context, final UpdateRequest request)
+    public ResourceResponse update(final Context context, final UpdateRequest request)
             throws ResourceException {
         return updateAsync(context, request).getOrThrowUninterruptibly();
     }

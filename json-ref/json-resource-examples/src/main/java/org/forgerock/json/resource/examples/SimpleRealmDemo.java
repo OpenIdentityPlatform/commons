@@ -16,6 +16,7 @@
 
 package org.forgerock.json.resource.examples;
 
+import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.json.resource.examples.DemoUtils.ctx;
 import static org.forgerock.json.resource.examples.DemoUtils.log;
 import static org.forgerock.util.promise.Promises.newResultPromise;
@@ -30,8 +31,8 @@ import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.util.promise.Promise;
 
@@ -75,7 +76,7 @@ public final class SimpleRealmDemo {
     private static RequestHandler simpleRouter() {
         return new AbstractRequestHandler() {
             @Override
-            public Promise<Resource, ResourceException> handleRead(final ServerContext context,
+            public Promise<ResourceResponse, ResourceException> handleRead(final ServerContext context,
                     final ReadRequest request) {
                 final ResourcePath name = request.getResourcePathObject();
                 final int size = name.size();
@@ -99,7 +100,7 @@ public final class SimpleRealmDemo {
 
                 final JsonValue content =
                         new JsonValue(Collections.singletonMap("id", (Object) name.leaf()));
-                return newResultPromise(new Resource(name.leaf(), "1", content));
+                return newResultPromise(newResourceResponse(name.leaf(), "1", content));
             }
         };
     }

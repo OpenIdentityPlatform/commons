@@ -25,7 +25,6 @@ import static org.mockito.Mockito.*;
 import org.forgerock.http.context.RootContext;
 import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.http.context.ServerContext;
-import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.VersionSelector.DefaultVersionBehaviour;
 import org.forgerock.util.promise.Promise;
 import org.mockito.Matchers;
@@ -109,7 +108,7 @@ public class VersionedRouterTest {
         CreateRequest request = Requests.newCreateRequest(resource, json(object()));
 
         //When
-        Promise<Resource, ResourceException> promise = router.handleCreate(context, request);
+        Promise<ResourceResponse, ResourceException> promise = router.handleCreate(context, request);
 
         //Then
         if (expectException) {
@@ -134,7 +133,7 @@ public class VersionedRouterTest {
         ReadRequest request = Requests.newReadRequest(resource);
 
         //When
-        Promise<Resource, ResourceException> promise = router.handleRead(context, request);
+        Promise<ResourceResponse, ResourceException> promise = router.handleRead(context, request);
 
         //Then
         if (expectException) {
@@ -159,7 +158,7 @@ public class VersionedRouterTest {
         UpdateRequest request = Requests.newUpdateRequest(resource, json(object()));
 
         //When
-        Promise<Resource, ResourceException> promise = router.handleUpdate(context, request);
+        Promise<ResourceResponse, ResourceException> promise = router.handleUpdate(context, request);
 
         //Then
         if (expectException) {
@@ -184,7 +183,7 @@ public class VersionedRouterTest {
         DeleteRequest request = Requests.newDeleteRequest(resource);
 
         //When
-        Promise<Resource, ResourceException> promise = router.handleDelete(context, request);
+        Promise<ResourceResponse, ResourceException> promise = router.handleDelete(context, request);
 
         //Then
         if (expectException) {
@@ -209,7 +208,7 @@ public class VersionedRouterTest {
         PatchRequest request = Requests.newPatchRequest(resource);
 
         //When
-        Promise<Resource, ResourceException> promise = router.handlePatch(context, request);
+        Promise<ResourceResponse, ResourceException> promise = router.handlePatch(context, request);
 
         //Then
         if (expectException) {
@@ -234,7 +233,7 @@ public class VersionedRouterTest {
         ActionRequest request = Requests.newActionRequest(resource, "ACTION_ID").setContent(json(object()));
 
         //When
-        Promise<JsonValue, ResourceException> promise = router.handleAction(context, request);
+        Promise<ActionResponse, ResourceException> promise = router.handleAction(context, request);
 
         //Then
         if (expectException) {
@@ -259,7 +258,7 @@ public class VersionedRouterTest {
         QueryResourceHandler handler = mock(QueryResourceHandler.class);
 
         //When
-        Promise<QueryResult, ResourceException> promise = router.handleQuery(context, request, handler);
+        Promise<QueryResponse, ResourceException> promise = router.handleQuery(context, request, handler);
 
         //Then
         if (expectException) {
@@ -297,7 +296,7 @@ public class VersionedRouterTest {
         setDefaultVersionBehaviour(versionRouter2, versionBehaviour);
 
         //When
-        Promise<Resource, ResourceException> promise = router.handleCreate(context, request);
+        Promise<ResourceResponse, ResourceException> promise = router.handleCreate(context, request);
 
         //Then
         if (expectException) {
@@ -323,7 +322,7 @@ public class VersionedRouterTest {
         setDefaultVersionBehaviour(versionRouter2, versionBehaviour);
 
         //When
-        Promise<Resource, ResourceException> promise = router.handleRead(context, request);
+        Promise<ResourceResponse, ResourceException> promise = router.handleRead(context, request);
 
         //Then
         if (expectException) {
@@ -349,7 +348,7 @@ public class VersionedRouterTest {
         setDefaultVersionBehaviour(versionRouter2, versionBehaviour);
 
         //When
-        Promise<Resource, ResourceException> promise = router.handleUpdate(context, request);
+        Promise<ResourceResponse, ResourceException> promise = router.handleUpdate(context, request);
 
         //Then
         if (expectException) {
@@ -375,7 +374,7 @@ public class VersionedRouterTest {
         setDefaultVersionBehaviour(versionRouter2, versionBehaviour);
 
         //When
-        Promise<Resource, ResourceException> promise = router.handleDelete(context, request);
+        Promise<ResourceResponse, ResourceException> promise = router.handleDelete(context, request);
 
         //Then
         if (expectException) {
@@ -401,7 +400,7 @@ public class VersionedRouterTest {
         setDefaultVersionBehaviour(versionRouter2, versionBehaviour);
 
         //When
-        Promise<Resource, ResourceException> promise = router.handlePatch(context, request);
+        Promise<ResourceResponse, ResourceException> promise = router.handlePatch(context, request);
 
         //Then
         if (expectException) {
@@ -427,7 +426,7 @@ public class VersionedRouterTest {
         setDefaultVersionBehaviour(versionRouter2, versionBehaviour);
 
         //When
-        Promise<JsonValue, ResourceException> promise = router.handleAction(context, request);
+        Promise<ActionResponse, ResourceException> promise = router.handleAction(context, request);
 
         //Then
         if (expectException) {
@@ -453,7 +452,7 @@ public class VersionedRouterTest {
         setDefaultVersionBehaviour(versionRouter2, versionBehaviour);
 
         //When
-        Promise<QueryResult, ResourceException> promise = router.handleQuery(context, request, handler);
+        Promise<QueryResponse, ResourceException> promise = router.handleQuery(context, request, handler);
 
         //Then
         if (expectException) {

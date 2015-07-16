@@ -17,7 +17,6 @@
 package org.forgerock.json.resource;
 
 import org.forgerock.http.context.ServerContext;
-import org.forgerock.json.JsonValue;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -55,7 +54,7 @@ public interface SingletonResourceProvider {
      * @return A {@code Promise} containing the result of the operation.
      * @see RequestHandler#handleAction(ServerContext, ActionRequest)
      */
-    Promise<JsonValue, ResourceException> actionInstance(ServerContext context, ActionRequest request);
+    Promise<ActionResponse, ResourceException> actionInstance(ServerContext context, ActionRequest request);
 
     /**
      * {@link RequestHandler#handlePatch(ServerContext, PatchRequest)
@@ -68,7 +67,7 @@ public interface SingletonResourceProvider {
      * @return A {@code Promise} containing the result of the operation.
      * @see RequestHandler#handlePatch(ServerContext, PatchRequest)
      */
-    Promise<Resource, ResourceException> patchInstance(ServerContext context, PatchRequest request);
+    Promise<ResourceResponse, ResourceException> patchInstance(ServerContext context, PatchRequest request);
 
     /**
      * {@link RequestHandler#handleRead(ServerContext, ReadRequest)
@@ -81,7 +80,7 @@ public interface SingletonResourceProvider {
      * @return A {@code Promise} containing the result of the operation.
      * @see RequestHandler#handleRead(ServerContext, ReadRequest)
      */
-    Promise<Resource, ResourceException> readInstance(ServerContext context, ReadRequest request);
+    Promise<ResourceResponse, ResourceException> readInstance(ServerContext context, ReadRequest request);
 
     /**
      * {@link RequestHandler#handleUpdate(ServerContext, UpdateRequest)
@@ -94,5 +93,5 @@ public interface SingletonResourceProvider {
      * @return A {@code Promise} containing the result of the operation.
      * @see RequestHandler#handleUpdate(ServerContext, UpdateRequest)
      */
-    Promise<Resource, ResourceException> updateInstance(ServerContext context, UpdateRequest request);
+    Promise<ResourceResponse, ResourceException> updateInstance(ServerContext context, UpdateRequest request);
 }

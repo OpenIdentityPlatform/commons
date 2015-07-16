@@ -18,6 +18,7 @@ package org.forgerock.json.resource.descriptor;
 
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Requests.newReadRequest;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.json.resource.descriptor.Api.JSON_MAPPER;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
@@ -37,8 +38,8 @@ import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.descriptor.RelationDescriptor.Multiplicity;
 import org.forgerock.util.promise.Promise;
@@ -93,12 +94,12 @@ public final class ApiDescriptorTest {
                     } else if (relation.getResourceUrn().equals(USERS_URN)) {
                         return new AbstractRequestHandler() {
                             @Override
-                            public Promise<Resource, ResourceException> handleRead(final ServerContext context,
+                            public Promise<ResourceResponse, ResourceException> handleRead(final ServerContext context,
                                     final ReadRequest request) {
                                 System.out.println("Reading user from realm " + realmList);
                                 final JsonValue content =
                                         json(object(field("id", request.getResourcePath())));
-                                return newResultPromise(new Resource(request.getResourcePath(), "1",
+                                return newResultPromise(newResourceResponse(request.getResourcePath(), "1",
                                         content));
                             }
                         };
@@ -184,13 +185,13 @@ public final class ApiDescriptorTest {
 
         System.out.println("#### Reading API Descriptor");
         System.out.println();
-        final Resource apiValue = connection.read(new RootContext(), newReadRequest(""));
+        final ResourceResponse apiValue = connection.read(new RootContext(), newReadRequest(""));
         WRITER.writeObject(apiValue.getContent().getObject());
 
         System.out.println();
         System.out.println("#### Reading user realms/com/subrealms/example/users/bjensen");
         System.out.println();
-        final Resource bjensen =
+        final ResourceResponse bjensen =
                 connection.read(new RootContext(),
                         newReadRequest("realms/com/subrealms/example/users/bjensen"));
         WRITER.writeObject(bjensen.getContent().getObject());
