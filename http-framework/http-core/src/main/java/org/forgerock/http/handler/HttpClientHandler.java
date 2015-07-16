@@ -133,6 +133,11 @@ public final class HttpClientHandler implements Handler, Closeable {
             HostnameVerifier.class, HostnameVerifier.ALLOW_ALL);
 
     /**
+     * SSLContext algorithm to be used when making SSL/TLS connections.
+     */
+    public static final Option<String> OPTION_SSLCONTEXT_ALGORITHM = Option.withDefault("TLS");
+
+    /**
      * Creates a new HTTP client using default client options. The returned
      * client must be closed when it is no longer needed by the application.
      *
