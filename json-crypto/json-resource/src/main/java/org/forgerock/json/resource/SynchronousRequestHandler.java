@@ -19,7 +19,6 @@ package org.forgerock.json.resource;
 import java.util.Collection;
 
 import org.forgerock.http.context.ServerContext;
-import org.forgerock.json.JsonValue;
 
 /**
  * An interface for implementing synchronous {@link RequestHandler}s. A
@@ -56,7 +55,7 @@ public interface SynchronousRequestHandler {
      *             If the request failed for some reason.
      * @see RequestHandler#handleAction(ServerContext, ActionRequest)
      */
-    JsonValue handleAction(ServerContext context, ActionRequest request) throws ResourceException;
+    ActionResponse handleAction(ServerContext context, ActionRequest request) throws ResourceException;
 
     /**
      * Adds a new JSON resource.
@@ -70,7 +69,7 @@ public interface SynchronousRequestHandler {
      *             If the request failed for some reason.
      * @see RequestHandler#handleCreate(ServerContext, CreateRequest)
      */
-    Resource handleCreate(ServerContext context, CreateRequest request) throws ResourceException;
+    ResourceResponse handleCreate(ServerContext context, CreateRequest request) throws ResourceException;
 
     /**
      * Deletes a JSON resource.
@@ -84,7 +83,7 @@ public interface SynchronousRequestHandler {
      *             If the request failed for some reason.
      * @see RequestHandler#handleDelete(ServerContext, DeleteRequest)
      */
-    Resource handleDelete(ServerContext context, DeleteRequest request) throws ResourceException;
+    ResourceResponse handleDelete(ServerContext context, DeleteRequest request) throws ResourceException;
 
     /**
      * Updates a JSON resource by applying a set of changes to its existing
@@ -99,7 +98,7 @@ public interface SynchronousRequestHandler {
      *             If the request failed for some reason.
      * @see RequestHandler#handlePatch(ServerContext, PatchRequest)
      */
-    Resource handlePatch(ServerContext context, PatchRequest request) throws ResourceException;
+    ResourceResponse handlePatch(ServerContext context, PatchRequest request) throws ResourceException;
 
     /**
      * Searches for all JSON resources matching a user specified set of
@@ -118,8 +117,8 @@ public interface SynchronousRequestHandler {
      * @see RequestHandler#handleQuery(ServerContext, QueryRequest,
      *      QueryResourceHandler)
      */
-    QueryResult handleQuery(ServerContext context, QueryRequest request,
-            Collection<Resource> resources) throws ResourceException;
+    QueryResponse handleQuery(ServerContext context, QueryRequest request,
+            Collection<ResourceResponse> resources) throws ResourceException;
 
     /**
      * Reads a JSON resource.
@@ -133,7 +132,7 @@ public interface SynchronousRequestHandler {
      *             If the request failed for some reason.
      * @see RequestHandler#handleRead(ServerContext, ReadRequest)
      */
-    Resource handleRead(ServerContext context, ReadRequest request) throws ResourceException;
+    ResourceResponse handleRead(ServerContext context, ReadRequest request) throws ResourceException;
 
     /**
      * Updates a JSON resource by replacing its existing content with new
@@ -148,5 +147,5 @@ public interface SynchronousRequestHandler {
      *             If the request failed for some reason.
      * @see RequestHandler#handleUpdate(ServerContext, UpdateRequest)
      */
-    Resource handleUpdate(ServerContext context, UpdateRequest request) throws ResourceException;
+    ResourceResponse handleUpdate(ServerContext context, UpdateRequest request) throws ResourceException;
 }

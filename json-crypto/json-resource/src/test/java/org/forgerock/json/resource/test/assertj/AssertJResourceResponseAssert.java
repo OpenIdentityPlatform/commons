@@ -19,54 +19,54 @@ package org.forgerock.json.resource.test.assertj;
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.AbstractCharSequenceAssert;
 import org.assertj.core.api.Assertions;
-import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.test.assertj.AssertJJsonValueAssert;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.test.assertj.AbstractAssertJPromiseAssert;
 
 /**
- * Offers AssertJ assertions for {@link Resource} instances.
+ * Offers AssertJ assertions for {@link ResourceResponse} instances.
  */
-public class AssertJResourceAssert extends AbstractAssert<AssertJResourceAssert, Resource> {
+public class AssertJResourceResponseAssert extends AbstractAssert<AssertJResourceResponseAssert, ResourceResponse> {
 
     /**
-     * Assert the value of the provided {@link Resource} instance.
+     * Assert the value of the provided {@link ResourceResponse} instance.
      * @param resource The instance to make assertions on.
      * @return An assert object.
      */
-    public static AssertJResourceAssert assertThat(Resource resource) {
-        return new AssertJResourceAssert(resource);
+    public static AssertJResourceResponseAssert assertThat(ResourceResponse resource) {
+        return new AssertJResourceResponseAssert(resource);
     }
 
     /**
-     * Assert the promise of a {@link Resource} instance.
+     * Assert the promise of a {@link ResourceResponse} instance.
      * @param promise The promise to make assertions on.
      * @return An assert object.
      */
-    public static AssertJResourcePromiseAssert assertThat(Promise<Resource, ?> promise) {
+    public static AssertJResourcePromiseAssert assertThat(Promise<ResourceResponse, ?> promise) {
         return new AssertJResourcePromiseAssert(promise);
     }
 
     public static class AssertJResourcePromiseAssert
-            extends AbstractAssertJPromiseAssert<Resource, AssertJResourcePromiseAssert, AssertJResourceAssert> {
+            extends AbstractAssertJPromiseAssert<ResourceResponse, AssertJResourcePromiseAssert, AssertJResourceResponseAssert> {
 
-        protected AssertJResourcePromiseAssert(Promise<Resource, ?> promise) {
+        protected AssertJResourcePromiseAssert(Promise<ResourceResponse, ?> promise) {
             super(promise, AssertJResourcePromiseAssert.class);
         }
 
         @Override
-        protected AssertJResourceAssert createSucceededAssert(Resource resource) {
-            return new AssertJResourceAssert(resource);
+        protected AssertJResourceResponseAssert createSucceededAssert(ResourceResponse resource) {
+            return new AssertJResourceResponseAssert(resource);
         }
     }
 
     /**
-     * Creates a new {@link AssertJResourceAssert}.
+     * Creates a new {@link AssertJResourceResponseAssert}.
      *
      * @param actual   the actual value to verify.
      */
-    private AssertJResourceAssert(Resource actual) {
-        super(actual, AssertJResourceAssert.class);
+    private AssertJResourceResponseAssert(ResourceResponse actual) {
+        super(actual, AssertJResourceResponseAssert.class);
     }
 
     /**

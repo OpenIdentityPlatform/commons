@@ -16,7 +16,7 @@
 
 package org.forgerock.json.resource.http;
 
-import static org.forgerock.json.resource.QueryResult.*;
+import static org.forgerock.json.resource.QueryResponse.*;
 import static org.forgerock.json.resource.http.HttpUtils.*;
 import static org.forgerock.util.Utils.closeSilently;
 import static org.forgerock.util.promise.Promises.newResultPromise;
@@ -38,19 +38,20 @@ import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.Status;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.AdviceContext;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestVisitor;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.encode.Base64url;
@@ -99,13 +100,13 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
     @Override
     public final Promise<Response, NeverThrowsException> visitActionRequest(final Void p, final ActionRequest request) {
         return connection.actionAsync(context, request)
-                .thenAsync(new AsyncFunction<JsonValue, Response, NeverThrowsException>() {
+                .thenAsync(new AsyncFunction<ActionResponse, Response, NeverThrowsException>() {
                     @Override
-                    public Promise<Response, NeverThrowsException> apply(JsonValue result) {
+                    public Promise<Response, NeverThrowsException> apply(ActionResponse result) {
                         try {
                             writeAdvice();
                             if (result != null) {
-                                writeJsonValue(result);
+                                writeJsonValue(result.getJsonContent());
                             } else {
                                 // No content.
                                 httpResponse.setStatus(Status.NO_CONTENT);
@@ -131,9 +132,9 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
     @Override
     public final Promise<Response, NeverThrowsException> visitCreateRequest(final Void p, final CreateRequest request) {
         return connection.createAsync(context, request)
-                .thenAsync(new AsyncFunction<Resource, Response, NeverThrowsException>() {
+                .thenAsync(new AsyncFunction<ResourceResponse, Response, NeverThrowsException>() {
                     @Override
-                    public Promise<Response, NeverThrowsException> apply(Resource result) {
+                    public Promise<Response, NeverThrowsException> apply(ResourceResponse result) {
                         try {
                             writeAdvice();
                             if (result.getId() != null) {
@@ -195,7 +196,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
         final AtomicInteger resultCount = new AtomicInteger(0);
         return connection.queryAsync(context, request, new QueryResourceHandler() {
             @Override
-            public boolean handleResource(final Resource resource) {
+            public boolean handleResource(final ResourceResponse resource) {
                 try {
                     writeHeader(isFirstResult);
                     writeJsonValue(resource.getContent());
@@ -206,19 +207,17 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
                     return false;
                 }
             }
-        }).thenOnResult(new ResultHandler<QueryResult>() {
+        }).thenOnResult(new ResultHandler<QueryResponse>() {
             @Override
-            public void handleResult(QueryResult result) {
+            public void handleResult(QueryResponse result) {
                 try {
                     writeHeader(isFirstResult);
                     writer.writeEndArray();
                     writer.writeNumberField(FIELD_RESULT_COUNT, resultCount.get());
-                    writer.writeStringField(FIELD_PAGED_RESULTS_COOKIE, result
-                            .getPagedResultsCookie());
+                    writer.writeStringField(FIELD_PAGED_RESULTS_COOKIE, result.getPagedResultsCookie());
                     writer.writeStringField(FIELD_TOTAL_PAGED_RESULTS_POLICY,
                             result.getTotalPagedResultsPolicy().toString());
-                    writer.writeNumberField(FIELD_TOTAL_PAGED_RESULTS, result
-                            .getTotalPagedResults());
+                    writer.writeNumberField(FIELD_TOTAL_PAGED_RESULTS, result.getTotalPagedResults());
                     writer.writeEndObject();
                     onSuccess();
                 } catch (final Exception e) {
@@ -243,9 +242,9 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
                     }
                 }
             }
-        }).thenAsync(new AsyncFunction<QueryResult, Response, NeverThrowsException>() {
+        }).thenAsync(new AsyncFunction<QueryResponse, Response, NeverThrowsException>() {
             @Override
-            public Promise<Response, NeverThrowsException> apply(QueryResult queryResult) {
+            public Promise<Response, NeverThrowsException> apply(QueryResponse queryResponse) {
                 return newResultPromise(httpResponse);
             }
         }, new AsyncFunction<ResourceException, Response, NeverThrowsException>() {
@@ -304,7 +303,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
         closeSilently(connection);
     }
 
-    private String getResourceURL(final CreateRequest request, final Resource resource) {
+    private String getResourceURL(final CreateRequest request, final ResourceResponse resource) {
         // Strip out everything except the scheme and host.
         StringBuilder builder = new StringBuilder()
                 .append(httpRequest.getUri().getScheme())
@@ -326,10 +325,10 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
         return builder.toString();
     }
 
-    private AsyncFunction<Resource, Response, NeverThrowsException> newResourceSuccessHandler() {
-        return new AsyncFunction<Resource, Response, NeverThrowsException>() {
+    private AsyncFunction<ResourceResponse, Response, NeverThrowsException> newResourceSuccessHandler() {
+        return new AsyncFunction<ResourceResponse, Response, NeverThrowsException>() {
             @Override
-            public Promise<Response, NeverThrowsException> apply(Resource result) {
+            public Promise<Response, NeverThrowsException> apply(ResourceResponse result) {
                 try {
                     writeAdvice();
                     // Don't return the resource if this is a read request and the
@@ -393,7 +392,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
         httpResponse.setEntity(data);
     }
 
-    private void writeResource(final Resource resource) throws IOException, ParseException {
+    private void writeResource(final ResourceResponse resource) throws IOException, ParseException {
         if (resource.getRevision() != null) {
             final StringBuilder builder = new StringBuilder();
             builder.append('"');

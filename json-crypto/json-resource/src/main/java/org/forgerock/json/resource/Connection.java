@@ -20,7 +20,6 @@ import java.io.Closeable;
 import java.util.Collection;
 
 import org.forgerock.http.Context;
-import org.forgerock.json.JsonValue;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -47,7 +46,7 @@ public interface Connection extends Closeable {
      *             If this connection has already been closed, i.e. if
      *             {@code isClosed() == true}.
      */
-    JsonValue action(Context context, ActionRequest request) throws ResourceException;
+    ActionResponse action(Context context, ActionRequest request) throws ResourceException;
 
     /**
      * Asynchronously performs an action against a specific resource, or set of
@@ -64,7 +63,7 @@ public interface Connection extends Closeable {
      *             If this connection has already been closed, i.e. if
      *             {@code isClosed() == true}.
      */
-    Promise<JsonValue, ResourceException> actionAsync(Context context, ActionRequest request);
+    Promise<ActionResponse, ResourceException> actionAsync(Context context, ActionRequest request);
 
     /**
      * Releases any resources associated with this connection. For physical
@@ -95,7 +94,7 @@ public interface Connection extends Closeable {
      *             If this connection has already been closed, i.e. if
      *             {@code isClosed() == true}.
      */
-    Resource create(Context context, CreateRequest request) throws ResourceException;
+    ResourceResponse create(Context context, CreateRequest request) throws ResourceException;
 
     /**
      * Asynchronously adds a new JSON resource.
@@ -111,7 +110,7 @@ public interface Connection extends Closeable {
      *             If this connection has already been closed, i.e. if
      *             {@code isClosed() == true}.
      */
-    Promise<Resource, ResourceException> createAsync(Context context, CreateRequest request);
+    Promise<ResourceResponse, ResourceException> createAsync(Context context, CreateRequest request);
 
     /**
      * Deletes a JSON resource.
@@ -129,7 +128,7 @@ public interface Connection extends Closeable {
      *             If this connection has already been closed, i.e. if
      *             {@code isClosed() == true}.
      */
-    Resource delete(Context context, DeleteRequest request) throws ResourceException;
+    ResourceResponse delete(Context context, DeleteRequest request) throws ResourceException;
 
     /**
      * Asynchronously deletes a JSON resource.
@@ -145,7 +144,7 @@ public interface Connection extends Closeable {
      *             If this connection has already been closed, i.e. if
      *             {@code isClosed() == true}.
      */
-    Promise<Resource, ResourceException> deleteAsync(Context context, DeleteRequest request);
+    Promise<ResourceResponse, ResourceException> deleteAsync(Context context, DeleteRequest request);
 
     /**
      * Indicates whether or not this connection has been explicitly closed by
@@ -186,7 +185,7 @@ public interface Connection extends Closeable {
      *             If this connection has already been closed, i.e. if
      *             {@code isClosed() == true}.
      */
-    Resource patch(Context context, PatchRequest request) throws ResourceException;
+    ResourceResponse patch(Context context, PatchRequest request) throws ResourceException;
 
     /**
      * Asynchronously updates a JSON resource by applying a set of changes to
@@ -203,7 +202,7 @@ public interface Connection extends Closeable {
      *             If this connection has already been closed, i.e. if
      *             {@code isClosed() == true}.
      */
-    Promise<Resource, ResourceException> patchAsync(Context context, PatchRequest request);
+    Promise<ResourceResponse, ResourceException> patchAsync(Context context, PatchRequest request);
 
     /**
      * Searches for all JSON resources matching a user specified set of
@@ -229,7 +228,7 @@ public interface Connection extends Closeable {
      *             If this connection has already been closed, i.e. if
      *             {@code isClosed() == true}.
      */
-    QueryResult query(Context context, QueryRequest request, QueryResourceHandler handler)
+    QueryResponse query(Context context, QueryRequest request, QueryResourceHandler handler)
             throws ResourceException;
 
     /**
@@ -252,7 +251,7 @@ public interface Connection extends Closeable {
      *             If this connection has already been closed, i.e. if
      *             {@code isClosed() == true}.
      */
-    QueryResult query(Context context, QueryRequest request, Collection<? super Resource> results)
+    QueryResponse query(Context context, QueryRequest request, Collection<? super ResourceResponse> results)
             throws ResourceException;
 
     /**
@@ -277,7 +276,7 @@ public interface Connection extends Closeable {
      *             If this connection has already been closed, i.e. if
      *             {@code isClosed() == true}.
      */
-    Promise<QueryResult, ResourceException> queryAsync(Context context, QueryRequest request,
+    Promise<QueryResponse, ResourceException> queryAsync(Context context, QueryRequest request,
             QueryResourceHandler handler);
 
     /**
@@ -296,7 +295,7 @@ public interface Connection extends Closeable {
      *             If this connection has already been closed, i.e. if
      *             {@code isClosed() == true}.
      */
-    Resource read(Context context, ReadRequest request) throws ResourceException;
+    ResourceResponse read(Context context, ReadRequest request) throws ResourceException;
 
     /**
      * Asynchronously reads a JSON resource.
@@ -312,7 +311,7 @@ public interface Connection extends Closeable {
      *             If this connection has already been closed, i.e. if
      *             {@code isClosed() == true}.
      */
-    Promise<Resource, ResourceException> readAsync(Context context, ReadRequest request);
+    Promise<ResourceResponse, ResourceException> readAsync(Context context, ReadRequest request);
 
     /**
      * Updates a JSON resource by replacing its existing content with new
@@ -331,7 +330,7 @@ public interface Connection extends Closeable {
      *             If this connection has already been closed, i.e. if
      *             {@code isClosed() == true}.
      */
-    Resource update(Context context, UpdateRequest request) throws ResourceException;
+    ResourceResponse update(Context context, UpdateRequest request) throws ResourceException;
 
     /**
      * Asynchronously updates a JSON resource by replacing its existing content
@@ -348,5 +347,5 @@ public interface Connection extends Closeable {
      *             If this connection has already been closed, i.e. if
      *             {@code isClosed() == true}.
      */
-    Promise<Resource, ResourceException> updateAsync(Context context, UpdateRequest request);
+    Promise<ResourceResponse, ResourceException> updateAsync(Context context, UpdateRequest request);
 }

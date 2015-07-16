@@ -21,8 +21,8 @@ import static org.forgerock.json.resource.examples.DemoUtils.*;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
 
 /**
  * An example client application which performs an asynchronous read, modify,
@@ -47,10 +47,10 @@ public final class ReadModifyWriteDemo {
         try (final ConnectionFactory server = getConnectionFactory();
              final Connection connection = server.getConnection()) {
             log("Reading resource");
-            final Resource before = connection.read(ctx(), Requests.newReadRequest("users/1"));
+            final ResourceResponse before = connection.read(ctx(), Requests.newReadRequest("users/1"));
             log("Resource read and has revision " + before.getRevision());
             log("Updating resource");
-            final Resource after =
+            final ResourceResponse after =
                     connection.update(ctx(), Requests.newUpdateRequest("users/1",
                             userAliceWithIdAndRev(1, 1)));
             log("Updated resource now has revision " + after.getRevision());

@@ -33,7 +33,6 @@ import org.forgerock.http.Context;
 import org.forgerock.http.ResourcePath;
 import org.forgerock.http.context.ServerContext;
 import org.forgerock.http.routing.RouterContext;
-import org.forgerock.json.JsonValue;
 import org.forgerock.util.promise.Promise;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -296,7 +295,7 @@ public class RouterTest {
         given(request.getResourcePath()).willReturn("users/demo");
 
         //When
-        Promise<Resource, ResourceException> promise = router.handleCreate(context, request);
+        Promise<ResourceResponse, ResourceException> promise = router.handleCreate(context, request);
 
         //Then
         assertThat(promise).failedWithException();
@@ -319,7 +318,7 @@ public class RouterTest {
         given(request.getResourcePath()).willReturn("users/demo");
 
         //When
-        Promise<Resource, ResourceException> promise = router.handleRead(context, request);
+        Promise<ResourceResponse, ResourceException> promise = router.handleRead(context, request);
 
         //Then
         assertThat(promise).failedWithException();
@@ -342,7 +341,7 @@ public class RouterTest {
         given(request.getResourcePath()).willReturn("users/demo");
 
         //When
-        Promise<Resource, ResourceException> promise = router.handleUpdate(context, request);
+        Promise<ResourceResponse, ResourceException> promise = router.handleUpdate(context, request);
 
         //Then
         assertThat(promise).failedWithException();
@@ -365,7 +364,7 @@ public class RouterTest {
         given(request.getResourcePath()).willReturn("users/demo");
 
         //When
-        Promise<Resource, ResourceException> promise = router.handleDelete(context, request);
+        Promise<ResourceResponse, ResourceException> promise = router.handleDelete(context, request);
 
         //Then
         assertThat(promise).failedWithException();
@@ -388,7 +387,7 @@ public class RouterTest {
         given(request.getResourcePath()).willReturn("users/demo");
 
         //When
-        Promise<Resource, ResourceException> promise = router.handlePatch(context, request);
+        Promise<ResourceResponse, ResourceException> promise = router.handlePatch(context, request);
 
         //Then
         assertThat(promise).failedWithException();
@@ -411,7 +410,7 @@ public class RouterTest {
         given(request.getResourcePath()).willReturn("users/demo");
 
         //When
-        Promise<JsonValue, ResourceException> promise = router.handleAction(context, request);
+        Promise<ActionResponse, ResourceException> promise = router.handleAction(context, request);
 
         //Then
         assertThat(promise).failedWithException();
@@ -435,7 +434,7 @@ public class RouterTest {
         given(request.getResourcePath()).willReturn("users/demo");
 
         //When
-        Promise<QueryResult, ResourceException> promise = router.handleQuery(context, request, resultHandler);
+        Promise<QueryResponse, ResourceException> promise = router.handleQuery(context, request, resultHandler);
 
         //Then
         assertThat(promise).failedWithException();

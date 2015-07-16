@@ -17,7 +17,6 @@
 package org.forgerock.json.resource;
 
 import org.forgerock.http.context.ServerContext;
-import org.forgerock.json.JsonValue;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -62,7 +61,7 @@ public interface CollectionResourceProvider {
      * @return A {@code Promise} containing the result of the operation.
      * @see RequestHandler#handleAction(ServerContext, ActionRequest)
      */
-    Promise<JsonValue, ResourceException> actionCollection(ServerContext context, ActionRequest request);
+    Promise<ActionResponse, ResourceException> actionCollection(ServerContext context, ActionRequest request);
 
     /**
      * Performs the provided
@@ -78,7 +77,7 @@ public interface CollectionResourceProvider {
      * @return A {@code Promise} containing the result of the operation.
      * @see RequestHandler#handleAction(ServerContext, ActionRequest)
      */
-    Promise<JsonValue, ResourceException> actionInstance(ServerContext context, String resourceId,
+    Promise<ActionResponse, ResourceException> actionInstance(ServerContext context, String resourceId,
             ActionRequest request);
 
     /**
@@ -98,7 +97,7 @@ public interface CollectionResourceProvider {
      * @see RequestHandler#handleCreate(ServerContext, CreateRequest)
      * @see CreateRequest#getNewResourceId()
      */
-    Promise<Resource, ResourceException> createInstance(ServerContext context, CreateRequest request);
+    Promise<ResourceResponse, ResourceException> createInstance(ServerContext context, CreateRequest request);
 
     /**
      * {@link RequestHandler#handleDelete(ServerContext, DeleteRequest)
@@ -113,7 +112,7 @@ public interface CollectionResourceProvider {
      * @return A {@code Promise} containing the result of the operation.
      * @see RequestHandler#handleDelete(ServerContext, DeleteRequest)
      */
-    Promise<Resource, ResourceException> deleteInstance(ServerContext context, String resourceId,
+    Promise<ResourceResponse, ResourceException> deleteInstance(ServerContext context, String resourceId,
             DeleteRequest request);
 
     /**
@@ -129,7 +128,8 @@ public interface CollectionResourceProvider {
      * @return A {@code Promise} containing the result of the operation.
      * @see RequestHandler#handlePatch(ServerContext, PatchRequest)
      */
-    Promise<Resource, ResourceException> patchInstance(ServerContext context, String resourceId, PatchRequest request);
+    Promise<ResourceResponse, ResourceException> patchInstance(ServerContext context, String resourceId,
+            PatchRequest request);
 
     /**
      * {@link RequestHandler#handleQuery(ServerContext, QueryRequest, QueryResourceHandler)
@@ -140,7 +140,7 @@ public interface CollectionResourceProvider {
      * {@link QueryResourceHandler#handleResource(Resource)} for each resource
      * which matches the query criteria. Once all matching resources have been
      * returned implementations are required to return either a
-     * {@link QueryResult} if the query has completed successfully, or
+     * {@link QueryResponse} if the query has completed successfully, or
      * {@link ResourceException} if the query did not complete successfully
      * (even if some matching resources were returned).
      *
@@ -155,7 +155,7 @@ public interface CollectionResourceProvider {
      * @see RequestHandler#handleQuery(ServerContext, QueryRequest,
      *      QueryResourceHandler)
      */
-    Promise<QueryResult, ResourceException> queryCollection(ServerContext context, QueryRequest request,
+    Promise<QueryResponse, ResourceException> queryCollection(ServerContext context, QueryRequest request,
             QueryResourceHandler handler);
 
     /**
@@ -171,7 +171,8 @@ public interface CollectionResourceProvider {
      * @return A {@code Promise} containing the result of the operation.
      * @see RequestHandler#handleRead(ServerContext, ReadRequest)
      */
-    Promise<Resource, ResourceException> readInstance(ServerContext context, String resourceId, ReadRequest request);
+    Promise<ResourceResponse, ResourceException> readInstance(ServerContext context, String resourceId,
+            ReadRequest request);
 
     /**
      * {@link RequestHandler#handleUpdate(ServerContext, UpdateRequest)
@@ -186,6 +187,6 @@ public interface CollectionResourceProvider {
      * @return A {@code Promise} containing the result of the operation.
      * @see RequestHandler#handleUpdate(ServerContext, UpdateRequest)
      */
-    Promise<Resource, ResourceException> updateInstance(ServerContext context, String resourceId,
+    Promise<ResourceResponse, ResourceException> updateInstance(ServerContext context, String resourceId,
             UpdateRequest request);
 }

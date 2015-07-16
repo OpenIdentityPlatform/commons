@@ -23,7 +23,6 @@ import static org.mockito.Mockito.*;
 
 import org.forgerock.http.context.RootContext;
 import org.forgerock.http.context.ServerContext;
-import org.forgerock.json.JsonValue;
 import org.forgerock.util.promise.Promise;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
@@ -86,7 +85,7 @@ public class VersionRouterTest {
         CreateRequest request = Requests.newCreateRequest("RESOURCE_NAME", json(object()));
 
         //When
-        Promise<Resource, ResourceException> promise = versionRouter.handleCreate(context, request);
+        Promise<ResourceResponse, ResourceException> promise = versionRouter.handleCreate(context, request);
 
         //Then
         if (expectException) {
@@ -112,7 +111,7 @@ public class VersionRouterTest {
         ReadRequest request = Requests.newReadRequest("RESOURCE_NAME");
 
         //When
-        Promise<Resource, ResourceException> promise = versionRouter.handleRead(context, request);
+        Promise<ResourceResponse, ResourceException> promise = versionRouter.handleRead(context, request);
 
         //Then
         if (expectException) {
@@ -138,7 +137,7 @@ public class VersionRouterTest {
         UpdateRequest request = Requests.newUpdateRequest("RESOURCE_NAME", json(object()));
 
         //When
-        Promise<Resource, ResourceException> promise = versionRouter.handleUpdate(context, request);
+        Promise<ResourceResponse, ResourceException> promise = versionRouter.handleUpdate(context, request);
 
         //Then
         if (expectException) {
@@ -164,7 +163,7 @@ public class VersionRouterTest {
         DeleteRequest request = Requests.newDeleteRequest("RESOURCE_NAME");
 
         //When
-        Promise<Resource, ResourceException> promise = versionRouter.handleDelete(context, request);
+        Promise<ResourceResponse, ResourceException> promise = versionRouter.handleDelete(context, request);
 
         //Then
         if (expectException) {
@@ -190,7 +189,7 @@ public class VersionRouterTest {
         PatchRequest request = Requests.newPatchRequest("RESOURCE_NAME");
 
         //When
-        Promise<Resource, ResourceException> promise = versionRouter.handlePatch(context, request);
+        Promise<ResourceResponse, ResourceException> promise = versionRouter.handlePatch(context, request);
 
         //Then
         if (expectException) {
@@ -216,7 +215,7 @@ public class VersionRouterTest {
         ActionRequest request = Requests.newActionRequest("RESOURCE_NAME", "ACTION_ID").setContent(json(object()));
 
         //When
-        Promise<JsonValue, ResourceException> promise = versionRouter.handleAction(context, request);
+        Promise<ActionResponse, ResourceException> promise = versionRouter.handleAction(context, request);
 
         //Then
         if (expectException) {
@@ -242,7 +241,7 @@ public class VersionRouterTest {
         QueryResourceHandler handler = mock(QueryResourceHandler.class);
 
         //When
-        Promise<QueryResult, ResourceException> promise = versionRouter.handleQuery(context, request, handler);
+        Promise<QueryResponse, ResourceException> promise = versionRouter.handleQuery(context, request, handler);
 
         //Then
         if (expectException) {

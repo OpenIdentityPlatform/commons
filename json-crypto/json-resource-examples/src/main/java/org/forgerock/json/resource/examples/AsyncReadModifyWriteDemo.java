@@ -23,8 +23,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
@@ -53,36 +53,36 @@ public final class AsyncReadModifyWriteDemo {
 
         // @formatter:off
         log("Opening connection");
-        final Promise<Resource, ResourceException> promise = server.getConnectionAsync()
-            .thenAsync(new AsyncFunction<Connection, Resource, ResourceException>() {
+        final Promise<ResourceResponse, ResourceException> promise = server.getConnectionAsync()
+            .thenAsync(new AsyncFunction<Connection, ResourceResponse, ResourceException>() {
                 /*
                  * Read resource.
                  */
                 @Override
-                public Promise<Resource, ResourceException> apply(final Connection connection)
+                public Promise<ResourceResponse, ResourceException> apply(final Connection connection)
                         throws ResourceException {
                     log("Reading resource");
                     connectionHolder.set(connection); // Save connection for later.
                     return connection.readAsync(ctx(), Requests.newReadRequest("users/1"));
                 }
-            }).thenAsync(new AsyncFunction<Resource, Resource, ResourceException>() {
+            }).thenAsync(new AsyncFunction<ResourceResponse, ResourceResponse, ResourceException>() {
                 /*
                  * Update resource.
                  */
                 @Override
-                public Promise<Resource, ResourceException> apply(final Resource user)
+                public Promise<ResourceResponse, ResourceException> apply(final ResourceResponse user)
                         throws ResourceException {
                     log("Resource read and has revision " + user.getRevision());
                     log("Updating resource");
                     return connectionHolder.get().updateAsync(ctx(),
                             Requests.newUpdateRequest("users/1", userAliceWithIdAndRev(1, 1)));
                 }
-            }).thenOnResult(new ResultHandler<Resource>() {
+            }).thenOnResult(new ResultHandler<ResourceResponse>() {
                 /*
                  * Check updated resource.
                  */
                 @Override
-                public void handleResult(final Resource user) {
+                public void handleResult(final ResourceResponse user) {
                     log("Updated resource now has revision " + user.getRevision());
                 }
             }).thenAlways(new Runnable() {

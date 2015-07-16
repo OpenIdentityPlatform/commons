@@ -16,15 +16,13 @@
 
 package org.forgerock.json.resource;
 
-import java.util.LinkedHashMap;
-
 import org.forgerock.json.JsonValue;
 
 /**
  * A resource, comprising of a resource ID, a revision (etag), and its JSON
  * content.
  */
-public final class Resource {
+public interface ResourceResponse extends Response {
 
     /**
      * The name of the field which contains the resource ID in the JSON
@@ -33,7 +31,7 @@ public final class Resource {
      * <b>Note:</b> when encoding the resource ID as part of a resource's
      * content the field name {@link #FIELD_CONTENT_ID} should be used.
      */
-    public static final String FIELD_ID = "id";
+    String FIELD_ID = "id";
 
     /**
      * The name of the field which contains the resource version in the JSON
@@ -42,7 +40,7 @@ public final class Resource {
      * <b>Note:</b> when encoding the resource revision as part of a resource's
      * content the field name {@link #FIELD_CONTENT_REVISION} should be used.
      */
-    public static final String FIELD_REVISION = "revision";
+    String FIELD_REVISION = "revision";
 
     /**
      * The name of the field in the resource content which contains the resource
@@ -50,7 +48,7 @@ public final class Resource {
      * intended for use in cases where a commons REST API wishes to expose the
      * resource ID as part of the resource content.
      */
-    public static final String FIELD_CONTENT_ID = "_id";
+    String FIELD_CONTENT_ID = "_id";
 
     /**
      * The name of the field in the resource content which contains the resource
@@ -59,33 +57,36 @@ public final class Resource {
      * REST API wishes to expose the resource revision as part of the resource
      * content.
      */
-    public static final String FIELD_CONTENT_REVISION = "_rev";
+    String FIELD_CONTENT_REVISION = "_rev";
 
     /**
      * The name of the field which contains the resource content in the JSON
      * representation.
      */
-    public static final String FIELD_CONTENT = "content";
-
-    private final JsonValue content;
-    private final String id;
-    private final String revision;
+    String FIELD_CONTENT = "content";
 
     /**
-     * Creates a new resource.
+     * Returns the JSON content of this resource.
      *
-     * @param id
-     *            The resource ID if applicable otherwise {@code null}.
-     * @param revision
-     *            The resource version, if known.
-     * @param content
-     *            The resource content.
+     * @return The JSON content of this resource.
      */
-    public Resource(final String id, final String revision, final JsonValue content) {
-        this.id = id;
-        this.revision = revision;
-        this.content = content;
-    }
+    JsonValue getContent();
+
+    /**
+     * Returns the ID of this resource, if applicable.
+     *
+     * @return The ID of this resource, or {@code null} if this resource does
+     *         not have an ID.
+     */
+    String getId();
+
+    /**
+     * Returns the revision of this resource, if known.
+     *
+     * @return The revision of this resource, or {@code null} if the version is
+     *         not known.
+     */
+    String getRevision();
 
     /**
      * Returns {@code true} if the provided object is a resource having the same
@@ -94,45 +95,7 @@ public final class Resource {
      * {@inheritDoc}
      */
     @Override
-    public boolean equals(final Object obj) {
-        if (obj == this) {
-            return true;
-        } else if (obj instanceof Resource) {
-            final Resource that = (Resource) obj;
-            return isEqual(id, that.id) && isEqual(revision, that.revision);
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * Returns the JSON content of this resource.
-     *
-     * @return The JSON content of this resource.
-     */
-    public JsonValue getContent() {
-        return content;
-    }
-
-    /**
-     * Returns the ID of this resource, if applicable.
-     *
-     * @return The ID of this resource, or {@code null} if this resource does
-     *         not have an ID.
-     */
-    public String getId() {
-        return id;
-    }
-
-    /**
-     * Returns the revision of this resource, if known.
-     *
-     * @return The revision of this resource, or {@code null} if the version is
-     *         not known.
-     */
-    public String getRevision() {
-        return revision;
-    }
+    boolean equals(final Object obj);
 
     /**
      * Returns the hash code for this resource. Two resources are guaranteed to
@@ -141,31 +104,5 @@ public final class Resource {
      * {@inheritDoc}
      */
     @Override
-    public int hashCode() {
-        final int hash = id != null ? id.hashCode() : 17;
-        return (hash * 31) + (revision != null ? revision.hashCode() : 0);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String toString() {
-        final JsonValue wrapper = new JsonValue(new LinkedHashMap<>(3));
-        wrapper.add("id", id);
-        wrapper.add("rev", revision);
-        wrapper.add("content", content);
-        return wrapper.toString();
-    }
-
-    private boolean isEqual(final String s1, final String s2) {
-        if (s1 == s2) {
-            return true;
-        } else if (s1 == null || s2 == null) {
-            return false;
-        } else {
-            return s1.equals(s2);
-        }
-    }
-
+    int hashCode();
 }

@@ -17,7 +17,6 @@
 package org.forgerock.json.resource;
 
 import org.forgerock.http.context.ServerContext;
-import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.annotations.Delete;
 import org.forgerock.json.resource.annotations.Patch;
 import org.forgerock.json.resource.annotations.Read;
@@ -52,27 +51,27 @@ class AnnotationCollectionInstance extends InterfaceCollectionInstance {
     }
 
     @Override
-    public Promise<Resource, ResourceException> handleRead(ServerContext context, ReadRequest request) {
+    public Promise<ResourceResponse, ResourceException> handleRead(ServerContext context, ReadRequest request) {
         return RequestHandlerUtils.handle(readMethod, context, request, Resources.idOf(context));
     }
 
     @Override
-    public Promise<Resource, ResourceException> handleUpdate(ServerContext context, UpdateRequest request) {
+    public Promise<ResourceResponse, ResourceException> handleUpdate(ServerContext context, UpdateRequest request) {
         return RequestHandlerUtils.handle(updateMethod, context, request, Resources.idOf(context));
     }
 
     @Override
-    public Promise<Resource, ResourceException> handleDelete(ServerContext context, DeleteRequest request) {
+    public Promise<ResourceResponse, ResourceException> handleDelete(ServerContext context, DeleteRequest request) {
         return RequestHandlerUtils.handle(deleteMethod, context, request, Resources.idOf(context));
     }
 
     @Override
-    public Promise<Resource, ResourceException> handlePatch(ServerContext context, PatchRequest request) {
+    public Promise<ResourceResponse, ResourceException> handlePatch(ServerContext context, PatchRequest request) {
         return RequestHandlerUtils.handle(patchMethod, context, request, Resources.idOf(context));
     }
 
     @Override
-    public Promise<JsonValue, ResourceException> handleAction(ServerContext context, ActionRequest request) {
+    public Promise<ActionResponse, ResourceException> handleAction(ServerContext context, ActionRequest request) {
         return actionMethods.invoke(context, request, Resources.idOf(context));
     }
 }

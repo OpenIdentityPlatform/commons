@@ -17,6 +17,7 @@
 package org.forgerock.json.resource;
 
 import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,8 +41,8 @@ public final class TestUtils {
      *            The JSON content.
      * @return A {@code Resource} containing the provided JSON content.
      */
-    public static Resource asResource(final JsonValue content) {
-        return new Resource(content.get("_id").asString(), content.get("_rev").asString(), content);
+    public static ResourceResponse asResource(final JsonValue content) {
+        return newResourceResponse(content.get("_id").asString(), content.get("_rev").asString(), content);
     }
 
     /**

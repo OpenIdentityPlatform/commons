@@ -16,16 +16,6 @@
 
 package org.forgerock.json.resource;
 
-import org.forgerock.http.Context;
-import org.forgerock.http.context.ServerContext;
-import org.forgerock.http.routing.AbstractRouter;
-import org.forgerock.http.routing.IncomparableRouteMatchException;
-import org.forgerock.http.routing.RouteMatcher;
-import org.forgerock.http.routing.RouterContext;
-import org.forgerock.json.JsonValue;
-import org.forgerock.util.Pair;
-import org.forgerock.util.promise.Promise;
-
 import static org.forgerock.http.routing.RoutingMode.EQUALS;
 import static org.forgerock.http.routing.RoutingMode.STARTS_WITH;
 import static org.forgerock.json.resource.Requests.*;
@@ -33,6 +23,15 @@ import static org.forgerock.json.resource.Resources.newCollection;
 import static org.forgerock.json.resource.Resources.newSingleton;
 import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
 import static org.forgerock.util.promise.Promises.newExceptionPromise;
+
+import org.forgerock.http.Context;
+import org.forgerock.http.context.ServerContext;
+import org.forgerock.http.routing.AbstractRouter;
+import org.forgerock.http.routing.IncomparableRouteMatchException;
+import org.forgerock.http.routing.RouteMatcher;
+import org.forgerock.http.routing.RouterContext;
+import org.forgerock.util.Pair;
+import org.forgerock.util.promise.Promise;
 
 /**
  * A router which routes requests based on route predicates. Each route is
@@ -145,7 +144,7 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler> impl
     }
 
     @Override
-    public Promise<JsonValue, ResourceException> handleAction(ServerContext context, ActionRequest request) {
+    public Promise<ActionResponse, ResourceException> handleAction(ServerContext context, ActionRequest request) {
         try {
             Pair<Context, RequestHandler> bestMatch = getBestMatch(context, request);
             RouterContext routerContext = getRouterContext(bestMatch.getFirst());
@@ -159,7 +158,7 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler> impl
     }
 
     @Override
-    public Promise<Resource, ResourceException> handleCreate(ServerContext context, CreateRequest request) {
+    public Promise<ResourceResponse, ResourceException> handleCreate(ServerContext context, CreateRequest request) {
         try {
             Pair<Context, RequestHandler> bestMatch = getBestMatch(context, request);
             RouterContext routerContext = getRouterContext(bestMatch.getFirst());
@@ -173,7 +172,7 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler> impl
     }
 
     @Override
-    public Promise<Resource, ResourceException> handleDelete(ServerContext context, DeleteRequest request) {
+    public Promise<ResourceResponse, ResourceException> handleDelete(ServerContext context, DeleteRequest request) {
         try {
             Pair<Context, RequestHandler> bestMatch = getBestMatch(context, request);
             RouterContext routerContext = getRouterContext(bestMatch.getFirst());
@@ -187,7 +186,7 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler> impl
     }
 
     @Override
-    public Promise<Resource, ResourceException> handlePatch(ServerContext context, PatchRequest request) {
+    public Promise<ResourceResponse, ResourceException> handlePatch(ServerContext context, PatchRequest request) {
         try {
             Pair<Context, RequestHandler> bestMatch = getBestMatch(context, request);
             RouterContext routerContext = getRouterContext(bestMatch.getFirst());
@@ -201,7 +200,8 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler> impl
     }
 
     @Override
-    public Promise<QueryResult, ResourceException> handleQuery(ServerContext context, QueryRequest request, QueryResourceHandler handler) {
+    public Promise<QueryResponse, ResourceException> handleQuery(ServerContext context, QueryRequest request,
+            QueryResourceHandler handler) {
         try {
             Pair<Context, RequestHandler> bestMatch = getBestMatch(context, request);
             RouterContext routerContext = getRouterContext(bestMatch.getFirst());
@@ -215,7 +215,7 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler> impl
     }
 
     @Override
-    public Promise<Resource, ResourceException> handleRead(ServerContext context, ReadRequest request) {
+    public Promise<ResourceResponse, ResourceException> handleRead(ServerContext context, ReadRequest request) {
         try {
             Pair<Context, RequestHandler> bestMatch = getBestMatch(context, request);
             RouterContext routerContext = getRouterContext(bestMatch.getFirst());
@@ -229,7 +229,7 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler> impl
     }
 
     @Override
-    public Promise<Resource, ResourceException> handleUpdate(ServerContext context, UpdateRequest request) {
+    public Promise<ResourceResponse, ResourceException> handleUpdate(ServerContext context, UpdateRequest request) {
         try {
             Pair<Context, RequestHandler> bestMatch = getBestMatch(context, request);
             RouterContext routerContext = getRouterContext(bestMatch.getFirst());

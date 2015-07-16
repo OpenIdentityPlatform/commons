@@ -19,7 +19,6 @@ package org.forgerock.json.resource;
 import static org.forgerock.util.promise.Promises.newExceptionPromise;
 
 import org.forgerock.http.context.ServerContext;
-import org.forgerock.json.JsonValue;
 import org.forgerock.util.promise.Promise;
 
 class InterfaceCollectionInstance implements RequestHandler {
@@ -30,12 +29,13 @@ class InterfaceCollectionInstance implements RequestHandler {
     }
 
     @Override
-    public Promise<JsonValue, ResourceException> handleAction(final ServerContext context, final ActionRequest request) {
+    public Promise<ActionResponse, ResourceException> handleAction(final ServerContext context,
+            final ActionRequest request) {
         return provider.actionInstance(Resources.parentOf(context), Resources.idOf(context), request);
     }
 
     @Override
-    public final Promise<Resource, ResourceException> handleCreate(final ServerContext context,
+    public final Promise<ResourceResponse, ResourceException> handleCreate(final ServerContext context,
             final CreateRequest request) {
         // TODO: i18n
         return newExceptionPromise(Resources.newBadRequestException(
@@ -43,17 +43,19 @@ class InterfaceCollectionInstance implements RequestHandler {
     }
 
     @Override
-    public Promise<Resource, ResourceException> handleDelete(final ServerContext context, final DeleteRequest request) {
+    public Promise<ResourceResponse, ResourceException> handleDelete(final ServerContext context,
+            final DeleteRequest request) {
         return provider.deleteInstance(Resources.parentOf(context), Resources.idOf(context), request);
     }
 
     @Override
-    public Promise<Resource, ResourceException> handlePatch(final ServerContext context, final PatchRequest request) {
+    public Promise<ResourceResponse, ResourceException> handlePatch(final ServerContext context,
+            final PatchRequest request) {
         return provider.patchInstance(Resources.parentOf(context), Resources.idOf(context), request);
     }
 
     @Override
-    public final Promise<QueryResult, ResourceException> handleQuery(final ServerContext context,
+    public final Promise<QueryResponse, ResourceException> handleQuery(final ServerContext context,
             final QueryRequest request, QueryResourceHandler handler) {
         // TODO: i18n
         return newExceptionPromise(Resources.newBadRequestException(
@@ -61,12 +63,14 @@ class InterfaceCollectionInstance implements RequestHandler {
     }
 
     @Override
-    public Promise<Resource, ResourceException> handleRead(final ServerContext context, final ReadRequest request) {
+    public Promise<ResourceResponse, ResourceException> handleRead(final ServerContext context,
+            final ReadRequest request) {
         return provider.readInstance(Resources.parentOf(context), Resources.idOf(context), request);
     }
 
     @Override
-    public Promise<Resource, ResourceException> handleUpdate(final ServerContext context, final UpdateRequest request) {
+    public Promise<ResourceResponse, ResourceException> handleUpdate(final ServerContext context,
+            final UpdateRequest request) {
         return provider.updateInstance(Resources.parentOf(context), Resources.idOf(context), request);
     }
 }

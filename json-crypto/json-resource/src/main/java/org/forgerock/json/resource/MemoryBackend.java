@@ -18,6 +18,8 @@ package org.forgerock.json.resource;
 
 import static org.forgerock.json.resource.ResourceException.newBadRequestException;
 import static org.forgerock.json.resource.ResourceException.newNotSupportedException;
+import static org.forgerock.json.resource.Responses.newQueryResponse;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
@@ -57,7 +59,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
         }
     }
 
-    private static final class ResourceComparator implements Comparator<Resource> {
+    private static final class ResourceComparator implements Comparator<ResourceResponse> {
         private final List<SortKey> sortKeys;
 
         private ResourceComparator(final List<SortKey> sortKeys) {
@@ -65,7 +67,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
         }
 
         @Override
-        public int compare(final Resource r1, final Resource r2) {
+        public int compare(final ResourceResponse r1, final ResourceResponse r2) {
             for (final SortKey sortKey : sortKeys) {
                 final int result = compare(r1, r2, sortKey);
                 if (result != 0) {
@@ -75,7 +77,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
             return 0;
         }
 
-        private int compare(final Resource r1, final Resource r2, final SortKey sortKey) {
+        private int compare(final ResourceResponse r1, final ResourceResponse r2, final SortKey sortKey) {
             final List<Object> vs1 = getValuesSorted(r1, sortKey.getField());
             final List<Object> vs2 = getValuesSorted(r2, sortKey.getField());
             if (vs1.isEmpty() && vs2.isEmpty()) {
@@ -94,7 +96,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
             }
         }
 
-        private List<Object> getValuesSorted(final Resource resource, final JsonPointer field) {
+        private List<Object> getValuesSorted(final ResourceResponse resource, final JsonPointer field) {
             final JsonValue value = resource.getContent().get(field);
             if (value == null) {
                 return Collections.emptyList();
@@ -111,11 +113,11 @@ public final class MemoryBackend implements CollectionResourceProvider {
         }
     }
 
-    private static final QueryFilterVisitor<FilterResult, Resource, JsonPointer> RESOURCE_FILTER =
-            new QueryFilterVisitor<FilterResult, Resource, JsonPointer>() {
+    private static final QueryFilterVisitor<FilterResult, ResourceResponse, JsonPointer> RESOURCE_FILTER =
+            new QueryFilterVisitor<FilterResult, ResourceResponse, JsonPointer>() {
 
                 @Override
-                public FilterResult visitAndFilter(final Resource p,
+                public FilterResult visitAndFilter(final ResourceResponse p,
                         final List<org.forgerock.util.query.QueryFilter<JsonPointer>> subFilters) {
                     FilterResult result = FilterResult.TRUE;
                     for (final org.forgerock.util.query.QueryFilter<JsonPointer> subFilter : subFilters) {
@@ -131,12 +133,12 @@ public final class MemoryBackend implements CollectionResourceProvider {
                 }
 
                 @Override
-                public FilterResult visitBooleanLiteralFilter(final Resource p, final boolean value) {
+                public FilterResult visitBooleanLiteralFilter(final ResourceResponse p, final boolean value) {
                     return FilterResult.valueOf(value);
                 }
 
                 @Override
-                public FilterResult visitContainsFilter(final Resource p, final JsonPointer field,
+                public FilterResult visitContainsFilter(final ResourceResponse p, final JsonPointer field,
                         final Object valueAssertion) {
                     for (final Object value : getValues(p, field)) {
                         if (isCompatible(valueAssertion, value)) {
@@ -159,7 +161,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
                 }
 
                 @Override
-                public FilterResult visitEqualsFilter(final Resource p, final JsonPointer field,
+                public FilterResult visitEqualsFilter(final ResourceResponse p, final JsonPointer field,
                         final Object valueAssertion) {
                     for (final Object value : getValues(p, field)) {
                         if (isCompatible(valueAssertion, value)
@@ -171,7 +173,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
                 }
 
                 @Override
-                public FilterResult visitExtendedMatchFilter(final Resource p,
+                public FilterResult visitExtendedMatchFilter(final ResourceResponse p,
                         final JsonPointer field, final String matchingRuleId,
                         final Object valueAssertion) {
                     // This backend does not support any extended filters.
@@ -179,7 +181,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
                 }
 
                 @Override
-                public FilterResult visitGreaterThanFilter(final Resource p,
+                public FilterResult visitGreaterThanFilter(final ResourceResponse p,
                         final JsonPointer field, final Object valueAssertion) {
                     for (final Object value : getValues(p, field)) {
                         if (isCompatible(valueAssertion, value)
@@ -191,7 +193,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
                 }
 
                 @Override
-                public FilterResult visitGreaterThanOrEqualToFilter(final Resource p,
+                public FilterResult visitGreaterThanOrEqualToFilter(final ResourceResponse p,
                         final JsonPointer field, final Object valueAssertion) {
                     for (final Object value : getValues(p, field)) {
                         if (isCompatible(valueAssertion, value)
@@ -203,7 +205,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
                 }
 
                 @Override
-                public FilterResult visitLessThanFilter(final Resource p, final JsonPointer field,
+                public FilterResult visitLessThanFilter(final ResourceResponse p, final JsonPointer field,
                         final Object valueAssertion) {
                     for (final Object value : getValues(p, field)) {
                         if (isCompatible(valueAssertion, value)
@@ -215,7 +217,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
                 }
 
                 @Override
-                public FilterResult visitLessThanOrEqualToFilter(final Resource p,
+                public FilterResult visitLessThanOrEqualToFilter(final ResourceResponse p,
                         final JsonPointer field, final Object valueAssertion) {
                     for (final Object value : getValues(p, field)) {
                         if (isCompatible(valueAssertion, value)
@@ -227,7 +229,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
                 }
 
                 @Override
-                public FilterResult visitNotFilter(final Resource p,
+                public FilterResult visitNotFilter(final ResourceResponse p,
                         final org.forgerock.util.query.QueryFilter<JsonPointer> subFilter) {
                     switch (subFilter.accept(this, p)) {
                     case FALSE:
@@ -240,7 +242,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
                 }
 
                 @Override
-                public FilterResult visitOrFilter(final Resource p,
+                public FilterResult visitOrFilter(final ResourceResponse p,
                         final List<org.forgerock.util.query.QueryFilter<JsonPointer>> subFilters) {
                     FilterResult result = FilterResult.FALSE;
                     for (final org.forgerock.util.query.QueryFilter<JsonPointer> subFilter : subFilters) {
@@ -256,13 +258,13 @@ public final class MemoryBackend implements CollectionResourceProvider {
                 }
 
                 @Override
-                public FilterResult visitPresentFilter(final Resource p, final JsonPointer field) {
+                public FilterResult visitPresentFilter(final ResourceResponse p, final JsonPointer field) {
                     final JsonValue value = p.getContent().get(field);
                     return FilterResult.valueOf(value != null);
                 }
 
                 @Override
-                public FilterResult visitStartsWithFilter(final Resource p,
+                public FilterResult visitStartsWithFilter(final ResourceResponse p,
                         final JsonPointer field, final Object valueAssertion) {
                     for (final Object value : getValues(p, field)) {
                         if (isCompatible(valueAssertion, value)) {
@@ -284,7 +286,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
                     return FilterResult.FALSE;
                 }
 
-                private List<Object> getValues(final Resource resource, final JsonPointer field) {
+                private List<Object> getValues(final ResourceResponse resource, final JsonPointer field) {
                     final JsonValue value = resource.getContent().get(field);
                     if (value == null) {
                         return Collections.emptyList();
@@ -331,7 +333,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
     }
 
     private final AtomicLong nextResourceId = new AtomicLong();
-    private final Map<String, Resource> resources = new ConcurrentHashMap<>();
+    private final Map<String, ResourceResponse> resources = new ConcurrentHashMap<>();
     private final Object writeLock = new Object();
 
     /**
@@ -345,7 +347,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
      * {@inheritDoc}
      */
     @Override
-    public Promise<JsonValue, ResourceException> actionCollection(final ServerContext context,
+    public Promise<ActionResponse, ResourceException> actionCollection(final ServerContext context,
             final ActionRequest request) {
         try {
             if (request.getAction().equals("clear")) {
@@ -356,7 +358,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
                 }
                 final JsonValue result = new JsonValue(new LinkedHashMap<>(1));
                 result.put("cleared", size);
-                return newResultPromise(result);
+                return newResultPromise(Responses.newActionResponse(result));
             } else {
                 throw new NotSupportedException("Unrecognized action ID '" + request.getAction()
                         + "'. Supported action IDs: clear");
@@ -370,7 +372,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
      * {@inheritDoc}
      */
     @Override
-    public Promise<JsonValue, ResourceException> actionInstance(final ServerContext context, final String id,
+    public Promise<ActionResponse, ResourceException> actionInstance(final ServerContext context, final String id,
             final ActionRequest request) {
         final ResourceException e =
                 new NotSupportedException("Actions are not supported for resource instances");
@@ -381,19 +383,19 @@ public final class MemoryBackend implements CollectionResourceProvider {
      * {@inheritDoc}
      */
     @Override
-    public Promise<Resource, ResourceException> createInstance(final ServerContext context,
+    public Promise<ResourceResponse, ResourceException> createInstance(final ServerContext context,
             final CreateRequest request) {
         final JsonValue value = request.getContent();
         final String id = request.getNewResourceId();
         final String rev = "0";
         try {
-            final Resource resource;
+            final ResourceResponse resource;
             while (true) {
                 final String eid =
                         id != null ? id : String.valueOf(nextResourceId.getAndIncrement());
-                final Resource tmp = new Resource(eid, rev, value);
+                final ResourceResponse tmp = newResourceResponse(eid, rev, value);
                 synchronized (writeLock) {
-                    final Resource existingResource = resources.put(eid, tmp);
+                    final ResourceResponse existingResource = resources.put(eid, tmp);
                     if (existingResource != null) {
                         if (id != null) {
                             // Already exists - put the existing resource back.
@@ -422,11 +424,11 @@ public final class MemoryBackend implements CollectionResourceProvider {
      * {@inheritDoc}
      */
     @Override
-    public Promise<Resource, ResourceException> deleteInstance(final ServerContext context, final String id,
+    public Promise<ResourceResponse, ResourceException> deleteInstance(final ServerContext context, final String id,
             final DeleteRequest request) {
         final String rev = request.getRevision();
         try {
-            final Resource resource;
+            final ResourceResponse resource;
             synchronized (writeLock) {
                 resource = getResourceForUpdate(id, rev);
                 resources.remove(id);
@@ -441,13 +443,13 @@ public final class MemoryBackend implements CollectionResourceProvider {
      * {@inheritDoc}
      */
     @Override
-    public Promise<Resource, ResourceException> patchInstance(final ServerContext context, final String id,
+    public Promise<ResourceResponse, ResourceException> patchInstance(final ServerContext context, final String id,
             final PatchRequest request) {
         final String rev = request.getRevision();
         try {
-            final Resource resource;
+            final ResourceResponse resource;
             synchronized (writeLock) {
-                final Resource existingResource = getResourceForUpdate(id, rev);
+                final ResourceResponse existingResource = getResourceForUpdate(id, rev);
                 final String newRev = getNextRevision(existingResource.getRevision());
                 final JsonValue newContent = existingResource.getContent().copy();
                 for (final PatchOperation operation : request.getPatchOperations()) {
@@ -509,7 +511,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
                                 + "' does not exist");
                     }
                 }
-                resource = new Resource(id, newRev, newContent);
+                resource = newResourceResponse(id, newRev, newContent);
                 addIdAndRevision(resource);
                 resources.put(id, resource);
             }
@@ -523,7 +525,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
      * {@inheritDoc}
      */
     @Override
-    public Promise<QueryResult, ResourceException> queryCollection(final ServerContext context,
+    public Promise<QueryResponse, ResourceException> queryCollection(final ServerContext context,
             final QueryRequest request, final QueryResourceHandler handler) {
         if (request.getQueryId() != null) {
             return newExceptionPromise(newNotSupportedException("Query by ID not supported"));
@@ -559,7 +561,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
             int resultCount;
             if (request.getSortKeys().isEmpty()) {
                 // No sorting so stream the results.
-                for (final Resource resource : resources.values()) {
+                for (final ResourceResponse resource : resources.values()) {
                     if (filter == null || filter.accept(RESOURCE_FILTER, resource).toBoolean()) {
                         if (resultIndex >= firstResultIndex && resultIndex < lastResultIndex) {
                             handler.handleResource(resource);
@@ -572,14 +574,14 @@ public final class MemoryBackend implements CollectionResourceProvider {
             } else {
                 // Server side sorting: aggregate the result set then sort. A robust implementation
                 // would need to impose administrative limits in order to control memory utilization.
-                final List<Resource> results = new ArrayList<>();
-                for (final Resource resource : resources.values()) {
+                final List<ResourceResponse> results = new ArrayList<>();
+                for (final ResourceResponse resource : resources.values()) {
                     if (filter == null || filter.accept(RESOURCE_FILTER, resource).toBoolean()) {
                         results.add(resource);
                     }
                 }
                 Collections.sort(results, new ResourceComparator(request.getSortKeys()));
-                for (final Resource resource : results) {
+                for (final ResourceResponse resource : results) {
                     if (resultIndex >= firstResultIndex && resultIndex < lastResultIndex) {
                         handler.handleResource(resource);
                     }
@@ -600,16 +602,16 @@ public final class MemoryBackend implements CollectionResourceProvider {
 
                 switch (request.getTotalPagedResultsPolicy()) {
                     case NONE:
-                        return newResultPromise(new QueryResult(nextCookie));
+                        return newResultPromise(newQueryResponse(nextCookie));
                     case EXACT:
                     case ESTIMATE:
-                        return newResultPromise(new QueryResult(nextCookie, CountPolicy.EXACT, resultCount));
+                        return newResultPromise(newQueryResponse(nextCookie, CountPolicy.EXACT, resultCount));
                     default:
                         throw new UnsupportedOperationException("totalPagedResultsPolicy: " +
                                 request.getTotalPagedResultsPolicy().toString() + " not supported");
                 }
             } else {
-                return newResultPromise(new QueryResult());
+                return newResultPromise(newQueryResponse());
             }
         }
     }
@@ -618,10 +620,10 @@ public final class MemoryBackend implements CollectionResourceProvider {
      * {@inheritDoc}
      */
     @Override
-    public Promise<Resource, ResourceException> readInstance(final ServerContext context, final String id,
+    public Promise<ResourceResponse, ResourceException> readInstance(final ServerContext context, final String id,
             final ReadRequest request) {
         try {
-            final Resource resource = resources.get(id);
+            final ResourceResponse resource = resources.get(id);
             if (resource == null) {
                 throw new NotFoundException("The resource with ID '" + id
                         + "' could not be read because it does not exist");
@@ -636,15 +638,15 @@ public final class MemoryBackend implements CollectionResourceProvider {
      * {@inheritDoc}
      */
     @Override
-    public Promise<Resource, ResourceException> updateInstance(final ServerContext context, final String id,
+    public Promise<ResourceResponse, ResourceException> updateInstance(final ServerContext context, final String id,
             final UpdateRequest request) {
         final String rev = request.getRevision();
         try {
-            final Resource resource;
+            final ResourceResponse resource;
             synchronized (writeLock) {
-                final Resource existingResource = getResourceForUpdate(id, rev);
+                final ResourceResponse existingResource = getResourceForUpdate(id, rev);
                 final String newRev = getNextRevision(existingResource.getRevision());
-                resource = new Resource(id, newRev, request.getContent());
+                resource = newResourceResponse(id, newRev, request.getContent());
                 addIdAndRevision(resource);
                 resources.put(id, resource);
             }
@@ -660,11 +662,11 @@ public final class MemoryBackend implements CollectionResourceProvider {
      * content in case it is shared by other components, but we'll do it here
      * anyway for simplicity.
      */
-    private void addIdAndRevision(final Resource resource) throws ResourceException {
+    private void addIdAndRevision(final ResourceResponse resource) throws ResourceException {
         final JsonValue content = resource.getContent();
         try {
-            content.asMap().put(Resource.FIELD_CONTENT_ID, resource.getId());
-            content.asMap().put(Resource.FIELD_CONTENT_REVISION, resource.getRevision());
+            content.asMap().put(ResourceResponse.FIELD_CONTENT_ID, resource.getId());
+            content.asMap().put(ResourceResponse.FIELD_CONTENT_REVISION, resource.getRevision());
         } catch (final JsonValueException e) {
             throw new BadRequestException(
                     "The request could not be processed because the provided "
@@ -681,9 +683,9 @@ public final class MemoryBackend implements CollectionResourceProvider {
         }
     }
 
-    private Resource getResourceForUpdate(final String id, final String rev)
+    private ResourceResponse getResourceForUpdate(final String id, final String rev)
             throws NotFoundException, PreconditionFailedException {
-        final Resource existingResource = resources.get(id);
+        final ResourceResponse existingResource = resources.get(id);
         if (existingResource == null) {
             throw new NotFoundException("The resource with ID '" + id
                     + "' could not be updated because it does not exist");
