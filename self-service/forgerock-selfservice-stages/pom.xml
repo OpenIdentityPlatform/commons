@@ -27,38 +27,22 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>forgerock-selfservice-core</artifactId>
+    <artifactId>forgerock-selfservice-stages</artifactId>
     <packaging>bundle</packaging>
-    <name>Self Service Core</name>
+    <name>Self Service Stages</name>
     <description>
-        Core implementation of the self service framework.
+        Implementation of common self service stages.
     </description>
 
     <dependencies>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
-            <artifactId>json-resource</artifactId>
+            <artifactId>forgerock-selfservice-core</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
-            <artifactId>json-web-token</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.inject</groupId>
-            <artifactId>javax.inject</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
+            <artifactId>json-resource</artifactId>
         </dependency>
     </dependencies>
 

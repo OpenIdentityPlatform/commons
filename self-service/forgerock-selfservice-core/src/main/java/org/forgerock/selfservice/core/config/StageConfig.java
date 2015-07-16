@@ -14,7 +14,20 @@
  * Copyright 2015 ForgeRock AS.
  */
 
+package org.forgerock.selfservice.core.config;
+
 /**
- * This package contains the core implementation for self service.
+ * Represents the configuration for a given progress stage.
+ *
+ * @since 0.1.0
  */
-package com.forgerock.selfservice;
+public interface StageConfig {
+
+    /**
+     * Gets the type associated with this stage config.
+     *
+     * @return the stage types
+     */
+    StageType<?> getStageType();
+
+}

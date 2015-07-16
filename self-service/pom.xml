@@ -39,6 +39,8 @@
 
     <modules>
         <module>forgerock-selfservice-core</module>
+        <module>forgerock-selfservice-example</module>
+        <module>forgerock-selfservice-stages</module>
     </modules>
 
     <scm>
@@ -51,10 +53,11 @@
     </licenses>
 
     <properties>
-        <maven.compiler.target>1.7</maven.compiler.target>
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <commons.forgerock-rest.version>2.4.2</commons.forgerock-rest.version>
-        <fest-assert.version>2.0M10</fest-assert.version>
+        <commons.forgerock-rest.version>3.0.0-SNAPSHOT</commons.forgerock-rest.version>
+        <commons.json-web-token.version>3.0.0-SNAPSHOT</commons.json-web-token.version>
+        <commons.chf-http-servlet.version>0.0.1-SNAPSHOT</commons.chf-http-servlet.version>
+        <javax.inject.version>1</javax.inject.version>
+        <assertj.version>1.6.1</assertj.version>
         <mockito.version>1.9.5</mockito.version>
         <testng.version>6.8.21</testng.version>
     </properties>
@@ -66,6 +69,26 @@
                 <artifactId>json-resource</artifactId>
                 <version>${commons.forgerock-rest.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons</groupId>
+                <artifactId>json-web-token</artifactId>
+                <version>${commons.json-web-token.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.http</groupId>
+                <artifactId>chf-http-servlet</artifactId>
+                <version>${commons.chf-http-servlet.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons</groupId>
+                <artifactId>json-resource-http</artifactId>
+                <version>${commons.forgerock-rest.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.inject</groupId>
+                <artifactId>javax.inject</artifactId>
+                <version>${javax.inject.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.testng</groupId>
@@ -74,9 +97,9 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.easytesting</groupId>
-                <artifactId>fest-assert-core</artifactId>
-                <version>${fest-assert.version}</version>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>${assertj.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
