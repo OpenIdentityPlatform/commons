@@ -22,11 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, window */
-
-/**
- * @author mbilski
- */
+/*global define*/
 define("org/forgerock/commons/ui/common/main/AbstractView", [
     "jquery",
     "underscore",
@@ -39,7 +35,7 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/util/Constants",
     "ThemeManager"
-], function($, _, Backbone, uiUtils, validatorsManager, validatorsUtils, conf, eventManager, router, constants, themeManager) {
+], function($, _, Backbone, UIUtils, ValidatorsManager, ValidatorsUtils, Configuration, EventManager, Router, Constants, ThemeManager) {
     /**
      * @exports org/forgerock/commons/ui/common/main/AbstractView
      */
@@ -73,30 +69,30 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
 
             var _this = this,
                 needsNewBaseTemplate = function () {
-                    return (conf.baseTemplate !== _this.baseTemplate && !_this.noBaseTemplate);
+                    return (Configuration.baseTemplate !== _this.baseTemplate && !_this.noBaseTemplate);
                 };
-            eventManager.registerListener(constants.EVENT_REQUEST_RESEND_REQUIRED, function () {
+            EventManager.registerListener(Constants.EVENT_REQUEST_RESEND_REQUIRED, function () {
                 _this.unlock();
             });
 
-            themeManager.getTheme().then(function(theme){
+            ThemeManager.getTheme().then(function(theme){
                 _this.data.theme = theme;
 
                 if(needsNewBaseTemplate()) {
-                    uiUtils.renderTemplate(_this.data.theme.path + _this.baseTemplate, $("#wrapper"), _.extend({}, conf.globalData, _this.data), _.bind(_this.loadTemplate, _this), "replace", needsNewBaseTemplate);
+                    UIUtils.renderTemplate(_this.data.theme.path + _this.baseTemplate, $("#wrapper"), _.extend({}, Configuration.globalData, _this.data), _.bind(_this.loadTemplate, _this), "replace", needsNewBaseTemplate);
                 } else {
                     _this.loadTemplate();
                 }
             });
 
             //Added in due to the migration of the username to the main nav bar
-            if(conf.loggedUser) {
+            if(Configuration.loggedUser) {
                 this.$el.find("#profile_link").show();
 
-                if (conf.loggedUser.userName) {
-                    this.$el.find("#user_name").text(conf.loggedUser.userName); //idm
-                } else if (conf.loggedUser.cn) {
-                    this.$el.find("#user_name").text(conf.loggedUser.cn); //am
+                if (Configuration.loggedUser.userName) {
+                    this.$el.find("#user_name").text(Configuration.loggedUser.userName); //idm
+                } else if (Configuration.loggedUser.cn) {
+                    this.$el.find("#user_name").text(Configuration.loggedUser.cn); //am
                 }
             }
         },
@@ -106,10 +102,10 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
                 validateCurrent = function () {
                     if (!_.has(_this, "route")) {
                         return true;
-                    } else if (!_this.route.url.length && router.getCurrentHash().replace(/^#/, '') === "") {
+                    } else if (!_this.route.url.length && Router.getCurrentHash().replace(/^#/, '') === "") {
                         return true;
                     } else {
-                        return router.getCurrentHash().replace(/^#/, '').match(_this.route.url);
+                        return Router.getCurrentHash().replace(/^#/, '').match(_this.route.url);
                     }
                 };
 
@@ -117,17 +113,20 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
             this.$el.unbind();
             this.delegateEvents();
 
-            if(conf.baseTemplate !== this.baseTemplate && !this.noBaseTemplate) {
-                conf.setProperty("baseTemplate", this.baseTemplate);
-                eventManager.sendEvent(constants.EVENT_CHANGE_BASE_VIEW);
+            if(Configuration.baseTemplate !== this.baseTemplate && !this.noBaseTemplate) {
+                Configuration.setProperty("baseTemplate", this.baseTemplate);
+                EventManager.sendEvent(Constants.EVENT_CHANGE_BASE_VIEW);
             }
 
             if(this.callback) {
-                uiUtils.renderTemplate(this.data.theme.path + this.template, this.$el, _.extend({}, conf.globalData, this.data), _.bind(this.callback, this), this.mode, validateCurrent);
+                UIUtils.renderTemplate(this.data.theme.path + this.template, this.$el, _.extend({}, Configuration.globalData, this.data), _.bind(this.callback, this), this.mode, validateCurrent);
             } else {
-                uiUtils.renderTemplate(this.data.theme.path + this.template, this.$el, _.extend({}, conf.globalData, this.data), null, this.mode, validateCurrent);
+                UIUtils.renderTemplate(this.data.theme.path + this.template, this.$el, _.extend({}, Configuration.globalData, this.data), null, this.mode, validateCurrent);
             }
 
+            _.each(this.partials, function(url) {
+                UIUtils.preloadPartial(url);
+            });
         },
 
         rebind: function() {
@@ -155,11 +154,11 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
                 $(input, this.$el).popover('destroy');
             }
             $(input, this.$el).removeClass('field-error');
-                
+
             if(msg && _.isArray(msg)){
                 validationMessage = msg;
             }
-            
+
             if(msg === "inProgress") {
                 //TODO spinner
                 //console.log("in progress..");
@@ -168,7 +167,7 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
             if (!button.length) {
                 button = this.$el.find("#submit");
             }
-            if (validatorsManager.formValidated(this.$el)) {
+            if (ValidatorsManager.formValidated(this.$el)) {
                 button.prop('disabled', false);
                 this.$el.find(".input-validation-message").hide();
             } else {
@@ -177,10 +176,10 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
             }
 
             if (msg === "disabled") {
-                validatorsUtils.hideValidation(input, this.$el);
+                ValidatorsUtils.hideValidation(input, this.$el);
                 return;
             } else {
-                validatorsUtils.showValidation(input, this.$el);
+                ValidatorsUtils.showValidation(input, this.$el);
                 if(validationMessage.length){
                     $(input, this.$el).addClass('field-error');
                     //clean up existing popover if validation messsage is different
@@ -199,7 +198,7 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
             }
 
             if (input.nextAll("span")) {
-                validatorsUtils.setTick(input, msg);
+                ValidatorsUtils.setTick(input, msg);
             }
 
             if (msg) {
@@ -213,7 +212,7 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
             this.$el.find("div.validation-message[for='" + input.attr('name') + "']").html(msg ? msg : '');
 
             if (validatorType) {
-                validatorsUtils.setErrors(this.$el, validatorType, msg);
+                ValidatorsUtils.setErrors(this.$el, validatorType, msg);
             }
 
             this.$el.trigger("customValidate", [input, msg, validatorType]);
