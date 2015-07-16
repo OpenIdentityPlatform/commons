@@ -165,9 +165,9 @@ public interface QueryRequest extends Request {
     String getPagedResultsCookie();
 
     /**
-     * Returns the {@link CountPolicy} used to calculate {@link QueryResult#getTotalPagedResults()}.
+     * Returns the {@link CountPolicy} used to calculate {@link QueryResponse#getTotalPagedResults()}.
      *
-     * @see QueryResult#getTotalPagedResults()
+     * @see QueryResponse#getTotalPagedResults()
      */
     CountPolicy getTotalPagedResultsPolicy();
 
@@ -308,8 +308,8 @@ public interface QueryRequest extends Request {
      *
      * @return This query request.
      *
-     * @see QueryResult#getTotalPagedResultsPolicy()
-     * @see QueryResult#getTotalPagedResults()
+     * @see QueryResponse#getTotalPagedResultsPolicy()
+     * @see QueryResponse#getTotalPagedResults()
      */
     QueryRequest setTotalPagedResultsPolicy(CountPolicy policy);
 

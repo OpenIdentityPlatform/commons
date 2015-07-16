@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.forgerock.http.context.ServerContext;
-import org.forgerock.json.JsonValue;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -173,7 +172,7 @@ public final class VersionRouter implements RequestHandler {
      * {@inheritDoc}
      */
     @Override
-    public Promise<JsonValue, ResourceException> handleAction(ServerContext context, ActionRequest request) {
+    public Promise<ActionResponse, ResourceException> handleAction(ServerContext context, ActionRequest request) {
         try {
             return getBestRoute(context).handleAction(context, request);
         } catch (ResourceException e) {
@@ -185,7 +184,7 @@ public final class VersionRouter implements RequestHandler {
      * {@inheritDoc}
      */
     @Override
-    public Promise<Resource, ResourceException> handleCreate(ServerContext context, CreateRequest request) {
+    public Promise<ResourceResponse, ResourceException> handleCreate(ServerContext context, CreateRequest request) {
         try {
             return getBestRoute(context).handleCreate(context, request);
         } catch (ResourceException e) {
@@ -197,7 +196,7 @@ public final class VersionRouter implements RequestHandler {
      * {@inheritDoc}
      */
     @Override
-    public Promise<Resource, ResourceException> handleDelete(ServerContext context, DeleteRequest request) {
+    public Promise<ResourceResponse, ResourceException> handleDelete(ServerContext context, DeleteRequest request) {
         try {
             return getBestRoute(context).handleDelete(context, request);
         } catch (ResourceException e) {
@@ -209,7 +208,7 @@ public final class VersionRouter implements RequestHandler {
      * {@inheritDoc}
      */
     @Override
-    public Promise<Resource, ResourceException> handlePatch(ServerContext context, PatchRequest request) {
+    public Promise<ResourceResponse, ResourceException> handlePatch(ServerContext context, PatchRequest request) {
         try {
             return getBestRoute(context).handlePatch(context, request);
         } catch (ResourceException e) {
@@ -221,7 +220,7 @@ public final class VersionRouter implements RequestHandler {
      * {@inheritDoc}
      */
     @Override
-    public Promise<QueryResult, ResourceException> handleQuery(ServerContext context, QueryRequest request,
+    public Promise<QueryResponse, ResourceException> handleQuery(ServerContext context, QueryRequest request,
             QueryResourceHandler handler) {
         try {
             return getBestRoute(context).handleQuery(context, request, handler);
@@ -234,7 +233,7 @@ public final class VersionRouter implements RequestHandler {
      * {@inheritDoc}
      */
     @Override
-    public Promise<Resource, ResourceException> handleRead(ServerContext context, ReadRequest request) {
+    public Promise<ResourceResponse, ResourceException> handleRead(ServerContext context, ReadRequest request) {
         try {
             return getBestRoute(context).handleRead(context, request);
         } catch (ResourceException e) {
@@ -246,7 +245,7 @@ public final class VersionRouter implements RequestHandler {
      * {@inheritDoc}
      */
     @Override
-    public Promise<Resource, ResourceException> handleUpdate(ServerContext context, UpdateRequest request) {
+    public Promise<ResourceResponse, ResourceException> handleUpdate(ServerContext context, UpdateRequest request) {
         try {
             return getBestRoute(context).handleUpdate(context, request);
         } catch (ResourceException e) {

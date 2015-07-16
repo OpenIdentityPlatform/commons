@@ -24,7 +24,7 @@ import org.forgerock.http.context.ServerContext;
  * A query result completion handler may be specified when performing query
  * requests using a {@link Connection} object. The {@link #handleResource}
  * method is invoked for each resource which matches the query criteria,
- * followed by returning a {@link QueryResult} or a {@link ResourceException}
+ * followed by returning a {@link QueryResponse} or a {@link ResourceException}
  * indicating that no more JSON resources will be returned.
  * <p>
  * Implementations of these methods should complete in a timely manner so as to
@@ -32,11 +32,11 @@ import org.forgerock.http.context.ServerContext;
  * handlers.
  * <p>
  * <b>Synchronization note:</b> each invocation of
- * {@link #handleResource(Resource) handleResource} for a resource <i><a href=
+ * {@link #handleResource(ResourceResponse) handleResource} for a resource <i><a href=
  * "http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/package-summary.html#MemoryVisibility"
  * >happens-before</a></i> the invocation of {@code handleResource} for the next
  * resource. Invocation of {@code handleResource} for the final resource
- * <i>happens-before</i> returning a {@link QueryResult} or a
+ * <i>happens-before</i> returning a {@link QueryResponse} or a
  * {@link ResourceException} are invoked with the final query status. In other
  * words, query resource handler method invocations will occur sequentially and
  * one at a time.
@@ -60,5 +60,5 @@ public interface QueryResourceHandler {
      *         remaining JSON resources should be skipped for some reason (e.g.
      *         a client side size limit has been reached).
      */
-    boolean handleResource(Resource resource);
+    boolean handleResource(ResourceResponse resource);
 }

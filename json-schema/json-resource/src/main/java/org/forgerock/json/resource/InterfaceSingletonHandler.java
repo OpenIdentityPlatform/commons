@@ -19,7 +19,6 @@ package org.forgerock.json.resource;
 import static org.forgerock.util.promise.Promises.newExceptionPromise;
 
 import org.forgerock.http.context.ServerContext;
-import org.forgerock.json.JsonValue;
 import org.forgerock.util.promise.Promise;
 
 class InterfaceSingletonHandler implements RequestHandler {
@@ -30,13 +29,13 @@ class InterfaceSingletonHandler implements RequestHandler {
     }
 
     @Override
-    public Promise<JsonValue, ResourceException> handleAction(final ServerContext context,
+    public Promise<ActionResponse, ResourceException> handleAction(final ServerContext context,
             final ActionRequest request) {
         return provider.actionInstance(context, request);
     }
 
     @Override
-    public final Promise<Resource, ResourceException> handleCreate(final ServerContext context,
+    public final Promise<ResourceResponse, ResourceException> handleCreate(final ServerContext context,
             final CreateRequest request) {
         // TODO: i18n
         return newExceptionPromise(Resources.newBadRequestException(
@@ -44,7 +43,7 @@ class InterfaceSingletonHandler implements RequestHandler {
     }
 
     @Override
-    public final Promise<Resource, ResourceException> handleDelete(final ServerContext context,
+    public final Promise<ResourceResponse, ResourceException> handleDelete(final ServerContext context,
             final DeleteRequest request) {
         // TODO: i18n
         return newExceptionPromise(Resources.newBadRequestException(
@@ -52,25 +51,28 @@ class InterfaceSingletonHandler implements RequestHandler {
     }
 
     @Override
-    public Promise<Resource, ResourceException> handlePatch(final ServerContext context, final PatchRequest request) {
+    public Promise<ResourceResponse, ResourceException> handlePatch(final ServerContext context,
+            final PatchRequest request) {
         return provider.patchInstance(context, request);
     }
 
     @Override
-    public final Promise<QueryResult, ResourceException> handleQuery(final ServerContext context, final QueryRequest request,
-            final QueryResourceHandler handler) {
+    public final Promise<QueryResponse, ResourceException> handleQuery(final ServerContext context,
+            final QueryRequest request, final QueryResourceHandler handler) {
         // TODO: i18n
         return newExceptionPromise(Resources.newBadRequestException(
                 "The singleton resource %s cannot be queried", request.getResourcePath()));
     }
 
     @Override
-    public Promise<Resource, ResourceException> handleRead(final ServerContext context, final ReadRequest request) {
+    public Promise<ResourceResponse, ResourceException> handleRead(final ServerContext context,
+            final ReadRequest request) {
         return provider.readInstance(context, request);
     }
 
     @Override
-    public Promise<Resource, ResourceException> handleUpdate(final ServerContext context, final UpdateRequest request) {
+    public Promise<ResourceResponse, ResourceException> handleUpdate(final ServerContext context,
+            final UpdateRequest request) {
         return provider.updateInstance(context, request);
     }
 }

@@ -17,6 +17,7 @@
 package org.forgerock.json.resource;
 
 import static org.forgerock.http.routing.RoutingMode.EQUALS;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
 
@@ -123,14 +124,14 @@ public final class Resources {
      *            The list of fields to be extracted.
      * @return The filtered resource.
      */
-    public static Resource filterResource(final Resource resource,
+    public static ResourceResponse filterResource(final ResourceResponse resource,
             final Collection<JsonPointer> fields) {
         final JsonValue unfiltered = resource.getContent();
         final JsonValue filtered = filterResource(unfiltered, fields);
         if (filtered == unfiltered) {
             return resource; // Unchanged.
         } else {
-            return new Resource(resource.getId(), resource.getRevision(), filtered);
+            return newResourceResponse(resource.getId(), resource.getRevision(), filtered);
         }
     }
 

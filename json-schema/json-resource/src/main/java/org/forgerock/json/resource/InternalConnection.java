@@ -18,7 +18,6 @@ package org.forgerock.json.resource;
 
 import org.forgerock.http.Context;
 import org.forgerock.http.context.ServerContext;
-import org.forgerock.json.JsonValue;
 import org.forgerock.util.promise.Promise;
 
 final class InternalConnection extends AbstractAsynchronousConnection {
@@ -29,7 +28,7 @@ final class InternalConnection extends AbstractAsynchronousConnection {
     }
 
     @Override
-    public Promise<JsonValue, ResourceException> actionAsync(final Context context,
+    public Promise<ActionResponse, ResourceException> actionAsync(final Context context,
             final ActionRequest request) {
         return requestHandler.handleAction(getServerContext(context), request);
     }
@@ -40,13 +39,13 @@ final class InternalConnection extends AbstractAsynchronousConnection {
     }
 
     @Override
-    public Promise<Resource, ResourceException> createAsync(final Context context,
+    public Promise<ResourceResponse, ResourceException> createAsync(final Context context,
             final CreateRequest request) {
         return requestHandler.handleCreate(getServerContext(context), request);
     }
 
     @Override
-    public Promise<Resource, ResourceException> deleteAsync(final Context context,
+    public Promise<ResourceResponse, ResourceException> deleteAsync(final Context context,
             final DeleteRequest request) {
         return requestHandler.handleDelete(getServerContext(context), request);
     }
@@ -64,31 +63,31 @@ final class InternalConnection extends AbstractAsynchronousConnection {
     }
 
     @Override
-    public Promise<Resource, ResourceException> patchAsync(final Context context,
+    public Promise<ResourceResponse, ResourceException> patchAsync(final Context context,
             final PatchRequest request) {
         return requestHandler.handlePatch(getServerContext(context), request);
     }
 
     @Override
-    public Promise<QueryResult, ResourceException> queryAsync(final Context context,
+    public Promise<QueryResponse, ResourceException> queryAsync(final Context context,
             final QueryRequest request, final QueryResourceHandler handler) {
         return requestHandler.handleQuery(getServerContext(context), request,
                 new QueryResourceHandler() {
                     @Override
-                    public boolean handleResource(Resource resource) {
+                    public boolean handleResource(ResourceResponse resource) {
                         return handler.handleResource(Resources.filterResource(resource, request.getFields()));
                     }
                 });
     }
 
     @Override
-    public Promise<Resource, ResourceException> readAsync(final Context context,
+    public Promise<ResourceResponse, ResourceException> readAsync(final Context context,
             final ReadRequest request) {
         return requestHandler.handleRead(getServerContext(context), request);
     }
 
     @Override
-    public Promise<Resource, ResourceException> updateAsync(final Context context,
+    public Promise<ResourceResponse, ResourceException> updateAsync(final Context context,
             final UpdateRequest request) {
         return requestHandler.handleUpdate(getServerContext(context), request);
     }

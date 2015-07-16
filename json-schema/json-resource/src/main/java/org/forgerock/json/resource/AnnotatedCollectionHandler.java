@@ -17,7 +17,6 @@
 package org.forgerock.json.resource;
 
 import org.forgerock.http.context.ServerContext;
-import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.annotations.Create;
 import org.forgerock.json.resource.annotations.Query;
 import org.forgerock.json.resource.annotations.RequestHandler;
@@ -51,18 +50,18 @@ class AnnotatedCollectionHandler extends InterfaceCollectionHandler {
     }
 
     @Override
-    public Promise<Resource, ResourceException> handleCreate(ServerContext context, CreateRequest request) {
+    public Promise<ResourceResponse, ResourceException> handleCreate(ServerContext context, CreateRequest request) {
         return RequestHandlerUtils.handle(createMethod, context, request);
     }
 
     @Override
-    public Promise<QueryResult, ResourceException> handleQuery(ServerContext context, QueryRequest request,
+    public Promise<QueryResponse, ResourceException> handleQuery(ServerContext context, QueryRequest request,
             QueryResourceHandler handler) {
         return RequestHandlerUtils.handle(queryMethod, context, request, handler);
     }
 
     @Override
-    public Promise<JsonValue, ResourceException> handleAction(ServerContext context, ActionRequest request) {
+    public Promise<ActionResponse, ResourceException> handleAction(ServerContext context, ActionRequest request) {
         return actionMethods.invoke(context, request, null);
     }
 }

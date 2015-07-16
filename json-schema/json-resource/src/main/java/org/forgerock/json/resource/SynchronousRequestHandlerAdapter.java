@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 
 import org.forgerock.http.context.ServerContext;
-import org.forgerock.json.JsonValue;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -37,7 +36,8 @@ final class SynchronousRequestHandlerAdapter implements RequestHandler {
     }
 
     @Override
-    public Promise<Resource, ResourceException> handleUpdate(final ServerContext context, final UpdateRequest request) {
+    public Promise<ResourceResponse, ResourceException> handleUpdate(final ServerContext context,
+            final UpdateRequest request) {
         try {
             return newResultPromise(syncHandler.handleUpdate(context, request));
         } catch (final ResourceException e) {
@@ -46,7 +46,8 @@ final class SynchronousRequestHandlerAdapter implements RequestHandler {
     }
 
     @Override
-    public Promise<Resource, ResourceException> handleRead(final ServerContext context, final ReadRequest request) {
+    public Promise<ResourceResponse, ResourceException> handleRead(final ServerContext context,
+            final ReadRequest request) {
         try {
             return newResultPromise(syncHandler.handleRead(context, request));
         } catch (final ResourceException e) {
@@ -55,12 +56,13 @@ final class SynchronousRequestHandlerAdapter implements RequestHandler {
     }
 
     @Override
-    public Promise<QueryResult, ResourceException> handleQuery(final ServerContext context, final QueryRequest request,
+    public Promise<QueryResponse, ResourceException> handleQuery(final ServerContext context,
+            final QueryRequest request,
             final QueryResourceHandler handler) {
         try {
-            final Collection<Resource> resources = new LinkedList<>();
-            final QueryResult result = syncHandler.handleQuery(context, request, resources);
-            for (final Resource resource : resources) {
+            final Collection<ResourceResponse> resources = new LinkedList<>();
+            final QueryResponse result = syncHandler.handleQuery(context, request, resources);
+            for (final ResourceResponse resource : resources) {
                 handler.handleResource(resource);
             }
             return newResultPromise(result);
@@ -70,7 +72,8 @@ final class SynchronousRequestHandlerAdapter implements RequestHandler {
     }
 
     @Override
-    public Promise<Resource, ResourceException> handlePatch(final ServerContext context, final PatchRequest request) {
+    public Promise<ResourceResponse, ResourceException> handlePatch(final ServerContext context,
+            final PatchRequest request) {
         try {
             return newResultPromise(syncHandler.handlePatch(context, request));
         } catch (final ResourceException e) {
@@ -79,7 +82,8 @@ final class SynchronousRequestHandlerAdapter implements RequestHandler {
     }
 
     @Override
-    public Promise<Resource, ResourceException> handleDelete(final ServerContext context, final DeleteRequest request) {
+    public Promise<ResourceResponse, ResourceException> handleDelete(final ServerContext context,
+            final DeleteRequest request) {
         try {
             return newResultPromise(syncHandler.handleDelete(context, request));
         } catch (final ResourceException e) {
@@ -88,7 +92,8 @@ final class SynchronousRequestHandlerAdapter implements RequestHandler {
     }
 
     @Override
-    public Promise<Resource, ResourceException> handleCreate(final ServerContext context, final CreateRequest request) {
+    public Promise<ResourceResponse, ResourceException> handleCreate(final ServerContext context,
+            final CreateRequest request) {
         try {
             return newResultPromise(syncHandler.handleCreate(context, request));
         } catch (final ResourceException e) {
@@ -97,7 +102,7 @@ final class SynchronousRequestHandlerAdapter implements RequestHandler {
     }
 
     @Override
-    public Promise<JsonValue, ResourceException> handleAction(final ServerContext context,
+    public Promise<ActionResponse, ResourceException> handleAction(final ServerContext context,
             final ActionRequest request) {
         try {
             return newResultPromise(syncHandler.handleAction(context, request));

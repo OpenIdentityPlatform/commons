@@ -22,104 +22,55 @@ package org.forgerock.json.resource;
  * are to be returned by the query, the query result will contain page results
  * state information if result paging has been enabled for the query.
  */
-public final class QueryResult {
+public interface QueryResponse extends Response {
 
     /**
      * The name of the field which contains the error in the JSON
      * representation.
      */
-    public static final String FIELD_ERROR = "error";
+    String FIELD_ERROR = "error";
 
     /**
      * The name of the field which contains the paged results cookie in the JSON
      * representation.
      */
-    public static final String FIELD_PAGED_RESULTS_COOKIE = QueryRequest.FIELD_PAGED_RESULTS_COOKIE;
+    String FIELD_PAGED_RESULTS_COOKIE = QueryRequest.FIELD_PAGED_RESULTS_COOKIE;
 
     /**
      * The name of the field which contains the policy used for calculating
      * the total number of paged results in the JSON representation.
      */
-    public static final String FIELD_TOTAL_PAGED_RESULTS_POLICY = QueryRequest.FIELD_TOTAL_PAGED_RESULTS_POLICY;
+    String FIELD_TOTAL_PAGED_RESULTS_POLICY = QueryRequest.FIELD_TOTAL_PAGED_RESULTS_POLICY;
 
     /**
      * The name of the field which contains the total paged results in the JSON
      * representation.
      */
-    public static final String FIELD_TOTAL_PAGED_RESULTS = "totalPagedResults";
+    String FIELD_TOTAL_PAGED_RESULTS = "totalPagedResults";
 
     /**
      * The name of the field which contains the result count in the JSON
      * representation.
      */
-    public static final String FIELD_RESULT_COUNT = "resultCount";
+    String FIELD_RESULT_COUNT = "resultCount";
 
     /**
      * The name of the field which contains the array of matching resources in
      * the JSON representation.
      */
-    public static final String FIELD_RESULT = "result";
+    String FIELD_RESULT = "result";
 
     /**
      * The value provided when no count is known or can reasonably be supplied.
      */
-    public static final int NO_COUNT = -1;
-
-    private final String pagedResultsCookie;
-
-    private final CountPolicy totalPagedResultsPolicy;
-
-    private final int totalPagedResults;
+    int NO_COUNT = -1;
 
     /**
-     * Creates a new query result with a {@code null} paged results cookie and
-     * no count of the total number of remaining results.
-     */
-    public QueryResult() {
-        this(null);
-    }
-
-    /**
-     * Creates a new query result with the provided paged results cookie and
-     * no count.
-     *
-     * @param pagedResultsCookie
-     */
-    public QueryResult(final String pagedResultsCookie) {
-        this(pagedResultsCookie, CountPolicy.NONE, NO_COUNT);
-    }
-
-    /**
-     * Creates a new query result with the provided paged results cookie and
-     * a count of the total number of remaining results according to {@link #totalPagedResultsPolicy}.
-     *
-     * @param pagedResultsCookie
-     *            The opaque cookie which should be used with the next paged
-     *            results query request, or {@code null} if paged results were
-     *            not requested, or if there are not more pages to be returned.
-     * @param totalPagedResultsPolicy
-     *            The policy that was used to calculate {@link #totalPagedResults}
-     * @param totalPagedResults
-     *            The total number of paged results requested in adherence to
-     *            the {@link QueryRequest#getTotalPagedResultsPolicy()} in the request,
-     *            or {@link #NO_COUNT} if paged results were not requested, the count
-     *            policy is {@code NONE}, or if the total number of remaining
-     *            results is unknown.
-     */
-    public QueryResult(final String pagedResultsCookie,
-                       final CountPolicy totalPagedResultsPolicy,
-                       final int totalPagedResults) {
-        this.pagedResultsCookie = pagedResultsCookie;
-        this.totalPagedResultsPolicy = totalPagedResultsPolicy;
-        this.totalPagedResults = totalPagedResults;
-    }
-
-    /**
-     * Returns the policy that was used to calculate the {@link #totalPagedResults}.
+     * Returns the policy that was used to calculate the {@literal totalPagedResults}.
      *
      * @see #getTotalPagedResults()
      */
-    public CountPolicy getTotalPagedResultsPolicy() { return totalPagedResultsPolicy; }
+    CountPolicy getTotalPagedResultsPolicy();
 
     /**
      * Returns the opaque cookie which should be used with the next paged
@@ -129,9 +80,7 @@ public final class QueryResult {
      *         results query request, or {@code null} if paged results were not
      *         requested, or if there are not more pages to be returned.
      */
-    public String getPagedResultsCookie() {
-        return pagedResultsCookie;
-    }
+    String getPagedResultsCookie();
 
     /**
      * Returns the total number of paged results in adherence with
@@ -145,8 +94,5 @@ public final class QueryResult {
      *         {@link #NO_COUNT} if paged results were not requested, or if the total
      *         number of remaining results is unknown.
      */
-    public int getTotalPagedResults() {
-        return totalPagedResults;
-    }
-
+    int getTotalPagedResults();
 }
