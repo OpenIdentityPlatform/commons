@@ -477,4 +477,38 @@ public class MutableUriTest {
         assertThat(uri.getQuery()).isEqualTo("param=+");
         assertThat(uri.getRawQuery()).isEqualTo("param=%2B");
     }
+
+    @Test
+    public void shouldRelativize() throws Exception {
+        MutableUri uri = uri("http://www.example.com/a%20b/");
+        MutableUri relativized = uri.relativize(uri("http://www.example.com/a%20b/c%3Dd"));
+        assertThat(relativized).isEqualTo(uri("c%3Dd"));
+        assertThat(relativized.getResourcePath().toString()).isEqualTo("c%3Dd");
+    }
+
+    @Test
+    public void shouldResolveKeepingTheExistingPath() throws Exception {
+        MutableUri uri = uri("http://www.example.com/a%20b/");
+        MutableUri resolved = uri.resolve(uri("c%3Dd"));
+        assertThat(resolved).isEqualTo(uri("http://www.example.com/a%20b/c%3Dd"));
+        assertThat(resolved.getResourcePath().toString()).isEqualTo("a%20b/c%3Dd");
+    }
+
+    @Test
+    public void shouldResolveStrippingTheExistingPath() throws Exception {
+        MutableUri uri = uri("http://www.example.com/a%20b/");
+        MutableUri resolved = uri.resolve(uri("/c%3Dd"));
+        assertThat(resolved).isEqualTo(uri("http://www.example.com/c%3Dd"));
+        assertThat(resolved.getResourcePath().toString()).isEqualTo("c%3Dd");
+    }
+
+    @Test
+    public void shouldResolveWhenThereIsNoTrailingSlashInBase() throws Exception {
+        MutableUri uri = uri("http://www.example.com");
+        MutableUri resolved = uri.resolve(uri("c%3Dd"));
+        // Do not use uri() here because resolution knows %3d is a path element
+        // where http://...comc%3Dd is see as part of the hostname (no path element)
+        assertThat(resolved.toString()).isEqualTo("http://www.example.comc%3Dd");
+        assertThat(resolved.getResourcePath().toString()).isEqualTo("c%3Dd");
+    }
 }

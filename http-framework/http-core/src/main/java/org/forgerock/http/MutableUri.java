@@ -425,6 +425,7 @@ public final class MutableUri implements Comparable<MutableUri> {
      */
     public MutableUri relativize(final MutableUri uri) {
         this.uri = this.uri.relativize(uri.asURI());
+        setResourcePath(this.uri.getRawPath());
         return this;
     }
 
@@ -436,6 +437,7 @@ public final class MutableUri implements Comparable<MutableUri> {
      */
     public MutableUri resolve(final MutableUri uri) {
         this.uri = this.uri.resolve(uri.asURI());
+        setResourcePath(this.uri.getRawPath());
         return this;
     }
 
