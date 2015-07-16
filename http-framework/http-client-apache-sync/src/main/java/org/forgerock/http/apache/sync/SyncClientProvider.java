@@ -78,7 +78,7 @@ public final class SyncClientProvider implements ClientImplProvider {
         // SSL
         final SSLContext context;
         try {
-            context = SSLContext.getInstance("TLS");
+            context = SSLContext.getInstance(options.get(OPTION_SSLCONTEXT_ALGORITHM));
             context.init(options.get(OPTION_KEY_MANAGERS), options.get(OPTION_TRUST_MANAGERS), null);
         } catch (final GeneralSecurityException e) {
             throw new HttpApplicationException(e);

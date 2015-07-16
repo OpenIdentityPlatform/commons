@@ -93,7 +93,7 @@ public class AsyncClientProvider implements ClientImplProvider {
         // SSL
         final SSLContext sslContext;
         try {
-            sslContext = SSLContext.getInstance("TLS");
+            sslContext = SSLContext.getInstance(options.get(OPTION_SSLCONTEXT_ALGORITHM));
             sslContext.init(options.get(OPTION_KEY_MANAGERS),
                             options.get(OPTION_TRUST_MANAGERS), null);
         } catch (final GeneralSecurityException e) {
