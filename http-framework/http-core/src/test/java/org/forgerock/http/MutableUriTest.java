@@ -18,10 +18,12 @@ package org.forgerock.http;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.http.MutableUri.uri;
+import static org.forgerock.http.util.Uris.urlEncode;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")
@@ -271,41 +273,208 @@ public class MutableUriTest {
     }
 
     // Tests for correct encoding of clear values with reserved characters in URI components
-    // -------------------------------------------------------------------------------------------
-    // Note: It appears that when we re-create a URI with decoded values that contains reserved
-    // characters ('=', '?', ...) the URI inner parser doesn't re-encode properly the reserved char
-    // for some components.
-    // -------------------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------
 
-    @Test(enabled = false)
-    public void shouldAcceptReservedCharactersInSetQuery() throws Exception {
-        MutableUri uri = uri("http://www.example.com");
-        uri.setQuery("x=?");
-        assertThat(uri.getQuery()).isEqualTo("x=?");
-        assertThat(uri.getRawQuery()).isEqualTo("x=%3F");
+    public static final String ALPHA = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    public static final String DIGIT = "0123456789";
+    public static final String GEN_DELIMS = ":/?#[]@";
+    public static final String SUB_DELIMS = "!$&'()*+,;=";
+    public static final String RESERVED = GEN_DELIMS + SUB_DELIMS;
+    public static final String UNRESERVED = ALPHA + DIGIT + "-._~";
+    public static final String PCHAR = UNRESERVED + SUB_DELIMS + ":@"; // Does not have %encoded values
+    public static final String QUERY = PCHAR + "/?";
+    public static final String FRAGMENT = PCHAR + "/?";
+    public static final String USERINFO = UNRESERVED + SUB_DELIMS + ":";
+    public static final String PATH = PCHAR;
+
+    public static Object[][] arrayOf(String set) {
+        char[] chars = set.toCharArray();
+        int i = 0;
+        Object[][] arr = new Object[chars.length][1];
+        for (char c : chars) {
+            arr[i++][0] = Character.toString(c);
+        }
+        return arr;
     }
 
-    @Test(enabled = false)
-    public void shouldAcceptReservedCharactersInSetPath() throws Exception {
-        MutableUri uri = uri("http://www.example.com");
-        uri.setPath("/=");
-        assertThat(uri.getPath()).isEqualTo("/=");
-        assertThat(uri.getRawPath()).isEqualTo("/%3F");
+    @DataProvider
+    public static Object[][] queryChars() {
+        return arrayOf(QUERY);
     }
 
-    @Test(enabled = false)
-    public void shouldAcceptReservedCharactersInSetFragment() throws Exception {
+    @Test(dataProvider = "queryChars")
+    public void shouldNotEncodeLegalQueryChars(final String character) throws Exception {
         MutableUri uri = uri("http://www.example.com");
-        uri.setFragment("marker=");
-        assertThat(uri.getFragment()).isEqualTo("marker=");
-        assertThat(uri.getRawFragment()).isEqualTo("marker%3F");
+        uri.setQuery(character);
+        assertThat(uri.getQuery()).isEqualTo(character);
+        assertThat(uri.getRawQuery()).isEqualTo(character);
+    }
+
+    @Test(dataProvider = "illegalQueryAndFragmentChars")
+    public void shouldEncodeIllegalQueryChars(final String character) throws Exception {
+        MutableUri uri = uri("http://www.example.com");
+        uri.setQuery(character);
+        assertThat(uri.getQuery()).isEqualTo(character);
+        assertThat(uri.getRawQuery()).isEqualTo(urlEncode(character));
+    }
+
+    @DataProvider
+    public static Object[][] pathChars() {
+        return arrayOf(PATH);
+    }
+
+    @Test(dataProvider = "pathChars")
+    public void shouldNotEncodeLegalPathChars(final String character) throws Exception {
+        MutableUri uri = uri("http://www.example.com");
+        uri.setPath("/" + character);
+        assertThat(uri.getPath()).isEqualTo("/" + character);
+        assertThat(uri.getRawPath()).isEqualTo("/" + character);
+        assertThat(uri.getResourcePath().toString()).isEqualTo(character);
+    }
+
+    @DataProvider
+    public static Object[][] illegalPathChars() {
+        return arrayOf(GEN_DELIMS.replace(":", "").replace("@", "").replace("/", ""));
+    }
+
+    @Test(dataProvider = "illegalPathChars")
+    public void shouldEncodeIllegalPathChars(final String character) throws Exception {
+        MutableUri uri = uri("http://www.example.com");
+        uri.setPath("/" + character);
+        assertThat(uri.getPath()).isEqualTo("/" + character);
+        assertThat(uri.getRawPath()).isEqualTo("/" + urlEncode(character));
+        assertThat(uri.getResourcePath().toString()).isEqualTo(urlEncode(character));
+    }
+
+    @DataProvider
+    public static Object[][] fragmentChars() {
+        return arrayOf(FRAGMENT);
+    }
+
+    @Test(dataProvider = "fragmentChars")
+    public void shouldNotEncodeLegalFragmentChars(final String character) throws Exception {
+        MutableUri uri = uri("http://www.example.com");
+        uri.setFragment(character);
+        assertThat(uri.getFragment()).isEqualTo(character);
+        assertThat(uri.getRawFragment()).isEqualTo(character);
+    }
+
+    @DataProvider
+    public static Object[][] illegalQueryAndFragmentChars() {
+        return arrayOf(GEN_DELIMS.replace(":", "")
+                                 .replace("@", "")
+                                 .replace("/", "")
+                                 .replace("?", "")
+                                 .replace("[", "") // See URI javadoc
+                                 .replace("]", ""));
+    }
+
+    @Test(dataProvider = "illegalQueryAndFragmentChars")
+    public void shouldEncodeIllegalFragmentChars(final String character) throws Exception {
+        MutableUri uri = uri("http://www.example.com");
+        uri.setFragment(character);
+        assertThat(uri.getFragment()).isEqualTo(character);
+        assertThat(uri.getRawFragment()).isEqualTo(urlEncode(character));
+    }
+
+    @DataProvider
+    public static Object[][] userInfoChars() {
+        return arrayOf(USERINFO);
+    }
+
+    @Test(dataProvider = "userInfoChars")
+    public void shouldNotEncodeLegalUserInfoChars(final String character) throws Exception {
+        MutableUri uri = uri("http://www.example.com");
+        uri.setUserInfo(character);
+        assertThat(uri.getUserInfo()).isEqualTo(character);
+        assertThat(uri.getRawUserInfo()).isEqualTo(character);
+    }
+
+    @DataProvider
+    public static Object[][] illegalUserInfoChars() {
+        return arrayOf(GEN_DELIMS.replace(":", ""));
+    }
+
+    @Test(dataProvider = "illegalUserInfoChars")
+    public void shouldEncodeIllegalUserInfoChars(final String character) throws Exception {
+        MutableUri uri = uri("http://www.example.com");
+        uri.setUserInfo(character);
+        assertThat(uri.getUserInfo()).isEqualTo(character);
+        assertThat(uri.getRawUserInfo()).isEqualTo(urlEncode(character));
     }
 
     @Test
-    public void shouldAcceptReservedCharactersInSetUserInfo() throws Exception {
+    public void shouldNotDecodePercentEncodedValuesInRawUserInfo() throws Exception {
         MutableUri uri = uri("http://www.example.com");
-        uri.setUserInfo("test:pass?word");
-        assertThat(uri.getUserInfo()).isEqualTo("test:pass?word");
-        assertThat(uri.getRawUserInfo()).isEqualTo("test:pass%3Fword");
+        uri.setRawUserInfo("%3A");
+        assertThat(uri.getUserInfo()).isEqualTo(":");
+        assertThat(uri.getRawUserInfo()).isEqualTo("%3A");
+    }
+
+    @Test
+    public void shouldEncodePercentInUserInfo() throws Exception {
+        MutableUri uri = uri("http://www.example.com");
+        uri.setUserInfo("%");
+        assertThat(uri.getUserInfo()).isEqualTo("%");
+        assertThat(uri.getRawUserInfo()).isEqualTo("%25");
+    }
+
+    @Test
+    public void shouldNotDecodePercentEncodedValuesInRawPath() throws Exception {
+        MutableUri uri = uri("http://www.example.com");
+        uri.setRawPath("/%3A");
+        assertThat(uri.getPath()).isEqualTo("/:");
+        assertThat(uri.getRawPath()).isEqualTo("/%3A");
+    }
+
+    @Test
+    public void shouldEncodePercentInPath() throws Exception {
+        MutableUri uri = uri("http://www.example.com");
+        uri.setPath("/%");
+        assertThat(uri.getPath()).isEqualTo("/%");
+        assertThat(uri.getRawPath()).isEqualTo("/%25");
+    }
+
+    @Test
+    public void shouldNotDecodePercentEncodedValuesInRawQuery() throws Exception {
+        MutableUri uri = uri("http://www.example.com");
+        uri.setRawQuery("%3A");
+        assertThat(uri.getQuery()).isEqualTo(":");
+        assertThat(uri.getRawQuery()).isEqualTo("%3A");
+    }
+
+    @Test
+    public void shouldEncodePercentInQuery() throws Exception {
+        MutableUri uri = uri("http://www.example.com");
+        uri.setQuery("%");
+        assertThat(uri.getQuery()).isEqualTo("%");
+        assertThat(uri.getRawQuery()).isEqualTo("%25");
+    }
+
+    @Test
+    public void shouldNotDecodePercentEncodedValuesInRawFragment() throws Exception {
+        MutableUri uri = uri("http://www.example.com");
+        uri.setRawFragment("%3A");
+        assertThat(uri.getFragment()).isEqualTo(":");
+        assertThat(uri.getRawFragment()).isEqualTo("%3A");
+    }
+
+    @Test
+    public void shouldEncodePercentInFragment() throws Exception {
+        MutableUri uri = uri("http://www.example.com");
+        uri.setFragment("%");
+        assertThat(uri.getFragment()).isEqualTo("%");
+        assertThat(uri.getRawFragment()).isEqualTo("%25");
+    }
+
+    @Test
+    public void shouldNotDecodeQueryParamsWhenUpdatingAnotherField() throws Exception {
+        MutableUri uri = uri("http://www.example.com/abc?param=%2B");
+        uri.setHost("internal");
+        assertThat(uri.asURI()).isEqualTo(new URI("http://internal/abc?param=%2B"));
+        assertThat(uri.toString()).isEqualTo("http://internal/abc?param=%2B");
+        assertThat(uri.toASCIIString()).isEqualTo("http://internal/abc?param=%2B");
+        assertThat(uri.getQuery()).isEqualTo("param=+");
+        assertThat(uri.getRawQuery()).isEqualTo("param=%2B");
     }
 }

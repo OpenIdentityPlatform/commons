@@ -116,13 +116,13 @@ public final class MutableUri implements Comparable<MutableUri> {
      * @throws URISyntaxException if the new equivalent URI is invalid
      */
     public void setScheme(final String scheme) throws URISyntaxException {
-        this.uri = new URI(scheme,
-                           uri.getUserInfo(),
-                           uri.getHost(),
-                           uri.getPort(),
-                           uri.getPath(),
-                           uri.getQuery(),
-                           uri.getFragment());
+        this.uri = create(scheme,
+                          uri.getRawUserInfo(),
+                          uri.getHost(),
+                          uri.getPort(),
+                          uri.getRawPath(),
+                          uri.getRawQuery(),
+                          uri.getRawFragment());
     }
 
     /**
@@ -147,13 +147,8 @@ public final class MutableUri implements Comparable<MutableUri> {
      * @throws URISyntaxException if the new equivalent URI is invalid
      */
     public void setUserInfo(final String userInfo) throws URISyntaxException {
-        this.uri = new URI(uri.getScheme(),
-                           userInfo,
-                           uri.getHost(),
-                           uri.getPort(),
-                           uri.getPath(),
-                           uri.getQuery(),
-                           uri.getFragment());
+        URI other = new URI(null, userInfo, "ignored", -1, null, null, null);
+        setRawUserInfo(other.getRawUserInfo());
     }
 
     /**
@@ -185,13 +180,13 @@ public final class MutableUri implements Comparable<MutableUri> {
      * @throws URISyntaxException if the new equivalent URI is invalid
      */
     public void setHost(final String host) throws URISyntaxException {
-        this.uri = new URI(uri.getScheme(),
-                           uri.getUserInfo(),
-                           host,
-                           uri.getPort(),
-                           uri.getPath(),
-                           uri.getQuery(),
-                           uri.getFragment());
+        this.uri = create(uri.getScheme(),
+                          uri.getRawUserInfo(),
+                          host,
+                          uri.getPort(),
+                          uri.getRawPath(),
+                          uri.getRawQuery(),
+                          uri.getRawFragment());
     }
 
     /**
@@ -208,13 +203,13 @@ public final class MutableUri implements Comparable<MutableUri> {
      * @throws URISyntaxException if the new equivalent URI is invalid
      */
     public void setPort(final int port) throws URISyntaxException {
-        uri = new URI(uri.getScheme(),
-                      uri.getUserInfo(),
-                      uri.getHost(),
-                      port,
-                      uri.getPath(),
-                      uri.getQuery(),
-                      uri.getFragment());
+        uri = create(uri.getScheme(),
+                     uri.getRawUserInfo(),
+                     uri.getHost(),
+                     port,
+                     uri.getRawPath(),
+                     uri.getRawQuery(),
+                     uri.getRawFragment());
     }
 
     /**
@@ -239,14 +234,8 @@ public final class MutableUri implements Comparable<MutableUri> {
      * @throws URISyntaxException if the new equivalent URI is invalid
      */
     public void setPath(final String path) throws URISyntaxException {
-        this.uri = new URI(uri.getScheme(),
-                           uri.getUserInfo(),
-                           uri.getHost(),
-                           uri.getPort(),
-                           path,
-                           uri.getQuery(),
-                           uri.getFragment());
-        setResourcePath(uri.getPath());
+        URI other = new URI(null, null, "ignored", -1, path, null, null);
+        setRawPath(other.getRawPath());
     }
 
     /**
@@ -287,13 +276,8 @@ public final class MutableUri implements Comparable<MutableUri> {
      * @throws URISyntaxException if the new equivalent URI is invalid
      */
     public void setQuery(final String query) throws URISyntaxException {
-        this.uri = new URI(uri.getScheme(),
-                           uri.getUserInfo(),
-                           uri.getHost(),
-                           uri.getPort(),
-                           uri.getPath(),
-                           query,
-                           uri.getFragment());
+        URI other = new URI(null, null, "ignored", -1, null, query, null);
+        setRawQuery(other.getRawQuery());
     }
 
     /**
@@ -333,13 +317,8 @@ public final class MutableUri implements Comparable<MutableUri> {
      * @throws URISyntaxException if the new equivalent URI is invalid
      */
     public void setFragment(final String fragment) throws URISyntaxException {
-        this.uri = new URI(uri.getScheme(),
-                           uri.getUserInfo(),
-                           uri.getHost(),
-                           uri.getPort(),
-                           uri.getPath(),
-                           uri.getQuery(),
-                           fragment);
+        URI other = new URI(null, null, "ignored", -1, null, null, fragment);
+        setRawFragment(other.getRawFragment());
     }
 
     /**
