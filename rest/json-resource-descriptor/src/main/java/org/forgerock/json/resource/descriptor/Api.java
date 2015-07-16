@@ -20,6 +20,7 @@ import static java.util.Collections.unmodifiableSet;
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Requests.*;
 import static org.forgerock.json.resource.ResourceException.newNotSupportedException;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
@@ -35,21 +36,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.http.ResourcePath;
 import org.forgerock.http.context.ServerContext;
 import org.forgerock.i18n.LocalizableMessage;
-import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.AbstractRequestHandler;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
-import org.forgerock.json.resource.QueryResult;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.json.resource.descriptor.RelationDescriptor.Multiplicity;
 import org.forgerock.util.AsyncFunction;
@@ -62,10 +63,10 @@ public final class Api {
     public static RequestHandler newApiDescriptorRequestHandler(final ApiDescriptor api) {
         return new AbstractRequestHandler() {
             @Override
-            public Promise<Resource, ResourceException> handleRead(final ServerContext context,
+            public Promise<ResourceResponse, ResourceException> handleRead(final ServerContext context,
                     final ReadRequest request) {
                 if (request.getResourcePathObject().isEmpty()) {
-                    return newResultPromise(new Resource(null, null, json(apiToJson(api))));
+                    return newResultPromise(newResourceResponse(null, null, json(apiToJson(api))));
                 } else {
                     return newExceptionPromise(newNotSupportedException());
                 }
@@ -76,14 +77,14 @@ public final class Api {
     public static RequestHandler newApiDescriptorRequestHandler(final Collection<ApiDescriptor> apis) {
         return new AbstractRequestHandler() {
             @Override
-            public Promise<Resource, ResourceException> handleRead(final ServerContext context,
+            public Promise<ResourceResponse, ResourceException> handleRead(final ServerContext context,
                     final ReadRequest request) {
                 if (request.getResourcePathObject().isEmpty()) {
                     final List<Object> values = new ArrayList<>(apis.size());
                     for (final ApiDescriptor api : apis) {
                         values.add(apiToJson(api));
                     }
-                    return newResultPromise(new Resource(null, null, json(values)));
+                    return newResultPromise(newResourceResponse(null, null, json(values)));
                 } else {
                     return newExceptionPromise(newNotSupportedException());
                 }
@@ -96,98 +97,98 @@ public final class Api {
         return new RequestHandler() {
 
             @Override
-            public Promise<JsonValue, ResourceException> handleAction(final ServerContext context,
+            public Promise<ActionResponse, ResourceException> handleAction(final ServerContext context,
                     final ActionRequest request) {
                 final ActionRequest mutableCopy = copyOfActionRequest(request);
                 final Resolver resolver = factory.createResolver(context, request);
                 return resolveAndInvoke(api.getRelations(), mutableCopy, resolver)
-                        .thenAsync(new AsyncFunction<RequestHandler, JsonValue, ResourceException>() {
+                        .thenAsync(new AsyncFunction<RequestHandler, ActionResponse, ResourceException>() {
                             @Override
-                            public Promise<JsonValue, ResourceException> apply(RequestHandler resolvedRequestHandler) {
+                            public Promise<ActionResponse, ResourceException> apply(RequestHandler resolvedRequestHandler) {
                                 return resolvedRequestHandler.handleAction(context, mutableCopy);
                             }
                         });
             }
 
             @Override
-            public Promise<Resource, ResourceException> handleCreate(final ServerContext context,
+            public Promise<ResourceResponse, ResourceException> handleCreate(final ServerContext context,
                     final CreateRequest request) {
                 final CreateRequest mutableCopy = copyOfCreateRequest(request);
                 final Resolver resolver = factory.createResolver(context, request);
                 return resolveAndInvoke(api.getRelations(), mutableCopy, resolver)
-                        .thenAsync(new AsyncFunction<RequestHandler, Resource, ResourceException>() {
+                        .thenAsync(new AsyncFunction<RequestHandler, ResourceResponse, ResourceException>() {
                             @Override
-                            public Promise<Resource, ResourceException> apply(RequestHandler resolvedRequestHandler) {
+                            public Promise<ResourceResponse, ResourceException> apply(RequestHandler resolvedRequestHandler) {
                                 return resolvedRequestHandler.handleCreate(context, mutableCopy);
                             }
                         });
             }
 
             @Override
-            public Promise<Resource, ResourceException> handleDelete(final ServerContext context,
+            public Promise<ResourceResponse, ResourceException> handleDelete(final ServerContext context,
                     final DeleteRequest request) {
                 final DeleteRequest mutableCopy = copyOfDeleteRequest(request);
                 final Resolver resolver = factory.createResolver(context, request);
                 return resolveAndInvoke(api.getRelations(), mutableCopy, resolver)
-                        .thenAsync(new AsyncFunction<RequestHandler, Resource, ResourceException>() {
+                        .thenAsync(new AsyncFunction<RequestHandler, ResourceResponse, ResourceException>() {
                             @Override
-                            public Promise<Resource, ResourceException> apply(RequestHandler resolvedRequestHandler) {
+                            public Promise<ResourceResponse, ResourceException> apply(RequestHandler resolvedRequestHandler) {
                                 return resolvedRequestHandler.handleDelete(context, mutableCopy);
                             }
                         });
             }
 
             @Override
-            public Promise<Resource, ResourceException> handlePatch(final ServerContext context,
+            public Promise<ResourceResponse, ResourceException> handlePatch(final ServerContext context,
                     final PatchRequest request) {
                 final PatchRequest mutableCopy = copyOfPatchRequest(request);
                 final Resolver resolver = factory.createResolver(context, request);
                 return resolveAndInvoke(api.getRelations(), mutableCopy, resolver)
-                        .thenAsync(new AsyncFunction<RequestHandler, Resource, ResourceException>() {
+                        .thenAsync(new AsyncFunction<RequestHandler, ResourceResponse, ResourceException>() {
                             @Override
-                            public Promise<Resource, ResourceException> apply(RequestHandler resolvedRequestHandler) {
+                            public Promise<ResourceResponse, ResourceException> apply(RequestHandler resolvedRequestHandler) {
                                 return resolvedRequestHandler.handlePatch(context, mutableCopy);
                             }
                         });
             }
 
             @Override
-            public Promise<QueryResult, ResourceException> handleQuery(final ServerContext context,
+            public Promise<QueryResponse, ResourceException> handleQuery(final ServerContext context,
                     final QueryRequest request, final QueryResourceHandler handler) {
                 final QueryRequest mutableCopy = copyOfQueryRequest(request);
                 final Resolver resolver = factory.createResolver(context, request);
                 return resolveAndInvoke(api.getRelations(), mutableCopy, resolver)
-                        .thenAsync(new AsyncFunction<RequestHandler, QueryResult, ResourceException>() {
+                        .thenAsync(new AsyncFunction<RequestHandler, QueryResponse, ResourceException>() {
                             @Override
-                            public Promise<QueryResult, ResourceException> apply(RequestHandler resolvedRequestHandler) {
+                            public Promise<QueryResponse, ResourceException> apply(RequestHandler resolvedRequestHandler) {
                                 return resolvedRequestHandler.handleQuery(context, mutableCopy, handler);
                             }
                         });
             }
 
             @Override
-            public Promise<Resource, ResourceException> handleRead(final ServerContext context,
+            public Promise<ResourceResponse, ResourceException> handleRead(final ServerContext context,
                     final ReadRequest request) {
                 final ReadRequest mutableCopy = copyOfReadRequest(request);
                 final Resolver resolver = factory.createResolver(context, request);
                 return resolveAndInvoke(api.getRelations(), mutableCopy, resolver)
-                        .thenAsync(new AsyncFunction<RequestHandler, Resource, ResourceException>() {
+                        .thenAsync(new AsyncFunction<RequestHandler, ResourceResponse, ResourceException>() {
                             @Override
-                            public Promise<Resource, ResourceException> apply(RequestHandler resolvedRequestHandler) {
+                            public Promise<ResourceResponse, ResourceException> apply(RequestHandler resolvedRequestHandler) {
                                 return resolvedRequestHandler.handleRead(context, mutableCopy);
                             }
                         });
             }
 
             @Override
-            public Promise<Resource, ResourceException> handleUpdate(final ServerContext context,
+            public Promise<ResourceResponse, ResourceException> handleUpdate(final ServerContext context,
                     final UpdateRequest request) {
                 final UpdateRequest mutableCopy = copyOfUpdateRequest(request);
                 final Resolver resolver = factory.createResolver(context, request);
                 return resolveAndInvoke(api.getRelations(), mutableCopy, resolver)
-                        .thenAsync(new AsyncFunction<RequestHandler, Resource, ResourceException>() {
+                        .thenAsync(new AsyncFunction<RequestHandler, ResourceResponse, ResourceException>() {
                             @Override
-                            public Promise<Resource, ResourceException> apply(RequestHandler resolvedRequestHandler) {
+                            public Promise<ResourceResponse, ResourceException> apply(RequestHandler resolvedRequestHandler) {
                                 return resolvedRequestHandler.handleUpdate(context, mutableCopy);
                             }
                         });

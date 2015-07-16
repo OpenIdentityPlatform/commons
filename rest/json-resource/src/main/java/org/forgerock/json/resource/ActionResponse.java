@@ -16,27 +16,17 @@
 
 package org.forgerock.json.resource;
 
+import org.forgerock.json.JsonValue;
+
 /**
- * An enum of count policy types.
- *
- * @see QueryRequest#setTotalPagedResultsPolicy(CountPolicy)
- * @see QueryResponse#getTotalPagedResultsPolicy()
+ * Response object for JSON responses.
  */
-public enum CountPolicy {
-    /**
-     * There should be no count returned. No overhead should be incurred.
-     */
-    NONE,
+public interface ActionResponse extends Response {
 
     /**
-     * Estimated count may be used. If no estimation is available it is up to the implementor whether to return
-     * an {@link #EXACT} count or {@link #NONE}. It should be known to the client which was used as in
-     * {@link QueryResponse#getTotalPagedResultsPolicy()}
+     * Gets the {@code JsonValue} content contained in the {@code Response}.
+     *
+     * @return The {@code JsonValue} response content.
      */
-    ESTIMATE,
-
-    /**
-     * Exact count is required.
-     */
-    EXACT
+    JsonValue getJsonContent();
 }

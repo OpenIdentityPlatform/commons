@@ -17,7 +17,6 @@
 package org.forgerock.json.resource;
 
 import org.forgerock.http.context.ServerContext;
-import org.forgerock.json.JsonValue;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -28,7 +27,7 @@ import org.forgerock.util.promise.Promise;
  * <ul>
  * <li><i>stop processing</i> the request and return a result or error
  * immediately. This is achieved by returning a completed {@code Promise} with
- * a {@link QueryResult} or a {@link ResourceException} methods and returning
+ * a {@link QueryResponse} or a {@link ResourceException} methods and returning
  * <li><i>continue processing</i> the request using the next filter in the
  * filter chain. This is achieved by invoking the appropriate {@code handlerXXX}
  * method on the passed in request handler. Implementations are permitted to
@@ -115,7 +114,7 @@ public interface Filter {
      *            chain.
      * @return A {@code Promise} containing the result of the operation.
      */
-    Promise<JsonValue, ResourceException> filterAction(ServerContext context, ActionRequest request,
+    Promise<ActionResponse, ResourceException> filterAction(ServerContext context, ActionRequest request,
             RequestHandler next);
 
     /**
@@ -130,7 +129,7 @@ public interface Filter {
      *            chain.
      * @return A {@code Promise} containing the result of the operation.
      */
-    Promise<Resource, ResourceException> filterCreate(ServerContext context, CreateRequest request,
+    Promise<ResourceResponse, ResourceException> filterCreate(ServerContext context, CreateRequest request,
             RequestHandler next);
 
     /**
@@ -145,7 +144,7 @@ public interface Filter {
      *            chain.
      * @return A {@code Promise} containing the result of the operation.
      */
-    Promise<Resource, ResourceException> filterDelete(ServerContext context, DeleteRequest request,
+    Promise<ResourceResponse, ResourceException> filterDelete(ServerContext context, DeleteRequest request,
             RequestHandler next);
 
     /**
@@ -160,7 +159,8 @@ public interface Filter {
      *            chain.
      * @return A {@code Promise} containing the result of the operation.
      */
-    Promise<Resource, ResourceException> filterPatch(ServerContext context, PatchRequest request, RequestHandler next);
+    Promise<ResourceResponse, ResourceException> filterPatch(ServerContext context, PatchRequest request,
+            RequestHandler next);
 
     /**
      * Filters a query request.
@@ -169,7 +169,7 @@ public interface Filter {
      * request should invoke {@link QueryResourceHandler#handleResource(Resource)}
      * for each resource which matches the query criteria. Once all matching
      * resources have been returned implementations are required to return
-     * either a {@link QueryResult} if the query has completed successfully, or
+     * either a {@link QueryResponse} if the query has completed successfully, or
      * {@link ResourceException} if the query did not complete successfully
      * (even if some matching resources were returned).
      *
@@ -184,7 +184,7 @@ public interface Filter {
      *            chain.
      * @return A {@code Promise} containing the result of the operation.
      */
-    Promise<QueryResult, ResourceException> filterQuery(ServerContext context, QueryRequest request,
+    Promise<QueryResponse, ResourceException> filterQuery(ServerContext context, QueryRequest request,
             QueryResourceHandler handler, RequestHandler next);
 
     /**
@@ -199,7 +199,8 @@ public interface Filter {
      *            chain.
      * @return A {@code Promise} containing the result of the operation.
      */
-    Promise<Resource, ResourceException> filterRead(ServerContext context, ReadRequest request, RequestHandler next);
+    Promise<ResourceResponse, ResourceException> filterRead(ServerContext context, ReadRequest request,
+            RequestHandler next);
 
     /**
      * Filters an update request.
@@ -213,6 +214,6 @@ public interface Filter {
      *            chain.
      * @return A {@code Promise} containing the result of the operation.
      */
-    Promise<Resource, ResourceException> filterUpdate(ServerContext context, UpdateRequest request,
+    Promise<ResourceResponse, ResourceException> filterUpdate(ServerContext context, UpdateRequest request,
             RequestHandler next);
 }

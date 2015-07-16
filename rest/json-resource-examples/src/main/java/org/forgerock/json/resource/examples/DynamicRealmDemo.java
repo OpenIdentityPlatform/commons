@@ -16,6 +16,7 @@
 
 package org.forgerock.json.resource.examples;
 
+import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
 import static org.forgerock.json.resource.examples.DemoUtils.ctx;
 import static org.forgerock.json.resource.examples.DemoUtils.log;
@@ -26,12 +27,13 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.http.context.ServerContext;
 import org.forgerock.http.routing.RouterContext;
+import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.AbstractRequestHandler;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.CollectionResourceProvider;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.CreateRequest;
@@ -39,17 +41,17 @@ import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Resources;
+import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.json.resource.Router;
 
 /**
  * An example illustrating how you can route realms / sub-realm requests using
@@ -99,60 +101,60 @@ public final class DynamicRealmDemo {
         return new CollectionResourceProvider() {
 
             @Override
-            public Promise<JsonValue, ResourceException> actionCollection(final ServerContext context,
+            public Promise<ActionResponse, ResourceException> actionCollection(final ServerContext context,
                     final ActionRequest request) {
                 ResourceException e = new NotSupportedException();
                 return newExceptionPromise(e);
             }
 
             @Override
-            public Promise<JsonValue, ResourceException> actionInstance(final ServerContext context,
+            public Promise<ActionResponse, ResourceException> actionInstance(final ServerContext context,
                     final String resourceId, final ActionRequest request) {
                 ResourceException e = new NotSupportedException();
                 return newExceptionPromise(e);
             }
 
             @Override
-            public Promise<Resource, ResourceException> createInstance(final ServerContext context,
+            public Promise<ResourceResponse, ResourceException> createInstance(final ServerContext context,
                     final CreateRequest request) {
                 ResourceException e = new NotSupportedException();
                 return newExceptionPromise(e);
             }
 
             @Override
-            public Promise<Resource, ResourceException> deleteInstance(final ServerContext context,
+            public Promise<ResourceResponse, ResourceException> deleteInstance(final ServerContext context,
                     final String resourceId, final DeleteRequest request) {
                 ResourceException e = new NotSupportedException();
                 return newExceptionPromise(e);
             }
 
             @Override
-            public Promise<Resource, ResourceException> patchInstance(final ServerContext context,
+            public Promise<ResourceResponse, ResourceException> patchInstance(final ServerContext context,
                     final String resourceId, final PatchRequest request) {
                 ResourceException e = new NotSupportedException();
                 return newExceptionPromise(e);
             }
 
             @Override
-            public Promise<QueryResult, ResourceException> queryCollection(final ServerContext context,
+            public Promise<QueryResponse, ResourceException> queryCollection(final ServerContext context,
                     final QueryRequest request, final QueryResourceHandler handler) {
                 ResourceException e = new NotSupportedException();
                 return newExceptionPromise(e);
             }
 
             @Override
-            public Promise<Resource, ResourceException> readInstance(final ServerContext context,
+            public Promise<ResourceResponse, ResourceException> readInstance(final ServerContext context,
                     final String resourceId, final ReadRequest request) {
                 log("Reading " + name);
                 log("    resource ID : " + resourceId);
                 log("    realm path  : " + path);
                 final JsonValue content =
                         new JsonValue(Collections.singletonMap("id", (Object) resourceId));
-                return newResultPromise(new Resource(resourceId, "1", content));
+                return newResultPromise(newResourceResponse(resourceId, "1", content));
             }
 
             @Override
-            public Promise<Resource, ResourceException> updateInstance(final ServerContext context,
+            public Promise<ResourceResponse, ResourceException> updateInstance(final ServerContext context,
                     final String resourceId, final UpdateRequest request) {
                 ResourceException e = new NotSupportedException();
                 return newExceptionPromise(e);
@@ -187,7 +189,7 @@ public final class DynamicRealmDemo {
     private static RequestHandler subrealms(final List<String> parentPath) {
         return new AbstractRequestHandler() {
             @Override
-            public Promise<Resource, ResourceException> handleRead(final ServerContext context,
+            public Promise<ResourceResponse, ResourceException> handleRead(final ServerContext context,
                     final ReadRequest request) {
                 return subrealm(parentPath, context).handleRead(context, request);
             }

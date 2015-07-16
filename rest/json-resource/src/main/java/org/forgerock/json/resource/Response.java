@@ -17,26 +17,8 @@
 package org.forgerock.json.resource;
 
 /**
- * An enum of count policy types.
- *
- * @see QueryRequest#setTotalPagedResultsPolicy(CountPolicy)
- * @see QueryResponse#getTotalPagedResultsPolicy()
+ * Common response object of all resource responses.
  */
-public enum CountPolicy {
-    /**
-     * There should be no count returned. No overhead should be incurred.
-     */
-    NONE,
+public interface Response {
 
-    /**
-     * Estimated count may be used. If no estimation is available it is up to the implementor whether to return
-     * an {@link #EXACT} count or {@link #NONE}. It should be known to the client which was used as in
-     * {@link QueryResponse#getTotalPagedResultsPolicy()}
-     */
-    ESTIMATE,
-
-    /**
-     * Exact count is required.
-     */
-    EXACT
 }

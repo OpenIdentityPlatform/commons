@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.forgerock.http.context.ServerContext;
-import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.annotations.Action;
 import org.forgerock.util.promise.Promise;
 
@@ -37,7 +36,7 @@ class AnnotatedActionMethods {
 
     private Map<String, AnnotatedMethod> methods = new HashMap<>();
 
-    Promise<JsonValue, ResourceException> invoke(ServerContext context, ActionRequest request, String id) {
+    Promise<ActionResponse, ResourceException> invoke(ServerContext context, ActionRequest request, String id) {
         AnnotatedMethod method = methods.get(request.getAction());
         if (method == null) {
             return newExceptionPromise(newNotSupportedException(request.getAction() + "not supported"));

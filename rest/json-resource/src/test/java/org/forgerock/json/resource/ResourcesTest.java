@@ -19,10 +19,12 @@ package org.forgerock.json.resource;
 import static org.forgerock.http.routing.RoutingMode.EQUALS;
 import static org.forgerock.http.routing.RoutingMode.STARTS_WITH;
 import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.resource.Responses.newQueryResponse;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
 import static org.forgerock.json.resource.TestUtils.*;
-import static org.forgerock.json.resource.test.assertj.AssertJResourceAssert.assertThat;
-import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThatJsonValue;
+import static org.forgerock.json.resource.test.assertj.AssertJResourceResponseAssert.assertThat;
+import static org.forgerock.json.resource.test.assertj.AssertJJsonValueResponseAssert.assertThat;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -43,7 +45,6 @@ import org.forgerock.json.resource.annotations.Patch;
 import org.forgerock.json.resource.annotations.Query;
 import org.forgerock.json.resource.annotations.Read;
 import org.forgerock.json.resource.annotations.Update;
-import org.forgerock.json.test.assertj.AssertJJsonValueAssert;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.test.assertj.AssertJPromiseAssert;
 import org.mockito.ArgumentCaptor;
@@ -230,7 +231,7 @@ public final class ResourcesTest {
         CreateRequest req = Requests.newCreateRequest("/test", json(object(field("dummy", "test"))));
 
         // When
-        Promise<Resource, ResourceException> promise = connection.createAsync(new RootContext(), req);
+        Promise<ResourceResponse, ResourceException> promise = connection.createAsync(new RootContext(), req);
 
         // Then
         if (create && collection) {
@@ -254,7 +255,7 @@ public final class ResourcesTest {
         ReadRequest req = Requests.newReadRequest("/test");
 
         // When
-        Promise<Resource, ResourceException> promise = connection.readAsync(new RootContext(), req);
+        Promise<ResourceResponse, ResourceException> promise = connection.readAsync(new RootContext(), req);
 
         // Then
         if (read && !collection) {
@@ -278,7 +279,7 @@ public final class ResourcesTest {
         ReadRequest req = Requests.newReadRequest("/test/fred");
 
         // When
-        Promise<Resource, ResourceException> promise = connection.readAsync(new RootContext(), req);
+        Promise<ResourceResponse, ResourceException> promise = connection.readAsync(new RootContext(), req);
 
         // Then
         if (read && collection) {
@@ -302,7 +303,7 @@ public final class ResourcesTest {
         UpdateRequest req = Requests.newUpdateRequest("/test", json(object(field("dummy", "test"))));
 
         // When
-        Promise<Resource, ResourceException> promise = connection.updateAsync(new RootContext(), req);
+        Promise<ResourceResponse, ResourceException> promise = connection.updateAsync(new RootContext(), req);
 
         // Then
         if (update && !collection) {
@@ -326,7 +327,7 @@ public final class ResourcesTest {
         UpdateRequest req = Requests.newUpdateRequest("/test/fred", json(object(field("dummy", "test"))));
 
         // When
-        Promise<Resource, ResourceException> promise = connection.updateAsync(new RootContext(), req);
+        Promise<ResourceResponse, ResourceException> promise = connection.updateAsync(new RootContext(), req);
 
         // Then
         if (update && collection) {
@@ -350,7 +351,7 @@ public final class ResourcesTest {
         DeleteRequest req = Requests.newDeleteRequest("/test/fred");
 
         // When
-        Promise<Resource, ResourceException> promise = connection.deleteAsync(new RootContext(), req);
+        Promise<ResourceResponse, ResourceException> promise = connection.deleteAsync(new RootContext(), req);
 
         // Then
         if (delete && collection) {
@@ -374,7 +375,7 @@ public final class ResourcesTest {
         PatchRequest req = Requests.newPatchRequest("/test");
 
         // When
-        Promise<Resource, ResourceException> promise = connection.patchAsync(new RootContext(), req);
+        Promise<ResourceResponse, ResourceException> promise = connection.patchAsync(new RootContext(), req);
 
         // Then
         if (patch && !collection) {
@@ -398,7 +399,7 @@ public final class ResourcesTest {
         PatchRequest req = Requests.newPatchRequest("/test/fred");
 
         // When
-        Promise<Resource, ResourceException> promise = connection.patchAsync(new RootContext(), req);
+        Promise<ResourceResponse, ResourceException> promise = connection.patchAsync(new RootContext(), req);
 
         // Then
         if (patch && collection) {
@@ -425,16 +426,16 @@ public final class ResourcesTest {
         ActionRequest req2 = Requests.newActionRequest("/test", actionId2);
 
         // When
-        Promise<JsonValue, ResourceException> promise1 = connection.actionAsync(new RootContext(), req1);
-        Promise<JsonValue, ResourceException> promise2 = connection.actionAsync(new RootContext(), req2);
+        Promise<ActionResponse, ResourceException> promise1 = connection.actionAsync(new RootContext(), req1);
+        Promise<ActionResponse, ResourceException> promise2 = connection.actionAsync(new RootContext(), req2);
 
         // Then
         if ((collection && collectionAction) || (!collection && resourceAction)) {
-            assertThatJsonValue(promise1).succeeded().stringAt("result").isEqualTo(actionId1);
-            assertThatJsonValue(promise2).succeeded().stringAt("result").isEqualTo(actionId2);
+            assertThat(promise1).succeeded().withContent().stringAt("result").isEqualTo(actionId1);
+            assertThat(promise2).succeeded().withContent().stringAt("result").isEqualTo(actionId2);
         } else {
-            assertThatJsonValue(promise1).failedWithException().isInstanceOf(NotSupportedException.class);
-            assertThatJsonValue(promise2).failedWithException().isInstanceOf(NotSupportedException.class);
+            assertThat(promise1).failedWithException().isInstanceOf(NotSupportedException.class);
+            assertThat(promise2).failedWithException().isInstanceOf(NotSupportedException.class);
         }
     }
 
@@ -451,19 +452,19 @@ public final class ResourcesTest {
         ActionRequest req2 = Requests.newActionRequest("/test/fred", "instanceAction2");
 
         // When
-        Promise<JsonValue, ResourceException> promise1 = connection.actionAsync(new RootContext(), req1);
-        Promise<JsonValue, ResourceException> promise2 = connection.actionAsync(new RootContext(), req2);
+        Promise<ActionResponse, ResourceException> promise1 = connection.actionAsync(new RootContext(), req1);
+        Promise<ActionResponse, ResourceException> promise2 = connection.actionAsync(new RootContext(), req2);
 
         // Then
         if (collectionAction && collection) {
-            AssertJJsonValueAssert.assertThat(promise1).succeeded().stringAt("result").isEqualTo("instanceAction1-fred");
-            AssertJJsonValueAssert.assertThat(promise2).succeeded().stringAt("result").isEqualTo("instanceAction2-fred");
+            assertThat(promise1).succeeded().withContent().stringAt("result").isEqualTo("instanceAction1-fred");
+            assertThat(promise2).succeeded().withContent().stringAt("result").isEqualTo("instanceAction2-fred");
         } else if (collection) {
-            AssertJJsonValueAssert.assertThat(promise1).failedWithException().isInstanceOf(NotSupportedException.class);
-            AssertJJsonValueAssert.assertThat(promise2).failedWithException().isInstanceOf(NotSupportedException.class);
+            assertThat(promise1).failedWithException().isInstanceOf(NotSupportedException.class);
+            assertThat(promise2).failedWithException().isInstanceOf(NotSupportedException.class);
         } else {
-            AssertJJsonValueAssert.assertThat(promise1).failedWithException().isInstanceOf(NotFoundException.class);
-            AssertJJsonValueAssert.assertThat(promise2).failedWithException().isInstanceOf(NotFoundException.class);
+            assertThat(promise1).failedWithException().isInstanceOf(NotFoundException.class);
+            assertThat(promise2).failedWithException().isInstanceOf(NotFoundException.class);
         }
     }
 
@@ -479,12 +480,12 @@ public final class ResourcesTest {
         QueryRequest req = Requests.newQueryRequest("/test");
 
         // When
-        Promise<QueryResult, ResourceException> promise = connection.queryAsync(new RootContext(), req, mock(QueryResourceHandler.class));
+        Promise<QueryResponse, ResourceException> promise = connection.queryAsync(new RootContext(), req, mock(QueryResourceHandler.class));
 
         // Then
         if (query && collection) {
             AssertJPromiseAssert.assertThat(promise).succeeded();
-            QueryResult result = promise.get();
+            QueryResponse result = promise.get();
             Assertions.assertThat(result.getPagedResultsCookie()).isEqualTo("query");
         } else if (collection) {
             AssertJPromiseAssert.assertThat(promise).failedWithException().isInstanceOf(NotSupportedException.class);
@@ -507,103 +508,103 @@ public final class ResourcesTest {
     @org.forgerock.json.resource.annotations.RequestHandler
     public static final class AnnotationCollection {
         @Create
-        public Promise<Resource, ResourceException> myCreate(CreateRequest request) {
-            return newResultPromise(new Resource("create", "1", json(object(field("result", "read")))));
+        public Promise<ResourceResponse, ResourceException> myCreate(CreateRequest request) {
+            return newResultPromise(newResourceResponse("create", "1", json(object(field("result", "read")))));
         }
         @Read
-        public Promise<Resource, ResourceException> myRead(String id) {
-            return newResultPromise(new Resource("read-" + id, "1", json(object(field("result", null)))));
+        public Promise<ResourceResponse, ResourceException> myRead(String id) {
+            return newResultPromise(newResourceResponse("read-" + id, "1", json(object(field("result", null)))));
         }
         @Update
-        public Promise<Resource, ResourceException> myUpdate(UpdateRequest request, String id) {
-            return newResultPromise(new Resource("update-" + id, "1", json(object(field("result", null)))));
+        public Promise<ResourceResponse, ResourceException> myUpdate(UpdateRequest request, String id) {
+            return newResultPromise(newResourceResponse("update-" + id, "1", json(object(field("result", null)))));
         }
         @Delete
-        public Promise<Resource, ResourceException> myDelete(String id) {
-            return newResultPromise(new Resource("delete-" + id, "1", json(object(field("result", null)))));
+        public Promise<ResourceResponse, ResourceException> myDelete(String id) {
+            return newResultPromise(newResourceResponse("delete-" + id, "1", json(object(field("result", null)))));
         }
         @Patch
-        public Promise<Resource, ResourceException> myPatch(PatchRequest request, String id) {
-            return newResultPromise(new Resource("patch-" + id, "1", json(object(field("result", null)))));
+        public Promise<ResourceResponse, ResourceException> myPatch(PatchRequest request, String id) {
+            return newResultPromise(newResourceResponse("patch-" + id, "1", json(object(field("result", null)))));
         }
         @Action("instanceAction1")
-        public Promise<JsonValue, ResourceException> instAction1(String id) {
-            return newResultPromise(json(object(field("result", "instanceAction1-" + id))));
+        public Promise<ActionResponse, ResourceException> instAction1(String id) {
+            return newResultPromise(Responses.newActionResponse(json(object(field("result", "instanceAction1-" + id)))));
         }
         @Action
-        public Promise<JsonValue, ResourceException> instanceAction2(String id) {
-            return newResultPromise(json(object(field("result", "instanceAction2-" + id))));
+        public Promise<ActionResponse, ResourceException> instanceAction2(String id) {
+            return newResultPromise(Responses.newActionResponse(json(object(field("result", "instanceAction2-" + id)))));
         }
         @Action("collectionAction1")
-        public Promise<JsonValue, ResourceException> action1() {
-            return newResultPromise(json(object(field("result", "collectionAction1"))));
+        public Promise<ActionResponse, ResourceException> action1() {
+            return newResultPromise(Responses.newActionResponse(json(object(field("result", "collectionAction1")))));
         }
         @Action
-        public Promise<JsonValue, ResourceException> collectionAction2() {
-            return newResultPromise(json(object(field("result", "collectionAction2"))));
+        public Promise<ActionResponse, ResourceException> collectionAction2() {
+            return newResultPromise(Responses.newActionResponse(json(object(field("result", "collectionAction2")))));
         }
         @Query
-        public Promise<QueryResult, ResourceException> query(QueryRequest request, QueryResourceHandler handler) {
-            return newResultPromise(new QueryResult("query", CountPolicy.NONE, QueryResult.NO_COUNT));
+        public Promise<QueryResponse, ResourceException> query(QueryRequest request, QueryResourceHandler handler) {
+            return newResultPromise(newQueryResponse("query", CountPolicy.NONE, QueryResponse.NO_COUNT));
         }
     }
 
     @org.forgerock.json.resource.annotations.RequestHandler
     public static final class AnnotationSingleton {
         @Read
-        public Promise<Resource, ResourceException> myRead() {
-            return newResultPromise(new Resource("read", "1", json(object(field("result", "read")))));
+        public Promise<ResourceResponse, ResourceException> myRead() {
+            return newResultPromise(newResourceResponse("read", "1", json(object(field("result", "read")))));
         }
         @Update
-        public Promise<Resource, ResourceException> myUpdate(UpdateRequest request) {
-            return newResultPromise(new Resource("update", "1", json(object(field("result", null)))));
+        public Promise<ResourceResponse, ResourceException> myUpdate(UpdateRequest request) {
+            return newResultPromise(newResourceResponse("update", "1", json(object(field("result", null)))));
         }
         @Patch
-        public Promise<Resource, ResourceException> myPatch(PatchRequest request) {
-            return newResultPromise(new Resource("patch", "1", json(object(field("result", null)))));
+        public Promise<ResourceResponse, ResourceException> myPatch(PatchRequest request) {
+            return newResultPromise(newResourceResponse("patch", "1", json(object(field("result", null)))));
         }
         @Action("instanceAction1")
-        public Promise<JsonValue, ResourceException> action1() {
-            return newResultPromise(json(object(field("result", "instanceAction1"))));
+        public Promise<ActionResponse, ResourceException> action1() {
+            return newResultPromise(Responses.newActionResponse(json(object(field("result", "instanceAction1")))));
         }
         @Action
-        public Promise<JsonValue, ResourceException> instanceAction2() {
-            return newResultPromise(json(object(field("result", "instanceAction2"))));
+        public Promise<ActionResponse, ResourceException> instanceAction2() {
+            return newResultPromise(Responses.newActionResponse(json(object(field("result", "instanceAction2")))));
         }
     }
 
     @org.forgerock.json.resource.annotations.RequestHandler
     public static final class ConventionCollection {
-        public Promise<Resource, ResourceException> create(CreateRequest request) {
-            return newResultPromise(new Resource("create", "1", json(object(field("result", "read")))));
+        public Promise<ResourceResponse, ResourceException> create(CreateRequest request) {
+            return newResultPromise(newResourceResponse("create", "1", json(object(field("result", "read")))));
         }
-        public Promise<Resource, ResourceException> read(String id) {
-            return newResultPromise(new Resource("read-" + id, "1", json(object(field("result", null)))));
+        public Promise<ResourceResponse, ResourceException> read(String id) {
+            return newResultPromise(newResourceResponse("read-" + id, "1", json(object(field("result", null)))));
         }
-        public Promise<Resource, ResourceException> update(UpdateRequest request, String id) {
-            return newResultPromise(new Resource("update-" + id, "1", json(object(field("result", null)))));
+        public Promise<ResourceResponse, ResourceException> update(UpdateRequest request, String id) {
+            return newResultPromise(newResourceResponse("update-" + id, "1", json(object(field("result", null)))));
         }
-        public Promise<Resource, ResourceException> delete(String id) {
-            return newResultPromise(new Resource("delete-" + id, "1", json(object(field("result", null)))));
+        public Promise<ResourceResponse, ResourceException> delete(String id) {
+            return newResultPromise(newResourceResponse("delete-" + id, "1", json(object(field("result", null)))));
         }
-        public Promise<Resource, ResourceException> patch(PatchRequest request, String id) {
-            return newResultPromise(new Resource("patch-" + id, "1", json(object(field("result", null)))));
+        public Promise<ResourceResponse, ResourceException> patch(PatchRequest request, String id) {
+            return newResultPromise(newResourceResponse("patch-" + id, "1", json(object(field("result", null)))));
         }
-        public Promise<QueryResult, ResourceException> query(QueryRequest request, QueryResourceHandler handler) {
-            return newResultPromise(new QueryResult("query", CountPolicy.NONE, QueryResult.NO_COUNT));
+        public Promise<QueryResponse, ResourceException> query(QueryRequest request, QueryResourceHandler handler) {
+            return newResultPromise(newQueryResponse("query", CountPolicy.NONE, QueryResponse.NO_COUNT));
         }
     }
 
     @org.forgerock.json.resource.annotations.RequestHandler
     public static final class ConventionSingleton {
-        public Promise<Resource, ResourceException> read() {
-            return newResultPromise(new Resource("read", "1", json(object(field("result", "read")))));
+        public Promise<ResourceResponse, ResourceException> read() {
+            return newResultPromise(newResourceResponse("read", "1", json(object(field("result", "read")))));
         }
-        public Promise<Resource, ResourceException> update(UpdateRequest request) {
-            return newResultPromise(new Resource("update", "1", json(object(field("result", null)))));
+        public Promise<ResourceResponse, ResourceException> update(UpdateRequest request) {
+            return newResultPromise(newResourceResponse("update", "1", json(object(field("result", null)))));
         }
-        public Promise<Resource, ResourceException> patch(PatchRequest request) {
-            return newResultPromise(new Resource("patch", "1", json(object(field("result", null)))));
+        public Promise<ResourceResponse, ResourceException> patch(PatchRequest request) {
+            return newResultPromise(newResourceResponse("patch", "1", json(object(field("result", null)))));
         }
     }
 

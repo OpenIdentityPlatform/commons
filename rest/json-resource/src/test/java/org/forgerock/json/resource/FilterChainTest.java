@@ -16,6 +16,8 @@
 
 package org.forgerock.json.resource;
 
+import static org.forgerock.json.resource.Responses.newQueryResponse;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 import static org.forgerock.util.promise.Promises.when;
 import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
@@ -43,8 +45,8 @@ import org.testng.annotations.Test;
 @SuppressWarnings({ "javadoc", "unchecked" })
 public final class FilterChainTest {
     private static final JsonValue JSON = new JsonValue(Collections.singletonMap("test", "value"));
-    private static final QueryResult QUERY_RESULT = new QueryResult();
-    private static final Resource RESOURCE = new Resource("id", "rev", JSON);
+    private static final QueryResponse QUERY_RESULT = newQueryResponse();
+    private static final ResourceResponse RESOURCE = newResourceResponse("id", "rev", JSON);
 
     /**
      * Tests that a filter can call next filter multiple times. If the cursoring
@@ -67,7 +69,7 @@ public final class FilterChainTest {
         // filter1 will chain the downstream handler's returned promise and combine/reduce
         // the result of the two sub-reads to produce a single read response. We won't do
         // that here in order to keep the test simple.
-        Promise<Resource, ResourceException> promise = chain.handleRead(context, request);
+        Promise<ResourceResponse, ResourceException> promise = chain.handleRead(context, request);
 
         final InOrder inOrder = inOrder(filter1, filter2, target);
         inOrder.verify(filter1).filterRead(same(context), same(request),
@@ -91,13 +93,13 @@ public final class FilterChainTest {
         final Filter filter1 = mock(Filter.class);
         final ResourceException expectedError = new NotSupportedException();
         given(filter1.filterRead(any(ServerContext.class), any(ReadRequest.class), any(RequestHandler.class)))
-                .willReturn(Promises.<Resource, ResourceException>newExceptionPromise(expectedError));
+                .willReturn(Promises.<ResourceResponse, ResourceException>newExceptionPromise(expectedError));
         final Filter filter2 = filter();
         final FilterChain chain = new FilterChain(target, filter1, filter2);
         final ServerContext context = context();
         final ReadRequest request = Requests.newReadRequest("read");
 
-        Promise<Resource, ResourceException> promise = chain.handleRead(context, request);
+        Promise<ResourceResponse, ResourceException> promise = chain.handleRead(context, request);
 
         final InOrder inOrder = inOrder(filter1, filter2, target);
         inOrder.verify(filter1).filterRead(same(context), same(request), any(RequestHandler.class));
@@ -110,13 +112,13 @@ public final class FilterChainTest {
         final RequestHandler target = target();
         final Filter filter1 = mock(Filter.class);
         given(filter1.filterRead(any(ServerContext.class), any(ReadRequest.class), any(RequestHandler.class)))
-                .willReturn(Promises.<Resource, ResourceException>newResultPromise(RESOURCE));
+                .willReturn(Promises.<ResourceResponse, ResourceException>newResultPromise(RESOURCE));
         final Filter filter2 = filter();
         final FilterChain chain = new FilterChain(target, filter1, filter2);
         final ServerContext context = context();
         final ReadRequest request = Requests.newReadRequest("read");
 
-        Promise<Resource, ResourceException> promise = chain.handleRead(context, request);
+        Promise<ResourceResponse, ResourceException> promise = chain.handleRead(context, request);
 
         final InOrder inOrder = inOrder(filter1, filter2, target);
         inOrder.verify(filter1).filterRead(same(context), same(request), any(RequestHandler.class));
@@ -136,11 +138,11 @@ public final class FilterChainTest {
         // Test twice to ensure that no state is carried over.
         final InOrder inOrder = inOrder(filter1, filter2, target);
         for (int i = 0; i < 2; i++) {
-            Promise<JsonValue, ResourceException> promise = chain.handleAction(context, request);
+            Promise<ActionResponse, ResourceException> promise = chain.handleAction(context, request);
             inOrder.verify(filter1).filterAction(same(context), same(request), any(RequestHandler.class));
             inOrder.verify(filter2).filterAction(same(context), same(request), any(RequestHandler.class));
             inOrder.verify(target).handleAction(context, request);
-            assertThat(promise).succeeded().withObject().isEqualTo(JSON);
+            assertThat(promise).succeeded().withObject().isEqualTo(Responses.newActionResponse(JSON));
         }
     }
 
@@ -156,7 +158,7 @@ public final class FilterChainTest {
         // Test twice to ensure that no state is carried over.
         final InOrder inOrder = inOrder(filter1, filter2, target);
         for (int i = 0; i < 2; i++) {
-            Promise<Resource, ResourceException> promise = chain.handleCreate(context, request);
+            Promise<ResourceResponse, ResourceException> promise = chain.handleCreate(context, request);
             inOrder.verify(filter1).filterCreate(same(context), same(request), any(RequestHandler.class));
             inOrder.verify(filter2).filterCreate(same(context), same(request), any(RequestHandler.class));
             inOrder.verify(target).handleCreate(context, request);
@@ -176,7 +178,7 @@ public final class FilterChainTest {
         // Test twice to ensure that no state is carried over.
         final InOrder inOrder = inOrder(filter1, filter2, target);
         for (int i = 0; i < 2; i++) {
-            Promise<Resource, ResourceException> promise = chain.handleDelete(context, request);
+            Promise<ResourceResponse, ResourceException> promise = chain.handleDelete(context, request);
             inOrder.verify(filter1).filterDelete(same(context), same(request), any(RequestHandler.class));
             inOrder.verify(filter2).filterDelete(same(context), same(request), any(RequestHandler.class));
             inOrder.verify(target).handleDelete(context, request);
@@ -196,7 +198,7 @@ public final class FilterChainTest {
         // Test twice to ensure that no state is carried over.
         final InOrder inOrder = inOrder(filter1, filter2, target);
         for (int i = 0; i < 2; i++) {
-            Promise<Resource, ResourceException> promise = chain.handlePatch(context, request);
+            Promise<ResourceResponse, ResourceException> promise = chain.handlePatch(context, request);
             inOrder.verify(filter1).filterPatch(same(context), same(request), any(RequestHandler.class));
             inOrder.verify(filter2).filterPatch(same(context), same(request), any(RequestHandler.class));
             inOrder.verify(target).handlePatch(context, request);
@@ -217,7 +219,7 @@ public final class FilterChainTest {
         // Test twice to ensure that no state is carried over.
         final InOrder inOrder = inOrder(filter1, filter2, target, handler);
         for (int i = 0; i < 2; i++) {
-            Promise<QueryResult, ResourceException> promise = chain.handleQuery(context, request, handler);
+            Promise<QueryResponse, ResourceException> promise = chain.handleQuery(context, request, handler);
             inOrder.verify(filter1).filterQuery(same(context), same(request), same(handler),
                     any(RequestHandler.class));
             inOrder.verify(filter2).filterQuery(same(context), same(request), same(handler),
@@ -239,7 +241,7 @@ public final class FilterChainTest {
         // Test twice to ensure that no state is carried over.
         final InOrder inOrder = inOrder(filter1, filter2, target);
         for (int i = 0; i < 2; i++) {
-            Promise<Resource, ResourceException> promise = chain.handleRead(context, request);
+            Promise<ResourceResponse, ResourceException> promise = chain.handleRead(context, request);
             inOrder.verify(filter1).filterRead(same(context), same(request), any(RequestHandler.class));
             inOrder.verify(filter2).filterRead(same(context), same(request), any(RequestHandler.class));
             inOrder.verify(target).handleRead(context, request);
@@ -259,7 +261,7 @@ public final class FilterChainTest {
         // Test twice to ensure that no state is carried over.
         final InOrder inOrder = inOrder(filter1, filter2, target);
         for (int i = 0; i < 2; i++) {
-            Promise<Resource, ResourceException> promise = chain.handleUpdate(context, request);
+            Promise<ResourceResponse, ResourceException> promise = chain.handleUpdate(context, request);
             inOrder.verify(filter1).filterUpdate(same(context), same(request), any(RequestHandler.class));
             inOrder.verify(filter2).filterUpdate(same(context), same(request), any(RequestHandler.class));
             inOrder.verify(target).handleUpdate(context, request);
@@ -349,19 +351,19 @@ public final class FilterChainTest {
     private RequestHandler target() {
         final RequestHandler target = mock(RequestHandler.class);
         given(target.handleAction(any(ServerContext.class), any(ActionRequest.class)))
-                .willReturn(Promises.<JsonValue, ResourceException>newResultPromise(JSON));
+                .willReturn(Promises.<ActionResponse, ResourceException>newResultPromise(Responses.newActionResponse(JSON)));
         given(target.handleCreate(any(ServerContext.class), any(CreateRequest.class)))
-                .willReturn(Promises.<Resource, ResourceException>newResultPromise(RESOURCE));
+                .willReturn(Promises.<ResourceResponse, ResourceException>newResultPromise(RESOURCE));
         given(target.handleDelete(any(ServerContext.class), any(DeleteRequest.class)))
-                .willReturn(Promises.<Resource, ResourceException>newResultPromise(RESOURCE));
+                .willReturn(Promises.<ResourceResponse, ResourceException>newResultPromise(RESOURCE));
         given(target.handlePatch(any(ServerContext.class), any(PatchRequest.class)))
-                .willReturn(Promises.<Resource, ResourceException>newResultPromise(RESOURCE));
+                .willReturn(Promises.<ResourceResponse, ResourceException>newResultPromise(RESOURCE));
         given(target.handleQuery(any(ServerContext.class), any(QueryRequest.class), any(QueryResourceHandler.class)))
-                .willReturn(Promises.<QueryResult, ResourceException>newResultPromise(QUERY_RESULT));
+                .willReturn(Promises.<QueryResponse, ResourceException>newResultPromise(QUERY_RESULT));
         given(target.handleRead(any(ServerContext.class), any(ReadRequest.class)))
-                .willReturn(Promises.<Resource, ResourceException>newResultPromise(RESOURCE));
+                .willReturn(Promises.<ResourceResponse, ResourceException>newResultPromise(RESOURCE));
         given(target.handleUpdate(any(ServerContext.class), any(UpdateRequest.class)))
-                .willReturn(Promises.<Resource, ResourceException>newResultPromise(RESOURCE));
+                .willReturn(Promises.<ResourceResponse, ResourceException>newResultPromise(RESOURCE));
         return target;
     }
 }

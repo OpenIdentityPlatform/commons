@@ -17,6 +17,8 @@
 package org.forgerock.json.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.json.resource.Responses.newQueryResponse;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
@@ -37,9 +39,9 @@ public final class FiltersTest {
 
     private static final ResourceException ERROR = new InternalServerErrorException();
     private static final JsonValue JSON = new JsonValue(Collections.singletonMap("test", "value"));
-    private static final QueryResult QUERY_RESULT = new QueryResult();
-    private static final Resource RESOURCE1 = new Resource("id1", "rev", JSON);
-    private static final Resource RESOURCE2 = new Resource("id2", "rev", JSON);
+    private static final QueryResponse QUERY_RESULT = newQueryResponse();
+    private static final ResourceResponse RESOURCE1 = newResourceResponse("id1", "rev", JSON);
+    private static final ResourceResponse RESOURCE2 = newResourceResponse("id2", "rev", JSON);
 
     private static final ActionRequest ACTION_REQUEST = Requests
             .newActionRequest("test", "action");

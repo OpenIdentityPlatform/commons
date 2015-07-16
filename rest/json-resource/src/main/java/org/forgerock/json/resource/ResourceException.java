@@ -32,7 +32,7 @@ import org.forgerock.json.JsonValue;
  * interoperability with HTTP, if an exception corresponds with an HTTP error
  * status, use the matching HTTP status code.
  */
-public class ResourceException extends IOException {
+public class ResourceException extends IOException implements Response {
 
     /**
      * The name of the JSON field used for the detail.

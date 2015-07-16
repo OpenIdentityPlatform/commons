@@ -18,9 +18,12 @@ package org.forgerock.json.resource.http;
 
 import static org.forgerock.http.test.HttpTest.newRequest;
 import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.resource.Responses.newQueryResponse;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.eq;
 import static org.testng.Assert.assertEquals;
 
 import java.io.ByteArrayOutputStream;
@@ -31,11 +34,11 @@ import org.forgerock.http.protocol.Response;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.util.promise.Promise;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -45,8 +48,8 @@ import org.testng.annotations.Test;
 public class RequestRunnerTest {
 
     private static final ResourceException EXCEPTION = ResourceException.getException(ResourceException.NOT_FOUND);
-    private static final Promise<QueryResult, ResourceException> QUERY_RESULT = newResultPromise(new QueryResult());
-    private static final Promise<QueryResult, ResourceException> RESOURCE_EXCEPTION = newExceptionPromise(EXCEPTION);
+    private static final Promise<QueryResponse, ResourceException> QUERY_RESULT = newResultPromise(newQueryResponse());
+    private static final Promise<QueryResponse, ResourceException> RESOURCE_EXCEPTION = newExceptionPromise(EXCEPTION);
 
     @Test
     public void testHandleResultAnonymousQueryResourceHandlerInVisitQueryAsync() throws Exception {
@@ -59,7 +62,7 @@ public class RequestRunnerTest {
     @Test
     public void testHandleResourceAnonymousQueryResourceHandlerInVisitQueryAsync() throws Exception {
         Response response = getAnonymousQueryResourceHandler(QUERY_RESULT,
-                new Resource("id", "revision", new JsonValue("jsonValue")));
+                newResourceResponse("id", "revision", new JsonValue("jsonValue")));
         assertEquals(getResponseContent(response), "{" + "\"result\":[\"jsonValue\"],"
                 + "\"resultCount\":1,\"pagedResultsCookie\":null,\"totalPagedResultsPolicy\":\"NONE\",\"totalPagedResults\":-1"
                 + "}");
@@ -69,9 +72,9 @@ public class RequestRunnerTest {
     public void testHandleResourceTwoAnonymousQueryResourceHandlerInVisitQueryAsync()
             throws Exception {
         Response response = getAnonymousQueryResourceHandler(QUERY_RESULT,
-                new Resource("id", "revision",
+                newResourceResponse("id", "revision",
                         json(object(field("intField", 42), field("stringField", "stringValue")))),
-                new Resource("id", "revision",
+                newResourceResponse("id", "revision",
                         json(object(field("intField", 43), field("stringField", "otherString")))));
         assertEquals(getResponseContent(response), "{" + "\"result\":["
                 + "{\"intField\":42,\"stringField\":\"stringValue\"},"
@@ -90,7 +93,7 @@ public class RequestRunnerTest {
     public void testHandleResourceThenErrorAnonymousQueryResourceHandlerInVisitQueryAsync()
             throws Exception {
         Response response = getAnonymousQueryResourceHandler(RESOURCE_EXCEPTION,
-                new Resource("id", "revision",
+                newResourceResponse("id", "revision",
                         json(object(field("intField", 42), field("stringField", "stringValue")))));
         assertEquals(getResponseContent(response), "{\"code\":404,\"reason\":\"Not Found\",\"message\":\"Not Found\"}");
     }
@@ -101,8 +104,8 @@ public class RequestRunnerTest {
         return new String(outputStream.toByteArray());
     }
 
-    private Response getAnonymousQueryResourceHandler(final Promise<QueryResult, ResourceException> queryPromise,
-            final Resource... resources) throws Exception {
+    private Response getAnonymousQueryResourceHandler(final Promise<QueryResponse, ResourceException> queryPromise,
+            final ResourceResponse... resources) throws Exception {
         // mock everything
         Context context = mock(Context.class);
         QueryRequest request = Requests.newQueryRequest("");
@@ -112,11 +115,11 @@ public class RequestRunnerTest {
 
         // set the expectations
         when(connection.queryAsync(eq(context), eq(request), any(QueryResourceHandler.class)))
-                .thenAnswer(new Answer<Promise<QueryResult, ResourceException>>() {
+                .thenAnswer(new Answer<Promise<QueryResponse, ResourceException>>() {
                     @Override
-                    public Promise<QueryResult, ResourceException> answer(InvocationOnMock invocationOnMock) {
+                    public Promise<QueryResponse, ResourceException> answer(InvocationOnMock invocationOnMock) {
                         QueryResourceHandler handler = (QueryResourceHandler) invocationOnMock.getArguments()[2];
-                        for (Resource resource : resources) {
+                        for (ResourceResponse resource : resources) {
                             handler.handleResource(resource);
                         }
                         return queryPromise;

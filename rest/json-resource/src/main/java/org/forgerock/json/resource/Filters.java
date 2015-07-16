@@ -23,7 +23,6 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.forgerock.http.context.ServerContext;
-import org.forgerock.json.JsonValue;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -45,7 +44,7 @@ public final class Filters {
         }
 
         @Override
-        public Promise<JsonValue, ResourceException> filterAction(final ServerContext context,
+        public Promise<ActionResponse, ResourceException> filterAction(final ServerContext context,
                 final ActionRequest request, final RequestHandler next) {
             if (condition.matches(context, request)) {
                 return subFilter.filterAction(context, request, next);
@@ -55,7 +54,7 @@ public final class Filters {
         }
 
         @Override
-        public Promise<Resource, ResourceException> filterCreate(final ServerContext context,
+        public Promise<ResourceResponse, ResourceException> filterCreate(final ServerContext context,
                 final CreateRequest request, final RequestHandler next) {
             if (condition.matches(context, request)) {
                 return subFilter.filterCreate(context, request, next);
@@ -65,7 +64,7 @@ public final class Filters {
         }
 
         @Override
-        public Promise<Resource, ResourceException> filterDelete(final ServerContext context,
+        public Promise<ResourceResponse, ResourceException> filterDelete(final ServerContext context,
                 final DeleteRequest request, final RequestHandler next) {
             if (condition.matches(context, request)) {
                 return subFilter.filterDelete(context, request, next);
@@ -75,7 +74,7 @@ public final class Filters {
         }
 
         @Override
-        public Promise<Resource, ResourceException> filterPatch(final ServerContext context,
+        public Promise<ResourceResponse, ResourceException> filterPatch(final ServerContext context,
                 final PatchRequest request, final RequestHandler next) {
             if (condition.matches(context, request)) {
                 return subFilter.filterPatch(context, request, next);
@@ -85,7 +84,7 @@ public final class Filters {
         }
 
         @Override
-        public Promise<QueryResult, ResourceException> filterQuery(final ServerContext context,
+        public Promise<QueryResponse, ResourceException> filterQuery(final ServerContext context,
                 final QueryRequest request, final QueryResourceHandler handler, final RequestHandler next) {
             if (condition.matches(context, request)) {
                 return subFilter.filterQuery(context, request, handler, next);
@@ -95,7 +94,7 @@ public final class Filters {
         }
 
         @Override
-        public Promise<Resource, ResourceException> filterRead(final ServerContext context, final ReadRequest request,
+        public Promise<ResourceResponse, ResourceException> filterRead(final ServerContext context, final ReadRequest request,
                 final RequestHandler next) {
             if (condition.matches(context, request)) {
                 return subFilter.filterRead(context, request, next);
@@ -105,7 +104,7 @@ public final class Filters {
         }
 
         @Override
-        public Promise<Resource, ResourceException> filterUpdate(final ServerContext context,
+        public Promise<ResourceResponse, ResourceException> filterUpdate(final ServerContext context,
                 final UpdateRequest request, final RequestHandler next) {
             if (condition.matches(context, request)) {
                 return subFilter.filterUpdate(context, request, next);

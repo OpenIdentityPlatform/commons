@@ -29,7 +29,7 @@ import org.forgerock.json.resource.QueryResourceHandler;
  * <p>
  * The annotated method's return type must be:
  * <ul>
- *     <li>A {@code Promise<QueryResult, ? extends ResourceException>} promise.</li>
+ *     <li>A {@code Promise<QueryResponse, ? extends ResourceException>} promise.</li>
  * </ul>
  * The method must take the following parameters:
  * <ul>

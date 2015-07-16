@@ -24,7 +24,6 @@ import static org.forgerock.json.resource.examples.DemoUtils.*;
 import org.forgerock.http.Context;
 import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.http.context.ServerContext;
-import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.AcceptAPIVersion;
 import org.forgerock.json.resource.AcceptAPIVersionContext;
 import org.forgerock.json.resource.ActionRequest;
@@ -32,16 +31,17 @@ import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.SingletonResourceProvider;
@@ -72,7 +72,7 @@ public final class VersionedResourcesDemo {
         try (ConnectionFactory server = getConnectionFactory();
              Connection connection = server.getConnection()) {
             log("Reading version 1.0 of resource");
-            Resource resource = connection.read(apiCtx("1.0"), Requests.newReadRequest("users/1"));
+            ResourceResponse resource = connection.read(apiCtx("1.0"), Requests.newReadRequest("users/1"));
             log("Retrieved resource with revision: " + resource.getRevision());
 
 
@@ -138,22 +138,22 @@ public final class VersionedResourcesDemo {
         return new SingletonResourceProvider() {
 
             @Override
-            public Promise<JsonValue, ResourceException> actionInstance(ServerContext context, ActionRequest request) {
+            public Promise<ActionResponse, ResourceException> actionInstance(ServerContext context, ActionRequest request) {
                 return backend.actionInstance(context, "INSTANCE", request);
             }
 
             @Override
-            public Promise<Resource, ResourceException> patchInstance(ServerContext context, PatchRequest request) {
+            public Promise<ResourceResponse, ResourceException> patchInstance(ServerContext context, PatchRequest request) {
                 return backend.patchInstance(context, "INSTANCE", request);
             }
 
             @Override
-            public Promise<Resource, ResourceException> readInstance(ServerContext context, ReadRequest request) {
+            public Promise<ResourceResponse, ResourceException> readInstance(ServerContext context, ReadRequest request) {
                 return backend.readInstance(context, "INSTANCE", request);
             }
 
             @Override
-            public Promise<Resource, ResourceException> updateInstance(ServerContext context, UpdateRequest request) {
+            public Promise<ResourceResponse, ResourceException> updateInstance(ServerContext context, UpdateRequest request) {
                 return backend.updateInstance(context, "INSTANCE", request);
             }
         };
@@ -162,38 +162,38 @@ public final class VersionedResourcesDemo {
     private static RequestHandler handler(final MemoryBackend backend) {
         return new RequestHandler() {
             @Override
-            public Promise<JsonValue, ResourceException> handleAction(ServerContext context, ActionRequest request) {
+            public Promise<ActionResponse, ResourceException> handleAction(ServerContext context, ActionRequest request) {
                 return backend.actionInstance(context, "INSTANCE", request);
             }
 
             @Override
-            public Promise<Resource, ResourceException> handleCreate(ServerContext context, CreateRequest request) {
+            public Promise<ResourceResponse, ResourceException> handleCreate(ServerContext context, CreateRequest request) {
                 return backend.createInstance(context, request);
             }
 
             @Override
-            public Promise<Resource, ResourceException> handleDelete(ServerContext context, DeleteRequest request) {
+            public Promise<ResourceResponse, ResourceException> handleDelete(ServerContext context, DeleteRequest request) {
                 return backend.deleteInstance(context, "INSTANCE", request);
             }
 
             @Override
-            public Promise<Resource, ResourceException> handlePatch(ServerContext context, PatchRequest request) {
+            public Promise<ResourceResponse, ResourceException> handlePatch(ServerContext context, PatchRequest request) {
                 return backend.patchInstance(context, "INSTANCE", request);
             }
 
             @Override
-            public Promise<QueryResult, ResourceException> handleQuery(ServerContext context, QueryRequest request,
+            public Promise<QueryResponse, ResourceException> handleQuery(ServerContext context, QueryRequest request,
                     QueryResourceHandler handler) {
                 return backend.queryCollection(context, request, handler);
             }
 
             @Override
-            public Promise<Resource, ResourceException> handleRead(ServerContext context, ReadRequest request) {
+            public Promise<ResourceResponse, ResourceException> handleRead(ServerContext context, ReadRequest request) {
                 return backend.readInstance(context, "INSTANCE", request);
             }
 
             @Override
-            public Promise<Resource, ResourceException> handleUpdate(ServerContext context, UpdateRequest request) {
+            public Promise<ResourceResponse, ResourceException> handleUpdate(ServerContext context, UpdateRequest request) {
                 return backend.updateInstance(context, "INSTANCE", request);
             }
         };
