@@ -42,18 +42,6 @@
             <type>zip</type>
             <classifier>www</classifier>
         </dependency>
-        <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
-            <artifactId>jquery-ui</artifactId>
-            <type>js</type>
-            <classifier>min</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
-            <artifactId>jquery.jqGrid</artifactId>
-            <classifier>min</classifier>
-            <type>js</type>
-        </dependency>
     </dependencies>
 
     <build>
@@ -74,7 +62,7 @@
             </testResource>
         </testResources>
 
-        <plugins>            
+        <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>jslint-maven-plugin</artifactId>
@@ -106,7 +94,7 @@
                     </execution>
                 </executions>
             </plugin>
-            
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -131,7 +119,7 @@
                     </execution>
                 </executions>
             </plugin>
-            
+
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
@@ -151,4 +139,3 @@
         </plugins>
     </build>
 </project>
-

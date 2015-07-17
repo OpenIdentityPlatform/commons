@@ -170,9 +170,11 @@ define([
 
                 navigationView.init(function(){
                     securityLink = $('#security_link');
-                    navDropdownMenu = $('#navDropdownMenu li');
 
-                    QUnit.ok(navDropdownMenu.length > 0 && navDropdownMenu.length === configuration.userBar.length, "All UserBar items displayed (" + navDropdownMenu.length + ")");
+                    QUnit.ok(
+                        _.reduce(configuration.userBar, function (allPresent, thisNav) {
+                            return allPresent && ($("#" + thisNav.id).length === 1);
+                        }, true), "All userBar entries present on the DOM");
                     QUnit.ok(securityLink.data().event && securityLink.data().event === constants.EVENT_SHOW_CHANGE_SECURITY_DIALOG, "Security link has event in data attribute");
                     QUnit.start();
                 });
@@ -190,58 +192,58 @@ define([
                             var dialog = modal.$modal,
                                 pwd = $('input[name="password"]', dialog),
                                 pwdConfirm = $('input[name="passwordConfirm"]', dialog);
-    
+
                             // Test if inputs and submit button are available
                             QUnit.ok($('input[name="password"]', dialog).length > 0, "Password field is available");
                             QUnit.ok($('input[name="passwordConfirm"]', dialog).length > 0, "Password confirm field is available");
                             QUnit.ok($('#btnOk', dialog).length > 0, "Submit button is available");
-    
+
                             // Check submit button initial status
                             QUnit.ok($('#btnOk', dialog).prop('disabled'), 'Initial state of submit button is disabled');
-    
+
                             // Check if inputs pass validation
                             QUnit.equal($('input[name="password"]', dialog).data('validation-status'), 'error', "Empty password field doesn't pass validation");
                             QUnit.equal($('input[name="passwordConfirm"]', dialog).data('validation-status'), 'error', "Empty password confirm field doesn't pass validation");
-    
+
                             var passwordConfirmMatchesPassword = $('[data-for-validator="passwordConfirm"]', dialog).parent(),
                                 passwordRequired = $('[data-for-req="REQUIRED"]', dialog).parent(),
                                 passwordContainsNumbers = $('[data-for-req="AT_LEAST_X_NUMBERS"]', dialog).parent(),
                                 passwordMinLength = $('[data-for-req="MIN_LENGTH"]', dialog).parent(),
                                 passwordContainsCapitalLetters = $('[data-for-req="AT_LEAST_X_CAPITAL_LETTERS"]', dialog).parent();
-    
+
                             pwd.val('abc').trigger('change');
                             QUnit.ok(passwordRequired.find("span.error").length === 0, 'Password field cannot be blank');
-    
+
                             pwd.val('abc1').trigger('change');
                             QUnit.ok(passwordContainsNumbers.find("span.error").length === 0, 'Number added to password satisfied AT_LEAST_X_NUMBERS');
-    
+
                             pwd.val('abcdefgh').trigger('change');
                             QUnit.ok(passwordMinLength.find("span.error").length === 0, 'Password length satisfied MIN_LENGTH');
-    
+
                             pwd.val('abCdefgh').trigger('change');
                             QUnit.ok(passwordContainsCapitalLetters.find("span.error").length === 0, 'Capital letter added to password satisfied AT_LEAST_X_CAPITAL_LETTERS');
-    
+
                             pwd.val('1122334455').trigger('change');
                             QUnit.equal($('input[name="password"]', dialog).data('validation-status'), 'error', "Password doesn't pass validation");
-    
+
                             pwd.val('apple').trigger('change');
                             pwdConfirm.val('apple').trigger('change');
                             QUnit.equal($('input[name="passwordConfirm"]', dialog).attr('data-validation-status'), 'error', 'Password not confirming with bad values');
-    
+
                             pwd.val('Passw0rd').trigger('change');
                             pwdConfirm.val('Passw0rd').trigger('change');
                             QUnit.equal($('input[name="password"]', dialog).attr('data-validation-status'), 'ok', 'Password passes validation');
                             QUnit.equal($('input[name="passwordConfirm"]', dialog).attr('data-validation-status'), 'ok', 'Password confirm field passes validation');
                             QUnit.ok(passwordConfirmMatchesPassword.find("span.error").length === 0, 'Confirmation matches password');
                             QUnit.ok(!$('#btnOk', dialog).prop('disabled'), 'Submit button is enabled');
-    
+
                             // Check if new password was set for user
                             pwd.val('Passw0rds').trigger('change');
                             pwdConfirm.val('Passw0rds').trigger('change');
                             $('#btnOk', dialog).trigger("click");
                             QUnit.ok(conf.loggedUser !== undefined, "User should be logged in");
                             QUnit.ok(conf.loggedUser.password == 'Passw0rds', "New password wasn't set for the user");
-    
+
                             // log-out
                             localStorage.remove('mock/repo/internal/user/test');
                             conf.setProperty('loggedUser', null);
@@ -250,8 +252,9 @@ define([
                         });
                     });
 
-                    
-                window.location.hash = "profile/change_security_data/";
+                eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {
+                    route: router.configuration.routes.changeSecurityData
+                });
             });
 
             QUnit.asyncTest("Unauthorized non-GET Request", function () {
@@ -287,10 +290,10 @@ define([
                             QUnit.start();
                         });
                     });
-                
-                window.location.hash = "profile/change_security_data/";
-            });
 
+                router.navigate("profile/change_security_data/", {trigger: true});
+            });
+/*
             QUnit.asyncTest("Opening a dialog with a parameterized base view (CUI-58)", function () {
                 var selfReg = require("RegisterView"),
                     stub = sinon.stub(selfReg, "render", function (args, callback) {
@@ -300,17 +303,18 @@ define([
                             QUnit.start();
                         });
                     });
-
-                window.location.hash = "registerTerms/foo&bar=blah";
+                router.navigate("registerTerms/foo&bar=blah", {trigger: true});
             });
-
+*/
             QUnit.asyncTest("Loading a module asynchronously (CUI-62)", function () {
+                var moduleLoader = require("org/forgerock/commons/ui/common/util/ModuleLoader");
 
-                QUnit.equal(typeof $.prototype.jqGrid, "undefined", "jqGrid not loaded");
-
-                require("org/forgerock/commons/ui/common/util/ModuleLoader").load("jqgrid").then(function () {
-                    QUnit.equal(typeof $.prototype.jqGrid, "function", "jqGrid loaded by module loader");
-                    QUnit.start();
+                moduleLoader.load("backgrid").then(function (Backgrid) {
+                    QUnit.equal(typeof Backgrid, "object", "Backgrid loaded by module loader");
+                    moduleLoader.load("backgrid-paginator").then(function () {
+                        QUnit.equal(typeof Backgrid.Extension.Paginator, "function", "Backgrid Paginator loaded by module loader");
+                        QUnit.start();
+                    });
                 });
 
             });

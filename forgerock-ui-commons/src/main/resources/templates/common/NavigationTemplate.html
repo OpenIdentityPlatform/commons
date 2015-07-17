@@ -99,13 +99,13 @@
                         {{#if usernameConf.isLink}}
                         <li>
                             <a href="{{usernameConf.href}}">
-                                {{username}}
+                                <span id="user_name">{{username}}</span>
                                 <small>{{usernameConf.secondaryLabel}}</small>
                             </a>
                         </li>
                         {{else}}
                         <li class="dropdown-nolink-item">
-                            {{username}}
+                            <span id="user_name">{{username}}</span>
                         </li>
                         {{/if}}
 

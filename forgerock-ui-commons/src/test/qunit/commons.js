@@ -89,7 +89,7 @@ define([
                     "userName": "test"
                 };
 
-                nav.navigation.render(null, function () {
+                nav.init(function () {
                     QUnit.equal($("#user_name").text(), conf.loggedUser.userName                , "Login Bar 'user_name' reflects logged user");
                     QUnit.ok($("#logout_link").length                                           , "Log out link available");
 
@@ -349,7 +349,8 @@ define([
             });
 
             QUnit.test("url helper for handlebars", function () {
-                var template = Handlebars.compile("{{url 'selfRegistration' input}}");
+                var Handlebars = require("handlebars"),
+                    template = Handlebars.compile("{{url 'selfRegistration' input}}");
 
                 QUnit.ok(template({input: ["/foo", ""]}) === "#register/foo", "url helper properly handles array value as second argument.");
 
