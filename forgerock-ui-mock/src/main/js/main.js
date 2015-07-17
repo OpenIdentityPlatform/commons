@@ -113,9 +113,6 @@ require.config({
             deps: ["jquery"],
             exports: "doTimeout"
         },
-        handlebars: {
-            exports: "handlebars"
-        },
         i18next: {
             deps: ["jquery", "handlebars"],
             exports: "i18next"

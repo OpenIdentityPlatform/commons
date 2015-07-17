@@ -349,7 +349,8 @@ define([
             });
 
             QUnit.test("url helper for handlebars", function () {
-                var template = Handlebars.compile("{{url 'selfRegistration' input}}");
+                var Handlebars = require("handlebars"),
+                    template = Handlebars.compile("{{url 'selfRegistration' input}}");
 
                 QUnit.ok(template({input: ["/foo", ""]}) === "#register/foo", "url helper properly handles array value as second argument.");
 

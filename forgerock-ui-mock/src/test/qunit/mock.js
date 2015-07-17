@@ -40,7 +40,7 @@ define([
                 securityDataPromise = $.Deferred();
 
             module('Mock Tests');
-/*
+
             QUnit.asyncTest('User Registration', function () {
                 conf.loggedUser = null;
 
@@ -154,7 +154,7 @@ define([
 
                 });
             });
-*/
+
             QUnit.asyncTest('Navigation', function () {
                 var moduleClass     = "org/forgerock/commons/ui/common/components/Navigation",
                     navigationView  = require(moduleClass),
@@ -253,7 +253,7 @@ define([
                     });
 
                 eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {
-                    route: _.extend({ forceUpdate: true }, router.configuration.routes.changeSecurityData)
+                    route: router.configuration.routes.changeSecurityData
                 });
             });
 
