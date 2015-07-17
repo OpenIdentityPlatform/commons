@@ -46,9 +46,9 @@
 
 
   <scm>
-    <connection>scm:svn:https://svn.forgerock.org/commons/forgerock-bom/trunk</connection>
-    <developerConnection>scm:svn:https://svn.forgerock.org/commons/forgerock-bom/trunk</developerConnection>
-    <url>http://sources.forgerock.org/browse/commons/forgerock-bom/trunk</url>
+    <connection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-bom.git</connection>
+    <developerConnection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-bom.git</developerConnection>
+    <url>http://stash.forgerock.org/projects/COMMONS/repos/forgerock-bom/browse</url>
   </scm>
 
 
