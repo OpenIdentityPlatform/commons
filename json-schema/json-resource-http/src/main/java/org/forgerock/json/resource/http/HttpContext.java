@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.forgerock.http.context.AbstractContext;
 import org.forgerock.http.context.ClientInfoContext;
@@ -59,7 +60,7 @@ public final class HttpContext extends AbstractContext implements ClientContext 
                 new Factory<Map<String, List<String>>>() {
                     @Override
                     public Map<String, List<String>> newInstance() {
-                        Map<String, List<String>> result = new LinkedHashMap<>();
+                        Map<String, List<String>> result = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
                         Set<Map.Entry<String, List<String>>> headers = req.getHeaders().entrySet();
                         for (Map.Entry<String, List<String>> header : headers) {
                             String name = header.getKey();
