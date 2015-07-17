@@ -1,6 +1,7 @@
 /*
  * The contents of this file are subject to the terms of the Common Development and
- * Distribution License (the License). You may not use this file except in compliance with the License.
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
  * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
  * specific language governing permission and limitations under the License.
@@ -80,21 +81,22 @@ public final class Utils {
 
     /**
      * Returns a string whose content is the string representation of the
-     * objects contained in the provided collection concatenated together using
+     * objects contained in the provided iterable concatenated together using
      * the provided separator.
      *
      * @param separator
      *            The separator string.
      * @param values
-     *            The collection whose elements are to be joined.
+     *            The iterable whose elements are to be joined.
      * @return A string whose content is the string representation of the
-     *         objects contained in the provided collection concatenated
+     *         objects contained in the provided iterable concatenated
      *         together using the provided separator.
      * @throws NullPointerException
-     *             If {@code c} or {@code separator} were {@code null}.
+     *             If {@code separator} or {@code values} were {@code null}.
      */
     public static String joinAsString(final String separator, final Iterable<?> values) {
-        Reject.ifNull(values, separator);
+        Reject.ifNull(separator);
+        Reject.ifNull(values);
 
         final Iterator<?> iterator = values.iterator();
         if (!iterator.hasNext()) {
@@ -111,6 +113,53 @@ public final class Utils {
             builder.append(iterator.next());
         } while (iterator.hasNext());
         return builder.toString();
+    }
+
+    /**
+     * Appends into the provided {@link StringBuilder} the string representation
+     * of the provided objects concatenated together using the provided separator.
+     *
+     * @param builder
+     *            The String builder where to append.
+     * @param separator
+     *            The separator string.
+     * @param values
+     *            The objects to be joined.
+     * @throws NullPointerException
+     *             If {@code builder}, {@code separator} or {@code values} were {@code null}.
+     */
+    public static void joinAsString(final StringBuilder builder, final String separator, final Object... values) {
+        joinAsString(builder, separator, Arrays.asList(values));
+    }
+
+    /**
+     * Appends into the provided {@link StringBuilder} the string representation
+     * of the objects contained in the provided iterable concatenated together
+     * using the provided separator.
+     *
+     * @param builder
+     *            The String builder where to append.
+     * @param separator
+     *            The separator string.
+     * @param values
+     *            The iterable whose elements are to be joined.
+     * @throws NullPointerException
+     *             If {@code builder}, {@code separator} or {@code values} were {@code null}.
+     */
+    public static void joinAsString(final StringBuilder builder, final String separator, final Iterable<?> values) {
+        Reject.ifNull(builder);
+        Reject.ifNull(separator);
+        Reject.ifNull(values);
+
+        final Iterator<?> iterator = values.iterator();
+        if (iterator.hasNext()) {
+            builder.append(iterator.next());
+
+            while (iterator.hasNext()) {
+                builder.append(separator);
+                builder.append(iterator.next());
+            }
+        }
     }
 
     /**

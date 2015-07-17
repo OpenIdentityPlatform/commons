@@ -1,6 +1,7 @@
 /*
  * The contents of this file are subject to the terms of the Common Development and
- * Distribution License (the License). You may not use this file except in compliance with the License.
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
  * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
  * specific language governing permission and limitations under the License.
@@ -14,12 +15,12 @@
  */
 package org.forgerock.util;
 
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.util.Utils.joinAsString;
 import static org.forgerock.util.Utils.asEnum;
 
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -27,44 +28,48 @@ import org.testng.annotations.Test;
 @SuppressWarnings("javadoc")
 public class UtilsTest {
 
-    @Test
-    public void joinAsStringStringObject0() {
-        assertThat(joinAsString(", ")).isEqualTo("");
+    @DataProvider
+    public Object[][] joinAsStringVarargsDataProvider() {
+        return new Object[][] {
+            { new Object[] {}, "" },
+            { new Object[] {1}, "1" },
+            { new Object[] {1, 2}, "1, 2" },
+            { new Object[] {1, 2, 3}, "1, 2, 3" },
+        };
     }
 
-    @Test
-    public void joinAsStringStringObject1() {
-        assertThat(joinAsString(", ", 1)).isEqualTo("1");
+    @Test(dataProvider = "joinAsStringVarargsDataProvider")
+    public void joinAsStringVarargs(Object[] data, String expectedResult) {
+        assertThat(joinAsString(", ", data)).isEqualTo(expectedResult);
     }
 
-    @Test
-    public void joinAsStringStringObject2() {
-        assertThat(joinAsString(", ", 1, 2)).isEqualTo("1, 2");
+    @Test(dataProvider = "joinAsStringVarargsDataProvider")
+    public void joinAsStringBuilderVarargs(Object[] data, String expectedResult) {
+        StringBuilder sb = new StringBuilder();
+        joinAsString(sb, ", ", data);
+        assertThat(sb.toString()).isEqualTo(expectedResult);
     }
 
-    @Test
-    public void joinAsStringStringObject3() {
-        assertThat(joinAsString(", ", 1, 2, 3)).isEqualTo("1, 2, 3");
+    @DataProvider
+    public Object[][] joinAsStringIterableDataProvider() {
+        return new Object[][] {
+            { asList(), "" },
+            { asList(1), "1" },
+            { asList(1, 2), "1, 2" },
+            { asList(1, 2, 3), "1, 2, 3" },
+        };
     }
 
-    @Test
-    public void joinAsStringStringIterable0() {
-        assertThat(joinAsString(", ", Collections.emptyList())).isEqualTo("");
+    @Test(dataProvider = "joinAsStringIterableDataProvider")
+    public void joinAsStringIterable(List<Integer> data, String expectedResult) {
+        assertThat(joinAsString(", ", data)).isEqualTo(expectedResult);
     }
 
-    @Test
-    public void joinAsStringStringIterable1() {
-        assertThat(joinAsString(", ", Collections.singletonList(1))).isEqualTo("1");
-    }
-
-    @Test
-    public void joinAsStringStringIterable2() {
-        assertThat(joinAsString(", ", Arrays.asList(1, 2))).isEqualTo("1, 2");
-    }
-
-    @Test
-    public void joinAsStringStringIterable3() {
-        assertThat(joinAsString(", ", Arrays.asList(1, 2, 3))).isEqualTo("1, 2, 3");
+    @Test(dataProvider = "joinAsStringIterableDataProvider")
+    public void joinAsStringBuilderVarargs(List<Integer> data, String expectedResult) {
+        StringBuilder sb = new StringBuilder();
+        joinAsString(sb, ", ", data);
+        assertThat(sb.toString()).isEqualTo(expectedResult);
     }
 
     enum MyAction {
@@ -74,12 +79,11 @@ public class UtilsTest {
     @DataProvider
     public Object[][] actionNames() {
         return new Object[][] {
-                // @formatter:off
-                { "action1", MyAction.action1 },
-                { "action2", MyAction.action2 },
-                { "mixedcase", MyAction.mIxEdCase },
-
-                // @formatter:on
+            // @formatter:off
+            { "action1", MyAction.action1 },
+            { "action2", MyAction.action2 },
+            { "mixedcase", MyAction.mIxEdCase },
+            // @formatter:on
         };
     }
 
