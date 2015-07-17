@@ -429,7 +429,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
      * Loads a Handlebars partial.
      * <p>
      * The registered name for the partial is inferred from the URL specified. e.g.
-     * "partials/headers/_Simple.html" => "headers/_Simple"
+     * "partials/headers/_Title.html" => "headers/_Title"
      * <p>
      * Will not reload and register partials that are already loaded and registered
      * @param  {String} url URL of partial to load in the format "partials/<path_to_partial>.html"
