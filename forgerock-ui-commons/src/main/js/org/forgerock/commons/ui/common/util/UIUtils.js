@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, window, Handlebars, i18n, sessionStorage */
+/*global define, window, i18n, sessionStorage */
 
 define("org/forgerock/commons/ui/common/util/UIUtils", [
     "jquery",
@@ -35,13 +35,13 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     "i18next",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/util/DateUtil"
-], function ($, _, require, String, AbstractConfigurationAware, handlebars, BootstrapDialog, i18next, router, dateUtil) {
+], function ($, _, require, String, AbstractConfigurationAware, Handlebars, BootstrapDialog, i18next, router, dateUtil) {
     /**
      * @exports org/forgerock/commons/ui/common/util/UIUtils
      */
     var obj = new AbstractConfigurationAware();
 
-    // these functions used to exist in this module, but they were moved to the 
+    // these functions used to exist in this module, but they were moved to the
     // router module (they are all route-related, rather than UI)
     // this remains so that old code doesn't just break;
     _.each([
@@ -408,22 +408,52 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     };
 
     obj.reloadTemplate = function(url) {
-        $.ajax({
+        return $.ajax({
             type: "GET",
             url: require.toUrl(url),
-            dataType: "html",
-            success: function(template) {
-                obj.templates[url] = template;
-            }
+            dataType: "html"
         });
     };
 
     obj.preloadTemplates = function() {
-        var url;
+        _.each(obj.configuration.templateUrls, function(url) {
+            obj.reloadTemplate(url).done(function (data) {
+                obj.templates[url] = data;
+            }).fail(function() {
+                console.error("Template \"" + url + "\" failed to loaded");
+            });
+        });
+    };
 
-        for(url in obj.configuration.templateUrls) {
-            obj.reloadTemplate(obj.configuration.templateUrls[url]);
-        }
+    /**
+     * Loads a Handlebars partial.
+     * <p>
+     * The registered name for the partial is inferred from the URL specified. e.g.
+     * "partials/headers/_Title.html" => "headers/_Title"
+     * <p>
+     * Will not reload and register partials that are already loaded and registered
+     * @param  {String} url URL of partial to load in the format "partials/<path_to_partial>.html"
+     * @return {Promise.<Object>|false} Load promise or false if partial is already loaded
+     */
+    obj.preloadPartial = function(url) {
+        var name = url.replace(/(^partials\/)|(\.html$)/g, "");
+
+        if (Handlebars.partials[name]) { return false; }
+
+        return obj.reloadTemplate(url).done(function (data) {
+            Handlebars.registerPartial(name, data);
+        }).fail(function() {
+            console.error("Partial \"" + url + "\" failed to loaded");
+        });
+    };
+
+    /**
+     * Loads all the Handlebars partials defined in the "partialUrls" attribute of this module's configuration
+     */
+    obj.preloadPartials = function() {
+        _.each(obj.configuration.partialUrls, function(url) {
+            obj.preloadPartial(url);
+        });
     };
 
     $.fn.emptySelect = function() {
@@ -481,7 +511,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         } else {
             result = "#" + router.getLink(router.configuration.routes[routeKey], _.toArray([arguments[1]]));
         }
-        
+
         //Don't return a safe string to prevent XSS.
         return result;
     });
