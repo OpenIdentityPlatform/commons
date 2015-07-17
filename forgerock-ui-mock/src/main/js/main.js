@@ -38,13 +38,14 @@ require.config({
         backbone: "libs/backbone-1.1.2-min",
         "backbone.paginator": "libs/backbone.paginator.min-2.0.2-min",
         "backbone-relational": "libs/backbone-relational-0.9.0-min",
+        "backgrid": "libs/backgrid.min-0.3.5-min",
+        "backgrid-filter": "libs/backgrid-filter.min-0.3.5-min",
+        "backgrid-paginator": "libs/backgrid-paginator.min-0.3.5-min",
         underscore: "libs/lodash-2.4.1-min",
         js2form: "libs/js2form-2.0",
         form2js: "libs/form2js-2.0",
         spin: "libs/spin-2.0.1-min",
         jquery: "libs/jquery-2.1.1-min",
-        jqueryui: "libs/jquery-ui-1.11.1-min",
-        jqgrid: "libs/jquery.jqGrid-4.5.4-min",
         xdate: "libs/xdate-0.8-min",
         doTimeout: "libs/jquery.ba-dotimeout-1.0-min",
         handlebars: "libs/handlebars-1.3.0-min",
@@ -66,6 +67,19 @@ require.config({
         backbone: {
             deps: ["underscore"],
             exports: "Backbone"
+        },
+        "backbone.paginator": {
+            deps: ["backbone"]
+        },
+        "backgrid": {
+            deps: ["jquery", "underscore", "backbone"],
+            exports: "Backgrid"
+        },
+        "backgrid-filter": {
+            deps: ["backgrid"]
+        },
+        "backgrid-paginator": {
+            deps: ["backgrid", "backbone.paginator"]
         },
         js2form: {
             exports: "js2form"
@@ -89,15 +103,8 @@ require.config({
         placeholder: {
             deps: ["jquery"]
         },
-        jqueryui: {
-            deps: ["jquery"],
-            exports: "jqueryui"
-        },
         i18nGrid: {
             deps: ["jquery"]
-        },
-        jqgrid: {
-            deps: ["jqueryui", "i18nGrid"]
         },
         xdate: {
             exports: "xdate"
@@ -132,7 +139,6 @@ require([
     "form2js",
     "js2form",
     "spin",
-    "jqueryui",
     "xdate",
     "moment",
     "doTimeout",
@@ -151,7 +157,7 @@ require([
     "UserDelegate",
     "ThemeManager",
     "config/main"
-], function ( sinon, $, _, Backbone, form2js, js2form, spin, $ui, xdate, moment, doTimeout, Handlebars, i18n,
+], function ( sinon, $, _, Backbone, form2js, js2form, spin, xdate, moment, doTimeout, Handlebars, i18n,
               placeholder, mockServer, i18nManager, constants, eventManager, localStorage) {
 
     // Helpers for the code that hasn't been properly migrated to require these as explicit dependencies:

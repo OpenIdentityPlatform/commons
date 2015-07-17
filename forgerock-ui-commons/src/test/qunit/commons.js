@@ -89,7 +89,7 @@ define([
                     "userName": "test"
                 };
 
-                nav.navigation.render(null, function () {
+                nav.init(function () {
                     QUnit.equal($("#user_name").text(), conf.loggedUser.userName                , "Login Bar 'user_name' reflects logged user");
                     QUnit.ok($("#logout_link").length                                           , "Log out link available");
 
