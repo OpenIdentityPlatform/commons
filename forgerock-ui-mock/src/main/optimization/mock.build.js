@@ -30,11 +30,9 @@
     generateSourceMaps: true,
     optimize: "uglify2",
     excludeShallow: [
-        // these three are only useful for the mock project
+        // these are only useful for the mock project as a way of faking a backend
         // excluding them in the minification bundle presents a more meaningful representation
         "sinon",
-        "text",
-        "mock/Data",
-        "org/forgerock/mock/ui/common/main/MockServer"
+        "mock/Data"
     ]
 })
