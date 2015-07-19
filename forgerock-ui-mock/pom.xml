@@ -218,6 +218,7 @@
                                             <arg value="cssIn=${project.build.directory}/www/css/styles.css" />
                                             <arg value="out=${project.build.directory}/www/css/styles_min.css" />
                                             <arg value="optimizeCss=standard" />
+                                            <arg value="cssImportIgnore=bootstrap-3.3.4-custom.css" />
                                         </java>
 
                                         <move file="${project.build.directory}/www/css/styles_min.css" tofile="${project.build.directory}/www/css/styles.css" />
