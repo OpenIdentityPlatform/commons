@@ -59,10 +59,6 @@ define("org/forgerock/commons/ui/common/main/ProcessConfiguration", [
     };
 
     obj.updateConfigurationCallback = function(configuration) {
-        var oneProcessDefinitionObject,
-            processArray = [],
-            overrideArray = [];
-
         AbstractConfigurationAware.prototype.updateConfigurationCallback
             .call(this, configuration)
             .then(function () {
@@ -79,8 +75,8 @@ define("org/forgerock/commons/ui/common/main/ProcessConfiguration", [
 
                     // remove those processes which have been overridden
                     processArray = _.reject(processArray, function (process) {
-                        return process.override || _.find(overrideArray, function (override) {
-                            return override.startEvent === process.startEvent;
+                        return !process.override && _.find(overrideArray, function (override) {
+                            return override.startEvent === process.startEvent && !!override.override;
                         });
                     });
 
