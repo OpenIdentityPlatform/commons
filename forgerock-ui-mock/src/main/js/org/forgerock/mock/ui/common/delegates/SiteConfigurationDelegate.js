@@ -36,8 +36,6 @@ define("org/forgerock/mock/ui/common/delegates/SiteConfigurationDelegate", [
     var obj = new AbstractDelegate("/mock/config/ui/configuration");
 
     obj.getConfiguration = function (successCallback, errorCallback) {
-        console.info("Getting configuration");
-
         obj.serviceCall({url: "", success: function (data) {
             if (successCallback) {
                 successCallback(data.configuration);

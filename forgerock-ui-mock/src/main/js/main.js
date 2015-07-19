@@ -32,9 +32,8 @@
 require.config({
     paths: {
         // sinon only needed (or available) for Mock project
-        sinon: "libs/sinon-1.12.2",
+        sinon: "libs/sinon-1.15.4",
         i18next: "libs/i18next-1.7.3-min",
-        i18nGrid: "libs/i18n/grid.locale-en",
         backbone: "libs/backbone-1.1.2-min",
         "backbone.paginator": "libs/backbone.paginator.min-2.0.2-min",
         "backbone-relational": "libs/backbone-relational-0.9.0-min",
@@ -90,10 +89,6 @@ require.config({
         spin: {
             exports: "spin"
         },
-        bootstrapjs: {
-            deps: ["jquery"],
-            exports: "bootstrapjs"
-        },
         bootstrap: {
             deps: ["jquery"]
         },
@@ -101,9 +96,6 @@ require.config({
             deps: ["jquery", "underscore","backbone", "bootstrap"]
         },
         placeholder: {
-            deps: ["jquery"]
-        },
-        i18nGrid: {
             deps: ["jquery"]
         },
         xdate: {
@@ -123,54 +115,49 @@ require.config({
     }
 });
 
-/**
- * Loads all application on start, so each module will be available to
- * required synchronously
- */
 require([
-    // sinon only needed (or available) for Mock project
-    "sinon",
+    // This list should be all of the things that you either need to use to initialize
+    // prior to starting, or should be the modules that you want included in the minified
+    // startup bundle. Be sure to only put things in this list that you really need to have
+    // loaded on startup (so that you get the benefit of minification without adding more
+    // than you really need for the first load)
+
+    // These are used prior to initialization. Note that the callback function names
+    // these as arguments, but ignores the others.
+    "org/forgerock/commons/ui/common/main/EventManager",
+    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/util/CookieHelper",
+    "org/forgerock/mock/ui/common/main/LocalStorage",
+
+    // core forgerock-ui files
+    "org/forgerock/commons/ui/common/main",
+
+    // files that are necessary for rendering the login page for forgerock-ui-mock
+    "org/forgerock/mock/ui/main",
+    "config/main",
+
+    // generic names for modules that may be implemented differently
+    "UserDelegate",
+    "ThemeManager",
+
+    // libraries necessary for forgerock-ui (and thus worth bundling)
     "jquery",
     "underscore",
     "backbone",
-    "form2js",
-    "js2form",
-    "spin",
-    "xdate",
-    "moment",
-    "doTimeout",
     "handlebars",
     "i18next",
-    "placeholder",
-    "org/forgerock/mock/ui/common/main/MockServer",
-    "org/forgerock/commons/ui/common/main/i18nManager",
-    "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/mock/ui/common/main/LocalStorage",
-    "org/forgerock/mock/ui/common/main",
-    "org/forgerock/mock/ui/user/main",
-    "org/forgerock/commons/ui/user/main",
-    "org/forgerock/commons/ui/common/main",
-    "UserDelegate",
-    "ThemeManager",
-    "config/main"
-], function ( sinon, $, _, Backbone, form2js, js2form, spin, xdate, moment, doTimeout, Handlebars, i18n,
-              placeholder, mockServer, i18nManager, constants, eventManager, localStorage) {
-
-    // Helpers for the code that hasn't been properly migrated to require these as explicit dependencies:
-    window.$ = $;
-    window._ = _;
-    window.Backbone = Backbone;
+    "spin"
+], function (EventManager, Constants, CookieHelper, LocalStorage) {
 
     // Mock project is run without server. Framework requires cookies to be enabled in order to be able to login.
     // Default CookieHelper.cookiesEnabled() implementation will always return false as cookies cannot be set from local
     // file. Hence redefining function to return true
-    require('org/forgerock/commons/ui/common/util/CookieHelper').cookiesEnabled = function () {
+    CookieHelper.cookiesEnabled = function () {
         return true;
     };
 
     // Adding stub user
-    localStorage.add('mock/repo/internal/user/test', {
+    LocalStorage.add('mock/repo/internal/user/test', {
         _id: 'test',
         _rev: '1',
         component: 'mock/repo/internal/user',
@@ -184,5 +171,5 @@ require([
         mail: 'white@test.com'
     });
 
-    eventManager.sendEvent(constants.EVENT_DEPENDECIES_LOADED);
+    EventManager.sendEvent(Constants.EVENT_DEPENDENCIES_LOADED);
 });

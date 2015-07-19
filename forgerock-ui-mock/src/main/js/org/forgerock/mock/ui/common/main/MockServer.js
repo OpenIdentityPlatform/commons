@@ -41,10 +41,6 @@ define("org/forgerock/mock/ui/common/main/MockServer", [
 
         sinon.FakeXMLHttpRequest.useFilters = true;
         sinon.FakeXMLHttpRequest.addFilter(function (method, url, async, username, password) {
-            if (/((translation\.json)|(less-1\.5\.1-min\.js))$/.test(url)) {
-                return false;
-            }
-
             return (/((\.html)|(\.css)|(\.less)|(\.json))$/).test(url);
         });
 

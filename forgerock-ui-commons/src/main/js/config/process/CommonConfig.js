@@ -22,28 +22,27 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, require, window, _*/
+/*global define, window, _*/
 
 define("config/process/CommonConfig", [
     "jquery",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/main/EventManager"
-], function($, Constants, EventManager) {
+    "org/forgerock/commons/ui/common/main/EventManager",
+    "org/forgerock/commons/ui/common/util/ModuleLoader"
+], function($, Constants, EventManager, ModuleLoader) {
     var obj = [
         {
             startEvent: Constants.EVENT_APP_INTIALIZED,
             description: "Starting basic components",
             dependencies: [
-                "org/forgerock/commons/ui/common/components/Breadcrumbs",
                 "org/forgerock/commons/ui/common/main/Router",
                 "org/forgerock/commons/ui/common/main/Configuration",
                 "org/forgerock/commons/ui/common/util/UIUtils",
                 "org/forgerock/commons/ui/common/util/CookieHelper",
                 "org/forgerock/commons/ui/common/main/SessionManager"
             ],
-            processDescription: function(event, Breadcrumbs, Router, Configuration, UIUtils, CookieHelper,
+            processDescription: function(event, Router, Configuration, UIUtils, CookieHelper,
                                          SessionManager) {
-                Breadcrumbs.init();
                 UIUtils.preloadTemplates();
                 UIUtils.preloadPartials();
 
@@ -65,16 +64,11 @@ define("config/process/CommonConfig", [
             description: "",
             dependencies: [
                 "org/forgerock/commons/ui/common/components/Navigation",
-                "org/forgerock/commons/ui/common/components/popup/PopupCtrl",
-                "org/forgerock/commons/ui/common/components/Breadcrumbs",
                 "org/forgerock/commons/ui/common/main/Configuration",
                 "org/forgerock/commons/ui/common/components/Footer"
             ],
-            processDescription: function(event, navigation, popupCtrl, breadcrumbs, conf,footer) {
+            processDescription: function(event, navigation, conf,footer) {
                 navigation.init();
-                popupCtrl.init();
-
-                breadcrumbs.buildByUrl();
                 footer.render();
             }
         },
@@ -163,9 +157,11 @@ define("config/process/CommonConfig", [
             processDescription: function(event, router, conf, viewManager, navigation) {
                 viewManager.currentDialog = null;
                 if(conf.baseView) {
-                    require(router.configuration.routes[conf.baseView].view).rebind();
-                    router.navigate(router.getLink(router.configuration.routes[conf.baseView], conf.baseViewArgs));
-                    navigation.reload();
+                    ModuleLoader.load(router.configuration.routes[conf.baseView].view).then(function (view) {
+                        view.rebind();
+                        router.navigate(router.getLink(router.configuration.routes[conf.baseView], conf.baseViewArgs));
+                        navigation.reload();
+                    });
                 }
             }
         },
@@ -215,24 +211,27 @@ define("config/process/CommonConfig", [
                 "org/forgerock/commons/ui/common/SiteConfigurator"
             ],
             processDescription: function(args, viewManager, router, conf, navigation, spinner, siteConfigurator) {
-                var route = args.route, params = args.args, callback = args.callback,
-                    view = require(route.view);
+                var route = args.route,
+                    params = args.args,
+                    callback = args.callback;
 
                 if (!router.checkRole(route)) {
                     return;
                 }
 
-                view.route = route;
+                ModuleLoader.load(route.view).then(function (view) {
+                    view.route = route;
 
-                params = params || route.defaults;
-                conf.setProperty("baseView", "");
-                conf.setProperty("baseViewArgs", "");
+                    params = params || route.defaults;
+                    conf.setProperty("baseView", "");
+                    conf.setProperty("baseViewArgs", "");
 
-                siteConfigurator.configurePage(route, params).then(function () {
-                    spinner.hideSpinner(10);
-                    router.routeTo(route, {trigger: true, args: params});
-                    viewManager.changeView(route.view, params, callback, route.forceUpdate);
-                    navigation.reload();
+                    siteConfigurator.configurePage(route, params).then(function () {
+                        spinner.hideSpinner(10);
+                        router.routeTo(route, {trigger: true, args: params});
+                        viewManager.changeView(route.view, params, callback, route.forceUpdate);
+                        navigation.reload();
+                    });
                 });
             }
         },
@@ -364,9 +363,11 @@ define("config/process/CommonConfig", [
                             }
                         }
                     } else if (viewManager.currentDialog !== null) {
-                        require(viewManager.currentDialog).close();
-                    } else {
-                        $(".modal").modal("hide");
+                        ModuleLoader.load(viewManager.currentDialog).then(function (dialog) {
+                            dialog.close();
+                        });
+                    } else if (typeof $.prototype.modal === "function") {
+                        $(".modal.in").modal("hide");
                     }
 
                     EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "loggedIn");

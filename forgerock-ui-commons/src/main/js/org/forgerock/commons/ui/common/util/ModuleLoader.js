@@ -25,12 +25,17 @@
 /*global define, require*/
 
 define("org/forgerock/commons/ui/common/util/ModuleLoader", [
-    "jquery"
-], function ($) {
-    
-    return {
-        load: function (libPath) {
+    "jquery",
+    "underscore"
+], function ($, _) {
+    var aliasMap = {};
 
+    return {
+        setAlias: function (alias, target) {
+            aliasMap[alias] = target;
+            return this;
+        },
+        load: function (libPath) {
             /*
                  For some reason, the first time you try to require([...]) a module like this,
                  require throws an error. But if you do so again immediately afterward (like
@@ -39,6 +44,10 @@ define("org/forgerock/commons/ui/common/util/ModuleLoader", [
             */
 
             var promise = $.Deferred();
+
+            if (_.has(aliasMap, libPath)) {
+                libPath = aliasMap[libPath];
+            }
 
             try {
                 require([libPath], promise.resolve);

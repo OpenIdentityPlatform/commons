@@ -26,15 +26,16 @@
 
 define("org/forgerock/commons/ui/common/util/FormGenerationUtils", [
     "jquery",
-    "org/forgerock/commons/ui/common/util/DateUtil"
+    "org/forgerock/commons/ui/common/util/DateUtil",
+    "org/forgerock/commons/ui/common/util/typeextentions/String"
 ], function ($, dateUtil) {
-    
+
     var obj = {};
-    
+
     obj.standardErrorSpan = '<span class="error">x</span>';
-    
+
     obj.standardErrorMessageTag = '<div class="validation-message"></div>';
-    
+
     obj.generateTemplateFromFormProperties = function(definition, formValues) {
         var property, formTemplate = "", formFieldType, formFieldDescription, i;
         for(i = 0; i < definition.formProperties.length; i++) {
@@ -47,7 +48,7 @@ define("org/forgerock/commons/ui/common/util/FormGenerationUtils", [
         }
         return formTemplate;
     };
-    
+
     obj.getValueForKey = function(key, formValues) {
         var i, formValueEntry;
         if (!formValues) {
@@ -60,29 +61,29 @@ define("org/forgerock/commons/ui/common/util/FormGenerationUtils", [
             }
         }
     };
-    
+
     obj.generateTemplateLine = function(formFieldId, formFieldDescription) {
-        
+
         var enumValues, handlebarsValueExpression, fieldValue, valueExpression, formFieldDisplayName,
-        formFieldIsReadable, formFieldIsWritable, formFieldIsRequired, formFieldType, formFieldVariableExpression, 
-        formFieldVariableName, formFieldDefaultExpression, formFieldValue, formFieldDateFormat; 
-        
+        formFieldIsReadable, formFieldIsWritable, formFieldIsRequired, formFieldType, formFieldVariableExpression,
+        formFieldVariableName, formFieldDefaultExpression, formFieldValue, formFieldDateFormat;
+
         formFieldIsReadable = formFieldDescription.readable;
-        
+
         formFieldIsWritable = formFieldDescription.writable && formFieldDescription.readable;
-        
+
         formFieldIsRequired = formFieldDescription.required && formFieldDescription.writable && formFieldDescription.readable;
-        
+
         formFieldType = formFieldDescription.type;
-        
-        formFieldDisplayName = formFieldDescription.name; 
-        
+
+        formFieldDisplayName = formFieldDescription.name;
+
         formFieldVariableName = formFieldDescription.variableName ? formFieldDescription.variableName : formFieldId;
-        
-        formFieldVariableExpression = formFieldDescription.variableExpression ? formFieldDescription.variableExpression.expressionText : null; 
+
+        formFieldVariableExpression = formFieldDescription.variableExpression ? formFieldDescription.variableExpression.expressionText : null;
         formFieldDefaultExpression = formFieldDescription.defaultExpression ? formFieldDescription.defaultExpression.expressionText : null;
         formFieldValue = formFieldDescription.value ? formFieldDescription.value : null;
-        
+
         if (formFieldValue) {
             valueExpression = formFieldValue;
         } else {
@@ -92,12 +93,12 @@ define("org/forgerock/commons/ui/common/util/FormGenerationUtils", [
                 valueExpression = formFieldDefaultExpression;
             }
         }
-        
+
         if (valueExpression) {
             handlebarsValueExpression = valueExpression.replace(/\$\{/g,'{{variables.');
             handlebarsValueExpression = handlebarsValueExpression.replace(/\}/g,'}}');
         }
-        
+
         if (!formFieldType || !formFieldType.name || formFieldType.name === 'string') {
             return this.generateStringTypeField(formFieldVariableName, formFieldDisplayName, handlebarsValueExpression, formFieldIsReadable, formFieldIsWritable, formFieldIsRequired);
         } else if (formFieldType.name === 'enum') {
@@ -111,36 +112,36 @@ define("org/forgerock/commons/ui/common/util/FormGenerationUtils", [
             return this.generateDateTypeField(formFieldVariableName, formFieldDisplayName, handlebarsValueExpression, formFieldIsReadable, formFieldIsWritable, formFieldIsRequired, formFieldDateFormat);
         }
     };
-    
+
     obj.generateDateTypeField = function(elementName, elementDisplayName, value, isReadable, isWritable, isRequired, dateFormat) {
         var fieldTagStartPart = '<div class="field">', fieldTagEndPart = '</div>', label = "", input, dateFormatInput, validatorMessageTag;
         if (isReadable) {
             label = this.generateLabel(elementDisplayName);
         }
-        
+
         if (value && value.startsWith("{{variables.")) {
             value = "{{date " + value.substring(2).removeLastChars(2) + " '" + dateFormat + "'}}";
-        }      
-        
+        }
+
         dateFormatInput = this.generateInput("dateFormat", dateFormat, false, false, false);
         input = this.generateInput(elementName, value, isReadable, isWritable, isRequired, "formattedDate");
         validatorMessageTag = isReadable && isWritable ? obj.standardErrorSpan + obj.standardErrorMessageTag : '';
         return fieldTagStartPart + label + input + validatorMessageTag + dateFormatInput + fieldTagEndPart;
     };
-    
+
     obj.generateBooleanTypeField = function(elementName, elementDisplayName, value, isReadable, isWritable, isRequired) {
         var map = {'true' : $.t('common.form.true'), 'false' : $.t('common.form.false'), '__null' : ' '};
         return obj.generateEnumTypeField(elementName, elementDisplayName, map, value, isReadable, isWritable, isRequired);
     };
-    
+
     obj.generateEnumTypeField = function(elementName, elementDisplayName, variableMap, value, isReadable, isWritable, isRequired) {
         var fieldTagStartPart = '<div class="field">', fieldTagEndPart = '</div>', label = '', select, additionalParams='', selectedKey, validatorMessageTag;
-        
+
         additionalParams = isRequired ? additionalParams + ' data-validator="required" ' : '';
         additionalParams = !isWritable ? additionalParams + ' disabled="disabled" ' : additionalParams;
         additionalParams = !isReadable ? additionalParams + ' style="display: none" ' : additionalParams;
-        
-        selectedKey = value ? value : '__null'; 
+
+        selectedKey = value ? value : '__null';
         if (selectedKey.startsWith("{{variables.")) {
             selectedKey = selectedKey.substring(2).removeLastChars(2);
         } else {
@@ -154,7 +155,7 @@ define("org/forgerock/commons/ui/common/util/FormGenerationUtils", [
         validatorMessageTag = isRequired && isWritable ? obj.standardErrorSpan + obj.standardErrorMessageTag : '';
         return fieldTagStartPart + label + select + validatorMessageTag + fieldTagEndPart;
     };
-    
+
     obj.generateStringTypeField = function(elementName, elementDisplayName, handlebarsValueExpression, isReadable, isWritable, isRequired) {
         var fieldTagStartPart = '<div class="field">', fieldTagEndPart = '</div>', label = "", input, validatorMessageTag;
         if (isReadable) {
@@ -164,7 +165,7 @@ define("org/forgerock/commons/ui/common/util/FormGenerationUtils", [
         validatorMessageTag = isRequired && isWritable ? obj.standardErrorSpan + obj.standardErrorMessageTag : '';
         return fieldTagStartPart + label + input + validatorMessageTag + fieldTagEndPart;
     };
-    
+
     obj.generateLongTypeField = function(elementName, elementDisplayName, handlebarsValueExpression, isReadable, isWritable, isRequired) {
         var fieldTagStartPart = '<div class="field">', fieldTagEndPart = '</div>', label = "", input, validatorMessageTag;
         if (isReadable) {
@@ -174,10 +175,10 @@ define("org/forgerock/commons/ui/common/util/FormGenerationUtils", [
         validatorMessageTag = isReadable && isWritable ?  obj.standardErrorSpan + obj.standardErrorMessageTag : '';
         return fieldTagStartPart + label + input + validatorMessageTag + fieldTagEndPart;
     };
-    
+
     obj.generateInput = function(elementName, value, isReadable, isWritable, isRequired, validatorType) {
         var isDisabledPart = isWritable ? '' : 'disabled="disabled"' , isHiddenPart = isReadable ? '' : 'style="display: none"', isRequiredPart, validatorName = 'required';
-        
+
         if (validatorType) {
             if (isRequired) {
                 validatorName = validatorName + "_" + validatorType;
@@ -191,11 +192,11 @@ define("org/forgerock/commons/ui/common/util/FormGenerationUtils", [
         }
         return '<input type="text" name="' + elementName + '" value="' + value +'" ' + isDisabledPart + ' ' + isHiddenPart + ' ' + isRequiredPart + ' />';
     };
-    
+
     obj.generateLabel = function(labelValue) {
         return '<label class="light">' + labelValue +'</label>';
     };
-    
+
     obj.buildPropertyTypeMap = function(formProperties) {
         var typeName, datePattern, property, formFieldType, formFieldDescription, result = {}, i, propName;
         for (i = 0; i < formProperties.length; i++) {
@@ -216,7 +217,7 @@ define("org/forgerock/commons/ui/common/util/FormGenerationUtils", [
         }
         return result;
     };
-    
+
     obj.changeParamsToMeetTheirTypes = function(params, propertyTypeMapping) {
         var param, typeName, paramValue, dateFormat, date;
         for (param in params) {
@@ -245,7 +246,6 @@ define("org/forgerock/commons/ui/common/util/FormGenerationUtils", [
             }
         }
     };
-    
+
     return obj;
 });
-    

@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2014 ForgeRock AS.
+ * Copyright (c) 2015 ForgeRock AS.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,16 +24,10 @@
 
 /*global define*/
 
-define("org/forgerock/commons/ui/common/util/main", [
-    "./Base64",
-    "./Constants",
-    "./CookieHelper",
-    "./CustomPolyfill",
-    "./DateUtil",
-    "./ModuleLoader",
-    "./Mime",
-    "./ObjectUtil",
-    "./UIUtils",
-    "./ValidatorsUtils",
-    "./typeextentions/String"
+// core files needed during startup of the mock app
+define("org/forgerock/mock/ui/main", [
+    "./common/main/MockServer",
+    "./common/delegates/SiteConfigurationDelegate",
+    "./user/login/InternalLoginHelper",
+    "./user/LoginView"
 ]);

@@ -29,7 +29,7 @@ require.config({
     paths: {
         jquery: "libs/jquery-2.1.1-min",
         underscore: "libs/lodash-2.4.1-min",
-        sinon: "libs/sinon-1.12.2"
+        sinon: "libs/sinon-1.15.4"
     },
     shim: {
         underscore: {

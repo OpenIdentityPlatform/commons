@@ -1,4 +1,4 @@
-/** 
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2012 ForgeRock AS. All Rights Reserved
@@ -22,16 +22,19 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 ({
-    appDir : "../../../target/www",
-    baseUrl : ".",
-    dir: "../../../target/www_minified",
-    mainConfigFile : '../js/main.js',
+    baseUrl         : "../../../target/www",
+    mainConfigFile  : '../js/main.js',
+    out             : "../../../target/www/main.js",
+    include: ["main"],
     preserveLicenseComments: false,
     generateSourceMaps: true,
     optimize: "uglify2",
-    modules: [
-        {
-            name: "main"
-        }
+    excludeShallow: [
+        // these three are only useful for the mock project
+        // excluding them in the minification bundle presents a more meaningful representation
+        "sinon",
+        "text",
+        "mock/Data",
+        "org/forgerock/mock/ui/common/main/MockServer"
     ]
 })

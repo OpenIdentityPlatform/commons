@@ -136,7 +136,6 @@ define("config/AppConfiguration", [
                 moduleClass: "org/forgerock/commons/ui/common/util/UIUtils",
                 configuration: {
                     templateUrls: [
-                        "templates/user/ConfirmPasswordDialogTemplate.html"
                     ]
                 }
             },

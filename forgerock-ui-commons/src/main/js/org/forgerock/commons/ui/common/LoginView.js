@@ -28,22 +28,24 @@
  * @author mbilski
  */
 define("org/forgerock/commons/ui/common/LoginView", [
+    "underscore",
     "org/forgerock/commons/ui/common/main/AbstractView",
+    "org/forgerock/commons/ui/common/util/ModuleLoader",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/util/CookieHelper",
     "org/forgerock/commons/ui/common/main/Configuration"
-], function(AbstractView, validatorsManager, eventManager, constants, cookieHelper, conf) {
+], function(_, AbstractView, ModuleLoader, validatorsManager, eventManager, constants, cookieHelper, conf) {
     var LoginView = AbstractView.extend({
         template: "templates/common/LoginTemplate.html",
         baseTemplate: "templates/common/LoginBaseTemplate.html",
-        
+
         events: {
             "click input[type=submit]": "formSubmit",
             "onValidate": "onValidate"
         },
-        
+
         formSubmit: function(event) {
             event.preventDefault();
             if(this.$el.find("[name=loginRemember]:checked").length !== 0) {
@@ -53,10 +55,10 @@ define("org/forgerock/commons/ui/common/LoginView", [
             } else {
                 cookieHelper.deleteCookie("login");
             }
-            
+
             eventManager.sendEvent(constants.EVENT_LOGIN_REQUEST, {userName: this.$el.find("input[name=login]").val(), password: this.$el.find("input[name=password]").val()});
         },
-        
+
         render: function(args, callback) {
             this.data.hasOptionalUIFeatures =   !!conf.globalData.selfRegistration ||
                                                 !!conf.globalData.securityQuestions ||
@@ -66,10 +68,12 @@ define("org/forgerock/commons/ui/common/LoginView", [
             this.parentRender(function() {
                 validatorsManager.bindValidators(this.$el);
 
-                this.$el.find("input").placeholder();
+                ModuleLoader.load("placeholder").then(_.bind(function () {
+                    this.$el.find("input").placeholder();
+                }, this));
 
                 var login = cookieHelper.getCookie("login");
-                if(login) {
+                if (login) {
                     this.$el.find("input[name=login]").val(login).prop('autofocus', false);
                     this.$el.find("[name=loginRemember]").prop("checked",true);
                     validatorsManager.validateAllFields(this.$el);
@@ -77,16 +81,14 @@ define("org/forgerock/commons/ui/common/LoginView", [
                 } else {
                     this.$el.find("input[name=login]").focus();
                 }
-                
-                if(callback) {
+
+                if (callback) {
                     callback();
                 }
-                
+
             });
         }
-    }); 
-    
+    });
+
     return new LoginView();
 });
-
-

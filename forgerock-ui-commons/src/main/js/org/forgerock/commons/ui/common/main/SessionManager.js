@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, require */
+/*global define */
 
 /**
  * Interface
@@ -30,21 +30,28 @@
  */
 define("org/forgerock/commons/ui/common/main/SessionManager", [
     "org/forgerock/commons/ui/common/util/CookieHelper",
-    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware"
-], function(cookieHelper, AbstractConfigurationAware) {
+    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
+    "org/forgerock/commons/ui/common/util/ModuleLoader"
+], function(cookieHelper, AbstractConfigurationAware, ModuleLoader) {
     var obj = new AbstractConfigurationAware();
-    
+
     obj.login = function(params, successCallback, errorCallback) {
         cookieHelper.deleteCookie("session-jwt", "/", ""); // resets the session cookie to discard old session that may still exist
-        require(obj.configuration.loginHelperClass).login(params, successCallback, errorCallback);
+        ModuleLoader.load(obj.configuration.loginHelperClass).then(function (helper) {
+            helper.login(params, successCallback, errorCallback);
+        });
     };
-    
+
     obj.logout = function(successCallback, errorCallback) {
-        require(obj.configuration.loginHelperClass).logout(successCallback, errorCallback);
+        ModuleLoader.load(obj.configuration.loginHelperClass).then(function (helper) {
+            helper.logout(successCallback, errorCallback);
+        });
     };
-    
+
     obj.getLoggedUser = function(successCallback, errorCallback) {
-        require(obj.configuration.loginHelperClass).getLoggedUser(successCallback, errorCallback);
+        ModuleLoader.load(obj.configuration.loginHelperClass).then(function (helper) {
+            helper.getLoggedUser(successCallback, errorCallback);
+        });
     };
 
     return obj;

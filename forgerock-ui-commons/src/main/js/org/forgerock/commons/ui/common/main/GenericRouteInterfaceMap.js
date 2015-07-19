@@ -22,15 +22,16 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, require */
+/*global define */
 
 /**
  * @author huck.elliott
  */
 define("org/forgerock/commons/ui/common/main/GenericRouteInterfaceMap", [
     "underscore",
-    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware"
-], function(_, AbstractConfigurationAware) {
+    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
+    "org/forgerock/commons/ui/common/util/ModuleLoader"
+], function(_, AbstractConfigurationAware, ModuleLoader) {
     var obj = new AbstractConfigurationAware();
     //this module is a generic way of defining require js routes
     //another way of doing this same thing would be to add a route to app_root/main.js
@@ -45,16 +46,12 @@ define("org/forgerock/commons/ui/common/main/GenericRouteInterfaceMap", [
     obj.updateConfigurationCallback = function (conf) {
         //loop over each configuration key/value pair
         _.each(conf,function(val,key){
-            //define the module by keyname
-            //and call the require function using the filepath
-            define(key, require(val));
-            //once defined we need to load the module so that 
-            //it is available to routes.js
-            require([key]);
+            // define the module by keyname
+            // use the ModuleLoader to get a reference and when it is
+            // available register it under the new name
+            ModuleLoader.setAlias(key, val);
         });
     };
-    
+
     return obj;
 });
-
-
