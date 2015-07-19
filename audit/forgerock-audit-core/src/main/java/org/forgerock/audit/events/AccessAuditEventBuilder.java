@@ -97,6 +97,8 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
 
     private static final Logger logger = LoggerFactory.getLogger(AccessAuditEventBuilder.class);
 
+    private boolean performReverseDnsLookup = false;
+
     /**
      * Starts to build an audit access event.
      * <p>
@@ -108,6 +110,11 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
     @SuppressWarnings("rawtypes")
     public static AccessAuditEventBuilder<?> accessEvent() {
         return new AccessAuditEventBuilder();
+    }
+
+    public final T withReverseDnsLookup() {
+        performReverseDnsLookup = true;
+        return self();
     }
 
     /**
@@ -345,28 +352,17 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
      * @return this builder
      */
     public final T clientFromHttpContext(Context context) {
-        return clientFromHttpContext(context, new DnsUtils());
-    }
-
-    /**
-     * Sets client ip, port and host from <code>HttpContext</code>, iff the provided
-     * <code>Context</code> contains a <code>HttpContext</code>.
-     *
-     * This method is visible for testing so that DNS lookup can be mocked.
-     *
-     * @param context The CREST context.
-     * @param dnsUtils Delegate responsible for DNS lookup.
-     * @return this builder
-     */
-    protected final T clientFromHttpContext(Context context, DnsUtils dnsUtils) {
         if (context.containsContext(HTTP_CONTEXT_NAME)) {
             JsonValue httpContext = context.getContext(HTTP_CONTEXT_NAME).toJsonValue();
             String ipAddress = httpContext.get(HTTP_CONTEXT_REMOTE_ADDRESS).asString();
             String hostName = null;
-            try {
-                hostName = dnsUtils.getHostName(ipAddress);
-            } catch (UnknownHostException e) {
-                logger.debug("Unable to lookup client host name for {}.", ipAddress);
+            if (performReverseDnsLookup) {
+                try {
+                    InetAddress ipAddr = InetAddress.getByName(ipAddress);
+                    hostName = ipAddr.getHostName();
+                } catch (UnknownHostException e) {
+                    logger.debug("Unable to lookup client host name for {}.", ipAddress);
+                }
             }
             client(ipAddress, hostName);
         }
@@ -420,29 +416,8 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
      * @return this builder
      */
     public final T forHttpCrestRequest(Context context, Request request) {
-        return forHttpCrestRequest(context, request, new DnsUtils());
-    }
-
-    /**
-     * Sets common fields from CREST contexts and request.
-     *
-     * This method is visible for testing so that DNS lookup can be mocked.
-     *
-     * @param context The CREST context.
-     * @param request The CREST request.
-     * @param dnsUtils Delegate responsible for DNS lookup.
-     *
-     * @see #transactionIdFromRootContext(Context)
-     * @see #clientFromHttpContext(Context)
-     * @see #httpFromHttpContext(Context)
-     * @see #authenticationFromSecurityContext(Context)
-     * @see #resourceOperationFromRequest(Request)
-     *
-     * @return this builder
-     */
-    protected T forHttpCrestRequest(Context context, Request request, DnsUtils dnsUtils) {
         transactionIdFromRootContext(context);
-        clientFromHttpContext(context, dnsUtils);
+        clientFromHttpContext(context);
         httpFromHttpContext(context);
         authenticationFromSecurityContext(context);
         resourceOperationFromRequest(request);
@@ -473,22 +448,4 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
             return string;
         }
     }
-
-    /**
-     * Encapsulates DNS utilities into an object that can be mocked from unit tests.
-     */
-    protected static class DnsUtils {
-
-        /**
-         * Gets the host name for this IP address.
-         *
-         * @param ipAddress An IP address (supports v4 and v6 addresses).
-         * @return The host for the specified IP address or null if reverse DNS lookup could not be completed.
-         */
-        public String getHostName(String ipAddress) throws UnknownHostException {
-            InetAddress ipAddr = InetAddress.getByName(ipAddress);
-            return ipAddr.getHostName();
-        }
-    }
-
 }

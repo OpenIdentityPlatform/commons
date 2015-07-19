@@ -175,21 +175,19 @@ public class AccessAuditEventBuilderTest {
     public void canPopulateClientFromHttpContext() throws Exception {
         // Given
         HttpContext httpContext = new HttpContext(jsonFromFile("/httpContext.json"), null);
-        DnsUtils dnsUtils = mock(DnsUtils.class);
-        given(dnsUtils.getHostName("168.0.0.10")).willReturn("hostname");
 
         // When
         AuditEvent event = productAccessEvent()
                 .eventName("IDM-sync-10")
                 .transactionId("transactionId")
                 .authentication("someone@forgerock.com")
-                .clientFromHttpContext(httpContext, dnsUtils)
+                .clientFromHttpContext(httpContext)
                 .toEvent();
 
         // Then
         JsonValue value = event.getValue();
         assertThat(value.get(CLIENT).get(IP).asString()).isEqualTo("168.0.0.10");
-        assertThat(value.get(CLIENT).get(HOST).asString()).isEqualTo("hostname");
+        assertThat(value.get(CLIENT).get(HOST).asString()).isNull();
     }
 
     @Test
