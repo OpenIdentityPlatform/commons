@@ -336,8 +336,15 @@
                 <artifactId>qunit</artifactId>
                 <version>1.15.0</version>
                 <type>js</type>
+                <scope>test</scope>
             </dependency>
-
+            <dependency>
+                <groupId>org.forgerock.commons.ui.libs</groupId>
+                <artifactId>qunit</artifactId>
+                <type>css</type>
+                <version>1.15.0</version>
+                <scope>test</scope>
+            </dependency>
 
         </dependencies>
     </dependencyManagement>
