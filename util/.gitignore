@@ -91,3 +91,6 @@ local.properties
 
 # TeXlipse plugin
 .texlipse
+
+# TestNG Eclipse plugin default output directory
+test-output
