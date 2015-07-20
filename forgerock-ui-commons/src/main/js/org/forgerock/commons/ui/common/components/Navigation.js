@@ -162,7 +162,7 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                 e.preventDefault();
                 var event = $(e.currentTarget).data().event;
                 if (event){
-                    e.eventManager.sendEvent(event);
+                    eventManager.sendEvent(event);
                 }
             },
             render: function(args, callback) {
