@@ -98,20 +98,8 @@ public final class Utils {
         Reject.ifNull(separator);
         Reject.ifNull(values);
 
-        final Iterator<?> iterator = values.iterator();
-        if (!iterator.hasNext()) {
-            return "";
-        }
-        final Object firstValue = iterator.next();
-        if (!iterator.hasNext()) {
-            return String.valueOf(firstValue);
-        }
         final StringBuilder builder = new StringBuilder();
-        builder.append(firstValue);
-        do {
-            builder.append(separator);
-            builder.append(iterator.next());
-        } while (iterator.hasNext());
+        joinAsString(builder, separator, values);
         return builder.toString();
     }
 
