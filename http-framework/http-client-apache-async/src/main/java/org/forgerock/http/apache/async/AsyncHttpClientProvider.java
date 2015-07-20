@@ -48,19 +48,19 @@ import org.apache.http.protocol.HttpContext;
 import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.apache.NoAuthenticationStrategy;
 import org.forgerock.http.io.Buffer;
-import org.forgerock.http.spi.ClientImpl;
-import org.forgerock.http.spi.ClientImplProvider;
+import org.forgerock.http.spi.HttpClient;
+import org.forgerock.http.spi.HttpClientProvider;
 import org.forgerock.util.Factory;
 import org.forgerock.util.Option;
 import org.forgerock.util.Options;
 import org.forgerock.util.time.Duration;
 
 /**
- * Creates and configures a {@link ClientImpl} instance built around Apache HTTP Async Client component.
+ * Creates and configures a {@link HttpClient} instance built around Apache HTTP Async Client component.
  *
  * @see <a href="https://hc.apache.org/httpcomponents-asyncclient-dev/index.html">Apache HTTP Async Client</a>
  */
-public class AsyncClientProvider implements ClientImplProvider {
+public class AsyncHttpClientProvider implements HttpClientProvider {
 
     /**
      * Specify the number of worker threads. If not set, the async client implementation manages this setting itself
@@ -86,7 +86,7 @@ public class AsyncClientProvider implements ClientImplProvider {
     };
 
     @Override
-    public ClientImpl newClientImpl(final Options options) throws HttpApplicationException {
+    public HttpClient newHttpClient(final Options options) throws HttpApplicationException {
 
         final Factory<Buffer> storage = options.get(OPTION_TEMPORARY_STORAGE);
 
@@ -171,6 +171,6 @@ public class AsyncClientProvider implements ClientImplProvider {
                 .setProxyAuthenticationStrategy(NoAuthenticationStrategy.INSTANCE)
                 .build();
         client.start();
-        return new AsyncClient(client, storage);
+        return new AsyncHttpClient(client, storage);
     }
 }

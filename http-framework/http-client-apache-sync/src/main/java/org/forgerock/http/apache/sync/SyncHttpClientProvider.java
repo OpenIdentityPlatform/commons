@@ -32,8 +32,8 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.apache.NoAuthenticationStrategy;
 import org.forgerock.http.io.Buffer;
-import org.forgerock.http.spi.ClientImpl;
-import org.forgerock.http.spi.ClientImplProvider;
+import org.forgerock.http.spi.HttpClient;
+import org.forgerock.http.spi.HttpClientProvider;
 import org.forgerock.util.Factory;
 import org.forgerock.util.Options;
 import org.forgerock.util.time.Duration;
@@ -41,10 +41,10 @@ import org.forgerock.util.time.Duration;
 /**
  * An HTTP client implementation provider for Apache HttpClient.
  */
-public final class SyncClientProvider implements ClientImplProvider {
+public final class SyncHttpClientProvider implements HttpClientProvider {
 
     @Override
-    public ClientImpl newClientImpl(final Options options) throws HttpApplicationException {
+    public HttpClient newHttpClient(final Options options) throws HttpApplicationException {
         final Factory<Buffer> storage = options.get(OPTION_TEMPORARY_STORAGE);
 
         final HttpClientBuilder builder = HttpClientBuilder.create();
@@ -99,6 +99,6 @@ public final class SyncClientProvider implements ClientImplProvider {
         builder.setProxyAuthenticationStrategy(NoAuthenticationStrategy.INSTANCE);
         builder.setTargetAuthenticationStrategy(NoAuthenticationStrategy.INSTANCE);
 
-        return new SyncClient(builder.build(), storage);
+        return new SyncHttpClient(builder.build(), storage);
     }
 }

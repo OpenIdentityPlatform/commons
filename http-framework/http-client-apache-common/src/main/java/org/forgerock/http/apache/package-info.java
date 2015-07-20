@@ -16,6 +16,6 @@
 
 /**
  * Base classes for Apache HttpClient (synchronous and asynchronous)
- * {@link org.forgerock.http.spi.ClientImplProvider} implementations.
+ * {@link org.forgerock.http.spi.HttpClientProvider} implementations.
  */
 package org.forgerock.http.apache;

@@ -24,7 +24,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
-import org.forgerock.http.apache.AbstractClient;
+import org.forgerock.http.apache.AbstractHttpClient;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
@@ -37,11 +37,11 @@ import org.forgerock.util.promise.PromiseImpl;
 /**
  * Apache HTTP Async Client based implementation.
  */
-public class AsyncClient extends AbstractClient {
+public class AsyncHttpClient extends AbstractHttpClient {
 
     private final CloseableHttpAsyncClient client;
 
-    AsyncClient(final CloseableHttpAsyncClient client, final Factory<Buffer> storage) {
+    AsyncHttpClient(final CloseableHttpAsyncClient client, final Factory<Buffer> storage) {
         super(storage);
         // Client should already be started
         this.client = client;

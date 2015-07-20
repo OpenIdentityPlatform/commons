@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.http.spi;
@@ -20,24 +20,24 @@ import org.forgerock.http.HttpApplicationException;
 import org.forgerock.util.Options;
 
 /**
- * A provider interface for obtaining {@link ClientImpl} instances. A
- * {@link ClientImplProvider} is loaded during construction of a new HTTP
- * {@link org.forgerock.http.Client Client}. The first available provider is
- * selected and its {@link #newClientImpl(Options)} method invoked in order to
- * construct and configure a new {@link ClientImpl}.
+ * A provider interface for obtaining {@link HttpClient} instances. A
+ * {@link HttpClientProvider} is loaded during construction of a new HTTP
+ * {@link org.forgerock.http.Client Client}. A provider is selected and its
+ * {@link #newHttpClient(Options)} method invoked in order to construct and
+ * configure a new {@link HttpClient}.
  */
-public interface ClientImplProvider {
+public interface HttpClientProvider {
     /**
-     * Returns a new {@link ClientImpl} configured using the provided set of
+     * Returns a new {@link HttpClient} configured using the provided set of
      * options.
      *
      * @param options
      *            The client options (never {@code null}).
-     * @return A new {@link ClientImpl} configured using the provided set of
+     * @return A new {@link HttpClient} configured using the provided set of
      *         options.
      * @throws HttpApplicationException
      *             If the client implementation could not be configured using
      *             the provided set of options.
      */
-    ClientImpl newClientImpl(Options options) throws HttpApplicationException;
+    HttpClient newHttpClient(Options options) throws HttpApplicationException;
 }

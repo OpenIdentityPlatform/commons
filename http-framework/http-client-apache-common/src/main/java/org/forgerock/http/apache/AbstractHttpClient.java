@@ -37,7 +37,7 @@ import org.forgerock.http.io.IO;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.Status;
-import org.forgerock.http.spi.ClientImpl;
+import org.forgerock.http.spi.HttpClient;
 import org.forgerock.http.util.CaseInsensitiveSet;
 import org.forgerock.util.Factory;
 
@@ -45,7 +45,7 @@ import org.forgerock.util.Factory;
  * This abstract client is used to share commonly used constants and methods
  * in both synchronous and asynchronous Apache HTTP Client libraries.
  */
-public abstract class AbstractClient implements ClientImpl {
+public abstract class AbstractHttpClient implements HttpClient {
 
     /** Headers that are suppressed in request. */
     // FIXME: How should the the "Expect" header be handled?
@@ -67,12 +67,12 @@ public abstract class AbstractClient implements ClientImpl {
     private final Factory<Buffer> storage;
 
     /**
-     * Base constructor for AHC {@link ClientImpl} drivers.
+     * Base constructor for AHC {@link HttpClient} drivers.
      *
      * @param storage
      *         temporary storage area
      */
-    protected AbstractClient(final Factory<Buffer> storage) {
+    protected AbstractHttpClient(final Factory<Buffer> storage) {
         this.storage = storage;
     }
 

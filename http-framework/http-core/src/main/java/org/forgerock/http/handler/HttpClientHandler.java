@@ -31,8 +31,8 @@ import org.forgerock.http.io.Buffer;
 import org.forgerock.http.io.IO;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
-import org.forgerock.http.spi.ClientImpl;
-import org.forgerock.http.spi.ClientImplProvider;
+import org.forgerock.http.spi.HttpClient;
+import org.forgerock.http.spi.HttpClientProvider;
 import org.forgerock.http.spi.Loader;
 import org.forgerock.util.Factory;
 import org.forgerock.util.Option;
@@ -79,7 +79,7 @@ public final class HttpClientHandler implements Handler, Closeable {
 
     /**
      * The strategy which should be used for loading the
-     * {@link ClientImplProvider}. By default, the provider will be loaded using
+     * {@link HttpClientProvider}. By default, the provider will be loaded using
      * a {@code ServiceLoader}.
      *
      * @see Loader#SERVICE_LOADER
@@ -107,7 +107,7 @@ public final class HttpClientHandler implements Handler, Closeable {
     public static final Option<TrustManager[]> OPTION_TRUST_MANAGERS = Option.of(TrustManager[].class, null);
 
     /** The client implementation. */
-    private final ClientImpl impl;
+    private final HttpClient httpClient;
 
     /**
      * SSL host name verification policies.
@@ -163,11 +163,11 @@ public final class HttpClientHandler implements Handler, Closeable {
     public HttpClientHandler(final Options options) throws HttpApplicationException {
         Reject.ifNull(options);
         final Loader loader = options.get(OPTION_LOADER);
-        final ClientImplProvider factory = loader.load(ClientImplProvider.class, options);
+        final HttpClientProvider factory = loader.load(HttpClientProvider.class, options);
         if (factory == null) {
-            throw new HttpApplicationException("No HTTP client factory found");
+            throw new HttpApplicationException("No HTTP client provider found");
         }
-        this.impl = factory.newClientImpl(options);
+        this.httpClient = factory.newHttpClient(options);
     }
 
     /**
@@ -179,7 +179,7 @@ public final class HttpClientHandler implements Handler, Closeable {
      */
     @Override
     public void close() throws IOException {
-        impl.close();
+        httpClient.close();
     }
 
     /**
@@ -190,6 +190,6 @@ public final class HttpClientHandler implements Handler, Closeable {
      */
     @Override
     public Promise<Response, NeverThrowsException> handle(Context context, Request request) {
-        return impl.sendAsync(request);
+        return httpClient.sendAsync(request);
     }
 }

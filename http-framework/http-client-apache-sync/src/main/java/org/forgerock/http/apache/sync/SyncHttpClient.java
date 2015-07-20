@@ -23,7 +23,7 @@ import java.io.IOException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.forgerock.http.apache.AbstractClient;
+import org.forgerock.http.apache.AbstractHttpClient;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
@@ -36,12 +36,12 @@ import org.forgerock.util.promise.Promises;
 /**
  * Apache HTTP Client implementation.
  */
-final class SyncClient extends AbstractClient {
+final class SyncHttpClient extends AbstractHttpClient {
 
     /** The Apache HTTP client to transmit requests through. */
     private final CloseableHttpClient httpClient;
 
-    SyncClient(final CloseableHttpClient httpClient, final Factory<Buffer> storage) {
+    SyncHttpClient(final CloseableHttpClient httpClient, final Factory<Buffer> storage) {
         super(storage);
         this.httpClient = httpClient;
     }

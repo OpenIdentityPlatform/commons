@@ -25,12 +25,12 @@ import org.forgerock.util.promise.Promise;
 
 /**
  * An SPI interface for HTTP {@code Client} implementations. A
- * {@link ClientImplProvider} is loaded during construction of a new HTTP
+ * {@link HttpClientProvider} is loaded during construction of a new HTTP
  * {@link org.forgerock.http.Client Client}. The first available provider is
- * selected and its {@link ClientImplProvider#newClientImpl(org.forgerock.util.Options)} method
- * invoked in order to construct and configure a new {@link ClientImpl}.
+ * selected and its {@link HttpClientProvider#newHttpClient(org.forgerock.util.Options)} method
+ * invoked in order to construct and configure a new {@link HttpClient}.
  */
-public interface ClientImpl extends Closeable {
+public interface HttpClient extends Closeable {
 
     /**
      * Returns a {@link Promise} representing the asynchronous {@link Response} of the given {@code request}.
