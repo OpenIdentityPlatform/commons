@@ -16,16 +16,19 @@
 
 package org.forgerock.json.test.assertj;
 
+import java.util.List;
+import java.util.Map;
+
 import org.assertj.core.api.AbstractAssert;
+import org.assertj.core.api.AbstractBooleanAssert;
+import org.assertj.core.api.AbstractCharSequenceAssert;
+import org.assertj.core.api.AbstractDoubleAssert;
+import org.assertj.core.api.AbstractIntegerAssert;
+import org.assertj.core.api.AbstractListAssert;
+import org.assertj.core.api.AbstractLongAssert;
+import org.assertj.core.api.AbstractMapAssert;
 import org.assertj.core.api.Assertions;
-import org.assertj.core.api.BooleanAssert;
 import org.assertj.core.api.Condition;
-import org.assertj.core.api.DoubleAssert;
-import org.assertj.core.api.IntegerAssert;
-import org.assertj.core.api.ListAssert;
-import org.assertj.core.api.LongAssert;
-import org.assertj.core.api.MapAssert;
-import org.assertj.core.api.StringAssert;
 import org.assertj.core.data.MapEntry;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -169,11 +172,11 @@ public class AssertJJsonValueAssert {
         }
 
         /**
-         * Get a {@link BooleanAssert} for the referenced {@link JsonValue} is a boolean, to check its value.
+         * Get a {@link AbstractBooleanAssert} for the referenced {@link JsonValue} is a boolean, to check its value.
          * @param path The {@link JsonPointer} path to the expected value.
-         * @return This {@link BooleanAssert} instance.
+         * @return This {@link AbstractBooleanAssert} instance.
          */
-        public BooleanAssert booleanAt(String path) {
+        public AbstractBooleanAssert<?> booleanAt(String path) {
             JsonValue child = actual.get(new JsonPointer(path));
             Assertions.assertThat(child.isBoolean()).isTrue();
             return Assertions.assertThat(child.asBoolean());
@@ -204,11 +207,11 @@ public class AssertJJsonValueAssert {
         }
 
         /**
-         * Get a {@link StringAssert} for the referenced {@link JsonValue} is a string, to check its value.
+         * Get a {@link AbstractCharSequenceAssert} for the referenced {@link JsonValue} is a string, to check its value.
          * @param path The {@link JsonPointer} path to the expected value.
-         * @return This {@link StringAssert} instance.
+         * @return This {@link AbstractCharSequenceAssert} instance.
          */
-        public StringAssert stringAt(String path) {
+        public AbstractCharSequenceAssert<?, String> stringAt(String path) {
             JsonValue child = actual.get(new JsonPointer(path));
             Assertions.assertThat(child.isString()).isTrue();
             return Assertions.assertThat(child.asString());
@@ -239,11 +242,11 @@ public class AssertJJsonValueAssert {
         }
 
         /**
-         * Get a {@link IntegerAssert} for the referenced {@link JsonValue} is an integer, to check its value.
+         * Get a {@link AbstractIntegerAssert} for the referenced {@link JsonValue} is an integer, to check its value.
          * @param path The {@link JsonPointer} path to the expected value.
-         * @return This {@link IntegerAssert} instance.
+         * @return This {@link AbstractIntegerAssert} instance.
          */
-        public IntegerAssert integerAt(String path) {
+        public AbstractIntegerAssert<?> integerAt(String path) {
             JsonValue child = actual.get(new JsonPointer(path));
             Assertions.assertThat(child.isNumber()).isTrue();
             return Assertions.assertThat(child.asInteger());
@@ -263,11 +266,11 @@ public class AssertJJsonValueAssert {
         }
 
         /**
-         * Get a {@link LongAssert} for the referenced {@link JsonValue} is a long, to check its value.
+         * Get a {@link AbstractLongAssert} for the referenced {@link JsonValue} is a long, to check its value.
          * @param path The {@link JsonPointer} path to the expected value.
-         * @return This {@link LongAssert} instance.
+         * @return This {@link AbstractLongAssert} instance.
          */
-        public LongAssert longAt(String path) {
+        public AbstractLongAssert<?> longAt(String path) {
             JsonValue child = actual.get(new JsonPointer(path));
             Assertions.assertThat(child.isNumber()).isTrue();
             return Assertions.assertThat(child.asLong());
@@ -287,11 +290,11 @@ public class AssertJJsonValueAssert {
         }
 
         /**
-         * Get a {@link DoubleAssert} for the referenced {@link JsonValue} is a double, to check its value.
+         * Get a {@link AbstractDoubleAssert} for the referenced {@link JsonValue} is a double, to check its value.
          * @param path The {@link JsonPointer} path to the expected value.
-         * @return This {@link DoubleAssert} instance.
+         * @return This {@link AbstractDoubleAssert} instance.
          */
-        public DoubleAssert doubleAt(String path) {
+        public AbstractDoubleAssert<?> doubleAt(String path) {
             JsonValue child = actual.get(new JsonPointer(path));
             Assertions.assertThat(child.isNumber()).isTrue();
             return Assertions.assertThat(child.asDouble());
@@ -307,7 +310,7 @@ public class AssertJJsonValueAssert {
 
     public static class ObjectJsonValueAssert extends AbstractJsonValueAssert<ObjectJsonValueAssert> {
 
-        private MapAssert<String, Object> mapAssert;
+        private AbstractMapAssert<?, ? extends Map<String, Object>, String, Object> mapAssert;
 
         private ObjectJsonValueAssert(JsonValue value) {
             super(ObjectJsonValueAssert.class, value);
@@ -319,7 +322,7 @@ public class AssertJJsonValueAssert {
          * @param key The name of the object property.
          * @param value The expected value.
          * @return This assert instance for further processing (if required).
-         * @see MapAssert#containsEntry
+         * @see AbstractMapAssert#containsEntry
          */
         public ObjectJsonValueAssert contains(String key, Object value) {
             mapAssert.containsEntry(key, value);
@@ -330,7 +333,7 @@ public class AssertJJsonValueAssert {
          * Check that this object contains the specified properties.
          * @param entries The expected values.
          * @return This assert instance for further processing (if required).
-         * @see MapAssert#contains
+         * @see AbstractMapAssert#contains
          */
         public ObjectJsonValueAssert contains(MapEntry... entries) {
             mapAssert.contains(entries);
@@ -341,7 +344,7 @@ public class AssertJJsonValueAssert {
          * Check that this object only contains the specified properties.
          * @param entries The expected values.
          * @return This assert instance for further processing (if required).
-         * @see MapAssert#containsOnly
+         * @see AbstractMapAssert#containsOnly
          */
         public ObjectJsonValueAssert containsOnly(MapEntry... entries) {
             mapAssert.containsOnly(entries);
@@ -352,7 +355,7 @@ public class AssertJJsonValueAssert {
          * Check that this object contains exactly the specified properties.
          * @param entries The expected values.
          * @return This assert instance for further processing (if required).
-         * @see MapAssert#containsExactly
+         * @see AbstractMapAssert#containsExactly
          */
         public ObjectJsonValueAssert containsExactly(MapEntry... entries) {
             mapAssert.containsExactly(entries);
@@ -363,7 +366,7 @@ public class AssertJJsonValueAssert {
          * Check that this object contains a field with the specified name.
          * @param key The expected key.
          * @return This assert instance for further processing (if required).
-         * @see MapAssert#containsKey
+         * @see AbstractMapAssert#containsKey
          */
         public ObjectJsonValueAssert containsField(String key) {
             mapAssert.containsKey(key);
@@ -374,7 +377,7 @@ public class AssertJJsonValueAssert {
          * Check that this object contains fields with the specified names.
          * @param keys The expected keys.
          * @return This assert instance for further processing (if required).
-         * @see MapAssert#containsKeys
+         * @see AbstractMapAssert#containsKeys
          */
         public ObjectJsonValueAssert containsFields(String... keys) {
             mapAssert.containsKeys(keys);
@@ -386,7 +389,7 @@ public class AssertJJsonValueAssert {
          * @param key The name of the object property.
          * @param value The expected value it should not equal if it exists.
          * @return This assert instance for further processing (if required).
-         * @see MapAssert#doesNotContainEntry
+         * @see AbstractMapAssert#doesNotContainEntry
          */
         public ObjectJsonValueAssert doesNotContain(String key, Object value) {
             mapAssert.doesNotContainEntry(key, value);
@@ -397,7 +400,7 @@ public class AssertJJsonValueAssert {
          * Check that this object does not contain a property with the given name, and value.
          * @param entries The expected entries that should not exist.
          * @return This assert instance for further processing (if required).
-         * @see MapAssert#doesNotContain
+         * @see AbstractMapAssert#doesNotContain
          */
         public ObjectJsonValueAssert doesNotContain(MapEntry... entries) {
             mapAssert.doesNotContain(entries);
@@ -407,7 +410,7 @@ public class AssertJJsonValueAssert {
     }
 
     public static class ArrayJsonValueAssert extends AbstractJsonValueAssert<ArrayJsonValueAssert> {
-        private ListAssert<Object> listAssert;
+        private AbstractListAssert<?, ? extends List<?>, Object> listAssert;
 
         private ArrayJsonValueAssert(JsonValue value) {
             super(ArrayJsonValueAssert.class, value);
@@ -418,7 +421,7 @@ public class AssertJJsonValueAssert {
          * Check that this array contains the given values.
          * @param values The expected values.
          * @return This assert instance for further processing (if required).
-         * @see ListAssert#contains
+         * @see AbstractListAssert#contains
          */
         public ArrayJsonValueAssert contains(Object... values) {
             listAssert.contains(values);
@@ -429,7 +432,7 @@ public class AssertJJsonValueAssert {
          * Check that this array contains exactly the given values.
          * @param values The expected values.
          * @return This assert instance for further processing (if required).
-         * @see ListAssert#containsExactly
+         * @see AbstractListAssert#containsExactly
          */
         public ArrayJsonValueAssert containsExactly(Object... values) {
             listAssert.containsExactly(values);
@@ -440,7 +443,7 @@ public class AssertJJsonValueAssert {
          * Check that this array contains the given values as a sequence.
          * @param values The expected values.
          * @return This assert instance for further processing (if required).
-         * @see ListAssert#containsSequence
+         * @see AbstractListAssert#containsSequence
          */
         public ArrayJsonValueAssert containsSequence(Object... values) {
             listAssert.containsSequence(values);
@@ -451,7 +454,7 @@ public class AssertJJsonValueAssert {
          * Check that this array contains only the given values.
          * @param values The expected values.
          * @return This assert instance for further processing (if required).
-         * @see ListAssert#containsOnly
+         * @see AbstractListAssert#containsOnly
          */
         public ArrayJsonValueAssert containsOnly(Object... values) {
             listAssert.containsOnly(values);
@@ -462,7 +465,7 @@ public class AssertJJsonValueAssert {
          * Check that this array does not contain the given values.
          * @param values The values expected to not be contained.
          * @return This assert instance for further processing (if required).
-         * @see ListAssert#doesNotContain
+         * @see AbstractListAssert#doesNotContain
          */
         public ArrayJsonValueAssert doesNotContain(Object... values) {
             listAssert.doesNotContain(values);
@@ -473,7 +476,7 @@ public class AssertJJsonValueAssert {
          * Check that this array starts with the given values.
          * @param values The expected values.
          * @return This assert instance for further processing (if required).
-         * @see ListAssert#startsWith
+         * @see AbstractListAssert#startsWith
          */
         public ArrayJsonValueAssert startsWith(Object... values) {
             listAssert.startsWith(values);
@@ -484,7 +487,7 @@ public class AssertJJsonValueAssert {
          * Check that this array ends with the given values.
          * @param values The expected values.
          * @return This assert instance for further processing (if required).
-         * @see ListAssert#endsWith
+         * @see AbstractListAssert#endsWith
          */
         public ArrayJsonValueAssert endsWith(Object... values) {
             listAssert.endsWith(values);
@@ -494,7 +497,7 @@ public class AssertJJsonValueAssert {
         /**
          * Check that this array does not contain duplicates.
          * @return This assert instance for further processing (if required).
-         * @see ListAssert#doesNotHaveDuplicates
+         * @see AbstractListAssert#doesNotHaveDuplicates
          */
         public ArrayJsonValueAssert doesNotHaveDuplicates() {
             listAssert.doesNotHaveDuplicates();
@@ -505,7 +508,7 @@ public class AssertJJsonValueAssert {
          * Check that this array contains the given size.
          * @param size The expected size.
          * @return This assert instance for further processing (if required).
-         * @see ListAssert#hasSize
+         * @see AbstractListAssert#hasSize
          */
         public ArrayJsonValueAssert hasSize(int size) {
             listAssert.hasSize(size);
