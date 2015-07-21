@@ -26,6 +26,7 @@
 
 define([
     "jquery",
+    "doTimeout",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
     "../test/tests/commons",
@@ -33,7 +34,7 @@ define([
     "../test/tests/mock",
     "../test/tests/getLoggedUser",
     "../test/tests/router"
-], function ($, constants, eventManager, commonsTests, userTests, mockTests, getLoggedUser, routerTests) {
+], function ($, doTimeout, constants, eventManager, commonsTests, userTests, mockTests, getLoggedUser, routerTests) {
 
     $.doTimeout = function (name, time, func) {
         func(); // run the function immediately rather than delayed.
@@ -47,7 +48,9 @@ define([
                         "password": "test"
                     };
 
-                QUnit.testStart(function () {
+                QUnit.testStart(function (testDetails) {
+                    console.log("Starting " + testDetails.module + ":" + testDetails.name + "("+ testDetails.testNumber +")");
+
                     var vm = require("org/forgerock/commons/ui/common/main/ViewManager");
 
                     vm.currentView = null;
@@ -63,7 +66,7 @@ define([
                     QUnit.start();
 
                     commonsTests.executeAll(server, userParams);
-                    //userTests.executeAll(server, getLoggedUser());
+                    userTests.executeAll(server, getLoggedUser());
                     //mockTests.executeAll(server, userParams);
                     //routerTests.executeAll();
                 }, 500);
