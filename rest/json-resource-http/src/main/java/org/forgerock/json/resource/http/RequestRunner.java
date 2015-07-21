@@ -153,7 +153,9 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
                 }, new AsyncFunction<ResourceException, Response, NeverThrowsException>() {
                     @Override
                     public Promise<Response, NeverThrowsException> apply(ResourceException e) {
-                        if (e instanceof PreconditionFailedException && request.getNewResourceId() != null) {
+                        if (e instanceof PreconditionFailedException
+                                && getIfNoneMatch(httpRequest) == null
+                                && request.getNewResourceId() != null) {
                             // update existing resource
                             return visitUpdateRequest(p,
                                     Requests.newUpdateRequest(
