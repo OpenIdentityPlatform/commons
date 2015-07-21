@@ -17,6 +17,7 @@
 package org.forgerock.json.resource.test.assertj;
 
 import org.assertj.core.api.AbstractAssert;
+import org.assertj.core.api.AbstractCharSequenceAssert;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.StringAssert;
 import org.forgerock.json.resource.Resource;
@@ -71,17 +72,17 @@ public class AssertJResourceAssert extends AbstractAssert<AssertJResourceAssert,
 
     /**
      * Assert the value of the resource ID.
-     * @return A {@code StringAssert} for this Resource's ID.
+     * @return A {@code AbstractCharSequenceAssert} for this Resource's ID.
      */
-    public StringAssert withId() {
+    public AbstractCharSequenceAssert<?, String> withId() {
         return Assertions.assertThat(actual.getId());
     }
 
     /**
      * Assert the value of the resource revision.
-     * @return A {@code StringAssert} for this Resource's revision.
+     * @return A {@code AbstractCharSequenceAssert} for this Resource's revision.
      */
-    public StringAssert withRevision() {
+    public AbstractCharSequenceAssert<?, String> withRevision() {
         return Assertions.assertThat(actual.getRevision());
     }
 
