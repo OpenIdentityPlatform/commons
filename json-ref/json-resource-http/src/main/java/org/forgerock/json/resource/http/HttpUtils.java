@@ -16,7 +16,9 @@
 
 package org.forgerock.json.resource.http;
 
-import static org.forgerock.json.resource.VersionConstants.ACCEPT_API_VERSION;
+import org.forgerock.http.header.AcceptApiVersionHeader;
+
+import static org.forgerock.http.routing.Version.version;
 import static org.forgerock.util.Utils.closeSilently;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
@@ -51,6 +53,7 @@ import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.Status;
 import org.forgerock.json.JsonValue;
+import org.forgerock.http.routing.Version;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.InternalServerErrorException;
@@ -59,7 +62,6 @@ import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.Version;
 import org.forgerock.util.encode.Base64url;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
@@ -90,7 +92,7 @@ public final class HttpUtils {
     public static final String CONTENT_DISPOSITION = "Content-Disposition";
     static final Collection<String> RESTRICTED_HEADER_NAMES = Arrays.asList(
             ContentTypeHeader.NAME,
-            ACCEPT_API_VERSION,
+            AcceptApiVersionHeader.NAME,
             HEADER_IF_MODIFIED_SINCE,
             HEADER_IF_UNMODIFIED_SINCE,
             HEADER_IF_MATCH,
@@ -141,7 +143,7 @@ public final class HttpUtils {
     /** The name of the protocol in use */
     public static final String PROTOCOL_NAME = "crest";
     /** The version of the named protocol */
-    public static final Version PROTOCOL_VERSION = Version.valueOf("1.0");
+    public static final Version PROTOCOL_VERSION = version("1.0");
 
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
 
@@ -246,9 +248,33 @@ public final class HttpUtils {
      *            The resource exception indicating why the request failed.
      */
     static Promise<Response, NeverThrowsException> fail(org.forgerock.http.protocol.Request req, final Throwable t) {
+        return fail0(req, null, t);
+    }
+
+    /**
+     * Safely fail an HTTP request using the provided {@code Exception}.
+     *
+     * @param req
+     *            The HTTP request.
+     * @param resp
+     *            The HTTP response.
+     * @param t
+     *            The resource exception indicating why the request failed.
+     */
+    static Promise<Response, NeverThrowsException> fail(org.forgerock.http.protocol.Request req,
+            org.forgerock.http.protocol.Response resp, final Throwable t) {
+        return fail0(req, resp, t);
+    }
+
+    private static Promise<Response, NeverThrowsException> fail0(org.forgerock.http.protocol.Request req,
+            org.forgerock.http.protocol.Response resp, Throwable t) {
         final ResourceException re = adapt(t);
         try {
-            Response resp = prepareResponse(req);
+            if (resp == null) {
+                resp = prepareResponse(req);
+            } else {
+                resp = prepareResponse(req, resp);
+            }
             resp.setStatus(Status.valueOf(re.getCode()));
             final JsonGenerator writer = getJsonGenerator(req, resp);
             writer.writeObject(re.toJsonValue().getObject());
@@ -448,10 +474,14 @@ public final class HttpUtils {
     }
 
     static Response prepareResponse(org.forgerock.http.protocol.Request req) throws ResourceException {
+        return prepareResponse(req, new Response());
+    }
+
+    static Response prepareResponse(org.forgerock.http.protocol.Request req, org.forgerock.http.protocol.Response resp)
+            throws ResourceException {
         //get content type from req path
         try {
-            Response resp = new Response()
-                    .setStatus(Status.OK);
+            resp.setStatus(Status.OK);
             String mimeType = req.getForm().getFirst(PARAM_MIME_TYPE);
             if (METHOD_GET.equalsIgnoreCase(getMethod(req)) && mimeType != null && !mimeType.isEmpty()) {
                 ContentType contentType = new ContentType(mimeType);

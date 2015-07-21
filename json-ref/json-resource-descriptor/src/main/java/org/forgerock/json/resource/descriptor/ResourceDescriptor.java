@@ -27,9 +27,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.factories.SchemaFactoryWrapper;
 import org.forgerock.http.ResourcePath;
+import org.forgerock.http.routing.Version;
 import org.forgerock.i18n.LocalizableMessage;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.Version;
 
 @SuppressWarnings("javadoc")
 public final class ResourceDescriptor {

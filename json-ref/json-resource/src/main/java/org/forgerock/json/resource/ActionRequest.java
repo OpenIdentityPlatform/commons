@@ -19,6 +19,7 @@ package org.forgerock.json.resource;
 import org.forgerock.http.ResourcePath;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.http.routing.Version;
 
 import java.util.List;
 
@@ -30,19 +31,19 @@ public interface ActionRequest extends Request {
      * The name of the field which contains the action ID in the JSON
      * representation.
      */
-    public static final String FIELD_ACTION = "action";
+    String FIELD_ACTION = "action";
 
     /**
      * The name of the field which contains the action content in the JSON
      * representation.
      */
-    public static final String FIELD_CONTENT = "content";
+    String FIELD_CONTENT = "content";
 
     /**
      * The name of the action which is reserved for performing "create"
      * operations.
      */
-    public static final String ACTION_ID_CREATE = "create";
+    String ACTION_ID_CREATE = "create";
 
     /**
      * {@inheritDoc}
@@ -161,4 +162,7 @@ public interface ActionRequest extends Request {
      */
     @Override
     ActionRequest setAdditionalParameter(String name, String value) throws BadRequestException;
+
+    @Override
+    ActionRequest setResourceVersion(Version resourceVersion);
 }

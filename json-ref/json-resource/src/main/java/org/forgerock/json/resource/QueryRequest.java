@@ -18,6 +18,7 @@ package org.forgerock.json.resource;
 
 import org.forgerock.http.ResourcePath;
 import org.forgerock.json.JsonPointer;
+import org.forgerock.http.routing.Version;
 
 import java.util.List;
 
@@ -427,4 +428,7 @@ public interface QueryRequest extends Request {
      */
     @Override
     QueryRequest setAdditionalParameter(String name, String value) throws BadRequestException;
+
+    @Override
+    QueryRequest setResourceVersion(Version resourceVersion);
 }

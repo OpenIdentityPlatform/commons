@@ -22,6 +22,7 @@ import java.util.Map;
 import org.forgerock.http.ResourcePath;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.http.routing.Version;
 
 /**
  * Common attributes of all JSON resource requests.
@@ -130,7 +131,7 @@ public interface Request {
      * <p>
      * <b>NOTE</b>: for resource provider implementations the resource path is
      * relative to the current resource being accessed. See the description of
-     * {@link org.forgerock.http.RouterContext} for more information.
+     * {@link org.forgerock.http.routing.RouterContext} for more information.
      *
      * @return The non-{@code null} path of the JSON resource to which this
      *         request should be targeted, which may be the empty string.
@@ -144,7 +145,7 @@ public interface Request {
      * <p>
      * <b>NOTE</b>: for resource provider implementations the resource path is
      * relative to the current resource being accessed. See the description of
-     * {@link org.forgerock.http.RouterContext} for more information.
+     * {@link org.forgerock.http.routing.RouterContext} for more information.
      *
      * @return The non-{@code null} path of the JSON resource to which this
      *         request should be targeted, which may be the empty string.
@@ -173,13 +174,20 @@ public interface Request {
     String getAdditionalParameter(String name);
 
     /**
+     * Gets the requested API version of the resource.
+     *
+     * @return The requested API version of the resource.
+     */
+    Version getResourceVersion();
+
+    /**
      * Sets the non-{@code null} path of the JSON resource to which this request
      * should be targeted. The resource path is relative and never begins or
      * ends with a forward slash, but may be empty.
      * <p>
      * <b>NOTE</b>: for resource provider implementations the resource path is
      * relative to the current resource being accessed. See the description of
-     * {@link org.forgerock.http.RouterContext} for more information.
+     * {@link org.forgerock.http.routing.RouterContext} for more information.
      *
      * @param path
      *            The non-{@code null} path of the JSON resource to which this
@@ -199,7 +207,7 @@ public interface Request {
      * <p>
      * <b>NOTE</b>: for resource provider implementations the resource path is
      * relative to the current resource being accessed. See the description of
-     * {@link org.forgerock.http.RouterContext} for more information.
+     * {@link org.forgerock.http.routing.RouterContext} for more information.
      *
      * @param path
      *            The non-{@code null} path of the JSON resource to which this
@@ -219,7 +227,7 @@ public interface Request {
      *            The name of the additional parameter.
      * @param value
      *            The additional parameter's value.
-     * @return This action request.
+     * @return This request.
      * @throws BadRequestException
      *             If this request does not permit the additional parameter to be set.
      * @throws UnsupportedOperationException
@@ -227,6 +235,14 @@ public interface Request {
      *             additional parameters.
      */
     Request setAdditionalParameter(String name, String value) throws BadRequestException;
+
+    /**
+     * Sets the requested API version of the resource.
+     *
+     * @param resourceVersion The requested API version of the resource.
+     * @return This request.
+     */
+    Request setResourceVersion(Version resourceVersion);
 
     /**
      * Return a JsonValue representation of this request.
