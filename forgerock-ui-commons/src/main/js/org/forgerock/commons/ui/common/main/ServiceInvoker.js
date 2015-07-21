@@ -29,9 +29,8 @@ define("org/forgerock/commons/ui/common/main/ServiceInvoker", [
     /**
      * Performs a REST service call.
      * <p>
-     * Irrespective of the call method (GET, POST etc), if a <tt>dataType</tt> of <tt>"json"</tt> is not set on the
-     * options, the request has it's <tt>dataType</tt> and <tt>contentType</tt> set to be <tt>"json"</tt> and
-     * <tt>"application/json"</tt> respectively.
+     * If a <tt>dataType</tt> of <tt>"json"</tt> is set on the options, the request has it's <tt>contentType</tt> set to
+     * be <tt>"application/json"</tt> automatically.
      * <p>
      * Additional options can also be passed to control behaviour beyond what
      * {@link http://api.jquery.com/jquery.ajax|$.ajax()} is aware of:
@@ -50,7 +49,7 @@ define("org/forgerock/commons/ui/common/main/ServiceInvoker", [
             errorCallback = options.error,
             isJSONRequest = options.hasOwnProperty("dataType") && options.dataType === "json";
 
-        if (!isJSONRequest) {
+        if (isJSONRequest) {
             options.dataType = "json";
             options.contentType = "application/json";
         }
