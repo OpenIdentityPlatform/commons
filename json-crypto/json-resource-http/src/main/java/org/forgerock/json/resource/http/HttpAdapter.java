@@ -447,7 +447,7 @@ final class HttpAdapter implements Handler {
             final JsonValue content = getJsonContent(req);
 
             final String rev = getIfNoneMatch(req);
-            if (ETAG_ANY.equals(rev)) {
+            if (ETAG_ANY.equals(rev) || getIfMatch(req) == null) {
                 // This is a create with a user provided resource ID: split the
                 // path into the parent resource name and resource ID.
                 final ResourcePath resourcePath = getResourcePath(context, req);

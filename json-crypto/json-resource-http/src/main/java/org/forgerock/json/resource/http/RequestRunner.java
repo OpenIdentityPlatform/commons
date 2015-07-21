@@ -43,12 +43,14 @@ import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestVisitor;
+import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.UpdateRequest;
@@ -151,7 +153,15 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
                 }, new AsyncFunction<ResourceException, Response, NeverThrowsException>() {
                     @Override
                     public Promise<Response, NeverThrowsException> apply(ResourceException e) {
-                        return handleError(e);
+                        if (e instanceof PreconditionFailedException && request.getNewResourceId() != null) {
+                            // update existing resource
+                            return visitUpdateRequest(p,
+                                    Requests.newUpdateRequest(
+                                            request.getResourcePathObject().child(request.getNewResourceId()),
+                                            request.getContent()));
+                        } else {
+                            return handleError(e);
+                        }
                     }
                 });
     }
