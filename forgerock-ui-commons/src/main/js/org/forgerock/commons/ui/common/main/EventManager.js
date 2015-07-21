@@ -43,6 +43,11 @@ define("org/forgerock/commons/ui/common/main/EventManager", [
     obj.sendEvent = function (eventId, event) {
         return $.when($(document).triggerHandler(eventId, event)).then(
             function (response) {
+
+                if (response === undefined) {
+                    // in the case when the event handler didn't return anything, just pass along the original event
+                    response = event;
+                }
                 var promise;
                 if (_.has(subscriptions, eventId)) {
                     promise = subscriptions[eventId];
@@ -83,7 +88,7 @@ define("org/forgerock/commons/ui/common/main/EventManager", [
             subscriptions[eventId] = $.Deferred();
         }
         return subscriptions[eventId];
-    }
+    };
 
     return obj;
 });
