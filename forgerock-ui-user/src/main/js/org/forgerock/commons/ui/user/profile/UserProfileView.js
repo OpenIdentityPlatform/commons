@@ -28,8 +28,9 @@
  * @author mbilski
  */
 define("org/forgerock/commons/ui/user/profile/UserProfileView", [
+    "form2js",
+    "js2form",
     "org/forgerock/commons/ui/common/main/AbstractView",
-    "org/forgerock/commons/ui/common/util/ModuleLoader",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "UserDelegate",
@@ -38,7 +39,7 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration"
-], function(AbstractView, ModuleLoader, validatorsManager, uiUtils, userDelegate, router, navigation, eventManager, constants, conf) {
+], function(form2js, js2form, AbstractView, validatorsManager, uiUtils, userDelegate, router, navigation, eventManager, constants, conf) {
     var UserProfileView = AbstractView.extend({
         template: "templates/user/UserProfileTemplate.html",
         baseTemplate: "templates/common/DefaultBaseTemplate.html",
@@ -77,47 +78,48 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
                 changedProtected = [];
 
             if (validatorsManager.formValidated(this.$el)) {
-                ModuleLoader.load("form2js").then(_.bind(function (form2js) {
-                    this.data = form2js(this.el, '.', false);
 
-                    // buttons will be included in this structure, so remove those.
-                    _.each(this.data, function (value, key, list) {
-                        if (this.$el.find("input[name=" + key + "]").hasClass('btn')) {
-                            delete this.data[key];
-                        }
-                    }, this);
+                this.data = form2js(this.el, '.', false);
 
-                    _.each(conf.globalData.protectedUserAttributes, function(attr){
-                        if(_this.data[attr] && conf.loggedUser[attr] !== _this.data[attr]){
-                            changedProtected.push(" "+_this.$el.find("label[for="+attr+"]").text());
-                        }
-                    });
-
-                    if (changedProtected.length === 0) {
-                        this.submit();
-                    } else {
-                        this.data.changedProtected = changedProtected;
-                        eventManager.sendEvent(constants.EVENT_SHOW_CONFIRM_PASSWORD_DIALOG, "ConfirmPasswordDialog");
+                // buttons will be included in this structure, so remove those.
+                _.each(this.data, function (value, key, list) {
+                    if (this.$el.find("input[name=" + key + "]").hasClass('btn')) {
+                        delete this.data[key];
                     }
-                }, this));
+                }, this);
+
+                _.each(conf.globalData.protectedUserAttributes, function(attr){
+                    if(_this.data[attr] && conf.loggedUser[attr] !== _this.data[attr]){
+                        changedProtected.push(" "+_this.$el.find("label[for="+attr+"]").text());
+                    }
+                });
+
+                if (changedProtected.length === 0) {
+                    this.submit();
+                } else {
+                    this.data.changedProtected = changedProtected;
+                    eventManager.sendEvent(constants.EVENT_SHOW_CONFIRM_PASSWORD_DIALOG, "ConfirmPasswordDialog");
+                }
+
             }
         },
 
         render: function(args, callback) {
             this.parentRender(function() {
                 validatorsManager.bindValidators( this.$el, this.delegate.getUserResourceName(conf.loggedUser), _.bind(function () {
-                    this.reloadData().then(callback);
+                    this.reloadData();
+                    if (callback) {
+                        callback();
+                    }
                 }, this ));
             });
         },
 
         reloadData: function() {
-            return ModuleLoader.load("js2form").then(_.bind(function (js2form) {
-                js2form(this.$el.find("#userProfileForm")[0], conf.loggedUser);
-                this.$el.find("input[name=saveButton]").val($.t("common.form.update"));
-                this.$el.find("input[name=resetButton]").val($.t("common.form.reset"));
-                validatorsManager.validateAllFields(this.$el);
-            }, this));
+            js2form(this.$el.find("#userProfileForm")[0], conf.loggedUser);
+            this.$el.find("input[name=saveButton]").val($.t("common.form.update"));
+            this.$el.find("input[name=resetButton]").val($.t("common.form.reset"));
+            validatorsManager.validateAllFields(this.$el);
         }
     });
 
