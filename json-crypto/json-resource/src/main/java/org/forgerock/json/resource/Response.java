@@ -16,9 +16,24 @@
 
 package org.forgerock.json.resource;
 
+import org.forgerock.http.routing.Version;
+
 /**
  * Common response object of all resource responses.
  */
 public interface Response {
 
+    /**
+     * Sets the API version of the resource that the request was routed to.
+     *
+     * @param version The resource API version.
+     */
+    void setResourceApiVersion(Version version);
+
+    /**
+     * Gets the API version of the resource that the request was routed to.
+     *
+     * @return The resource API version.
+     */
+    Version getResourceApiVersion();
 }

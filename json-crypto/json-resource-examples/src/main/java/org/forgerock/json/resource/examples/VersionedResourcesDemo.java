@@ -16,22 +16,22 @@
 
 package org.forgerock.json.resource.examples;
 
-import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
+import static org.forgerock.http.routing.Version.version;
 import static org.forgerock.json.resource.Requests.newCreateRequest;
 import static org.forgerock.json.resource.Resources.newInternalConnection;
+import static org.forgerock.json.resource.RouteMatchers.requestResourceApiVersionMatcher;
+import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
+import static org.forgerock.json.resource.Router.uriTemplate;
 import static org.forgerock.json.resource.examples.DemoUtils.*;
 
-import org.forgerock.http.Context;
-import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.http.context.ServerContext;
-import org.forgerock.json.resource.AcceptAPIVersion;
-import org.forgerock.json.resource.AcceptAPIVersionContext;
+import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
-import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
@@ -46,7 +46,6 @@ import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.json.resource.VersionRouter;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -72,24 +71,21 @@ public final class VersionedResourcesDemo {
         try (ConnectionFactory server = getConnectionFactory();
              Connection connection = server.getConnection()) {
             log("Reading version 1.0 of resource");
-            ResourceResponse resource = connection.read(apiCtx("1.0"), Requests.newReadRequest("users/1"));
-            log("Retrieved resource with revision: " + resource.getRevision());
+            ResourceResponse response = connection.read(ctx(), Requests.newReadRequest("users/1")
+                    .setResourceVersion(version(1)));
+            log("Retrieved resource with revision: " + response.getRevision());
 
 
             log("Reading version 1.5 of resource");
-            resource = connection.read(apiCtx("1.5"), Requests.newReadRequest("users/1"));
-            log("Retrieved resource with revision: " + resource.getRevision());
+            response = connection.read(ctx(), Requests.newReadRequest("users/1")
+                    .setResourceVersion(version(1, 5)));
+            log("Retrieved resource with revision: " + response.getRevision());
 
             log("Reading version 2.0 of resource");
-            resource = connection.read(apiCtx("2.0"), Requests.newReadRequest("users/1"));
-            log("Retrieved resource with revision: " + resource.getRevision());
+            response = connection.read(ctx(), Requests.newReadRequest("users/1")
+                    .setResourceVersion(version(2)));
+            log("Retrieved resource with revision: " + response.getRevision());
         }
-    }
-
-    private static Context apiCtx(String resourceVersion) {
-        return new AcceptAPIVersionContext(ctx(), "PROTOCOL_NAME",
-                AcceptAPIVersion.newBuilder().withDefaultProtocolVersion("1.0").
-                        withDefaultResourceVersion(resourceVersion).build());
     }
 
     private static ConnectionFactory getConnectionFactory() throws ResourceException {
@@ -108,28 +104,34 @@ public final class VersionedResourcesDemo {
         MemoryBackend groups = new MemoryBackend();
 
         Router router = new Router();
-        router.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "/users"), new VersionRouter()
-                .addVersion("1", usersV1Dot0)
-                .addVersion("1.5", usersV1Dot5)
-                .addVersion("2.0", usersV2Dot0));
+        Router usersRouter = new Router();
+        router.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "/users"), usersRouter);
+        usersRouter.addRoute(version(1), usersV1Dot0);
+        usersRouter.addRoute(version(1, 5), usersV1Dot5);
+        usersRouter.addRoute(version(2), usersV2Dot0);
 
-        router.addRoute(requestUriMatcher(RoutingMode.EQUALS, "/roles"), new VersionRouter()
-                .addVersion("1.0", rolesV1Dot0)
-                .addVersion("1.5", rolesV1Dot5)
-                .addVersion("2.0", rolesV2Dot0));
+        Router rolesRouter = new Router();
+        router.addRoute(requestUriMatcher(RoutingMode.EQUALS, "/roles"), rolesRouter);
+        rolesRouter.addRoute(requestResourceApiVersionMatcher(version(1)), rolesV1Dot0);
+        rolesRouter.addRoute(requestResourceApiVersionMatcher(version(1, 5)), rolesV1Dot5);
+        rolesRouter.addRoute(requestResourceApiVersionMatcher(version(2)), rolesV2Dot0);
 
-        router.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "/config"), new VersionRouter()
-                .addVersion("1.0", configV1Dot0)
-                .addVersion("1.5", configV1Dot5)
-                .addVersion("2.0", configV2Dot0));
+        Router configRouter = new Router();
+        router.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "/config"), configRouter);
+        configRouter.addRoute(version(1), configV1Dot0);
+        configRouter.addRoute(version(1, 5), configV1Dot5);
+        configRouter.addRoute(version(2), configV2Dot0);
 
         // Ignores any version information.
-        router.addRoute("groups", groups);
+        router.addRoute(uriTemplate("groups"), groups);
 
         final Connection connection = newInternalConnection(router);
-        connection.create(apiCtx("1.0"), newCreateRequest("users", "1", userAliceWithIdAndRev(1, 0)));
-        connection.create(apiCtx("1.5"), newCreateRequest("users", "1", userAliceWithIdAndRev(1, 1)));
-        connection.create(apiCtx("2.0"), newCreateRequest("users", "1", userAliceWithIdAndRev(1, 2)));
+        connection.create(ctx(), newCreateRequest("users", "1", userAliceWithIdAndRev(1, 0))
+                .setResourceVersion(version(1)));
+        connection.create(ctx(), newCreateRequest("users", "1", userAliceWithIdAndRev(1, 1))
+                .setResourceVersion(version(1, 5)));
+        connection.create(ctx(), newCreateRequest("users", "1", userAliceWithIdAndRev(1, 2))
+                .setResourceVersion(version(2)));
 
         return Resources.newInternalConnectionFactory(router);
     }

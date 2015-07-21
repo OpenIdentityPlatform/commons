@@ -21,6 +21,7 @@ import java.util.List;
 import org.forgerock.http.ResourcePath;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.http.routing.Version;
 
 /**
  * A request to update a JSON resource by applying a set of changes to its
@@ -182,4 +183,7 @@ public interface PatchRequest extends Request {
      */
     @Override
     PatchRequest setAdditionalParameter(String name, String value) throws BadRequestException;
+
+    @Override
+    PatchRequest setResourceVersion(Version resourceVersion);
 }

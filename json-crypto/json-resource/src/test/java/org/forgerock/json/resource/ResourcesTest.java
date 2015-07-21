@@ -24,7 +24,7 @@ import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
 import static org.forgerock.json.resource.TestUtils.*;
 import static org.forgerock.json.resource.test.assertj.AssertJResourceResponseAssert.assertThat;
-import static org.forgerock.json.resource.test.assertj.AssertJJsonValueResponseAssert.assertThat;
+import static org.forgerock.json.resource.test.assertj.AssertJActionResponseAssert.assertThat;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;

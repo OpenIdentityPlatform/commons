@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 import static org.forgerock.http.routing.RoutingMode.EQUALS;
 import static org.forgerock.http.routing.RoutingMode.STARTS_WITH;
 import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
+import static org.forgerock.json.resource.Router.uriTemplate;
 import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.*;
@@ -97,7 +98,7 @@ public class RouterTest {
         ReadRequest request = mockRequest(ReadRequest.class, "users/demo");
 
         //When
-        router.addRoute("users", provider);
+        router.addRoute(uriTemplate("users"), provider);
 
         //Then
         router.handleRead(context, request);
@@ -113,7 +114,7 @@ public class RouterTest {
         ReadRequest request = mockRequest(ReadRequest.class, "config");
 
         //When
-        router.addRoute("config", provider);
+        router.addRoute(uriTemplate("config"), provider);
 
         //Then
         router.handleRead(context, request);

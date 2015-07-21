@@ -21,6 +21,7 @@ import java.util.List;
 import org.forgerock.http.ResourcePath;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.http.routing.Version;
 
 /**
  * A request to create a new JSON resource.
@@ -184,4 +185,7 @@ public interface CreateRequest extends Request {
      */
     @Override
     CreateRequest setAdditionalParameter(String name, String value) throws BadRequestException;
+
+    @Override
+    CreateRequest setResourceVersion(Version resourceVersion);
 }

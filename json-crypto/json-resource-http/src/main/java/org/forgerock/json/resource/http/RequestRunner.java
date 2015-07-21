@@ -32,11 +32,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.fasterxml.jackson.core.JsonGenerator;
 import org.forgerock.http.Context;
 import org.forgerock.http.ResourcePath;
-import org.forgerock.http.routing.RouterContext;
+import org.forgerock.http.header.ContentApiVersionHeader;
 import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.Status;
 import org.forgerock.json.JsonValue;
+import org.forgerock.http.routing.RouterContext;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.AdviceContext;
@@ -84,7 +85,9 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
 
     public final Promise<Response, NeverThrowsException> handleError(final ResourceException error) {
         onError(error);
-        return fail(httpRequest, error);
+        writeApiVersionHeaders(error);
+        writeAdvice();
+        return fail(httpRequest, httpResponse, error);
     }
 
     public final Promise<Response, NeverThrowsException> handleResult(final Connection result) {
@@ -104,6 +107,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
                     @Override
                     public Promise<Response, NeverThrowsException> apply(ActionResponse result) {
                         try {
+                            writeApiVersionHeaders(result);
                             writeAdvice();
                             if (result != null) {
                                 writeJsonValue(result.getJsonContent());
@@ -136,6 +140,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
                     @Override
                     public Promise<Response, NeverThrowsException> apply(ResourceResponse result) {
                         try {
+                            writeApiVersionHeaders(result);
                             writeAdvice();
                             if (result.getId() != null) {
                                 httpResponse.getHeaders().putSingle(HEADER_LOCATION, getResourceURL(request,
@@ -198,7 +203,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
             @Override
             public boolean handleResource(final ResourceResponse resource) {
                 try {
-                    writeHeader(isFirstResult);
+                    writeHeader(resource, isFirstResult);
                     writeJsonValue(resource.getContent());
                     resultCount.incrementAndGet();
                     return true;
@@ -211,7 +216,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
             @Override
             public void handleResult(QueryResponse result) {
                 try {
-                    writeHeader(isFirstResult);
+                    writeHeader(result, isFirstResult);
                     writer.writeEndArray();
                     writer.writeNumberField(FIELD_RESULT_COUNT, resultCount.get());
                     writer.writeStringField(FIELD_PAGED_RESULTS_COOKIE, result.getPagedResultsCookie());
@@ -255,8 +260,9 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
         });
     }
 
-    private void writeHeader(AtomicBoolean isFirstResult) throws IOException {
+    private void writeHeader(org.forgerock.json.resource.Response response, AtomicBoolean isFirstResult) throws IOException {
         if (isFirstResult.compareAndSet(true, false)) {
+            writeApiVersionHeaders(response);
             writeAdvice();
             writer.writeStartObject();
             writer.writeArrayFieldStart(FIELD_RESULT);
@@ -330,6 +336,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
             @Override
             public Promise<Response, NeverThrowsException> apply(ResourceResponse result) {
                 try {
+                    writeApiVersionHeaders(result);
                     writeAdvice();
                     // Don't return the resource if this is a read request and the
                     // If-None-Match header was specified.
@@ -409,6 +416,13 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
             writeTextValue(resource.getContent());
         } else {
             writeBinaryValue(resource.getContent());
+        }
+    }
+
+    private void writeApiVersionHeaders(org.forgerock.json.resource.Response response) {
+        if (response.getResourceApiVersion() != null) {
+            httpResponse.getHeaders().putSingle(
+                    new ContentApiVersionHeader(PROTOCOL_VERSION, response.getResourceApiVersion()));
         }
     }
 

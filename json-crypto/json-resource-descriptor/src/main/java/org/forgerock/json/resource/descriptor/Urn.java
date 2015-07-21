@@ -15,9 +15,11 @@
  */
 package org.forgerock.json.resource.descriptor;
 
-import org.forgerock.json.resource.Version;
+import static org.forgerock.http.routing.Version.version;
 
 import java.util.Locale;
+
+import org.forgerock.http.routing.Version;
 
 @SuppressWarnings("javadoc")
 public final class Urn implements Comparable<Urn> {
@@ -93,7 +95,7 @@ public final class Urn implements Comparable<Urn> {
                 final String namespace = fields[2];
                 final Type type = Type.valueOf(fields[3].toUpperCase(Locale.ENGLISH));
                 final String name = fields[4];
-                final Version version = Version.valueOf(fields[5]);
+                final Version version = version(fields[5]);
                 return new Urn(s, organization, namespace, type, name, version);
             }
         } catch (final IllegalArgumentException e) {

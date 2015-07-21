@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.forgerock.http.ResourcePath;
 import org.forgerock.json.JsonPointer;
+import org.forgerock.http.routing.Version;
 
 /**
  * A request to delete a JSON resource.
@@ -128,4 +129,6 @@ public interface DeleteRequest extends Request {
     @Override
     DeleteRequest setAdditionalParameter(String name, String value) throws BadRequestException;
 
+    @Override
+    DeleteRequest setResourceVersion(Version resourceVersion);
 }

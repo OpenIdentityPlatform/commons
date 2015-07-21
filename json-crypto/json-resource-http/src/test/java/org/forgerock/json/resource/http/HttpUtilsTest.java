@@ -313,7 +313,6 @@ public class HttpUtilsTest {
 
         //then
         assertThat(httpResponse.getHeaders())
-                .hasSize(2)
                 .contains(
                         entry(ContentTypeHeader.NAME, Collections.singletonList(
                                 new ContentTypeHeader(result, HttpUtils.CHARACTER_ENCODING, null).toString())),
@@ -359,7 +358,6 @@ public class HttpUtilsTest {
 
         //then
         assertThat(httpResponse.getHeaders())
-                .hasSize(2)
                 .contains(
                         entry(ContentTypeHeader.NAME, Collections.singletonList(
                                 new ContentTypeHeader(result, HttpUtils.CHARACTER_ENCODING, null).toString())),

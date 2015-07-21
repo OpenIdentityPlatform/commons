@@ -22,6 +22,7 @@ import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.PatchOperation.*;
 import static org.forgerock.json.resource.Requests.*;
 import static org.forgerock.json.resource.Resources.newInternalConnection;
+import static org.forgerock.json.resource.Router.uriTemplate;
 import static org.forgerock.json.resource.TestUtils.*;
 import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
 import static org.testng.Assert.fail;
@@ -34,7 +35,6 @@ import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.Collection;
-
 
 /**
  * Tests for {@link MemoryBackend}.
@@ -297,7 +297,7 @@ public final class MemoryBackendTest {
     private Connection getConnection() {
         final MemoryBackend users = new MemoryBackend();
         final Router router = new Router();
-        router.addRoute("users", users);
+        router.addRoute(uriTemplate("users"), users);
         return newInternalConnection(router);
     }
 
