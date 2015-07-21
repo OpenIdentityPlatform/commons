@@ -132,7 +132,7 @@ abstract class StateChangeAuditEventBuilder<T extends StateChangeAuditEventBuild
      * @param newRevision resulting revision of the affected object.
      * @return this builder
      */
-    public final T revision(long newRevision) {
+    public final T revision(String newRevision) {
         jsonValue.put(REVISION, newRevision);
         return self();
     }

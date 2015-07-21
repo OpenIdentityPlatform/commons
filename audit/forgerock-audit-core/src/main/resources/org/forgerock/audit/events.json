@@ -190,7 +190,7 @@
           }
         },
         "revision": {
-          "type": "integer"
+          "type": "string"
         }
       }
     }
@@ -317,7 +317,7 @@
           }
         },
         "revision": {
-          "type": "integer"
+          "type": "string"
         }
       }
     }

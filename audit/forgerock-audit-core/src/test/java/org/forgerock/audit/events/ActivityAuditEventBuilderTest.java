@@ -74,7 +74,7 @@ public class ActivityAuditEventBuilderTest {
                 .before("{ \"name\": \"Old\", \"revision\": 1 }")
                 .after("{ \"name\": \"New\", \"revision\": 2 }")
                 .changedFields("name", "revision")
-                .revision(2)
+                .revision("2")
                 .openField("value")
                 .toEvent();
 
@@ -116,7 +116,7 @@ public class ActivityAuditEventBuilderTest {
                 .before("{ \"name\": \"Old\", \"revision\": 1 }")
                 .after("{ \"name\": \"New\", \"revision\": 2 }")
                 .changedFields("name", "revision")
-                .revision(2)
+                .revision("2")
                 .openField("value")
                 .transactionId("transactionId")
                 .timestamp(1427293286239L)
@@ -138,7 +138,7 @@ public class ActivityAuditEventBuilderTest {
         assertThat(value.get(BEFORE).asString()).isEqualTo("{ \"name\": \"Old\", \"revision\": 1 }");
         assertThat(value.get(AFTER).asString()).isEqualTo("{ \"name\": \"New\", \"revision\": 2 }");
         assertThat(value.get(CHANGED_FIELDS).asList(String.class)).containsExactly("name", "revision");
-        assertThat(value.get(REVISION).asLong()).isEqualTo(2);
+        assertThat(value.get(REVISION).asString()).isEqualTo("2");
         assertThat(value.get("open").getObject()).isEqualTo("value");
     }
 
