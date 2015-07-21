@@ -65,7 +65,10 @@ public final class JsonSchemaUtils {
     }
 
     private static Set<String> concatPrefix(final Set<String> pointers, final String id) {
-        final Set<String> newPointers = new LinkedHashSet<String>(pointers.size());
+        if (pointers.isEmpty()) {
+            return new HashSet<String>(){{add(id);}};
+        }
+        final Set<String> newPointers = new LinkedHashSet<>(pointers.size());
         for (String pointer : pointers) {
             final StringBuilder stringBuilder = new StringBuilder();
             if (FORWARD_SLASH.equals(id)) {
