@@ -32,6 +32,7 @@ import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.Status;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
+import org.forgerock.util.promise.Promises;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -83,6 +84,9 @@ public class RouterTest {
         Handler defaultRouteHandler = mock(Handler.class);
 
         router.setDefaultRoute(defaultRouteHandler);
+
+        given(defaultRouteHandler.handle(any(Context.class), eq(request)))
+                .willReturn(Promises.<Response, NeverThrowsException>newResultPromise(new Response()));
 
         //When
         router.handle(context, request);

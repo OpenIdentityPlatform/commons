@@ -67,7 +67,7 @@ enum HttpApplicationLoader {
             Iterator<HttpApplication> iterator = configurations.iterator();
 
             if (!iterator.hasNext()) {
-                throw new ServletException("No ServletConfiguration implementation registered.");
+                throw new ServletException("No HttpApplication implementation registered.");
             }
 
             HttpApplication configuration = iterator.next();
@@ -77,7 +77,7 @@ enum HttpApplicationLoader {
                 List<Object> messageParams = new ArrayList<Object>();
                 messageParams.add(iterator.next().getClass().getName());
 
-                String message = "Multiple ServletConfiguration implementations registered.\n"
+                String message = "Multiple HttpApplication implementations registered.\n"
                         + "%d configurations found: %s";
 
                 while (iterator.hasNext()) {
