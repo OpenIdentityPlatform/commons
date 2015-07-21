@@ -1,96 +1,121 @@
 /**
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2011-2015 ForgeRock AS.
  */
 
 /*global define*/
-
-/**
- * @author yaromin
- */
 define("org/forgerock/commons/ui/common/main/ServiceInvoker", [
     "jquery",
+    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/commons/ui/common/util/ObjectUtil",
-    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware"
-], function($, constants, em, objUtil, AbstractConfigurationAware) {
-
+    "org/forgerock/commons/ui/common/main/EventManager"
+], function($, AbstractConfigurationAware, Constants, EventManager) {
+    /**
+     * @exports org/forgerock/commons/ui/common/main/ServiceInvoker
+     */
     var obj = new AbstractConfigurationAware();
 
-    obj.restCall = function(callParamsParam) {
-        var current = this, callParams, realSuccess, realError, nonJsonRequest = false;
+    /**
+     * Performs a REST service call.
+     * <p>
+     * Irrespective of the call method (GET, POST etc), if a <tt>dataType</tt> of <tt>"json"</tt> is not set on the
+     * options, the request has it's <tt>dataType</tt> and <tt>contentType</tt> set to be <tt>"json"</tt> and
+     * <tt>"application/json"</tt> respectively.
+     * <p>
+     * Additional options can also be passed to control behaviour beyond what
+     * {@link http://api.jquery.com/jquery.ajax|$.ajax()} is aware of:
+     * <code><pre>
+     * {
+     *     suppressEvents: true // Default "false". Suppresses dispatching of EVENT_START_REST_CALL,
+     *                             EVENT_REST_CALL_ERROR and EVENT_END_REST_CALL events.
+     * }
+     * </code></pre>
+     * @param  {Object} options Options that will be passed to {@link http://api.jquery.com/jquery.ajax|$.ajax()}
+     * @return {@link http://api.jquery.com/Types/#jqXHR|jqXHR} Return value from call to
+     *                          {@link http://api.jquery.com/jquery.ajax|$.ajax()}
+     */
+    obj.restCall = function(options) {
+        var successCallback = options.success,
+            errorCallback = options.error,
+            isJSONRequest = options.hasOwnProperty("dataType") && options.dataType === "json";
 
-        nonJsonRequest = (callParamsParam.hasOwnProperty('dataType') && callParamsParam.dataType !== "json");
-
-        if (!nonJsonRequest) {
-            callParamsParam.contentType = 'application/json';
+        if (!isJSONRequest) {
+            options.dataType = "json";
+            options.contentType = "application/json";
         }
-        callParams = callParamsParam;
-        obj.applyDefaultHeadersIfNecessary(callParams, obj.configuration.defaultHeaders);
 
-        //TODO This line can be deleted when the bug https://bugster.forgerock.org/jira/browse/OPENIDM-568 is fixed
-        if(callParams.headers[constants.HEADER_PARAM_NO_SESSION] === false) {
-            delete callParams.headers[constants.HEADER_PARAM_NO_SESSION];
+        obj.applyDefaultHeadersIfNecessary(options, obj.configuration.defaultHeaders);
+
+        if (!options.suppressEvents) {
+            EventManager.sendEvent(Constants.EVENT_START_REST_CALL, {
+                suppressSpinner: options.suppressSpinner
+            });
         }
 
-        em.sendEvent(constants.EVENT_START_REST_CALL, {suppressSpinner: callParamsParam.suppressSpinner});
-        realSuccess = callParams.success;
-        realError = callParams.error;
-        callParams.success = function (data,textStatus, jqXHR) {
+        options.success = function (data, textStatus, jqXHR) {
             if(data && data.error) {
-                em.sendEvent(constants.EVENT_REST_CALL_ERROR, { data: $.extend({}, data, {type: this.type}), textStatus: textStatus, jqXHR: jqXHR, errorsHandlers: callParams.errorsHandlers});
-                if(realError) {
-                    realError(data);
+                if (!options.suppressEvents) {
+                    EventManager.sendEvent(Constants.EVENT_REST_CALL_ERROR, {
+                        data: $.extend({}, data, {type: this.type}),
+                        textStatus: textStatus,
+                        jqXHR: jqXHR,
+                        errorsHandlers: options.errorsHandlers
+                    });
                 }
-            } else {
-                em.sendEvent(constants.EVENT_END_REST_CALL, { data: data, textStatus: textStatus, jqXHR: jqXHR});
-                if(realSuccess) {
-                    realSuccess(data);
-                }
-            }
-        };
-        callParams.error = function (jqXHR, textStatus, errorThrown ) {
-            //TODO try to handle error
-            em.sendEvent(constants.EVENT_REST_CALL_ERROR, { data: $.extend({}, jqXHR, {type: this.type}), textStatus: textStatus, errorThrown: errorThrown, errorsHandlers: callParams.errorsHandlers});
-            if(realError) {
-                realError(jqXHR);
-            }
-        };
-        if (!nonJsonRequest) {
-            callParams.dataType = "json";
-            callParams.contentType = "application/json";
-        }
 
-        callParams.xhrFields = {
-            // Useful for CORS requests, should we be accessing a remote endpoint
-            // http://www.html5rocks.com/en/tutorials/cors/#toc-withcredentials
+                if(errorCallback) { errorCallback(data); }
+            } else {
+                if (!options.suppressEvents) {
+                    EventManager.sendEvent(Constants.EVENT_END_REST_CALL, {
+                        data: data,
+                        textStatus: textStatus,
+                        jqXHR: jqXHR
+                    });
+                }
+
+                if(successCallback) { successCallback(data); }
+            }
+        };
+        options.error = function (jqXHR, textStatus, errorThrown ) {
+            // TODO: Try to handle error
+            if (!options.suppressEvents) {
+                EventManager.sendEvent(Constants.EVENT_REST_CALL_ERROR, {
+                    data: $.extend({}, jqXHR, { type: this.type }),
+                    textStatus: textStatus,
+                    errorThrown: errorThrown,
+                    errorsHandlers: options.errorsHandlers
+                });
+            }
+
+            if(errorCallback) { errorCallback(jqXHR); }
+        };
+
+        options.xhrFields = {
+            /**
+             * Useful for CORS requests, should we be accessing a remote endpoint.
+             * @see http://www.html5rocks.com/en/tutorials/cors/#toc-withcredentials
+             */
             withCredentials: true
         };
 
-        // this is the jQuery default value for this header, but unless manually specified (like so) it won't be included in CORS requests
-        callParams.headers["X-Requested-With"] = "XMLHttpRequest";
+        /**
+         * This is the jQuery default value for this header, but unless manually specified (like so) it won't be
+         * included in CORS requests.
+         */
+        options.headers["X-Requested-With"] = "XMLHttpRequest";
 
-        return $.ajax(callParams);
+        return $.ajax(options);
     };
 
     /**
@@ -100,17 +125,17 @@ define("org/forgerock/commons/ui/common/main/ServiceInvoker", [
      * y ={};
      * require("org/forgerock/commons/ui/common/main/ServiceInvoker").applyDefaultHeadersIfNecessary(y, {a:"c",d:"c"});
      */
-    obj.applyDefaultHeadersIfNecessary = function(callParams, defaultHeaders) {
+    obj.applyDefaultHeadersIfNecessary = function(options, defaultHeaders) {
         var oneHeaderName;
-        if(!defaultHeaders) {
-            return;
-        }
-        if(!callParams.headers) {
-            callParams.headers = defaultHeaders;
+
+        if(!defaultHeaders) { return; }
+
+        if(!options.headers) {
+            options.headers = defaultHeaders;
         } else {
             for(oneHeaderName in defaultHeaders) {
-                if(callParams.headers[oneHeaderName] === undefined) {
-                    callParams.headers[oneHeaderName] = defaultHeaders[oneHeaderName];
+                if(options.headers[oneHeaderName] === undefined) {
+                    options.headers[oneHeaderName] = defaultHeaders[oneHeaderName];
                 }
             }
         }

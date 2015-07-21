@@ -1,12 +1,11 @@
 {
   "name": "forgerock-ui-commons",
-  "version": "1.0.0",
-  "devDependencies": {
-    "jsdoc": "^3.3.0-beta1",
-    "rimraf": "^2.2.8"
-  },
   "scripts": {
     "predocs": "rimraf docs",
     "docs": "jsdoc -P package.json -d docs -r src/main/js"
+  },
+  "devDependencies": {
+    "jsdoc": "^3.3.2",
+    "rimraf": "^2.4.2"
   }
 }
