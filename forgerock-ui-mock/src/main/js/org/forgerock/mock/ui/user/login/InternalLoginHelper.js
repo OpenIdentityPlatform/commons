@@ -25,13 +25,14 @@
 /*global define, window */
 
 define("org/forgerock/mock/ui/user/login/InternalLoginHelper", [
+    "jquery",
     "UserDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "org/forgerock/commons/ui/common/main/ServiceInvoker",
     "org/forgerock/commons/ui/common/main/Configuration"
-], function (userDelegate, eventManager, constants, AbstractConfigurationAware, serviceInvoker, conf) {
+], function ($, userDelegate, eventManager, constants, AbstractConfigurationAware, serviceInvoker, conf) {
     var obj = new AbstractConfigurationAware();
 
     obj.login = function (params, successCallback, errorCallback) {
