@@ -29,5 +29,5 @@ define("org/forgerock/mock/ui/main", [
     "./common/main/MockServer",
     "./common/delegates/SiteConfigurationDelegate",
     "./user/login/InternalLoginHelper",
-    "./user/LoginView"
+    "org/forgerock/commons/ui/common/LoginView"
 ]);
