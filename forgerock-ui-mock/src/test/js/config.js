@@ -42,18 +42,11 @@ require.config({
 });
 
 require([
-    "underscore",
-    "sinon",
-    "mock/Data"
-], function (_, sinon, mockData) {
-
-    var server = sinon.fakeServer.create();
-    server.autoRespond = true;
-    mockData(server);
+    "org/forgerock/mock/ui/common/main/MockServer"
+], function (MockServer) {
 
     require(['../www/main','../test/run'], function (appMain, run) {
-        run(server);
+        run(MockServer.instance);
     });
 
-    return server;
 });

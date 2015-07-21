@@ -171,6 +171,10 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                 // but it is stored in different ways for different products.
                 if (conf.loggedUser) {
                     ModuleLoader.load("bootstrap").then(_.bind(function () {
+                        // in rare cases conf.loggedUser can be reset by the time bootstap has loaded
+                        if (!conf.loggedUser) {
+                            return;
+                        }
 
                         if (conf.loggedUser.userName) {
                             this.data.username = conf.loggedUser.userName; //idm

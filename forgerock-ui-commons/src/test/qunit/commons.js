@@ -26,82 +26,90 @@
 
 
 define([
+    "bootstrap-dialog",
     "sinon",
+    "org/forgerock/commons/ui/common/util/Base64",
+    "org/forgerock/commons/ui/common/util/CookieHelper",
     "org/forgerock/commons/ui/common/main/Configuration",
+    "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/components/Dialog",
     "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/util/CookieHelper",
-    "org/forgerock/commons/ui/common/util/UIUtils",
-    "org/forgerock/commons/ui/common/util/ObjectUtil",
-    "org/forgerock/commons/ui/common/util/Base64",
     "org/forgerock/commons/ui/common/util/Mime",
+    "org/forgerock/commons/ui/common/util/ModuleLoader",
+    "org/forgerock/commons/ui/common/util/ObjectUtil",
     "org/forgerock/commons/ui/common/main/Router",
-    "bootstrap-dialog",
+    "org/forgerock/commons/ui/common/util/UIUtils",
     "./getLoggedUser"
-], function (sinon, conf, Dialog, eventManager, constants, cookieHelper, UIUtils, ObjectUtil, Base64, Mime, router, BootstrapDialog, getLoggedUser) {
+], function (BootstrapDialog, sinon, Base64, CookieHelper, Configuration, Constants, Dialog, EventManager, Mime, ModuleLoader, ObjectUtil, Router,  UIUtils, getLoggedUser) {
     return {
         executeAll: function (server, parameters) {
 
             module('Common Tests');
 
             QUnit.asyncTest("Login", function () {
+                ModuleLoader.load("LoginView").then(function (loginView) {
+                    // intercept the framework's invocation of the render function to define our own callback function
+                    sinon.stub(loginView, "render", function (args, callback) {
+                        loginView.render.restore();
+                        loginView.render(args, function () {
 
-                var loginView = require("LoginView");
-                // intercept the framework's invocation of the render function to define our own callback function
-                sinon.stub(loginView, "render", function (args, callback) {
-                    loginView.render.restore();
-                    loginView.render(args, function () {
+                            QUnit.ok(!_.has(Configuration.globalData, 'hasOptionalUIFeatures'), "There should be no hasOptionalUIFeatures within Configuration.globalData (CUI-24)");
 
-                        QUnit.ok(!_.has(conf.globalData, 'hasOptionalUIFeatures'), "There should be no hasOptionalUIFeatures within conf.globalData (CUI-24)");
+                            QUnit.ok($("#login", loginView.$el).length                                  , "Username field available");
+                            QUnit.ok($("#password", loginView.$el).length                               , "Password field available");
+                            QUnit.ok($("[name=loginButton]", loginView.$el).length                      , "Login button available");
 
-                        QUnit.ok($("#login", loginView.$el).length                                  , "Username field available");
-                        QUnit.ok($("#password", loginView.$el).length                               , "Password field available");
-                        QUnit.ok($("[name=loginButton]", loginView.$el).length                      , "Login button available");
+                            $("#login", loginView.$el).val(parameters.username).trigger('keyup');
 
-                        $("#login", loginView.$el).val(parameters.username).trigger('keyup');
-                        $("#password", loginView.$el).val(parameters.password).trigger('keyup');
 
-                        $("[name=loginButton]", loginView.$el).trigger("click");
+                            $("#password", loginView.$el).val("badPassword").trigger('keyup');
+                            EventManager.subscribeTo(Constants.EVENT_LOGIN_REQUEST).fail(function (reason) {
 
-                        QUnit.ok(conf.loggedUser !== undefined && conf.loggedUser !== null          , "User should be logged in");
+                                QUnit.equal(reason, "authenticationFailed", "Incorrect password resulted in failed login attempt");
 
-                        delete router.configuration.routes.login.forceUpdate;
-                        QUnit.start();
+                                // this is the good password
+                                $("#password", loginView.$el).val(parameters.password).trigger('keyup');
 
+                                EventManager.subscribeTo(Constants.EVENT_LOGIN_REQUEST).done(function (user) {
+                                    QUnit.ok(user.userName === parameters.username, "User info returned matches provided username");
+                                    QUnit.ok(Configuration.loggedUser !== undefined && Configuration.loggedUser !== null          , "Logged-in user information saved in configuration scope");
+                                    QUnit.start();
+                                });
+
+                                $("[name=loginButton]", loginView.$el).trigger("click");
+
+                            });
+
+                            $("[name=loginButton]", loginView.$el).trigger("click");
+
+                        });
                     });
 
-
+                    Router.configuration.routes.login.forceUpdate=true;
+                    EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {route: Router.configuration.routes.login});
                 });
-
-                router.configuration.routes.login.forceUpdate=true;
-                eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login});
-
             });
 
             QUnit.asyncTest("Logout", function () {
-                var nav = require("org/forgerock/commons/ui/common/components/Navigation"),
-                    sessionManager = require("org/forgerock/commons/ui/common/main/SessionManager");
+
+                var nav = require("org/forgerock/commons/ui/common/components/Navigation");
 
                 $("#qunit-fixture").append("<div id='menu'></div>");
 
-                conf.loggedUser = {
-                    "userName": "test"
+                Configuration.loggedUser = {
+                    "userName": "test",
+                    "roles": [
+                        "ui-user"
+                    ]
                 };
 
                 nav.init(function () {
-                    QUnit.equal($("#user_name").text(), conf.loggedUser.userName                , "Login Bar 'user_name' reflects logged user");
-                    QUnit.ok($("#logout_link").length                                           , "Log out link available");
+                    QUnit.equal($("#user_name").text(), Configuration.loggedUser.userName, "Login Bar 'user_name' reflects logged user");
+                    QUnit.ok($("#logout_link").length, "Log out link available");
 
-                    sinon.stub(sessionManager, "logout", function (callback) {
-                        sessionManager.logout.restore();
-                        sessionManager.logout(function () {
-                            if (callback) {
-                                callback();
-                            }
-                            QUnit.ok(conf.loggedUser === null                                   , "User should be logged out");
-                            QUnit.start();
-                        });
+                    EventManager.subscribeTo(Constants.EVENT_LOGOUT).then(function () {
+                        QUnit.ok(Configuration.loggedUser === null || Configuration.loggedUser === undefined, "User should be logged out");
+                        QUnit.start();
                     });
 
                     window.location.hash = $("#logout_link").attr('href');
@@ -112,45 +120,48 @@ define([
 
             QUnit.asyncTest("Remember Login", function () {
 
-                conf.loggedUser = null;
-                var loginView = require("LoginView");
+                Configuration.loggedUser = null;
 
-                delete loginView.route;
+                Router.configuration.routes.login.forceUpdate=true;
 
-                loginView.render([], function () {
+                EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {
+                    route: Router.configuration.routes.login
+                }).then(function (loginView) {
+
                     // login with loginRemember checked
                     $("#login", loginView.$el).val(parameters.username).trigger('keyup');
                     $("#password", loginView.$el).val(parameters.password).trigger('keyup');
                     $("[name=loginRemember]", loginView.$el).prop("checked", true);
-                    $("[name=loginButton]", loginView.$el).trigger("click"); // login occurs
 
-                    _.delay(function () {
-                        sinon.stub(loginView, "render", function (args, callback) {
+                    sinon.stub(loginView, "render", function () {
+                        loginView.render.restore();
+                        loginView.render([], function () {
 
-                            loginView.render.restore();
-                            loginView.render(args, function () {
-                                QUnit.equal(cookieHelper.getCookie('login'), parameters.username, "Remember-login matches provided username");
-                                QUnit.equal($("#login", loginView.$el).val(), parameters.username, "Username is remembered after logout.");
-                                QUnit.ok($("input[name=loginRemember]", loginView.$el).prop('checked'), "Login Remember is still checked when the login form is re-rendered");
+                            QUnit.equal(CookieHelper.getCookie('login'), parameters.username, "Remember-login matches provided username");
+                            QUnit.equal($("#login", loginView.$el).val(), parameters.username, "Username is remembered after logout.");
+                            QUnit.ok($("input[name=loginRemember]", loginView.$el).prop('checked'), "Login Remember is still checked when the login form is re-rendered");
 
-                                cookieHelper.deleteCookie("login");
+                            CookieHelper.deleteCookie("login");
 
-                                if (callback) {
-                                    callback();
-                                }
-
-                                QUnit.start();
-
-                            });
+                            QUnit.start();
 
                         });
 
-                        eventManager.sendEvent(constants.EVENT_LOGOUT);
-                    }, 10);
+                    });
+
+                    ModuleLoader.load("UserProfileView").then(function (profile) {
+                        sinon.stub(profile, "render", function () {
+                            profile.render.restore();
+                            // once the profile is rendered, trigger the logout event to return to the login page
+                            EventManager.sendEvent(Constants.EVENT_LOGOUT);
+                        });
+                        $("[name=loginButton]", loginView.$el).trigger("click"); // login occurs
+                    });
+
                 });
             });
 
-            QUnit.asyncTest("Add Actions to Dialog", function () {
+            QUnit.test("Add Actions to Dialog", function () {
                 var testDialog = new Dialog();
 
                 QUnit.ok(testDialog.actions.length === 1 && testDialog.actions[0].name === "close", "Cancel Button is Available");
@@ -159,8 +170,6 @@ define([
                 testDialog.addAction("Test", "TestValue");
 
                 QUnit.ok(testDialog.actions.length === 2 && testDialog.actions[0].name === "close" && testDialog.actions[1].name === "Test", "Cancel and Test Buttons are Available");
-
-                QUnit.start();
             });
 
             QUnit.test("UIUtils loadSelect", function () {
@@ -194,7 +203,7 @@ define([
                 testDialog.data["FOO"] = "BAZ";
                 testDialog.loadContent(function () { return });
 
-                QUnit.ok(conf.globalData.FOO === undefined, "No data pollution in global scope from dialog render");
+                QUnit.ok(Configuration.globalData.FOO === undefined, "No data pollution in global scope from dialog render");
                 UIUtils.renderTemplate.restore();
             });
 
@@ -252,32 +261,35 @@ define([
             });
 
             QUnit.asyncTest("Views using plain route url incorrectly rendered multiple times (CUI-50)", function () {
-                var testView = require("org/forgerock/commons/ui/common/EnableCookiesView"), // a view with a plain (non-regexp) route url
-                    renderPromise = $.Deferred(),
-                    stub;
+                ModuleLoader.load("org/forgerock/commons/ui/common/EnableCookiesView").then(function (testView) {
 
-                stub = sinon.stub(testView, "render", function (args, callback) {
-                    renderPromise.resolve();
+                    var renderPromise = $.Deferred(),
+                        stub = sinon.stub(testView, "render", function (args, callback) {
+                            renderPromise.resolve();
+                        });
+
+                    window.location.hash = "enableCookies/";
+
+                    EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {route: Router.configuration.routes.enableCookies});
+                    _.delay(function () {
+                        renderPromise.then(function () {
+                            QUnit.equal(stub.callCount, 1, "Render function only called once");
+                            testView.render.restore();
+                            QUnit.start();
+                        });
+                    }, 100);
+
                 });
-
-                window.location.hash = "enableCookies/";
-
-                eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.enableCookies});
-
-                renderPromise.then(_.delay(function () {
-                    QUnit.equal(stub.callCount, 1, "Render function only called once");
-                    testView.render.restore();
-                    QUnit.start();
-                }, 10));
 
             });
 
             QUnit.asyncTest("Routes with special characters in parameter values (CUI-51)", function () {
                 var manySpecialCharacters = "/!@?#$%",
-                    additionalSpecialCharacters = "a%?b&c",
-                    loginView = require("org/forgerock/commons/ui/common/LoginView"),
-                    stub = sinon.stub(loginView, "render", function (args, callback) {
-                        var currentParams = router.convertCurrentUrlToJSON().params;
+                    additionalSpecialCharacters = "a%?b&c";
+
+                ModuleLoader.load("LoginView").then(function (loginView) {
+                    var stub = sinon.stub(loginView, "render", function (args, callback) {
+                        var currentParams = Router.convertCurrentUrlToJSON().params;
                         QUnit.equal(args[0], manySpecialCharacters, "Characters properly passed to first arg of render function");
                         QUnit.equal(args[1], '&name1=' + additionalSpecialCharacters, "Characters properly passed to last arg of render function");
                         QUnit.equal(currentParams.name1, additionalSpecialCharacters, "Characters accurately parsed out of url params");
@@ -285,12 +297,14 @@ define([
                         QUnit.start();
                     });
 
-                window.location.hash = "login" + encodeURIComponent(manySpecialCharacters) + '&name1=' + encodeURIComponent(additionalSpecialCharacters);
+                    window.location.hash = "login" + encodeURIComponent(manySpecialCharacters) + '&name1=' + encodeURIComponent(additionalSpecialCharacters);
+                });
+
             });
 
             QUnit.asyncTest("Parameters passed to logout event", function () {
 
-                eventManager.registerListener(constants.EVENT_LOGOUT, function (event) {
+                EventManager.registerListener(Constants.EVENT_LOGOUT, function (event) {
                     QUnit.equal(event.args[0], "foo/bar", "Logout event called with expected arguments");
                     QUnit.start();
                 });
@@ -337,15 +351,17 @@ define([
                 stub.restore();
             });
 
-            QUnit.test("Data scope not shared between views (CUI-57)", function () {
-                var notFound = require("org/forgerock/commons/ui/common/NotFoundView"),
-                    enableCookies = require("org/forgerock/commons/ui/common/EnableCookiesView");
+            QUnit.asyncTest("Data scope not shared between views (CUI-57)", function () {
+                $.when(
+                    ModuleLoader.load("org/forgerock/commons/ui/common/NotFoundView"),
+                    ModuleLoader.load("org/forgerock/commons/ui/common/EnableCookiesView")
+                ).then(function (notFound,enableCookies) {
+                    notFound.data.testVar = "foo";
+                    enableCookies.data.testVar = "bar";
 
-                notFound.data.testVar = "foo";
-                enableCookies.data.testVar = "bar";
-
-                QUnit.ok(notFound.data.testVar === "foo", "View still has original value in data scope after other view sets same name.");
-
+                    QUnit.ok(notFound.data.testVar === "foo", "View still has original value in data scope after other view sets same name.");
+                    QUnit.start();
+                });
             });
 
             QUnit.test("url helper for handlebars", function () {
@@ -360,23 +376,20 @@ define([
             });
 
             QUnit.asyncTest("Close Dialogs on View Change (OPENIDM-3358)", function () {
-                var closeAllSpy = sinon.stub(BootstrapDialog,"closeAll");
+                ModuleLoader.load("LoginDialog").then(function (loginDialog) {
+                    $("body").on("shown.bs.modal", function () {
+                        QUnit.equal($(".modal.in").length, 1, "One dialog shown after LoginDialog is rendered");
 
-                conf.loggedUser = getLoggedUser();
+                        EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {
+                            route: Router.configuration.routes.login
+                        }).then(function () {
+                            QUnit.equal($(".modal.in").length, 0, "No dialogs shown after navigating to another page");
+                            QUnit.start();
+                        });
+                    });
 
-                QUnit.ok(!closeAllSpy.called, "BootstrapDialog.closeAll() not yet called before EVENT_CHANGE_VIEW fired");
-
-                eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {
-                    route: router.configuration.routes.profile,
-                    callback: function () {
-                        QUnit.ok(closeAllSpy.called, "BootstrapDialog.closeAll() successfully called after EVENT_CHANGE_VIEW fired");
-                        BootstrapDialog.closeAll.restore();
-                        BootstrapDialog.closeAll();
-                        QUnit.start();
-                    }
+                    loginDialog.render();
                 });
-
-                window.location.hash = "profile/change_security_data/";
             });
 
             QUnit.test("ObjectUtil functions", function () {

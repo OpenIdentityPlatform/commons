@@ -42,8 +42,7 @@ define([
     return function (server) {
         eventManager.registerListener(constants.EVENT_APP_INTIALIZED, function () {
             require("ThemeManager").getTheme().then(function () {
-                var server = require("org/forgerock/mock/ui/common/main/MockServer").instance,
-                    userParams = {
+                var userParams = {
                         "username": "test",
                         "password": "test"
                     };
@@ -59,12 +58,15 @@ define([
                     require("org/forgerock/commons/ui/common/main/Configuration").baseTemplate = null;
                 });
 
-                QUnit.start();
 
-                commonsTests.executeAll(server, userParams);
-                userTests.executeAll(server, getLoggedUser());
-                mockTests.executeAll(server, userParams);
-                routerTests.executeAll();
+                _.delay(function () {
+                    QUnit.start();
+
+                    commonsTests.executeAll(server, userParams);
+                    //userTests.executeAll(server, getLoggedUser());
+                    //mockTests.executeAll(server, userParams);
+                    //routerTests.executeAll();
+                }, 500);
 
                 QUnit.done(function () {
                     localStorage.clear();
