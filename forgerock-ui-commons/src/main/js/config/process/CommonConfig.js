@@ -233,7 +233,7 @@ define("config/process/CommonConfig", [
 
                         viewManager.changeView(route.view, params, function () {
                             if (callback) {
-                                callback;
+                                callback();
                             }
                             promise.resolve(view);
                         }, route.forceUpdate);
