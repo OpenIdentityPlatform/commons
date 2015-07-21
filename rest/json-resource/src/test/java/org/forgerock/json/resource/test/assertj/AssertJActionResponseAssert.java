@@ -25,21 +25,21 @@ import org.forgerock.util.promise.Promise;
 import org.forgerock.util.test.assertj.AbstractAssertJPromiseAssert;
 
 /**
- * Offers AssertJ assertions for {@link ResourceResponse} instances.
+ * Offers AssertJ assertions for {@link ActionResponse} instances.
  */
-public class AssertJJsonValueResponseAssert extends AbstractAssert<AssertJJsonValueResponseAssert, ActionResponse> {
+public class AssertJActionResponseAssert extends AbstractAssert<AssertJActionResponseAssert, ActionResponse> {
 
     /**
-     * Assert the value of the provided {@link ResourceResponse} instance.
+     * Assert the value of the provided {@link ActionResponse} instance.
      * @param resource The instance to make assertions on.
      * @return An assert object.
      */
-    public static AssertJJsonValueResponseAssert assertThat(ActionResponse resource) {
-        return new AssertJJsonValueResponseAssert(resource);
+    public static AssertJActionResponseAssert assertThat(ActionResponse resource) {
+        return new AssertJActionResponseAssert(resource);
     }
 
     /**
-     * Assert the promise of a {@link ResourceResponse} instance.
+     * Assert the promise of a {@link ActionResponse} instance.
      * @param promise The promise to make assertions on.
      * @return An assert object.
      */
@@ -48,25 +48,25 @@ public class AssertJJsonValueResponseAssert extends AbstractAssert<AssertJJsonVa
     }
 
     public static class AssertJResourcePromiseAssert
-            extends AbstractAssertJPromiseAssert<ActionResponse, AssertJResourcePromiseAssert, AssertJJsonValueResponseAssert> {
+            extends AbstractAssertJPromiseAssert<ActionResponse, AssertJResourcePromiseAssert, AssertJActionResponseAssert> {
 
         protected AssertJResourcePromiseAssert(Promise<ActionResponse, ?> promise) {
             super(promise, AssertJResourcePromiseAssert.class);
         }
 
         @Override
-        protected AssertJJsonValueResponseAssert createSucceededAssert(ActionResponse resource) {
-            return new AssertJJsonValueResponseAssert(resource);
+        protected AssertJActionResponseAssert createSucceededAssert(ActionResponse resource) {
+            return new AssertJActionResponseAssert(resource);
         }
     }
 
     /**
-     * Creates a new {@link AssertJJsonValueResponseAssert}.
+     * Creates a new {@link AssertJActionResponseAssert}.
      *
      * @param actual the actual value to verify.
      */
-    private AssertJJsonValueResponseAssert(ActionResponse actual) {
-        super(actual, AssertJJsonValueResponseAssert.class);
+    private AssertJActionResponseAssert(ActionResponse actual) {
+        super(actual, AssertJActionResponseAssert.class);
     }
 
     /**

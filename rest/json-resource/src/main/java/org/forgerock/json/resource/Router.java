@@ -18,18 +18,23 @@ package org.forgerock.json.resource;
 
 import static org.forgerock.http.routing.RoutingMode.EQUALS;
 import static org.forgerock.http.routing.RoutingMode.STARTS_WITH;
+import static org.forgerock.json.resource.ResourceApiVersionRoutingFilter.setApiVersionInfo;
 import static org.forgerock.json.resource.Requests.*;
 import static org.forgerock.json.resource.Resources.newCollection;
 import static org.forgerock.json.resource.Resources.newSingleton;
+import static org.forgerock.json.resource.RouteMatchers.requestResourceApiVersionMatcher;
 import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
 import static org.forgerock.util.promise.Promises.newExceptionPromise;
 
 import org.forgerock.http.Context;
 import org.forgerock.http.context.ServerContext;
 import org.forgerock.http.routing.AbstractRouter;
+import org.forgerock.http.routing.ApiVersionRouterContext;
 import org.forgerock.http.routing.IncomparableRouteMatchException;
 import org.forgerock.http.routing.RouteMatcher;
 import org.forgerock.http.routing.RouterContext;
+import org.forgerock.http.routing.RoutingMode;
+import org.forgerock.http.routing.Version;
 import org.forgerock.util.Pair;
 import org.forgerock.util.promise.Promise;
 
@@ -95,13 +100,13 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler> impl
      *
      * <pre>
      * CollectionResourceProvider users = ...;
-     * UriRouter router = new UriRouter();
+     * Router router = new Router();
      *
      * // This is valid usage: the template matches the resource collection.
-     * router.addRoute("users", users);
+     * router.addRoute(Router.uriTemplate("users"), users);
      *
      * // This is invalid usage: the template matches resource instances.
-     * router.addRoute("users/{userId}", users);
+     * router.addRoute(Router.uriTemplate("users/{userId}"), users);
      * </pre>
      *
      * @param uriTemplate
@@ -109,9 +114,13 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler> impl
      * @param provider
      *            The collection resource provider to which matching requests
      *            will be routed.
+     * @return The {@link RouteMatcher} for the route that can be used to
+     * remove the route at a later point.
      */
-    public void addRoute(String uriTemplate, CollectionResourceProvider provider) {
-        addRoute(requestUriMatcher(STARTS_WITH, uriTemplate), newCollection(provider));
+    public RouteMatcher<Request> addRoute(UriTemplate uriTemplate, CollectionResourceProvider provider) {
+        RouteMatcher<Request> routeMatcher = requestUriMatcher(STARTS_WITH, uriTemplate.template);
+        addRoute(routeMatcher, newCollection(provider));
+        return routeMatcher;
     }
 
     /**
@@ -124,9 +133,90 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler> impl
      * @param provider
      *            The singleton resource provider to which matching requests
      *            will be routed.
+     * @return The {@link RouteMatcher} for the route that can be used to
+     * remove the route at a later point.
      */
-    public void addRoute(String uriTemplate, SingletonResourceProvider provider) {
-        addRoute(requestUriMatcher(EQUALS, uriTemplate), newSingleton(provider));
+    public RouteMatcher<Request> addRoute(UriTemplate uriTemplate, SingletonResourceProvider provider) {
+        RouteMatcher<Request> routeMatcher = requestUriMatcher(EQUALS, uriTemplate.template);
+        addRoute(routeMatcher, newSingleton(provider));
+        return routeMatcher;
+    }
+
+    /**
+     * Adds a new route to this router for the provided request handler. New
+     * routes may be added while this router is processing requests.
+     *
+     * @param mode
+     *            Indicates how the URI template should be matched against
+     *            resource names.
+     * @param uriTemplate
+     *            The URI template which request resource names must match.
+     * @param handler
+     *            The request handler to which matching requests will be routed.
+     * @return The {@link RouteMatcher} for the route that can be used to
+     * remove the route at a later point.
+     */
+    public RouteMatcher<Request> addRoute(RoutingMode mode, UriTemplate uriTemplate, RequestHandler handler) {
+        RouteMatcher<Request> routeMatcher = requestUriMatcher(mode, uriTemplate.template);
+        addRoute(routeMatcher, handler);
+        return routeMatcher;
+    }
+
+    /**
+     * Creates a {@link UriTemplate} from a URI template string that will be
+     * used to match and route incoming requests.
+     *
+     * @param template The URI template.
+     * @return A {@code UriTemplate} instance.
+     */
+    public static UriTemplate uriTemplate(String template) {
+        return new UriTemplate(template);
+    }
+
+    /**
+     * Adds a new route to this router for the provided collection resource
+     * provider. New routes may be added while this router is processing
+     * requests.
+     *
+     * @param version The resource API version the the request must match.
+     * @param provider The collection resource provider to which matching
+     *                 requests will be routed.
+     * @return The {@link RouteMatcher} for the route that can be used to
+     * remove the route at a later point.
+     */
+    public RouteMatcher<Request> addRoute(Version version, CollectionResourceProvider provider) {
+        return addRoute(version, newCollection(provider));
+    }
+
+    /**
+     * Adds a new route to this router for the provided singleton resource
+     * provider. New routes may be added while this router is processing
+     * requests.
+     *
+     * @param version The resource API version the the request must match.
+     * @param provider The singleton resource provider to which matching
+     *                 requests will be routed.
+     * @return The {@link RouteMatcher} for the route that can be used to
+     * remove the route at a later point.
+     */
+    public RouteMatcher<Request> addRoute(Version version, SingletonResourceProvider provider) {
+        return addRoute(version, newSingleton(provider));
+    }
+
+    /**
+     * Adds a new route to this router for the provided request handler. New
+     * routes may be added while this router is processing requests.
+     *
+     * @param version The resource API version the the request must match.
+     * @param handler
+     *            The request handler to which matching requests will be routed.
+     * @return The {@link RouteMatcher} for the route that can be used to
+     * remove the route at a later point.
+     */
+    public RouteMatcher<Request> addRoute(Version version, RequestHandler handler) {
+        RouteMatcher<Request> routeMatcher = requestResourceApiVersionMatcher(version);
+        addRoute(routeMatcher, handler);
+        return routeMatcher;
     }
 
     private Pair<Context, RequestHandler> getBestMatch(ServerContext context, Request request)
@@ -200,15 +290,27 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler> impl
     }
 
     @Override
-    public Promise<QueryResponse, ResourceException> handleQuery(ServerContext context, QueryRequest request,
-            QueryResourceHandler handler) {
+    public Promise<QueryResponse, ResourceException> handleQuery(final ServerContext context,
+            final QueryRequest request, final QueryResourceHandler handler) {
         try {
             Pair<Context, RequestHandler> bestMatch = getBestMatch(context, request);
-            RouterContext routerContext = getRouterContext(bestMatch.getFirst());
+            final Context decoratedContext = bestMatch.getFirst();
+            RouterContext routerContext = getRouterContext(decoratedContext);
             QueryRequest routedRequest = wasRouted(routerContext, request)
                     ? copyOfQueryRequest(request).setResourcePath(getResourcePath(routerContext))
                     : request;
-            return bestMatch.getSecond().handleQuery((ServerContext) bestMatch.getFirst(), routedRequest, handler);
+            QueryResourceHandler resourceHandler = new QueryResourceHandler() {
+                @Override
+                public boolean handleResource(ResourceResponse resource) {
+                    if (decoratedContext.containsContext(ApiVersionRouterContext.class)) {
+                        ApiVersionRouterContext apiVersionRouterContext =
+                                decoratedContext.asContext(ApiVersionRouterContext.class);
+                        setApiVersionInfo(apiVersionRouterContext, request, resource);
+                    }
+                    return handler.handleResource(resource);
+                }
+            };
+            return bestMatch.getSecond().handleQuery((ServerContext) decoratedContext, routedRequest, resourceHandler);
         } catch (ResourceException e) {
             return newExceptionPromise(e);
         }
@@ -256,5 +358,17 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler> impl
 
     private String getResourcePath(RouterContext routerContext) {
         return routerContext.getRemainingUri();
+    }
+
+    /**
+     * Represents a URI template string that will be used to match and route
+     * incoming requests.
+     */
+    public static final class UriTemplate {
+        private final String template;
+
+        private UriTemplate(String template) {
+            this.template = template;
+        }
     }
 }

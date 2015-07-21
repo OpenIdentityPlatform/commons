@@ -16,6 +16,8 @@
 
 package org.forgerock.json.resource;
 
+import static org.forgerock.util.Utils.asEnum;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -24,10 +26,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.forgerock.http.ResourcePath;
+import org.forgerock.http.routing.Version;
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
-import static org.forgerock.util.Utils.asEnum;
 
 /**
  * A utility class containing various factory methods for creating and
@@ -38,6 +40,7 @@ public final class Requests {
         private final List<JsonPointer> fields = new LinkedList<>();
         private ResourcePath resourcePath;
         private final Map<String, String> parameters = new LinkedHashMap<>(2);
+        private Version resourceVersion;
 
         protected AbstractRequestImpl() {
             // Default constructor.
@@ -95,6 +98,11 @@ public final class Requests {
         }
 
         @Override
+        public Version getResourceVersion() {
+            return resourceVersion;
+        }
+
+        @Override
         public final T setResourcePath(final String path) {
             resourcePath = ResourcePath.valueOf(path);
             return getThis();
@@ -112,6 +120,12 @@ public final class Requests {
                 throw new BadRequestException("Unrecognized request parameter '" + name + "'");
             }
             parameters.put(notNull(name), notNull(value));
+            return getThis();
+        }
+
+        @Override
+        public T setResourceVersion(Version resourceVersion) {
+            this.resourceVersion = resourceVersion;
             return getThis();
         }
 

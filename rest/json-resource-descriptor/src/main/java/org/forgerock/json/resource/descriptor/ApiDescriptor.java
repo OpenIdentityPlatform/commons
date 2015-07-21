@@ -29,10 +29,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.forgerock.http.ResourcePath;
+import org.forgerock.http.routing.Version;
 import org.forgerock.i18n.LocalizableMessage;
 import org.forgerock.i18n.LocalizedIllegalArgumentException;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.Version;
 
 @SuppressWarnings("javadoc")
 public final class ApiDescriptor {

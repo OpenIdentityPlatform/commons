@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.forgerock.http.ResourcePath;
 import org.forgerock.json.JsonPointer;
+import org.forgerock.http.routing.Version;
 
 /**
  * A request to read a single identified JSON resource.
@@ -84,4 +85,7 @@ public interface ReadRequest extends Request {
      */
     @Override
     ReadRequest setAdditionalParameter(String name, String value) throws BadRequestException;
+
+    @Override
+    ReadRequest setResourceVersion(Version resourceVersion);
 }
