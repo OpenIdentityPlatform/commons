@@ -18,6 +18,7 @@ package org.forgerock.json.resource.examples;
 
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
+import static org.forgerock.json.resource.Router.uriTemplate;
 import static org.forgerock.json.resource.examples.DemoUtils.ctx;
 import static org.forgerock.json.resource.examples.DemoUtils.log;
 import static org.forgerock.util.promise.Promises.newExceptionPromise;
@@ -173,8 +174,8 @@ public final class DynamicRealmDemo {
      */
     private static RequestHandler realm(final List<String> path) {
         final Router router = new Router();
-        router.addRoute("/users", collection(path, "user"));
-        router.addRoute("/groups", collection(path, "group"));
+        router.addRoute(uriTemplate("/users"), collection(path, "user"));
+        router.addRoute(uriTemplate("/groups"), collection(path, "group"));
         router.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "/{realm}"), subrealms(path));
         return router;
     }

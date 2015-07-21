@@ -16,20 +16,24 @@
 
 package org.forgerock.json.resource;
 
+import static org.forgerock.http.routing.RouteMatchers.resourceApiVersionMatcher;
 import static org.forgerock.http.routing.RouteMatchers.uriMatcher;
 
 import org.forgerock.http.Context;
 import org.forgerock.http.ResourcePath;
+import org.forgerock.http.routing.ResourceApiVersionBehaviourManager;
 import org.forgerock.http.routing.RouteMatch;
 import org.forgerock.http.routing.RouteMatcher;
 import org.forgerock.http.routing.RoutingMode;
+import org.forgerock.http.routing.Version;
 
 /**
  * A utility class that contains methods for creating route matchers.
- *
- * @since 3.0.0
  */
 public final class RouteMatchers {
+
+    private RouteMatchers() {
+    }
 
     /**
      * Creates a {@code RouteMatcher} instance that matches {@code Request}s
@@ -40,21 +44,56 @@ public final class RouteMatchers {
      * @return A {@code RouteMatcher} instance.
      */
     public static RouteMatcher<Request> requestUriMatcher(RoutingMode mode, String template) {
-        return new RequestUriRoutePredicate(uriMatcher(mode, template));
+        return new RequestUriRouteMatcher(uriMatcher(mode, template));
+    }
+
+    /**
+     * Creates a new {@code ResourceApiVersionBehaviourManager} which is responsibly
+     * for managing whether warning headers are returned and the default
+     * version behaviour when the {@literal Accept-API-Version} header is not
+     * present on the request.
+     *
+     * @return A new {@code ResourceApiVersionBehaviourManager}.
+     */
+    public static ResourceApiVersionBehaviourManager newResourceApiVersionBehaviourManager() {
+        return org.forgerock.http.routing.RouteMatchers.newResourceApiVersionBehaviourManager();
+    }
+
+    /**
+     * Creates a {@code Filter} which MUST be placed, in the route, before any
+     * API Version routing takes place.
+     *
+     * <p>The filter will add the required {@code Context}s, default version
+     * behaviour and response headers.</p>
+     *
+     * @param behaviourManager A {@code ResourceApiVersionBehaviourManager} instance.
+     * @return A {@code Filter} instance.
+     */
+    public static Filter resourceApiVersionContextFilter(ResourceApiVersionBehaviourManager behaviourManager) {
+        return new ResourceApiVersionRoutingFilter(behaviourManager);
+    }
+
+    /**
+     * Creates a {@code RouteMatcher} instance that matches the request
+     * resource API version with the provided {@literal version}.
+     *
+     * @param version The API version of the resource.
+     * @return A {@code RouteMatcher} instance.
+     */
+    public static RouteMatcher<Request> requestResourceApiVersionMatcher(Version version) {
+        return new RequestApiVersionRouteMatcher(resourceApiVersionMatcher(version));
     }
 
     /**
      * A CREST specific {@code RouteMatcher} which extracts the requests
      * resource name from a {@code Request} and passes it as a
      * {@code ResourcePath} to the common {@code ResourcePath} route predicate.
-     *
-     * @since 3.0.0
      */
-    private static final class RequestUriRoutePredicate extends RouteMatcher<Request> {
+    private static final class RequestUriRouteMatcher extends RouteMatcher<Request> {
 
         private final RouteMatcher<ResourcePath> delegate;
 
-        private RequestUriRoutePredicate(RouteMatcher<ResourcePath> delegate) {
+        private RequestUriRouteMatcher(RouteMatcher<ResourcePath> delegate) {
             this.delegate = delegate;
         }
 
@@ -70,9 +109,54 @@ public final class RouteMatchers {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof RequestUriRoutePredicate)) return false;
-            RequestUriRoutePredicate that = (RequestUriRoutePredicate) o;
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof RequestUriRouteMatcher)) {
+                return false;
+            }
+            RequestUriRouteMatcher that = (RequestUriRouteMatcher) o;
+            return delegate.equals(that.delegate);
+        }
+
+        @Override
+        public int hashCode() {
+            return delegate.hashCode();
+        }
+    }
+
+    /**
+     * A CREST specific {@code RouteMatcher} which extracts the resource API
+     * version from a {@code Request} and passes it to the common
+     * {@code Version} route matcher.
+     */
+    private static final class RequestApiVersionRouteMatcher extends RouteMatcher<Request> {
+
+        private final RouteMatcher<Version> delegate;
+
+        private RequestApiVersionRouteMatcher(RouteMatcher<Version> delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public RouteMatch evaluate(Context context, Request request) {
+            return delegate.evaluate(context, request.getResourceVersion());
+        }
+
+        @Override
+        public String toString() {
+            return delegate.toString();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof RequestApiVersionRouteMatcher)) {
+                return false;
+            }
+            RequestApiVersionRouteMatcher that = (RequestApiVersionRouteMatcher) o;
             return delegate.equals(that.delegate);
         }
 

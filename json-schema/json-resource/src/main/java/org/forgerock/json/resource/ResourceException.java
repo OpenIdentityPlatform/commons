@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.forgerock.http.routing.Version;
 import org.forgerock.json.JsonValue;
 
 /**
@@ -633,5 +634,15 @@ public class ResourceException extends IOException implements Response {
             result.put(FIELD_CAUSE, cause);
         }
         return new JsonValue(result);
+    }
+
+    @Override
+    public void setResourceApiVersion(Version version) {
+
+    }
+
+    @Override
+    public Version getResourceApiVersion() {
+        return null;
     }
 }

@@ -17,7 +17,6 @@
 package org.forgerock.json.resource.http;
 
 import static org.forgerock.json.resource.ActionRequest.ACTION_ID_CREATE;
-import static org.forgerock.json.resource.VersionConstants.ACCEPT_API_VERSION;
 import static org.forgerock.json.resource.http.HttpUtils.*;
 import static org.forgerock.util.Reject.checkNotNull;
 
@@ -28,13 +27,14 @@ import java.util.Map;
 
 import org.forgerock.http.Context;
 import org.forgerock.http.Handler;
-import org.forgerock.http.routing.RouterContext;
+import org.forgerock.http.ResourcePath;
+import org.forgerock.http.header.AcceptApiVersionHeader;
 import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.protocol.Form;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.AcceptAPIVersion;
-import org.forgerock.json.resource.AcceptAPIVersionContext;
+import org.forgerock.http.routing.RouterContext;
+import org.forgerock.http.routing.Version;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.AdviceContext;
 import org.forgerock.json.resource.BadRequestException;
@@ -53,9 +53,7 @@ import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.http.ResourcePath;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.json.resource.Version;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
@@ -178,8 +176,7 @@ final class HttpAdapter implements Handler {
 
     Promise<Response, NeverThrowsException> doDelete(Context context, org.forgerock.http.protocol.Request req) {
         try {
-            // Parse out the required API versions.
-            final AcceptAPIVersion acceptVersion = parseAcceptAPIVersion(req);
+            Version requestedResourceVersion = getRequestedResourceVersion(req);
 
             // Prepare response.
             Response resp = prepareResponse(req);
@@ -190,7 +187,9 @@ final class HttpAdapter implements Handler {
 
             final Form parameters = req.getForm();
             final DeleteRequest request =
-                    Requests.newDeleteRequest(getResourcePath(context, req)).setRevision(getIfMatch(req));
+                    Requests.newDeleteRequest(getResourcePath(context, req))
+                            .setRevision(getIfMatch(req))
+                            .setResourceVersion(requestedResourceVersion);
             for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
                 final String name = p.getKey();
                 final List<String> values = p.getValue();
@@ -200,7 +199,7 @@ final class HttpAdapter implements Handler {
                     request.setAdditionalParameter(name, asSingleValue(name, values));
                 }
             }
-            return doRequest(context, req, resp, acceptVersion, request);
+            return doRequest(context, req, resp, request);
         } catch (final Exception e) {
             return fail(req, e);
         }
@@ -208,8 +207,7 @@ final class HttpAdapter implements Handler {
 
     Promise<Response, NeverThrowsException> doGet(Context context, org.forgerock.http.protocol.Request req) {
         try {
-            // Parse out the required API versions.
-            final AcceptAPIVersion acceptVersion = parseAcceptAPIVersion(req);
+            Version requestedResourceVersion = getRequestedResourceVersion(req);
 
             // Prepare response.
             Response resp = prepareResponse(req);
@@ -225,7 +223,8 @@ final class HttpAdapter implements Handler {
                 rejectIfNoneMatch(req);
 
                 // Query against collection.
-                final QueryRequest request = Requests.newQueryRequest(getResourcePath(context, req));
+                final QueryRequest request = Requests.newQueryRequest(getResourcePath(context, req))
+                        .setResourceVersion(requestedResourceVersion);
 
                 for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
                     final String name = p.getKey();
@@ -298,7 +297,7 @@ final class HttpAdapter implements Handler {
                             + PARAM_QUERY_EXPRESSION + " are mutually exclusive");
                 }
 
-                return doRequest(context, req, resp, acceptVersion, request);
+                return doRequest(context, req, resp, request);
             } else {
                 // Read of instance within collection or singleton.
                 final String rev = getIfNoneMatch(req);
@@ -308,7 +307,8 @@ final class HttpAdapter implements Handler {
                             + getMethod(req) + " requests");
                 }
 
-                final ReadRequest request = Requests.newReadRequest(getResourcePath(context, req));
+                final ReadRequest request = Requests.newReadRequest(getResourcePath(context, req))
+                        .setResourceVersion(requestedResourceVersion);
                 for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
                     final String name = p.getKey();
                     final List<String> values = p.getValue();
@@ -328,7 +328,7 @@ final class HttpAdapter implements Handler {
                         request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
                 }
-                return doRequest(context, req, resp, acceptVersion, request);
+                return doRequest(context, req, resp, request);
             }
         } catch (final Exception e) {
             return fail(req, e);
@@ -337,8 +337,7 @@ final class HttpAdapter implements Handler {
 
     Promise<Response, NeverThrowsException> doPatch(Context context, org.forgerock.http.protocol.Request req) {
         try {
-            // Parse out the required API versions.
-            final AcceptAPIVersion acceptVersion = parseAcceptAPIVersion(req);
+            Version requestedResourceVersion = getRequestedResourceVersion(req);
 
             // Prepare response.
             Response resp = prepareResponse(req);
@@ -353,7 +352,9 @@ final class HttpAdapter implements Handler {
 
             final Form parameters = req.getForm();
             final PatchRequest request =
-                    Requests.newPatchRequest(getResourcePath(context, req)).setRevision(getIfMatch(req));
+                    Requests.newPatchRequest(getResourcePath(context, req))
+                            .setRevision(getIfMatch(req))
+                            .setResourceVersion(requestedResourceVersion);
             request.getPatchOperations().addAll(getJsonPatchContent(req));
             for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
                 final String name = p.getKey();
@@ -364,7 +365,7 @@ final class HttpAdapter implements Handler {
                     request.setAdditionalParameter(name, asSingleValue(name, values));
                 }
             }
-            return doRequest(context, req, resp, acceptVersion, request);
+            return doRequest(context, req, resp, request);
         } catch (final Exception e) {
             return fail(req, e);
         }
@@ -372,8 +373,7 @@ final class HttpAdapter implements Handler {
 
     Promise<Response, NeverThrowsException> doPost(Context context, org.forgerock.http.protocol.Request req) {
         try {
-            // Parse out the required API versions.
-            final AcceptAPIVersion acceptVersion = parseAcceptAPIVersion(req);
+            Version requestedResourceVersion = getRequestedResourceVersion(req);
 
             // Prepare response.
             Response resp = prepareResponse(req);
@@ -388,7 +388,8 @@ final class HttpAdapter implements Handler {
             if (action.equalsIgnoreCase(ACTION_ID_CREATE)) {
                 final JsonValue content = getJsonContent(req);
                 final CreateRequest request =
-                        Requests.newCreateRequest(getResourcePath(context, req), content);
+                        Requests.newCreateRequest(getResourcePath(context, req), content)
+                                .setResourceVersion(requestedResourceVersion);
                 for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
                     final String name = p.getKey();
                     final List<String> values = p.getValue();
@@ -400,12 +401,14 @@ final class HttpAdapter implements Handler {
                         request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
                 }
-                return doRequest(context, req, resp, acceptVersion, request);
+                return doRequest(context, req, resp, request);
             } else {
                 // Action request.
                 final JsonValue content = getJsonActionContent(req);
                 final ActionRequest request =
-                        Requests.newActionRequest(getResourcePath(context, req), action).setContent(content);
+                        Requests.newActionRequest(getResourcePath(context, req), action)
+                                .setContent(content)
+                                .setResourceVersion(requestedResourceVersion);
                 for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
                     final String name = p.getKey();
                     final List<String> values = p.getValue();
@@ -417,7 +420,7 @@ final class HttpAdapter implements Handler {
                         request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
                 }
-                return doRequest(context, req, resp, acceptVersion, request);
+                return doRequest(context, req, resp, request);
             }
         } catch (final Exception e) {
             return fail(req, e);
@@ -426,8 +429,7 @@ final class HttpAdapter implements Handler {
 
     Promise<Response, NeverThrowsException> doPut(Context context, org.forgerock.http.protocol.Request req) {
         try {
-            // Parse out the required API versions.
-            final AcceptAPIVersion acceptVersion = parseAcceptAPIVersion(req);
+            Version requestedResourceVersion = getRequestedResourceVersion(req);
 
             // Prepare response.
             Response resp = prepareResponse(req);
@@ -458,8 +460,9 @@ final class HttpAdapter implements Handler {
 
                 // We have a pathInfo of the form "{container}/{id}"
                 final CreateRequest request =
-                        Requests.newCreateRequest(resourcePath.parent(), content).setNewResourceId(
-                                resourcePath.leaf());
+                        Requests.newCreateRequest(resourcePath.parent(), content)
+                                .setNewResourceId(resourcePath.leaf())
+                                .setResourceVersion(requestedResourceVersion);
                 for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
                     final String name = p.getKey();
                     final List<String> values = p.getValue();
@@ -469,11 +472,12 @@ final class HttpAdapter implements Handler {
                         request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
                 }
-                return doRequest(context, req, resp, acceptVersion, request);
+                return doRequest(context, req, resp, request);
             } else {
                 final UpdateRequest request =
-                        Requests.newUpdateRequest(getResourcePath(context, req), content).setRevision(
-                                getIfMatch(req));
+                        Requests.newUpdateRequest(getResourcePath(context, req), content)
+                                .setRevision(getIfMatch(req))
+                                .setResourceVersion(requestedResourceVersion);
                 for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
                     final String name = p.getKey();
                     final List<String> values = p.getValue();
@@ -483,7 +487,7 @@ final class HttpAdapter implements Handler {
                         request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
                 }
-                return doRequest(context, req, resp, acceptVersion, request);
+                return doRequest(context, req, resp, request);
             }
         } catch (final Exception e) {
             return fail(req, e);
@@ -491,9 +495,9 @@ final class HttpAdapter implements Handler {
     }
 
     private Promise<Response, NeverThrowsException> doRequest(Context context, org.forgerock.http.protocol.Request req,
-            Response resp, AcceptAPIVersion acceptVersion, Request request) throws Exception {
+            Response resp, Request request) throws Exception {
 
-        Context ctx = newRequestContext(context, req, acceptVersion);
+        Context ctx = newRequestContext(context, req);
         final RequestRunner runner = new RequestRunner(ctx, request, req, resp);
         return connectionFactory.getConnectionAsync()
                 .thenAsync(new AsyncFunction<Connection, Response, NeverThrowsException>() {
@@ -527,10 +531,8 @@ final class HttpAdapter implements Handler {
 
     private ResourcePath getMatchedUri(Context context) {
         List<ResourcePath> matched = new ArrayList<>();
-        for (Context ctx = context; ctx != null; ctx = ctx.getParent()) {
-            if (!ctx.containsContext(RouterContext.class)) {
-                break;
-            } else {
+        if (context.containsContext(RouterContext.class)) {
+            for (Context ctx = context.asContext(RouterContext.class); ctx != null && ctx.containsContext(RouterContext.class); ctx = ctx.getParent()) {
                 matched.add(ResourcePath.valueOf(ctx.asContext(RouterContext.class).getMatchedUri()));
             }
         }
@@ -542,12 +544,10 @@ final class HttpAdapter implements Handler {
         return matchedUri;
     }
 
-    private Context newRequestContext(Context context, org.forgerock.http.protocol.Request req, AcceptAPIVersion acceptVersion)
+    private Context newRequestContext(Context context, org.forgerock.http.protocol.Request req)
             throws ResourceException {
         final Context parent = contextFactory.createContext(context, req);
-        return new AdviceContext(
-                new AcceptAPIVersionContext(
-                        new HttpContext(parent, req), PROTOCOL_NAME, acceptVersion), RESTRICTED_HEADER_NAMES);
+        return new AdviceContext(new HttpContext(parent, req), RESTRICTED_HEADER_NAMES);
     }
 
     private boolean parseCommonParameter(final String name, final List<String> values,
@@ -613,27 +613,15 @@ final class HttpAdapter implements Handler {
      * @throws BadRequestException
      *         If an invalid version is requested
      */
-    private AcceptAPIVersion parseAcceptAPIVersion(org.forgerock.http.protocol.Request req) throws BadRequestException {
-        // Extract out the protocol and resource versions.
-        final String versionString = req.getHeaders().getFirst(ACCEPT_API_VERSION);
-
-        final AcceptAPIVersion acceptAPIVersion = AcceptAPIVersion
-                .newBuilder(versionString)
-                .withDefaultProtocolVersion(PROTOCOL_VERSION)
-                .expectsProtocolVersion()
-                .build();
-
-        final Version protocolVersion = acceptAPIVersion.getProtocolVersion();
-
-        if (protocolVersion.getMajor() != PROTOCOL_VERSION.getMajor()) {
+    private Version getRequestedResourceVersion(org.forgerock.http.protocol.Request req) throws BadRequestException {
+        AcceptApiVersionHeader apiVersionHeader = AcceptApiVersionHeader.valueOf(req);
+        Version protocolVersion = apiVersionHeader.getProtocolVersion();
+        if (protocolVersion != null && protocolVersion.getMajor() != PROTOCOL_VERSION.getMajor()) {
             throw new BadRequestException("Unsupported major version: " + protocolVersion);
         }
-
-        if (protocolVersion.getMinor() > PROTOCOL_VERSION.getMinor()) {
+        if (protocolVersion != null && protocolVersion.getMinor() > PROTOCOL_VERSION.getMinor()) {
             throw new BadRequestException("Unsupported minor version: " + protocolVersion);
         }
-
-        return acceptAPIVersion;
+        return apiVersionHeader.getResourceVersion();
     }
-
 }

@@ -19,6 +19,7 @@ package org.forgerock.json.resource;
 import java.util.LinkedHashMap;
 
 import org.forgerock.json.JsonValue;
+import org.forgerock.http.routing.Version;
 
 /**
  * A utility class containing various factory methods for creating and
@@ -26,11 +27,14 @@ import org.forgerock.json.JsonValue;
  */
 public final class Responses {
 
+    private Responses() {
+    }
+
     /**
      * Returns a new {@code JsonValue} response with the provided JSON content.
      *
      * @param json The JSON content.
-     * @return The new {@code JsonValue} response.
+     * @return The new {@code ActionResponse}.
      */
     public static ActionResponse newActionResponse(JsonValue json) {
         return new ActionResponseImpl(json);
@@ -52,6 +56,8 @@ public final class Responses {
     /**
      * Creates a new query result with a {@code null} paged results cookie and
      * no count of the total number of remaining results.
+     *
+     * @return The new {@code QueryResponse}.
      */
     public static QueryResponse newQueryResponse() {
         return newQueryResponse(null);
@@ -65,6 +71,7 @@ public final class Responses {
      *            The opaque cookie which should be used with the next paged
      *            results query request, or {@code null} if paged results were
      *            not requested, or if there are not more pages to be returned.
+     * @return The new {@code QueryResponse}.
      */
     public static QueryResponse newQueryResponse(String pagedResultsCookie) {
         return newQueryResponse(pagedResultsCookie, CountPolicy.NONE, QueryResponse.NO_COUNT);
@@ -87,6 +94,7 @@ public final class Responses {
      *            or {@link QueryResponse#NO_COUNT} if paged results were not requested,
      *            the count policy is {@code NONE}, or if the total number of remaining
      *            results is unknown.
+     * @return The new {@code QueryResponse}.
      */
     public static QueryResponse newQueryResponse(String pagedResultsCookie, CountPolicy totalPagedResultsPolicy,
             int totalPagedResults) {
@@ -94,7 +102,17 @@ public final class Responses {
     }
 
     private static abstract class AbstractResponseImpl implements Response {
+        private Version resourceApiVersion;
 
+        @Override
+        public void setResourceApiVersion(Version version) {
+            resourceApiVersion = version;
+        }
+
+        @Override
+        public Version getResourceApiVersion() {
+            return resourceApiVersion;
+        }
     }
 
     private static final class ActionResponseImpl extends AbstractResponseImpl implements ActionResponse {
@@ -112,11 +130,13 @@ public final class Responses {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
             ActionResponse that = (ActionResponse) o;
-
             return getJsonContent().getObject().equals(that.getJsonContent().getObject());
         }
 
@@ -262,14 +282,15 @@ public final class Responses {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
             QueryResponseImpl that = (QueryResponseImpl) o;
-
-            if (totalPagedResults != that.totalPagedResults) return false;
-            if (!pagedResultsCookie.equals(that.pagedResultsCookie)) return false;
-            return totalPagedResultsPolicy == that.totalPagedResultsPolicy;
+            return totalPagedResults == that.totalPagedResults && pagedResultsCookie.equals(that.pagedResultsCookie)
+                    && totalPagedResultsPolicy == that.totalPagedResultsPolicy;
         }
 
         @Override

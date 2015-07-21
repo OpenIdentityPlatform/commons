@@ -93,20 +93,7 @@ public class AdviceWarning {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(warningCode).append(" ");
-        sb.append(warningAgent).append(" ");
-        sb.append(warningText);
-        return sb.toString();
-    }
-
-    /**
-     * Returns a new builder for constructing new {@code AdviceWarning}.
-     *
-     * @return a new builder for constructing new {@code AdviceWarning}.
-     */
-    public static Builder newBuilder() {
-        return new Builder();
+        return String.valueOf(warningCode) + " " + warningAgent + " " + warningText;
     }
 
     /**
@@ -126,6 +113,7 @@ public class AdviceWarning {
 
     /**
      * Generate a warning using the builder provided.
+     *
      * @param agentName the agent name
      * @param fmt The format, which may include embedded %s, etc.
      * @param args Zero or more args, passed into String.format to generate the warning text
@@ -140,10 +128,14 @@ public class AdviceWarning {
                 .build();
     }
 
+    private static Builder newBuilder() {
+        return new Builder();
+    }
+
     /**
      * Accessed via {@link AdviceWarning#newBuilder()}.
      */
-    public static final class Builder {
+    private static final class Builder {
 
         private int warningCode;
         private String warningAgent;
@@ -152,7 +144,7 @@ public class AdviceWarning {
         /**
          * Package private default CTOR to prevent direct instantiation by other than us.
          */
-        Builder() {
+        private Builder() {
         }
 
         /**
@@ -161,7 +153,7 @@ public class AdviceWarning {
          * @param warningCode a three-digit integer.
          * @return this builder.
          */
-        public Builder withWarningCode(int warningCode) {
+        private Builder withWarningCode(int warningCode) {
             Reject.ifTrue(warningCode < 0);
             Reject.ifTrue(String.valueOf(warningCode).length() != 3);
             this.warningCode = warningCode;
@@ -175,7 +167,7 @@ public class AdviceWarning {
          * @param warningAgent a String identifier.
          * @return this builder.
          */
-        public Builder withWarningAgent(String warningAgent) {
+        private Builder withWarningAgent(String warningAgent) {
             Reject.ifNull(warningAgent);
             Reject.ifTrue(warningAgent.isEmpty());
             this.warningAgent = warningAgent;
@@ -188,7 +180,7 @@ public class AdviceWarning {
          * @param warningText a String description
          * @return this builder.
          */
-        public Builder withWarningText(String warningText) {
+        private Builder withWarningText(String warningText) {
             Reject.ifNull(warningText);
             Reject.ifTrue(warningText.isEmpty());
             this.warningText = warningText;
@@ -201,9 +193,8 @@ public class AdviceWarning {
          *
          * @return The built {@code WarningHeader}.
          */
-        public AdviceWarning build() {
+        private AdviceWarning build() {
             return new AdviceWarning(this);
         }
-
     }
 }

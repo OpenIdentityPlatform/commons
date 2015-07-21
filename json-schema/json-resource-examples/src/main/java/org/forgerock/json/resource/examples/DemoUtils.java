@@ -19,6 +19,7 @@ package org.forgerock.json.resource.examples;
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Requests.newCreateRequest;
 import static org.forgerock.json.resource.Resources.newInternalConnection;
+import static org.forgerock.json.resource.Router.uriTemplate;
 
 import org.forgerock.http.Context;
 import org.forgerock.http.context.RootContext;
@@ -58,7 +59,7 @@ final class DemoUtils {
     static ConnectionFactory getConnectionFactory() throws ResourceException {
         final MemoryBackend users = new MemoryBackend();
         final Router router = new Router();
-        router.addRoute("users", users);
+        router.addRoute(uriTemplate("users"), users);
         final Connection connection = newInternalConnection(router);
         connection.create(ctx(), newCreateRequest("users", "1", userAliceWithIdAndRev(1, 0)));
         return Resources.newInternalConnectionFactory(router);
