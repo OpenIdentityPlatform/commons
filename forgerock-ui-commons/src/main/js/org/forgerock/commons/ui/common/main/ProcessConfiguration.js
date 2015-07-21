@@ -49,11 +49,11 @@ define("org/forgerock/commons/ui/common/main/ProcessConfiguration", [
     });
 
     obj.callRegisterListenerFromConfig = function (config) {
-        eventManager.registerListener(config.startEvent, function(event) {
-            $.when.apply($, _.map(config.dependencies, function (dep) {
+        eventManager.registerListener(config.startEvent, function (event) {
+            return $.when.apply($, _.map(config.dependencies, function (dep) {
                 return ModuleLoader.load(dep);
             })).then(function () {
-                config.processDescription.apply(this, [event].concat(_.toArray(arguments)));
+                return config.processDescription.apply(this, [event].concat(_.toArray(arguments)));
             });
         });
     };

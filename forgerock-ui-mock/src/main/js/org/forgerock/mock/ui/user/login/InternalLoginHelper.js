@@ -36,10 +36,12 @@ define("org/forgerock/mock/ui/user/login/InternalLoginHelper", [
 
     obj.login = function (params, successCallback, errorCallback) {
 
-        userDelegate.login(params.userName, params.password,
+        return userDelegate.login(params.userName, params.password,
             function (user) {
                 conf.globalData.userComponent = user.component;
-                successCallback(user);
+                if (successCallback) {
+                    successCallback(user);
+                }
             },
             function () {
                 if (errorCallback) {
@@ -60,14 +62,19 @@ define("org/forgerock/mock/ui/user/login/InternalLoginHelper", [
 
     obj.logout = function (successCallback, errorCallback) {
         delete conf.loggedUser;
-        successCallback();
+        if (successCallback) {
+            successCallback();
+        }
+        return $.Deferred().resolve();
     };
 
     obj.getLoggedUser = function (successCallback, errorCallback) {
-        userDelegate.getProfile(
+        return userDelegate.getProfile(
             function (user) {
                 conf.globalData.userComponent = user.component;
-                successCallback(user);
+                if (successCallback) {
+                    successCallback(user);
+                }
             },
             function () {
                 if (errorCallback) {

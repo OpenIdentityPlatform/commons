@@ -37,20 +37,20 @@ define("org/forgerock/commons/ui/common/main/SessionManager", [
 
     obj.login = function(params, successCallback, errorCallback) {
         cookieHelper.deleteCookie("session-jwt", "/", ""); // resets the session cookie to discard old session that may still exist
-        ModuleLoader.load(obj.configuration.loginHelperClass).then(function (helper) {
-            helper.login(params, successCallback, errorCallback);
+        return ModuleLoader.load(obj.configuration.loginHelperClass).then(function (helper) {
+            return helper.login(params).then(successCallback, errorCallback);
         });
     };
 
     obj.logout = function(successCallback, errorCallback) {
-        ModuleLoader.load(obj.configuration.loginHelperClass).then(function (helper) {
-            helper.logout(successCallback, errorCallback);
+        return ModuleLoader.load(obj.configuration.loginHelperClass).then(function (helper) {
+            return helper.logout().then(successCallback, errorCallback);
         });
     };
 
     obj.getLoggedUser = function(successCallback, errorCallback) {
-        ModuleLoader.load(obj.configuration.loginHelperClass).then(function (helper) {
-            helper.getLoggedUser(successCallback, errorCallback);
+        return ModuleLoader.load(obj.configuration.loginHelperClass).then(function (helper) {
+            return helper.getLoggedUser().then(successCallback, errorCallback);
         });
     };
 

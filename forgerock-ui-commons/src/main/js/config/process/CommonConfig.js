@@ -219,18 +219,27 @@ define("config/process/CommonConfig", [
                     return;
                 }
 
-                ModuleLoader.load(route.view).then(function (view) {
+                return ModuleLoader.load(route.view).then(function (view) {
                     view.route = route;
 
                     params = params || route.defaults;
                     conf.setProperty("baseView", "");
                     conf.setProperty("baseViewArgs", "");
 
-                    siteConfigurator.configurePage(route, params).then(function () {
+                    return siteConfigurator.configurePage(route, params).then(function () {
+                        var promise = $.Deferred();
                         spinner.hideSpinner(10);
                         router.routeTo(route, {trigger: true, args: params});
-                        viewManager.changeView(route.view, params, callback, route.forceUpdate);
+
+                        viewManager.changeView(route.view, params, function () {
+                            if (callback) {
+                                callback;
+                            }
+                            promise.resolve(view);
+                        }, route.forceUpdate);
+
                         navigation.reload();
+                        return promise;
                     });
                 });
             }
@@ -340,6 +349,8 @@ define("config/process/CommonConfig", [
                 "org/forgerock/commons/ui/common/main/ViewManager"
             ],
             processDescription: function(event, sessionManager, conf, router, viewManager) {
+                var promise = $.Deferred();
+
                 sessionManager.login(event, function(user) {
                     conf.setProperty('loggedUser', user);
 
@@ -371,6 +382,7 @@ define("config/process/CommonConfig", [
                     }
 
                     EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "loggedIn");
+                    promise.resolve(user);
                 }, function (reason) {
                     if (conf.globalData.auth.urlParams && conf.globalData.auth.urlParams.gotoOnFail) {
                         window.location.href = conf.globalData.auth.urlParams.gotoOnFail;
@@ -378,7 +390,10 @@ define("config/process/CommonConfig", [
                     }
                     reason = reason ? reason : "authenticationFailed";
                     EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, reason);
+                    promise.reject(reason);
                 });
+
+                return promise;
             }
         },
         {
@@ -400,11 +415,11 @@ define("config/process/CommonConfig", [
                 "org/forgerock/commons/ui/common/main/SessionManager"
             ],
             processDescription: function(event, router, conf, sessionManager) {
-                sessionManager.logout(function() {
+                return sessionManager.logout(function() {
+                    delete conf.gotoURL;
                     EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "loggedOut");
                     EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: true});
-                    EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
-                    delete conf.gotoURL;
+                    return EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
                 });
             }
         }

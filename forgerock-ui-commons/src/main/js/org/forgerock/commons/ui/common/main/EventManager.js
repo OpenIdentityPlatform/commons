@@ -29,22 +29,43 @@
  */
 define("org/forgerock/commons/ui/common/main/EventManager", [
     "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/util/Constants"
-], function($, constants) {
-    
+], function($, _, constants) {
+
     /**
      * listenerProxyMap - Association of real listeners and proxies which transforms parameter set
      */
-    var obj = {}, listenerProxyMap = [];
-    
+    var obj = {}, listenerProxyMap = [],
+        subscriptions = {};
+
 
     obj.sendEvent = function (eventId, event) {
-        $(document).trigger(eventId, event);
+        return $.when($(document).triggerHandler(eventId, event)).then(
+            function (response) {
+                var promise;
+                if (_.has(subscriptions, eventId)) {
+                    promise = subscriptions[eventId];
+                    delete subscriptions[eventId];
+                    promise.resolve(response);
+                }
+                return response;
+            },
+            function (rejection) {
+                var promise;
+                if (_.has(subscriptions, eventId)) {
+                    promise = subscriptions[eventId];
+                    delete subscriptions[eventId];
+                    promise.reject(rejection);
+                }
+                return rejection;
+            }
+        );
     };
 
     obj.registerListener = function (eventId, callback) {
         var proxyFunction = function(element, event) {
-            callback(event);
+            return callback(event);
         };
         listenerProxyMap[callback] = proxyFunction;
         $(document).on(eventId, proxyFunction);
@@ -53,6 +74,16 @@ define("org/forgerock/commons/ui/common/main/EventManager", [
     obj.unregisterListener = function (eventId, callback) {
         $(document).off(eventId);
     };
+
+    /**
+     * Returns a promise that will be resolved the next time the provided eventId is triggered.
+     */
+    obj.subscribeTo = function (eventId) {
+        if (!_.has(subscriptions, eventId)) {
+            subscriptions[eventId] = $.Deferred();
+        }
+        return subscriptions[eventId];
+    }
 
     return obj;
 });
