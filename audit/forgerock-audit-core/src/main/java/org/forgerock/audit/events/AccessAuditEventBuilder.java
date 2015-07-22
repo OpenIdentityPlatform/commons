@@ -112,9 +112,21 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
         return new AccessAuditEventBuilder();
     }
 
+    /**
+     * Instructs the builder to lookup client.host from client.ip when populating client details.
+     *
+     * @return this builder
+     */
     public final T withReverseDnsLookup() {
         performReverseDnsLookup = true;
         return self();
+    }
+
+    /**
+     * @return True if client.host should be looked up from client.ip.
+     */
+    protected boolean isReverseDnsLookupEnabled() {
+        return performReverseDnsLookup;
     }
 
     /**
