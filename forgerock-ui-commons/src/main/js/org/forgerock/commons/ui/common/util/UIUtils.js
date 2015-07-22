@@ -22,12 +22,11 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, window, i18n, sessionStorage */
-
+/*global define, i18n, sessionStorage */
 define("org/forgerock/commons/ui/common/util/UIUtils", [
     "jquery",
     "underscore",
-    'require',
+    "require",
     "org/forgerock/commons/ui/common/util/typeextentions/String",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "handlebars",
@@ -441,7 +440,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         if (Handlebars.partials[name]) { return false; }
 
         return obj.reloadTemplate(url).done(function (data) {
-            Handlebars.registerPartial(name, data);
+            Handlebars.registerPartial(name, Handlebars.compile(data));
         }).fail(function() {
             console.error("Partial \"" + url + "\" failed to loaded");
         });
@@ -732,6 +731,19 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         result += router.getLink(router.configuration.routes[routeKey], args);
 
         return new Handlebars.SafeString(result);
+    });
+
+    /**
+     * Handlebars "partial" helper
+     */
+    Handlebars.registerHelper("partial", function(name, context) {
+        var partial = Handlebars.partials[name];
+
+        if(!partial) {
+            console.error("Handlebars \"partial\" helper unable to find partial \"" + name + "\"");
+        } else {
+            return new Handlebars.SafeString(partial(context));
+        }
     });
 
     obj.loadSelectOptions = function(data, el, empty, callback) {

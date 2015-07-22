@@ -118,15 +118,15 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
                 EventManager.sendEvent(Constants.EVENT_CHANGE_BASE_VIEW);
             }
 
+            _.each(this.partials, function(url) {
+                UIUtils.preloadPartial(url);
+            });
+
             if(this.callback) {
                 UIUtils.renderTemplate(this.data.theme.path + this.template, this.$el, _.extend({}, Configuration.globalData, this.data), _.bind(this.callback, this), this.mode, validateCurrent);
             } else {
                 UIUtils.renderTemplate(this.data.theme.path + this.template, this.$el, _.extend({}, Configuration.globalData, this.data), null, this.mode, validateCurrent);
             }
-
-            _.each(this.partials, function(url) {
-                UIUtils.preloadPartial(url);
-            });
         },
 
         rebind: function() {
