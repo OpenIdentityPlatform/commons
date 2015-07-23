@@ -67,8 +67,11 @@ define([
 
                     commonsTests.executeAll(server, userParams);
                     userTests.executeAll(server, getLoggedUser());
+
+                    // mockTests disabled pending some major changes expected to be coming soon in this area
+                    // not worth the time investment in fixing them, owing to those changes.
                     //mockTests.executeAll(server, userParams);
-                    //routerTests.executeAll();
+                    routerTests.executeAll();
                 }, 500);
 
                 QUnit.done(function () {
