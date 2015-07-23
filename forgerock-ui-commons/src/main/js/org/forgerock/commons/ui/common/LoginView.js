@@ -29,6 +29,7 @@
  */
 define("org/forgerock/commons/ui/common/LoginView", [
     "underscore",
+    "placeholder",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/util/ModuleLoader",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
@@ -36,7 +37,7 @@ define("org/forgerock/commons/ui/common/LoginView", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/util/CookieHelper",
     "org/forgerock/commons/ui/common/main/Configuration"
-], function(_, AbstractView, ModuleLoader, validatorsManager, eventManager, constants, cookieHelper, conf) {
+], function(_, placeholder, AbstractView, ModuleLoader, validatorsManager, eventManager, constants, cookieHelper, conf) {
     var LoginView = AbstractView.extend({
         template: "templates/common/LoginTemplate.html",
         baseTemplate: "templates/common/LoginBaseTemplate.html",
@@ -68,9 +69,7 @@ define("org/forgerock/commons/ui/common/LoginView", [
             this.parentRender(function() {
                 validatorsManager.bindValidators(this.$el);
 
-                ModuleLoader.load("placeholder").then(_.bind(function () {
-                    this.$el.find("input").placeholder();
-                }, this));
+                this.$el.find("input").placeholder();
 
                 var login = cookieHelper.getCookie("login");
                 if (login) {

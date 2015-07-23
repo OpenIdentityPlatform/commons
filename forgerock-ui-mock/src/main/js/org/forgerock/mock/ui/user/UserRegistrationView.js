@@ -31,6 +31,7 @@
 define("org/forgerock/mock/ui/user/UserRegistrationView", [
     "jquery",
     "underscore",
+    "placeholder",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/util/ModuleLoader",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
@@ -39,7 +40,7 @@ define("org/forgerock/mock/ui/user/UserRegistrationView", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration"
-], function ($, _, AbstractView, ModuleLoader, validatorsManager, uiUtils, userDelegate, eventManager, constants, conf) {
+], function ($, _, placeholder, AbstractView, ModuleLoader, validatorsManager, uiUtils, userDelegate, eventManager, constants, conf) {
     var UserRegistrationView = AbstractView.extend({
         template: "templates/mock/UserRegistrationTemplate.html",
         baseTemplate: "templates/common/MediumBaseTemplate.html",
@@ -94,9 +95,7 @@ define("org/forgerock/mock/ui/user/UserRegistrationView", [
             this.data.baseParams = args;
 
             this.parentRender(function () {
-                ModuleLoader.load("placeholder").then(_.bind(function () {
-                    this.$el.find("input").placeholder();
-                }, this));
+                this.$el.find("input").placeholder();
 
                 validatorsManager.bindValidators(this.$el, userDelegate.serviceUrl + "/*", _.bind(function () {
                     validatorsManager.validateAllFields(this.$el);
