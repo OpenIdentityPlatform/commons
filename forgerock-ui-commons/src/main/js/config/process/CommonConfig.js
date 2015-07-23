@@ -44,8 +44,8 @@ define("config/process/CommonConfig", [
             processDescription: function(event, Breadcrumbs, Router, Configuration, UIUtils, CookieHelper,
                                          SessionManager) {
                 Breadcrumbs.init();
-                UIUtils.preloadTemplates();
-                UIUtils.preloadPartials();
+                UIUtils.preloadInitialTemplates();
+                UIUtils.preloadInitialPartials();
 
                 SessionManager.getLoggedUser(function(user) {
                     Configuration.setProperty('loggedUser', user);
