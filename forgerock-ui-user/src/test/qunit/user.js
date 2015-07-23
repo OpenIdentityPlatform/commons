@@ -29,8 +29,9 @@ define([
         "org/forgerock/commons/ui/common/main/Configuration",
         "org/forgerock/commons/ui/common/util/Constants",
         "org/forgerock/commons/ui/common/main/EventManager",
-        "org/forgerock/commons/ui/common/util/ModuleLoader"
-    ], function (sinon, conf, Constants, EventManager, ModuleLoader) {
+        "org/forgerock/commons/ui/common/util/ModuleLoader",
+        "org/forgerock/commons/ui/common/main/Router"
+    ], function (sinon, conf, Constants, EventManager, ModuleLoader, Router) {
     return {
         executeAll: function (server, loggedUser) {
 
@@ -45,7 +46,7 @@ define([
 
                     delete userProfileView.route; // necessary to prevent some error-checking code from causing problems in this context
 
-                    userProfileView.render(null,function() {
+                    userProfileView.render([],function() {
 
                         var testVals = {
                                 uid                 : 'Username',
@@ -160,6 +161,47 @@ define([
                     testElement.find("input").val("testUser").trigger("blur");
                     QUnit.equal(testElement.find("input").attr('data-validation-status'), "ok", "Validation status should be ok when provided with correct value");
 
+            });
+
+
+            QUnit.asyncTest("Unauthorized Request Behavior", function () {
+                conf.loggedUser = loggedUser;
+                delete conf.globalData.authorizationFailurePending;
+
+                ModuleLoader.load("LoginDialog").then(function (loginDialog) {
+
+                    // stub the loginDialog because we don't actually care about its contents, just that it gets called
+                    sinon.stub(loginDialog, 'render', function (args, callback) {
+                        if (callback) {
+                            callback();
+                        }
+                    });
+
+                    QUnit.ok(!loginDialog.render.called, "Login Dialog render function has not yet been called");
+                    EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {
+                        route: Router.configuration.routes.profile
+                    }).then(function () {
+
+                        EventManager.sendEvent(Constants.EVENT_UNAUTHORIZED, {error: {type:"POST"} }).then(function () {
+                            QUnit.ok(conf.loggedUser !== null, "User info should be retained after UNAUTHORIZED POST error");
+                            QUnit.ok(loginDialog.render.calledOnce, "LoginDialog render function was called once");
+                            loginDialog.render.restore();
+
+                            delete conf.globalData.authorizationFailurePending;
+
+                            EventManager.sendEvent(Constants.EVENT_UNAUTHORIZED, {error: {type:"GET"} }).then(function () {
+                                QUnit.ok(conf.loggedUser === null, "User info should be discarded after UNAUTHORIZED GET error");
+                                QUnit.ok(conf.gotoURL === "#profile/", "gotoURL should be preserved after UNAUTHORIZED GET error");
+                                QUnit.equal(window.location.hash, "#login/", "Redirected to main login page")
+                                delete conf.gotoURL;
+                                QUnit.start();
+                            });
+
+                        });
+
+                    });
+
+                })
             });
 
         }

@@ -72,7 +72,7 @@ define([
 
                                 EventManager.subscribeTo(Constants.EVENT_LOGIN_REQUEST).done(function (user) {
                                     QUnit.ok(user.userName === parameters.username, "User info returned matches provided username");
-                                    QUnit.ok(Configuration.loggedUser !== undefined && Configuration.loggedUser !== null          , "Logged-in user information saved in configuration scope");
+                                    QUnit.ok(Configuration.loggedUser !== undefined && Configuration.loggedUser !== null, "Logged-in user information saved in configuration scope");
                                     QUnit.start();
                                 });
 
@@ -107,8 +107,12 @@ define([
                     QUnit.equal($("#user_name").text(), Configuration.loggedUser.userName, "Login Bar 'user_name' reflects logged user");
                     QUnit.ok($("#logout_link").length, "Log out link available");
 
-                    EventManager.subscribeTo(Constants.EVENT_LOGOUT).then(function () {
+                    $.when(
+                        EventManager.subscribeTo(Constants.EVENT_LOGOUT),
+                        EventManager.subscribeTo(Constants.EVENT_CHANGE_VIEW)
+                    ).then(function (logoutEvent, newView) {
                         QUnit.ok(Configuration.loggedUser === null || Configuration.loggedUser === undefined, "User should be logged out");
+                        QUnit.equal("#login/", window.location.hash, "After logout, should be on the login page");
                         QUnit.start();
                     });
 
@@ -133,23 +137,24 @@ define([
                     $("#password", loginView.$el).val(parameters.password).trigger('keyup');
                     $("[name=loginRemember]", loginView.$el).prop("checked", true);
 
-                    sinon.stub(loginView, "render", function () {
-                        loginView.render.restore();
-                        loginView.render([], function () {
+                    ModuleLoader.load("UserProfileView").then(function (profile) {
 
-                            QUnit.equal(CookieHelper.getCookie('login'), parameters.username, "Remember-login matches provided username");
-                            QUnit.equal($("#login", loginView.$el).val(), parameters.username, "Username is remembered after logout.");
-                            QUnit.ok($("input[name=loginRemember]", loginView.$el).prop('checked'), "Login Remember is still checked when the login form is re-rendered");
+                        sinon.stub(loginView, "render", function () {
+                            loginView.render.restore();
+                            loginView.render([], function () {
 
-                            CookieHelper.deleteCookie("login");
+                                QUnit.equal(CookieHelper.getCookie('login'), parameters.username, "Remember-login matches provided username");
+                                QUnit.equal($("#login", loginView.$el).val(), parameters.username, "Username is remembered after logout.");
+                                QUnit.ok($("input[name=loginRemember]", loginView.$el).prop('checked'), "Login Remember is still checked when the login form is re-rendered");
 
-                            QUnit.start();
+                                CookieHelper.deleteCookie("login");
+
+                                QUnit.start();
+
+                            });
 
                         });
 
-                    });
-
-                    ModuleLoader.load("UserProfileView").then(function (profile) {
                         sinon.stub(profile, "render", function () {
                             profile.render.restore();
                             // once the profile is rendered, trigger the logout event to return to the login page
@@ -273,7 +278,7 @@ define([
                     EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {route: Router.configuration.routes.enableCookies});
                     _.delay(function () {
                         renderPromise.then(function () {
-                            QUnit.equal(stub.callCount, 1, "Render function only called once");
+                            QUnit.equal(stub.callCount, 1, "Render function only called once during 100 millisecond period");
                             testView.render.restore();
                             QUnit.start();
                         });
@@ -402,6 +407,19 @@ define([
 
                 patchDef = ObjectUtil.generatePatchSet({"a": 1, "b": 2}, {"c": 1});
                 QUnit.equal(patchDef.length, 3, "Expected operation count for removal of one attribute and addition of two others");
+            });
+
+            QUnit.asyncTest("Loading a module asynchronously (CUI-62)", function () {
+                var moduleLoader = require("org/forgerock/commons/ui/common/util/ModuleLoader");
+
+                moduleLoader.load("backgrid").then(function (Backgrid) {
+                    QUnit.equal(typeof Backgrid, "object", "Backgrid loaded by module loader");
+                    moduleLoader.load("backgrid-paginator").then(function () {
+                        QUnit.equal(typeof Backgrid.Extension.Paginator, "function", "Backgrid Paginator loaded by module loader");
+                        QUnit.start();
+                    });
+                });
+
             });
 
         }

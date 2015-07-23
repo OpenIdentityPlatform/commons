@@ -28,6 +28,7 @@ require.config({
     baseUrl: '../www',
     paths: {
         jquery: "libs/jquery-2.1.1-min",
+        doTimeout: "libs/jquery.ba-dotimeout-1.0-min",
         underscore: "libs/lodash-2.4.1-min",
         sinon: "libs/sinon-1.15.4"
     },
@@ -37,6 +38,10 @@ require.config({
         },
         sinon: {
             exports: "sinon"
+        },
+        doTimeout: {
+            deps: ["jquery"],
+            exports: "doTimeout"
         }
     }
 });
