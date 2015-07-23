@@ -29,28 +29,39 @@
  * @author mbilski
  */
 define("org/forgerock/commons/ui/common/main/SessionManager", [
+    "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/util/CookieHelper",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "org/forgerock/commons/ui/common/util/ModuleLoader"
-], function(cookieHelper, AbstractConfigurationAware, ModuleLoader) {
+], function($, _, cookieHelper, AbstractConfigurationAware, ModuleLoader) {
     var obj = new AbstractConfigurationAware();
 
     obj.login = function(params, successCallback, errorCallback) {
         cookieHelper.deleteCookie("session-jwt", "/", ""); // resets the session cookie to discard old session that may still exist
         return ModuleLoader.load(obj.configuration.loginHelperClass).then(function (helper) {
-            return helper.login(params).then(successCallback, errorCallback);
+            return ModuleLoader.promiseWrapper(_.curry(helper.login)(params), {
+                success: successCallback,
+                error: errorCallback
+            });
         });
     };
 
     obj.logout = function(successCallback, errorCallback) {
         return ModuleLoader.load(obj.configuration.loginHelperClass).then(function (helper) {
-            return helper.logout().then(successCallback, errorCallback);
+            return ModuleLoader.promiseWrapper(helper.logout, {
+                success: successCallback,
+                error: errorCallback
+            });
         });
     };
 
     obj.getLoggedUser = function(successCallback, errorCallback) {
         return ModuleLoader.load(obj.configuration.loginHelperClass).then(function (helper) {
-            return helper.getLoggedUser().then(successCallback, errorCallback);
+            return ModuleLoader.promiseWrapper(helper.getLoggedUser, {
+                success: successCallback,
+                error: errorCallback
+            });
         });
     };
 
