@@ -106,7 +106,7 @@
     <testng.version>6.9.4</testng.version>
     <fest-assert.version>1.4</fest-assert.version>
     <mockito.version>1.10.19</mockito.version>
-    <assertj.version>1.6.1</assertj.version>
+    <assertj.version>2.1.0</assertj.version>
     <jackson.version>2.5.3</jackson.version>
     <!-- note: typically only ".0" patch version exists for core annotations -->
     <jackson-annotations.version>2.5.0</jackson-annotations.version>
