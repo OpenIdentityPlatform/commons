@@ -246,7 +246,7 @@ define("org/forgerock/commons/ui/common/main/Router", [
 
                     eventManager.sendEvent(constants.EVENT_SHOW_DIALOG, {route: route, args: args, base: route.base});
                 } else if(route.view) {
-                    eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: route, args: args});
+                    eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: route, args: args, fromRouter: true});
                 }
             }
         });

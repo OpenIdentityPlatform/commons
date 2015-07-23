@@ -112,11 +112,11 @@ define("config/process/CommonConfig", [
             ],
             processDescription: function(error, viewManager, router, conf, sessionManager) {
                 var saveGotoURL = function () {
-                    var hash = router.getCurrentHash();
-                    if(!conf.gotoURL && !hash.match(router.configuration.routes.login.url)) {
-                        conf.setProperty("gotoURL", "#" + hash);
-                    }
-                };
+                        var hash = router.getCurrentHash();
+                        if(!conf.gotoURL && !hash.match(router.configuration.routes.login.url)) {
+                            conf.setProperty("gotoURL", "#" + hash);
+                        }
+                    };
 
                 // multiple rest calls that all return authz failures will cause this event to be called multiple times
                 if (conf.globalData.authorizationFailurePending !== undefined) {
@@ -128,19 +128,18 @@ define("config/process/CommonConfig", [
                 if(!conf.loggedUser) {
                     saveGotoURL();
                     EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: true});
-                    EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
-                    return;
+                    return EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
                 }
 
                 if (typeof error !== "object" || error === null || typeof error.error !== "object" || error.error === null || error.error.type === "GET") {
                     saveGotoURL();
-                    sessionManager.logout(function() {
+                    return sessionManager.logout().then(function() {
                         EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: true});
                         EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unauthorized");
-                        EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
+                        return EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
                     });
                 } else {
-                    EventManager.sendEvent(Constants.EVENT_SHOW_LOGIN_DIALOG);
+                    return EventManager.sendEvent(Constants.EVENT_SHOW_LOGIN_DIALOG);
                 }
 
             }
@@ -213,7 +212,8 @@ define("config/process/CommonConfig", [
             processDescription: function(args, viewManager, router, conf, navigation, spinner, siteConfigurator) {
                 var route = args.route,
                     params = args.args,
-                    callback = args.callback;
+                    callback = args.callback,
+                    fromRouter = args.fromRouter;
 
                 if (!router.checkRole(route)) {
                     return;
@@ -229,7 +229,9 @@ define("config/process/CommonConfig", [
                     return siteConfigurator.configurePage(route, params).then(function () {
                         var promise = $.Deferred();
                         spinner.hideSpinner(10);
-                        router.routeTo(route, {trigger: true, args: params});
+                        if (!fromRouter) {
+                            router.routeTo(route, {trigger: true, args: params});
+                        }
 
                         viewManager.changeView(route.view, params, function () {
                             if (callback) {
