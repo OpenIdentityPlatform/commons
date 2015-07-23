@@ -176,7 +176,7 @@
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>css optimization</id>
+                        <id>compile-less-to-css</id>
                         <phase>package</phase>
 
                         <configuration>
