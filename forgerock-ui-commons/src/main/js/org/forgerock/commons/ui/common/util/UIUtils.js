@@ -1,28 +1,21 @@
 /**
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2011-2015 ForgeRock AS. All rights reserved.
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions copyright 2011-2015 ForgeRock AS.
  */
 
 /*global define, i18n, sessionStorage */
+
 define("org/forgerock/commons/ui/common/util/UIUtils", [
     "jquery",
     "underscore",
@@ -68,49 +61,49 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     obj.commonJQGridFormatters = {
         objectFormatter: function (cellvalue, options, rowObject) {
             if (!cellvalue) {
-                return '';
+                return "";
             }
 
-            var result = '<dl>',
+            var result = "<dl>",
                 prop;
             for (prop in cellvalue) {
 
                 if (_.isString(cellvalue[prop])){
-                    result += '<dt>' + prop + '</dt><dd>' + cellvalue[prop] + '</dd>';
+                    result += "<dt>" + prop + "</dt><dd>" + cellvalue[prop] + "</dd>";
                 } else{
-                    result += '<dt>' + prop + '</dt><dd>' + JSON.stringify(cellvalue[prop]) + '</dd>';
+                    result += "<dt>" + prop + "</dt><dd>" + JSON.stringify(cellvalue[prop]) + "</dd>";
                 }
             }
 
-            result += '</dl>';
+            result += "</dl>";
 
             return result;
         },
         arrayFormatter: function (cellvalue, options, rowObject) {
             if (!cellvalue) {
-                return '';
+                return "";
             }
 
-            var result = '<ul>',
+            var result = "<ul>",
                 i,
                 len = cellvalue.length;
             for (i = 0; i < len; i++) {
 
                 if (_.isString(cellvalue[i])){
-                    result += '<li>' + cellvalue[i] + '</li>';
+                    result += "<li>" + cellvalue[i] + "</li>";
                 } else{
-                    result += '<li>' + JSON.stringify(cellvalue[i]) + '</li>';
+                    result += "<li>" + JSON.stringify(cellvalue[i]) + "</li>";
                 }
             }
 
-            result += '</ul>';
+            result += "</ul>";
 
             return result;
         },
 
         dateFormatter: function (cellvalue, options, rowObject) {
             if (!cellvalue) {
-                return '';
+                return "";
             }
 
             return Handlebars.helpers.date(cellvalue);
@@ -126,20 +119,20 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                 return false;
             }
 
-            if(mode === "append") {
+            if (mode === "append") {
                 el.append(tpl);
             } else {
                 el.html(tpl);
             }
 
-            if(clb) {
+            if (clb) {
                 clb();
             }
         });
     };
 
     obj.fillTemplateWithData = function(templateUrl, data, callback) {
-        if(templateUrl) {
+        if (templateUrl) {
             if (obj.templates[templateUrl]) {
                 var code = Handlebars.compile(obj.templates[templateUrl])(data);
 
@@ -154,7 +147,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                     url: require.toUrl(templateUrl),
                     dataType: "html",
                     success: function(template) {
-                        if(data === 'unknown' || data === null) {
+                        if (data === "unknown" || data === null) {
                             //don't fill the template
                             if (callback) {
                                 callback(template);
@@ -174,6 +167,24 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         }
     };
 
+    /**
+     * Preloads templates for their later usage.
+     * @param {(string|string[])} urls - Urls to be preloaded, can be either a string or an array.
+     */
+    obj.preloadTemplates = function(urls) {
+        if (typeof urls === "string") {
+            urls = [urls];
+        }
+
+        _.each(urls, function(url) {
+            obj.reloadTemplate(url).done(function (data) {
+                obj.templates[url] = data;
+            }).fail(function() {
+                console.error("Template \"" + url + "\" failed to loaded");
+            });
+        });
+    };
+
     obj.reloadTemplate = function(url) {
         return $.ajax({
             type: "GET",
@@ -182,14 +193,11 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         });
     };
 
-    obj.preloadTemplates = function() {
-        _.each(obj.configuration.templateUrls, function(url) {
-            obj.reloadTemplate(url).done(function (data) {
-                obj.templates[url] = data;
-            }).fail(function() {
-                console.error("Template \"" + url + "\" failed to loaded");
-            });
-        });
+    /**
+     * Loads all the templates defined in the "templateUrls" attribute of this module's configuration.
+     */
+    obj.preloadInitialTemplates = function() {
+        obj.preloadTemplates(obj.configuration.templateUrls);
     };
 
     /**
@@ -217,7 +225,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     /**
      * Loads all the Handlebars partials defined in the "partialUrls" attribute of this module's configuration
      */
-    obj.preloadPartials = function() {
+    obj.preloadInitialPartials = function() {
         _.each(obj.configuration.partialUrls, function(url) {
             obj.preloadPartial(url);
         });
@@ -225,7 +233,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
 
     $.fn.emptySelect = function() {
         return this.each(function() {
-            if (this.tagName === 'SELECT') {
+            if (this.tagName === "SELECT") {
                 this.options.length = 0;
             }
         });
@@ -233,7 +241,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
 
     $.fn.loadSelect = function(optionsDataArray) {
         return this.emptySelect().each(function() {
-            if (this.tagName === 'SELECT') {
+            if (this.tagName === "SELECT") {
                 var i, option, selectElement = this;
                 for(i=0;i<optionsDataArray.length;i++){
                     option = new Option(optionsDataArray[i].value, optionsDataArray[i].key);
@@ -257,21 +265,26 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
 
             event.type = "delayedkeyup";
 
-            $.doTimeout('delayedkeyup', 250, function() {
+            $.doTimeout("delayedkeyup", 250, function() {
                 $.event.handle.apply(self, args);
             });
         }
     };
 
-    Handlebars.registerHelper('t', function(i18nKey) {
-        var params = { postProcess: 'sprintf', sprintf: _.map(_.toArray(arguments).slice(1, -1), Handlebars.Utils.escapeExpression)}, result;
+    Handlebars.registerHelper("t", function(i18nKey) {
+        var params = {
+            postProcess: "sprintf",
+            sprintf: _.map(_.toArray(arguments).slice(1, -1),
+            Handlebars.Utils.escapeExpression)
+        },
+        result;
 
         result = i18n.t(i18nKey, params);
 
         return new Handlebars.SafeString(result);
      });
 
-    Handlebars.registerHelper('url', function(routeKey) {
+    Handlebars.registerHelper("url", function(routeKey) {
         var result;
         if (_.isArray(arguments[1])) {
             result = "#" + Router.getLink(Router.configuration.routes[routeKey], arguments[1]);
@@ -284,10 +297,10 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     });
 
     //map should have format key : value
-    Handlebars.registerHelper('selectm', function(map, elementName, selectedKey, selectedValue, multiple, height) {
+    Handlebars.registerHelper("selectm", function(map, elementName, selectedKey, selectedValue, multiple, height) {
         var result, prePart, postPart, content = "", isSelected, entityName;
 
-        prePart = '<select';
+        prePart = "<select";
 
         if (elementName && _.isString(elementName)) {
             prePart += ' name="' + elementName + '"';
@@ -328,9 +341,9 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         return new Handlebars.SafeString(result);
     });
 
-    Handlebars.registerHelper('staticSelect', function(value, options){
-        var selected = $('<select />').html(options.fn(this));
-        selected.find('[value=' + value + ']').attr({'selected':'selected'});
+    Handlebars.registerHelper("staticSelect", function(value, options){
+        var selected = $("<select />").html(options.fn(this));
+        selected.find("[value=" + value + "]").attr({"selected":"selected"});
 
         return selected.html();
     });
@@ -574,7 +587,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         *    ]
         *
         */
-        'findByValues': function(collection, property, values) {
+        "findByValues": function(collection, property, values) {
             return _.filter(collection, function(item) {
                 return _.contains(values, item[property]);
             });
@@ -593,7 +606,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         *    ]
         *
         */
-        'removeByValues': function(collection, property, values) {
+        "removeByValues": function(collection, property, values) {
             return _.reject(collection, function(item) {
                 return _.contains(values, item[property]);
             });
@@ -603,7 +616,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         * isUrl checks to see if string is a valid URL
         * @returns {Boolean}
         */
-        'isUrl': function(string){
+        "isUrl": function(string){
             var regexp = /(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
             return regexp.test(string);
         }
