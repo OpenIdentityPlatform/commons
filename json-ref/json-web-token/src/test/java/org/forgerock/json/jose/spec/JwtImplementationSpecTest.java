@@ -563,9 +563,10 @@ public class JwtImplementationSpecTest {
     public void shouldDecryptJDK6Or7JweWithJDK8() {
 
         //Given
-        String originalJwe = "eyAiYWxnIjogIlJTQUVTX1BLQ1MxX1YxXzUiLCAidHlwIjogImp3dCIsICJlbmMiOiAiQTEyOENCQ19IUzI1NiIgf"
-                + "Q.Ew8KPoUx-PoD3gsYreWud9n0KNqIOSYOgr4EiTgDdMqT_IKZ1juAFV9JUIK2FhN0r5yD6261v_ltlW95voCL3w.1-ERoOvu1Tv"
-                + "0JhEh7Utdxg.kexUc5ESTVIOns4HJMmp-eR4bFiBMkIUTuNnDMGsyPkQMSqIIqWnIHRKzxMR1CXo.QzTRu5uBtUqdAXhcRj8TJw";
+        String originalJwe = "eyAidHlwIjogIkpXVCIsICJhbGciOiAiUlNBRVNfUEtDUzFfVjFfNSIsICJlbmMiOiAiQTEyOENCQ19IUzI" +
+                "1NiIgfQ.XftfhI758nV17DtXxgq6ykQEIsVBkVsEDCebrRjTPpYYobXSuJKXSAMirT3Kv-gELpsw-r4mT5eLt2wOwKEdcw.0" +
+                "Z4Ze0easjxgcK9WmExjwg.ooyGybIEKD6SFbC65gVui9YGq94_19VXVnlBGMlZ3-Uq5Gye2Ud_fO9i5RvwJGbR.trMZifMFl" +
+                "RVoA5SPmFoifQ";
         EncryptedJwt encryptedJwt = reconstruction.reconstructJwt(originalJwe, EncryptedJwt.class);
 
         //When
@@ -595,10 +596,12 @@ public class JwtImplementationSpecTest {
     public void shouldDecryptJweWhenOriginalContainsNoSpaces() {
 
         //Given
-        String noSpaceJwe = "eyJ0eXAiOiJqd3QiLCJhbGciOiJSU0FFU19QS0NTMV9WMV81IiwiaGVhZGVyLWtleSI6ImhlYWRlci12YWx1ZSIsIm"
-                + "VuYyI6IkExMjhDQkNfSFMyNTYifQ.C7hfe8oQWYLhaSdp_IKTATQz2A1um5OCZK4WM73itYRT5VesE1Ne9ZHTXWjQ96XQhC4gFh-"
-                + "XrFr5s005FMAZVA.KTX2TzreIU5Mgu5lQ0Lflg.qy_V5xI6hv-elGYuJilD8O-3Usa3ySsD5w819v0lP24.CYm_wYWjjGBEr_Pad"
-                + "u-OJA";
+        // JSON headers and claims are stripped of spaces around keys/values before encrypting,
+        // i.e. {"typ":"JWT"} vs { "typ" : "JWT" } etc.
+        String noSpaceJwe = "eyJ0eXAiOiJKV1QiLCJoZWFkZXIta2V5IjoiaGVhZGVyLXZhbHVlIiwiZW5jIjoiQTEyOENCQ19IUzI" +
+                "1NiIsImFsZyI6IlJTQUVTX1BLQ1MxX1YxXzUifQ.LwGSGsJ1LOEKgv1jA3GE90081GfJrM21DCDdL4b_8S22hjvzgFY" +
+                "yDKV6rchkkTiZHJiSyjMdtgQbyCvzJNx-GA.yGUN6WZWEwfyzhKdH5ifHw.AAfJrA4u_83EEhuNfmWmc1yjyev1rvpS" +
+                "1B7o7uvAfxg.c2zquNkMFg4QG5WyyXtqnA";
         EncryptedJwt encryptedJwt = reconstruction.reconstructJwt(noSpaceJwe, EncryptedJwt.class);
 
         //When

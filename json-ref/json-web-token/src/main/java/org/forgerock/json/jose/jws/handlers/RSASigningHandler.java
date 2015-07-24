@@ -19,14 +19,17 @@ package org.forgerock.json.jose.jws.handlers;
 import org.forgerock.json.jose.exceptions.JwsSigningException;
 import org.forgerock.json.jose.exceptions.JwsVerifyingException;
 import org.forgerock.json.jose.jws.JwsAlgorithm;
+import org.forgerock.json.jose.jws.JwsAlgorithmType;
 import org.forgerock.json.jose.utils.Utils;
 import org.forgerock.util.Reject;
 import org.forgerock.util.SignatureUtil;
 
+import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.Signature;
 import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 
@@ -57,6 +60,7 @@ public class RSASigningHandler implements SigningHandler {
      */
     @Override
     public byte[] sign(JwsAlgorithm algorithm, String data) {
+        validateAlgorithm(algorithm);
         try {
             Reject.ifFalse(key instanceof PrivateKey, "RSA requires private key for signing.");
             return signatureUtil.sign((PrivateKey) key, algorithm.getAlgorithm(), data);
@@ -72,7 +76,27 @@ public class RSASigningHandler implements SigningHandler {
      * {@inheritDoc}
      */
     @Override
+    public byte[] sign(final JwsAlgorithm algorithm, final byte[] data) {
+        validateAlgorithm(algorithm);
+        try {
+            Reject.ifFalse(key instanceof PrivateKey, "RSA requires private key for signing.");
+            Signature signature = Signature.getInstance(algorithm.getAlgorithm());
+            signature.initSign((PrivateKey) key);
+            signature.update(data);
+            return signature.sign();
+        } catch (SignatureException | InvalidKeyException e) {
+            throw new JwsSigningException(e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new JwsSigningException("Unsupported Signing Algorithm, " + algorithm.getAlgorithm(), e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean verify(JwsAlgorithm algorithm, byte[] data, byte[] signature) {
+        validateAlgorithm(algorithm);
         try {
             Reject.ifFalse(key instanceof PublicKey, "RSA requires public key for signature verification.");
             return signatureUtil.verify((PublicKey) key, algorithm.getAlgorithm(),
@@ -83,5 +107,10 @@ public class RSASigningHandler implements SigningHandler {
             }
             throw new JwsVerifyingException(e);
         }
+    }
+
+    private void validateAlgorithm(JwsAlgorithm algorithm) {
+        Reject.ifNull(algorithm, "Algorithm must not be null.");
+        Reject.ifTrue(algorithm.getAlgorithmType() != JwsAlgorithmType.RSA, "Not an RSA algorithm.");
     }
 }

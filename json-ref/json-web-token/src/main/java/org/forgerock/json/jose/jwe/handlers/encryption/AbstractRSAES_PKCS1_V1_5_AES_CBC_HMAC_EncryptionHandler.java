@@ -31,6 +31,7 @@ import org.forgerock.json.jose.utils.Utils;
 import javax.crypto.KeyGenerator;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -173,8 +174,8 @@ abstract class AbstractRSAES_PKCS1_V1_5_AES_CBC_HMAC_EncryptionHandler extends A
                 plaintext);
 
 
-        int alLength = additionalAuthenticatedData.length * 8;
-        byte[] al = ByteBuffer.allocate(8).putInt(alLength).array();
+        long alLength = additionalAuthenticatedData.length * 8L;
+        byte[] al = ByteBuffer.allocate(8).order(ByteOrder.BIG_ENDIAN).putLong(alLength).array();
 
 
         int authenticationTagInputLength = additionalAuthenticatedData.length + initialisationVector.length
@@ -182,8 +183,7 @@ abstract class AbstractRSAES_PKCS1_V1_5_AES_CBC_HMAC_EncryptionHandler extends A
         byte[] dataBytes = ByteBuffer.allocate(authenticationTagInputLength).put(additionalAuthenticatedData)
                 .put(initialisationVector).put(ciphertext).put(al).array();
         SigningHandler signingHandler = signingManager.newHmacSigningHandler(macKey.getEncoded());
-        byte[] hmac = signingHandler.sign(JwsAlgorithm.getJwsAlgorithm(macKey.getAlgorithm()),
-                new String(dataBytes, Utils.CHARSET));
+        byte[] hmac = signingHandler.sign(JwsAlgorithm.getJwsAlgorithm(macKey.getAlgorithm()), dataBytes);
 
         byte[] authenticationTag = Arrays.copyOf(hmac, encryptionMethod.getKeyOffset());
 
@@ -223,8 +223,8 @@ abstract class AbstractRSAES_PKCS1_V1_5_AES_CBC_HMAC_EncryptionHandler extends A
                 encryptionMethod.getEncryptionAlgorithm());
 
 
-        int alLength = additionalAuthenticatedData.length * 8;
-        byte[] al = ByteBuffer.allocate(8).putInt(alLength).array();
+        long alLength = additionalAuthenticatedData.length * 8L;
+        byte[] al = ByteBuffer.allocate(8).order(ByteOrder.BIG_ENDIAN).putLong(alLength).array();
 
         int authenticationTagInputLength = additionalAuthenticatedData.length + initialisationVector.length
                 + ciphertext.length + al.length;
@@ -232,7 +232,7 @@ abstract class AbstractRSAES_PKCS1_V1_5_AES_CBC_HMAC_EncryptionHandler extends A
                 .put(initialisationVector).put(ciphertext).put(al).array();
         SigningHandler signingHandler = signingManager.newHmacSigningHandler(macKey.getEncoded());
         byte[] hmac = signingHandler.sign(JwsAlgorithm.getJwsAlgorithm(macKey.getAlgorithm()),
-                new String(dataBytes, Utils.CHARSET));
+                dataBytes);
 
         byte[] expectedAuthenticationTag = Arrays.copyOf(hmac, encryptionMethod.getKeyOffset());
 
