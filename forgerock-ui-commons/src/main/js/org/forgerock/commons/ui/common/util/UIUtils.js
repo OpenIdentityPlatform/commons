@@ -735,6 +735,8 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
 
     /**
      * Handlebars "partial" helper
+     * @example
+     * {{partial this.partialName this}}
      */
     Handlebars.registerHelper("partial", function(name, context) {
         var partial = Handlebars.partials[name];
