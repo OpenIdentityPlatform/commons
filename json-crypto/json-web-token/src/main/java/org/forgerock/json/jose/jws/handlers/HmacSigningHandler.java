@@ -57,6 +57,14 @@ public class HmacSigningHandler implements SigningHandler {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public byte[] sign(final JwsAlgorithm algorithm, final byte[] data) {
+        return signWithHMAC(algorithm.getAlgorithm(), sharedSecret, data);
+    }
+
+    /**
      * Performs the creation of the MAC for the data using the given Java Cryptographic algorithm.
      *
      * @param algorithm The Java Cryptographic algorithm.
