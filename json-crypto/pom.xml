@@ -63,9 +63,6 @@
         <maven.compiler.target>1.7</maven.compiler.target>
         <maven.compiler.source>1.7</maven.compiler.source>
         <i18nFrameworkVersion>1.4.1</i18nFrameworkVersion>
-        <jacksonVersion>2.5.3</jacksonVersion>
-        <forgerockUtilVersion>2.0.0-SNAPSHOT</forgerockUtilVersion>
-        <forgerockChfVersion>0.0.1-SNAPSHOT</forgerockChfVersion>
     </properties>
     <modules>
         <module>json-fluent</module>
@@ -91,13 +88,11 @@
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>6.9.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
-            <version>1.10.19</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
