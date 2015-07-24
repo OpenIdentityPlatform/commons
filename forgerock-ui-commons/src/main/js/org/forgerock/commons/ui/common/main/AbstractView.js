@@ -98,14 +98,14 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
         },
 
         loadTemplate: function() {
-            var _this = this,
+            var self = this,
                 validateCurrent = function () {
-                    if (!_.has(_this, "route")) {
+                    if (!_.has(self, "route")) {
                         return true;
-                    } else if (!_this.route.url.length && Router.getCurrentHash().replace(/^#/, '') === "") {
+                    } else if (!self.route.url.length && Router.getCurrentHash().replace(/^#/, '') === "") {
                         return true;
                     } else {
-                        return Router.getCurrentHash().replace(/^#/, '').match(_this.route.url);
+                        return Router.getCurrentHash().replace(/^#/, '').match(self.route.url);
                     }
                 };
 
@@ -118,14 +118,13 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
                 EventManager.sendEvent(Constants.EVENT_CHANGE_BASE_VIEW);
             }
 
-            if(this.callback) {
-                UIUtils.renderTemplate(this.data.theme.path + this.template, this.$el, _.extend({}, Configuration.globalData, this.data), _.bind(this.callback, this), this.mode, validateCurrent);
-            } else {
-                UIUtils.renderTemplate(this.data.theme.path + this.template, this.$el, _.extend({}, Configuration.globalData, this.data), null, this.mode, validateCurrent);
-            }
-
-            _.each(this.partials, function(url) {
-                UIUtils.preloadPartial(url);
+            // Ensure all partials are (pre)loaded before rendering the template
+            $.when.apply($, _.map(this.partials, UIUtils.preloadPartial)).then(function () {
+                if(self.callback) {
+                    UIUtils.renderTemplate(self.data.theme.path + self.template, self.$el, _.extend({}, Configuration.globalData, self.data), _.bind(self.callback, self), self.mode, validateCurrent);
+                } else {
+                    UIUtils.renderTemplate(self.data.theme.path + self.template, self.$el, _.extend({}, Configuration.globalData, self.data), null, self.mode, validateCurrent);
+                }
             });
         },
 

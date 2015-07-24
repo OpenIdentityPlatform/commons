@@ -22,18 +22,18 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, require, i18n, window, sessionStorage */
-
+/*global define, i18n, sessionStorage */
 define("org/forgerock/commons/ui/common/util/UIUtils", [
     "jquery",
     "underscore",
+    "require",
     "handlebars",
     "i18next",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "org/forgerock/commons/ui/common/util/ModuleLoader",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/util/typeextentions/String"
-], function ($, _, Handlebars, i18next, AbstractConfigurationAware, ModuleLoader, Router, String) {
+], function ($, _, require, Handlebars, i18next, AbstractConfigurationAware, ModuleLoader, Router, String) {
     /**
      * @exports org/forgerock/commons/ui/common/util/UIUtils
      */
@@ -208,7 +208,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         if (Handlebars.partials[name]) { return false; }
 
         return obj.reloadTemplate(url).done(function (data) {
-            Handlebars.registerPartial(name, data);
+            Handlebars.registerPartial(name, Handlebars.compile(data));
         }).fail(function() {
             console.error("Partial \"" + url + "\" failed to loaded");
         });
@@ -482,6 +482,21 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         result += Router.getLink(Router.configuration.routes[routeKey], args);
 
         return new Handlebars.SafeString(result);
+    });
+
+    /**
+     * Handlebars "partial" helper
+     * @example
+     * {{partial this.partialName this}}
+     */
+    Handlebars.registerHelper("partial", function(name, context) {
+        var partial = Handlebars.partials[name];
+
+        if(!partial) {
+            console.error("Handlebars \"partial\" helper unable to find partial \"" + name + "\"");
+        } else {
+            return new Handlebars.SafeString(partial(context));
+        }
     });
 
     obj.loadSelectOptions = function(data, el, empty, callback) {
