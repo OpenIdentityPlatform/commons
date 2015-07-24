@@ -19,6 +19,7 @@ package org.forgerock.json.jose.jwe;
 import org.forgerock.json.jose.exceptions.JweException;
 import org.forgerock.json.jose.jwe.handlers.encryption.EncryptionHandler;
 import org.forgerock.json.jose.jwe.handlers.encryption.RSA15AES128CBCHS256EncryptionHandler;
+import org.forgerock.json.jose.jwe.handlers.encryption.RSA15AES256CBCHS512EncryptionHandler;
 import org.forgerock.json.jose.jws.SigningManager;
 
 /**
@@ -67,7 +68,7 @@ public class EncryptionManager {
             return new RSA15AES128CBCHS256EncryptionHandler(new SigningManager());
         }
         case A256CBC_HS512: {
-            throw new JweException(new UnsupportedOperationException("A256CBC_HS512 not yet supported"));
+            return new RSA15AES256CBCHS512EncryptionHandler(new SigningManager());
         }
         default: {
             throw new JweException("No Encryption Handler for unknown encryption method, "
