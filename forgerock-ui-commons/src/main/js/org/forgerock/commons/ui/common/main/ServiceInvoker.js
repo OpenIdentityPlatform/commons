@@ -47,9 +47,15 @@ define("org/forgerock/commons/ui/common/main/ServiceInvoker", [
     obj.restCall = function(options) {
         var successCallback = options.success,
             errorCallback = options.error,
-            isJSONRequest = options.hasOwnProperty("dataType") && options.dataType === "json";
+            hasDataType = options.hasOwnProperty("dataType"),
+            isJSONRequest = hasDataType && options.dataType === "json";
 
-        if (isJSONRequest) {
+        /**
+         * Logic to cover two scenarios:
+         * 1. If we don't have a dataType we default to JSON
+         * 2. If the dataType is "json" we ensure the correct value for contentType has been set
+         */
+        if (!hasDataType || isJSONRequest) {
             options.dataType = "json";
             options.contentType = "application/json";
         }
