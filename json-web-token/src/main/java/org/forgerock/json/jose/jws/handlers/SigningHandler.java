@@ -39,6 +39,15 @@ public interface SigningHandler {
     byte[] sign(JwsAlgorithm algorithm, String data);
 
     /**
+     * Signs the given raw data bytes using the Java Cryptographic algorithm defined by the JwsAlgorithm.
+     *
+     * @param algorithm the JWS signature algorithm to use.
+     * @param data the raw data to sign.
+     * @return the signature.
+     */
+    byte[] sign(JwsAlgorithm algorithm, byte[] data);
+
+    /**
      * Verifies that the given signature is valid for the given data.
      * <p>
      * Uses the Java Cryptographic algorithm defined by the JwsAlgorithm and private key to create a new signature
