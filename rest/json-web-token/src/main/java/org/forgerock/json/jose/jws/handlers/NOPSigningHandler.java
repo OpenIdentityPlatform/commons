@@ -40,6 +40,18 @@ public class NOPSigningHandler implements SigningHandler {
     }
 
     /**
+     * Returns an empty byte array.
+     *
+     * @param algorithm {@inheritDoc}
+     * @param data {@inheritDoc}
+     * @return {@inheritDoc}
+     */
+    @Override
+    public byte[] sign(final JwsAlgorithm algorithm, final byte[] data) {
+        return new byte[0];
+    }
+
+    /**
      * Verifies that the signature length is zero.
      *
      * @param algorithm {@inheritDoc}
