@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2015 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwe.handlers.encryption;
@@ -21,13 +21,13 @@ import org.forgerock.json.jose.jws.SigningManager;
 
 /**
  * An implementation of an EncryptionHandler that provides encryption and decryption methods using the JweAlgorithm
- * RSAES_PCKS1_V1_5 and EncryptionMethod A128CBC_HS256.
+ * RSAES_PCKS1_V1_5 and EncryptionMethod A256CBC_HS512.
  *
- * @since 2.0.0
+ * @since 2.5.0
  */
-public final class RSA15AES128CBCHS256EncryptionHandler extends AbstractRSAES_PKCS1_V1_5_AES_CBC_HMAC_EncryptionHandler {
+public final class RSA15AES256CBCHS512EncryptionHandler extends AbstractRSAES_PKCS1_V1_5_AES_CBC_HMAC_EncryptionHandler {
 
-    public RSA15AES128CBCHS256EncryptionHandler(final SigningManager signingManager) {
-        super(signingManager, EncryptionMethod.A128CBC_HS256);
+    public RSA15AES256CBCHS512EncryptionHandler(final SigningManager signingManager) {
+        super(signingManager, EncryptionMethod.A256CBC_HS512);
     }
 }
