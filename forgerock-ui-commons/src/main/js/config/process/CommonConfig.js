@@ -43,8 +43,8 @@ define("config/process/CommonConfig", [
             ],
             processDescription: function(event, Router, Configuration, UIUtils, CookieHelper,
                                          SessionManager) {
-                UIUtils.preloadTemplates();
-                UIUtils.preloadPartials();
+                UIUtils.preloadInitialTemplates();
+                UIUtils.preloadInitialPartials();
 
                 SessionManager.getLoggedUser(function(user) {
                     Configuration.setProperty('loggedUser', user);
