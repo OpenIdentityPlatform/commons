@@ -81,10 +81,11 @@ public class EntityTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void getJson() throws Exception {
         entity.setRawContentInputStream(mockJsonContent1);
         assertThat(entity.getJson()).isInstanceOf(Map.class);
-        final Map<?, ?> jsonEntity = ((Map<?, ?>) entity.getJson());
+        final Map<String, Integer> jsonEntity = ((Map<String, Integer>) entity.getJson());
 
         assertThat(jsonEntity).hasSize(2);
         assertThat(jsonEntity).contains(entry("a", 1), entry("b", 2));
@@ -275,24 +276,26 @@ public class EntityTest {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void assertThatContentIsJsonContent1() throws IOException {
         assertThat(entity.getString()).isEqualTo(JSON_CONTENT1);
         assertThat(entity.getBytes()).isEqualTo(bytes(JSON_CONTENT1));
 
         assertThat(entity.getJson()).isInstanceOf(LinkedHashMap.class);
-        final Map<?, ?> jsonEntity = ((LinkedHashMap<?, ?>) entity.getJson());
+        final Map<String, Integer> jsonEntity = ((LinkedHashMap<String, Integer>) entity.getJson());
 
         assertThat(jsonEntity).hasSize(2);
         assertThat(jsonEntity).contains(entry("a", 1), entry("b", 2));
         assertThat(mockJsonContent1.available()).isEqualTo(JSON_CONTENT1.length());
     }
 
+    @SuppressWarnings("unchecked")
     private void assertThatContentIsJsonContent2() throws IOException {
         assertThat(entity.getRawContentInputStream()).isNotSameAs(mockJsonContent1);
         assertThat(entity.getBytes()).isEqualTo(bytes(JSON_CONTENT2));
 
         assertThat(entity.getJson()).isInstanceOf(LinkedHashMap.class);
-        final Map<?, ?> jsonEntity = ((LinkedHashMap<?, ?>) entity.getJson());
+        final Map<String, Integer> jsonEntity = ((LinkedHashMap<String, Integer>) entity.getJson());
 
         assertThat(jsonEntity).hasSize(2);
         assertThat(jsonEntity).contains(entry("c", 3), entry("d", 4));
