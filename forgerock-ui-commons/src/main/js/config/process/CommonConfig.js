@@ -369,7 +369,6 @@ define("config/process/CommonConfig", [
                         $(".modal").modal("hide");
                     }
 
-                    EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "loggedIn");
                 }, function (reason) {
                     if (conf.globalData.auth.urlParams && conf.globalData.auth.urlParams.gotoOnFail) {
                         window.location.href = conf.globalData.auth.urlParams.gotoOnFail;
