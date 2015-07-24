@@ -23,10 +23,12 @@ import org.forgerock.json.jose.common.JwtReconstruction;
 import org.forgerock.json.jose.exceptions.JweDecryptionException;
 import org.forgerock.json.jose.jwt.JwtClaimsSet;
 import org.forgerock.util.encode.Base64url;
+import org.testng.SkipException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import javax.crypto.Cipher;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.security.KeyPair;
@@ -45,7 +47,15 @@ public class EncryptedJwtTest {
 
     @Test(dataProvider = "encryptionMethods")
     public void shouldNotLeakInformationAboutDecryptionFailures(EncryptionMethod encryptionMethod,
-                                                                JweAlgorithm algorithm) {
+                                                                JweAlgorithm algorithm)
+            throws Exception {
+
+        // Check if the JRE supports the key size requested
+        final int encryptionKeySize = encryptionMethod.getKeySize() - (encryptionMethod.getKeyOffset() * 8);
+        if (Cipher.getMaxAllowedKeyLength(encryptionMethod.getEncryptionAlgorithm()) < encryptionKeySize) {
+            throw new SkipException("Install JCE Unlimited Strength to test AES-256 and above");
+        }
+
         // Given
         JwtReconstruction reconstruction = new JwtReconstruction();
         JwtClaimsSet claims = new JwtBuilderFactory().claims().build();
@@ -91,7 +101,8 @@ public class EncryptedJwtTest {
     @DataProvider
     public Object[][] encryptionMethods() {
         return new Object[][] {
-                { EncryptionMethod.A128CBC_HS256, JweAlgorithm.RSAES_PKCS1_V1_5 }
+                { EncryptionMethod.A128CBC_HS256, JweAlgorithm.RSAES_PKCS1_V1_5 },
+                { EncryptionMethod.A256CBC_HS512, JweAlgorithm.RSAES_PKCS1_V1_5 }
         };
     }
 
