@@ -52,11 +52,7 @@ define("org/forgerock/commons/ui/common/util/ModuleLoader", [
             try {
                 require([libPath], promise.resolve);
             } catch (e) {
-                try {
-                    require([libPath], promise.resolve);
-                } catch (e2) {
-                    promise.reject(e2);
-                }
+                promise.reject(e);
             }
 
             return promise;
