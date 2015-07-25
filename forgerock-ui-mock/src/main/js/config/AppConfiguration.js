@@ -24,11 +24,6 @@
 
 /*global define*/
 
-/**
- * @author yaromin
- * @author Eugenia Sergueeva
- */
-
 define("config/AppConfiguration", [
     "org/forgerock/commons/ui/common/util/Constants"
 ], function (Constants) {

@@ -33,6 +33,9 @@
         // these are only useful for the mock project as a way of faking a backend
         // excluding them in the minification bundle presents a more meaningful representation
         "sinon",
-        "mock/Data"
+        "mock/Data",
+
+        // This file is excluded from optimization so that the UI can be customized without having to repackage it.
+        "config/AppConfiguration"
     ]
 })
