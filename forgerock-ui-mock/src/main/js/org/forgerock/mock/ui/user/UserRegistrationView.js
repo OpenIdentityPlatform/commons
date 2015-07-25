@@ -33,14 +33,13 @@ define("org/forgerock/mock/ui/user/UserRegistrationView", [
     "underscore",
     "placeholder",
     "org/forgerock/commons/ui/common/main/AbstractView",
-    "org/forgerock/commons/ui/common/util/ModuleLoader",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "UserDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration"
-], function ($, _, placeholder, AbstractView, ModuleLoader, validatorsManager, uiUtils, userDelegate, eventManager, constants, conf) {
+], function ($, _, placeholder, AbstractView, validatorsManager, uiUtils, userDelegate, eventManager, constants, conf) {
     var UserRegistrationView = AbstractView.extend({
         template: "templates/mock/UserRegistrationTemplate.html",
         baseTemplate: "templates/common/MediumBaseTemplate.html",
