@@ -137,6 +137,6 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-less');
 
     grunt.task.run('notify_hooks');
-    grunt.registerTask('default', ['sync', 'qunit', 'watch']);
+    grunt.registerTask('default', ['sync', 'less', 'qunit', 'watch']);
 
 };
