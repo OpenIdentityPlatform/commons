@@ -92,8 +92,7 @@ define([
 
                         //clicking submit button
 
-                        EventManager.subscribeTo(Constants.EVENT_DISPLAY_MESSAGE_REQUEST).then(function (message) {
-                            QUnit.equal(message, "profileUpdateSuccessful", "Correct Update Message displayed");
+                        EventManager.whenComplete(Constants.EVENT_DISPLAY_MESSAGE_REQUEST).then(function (message) {
 
                             QUnit.equal(conf.loggedUser.uid, testVals.uid                             , "Username changed");
                             QUnit.equal(conf.loggedUser.givenName, testVals.givenName                 , "First name changed");

@@ -63,16 +63,15 @@ define([
 
 
                             $("#password", loginView.$el).val("badPassword").trigger('keyup');
-                            EventManager.subscribeTo(Constants.EVENT_LOGIN_REQUEST).fail(function (reason) {
+                            EventManager.whenComplete(Constants.EVENT_LOGIN_REQUEST).fail(function () {
 
-                                QUnit.equal(reason, "authenticationFailed", "Incorrect password resulted in failed login attempt");
+                                QUnit.ok(!Configuration.loggedUser, "Incorrect password resulted in failed login attempt");
 
                                 // this is the good password
                                 $("#password", loginView.$el).val(parameters.password).trigger('keyup');
 
-                                EventManager.subscribeTo(Constants.EVENT_LOGIN_REQUEST).done(function (user) {
-                                    QUnit.ok(user.userName === parameters.username, "User info returned matches provided username");
-                                    QUnit.ok(Configuration.loggedUser !== undefined && Configuration.loggedUser !== null, "Logged-in user information saved in configuration scope");
+                                EventManager.whenComplete(Constants.EVENT_LOGIN_REQUEST).done(function () {
+                                    QUnit.ok(Configuration.loggedUser.userName === parameters.username, "Logged-in user information saved in configuration scope");
                                     QUnit.start();
                                 });
 
@@ -108,9 +107,9 @@ define([
                     QUnit.ok($("#logout_link").length, "Log out link available");
 
                     $.when(
-                        EventManager.subscribeTo(Constants.EVENT_LOGOUT),
-                        EventManager.subscribeTo(Constants.EVENT_CHANGE_VIEW)
-                    ).then(function (logoutEvent, newView) {
+                        EventManager.whenComplete(Constants.EVENT_LOGOUT),
+                        EventManager.whenComplete(Constants.EVENT_CHANGE_VIEW)
+                    ).then(function () {
                         QUnit.ok(Configuration.loggedUser === null || Configuration.loggedUser === undefined, "User should be logged out");
                         QUnit.equal("#login/", window.location.hash, "After logout, should be on the login page");
                         QUnit.start();
@@ -128,9 +127,12 @@ define([
 
                 Router.configuration.routes.login.forceUpdate=true;
 
-                EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {
-                    route: Router.configuration.routes.login
-                }).then(function (loginView) {
+                $.when(
+                    ModuleLoader.load("LoginView"),
+                    EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {
+                        route: Router.configuration.routes.login
+                    })
+                ).then(function (loginView) {
 
                     // login with loginRemember checked
                     $("#login", loginView.$el).val(parameters.username).trigger('keyup');
@@ -268,21 +270,23 @@ define([
             QUnit.asyncTest("Views using plain route url incorrectly rendered multiple times (CUI-50)", function () {
                 ModuleLoader.load("org/forgerock/commons/ui/common/EnableCookiesView").then(function (testView) {
 
-                    var renderPromise = $.Deferred(),
-                        stub = sinon.stub(testView, "render", function (args, callback) {
-                            renderPromise.resolve();
-                        });
+                    sinon.stub(testView, "render", function (args, callback) {
+                        if (callback) {
+                            callback();
+                        }
+                    });
 
                     window.location.hash = "enableCookies/";
 
-                    EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {route: Router.configuration.routes.enableCookies});
-                    _.delay(function () {
-                        renderPromise.then(function () {
-                            QUnit.equal(stub.callCount, 1, "Render function only called once during 100 millisecond period");
+                    EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {route: Router.configuration.routes.enableCookies}).then(function () {
+                        QUnit.equal(testView.render.callCount, 1, "Render function only called once");
+
+                        EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {route: _.extend({forceUpdate:true}, Router.configuration.routes.enableCookies) }).then(function () {
+                            QUnit.equal(testView.render.callCount, 2, "Render function called again when forceUpdate is true");
                             testView.render.restore();
                             QUnit.start();
                         });
-                    }, 100);
+                    });
 
                 });
 

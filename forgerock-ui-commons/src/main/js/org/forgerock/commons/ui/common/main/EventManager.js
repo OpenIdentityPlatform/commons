@@ -22,68 +22,79 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, document */
+/*global define */
 
-/**
- * @author yaromin
- */
 define("org/forgerock/commons/ui/common/main/EventManager", [
     "jquery",
     "underscore",
     "org/forgerock/commons/ui/common/util/Constants"
 ], function($, _, constants) {
 
-    /**
-     * listenerProxyMap - Association of real listeners and proxies which transforms parameter set
-     */
-    var obj = {}, listenerProxyMap = [],
+    var obj = {},
+        eventRegistry = {},
         subscriptions = {};
 
 
     obj.sendEvent = function (eventId, event) {
-        return $.when($(document).triggerHandler(eventId, event)).then(
-            function (response) {
+        return $.when.apply($,
 
+            _.map(eventRegistry[eventId], function (eventHandler) {
+                var response = eventHandler(event);
+
+                // in the case when the event handler didn't return anything, just pass along the original event
                 if (response === undefined) {
-                    // in the case when the event handler didn't return anything, just pass along the original event
-                    response = event;
+                    return event;
+                } else {
+                    return response;
                 }
+            })
+
+        ).then(
+            function () {
                 var promise;
                 if (_.has(subscriptions, eventId)) {
                     promise = subscriptions[eventId];
                     delete subscriptions[eventId];
-                    promise.resolve(response);
+                    promise.resolve(_.toArray(arguments));
                 }
-                return response;
+                return _.toArray(arguments);
             },
-            function (rejection) {
+            function () {
                 var promise;
                 if (_.has(subscriptions, eventId)) {
                     promise = subscriptions[eventId];
                     delete subscriptions[eventId];
-                    promise.reject(rejection);
+                    promise.reject(_.toArray(arguments));
                 }
-                return rejection;
+                return _.toArray(arguments);
             }
         );
     };
 
     obj.registerListener = function (eventId, callback) {
-        var proxyFunction = function(element, event) {
-            return callback(event);
-        };
-        listenerProxyMap[callback] = proxyFunction;
-        $(document).on(eventId, proxyFunction);
+        if (!_.has(eventRegistry, eventId)) {
+            eventRegistry[eventId] = [callback];
+        } else {
+            eventRegistry[eventId].push(callback);
+        }
     };
 
-    obj.unregisterListener = function (eventId, callback) {
-        $(document).off(eventId);
+    obj.unregisterListener = function (eventId, callbackToRemove) {
+        if (_.has(eventRegistry, eventId)) {
+            if (callbackToRemove !== undefined) {
+                eventRegistry[eventId] = _.omit(eventRegistry[eventId], function (callback) {
+                    return callback === callbackToRemove;
+                });
+            } else {
+                delete eventRegistry[eventId];
+            }
+        }
     };
 
     /**
-     * Returns a promise that will be resolved the next time the provided eventId is triggered.
+     * Returns a promise that will be resolved the next time the provided eventId has completed processing.
      */
-    obj.subscribeTo = function (eventId) {
+    obj.whenComplete = function (eventId) {
         if (!_.has(subscriptions, eventId)) {
             subscriptions[eventId] = $.Deferred();
         }

@@ -41,7 +41,7 @@ define("org/forgerock/commons/ui/common/SiteConfigurator", [
 
     obj.initialized = false;
 
-    $(document).on(constants.EVENT_READ_CONFIGURATION_REQUEST, function() {
+    eventManager.registerListener(constants.EVENT_READ_CONFIGURATION_REQUEST, function() {
         var configurationDelegate;
 
         if (!conf.globalData) {
