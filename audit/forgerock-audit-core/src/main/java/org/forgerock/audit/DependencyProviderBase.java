@@ -13,20 +13,17 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-
 package org.forgerock.audit;
 
 /**
- * An interface for a simple dependency provider.
+ * Base DependencyProvider that has provides no dependencies.
  */
-public interface AuditDependencyProvider {
+public class DependencyProviderBase implements DependencyProvider {
     /**
-     * Retrieve the dependency of type T.
-     *
-     * @param clazz the dependency's class
-     * @return the dependency
-     * @throws ClassNotFoundException if provider does not have a class registered for the
-     *         requested class type
+     * {@inheritDoc}
      */
-    <T> T getDependency(Class<T> clazz) throws ClassNotFoundException;
+    @Override
+    public <T> T getDependency(Class<T> clazz) throws ClassNotFoundException {
+        throw new ClassNotFoundException("No instance registered for class: " + clazz.getName());
+    }
 }

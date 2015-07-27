@@ -60,6 +60,8 @@ import org.slf4j.LoggerFactory;
  *  AuditService service = new AuditService(extentedTypes);
  *  // configure it
  *  service.configure(configuration);
+ *  // set dependency provider
+ *  service.registerDependencyProvider(provider);
  *  // register the handlers
  *  service.register(handler1, handler1Name, events1);
  *  service.register(handler2, handler2Name, events2);
@@ -90,7 +92,7 @@ public class AuditService implements RequestHandler {
     private Map<String, JsonValue> auditEvents;
 
     /** The dependency provider used by event handlers to satisfy dependencies. */
-    private AuditDependencyProvider dependencyProvider;
+    private DependencyProvider dependencyProvider = new DependencyProviderBase();
 
     /** The name of the AuditEventHandler to use for queries. */
     private String queryHandlerName;
@@ -133,7 +135,6 @@ public class AuditService implements RequestHandler {
         for (String eventName : auditEvents.keySet()) {
             eventTypeAuditEventHandlers.put(eventName, new ArrayList<AuditEventHandler<?>>());
         }
-
     }
 
     /**
@@ -151,14 +152,14 @@ public class AuditService implements RequestHandler {
     }
 
     /**
-     * Register the AuditDependencyProvider, after which, an AuditEventHandler can be registered and
+     * Register the DependencyProvider, after which, an AuditEventHandler can be registered and
      * receive this provider.  The dependency provider allows the handler to obtain resources or
      * objects from the product which integrates the Audit Service.
      *
      * @param provider
-     *            the AuditDependencyProvider to register
+     *            the DependencyProvider to register
      */
-    public void registerDependencyProvider(AuditDependencyProvider provider) {
+    public void registerDependencyProvider(DependencyProvider provider) {
         dependencyProvider = provider;
     }
 
@@ -201,7 +202,7 @@ public class AuditService implements RequestHandler {
         }
 
         handler.setAuditEventsMetaData(auditEventsMetaData);
-        handler.setAuditDependencyProvider(dependencyProvider);
+        handler.setDependencyProvider(dependencyProvider);
         logger.info("Registered {}", eventTypeAuditEventHandlers.toString());
     }
 
