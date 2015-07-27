@@ -156,7 +156,8 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
                         if (e instanceof PreconditionFailedException
                                 && getIfNoneMatch(httpRequest) == null
                                 && request.getNewResourceId() != null) {
-                            // update existing resource
+                            // create failed because object already exists; treat as update to existing resource if
+                            // If-None-Match header wasn't specified
                             return visitUpdateRequest(p,
                                     Requests.newUpdateRequest(
                                             request.getResourcePathObject().child(request.getNewResourceId()),
