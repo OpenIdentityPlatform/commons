@@ -43,7 +43,11 @@ public abstract class AuditEventHandlerBase<CFG> implements AuditEventHandler<CF
         // do nothing by default
     }
 
-    public void setAuditDependencyProvider(AuditDependencyProvider adp) {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setAuditDependencyProvider(AuditDependencyProvider dependencyProvider) {
         // do nothing by default
     }
 
