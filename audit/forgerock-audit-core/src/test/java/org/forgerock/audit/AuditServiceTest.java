@@ -64,6 +64,23 @@ public class AuditServiceTest {
     }
 
     @Test
+    public void testRegisterInjectDependencyProvider() throws Exception {
+        final AuditService auditService = getAuditService(QUERY_HANDLER_NAME);
+        DependencyProvider dependencyProvider = mock(DependencyProvider.class);
+        when(dependencyProvider.getDependency(Integer.class)).thenReturn(4);
+        final ArgumentCaptor<DependencyProvider> dependencyProviderArgumentCaptor =
+                ArgumentCaptor.forClass(DependencyProvider.class);
+        AuditEventHandler<?> auditEventHandler = mock(AuditEventHandler.class);
+
+        auditService.registerDependencyProvider(dependencyProvider);
+        auditService.register(auditEventHandler, "mock", Collections.singleton("access"));
+
+        verify(auditEventHandler).setDependencyProvider(dependencyProviderArgumentCaptor.capture());
+        DependencyProvider provider = dependencyProviderArgumentCaptor.getValue();
+        assertThat(provider.getDependency(Integer.class)).isEqualTo(4);
+    }
+
+    @Test
     public void testCreatingAuditLogEntry() throws Exception {
         final AuditService auditService = getAuditService(QUERY_HANDLER_NAME);
         auditService.register(new PassThroughAuditEventHandler(), QUERY_HANDLER_NAME, Collections.singleton("access"));
