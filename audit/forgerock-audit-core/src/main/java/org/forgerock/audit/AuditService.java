@@ -89,6 +89,7 @@ public class AuditService implements RequestHandler {
     /** All the audit event types configured. */
     private Map<String, JsonValue> auditEvents;
 
+    /** The dependency provider used by event handlers to satisfy dependencies. */
     private AuditDependencyProvider dependencyProvider;
 
     /** The name of the AuditEventHandler to use for queries. */
@@ -149,9 +150,16 @@ public class AuditService implements RequestHandler {
         config = new AuditServiceConfiguration(configuration);
     }
 
-    public AuditService registerDependencyProvider(AuditDependencyProvider provider) {
+    /**
+     * Register the AuditDependencyProvider, after which, an AuditEventHandler can be registered and
+     * receive this provider.  The dependency provider allows the handler to obtain resources or
+     * objects from the product which integrates the Audit Service.
+     *
+     * @param provider
+     *            the AuditDependencyProvider to register
+     */
+    public void registerDependencyProvider(AuditDependencyProvider provider) {
         dependencyProvider = provider;
-        return this;
     }
 
     /**

@@ -53,5 +53,12 @@ public interface AuditEventHandler<CFG> extends CollectionResourceProvider {
      */
     public void setAuditEventsMetaData(Map<String, JsonValue> auditEvents);
 
-    public void setAuditDependencyProvider(AuditDependencyProvider adp);
+    /**
+     * Set the dependency provider to satisfy dependencies of this EventHandler. This method is supposed to be
+     * called by the AuditService when registering this AuditEventHandler.
+     *
+     * @param dependencyProvider
+     *            An provider that provide dependencies to the EventHandler.
+     */
+    public void setAuditDependencyProvider(AuditDependencyProvider dependencyProvider);
 }
