@@ -24,6 +24,7 @@ import static org.mockito.Mockito.*;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.audit.events.handlers.impl.PassThroughAuditEventHandler;
@@ -64,6 +65,18 @@ public class AuditServiceTest {
     }
 
     @Test
+    public void testExposesListOfKnownTopics() throws Exception {
+        // Given
+        final AuditService auditService = getAuditService(QUERY_HANDLER_NAME);
+
+        // When
+        Set<String> knownTopics = auditService.getKnownTopics();
+
+        // Then
+        assertThat(knownTopics).containsOnly("access", "activity", "authentication", "config");
+    }
+
+    @Test
     public void testCreatingAuditLogEntry() throws Exception {
         final AuditService auditService = getAuditService(QUERY_HANDLER_NAME);
         auditService.register(new PassThroughAuditEventHandler(), QUERY_HANDLER_NAME, Collections.singleton("access"));
@@ -76,6 +89,7 @@ public class AuditServiceTest {
         auditService.handleCreate(new ServerContext(new RootContext()), createRequest, resultHandler);
 
         //then
+        assertThat(auditService.isAuditing("access")).isTrue();
         verify(resultHandler, never()).handleError(any(ResourceException.class));
         verify(resultHandler).handleResult(resourceCaptor.capture());
 
@@ -96,6 +110,7 @@ public class AuditServiceTest {
         auditService.handleCreate(new ServerContext(new RootContext()), createRequest, resultHandler);
 
         //then
+        assertThat(auditService.isAuditing("activity")).isFalse();
         verify(resultHandler, never()).handleError(any(ResourceException.class));
         verify(resultHandler).handleResult(resourceCaptor.capture());
 
@@ -115,8 +130,34 @@ public class AuditServiceTest {
         auditService.handleCreate(new ServerContext(new RootContext()), createRequest, resultHandler);
 
         //then
+        assertThat(auditService.isAuditing("unknownTopic")).isFalse();
         verify(resultHandler).handleError(any(ResourceException.class));
         verifyNoMoreInteractions(resultHandler);
+    }
+
+    @Test
+    public void testHandleCreateIgnoresEventsIfDisabledByConfig() throws Exception {
+        final AuditService auditService = getAuditService(QUERY_HANDLER_NAME);
+        AuditServiceConfiguration auditServiceConfiguration = new AuditServiceConfiguration();
+        auditServiceConfiguration.setCreateEnabled(false);
+        auditService.configure(auditServiceConfiguration);
+        auditService.register(new PassThroughAuditEventHandler(), QUERY_HANDLER_NAME, Collections.singleton("access"));
+
+        final CreateRequest createRequest = makeCreateRequest();
+        final ResultHandler<Resource> resultHandler = mockResultHandler(Resource.class);
+        final ArgumentCaptor<Resource> resourceCaptor = ArgumentCaptor.forClass(Resource.class);
+
+        //when
+        auditService.handleCreate(new ServerContext(new RootContext()), createRequest, resultHandler);
+
+        //then
+        assertThat(auditService.isAuditing("access")).isFalse();
+        verify(resultHandler, never()).handleError(any(ResourceException.class));
+        verify(resultHandler).handleResult(resourceCaptor.capture());
+
+        final Resource resource = resourceCaptor.getValue();
+        assertThat(resource).isNotNull();
+        assertThat(resource.getContent().asMap()).isEqualTo(createRequest.getContent().asMap());
     }
 
     @Test

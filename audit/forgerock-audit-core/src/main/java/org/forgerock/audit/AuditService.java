@@ -15,8 +15,6 @@
  */
 package org.forgerock.audit;
 
-import static org.forgerock.json.fluent.JsonValue.*;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -133,6 +131,7 @@ public class AuditService implements RequestHandler {
             eventTypeAuditEventHandlers.put(eventName, new ArrayList<AuditEventHandler<?>>());
         }
 
+        config = new AuditServiceConfiguration();
     }
 
     /**
@@ -191,7 +190,7 @@ public class AuditService implements RequestHandler {
         logger.info("Registered {}", eventTypeAuditEventHandlers.toString());
     }
 
-    private void cleanupPreviousConfig() throws ResourceException {
+    private void cleanupPreviousConfig() {
         queryHandlerName = null;
     }
 
@@ -249,6 +248,18 @@ public class AuditService implements RequestHandler {
                     request.getResourceName(),
                     request.getContent().asMap());
 
+            // Don't audit if disabled by config
+            if (!config.isCreateEnabled()) {
+                handler.handleResult(new Resource(null, null, request.getContent().copy()));
+                return;
+            }
+
+            // Don't audit the audit log
+            if (context.containsContext(AuditContext.class)) {
+                handler.handleResult(new Resource(null, null, request.getContent().copy()));
+                return;
+            }
+
             // Generate an ID for the object
             final String localId = (request.getNewResourceId() == null || request.getNewResourceId().isEmpty())
                     ? UUID.randomUUID().toString()
@@ -260,12 +271,6 @@ public class AuditService implements RequestHandler {
             if (!request.getContent().isDefined("transactionId")
                     || !request.getContent().isDefined("timestamp")) {
                 throw new BadRequestException("The request requires a transactionId and a timestamp");
-            }
-
-            // Don't audit the audit log
-            if (context.containsContext(AuditContext.class)) {
-                handler.handleResult(new Resource(null, null, request.getContent().copy()));
-                return;
             }
 
             final String auditEventType = request.getResourceNameObject().head(1).toString();
@@ -361,12 +366,11 @@ public class AuditService implements RequestHandler {
     }
 
 
-    private Collection<AuditEventHandler<?>> getAuditEventHandlersForEvent(final String auditEvent)
-            throws InternalServerErrorException {
+    private Collection<AuditEventHandler<?>> getAuditEventHandlersForEvent(final String auditEvent) {
         if (eventTypeAuditEventHandlers.containsKey(auditEvent)) {
             return eventTypeAuditEventHandlers.get(auditEvent);
         } else {
-            return Collections.<AuditEventHandler<?>>emptyList();
+            return Collections.emptyList();
         }
     }
 
@@ -430,5 +434,24 @@ public class AuditService implements RequestHandler {
      */
     public AuditEventHandler<?> getRegisteredHandler(String handlerName) {
         return allAuditEventHandlers.get(handlerName);
+    }
+
+    /**
+     * Returns whether or not events of the specified topic will be handled.
+     *
+     * @param topic Identifies a category of events to which handlers may or may not be registered.
+     * @return whether handling of the specified topic is enabled.
+     */
+    public boolean isAuditing(String topic) {
+        return config.isCreateEnabled() && !getAuditEventHandlersForEvent(topic).isEmpty();
+    }
+
+    /**
+     * Returns the set of event topics (schemas) that the <code>AuditService</code> understands.
+     *
+     * @return The set of event topics.
+     */
+    public Set<String> getKnownTopics() {
+        return Collections.unmodifiableSet(auditEvents.keySet());
     }
 }
