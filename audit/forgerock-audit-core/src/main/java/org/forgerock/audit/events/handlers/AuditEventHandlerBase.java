@@ -18,6 +18,7 @@ package org.forgerock.audit.events.handlers;
 
 import java.util.Map;
 
+import org.forgerock.audit.AuditDependencyProvider;
 import org.forgerock.audit.util.ResourceExceptionsUtil;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.DeleteRequest;
@@ -39,6 +40,10 @@ public abstract class AuditEventHandlerBase<CFG> implements AuditEventHandler<CF
      */
     @Override
     public void setAuditEventsMetaData(final Map<String, JsonValue> auditEvents) {
+        // do nothing by default
+    }
+
+    public void setAuditDependencyProvider(AuditDependencyProvider adp) {
         // do nothing by default
     }
 

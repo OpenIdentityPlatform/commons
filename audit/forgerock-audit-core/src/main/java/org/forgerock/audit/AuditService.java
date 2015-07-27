@@ -89,6 +89,8 @@ public class AuditService implements RequestHandler {
     /** All the audit event types configured. */
     private Map<String, JsonValue> auditEvents;
 
+    private AuditDependencyProvider dependencyProvider;
+
     /** The name of the AuditEventHandler to use for queries. */
     private String queryHandlerName;
 
@@ -147,6 +149,11 @@ public class AuditService implements RequestHandler {
         config = new AuditServiceConfiguration(configuration);
     }
 
+    public AuditService registerDependencyProvider(AuditDependencyProvider provider) {
+        dependencyProvider = provider;
+        return this;
+    }
+
     /**
      * Register an AuditEventHandler. After that registration, that AuditEventHandler can be referred with the given
      * name. This AuditEventHandler will only be notified about the events specified in the parameter events.
@@ -186,6 +193,7 @@ public class AuditService implements RequestHandler {
         }
 
         handler.setAuditEventsMetaData(auditEventsMetaData);
+        handler.setAuditDependencyProvider(dependencyProvider);
         logger.info("Registered {}", eventTypeAuditEventHandlers.toString());
     }
 
