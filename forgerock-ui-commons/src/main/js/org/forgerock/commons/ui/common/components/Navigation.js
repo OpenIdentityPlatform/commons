@@ -167,9 +167,16 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                 }
             },
             render: function(args, callback) {
-                // The user information is shown at the top of the userBar widget,
-                // but it is stored in different ways for different products.
+                /*
+                   The user information is shown at the top of the userBar widget,
+                   but it is stored in different ways for different products.
+                */
                 if (conf.loggedUser) {
+                    /*
+                        The Navigation module is called with every page load, but it doesn't render a drop down
+                        unless the user is actually logged in. To prevent any unnecessary module loading, only
+                        load bootstrap when actually needed.
+                    */
                     ModuleLoader.load("bootstrap").then(_.bind(function () {
                         // in rare cases conf.loggedUser can be reset by the time bootstap has loaded
                         if (!conf.loggedUser) {
