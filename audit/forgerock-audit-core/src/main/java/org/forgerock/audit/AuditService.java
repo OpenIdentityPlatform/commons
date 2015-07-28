@@ -452,6 +452,6 @@ public class AuditService implements RequestHandler {
      * @return The set of event topics.
      */
     public Set<String> getKnownTopics() {
-        return Collections.unmodifiableSet(auditEvents.keySet());
+        return auditEvents.keySet();
     }
 }
