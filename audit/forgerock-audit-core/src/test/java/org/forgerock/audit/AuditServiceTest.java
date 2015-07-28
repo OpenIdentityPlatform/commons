@@ -80,6 +80,22 @@ public class AuditServiceTest {
         assertThat(provider.getDependency(Integer.class)).isEqualTo(4);
     }
 
+    @Test(expectedExceptions = ClassNotFoundException.class)
+    public void testDependencyNotFound() throws Exception {
+        final AuditService auditService = getAuditService(QUERY_HANDLER_NAME);
+        DependencyProvider dependencyProvider = new DependencyProviderBase();
+        final ArgumentCaptor<DependencyProvider> dependencyProviderArgumentCaptor =
+                ArgumentCaptor.forClass(DependencyProvider.class);
+        AuditEventHandler<?> auditEventHandler = mock(AuditEventHandler.class);
+
+        auditService.registerDependencyProvider(dependencyProvider);
+        auditService.register(auditEventHandler, "mock", Collections.singleton("access"));
+
+        verify(auditEventHandler).setDependencyProvider(dependencyProviderArgumentCaptor.capture());
+        DependencyProvider provider = dependencyProviderArgumentCaptor.getValue();
+        provider.getDependency(Integer.class);
+    }
+
     @Test
     public void testCreatingAuditLogEntry() throws Exception {
         final AuditService auditService = getAuditService(QUERY_HANDLER_NAME);
