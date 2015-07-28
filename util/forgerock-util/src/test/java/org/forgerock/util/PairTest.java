@@ -22,7 +22,7 @@ import org.testng.annotations.Test;
 
 import static org.forgerock.util.Pair.*;
 
-import static org.fest.assertions.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Tests the {@link Pair} class.

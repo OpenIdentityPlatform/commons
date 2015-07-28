@@ -15,7 +15,7 @@
 
 package org.forgerock.util.query;
 
-import static org.fest.assertions.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.forgerock.util.query.QueryFilter.*;
 
 import org.testng.annotations.DataProvider;

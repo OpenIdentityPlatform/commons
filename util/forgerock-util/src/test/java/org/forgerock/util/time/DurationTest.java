@@ -18,8 +18,9 @@ package org.forgerock.util.time;
 
 import static org.forgerock.util.time.Duration.duration;
 
-import org.fest.assertions.Assertions;
-import org.fest.assertions.GenericAssert;
+import org.assertj.core.api.Assertions;
+import org.assertj.core.api.AbstractAssert;
+import org.assertj.core.api.Fail;
 import org.testng.annotations.Test;
 
 import java.util.concurrent.TimeUnit;
@@ -163,19 +164,19 @@ public class DurationTest {
     /**
      * Provide a better assertion method.
      */
-    private static class DurationAssert extends GenericAssert<DurationAssert, Duration> {
+    private static class DurationAssert extends AbstractAssert<DurationAssert, Duration> {
 
         protected DurationAssert(final Duration actual) {
-            super(DurationAssert.class, actual);
+            super(actual, DurationAssert.class);
         }
 
         public DurationAssert isEqualTo(long n, TimeUnit unit) {
             isNotNull();
             if (actual.getValue() != n) {
-                fail(String.format("Duration value does not match: was:%d expected:%d", actual.getValue(), n));
+                Fail.fail(String.format("Duration value does not match: was:%d expected:%d", actual.getValue(), n));
             }
             if (!actual.getUnit().equals(unit)) {
-                fail(String.format("Duration TimeUnit does not match: was:%s expected:%s", 
+                Fail.fail(String.format("Duration TimeUnit does not match: was:%s expected:%s",
                         actual.getUnit().name(), unit.name()));
             }
             return this;
@@ -184,7 +185,7 @@ public class DurationTest {
         public DurationAssert isUnlimited() {
             isNotNull();
             if (!actual.isUnlimited()) {
-                fail(String.format("Duration is not unlimited current values: %d %s", 
+                Fail.fail(String.format("Duration is not unlimited current values: %d %s",
                         actual.getValue(), actual.getUnit()));
             }
             return this;
@@ -193,7 +194,7 @@ public class DurationTest {
         public DurationAssert isZero() {
             isNotNull();
             if (!actual.isZero()) {
-                fail(String.format("Duration is not zero-length: %d %s", actual.getValue(), actual.getUnit()));
+                Fail.fail(String.format("Duration is not zero-length: %d %s", actual.getValue(), actual.getUnit()));
             }
             return this;
         }

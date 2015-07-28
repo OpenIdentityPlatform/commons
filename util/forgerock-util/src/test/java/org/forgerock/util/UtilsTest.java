@@ -14,7 +14,7 @@
  */
 package org.forgerock.util;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.util.Utils.joinAsString;
 import static org.forgerock.util.Utils.asEnum;
 

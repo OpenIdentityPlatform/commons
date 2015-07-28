@@ -15,8 +15,7 @@
 
 package org.forgerock.util;
 
-// FEST-Assert
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 // TestNG
 import org.testng.annotations.Test;
