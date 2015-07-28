@@ -383,7 +383,6 @@ define("config/process/CommonConfig", [
                         $(".modal.in").modal("hide");
                     }
 
-                    EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "loggedIn");
                     promise.resolve(user);
                 }, function (reason) {
                     if (conf.globalData.auth.urlParams && conf.globalData.auth.urlParams.gotoOnFail) {
