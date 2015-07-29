@@ -19,26 +19,17 @@ import static java.util.Arrays.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.forgerock.audit.events.ActivityAuditEventBuilderTest.OpenProductActivityAuditEventBuilder.*;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.servlet.HttpContext;
 import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")
 public class ActivityAuditEventBuilderTest {
-
-    private static final ObjectMapper MAPPER = new ObjectMapper(
-            new JsonFactory().configure(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS, true));
 
     /**
      * Example builder of audit activity events for some imaginary product "OpenProduct".
@@ -87,7 +78,6 @@ public class ActivityAuditEventBuilderTest {
         headers.put("Content-Length", asList("200"));
         headers.put("Content-Type", asList("application/json"));
 
-        HttpContext context = new HttpContext(jsonFromFile("/httpContext.json"), null);
         Request request = Requests.newActionRequest("some/resource", "customAction");
 
         AuditEvent event = productActivityEvent()
@@ -140,11 +130,6 @@ public class ActivityAuditEventBuilderTest {
         assertThat(value.get(CHANGED_FIELDS).asList(String.class)).containsExactly("name", "revision");
         assertThat(value.get(REVISION).asString()).isEqualTo("2");
         assertThat(value.get("open").getObject()).isEqualTo("value");
-    }
-
-    private JsonValue jsonFromFile(String resourceFilePath) throws IOException {
-        final InputStream configStream = ActivityAuditEventBuilderTest.class.getResourceAsStream(resourceFilePath);
-        return new JsonValue(MAPPER.readValue(configStream, Map.class));
     }
 
 }

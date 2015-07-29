@@ -30,7 +30,6 @@ public final class JsonSchemaUtils {
     private static final String ID = "id";
     private static final String TYPE = "type";
     private static final String OBJECT = "object";
-    private static final String ARRAY = "array";
     private static final String FORWARD_SLASH = "/";
 
     private JsonSchemaUtils() {
