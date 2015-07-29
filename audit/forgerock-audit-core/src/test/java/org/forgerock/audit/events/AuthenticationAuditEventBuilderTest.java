@@ -19,9 +19,9 @@ import static java.util.Arrays.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.forgerock.audit.events.AuthenticationAuditEventBuilderTest.OpenProductAuthenticationAuditEventBuilder.*;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -61,19 +61,9 @@ public class AuthenticationAuditEventBuilderTest {
                 .eventName("AM-AUTHENTICATION-SUCCESS")
                 .authentication("someone@forgerock.com")
                 .sessionId("sessionId")
-                .principal(new LinkedList<String>() {{
-                    add("admin");
-                }})
-                .context(new LinkedHashMap<String, Object>() {{
-                    put("contextKey", "contextValue");
-                }})
-                .entries(new LinkedList<Map<String, Object>>() {{
-                    add(new LinkedHashMap<String, Object>() {{
-                        put("moduleId", "datastore");
-                        put("result", Status.SUCCESSFUL.toString());
-                        put("info", new LinkedHashMap<>());
-                    }});
-                }})
+                .principal(Collections.singletonList("admin"))
+                .context(Collections.<String, Object>singletonMap("contextKey", "contextValue"))
+                .entries(Collections.singletonList(authenticationModule()))
                 .result(Status.SUCCESSFUL)
                 .openField("value")
                 .toEvent();
@@ -87,25 +77,23 @@ public class AuthenticationAuditEventBuilderTest {
                 .eventName("AM-AUTHENTICATION-SUCCESS")
                 .authentication("someone@forgerock.com")
                 .sessionId("sessionId")
-                .principal(new LinkedList<String>() {{
-                    add("admin");
-                }})
-                .context(new LinkedHashMap<String, Object>() {{
-                    put("contextKey", "contextValue");
-                }})
-                .entries(new LinkedList<Map<String, Object>>() {{
-                    add(new LinkedHashMap<String, Object>() {{
-                        put("moduleId", "datastore");
-                        put("result", Status.SUCCESSFUL.toString());
-                        put("info", new LinkedHashMap<>());
-                    }});
-                }})
+                .principal(Collections.singletonList("admin"))
+                .context(Collections.<String, Object>singletonMap("contextKey", "contextValue"))
+                .entries(Collections.singletonList(authenticationModule()))
                 .result(Status.SUCCESSFUL)
                 .openField("value")
                 .transactionId("transactionId")
                 .timestamp(1427293286239L)
                 .toEvent();
         assertEvent(event);
+    }
+
+    private Map<String, Object> authenticationModule() {
+        Map<String, Object> result = new LinkedHashMap<String, Object>();
+        result.put("moduleId", "datastore");
+        result.put("result", Status.SUCCESSFUL.toString());
+        result.put("info", new LinkedHashMap<>());
+        return result;
     }
 
     private void assertEvent(AuditEvent event) {
