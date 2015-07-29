@@ -309,7 +309,7 @@ public class CSVAuditEventHandlerTest {
 
     }
 
-    private Resource createAccessEvent(AuditEventHandler auditEventHandler) {
+    private Resource createAccessEvent(AuditEventHandler<?> auditEventHandler) {
         final CreateRequest createRequest = makeCreateRequest();
         final ResultHandler<Resource> createResultHandler = mockResultHandler(Resource.class);
         final ArgumentCaptor<Resource> createArgument = ArgumentCaptor.forClass(Resource.class);
