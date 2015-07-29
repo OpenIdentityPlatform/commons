@@ -27,12 +27,11 @@
 define("config/process/CommonConfig", [
     "jquery",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/commons/ui/common/util/ModuleLoader"
-], function($, Constants, EventManager, ModuleLoader) {
+    "org/forgerock/commons/ui/common/main/EventManager"
+], function($, Constants, EventManager) {
     var obj = [
         {
-            startEvent: Constants.EVENT_APP_INTIALIZED,
+            startEvent: Constants.EVENT_APP_INITIALIZED,
             description: "Starting basic components",
             dependencies: [
                 "org/forgerock/commons/ui/common/main/Router",
@@ -148,18 +147,19 @@ define("config/process/CommonConfig", [
             startEvent: Constants.EVENT_DIALOG_CLOSE,
             description: "",
             dependencies: [
-                "org/forgerock/commons/ui/common/main/Router",
                 "org/forgerock/commons/ui/common/main/Configuration",
-                "org/forgerock/commons/ui/common/main/ViewManager",
-                "org/forgerock/commons/ui/common/components/Navigation"
+                "org/forgerock/commons/ui/common/util/ModuleLoader",
+                "org/forgerock/commons/ui/common/components/Navigation",
+                "org/forgerock/commons/ui/common/main/Router",
+                "org/forgerock/commons/ui/common/main/ViewManager"
             ],
-            processDescription: function(event, router, conf, viewManager, navigation) {
-                viewManager.currentDialog = null;
-                if(conf.baseView) {
-                    ModuleLoader.load(router.configuration.routes[conf.baseView].view).then(function (view) {
+            processDescription: function(event, Configuration, ModuleLoader, Navigation, Router, ViewManager) {
+                ViewManager.currentDialog = null;
+                if(Configuration.baseView) {
+                    ModuleLoader.load(Router.configuration.routes[Configuration.baseView].view).then(function (view) {
                         view.rebind();
-                        router.navigate(router.getLink(router.configuration.routes[conf.baseView], conf.baseViewArgs));
-                        navigation.reload();
+                        Router.navigate(Router.getLink(Router.configuration.routes[Configuration.baseView], Configuration.baseViewArgs));
+                        Navigation.reload();
                     });
                 }
             }
@@ -202,20 +202,21 @@ define("config/process/CommonConfig", [
             startEvent: Constants.EVENT_CHANGE_VIEW,
             description: "",
             dependencies: [
-                "org/forgerock/commons/ui/common/main/ViewManager",
-                "org/forgerock/commons/ui/common/main/Router",
                 "org/forgerock/commons/ui/common/main/Configuration",
+                "org/forgerock/commons/ui/common/util/ModuleLoader",
                 "org/forgerock/commons/ui/common/components/Navigation",
+                "org/forgerock/commons/ui/common/main/Router",
+                "org/forgerock/commons/ui/common/SiteConfigurator",
                 "org/forgerock/commons/ui/common/main/SpinnerManager",
-                "org/forgerock/commons/ui/common/SiteConfigurator"
+                "org/forgerock/commons/ui/common/main/ViewManager"
             ],
-            processDescription: function(args, viewManager, router, conf, navigation, spinner, siteConfigurator) {
-                var route = args.route,
-                    params = args.args,
-                    callback = args.callback,
-                    fromRouter = args.fromRouter;
+            processDescription: function(event, Configuration, ModuleLoader, Navigation, Router, SiteConfigurator, SpinnerManager, ViewManager) {
+                var route = event.route,
+                    params = event.args,
+                    callback = event.callback,
+                    fromRouter = event.fromRouter;
 
-                if (!router.checkRole(route)) {
+                if (!Router.checkRole(route)) {
                     return;
                 }
 
@@ -223,24 +224,24 @@ define("config/process/CommonConfig", [
                     view.route = route;
 
                     params = params || route.defaults;
-                    conf.setProperty("baseView", "");
-                    conf.setProperty("baseViewArgs", "");
+                    Configuration.setProperty("baseView", "");
+                    Configuration.setProperty("baseViewArgs", "");
 
-                    return siteConfigurator.configurePage(route, params).then(function () {
+                    return SiteConfigurator.configurePage(route, params).then(function () {
                         var promise = $.Deferred();
-                        spinner.hideSpinner(10);
+                        SpinnerManager.hideSpinner(10);
                         if (!fromRouter) {
-                            router.routeTo(route, {trigger: true, args: params});
+                            Router.routeTo(route, {trigger: true, args: params});
                         }
 
-                        viewManager.changeView(route.view, params, function () {
+                        ViewManager.changeView(route.view, params, function () {
                             if (callback) {
                                 callback();
                             }
                             promise.resolve(view);
                         }, route.forceUpdate);
 
-                        navigation.reload();
+                        Navigation.reload();
                         return promise;
                     });
                 });
@@ -345,38 +346,39 @@ define("config/process/CommonConfig", [
             startEvent: Constants.EVENT_LOGIN_REQUEST,
             description: "",
             dependencies: [
-                "org/forgerock/commons/ui/common/main/SessionManager",
                 "org/forgerock/commons/ui/common/main/Configuration",
+                "org/forgerock/commons/ui/common/util/ModuleLoader",
                 "org/forgerock/commons/ui/common/main/Router",
+                "org/forgerock/commons/ui/common/main/SessionManager",
                 "org/forgerock/commons/ui/common/main/ViewManager"
             ],
-            processDescription: function(event, sessionManager, conf, router, viewManager) {
+            processDescription: function(event, Configuration, ModuleLoader, Router, SessionManager, ViewManager) {
                 var promise = $.Deferred();
 
-                sessionManager.login(event, function(user) {
-                    conf.setProperty('loggedUser', user);
+                SessionManager.login(event, function(user) {
+                    Configuration.setProperty('loggedUser', user);
 
                     EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: false});
 
-                    if (! conf.backgroundLogin) {
-                        if(conf.globalData.auth.urlParams && conf.globalData.auth.urlParams.goto){
-                            window.location.href = conf.globalData.auth.urlParams.goto;
+                    if (! Configuration.backgroundLogin) {
+                        if (Configuration.globalData.auth.urlParams && Configuration.globalData.auth.urlParams.goto) {
+                            window.location.href = Configuration.globalData.auth.urlParams.goto;
                             return false;
                         }
-                        if(conf.gotoURL && _.indexOf(["#","","#/","/#"], conf.gotoURL) === -1) {
-                            console.log("Auto redirect to " + conf.gotoURL);
-                            router.navigate(conf.gotoURL, {trigger: true});
-                            delete conf.gotoURL;
+
+                        if (Configuration.gotoURL && _.indexOf(["#","","#/","/#"], Configuration.gotoURL) === -1) {
+                            Router.navigate(Configuration.gotoURL, {trigger: true});
+                            delete Configuration.gotoURL;
                         } else {
-                            if (router.checkRole(router.configuration.routes["default"])) {
+                            if (Router.checkRole(Router.configuration.routes["default"])) {
                                 EventManager.sendEvent(Constants.ROUTE_REQUEST, {routeName: "default", args: []});
                             } else {
                                 EventManager.sendEvent(Constants.EVENT_UNAUTHORIZED);
                                 return;
                             }
                         }
-                    } else if (viewManager.currentDialog !== null) {
-                        ModuleLoader.load(viewManager.currentDialog).then(function (dialog) {
+                    } else if (ViewManager.currentDialog !== null) {
+                        ModuleLoader.load(ViewManager.currentDialog).then(function (dialog) {
                             dialog.close();
                         });
                     } else if (typeof $.prototype.modal === "function") {
@@ -385,8 +387,8 @@ define("config/process/CommonConfig", [
 
                     promise.resolve(user);
                 }, function (reason) {
-                    if (conf.globalData.auth.urlParams && conf.globalData.auth.urlParams.gotoOnFail) {
-                        window.location.href = conf.globalData.auth.urlParams.gotoOnFail;
+                    if (Configuration.globalData.auth.urlParams && Configuration.globalData.auth.urlParams.gotoOnFail) {
+                        window.location.href = Configuration.globalData.auth.urlParams.gotoOnFail;
                         return false;
                     }
                     reason = reason ? reason : "authenticationFailed";

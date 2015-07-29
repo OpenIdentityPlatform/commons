@@ -24,11 +24,6 @@
 
 /*global require, window */
 
-/**
- * @author yaromin
- * @author Eugenia Sergueeva
- */
-
 require.config({
     paths: {
         // sinon only needed (or available) for Mock project
