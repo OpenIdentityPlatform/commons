@@ -19,9 +19,8 @@ package org.forgerock.json.resource.test.assertj;
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.AbstractCharSequenceAssert;
 import org.assertj.core.api.Assertions;
-import org.assertj.core.api.StringAssert;
 import org.forgerock.json.resource.Resource;
-import org.forgerock.json.test.fest.FestJsonValueAssert;
+import org.forgerock.json.test.assertj.AssertJJsonValueAssert;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.test.assertj.AbstractAssertJPromiseAssert;
 
@@ -87,10 +86,10 @@ public class AssertJResourceAssert extends AbstractAssert<AssertJResourceAssert,
     }
 
     /**
-     * Assert the value of the resource ID.
-     * @return A {@code StringAssert} for this Resource's ID.
+     * Assert the value of the resource content.
+     * @return A {@code AbstractJsonValueAssert} for this Resource's content.
      */
-    public FestJsonValueAssert.AbstractJsonValueAssert withContent() {
-        return FestJsonValueAssert.assertThat(actual.getContent());
+    public AssertJJsonValueAssert.AbstractJsonValueAssert<?> withContent() {
+        return AssertJJsonValueAssert.assertThat(actual.getContent());
     }
 }
