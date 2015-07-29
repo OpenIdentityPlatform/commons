@@ -41,7 +41,7 @@ define([
     };
 
     return function (server) {
-        eventManager.registerListener(constants.EVENT_APP_INTIALIZED, function () {
+        eventManager.registerListener(constants.EVENT_APP_INITIALIZED, function () {
             require("ThemeManager").getTheme().then(function () {
                 var userParams = {
                         "username": "test",

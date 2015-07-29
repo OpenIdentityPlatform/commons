@@ -60,15 +60,15 @@ define("org/forgerock/commons/ui/common/SiteConfigurator", [
                 ModuleLoader.load(obj.configuration.delegate).then(function (configurationDelegate) {
                      configurationDelegate.getConfiguration(function(config) {
                          obj.processConfiguration(config);
-                         eventManager.sendEvent(constants.EVENT_APP_INTIALIZED);
+                         eventManager.sendEvent(constants.EVENT_APP_INITIALIZED);
                      }, function() {
                          obj.processConfiguration({});
-                         eventManager.sendEvent(constants.EVENT_APP_INTIALIZED);
+                         eventManager.sendEvent(constants.EVENT_APP_INITIALIZED);
                      });
                 });
             } else {
                 obj.processConfiguration(obj.configuration);
-                eventManager.sendEvent(constants.EVENT_APP_INTIALIZED);
+                eventManager.sendEvent(constants.EVENT_APP_INITIALIZED);
             }
         }
     });
