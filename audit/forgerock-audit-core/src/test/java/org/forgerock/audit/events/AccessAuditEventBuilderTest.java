@@ -16,7 +16,7 @@
 package org.forgerock.audit.events;
 
 import static java.util.Arrays.*;
-import static org.fest.assertions.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.forgerock.audit.events.AccessAuditEventBuilderTest.OpenProductAccessAuditEventBuilder.*;
 import static org.forgerock.audit.events.AuditEventBuilder.ID;
 import static org.mockito.BDDMockito.given;
