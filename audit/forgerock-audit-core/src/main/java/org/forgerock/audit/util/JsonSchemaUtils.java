@@ -18,7 +18,6 @@ package org.forgerock.audit.util;
 
 import org.forgerock.json.fluent.JsonValue;
 
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 

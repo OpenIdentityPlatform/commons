@@ -18,7 +18,6 @@ package org.forgerock.audit.events;
 import static java.util.Arrays.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.forgerock.audit.events.AuthenticationAuditEventBuilderTest.OpenProductAuthenticationAuditEventBuilder.*;
-import static org.forgerock.json.fluent.JsonValue.array;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;

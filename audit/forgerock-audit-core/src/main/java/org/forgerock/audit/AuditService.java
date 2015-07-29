@@ -15,8 +15,6 @@
  */
 package org.forgerock.audit;
 
-import static org.forgerock.json.fluent.JsonValue.*;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
