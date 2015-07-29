@@ -16,8 +16,7 @@
 
 package org.forgerock.audit.events.handlers.impl;
 
-import static org.fest.assertions.api.Assertions.assertThat;
-import static org.forgerock.json.fluent.JsonValue.array;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.fluent.JsonValue.field;
 import static org.forgerock.json.fluent.JsonValue.json;
 import static org.forgerock.json.fluent.JsonValue.object;
@@ -310,7 +309,7 @@ public class CSVAuditEventHandlerTest {
 
     }
 
-    private Resource createAccessEvent(AuditEventHandler auditEventHandler) {
+    private Resource createAccessEvent(AuditEventHandler<?> auditEventHandler) {
         final CreateRequest createRequest = makeCreateRequest();
         final ResultHandler<Resource> createResultHandler = mockResultHandler(Resource.class);
         final ArgumentCaptor<Resource> createArgument = ArgumentCaptor.forClass(Resource.class);

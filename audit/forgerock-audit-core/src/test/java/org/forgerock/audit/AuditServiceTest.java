@@ -16,7 +16,7 @@
 
 package org.forgerock.audit;
 
-import static org.fest.assertions.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.forgerock.json.fluent.JsonValue.*;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
