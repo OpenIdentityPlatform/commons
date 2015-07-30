@@ -24,11 +24,7 @@
 
 /*global define */
 
-/**
- * @author Eugenia Sergueeva
- */
-
-define("ThemeManager", [
+define("org/forgerock/mock/ui/common/util/ThemeManager", [
     "jquery",
     "underscore",
     "org/forgerock/commons/ui/common/util/Constants",

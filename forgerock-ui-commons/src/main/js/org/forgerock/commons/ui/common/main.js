@@ -33,7 +33,6 @@ define("org/forgerock/commons/ui/common/main", [
     "./components/BootstrapDialogView",
     "./main/ErrorsHandler",
     "./components/Footer",
-    "./main/GenericRouteInterfaceMap",
     "./main/i18nManager",
     "./components/Messages",
     "./components/Navigation",

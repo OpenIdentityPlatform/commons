@@ -25,6 +25,17 @@
 /*global require, window */
 
 require.config({
+    map: {
+        "*" : {
+            "UserDelegate": "org/forgerock/mock/ui/user/delegates/UserDelegate",
+            "ThemeManager": "org/forgerock/mock/ui/common/util/ThemeManager",
+            "LoginView": "org/forgerock/commons/ui/common/LoginView",
+            "UserProfileView": "org/forgerock/commons/ui/user/profile/UserProfileView",
+            "LoginDialog": "org/forgerock/commons/ui/common/LoginDialog",
+            "RegisterView": "org/forgerock/mock/ui/user/UserRegistrationView",
+            "ChangeSecurityDataDialog": "org/forgerock/mock/ui/user/profile/ChangeSecurityDataDialog"
+        }
+    },
     paths: {
         // sinon only needed (or available) for Mock project
         sinon: "libs/sinon-1.15.4",
@@ -46,9 +57,7 @@ require.config({
         moment: "libs/moment-2.8.1-min",
         bootstrap: "libs/bootstrap-3.3.4-custom",
         "bootstrap-dialog": "libs/bootstrap-dialog-1.34.4-min",
-        placeholder: "libs/jquery.placeholder-2.0.8",
-        UserDelegate: "org/forgerock/mock/ui/user/delegates/UserDelegate",
-        ThemeManager: "org/forgerock/mock/ui/common/util/ThemeManager"
+        placeholder: "libs/jquery.placeholder-2.0.8"
     },
 
     shim: {
@@ -130,10 +139,6 @@ require([
     // files that are necessary for rendering the login page for forgerock-ui-mock
     "org/forgerock/mock/ui/main",
     "config/main",
-
-    // generic names for modules that may be implemented differently
-    "UserDelegate",
-    "ThemeManager",
 
     // libraries necessary for forgerock-ui (and thus worth bundling)
     "jquery",

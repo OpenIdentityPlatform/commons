@@ -28,26 +28,10 @@ define("org/forgerock/commons/ui/common/util/ModuleLoader", [
     "jquery",
     "underscore"
 ], function ($, _) {
-    var aliasMap = {};
 
     return {
-        setAlias: function (alias, target) {
-            aliasMap[alias] = target;
-            return this;
-        },
         load: function (libPath) {
-            /*
-                 For some reason, the first time you try to require([...]) a module like this,
-                 require throws an error. But if you do so again immediately afterward (like
-                 is being done within the the catch block), it works. Subsequent calls to load
-                 the same module should work the first time.
-            */
-
             var promise = $.Deferred();
-
-            if (_.has(aliasMap, libPath)) {
-                libPath = aliasMap[libPath];
-            }
 
             try {
                 require([libPath], promise.resolve);

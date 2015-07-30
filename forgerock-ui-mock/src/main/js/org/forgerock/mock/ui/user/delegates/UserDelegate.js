@@ -24,12 +24,7 @@
 
 /*global define */
 
-/**
- * @author yaromin
- * @author Eugenia Sergueeva
- */
-
-define("UserDelegate", [
+define("org/forgerock/mock/ui/user/delegates/UserDelegate", [
     "jquery",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
