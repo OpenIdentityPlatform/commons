@@ -24,12 +24,9 @@
 
 /*global define */
 
-/**
- * @author yaromin
- */
 define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
     "underscore",
-    "org/forgerock/commons/ui/common/util/Constants", 
+    "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/ServiceInvoker"
 ], function(_, constants, configuration, serviceInvoker) {
@@ -38,7 +35,7 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
         var baseRegex = new RegExp("^/" + constants.context + "\/([\\w/]*)"),
             baseEntity = serviceUrl.match(baseRegex);
         this.serviceUrl = serviceUrl;
-        
+
         if (baseEntity && baseEntity.length > 1) {
             this.baseEntity = baseEntity[1];
         }
@@ -61,8 +58,7 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
     };
 
     obj.prototype.createEntity = function(id, objectParam, successCallback, errorCallback) {
-        console.debug("create entity");
-        var headers = {}; 
+        var headers = {};
 
         if (typeof id === "object" && id !== null) {
             throw "Invalid id value passed to createEntity";
@@ -94,7 +90,6 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
     };
 
     obj.prototype.deleteEntity = function(id, successCallback, errorCallback) {
-        console.debug("delete entity");
         var current = this;
         return this.readEntity(id, null, errorCallback).then(function(data) {
             var callParams = {url: "/" + id, type: "DELETE", success: successCallback, error: errorCallback };
@@ -108,20 +103,18 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
     };
 
     obj.prototype.readEntity = function(id, successCallback, errorCallback) {
-        console.debug("get entity");
         return this.serviceCall({url: "/" + id, type: "GET", success: successCallback, error: errorCallback});
     };
 
     obj.prototype.updateEntity = function(id, objectParam, successCallback, errorCallback) {
-        console.debug("update entity");
         var headers = {};
-        
+
         if(objectParam._rev) {
             headers["If-Match"] = '"' + objectParam._rev + '"';
         } else {
             headers["If-Match"] = '"' + "*" + '"';
         }
-        
+
         return this.serviceCall({url: "/" + id,
             type: "PUT",
             success: successCallback,
@@ -135,11 +128,9 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
      * Discovers differences between new and old object and invokes patch action only on attributes which are not equal.
      */
     obj.prototype.patchEntityDifferences = function(queryParameters, oldObject, newObject, successCallback, errorCallback, noChangesCallback, errorsHandlers) {
-        console.debug("patching entity");
 
         var differences = this.getDifferences(oldObject, newObject);
         if(!differences.length){
-            console.debug("No changes detected");
             if(noChangesCallback){
                 noChangesCallback();
             }
@@ -149,7 +140,7 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
     };
 
     /**
-     * Invokes patch action which modify only selected object attributes defined as PATCH action compatible JSON object {"operation": "replace", "field": "fieldname", value: "value" } 
+     * Invokes patch action which modify only selected object attributes defined as PATCH action compatible JSON object {"operation": "replace", "field": "fieldname", value: "value" }
      */
     obj.prototype.patchEntity = function(queryParameters, patchDefinition, successCallback, errorCallback, noChangesCallback, errorsHandlers) {
         //simple transformation
@@ -159,10 +150,10 @@ define("org/forgerock/commons/ui/common/main/AbstractDelegate", [
                 patchDefinition[i].field = "/" + patchDefinition[i].field;
             }
         }
-        return this.serviceCall({url: "/" + queryParameters.id, 
-            type: "PATCH", 
-            success: successCallback, 
-            error: errorCallback, 
+        return this.serviceCall({url: "/" + queryParameters.id,
+            type: "PATCH",
+            success: successCallback,
+            error: errorCallback,
             data: JSON.stringify(patchDefinition),
             headers: {
                 "If-Match": '"' + queryParameters.rev + '"'
