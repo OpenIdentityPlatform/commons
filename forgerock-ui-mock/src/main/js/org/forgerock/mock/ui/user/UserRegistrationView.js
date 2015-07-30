@@ -24,10 +24,6 @@
 
 /*global define, form2js */
 
-/**
- * @author mbilski
- * @author Eugenia Sergueeva
- */
 define("org/forgerock/mock/ui/user/UserRegistrationView", [
     "jquery",
     "underscore",

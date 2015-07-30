@@ -90,9 +90,7 @@ define([
                         $('input[name="sn"]', userProfileView.$el).val(testVals.sn).trigger('change');
                         $('input[name="telephoneNumber"]', userProfileView.$el).val(testVals.telephoneNumber).trigger('change');
 
-                        //clicking submit button
-
-                        EventManager.whenComplete(Constants.EVENT_DISPLAY_MESSAGE_REQUEST).then(function (message) {
+                        EventManager.whenComplete(Constants.EVENT_DISPLAY_MESSAGE_REQUEST).always(function () {
 
                             QUnit.equal(conf.loggedUser.uid, testVals.uid                             , "Username changed");
                             QUnit.equal(conf.loggedUser.givenName, testVals.givenName                 , "First name changed");
@@ -123,7 +121,11 @@ define([
 
                         });
 
-                        $('input[name="saveButton"]', userProfileView.$el).trigger('click');
+                        // a slight delay is necessary to ensure that validation has completed
+                        _.delay(function () {
+                            //clicking submit button
+                            $('input[name="saveButton"]', userProfileView.$el).trigger('click');
+                        }, 100);
 
                     });
 

@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define */
+/*global define, window */
 
 define("org/forgerock/commons/ui/common/main/EventManager", [
     "jquery",
@@ -39,14 +39,11 @@ define("org/forgerock/commons/ui/common/main/EventManager", [
         return $.when.apply($,
 
             _.map(eventRegistry[eventId], function (eventHandler) {
-                var response = eventHandler(event);
-
-                // in the case when the event handler didn't return anything, just pass along the original event
-                if (response === undefined) {
-                    return event;
-                } else {
-                    return response;
-                }
+                var promise = $.Deferred();
+                window.setTimeout(function () {
+                    $.when(eventHandler(event)).always(promise.resolve);
+                });
+                return promise;
             })
 
         ).then(
@@ -55,18 +52,9 @@ define("org/forgerock/commons/ui/common/main/EventManager", [
                 if (_.has(subscriptions, eventId)) {
                     promise = subscriptions[eventId];
                     delete subscriptions[eventId];
-                    promise.resolve(_.toArray(arguments));
+                    promise.resolve();
                 }
-                return _.toArray(arguments);
-            },
-            function () {
-                var promise;
-                if (_.has(subscriptions, eventId)) {
-                    promise = subscriptions[eventId];
-                    delete subscriptions[eventId];
-                    promise.reject(_.toArray(arguments));
-                }
-                return _.toArray(arguments);
+                return;
             }
         );
     };

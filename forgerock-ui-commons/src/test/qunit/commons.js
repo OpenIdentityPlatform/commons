@@ -63,16 +63,20 @@ define([
 
 
                             $("#password", loginView.$el).val("badPassword").trigger('keyup');
-                            EventManager.whenComplete(Constants.EVENT_LOGIN_REQUEST).fail(function () {
+                            EventManager.whenComplete(Constants.EVENT_LOGIN_REQUEST).always(function () {
 
                                 QUnit.ok(!Configuration.loggedUser, "Incorrect password resulted in failed login attempt");
 
                                 // this is the good password
                                 $("#password", loginView.$el).val(parameters.password).trigger('keyup');
 
-                                EventManager.whenComplete(Constants.EVENT_LOGIN_REQUEST).done(function () {
+                                EventManager.whenComplete(Constants.EVENT_LOGIN_REQUEST).always(function () {
                                     QUnit.ok(Configuration.loggedUser.userName === parameters.username, "Logged-in user information saved in configuration scope");
-                                    QUnit.start();
+
+                                    EventManager.whenComplete(Constants.EVENT_CHANGE_VIEW).always(function () {
+                                        QUnit.equal("#profile/", window.location.hash, "After login, should be on the profile page");
+                                        QUnit.start();
+                                    });
                                 });
 
                                 $("[name=loginButton]", loginView.$el).trigger("click");
@@ -109,7 +113,7 @@ define([
                     $.when(
                         EventManager.whenComplete(Constants.EVENT_LOGOUT),
                         EventManager.whenComplete(Constants.EVENT_CHANGE_VIEW)
-                    ).then(function () {
+                    ).always(function () {
                         QUnit.ok(Configuration.loggedUser === null || Configuration.loggedUser === undefined, "User should be logged out");
                         QUnit.equal("#login/", window.location.hash, "After logout, should be on the login page");
                         QUnit.start();
