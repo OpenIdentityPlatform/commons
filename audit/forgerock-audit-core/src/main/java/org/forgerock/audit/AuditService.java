@@ -40,6 +40,7 @@ import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
@@ -362,7 +363,18 @@ public class AuditService implements RequestHandler {
      */
     @Override
     public void handleQuery(final ServerContext context, final QueryRequest request, final QueryResultHandler handler) {
-        handler.handleError(ResourceExceptionsUtil.notSupported(request));
+        try {
+            logger.debug("Audit query called for {}", request.getResourceName());
+            if (queryHandlerName != null && allAuditEventHandlers.containsKey(queryHandlerName)) {
+                allAuditEventHandlers.get(queryHandlerName).queryCollection(context, request, handler);
+                return;
+            }
+            handler.handleError(ResourceExceptionsUtil.adapt(new AuditException(String.format(
+                    "The handler defined for queries, '%s', has not been registered to the audit service.",
+                    queryHandlerName))));
+        } catch (Exception e) {
+            handler.handleError(ResourceExceptionsUtil.adapt(e));
+        }
     }
     /**
      * Audit service does not support actions on audit entries.

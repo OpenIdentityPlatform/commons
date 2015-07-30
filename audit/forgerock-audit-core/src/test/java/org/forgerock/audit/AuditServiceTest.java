@@ -268,8 +268,9 @@ public class AuditServiceTest {
     }
 
     @Test
-    public void testQueryOnAuditLogEntry() throws ResourceException {
+    public void testQueryOnAuditLogEntry() throws Exception {
         final AuditService auditService = getAuditService(QUERY_HANDLER_NAME);
+        auditService.register(new PassThroughAuditEventHandler(), QUERY_HANDLER_NAME, Collections.singleton("access"));
         final QueryResultHandler resultHandler = mock(QueryResultHandler.class);
         final ArgumentCaptor<QueryResult> resourceCaptor = ArgumentCaptor.forClass(QueryResult.class);
         final ArgumentCaptor<ResourceException> resourceExceptionCaptor =
@@ -278,15 +279,15 @@ public class AuditServiceTest {
         //when
         auditService.handleQuery(
                 new ServerContext(new RootContext()),
-                Requests.newQueryRequest("_id"),
+                Requests.newQueryRequest("access"),
                 resultHandler
         );
 
         //then
-        verify(resultHandler, never()).handleResult(resourceCaptor.capture());
-        verify(resultHandler).handleError(resourceExceptionCaptor.capture());
+        verify(resultHandler).handleResult(resourceCaptor.capture());
+        verify(resultHandler, never()).handleError(resourceExceptionCaptor.capture());
 
-        assertThat(resourceExceptionCaptor.getValue()).isInstanceOf(NotSupportedException.class);
+        assertThat(resourceCaptor.getValue()).isInstanceOf(QueryResult.class);
     }
 
     @Test
