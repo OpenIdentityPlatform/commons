@@ -366,7 +366,7 @@ public class AuditService implements RequestHandler {
         try {
             logger.debug("Audit query called for {}", request.getResourceName());
             if (queryHandlerName != null && allAuditEventHandlers.containsKey(queryHandlerName)) {
-                allAuditEventHandlers.get(queryHandlerName).queryCollection(context, request, handler);
+                getRegisteredHandler(queryHandlerName).queryCollection(context, request, handler);
                 return;
             }
             handler.handleError(ResourceExceptionsUtil.adapt(new AuditException(String.format(

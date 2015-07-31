@@ -31,7 +31,7 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.NotSupportedException;
-import org.forgerock.json.resource.QueryResult;
+import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Requests;
@@ -270,24 +270,21 @@ public class AuditServiceTest {
     @Test
     public void testQueryOnAuditLogEntry() throws Exception {
         final AuditService auditService = getAuditService(QUERY_HANDLER_NAME);
-        auditService.register(new PassThroughAuditEventHandler(), QUERY_HANDLER_NAME, Collections.singleton("access"));
-        final QueryResultHandler resultHandler = mock(QueryResultHandler.class);
-        final ArgumentCaptor<QueryResult> resourceCaptor = ArgumentCaptor.forClass(QueryResult.class);
-        final ArgumentCaptor<ResourceException> resourceExceptionCaptor =
-                ArgumentCaptor.forClass(ResourceException.class);
+        final AuditEventHandler auditEventHandler = mock(AuditEventHandler.class);
+        auditService.register(auditEventHandler, QUERY_HANDLER_NAME, Collections.singleton("access"));
+        doNothing().when(auditEventHandler).queryCollection(
+                any(ServerContext.class), any(QueryRequest.class), any(QueryResultHandler.class));
 
         //when
         auditService.handleQuery(
                 new ServerContext(new RootContext()),
                 Requests.newQueryRequest("access"),
-                resultHandler
+                mock(QueryResultHandler.class)
         );
 
         //then
-        verify(resultHandler).handleResult(resourceCaptor.capture());
-        verify(resultHandler, never()).handleError(resourceExceptionCaptor.capture());
-
-        assertThat(resourceCaptor.getValue()).isInstanceOf(QueryResult.class);
+        verify(auditEventHandler).queryCollection(
+                any(ServerContext.class), any(QueryRequest.class), any(QueryResultHandler.class));
     }
 
     @Test
