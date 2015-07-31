@@ -260,7 +260,7 @@
                     <configuration>
                         <instructions>
                             <Implementation-Build>${ci.build.number}</Implementation-Build>
-                            <SCM-Revision>${ci.svn.revision}</SCM-Revision>
+                            <SCM-Revision>${ci.scm.revision}</SCM-Revision>
                         </instructions>
                     </configuration>
                 </plugin>
