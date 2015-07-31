@@ -16,6 +16,22 @@
 
 package org.forgerock.audit.events.handlers.impl;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -47,25 +63,12 @@ import org.slf4j.LoggerFactory;
 import org.supercsv.cellprocessor.Optional;
 import org.supercsv.cellprocessor.ift.CellProcessor;
 import org.supercsv.io.CsvMapReader;
+import org.supercsv.io.CsvMapWriter;
 import org.supercsv.io.ICsvMapReader;
+import org.supercsv.io.ICsvMapWriter;
 import org.supercsv.prefs.CsvPreference;
+import org.supercsv.quote.AlwaysQuoteMode;
 import org.supercsv.util.CsvContext;
-
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Handles AuditEvents by writing them to a CSV file.
@@ -77,7 +80,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
     private String auditLogDirectory;
     private String recordDelim;
 
-    private final Map<String, FileWriter> fileWriters = new HashMap<String, FileWriter>();
+    private final Map<String, ICsvMapWriter> writers = new HashMap<>();
     private static final ObjectMapper mapper;
 
     static {
@@ -172,7 +175,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
             final String auditEventType = request.getResourceName();
             do {
                 retry = false;
-                FileWriter fileWriter = null;
+                ICsvMapWriter csvWriter = null;
                 try {
                     final JsonValue auditEventProperties =
                             AuditEventHelper.getAuditEventProperties(auditEvents.get(auditEventType));
@@ -180,7 +183,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
                         throw new InternalServerErrorException("No audit event properties defined for audit event: "
                                 + auditEventType);
                     }
-                    final Collection<String> fieldOrder = new LinkedHashSet<>();
+                    final Set<String> fieldOrder = new LinkedHashSet<>();
                     fieldOrder.addAll(JsonSchemaUtils.generateJsonPointers(
                             AuditEventHelper.getAuditEventSchema(auditEvents.get(auditEventType))));
 
@@ -188,30 +191,30 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
                     // Create header if creating a new file
                     if (!auditFile.exists()) {
                         synchronized (this) {
-                            final FileWriter existingFileWriter = getWriter(auditEventType, auditFile, false);
+                            final ICsvMapWriter existingCsvWriter = getWriter(auditEventType, auditFile, false);
                             final File auditTmpFile = new File(auditFile.getParent(), auditEventType + ".tmp");
                             // This is atomic, so only one caller will succeed with created
                             final boolean created = auditTmpFile.createNewFile();
                             if (created) {
-                                final FileWriter tmpFileWriter = new FileWriter(auditTmpFile, true);
-                                writeHeaders(fieldOrder, tmpFileWriter);
+                                final ICsvMapWriter tmpFileWriter = createCsvMapWriter(auditTmpFile);
+                                tmpFileWriter.writeHeader(buildHeaders(fieldOrder));
                                 tmpFileWriter.close();
                                 if (!auditTmpFile.renameTo(auditFile)) {
                                     logger.error("Unable to rename audit temp file");
                                     throw new InternalServerErrorException("Unable to rename audit temp file");
                                 }
-                                resetWriter(auditEventType, existingFileWriter);
+                                resetWriter(auditEventType, existingCsvWriter);
                             }
                         }
                     }
-                    fileWriter = getWriter(auditEventType, auditFile, true);
-                    writeEntry(fileWriter, request.getContent(), fieldOrder);
+                    csvWriter = getWriter(auditEventType, auditFile, true);
+                    writeEntry(csvWriter, request.getContent(), fieldOrder);
                 } catch (IOException ex) {
                     if (retryCount == 0) {
                         retry = true;
                         logger.debug("IOException during entry write, reset writer and re-try {}", ex.getMessage());
                         synchronized (this) {
-                            resetWriter(auditEventType, fileWriter);
+                            resetWriter(auditEventType, csvWriter);
                         }
                     } else {
                         throw new BadRequestException(ex);
@@ -229,6 +232,19 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
         } catch (ResourceException e) {
             handler.handleError(e);
         }
+    }
+
+    private ICsvMapWriter createCsvMapWriter(final File auditTmpFile) throws IOException {
+        return new CsvMapWriter(new FileWriter(auditTmpFile, true), getCsvPreference());
+    }
+
+    private String[] buildHeaders(final Collection<String> fieldOrder) {
+        final String[] headers = new String[fieldOrder.size()];
+        fieldOrder.toArray(headers);
+        for (int i = 0; i < headers.length; i++) {
+            headers[i] = convertToDotNotation(headers[i]);
+        }
+        return headers;
     }
 
     /**
@@ -281,68 +297,56 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
         return new File(auditLogDirectory, type + ".csv");
     }
 
-    private FileWriter getWriter(final String auditEventType, final File auditFile, final boolean createIfMissing)
+    private ICsvMapWriter getWriter(final String auditEventType, final File auditFile, final boolean createIfMissing)
             throws IOException {
-        synchronized (fileWriters) {
-            FileWriter existingWriter = fileWriters.get(auditEventType);
+        synchronized (writers) {
+            ICsvMapWriter existingWriter = writers.get(auditEventType);
             if (existingWriter == null && createIfMissing) {
-                existingWriter = new FileWriter(auditFile, true);
-                fileWriters.put(auditEventType, existingWriter);
+                existingWriter = createCsvMapWriter(auditFile);
+                writers.put(auditEventType, existingWriter);
             }
             return existingWriter;
         }
     }
 
+    private CsvPreference getCsvPreference() {
+        return new CsvPreference.Builder(CsvPreference.STANDARD_PREFERENCE).useQuoteMode(new AlwaysQuoteMode()).build();
+    }
+
     private void writeEntry(
-            final FileWriter fileWriter,
+            final ICsvMapWriter csvWriter,
             final JsonValue obj,
             final Collection<String> fieldOrder) throws IOException {
 
+        Map<String, String> cells = new HashMap<>(fieldOrder.size());
         final Iterator<String> iter = fieldOrder.iterator();
-        final StringBuilder entry = new StringBuilder();
         while (iter.hasNext()) {
             final String key = iter.next();
-            JsonValue value = obj.get(new JsonPointer(key));
-            entry.append("\"");
-            if (value != null) {
-                String rawStr = value.isString() ? value.asString() : value.toString();
-                // Escape quotes with double quotes
-                final String escapedStr = rawStr.replaceAll("\"", "\"\"");
-                entry.append(escapedStr);
-            }
-            entry.append("\"");
-            if (iter.hasNext()) {
-                entry.append(",");
-            }
+            cells.put(convertToDotNotation(key),
+                      extractValue(obj, key));
         }
-        entry.append(recordDelim);
-        fileWriter.append(entry.toString());
-        fileWriter.flush();
+        csvWriter.write(cells, buildHeaders(fieldOrder));
+        csvWriter.flush();
     }
 
-    private void writeHeaders(final Collection<String> fieldOrder, final FileWriter fileWriter)
-            throws IOException {
-        final Iterator<String> iter = fieldOrder.iterator();
-        final StringBuilder header = new StringBuilder();
-        while (iter.hasNext()) {
-            final String key = convertToDotNotation(iter.next());
-            header.append("\"");
-            final String escapedStr = key.replaceAll("\"", "\"\"");
-            header.append(escapedStr);
-            header.append("\"");
-            if (iter.hasNext()) {
-                header.append(",");
-            }
+    private String extractValue(final JsonValue obj, final String key) {
+        JsonValue value = obj.get(new JsonPointer(key));
+        final String rawStr;
+        if (value == null) {
+            rawStr = "";
+        } else if (value.isString())
+            rawStr = value.asString();
+        else {
+            rawStr = value.toString();
         }
-        header.append(recordDelim);
-        fileWriter.append(header.toString());
+        return rawStr;
     }
 
-    private void resetWriter(final String auditEventType, final FileWriter writerToReset) {
-        synchronized (fileWriters) {
-            final FileWriter existingWriter = fileWriters.get(auditEventType);
+    private void resetWriter(final String auditEventType, final ICsvMapWriter writerToReset) {
+        synchronized (writers) {
+            final ICsvMapWriter existingWriter = writers.get(auditEventType);
             if (existingWriter != null && writerToReset != null && existingWriter == writerToReset) {
-                fileWriters.remove(auditEventType);
+                writers.remove(auditEventType);
                 // attempt clean-up close
                 try {
                     existingWriter.close();
@@ -372,10 +376,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
         if (auditFile.exists()) {
             ICsvMapReader reader = null;
             try {
-                reader =
-                        new CsvMapReader(
-                                new FileReader(auditFile),
-                                new CsvPreference.Builder('"', ',', recordDelim).build());
+                reader = new CsvMapReader(new FileReader(auditFile), getCsvPreference());
 
                 // the header elements are used to map the values to the bean (names must match)
                 final String[] header = convertDotNotationToSlashes(reader.getHeader(true));
@@ -450,10 +451,10 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
         auditLogDirectory = null;
         recordDelim = null;
         try {
-            for (FileWriter fileWriter : fileWriters.values()) {
-                if (fileWriter != null) {
-                    fileWriter.flush();
-                    fileWriter.close();
+            for (ICsvMapWriter csvWriter : writers.values()) {
+                if (csvWriter != null) {
+                    csvWriter.flush();
+                    csvWriter.close();
                 }
             }
         } catch (IOException e) {
