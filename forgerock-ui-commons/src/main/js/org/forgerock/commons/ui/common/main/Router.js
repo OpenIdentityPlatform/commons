@@ -25,9 +25,6 @@
 /*global define, Backbone, _, window */
 /*jslint regexp: false*/
 
-/**
- * @author mbilski
- */
 define("org/forgerock/commons/ui/common/main/Router", [
     "underscore",
     "org/forgerock/commons/ui/common/main/EventManager",
@@ -238,6 +235,8 @@ define("org/forgerock/commons/ui/common/main/Router", [
                 if (!obj.checkRole(route)) {
                     return;
                 }
+
+                obj.currentRoute = route;
 
                 if(route.event) {
                     eventManager.sendEvent(route.event, {route: route, args: args});
