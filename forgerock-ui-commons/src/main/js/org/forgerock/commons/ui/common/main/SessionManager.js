@@ -24,10 +24,6 @@
 
 /*global define */
 
-/**
- * Interface
- * @author mbilski
- */
 define("org/forgerock/commons/ui/common/main/SessionManager", [
     "jquery",
     "underscore",
@@ -40,7 +36,7 @@ define("org/forgerock/commons/ui/common/main/SessionManager", [
     obj.login = function(params, successCallback, errorCallback) {
         cookieHelper.deleteCookie("session-jwt", "/", ""); // resets the session cookie to discard old session that may still exist
         return ModuleLoader.load(obj.configuration.loginHelperClass).then(function (helper) {
-            return ModuleLoader.promiseWrapper(_.curry(helper.login)(params), {
+            return ModuleLoader.promiseWrapper(_.bind(_.curry(helper.login)(params), helper), {
                 success: successCallback,
                 error: errorCallback
             });
@@ -49,7 +45,7 @@ define("org/forgerock/commons/ui/common/main/SessionManager", [
 
     obj.logout = function(successCallback, errorCallback) {
         return ModuleLoader.load(obj.configuration.loginHelperClass).then(function (helper) {
-            return ModuleLoader.promiseWrapper(helper.logout, {
+            return ModuleLoader.promiseWrapper(_.bind(helper.logout, helper), {
                 success: successCallback,
                 error: errorCallback
             });
@@ -58,7 +54,7 @@ define("org/forgerock/commons/ui/common/main/SessionManager", [
 
     obj.getLoggedUser = function(successCallback, errorCallback) {
         return ModuleLoader.load(obj.configuration.loginHelperClass).then(function (helper) {
-            return ModuleLoader.promiseWrapper(helper.getLoggedUser, {
+            return ModuleLoader.promiseWrapper(_.bind(helper.getLoggedUser, helper), {
                 success: successCallback,
                 error: errorCallback
             });
