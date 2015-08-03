@@ -57,59 +57,6 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         };
     });
 
-    // TODO: Remove it when jqgrid is not used in both AM and IDM
-    obj.commonJQGridFormatters = {
-        objectFormatter: function (cellvalue, options, rowObject) {
-            if (!cellvalue) {
-                return "";
-            }
-
-            var result = "<dl>",
-                prop;
-            for (prop in cellvalue) {
-
-                if (_.isString(cellvalue[prop])){
-                    result += "<dt>" + prop + "</dt><dd>" + cellvalue[prop] + "</dd>";
-                } else{
-                    result += "<dt>" + prop + "</dt><dd>" + JSON.stringify(cellvalue[prop]) + "</dd>";
-                }
-            }
-
-            result += "</dl>";
-
-            return result;
-        },
-        arrayFormatter: function (cellvalue, options, rowObject) {
-            if (!cellvalue) {
-                return "";
-            }
-
-            var result = "<ul>",
-                i,
-                len = cellvalue.length;
-            for (i = 0; i < len; i++) {
-
-                if (_.isString(cellvalue[i])){
-                    result += "<li>" + cellvalue[i] + "</li>";
-                } else{
-                    result += "<li>" + JSON.stringify(cellvalue[i]) + "</li>";
-                }
-            }
-
-            result += "</ul>";
-
-            return result;
-        },
-
-        dateFormatter: function (cellvalue, options, rowObject) {
-            if (!cellvalue) {
-                return "";
-            }
-
-            return Handlebars.helpers.date(cellvalue);
-        }
-    };
-
     obj.templates = {};
 
     obj.renderTemplate = function(templateUrl, el, data, clb, mode, validation) {
