@@ -329,9 +329,9 @@ public class CSVAuditEventHandlerTest {
         CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory);
         final JsonValue content = json(
                 object(
-                    field("_id", "1"),
-                    field("timestamp", "123456"),
-                    field("transactionId", "A10000")));
+                        field("_id", "1"),
+                        field("timestamp", "123456"),
+                        field("transactionId", "A10000")));
         CreateRequest createRequest = Requests.newCreateRequest("access", content);
 
         csvHandler.createInstance(
@@ -339,6 +339,29 @@ public class CSVAuditEventHandlerTest {
 
         String expectedContent = "\"_id\",\"timestamp\",\"transactionId\"\n" + "\"1\",\"123456\",\"A10000\"";
         assertThat(logDirectory.resolve("access.csv").toFile()).hasContent(expectedContent);
+    }
+
+    @Test
+    public void testGetConfigurationSchema() throws Exception {
+        //given
+        final CSVAuditEventHandler csvAuditEventHandler = new CSVAuditEventHandler();
+        final JsonValue expectedSchema = json(object(
+                field("type", "object"),
+                field("properties", object(
+                        field("logDirectory", object(
+                                field("type", "string")
+                        )),
+                        field("recordDelimiter", object(
+                                field("type", "string")
+                        ))
+                ))
+        ));
+
+        //when
+        final JsonValue schema = csvAuditEventHandler.getConfigurationSchema();
+
+        //then
+        assertThat(schema.asMap()).isEqualTo(expectedSchema.asMap());
     }
 
     private CSVAuditEventHandler createAndConfigureHandler(Path tempDirectory) throws Exception {

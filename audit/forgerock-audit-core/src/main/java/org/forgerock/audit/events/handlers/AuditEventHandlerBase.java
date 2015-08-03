@@ -16,8 +16,11 @@
 
 package org.forgerock.audit.events.handlers;
 
+import java.io.IOException;
 import java.util.Map;
 
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.schema.JsonSchema;
 import org.forgerock.audit.DependencyProvider;
 import org.forgerock.audit.util.ResourceExceptionsUtil;
 import org.forgerock.json.fluent.JsonValue;
@@ -27,6 +30,8 @@ import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstract AuditEventHandler class.
@@ -34,6 +39,8 @@ import org.forgerock.json.resource.UpdateRequest;
  * @param <CFG> type of the configuration
  */
 public abstract class AuditEventHandlerBase<CFG> implements AuditEventHandler<CFG> {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuditEventHandlerBase.class);
 
     /**
      * {@inheritDoc}
@@ -85,6 +92,27 @@ public abstract class AuditEventHandlerBase<CFG> implements AuditEventHandler<CF
             final UpdateRequest request,
             final ResultHandler<Resource> handler) {
         handler.handleError(ResourceExceptionsUtil.notSupported(request));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public abstract Class getConfigurationClass();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public JsonValue getConfigurationSchema() throws Exception {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonSchema schema = mapper.generateJsonSchema(getConfigurationClass());
+            return new JsonValue(mapper.readValue(schema.toString(), Map.class));
+        } catch (IOException e) {
+            logger.error("Unable to parse configuration class schema for class {}", this.getClass().getName(), e);
+            throw e;
+        }
     }
 
 }

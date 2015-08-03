@@ -19,6 +19,8 @@ package org.forgerock.audit.events.handlers.impl;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.SerializationConfig;
+import org.codehaus.jackson.schema.JsonSchema;
 import org.forgerock.audit.events.AuditEventHelper;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
 import org.forgerock.audit.util.JsonSchemaUtils;
@@ -484,6 +486,13 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
             newPath = path.substring(1);
         }
         return StringUtils.replace(newPath, "/", ".");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Class getConfigurationClass() {
+        return CSVAuditEventHandlerConfiguration.class;
     }
 }
 
