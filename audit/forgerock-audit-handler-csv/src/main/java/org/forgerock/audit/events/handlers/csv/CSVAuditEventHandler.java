@@ -85,6 +85,11 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
     private CsvPreference csvPreference;
 
     private final Map<String, ICsvMapWriter> writers = new HashMap<>();
+
+    private boolean secure;
+    private String keystoreFilename;
+    private String keystorePassword;
+
     private static final ObjectMapper mapper;
 
     static {
@@ -124,6 +129,11 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
                 }
             }
             csvPreference = createCsvPreference(config);
+            secure = config.getCsvSecurity().isEnabled();
+            if (secure) {
+                keystoreFilename = config.getCsvSecurity().getFilename();
+                keystorePassword = config.getCsvSecurity().getPassword();
+            }
         }
     }
 
@@ -242,7 +252,30 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
     }
 
     private ICsvMapWriter createCsvMapWriter(final File auditTmpFile) throws IOException {
-        return new CsvMapWriter(new FileWriter(auditTmpFile, true), csvPreference);
+        CsvMapWriter csvWriter = new CsvMapWriter(new FileWriter(auditTmpFile, true), csvPreference);
+
+        if (secure) {
+            HmacCalculator hmacCalculator = setupHmacCalculator();
+            return new CsvHmacMapWriter(csvWriter, hmacCalculator);
+        } else {
+            return csvWriter;
+        }
+    }
+
+    HmacCalculator setupHmacCalculator() {
+        final HmacCalculator hmacCalculator = new HmacCalculator(keystoreFilename, keystorePassword);
+        hmacCalculator.init();
+        return hmacCalculator;
+    }
+
+    private ICsvMapReader createCsvMapReader(final File auditFile) throws IOException {
+        CsvMapReader csvReader = new CsvMapReader(new FileReader(auditFile), csvPreference);
+
+        if (secure) {
+            return new CsvHmacMapReader(csvReader);
+        } else {
+            return csvReader;
+        }
     }
 
     private String[] buildHeaders(final Collection<String> fieldOrder) {
@@ -382,7 +415,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
         if (auditFile.exists()) {
             ICsvMapReader reader = null;
             try {
-                reader = new CsvMapReader(new FileReader(auditFile), csvPreference);
+                reader = createCsvMapReader(auditFile);
 
                 // the header elements are used to map the values to the bean (names must match)
                 final String[] header = convertDotNotationToSlashes(reader.getHeader(true));

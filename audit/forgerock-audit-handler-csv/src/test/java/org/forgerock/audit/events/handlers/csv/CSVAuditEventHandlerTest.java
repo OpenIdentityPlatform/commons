@@ -25,6 +25,7 @@ import static org.mockito.Mockito.verify;
 import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionResponse;
@@ -50,6 +51,9 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import javax.crypto.spec.SecretKeySpec;
+
+import static org.mockito.Mockito.spy;
 
 public class CSVAuditEventHandlerTest {
 
@@ -300,14 +304,24 @@ public class CSVAuditEventHandlerTest {
 
         csvHandler.createInstance(new RootContext(), createRequest);
 
-        String expectedContent = "\"_id\",\"timestamp\",\"transactionId\"\n" + "\"1\",\"123456\",\"A10000\"";
+        String expectedContent = "\"_id\",\"timestamp\",\"transactionId\",\"HMAC\"\n"
+                + "\"1\",\"123456\",\"A10000\",\"N/DdzwOaO8ML86L7SaA5Y2Ptd4nl4cPsAAfstbNdIQ0=\"";
         assertThat(logDirectory.resolve("access.csv").toFile()).hasContent(expectedContent);
     }
 
     private CSVAuditEventHandler createAndConfigureHandler(Path tempDirectory) throws Exception {
-        CSVAuditEventHandler handler = new CSVAuditEventHandler();
+        CSVAuditEventHandler handler = spy(new CSVAuditEventHandler());
         CSVAuditEventHandlerConfiguration config = new CSVAuditEventHandlerConfiguration();
         config.setLogDirectory(tempDirectory.toString());
+
+        CSVAuditEventHandlerConfiguration.CsvSecurity csvSecurity = new CSVAuditEventHandlerConfiguration.CsvSecurity();
+        csvSecurity.setEnabled(true);
+        csvSecurity.setFilename(new File(System.getProperty("java.io.tmpdir"), "secure-audit.jks").getAbsolutePath());
+        csvSecurity.setPassword("forgerock");
+        config.setCsvSecurity(csvSecurity);
+
+        HmacCalculator.writeToKeyStore(new SecretKeySpec("forgerock".getBytes("UTF-8"), "Raw"), "/tmp/secure-audit.jks", "InitialKey", "forgerock");
+
         handler.configure(config);
         addEventsMetaData(handler);
         return handler;

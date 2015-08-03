@@ -27,6 +27,10 @@ import org.forgerock.util.Reject;
  *    "logDirectory" : "/tmp/audit",
  *    "csvConfiguration" : {
  *      "quoteChar" : ";"
+ *    },
+ *    "csvSecurity" : {
+ *      "enabled" : true,
+ *      "filename" : "/var/secure/secure-audit.jks"
  *    }
  *  }
  * </pre>
@@ -37,6 +41,8 @@ public class CSVAuditEventHandlerConfiguration {
     private String logDirectory;
 
     private CsvConfiguration csvConfiguration = new CsvConfiguration();
+
+    private CsvSecurity csvSecurity = new CsvSecurity();
 
     /**
      * Returns the directory where CSV file is located.
@@ -74,6 +80,23 @@ public class CSVAuditEventHandlerConfiguration {
         this.csvConfiguration = Reject.checkNotNull(csvConfiguration);
     }
 
+    /**
+     * Returns the csvSecurity
+     *
+     * @return the csvSecurity
+     */
+    public CsvSecurity getCsvSecurity() {
+        return csvSecurity;
+    }
+
+    /**
+     *
+     * @param csvSecurity the csvSecurity to set
+     */
+    public void setCsvSecurity(CsvSecurity csvSecurity) {
+        this.csvSecurity = Reject.checkNotNull(csvSecurity);
+    }
+
     public static class CsvConfiguration {
 
         private char quoteChar = '"';
@@ -103,5 +126,37 @@ public class CSVAuditEventHandlerConfiguration {
         public void setEndOfLineSymbols(String endOfLineSymbols) {
             this.endOfLineSymbols = endOfLineSymbols;
         }
+    }
+
+    public static class CsvSecurity {
+
+        private boolean enabled = false;
+        private String filename;
+        private String password;
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setFilename(String filename) {
+            this.filename = filename;
+        }
+
+        public String getFilename() {
+            return filename;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
     }
 }
