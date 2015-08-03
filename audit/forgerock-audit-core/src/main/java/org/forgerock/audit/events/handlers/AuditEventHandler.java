@@ -68,11 +68,4 @@ public interface AuditEventHandler<CFG> extends CollectionResourceProvider {
      */
     public Class getConfigurationClass();
 
-    /**
-     * Gets the configuration class schema as json schema.
-     * @return a representation of the configuration classes schema as json schema
-     * @throws Exception if unable to parse the configuration classes schema.
-     */
-    public JsonValue getConfigurationSchema() throws Exception;
-
 }

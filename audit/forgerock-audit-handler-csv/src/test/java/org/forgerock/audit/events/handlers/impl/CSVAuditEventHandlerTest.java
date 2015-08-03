@@ -341,29 +341,6 @@ public class CSVAuditEventHandlerTest {
         assertThat(logDirectory.resolve("access.csv").toFile()).hasContent(expectedContent);
     }
 
-    @Test
-    public void testGetConfigurationSchema() throws Exception {
-        //given
-        final CSVAuditEventHandler csvAuditEventHandler = new CSVAuditEventHandler();
-        final JsonValue expectedSchema = json(object(
-                field("type", "object"),
-                field("properties", object(
-                        field("logDirectory", object(
-                                field("type", "string")
-                        )),
-                        field("recordDelimiter", object(
-                                field("type", "string")
-                        ))
-                ))
-        ));
-
-        //when
-        final JsonValue schema = csvAuditEventHandler.getConfigurationSchema();
-
-        //then
-        assertThat(schema.asMap()).isEqualTo(expectedSchema.asMap());
-    }
-
     private CSVAuditEventHandler createAndConfigureHandler(Path tempDirectory) throws Exception {
         CSVAuditEventHandler handler = new CSVAuditEventHandler();
         CSVAuditEventHandlerConfiguration config = new CSVAuditEventHandlerConfiguration();
