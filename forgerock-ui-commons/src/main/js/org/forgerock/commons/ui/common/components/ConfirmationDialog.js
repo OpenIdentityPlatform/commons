@@ -36,7 +36,10 @@ define("org/forgerock/commons/ui/common/components/ConfirmationDialog", [
             this.message = msg;
             this.actions =  [
                 {
-                    type: "close"
+                    label: $.t("common.form.cancel"),
+                    action: function (dialogRef) {
+                        dialogRef.close();
+                    }
                 },
                 {
                     label: actionName,
