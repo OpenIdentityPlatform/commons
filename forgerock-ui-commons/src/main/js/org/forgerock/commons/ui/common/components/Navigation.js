@@ -168,6 +168,7 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
             render: function(args, callback) {
                 // The user information is shown at the top of the userBar widget,
                 // but it is stored in different ways for different products.
+
                 if (conf.loggedUser) {
                     if (conf.loggedUser.userName) {
                         this.data.username = conf.loggedUser.userName; //idm
@@ -207,7 +208,6 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                 this.reload();
                 this.parentRender(callback);
             },
-
 
             addLinks: function(linkName) {
                 var urlName,
