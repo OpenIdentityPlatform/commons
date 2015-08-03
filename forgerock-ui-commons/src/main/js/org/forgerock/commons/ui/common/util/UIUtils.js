@@ -20,14 +20,13 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     "jquery",
     "underscore",
     "require",
-    "org/forgerock/commons/ui/common/util/typeextentions/String",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "handlebars",
     "bootstrap-dialog",
     "i18next",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/util/DateUtil"
-], function ($, _, require, String, AbstractConfigurationAware, Handlebars, BootstrapDialog, i18next, Router, dateUtil) {
+], function ($, _, require, AbstractConfigurationAware, Handlebars, BootstrapDialog, i18next, Router, dateUtil) {
     /**
      * @exports org/forgerock/commons/ui/common/util/UIUtils
      */
