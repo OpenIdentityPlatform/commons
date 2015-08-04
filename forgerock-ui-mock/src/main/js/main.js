@@ -55,7 +55,7 @@ require.config({
         doTimeout: "libs/jquery.ba-dotimeout-1.0-min",
         handlebars: "libs/handlebars-3.0.3-min",
         moment: "libs/moment-2.8.1-min",
-        bootstrap: "libs/bootstrap-3.3.4-custom",
+        bootstrap: "libs/bootstrap-3.3.5-custom",
         "bootstrap-dialog": "libs/bootstrap-dialog-1.34.4-min",
         placeholder: "libs/jquery.placeholder-2.0.8"
     },
