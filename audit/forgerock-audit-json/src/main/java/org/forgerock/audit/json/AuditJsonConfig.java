@@ -29,8 +29,6 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ResourceException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Utility class to facilitate creation and configuration of audit service and audit event handlers
