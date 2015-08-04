@@ -40,6 +40,7 @@ import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
@@ -60,6 +61,8 @@ import org.slf4j.LoggerFactory;
  *  AuditService service = new AuditService(extentedTypes);
  *  // configure it
  *  service.configure(configuration);
+ *  // set dependency provider
+ *  service.registerDependencyProvider(provider);
  *  // register the handlers
  *  service.register(handler1, handler1Name, events1);
  *  service.register(handler2, handler2Name, events2);
@@ -88,6 +91,9 @@ public class AuditService implements RequestHandler {
     private Map<String, List<AuditEventHandler<?>>> eventTypeAuditEventHandlers;
     /** All the audit event types configured. */
     private Map<String, JsonValue> auditEvents;
+
+    /** The dependency provider used by event handlers to satisfy dependencies. */
+    private DependencyProvider dependencyProvider = new DependencyProviderBase();
 
     /** The name of the AuditEventHandler to use for queries. */
     private String queryHandlerName;
@@ -149,6 +155,18 @@ public class AuditService implements RequestHandler {
     }
 
     /**
+     * Register the DependencyProvider, after which, an AuditEventHandler can be registered and
+     * receive this provider.  The dependency provider allows the handler to obtain resources or
+     * objects from the product which integrates the Audit Service.
+     *
+     * @param provider
+     *            the DependencyProvider to register
+     */
+    public void registerDependencyProvider(DependencyProvider provider) {
+        dependencyProvider = provider;
+    }
+
+    /**
      * Register an AuditEventHandler. After that registration, that AuditEventHandler can be referred with the given
      * name. This AuditEventHandler will only be notified about the events specified in the parameter events.
      *
@@ -187,6 +205,7 @@ public class AuditService implements RequestHandler {
         }
 
         handler.setAuditEventsMetaData(auditEventsMetaData);
+        handler.setDependencyProvider(dependencyProvider);
         logger.info("Registered {}", eventTypeAuditEventHandlers.toString());
     }
 
@@ -352,7 +371,18 @@ public class AuditService implements RequestHandler {
      */
     @Override
     public void handleQuery(final ServerContext context, final QueryRequest request, final QueryResultHandler handler) {
-        handler.handleError(ResourceExceptionsUtil.notSupported(request));
+        try {
+            logger.debug("Audit query called for {}", request.getResourceName());
+            if (queryHandlerName != null && allAuditEventHandlers.containsKey(queryHandlerName)) {
+                getRegisteredHandler(queryHandlerName).queryCollection(context, request, handler);
+                return;
+            }
+            handler.handleError(ResourceExceptionsUtil.adapt(new AuditException(String.format(
+                    "The handler defined for queries, '%s', has not been registered to the audit service.",
+                    queryHandlerName))));
+        } catch (Exception e) {
+            handler.handleError(ResourceExceptionsUtil.adapt(e));
+        }
     }
     /**
      * Audit service does not support actions on audit entries.

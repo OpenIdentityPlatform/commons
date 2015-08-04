@@ -44,7 +44,6 @@ public final class AuditEventHelper {
     private static final String TYPE = "type";
     private static final String SCHEMA = "schema";
     private static final String REQUIRED = "required";
-    private static final String CONFIG = "config";
     private static final String LOG_TO = "logTo";
 
     private AuditEventHelper() {

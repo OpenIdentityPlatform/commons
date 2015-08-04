@@ -22,6 +22,7 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Resource;
@@ -93,7 +94,7 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<Void> {
             final ServerContext context,
             final QueryRequest request,
             final QueryResultHandler handler) {
-        handler.handleError(ResourceExceptionsUtil.notSupported(request));
+        handler.handleResult(new QueryResult());
     }
 
     /**

@@ -18,6 +18,7 @@ package org.forgerock.audit.events.handlers;
 
 import java.util.Map;
 
+import org.forgerock.audit.DependencyProvider;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.CollectionResourceProvider;
 import org.forgerock.json.resource.ResourceException;
@@ -51,4 +52,14 @@ public interface AuditEventHandler<CFG> extends CollectionResourceProvider {
      *            List of AuditEvents to handle.
      */
     public void setAuditEventsMetaData(Map<String, JsonValue> auditEvents);
+
+    /**
+     * Set the dependency provider to satisfy dependencies of this EventHandler. This method is supposed to be
+     * called by the AuditService when registering this AuditEventHandler.
+     *
+     * @param dependencyProvider
+     *            An provider that provide dependencies to the EventHandler.
+     */
+    public void setDependencyProvider(DependencyProvider dependencyProvider);
+
 }

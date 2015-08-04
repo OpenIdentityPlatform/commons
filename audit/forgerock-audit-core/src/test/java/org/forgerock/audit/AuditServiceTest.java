@@ -16,7 +16,7 @@
 
 package org.forgerock.audit;
 
-import static org.fest.assertions.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.forgerock.json.fluent.JsonValue.*;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
@@ -32,7 +32,7 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.NotSupportedException;
-import org.forgerock.json.resource.QueryResult;
+import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Requests;
@@ -74,6 +74,39 @@ public class AuditServiceTest {
 
         // Then
         assertThat(knownTopics).containsOnly("access", "activity", "authentication", "config");
+    }
+
+    @Test
+    public void testRegisterInjectDependencyProvider() throws Exception {
+        final AuditService auditService = getAuditService(QUERY_HANDLER_NAME);
+        DependencyProvider dependencyProvider = mock(DependencyProvider.class);
+        when(dependencyProvider.getDependency(Integer.class)).thenReturn(4);
+        final ArgumentCaptor<DependencyProvider> dependencyProviderArgumentCaptor =
+                ArgumentCaptor.forClass(DependencyProvider.class);
+        AuditEventHandler<?> auditEventHandler = mock(AuditEventHandler.class);
+
+        auditService.registerDependencyProvider(dependencyProvider);
+        auditService.register(auditEventHandler, "mock", Collections.singleton("access"));
+
+        verify(auditEventHandler).setDependencyProvider(dependencyProviderArgumentCaptor.capture());
+        DependencyProvider provider = dependencyProviderArgumentCaptor.getValue();
+        assertThat(provider.getDependency(Integer.class)).isEqualTo(4);
+    }
+
+    @Test(expectedExceptions = ClassNotFoundException.class)
+    public void testDependencyNotFound() throws Exception {
+        final AuditService auditService = getAuditService(QUERY_HANDLER_NAME);
+        DependencyProvider dependencyProvider = new DependencyProviderBase();
+        final ArgumentCaptor<DependencyProvider> dependencyProviderArgumentCaptor =
+                ArgumentCaptor.forClass(DependencyProvider.class);
+        AuditEventHandler<?> auditEventHandler = mock(AuditEventHandler.class);
+
+        auditService.registerDependencyProvider(dependencyProvider);
+        auditService.register(auditEventHandler, "mock", Collections.singleton("access"));
+
+        verify(auditEventHandler).setDependencyProvider(dependencyProviderArgumentCaptor.capture());
+        DependencyProvider provider = dependencyProviderArgumentCaptor.getValue();
+        provider.getDependency(Integer.class);
     }
 
     @Test
@@ -276,25 +309,23 @@ public class AuditServiceTest {
     }
 
     @Test
-    public void testQueryOnAuditLogEntry() throws ResourceException {
+    public void testQueryOnAuditLogEntry() throws Exception {
         final AuditService auditService = getAuditService(QUERY_HANDLER_NAME);
-        final QueryResultHandler resultHandler = mock(QueryResultHandler.class);
-        final ArgumentCaptor<QueryResult> resourceCaptor = ArgumentCaptor.forClass(QueryResult.class);
-        final ArgumentCaptor<ResourceException> resourceExceptionCaptor =
-                ArgumentCaptor.forClass(ResourceException.class);
+        final AuditEventHandler auditEventHandler = mock(AuditEventHandler.class);
+        auditService.register(auditEventHandler, QUERY_HANDLER_NAME, Collections.singleton("access"));
+        doNothing().when(auditEventHandler).queryCollection(
+                any(ServerContext.class), any(QueryRequest.class), any(QueryResultHandler.class));
 
         //when
         auditService.handleQuery(
                 new ServerContext(new RootContext()),
-                Requests.newQueryRequest("_id"),
-                resultHandler
+                Requests.newQueryRequest("access"),
+                mock(QueryResultHandler.class)
         );
 
         //then
-        verify(resultHandler, never()).handleResult(resourceCaptor.capture());
-        verify(resultHandler).handleError(resourceExceptionCaptor.capture());
-
-        assertThat(resourceExceptionCaptor.getValue()).isInstanceOf(NotSupportedException.class);
+        verify(auditEventHandler).queryCollection(
+                any(ServerContext.class), any(QueryRequest.class), any(QueryResultHandler.class));
     }
 
     @Test

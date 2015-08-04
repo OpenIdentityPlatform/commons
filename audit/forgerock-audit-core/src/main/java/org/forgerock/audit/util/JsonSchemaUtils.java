@@ -18,7 +18,6 @@ package org.forgerock.audit.util;
 
 import org.forgerock.json.fluent.JsonValue;
 
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -31,7 +30,6 @@ public final class JsonSchemaUtils {
     private static final String ID = "id";
     private static final String TYPE = "type";
     private static final String OBJECT = "object";
-    private static final String ARRAY = "array";
     private static final String FORWARD_SLASH = "/";
 
     private JsonSchemaUtils() {

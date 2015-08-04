@@ -16,7 +16,7 @@
 package org.forgerock.audit.events;
 
 import static java.util.Arrays.*;
-import static org.fest.assertions.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.forgerock.audit.events.AuditEventBuilderTest.OpenProductAuditEventBuilder.*;
 
 import java.util.HashMap;

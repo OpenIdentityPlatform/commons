@@ -21,8 +21,6 @@ import static org.forgerock.json.fluent.JsonValue.*;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.Request;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Base class for {@link ActivityAuditEventBuilder} and {@link ConfigAuditEventBuilder}.
@@ -40,8 +38,6 @@ abstract class StateChangeAuditEventBuilder<T extends StateChangeAuditEventBuild
     public static final String AFTER = "after";
     public static final String REVISION = "revision";
     public static final String CHANGED_FIELDS = "changedFields";
-
-    private static final Logger logger = LoggerFactory.getLogger(StateChangeAuditEventBuilder.class);
 
     /**
      * {@inheritDoc}
