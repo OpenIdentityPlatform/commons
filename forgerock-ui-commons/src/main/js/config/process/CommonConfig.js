@@ -1,25 +1,17 @@
 /**
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2011-2015 ForgeRock AS. All rights reserved.
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions copyright 2011-2015 ForgeRock AS.
  */
 
 /*global define, window, _*/
@@ -78,12 +70,12 @@ define("config/process/CommonConfig", [
                 "org/forgerock/commons/ui/common/main/Configuration",
                 "org/forgerock/commons/ui/common/components/Navigation"
             ],
-            processDescription: function(event, conf, navigation) {
+            processDescription: function(event, Configuration, Navigation) {
                 var serviceInvokerModuleName, serviceInvokerConfig;
                 serviceInvokerModuleName = "org/forgerock/commons/ui/common/main/ServiceInvoker";
-                serviceInvokerConfig = conf.getModuleConfiguration(serviceInvokerModuleName);
-                if(!event.anonymousMode) {
-                    delete conf.globalData.authorizationFailurePending;
+                serviceInvokerConfig = Configuration.getModuleConfiguration(serviceInvokerModuleName);
+                if (!event.anonymousMode) {
+                    delete Configuration.globalData.authorizationFailurePending;
                     delete serviceInvokerConfig.defaultHeaders[Constants.HEADER_PARAM_PASSWORD];
                     delete serviceInvokerConfig.defaultHeaders[Constants.HEADER_PARAM_USERNAME];
                     delete serviceInvokerConfig.defaultHeaders[Constants.HEADER_PARAM_NO_SESSION];
@@ -94,53 +86,80 @@ define("config/process/CommonConfig", [
                     serviceInvokerConfig.defaultHeaders[Constants.HEADER_PARAM_USERNAME] = Constants.ANONYMOUS_USERNAME;
                     serviceInvokerConfig.defaultHeaders[Constants.HEADER_PARAM_NO_SESSION]= true;
 
-                    conf.setProperty('loggedUser', null);
-                    navigation.reload();
+                    Configuration.setProperty("loggedUser", null);
+                    Navigation.reload();
                 }
-                conf.sendSingleModuleConfigurationChangeInfo(serviceInvokerModuleName);
+                Configuration.sendSingleModuleConfigurationChangeInfo(serviceInvokerModuleName);
             }
         },
         {
             startEvent: Constants.EVENT_UNAUTHORIZED,
             description: "",
             dependencies: [
-                "org/forgerock/commons/ui/common/main/ViewManager",
                 "org/forgerock/commons/ui/common/main/Router",
                 "org/forgerock/commons/ui/common/main/Configuration",
                 "org/forgerock/commons/ui/common/main/SessionManager"
             ],
-            processDescription: function(error, viewManager, router, conf, sessionManager) {
-                var saveGotoURL = function () {
-                        var hash = router.getCurrentHash();
-                        if(!conf.gotoURL && !hash.match(router.configuration.routes.login.url)) {
-                            conf.setProperty("gotoURL", "#" + hash);
-                        }
-                    };
+            processDescription: function(error, Router, Configuration, SessionManager) {
+                var setGoToUrlProperty = function () {
+                    var hash = Router.getCurrentHash();
+                    if (!Configuration.gotoURL && !hash.match(Router.configuration.routes.login.url)) {
+                        Configuration.setProperty("gotoURL", "#" + hash);
+                    }
+                };
 
-                // multiple rest calls that all return authz failures will cause this event to be called multiple times
-                if (conf.globalData.authorizationFailurePending !== undefined) {
+                // Multiple rest calls that all return authz failures will cause this event to be called multiple times
+                if (Configuration.globalData.authorizationFailurePending !== undefined) {
                     return;
                 }
 
-                conf.globalData.authorizationFailurePending = true;
+                Configuration.globalData.authorizationFailurePending = true;
 
-                if(!conf.loggedUser) {
-                    saveGotoURL();
-                    EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: true});
-                    return EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
-                }
+                if (!Configuration.loggedUser) {
+                    setGoToUrlProperty();
 
-                if (typeof error !== "object" || error === null || typeof error.error !== "object" || error.error === null || error.error.type === "GET") {
-                    saveGotoURL();
-                    return sessionManager.logout().then(function() {
-                        EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: true});
-                        EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unauthorized");
-                        return EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
+                    EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, {
+                        anonymousMode: true
                     });
-                } else {
-                    return EventManager.sendEvent(Constants.EVENT_SHOW_LOGIN_DIALOG);
+                    EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {
+                        route: Router.configuration.routes.login
+                    });
+                    return;
                 }
 
+                function logout (callback) {
+                    setGoToUrlProperty();
+
+                    SessionManager.logout(function() {
+                        EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, {
+                            anonymousMode: true
+                        });
+                        EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unauthorized");
+                        EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {
+                            route: Router.configuration.routes.login
+                        });
+                    });
+
+                }
+
+                if (typeof error !== "object" || error === null ||
+                    typeof error.error !== "object" || error.error === null) {
+                    logout();
+                } else {
+                    // Special case for GET requests, behavior should be different based on the error code returned
+                    if (error.error.type === "GET") {
+                        if (error.error.status === 501 || error.error.status === 403) {
+                            // 501 Not Implemented or 403 Forbidden. Log out and redirect to the login view
+                            logout();
+                        } else if (error.error.status === 401) {
+                            // 401 Unauthorized. Unauthorized in-app GET requests, just show the login dialog
+                            EventManager.sendEvent(Constants.EVENT_SHOW_LOGIN_DIALOG);
+                        }
+                    } else {
+                        // Session expired, just show the login dialog
+                        EventManager.sendEvent(Constants.EVENT_SHOW_LOGIN_DIALOG);
+                    }
+                }
             }
         },
         {
