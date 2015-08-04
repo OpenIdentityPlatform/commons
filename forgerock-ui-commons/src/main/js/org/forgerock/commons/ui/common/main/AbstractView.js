@@ -86,17 +86,6 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
                     _this.loadTemplate();
                 }
             });
-
-            //Added in due to the migration of the username to the main nav bar
-            if(Configuration.loggedUser) {
-                this.$el.find("#profile_link").show();
-
-                if (Configuration.loggedUser.userName) {
-                    this.$el.find("#user_name").text(Configuration.loggedUser.userName); //idm
-                } else if (Configuration.loggedUser.cn) {
-                    this.$el.find("#user_name").text(Configuration.loggedUser.cn); //am
-                }
-            }
         },
 
         loadTemplate: function() {

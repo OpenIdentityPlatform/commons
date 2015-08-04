@@ -229,7 +229,6 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
 
             },
 
-
             addLinks: function(linkName) {
                 var urlName,
                     subUrl,
