@@ -79,4 +79,6 @@ public final class JsonSchemaUtils {
         }
         return newPointers;
     }
+
+
 }
