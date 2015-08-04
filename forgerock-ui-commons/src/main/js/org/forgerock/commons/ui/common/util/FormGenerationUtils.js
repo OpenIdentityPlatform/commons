@@ -119,8 +119,8 @@ define("org/forgerock/commons/ui/common/util/FormGenerationUtils", [
             label = this.generateLabel(elementDisplayName);
         }
 
-        if (value && value.startsWith("{{variables.")) {
-            value = "{{date " + value.substring(2).removeLastChars(2) + " '" + dateFormat + "'}}";
+        if (value && value.match(new RegExp("^\\{\\{variables\\."))) {
+            value = "{{date " + value.substring(2).slice(-2) + " '" + dateFormat + "'}}";
         }
 
         dateFormatInput = this.generateInput("dateFormat", dateFormat, false, false, false);
@@ -142,8 +142,8 @@ define("org/forgerock/commons/ui/common/util/FormGenerationUtils", [
         additionalParams = !isReadable ? additionalParams + ' style="display: none" ' : additionalParams;
 
         selectedKey = value ? value : '__null';
-        if (selectedKey.startsWith("{{variables.")) {
-            selectedKey = selectedKey.substring(2).removeLastChars(2);
+        if (selectedKey.match(new RegExp("^\\{\\{variables\\."))) {
+            selectedKey = selectedKey.substring(2).slice(-2);
         } else {
             selectedKey = "'" + selectedKey + "'";
         }

@@ -138,10 +138,7 @@ define("org/forgerock/commons/ui/common/main/Router", [
     };
 
     obj.normalizeSubPath = function(subPath) {
-        if(subPath.endsWith('/')) {
-            return subPath.removeLastChars();
-        }
-        return subPath;
+        return subPath.replace(/\/$/, '');
     };
 
     obj.convertCurrentUrlToJSON = function() {

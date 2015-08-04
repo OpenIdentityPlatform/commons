@@ -24,9 +24,8 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     "i18next",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "org/forgerock/commons/ui/common/util/ModuleLoader",
-    "org/forgerock/commons/ui/common/main/Router",
-    "org/forgerock/commons/ui/common/util/typeextentions/String"
-], function ($, _, require, Handlebars, i18next, AbstractConfigurationAware, ModuleLoader, Router, String) {
+    "org/forgerock/commons/ui/common/main/Router"
+], function ($, _, require, Handlebars, i18next, AbstractConfigurationAware, ModuleLoader, Router) {
     /**
      * @exports org/forgerock/commons/ui/common/util/UIUtils
      */
