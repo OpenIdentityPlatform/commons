@@ -15,10 +15,16 @@
  */
 package org.forgerock.audit.json;
 
+import static org.forgerock.json.fluent.JsonValue.field;
+import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.fluent.JsonValue.object;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import org.forgerock.audit.AuditException;
@@ -269,6 +275,67 @@ public class AuditJsonConfig {
         AuditEventHandler<CFG> handler = buildAuditEventHandler(name, jsonConfig, classLoader);
         Set<String> events = getEvents(name, jsonConfig);
         auditService.register(handler, name, events);
+    }
+
+
+    /**
+     * Gets the available audit event handlers from the audit service and the config schema.
+     *
+     * Should return a json object similar to this:
+     * <pre>
+     *      [{
+     *          "class" : "org.forgerock.audit.events.handlers.impl.CSVAuditEventHandler",
+     *          "config" : {
+     *              "type" : "object",
+     *              "properties" : {
+     *                  "logDirectory" : {
+     *                      "type" : "string"
+     *                  },
+     *                  ....
+     *              }
+     *          }
+     *      },
+     *      {
+     *          "class" : "org.forgerock.audit.events.handlers.impl.AnotherAuditEventHandler",
+     *          "config" : {
+     *              "type" : "object",
+     *              "properties" : {
+     *                  "configKey" : {
+     *                      "type" : "string"
+     *                  },
+     *                  ....
+     *              }
+     *          }
+     *      }]
+     * </pre>
+     * @param auditServiceConfiguration
+     *          The audit service configuration storing the list of available audit event handlers
+     * @return A json object containing the available audit event handlers and their config schema.
+     * @throws AuditException If an error occurs instantiating one of the audit event handlers
+     */
+    public static JsonValue getAvailableAuditEventHandlersWithConfigSchema(
+            final AuditServiceConfiguration auditServiceConfiguration, final ClassLoader classLoader)
+            throws AuditException {
+
+        final List<String> availableAuditEventHandlers = auditServiceConfiguration.getAvailableAuditEventHandlers();
+        final JsonValue result = new JsonValue(new LinkedList<>());
+
+        for (final String auditEventHandler : availableAuditEventHandlers) {
+            try {
+                AuditEventHandler eventHandler =
+                        (AuditEventHandler) Class.forName(auditEventHandler, true, classLoader).newInstance();
+                final JsonValue entry = json(object(
+                        field("class", auditEventHandler),
+                        //TODO populate the config field
+                        field("config", json(object()))
+                ));
+                result.add(entry);
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+                throw new AuditException(String.format("An error occured while trying to instantiate class "
+                        + "for the handler '%s' or its configuration", auditEventHandler), e);
+            }
+        }
+        return result;
     }
 
 }

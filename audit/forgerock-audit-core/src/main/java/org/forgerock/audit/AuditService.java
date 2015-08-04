@@ -15,6 +15,8 @@
  */
 package org.forgerock.audit;
 
+import static org.forgerock.json.fluent.JsonValue.object;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -384,9 +386,15 @@ public class AuditService implements RequestHandler {
     @Override
     public void handleAction(final ServerContext context, final ActionRequest request,
             final ResultHandler<JsonValue> handler) {
-        handler.handleError(ResourceExceptionsUtil.notSupported(request));
-    }
+        switch(request.getAction()) {
+            case "availableHandlers":
+                handler.handleResult(AuditJsonConfig.);
+                break;
+            default:
+                handler.handleResult(JsonValue.json(object()));
 
+        }
+    }
 
     private Collection<AuditEventHandler<?>> getAuditEventHandlersForEvent(final String auditEvent)
             throws InternalServerErrorException {
