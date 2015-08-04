@@ -18,14 +18,10 @@ package org.forgerock.audit.json;
 import java.io.InputStream;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
 
 import org.forgerock.audit.AuditException;
 import org.forgerock.audit.AuditService;
 import org.forgerock.audit.AuditServiceConfiguration;
-import org.forgerock.audit.PassThroughAuditEventHandler;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ResourceException;
