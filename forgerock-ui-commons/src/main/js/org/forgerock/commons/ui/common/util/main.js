@@ -34,6 +34,5 @@ define("org/forgerock/commons/ui/common/util/main", [
     "./Mime",
     "./ObjectUtil",
     "./UIUtils",
-    "./ValidatorsUtils",
-    "./typeextentions/String"
+    "./ValidatorsUtils"
 ]);
