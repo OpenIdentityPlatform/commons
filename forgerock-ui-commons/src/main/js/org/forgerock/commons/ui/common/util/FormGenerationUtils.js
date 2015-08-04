@@ -26,8 +26,7 @@
 
 define("org/forgerock/commons/ui/common/util/FormGenerationUtils", [
     "jquery",
-    "org/forgerock/commons/ui/common/util/DateUtil",
-    "org/forgerock/commons/ui/common/util/typeextentions/String"
+    "org/forgerock/commons/ui/common/util/DateUtil"
 ], function ($, dateUtil) {
 
     var obj = {};

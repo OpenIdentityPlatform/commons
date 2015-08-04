@@ -30,8 +30,7 @@ define("org/forgerock/commons/ui/common/main/Router", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
-    "org/forgerock/commons/ui/common/util/typeextentions/String"
+    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware"
 ], function(_, eventManager, constants, conf, AbstractConfigurationAware) {
     /**
      * @exports org/forgerock/commons/ui/common/main/Router
