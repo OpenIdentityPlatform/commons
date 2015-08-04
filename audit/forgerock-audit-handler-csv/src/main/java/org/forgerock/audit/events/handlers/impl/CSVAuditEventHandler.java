@@ -491,7 +491,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
     /**
      * {@inheritDoc}
      */
-    public Class getConfigurationClass() {
+    public Class<CSVAuditEventHandlerConfiguration> getConfigurationClass() {
         return CSVAuditEventHandlerConfiguration.class;
     }
 }

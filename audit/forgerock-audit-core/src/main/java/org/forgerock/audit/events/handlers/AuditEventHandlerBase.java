@@ -91,6 +91,6 @@ public abstract class AuditEventHandlerBase<CFG> implements AuditEventHandler<CF
      * {@inheritDoc}
      */
     @Override
-    public abstract Class getConfigurationClass();
+    public abstract Class<CFG> getConfigurationClass();
 
 }

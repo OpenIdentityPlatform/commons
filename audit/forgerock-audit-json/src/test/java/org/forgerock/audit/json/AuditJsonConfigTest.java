@@ -72,26 +72,6 @@ public class AuditJsonConfigTest {
         AuditJsonConfig.registerHandlerToService(config, auditService);
     }
 
-    @Test
-    public void testGetAuditEventHandlerConfigurationSchema() throws Exception {
-        //given
-        final AuditEventHandler auditEventHandler = new PassThroughAuditEventHandler();
-        final JsonValue expectedSchema = json(object(
-                field("type", "object"),
-                field("properties", object(
-                        field("message", object(
-                                field("type", "string")
-                        ))
-                ))
-        ));
-
-        //when
-        final JsonValue schema = AuditJsonConfig.getAuditEventHandlerConfigurationMetaData(auditEventHandler);
-
-        //then
-        assertThat(schema.asMap()).isEqualTo(expectedSchema.asMap());
-    }
-
     private AuditService createAndConfigureAuditService() throws AuditException, ResourceException {
         final AuditService auditService = new AuditService();
         AuditServiceConfiguration serviceConfig =

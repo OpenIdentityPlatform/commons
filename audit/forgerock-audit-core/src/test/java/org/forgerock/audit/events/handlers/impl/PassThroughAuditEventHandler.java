@@ -117,7 +117,7 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
      * {@inheritDoc}
      */
     @Override
-    public Class getConfigurationClass() {
+    public Class<PassThroughAuditEventHandlerConfiguration> getConfigurationClass() {
         return PassThroughAuditEventHandlerConfiguration.class;
     }
 }

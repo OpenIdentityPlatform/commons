@@ -19,14 +19,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Set;
 
-import org.codehaus.jackson.schema.JsonSchema;
 import org.forgerock.audit.AuditException;
 import org.forgerock.audit.AuditService;
 import org.forgerock.audit.AuditServiceConfiguration;
-import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ResourceException;
@@ -51,8 +48,6 @@ public class AuditJsonConfig {
     private static final String CONFIG_FIELD = "config";
     /** Field containing events topics to process for an event handler. */
     private static final String EVENTS_FIELD = "events";
-
-    private static final Logger logger = LoggerFactory.getLogger(AuditJsonConfig.class);
 
     /** The mapper from JSON structure to Java object. */
     //checkstyle:off
@@ -166,7 +161,7 @@ public class AuditJsonConfig {
             eventHandler = (AuditEventHandler<CFG>) Class.forName(className, true, classLoader).newInstance();
             JsonValue conf = jsonConfig.get(CONFIG_FIELD);
             if (conf != null) {
-                Class<CFG> klass = (Class<CFG>) eventHandler.getConfigurationClass();
+                Class<CFG> klass = eventHandler.getConfigurationClass();
                 CFG configuration = mapper.readValue(conf.toString(), klass);
                 eventHandler.configure(configuration);
             }
@@ -275,25 +270,6 @@ public class AuditJsonConfig {
         AuditEventHandler<CFG> handler = buildAuditEventHandler(name, jsonConfig, classLoader);
         Set<String> events = getEvents(name, jsonConfig);
         auditService.register(handler, name, events);
-    }
-
-    /**
-     * Gets the configuration metadata for an audit event handler as json schema.
-     * @param auditEventHandler The audit event handler to get the config metadata for.
-     * @return The config metadata as json schema.
-     * @throws Exception If any error occurs parsing the config class for metadata.
-     */
-    public static JsonValue getAuditEventHandlerConfigurationMetaData(final AuditEventHandler auditEventHandler)
-            throws Exception {
-        try {
-            org.codehaus.jackson.map.ObjectMapper mapper = new org.codehaus.jackson.map.ObjectMapper();
-            JsonSchema schema = mapper.generateJsonSchema(auditEventHandler.getConfigurationClass());
-            return new JsonValue(mapper.readValue(schema.toString(), Map.class));
-        } catch (IOException e) {
-            logger.error("Unable to parse configuration class schema for class {}",
-                    auditEventHandler.getClass().getName(), e);
-            throw e;
-        }
     }
 
 }

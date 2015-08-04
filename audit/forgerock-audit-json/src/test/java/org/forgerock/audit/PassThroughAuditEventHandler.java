@@ -89,8 +89,8 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
             final ResultHandler<Resource> handler) {
         logger.info("Added an entry. Message: " + message);
         handler.handleResult(new Resource(request.getContent().get(Resource.FIELD_CONTENT_ID).asString(),
-                                          null,
-                                          new JsonValue(request.getContent())));
+                null,
+                new JsonValue(request.getContent())));
     }
 
     /**
@@ -119,7 +119,7 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
     }
 
     @Override
-    public Class getConfigurationClass() {
+    public Class<PassThroughAuditEventHandlerConfiguration> getConfigurationClass() {
         return PassThroughAuditEventHandlerConfiguration.class;
     }
 }
