@@ -179,14 +179,14 @@
             <dependency>
                 <groupId>org.forgerock.commons.ui.libs</groupId>
                 <artifactId>bootstrap</artifactId>
-                <version>3.3.4</version>
+                <version>3.3.5</version>
                 <classifier>custom</classifier>
                 <type>js</type>
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons.ui.libs</groupId>
                 <artifactId>bootstrap</artifactId>
-                <version>3.3.4</version>
+                <version>3.3.5</version>
                 <classifier>custom</classifier>
                 <type>css</type>
             </dependency>
