@@ -447,19 +447,9 @@ final class HttpAdapter implements Handler {
             final JsonValue content = getJsonContent(req);
 
             final String rev = getIfNoneMatch(req);
-            if (ETAG_ANY.equals(rev) || getIfMatch(req) == null) {
-                // Two methods of create are implied by PUT:
-                //
-                //  - "If-None-Match: *" is present, this is a create which will fail if the object already exists.
-                //  - "If-Match: <rev>" is _not_ present, this is either a create or an update (upsert).
-                //
-                // In the first case, attempt a create, fail if the object already exists.
-                // In the second case attempt a create, treat as an update if the create fails.  If the update
-                // fails, return an error (the record could have been deleted between the create-failure and
-                // the update, for example).
-                //
-                // This request specifies a user provided resource ID; split the path into the parent resource name
-                // and resource ID.
+            if (ETAG_ANY.equals(rev)) {
+                // This is a create with a user provided resource ID: split the
+                // path into the parent resource name and resource ID.
                 final ResourcePath resourcePath = getResourcePath(context, req);
                 if (resourcePath.isEmpty()) {
                     // FIXME: i18n.
