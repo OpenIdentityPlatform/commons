@@ -46,7 +46,8 @@
         <connection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-ui.git</connection>
         <developerConnection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-ui.git</developerConnection>
         <url>http://stash.forgerock.org/projects/COMMONS/repos/forgerock-ui/browse</url>
-    </scm>
+      <tag>2.1.0</tag>
+  </scm>
     <distributionManagement>
         <site>
             <id>community.internal.forgerock.com</id>
