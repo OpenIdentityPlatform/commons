@@ -34,6 +34,8 @@ define("org/forgerock/commons/ui/common/util/Constants", [
 
     obj.EVENT_PROFILE_INITIALIZATION = "user.profile.EVENT_PROFILE_INITIALIZATION";
 
+    obj.LESS_VERSION = 'libs/less-1.5.1-min.js';
+
     //service invoker
     obj.EVENT_END_REST_CALL = "common.delegate.EVENT_END_REST_CALL";
     obj.EVENT_START_REST_CALL = "common.delegate.EVENT_START_REST_CALL";
@@ -92,10 +94,9 @@ define("org/forgerock/commons/ui/common/util/Constants", [
     //serviceinvoker
     obj.EVENT_AUTHENTICATION_DATA_CHANGED = "common.delegate.EVENT_AUTHENTICATION_DATA_CHANGED";
 
-    obj.EVENT_APP_INITIALIZED = "main.EVENT_APP_INITIALIZED";
+    obj.EVENT_APP_INTIALIZED = "main.EVENT_APP_INTIALIZED";
     obj.EVENT_READ_CONFIGURATION_REQUEST = "main.EVENT_READ_CONFIGURATION_REQUEST";
-    obj.EVENT_DEPENDENCIES_LOADED = "main.EVENT_DEPENDENCIES_LOADED";
-    obj.EVENT_DEPENDECIES_LOADED = "main.EVENT_DEPENDENCIES_LOADED";// deprecated typo
+    obj.EVENT_DEPENDECIES_LOADED = "main.EVENT_DEPENDECIES_LOADED";
 
     obj.ROUTE_REQUEST = "view.ROUTE_REQUEST";
     obj.EVENT_CHANGE_BASE_VIEW = "view.EVENT_CHANGE_BASE_VIEW";

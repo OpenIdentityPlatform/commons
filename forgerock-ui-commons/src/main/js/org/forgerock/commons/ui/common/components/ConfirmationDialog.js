@@ -27,33 +27,34 @@
 define("org/forgerock/commons/ui/common/components/ConfirmationDialog", [
     "jquery",
     "org/forgerock/commons/ui/common/components/Dialog",
-    "org/forgerock/commons/ui/common/components/BootstrapDialogView"
-], function($, Dialog, BootstrapDialogView) {
-    var ConfirmationDialog = BootstrapDialogView.extend({
+    "bootstrap-dialog"
+], function($, Dialog, BootstrapDialog) {
+    var ConfirmationDialog = Dialog.extend({
         render: function(title, msg, actionName, okCallback) {
             this.setElement($('<div id="CommonConfirmationDialog"></div>'));
-            this.title = title;
-            this.message = msg;
-            this.actions =  [
-                {
-                    label: $.t("common.form.cancel"),
-                    action: function (dialogRef) {
-                        dialogRef.close();
-                    }
-                },
-                {
-                    label: actionName,
-                    cssClass: "btn-primary",
-                    action: function (dialogRef) {
-                        if (okCallback) {
-                            okCallback();
+            BootstrapDialog.show({
+                title: title,
+                type: BootstrapDialog.TYPE_DEFAULT,
+                message: msg,
+                buttons: [
+                    {
+                        label: $.t("common.form.cancel"),
+                        action: function (dialogRef) {
+                            dialogRef.close();
                         }
-                        dialogRef.close();
+                    },
+                    {
+                        label: actionName,
+                        cssClass: "btn-primary",
+                        action: function (dialogRef) {
+                            if (okCallback) {
+                                okCallback();
+                            }
+                            dialogRef.close();
+                        }
                     }
-                }
-            ];
-
-            this.show();
+                ]
+            });
         }
     });
 

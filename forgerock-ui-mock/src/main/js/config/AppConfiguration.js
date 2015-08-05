@@ -24,6 +24,11 @@
 
 /*global define*/
 
+/**
+ * @author yaromin
+ * @author Eugenia Sergueeva
+ */
+
 define("config/AppConfiguration", [
     "org/forgerock/commons/ui/common/util/Constants"
 ], function (Constants) {
@@ -35,6 +40,17 @@ define("config/AppConfiguration", [
                     loginHelperClass: "org/forgerock/mock/ui/user/login/InternalLoginHelper"
                 }
             },
+            {
+                moduleClass: "org/forgerock/commons/ui/common/main/GenericRouteInterfaceMap",
+                configuration: {
+                    LoginView: "org/forgerock/mock/ui/user/LoginView",
+                    UserProfileView: "org/forgerock/commons/ui/user/profile/UserProfileView",
+                    LoginDialog: "org/forgerock/commons/ui/common/LoginDialog",
+                    RegisterView: "org/forgerock/mock/ui/user/UserRegistrationView",
+                    ChangeSecurityDataDialog: "org/forgerock/mock/ui/user/profile/ChangeSecurityDataDialog"
+                }
+            },
+
             {
                 moduleClass: "org/forgerock/commons/ui/common/SiteConfigurator",
                 configuration: {
@@ -120,6 +136,7 @@ define("config/AppConfiguration", [
                 moduleClass: "org/forgerock/commons/ui/common/util/UIUtils",
                 configuration: {
                     templateUrls: [
+                        "templates/user/ConfirmPasswordDialogTemplate.html"
                     ]
                 }
             },

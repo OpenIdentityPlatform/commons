@@ -97,7 +97,6 @@
                         </goals>
                         <configuration>
                             <includeGroupIds>org.forgerock.commons.ui.libs</includeGroupIds>
-                            <excludeArtifactIds>less,qunit,r</excludeArtifactIds>
                             <includeTypes>js</includeTypes>
                             <outputDirectory>${project.build.directory}/www/libs</outputDirectory>
                             <overWriteReleases>false</overWriteReleases>
@@ -113,53 +112,8 @@
                         </goals>
                         <configuration>
                             <includeGroupIds>org.forgerock.commons.ui.libs</includeGroupIds>
-                            <excludeArtifactIds>qunit</excludeArtifactIds>
                             <includeTypes>css</includeTypes>
                             <outputDirectory>${project.build.directory}/www/css</outputDirectory>
-                            <overWriteReleases>false</overWriteReleases>
-                            <overWriteSnapshots>false</overWriteSnapshots>
-                            <overWriteIfNewer>true</overWriteIfNewer>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy-dependencies-less</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <includeArtifactIds>less</includeArtifactIds>
-                            <includeTypes>js</includeTypes>
-                            <outputDirectory>${project.build.directory}/less</outputDirectory>
-                            <overWriteReleases>false</overWriteReleases>
-                            <overWriteSnapshots>false</overWriteSnapshots>
-                            <overWriteIfNewer>true</overWriteIfNewer>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy-dependencies-r</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <includeArtifactIds>r</includeArtifactIds>
-                            <includeTypes>js</includeTypes>
-                            <outputDirectory>${project.build.directory}/optimization</outputDirectory>
-                            <overWriteReleases>false</overWriteReleases>
-                            <overWriteSnapshots>false</overWriteSnapshots>
-                            <overWriteIfNewer>true</overWriteIfNewer>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy-dependencies-qunit</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <includeArtifactIds>qunit</includeArtifactIds>
-                            <outputDirectory>${basedir}/target/test/libs</outputDirectory>
                             <overWriteReleases>false</overWriteReleases>
                             <overWriteSnapshots>false</overWriteSnapshots>
                             <overWriteIfNewer>true</overWriteIfNewer>
@@ -174,6 +128,7 @@
                     <excludes>
                         <exclude>**/libs/*.js</exclude>
                         <exclude>**/*Test.js</exclude>
+                        <exclude>text.js</exclude>
                     </excludes>
                 </configuration>
                 <executions>
@@ -185,34 +140,6 @@
                     </execution>
                 </executions>
             </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>compile-less-to-css</id>
-                        <phase>package</phase>
-
-                        <configuration>
-                            <target name="compileLess">
-
-                                <java classname="org.mozilla.javascript.tools.shell.Main" fork="true">
-                                    <classpath refid="maven.compile.classpath" />
-                                    <arg value="${project.build.directory}/less/less-1.5.1-rhino.js" />
-                                    <arg value="${project.build.directory}/www/css/styles.less" />
-                                    <arg value="${project.build.directory}/www/css/styles.css" />
-                                </java>
-
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
         </plugins>
     </build>
 
@@ -230,28 +157,20 @@
                                 <phase>package</phase>
 
                                 <configuration>
-                                    <target name="optimizeJS">
-
-                                        <property name="requirejs.dir" value="${project.build.directory}/optimization" />
-
+                                    <target name="optimize">
+                                        
+                                        <property name="requirejs.dir" value="${basedir}/src/main/optimization" />
+        
                                         <java classname="org.mozilla.javascript.tools.shell.Main">
                                             <classpath refid="maven.compile.classpath" />
-                                            <arg value="${requirejs.dir}/r-2.1.10.js" />
+                                            <arg value="${requirejs.dir}/r.js" />
                                             <arg value="-o" />
-                                            <arg value="${basedir}/src/main/optimization/mock.build.js" />
+                                            <arg value="${requirejs.dir}/mock.build.js" />
                                         </java>
+                                        
+                                        <delete dir="${project.build.directory}/www" />
 
-                                        <java classname="org.mozilla.javascript.tools.shell.Main">
-                                            <classpath refid="maven.compile.classpath" />
-                                            <arg value="${requirejs.dir}/r-2.1.10.js" />
-                                            <arg value="-o" />
-                                            <arg value="cssIn=${project.build.directory}/www/css/styles.css" />
-                                            <arg value="out=${project.build.directory}/www/css/styles_min.css" />
-                                            <arg value="optimizeCss=standard" />
-                                            <arg value="cssImportIgnore=bootstrap-3.3.5-custom.css" />
-                                        </java>
-
-                                        <move file="${project.build.directory}/www/css/styles_min.css" tofile="${project.build.directory}/www/css/styles.css" />
+                                        <move file="${project.build.directory}/www_minified" tofile="${project.build.directory}/www" />
 
                                     </target>
                                 </configuration>
@@ -301,24 +220,6 @@
         <dependency>
             <groupId>org.forgerock.commons.ui.libs</groupId>
             <artifactId>qunit</artifactId>
-            <type>js</type>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
-            <artifactId>qunit</artifactId>
-            <type>css</type>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
-            <artifactId>less</artifactId>
-            <version>1.5.1</version>
-            <classifier>rhino</classifier>
-            <type>js</type>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
-            <artifactId>r</artifactId>
-            <version>2.1.10</version>
             <type>js</type>
         </dependency>
         <dependency>

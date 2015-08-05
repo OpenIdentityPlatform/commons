@@ -14,19 +14,19 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-/*global define */
+/*global define, $, _ */
 
 define("org/forgerock/commons/ui/common/components/BootstrapDialogView", [
-    "jquery",
-    "underscore",
     "org/forgerock/commons/ui/common/main/AbstractView",
-    "org/forgerock/commons/ui/common/util/ModuleLoader",
+    "bootstrap-dialog",
     "org/forgerock/commons/ui/common/util/UIUtils"
-], function($, _, AbstractView, ModuleLoader, UIUtils) {
+], function(AbstractView, BootstrapDialog, UIUtils) {
     var BootstrapDialogView = AbstractView.extend({
         contentTemplate: "templates/common/DefaultBaseTemplate.html",
         data: { },
         noButtons: false,
+        type: BootstrapDialog.TYPE_DEFAULT,
+        size: BootstrapDialog.SIZE_NORMAL,
         closable : true,
         actions: [{
             label: function (){return $.t('common.form.close');},
@@ -37,30 +37,23 @@ define("org/forgerock/commons/ui/common/components/BootstrapDialogView", [
         show: function(callback) {
             var self = this;
             self.setButtons();
-            $.when(ModuleLoader.load("bootstrap-dialog"), self.loadContent()).then(_.bind(
-                function (BootstrapDialog, content) {
-                    self.type = self.type || BootstrapDialog.TYPE_DEFAULT;
-                    self.size = self.size || BootstrapDialog.SIZE_NORMAL;
-
-                    self.message = $("<div></div>").append(content);
-                    BootstrapDialog.show(self);
-                    if (callback) {
-                        callback();
-                    }
-                },
-            this));
+            self.loadContent(function(content){
+                self.message = $("<div></div>").append(content);
+                BootstrapDialog.show(self);
+                if (callback) {
+                    callback();
+                }
+            });
         },
 
-        loadContent: function() {
-            var promise = $.Deferred();
+        loadContent: function(callback){
             if (this.message === undefined) {
                 UIUtils.fillTemplateWithData(this.contentTemplate, this.data, function(template) {
-                    promise.resolve(template);
+                    callback(template);
                 });
             } else {
-                promise.resolve(this.message);
+                callback(this.message);
             }
-            return promise;
         },
 
         setTitle: function(title) {

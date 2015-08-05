@@ -25,7 +25,7 @@
 /*global define, require, window, _*/
 
 define("config/process/MockConfig", [
-    "org/forgerock/mock/ui/common/util/Constants"
+    "org/forgerock/commons/ui/common/util/Constants"
 ], function(Constants) {
     var obj = [
         {

@@ -22,18 +22,17 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define */
+/*global require, define */
 
 /**
  * @author mbilski
  */
 define("org/forgerock/commons/ui/common/main/ViewManager", [
-    "jquery",
     "underscore",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/components/Messages",
-    "org/forgerock/commons/ui/common/util/ModuleLoader"
-], function($, _, uiUtils, msg, ModuleLoader) {
+    "bootstrap-dialog"
+], function(_, uiUtils, msg, BootstrapDialog) {
     var obj = {},
         decodeArgs = function (args) {
             return _.map(args, function (a) {
@@ -57,35 +56,32 @@ define("org/forgerock/commons/ui/common/main/ViewManager", [
 
         if(obj.currentView !== viewPath || forceUpdate || !_.isEqual(obj.currentViewArgs, decodedArgs)) {
             if(obj.currentDialog !== null) {
-                ModuleLoader.load(obj.currentDialog).then(function (dialog) {
-                    dialog.close();
-                });
+                require(obj.currentDialog).close();
             }
-
+            
             //close all existing dialogs
-            if (typeof $.prototype.modal === "function") {
-                $('.modal.in').modal('hide');
-            }
+            BootstrapDialog.closeAll();
 
             obj.currentDialog = null;
 
             msg.messages.hideMessages();
-            ModuleLoader.load(viewPath).then(function (view) {
-                if(view.init) {
-                    view.init();
-                } else {
-                    view.render(decodedArgs, callback);
-                }
-            });
+
+            view = require(viewPath);
+
+            if(view.init) {
+                view.init();
+            } else {
+                view.render(decodedArgs, callback);
+            }
+
 
         } else {
-            ModuleLoader.load(obj.currentView).then(function (view) {
-                view.rebind();
+            view = require(obj.currentView);
+            view.rebind();
 
-                if(callback) {
-                    callback();
-                }
-            });
+            if(callback) {
+                callback();
+            }
         }
 
         obj.currentViewArgs = decodedArgs;
@@ -96,16 +92,12 @@ define("org/forgerock/commons/ui/common/main/ViewManager", [
         var decodedArgs = decodeArgs(args);
 
         if(obj.currentDialog !== dialogPath || !_.isEqual(obj.currentDialogArgs, decodedArgs)) {
+            require(dialogPath).render(decodedArgs, callback);
             msg.messages.hideMessages();
-            ModuleLoader.load(dialogPath).then(function (dialog) {
-                dialog.render(decodedArgs, callback);
-            });
         }
 
         if(obj.currentDialog !== null) {
-            ModuleLoader.load(obj.currentDialog).then(function (dialog) {
-                dialog.close();
-            });
+            require(obj.currentDialog).close();
         }
 
         obj.currentDialog = dialogPath;

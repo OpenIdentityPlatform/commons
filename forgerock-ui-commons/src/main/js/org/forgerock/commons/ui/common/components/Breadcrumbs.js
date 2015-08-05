@@ -40,7 +40,7 @@ define("org/forgerock/commons/ui/common/components/Breadcrumbs", [
 
         size: 0,
         element: "#nav-content",
-
+        
         /**
          * Registers listeners and creates links using URL
          */
@@ -49,65 +49,71 @@ define("org/forgerock/commons/ui/common/components/Breadcrumbs", [
             this.baseTitle = document.title;
             this.buildByUrl();
         },
-
+        
         /**
          * Creates links using URL
          */
         buildByUrl: function() {
             var path, parts, url, i, humanized;
-
+            
             path = window.location.href.match(/#([a-zA-Z\/_.@]+)/);
-
+            
             if(path === null) {
                 document.title = this.baseTitle;
             } else {
                 path = path[1];
-
+            
                 parts = _.compact(path.split('/'));
                 humanized = this.getHumanizedUrls(parts);
-
-                url = "#";
-
-                this.clear();
+                
+                url = "#";     
+                
+                this.clear();            
                 for(i = 0; i < parts.length - 1; i++) {
                     url += parts[i] + "/";
                     this.push(humanized[i], url);
                 }
                 this.set(humanized[humanized.length-1]);
-
+                
                 document.title = this.baseTitle + " - " + humanized.join(" - ");
 
             }
         },
-
+        
         /**
          * Replaces '_' to ' ' and capitalize first letter in array of strings
          */
         getHumanizedUrls: function(urls) {
-            return _.map(urls, function (url) {
-                return url.split("_").join(" ").replace(new RegExp("^(.)(.*)"), function (all, first, rest) {
-                    return first.toUpperCase() + rest;
-                });
-            });
+            var humanized = [], i, emailPattern = /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,4}$/;
+            
+            for(i = 0; i < urls.length; i++) {
+                humanized[i] = urls[i].split("_").join(" ");
+                
+                if(!emailPattern.test(humanized[i])) { 
+                    humanized[i] = humanized[i].capitalize();
+                }
+            }
+            
+            return humanized;
         },
-
+        
         clear: function() {
             while(this.size > 0) {
                 this.pop();
             }
         },
-
+        
         /**
          * Sets the name of last breadcrumb item
          */
         set: function(name) {
             $(this.element).find("span:last").html(name);
         },
-
+        
         /**
          * Appends link to the breadcrumbs list and an arrow after it.
          */
-        push: function(name, url) {
+        push: function(name, url) {        
             $(this.element).find("a:last").after(' <a href="'+url+'" class="active">' + name + '</a>');
             $(this.element).find("a:last").before('<img src="images/navi-next.png" width="3" height="5" alt="" align="absmiddle" class="navi-next" /><span></span>');
 
@@ -120,7 +126,7 @@ define("org/forgerock/commons/ui/common/components/Breadcrumbs", [
                 $(this.element).find("img:last").remove();
                 $(this.element).find("span:last").remove();
             }
-
+            
             this.size--;
         }
     });

@@ -22,9 +22,13 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define */
+/*global define, less */
 
-define("org/forgerock/mock/ui/common/util/ThemeManager", [
+/**
+ * @author Eugenia Sergueeva
+ */
+
+define("ThemeManager", [
     "jquery",
     "underscore",
     "org/forgerock/commons/ui/common/util/Constants",
@@ -34,7 +38,14 @@ define("org/forgerock/mock/ui/common/util/ThemeManager", [
         themePromise;
 
     obj.loadThemeCSS = function (theme) {
+        $('head').find('link[href*=less]').remove();
         $('head').find('link[href*=favicon]').remove();
+
+        $("<link/>", {
+            rel: "stylesheet/less",
+            type: "text/css",
+            href: theme.path + "css/styles.less"
+        }).appendTo("head");
 
         $("<link/>", {
             rel: "icon",
@@ -48,11 +59,11 @@ define("org/forgerock/mock/ui/common/util/ThemeManager", [
             href: theme.path + theme.icon
         }).appendTo("head");
 
-        $("<link/>", {
-            rel: "stylesheet",
-            type: "text/css",
-            href: theme.stylesheet
-        }).appendTo("head");
+        return $.ajax({
+            url: constants.LESS_VERSION,
+            dataType: "script",
+            cache: true
+        });
     };
 
 
@@ -67,7 +78,6 @@ define("org/forgerock/mock/ui/common/util/ThemeManager", [
             return $.Deferred().resolve({
                 "path": "",
                 "icon": "favicon.ico",
-                "stylesheet": "css/styles.css",
                 "settings": {
                     "logo": {
                         "src": "images/logo-horizontal.png",
@@ -81,6 +91,20 @@ define("org/forgerock/mock/ui/common/util/ThemeManager", [
                         "height": "104px",
                         "width": "210px"
                     },
+                    "lessVars": {
+                        "background-image": "url('../images/box-bg.png')",
+                        "background-position": "950px -100px",
+                        "column-padding": "0px",
+                        "login-container-label-align": "left",
+                        "highlight-color": "#eeea07",
+                        "content-background": "#f9f9f9",
+                        "href-color-hover": "#5e887f",
+                        "color-error": "#d97986",
+                        "color-warning": "yellow",
+                        "color-success": "#71bd71",
+                        "color-info": "blue",
+                        "color-inactive": "gray"
+                    },
                     "footer": {
                         "mailto": "info@forgerock.com",
                         "phone": "+47-2108-1746"
@@ -93,9 +117,17 @@ define("org/forgerock/mock/ui/common/util/ThemeManager", [
     obj.getTheme = function () {
         if (themePromise === undefined) {
             themePromise = obj.loadThemeConfig().then(function (themeConfig) {
+                var newLessVars = {};
+
                 conf.globalData.theme = themeConfig;
-                obj.loadThemeCSS(themeConfig);
-                return themeConfig;
+                return obj.loadThemeCSS(themeConfig).then(function () {
+                    _.each(themeConfig.settings.lessVars, function (value, key) {
+                        newLessVars['@' + key] = value;
+                    });
+                    less.modifyVars(newLessVars);
+
+                    return themeConfig;
+                });
             });
         }
         return themePromise;

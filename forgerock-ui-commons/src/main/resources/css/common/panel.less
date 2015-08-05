@@ -112,3 +112,14 @@
 .panel-description {
     margin-bottom: 20px;
 }
+
+.panel-default > .panel-heading,
+.panel-primary > .panel-heading,
+.panel-success > .panel-heading,
+.panel-info > .panel-heading,
+.panel-warning > .panel-heading,
+.panel-danger > .panel-heading {
+    // required to override bootstrap-theme which adds background gradients
+    background-image: none;
+    filter: none;
+}

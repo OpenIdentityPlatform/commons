@@ -257,6 +257,42 @@ define([
                 });
             });
 
+            QUnit.asyncTest("Unauthorized non-GET Request", function () {
+                var loginDialog = require("LoginDialog"),
+                    loginDialogSpy = sinon.spy(loginDialog, 'render');
+
+                QUnit.ok(!loginDialogSpy.called, "Login Dialog render function has not yet been called");
+                conf.loggedUser = getLoggedUser();
+                delete conf.globalData.authorizationFailurePending;
+                eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {
+                    route: router.configuration.routes.profile,
+                    callback: function () {
+                        eventManager.sendEvent(constants.EVENT_UNAUTHORIZED, {error: {type:"POST"} });
+                        QUnit.ok(conf.loggedUser !== null, "User info should be retained after UNAUTHORIZED POST error");
+                        QUnit.ok(loginDialogSpy.called, "Login Dialog render function was called");
+                        QUnit.start();
+                    }
+                });
+            });
+
+            QUnit.asyncTest("Unauthorized GET Request", function () {
+                conf.loggedUser = getLoggedUser();
+                delete conf.globalData.authorizationFailurePending;
+                delete conf.gotoURL;
+
+                var changeDataView = require("ChangeSecurityDataDialog"),
+                    stub = sinon.stub(changeDataView, "render", function (args,callback) {
+                        changeDataView.render.restore();
+                        changeDataView.render([],function (modal) {
+                            eventManager.sendEvent(constants.EVENT_UNAUTHORIZED, {error: {type:"GET"} });
+                            QUnit.ok(conf.loggedUser === null, "User info should be discarded after UNAUTHORIZED GET error");
+                            QUnit.ok(conf.gotoURL === "#profile/change_security_data/", "gotoURL should be set to change security data after UNAUTHORIZED GET error");
+                            QUnit.start();
+                        });
+                    });
+
+                router.navigate("profile/change_security_data/", {trigger: true});
+            });
 /*
             QUnit.asyncTest("Opening a dialog with a parameterized base view (CUI-58)", function () {
                 var selfReg = require("RegisterView"),
@@ -270,6 +306,18 @@ define([
                 router.navigate("registerTerms/foo&bar=blah", {trigger: true});
             });
 */
+            QUnit.asyncTest("Loading a module asynchronously (CUI-62)", function () {
+                var moduleLoader = require("org/forgerock/commons/ui/common/util/ModuleLoader");
+
+                moduleLoader.load("backgrid").then(function (Backgrid) {
+                    QUnit.equal(typeof Backgrid, "object", "Backgrid loaded by module loader");
+                    moduleLoader.load("backgrid-paginator").then(function () {
+                        QUnit.equal(typeof Backgrid.Extension.Paginator, "function", "Backgrid Paginator loaded by module loader");
+                        QUnit.start();
+                    });
+                });
+
+            });
         }
     };
 });

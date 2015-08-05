@@ -25,24 +25,21 @@
 /*global define, window */
 
 define("org/forgerock/mock/ui/user/login/InternalLoginHelper", [
-    "jquery",
     "UserDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "org/forgerock/commons/ui/common/main/ServiceInvoker",
     "org/forgerock/commons/ui/common/main/Configuration"
-], function ($, userDelegate, eventManager, constants, AbstractConfigurationAware, serviceInvoker, conf) {
+], function (userDelegate, eventManager, constants, AbstractConfigurationAware, serviceInvoker, conf) {
     var obj = new AbstractConfigurationAware();
 
     obj.login = function (params, successCallback, errorCallback) {
 
-        return userDelegate.login(params.userName, params.password,
+        userDelegate.login(params.userName, params.password,
             function (user) {
                 conf.globalData.userComponent = user.component;
-                if (successCallback) {
-                    successCallback(user);
-                }
+                successCallback(user);
             },
             function () {
                 if (errorCallback) {
@@ -63,19 +60,14 @@ define("org/forgerock/mock/ui/user/login/InternalLoginHelper", [
 
     obj.logout = function (successCallback, errorCallback) {
         delete conf.loggedUser;
-        if (successCallback) {
-            successCallback();
-        }
-        return $.Deferred().resolve();
+        successCallback();
     };
 
     obj.getLoggedUser = function (successCallback, errorCallback) {
-        return userDelegate.getProfile(
+        userDelegate.getProfile(
             function (user) {
                 conf.globalData.userComponent = user.component;
-                if (successCallback) {
-                    successCallback(user);
-                }
+                successCallback(user);
             },
             function () {
                 if (errorCallback) {

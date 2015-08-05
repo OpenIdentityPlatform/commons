@@ -1,4 +1,4 @@
-/**
+/** 
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2012 ForgeRock AS. All Rights Reserved
@@ -22,20 +22,16 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 ({
-    baseUrl         : "../../../target/www",
-    mainConfigFile  : '../js/main.js',
-    out             : "../../../target/www/main.js",
-    include: ["main"],
+    appDir : "../../../target/www",
+    baseUrl : ".",
+    dir: "../../../target/www_minified",
+    mainConfigFile : '../js/main.js',
     preserveLicenseComments: false,
     generateSourceMaps: true,
     optimize: "uglify2",
-    excludeShallow: [
-        // these are only useful for the mock project as a way of faking a backend
-        // excluding them in the minification bundle presents a more meaningful representation
-        "sinon",
-        "mock/Data",
-
-        // This file is excluded from optimization so that the UI can be customized without having to repackage it.
-        "config/AppConfiguration"
+    modules: [
+        {
+            name: "main"
+        }
     ]
 })

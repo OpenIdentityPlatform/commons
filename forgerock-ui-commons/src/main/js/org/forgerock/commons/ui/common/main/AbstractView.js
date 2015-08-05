@@ -23,21 +23,19 @@
  */
 
 /*global define*/
-
 define("org/forgerock/commons/ui/common/main/AbstractView", [
     "jquery",
     "underscore",
     "backbone",
-    "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/commons/ui/common/util/ModuleLoader",
-    "org/forgerock/commons/ui/common/main/Router",
-    "ThemeManager",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
-    "org/forgerock/commons/ui/common/util/ValidatorsUtils"
-], function($, _, Backbone, Configuration, Constants, EventManager, ModuleLoader, Router, ThemeManager, UIUtils, ValidatorsManager, ValidatorsUtils) {
+    "org/forgerock/commons/ui/common/util/ValidatorsUtils",
+    "org/forgerock/commons/ui/common/main/Configuration",
+    "org/forgerock/commons/ui/common/main/EventManager",
+    "org/forgerock/commons/ui/common/main/Router",
+    "org/forgerock/commons/ui/common/util/Constants",
+    "ThemeManager"
+], function($, _, Backbone, UIUtils, ValidatorsManager, ValidatorsUtils, Configuration, EventManager, Router, Constants, ThemeManager) {
     /**
      * @exports org/forgerock/commons/ui/common/main/AbstractView
      */
@@ -86,6 +84,17 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
                     _this.loadTemplate();
                 }
             });
+
+            //Added in due to the migration of the username to the main nav bar
+            if(Configuration.loggedUser) {
+                this.$el.find("#profile_link").show();
+
+                if (Configuration.loggedUser.userName) {
+                    this.$el.find("#user_name").text(Configuration.loggedUser.userName); //idm
+                } else if (Configuration.loggedUser.cn) {
+                    this.$el.find("#user_name").text(Configuration.loggedUser.cn); //am
+                }
+            }
         },
 
         loadTemplate: function() {
@@ -139,77 +148,73 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
             var button = this.$el.find("input[type=submit]"),
                 validationMessage = (msg && !_.isArray(msg)) ? msg.split("<br>") : [];
 
-            // necessary to load bootstrap for popover support (which isn't always necessary for AbstractView)
-            ModuleLoader.load("bootstrap").then(_.bind(function () {
+            //clean up existing popover if no message is present
+            if (!msg && $(input, this.$el).data()["bs.popover"]) {
+                $(input, this.$el).popover('destroy');
+            }
+            $(input, this.$el).removeClass('field-error');
 
-                //clean up existing popover if no message is present
-                if (!msg && $(input, this.$el).data()["bs.popover"]) {
-                    $(input, this.$el).popover('destroy');
-                }
-                $(input, this.$el).removeClass('field-error');
+            if(msg && _.isArray(msg)){
+                validationMessage = msg;
+            }
 
-                if(msg && _.isArray(msg)){
-                    validationMessage = msg;
-                }
+            if(msg === "inProgress") {
+                //TODO spinner
+                //console.log("in progress..");
+                return;
+            }
+            if (!button.length) {
+                button = this.$el.find("#submit");
+            }
+            if (ValidatorsManager.formValidated(this.$el)) {
+                button.prop('disabled', false);
+                this.$el.find(".input-validation-message").hide();
+            } else {
+                button.prop('disabled', true);
+                this.$el.find(".input-validation-message").show();
+            }
 
-                if(msg === "inProgress") {
-                    return;
-                }
-                if (!button.length) {
-                    button = this.$el.find("#submit");
-                }
-                if (ValidatorsManager.formValidated(this.$el)) {
-                    button.prop('disabled', false);
-                    this.$el.find(".input-validation-message").hide();
-                } else {
-                    button.prop('disabled', true);
-                    this.$el.find(".input-validation-message").show();
-                }
-
-                if (msg === "disabled") {
-                    ValidatorsUtils.hideValidation(input, this.$el);
-                    return;
-                } else {
-                    ValidatorsUtils.showValidation(input, this.$el);
-                    if(validationMessage.length){
-                        $(input, this.$el).addClass('field-error');
-                        //clean up existing popover if validation messsage is different
-                        if ($(input, this.$el).data()["bs.popover"] && !_.isEqual(validationMessage,$(input, this.$el).data()["bs.popover"].options.validationMessage)) {
-                            $(input, this.$el).popover('destroy');
-                        }
-                        $(input, this.$el).popover({
-                            validationMessage: validationMessage,
-                            content: '<i class="fa fa-exclamation-circle"></i> ' + validationMessage.join('<br><i class="fa fa-exclamation-circle"></i> '),
-                            trigger:'hover',
-                            placement:'top',
-                            html: 'true',
-                            template: '<div class="popover popover-error" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>'
-                        });
+            if (msg === "disabled") {
+                ValidatorsUtils.hideValidation(input, this.$el);
+                return;
+            } else {
+                ValidatorsUtils.showValidation(input, this.$el);
+                if(validationMessage.length){
+                    $(input, this.$el).addClass('field-error');
+                    //clean up existing popover if validation messsage is different
+                    if ($(input, this.$el).data()["bs.popover"] && !_.isEqual(validationMessage,$(input, this.$el).data()["bs.popover"].options.validationMessage)) {
+                        $(input, this.$el).popover('destroy');
                     }
+                    $(input, this.$el).popover({
+                        validationMessage: validationMessage,
+                        content: '<i class="fa fa-exclamation-circle"></i> ' + validationMessage.join('<br><i class="fa fa-exclamation-circle"></i> '),
+                        trigger:'hover',
+                        placement:'top',
+                        html: 'true',
+                        template: '<div class="popover popover-error" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>'
+                    });
                 }
+            }
 
-                if (input.nextAll("span")) {
-                    ValidatorsUtils.setTick(input, msg);
-                }
+            if (input.nextAll("span")) {
+                ValidatorsUtils.setTick(input, msg);
+            }
 
-                if (msg) {
-                    input.parents('.separate-message').addClass('invalid');
-                    input.addClass('invalid');
-                } else {
-                    input.parents('.separate-message').removeClass('invalid');
-                    input.removeClass('invalid');
-                }
+            if (msg) {
+                input.parents('.separate-message').addClass('invalid');
+                input.addClass('invalid');
+            } else {
+                input.parents('.separate-message').removeClass('invalid');
+                input.removeClass('invalid');
+            }
 
-                this.$el.find("div.validation-message[for='" + input.attr('name') + "']").html(msg ? msg : '');
+            this.$el.find("div.validation-message[for='" + input.attr('name') + "']").html(msg ? msg : '');
 
-                if (validatorType) {
-                    ValidatorsUtils.setErrors(this.$el, validatorType, msg);
-                }
+            if (validatorType) {
+                ValidatorsUtils.setErrors(this.$el, validatorType, msg);
+            }
 
-                this.$el.trigger("customValidate", [input, msg, validatorType]);
-
-            }, this));
-
+            this.$el.trigger("customValidate", [input, msg, validatorType]);
         },
 
         lock: function() {

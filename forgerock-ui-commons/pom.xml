@@ -131,6 +131,12 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons.ui.libs</groupId>
+            <artifactId>less</artifactId>
+            <type>js</type>
+            <classifier>min</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons.ui.libs</groupId>
             <artifactId>handlebars</artifactId>
             <type>js</type>
             <classifier>min</classifier>

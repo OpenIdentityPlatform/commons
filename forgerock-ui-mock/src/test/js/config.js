@@ -28,9 +28,8 @@ require.config({
     baseUrl: '../www',
     paths: {
         jquery: "libs/jquery-2.1.1-min",
-        doTimeout: "libs/jquery.ba-dotimeout-1.0-min",
         underscore: "libs/lodash-2.4.1-min",
-        sinon: "libs/sinon-1.15.4"
+        sinon: "libs/sinon-1.12.2"
     },
     shim: {
         underscore: {
@@ -38,23 +37,23 @@ require.config({
         },
         sinon: {
             exports: "sinon"
-        },
-        doTimeout: {
-            deps: ["jquery"],
-            exports: "doTimeout"
         }
     }
 });
 
 require([
-    "jquery",
-    "org/forgerock/mock/ui/common/main/MockServer"
-], function ($, MockServer) {
+    "underscore",
+    "sinon",
+    "mock/Data"
+], function (_, sinon, mockData) {
 
-    $("head", document).append("<base href='../www/' />");
+    var server = sinon.fakeServer.create();
+    server.autoRespond = true;
+    mockData(server);
 
-    require(['main','../test/run'], function (appMain, run) {
-        run(MockServer.instance);
+    require(['../www/main','../test/run'], function (appMain, run) {
+        run(server);
     });
 
+    return server;
 });

@@ -24,7 +24,12 @@
 
 /*global define */
 
-define("org/forgerock/mock/ui/user/delegates/UserDelegate", [
+/**
+ * @author yaromin
+ * @author Eugenia Sergueeva
+ */
+
+define("UserDelegate", [
     "jquery",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
@@ -40,7 +45,7 @@ define("org/forgerock/mock/ui/user/delegates/UserDelegate", [
     obj.numberOfUsers = 0;
 
     obj.getUserResourceName = function (user) {
-        var userId = user ? user._id : "*";
+        var userId = user._id || "*";
         return this.serviceUrl + "/" + userId;
     };
 
@@ -53,20 +58,18 @@ define("org/forgerock/mock/ui/user/delegates/UserDelegate", [
         headers[constants.HEADER_PARAM_PASSWORD] = password;
         headers[constants.HEADER_PARAM_NO_SESSION] = false;
 
-        return obj.getProfile(successCallback, errorCallback, errorsHandlers, headers)
-                .done(function () {
-                    delete headers[constants.HEADER_PARAM_PASSWORD];
-                });
+        obj.getProfile(successCallback, errorCallback, errorsHandlers, headers);
+
+        delete headers[constants.HEADER_PARAM_PASSWORD];
     };
 
     obj.getUserById = function (id, component, successCallback, errorCallback, errorsHandlers) {
-        return this.serviceCall({
+        this.serviceCall({
             url: "/" + id,
             type: "GET",
             success: successCallback,
             error: errorCallback,
-            errorsHandlers: errorsHandlers
-        });
+            errorsHandlers: errorsHandlers});
     };
 
     obj.checkCredentials = function (password, successCallback, errorCallback) {
@@ -80,21 +83,16 @@ define("org/forgerock/mock/ui/user/delegates/UserDelegate", [
         if (headers) {
             var storedUser = localStorage.get(this.serviceUrl + "/" + headers[constants.HEADER_PARAM_USERNAME]);
             if (storedUser && storedUser.password === headers[constants.HEADER_PARAM_PASSWORD]) {
-                if (successCallback) {
-                    successCallback(storedUser);
-                }
-                return $.Deferred().resolve(storedUser);
+                successCallback(storedUser);
             } else {
                 if (errorCallback) {
                     errorCallback();
                 }
-                return $.Deferred().reject();
             }
         } else {
             if (errorCallback) {
                 errorCallback();
             }
-            return $.Deferred().reject();
         }
     };
 
@@ -129,16 +127,12 @@ define("org/forgerock/mock/ui/user/delegates/UserDelegate", [
 
         var updatedData = obj.getDifferences(oldUserData, newUserData);
         if (localStorage.patch(obj.getUserResourceName(oldUserData), updatedData)) {
-            if (successCallback) {
-                successCallback(updatedData);
-            }
-            return $.Deferred().resolve(updatedData);
+            successCallback(updatedData);
         }
-        return $.Deferred().reject();
     };
 
     obj.updateUser = function (oldUserData, newUserData, successCallback, errorCallback, noChangesCallback) {
-        return obj.patchUserDifferences(oldUserData, newUserData, successCallback, errorCallback, noChangesCallback, {
+        obj.patchUserDifferences(oldUserData, newUserData, successCallback, errorCallback, noChangesCallback, {
             "forbidden": {
                 status: "403",
                 event: constants.EVENT_USER_UPDATE_POLICY_FAILURE
@@ -149,10 +143,7 @@ define("org/forgerock/mock/ui/user/delegates/UserDelegate", [
     obj.patchSelectedUserAttributes = function (id, rev, patchDefinitionObject, successCallback, errorCallback, noChangesCallback) {
         console.log('changing password');
         if (localStorage.patch(id, patchDefinitionObject)) {
-            if (successCallback) {
-                successCallback();
-            }
-            return $.Deferred().resolve();
+            successCallback();
         }
     };
 

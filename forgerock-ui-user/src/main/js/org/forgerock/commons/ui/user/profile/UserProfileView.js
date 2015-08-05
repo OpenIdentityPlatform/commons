@@ -22,14 +22,12 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global window, define, $, _, document, console */
+/*global window, define, $, form2js, _, js2form, document, console */
 
 /**
  * @author mbilski
  */
 define("org/forgerock/commons/ui/user/profile/UserProfileView", [
-    "form2js",
-    "js2form",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/util/UIUtils",
@@ -39,7 +37,7 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration"
-], function(form2js, js2form, AbstractView, validatorsManager, uiUtils, userDelegate, router, navigation, eventManager, constants, conf) {
+], function(AbstractView, validatorsManager, uiUtils, userDelegate, router, navigation, eventManager, constants, conf) {
     var UserProfileView = AbstractView.extend({
         template: "templates/user/UserProfileTemplate.html",
         baseTemplate: "templates/common/DefaultBaseTemplate.html",
@@ -101,14 +99,17 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
                     eventManager.sendEvent(constants.EVENT_SHOW_CONFIRM_PASSWORD_DIALOG, "ConfirmPasswordDialog");
                 }
 
+            } else {
+                console.log('Invalid form');
             }
         },
 
         render: function(args, callback) {
+
             this.parentRender(function() {
                 validatorsManager.bindValidators( this.$el, this.delegate.getUserResourceName(conf.loggedUser), _.bind(function () {
                     this.reloadData();
-                    if (callback) {
+                    if(callback) {
                         callback();
                     }
                 }, this ));
