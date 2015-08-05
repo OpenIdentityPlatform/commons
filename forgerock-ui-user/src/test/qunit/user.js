@@ -168,6 +168,7 @@ define([
             QUnit.asyncTest("Unauthorized Request Behavior", function () {
                 conf.loggedUser = loggedUser;
                 delete conf.globalData.authorizationFailurePending;
+                delete conf.gotoURL;
 
                 ModuleLoader.load("LoginDialog").then(function (loginDialog) {
 
@@ -178,7 +179,6 @@ define([
                         }
                     });
 
-                    QUnit.ok(!loginDialog.render.called, "Login Dialog render function has not yet been called");
                     EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {
                         route: Router.configuration.routes.profile
                     }).then(function () {
@@ -190,8 +190,8 @@ define([
 
                             delete conf.globalData.authorizationFailurePending;
 
-                            EventManager.sendEvent(Constants.EVENT_UNAUTHORIZED, {error: {type:"GET"} }).then(function () {
-                                QUnit.ok(conf.loggedUser === null, "User info should be discarded after UNAUTHORIZED GET error");
+                            EventManager.sendEvent(Constants.EVENT_UNAUTHORIZED, {error: {type:"GET", status: 403} }).then(function () {
+                                QUnit.ok(!conf.loggedUser, "User info should be discarded after UNAUTHORIZED GET error");
                                 QUnit.ok(conf.gotoURL === "#profile/", "gotoURL should be preserved after UNAUTHORIZED GET error");
                                 QUnit.equal(window.location.hash, "#login/", "Redirected to main login page")
                                 delete conf.gotoURL;

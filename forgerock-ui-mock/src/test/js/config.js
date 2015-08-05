@@ -47,10 +47,13 @@ require.config({
 });
 
 require([
+    "jquery",
     "org/forgerock/mock/ui/common/main/MockServer"
-], function (MockServer) {
+], function ($, MockServer) {
 
-    require(['../www/main','../test/run'], function (appMain, run) {
+    $("head", document).append("<base href='../www/' />");
+
+    require(['main','../test/run'], function (appMain, run) {
         run(MockServer.instance);
     });
 

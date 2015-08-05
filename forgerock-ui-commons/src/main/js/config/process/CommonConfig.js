@@ -121,21 +121,20 @@ define("config/process/CommonConfig", [
                     EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, {
                         anonymousMode: true
                     });
-                    EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {
+                    return EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {
                         route: Router.configuration.routes.login
                     });
-                    return;
                 }
 
                 function logout (callback) {
                     setGoToUrlProperty();
 
-                    SessionManager.logout(function() {
+                    return SessionManager.logout().then(function() {
                         EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, {
                             anonymousMode: true
                         });
                         EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unauthorized");
-                        EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {
+                        return EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {
                             route: Router.configuration.routes.login
                         });
                     });
@@ -144,20 +143,20 @@ define("config/process/CommonConfig", [
 
                 if (typeof error !== "object" || error === null ||
                     typeof error.error !== "object" || error.error === null) {
-                    logout();
+                    return logout();
                 } else {
                     // Special case for GET requests, behavior should be different based on the error code returned
                     if (error.error.type === "GET") {
                         if (error.error.status === 403) {
                             // 403 Forbidden. Log out and redirect to the login view
-                            logout();
+                            return logout();
                         } else if (error.error.status === 401) {
                             // 401 Unauthorized. Unauthorized in-app GET requests, just show the login dialog
-                            EventManager.sendEvent(Constants.EVENT_SHOW_LOGIN_DIALOG);
+                            return EventManager.sendEvent(Constants.EVENT_SHOW_LOGIN_DIALOG);
                         }
                     } else {
                         // Session expired, just show the login dialog
-                        EventManager.sendEvent(Constants.EVENT_SHOW_LOGIN_DIALOG);
+                        return EventManager.sendEvent(Constants.EVENT_SHOW_LOGIN_DIALOG);
                     }
                 }
             }
