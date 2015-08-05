@@ -16,6 +16,7 @@
 package org.forgerock.audit.events.handlers.impl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.forgerock.util.Reject;
 
 /**
  * A configuration for CSV audit event handler.
@@ -24,7 +25,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * <pre>
  *  {
  *    "logDirectory" : "/tmp/audit",
- *    "recordDelimiter" : ";"
+ *    "csvConfiguration" : {
+ *      "quoteChar" : ";"
+ *    }
  *  }
  * </pre>
  */
@@ -33,7 +36,7 @@ public class CSVAuditEventHandlerConfiguration {
     @JsonProperty(required=true)
     private String logDirectory;
 
-    private String recordDelimiter;
+    private CsvConfiguration csvConfiguration = new CsvConfiguration();
 
     /**
      * Returns the directory where CSV file is located.
@@ -55,21 +58,50 @@ public class CSVAuditEventHandlerConfiguration {
     }
 
     /**
-     * Returns the record delimiter.
+     * Returns the csvConfiguration
      *
-     * @return the log delimiter.
+     * @return the csvConfiguration
      */
-    public String getRecordDelimiter() {
-        return recordDelimiter;
+    public CsvConfiguration getCsvConfiguration() {
+        return csvConfiguration;
     }
 
     /**
-     * Sets the record delimiter .
      *
-     * @param delimiter
-     *            the delimiter.
+     * @param csvConfiguration the csvConfiguration to set
      */
-    public void setRecordDelimiter(String delimiter) {
-        recordDelimiter = delimiter;
+    public void setCsvConfiguration(CsvConfiguration csvConfiguration) {
+        this.csvConfiguration = Reject.checkNotNull(csvConfiguration);
+    }
+
+    public static class CsvConfiguration {
+
+        private char quoteChar = '"';
+        private char delimiterChar = ',';
+        private String endOfLineSymbols = "\r\n";
+
+        public char getQuoteChar() {
+            return quoteChar;
+        }
+
+        public void setQuoteChar(char quoteChar) {
+            this.quoteChar = quoteChar;
+        }
+
+        public int getDelimiterChar() {
+            return delimiterChar;
+        }
+
+        public void setDelimiterChar(char delimiterChar) {
+            this.delimiterChar = delimiterChar;
+        }
+
+        public String getEndOfLineSymbols() {
+            return endOfLineSymbols;
+        }
+
+        public void setEndOfLineSymbols(String endOfLineSymbols) {
+            this.endOfLineSymbols = endOfLineSymbols;
+        }
     }
 }

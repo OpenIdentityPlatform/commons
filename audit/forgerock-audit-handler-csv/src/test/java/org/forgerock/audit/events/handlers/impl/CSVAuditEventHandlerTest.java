@@ -345,7 +345,6 @@ public class CSVAuditEventHandlerTest {
         CSVAuditEventHandler handler = new CSVAuditEventHandler();
         CSVAuditEventHandlerConfiguration config = new CSVAuditEventHandlerConfiguration();
         config.setLogDirectory(tempDirectory.toString());
-        config.setRecordDelimiter("");
         handler.configure(config);
         addEventsMetaData(handler);
         return handler;

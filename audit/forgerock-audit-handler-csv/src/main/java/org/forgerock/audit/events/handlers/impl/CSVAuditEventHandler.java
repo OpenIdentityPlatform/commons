@@ -78,7 +78,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
 
     private Map<String, JsonValue> auditEvents;
     private String auditLogDirectory;
-    private String recordDelim;
+    private CsvPreference csvPreference;
 
     private final Map<String, ICsvMapWriter> writers = new HashMap<>();
     private static final ObjectMapper mapper;
@@ -119,12 +119,18 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
                     }
                 }
             }
-
-            recordDelim = config.getRecordDelimiter();
-            if (StringUtils.isBlank(recordDelim)) {
-                recordDelim = System.getProperty("line.separator");
-            }
+            csvPreference = createCsvPreference(config);
         }
+    }
+
+    private CsvPreference createCsvPreference(final CSVAuditEventHandlerConfiguration config) {
+        CSVAuditEventHandlerConfiguration.CsvConfiguration csvConfiguration = config.getCsvConfiguration();
+        final CsvPreference.Builder builder = new CsvPreference.Builder(csvConfiguration.getQuoteChar(),
+                                                                        csvConfiguration.getDelimiterChar(),
+                                                                        csvConfiguration.getEndOfLineSymbols());
+
+        builder.useQuoteMode(new AlwaysQuoteMode());
+        return builder.build();
     }
 
     /** {@inheritDoc} */
@@ -235,7 +241,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
     }
 
     private ICsvMapWriter createCsvMapWriter(final File auditTmpFile) throws IOException {
-        return new CsvMapWriter(new FileWriter(auditTmpFile, true), getCsvPreference());
+        return new CsvMapWriter(new FileWriter(auditTmpFile, true), csvPreference);
     }
 
     private String[] buildHeaders(final Collection<String> fieldOrder) {
@@ -309,10 +315,6 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
         }
     }
 
-    private CsvPreference getCsvPreference() {
-        return new CsvPreference.Builder(CsvPreference.STANDARD_PREFERENCE).useQuoteMode(new AlwaysQuoteMode()).build();
-    }
-
     private void writeEntry(
             final ICsvMapWriter csvWriter,
             final JsonValue obj,
@@ -376,7 +378,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
         if (auditFile.exists()) {
             ICsvMapReader reader = null;
             try {
-                reader = new CsvMapReader(new FileReader(auditFile), getCsvPreference());
+                reader = new CsvMapReader(new FileReader(auditFile), csvPreference);
 
                 // the header elements are used to map the values to the bean (names must match)
                 final String[] header = convertDotNotationToSlashes(reader.getHeader(true));
@@ -449,7 +451,6 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
 
     private void cleanup() throws ResourceException {
         auditLogDirectory = null;
-        recordDelim = null;
         try {
             for (ICsvMapWriter csvWriter : writers.values()) {
                 if (csvWriter != null) {
@@ -496,4 +497,3 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
         return CSVAuditEventHandlerConfiguration.class;
     }
 }
-
