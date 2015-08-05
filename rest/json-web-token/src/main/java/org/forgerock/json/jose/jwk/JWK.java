@@ -1,7 +1,7 @@
 /*
  * DO NOT REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013 ForgeRock AS All rights reserved.
+ * Copyright (c) 2013-2015 ForgeRock AS All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -28,8 +28,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import org.forgerock.json.fluent.JsonException;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonException;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.jose.jwt.JWObject;
 import org.forgerock.util.encode.Base64;
 
@@ -167,7 +167,7 @@ public abstract class JWK extends JWObject {
      *
      * @param json The json String.
      * @return A JWK object
-     * @throws org.forgerock.json.fluent.JsonException If there is a problem parsing the json String.
+     * @throws org.forgerock.json.JsonException If there is a problem parsing the json String.
      */
     public static JWK parse(String json) {
         JsonValue jwk = new JsonValue(toJsonValue(json));
@@ -179,7 +179,7 @@ public abstract class JWK extends JWObject {
      *
      * @param jwk The JsonValue Object.
      * @return A JWK object
-     * @throws org.forgerock.json.fluent.JsonException If there is a problem parsing the json String.
+     * @throws org.forgerock.json.JsonException If there is a problem parsing the json String.
      */
     public static JWK parse(JsonValue jwk) {
         KeyType kty = KeyType.getKeyType(jwk.get(KTY).asString());
@@ -200,7 +200,7 @@ public abstract class JWK extends JWObject {
      *
      * @param json The json String.
      * @return A JsonValue object.
-     * @throws org.forgerock.json.fluent.JsonException If there is a problem parsing the json String.
+     * @throws org.forgerock.json.JsonException If there is a problem parsing the json String.
      */
     protected static JsonValue toJsonValue(String json) throws JsonException {
         ObjectMapper mapper = new ObjectMapper();

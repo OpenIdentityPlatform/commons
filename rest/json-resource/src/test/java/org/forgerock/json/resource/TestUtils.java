@@ -16,15 +16,15 @@
 
 package org.forgerock.json.resource;
 
-import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.JsonValue.json;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.forgerock.http.Context;
 import org.forgerock.http.context.RootContext;
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
 
 /**
  * Unit test utility methods, including fluent methods for creating JSON

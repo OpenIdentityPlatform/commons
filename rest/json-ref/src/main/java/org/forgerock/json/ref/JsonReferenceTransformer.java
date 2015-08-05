@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2015 ForgeRock AS. All rights reserved.
  */
 
 package org.forgerock.json.ref;
@@ -20,11 +20,10 @@ package org.forgerock.json.ref;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-// JSON Fluent
-import org.forgerock.json.fluent.JsonException;
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonTransformer;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonException;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonTransformer;
+import org.forgerock.json.JsonValue;
 
 /**
  * Simple JSON reference transformer that can resolve fragment URI references. Classes
@@ -33,8 +32,6 @@ import org.forgerock.json.fluent.JsonValue;
  * Note: The current implementation of this class has no checks for cyclic references. This
  * can lead to scenarios of infinite recursion and throwing of a {@link StackOverflowError}.
  * Plans for mitigating this are in place and will be implemented within this class.
- *
- * @author Paul C. Bryan
  */
 public class JsonReferenceTransformer implements JsonTransformer {
 

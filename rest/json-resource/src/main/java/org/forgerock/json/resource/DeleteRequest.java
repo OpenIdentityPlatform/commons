@@ -19,7 +19,7 @@ package org.forgerock.json.resource;
 import java.util.List;
 
 import org.forgerock.http.ResourcePath;
-import org.forgerock.json.fluent.JsonPointer;
+import org.forgerock.json.JsonPointer;
 
 /**
  * A request to delete a JSON resource.

@@ -24,7 +24,7 @@ import java.util.Set;
 
 import org.forgerock.http.ResourcePath;
 import org.forgerock.i18n.LocalizableMessage;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 
 @SuppressWarnings("javadoc")
 public final class RelationDescriptor {

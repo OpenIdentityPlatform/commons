@@ -19,7 +19,7 @@ package org.forgerock.json.resource;
 import java.util.Collection;
 
 import org.forgerock.http.context.ServerContext;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 
 /**
  * An interface for implementing synchronous {@link RequestHandler}s. A

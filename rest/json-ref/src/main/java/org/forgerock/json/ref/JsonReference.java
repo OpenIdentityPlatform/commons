@@ -19,13 +19,11 @@ package org.forgerock.json.ref;
 import java.net.URI;
 import java.util.HashMap;
 
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 
 /**
  * Represents a JSON Reference value.
- *
- * @author Paul C. Bryan
  */
 public class JsonReference {
 

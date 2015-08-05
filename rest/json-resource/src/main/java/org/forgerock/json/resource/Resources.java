@@ -26,8 +26,8 @@ import java.util.Map;
 
 import org.forgerock.http.context.ServerContext;
 import org.forgerock.http.routing.RouterContext;
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
 import org.forgerock.util.promise.Promise;
 
 /**

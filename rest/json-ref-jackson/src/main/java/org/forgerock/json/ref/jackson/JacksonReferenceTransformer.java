@@ -21,8 +21,8 @@ import java.io.InputStream;
 import java.net.URI;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.forgerock.json.fluent.JsonException;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonException;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.ref.JsonReferenceException;
 import org.forgerock.json.ref.JsonReferenceTransformer;
 
@@ -31,8 +31,6 @@ import org.forgerock.json.ref.JsonReferenceTransformer;
  * representations to standard Java objects. This transformer applies its transformation for
  * {@code http(s)} and {@code file} URL schemes, or associated relative URIs. Any other URIs
  * are ignored.
- *
- * @author Paul C. Bryan
  */
 public class JacksonReferenceTransformer extends JsonReferenceTransformer {
 

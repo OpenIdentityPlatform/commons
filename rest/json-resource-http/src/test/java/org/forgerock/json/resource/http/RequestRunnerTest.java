@@ -17,10 +17,9 @@
 package org.forgerock.json.resource.http;
 
 import static org.forgerock.http.test.HttpTest.newRequest;
-import static org.forgerock.json.fluent.JsonValue.*;
+import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import static org.forgerock.util.promise.Promises.newResultPromise;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
 
@@ -29,7 +28,7 @@ import java.io.IOException;
 
 import org.forgerock.http.Context;
 import org.forgerock.http.protocol.Response;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResult;

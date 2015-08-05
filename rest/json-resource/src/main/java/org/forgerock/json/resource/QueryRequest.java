@@ -17,7 +17,7 @@
 package org.forgerock.json.resource;
 
 import org.forgerock.http.ResourcePath;
-import org.forgerock.json.fluent.JsonPointer;
+import org.forgerock.json.JsonPointer;
 
 import java.util.List;
 

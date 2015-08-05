@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -34,11 +34,8 @@ import org.forgerock.json.schema.validator.exceptions.ValidationException;
  * handling, it must implement this class.
  * <p/>
  * Use this handler when call the
- * {@link org.forgerock.json.schema.validator.validators.SimpleValidator#validate(Object, org.forgerock.json.fluent.JsonPointer, ErrorHandler)}}
+ * {@link org.forgerock.json.schema.validator.validators.SimpleValidator#validate(Object, org.forgerock.json.JsonPointer, ErrorHandler)}}
  * method.  The helpers will then report all errors.</p>
- *
- * @author $author$
- * @version $Revision$ $Date$
  */
 public abstract class ErrorHandler {
 

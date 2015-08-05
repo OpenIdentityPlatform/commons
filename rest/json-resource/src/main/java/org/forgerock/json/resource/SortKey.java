@@ -11,13 +11,13 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright 2012 ForgeRock AS. All rights reserved.
+ * Copyright 2012-2015 ForgeRock AS. All rights reserved.
  */
 
 package org.forgerock.json.resource;
 
-import org.forgerock.json.fluent.JsonException;
-import org.forgerock.json.fluent.JsonPointer;
+import org.forgerock.json.JsonException;
+import org.forgerock.json.JsonPointer;
 
 /**
  * A sort key which can be used to specify the order in which JSON resources

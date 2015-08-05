@@ -16,7 +16,7 @@
 
 package org.forgerock.json.resource.descriptor;
 
-import static org.forgerock.json.fluent.JsonValue.*;
+import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Requests.newReadRequest;
 import static org.forgerock.json.resource.descriptor.Api.JSON_MAPPER;
 import static org.forgerock.util.promise.Promises.newResultPromise;
@@ -30,7 +30,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonGenerator.Feature;
 import org.forgerock.http.context.RootContext;
 import org.forgerock.http.context.ServerContext;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.AbstractRequestHandler;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.NotSupportedException;
