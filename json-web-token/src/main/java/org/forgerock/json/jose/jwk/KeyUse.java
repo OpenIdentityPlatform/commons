@@ -1,7 +1,7 @@
 /*
  * DO NOT REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013 ForgeRock AS All rights reserved.
+ * Copyright (c) 2013-2015 ForgeRock AS All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -23,7 +23,7 @@
  */
 package org.forgerock.json.jose.jwk;
 
-import org.forgerock.json.fluent.JsonException;
+import org.forgerock.json.JsonException;
 
 /**
  * Represents the Possible KeyUse values.

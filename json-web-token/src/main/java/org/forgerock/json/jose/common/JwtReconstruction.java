@@ -16,7 +16,7 @@
 
 package org.forgerock.json.jose.common;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.jose.exceptions.InvalidJwtException;
 import org.forgerock.json.jose.exceptions.JwtReconstructionException;
 import org.forgerock.json.jose.jwe.EncryptedJwt;
@@ -37,7 +37,6 @@ import java.util.Map;
  * A service that provides a method for reconstruct a JWT string back into its relevant JWT object,
  * (SignedJwt, EncryptedJwt, SignedEncryptedJwt).
  *
- * @author Phill Cunnington
  * @since 2.0.0
  */
 public class JwtReconstruction {

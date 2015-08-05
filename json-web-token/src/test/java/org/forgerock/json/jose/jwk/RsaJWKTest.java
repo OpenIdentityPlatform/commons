@@ -16,7 +16,7 @@
 
 package org.forgerock.json.jose.jwk;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.util.encode.Base64url;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
