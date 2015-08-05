@@ -132,7 +132,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
 
     /**
      * Perform an action on the csv audit log.
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public void actionCollection(
@@ -144,7 +144,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
 
     /**
      * Perform an action on the csv audit log entry.
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public void actionInstance(
@@ -157,7 +157,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
 
     /**
      * Create a csv audit log entry.
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public void createInstance(
@@ -233,7 +233,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
 
     /**
      * Perform a query on the csv audit log.
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public void queryCollection(
@@ -253,7 +253,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
 
     /**
      * Read from the csv audit log.
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public void readInstance(
