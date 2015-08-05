@@ -148,8 +148,8 @@ define("config/process/CommonConfig", [
                 } else {
                     // Special case for GET requests, behavior should be different based on the error code returned
                     if (error.error.type === "GET") {
-                        if (error.error.status === 501 || error.error.status === 403) {
-                            // 501 Not Implemented or 403 Forbidden. Log out and redirect to the login view
+                        if (error.error.status === 403) {
+                            // 403 Forbidden. Log out and redirect to the login view
                             logout();
                         } else if (error.error.status === 401) {
                             // 401 Unauthorized. Unauthorized in-app GET requests, just show the login dialog
