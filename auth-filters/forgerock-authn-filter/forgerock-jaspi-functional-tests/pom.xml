@@ -149,7 +149,6 @@
         <dependency>
             <groupId>org.forgerock.http</groupId>
             <artifactId>chf-http-servlet</artifactId>
-            <version>${forgerock-http.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
@@ -169,6 +168,12 @@
         <dependency>
             <groupId>com.jayway.restassured</groupId>
             <artifactId>rest-assured</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>verify</scope>
         </dependency>
     </dependencies>
 </project>

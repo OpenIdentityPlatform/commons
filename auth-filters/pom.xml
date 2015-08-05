@@ -63,21 +63,8 @@
     </modules>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-        <maven.compiler.target>1.7</maven.compiler.target>
-        <maven.compiler.source>1.7</maven.compiler.source>
-
-        <slf4j.version>1.7.12</slf4j.version>
-        <forgerock-http.version>0.0.1-SNAPSHOT</forgerock-http.version>
-        <forgerock-rest.version>3.0.0-SNAPSHOT</forgerock-rest.version>
-        <forgerock-util.version>2.0.0-SNAPSHOT</forgerock-util.version>
+        <forgerock-bom.version>1.0.0-SNAPSHOT</forgerock-bom.version>
         <restlet.version>2.1.2</restlet.version>
-        <jackson.version>2.5.3</jackson.version>
-
-        <testng.version>6.9.4</testng.version>
-        <mockito.version>1.10.19</mockito.version>
-        <assertj.version>1.6.1</assertj.version>
     </properties>
 
     <scm>
@@ -202,37 +189,13 @@
             </dependency>
 
             <dependency>
-                <groupId>org.forgerock.http</groupId>
-                <artifactId>chf-http-core</artifactId>
-                <version>${forgerock-http.version}</version>
+                <groupId>org.forgerock.commons</groupId>
+                <artifactId>forgerock-bom</artifactId>
+                <version>${forgerock-bom.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
             </dependency>
 
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>json-fluent</artifactId>
-                <version>${forgerock-rest.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>json-resource</artifactId>
-                <version>${forgerock-rest.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>json-resource-http</artifactId>
-                <version>${forgerock-rest.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>json-web-token</artifactId>
-                <version>${forgerock-rest.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.restlet.osgi</groupId>
                 <artifactId>org.restlet</artifactId>
@@ -264,18 +227,6 @@
                 <artifactId>json</artifactId>
                 <version>20140107</version>
             </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-nop</artifactId>
-                <version>${slf4j.version}</version>
-                <scope>test</scope>
-            </dependency>
 
             <dependency>
                 <groupId>javax.servlet</groupId>
@@ -289,62 +240,13 @@
                 <version>3.1</version>
             </dependency>
             <dependency>
-                <groupId>org.forgerock.commons.guava</groupId>
-                <artifactId>forgerock-guava-net</artifactId>
-                <version>18.0.1</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.testng</groupId>
-                <artifactId>testng</artifactId>
-                <version>${testng.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-all</artifactId>
-                <version>${mockito.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.assertj</groupId>
-                <artifactId>assertj-core</artifactId>
-                <version>${assertj.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
                 <groupId>com.jayway.restassured</groupId>
                 <artifactId>rest-assured</artifactId>
                 <version>2.3.0</version>
                 <scope>test</scope>
             </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>forgerock-test-utils</artifactId>
-                <version>${forgerock-util.version}</version>
-                <scope>test</scope>
-            </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>forgerock-test-utils</artifactId>
-        </dependency>
-    </dependencies>
 
     <reporting>
         <plugins>

@@ -157,7 +157,6 @@
         <dependency>
             <groupId>org.forgerock.http</groupId>
             <artifactId>chf-http-servlet</artifactId>
-            <version>${forgerock-http.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
