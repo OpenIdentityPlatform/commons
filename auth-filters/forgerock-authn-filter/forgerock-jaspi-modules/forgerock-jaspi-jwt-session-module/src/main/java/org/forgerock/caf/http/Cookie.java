@@ -352,8 +352,10 @@ public class Cookie {
      */
     public static Set<Cookie> getCookies(HttpServletRequest request) {
         Set<Cookie> cookies = new HashSet<>();
-        for (javax.servlet.http.Cookie cookie : request.getCookies()) {
-            cookies.add(newCookie(cookie));
+        if (request.getCookies() != null) {
+            for (javax.servlet.http.Cookie cookie : request.getCookies()) {
+                cookies.add(newCookie(cookie));
+            }
         }
         return cookies;
     }

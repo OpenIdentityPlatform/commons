@@ -21,6 +21,7 @@ import org.mockito.Matchers;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -98,5 +99,39 @@ public class CookieTest {
         assertThat(servletCookie.getMaxAge()).isEqualTo(6000);
         assertThat(servletCookie.getSecure()).isEqualTo(true);
         assertThat(servletCookie.isHttpOnly()).isEqualTo(true);
+    }
+
+    @Test
+    public void servletHasCookies() {
+
+        //Given
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        javax.servlet.http.Cookie[] cookies = new javax.servlet.http.Cookie[] {
+                new javax.servlet.http.Cookie("mycookie", "somevalue")
+        };
+
+        //When
+        when(request.getCookies()).thenReturn(cookies);
+
+        //Then
+        assertThat(Cookie.getCookies(request)).isNotNull();
+        assertThat(Cookie.getCookies(request)).hasSize(1);
+        Cookie cookie = Cookie.getCookies(request).iterator().next();
+        assertThat(cookie.getName()).isEqualTo("mycookie");
+        assertThat(cookie.getValue()).isEqualTo("somevalue");
+    }
+
+    @Test
+    public void servletHasNoCookies() {
+
+        //Given
+        HttpServletRequest request = mock(HttpServletRequest.class);
+
+        //When
+        when(request.getCookies()).thenReturn(null);
+
+        //Then
+        assertThat(Cookie.getCookies(request)).isNotNull();
+        assertThat(Cookie.getCookies(request)).hasSize(0);
     }
 }
