@@ -267,12 +267,6 @@ public class AuditService implements RequestHandler {
                     request.getResourceName(),
                     request.getContent().asMap());
 
-            // Don't audit if disabled by config
-            if (!config.isCreateEnabled()) {
-                handler.handleResult(new Resource(null, null, request.getContent().copy()));
-                return;
-            }
-
             // Don't audit the audit log
             if (context.containsContext(AuditContext.class)) {
                 handler.handleResult(new Resource(null, null, request.getContent().copy()));
@@ -473,7 +467,7 @@ public class AuditService implements RequestHandler {
      * @return whether handling of the specified topic is enabled.
      */
     public boolean isAuditing(String topic) {
-        return config.isCreateEnabled() && !getAuditEventHandlersForEvent(topic).isEmpty();
+        return !getAuditEventHandlersForEvent(topic).isEmpty();
     }
 
     /**

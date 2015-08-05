@@ -23,7 +23,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * This configuration object can be created from JSON. Example of valid JSON configuration:
  * <pre>
  *   {
- *     "enabled" : true,
  *     "handlerForQueries" : "csv"
  *   }
  * </pre>
@@ -32,9 +31,6 @@ public class AuditServiceConfiguration {
 
     @JsonProperty(required = true)
     private String handlerForQueries;
-
-    @JsonProperty
-    private boolean createEnabled = true;
 
     /**
      * Empty constructor.
@@ -50,7 +46,6 @@ public class AuditServiceConfiguration {
      */
     public AuditServiceConfiguration(AuditServiceConfiguration config) {
         handlerForQueries = config.getHandlerForQueries();
-        createEnabled = config.isCreateEnabled();
     }
 
     /**
@@ -71,23 +66,4 @@ public class AuditServiceConfiguration {
     public void setHandlerForQueries(String name) {
         handlerForQueries = name;
     }
-
-    /**
-     * Returns true if logging of audit events is currently enabled.
-     *
-     * @return whether logging of audit events is currently enabled.
-     */
-    public boolean isCreateEnabled() {
-        return createEnabled;
-    }
-
-    /**
-     * Sets whether audit events are passed to registered handlers.
-     *
-     * @param value The new state.
-     */
-    public void setCreateEnabled(boolean value) {
-        this.createEnabled = value;
-    }
-
 }
