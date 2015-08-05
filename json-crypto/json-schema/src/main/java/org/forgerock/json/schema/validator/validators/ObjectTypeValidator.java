@@ -31,7 +31,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import org.forgerock.json.fluent.JsonPointer;
+import org.forgerock.json.JsonPointer;
 import org.forgerock.json.schema.validator.CollectErrorsHandler;
 import org.forgerock.json.schema.validator.ErrorHandler;
 import org.forgerock.json.schema.validator.ObjectValidatorFactory;

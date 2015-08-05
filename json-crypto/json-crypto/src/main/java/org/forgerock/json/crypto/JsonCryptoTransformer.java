@@ -11,20 +11,17 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2015 ForgeRock AS. All rights reserved.
  */
 
 package org.forgerock.json.crypto;
 
-// JSON Fluent
-import org.forgerock.json.fluent.JsonException;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonTransformer;
+import org.forgerock.json.JsonException;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonTransformer;
 
 /**
  * Transforms JSON values by applying a decryptor.
- *
- * @author Paul C. Bryan
  */
 public class JsonCryptoTransformer implements JsonTransformer {
 

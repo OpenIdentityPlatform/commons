@@ -19,8 +19,8 @@ package org.forgerock.json.resource;
 import java.util.List;
 
 import org.forgerock.http.ResourcePath;
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
 
 /**
  * A request to update a JSON resource by applying a set of changes to its

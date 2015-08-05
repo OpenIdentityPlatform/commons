@@ -17,7 +17,7 @@
 package org.forgerock.json.resource;
 
 import org.forgerock.http.context.ServerContext;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.annotations.Create;
 import org.forgerock.json.resource.annotations.Query;
 import org.forgerock.json.resource.annotations.RequestHandler;

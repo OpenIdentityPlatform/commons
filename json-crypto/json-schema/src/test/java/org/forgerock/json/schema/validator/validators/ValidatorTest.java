@@ -16,7 +16,7 @@
 
 package org.forgerock.json.schema.validator.validators;
 
-import org.forgerock.json.fluent.JsonPointer;
+import org.forgerock.json.JsonPointer;
 import org.forgerock.json.schema.validator.Constants;
 import org.forgerock.json.schema.validator.ErrorHandler;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;

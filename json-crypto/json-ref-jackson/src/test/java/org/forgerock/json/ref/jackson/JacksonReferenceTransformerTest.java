@@ -25,7 +25,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.ref.JsonReference;
 import org.testng.annotations.Test;
 

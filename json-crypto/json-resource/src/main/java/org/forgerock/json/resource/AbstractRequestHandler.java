@@ -20,7 +20,7 @@ import static org.forgerock.json.resource.ResourceException.newNotSupportedExcep
 import static org.forgerock.util.promise.Promises.newExceptionPromise;
 
 import org.forgerock.http.context.ServerContext;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.util.promise.Promise;
 
 /**

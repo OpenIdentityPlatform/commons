@@ -19,7 +19,7 @@ package org.forgerock.json.resource;
 import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2012 ForgeRock AS. All rights reserved.
+ * Copyright © 2012-2015 ForgeRock AS. All rights reserved.
  */
 
 package org.forgerock.json.resource;
@@ -19,7 +19,7 @@ package org.forgerock.json.resource;
 import java.util.List;
 
 import org.forgerock.http.ResourcePath;
-import org.forgerock.json.fluent.JsonPointer;
+import org.forgerock.json.JsonPointer;
 
 /**
  * A request to read a single identified JSON resource.

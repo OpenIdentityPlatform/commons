@@ -22,7 +22,7 @@ import org.forgerock.http.routing.AbstractRouter;
 import org.forgerock.http.routing.IncomparableRouteMatchException;
 import org.forgerock.http.routing.RouteMatcher;
 import org.forgerock.http.routing.RouterContext;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.util.Pair;
 import org.forgerock.util.promise.Promise;
 

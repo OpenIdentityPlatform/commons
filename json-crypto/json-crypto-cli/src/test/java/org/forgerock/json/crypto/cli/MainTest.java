@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright 2011-2014 ForgeRock AS.
+ * Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.crypto.cli;
@@ -19,15 +19,12 @@ package org.forgerock.json.crypto.cli;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.testng.annotations.Test;
 
 import java.net.URLDecoder;
 import java.util.Map;
 
-/**
- * @author László Hordós
- */
 public class MainTest {
 
     @Test

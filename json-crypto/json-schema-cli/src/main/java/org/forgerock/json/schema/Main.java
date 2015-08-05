@@ -35,7 +35,7 @@ import java.util.Map;
 import java.util.Scanner;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.schema.validator.Constants;
 import org.forgerock.json.schema.validator.ErrorHandler;
 import org.forgerock.json.schema.validator.FailFastErrorHandler;
@@ -49,8 +49,7 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
 /**
- * @author $author$
- * @version $Revision$ $Date$
+ * Command-line interface to manipulate schemas.
  */
 public class Main {
 
