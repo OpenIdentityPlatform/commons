@@ -33,15 +33,12 @@ import java.util.Map;
 import org.forgerock.json.crypto.simple.SimpleDecryptor;
 import org.forgerock.json.crypto.simple.SimpleEncryptor;
 import org.forgerock.json.crypto.simple.SimpleKeySelector;
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonTransformer;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonTransformer;
+import org.forgerock.json.JsonValue;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-/**
- * @author Paul C. Bryan
-*/
 public class JsonCryptoTest {
 
     private static final String SYMMETRIC_CIPHER = "AES/CBC/PKCS5Padding";

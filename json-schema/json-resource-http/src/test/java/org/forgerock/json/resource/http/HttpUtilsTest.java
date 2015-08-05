@@ -29,7 +29,7 @@ import java.util.List;
 
 import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.protocol.Response;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.ResourceException;

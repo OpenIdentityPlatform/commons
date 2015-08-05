@@ -17,8 +17,8 @@
 package org.forgerock.json.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.PatchOperation.*;
 import static org.forgerock.json.resource.Requests.*;
 import static org.forgerock.json.resource.Resources.newInternalConnection;
@@ -26,14 +26,15 @@ import static org.forgerock.json.resource.TestUtils.*;
 import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
 import static org.testng.Assert.fail;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
+import org.forgerock.util.query.QueryFilter;
+
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.util.query.QueryFilter;
 
 /**
  * Tests for {@link MemoryBackend}.

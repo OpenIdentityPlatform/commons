@@ -18,7 +18,7 @@ package org.forgerock.json.resource;
 
 import java.util.LinkedHashMap;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 
 /**
  * A resource, comprising of a resource ID, a revision (etag), and its JSON

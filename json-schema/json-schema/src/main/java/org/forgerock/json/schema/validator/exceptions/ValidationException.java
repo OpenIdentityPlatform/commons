@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,8 +24,8 @@
  */
 package org.forgerock.json.schema.validator.exceptions;
 
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonPointer;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonPointer;
 
 /**
  * Encapsulate a JSON validator error.
@@ -41,8 +41,6 @@ import org.forgerock.json.fluent.JsonPointer;
  * <p>Since this exception is a subclass of {@link SchemaException
  * SchemaException}, it inherits the ability to wrap another exception.</p>
  *
- * @author $author$
- * @version $Revision$ $Date$
  * @see SchemaException
  */
 public class ValidationException extends SchemaException {

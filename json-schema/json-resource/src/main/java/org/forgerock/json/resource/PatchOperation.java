@@ -22,9 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.LinkedHashMap;
 
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonValue;
-import static org.forgerock.json.fluent.JsonValue.*;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
+import static org.forgerock.json.JsonValue.*;
 
 /**
  * An individual patch operation which is to be performed against a field within

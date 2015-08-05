@@ -33,7 +33,7 @@ import org.forgerock.http.Context;
 import org.forgerock.http.ResourcePath;
 import org.forgerock.http.context.ServerContext;
 import org.forgerock.http.routing.RouterContext;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.util.promise.Promise;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;

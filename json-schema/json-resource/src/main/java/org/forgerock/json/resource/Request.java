@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.forgerock.http.ResourcePath;
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
 
 /**
  * Common attributes of all JSON resource requests.

@@ -18,7 +18,7 @@ package org.forgerock.json.jose.jwk;
 
 import java.util.HashMap;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 

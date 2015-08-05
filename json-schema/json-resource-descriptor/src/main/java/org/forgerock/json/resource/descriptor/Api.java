@@ -17,7 +17,7 @@
 package org.forgerock.json.resource.descriptor;
 
 import static java.util.Collections.unmodifiableSet;
-import static org.forgerock.json.fluent.JsonValue.*;
+import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Requests.*;
 import static org.forgerock.json.resource.ResourceException.newNotSupportedException;
 import static org.forgerock.util.promise.Promises.newExceptionPromise;
@@ -35,7 +35,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.http.ResourcePath;
 import org.forgerock.http.context.ServerContext;
 import org.forgerock.i18n.LocalizableMessage;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.AbstractRequestHandler;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.CreateRequest;

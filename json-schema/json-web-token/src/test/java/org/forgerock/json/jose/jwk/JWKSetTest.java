@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 

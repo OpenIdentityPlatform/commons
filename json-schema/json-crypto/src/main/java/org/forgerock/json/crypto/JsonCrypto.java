@@ -18,13 +18,11 @@ package org.forgerock.json.crypto;
 
 import java.util.HashMap;
 
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 
 /**
  * Represents a JSON {@code $crypto} object.
- *
- * @author Paul C. Bryan
  */
 public class JsonCrypto {
 

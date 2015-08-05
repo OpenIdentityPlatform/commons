@@ -18,7 +18,7 @@ package org.forgerock.json.resource;
 
 import org.forgerock.http.Context;
 import org.forgerock.http.context.ServerContext;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.util.promise.Promise;
 
 final class InternalConnection extends AbstractAsynchronousConnection {

@@ -24,7 +24,7 @@ import java.util.Collections;
 
 import org.forgerock.http.ResourcePath;
 import org.forgerock.http.context.ServerContext;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.AbstractRequestHandler;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ReadRequest;

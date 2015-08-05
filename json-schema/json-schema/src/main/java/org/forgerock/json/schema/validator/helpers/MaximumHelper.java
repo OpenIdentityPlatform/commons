@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,7 +24,7 @@
  */
 package org.forgerock.json.schema.validator.helpers;
 
-import org.forgerock.json.fluent.JsonPointer;
+import org.forgerock.json.JsonPointer;
 import org.forgerock.json.schema.validator.ErrorHandler;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
 import org.forgerock.json.schema.validator.exceptions.ValidationException;
@@ -35,8 +35,6 @@ import java.lang.reflect.Method;
 /**
  * Helper compares two {@link Number}s to check the maximum constraint.
  *
- * @author $author$
- * @version $Revision$ $Date$
  * @see <a href="http://tools.ietf.org/html/draft-zyp-json-schema-03#section-5.10">maximum</a>
  */
 public class MaximumHelper implements SimpleValidator<Number> {
