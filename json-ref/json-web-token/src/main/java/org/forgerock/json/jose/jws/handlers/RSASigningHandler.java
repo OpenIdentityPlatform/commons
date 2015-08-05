@@ -31,7 +31,6 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
-import java.security.cert.X509Certificate;
 
 /**
  * An implementation of the SigningHandler which can sign and verify using algorithms from the RSA family.

@@ -19,7 +19,7 @@ package org.forgerock.json.resource;
 import java.util.Collection;
 
 import org.forgerock.http.Context;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.util.promise.Promise;
 
 /**

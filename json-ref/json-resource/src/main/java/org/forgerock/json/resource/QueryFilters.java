@@ -16,13 +16,13 @@
 
 package org.forgerock.json.resource;
 
-import org.forgerock.json.fluent.JsonPointer;
+import org.forgerock.json.JsonPointer;
 import org.forgerock.util.query.QueryFilter;
 import org.forgerock.util.query.QueryFilterParser;
 
 /**
  * Convenience methods to create {@link org.forgerock.util.query.QueryFilter} that
- * specify fields in terms of {@link org.forgerock.json.fluent.JsonPointer} instances.
+ * specify fields in terms of {@link org.forgerock.json.JsonPointer} instances.
  *
  * @see org.forgerock.util.query.QueryFilterParser
  */

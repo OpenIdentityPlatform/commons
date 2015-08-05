@@ -29,7 +29,7 @@ import java.util.List;
 import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.http.context.ServerContext;
 import org.forgerock.http.routing.RouterContext;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.AbstractRequestHandler;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.CollectionResourceProvider;

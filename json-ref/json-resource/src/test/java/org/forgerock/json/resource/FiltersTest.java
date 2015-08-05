@@ -24,7 +24,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.forgerock.http.context.ServerContext;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.util.promise.Promise;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;

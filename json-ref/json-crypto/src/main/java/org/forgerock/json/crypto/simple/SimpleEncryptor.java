@@ -28,12 +28,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.codec.binary.Base64;
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.crypto.JsonEncryptor;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 
 /**
  * Encrypts a JSON value into an {@code x-simple-encryption} type {@code $crypto} JSON object.
- *
- * @author Paul C. Bryan
  */
 public class SimpleEncryptor implements JsonEncryptor {
 

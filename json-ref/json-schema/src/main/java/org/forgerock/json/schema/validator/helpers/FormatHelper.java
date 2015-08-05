@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2015 ForgeRock AS. All rights reserved.
  * 
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,7 +24,7 @@
  */
 package org.forgerock.json.schema.validator.helpers;
 
-import org.forgerock.json.fluent.JsonPointer;
+import org.forgerock.json.JsonPointer;
 import org.forgerock.json.schema.validator.ErrorHandler;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
 import org.forgerock.json.schema.validator.validators.SimpleValidator;
@@ -40,8 +40,6 @@ import static org.forgerock.json.schema.validator.Constants.FORMAT_DATE_TIME;
  * be expressed as an URI, and this URI MAY reference a schema of that
  * format.
  *
- * @author $author$
- * @version $Revision$ $Date$
  * @see <a href="http://tools.ietf.org/html/draft-zyp-json-schema-03#section-5.23">format</a>
  */
 public class FormatHelper implements SimpleValidator<Object> {

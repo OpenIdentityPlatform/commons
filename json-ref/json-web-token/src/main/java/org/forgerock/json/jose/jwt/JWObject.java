@@ -16,7 +16,7 @@
 
 package org.forgerock.json.jose.jwt;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.jose.exceptions.JwtRuntimeException;
 
 import java.util.LinkedHashMap;
@@ -29,7 +29,6 @@ import java.util.Set;
  * <p>
  * Provides a set of methods which are common across JWT, JWS, JWE and JWK implementations.
  *
- * @author Phill Cunnington
  * @since 2.0.0
  */
 public abstract class JWObject {
