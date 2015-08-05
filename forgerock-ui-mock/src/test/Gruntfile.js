@@ -40,7 +40,14 @@ module.exports = function(grunt) {
                     'resources/**',
                     'js/**'
                 ],
-                tasks: [ 'sync', 'qunit' ]
+                tasks: [ 'sync', 'less', 'qunit' ]
+            }
+        },
+        less: {
+            mock: {
+                files: {
+                    "../../target/www/css/styles.css": "../../target/www/css/styles.less"
+                }
             }
         },
         sync: {
@@ -48,17 +55,17 @@ module.exports = function(grunt) {
                 files: [
                     {
                         cwd     : '../../../forgerock-ui-commons/src/main/js',
-                        src     : ['**'], 
+                        src     : ['**'],
                         dest    : '../../target/www'
                     },
                     {
                         cwd     : '../../../forgerock-ui-commons/src/main/resources',
-                        src     : ['**'], 
+                        src     : ['**'],
                         dest    : '../../target/www'
                     },
                     {
                         cwd     : '../../../forgerock-ui-commons/src/test/qunit',
-                        src     : ['**'], 
+                        src     : ['**'],
                         dest    : '../../target/test/tests'
                     }
                 ]
@@ -67,17 +74,17 @@ module.exports = function(grunt) {
                 files: [
                     {
                         cwd     : '../../../forgerock-ui-user/src/main/js',
-                        src     : ['**'], 
+                        src     : ['**'],
                         dest    : '../../target/www'
                     },
                     {
                         cwd     : '../../../forgerock-ui-user/src/main/resources',
-                        src     : ['**'], 
+                        src     : ['**'],
                         dest    : '../../target/www'
                     },
                     {
                         cwd     : '../../../forgerock-ui-user/src/test/qunit',
-                        src     : ['**'], 
+                        src     : ['**'],
                         dest    : '../../target/test/tests'
                     }
                 ]
@@ -86,27 +93,27 @@ module.exports = function(grunt) {
                 files: [
                     {
                         cwd     : '../main/js',
-                        src     : ['**'], 
+                        src     : ['**'],
                         dest    : '../../target/www'
                     },
                     {
                         cwd     : '../main/resources',
-                        src     : ['**'], 
+                        src     : ['**'],
                         dest    : '../../target/www'
                     },
                     {
                         cwd     : 'resources',
-                        src     : ['css/**', 'qunit.html'], 
+                        src     : ['css/**', 'qunit.html'],
                         dest    : '../../target/test'
                     },
                     {
                         cwd     : 'qunit',
-                        src     : ['**'], 
+                        src     : ['**'],
                         dest    : '../../target/test/tests'
                     },
                     {
                         cwd     : 'js',
-                        src     : ['**'], 
+                        src     : ['**'],
                         dest    : '../../target/test'
                     }
                 ]
@@ -124,14 +131,12 @@ module.exports = function(grunt) {
     });
 
     grunt.loadNpmTasks('grunt-contrib-qunit');
-
     grunt.loadNpmTasks('grunt-contrib-watch');
-    
     grunt.loadNpmTasks('grunt-notify');
-
     grunt.loadNpmTasks('grunt-sync');
+    grunt.loadNpmTasks('grunt-contrib-less');
 
     grunt.task.run('notify_hooks');
-    grunt.registerTask('default', ['sync', 'qunit', 'watch']);
+    grunt.registerTask('default', ['sync', 'less', 'qunit', 'watch']);
 
 };

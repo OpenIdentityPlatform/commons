@@ -22,36 +22,71 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, document */
+/*global define, window */
 
-/**
- * @author yaromin
- */
 define("org/forgerock/commons/ui/common/main/EventManager", [
     "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/util/Constants"
-], function($, constants) {
-    
-    /**
-     * listenerProxyMap - Association of real listeners and proxies which transforms parameter set
-     */
-    var obj = {}, listenerProxyMap = [];
-    
+], function($, _, constants) {
+
+    var obj = {},
+        eventRegistry = {},
+        subscriptions = {};
+
 
     obj.sendEvent = function (eventId, event) {
-        $(document).trigger(eventId, event);
+        return $.when.apply($,
+
+            _.map(eventRegistry[eventId], function (eventHandler) {
+                var promise = $.Deferred();
+                window.setTimeout(function () {
+                    $.when(eventHandler(event)).always(promise.resolve);
+                });
+                return promise;
+            })
+
+        ).then(
+            function () {
+                var promise;
+                if (_.has(subscriptions, eventId)) {
+                    promise = subscriptions[eventId];
+                    delete subscriptions[eventId];
+                    promise.resolve();
+                }
+                return;
+            }
+        );
     };
 
     obj.registerListener = function (eventId, callback) {
-        var proxyFunction = function(element, event) {
-            callback(event);
-        };
-        listenerProxyMap[callback] = proxyFunction;
-        $(document).on(eventId, proxyFunction);
+        if (!_.has(eventRegistry, eventId)) {
+            eventRegistry[eventId] = [callback];
+        } else {
+            eventRegistry[eventId].push(callback);
+        }
     };
 
-    obj.unregisterListener = function (eventId, callback) {
-        $(document).off(eventId);
+    obj.unregisterListener = function (eventId, callbackToRemove) {
+        if (_.has(eventRegistry, eventId)) {
+            if (callbackToRemove !== undefined) {
+                eventRegistry[eventId] = _.omit(eventRegistry[eventId], function (callback) {
+                    return callback === callbackToRemove;
+                });
+            } else {
+                delete eventRegistry[eventId];
+            }
+        }
+    };
+
+    /**
+     * Returns a promise that will be resolved the next time the provided eventId has completed processing.
+     */
+    obj.whenComplete = function (eventId) {
+        if (!_.has(subscriptions, eventId)) {
+            subscriptions[eventId] = $.Deferred();
+        }
+        return subscriptions[eventId];
     };
 
     return obj;

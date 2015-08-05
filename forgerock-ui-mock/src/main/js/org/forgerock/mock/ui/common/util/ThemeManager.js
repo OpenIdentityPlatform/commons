@@ -22,13 +22,9 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, less */
+/*global define */
 
-/**
- * @author Eugenia Sergueeva
- */
-
-define("ThemeManager", [
+define("org/forgerock/mock/ui/common/util/ThemeManager", [
     "jquery",
     "underscore",
     "org/forgerock/commons/ui/common/util/Constants",
@@ -38,14 +34,7 @@ define("ThemeManager", [
         themePromise;
 
     obj.loadThemeCSS = function (theme) {
-        $('head').find('link[href*=less]').remove();
         $('head').find('link[href*=favicon]').remove();
-
-        $("<link/>", {
-            rel: "stylesheet/less",
-            type: "text/css",
-            href: theme.path + "css/styles.less"
-        }).appendTo("head");
 
         $("<link/>", {
             rel: "icon",
@@ -59,11 +48,11 @@ define("ThemeManager", [
             href: theme.path + theme.icon
         }).appendTo("head");
 
-        return $.ajax({
-            url: constants.LESS_VERSION,
-            dataType: "script",
-            cache: true
-        });
+        $("<link/>", {
+            rel: "stylesheet",
+            type: "text/css",
+            href: theme.stylesheet
+        }).appendTo("head");
     };
 
 
@@ -78,6 +67,7 @@ define("ThemeManager", [
             return $.Deferred().resolve({
                 "path": "",
                 "icon": "favicon.ico",
+                "stylesheet": "css/styles.css",
                 "settings": {
                     "logo": {
                         "src": "images/logo-horizontal.png",
@@ -91,20 +81,6 @@ define("ThemeManager", [
                         "height": "104px",
                         "width": "210px"
                     },
-                    "lessVars": {
-                        "background-image": "url('../images/box-bg.png')",
-                        "background-position": "950px -100px",
-                        "column-padding": "0px",
-                        "login-container-label-align": "left",
-                        "highlight-color": "#eeea07",
-                        "content-background": "#f9f9f9",
-                        "href-color-hover": "#5e887f",
-                        "color-error": "#d97986",
-                        "color-warning": "yellow",
-                        "color-success": "#71bd71",
-                        "color-info": "blue",
-                        "color-inactive": "gray"
-                    },
                     "footer": {
                         "mailto": "info@forgerock.com",
                         "phone": "+47-2108-1746"
@@ -117,17 +93,9 @@ define("ThemeManager", [
     obj.getTheme = function () {
         if (themePromise === undefined) {
             themePromise = obj.loadThemeConfig().then(function (themeConfig) {
-                var newLessVars = {};
-
                 conf.globalData.theme = themeConfig;
-                return obj.loadThemeCSS(themeConfig).then(function () {
-                    _.each(themeConfig.settings.lessVars, function (value, key) {
-                        newLessVars['@' + key] = value;
-                    });
-                    less.modifyVars(newLessVars);
-
-                    return themeConfig;
-                });
+                obj.loadThemeCSS(themeConfig);
+                return themeConfig;
             });
         }
         return themePromise;

@@ -24,13 +24,10 @@
 
 /*global define, form2js */
 
-/**
- * @author mbilski
- * @author Eugenia Sergueeva
- */
 define("org/forgerock/mock/ui/user/UserRegistrationView", [
     "jquery",
     "underscore",
+    "placeholder",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/util/UIUtils",
@@ -38,7 +35,7 @@ define("org/forgerock/mock/ui/user/UserRegistrationView", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration"
-], function ($, _, AbstractView, validatorsManager, uiUtils, userDelegate, eventManager, constants, conf) {
+], function ($, _, placeholder, AbstractView, validatorsManager, uiUtils, userDelegate, eventManager, constants, conf) {
     var UserRegistrationView = AbstractView.extend({
         template: "templates/mock/UserRegistrationTemplate.html",
         baseTemplate: "templates/common/MediumBaseTemplate.html",

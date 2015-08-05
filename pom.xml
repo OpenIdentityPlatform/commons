@@ -96,6 +96,7 @@
                     <configuration>
                         <assumeConsoleAlertEtc>true</assumeConsoleAlertEtc>
                         <strictWhiteSpace>false</strictWhiteSpace>
+                        <tolerateEval>true</tolerateEval>
                     </configuration>
                 </plugin>
 
@@ -171,23 +172,15 @@
             <!-- Bootstrap, widgets and related theming -->
             <dependency>
                 <groupId>org.forgerock.commons.ui.libs</groupId>
-                <artifactId>less</artifactId>
-                <version>1.5.1</version>
-                <type>js</type>
-                <classifier>min</classifier>
-            </dependency>
-
-            <dependency>
-                <groupId>org.forgerock.commons.ui.libs</groupId>
                 <artifactId>bootstrap</artifactId>
-                <version>3.3.4</version>
+                <version>3.3.5</version>
                 <classifier>custom</classifier>
                 <type>js</type>
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons.ui.libs</groupId>
                 <artifactId>bootstrap</artifactId>
-                <version>3.3.4</version>
+                <version>3.3.5</version>
                 <classifier>custom</classifier>
                 <type>css</type>
             </dependency>
@@ -336,7 +329,7 @@
             <dependency>
                 <groupId>org.forgerock.commons.ui.libs</groupId>
                 <artifactId>sinon</artifactId>
-                <version>1.12.2</version>
+                <version>1.15.4</version>
                 <type>js</type>
             </dependency>
             <dependency>
@@ -344,8 +337,15 @@
                 <artifactId>qunit</artifactId>
                 <version>1.15.0</version>
                 <type>js</type>
+                <scope>test</scope>
             </dependency>
-
+            <dependency>
+                <groupId>org.forgerock.commons.ui.libs</groupId>
+                <artifactId>qunit</artifactId>
+                <type>css</type>
+                <version>1.15.0</version>
+                <scope>test</scope>
+            </dependency>
 
         </dependencies>
     </dependencyManagement>

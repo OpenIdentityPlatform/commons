@@ -22,11 +22,12 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $*/
+/*global define */
 
 define("org/forgerock/mock/ui/user/TermsOfUseDialog", [
+    "jquery",
     "org/forgerock/commons/ui/common/components/BootstrapDialogView"
-], function (BootstrapDialogView) {
+], function ($, BootstrapDialogView) {
     var TermsOfUseDialog = BootstrapDialogView.extend({
         contentTemplate: "templates/mock/TermsOfUseTemplate.html",
         render: function(){

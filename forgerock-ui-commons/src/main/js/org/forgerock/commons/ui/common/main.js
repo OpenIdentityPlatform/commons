@@ -24,13 +24,21 @@
 
 /*global define*/
 
+// this module is merely a useful construct for identifying
+// top-level modules which would be likely to need to embed
+// within a single minified package, since they are pretty much
+// always needed (even for the simplest of forgerock-ui apps)
 define("org/forgerock/commons/ui/common/main", [
-    "./main/main",
-    "./util/main",
-    "./components/main",
-    "./NotFoundView",
-    "./EnableCookiesView",
-    "./LoginView",
-    "./LoginDialog",
+    "./main/AbstractView",
+    "./components/BootstrapDialogView",
+    "./main/ErrorsHandler",
+    "./components/Footer",
+    "./main/i18nManager",
+    "./components/Messages",
+    "./components/Navigation",
+    "./main/ProcessConfiguration",
+    "./main/Router",
+    "./main/SessionManager",
+    "./main/SpinnerManager",
     "./SiteConfigurator"
 ]);

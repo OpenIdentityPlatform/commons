@@ -22,29 +22,43 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, require */
+/*global define */
 
-/**
- * Interface
- * @author mbilski
- */
 define("org/forgerock/commons/ui/common/main/SessionManager", [
+    "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/util/CookieHelper",
-    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware"
-], function(cookieHelper, AbstractConfigurationAware) {
+    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
+    "org/forgerock/commons/ui/common/util/ModuleLoader"
+], function($, _, cookieHelper, AbstractConfigurationAware, ModuleLoader) {
     var obj = new AbstractConfigurationAware();
-    
+
     obj.login = function(params, successCallback, errorCallback) {
         cookieHelper.deleteCookie("session-jwt", "/", ""); // resets the session cookie to discard old session that may still exist
-        require(obj.configuration.loginHelperClass).login(params, successCallback, errorCallback);
+        return ModuleLoader.load(obj.configuration.loginHelperClass).then(function (helper) {
+            return ModuleLoader.promiseWrapper(_.bind(_.curry(helper.login)(params), helper), {
+                success: successCallback,
+                error: errorCallback
+            });
+        });
     };
-    
+
     obj.logout = function(successCallback, errorCallback) {
-        require(obj.configuration.loginHelperClass).logout(successCallback, errorCallback);
+        return ModuleLoader.load(obj.configuration.loginHelperClass).then(function (helper) {
+            return ModuleLoader.promiseWrapper(_.bind(helper.logout, helper), {
+                success: successCallback,
+                error: errorCallback
+            });
+        });
     };
-    
+
     obj.getLoggedUser = function(successCallback, errorCallback) {
-        require(obj.configuration.loginHelperClass).getLoggedUser(successCallback, errorCallback);
+        return ModuleLoader.load(obj.configuration.loginHelperClass).then(function (helper) {
+            return ModuleLoader.promiseWrapper(_.bind(helper.getLoggedUser, helper), {
+                success: successCallback,
+                error: errorCallback
+            });
+        });
     };
 
     return obj;

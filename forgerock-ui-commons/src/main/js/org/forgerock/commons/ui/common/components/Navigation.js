@@ -33,9 +33,10 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
+    "org/forgerock/commons/ui/common/util/ModuleLoader",
     "org/forgerock/commons/ui/common/main/ViewManager",
     "org/forgerock/commons/ui/common/main/Router"
-], function($, _, Backbone, AbstractConfigurationAware, AbstractView, conf, constants, eventManager, viewManager, router) {
+], function($, _, Backbone, AbstractConfigurationAware, AbstractView, conf, constants, eventManager, ModuleLoader, viewManager, router) {
     var obj = new AbstractConfigurationAware();
 
 
@@ -162,52 +163,71 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                 e.preventDefault();
                 var event = $(e.currentTarget).data().event;
                 if (event){
-                    eventManager.sendEvent(event);
+                    eventManager.sendEvent(event, e);
                 }
             },
             render: function(args, callback) {
-                // The user information is shown at the top of the userBar widget,
-                // but it is stored in different ways for different products.
+                /*
+                   The user information is shown at the top of the userBar widget,
+                   but it is stored in different ways for different products.
+                */
                 if (conf.loggedUser) {
-                    if (conf.loggedUser.userName) {
-                        this.data.username = conf.loggedUser.userName; //idm
-                    } else if (conf.loggedUser.cn) {
-                        this.data.username = conf.loggedUser.cn; //am
-                    } else {
-                        this.data.username = conf.loggedUser._id; //fallback option
-                    }
-
-                    this.data.admin = _.contains(conf.loggedUser.roles, "ui-admin");
-
-                    this.data.userBar = _.map(obj.configuration.userBar, function (link) {
-                        if (_.has(link, "i18nKey")) {
-                            link.label = $.t(link.i18nKey);
-                        }
-                        return link;
-                    });
-
-                    if(obj.configuration.username) {
-
-                        if(obj.configuration.username.secondaryLabel) {
-                            obj.configuration.username.secondaryLabel = $.t(obj.configuration.username.secondaryLabel);
+                    /*
+                        The Navigation module is called with every page load, but it doesn't render a drop down
+                        unless the user is actually logged in. To prevent any unnecessary module loading, only
+                        load bootstrap when actually needed.
+                    */
+                    ModuleLoader.load("bootstrap").then(_.bind(function () {
+                        // in rare cases conf.loggedUser can be reset by the time bootstap has loaded
+                        if (!conf.loggedUser) {
+                            return;
                         }
 
-                        this.data.usernameConf = {
-                            "isLink" : obj.configuration.username.isLink,
-                            "href" : obj.configuration.username.href,
-                            "secondaryLabel" : obj.configuration.username.secondaryLabel
-                        };
-                    } else {
-                        this.data.usernameConf = {
-                            "isLink" : false
-                        };
-                    }
+                        if (conf.loggedUser.userName) {
+                            this.data.username = conf.loggedUser.userName; //idm
+                        } else if (conf.loggedUser.cn) {
+                            this.data.username = conf.loggedUser.cn; //am
+                        } else {
+                            this.data.username = conf.loggedUser._id; //fallback option
+                        }
+
+                        this.data.admin = _.contains(conf.loggedUser.roles, "ui-admin");
+
+                        this.data.userBar = _.map(obj.configuration.userBar, function (link) {
+                            if (_.has(link, "i18nKey")) {
+                                link.label = $.t(link.i18nKey);
+                            }
+                            return link;
+                        });
+
+                        if(obj.configuration.username) {
+
+                            if(obj.configuration.username.secondaryLabel) {
+                                obj.configuration.username.secondaryLabel = $.t(obj.configuration.username.secondaryLabel);
+                            }
+
+                            this.data.usernameConf = {
+                                "isLink" : obj.configuration.username.isLink,
+                                "href" : obj.configuration.username.href,
+                                "secondaryLabel" : obj.configuration.username.secondaryLabel
+                            };
+                        } else {
+                            this.data.usernameConf = {
+                                "isLink" : false
+                            };
+                        }
+
+                        this.reload();
+                        this.parentRender(callback);
+
+                    }, this));
+
+                } else {
+                    this.reload();
+                    this.parentRender(callback);
                 }
 
-                this.reload();
-                this.parentRender(callback);
             },
-
 
             addLinks: function(linkName) {
                 var urlName,
@@ -224,7 +244,7 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
 
                     this.data.topNav.push(this.buildNavElement(navObj, baseActive));
 
-                    // none dropdown menus display as submenus and only render for the baseActive.
+                    // dropdown menus display as submenus and only render for the baseActive.
                     if (navObj.dropdown !== true){
 
                         if (baseActive && navObj.urls) {

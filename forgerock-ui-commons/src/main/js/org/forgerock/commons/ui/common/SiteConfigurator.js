@@ -22,7 +22,7 @@
 * "Portions Copyrighted [year] [name of copyright owner]"
 */
 
-/*global define, require */
+/*global define */
 
 /**
 * @author mbilski
@@ -31,16 +31,17 @@ define("org/forgerock/commons/ui/common/SiteConfigurator", [
     "jquery",
     "underscore",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
-    "org/forgerock/commons/ui/common/util/Constants", 
+    "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/commons/ui/common/main/i18nManager"
-], function($, _, AbstractConfigurationAware, constants, eventManager, conf, i18nManager) {
+    "org/forgerock/commons/ui/common/main/i18nManager",
+    "org/forgerock/commons/ui/common/util/ModuleLoader"
+], function($, _, AbstractConfigurationAware, constants, eventManager, conf, i18nManager, ModuleLoader) {
     var obj = new AbstractConfigurationAware();
-    
+
     obj.initialized = false;
-    
-    $(document).on(constants.EVENT_READ_CONFIGURATION_REQUEST, function() {
+
+    eventManager.registerListener(constants.EVENT_READ_CONFIGURATION_REQUEST, function() {
         var configurationDelegate;
 
         if (!conf.globalData) {
@@ -52,23 +53,22 @@ define("org/forgerock/commons/ui/common/SiteConfigurator", [
             conf.setProperty('delegateCache', {});
         }
 
-        console.info("READING CONFIGURATION");
-
         if (obj.configuration && obj.initialized === false) {
             obj.initialized = true;
-            
+
             if (obj.configuration.remoteConfig === true) {
-                configurationDelegate = require(obj.configuration.delegate);
-                configurationDelegate.getConfiguration(function(config) {
-                    obj.processConfiguration(config); 
-                    eventManager.sendEvent(constants.EVENT_APP_INTIALIZED);
-                }, function() {
-                    obj.processConfiguration({}); 
-                    eventManager.sendEvent(constants.EVENT_APP_INTIALIZED);
+                ModuleLoader.load(obj.configuration.delegate).then(function (configurationDelegate) {
+                     configurationDelegate.getConfiguration(function(config) {
+                         obj.processConfiguration(config);
+                         eventManager.sendEvent(constants.EVENT_APP_INITIALIZED);
+                     }, function() {
+                         obj.processConfiguration({});
+                         eventManager.sendEvent(constants.EVENT_APP_INITIALIZED);
+                     });
                 });
             } else {
-                obj.processConfiguration(obj.configuration); 
-                eventManager.sendEvent(constants.EVENT_APP_INTIALIZED);
+                obj.processConfiguration(obj.configuration);
+                eventManager.sendEvent(constants.EVENT_APP_INITIALIZED);
             }
         }
     });
@@ -97,11 +97,10 @@ define("org/forgerock/commons/ui/common/SiteConfigurator", [
     };
 
     obj.configurePage = function (route, params) {
-       var promise = $.Deferred(),
-           configurationDelegate;
+       var promise = $.Deferred();
 
-           if (obj.configuration.remoteConfig === true) {
-                 configurationDelegate = require(obj.configuration.delegate);
+       if (obj.configuration.remoteConfig === true) {
+             ModuleLoader.load(obj.configuration.delegate).then(function (configurationDelegate) {
                  if (typeof configurationDelegate.checkForDifferences === "function") {
                      configurationDelegate.checkForDifferences(route, params).then(function (config) {
                          if (config) {
@@ -109,15 +108,16 @@ define("org/forgerock/commons/ui/common/SiteConfigurator", [
                          }
                          promise.resolve();
                      });
-           } else {
-               promise.resolve();
-           }
+                } else {
+                   promise.resolve();
+                }
+             });
        } else {
              promise.resolve();
        }
 
        return promise;
    };
-    
+
     return obj;
 });

@@ -22,46 +22,47 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global require define*/
+/*global define*/
 
 /**
  * @author yaromin
  */
 define("org/forgerock/commons/ui/common/main/AbstractConfigurationAware", [
-], function(globalConfiguration) {
+    "jquery",
+    "underscore",
+    "org/forgerock/commons/ui/common/util/ModuleLoader"
+], function($, _, ModuleLoader) {
 
     var obj = function AbstractConfigurationAware() {
     };
 
     obj.prototype.updateConfigurationCallback = function(configuration) {
-        var configurationSetsToLoad = [], i, key, itemKey, singleConfigurationData, confKey, confToAdd;
-        console.debug('Configuration updated');
         this.configuration = configuration;
-        
-        if (configuration.loader) {
-            configurationSetsToLoad = configuration.loader;
-            
-            for (key in configurationSetsToLoad) {
-                
-                if (configurationSetsToLoad.hasOwnProperty(key)) {
-                    
-                      singleConfigurationData = configurationSetsToLoad[key];
-                      for (itemKey in singleConfigurationData) {
-                          if (singleConfigurationData.hasOwnProperty(itemKey)) {
-                              confToAdd = require(singleConfigurationData[itemKey]);
-                              for (confKey in confToAdd) {
-                                  
-                                  if (!this.configuration[itemKey][confKey]) {
-                                      this.configuration[itemKey][confKey] = confToAdd[confKey];
-                                  }
-                              }
-                          }
-                      }
-                      
-                }
-            }
-        }
-        
+
+        /*
+            Configuration entries may have a "loader" defined, like so:
+            loader: [
+                {"messages": "config/messages/CommonMessages"},
+                {"messages": "config/messages/UserMessages"}
+            ]
+            Every key found within each map in the array will be used to populate
+            an item of the same name within this.configuration. For example, using the above
+            you would expect this.configuration.messages to contain the merged values from
+            the objects returned from "config/messages/CommonMessages" and
+            "config/messages/UserMessages".
+
+            It should be noted that these configuration items are loaded asynchronously,
+            and as such this function returns a promise that is only resolved when they are
+            all available.
+        */
+        return $.when.apply($, _.map(configuration.loader, function (mapToLoad) {
+            return $.when.apply($, _.map(_.pairs(mapToLoad), function (loadPair) {
+                return ModuleLoader.load(loadPair[1]).then(function (loaded) {
+                    return _.extend(configuration[loadPair[0]], loaded);
+                });
+            }));
+        }));
+
     };
 
     return obj;

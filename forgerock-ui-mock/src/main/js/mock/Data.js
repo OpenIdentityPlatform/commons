@@ -30,32 +30,8 @@
  */
 
  define("mock/Data", [
-    "text!locales/en/translation.json",
-    "text!libs/less-1.5.1-min.js"
  ], function () {
-
- var deps = arguments,
-     /* an unfortunate need to duplicate the file names here, but I haven't
-        yet found a way to fool requirejs into doing dynamic dependencies */
-     staticFiles = [
-        "locales/en/translation.json",
-        "libs/less-1.5.1-min.js"
-     ];
-
     return function (server) {
-
-        _.each(staticFiles, function (file, i) {
-            server.respondWith(
-                "GET",
-                new RegExp(file.replace(/([\/\.\-])/g, "\\$1") + "$"),
-                [
-                    200,
-                    { },
-                    deps[i]
-                ]
-            );
-        });
-
         server.respondWith(
             "GET",
             "/mock/config/ui/configuration",
