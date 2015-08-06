@@ -15,12 +15,17 @@
  */
 package org.forgerock.audit;
 
+import static org.forgerock.json.fluent.JsonValue.field;
+import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.fluent.JsonValue.object;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,6 +34,7 @@ import java.util.UUID;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
+import org.forgerock.audit.util.JsonSchemaUtils;
 import org.forgerock.audit.util.ResourceExceptionsUtil;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
@@ -40,7 +46,6 @@ import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
@@ -386,9 +391,23 @@ public class AuditService implements RequestHandler {
     @Override
     public void handleAction(final ServerContext context, final ActionRequest request,
             final ResultHandler<JsonValue> handler) {
-        handler.handleError(ResourceExceptionsUtil.notSupported(request));
-    }
+        final String action = request.getAction();
+        try {
+            switch (action) {
+                case "availableHandlers":
+                    handler.handleResult(getAvailableAuditEventHandlersWithConfigSchema());
+                    return;
+                default:
+                    throw new AuditException(String.format("Unable to handle action: %s", action));
 
+            }
+        } catch (AuditException e) {
+            final String error = String.format("Unable to handle action: %s", action);
+            logger.error(error);
+            handler.handleError(new InternalServerErrorException(error, e));
+            return;
+        }
+    }
 
     private Collection<AuditEventHandler<?>> getAuditEventHandlersForEvent(final String auditEvent) {
         if (eventTypeAuditEventHandlers.containsKey(auditEvent)) {
@@ -477,5 +496,61 @@ public class AuditService implements RequestHandler {
      */
     public Set<String> getKnownTopics() {
         return auditEvents.keySet();
+    }
+
+    /**
+     * Gets the available audit event handlers from the audit service and the config schema.
+     *
+     * Should return a json object similar to this:
+     * <pre>
+     *      [{
+     *          "class" : "org.forgerock.audit.events.handlers.impl.CSVAuditEventHandler",
+     *          "config" : {
+     *              "type" : "object",
+     *              "properties" : {
+     *                  "logDirectory" : {
+     *                      "type" : "string"
+     *                  },
+     *                  ....
+     *              }
+     *          }
+     *      },
+     *      {
+     *          "class" : "org.forgerock.audit.events.handlers.impl.AnotherAuditEventHandler",
+     *          "config" : {
+     *              "type" : "object",
+     *              "properties" : {
+     *                  "configKey" : {
+     *                      "type" : "string"
+     *                  },
+     *                  ....
+     *              }
+     *          }
+     *      }]
+     * </pre>
+     * @return A json object containing the available audit event handlers and their config schema.
+     * @throws AuditException If an error occurs instantiating one of the audit event handlers
+     */
+    private JsonValue getAvailableAuditEventHandlersWithConfigSchema()
+            throws AuditException {
+
+        final List<String> availableAuditEventHandlers = config.getAvailableAuditEventHandlers();
+        final JsonValue result = new JsonValue(new LinkedList<>());
+
+        for (final String auditEventHandler : availableAuditEventHandlers) {
+            try {
+                AuditEventHandler eventHandler =
+                        (AuditEventHandler) Class.forName(auditEventHandler).newInstance();
+                final JsonValue entry = json(object(
+                        field("class", auditEventHandler),
+                        field("config", JsonSchemaUtils.getAuditEventHandlerConfigurationSchema(eventHandler))
+                ));
+                result.add(entry);
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+                throw new AuditException(String.format("An error occurred while trying to instantiate class "
+                        + "for the handler '%s' or its configuration", auditEventHandler), e);
+            }
+        }
+        return result;
     }
 }
