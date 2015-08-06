@@ -38,6 +38,8 @@ public class AuditJsonConfigTest {
         AuditServiceConfiguration actualConfig = auditService.getConfig();
         assertThat(actualConfig).isNotNull();
         assertThat(actualConfig.getHandlerForQueries()).isEqualTo("pass-through");
+        assertThat(actualConfig.getAvailableAuditEventHandlers())
+                .containsOnly("org.forgerock.audit.PassThroughAuditEventHandler");
     }
 
     @Test

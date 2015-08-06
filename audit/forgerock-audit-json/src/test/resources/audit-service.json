@@ -1,3 +1,4 @@
 {
-  "handlerForQueries" : "pass-through"
+  "handlerForQueries" : "pass-through",
+  "availableAuditEventHandlers" : ["org.forgerock.audit.PassThroughAuditEventHandler"]
 }
