@@ -111,7 +111,6 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
     protected void validate() {
         requireField(EVENT_NAME);
         requireField(TRANSACTION_ID);
-        requireField(AUTHENTICATION);
         superValidateCalled = true;
     }
 

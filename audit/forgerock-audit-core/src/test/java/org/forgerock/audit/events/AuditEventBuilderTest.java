@@ -83,8 +83,8 @@ public class AuditEventBuilderTest {
                 .toEvent();
     }
 
-    @Test(expectedExceptions = { IllegalStateException.class })
-    public void ensureAuditEventContainsAuthentication() throws Exception {
+    @Test
+    public void auditEventAuthenticationDetailsAreOptional() throws Exception {
         productEvent()
                 .eventName("AM-CREST-SUCCESS")
                 .transactionId("transactionId")
