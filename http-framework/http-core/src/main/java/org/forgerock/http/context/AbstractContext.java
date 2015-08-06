@@ -16,7 +16,13 @@
 
 package org.forgerock.http.context;
 
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+
+import java.lang.reflect.Constructor;
+
 import org.forgerock.http.Context;
+import org.forgerock.json.JsonValue;
 import org.forgerock.util.Reject;
 
 /**
@@ -26,12 +32,47 @@ import org.forgerock.util.Reject;
  * additional information, time-stamp information, HTTP headers, etc. Contexts
  * are linked together to form a parent-child chain of context, whose root is a
  * {@link RootContext}.
+ * <p>
+ * Derived Contexts <b>MUST</b> support persistence by providing
+ * <ul>
+ * <li>a <b>public</b> constructor having the same declaration as
+ * {@link #AbstractContext(JsonValue, ClassLoader)}</li>
+ * <li>a <b>public</b> method having the same declaration as
+ * {@link org.forgerock.http.Context#toJsonValue}</li> See the
+ * documentation for more details.
+ * </ul>
+ * <p>
+ * Here is an example of the JSON representation of the core attributes of all
+ * contexts:
+ *
+ * <pre>
+ * {
+ *   "id"     : "56f0fb7e-3837-464d-b9ec-9d3b6af665c3",
+ *   "class"  : ...Java class name..,
+ *   "parent" : {
+ *       ...
+ *   }
+ * }
+ * </pre>
  */
 public abstract class AbstractContext implements Context {
 
-    private final String id;
-    private final String name;
+
+    // Persisted attribute names.
+    private static final String ATTR_CLASS = "class";
+    private static final String ATTR_ID = "id";
+    private static final String ATTR_NAME = "name";
+    private static final String ATTR_PARENT = "parent";
+
+    /**
+     * The parent Context.
+     */
     private final Context parent;
+
+    /**
+     * The Context data.
+     */
+    protected final JsonValue data;
 
     /**
      * Constructs a new {@code AbstractContext} with a {@code null} {@code id}.
@@ -51,14 +92,71 @@ public abstract class AbstractContext implements Context {
      * @param name The name of the context.
      */
     protected AbstractContext(String id, String name, Context parent) {
-        this.id = id;
-        this.name = name;
+        data = json(object());
+        data.put(ATTR_CLASS, getClass().getName());
+        if (id != null) {
+            data.put(ATTR_ID, id);
+        }
+        data.put(ATTR_NAME, name);
         this.parent = parent;
+    }
+
+    /**
+     * Creates a new context from the JSON representation of a previously
+     * persisted context.
+     * <p>
+     * Sub-classes <b>MUST</b> provide a constructor having the same declaration
+     * as this constructor in order to support persistence. Implementations
+     * <b>MUST</b> take care to invoke the super class implementation before
+     * parsing their own context attributes. Below is an example implementation
+     * for a security context which stores the user name and password of the
+     * authenticated user:
+     *
+     * <pre>
+     * protected SecurityContext(JsonValue savedContext, ClassLoader classLoader) {
+     *     // Invoke the super-class implementation first.
+     *     super(savedContext, classLoader);
+     *
+     *     // Now parse the attributes for this context.
+     *     this.username = savedContext.get(&quot;username&quot;).required().asString();
+     *     this.password = savedContext.get(&quot;password&quot;).required().asString();
+     * }
+     * </pre>
+     *
+     * In order to create a context's persisted JSON representation,
+     * implementations must override.
+     *
+     * @param savedContext
+     *            The JSON representation from which this context's attributes
+     *            should be parsed.
+     * @param classLoader
+     *            The ClassLoader which can properly resolve the persisted class-name.
+     */
+    protected AbstractContext(final JsonValue savedContext, final ClassLoader classLoader) {
+        final JsonValue savedParentContext = savedContext.get(ATTR_PARENT);
+        savedContext.remove(ATTR_PARENT);
+        data = savedContext.copy();
+        this.parent = savedParentContext.isNull() ? null : load0(savedParentContext, classLoader);
+    }
+
+    private static Context load0(final JsonValue savedContext, final ClassLoader classLoader) {
+        // Determine the context implementation class and instantiate it.
+        final String className = savedContext.get(ATTR_CLASS).required().asString();
+        try {
+            final Class<? extends Context> clazz = Class.forName(className, true, classLoader)
+                    .asSubclass(AbstractContext.class);
+            final Constructor<? extends Context> constructor = clazz.getDeclaredConstructor(
+                    JsonValue.class, ClassLoader.class);
+            return constructor.newInstance(savedContext, classLoader);
+        } catch (final Exception e) {
+            throw new IllegalArgumentException(
+                    "Unable to instantiate Context implementation class '" + className + "'", e);
+        }
     }
 
     @Override
     public final String getContextName() {
-        return name;
+        return data.get(ATTR_NAME).asString();
     }
 
     @Override
@@ -94,10 +192,10 @@ public abstract class AbstractContext implements Context {
 
     @Override
     public final String getId() {
-        if (id == null && !isRootContext()) {
+        if (data.get(ATTR_ID).isNull() && !isRootContext()) {
             return getParent().getId();
         } else {
-            return id;
+            return data.get(ATTR_ID).required().asString();
         }
     }
 
@@ -111,14 +209,31 @@ public abstract class AbstractContext implements Context {
         return getParent() == null;
     }
 
+    @Override
+    public JsonValue toJsonValue() {
+        final JsonValue value = data.copy();
+        value.put(ATTR_PARENT, parent != null ? parent.toJsonValue().getObject() : null);
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        return toJsonValue().toString();
+    }
+
     private <T extends Context> T asContext0(final Class<T> clazz) {
-        for (Context context = this; context != null; context = context.getParent()) {
-            final Class<?> contextClass = context.getClass();
-            if (clazz.isAssignableFrom(contextClass)) {
-                return contextClass.asSubclass(clazz).cast(context);
+        try {
+            for (Context context = this; context != null; context = context.getParent()) {
+                final Class<?> contextClass = context.getClass();
+                if (clazz.isAssignableFrom(contextClass)) {
+                    return contextClass.asSubclass(clazz).cast(context);
+                }
             }
+            return null;
+        } catch (final Exception e) {
+            throw new IllegalArgumentException(
+                    "Unable to instantiate Context implementation class '" + clazz.getName().toString() + "'", e);
         }
-        return null;
     }
 
     private Context getContext0(final String contextName) {

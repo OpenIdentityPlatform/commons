@@ -22,7 +22,9 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.forgerock.http.Context;
+import org.forgerock.http.context.AbstractContext;
 import org.forgerock.http.context.ServerContext;
+import org.forgerock.json.JsonValue;
 
 /**
  * A {@link Context} which is created when a request has been routed. The
@@ -39,8 +41,11 @@ import org.forgerock.http.context.ServerContext;
  */
 public final class RouterContext extends ServerContext {
 
-    private final String matchedUri;
-    private final String remainingUri;
+    // Persisted attribute names
+    private static final String ATTR_MATCHED_URI = "matchedUri";
+    private static final String ATTR_REMAINIG_URI = "remainingUri";
+    private static final String ATTR_URI_TEMPLATE_VARIABLES = "uriTemplateVariables";
+
     private final Map<String, String> uriTemplateVariables;
 
     /**
@@ -61,9 +66,25 @@ public final class RouterContext extends ServerContext {
     public RouterContext(final Context parent, final String matchedUri, final String remainingUri,
             final Map<String, String> uriTemplateVariables) {
         super(checkNotNull(parent, "Cannot instantiate RouterContext with null parent Context"), "router");
-        this.matchedUri = matchedUri;
-        this.remainingUri = remainingUri;
+        data.put(ATTR_MATCHED_URI, matchedUri);
+        data.put(ATTR_REMAINIG_URI, remainingUri);
         this.uriTemplateVariables = Collections.unmodifiableMap(uriTemplateVariables);
+        data.put(ATTR_URI_TEMPLATE_VARIABLES, this.uriTemplateVariables);
+    }
+
+    /**
+     * Restore from JSON representation.
+     *
+     * @param savedContext
+     *            The JSON representation from which this context's attributes
+     *            should be parsed.
+     * @param classLoader
+     *            The ClassLoader which can properly resolve the persisted class-name.
+     */
+    RouterContext(final JsonValue savedContext, final ClassLoader classLoader) {
+        super(savedContext, classLoader);
+        this.uriTemplateVariables =
+                Collections.unmodifiableMap(data.get(ATTR_URI_TEMPLATE_VARIABLES).required().asMap(String.class));
     }
 
     /**
@@ -102,7 +123,7 @@ public final class RouterContext extends ServerContext {
      *         URI template.
      */
     public String getMatchedUri() {
-        return matchedUri;
+        return data.get(ATTR_MATCHED_URI).asString();
     }
 
     /**
@@ -114,7 +135,7 @@ public final class RouterContext extends ServerContext {
      * remaining to be matched.
      */
     public String getRemainingUri() {
-        return remainingUri;
+        return data.get(ATTR_REMAINIG_URI).asString();
     }
 
     /**

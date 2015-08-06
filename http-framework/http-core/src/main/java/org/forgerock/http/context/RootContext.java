@@ -20,6 +20,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.forgerock.http.Context;
+import org.forgerock.json.JsonValue;
 
 /**
  * A {@link Context} which has an a globally unique ID but no parent. All request context
@@ -59,4 +60,18 @@ public final class RootContext extends AbstractContext {
         // No parent
         super(id, "root", null);
     }
+
+    /**
+     * Restore from JSON representation.
+     *
+     * @param savedContext
+     *            The JSON representation from which this context's attributes
+     *            should be parsed.
+     * @param classLoader
+     *            The ClassLoader which can properly resolve the persisted class-name.
+     */
+    RootContext(final JsonValue savedContext, final ClassLoader classLoader) {
+        super(savedContext, classLoader);
+    }
+
 }

@@ -16,6 +16,8 @@
 
 package org.forgerock.http;
 
+import org.forgerock.json.JsonValue;
+
 /**
  * The context associated with a request currently being processed by a {@code Handler}.
  * A request context can be used to query state information
@@ -111,4 +113,11 @@ public interface Context {
      * @return {@code true} if this context is a root context.
      */
     boolean isRootContext();
+
+    /**
+     * Return this Context as a JsonValue (for persistence).
+     *
+     * @return the Context data as a JsonValue.
+     */
+    JsonValue toJsonValue();
 }

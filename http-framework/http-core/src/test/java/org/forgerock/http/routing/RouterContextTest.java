@@ -17,11 +17,11 @@
 package org.forgerock.http.routing;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
 
 import java.util.Collections;
 
 import org.forgerock.http.Context;
+import org.forgerock.http.context.RootContext;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -29,7 +29,7 @@ public class RouterContextTest {
 
     @DataProvider
     private Object[][] testData() {
-        Context parentContext = mock(Context.class);
+        Context parentContext = new RootContext();
         return new Object[][]{
             {newContext(parentContext, "MATCHED_URI"), "MATCHED_URI"},
             {newContext(newContext(parentContext, "PREVIOUSLY_MATCHED_URI"), "MATCHED_URI"),

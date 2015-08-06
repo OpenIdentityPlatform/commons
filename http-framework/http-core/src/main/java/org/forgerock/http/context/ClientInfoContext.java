@@ -18,11 +18,19 @@ package org.forgerock.http.context;
 
 import static java.util.Arrays.asList;
 
-import java.security.cert.X509Certificate;
+import java.io.ByteArrayInputStream;
+import java.io.UnsupportedEncodingException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import org.forgerock.http.Context;
+import org.forgerock.json.JsonValue;
+import org.forgerock.util.encode.Base64;
 
 /**
  * ClientInfo gives easy access to client-related information that are available into the request.
@@ -31,33 +39,73 @@ import org.forgerock.http.Context;
  *     <li>Remote IP address or hostname</li>
  *     <li>Remote port</li>
  *     <li>Username</li>
- *     <li>Client provided X509 certificates</li>
+ *     <li>Client provided certificates</li>
  *     <li>User-Agent information</li>
  * </ul>
  */
-public final class ClientInfoContext extends ServerContext implements ClientInfo {
+public final class ClientInfoContext extends AbstractContext implements ClientInfo {
 
-    private final String remoteUser;
-    private final String remoteAddress;
-    private final String remoteHost;
-    private final int remotePort;
-    private final List<X509Certificate> certificates;
-    private final String userAgent;
+    // Persisted attribute names
+    private static final String ATTR_REMOTE_USER = "remoteUser";
+    private static final String ATTR_REMOTE_ADDRESS = "remoteAddress";
+    private static final String ATTR_REMOTE_HOST = "remoteHost";
+    private static final String ATTR_REMOTE_PORT = "remotePort";
+    private static final String ATTR_CERTIFICATES = "certificates";
+    private static final String ATTR_USER_AGENT = "userAgent";
+
+    private static final String X509_TYPE = "X.509";
+    private static final String BEGIN_CERTIFICATE = "-----BEGIN CERTIFICATE-----";
+    private static final String END_CERTIFICATE = "-----END CERTIFICATE-----";
+
+    private final Collection<? extends Certificate> certificates;
 
     private ClientInfoContext(Context parent,
                               String remoteUser,
                               String remoteAddress,
                               String remoteHost,
                               int remotePort,
-                              List<X509Certificate> certificates,
+                              List<? extends Certificate> certificates,
                               String userAgent) {
         super(parent, "clientInfo");
-        this.remoteUser = remoteUser;
-        this.remoteAddress = remoteAddress;
-        this.remoteHost = remoteHost;
-        this.remotePort = remotePort;
-        this.certificates = Collections.unmodifiableList(certificates);
-        this.userAgent = userAgent;
+        data.put(ATTR_REMOTE_USER, remoteUser);
+        data.put(ATTR_REMOTE_ADDRESS, remoteAddress);
+        data.put(ATTR_REMOTE_HOST, remoteHost);
+        data.put(ATTR_REMOTE_PORT, remotePort);
+        // maintain the real list of certificates for Java API
+        this.certificates = Collections.unmodifiableCollection(certificates);
+        // store Base64-encoded certificates for JSON serialization
+        StringBuilder builder = new StringBuilder();
+        for (final Certificate certificate : certificates) {
+            try {
+                builder.append(BEGIN_CERTIFICATE)
+                        .append(Base64.encode(certificate.getEncoded()))
+                        .append(END_CERTIFICATE);
+            } catch (CertificateEncodingException e) {
+                throw new IllegalStateException("Unable to serialize certificates", e);
+            }
+        }
+        data.put(ATTR_CERTIFICATES, builder.toString());
+        data.put(ATTR_USER_AGENT, userAgent);
+    }
+
+    /**
+     * Restore from JSON representation.
+     *
+     * @param savedContext
+     *            The JSON representation from which this context's attributes
+     *            should be parsed.
+     * @param classLoader
+     *            The ClassLoader which can properly resolve the persisted class-name.
+     */
+    ClientInfoContext(final JsonValue savedContext, final ClassLoader classLoader) {
+        super(savedContext, classLoader);
+        try {
+            this.certificates = Collections.unmodifiableCollection(
+                    CertificateFactory.getInstance(X509_TYPE).generateCertificates(
+                            new ByteArrayInputStream(data.get(ATTR_CERTIFICATES).asString().getBytes("UTF8"))));
+        } catch (CertificateException | UnsupportedEncodingException e) {
+            throw new IllegalStateException("Unable to deserialize certificates", e);
+        }
     }
 
     /**
@@ -70,7 +118,7 @@ public final class ClientInfoContext extends ServerContext implements ClientInfo
         private String remoteAddress;
         private String remoteHost;
         private int remotePort;
-        private List<X509Certificate> certificates;
+        private List<? extends Certificate> certificates;
         private String userAgent;
 
         private ClientInfoContextBuilder(Context parent) {
@@ -128,11 +176,11 @@ public final class ClientInfoContext extends ServerContext implements ClientInfo
          * @return The builder instance.
          * @see #certificates(List)
          */
-        public ClientInfoContextBuilder certificates(X509Certificate... certificates) {
+        public ClientInfoContextBuilder certificates(Certificate... certificates) {
             if (certificates != null) {
                 return certificates(asList(certificates));
             } else {
-                return certificates(Collections.<X509Certificate>emptyList());
+                return certificates(Collections.<Certificate>emptyList());
             }
         }
 
@@ -141,9 +189,9 @@ public final class ClientInfoContext extends ServerContext implements ClientInfo
          *
          * @param certificates The {@code List} of certificates.
          * @return The builder instance.
-         * @see #certificates(X509Certificate...)
+         * @see #certificates(Certificate...)
          */
-        public ClientInfoContextBuilder certificates(List<X509Certificate> certificates) {
+        public ClientInfoContextBuilder certificates(List<Certificate> certificates) {
             this.certificates = certificates;
             return this;
         }
@@ -187,7 +235,7 @@ public final class ClientInfoContext extends ServerContext implements ClientInfo
      */
     @Override
     public String getRemoteUser() {
-        return remoteUser;
+        return data.get(ATTR_REMOTE_USER).asString();
     }
 
     /**
@@ -197,7 +245,7 @@ public final class ClientInfoContext extends ServerContext implements ClientInfo
      */
     @Override
     public String getRemoteAddress() {
-        return remoteAddress;
+        return data.get(ATTR_REMOTE_ADDRESS).asString();
     }
 
     /**
@@ -207,7 +255,7 @@ public final class ClientInfoContext extends ServerContext implements ClientInfo
      */
     @Override
     public String getRemoteHost() {
-        return remoteHost;
+        return data.get(ATTR_REMOTE_HOST).asString();
     }
 
     /**
@@ -217,17 +265,17 @@ public final class ClientInfoContext extends ServerContext implements ClientInfo
      */
     @Override
     public int getRemotePort() {
-        return remotePort;
+        return data.get(ATTR_REMOTE_PORT).asInteger();
     }
 
     /**
-     * Returns the list (possibly empty) of X509 certificate(s) provided by the client.
+     * Returns the list (possibly empty) of certificate(s) provided by the client.
      * If no certificates are available, an empty list is returned.
      *
-     * @return the list (possibly empty) of X509 certificate(s) provided by the client.
+     * @return the list (possibly empty) of certificate(s) provided by the client.
      */
     @Override
-    public List<X509Certificate> getCertificates() {
+    public Collection<? extends Certificate> getCertificates() {
         return certificates;
     }
 
@@ -238,6 +286,6 @@ public final class ClientInfoContext extends ServerContext implements ClientInfo
      */
     @Override
     public String getUserAgent() {
-        return userAgent;
+        return data.get(ATTR_USER_AGENT).asString();
     }
 }

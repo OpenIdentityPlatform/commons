@@ -25,7 +25,7 @@ import org.forgerock.http.Filter;
 import org.forgerock.http.Handler;
 import org.forgerock.http.Session;
 import org.forgerock.http.SessionManager;
-import org.forgerock.http.context.HttpContext;
+import org.forgerock.http.context.HttpRequestContext;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.util.Reject;
@@ -34,7 +34,7 @@ import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
 
 /**
- * Filter implementation that uses a {@link SessionManager} to set the {@link Session} in the {@link HttpContext}.
+ * Filter implementation that uses a {@link SessionManager} to set the {@link Session} in the {@link HttpRequestContext}.
  *
  * <p>The previous {@code Session} value will be saved and restored after the {@code Handler} has been executed.</p>
  */
@@ -48,19 +48,19 @@ class SessionFilter implements Filter {
 
     @Override
     public Promise<Response, NeverThrowsException> filter(Context context, Request request, Handler next) {
-        final HttpContext httpContext = context.asContext(HttpContext.class);
-        final Session oldSession = httpContext.getSession();
-        httpContext.setSession(sessionManager.load(request));
+        final HttpRequestContext httpRequestContext = context.asContext(HttpRequestContext.class);
+        final Session oldSession = httpRequestContext.getSession();
+        httpRequestContext.setSession(sessionManager.load(request));
         return next.handle(context, request)
                    .thenOnResult(new ResultHandler<Response>() {
                        @Override
                        public void handleResult(Response response) {
                            try {
-                               sessionManager.save(httpContext.getSession(), response);
+                               sessionManager.save(httpRequestContext.getSession(), response);
                            } catch (IOException e) {
                                LOGGER.error("Failed to save session", e);
                            } finally {
-                               httpContext.setSession(oldSession);
+                               httpRequestContext.setSession(oldSession);
                            }
                        }
                    });

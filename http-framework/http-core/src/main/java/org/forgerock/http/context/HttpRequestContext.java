@@ -22,13 +22,14 @@ import java.util.Map;
 
 import org.forgerock.http.Context;
 import org.forgerock.http.Session;
+import org.forgerock.json.JsonValue;
 import org.forgerock.util.Reject;
 
 /**
  * Represents extrinsic state associated with the processing of a request in a
  * server.
  */
-public final class HttpContext extends AbstractContext {
+public final class HttpRequestContext extends AbstractContext {
 
     /*
      * TODO: add connection information such as IP address, SSL parameters, etc.
@@ -48,10 +49,23 @@ public final class HttpContext extends AbstractContext {
      * @param parent The parent {@code Context}.
      * @param session The HTTP {@code Session}.
      */
-    public HttpContext(Context parent, Session session) {
+    public HttpRequestContext(Context parent, Session session) {
         super(parent, "httpRequest");
         Reject.ifNull(session, "Session cannot be null.");
         this.session = session;
+    }
+
+    /**
+     * Restore from JSON representation.
+     *
+     * @param savedContext
+     *            The JSON representation from which this context's attributes
+     *            should be parsed.
+     * @param classLoader
+     *            The ClassLoader which can properly resolve the persisted class-name.
+     */
+    HttpRequestContext(final JsonValue savedContext, final ClassLoader classLoader) {
+        super(savedContext, classLoader);
     }
 
     /**
@@ -69,7 +83,7 @@ public final class HttpContext extends AbstractContext {
      * @param principal The principal.
      * @return The {@code HttpContext}.
      */
-    public HttpContext setPrincipal(Principal principal) {
+    public HttpRequestContext setPrincipal(Principal principal) {
         this.principal = principal;
         return this;
     }
@@ -89,7 +103,7 @@ public final class HttpContext extends AbstractContext {
      * @param session The session.
      * @return The {@code HttpContext}
      */
-    public HttpContext setSession(Session session) {
+    public HttpRequestContext setSession(Session session) {
         this.session = session;
         return this;
     }

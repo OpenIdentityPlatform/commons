@@ -16,9 +16,10 @@
 
 package org.forgerock.http.context;
 
-import static org.forgerock.util.Reject.*;
+import static org.forgerock.util.Reject.checkNotNull;
 
 import org.forgerock.http.Context;
+import org.forgerock.json.JsonValue;
 
 /**
  * The context associated with a request currently being processed by a {@code Handler}
@@ -39,7 +40,7 @@ public class ServerContext extends AbstractContext {
      *             server context.
      */
     public ServerContext(final Context parent) {
-        super(parent, "server");
+        super(checkNotNull(parent, "Cannot instantiate ServerContext with null parent Context"), "server");
     }
 
     /**
@@ -56,22 +57,20 @@ public class ServerContext extends AbstractContext {
      *             server context.
      */
     public ServerContext(final Context parent, final String name) {
-        super(parent, name);
+        super(checkNotNull(parent, "Cannot instantiate ServerContext with null parent Context"),
+                checkNotNull(name, "Cannot instantiate ServerContext with null name"));
     }
 
     /**
-     * Creates a new API information context having the provided ID, parent, and
-     * an internal connection inherited from a parent server context.
+     * Restore from JSON representation.
      *
-     * @param id
-     *            The context ID.
-     * @param parent
-     *            The parent context.
-     * @throws IllegalStateException
-     *             If it was not possible to inherit a connection from a parent
-     *             server context.
+     * @param savedContext
+     *            The JSON representation from which this context's attributes
+     *            should be parsed.
+     * @param classLoader
+     *            The ClassLoader which can properly resolve the persisted class-name.
      */
-    public ServerContext(final String id, final Context parent) {
-        super(id, "server", checkNotNull(parent, "Cannot instantiate ServerContext with null parent Context"));
+    protected ServerContext(final JsonValue savedContext, final ClassLoader classLoader) {
+        super(savedContext, classLoader);
     }
 }

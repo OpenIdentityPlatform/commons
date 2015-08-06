@@ -16,7 +16,9 @@
 
 package org.forgerock.http.context;
 
+import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -61,12 +63,12 @@ public interface ClientInfo {
     int getRemotePort();
 
     /**
-     * Returns the list (possibly empty) of X509 certificate(s) provided by the client.
+     * Returns the collection (possibly empty) of X509 certificate(s) provided by the client.
      * If no certificates are available, an empty list is returned.
      *
-     * @return the list (possibly empty) of X509 certificate(s) provided by the client.
+     * @return the collection (possibly empty) of X509 certificate(s) provided by the client.
      */
-    List<X509Certificate> getCertificates();
+    Collection<? extends Certificate> getCertificates();
 
     /**
      * Returns the value of the {@literal User-Agent} HTTP Header (if any, returns {@code null} otherwise).
