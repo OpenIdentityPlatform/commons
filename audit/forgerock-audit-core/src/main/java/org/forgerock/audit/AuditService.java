@@ -537,6 +537,10 @@ public class AuditService implements RequestHandler {
         final List<String> availableAuditEventHandlers = config.getAvailableAuditEventHandlers();
         final JsonValue result = new JsonValue(new LinkedList<>());
 
+        if (availableAuditEventHandlers == null) {
+            return result;
+        }
+
         for (final String auditEventHandler : availableAuditEventHandlers) {
             try {
                 AuditEventHandler eventHandler =

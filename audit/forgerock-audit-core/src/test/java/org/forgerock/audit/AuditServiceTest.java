@@ -23,6 +23,8 @@ import static org.mockito.Mockito.*;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -31,6 +33,7 @@ import org.forgerock.audit.events.handlers.impl.PassThroughAuditEventHandler;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResultHandler;
@@ -189,9 +192,9 @@ public class AuditServiceTest {
 
         //then
         verify(queryAuditEventHandler).readInstance(same(context),
-                                                    eq("1234"),
-                                                    same(readRequest),
-                                                    same(readResultHandler));
+                eq("1234"),
+                same(readRequest),
+                same(readResultHandler));
         verifyZeroInteractions(auditEventHandler);
     }
 
@@ -262,7 +265,7 @@ public class AuditServiceTest {
     }
 
     @Test
-    public void testActionOnAuditLogEntry() throws ResourceException {
+    public void testUnknownAction() throws ResourceException {
         final AuditService auditService = getAuditService(QUERY_HANDLER_NAME);
         final ResultHandler<JsonValue> resultHandler = mockResultHandler(JsonValue.class);
         final ArgumentCaptor<JsonValue> resourceCaptor = ArgumentCaptor.forClass(JsonValue.class);
@@ -272,7 +275,7 @@ public class AuditServiceTest {
         //when
         auditService.handleAction(
                 new ServerContext(new RootContext()),
-                Requests.newActionRequest("_id", "action"),
+                Requests.newActionRequest("", "unknownAction"),
                 resultHandler
         );
 
@@ -280,7 +283,43 @@ public class AuditServiceTest {
         verify(resultHandler, never()).handleResult(resourceCaptor.capture());
         verify(resultHandler).handleError(resourceExceptionCaptor.capture());
 
-        assertThat(resourceExceptionCaptor.getValue()).isInstanceOf(NotSupportedException.class);
+        assertThat(resourceExceptionCaptor.getValue()).isInstanceOf(InternalServerErrorException.class);
+    }
+
+    @Test
+    public void testAvailableHandlersAction() throws ResourceException {
+        final AuditService auditService = getAuditService(QUERY_HANDLER_NAME);
+        final ResultHandler<JsonValue> resultHandler = mockResultHandler(JsonValue.class);
+        final ArgumentCaptor<JsonValue> resourceCaptor = ArgumentCaptor.forClass(JsonValue.class);
+        final ArgumentCaptor<ResourceException> resourceExceptionCaptor =
+                ArgumentCaptor.forClass(ResourceException.class);
+
+        //when
+        auditService.handleAction(
+                new ServerContext(new RootContext()),
+                Requests.newActionRequest("", "availableHandlers"),
+                resultHandler
+        );
+
+        //then
+        verify(resultHandler).handleResult(resourceCaptor.capture());
+        verify(resultHandler, never()).handleError(resourceExceptionCaptor.capture());
+
+        final JsonValue result = resourceCaptor.getValue();
+        assertThat(result.keys().size()).isEqualTo(1);
+        assertThat(result.get(0).get("class").asString())
+                .isEqualTo("org.forgerock.audit.events.handlers.impl.PassThroughAuditEventHandler");
+
+        // { "type": "object", "properties": { "message": { "type": "string" } } }
+        final JsonValue expectedConfig = json(object(
+                field("type", "object"),
+                field("properties", object(
+                    field("message", object(
+                        field("type", "string")
+                    ))
+                ))
+        ));
+        assertThat(result.get(0).get("config").asMap()).isEqualTo(expectedConfig.asMap());
     }
 
     @Test
@@ -382,6 +421,9 @@ public class AuditServiceTest {
             String queryHandlerName, JsonValue additionalEventTypes) throws ResourceException {
         AuditServiceConfiguration config = new AuditServiceConfiguration();
         config.setHandlerForQueries(queryHandlerName);
+        final List<String> availableAuditEventHandlers = new LinkedList<>();
+        availableAuditEventHandlers.add("org.forgerock.audit.events.handlers.impl.PassThroughAuditEventHandler");
+        config.setAvailableAuditEventHandlers(availableAuditEventHandlers);
         AuditService auditService = new AuditService(json(object()), additionalEventTypes);
         auditService.configure(config);
         return auditService;

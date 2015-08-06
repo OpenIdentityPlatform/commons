@@ -52,6 +52,7 @@ public class AuditServiceConfiguration {
      */
     public AuditServiceConfiguration(AuditServiceConfiguration config) {
         handlerForQueries = config.getHandlerForQueries();
+        availableAuditEventHandlers = config.availableAuditEventHandlers;
     }
 
     /**
