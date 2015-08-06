@@ -44,7 +44,7 @@ public final class JsonSchemaUtils {
     private static final String FORWARD_SLASH = "/";
 
     private JsonSchemaUtils() {
-        //prevent instantiation
+        // prevent instantiation
     }
 
     /**
