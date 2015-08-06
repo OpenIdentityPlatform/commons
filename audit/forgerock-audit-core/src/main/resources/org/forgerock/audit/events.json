@@ -17,6 +17,14 @@
         "eventName": {
           "type": "string"
         },
+        "authentication": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            }
+          }
+        },
         "server": {
           "type": "object",
           "properties": {
@@ -38,14 +46,6 @@
               "type": "string"
             },
             "port": {
-              "type": "string"
-            }
-          }
-        },
-        "authentication": {
-          "type": "object",
-          "properties": {
-            "id": {
               "type": "string"
             }
           }
@@ -204,6 +204,18 @@
       "id": "/",
       "type": "object",
       "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string"
+        },
+        "transactionId": {
+          "type": "string"
+        },
+        "eventName": {
+          "type": "string"
+        },
         "authentication": {
           "type": "object",
           "properties": {
@@ -211,12 +223,6 @@
               "type": "string"
             }
           }
-        },
-        "transactionId": {
-          "type": "string"
-        },
-        "eventName": {
-          "type": "string"
         },
         "result": {
           "type": "string"
