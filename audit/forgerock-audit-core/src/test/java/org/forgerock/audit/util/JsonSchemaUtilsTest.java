@@ -22,6 +22,8 @@ import static org.forgerock.json.fluent.JsonValue.field;
 import static org.forgerock.json.fluent.JsonValue.json;
 import static org.forgerock.json.fluent.JsonValue.object;
 
+import org.forgerock.audit.events.handlers.AuditEventHandler;
+import org.forgerock.audit.events.handlers.impl.PassThroughAuditEventHandler;
 import org.forgerock.json.fluent.JsonValue;
 import org.testng.annotations.Test;
 
@@ -80,5 +82,25 @@ public class JsonSchemaUtilsTest {
         assertThat(pointers.contains("/server/ip"));
         assertThat(pointers.contains("/server/port"));
         assertThat(pointers.contains("/array"));
+    }
+
+    @Test
+    public void testGetAuditEventHandlerConfigurationSchema() throws Exception {
+        //given
+        final AuditEventHandler auditEventHandler = new PassThroughAuditEventHandler();
+        final JsonValue expectedSchema = json(object(
+                field("type", "object"),
+                field("properties", object(
+                        field("message", object(
+                                field("type", "string")
+                        ))
+                ))
+        ));
+
+        //when
+        final JsonValue schema = JsonSchemaUtils.getAuditEventHandlerConfigurationSchema(auditEventHandler);
+
+        //then
+        assertThat(schema.asMap()).isEqualTo(expectedSchema.asMap());
     }
 }

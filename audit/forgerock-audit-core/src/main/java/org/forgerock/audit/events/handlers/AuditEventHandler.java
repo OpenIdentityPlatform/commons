@@ -62,4 +62,10 @@ public interface AuditEventHandler<CFG> extends CollectionResourceProvider {
      */
     public void setDependencyProvider(DependencyProvider dependencyProvider);
 
+    /**
+     * Gets the configuration class for the audit event handler.
+     * @return the configuration class for the audit event handler
+     */
+    public Class<CFG> getConfigurationClass();
+
 }

@@ -329,9 +329,9 @@ public class CSVAuditEventHandlerTest {
         CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory);
         final JsonValue content = json(
                 object(
-                    field("_id", "1"),
-                    field("timestamp", "123456"),
-                    field("transactionId", "A10000")));
+                        field("_id", "1"),
+                        field("timestamp", "123456"),
+                        field("transactionId", "A10000")));
         CreateRequest createRequest = Requests.newCreateRequest("access", content);
 
         csvHandler.createInstance(

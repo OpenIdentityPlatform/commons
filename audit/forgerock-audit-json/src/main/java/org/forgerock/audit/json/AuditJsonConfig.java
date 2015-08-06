@@ -159,8 +159,7 @@ public class AuditJsonConfig {
             eventHandler = (AuditEventHandler<CFG>) Class.forName(className, true, classLoader).newInstance();
             JsonValue conf = jsonConfig.get(CONFIG_FIELD);
             if (conf != null) {
-                String configurationClassName = className + CONFIGURATION_CLASS_SUFFIX;
-                Class<CFG> klass = (Class<CFG>) Class.forName(configurationClassName, true, classLoader);
+                Class<CFG> klass = eventHandler.getConfigurationClass();
                 CFG configuration = mapper.readValue(conf.toString(), klass);
                 eventHandler.configure(configuration);
             }

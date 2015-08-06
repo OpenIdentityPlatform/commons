@@ -33,11 +33,14 @@ import org.forgerock.json.resource.ServerContext;
 /**
  * Handles AuditEvents by just calling the result Handler.
  */
-public class PassThroughAuditEventHandler extends AuditEventHandlerBase<Void> {
+public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThroughAuditEventHandlerConfiguration> {
+
+    /** A message logged when a new entry is added. */
+    private String message;
 
     @Override
-    public void configure(Void config) throws ResourceException {
-        // nothing to do
+    public void configure(PassThroughAuditEventHandlerConfiguration config) throws ResourceException {
+        this.message = config.getMessage();
     }
 
     /** {@inheritDoc} */
@@ -110,4 +113,11 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<Void> {
         handler.handleError(ResourceExceptionsUtil.notSupported(request));
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Class<PassThroughAuditEventHandlerConfiguration> getConfigurationClass() {
+        return PassThroughAuditEventHandlerConfiguration.class;
+    }
 }

@@ -87,4 +87,10 @@ public abstract class AuditEventHandlerBase<CFG> implements AuditEventHandler<CF
         handler.handleError(ResourceExceptionsUtil.notSupported(request));
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public abstract Class<CFG> getConfigurationClass();
+
 }

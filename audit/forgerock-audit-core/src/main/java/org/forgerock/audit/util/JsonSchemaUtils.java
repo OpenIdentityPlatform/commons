@@ -16,15 +16,26 @@
 
 package org.forgerock.audit.util;
 
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.schema.JsonSchema;
+import org.forgerock.audit.AuditException;
+import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.json.fluent.JsonValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
  * Contains Utility methods for dealing with JsonSchema data.
  */
 public final class JsonSchemaUtils {
+
+    private static final Logger logger = LoggerFactory.getLogger(JsonSchemaUtils.class);
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     private static final String PROPERTIES = "properties";
     private static final String ID = "id";
@@ -33,7 +44,7 @@ public final class JsonSchemaUtils {
     private static final String FORWARD_SLASH = "/";
 
     private JsonSchemaUtils() {
-
+        // prevent instantiation
     }
 
     /**
@@ -78,5 +89,25 @@ public final class JsonSchemaUtils {
             newPointers.add(stringBuilder.toString());
         }
         return newPointers;
+    }
+
+    /**
+     * Gets the configuration schema for an audit event handler as json schema.
+     * @param auditEventHandler The audit event handler to get the config schema for.
+     * @return The config schema as json schema.
+     * @throws AuditException If any error occurs parsing the config class for schema.
+     */
+    public static JsonValue getAuditEventHandlerConfigurationSchema(final AuditEventHandler auditEventHandler)
+            throws AuditException {
+        try {
+            JsonSchema schema = mapper.generateJsonSchema(auditEventHandler.getConfigurationClass());
+            return new JsonValue(mapper.readValue(schema.toString(), Map.class));
+        } catch (IOException e) {
+            logger.error("Unable to parse configuration class schema for class {}",
+                    auditEventHandler.getClass().getName(), e);
+            throw new AuditException(
+                    String.format("Unable to parse configuration class schema for class %s",
+                            auditEventHandler.getClass().getName()), e);
+        }
     }
 }

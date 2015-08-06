@@ -118,4 +118,8 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
         handler.handleError(ResourceExceptionsUtil.notSupported(request));
     }
 
+    @Override
+    public Class<PassThroughAuditEventHandlerConfiguration> getConfigurationClass() {
+        return PassThroughAuditEventHandlerConfiguration.class;
+    }
 }
