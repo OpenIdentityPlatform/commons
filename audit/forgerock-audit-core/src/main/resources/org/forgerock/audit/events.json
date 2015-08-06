@@ -119,6 +119,9 @@
             },
             "elapsedTime": {
               "type": "string"
+            },
+            "message": {
+              "type": "string"
             }
           }
         }
@@ -201,9 +204,6 @@
       "id": "/",
       "type": "object",
       "properties": {
-        "_id": {
-          "type": "string"
-        },
         "authentication": {
           "type": "object",
           "properties": {
