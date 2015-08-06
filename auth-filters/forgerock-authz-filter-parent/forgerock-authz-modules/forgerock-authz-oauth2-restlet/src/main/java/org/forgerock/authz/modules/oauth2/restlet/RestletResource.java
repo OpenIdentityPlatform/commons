@@ -18,7 +18,7 @@ package org.forgerock.authz.modules.oauth2.restlet;
 
 import org.forgerock.authz.modules.oauth2.RestResource;
 import org.forgerock.authz.modules.oauth2.RestResourceException;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.restlet.engine.header.Header;
 import org.restlet.representation.Representation;
 import org.restlet.resource.ClientResource;

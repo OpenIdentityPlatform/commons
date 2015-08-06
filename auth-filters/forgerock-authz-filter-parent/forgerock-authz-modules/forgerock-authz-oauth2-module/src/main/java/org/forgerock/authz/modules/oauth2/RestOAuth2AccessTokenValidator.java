@@ -16,7 +16,7 @@
 
 package org.forgerock.authz.modules.oauth2;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

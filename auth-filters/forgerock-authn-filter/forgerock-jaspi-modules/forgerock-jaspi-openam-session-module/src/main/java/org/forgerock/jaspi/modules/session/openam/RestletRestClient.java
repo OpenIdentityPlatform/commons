@@ -17,14 +17,14 @@
 package org.forgerock.jaspi.modules.session.openam;
 
 import static org.forgerock.caf.authentication.framework.AuthenticationFramework.LOG;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 
 import java.io.IOException;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ResourceException;
 import org.json.JSONObject;
 import org.restlet.Context;

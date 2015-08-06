@@ -17,13 +17,13 @@
 package org.forgerock.authz.filter.servlet;
 
 import static org.forgerock.authz.filter.api.AuthorizationResult.*;
-import static org.forgerock.json.fluent.JsonValue.*;
+import static org.forgerock.json.JsonValue.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
 
 import org.forgerock.authz.filter.api.AuthorizationResult;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.util.promise.Promise;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

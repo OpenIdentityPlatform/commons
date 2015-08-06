@@ -17,7 +17,7 @@
 package org.forgerock.authz.modules.oauth2.restlet;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 
 import java.io.IOException;
 import java.util.Map;

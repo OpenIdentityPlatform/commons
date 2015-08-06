@@ -16,7 +16,7 @@
 
 package org.forgerock.authz.filter.api;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 
 /**
  * Represents the result of the authorization of a request.

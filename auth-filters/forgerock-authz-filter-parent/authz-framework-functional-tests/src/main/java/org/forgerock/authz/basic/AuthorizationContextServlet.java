@@ -18,7 +18,7 @@ package org.forgerock.authz.basic;
 
 import org.forgerock.authz.filter.api.AuthorizationContext;
 import org.forgerock.authz.filter.servlet.api.HttpAuthorizationContext;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;

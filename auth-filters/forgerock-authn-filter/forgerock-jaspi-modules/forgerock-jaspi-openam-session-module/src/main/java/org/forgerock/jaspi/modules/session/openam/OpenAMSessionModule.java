@@ -37,7 +37,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.forgerock.caf.authentication.api.AuthenticationException;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.util.Reject;
 

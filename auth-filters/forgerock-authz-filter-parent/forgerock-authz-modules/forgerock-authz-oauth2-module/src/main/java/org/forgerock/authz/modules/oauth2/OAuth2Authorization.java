@@ -18,9 +18,9 @@ package org.forgerock.authz.modules.oauth2;
 
 import java.util.Set;
 
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 
 /**
  * Utility class providing convenience methods for creating both {@link OAuth2CrestAuthorizationModule}s and

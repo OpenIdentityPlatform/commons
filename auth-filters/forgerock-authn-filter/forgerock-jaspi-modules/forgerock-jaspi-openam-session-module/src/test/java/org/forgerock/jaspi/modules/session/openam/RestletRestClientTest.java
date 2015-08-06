@@ -16,7 +16,7 @@
 
 package org.forgerock.jaspi.modules.session.openam;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ResourceException;
 import org.json.JSONObject;
 import org.restlet.Context;

@@ -16,8 +16,8 @@
 
 package org.forgerock.caf.authn.test.configuration;
 
-import static org.forgerock.json.fluent.JsonValue.array;
-import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.JsonValue.array;
+import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.resource.ResourceException.newNotSupportedException;
 import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import static org.forgerock.util.promise.Promises.newResultPromise;
@@ -26,7 +26,7 @@ import javax.inject.Inject;
 
 import org.forgerock.caf.authn.test.runtime.TestAuditApi;
 import org.forgerock.http.context.ServerContext;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.ReadRequest;

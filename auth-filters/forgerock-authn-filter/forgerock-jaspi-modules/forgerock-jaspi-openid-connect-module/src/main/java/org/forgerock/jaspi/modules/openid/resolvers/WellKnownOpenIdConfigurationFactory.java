@@ -25,7 +25,7 @@ import java.util.Map;
 
 import org.forgerock.jaspi.modules.openid.exceptions.FailedToLoadJWKException;
 import org.forgerock.jaspi.modules.openid.helpers.SimpleHTTPClient;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.jose.utils.Utils;
 
 /**

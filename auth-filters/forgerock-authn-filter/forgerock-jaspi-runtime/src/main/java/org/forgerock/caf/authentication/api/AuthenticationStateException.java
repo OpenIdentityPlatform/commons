@@ -16,7 +16,7 @@
 
 package org.forgerock.caf.authentication.api;
 
-import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.json.JsonValueException;
 
 /**
  * An exception that is thrown during

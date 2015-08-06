@@ -16,7 +16,7 @@
 
 package org.forgerock.authz.modules.oauth2;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 
 /**
  * Abstraction layer around the Json resource to access.

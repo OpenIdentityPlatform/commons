@@ -16,7 +16,7 @@
 
 package org.forgerock.jaspi.modules.session.openam;
 
-import static org.forgerock.json.fluent.JsonValue.*;
+import static org.forgerock.json.JsonValue.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.anyMapOf;
 import static org.mockito.Matchers.anyString;
@@ -38,7 +38,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.forgerock.caf.authentication.api.AuthenticationException;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ResourceException;
 import org.mockito.ArgumentCaptor;
 import org.testng.annotations.BeforeMethod;

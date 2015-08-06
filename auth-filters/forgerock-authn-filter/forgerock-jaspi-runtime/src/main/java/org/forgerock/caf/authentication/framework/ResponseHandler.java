@@ -16,7 +16,7 @@
 
 package org.forgerock.caf.authentication.framework;
 
-import static org.forgerock.json.fluent.JsonValue.*;
+import static org.forgerock.json.JsonValue.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

@@ -22,7 +22,7 @@ import java.util.List;
 import com.google.inject.Singleton;
 import org.forgerock.caf.authentication.framework.AuditApi;
 import org.forgerock.guice.core.InjectorHolder;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 
 /**
  * <p>Test implementation of the JASPI runtime's {@code AuditApi} interface.</p>

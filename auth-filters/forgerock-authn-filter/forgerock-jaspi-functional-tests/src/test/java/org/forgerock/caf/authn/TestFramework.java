@@ -19,7 +19,7 @@ package org.forgerock.caf.authn;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 import static org.forgerock.caf.authn.test.ProtectedResource.RESOURCE_CALLED_HEADER;
-import static org.forgerock.json.fluent.JsonValue.*;
+import static org.forgerock.json.JsonValue.*;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
 import static org.testng.Assert.fail;
@@ -38,7 +38,7 @@ import com.jayway.restassured.parsing.Parser;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
 import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.hamcrest.Matcher;
 
 /**

@@ -16,7 +16,7 @@
 
 package org.forgerock.caf.authentication.framework;
 
-import static org.forgerock.json.fluent.JsonValue.*;
+import static org.forgerock.json.JsonValue.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.forgerock.caf.authentication.api.AuthenticationException;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 
 /**
  * <p>Responsible for tracking the auditing of an authentication attempt including auditing each of the modules that

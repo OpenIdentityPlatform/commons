@@ -25,9 +25,9 @@ import org.forgerock.util.promise.Promises;
 
 import javax.servlet.http.HttpServletRequest;
 
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 
 /**
  * A {@code HttpServletAuthorizationModule} that only allows access to the {@code users} endpoint.

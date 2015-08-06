@@ -16,7 +16,7 @@
 
 package org.forgerock.caf.authentication.framework;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 
 /**
  * Audit API interface for auditing the result of an authentication request.

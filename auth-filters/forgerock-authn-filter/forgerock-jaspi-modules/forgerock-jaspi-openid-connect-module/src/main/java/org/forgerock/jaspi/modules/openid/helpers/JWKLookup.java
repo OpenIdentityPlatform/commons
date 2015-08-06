@@ -18,7 +18,7 @@ package org.forgerock.jaspi.modules.openid.helpers;
 import java.security.Key;
 import javax.crypto.spec.SecretKeySpec;
 import org.forgerock.jaspi.modules.openid.exceptions.FailedToLoadJWKException;
-import org.forgerock.json.fluent.JsonException;
+import org.forgerock.json.JsonException;
 import org.forgerock.json.jose.jwk.EcJWK;
 import org.forgerock.json.jose.jwk.KeyType;
 import org.forgerock.json.jose.jwk.OctJWK;

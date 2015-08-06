@@ -16,7 +16,7 @@
 
 package org.forgerock.authz.filter.servlet;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;

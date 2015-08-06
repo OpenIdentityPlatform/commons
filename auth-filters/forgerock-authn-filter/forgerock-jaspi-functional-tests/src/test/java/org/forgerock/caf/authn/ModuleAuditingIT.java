@@ -33,7 +33,7 @@ import org.assertj.core.data.MapEntry;
 import org.forgerock.caf.authn.test.modules.AuditingAuthModule;
 import org.forgerock.caf.authn.test.modules.AuditingSessionAuthModule;
 import org.forgerock.caf.authn.test.modules.FailureAuditingAuthModule;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
