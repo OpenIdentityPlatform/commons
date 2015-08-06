@@ -92,10 +92,10 @@ public final class JsonSchemaUtils {
     }
 
     /**
-     * Gets the configuration metadata for an audit event handler as json schema.
-     * @param auditEventHandler The audit event handler to get the config metadata for.
-     * @return The config metadata as json schema.
-     * @throws AuditException If any error occurs parsing the config class for metadata.
+     * Gets the configuration schema for an audit event handler as json schema.
+     * @param auditEventHandler The audit event handler to get the config schema for.
+     * @return The config schema as json schema.
+     * @throws AuditException If any error occurs parsing the config class for schema.
      */
     public static JsonValue getAuditEventHandlerConfigurationSchema(final AuditEventHandler auditEventHandler)
             throws AuditException {
