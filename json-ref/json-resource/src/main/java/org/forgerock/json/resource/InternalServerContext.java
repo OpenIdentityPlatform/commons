@@ -18,6 +18,7 @@ package org.forgerock.json.resource;
 
 import org.forgerock.http.Context;
 import org.forgerock.http.context.ServerContext;
+import org.forgerock.json.JsonValue;
 
 /**
  * A {@link ServerContext} from an internal source.
@@ -32,6 +33,22 @@ public class InternalServerContext extends ServerContext implements ClientContex
      */
     public InternalServerContext(Context parent) {
         super(parent, "internalServer");
+    }
+
+    /**
+     * See {@link ServerContext#ServerContext(JsonValue, ClassLoader)}.
+     *
+     * @param savedContext
+     *         The JSON representation from which this context's attributes
+     *         should be parsed.
+     * @param classLoader
+     *            The ClassLoader which can properly resolve the persisted class-name.
+     *
+     * @throws ResourceException
+     *         If the JSON representation could not be parsed.
+     */
+    public InternalServerContext(JsonValue savedContext, ClassLoader classLoader) throws ResourceException {
+        super(savedContext, classLoader);
     }
 
     /**
