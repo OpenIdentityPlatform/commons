@@ -53,7 +53,7 @@ public interface QueryRequest extends Request {
      * The name of the field which contains the policy used for calculating
      * the total number of paged results.
      */
-    public static final String FIELD_TOTAL_PAGED_RESULTS_POLICY = "totalPagedResultsPolicy";
+    String FIELD_TOTAL_PAGED_RESULTS_POLICY = "totalPagedResultsPolicy";
 
     /**
      * The name of the field which contains the paged results offset in the JSON
@@ -168,6 +168,7 @@ public interface QueryRequest extends Request {
     /**
      * Returns the {@link CountPolicy} used to calculate {@link QueryResponse#getTotalPagedResults()}.
      *
+     * @return The count policy.
      * @see QueryResponse#getTotalPagedResults()
      */
     CountPolicy getTotalPagedResultsPolicy();

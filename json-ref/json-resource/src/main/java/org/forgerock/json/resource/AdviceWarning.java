@@ -28,7 +28,7 @@ import org.forgerock.util.Reject;
  *     http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html</a>
  * @since 2.4.0
  */
-public class AdviceWarning {
+public final class AdviceWarning {
 
     /**
      * 100 Indicates that there is data missing from the request.
@@ -92,6 +92,7 @@ public class AdviceWarning {
         warningText = builder.warningText;
     }
 
+    @Override
     public String toString() {
         return String.valueOf(warningCode) + " " + warningAgent + " " + warningText;
     }

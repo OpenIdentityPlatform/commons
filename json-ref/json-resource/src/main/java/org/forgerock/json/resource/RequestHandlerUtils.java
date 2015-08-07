@@ -22,7 +22,7 @@ import org.forgerock.util.promise.Promise;
 /**
  * Assorted utility methods useful to request handlers.
  */
-class RequestHandlerUtils {
+final class RequestHandlerUtils {
 
     static <T> Promise<T, ResourceException> handle(AnnotatedMethod method, Context context, Request request) {
         return method.invoke(context, request, null);
@@ -38,5 +38,6 @@ class RequestHandlerUtils {
         return method.invoke(context, request, id);
     }
 
-    private RequestHandlerUtils() {}
+    private RequestHandlerUtils() {
+    }
 }

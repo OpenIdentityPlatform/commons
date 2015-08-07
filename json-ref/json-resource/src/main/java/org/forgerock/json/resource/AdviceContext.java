@@ -39,7 +39,7 @@ import org.forgerock.util.Reject;
  */
 public class AdviceContext extends AbstractContext {
 
-    /** the persisted attribute name for the advices */
+    /** the persisted attribute name for the advices. */
     private static final String ADVICE_ATTR = "advice";
 
     /** The persisted attribute name for the restricted advice names. */
@@ -49,14 +49,14 @@ public class AdviceContext extends AbstractContext {
 
     private final Collection<String> restrictedAdviceNames = new HashSet<>();
 
-    /** advice currently stored for this context is help in this map. **/
+    /** Advice currently stored for this context is help in this map. **/
     private final Map<String, List<String>> advice = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
     /**
-     * Creates a new AdviceContext with the provided parent
-     * 
-     * @param parent
-     *            The parent context.
+     * Creates a new AdviceContext with the provided parent.
+     *
+     * @param parent The parent context.
+     * @param restrictedAdviceNames The restricted advice names.
      */
     public AdviceContext(Context parent, Collection<String> restrictedAdviceNames) {
         super(parent, "advice");
@@ -82,7 +82,7 @@ public class AdviceContext extends AbstractContext {
 
     /**
      * Returns the advices contained within this context.
-     * 
+     *
      * @return the advices contained within this context.
      */
     public Map<String, List<String>> getAdvices() {
